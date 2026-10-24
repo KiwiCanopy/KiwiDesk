@@ -24,7 +24,7 @@ struct ShelfHandleDrawnTests {
                 ? CGRect(x: 100, y: 0, width: 36, height: 8)
                 : CGRect(x: 0, y: 100, width: 8, height: 36),
             edge: edge,
-            fill: "#3366CC",
+            fill: GlassFill(hex: "#3366CC"),
             currentInk: "#000000",
             ink: "#AAAAAA",
             emptyInk: "#555555",

@@ -48,11 +48,14 @@ struct PrivatePathCensusTests {
     ]
 
     /// The resolver spellings: the three named resolvers, a bare
-    /// `dlsym(<handle>, "X")`, and the bridge roster's raw values.
+    /// `dlsym(<handle>, "X")`, the bridge roster's raw values, and a
+    /// private AppKit method KiwiDesk answers, spelled once as a
+    /// `privateSelector` (`GlassActiveAppearance`).
     private static let resolverPatterns = [
         #"\b(?:symbol|coreFoundationSymbol|globalSymbol)"#
             + #"\(\s*"([^"]+)"\s*,\s*as:"#,
         #"\bdlsym\(\s*[^"()]*(?:\([^()]*\))?\s*,\s*"([^"]+)"\s*\)"#,
+        #"\bprivateSelector\s*=\s*"([^"]+)""#,
     ]
     private static let operationPattern = #"=\s*"([A-Za-z]+Operation)""#
 

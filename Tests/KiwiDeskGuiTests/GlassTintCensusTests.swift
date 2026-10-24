@@ -18,19 +18,26 @@ struct GlassTintCensusTests {
     /// `memberBodies` returns the members that open a body, which
     /// is the same residue `BarMotionSeamTests` states.
     private static let members: [String: [String]] = [
-        "rendered": ["maxAlpha", "floorShare", "drawsGlass"],
+        "rendered": ["maxAlpha", "farShare(", "drawsGlass"],
+        // Pure arithmetic over the fade (#2569).
+        "farShare": ["floorShare"],
         // Pure direction: reaches no colour, so it names none.
         "fade": [],
-        "pinnedAppearance": ["drawsGlass", "wantsLightInk"],
-        "sits": ["subviews"],
+        // The one lightness verdict both pins read (#2569).
+        "pin": ["drawsGlass", "wantsLightInk"],
+        "pinnedAppearance": ["pin("],
+        // SwiftUI's mint: the same ends and pin (#2569).
+        "paint": ["rendered(", "fade(", "pin("],
         // KiwiVision's plate: no Fill, a black dim (#2103).
         "pinDark": ["darkAqua"],
         // The Space-switch plates: no Fill, the Appearance pick.
         "followPick": ["darkAqua", "bestMatch"],
-        // Both doors take the one painter (#1946's uniform tint).
-        "apply": ["paint("],
-        "applyUniform": ["paint("],
-        "paint": ["rendered(", "fade(", "pinnedAppearance(", "sits("],
+        // The one painter (#1946's uniform tint retired, #2569).
+        "apply": ["pinnedAppearance(", "setBackdrop(", "colour("],
+        // The handles' Fill beneath their glass (#2569 ▸ owner).
+        "applyBehind": ["pinnedAppearance(", ".below", "colour("],
+        // Both doors' one gradient, through the mint.
+        "colour": ["rendered(", "fade("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body
@@ -120,9 +127,17 @@ struct GlassTintCensusTests {
             "apply's signature did not parse"
         )
         #expect(
-            signature.contains("hex: String"),
+            signature.contains("fill: GlassFill"),
             "apply no longer takes the Fill: \(signature)"
         )
+        // The Fill value carries the stored hex, never a colour
+        // (#2569): one more door would reopen #1297.
+        let fill = try SourceScan.strippedSource(
+            at: Self.homeFile.deletingLastPathComponent()
+                .appendingPathComponent("GlassFill.swift")
+        )
+        #expect(fill.contains("var hex: String"), "\(fill)")
+        #expect(!fill.contains("NSColor"), "\(fill)")
         #expect(
             !signature.contains("NSColor"),
             """

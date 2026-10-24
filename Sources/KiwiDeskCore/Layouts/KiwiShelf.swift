@@ -106,6 +106,13 @@ public struct KiwiShelf: Sendable, Equatable {
     /// The plate's one fill (#660, retuned by #755;
     /// `PaletteBarFillTests`).
     public var fillColor = "#14201CB3"
+    /// How far the Fill fades across glass, in percent (#2569):
+    /// 100 to `GlassTint.floorShare` of it, 0 one even colour.
+    public var fillFade: CGFloat = 100
+    /// KiwiHub, the cue plates and the Space-switch slide plates
+    /// wear the Fill on `.clear` glass with the active rim; off,
+    /// they draw today's frosted, untinted glass (#2569).
+    public var tintHubAndPlates = true
     /// The border's colour (#1679): `itemColor`'s hex at alpha
     /// 0x59, spelled out (`ShelfBorderTests` pins the relation) and
     /// held against the wallpaper the plate blends into
@@ -131,6 +138,19 @@ public struct KiwiShelf: Sendable, Equatable {
             max(value, revealTimeoutRange.lowerBound),
             revealTimeoutRange.upperBound
         )
+    }
+
+    /// Bounds of `fillFade` in percent (#2569).
+    public static let fillFadeRange: ClosedRange<CGFloat> = 0...100
+
+    /// `value` within `fillFadeRange`.
+    public static func clampFillFade(_ value: CGFloat) -> CGFloat {
+        min(max(value, fillFadeRange.lowerBound), fillFadeRange.upperBound)
+    }
+
+    /// The Fill every KiwiShelf glass paints (#2569).
+    public var glassFill: GlassFill {
+        GlassFill(hex: fillColor, fade: fillFade)
     }
 
     /// Floor of `thickness` (QA 2026-07-19): below it the plate

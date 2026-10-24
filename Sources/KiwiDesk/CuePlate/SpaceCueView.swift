@@ -8,6 +8,8 @@ import SwiftUI
 /// dots: dots mean a Desktop, a symbol means a Space.
 struct SpaceCueView: View {
     let cue: SpaceSwitchCue
+    /// KiwiHub's glass, the Fill with it under the toggle (#2569).
+    let glass: PanelGlass
 
     /// Up to this many characters draw in the digit face.
     static let digitLength = 2
@@ -26,14 +28,12 @@ struct SpaceCueView: View {
             minHeight: CuePlateModel.side,
             maxHeight: CuePlateModel.side
         )
-        .glassChrome(
+        .panelGlassChrome(
             in: RoundedRectangle(
                 cornerRadius: CuePlateModel.corner,
                 style: .continuous
             ),
-            // Plain system glass, as the Desktop plate (#2142).
-            enabled: true,
-            variant: .regular,
+            glass: glass,
             fallback: AnyShapeStyle(.regularMaterial)
         )
     }

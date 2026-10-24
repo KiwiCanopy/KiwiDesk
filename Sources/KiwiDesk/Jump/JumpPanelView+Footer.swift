@@ -133,6 +133,7 @@ struct JumpFooterRow<Leading: View, Trailing: View>: View {
 
 /// The Shortcuts side's active layer, where it is not the default.
 struct JumpLayerLabel: View {
+    @Environment(\.kiwiHubPaint) private var paint
     let name: String
 
     var body: some View {
@@ -143,7 +144,7 @@ struct JumpLayerLabel: View {
             .padding(.horizontal, 10)
             .padding(.vertical, 3)
             .background(
-                Capsule().fill(SettingsTheme.accent.opacity(0.2))
+                Capsule().fill(paint.selection.opacity(0.2))
             )
             .frame(maxWidth: 280, alignment: .leading)
     }

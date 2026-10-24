@@ -134,7 +134,7 @@ struct ShelfDotSpokenTests {
                 mark: .dots([.init(current: true, occupied: true)]),
                 frame: CGRect(x: 0, y: 0, width: 20, height: 8),
                 edge: .top,
-                fill: "#000000",
+                fill: GlassFill(hex: "#000000"),
                 currentInk: "#FFFFFF",
                 ink: "#AAAAAA",
                 emptyInk: "#555555",

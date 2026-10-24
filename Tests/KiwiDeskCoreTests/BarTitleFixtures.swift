@@ -97,7 +97,7 @@ func paintedAppBar(
 }
 
 /// `spaces` Spaces on the fixture strip; `glass` takes the plain
-/// Liquid Glass finish (`GlassTintOrderTests`).
+/// Liquid Glass finish (`GlassFillOnTopTests`).
 @MainActor
 func paintedSpaceBar(
     edge: AppBarEdge = .top,

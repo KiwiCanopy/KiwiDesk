@@ -67,10 +67,10 @@ struct JumpClickWiringTests {
         for file in ["JumpRowView.swift", "JumpLayoutTile.swift"] {
             let source = try Self.squashed(file)
             let branch = source.range(of: "}elseifisLifted{")
-            let fill = source.range(of: ".fill(SettingsTheme.chipRest)")
+            let fill = source.range(of: ".fill(paint.rowHover)")
             #expect(source.occurrences(of: "}elseifisLifted{") == 1)
             #expect(
-                source.occurrences(of: ".fill(SettingsTheme.chipRest)") == 1
+                source.occurrences(of: ".fill(paint.rowHover)") == 1
             )
             #expect(
                 (branch?.upperBound).map { b in
@@ -81,7 +81,7 @@ struct JumpClickWiringTests {
         }
         let chip = try Self.squashed("ViewChip.swift")
         #expect(
-            chip.occurrences(of: ".fill(isLifted?SettingsTheme.chipHover:")
+            chip.occurrences(of: ".fill(isLifted?paint.chipHover:")
                 == 1
         )
     }

@@ -36,6 +36,17 @@ extension NSColor {
         )
     }
 
+    /// A Fill as the solid path paints it: clear where it has no
+    /// colour (`KiwiShelf.hasColour`), never `kiwiHex`'s accent
+    /// fallback (#2569).
+    convenience init(kiwiFill hex: String) {
+        guard KiwiShelf.hasColour(hex) else {
+            self.init(srgbRed: 0, green: 0, blue: 0, alpha: 0)
+            return
+        }
+        self.init(kiwiHex: hex)
+    }
+
     /// Parses hex color string with fallback to controlAccentColor
     /// (`DragVisual.parseHex`).
     convenience init(kiwiHex hex: String) {

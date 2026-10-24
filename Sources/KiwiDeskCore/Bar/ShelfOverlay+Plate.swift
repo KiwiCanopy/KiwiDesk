@@ -29,13 +29,12 @@ extension ShelfOverlay {
             let tint = glassTint
         {
             solidPlateView().isHidden = true
-            GlassPlate.setContent(glass, glassFiller)
             GlassBox.place(
                 glass,
                 tint: tint,
                 at: frame,
                 cornerRadius: radius,
-                hex: shelf.fillColor,
+                fill: shelf.glassFill,
                 edge: edge,
                 visible: true,
                 animated: animated,
@@ -56,7 +55,7 @@ extension ShelfOverlay {
         BarMotion.setFrame(plate, to: frame, animated: animated)
         plate.layer?.cornerRadius = radius
         plate.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.fillColor).cgColor
+            NSColor(kiwiFill: shelf.fillColor).cgColor
     }
 
     /// A thin line between the two sections, in the item colour

@@ -2,9 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
-/// shortcuts panel (#1307), and the sheen's own row beneath it
-/// (#1644), which alone shows below macOS 26 — the first group
-/// of Colors & glass (#2389).
+/// shortcuts panel (#1307), the Fill's two rows beneath it —
+/// "Tint KiwiHub and plates" and "Fill fade" (#2569) — and the
+/// sheen's own row last (#1644), which alone shows below macOS 26
+/// — the first group of Colors & glass (#2389).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -51,8 +52,22 @@ struct GlassCard: View {
     /// Whether Reduce transparency greys `key`: the card's gate,
     /// less the census's exemption.
     private func greyed(_ key: SettingKey) -> Bool {
-        reduceTransparency && !key.placement.exemptFromContainerGate
+        (reduceTransparency && !key.placement.exemptFromContainerGate)
+            || (Self.followsTheFill(key) && fillIdle)
     }
+
+    /// The rows the switch and the Fill both gate (#2569).
+    static func followsTheFill(_ key: SettingKey) -> Bool {
+        key == .kiwishelf(.tintHubAndPlates) || key == .kiwishelf(.fillFade)
+    }
+
+    /// The Fill's rows have nothing to do: the switch is off, or
+    /// the Fill has no colour (#2569 ▸ "No Colour").
+    private var fillIdle: Bool {
+        !model.liquidGlassMaster.wrappedValue || !shelf.hasFill
+    }
+
+    private var shelf: KiwiShelf { model.config.settings.kiwishelf }
 
     /// The Reduce-transparency reason, under the switch it greys
     /// and outside that grey so it survives the dim (#527) — never
@@ -62,6 +77,14 @@ struct GlassCard: View {
     ) -> some View {
         if reduceTransparency, key == .colours(.liquidGlassMaster) {
             Text(reduceTransparencyHelp)
+                .font(.caption)
+                .foregroundStyle(.secondary)
+        } else if !reduceTransparency, key == .kiwishelf(.fillFade),
+            model.liquidGlassMaster.wrappedValue, !shelf.hasFill
+        {
+            // The cause is on another group's row (#815): said
+            // inline, outside the grey, under the last row it greys.
+            Text(noColourHelp)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -75,6 +98,31 @@ struct GlassCard: View {
                 isOn: model.liquidGlassMaster,
                 help: agreement.differ ? differHelp : baseHelp
             )
+        case .kiwishelf(.tintHubAndPlates):
+            ToggleRow(
+                label: SettingsCatalog.colors.colorsAndGlass.children
+                    .tintHubAndPlates.text,
+                isOn: $model.config.settings.kiwishelf.tintHubAndPlates,
+                help: L(
+                    "kiwishelf.tint_hub_and_plates.help",
+                    "%1$@ and the plates a Space, Desktop or layout "
+                        + "switch shows wear the bars' %2$@ and colors "
+                        + "on clear glass. Off, they draw plain frosted "
+                        + "glass.",
+                    JumpScope.panelName,
+                    L("kiwishelf.color.fill", "Fill")
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.colors.colorsAndGlass.children
+                    .tintHubAndPlates
+            )
+        case .kiwishelf(.fillFade):
+            FillFadeRow(fade: $model.config.settings.kiwishelf.fillFade)
+                .searchAnchored(
+                    SettingsCatalog.colors.colorsAndGlass.children
+                        .fillFade
+                )
         case .colours(.borderSheen):
             SheenRow(strength: $model.config.settings.borderStyle.sheen)
                 .searchAnchored(
@@ -87,6 +135,16 @@ struct GlassCard: View {
             )
             EmptyView()
         }
+    }
+
+    /// Why the Fill's rows grey while the Fill has no colour.
+    private var noColourHelp: String {
+        L(
+            "kiwishelf.no_color.reason",
+            "The KiwiShelf %1$@ is set to \u{201C}%2$@\u{201D}.",
+            L("kiwishelf.color.fill", "Fill"),
+            L("color_field.no_color", "No Color")
+        )
     }
 
     /// Quotes Apple's own control (config-vocabulary.md) so the
@@ -127,12 +185,16 @@ struct GlassCard: View {
                 + "Bar, the App Bar, %2$@, the drag ghost and drop "
                 + "zone, the sticky mark and the plates a Space "
                 + "switch slides. KiwiShelf's %1$@ color tints the "
-                + "bars, fading from its screen edge; the drag "
-                + "ghost, drop zone and sticky mark take their own "
-                + "colors, fading downward; the panel and the "
-                + "plates stay untinted.",
+                + "bars, fading from their screen edge as far as "
+                + "\u{201C}%3$@\u{201D} sets; with "
+                + "\u{201C}%4$@\u{201D} on, it tints %2$@ and the "
+                + "plates too. The drag ghost, drop zone and sticky "
+                + "mark take their own colors.",
             L("kiwishelf.color.fill", "Fill"),
-            JumpScope.panelName
+            JumpScope.panelName,
+            L("kiwishelf.fill_fade", "Fill fade"),
+            SettingsCatalog.colors.colorsAndGlass.children
+                .tintHubAndPlates.text
         )
     }
 

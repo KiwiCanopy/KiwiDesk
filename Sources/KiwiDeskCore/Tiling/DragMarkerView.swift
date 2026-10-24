@@ -139,16 +139,14 @@ public final class DragMarkerView: NSView {
             GlassPlate.update(plate, frame: bounds, cornerRadius: radius)
             GlassTint.apply(
                 tint,
-                below: plate,
-                frame: bounds,
+                in: plate,
                 cornerRadius: radius,
-                hex: style.fill ? style.fillColor : "",
+                fill: GlassFill(hex: style.fill ? style.fillColor : ""),
                 edge: .top
             )
             return
         }
         self.glass?.isHidden = true
-        tint.isHidden = true
         layer.backgroundColor =
             style.fill
             ? Self.color(style.fillColor).cgColor
@@ -160,9 +158,7 @@ public final class DragMarkerView: NSView {
         if let glass { return glass }
         guard let plate = GlassPlate.make() else { return nil }
         plate.autoresizingMask = [.width, .height]
-        tint.autoresizingMask = [.width, .height]
         addSubview(plate, positioned: .below, relativeTo: rim)
-        GlassPlate.setContent(plate, NSView())
         glass = plate
         return plate
     }

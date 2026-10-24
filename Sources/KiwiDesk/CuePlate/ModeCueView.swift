@@ -10,6 +10,8 @@ import SwiftUI
 /// list entry, so the centre is always one of the ring's own.
 struct ModeCueView: View {
     let cue: ModeCycleCue
+    /// KiwiHub's glass, the Fill with it under the toggle (#2569).
+    let glass: PanelGlass
 
     /// The panel's room height, so the plate fills it.
     static let side = CuePlateModel.tallSide
@@ -32,14 +34,12 @@ struct ModeCueView: View {
             caption
         }
         .frame(width: Self.side, height: Self.side)
-        .glassChrome(
+        .panelGlassChrome(
             in: RoundedRectangle(
                 cornerRadius: CuePlateModel.corner,
                 style: .continuous
             ),
-            // Plain system glass, as the Desktop plate (#2142).
-            enabled: true,
-            variant: .regular,
+            glass: glass,
             fallback: AnyShapeStyle(.regularMaterial)
         )
     }

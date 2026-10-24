@@ -66,6 +66,9 @@ final class SpaceSlideOverlay {
         let holes: [CGRect]
         let space: SpaceID
         let glass: Bool
+        /// The Fill the plates wear, nil for today's frosted,
+        /// untinted plates (#2569 ▸ the toggle).
+        let tint: GlassFill?
         let pace: Double
     }
 
@@ -86,6 +89,7 @@ final class SpaceSlideOverlay {
         let holeHost: NSView
         let strip: NSView
         var glass: Bool
+        var tint: GlassFill?
         var pace: Double
         var pages: [CGFloat: NSView] = [:]
         var motion = SpaceSlideStrip()
@@ -126,6 +130,8 @@ final class SpaceSlideOverlay {
         if let play {
             current = play
             current.glass = press.glass
+            current.tint = press.tint
+            Self.wearActiveLook(current)
             current.pace = press.pace
             if now >= play.liftAt {
                 fadeFrom = play.fader.presentation()?.opacity ?? 0

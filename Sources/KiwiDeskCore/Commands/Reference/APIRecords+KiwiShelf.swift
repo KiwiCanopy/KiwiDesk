@@ -151,6 +151,16 @@ extension APIReference {
                 + "unfolds out of its mark, or fades in.",
             .choice("style", KiwiShelf.RevealStyle.self)
         ),
+        "set_tint_hub_and_plates": APIRecord(
+            "Gives KiwiHub and the switch plates the Fill on clear "
+                + "glass; off, plain frosted glass.",
+            .boolean("enabled")
+        ),
+        "set_fill_fade": APIRecord(
+            "Sets how far the Fill fades across Liquid Glass, "
+                + "0–100; 0 is one even color.",
+            .number("percent")
+        ),
         "set_reveal_timeout": APIRecord(
             "Sets how long the show/hide action keeps a shelf shown; "
                 + "0 waits for the next press.",

@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// A Space with no front app draws no front chip: under box glass
-/// the chip is a glass AND the tint painted beneath it, and a tint
+/// the chip is a glass AND the tint painted on it, and a tint
 /// left showing reads as a dark chip where the last app was.
 @Suite("Front-app glass hides with its tint")
 @MainActor
@@ -37,9 +37,12 @@ struct SpaceBarFrontGlassHideTests {
             manager.overlayForTesting(barTitleDisplay)
         )
         let tint = try #require(overlay.frontTint)
-        try #require(!tint.isHidden)
+        try #require(!tint.isHiddenOrHasHiddenAncestor)
         manager.sync([bar(front: nil)])
         #expect(overlay.frontGlass?.isHidden ?? true)
-        #expect(tint.isHidden, "the front chip's tint still shows")
+        #expect(
+            tint.isHiddenOrHasHiddenAncestor,
+            "the front chip's tint still shows"
+        )
     }
 }

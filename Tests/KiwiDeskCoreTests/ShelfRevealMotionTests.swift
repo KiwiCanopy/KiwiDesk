@@ -170,7 +170,7 @@ struct ShelfRevealMotionTests {
             mark: .dots([.init(current: true, occupied: true)]),
             frame: frame,
             edge: edge,
-            fill: "#000000",
+            fill: GlassFill(hex: "#000000"),
             currentInk: "#FFFFFF",
             ink: "#AAAAAA",
             emptyInk: "#555555",

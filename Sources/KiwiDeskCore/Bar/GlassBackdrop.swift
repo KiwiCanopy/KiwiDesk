@@ -1,9 +1,10 @@
 import AppKit
 import QuartzCore
 
-/// The coloured view `GlassTint.apply` places beneath a glass
-/// surface (#1622). Its BACKING layer is the gradient, so the fade
-/// follows the view's own frame animation (bars.md). It paints
+/// The coloured view `GlassTint.apply` makes a glass's content,
+/// wrapping what the glass hosts (#1622, #2569). Its BACKING layer
+/// is the gradient, so the fade follows the view's own frame
+/// animation (bars.md). It paints
 /// nothing itself — the colours are `GlassTint`'s alone (#1297,
 /// `GlassTintCensusTests` ▸ `backdropPaintsNothing`).
 final class GlassBackdrop: NSView {

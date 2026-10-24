@@ -148,7 +148,7 @@ struct LiquidGlassMasterTests {
         )
         #expect(
             try source("JumpPanelView.swift")
-                .contains("enabled:liquidGlass"),
+                .contains("glass.enabled=liquidGlass"),
             "Jump to window no longer hands its setting on."
         )
     }

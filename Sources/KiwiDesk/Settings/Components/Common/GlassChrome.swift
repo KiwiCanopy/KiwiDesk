@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 extension View {
@@ -12,8 +13,9 @@ extension View {
     ///
     /// `variant` is each surface's legibility decision (gui.md):
     /// `.regular` under dense text, `.clear` where nothing is
-    /// read. Untinted by ruling rather than by capability
-    /// (`docs/design-decisions.md` ▸ the shortcuts panel, #1295).
+    /// read or a Fill carries it. `tint` is that Fill, minted by
+    /// `GlassTint.paint` and drawn on the glass beneath the content
+    /// (#2569) — nil for an untinted surface.
     /// `enabled` is the caller's WHETHER — a Liquid Glass switch
     /// leaf, or a state such as the slider knob's drag (exempt
     /// from the switch by ruling, #1527). `fallback` is the
@@ -24,6 +26,7 @@ extension View {
         in shape: some Shape,
         enabled: Bool,
         variant: GlassChromeVariant,
+        tint: GlassPaint?,
         fallback: AnyShapeStyle
     ) -> some View {
         modifier(
@@ -31,6 +34,7 @@ extension View {
                 shape: shape,
                 enabled: enabled,
                 variant: variant,
+                tint: tint,
                 fallback: fallback
             )
         )
@@ -42,26 +46,35 @@ extension View {
         in shape: some Shape,
         enabled: Bool,
         variant: GlassChromeVariant,
+        tint: GlassPaint?,
+        colorScheme: ColorScheme,
         fallback: AnyShapeStyle
     ) -> some View {
         if #available(macOS 26, *), enabled {
-            glassEffect(variant.glass, in: shape)
+            // The Fill is the view's own ground, so the glass draws
+            // beneath it and the content above it (#2569).
+            background { tint.map { shape.fill($0.gradient) } }
+                .glassEffect(variant.glass, in: shape)
+                .environment(\.colorScheme, tint?.scheme ?? colorScheme)
         } else {
             background(fallback)
         }
     }
 }
 
-/// The one reader of Reduce transparency in this tree (#1374): a
+/// The glass branch's one Reduce transparency gate (#1374): a
 /// modifier, because an environment value is read from a view
 /// body rather than from a `View` extension's function.
 private struct GlassChrome<S: Shape>: ViewModifier {
     @Environment(\.accessibilityReduceTransparency)
     private var reduceTransparency
 
+    @Environment(\.colorScheme) private var colorScheme
+
     let shape: S
     let enabled: Bool
     let variant: GlassChromeVariant
+    let tint: GlassPaint?
     let fallback: AnyShapeStyle
 
     func body(content: Content) -> some View {
@@ -69,13 +82,16 @@ private struct GlassChrome<S: Shape>: ViewModifier {
             in: shape,
             enabled: enabled && !reduceTransparency,
             variant: variant,
+            tint: tint,
+            colorScheme: colorScheme,
             fallback: fallback
         )
     }
 }
 
 /// The glass finish, a legibility decision per surface (gui.md):
-/// `.regular` under dense text, `.clear` where nothing is read.
+/// `.regular` under dense text, `.clear` where nothing is read or
+/// a Fill carries the text (#2569).
 enum GlassChromeVariant {
     case regular
     case clear
@@ -93,5 +109,27 @@ enum GlassChromeVariant {
         case .regular: .regular
         case .clear: .clear
         }
+    }
+}
+
+extension GlassPaint {
+    /// The scheme the Fill pins, nil where it pins none.
+    var scheme: ColorScheme? {
+        switch pin {
+        case .dark?: .dark
+        case .light?: .light
+        case nil: nil
+        }
+    }
+
+    /// The Fill's fade as SwiftUI draws it.
+    var gradient: LinearGradient {
+        LinearGradient(
+            colors: [anchorAlpha, farAlpha].map {
+                Color(.sRGB, red: red, green: green, blue: blue, opacity: $0)
+            },
+            startPoint: UnitPoint(x: start.x, y: start.y),
+            endPoint: UnitPoint(x: end.x, y: end.y)
+        )
     }
 }

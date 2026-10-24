@@ -169,7 +169,7 @@ extension SpaceBarItemView {
 
     private var fillColor: NSColor {
         if isActive, style.hasBox {
-            return NSColor(kiwiHex: style.fillColor)
+            return NSColor(kiwiFill: style.fillColor)
         }
         if isActive { return .clear }
         if isHovered || isDragHovered {
@@ -178,7 +178,7 @@ extension SpaceBarItemView {
         guard style.hasBox else {
             return .clear
         }
-        return NSColor(kiwiHex: style.fillColor)
+        return NSColor(kiwiFill: style.fillColor)
     }
 
     var stateColor: NSColor {

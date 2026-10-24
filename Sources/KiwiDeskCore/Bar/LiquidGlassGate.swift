@@ -19,6 +19,22 @@ enum LiquidGlassGate {
             .accessibilityDisplayShouldReduceTransparency
     }
 
+    #if DEBUG
+        /// Test seam over the Increase Contrast read; nil reads the
+        /// machine.
+        static var contrastOverride: (() -> Bool)?
+    #endif
+
+    /// macOS's Increase Contrast: a reading surface's fade then
+    /// holds the bars' own ink floor (#2569 ▸ Ruling).
+    static var increasesContrast: Bool {
+        #if DEBUG
+            if let contrastOverride { return contrastOverride() }
+        #endif
+        return NSWorkspace.shared
+            .accessibilityDisplayShouldIncreaseContrast
+    }
+
     /// Platform glass, and transparency not reduced.
     static var drawsGlass: Bool {
         AppBarStyle.glassAvailable && !reducesTransparency

@@ -55,9 +55,16 @@ struct ShelfShowLabelTests {
                 let control = entry.control
                 guard let key = control.key else { continue }
                 let template = english[key]?.contains("%1$") == true
+                // A template names one layout, or KiwiHub through its
+                // one key (#2569) — never both, never neither.
                 #expect(
-                    template == (control.namedMode != nil),
-                    "\(key): a template names a layout, and only one"
+                    template
+                        == ((control.namedMode != nil)
+                            != control.namesKiwiHub),
+                    Comment(
+                        rawValue: "\(key): a template names a layout "
+                            + "or KiwiHub, and only one"
+                    )
                 )
                 guard let censusMode = censusModes[key] else {
                     continue

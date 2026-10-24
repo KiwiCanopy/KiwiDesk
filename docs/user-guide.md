@@ -601,14 +601,15 @@ flat look instead.
 It covers the floating mark too.
 
 :::unreleased
-It covers the plates a Space switch slides too.
+It covers the plates a Space switch slides too, and the Space,
+Desktop and layout plates.
 :::
 
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
 each surface draws its look without glass — the bars their Boxed
-or Plain shape with the Fill fully opaque — and the switch stays
-as you set it.
+or Plain shape with the Fill fully opaque, and no plate for a
+fully transparent Fill — and the switch stays as you set it.
 
 ### Space Bar
 

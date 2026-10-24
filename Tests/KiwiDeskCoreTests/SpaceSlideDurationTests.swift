@@ -55,6 +55,7 @@ struct SpaceSlideDurationTests {
                 holes: [],
                 space: SpaceID("2"),
                 glass: false,
+                tint: nil,
                 pace: pace
             )
         )

@@ -245,13 +245,16 @@ final class BarPeekPanel {
             glass.isHidden = false
             GlassPlate.setContent(glass, body)
             GlassPlate.update(glass, frame: bounds, cornerRadius: radius)
-            // A reading panel: one tint over its whole height.
-            GlassTint.applyUniform(
+            // Fades like the bar, from the shelf's edge, never past
+            // the reading floor (#2569 ▸ Ruling).
+            GlassTint.apply(
                 tint,
-                below: glass,
-                frame: bounds,
+                in: glass,
                 cornerRadius: radius,
-                hex: shelf.fillColor
+                fill: shelf.readingGlassFill(
+                    increaseContrast: LiquidGlassGate.increasesContrast
+                ),
+                edge: edge
             )
             return
         }
@@ -259,12 +262,11 @@ final class BarPeekPanel {
             GlassPlate.release(glass)
         }
         glass?.isHidden = true
-        tint.isHidden = true
         solid.isHidden = false
         solid.frame = bounds
         solid.layer?.cornerRadius = radius
         solid.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.fillColor).cgColor
+            NSColor(kiwiFill: shelf.fillColor).cgColor
         if body.superview !== stage {
             stage.addSubview(body, positioned: .below, relativeTo: header)
         }
@@ -281,6 +283,7 @@ final class BarPeekPanel {
     }
 
     func makePanel() -> BarPeekWindow {
+        GlassActiveAppearance.install()
         let panel = BarPanel.configure(
             BarPeekWindow(
                 contentRect: .zero,

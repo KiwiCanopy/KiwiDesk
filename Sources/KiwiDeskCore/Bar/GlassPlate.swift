@@ -60,16 +60,37 @@ enum GlassPlate {
         fitContent(glass)
     }
 
-    /// Embeds view into glass contentView.
+    /// Embeds `content` in the glass: inside its tint where
+    /// `GlassTint` has made one the glass's content, else as the
+    /// content itself.
     @MainActor
     static func setContent(_ view: NSView, _ content: NSView) {
         guard #available(macOS 26, *),
-            let glass = view as? NSGlassEffectView
+            let glass = view as? NSGlassEffectView,
+            !holds(glass, content)
         else { return }
-        if glass.contentView !== content {
-            release(glass)
+        release(glass)
+        guard let backdrop = glass.contentView as? GlassBackdrop else {
             glass.contentView = content
+            return
         }
+        backdrop.addSubview(content)
+        content.frame = backdrop.bounds
+    }
+
+    /// Makes `backdrop` the glass's content, moving what the glass
+    /// held inside it: the Fill draws on the material, beneath the
+    /// content (#2569). A no-op once it is.
+    @MainActor
+    static func setBackdrop(_ view: NSView, _ backdrop: GlassBackdrop) {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView,
+            glass.contentView !== backdrop
+        else { return }
+        let content = release(glass)
+        glass.contentView = backdrop
+        backdrop.frame = glass.bounds
+        if let content { setContent(glass, content) }
     }
 
     /// Writes a glass's content to the glass's bounds where it is
@@ -81,10 +102,14 @@ enum GlassPlate {
     static func fitContent(_ view: NSView) {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView,
-            let content = glass.contentView,
-            !fills(content.frame, glass.bounds)
+            let held = glass.contentView
         else { return }
-        content.frame = glass.bounds
+        if !fills(held.frame, glass.bounds) { held.frame = glass.bounds }
+        guard held is GlassBackdrop else { return }
+        for content in held.subviews
+        where !fills(content.frame, held.bounds) {
+            content.frame = held.bounds
+        }
     }
 
     /// Whether `frame` already fills `bounds`: each edge within
@@ -101,26 +126,34 @@ enum GlassPlate {
 
     /// Takes content out of a glass with frame layout restored,
     /// which hosting turned off (#1730); every exit through
-    /// `GlassPlate` takes it.
+    /// `GlassPlate` takes it. A tint stays the glass's content.
     @MainActor
     @discardableResult
     static func release(_ view: NSView) -> NSView? {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView,
-            let content = glass.contentView
+            let held = glass.contentView
         else { return nil }
+        if held is GlassBackdrop {
+            let content = held.subviews.first
+            content?.removeFromSuperview()
+            content?.translatesAutoresizingMaskIntoConstraints = true
+            return content
+        }
         glass.contentView = nil
-        content.translatesAutoresizingMaskIntoConstraints = true
-        return content
+        held.translatesAutoresizingMaskIntoConstraints = true
+        return held
     }
 
-    /// Checks if glass view currently hosts the content view as its
-    /// contentView.
+    /// Whether the glass hosts `content`, directly or inside its
+    /// tint.
     @MainActor
     static func holds(_ view: NSView, _ content: NSView) -> Bool {
         guard #available(macOS 26, *),
-            let glass = view as? NSGlassEffectView
+            let glass = view as? NSGlassEffectView,
+            let held = glass.contentView
         else { return false }
-        return glass.contentView === content
+        return held === content
+            || (held is GlassBackdrop && content.superview === held)
     }
 }

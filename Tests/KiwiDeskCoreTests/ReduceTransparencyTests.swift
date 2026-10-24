@@ -184,25 +184,23 @@ struct ReduceTransparencyTests {
         reducing(true) {
             GlassTint.apply(
                 backdrop,
-                below: glass,
-                frame: glass.frame,
+                in: glass,
                 cornerRadius: 4,
-                hex: "#000000B3",
+                fill: GlassFill(hex: "#000000B3"),
                 edge: .top
             )
-            #expect(backdrop.isHidden)
+            #expect(backdrop.gradient?.colors == nil)
             #expect(glass.appearance == nil)
         }
         reducing(false) {
             GlassTint.apply(
                 backdrop,
-                below: glass,
-                frame: glass.frame,
+                in: glass,
                 cornerRadius: 4,
-                hex: "#000000B3",
+                fill: GlassFill(hex: "#000000B3"),
                 edge: .top
             )
-            #expect(!backdrop.isHidden)
+            #expect(backdrop.gradient?.colors != nil)
         }
     }
 

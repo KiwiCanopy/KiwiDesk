@@ -25,7 +25,9 @@ struct SpaceSlidePlateAppearanceTests {
     /// The glass views of the pages a play built, after its
     /// panel took `appearance`.
     private func plateGlass(
-        under appearance: NSAppearance.Name
+        under appearance: NSAppearance.Name,
+        tint: GlassFill? = nil,
+        panel: ((NSPanel) -> Void)? = nil
     ) throws -> [NSView] {
         let overlay = SpaceSlideOverlay()
         overlay.present = { _ in }
@@ -42,6 +44,7 @@ struct SpaceSlidePlateAppearanceTests {
                 holes: [],
                 space: SpaceID("2"),
                 glass: true,
+                tint: tint,
                 pace: 1
             )
         )
@@ -50,6 +53,7 @@ struct SpaceSlidePlateAppearanceTests {
         // of its own would hide it from the plates.
         #expect(play.panel.appearance == nil)
         play.panel.appearance = NSAppearance(named: appearance)
+        panel?(play.panel)
         overlay.run(
             incoming: [
                 SpaceSlidePlan.Plate(
@@ -114,6 +118,50 @@ struct SpaceSlidePlateAppearanceTests {
         for view in glass {
             #expect(view.appearance == nil)
         }
+    }
+
+    /// "Tint KiwiHub and plates" on (#2569): the plate draws
+    /// `.clear` glass carrying the Fill, and its panel wears the
+    /// key-window rim; off, today's frosted plate and no rim.
+    @Test(
+        "a tinted plate is clear glass with the Fill",
+        arguments: [true, false]
+    )
+    func tintedPlateWearsTheFill(tinted: Bool) throws {
+        guard Self.drawsGlass, #available(macOS 26, *) else { return }
+        var wears: Bool?
+        let glass = try plateGlass(
+            under: .aqua,
+            tint: tinted ? GlassFill(hex: "#14201CB3") : nil,
+            panel: { wears = ($0 as? ActiveGlassPanel)?.wearsActiveLook }
+        )
+        #expect(wears == tinted, "the panel's rim follows the toggle")
+        let plate = try #require(
+            glass.compactMap { $0 as? NSGlassEffectView }.first
+        )
+        #expect(plate.style == (tinted ? .clear : .regular))
+        let backdrop = plate.contentView as? GlassBackdrop
+        #expect((backdrop?.gradient?.colors != nil) == tinted)
+    }
+
+    /// AppKit pins only dark (#2569): a light Fill's plate follows
+    /// the pick, a dark Fill's stays dark under a light pick.
+    @Test("a tinted plate pins dark only for a dark Fill")
+    func tintedPlateFollowsThePickWhenLight() throws {
+        guard Self.drawsGlass, #available(macOS 26, *) else { return }
+        func plate(
+            _ pick: NSAppearance.Name,
+            _ hex: String
+        ) throws -> NSView {
+            let glass = try plateGlass(under: pick, tint: GlassFill(hex: hex))
+            return try #require(
+                glass.compactMap { $0 as? NSGlassEffectView }.first
+            )
+        }
+        let light = "#F2F2F2B3"
+        #expect(try plate(.darkAqua, light).appearance?.name == .darkAqua)
+        #expect(try plate(.aqua, light).appearance == nil)
+        #expect(try plate(.aqua, "#14201CB3").appearance?.name == .darkAqua)
     }
 
     /// The door LIFTS a pin a dark pick left, not only declines to

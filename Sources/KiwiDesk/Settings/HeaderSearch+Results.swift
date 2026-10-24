@@ -38,6 +38,7 @@ extension HeaderSearch {
                     in: shape,
                     enabled: true,
                     variant: .regular,
+                    tint: nil,
                     fallback: AnyShapeStyle(SettingsTheme.card)
                 )
             }

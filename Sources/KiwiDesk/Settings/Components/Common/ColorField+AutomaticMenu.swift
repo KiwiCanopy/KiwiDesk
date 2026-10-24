@@ -12,12 +12,14 @@ extension View {
     @MainActor
     func automaticMenu(
         automatic: Bool,
+        clearable: Bool = false,
         hex: Binding<String>,
         draft: Binding<String>
     ) -> some View {
-        if automatic {
+        if automatic || clearable {
             rowActions {
-                automaticItem(hex: hex, draft: draft)
+                if automatic { automaticItem(hex: hex, draft: draft) }
+                if clearable { noColourItem(hex: hex, draft: draft) }
             }
         } else {
             self
@@ -45,6 +47,29 @@ private func automaticItem(
             )
         } else {
             Text(L("color_field.automatic", "Automatic"))
+        }
+    }
+}
+
+/// "No Colour" (#2569): the Fill at zero opacity, its hue kept so
+/// raising the opacity brings the colour back.
+@ViewBuilder
+@MainActor
+private func noColourItem(
+    hex: Binding<String>,
+    draft: Binding<String>
+) -> some View {
+    Button {
+        hex.wrappedValue = KiwiShelf.cleared(hex.wrappedValue)
+        draft.wrappedValue = hex.wrappedValue
+    } label: {
+        if !KiwiShelf.hasColour(hex.wrappedValue) {
+            Label(
+                L("color_field.no_color", "No Color"),
+                systemImage: "checkmark"
+            )
+        } else {
+            Text(L("color_field.no_color", "No Color"))
         }
     }
 }

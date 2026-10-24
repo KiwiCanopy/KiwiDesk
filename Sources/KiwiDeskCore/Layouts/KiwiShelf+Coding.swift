@@ -36,6 +36,8 @@ extension KiwiShelf {
         case hoverFillColor = "hover_fill_color"
         case hoverItemColor = "hover_item_color"
         case fillColor = "fill_color"
+        case fillFade = "fill_fade"
+        case tintHubAndPlates = "tint_hub_and_plates"
         case borderColor = "border_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
@@ -138,6 +140,13 @@ extension KiwiShelf {
         revealStyle =
             try c.decodeIfPresent(RevealStyle.self, forKey: .revealStyle)
             ?? d.revealStyle
+        fillFade = Self.clampFillFade(
+            try c.decodeIfPresent(CGFloat.self, forKey: .fillFade)
+                ?? d.fillFade
+        )
+        tintHubAndPlates =
+            try c.decodeIfPresent(Bool.self, forKey: .tintHubAndPlates)
+            ?? d.tintHubAndPlates
         try decodeColors(from: c)
     }
 

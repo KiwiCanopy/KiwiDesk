@@ -39,6 +39,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case iconSource = "settings.kiwishelf.iconSource"
     case dimFactor = "settings.kiwishelf.dimFactor"
     case revealTimeout = "settings.kiwishelf.revealTimeout"
+    case fillFade = "settings.kiwishelf.fillFade"
+    case tintHubAndPlates = "settings.kiwishelf.tintHubAndPlates"
     case revealStyle = "settings.kiwishelf.revealStyle"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
@@ -120,6 +122,16 @@ extension KiwiShelfKey {
         case .revealTimeout:
             // Lua/CLI until its Settings row lands (#761).
             return .luaOnly
+        case .fillFade, .tintHubAndPlates:
+            // The Liquid Glass group, under its switch (#2569):
+            // hidden below macOS 26 as the switch is; greyed while
+            // it is off or the Fill has no colour, by wiring.
+            return .row(
+                .coloursAndMotion,
+                .glass,
+                .showMore,
+                gate: .runtime(.liquidGlassUnavailable)
+            )
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).
             return .row(.coloursAndMotion, .accent, .showMore)
@@ -245,6 +257,18 @@ extension KiwiShelfKey {
             )
         case .liquidGlass, .dimFactor, .revealTimeout:
             return .none
+        case .fillFade:
+            return .text(
+                "kiwishelf.fill_fade",
+                help: "kiwishelf.fill_fade.help"
+            )
+        case .tintHubAndPlates:
+            // Its label names KiwiHub through `kiwihub.name`
+            // (`SettingKey.labelNamesKiwiHub`).
+            return .text(
+                "kiwishelf.tint_hub_and_plates",
+                help: "kiwishelf.tint_hub_and_plates.help"
+            )
         case .iconSource:
             return .text(
                 "kiwishelf.icon_source.label",

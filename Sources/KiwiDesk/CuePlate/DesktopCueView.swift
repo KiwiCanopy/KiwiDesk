@@ -7,6 +7,8 @@ import SwiftUI
 /// mouse.
 struct DesktopCueView: View {
     let cue: DesktopSwitchCue
+    /// KiwiHub's glass, the Fill with it under the toggle (#2569).
+    let glass: PanelGlass
 
     var body: some View {
         VStack(spacing: 0) {
@@ -33,15 +35,12 @@ struct DesktopCueView: View {
             minHeight: height(cue),
             maxHeight: height(cue)
         )
-        .glassChrome(
+        .panelGlassChrome(
             in: RoundedRectangle(
                 cornerRadius: CuePlateModel.corner,
                 style: .continuous
             ),
-            // Plain system glass by ruling (#2142), never a
-            // look's or a switch's; `.regular` carries the digit.
-            enabled: true,
-            variant: .regular,
+            glass: glass,
             fallback: AnyShapeStyle(.regularMaterial)
         )
     }

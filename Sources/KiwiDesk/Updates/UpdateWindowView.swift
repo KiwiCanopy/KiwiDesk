@@ -152,6 +152,7 @@ extension View {
                         in: Rectangle(),
                         enabled: true,
                         variant: .regular,
+                        tint: nil,
                         fallback: AnyShapeStyle(SettingsTheme.page)
                     )
                     .ignoresSafeArea()

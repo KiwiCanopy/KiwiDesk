@@ -93,7 +93,9 @@ struct SegmentedPickerCoverageTests {
         for needle in [
             ".background(Capsule().fill(SettingsTheme.trackFill))",
             "Capsule().strokeBorder(SettingsTheme.trackFill,",
-            "?SettingsTheme.chipRest:.clear",
+            // KiwiHub's paint, whose default is `chipRest`
+            // (`PanelGlassTests` ▸ `scopeSwitchReadsThePaint`).
+            "?paint.rowHover:.clear",
         ] {
             #expect(source.contains(needle), Comment(rawValue: needle))
         }

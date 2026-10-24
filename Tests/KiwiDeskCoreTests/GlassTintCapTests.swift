@@ -49,14 +49,12 @@ struct GlassTintCapTests {
         let (glass, backdrop) = host()
         GlassTint.apply(
             backdrop,
-            below: glass,
-            frame: frame,
+            in: glass,
             cornerRadius: 4,
-            hex: hex,
+            fill: GlassFill(hex: hex),
             edge: .top
         )
-        guard !backdrop.isHidden,
-            let colors = backdrop.gradient?.colors as? [CGColor],
+        guard let colors = backdrop.gradient?.colors as? [CGColor],
             colors.count == 2
         else { return nil }
         return (colors[0].alpha, colors[1].alpha)

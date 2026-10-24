@@ -16,13 +16,23 @@ struct GlassPairMotionSeamTests {
             .appendingPathComponent("Sources/KiwiDeskCore/Bar")
     }
 
-    /// Each frame writer of a glass or its backdrop: its file and
-    /// the declaration that opens it.
+    /// Each frame writer of a glass or its backdrop: its file, the
+    /// declaration that opens it and the parameter its frame comes
+    /// from — the tint takes the glass's (#2569).
     private static let writers = [
-        (file: "GlassPlate.swift", declaration: "static func update("),
-        (file: "GlassTint.swift", declaration: "static func apply("),
-        (file: "GlassTint.swift", declaration: "static func applyUniform("),
-        (file: "GlassTint.swift", declaration: "private static func paint("),
+        (
+            file: "GlassPlate.swift", declaration: "static func update(",
+            input: "frame: CGRect"
+        ),
+        (
+            file: "GlassPlate.swift",
+            declaration: "static func setBackdrop(",
+            input: "_ view: NSView"
+        ),
+        (
+            file: "GlassTint.swift", declaration: "static func apply(",
+            input: "in glass: NSView"
+        ),
     ]
 
     /// Motion inputs a signature may not take.
@@ -45,7 +55,7 @@ struct GlassPairMotionSeamTests {
                 source[start.upperBound...].firstIndex(of: "{")
             )
             let signature = source[start.lowerBound..<open]
-            #expect(signature.contains("frame: CGRect"), "\(signature)")
+            #expect(signature.contains(writer.input), "\(signature)")
             for input in Self.motionInputs {
                 #expect(
                     !signature.contains(input),
@@ -81,7 +91,7 @@ struct GlassPairMotionSeamTests {
             SourceScan.declarationBody(after: declaration, in: source),
             "\(declaration) is gone from GlassPlate.swift"
         )
-        #expect(body.contains("content.frame = glass.bounds"), "\(body)")
+        #expect(body.contains("held.frame = glass.bounds"), "\(body)")
         for spelling in Self.motionStarts {
             #expect(
                 !body.contains(spelling),

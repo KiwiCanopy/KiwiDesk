@@ -1,12 +1,13 @@
 import AppKit
 
-/// Colored backdrop behind Liquid Glass surfaces (`NSGlassEffectView`,
-/// #408), and the one place a stored Fill becomes a rendered colour on
-/// glass (#1297) — a fade from the shelf's screen edge toward the
-/// windows (#1622), or downward on a surface on no edge (#1620,
-/// #1621). A reading surface — the bar hover peek — takes no fade
-/// at all (`applyUniform`, owner ruling on #1946).
-enum GlassTint {
+/// The Fill on Liquid Glass surfaces (`NSGlassEffectView`, #408):
+/// a backdrop that is the glass's content, over the material and
+/// beneath what it hosts (#2569), and the one place a stored Fill
+/// becomes a rendered colour on glass (#1297) — a fade from the
+/// shelf's screen edge toward the windows (#1622), or downward on a
+/// surface on no edge (#1620, #1621). The bar hover peek fades like
+/// the bar (#2569, overturning #1946's uniform tint).
+public enum GlassTint {
     /// Ceiling on the backdrop's alpha at the fade's ANCHOR edge
     /// — a floor on how much refraction survives, not a legibility
     /// budget. A Fill at or below it renders exactly as picked
@@ -41,18 +42,27 @@ enum GlassTint {
     /// the only instrument that answers. Never subtract from the
     /// alpha a palette happens to ship: that measures the palette.
     ///
-    /// Since #1622 this binds the anchor edge only; the clear end
-    /// runs at `floorShare` of it, where the #1308 pin, not the
-    /// alpha, keeps a dark Fill's glass dark behind the ink.
+    /// Since #1622 this binds the anchor edge only; the far end
+    /// runs at `farShare` of it, and a reading surface's ink there
+    /// is held by its floor (`KiwiShelf.readingInkFloor`, #2569).
     static let maxAlpha: CGFloat = 0.65
 
-    /// The fade's far end as a share of the anchor's alpha: a hint
-    /// of the Fill across the whole surface, never fully clear
-    /// (owner ruling 2026-09-24, #1622).
+    /// The fade's far end as a share of the anchor's alpha at the
+    /// strongest fade: a hint of the Fill across the whole surface,
+    /// never fully clear (owner ruling 2026-09-24, #1622).
     static let floorShare: CGFloat = 1.0 / 8
 
+    /// The far end's share of the anchor at `fade` percent: 100 is
+    /// `floorShare`, 0 the anchor itself (#2569).
+    nonisolated static func farShare(fade: CGFloat) -> CGFloat {
+        let strength =
+            KiwiShelf.clampFillFade(fade)
+            / KiwiShelf.fillFadeRange.upperBound
+        return 1 - strength * (1 - floorShare)
+    }
+
     /// The two ends a stored Fill renders as on glass — the anchor
-    /// clamped to `maxAlpha`, the floor `floorShare` of it — `nil`
+    /// clamped to `maxAlpha`, the floor `farShare` of it — `nil`
     /// where the Fill is transparent or the OS draws no glass.
     ///
     /// **Private, and that is the guard.** Every surface reaches a
@@ -62,20 +72,22 @@ enum GlassTint {
     /// set `tintColor` that way.
     @MainActor
     private static func rendered(
-        _ hex: String
+        _ fill: GlassFill
     ) -> (anchor: NSColor, floor: NSColor)? {
+        let hex = fill.hex
         // The one drawing authority, not a second `#available`
         // beside it: nothing here touches a macOS 26 API, so the
         // check is policy rather than the compiler's (#1374).
-        guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
+        guard LiquidGlassGate.drawsGlass, KiwiShelf.hasColour(hex) else {
             return nil
         }
-        let fill = NSColor(kiwiHex: hex)
-        guard fill.alphaComponent > 0 else { return nil }
-        let anchor = min(fill.alphaComponent, maxAlpha)
+        let color = NSColor(kiwiHex: hex)
+        let anchor = min(color.alphaComponent, maxAlpha)
         return (
-            fill.withAlphaComponent(anchor),
-            fill.withAlphaComponent(anchor * floorShare)
+            color.withAlphaComponent(anchor),
+            color.withAlphaComponent(
+                anchor * max(farShare(fade: fill.fade), fill.minShare)
+            )
         )
     }
 
@@ -105,14 +117,43 @@ enum GlassTint {
     private static func pinnedAppearance(
         _ hex: String
     ) -> NSAppearance? {
-        guard LiquidGlassGate.drawsGlass, !hex.isEmpty else {
+        pin(hex) == .dark ? NSAppearance(named: .darkAqua) : nil
+    }
+
+    /// The variant a Fill decides: dark for a dark Fill, light
+    /// otherwise, nil where the Fill is empty, transparent or no
+    /// glass draws. AppKit can pin only dark; SwiftUI takes both
+    /// (#2569 ▸ Ruling). `wantsLightInk` is the one threshold.
+    @MainActor
+    public static func pin(_ hex: String) -> GlassPaint.Pin? {
+        guard LiquidGlassGate.drawsGlass, KiwiShelf.hasColour(hex) else {
             return nil
         }
-        let fill = NSColor(kiwiHex: hex)
-        guard fill.alphaComponent > 0, fill.wantsLightInk else {
-            return nil
-        }
-        return NSAppearance(named: .darkAqua)
+        return NSColor(kiwiHex: hex).wantsLightInk ? .dark : .light
+    }
+
+    /// The Fill as SwiftUI glass paints it (#2569): the AppKit
+    /// painter's capped ends, the Fill's pin, the fade's points in
+    /// SwiftUI's y-down unit space; nil where `apply` paints none.
+    @MainActor
+    public static func paint(
+        _ fill: GlassFill,
+        edge: AppBarEdge
+    ) -> GlassPaint? {
+        guard let ends = rendered(fill),
+            let anchor = ends.anchor.usingColorSpace(.sRGB)
+        else { return nil }
+        let direction = fade(from: edge)
+        return GlassPaint(
+            red: anchor.redComponent,
+            green: anchor.greenComponent,
+            blue: anchor.blueComponent,
+            anchorAlpha: anchor.alphaComponent,
+            farAlpha: ends.floor.alphaComponent,
+            start: CGPoint(x: direction.start.x, y: 1 - direction.start.y),
+            end: CGPoint(x: direction.end.x, y: 1 - direction.end.y),
+            pin: pin(fill.hex)
+        )
     }
 
     /// Pins `glass` dark where there is no Fill to decide it:
@@ -133,111 +174,78 @@ enum GlassTint {
         glass.appearance = dark ? NSAppearance(named: .darkAqua) : nil
     }
 
-    /// Whether `backdrop` is the subview immediately below `glass`
-    /// in `parent`.
-    @MainActor
-    private static func sits(
-        _ backdrop: NSView,
-        beneath glass: NSView,
-        in parent: NSView
-    ) -> Bool {
-        let order = parent.subviews
-        guard let index = order.firstIndex(of: backdrop),
-            order.indices.contains(index + 1)
-        else { return false }
-        return order[index + 1] === glass
-    }
-
-    /// Positions and colors the backdrop beneath the target glass,
+    /// Makes the backdrop `glass`'s content — above the material,
+    /// beneath what the glass hosts (#2569) — and colours it,
     /// fading from `edge` — the shelf's screen edge, or `.top` for
     /// a surface on none (#1620, #1621) — toward the windows
-    /// (#1622), hiding it where the Fill reaches no colour,
-    /// and pins the glass's variant from the same Fill (#1308). It
-    /// takes the Fill rather than a colour so the cap cannot be
-    /// walked around at a call site (#1297).
-    /// An EMPTY Fill is no colour — clear glass, nothing pinned —
-    /// while any other string resolves through `NSColor(kiwiHex:)`.
+    /// (#1622), clear where the Fill reaches no colour, and pins
+    /// the glass's variant from the same Fill (#1308). It takes the
+    /// Fill rather than a colour so the cap cannot be walked around
+    /// at a call site (#1297); `fill.fade` sets how far it fades.
+    /// A Fill with no colour (`KiwiShelf.hasColour`) is clear
+    /// glass, nothing pinned. AppKit pins only dark: with a `host`,
+    /// glass the Fill leaves unpinned follows its pick instead.
     @MainActor
     static func apply(
         _ backdrop: GlassBackdrop,
-        below glass: NSView,
-        frame: CGRect,
+        in glass: NSView,
         cornerRadius: CGFloat,
-        hex: String,
+        fill: GlassFill,
+        edge: AppBarEdge,
+        host: NSAppearance? = nil
+    ) {
+        // A clear Fill clears the gradient and never hides the
+        // backdrop, which carries the glass's content.
+        glass.appearance = pinnedAppearance(fill.hex)
+        if let host, glass.appearance == nil {
+            followPick(glass, host: host)
+        }
+        GlassPlate.setBackdrop(glass, backdrop)
+        colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
+    }
+
+    /// `apply`'s Fill BEHIND the glass, the backdrop its sibling
+    /// directly beneath: the hidden shelf's handles alone (#2569 ▸
+    /// owner). Their panel never wears the key-window look that
+    /// washes a Fill behind out, and glass over a Fill on top draws
+    /// its edge as a border around the pill.
+    @MainActor
+    static func applyBehind(
+        _ backdrop: GlassBackdrop,
+        below glass: NSView,
+        cornerRadius: CGFloat,
+        fill: GlassFill,
         edge: AppBarEdge
     ) {
-        paint(
-            backdrop,
-            below: glass,
-            frame: frame,
-            cornerRadius: cornerRadius,
-            hex: hex,
-            fadeFrom: edge
-        )
+        glass.appearance = pinnedAppearance(fill.hex)
+        if let parent = glass.superview,
+            parent.subviews.firstIndex(of: backdrop).map({ $0 + 1 })
+                != parent.subviews.firstIndex(of: glass)
+        {
+            parent.addSubview(backdrop, positioned: .below, relativeTo: glass)
+        }
+        backdrop.frame = glass.frame
+        colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
     }
 
-    /// A READING surface's tint: the Fill at the anchor's capped
-    /// alpha over the whole surface, no fade — the ruled exception
-    /// to #1620's detached-surface fade, since a panel of text must
-    /// stay legible over its whole height (owner, #1946: the bar
-    /// hover peek). Everything else `apply` holds holds here.
+    /// The backdrop's gradient: the capped ends fading from `edge`,
+    /// clear where the Fill reaches no colour.
     @MainActor
-    static func applyUniform(
+    private static func colour(
         _ backdrop: GlassBackdrop,
-        below glass: NSView,
-        frame: CGRect,
         cornerRadius: CGFloat,
-        hex: String
+        fill: GlassFill,
+        edge: AppBarEdge
     ) {
-        paint(
-            backdrop,
-            below: glass,
-            frame: frame,
-            cornerRadius: cornerRadius,
-            hex: hex,
-            fadeFrom: nil
-        )
-    }
-
-    /// The one painter both doors take: a fade from `edge`, or the
-    /// anchor alone where it is nil.
-    @MainActor
-    private static func paint(
-        _ backdrop: GlassBackdrop,
-        below glass: NSView,
-        frame: CGRect,
-        cornerRadius: CGFloat,
-        hex: String,
-        fadeFrom edge: AppBarEdge?
-    ) {
-        glass.appearance = pinnedAppearance(hex)
-        guard let ends = rendered(hex), let gradient = backdrop.gradient
-        else {
-            backdrop.isHidden = true
+        guard let gradient = backdrop.gradient else { return }
+        gradient.cornerRadius = cornerRadius
+        guard let ends = rendered(fill) else {
+            gradient.colors = nil
             return
         }
-        // Re-ordered whenever it is not DIRECTLY beneath the glass,
-        // not only when unparented: a sibling move of the glass
-        // (`spanBackdrop`) leaves the backdrop above it (#1314).
-        if let parent = glass.superview,
-            !Self.sits(backdrop, beneath: glass, in: parent)
-        {
-            parent.addSubview(
-                backdrop,
-                positioned: .below,
-                relativeTo: glass
-            )
-        }
-        backdrop.isHidden = false
-        // Never travels: a gliding backdrop rides its `GlassBox`
-        // host with its glass (#2095), and an equal write would
-        // cancel its follow.
-        if backdrop.frame != frame { backdrop.frame = frame }
-        let direction = fade(from: edge ?? .top)
+        let direction = fade(from: edge)
         gradient.startPoint = direction.start
         gradient.endPoint = direction.end
-        let far = edge == nil ? ends.anchor : ends.floor
-        gradient.colors = [ends.anchor.cgColor, far.cgColor]
-        gradient.cornerRadius = cornerRadius
+        gradient.colors = [ends.anchor.cgColor, ends.floor.cgColor]
     }
 }

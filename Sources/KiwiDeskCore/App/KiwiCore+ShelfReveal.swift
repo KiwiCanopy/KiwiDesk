@@ -171,7 +171,7 @@ extension KiwiCore {
                     mark: mark,
                     frame: markIn,
                     edge: plan.edge,
-                    fill: shelf.fillColor,
+                    fill: shelf.glassFill,
                     currentInk: shelf.activeItemColor,
                     ink: shelf.idleItemColor,
                     emptyInk: shelf.emptyItemColor,

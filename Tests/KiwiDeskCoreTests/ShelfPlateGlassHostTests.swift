@@ -41,7 +41,7 @@ struct ShelfPlateGlassHostTests {
         let glass = try #require(overlay.glassPlate)
         let tint = try #require(overlay.glassTint)
         let host = try #require(GlassBox.host(of: glass))
-        #expect(tint.superview === host)
+        #expect(tint.isDescendant(of: glass))
         #expect(host.superview === overlay.content)
         #expect(glass.frame == host.bounds)
         #expect(tint.frame == host.bounds)
@@ -119,7 +119,7 @@ struct ShelfPlateGlassHostTests {
                 tint: box.tint,
                 at: frame,
                 cornerRadius: 8,
-                hex: "#202020B3",
+                fill: GlassFill(hex: "#202020B3"),
                 edge: .top,
                 visible: true,
                 animated: true,
@@ -133,7 +133,7 @@ struct ShelfPlateGlassHostTests {
         place(CGRect(x: 120, y: 0, width: 60, height: 30))
         #expect(writes.contains { $0.view === host && $0.travels })
         #expect(!writes.contains { $0.view !== host })
-        #expect(box.tint.superview === host)
+        #expect(box.tint.isDescendant(of: box.glass))
         #expect(box.glass.frame == host.bounds)
         #expect(box.tint.frame == host.bounds)
     }
@@ -158,7 +158,7 @@ struct ShelfPlateGlassHostTests {
             tint: box.tint,
             at: CGRect(x: 594.5, y: 0, width: 539, height: 40),
             cornerRadius: 8,
-            hex: "#202020B3",
+            fill: GlassFill(hex: "#202020B3"),
             edge: .top,
             visible: true,
             animated: true,
@@ -173,7 +173,7 @@ struct ShelfPlateGlassHostTests {
             tint: box.tint,
             at: CGRect(x: 594.5, y: 0, width: 539, height: 40),
             cornerRadius: 8,
-            hex: "#202020B3",
+            fill: GlassFill(hex: "#202020B3"),
             edge: .top,
             visible: true,
             animated: true,
@@ -198,7 +198,7 @@ struct ShelfPlateGlassHostTests {
             tint: box.tint,
             at: CGRect(x: 382.8, y: 0, width: 962.4, height: 40),
             cornerRadius: 8,
-            hex: "#202020B3",
+            fill: GlassFill(hex: "#202020B3"),
             edge: .top,
             visible: true,
             animated: false

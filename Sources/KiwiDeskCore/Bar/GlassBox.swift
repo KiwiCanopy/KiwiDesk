@@ -79,7 +79,6 @@ enum GlassBox {
         }
         let tint = GlassBackdrop()
         glass.autoresizingMask = [.width, .height]
-        tint.autoresizingMask = [.width, .height]
         host.addSubview(glass)
         return (glass, tint)
     }
@@ -101,17 +100,18 @@ enum GlassBox {
     /// and writes the pair to each size it takes
     /// (`GlassBoxHost.setFrameSize`). A fresh host lands rather
     /// than gliding from nowhere. `visible` false hides the whole
-    /// box, which still takes its slot; `hex` is the Fill its tint
-    /// paints.
+    /// box, which still takes its slot; `fill` is the Fill its tint
+    /// paints, on the glass or, `behind`, beneath it.
     static func place(
         _ glass: NSView,
         tint: GlassBackdrop,
         at frame: CGRect,
         cornerRadius: CGFloat,
-        hex: String,
+        fill: GlassFill,
         edge: AppBarEdge,
         visible: Bool,
         animated: Bool,
+        behind: Bool = false,
         move: BarFrameMove = BarMotion.setFrame(_:to:animated:)
     ) {
         guard let host = host(of: glass) else { return }
@@ -125,14 +125,23 @@ enum GlassBox {
                 ? glass.frame : bounds,
             cornerRadius: cornerRadius
         )
-        GlassTint.apply(
-            tint,
-            below: glass,
-            frame: bounds,
-            cornerRadius: cornerRadius,
-            hex: hex,
-            edge: edge
-        )
+        if behind {
+            GlassTint.applyBehind(
+                tint,
+                below: glass,
+                cornerRadius: cornerRadius,
+                fill: fill,
+                edge: edge
+            )
+        } else {
+            GlassTint.apply(
+                tint,
+                in: glass,
+                cornerRadius: cornerRadius,
+                fill: fill,
+                edge: edge
+            )
+        }
         let travels = animated && host.frame != .zero
         move(host, frame, travels)
         // Auto Layout can leave a growing glass at its old size

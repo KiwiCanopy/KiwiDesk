@@ -9,7 +9,25 @@ extension ColorsAndGlassRow {
         case .fillColor:
             HexColorField(
                 label: L("kiwishelf.color.fill", "Fill"),
+                clearable: true,
                 hex: shelf.fillColor
+            )
+            .help(
+                L(
+                    "kiwishelf.color.fill.help",
+                    "The KiwiShelf color: both bars, the overflow "
+                        + "marks and their lists and the hover peek, "
+                        + "and %1$@ and the switch plates while "
+                        + "\u{201C}%2$@\u{201D} is on. How far it fades "
+                        + "is \u{201C}%3$@\u{201D}. \u{201C}%4$@\u{201D} "
+                        + "leaves plain glass.",
+                    JumpScope.panelName,
+                    SettingsCatalog.colors.colorsAndGlass.children
+                        .tintHubAndPlates
+                        .text,
+                    L("kiwishelf.fill_fade", "Fill fade"),
+                    L("color_field.no_color", "No Color")
+                )
             )
         case .itemColor:
             HexColorField(
