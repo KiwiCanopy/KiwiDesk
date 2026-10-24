@@ -104,4 +104,22 @@ struct SpaceBarOpenListTests {
         view.applyHover(true, target: web)
         #expect(view.hoveredTarget === mail, "the open one keeps the light")
     }
+
+    /// A list opened on another item takes the open one's place: the
+    /// item it leaves is told too, and goes unlit.
+    @Test("The item a list leaves goes unlit")
+    func leftItemGoesUnlit() throws {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        let actions = SpaceBarGlyphActions()
+        defer { withExtendedLifetime(actions) {} }
+        let first = item(rig, actions)
+        let second = item(rig, actions)
+        open(rig, try #require(first.glyphTargets.first))
+        #expect(first.isHovered)
+        open(rig, try #require(second.glyphTargets.first))
+        #expect(second.isHovered)
+        #expect(!first.isHovered, "the item it left goes unlit")
+        #expect(first.hoveredTarget == nil)
+    }
 }

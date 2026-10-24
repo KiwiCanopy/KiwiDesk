@@ -15977,8 +15977,9 @@ merely crossed the bar was noise, and the one thing a `+n`
 invites, clicking it, did nothing: the click only re-read the
 list the hover had opened. The Dock draws the same line — a hover
 shows a label, a click opens a stack — and the overflow mark's
-`+n` opens on click (#2563), so one `+n` behaves one way. The price is the hover label on a multi-window glyph and an
-App Bar group, which name their app only once clicked; bringing
+`+n` opens on click (#2563), so one `+n` behaves one way. The
+price is the hover label on a multi-window glyph and an App Bar
+group, which name their app only once clicked; bringing
 that label back is a ruling, not a regression fix. A one-window
 glyph still picks on the click; two lists for one set of windows
 is the fight the tooltip lost.

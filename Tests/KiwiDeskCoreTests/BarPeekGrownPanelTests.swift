@@ -82,6 +82,50 @@ struct BarPeekGrownPanelTests {
         #expect(rig.peek.panel.header.isHidden)
     }
 
+    /// A bar list opened over another item's opens afresh, its open
+    /// time its own: a click straight after it is the double-click
+    /// guard's, never a close (#2063).
+    @Test("A second item's list opens afresh")
+    func secondItemOpensAfresh() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        clickList(rig)
+        rig.clock += 1
+        let second = BarPeekSource.glyph([WindowID(3), WindowID(4)])
+        let open = {
+            rig.peek.clicked(
+                rig.second,
+                source: second,
+                space: SpaceID("1"),
+                edge: .top,
+                clickCount: 1
+            )
+        }
+        open()
+        #expect(rig.peek.panel.morph?.item === rig.second)
+        open()
+        #expect(rig.shownTitles == ["Window 3", "Window 4"], "too soon")
+    }
+
+    /// A run has a mark at each end: a click on the second while the
+    /// first's list shows grows the second's list and brings the
+    /// first pill back.
+    @Test("A second mark's list takes over and the first pill returns")
+    func secondPillTakesOver() {
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        let first = Pill(frame: CGRect(x: 100, y: 10, width: 24, height: 18))
+        let second = Pill(frame: CGRect(x: 300, y: 10, width: 24, height: 18))
+        rig.item.addSubview(first)
+        rig.item.addSubview(second)
+        clickPill(rig, first)
+        #expect(first.morphed)
+        clickPill(rig, second)
+        #expect(second.morphed, "the second pill hides as its list opens")
+        #expect(!first.morphed, "the first pill comes back")
+        #expect(rig.peek.panel.morph?.anchor === second)
+    }
+
     /// A bar list fades over its retract, so no plate rests while
     /// the spring settles; the overflow mark's shrinks into its pill
     /// whole (device, 2026-10-24).

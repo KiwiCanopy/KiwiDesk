@@ -39,8 +39,10 @@ extension BarPeekPanel {
         visible: CGRect
     ) {
         let shelf = LiquidGlassGate.rendered(stored)
-        // A bar item's list in its place ends at once (#2571).
-        if morph?.growth == .outOfItem { dropMorph() }
+        // Any other list in its place ends at once: a bar item's
+        // (#2571), or another mark's, whose pill comes back as this
+        // one's grows — a run has a mark at each end.
+        if let morph, morph.anchor !== request.anchor { dropMorph() }
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)

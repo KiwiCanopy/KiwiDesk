@@ -58,22 +58,51 @@ struct AppBarGroupClickTests {
         return view
     }
 
-    private func click(_ view: AppBarItemView) throws {
-        let event = { (type: NSEvent.EventType) in
+    /// A press and release, windowless unless `releasedAt` names a
+    /// point in `view`'s window, where the release lands.
+    private func click(
+        _ view: AppBarItemView,
+        releasedAt: CGPoint? = nil
+    ) throws {
+        let event = { (type: NSEvent.EventType, at: CGPoint?) in
             NSEvent.mouseEvent(
                 with: type,
-                location: .zero,
+                location: at ?? .zero,
                 modifierFlags: [],
                 timestamp: 0,
-                windowNumber: 0,
+                windowNumber: at == nil ? 0 : view.window?.windowNumber ?? 0,
                 context: nil,
                 eventNumber: 0,
                 clickCount: 1,
                 pressure: 1
             )
         }
-        view.mouseDown(with: try #require(event(.leftMouseDown)))
-        view.mouseUp(with: try #require(event(.leftMouseUp)))
+        view.mouseDown(with: try #require(event(.leftMouseDown, nil)))
+        view.mouseUp(with: try #require(event(.leftMouseUp, releasedAt)))
+    }
+
+    /// A press dragged off a group and released elsewhere cancels,
+    /// as a button's does (#2044) — a float group never drags.
+    @Test("A release off a group opens nothing")
+    func releaseOffAGroupCancels() throws {
+        let core = makeBarCore()
+        let rig = BarPeekRig()
+        defer { rig.close() }
+        let actions = AppBarItemActions()
+        defer { withExtendedLifetime(actions) {} }
+        let group = try finder(core, rig, actions, members: [1, 2])
+        let off = group.convert(
+            CGPoint(x: group.bounds.maxX + 40, y: group.bounds.midY),
+            to: nil
+        )
+        try click(group, releasedAt: off)
+        #expect(rig.peek.shown == nil)
+        let inside = group.convert(
+            CGPoint(x: group.bounds.midX, y: group.bounds.midY),
+            to: nil
+        )
+        try click(group, releasedAt: inside)
+        #expect(rig.peek.shown?.view === group, "a release inside opens")
     }
 
     @Test("A group's click opens its list and selects nothing")

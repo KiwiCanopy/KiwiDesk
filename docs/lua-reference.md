@@ -7318,8 +7318,9 @@ animations.set_reveal_duration(400)
 on hover — a label, or a collapsed Space's list — and a list a
 click opens growing out of its item — a bar's "+n", a glyph or App
 Bar item standing for several windows, the overflow mark's "+n" —
-and back, fading as it retracts. Off, both show and hide at once. With Reduce Motion on, a list cross-fades in place
-instead of growing, unless this is off. Lua-only: no Settings row
+and back, fading as it retracts. Off, both show and hide at once.
+With Reduce Motion on, a list cross-fades in place instead of
+growing, unless this is off. Lua-only: no Settings row
 turns it off.
 
 **Example:**
