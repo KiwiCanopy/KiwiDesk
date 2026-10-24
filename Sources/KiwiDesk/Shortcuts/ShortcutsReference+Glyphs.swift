@@ -64,11 +64,11 @@ extension ShortcutsReferenceBuilder {
     /// The layout cycle's arrows (#2529 ▸ Ruling).
     static let nextLayout = FloorSymbol(
         name: "arrow.trianglehead.clockwise",
-        floor: "arrow.clockwise"
+        floor: "arrow.clockwise.circle"
     )
     static let previousLayout = FloorSymbol(
         name: "arrow.trianglehead.counterclockwise",
-        floor: "arrow.counterclockwise"
+        floor: "arrow.counterclockwise.circle"
     )
     static let layoutCycle = FloorSymbol(
         name: "arrow.trianglehead.2.clockwise",

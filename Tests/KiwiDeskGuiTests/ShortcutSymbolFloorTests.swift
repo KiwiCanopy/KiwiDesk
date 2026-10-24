@@ -125,6 +125,11 @@ struct ShortcutSymbolFloorTests {
         )
         #expect(drawn.count > 20, "the census drew too few symbols")
         let stand = ShortcutsReferenceBuilder.floorSymbols
+        // A stand-in wears no other row's glyph (#2529: reset sizing's
+        // bare counterclockwise arrow).
+        let floors = stand.map(\.floor)
+        #expect(Set(floors).count == floors.count)
+        #expect(Set(floors).isDisjoint(with: drawn))
         for symbol in drawn {
             let first = try #require(since[symbol], "\(symbol) unlisted")
             if let pair = stand.first(where: { $0.name == symbol }) {
