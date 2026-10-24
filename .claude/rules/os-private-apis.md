@@ -285,7 +285,8 @@ Every one of the following binds whoever touches them:
   `privateSelector`, added at runtime to the panels its home lists,
   never to `NSPanel` itself** — the glass's key-window look on the
   shelf, the overflow marks, the peek and the plates' one
-  `ActiveGlassPanel` (`GlassActiveAppearance`, measured on macOS 27,
+  `ActiveGlassPanel`, whose answer is its own `wearsActiveLook`,
+  read on every ask (`GlassActiveAppearance`, measured on macOS 27,
   2026-10-23/24; `GlassActiveAppearanceTests`). Its fallback is that a macOS
   no longer asking leaves the added method uncalled, so the glass
   draws as it would anyway; it owes a `self_test` row like a

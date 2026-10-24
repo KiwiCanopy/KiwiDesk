@@ -49,8 +49,8 @@ paths:
   - "Sources/KiwiDeskCore/Borders/OverflowMark*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
-  # The Space slide's plates (#1956, #2524): untinted `.regular`
-  # glass, KiwiHub's, on KiwiHub's leaf.
+  # The Space slide's plates (#1956, #2524): KiwiHub's glass on
+  # KiwiHub's leaf, wearing the Fill under the toggle (#2569).
   - "Sources/KiwiDeskCore/Animation/SpaceSlideOverlay+Plates.swift"
   # ...and the sites that decide their glass through the gate.
   - "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift"
@@ -1310,11 +1310,17 @@ near-solid slab for as long as the finish shipped (#1297).
 Obligations:
 
 - **A glass surface takes its colour from `GlassTint.apply`**,
-  which is handed the Fill's **hex** and never an `NSColor`. The
-  narrower parameter is the rule, not an accident: while it took
-  a colour, a call site could substitute one for the capped one
-  and every guard stayed green — the same bypass one level up
-  from the one that was being closed. A surface that genuinely
+  which is handed a `GlassFill` — the Fill's **hex** with its fade
+  and floor — and never an `NSColor` (`GlassTintCensusTests` ▸
+  `applyTakesAFillNotAColour`). The narrower parameter is the
+  rule, not an accident: while it took a colour, a call site
+  could substitute one for the capped one and every guard stayed
+  green — the same bypass one level up from the one that was
+  being closed. A KiwiShelf surface mints its `GlassFill` from the
+  shelf (`glassFill`, or `readingGlassFill` / `panelGlassFill`
+  for a reading surface), never field by field. A SwiftUI surface
+  takes the same Fill as a `GlassPaint`, minted only by
+  `GlassTint.paint` (`GlassPaintTests`). A surface that genuinely
   needs a non-Fill colour on glass earns a second mint inside
   `GlassTint`, never a colour parameter.
 - **The Fill draws on the glass, beneath its content: the
@@ -1450,9 +1456,13 @@ Obligations:
   question it looks like it is answering; and what actually binds
   the cap is the bar's own ink, which is fixed palette hex with
   no vibrancy path, so the plate is its legibility floor at the
-  fade's anchor edge; at the clear end, where it runs at
-  `GlassTint.floorShare` of the cap, the #1308 dark pin carries
-  the ink, so a retune measures the ink at both ends.
+  fade's anchor edge. At the far end a READING surface's ink is
+  held by `KiwiShelf.readingInkFloor` (`idleInkFloor` under
+  Increase Contrast), never by the #1308 pin, and that number is
+  retuned on real glass over white and black, as its docstring
+  says (#2569, `PeekInkContrastTests`); the bars follow Fill fade
+  without a floor. A retune of either measures the ink at both
+  ends, Fill fade at 100.
 - **The glass's light/dark variant is PINNED from the Fill in
   `GlassTint.apply`, never left to the OS per view.** macOS
   decides a Liquid Glass view's variant from the backdrop that
@@ -1464,9 +1474,14 @@ Obligations:
   glass carries `NSApp.appearance`, which the Settings Appearance
   pick writes (#678) — two writers reach one view, and the
   precedence is the Fill's where it is dark and the pick's for
-  the rest, ruled in that entry. Only dark can be pinned, and
-  that fact is scoped to the ambient it was measured in by
-  `GlassTint.pinnedAppearance`'s docstring, never restated here.
+  the rest, ruled in that entry. Only dark can be pinned on
+  AppKit glass, and that fact is scoped to the ambient it was
+  measured in by `GlassTint.pinnedAppearance`'s docstring, never
+  restated here. SwiftUI glass can pin light, so a SwiftUI
+  surface takes both verdicts of the one `GlassTint.pin` through
+  `GlassPaint.pin` — KiwiHub and the cue plates under the toggle
+  (#2569; `GlassPaintTests`) — and never derives a scheme of its
+  own.
   The threshold is `wantsLightInk`'s — one copy with the mark
   glyphs — and `GlassTintPinTests` holds the consumer,
   including that a light Fill LIFTS a pin the previous Fill left.
@@ -1481,22 +1496,24 @@ Obligations:
   one-home scan exempts the home file and cannot see who calls it.
   **A surface with no Fill that follows the Appearance pick pins
   through `GlassTint.followPick`**, handed its window's effective
-  appearance — the Space-switch plates (#2539,
-  `SpaceSlidePlateAppearanceTests`) — and a new caller joins
+  appearance — the Space-switch plates with the toggle off (#2539,
+  `SpaceSlidePlateAppearanceTests`; tinted, they pin from the Fill
+  through `GlassTint.apply`) — and a new caller joins
   `GlassTintPinDarkCallerTests`' `followPick` register, for the
   reason `pinDark`'s has one.
-- **A `Sources/KiwiDesk` surface that tints glass owes this suite
-  a root.** `GlassTintSeamTests` scans Core alone, so the GUI
-  tree is not covered by it — a Fill→colour derivation that lands
-  there is invisible until someone widens the roots. Note the
-  reason to think twice before writing one, which is not a
-  capability limit: SwiftUI's `Glass.tint(_:)` **does** work, and
-  the near-colourless finding above is AppKit's. What the bars
-  lack is a vibrancy path for their ink, which a SwiftUI surface
-  drawing `.primary` / `.secondary` over a material has — so the
-  argument that forces a tinted fill onto a bar does not reach
-  that tree, and a tint there is a design choice needing its own
-  ruling rather than an inherited one.
+- **A `Sources/KiwiDesk` surface that tints glass takes a
+  `GlassPaint` from `GlassTint.paint` and derives no colour from a
+  Fill itself.** `GlassPaint` has no initializer outside Core, so
+  the compiler holds the mint; a GUI surface reading `fillColor`
+  and building its own gradient beside it is not covered, since
+  `GlassTintSeamTests` scans Core alone — that half is review's
+  until someone widens the roots. Which SwiftUI surfaces wear the
+  Fill is a ruling, not an inheritance: KiwiHub and the cue plates
+  under *Tint KiwiHub and plates* (#2569, `docs/design-decisions.md`
+  ▸ the shortcuts panel), drawn through `panelGlassChrome`
+  ([gui.md](gui.md) ▸ This tree draws glass through one modifier;
+  `PanelGlassTests`). A further surface argues its own entry
+  first.
 - **Reduce transparency stands the glass down at the one
   render-time read, and never by moving the stored value**
   (#1374). `NSGlassEffectView` ignores the setting — measured

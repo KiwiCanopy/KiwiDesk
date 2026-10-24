@@ -1824,29 +1824,56 @@ Obligations:
   *keep the design language* are different answers and the first
   is ours: a surface degrading to something nearly glass claims a
   finish the machine cannot draw.
-- **Glass here is untinted, and a tint needs its own ruling.**
-  `Glass.tint(_:)` is a **dimmer**: measured 2026-09-07, a
+- **Glass here carries a Fill only by ruling, and only as the
+  `tint` parameter's `GlassPaint`** — minted by `GlassTint.paint`
+  alone, nil for an untinted surface (bars.md ▸ A stored Fill
+  becomes a colour on glass in ONE place). The ruled surfaces are
+  KiwiHub and the cue plates under *Tint KiwiHub and plates*
+  (#2569), drawn through the one `panelGlassChrome`, which picks
+  the Fill, the variant and the inks from `PanelGlass`
+  (`PanelGlassTests`); with the toggle off they hand `tint` nil,
+  as does every surface no ruling names. Never reach for
+  `Glass.tint(_:)`: it is a **dimmer** — measured 2026-09-07, a
   neutral tint took a plate from luminance 144 to 134 with chroma
-  rising, which is what AppKit's `tintColor` does ▸ #390. So the
-  two toolkits agree, and a tint neither lightens a plate nor
-  colours it — only a `GlassTint`-style backdrop carries hue, and
-  one opaque enough to read stops the wallpaper coming through.
-  `docs/design-decisions.md` ▸ the shortcuts panel carries the
-  ruling; its second reason needs no platform fact at all, since
-  a SwiftUI surface's `.primary` / `.secondary` are vibrant
-  against the composite backdrop and so need no fill the way a
-  bar's fixed-hex ink does.
+  rising, which is what AppKit's `tintColor` does ▸ #390 — so it
+  neither lightens a plate nor colours it. A further tinted
+  surface argues its own entry in `docs/design-decisions.md` (▸
+  the shortcuts panel carries the ruling and its amendment).
 - **The variant is a legibility decision, per surface**, and so
   is the fallback: both are required parameters, never
   defaulted, so the compiler holds that every call names them.
-  Glass carrying text draws `.regular` (the ⌃⌥K panel), a
-  surface with nothing to read may take `.clear` (the dragged
-  slider knob, #1527), and the bars draw `.clear` — ruled
-  rather than drifted: `.regular` and `.clear` are visually
-  identical in AppKit (#390) and 59/255 apart in SwiftUI, so
-  there is no one finish to be consistent about. Moving either
-  is a device sitting, not a tidy-up; `GlassChromeSeamTests`
-  holds that both parameters reach the branch.
+  Glass carrying text on bare glass draws `.regular` (KiwiHub and
+  the cue plates with the toggle off), a surface with nothing to
+  read may take `.clear` (the dragged slider knob, #1527), and
+  glass carrying a Fill draws `.clear` — the bars, and KiwiHub and
+  the cue plates under the toggle, whose variant `PanelGlass`
+  derives from it (#2569, `PanelGlassTests`). `.regular` is
+  frosted and hides the key-window rim. On macOS 27 AppKit and
+  SwiftUI `.clear` measured pixel-identical and `.regular`
+  frosted in both (#2569, 2026-10-24); the "identical in AppKit"
+  of #390 was macOS 26.5.2's. Moving either is a device sitting,
+  not a tidy-up; `GlassChromeSeamTests` holds that both
+  parameters reach the branch.
+- **A tinted panel's text takes the hierarchical styles
+  `panelGlassChrome` sets, never an ink by name.** Under the
+  toggle it sets the look's three inks — `KiwiShelf.panelInk`:
+  Item colour, the peek header's dimmed ink, the idle ink (the
+  header's again under Increase Contrast) — as
+  the `.primary` / `.secondary` / `.tertiary` styles beneath the
+  glass, and the reading floor is measured on exactly those
+  (`GlassPaintTests`). So content inside KiwiHub or a cue plate
+  writes `.primary` / `.secondary` / `.tertiary`; a
+  `SettingsTheme` ink or a system label colour spelled there
+  draws the untinted panel's ink on the user's Fill, unmeasured.
+  These inks are the look's hex, not `SettingsTheme`'s — the
+  ground beneath them is the user's Fill, which the theme cannot
+  know — so they are this section's exception to *Colour*'s first
+  bullet, and only while the toggle is on. A selected or hovered
+  item takes `KiwiHubPaint` from the environment instead
+  (`kiwiHubRowInk`): off the toggle its theme tokens, which
+  `SettingsThemeContrastTests` measures, and under it the shelf's
+  highlight and hover pair, which `PanelHighlightTests` measures
+  (`PanelGlassTests` ▸ `rowsReadThePaint`).
 - **A surface states its `.tint` BELOW its glass**, so the
   ground is not inside the tinted environment. Otherwise
   "untinted" rests on `glassEffect` not reading `.tint`, which
