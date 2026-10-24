@@ -19,17 +19,33 @@ public struct PanelInk: Sendable, Equatable {
     public let primary: String
     public let secondary: String
     public let tertiary: String
+    /// A divider's hairline: `tertiary` thinned (#2596).
+    public let divider: String
 }
 
 extension KiwiShelf {
+    /// The share of the dim panel ink a divider draws at (#2596,
+    /// ui-designer): about Apple's separator, label ink at ~0.2.
+    /// The far end of the panel Fill holds the dim ink at exactly
+    /// `readingInkFloor` over white, so a retune of that floor moves
+    /// the divider's contrast with it (`PanelDividerContrastTests`).
+    public static let panelDividerAlpha: CGFloat = 0.35
+    /// The divider's share under Increase Contrast.
+    public static let panelDividerIncreasedAlpha: CGFloat = 0.6
+
     /// The look's inks for KiwiHub and the cue plates; under
     /// Increase Contrast the dim level takes the secondary ink,
     /// since the idle ink has no legibility step of its own.
     public func panelInk(increaseContrast: Bool) -> PanelInk {
-        PanelInk(
+        let tertiary = increaseContrast ? peekHeaderColor : idleItemColor
+        let share =
+            increaseContrast
+            ? Self.panelDividerIncreasedAlpha : Self.panelDividerAlpha
+        return PanelInk(
             primary: itemColor,
             secondary: peekHeaderColor,
-            tertiary: increaseContrast ? peekHeaderColor : idleItemColor
+            tertiary: tertiary,
+            divider: Self.hex(tertiary, atShare: share)
         )
     }
 

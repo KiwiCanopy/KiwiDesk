@@ -48,7 +48,7 @@ struct PanelGlassTests {
         let reduced = glass.drawn(reduceTransparency: true)
         #expect(reduced.shelf == nil)
         #expect(reduced.enabled == glass.enabled)
-        #expect(!KiwiHubPaint.of(reduced).tinted)
+        #expect(!KiwiHubPaint.of(reduced, increaseContrast: false).tinted)
         // A leaf turned off after the read draws the fallback too.
         var off = glass
         off.enabled = false
@@ -73,7 +73,12 @@ struct PanelGlassTests {
         settings.kiwishelf.tintHubAndPlates = true
         settings.shortcutPanelLiquidGlass = false
         #expect(PanelGlass(settings: settings).shelf == nil)
-        #expect(!KiwiHubPaint.of(PanelGlass(settings: settings)).tinted)
+        #expect(
+            !KiwiHubPaint.of(
+                PanelGlass(settings: settings),
+                increaseContrast: false
+            ).tinted
+        )
     }
 
     /// A Fill without colour leaves KiwiHub and the cues untinted,
@@ -84,7 +89,12 @@ struct PanelGlassTests {
         settings.kiwishelf.tintHubAndPlates = true
         settings.kiwishelf.fillColor = "#14201C00"
         #expect(PanelGlass(settings: settings).shelf == nil)
-        #expect(!KiwiHubPaint.of(PanelGlass(settings: settings)).tinted)
+        #expect(
+            !KiwiHubPaint.of(
+                PanelGlass(settings: settings),
+                increaseContrast: false
+            ).tinted
+        )
     }
 
     @Test("Every cue view and KiwiHub draw through the panel glass")
@@ -117,7 +127,8 @@ struct PanelGlassTests {
         #expect(
             chrome.contains(
                 "inked(content).environment(\\.kiwiHubPaint,"
-                    + "KiwiHubPaint.of(drawn)).glassChrome("
+                    + "KiwiHubPaint.of(drawn,increaseContrast:increased))"
+                    + ".glassChrome("
             )
         )
         #expect(
@@ -177,7 +188,10 @@ struct PanelGlassTests {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = tinted
         try #require(GlassChromeVariant.drawable, "no glass below 26")
-        let paint = KiwiHubPaint.of(PanelGlass(settings: settings))
+        let paint = KiwiHubPaint.of(
+            PanelGlass(settings: settings),
+            increaseContrast: false
+        )
         #expect(paint.tinted == tinted)
         // A selected item's every level takes its own ink only
         // under the toggle (#2569).
@@ -257,10 +271,11 @@ struct PanelGlassTests {
         // drawn.
         let chrome = try Self.source(
             "Settings/Components/Common/PanelGlass.swift"
-        )
+        ).filter { !$0.isWhitespace }
         #expect(
             chrome.contains(
-                ".environment(\\.kiwiHubPaint, KiwiHubPaint.of(drawn))"
+                ".environment(\\.kiwiHubPaint,KiwiHubPaint.of("
+                    + "drawn,increaseContrast:increased))"
             )
         )
     }

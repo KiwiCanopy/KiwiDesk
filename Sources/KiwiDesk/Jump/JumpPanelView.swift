@@ -67,9 +67,9 @@ struct JumpPanelView: View {
         VStack(spacing: 0) {
             field
             namingCaption
-            Divider()
+            PanelDivider()
             scopeContent
-            Divider()
+            PanelDivider()
             footer
         }
         // The side's own name, which its shortcut row shows (#2245).

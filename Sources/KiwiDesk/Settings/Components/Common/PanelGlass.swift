@@ -93,7 +93,10 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
 
     func body(content: Content) -> some View {
         inked(content)
-            .environment(\.kiwiHubPaint, KiwiHubPaint.of(drawn))
+            .environment(
+                \.kiwiHubPaint,
+                KiwiHubPaint.of(drawn, increaseContrast: increased)
+            )
             .glassChrome(
                 in: shape,
                 enabled: drawn.enabled,

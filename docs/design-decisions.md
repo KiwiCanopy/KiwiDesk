@@ -12473,7 +12473,15 @@ three reasons are answered one by one:
    and the look's inks are the ones measured on it. The system
    labels stay for the toggle off. The reading floor (▸ Liquid
    Glass, *Reading surfaces fade above a floor*) measures these
-   inks at the faint end (`GlassPaintTests`).
+   inks at the faint end (`GlassPaintTests`). KiwiHub's dividers
+   take the tertiary ink at 0.35 of its alpha, 0.6 under Increase
+   Contrast, never the system separator, which a dark Fill pins
+   to the light rule meant for dark system chrome (#2596). A
+   hairline is not text: it holds 1.15:1 at the faint end over
+   white, 1.5:1 under Increase Contrast, rather than raising the
+   Fill's floor for itself — no opacity under 1 reaches 1.5
+   there, since the floor holds the tertiary ink at exactly 1.5
+   (`PanelDividerContrastTests`).
 3. *A green ground erases the accent.* There is no kiwi on the
    tinted panel. The selected row takes KiwiShelf's highlight
    with black or white ink, whichever reads on it
