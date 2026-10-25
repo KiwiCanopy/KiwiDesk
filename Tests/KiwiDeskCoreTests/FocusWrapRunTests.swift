@@ -95,4 +95,31 @@ struct FocusWrapRunTests {
         #expect(core.navigate([.string("right")], swapping: false).isSuccess)
         #expect(core.state.workspaces.lastFocused == master)
     }
+
+    /// Six alternating BSP windows: 1 on the left, 2 top right, and
+    /// the chain 3…6 along the bottom right. → at the chain's end
+    /// wraps along its axis yet lands outside it, on window 1.
+    @Test("a wrap along a run that leaves it keeps its target")
+    func alongTheRunOutOfIt() throws {
+        let core = makeCore()
+        #expect(
+            core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300)
+        )
+        core.execute("bsp.set_strategy", args: [.string("alternating")])
+        for id in UInt32(1)...6 {
+            core.state.apply(.windowCreated(window(id)))
+        }
+        core.execute("set_mode", args: [.string("bsp")])
+        core.execute("set_focus_wrap", args: [.string("this_screen")])
+        let space = try #require(core.state.workspaces.activeSpace)
+        core.retile(animated: false)
+        let zone = try #require(core.tiler.runCovers[space]?.runs.first)
+            .zone
+        try #require(!zone.vertical)
+        try #require(!zone.members.contains(WindowID(1)))
+        let last = try #require(zone.members.last)
+        focus(core, last)
+        #expect(core.navigate([.string("right")], swapping: false).isSuccess)
+        #expect(core.state.workspaces.lastFocused == WindowID(1))
+    }
 }
