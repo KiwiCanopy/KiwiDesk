@@ -32,7 +32,7 @@ extension GridSchematic {
         }
         var cells: [(CGRect, CellKind)] = []
         guard ids.count <= capacity else {
-            return scrolledCells(ids, capacity: capacity) {
+            return scrolledCells(ids, cols: cols, rows: rows) {
                 let (c, r) = at($0)
                 return rect(c, r, 1, 1)
             }
@@ -63,21 +63,23 @@ extension GridSchematic {
     /// windows counts them.
     func scrolledCells(
         _ ids: [Int],
-        capacity: Int,
+        cols: Int,
+        rows: Int,
         cell: (Int) -> CGRect
     ) -> [(rect: CGRect, kind: CellKind)] {
         let start = GridLayout.runStart(
-            columns: dims.columns,
-            rows: dims.rows,
+            columns: cols,
+            rows: rows,
             rowMajor: columnsFirst
         )
+        let line = columnsFirst ? cols : rows
         var cells = ids.prefix(start).enumerated().map {
             (rect: cell($0.offset), kind: CellKind.window(kind($0.element)))
         }
         let members = Array(ids[start...])
         let run = ZoneRun.resolve(
             floors: Array(repeating: 1, count: members.count),
-            span: CGFloat(lineLength),
+            span: CGFloat(line),
             gap: 0,
             head: nil,
             focus: members.firstIndex(of: newID)

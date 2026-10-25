@@ -132,4 +132,18 @@ struct GridRunCommandTests {
         )
         #expect(core.state.workspaces[id]?.stackWeights.isEmpty == true)
     }
+
+    @Test("Leaving Grid drops its run's weights")
+    func gridExitClearsRunWeights() throws {
+        let core = makeCore()
+        let id = grid(core, focus: 1)
+        core.state.workspaces.withSpace(id) {
+            $0.stackWeights[WindowID(7)] = 3
+        }
+        core.execute(
+            "set_mode",
+            args: [.string(id.raw), .string("stack")]
+        )
+        #expect(core.state.workspaces[id]?.stackWeights.isEmpty == true)
+    }
 }

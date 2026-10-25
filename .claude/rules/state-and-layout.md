@@ -1188,7 +1188,8 @@ editing here:
   (`runStep`), the park keep beside the inward post-pass, the
   readers above — asks the recorded `runCovers`, never a list of
   layout modes, so a new scrolling layout needs no second wiring
-  (`GridRunCommandTests` ▸ `focusStepsIntoTheRun`):
+  (`GridRunCommandTests` ▸ `focusStepsIntoTheRun` holds Grid's
+  focus step; that no mode list returns is review's):
   `TilingSettings.context` defaults the flags to all-open (the
   single-screen verdict), and nothing scans for the omitted
   parameter, so a new site that computes real scrolling frames

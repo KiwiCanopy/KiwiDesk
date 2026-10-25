@@ -100,9 +100,9 @@ enum LayoutStoryArrangement {
     }
 
     /// The width the engine lays a story out at: a real screen's,
-    /// so fixed-point quantities — a pile's cascade offset, the
-    /// gap — keep their proportion when the frames are scaled down
-    /// to the thumbnail.
+    /// so a fixed-point quantity a layout adds keeps its proportion
+    /// when the frames are scaled down to the thumbnail. The gap
+    /// is scaled to match, so none is drawn today.
     static let screenWidth: CGFloat = 1280
 
     /// Each window's frame on a canvas of `size`: laid out by the

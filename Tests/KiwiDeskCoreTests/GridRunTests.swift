@@ -211,4 +211,14 @@ struct GridRunTests {
         #expect(cells[ids[3]] == nil)
         #expect(cells[ids[0]] == 0)
     }
+
+    @Test("Only BSP and Stack take the inward post-pass")
+    func inwardPassModes() {
+        // A run's park keep rides the same predicate (#2541), so
+        // a scrolling layout that gains the pass gains the keep.
+        #expect(
+            Set(LayoutMode.allCases.filter(SplitOverflow.movesInward))
+                == [.bsp, .stack]
+        )
+    }
 }

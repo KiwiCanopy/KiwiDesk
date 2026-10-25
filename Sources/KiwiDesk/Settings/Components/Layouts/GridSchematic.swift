@@ -102,10 +102,6 @@ struct GridSchematic: View {
     /// until the count EXCEEDS capacity (#2541).
     var hiddenCount: Int { max(0, ids.count - capacity) }
 
-    /// Cells in one track along the fill order — the last one
-    /// scrolls.
-    var lineLength: Int { columnsFirst ? dims.columns : dims.rows }
-
     /// Window IDs with incoming window spliced via engine placement (#702).
     var ids: [Int] {
         var ids = Array(1...max(1, windows - 1))

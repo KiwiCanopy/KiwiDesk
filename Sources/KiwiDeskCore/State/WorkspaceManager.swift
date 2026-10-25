@@ -73,6 +73,7 @@ public struct WorkspaceManager: Sendable {
         trackSeed: Set<WindowID>? = nil
     ) {
         guard spaces[id]?.mode != mode else { return }
+        let leavingGrid = spaces[id]?.mode == .grid
         spaces[id]?.mode = mode
         spaces[id]?.maximized = nil  // #2448
         spaces[id]?.scrollRest = nil
@@ -80,9 +81,11 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.runTails = []
         spaces[id]?.sessionRatios = SessionRatios()
         spaces[id]?.trackWeights = [:]
-        // Grid's run weighs by `stackWeights` too (#2541): a
-        // Stack session's weights must not reshape it.
-        if mode == .grid { spaces[id]?.stackWeights = [:] }
+        // Grid's run weighs by `stackWeights` too (#2541): one
+        // layout's run weights must not reshape the other's.
+        if mode == .grid || leavingGrid {
+            spaces[id]?.stackWeights = [:]
+        }
         spaces[id]?.handedBreaks = []
         let seed: Set<WindowID> =
             mode == .track
