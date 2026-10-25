@@ -116,8 +116,10 @@ extension KiwiCore {
         {
             return response
         }
-        if space.mode == .stack,
-            let response = stackStep(
+        // A Stack zone or a Grid's last track steps through its
+        // hidden windows in drawn order (#2235, #2541).
+        if space.mode == .stack || space.mode == .grid,
+            let response = runStep(
                 direction,
                 space: space,
                 focused: focused,

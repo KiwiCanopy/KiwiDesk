@@ -73,12 +73,11 @@ extension KiwiCore {
             refuseNothingToDivide(window, otherAxisDivides: false)
             return .fail("the grid is a single pile")
         }
-        let ordered = GridLayout.laidOrder(
-            tiled,
+        let cells = GridLayout.cellIndices(
+            of: tiled,
             shape: shape,
-            sticky: context.sticky
+            in: context
         )
-        let cells = cellIndices(ordered, shape: shape)
         guard let index = cells[window] else {
             return .fail("no focused tiled window")
         }
@@ -105,7 +104,7 @@ extension KiwiCore {
             return .fail("the cell spans the grid on this axis")
         }
         let floors = GridLayout.trackFloors(
-            windows: ordered,
+            windows: tiled,
             shape: shape,
             horizontal: horizontal,
             context: context
@@ -113,13 +112,15 @@ extension KiwiCore {
         let grownMembers = members(
             ofTrack: grown,
             horizontal: horizontal,
-            ordered: ordered,
+            ordered: tiled,
+            cells: cells,
             shape: shape
         )
         let neighborMembers = members(
             ofTrack: neighbor,
             horizontal: horizontal,
-            ordered: ordered,
+            ordered: tiled,
+            cells: cells,
             shape: shape
         )
         // The context carries the session layer over the
@@ -191,31 +192,18 @@ extension KiwiCore {
         }
     }
 
-    /// Each laid window's cell index; the pile shares the last.
-    private func cellIndices(
-        _ ordered: [WindowID],
-        shape: GridLayout.Shape
-    ) -> [WindowID: Int] {
-        var out: [WindowID: Int] = [:]
-        for (offset, window) in ordered.enumerated() {
-            out[window] = min(offset, shape.cells - 1)
-        }
-        return out
-    }
-
-    /// The windows whose cell lies in `track` alone on the axis,
-    /// the pile's included — a refusal's anchor.
+    /// The shown windows whose cell lies in `track` alone on the
+    /// axis — a refusal's anchor.
     private func members(
         ofTrack track: Int,
         horizontal: Bool,
         ordered: [WindowID],
+        cells: [WindowID: Int],
         shape: GridLayout.Shape
     ) -> [WindowID] {
-        ordered.enumerated().compactMap { offset, window in
-            let cell = GridLayout.cell(
-                min(offset, shape.cells - 1),
-                of: shape
-            )
+        ordered.compactMap { window in
+            guard let index = cells[window] else { return nil }
+            let cell = GridLayout.cell(index, of: shape)
             let span = horizontal ? cell.columns : cell.rows
             return span.first == track && span.last == track
                 ? window : nil

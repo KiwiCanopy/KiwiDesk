@@ -227,7 +227,7 @@ struct GridLayoutTests {
         #expect(columnsFirst.minY < rowsFirst.minY)
     }
 
-    @Test("Rigid overflow stacks excess in the last cell")
+    @Test("Rigid overflow scrolls through the last row (#2541)")
     func rigidOverflow() throws {
         let context = makeContext { grid in
             grid.type = .rigid
@@ -238,21 +238,16 @@ struct GridLayoutTests {
             for: ids(4),
             in: context
         )
-        let third = try #require(frames[WindowID(3)])
-        let fourth = try #require(frames[WindowID(4)])
-        // Windows 3 and 4 cascade in the last (right) cell.
-        #expect(third.minX == fourth.minX)
-        #expect(
-            fourth.minY - third.minY == OverlapStack.offset
-        )
-        #expect(third.minX > context.usable.midX - 1)
+        // One row: the whole grid is the run, two cells shown.
+        let first = try #require(frames[WindowID(1)])
+        let second = try #require(frames[WindowID(2)])
+        #expect(first.maxX < second.minX)
+        #expect(!context.usable.intersects(frames[WindowID(3)] ?? .null))
+        #expect(!context.usable.intersects(frames[WindowID(4)] ?? .null))
     }
 
-    @Test("Dynamic overflow stacks excess past the cap")
+    @Test("Dynamic overflow scrolls past the cap (#2541)")
     func dynamicOverflow() throws {
-        // Cap the dynamic grid at 2x1: the 4th window can no
-        // longer balance into a bigger grid, so windows past
-        // capacity cascade in the last cell (the rigid path).
         let context = makeContext { grid in
             grid.type = .dynamic
             grid.columns = 2
@@ -262,16 +257,11 @@ struct GridLayoutTests {
             for: ids(4),
             in: context
         )
-        let second = try #require(frames[WindowID(2)])
-        let third = try #require(frames[WindowID(3)])
-        let fourth = try #require(frames[WindowID(4)])
-        // 2,3,4 cascade in the last (right) cell.
-        #expect(second.minX == third.minX)
-        #expect(third.minX == fourth.minX)
-        #expect(
-            third.minY - second.minY == OverlapStack.offset
+        let cells = Set(
+            frames.values.filter { context.usable.intersects($0) }
+                .map { "\(Int($0.minX)),\(Int($0.minY))" }
         )
-        #expect(second.minX > context.usable.midX - 1)
+        #expect(cells.count == 2)
     }
 
     @Test("Auto-size lifts the dynamic cap from the screen")
@@ -296,10 +286,26 @@ struct GridLayoutTests {
         #expect(cells.count == 12)
     }
 
-    @Test("Tiny screens fall back to the overlap stack")
-    func minSizeFallback() throws {
+    @Test("A screen with room for one cell scrolls the rest (#2541)")
+    func oneCellScrolls() throws {
         let context = makeContext(
             bounds: CGRect(x: 0, y: 0, width: 500, height: 400)
+        )
+        let frames = layout.calculateGeometry(
+            for: ids(4),
+            in: context
+        )
+        let shown = frames.values.filter {
+            context.usable.intersects($0)
+        }
+        #expect(shown.count == 1)
+        #expect(shown.first == context.usable)
+    }
+
+    @Test("A screen under the minimum size piles (#44)")
+    func minSizeFallback() throws {
+        let context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 250, height: 250)
         )
         let frames = layout.calculateGeometry(
             for: ids(4),

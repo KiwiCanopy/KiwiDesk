@@ -34,7 +34,7 @@ public enum OverlapStack {
     }
 
     /// Computes partial-overflow frames for tiled and cascaded
-    /// slots (`stickyExempt`, #128, #414 v2). The buried pile is
+    /// slots (#128). The buried pile is
     /// ALWAYS offset downward — a horizontal offset would reveal
     /// side slivers, not title bars — and this is the single
     /// authority behind the stack column overflow and both track
@@ -95,37 +95,6 @@ public enum OverlapStack {
             return (rects, tiled)
         }
         return nil
-    }
-
-    /// Reorders windows so sticky windows keep fully-tiled slots
-    /// (#414 v2). Callers zip the result with positional rects, so
-    /// this must return exactly the input ids, only reordered.
-    public static func stickyExempt(
-        _ ids: [WindowID],
-        tiled: Int,
-        sticky: Set<WindowID>
-    ) -> [WindowID] {
-        guard tiled > 0, tiled < ids.count, !sticky.isEmpty
-        else { return ids }
-        let piled = ids[tiled...].filter { sticky.contains($0) }
-        guard !piled.isEmpty else { return ids }
-        var prefix = Array(ids[..<tiled])
-        var displaced: [WindowID] = []
-        for index in stride(
-            from: prefix.count - 1,
-            through: 0,
-            by: -1
-        )
-        where displaced.count < piled.count
-            && !sticky.contains(prefix[index])
-        {
-            displaced.insert(prefix.remove(at: index), at: 0)
-        }
-        let promoted = piled.prefix(displaced.count)
-        let rest = ids[tiled...].filter {
-            !promoted.contains($0)
-        }
-        return prefix + promoted + displaced + rest
     }
 
     /// Tiled rect along primary axis of region.
