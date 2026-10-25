@@ -164,8 +164,8 @@ extension APIReference {
             "Lists connected screens with IDs and geometry."
         ),
         "list_windows": APIRecord(
-            "Lists every window's frame, screen and visibility, "
-                + "or only one Space's.",
+            "Lists every window's frame, screen, visibility and "
+                + "stacking rank, or only one Space's.",
             .space("space", optional: true)
         ),
         "debug_log": APIRecord(

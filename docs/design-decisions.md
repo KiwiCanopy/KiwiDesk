@@ -1200,6 +1200,21 @@ answer one window; a script picks one with `jq`. The trade: an
 app that refuses its size shows the frame the layout asked for,
 and a float an app moved itself shows its last report.
 
+:::unreleased
+The stacking rank `z` (#2546) is the one field read from the
+WindowServer, its public front-to-back list of on-screen windows,
+once per call. KiwiDesk's own order cannot give it: it knows no
+order inside a pile or among floats, nor an app raising itself.
+The App Bar's rule that a bar takes issued frames, never a
+compositor read, does not reach this verb: that rule exists
+because the bars refresh on every switch (#1925), while
+`list_windows` runs only when asked. The rank counts the tracked
+windows on the screen a window's `display` names, so a menu or
+another app's popup covers without counting, and the list keeps
+its Space order rather than turning into the stacking order,
+since the rank is per screen and the list spans every screen.
+:::
+
 ### Whether a setting lasts is not a fact about its command
 
 **[Rationale]**

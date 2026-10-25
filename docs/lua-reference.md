@@ -7726,6 +7726,19 @@ full-screen window has no `visibility`.
 coordinates, and `layout_frame`, the area its shown Space lays
 windows out in.
 
+:::unreleased
+Each entry also carries `app`, `pid`, `index` (the window's
+place in its Space's row, from 1; `null` for a window no Space
+holds) and `z`: its stacking rank among the windows KiwiDesk
+tracks on the screen `display` names, `0` frontmost, as macOS
+reports it. A window no screen shows — on a Space no screen shows,
+parked out of sight or minimized — has `z` `null`. The list's own
+order is the Spaces' rows, not the stacking order: sort by `z` for
+that. A window KiwiDesk does not track, such as a menu, counts
+toward no rank, though it may cover a window; how much of a
+window is in view is yours to compute from `frame` and `z`.
+:::
+
 **Example:**
 
 ```lua
