@@ -10,9 +10,8 @@ import Carbon.HIToolbox
 //   2. No new permission prompt appears on first registration.
 //   3. GetEventDispatcherTarget still delivers on the main
 //      run loop.
-// If Carbon breaks, the fallback is a CGEventTap, which DOES
-// require Input Monitoring — a UX regression to surface
-// prominently in release notes.
+// If Carbon breaks, the fallback is a keyboard CGEventTap, which
+// Accessibility alone allows (measured on macOS 27, #2601).
 
 /// Modifier mask for Carbon hotkeys.
 public struct HotkeyModifiers: OptionSet, Sendable, Hashable {

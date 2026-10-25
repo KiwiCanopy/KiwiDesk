@@ -11001,8 +11001,8 @@ recordable — the first non-modifier key locks the combo
 
 **The Hyper key is a modifier KiwiDesk owns, and needs no
 Input Monitoring (#1870).** The usual hyper key is an event
-tap rewriting Caps Lock into `⌃⌥⇧⌘`, which needs the permission
-this app refuses. KiwiDesk instead remaps the chosen key to F18
+tap rewriting Caps Lock into `⌃⌥⇧⌘`. KiwiDesk instead remaps the
+chosen key to F18
 with `hidutil` — per user, no permission, gone at a restart —
 and watches F18 with a Carbon hotkey, which hears both its press
 and its release. Only while it is held are the `hyper+…`
@@ -11018,7 +11018,7 @@ setup turns the same key into Hyper on the new Mac. KiwiDesk touches a key mappi
 only where it is exactly the one KiwiDesk recorded writing —
 Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted
-key event, which is Input Monitoring, so it stays with #1874.
+key event, so it stays with #1874.
 
 The one way past that refusal is the user's own consent (#2471).
 An entry that is exactly KiwiDesk's own for the chosen key — what
@@ -11031,6 +11031,45 @@ own that entry, and two processes registering F18 both hear one
 press (measured 2026-10-20), so a take-over beside such a tool
 arms both. A mapping the other tool later removes is written again
 at the next apply; one it replaces is refused.
+
+:::unreleased
+**Left and right modifiers are told apart by one keyboard tap, and
+only while it has something to do (#2601).** Carbon cannot tell the
+sides: measured on macOS 27 (2026-10-25), a `⌘J` hotkey fired for
+both ⌘ keys with identical modifiers, Carbon.h has no right-⌘
+constant, and a `rightOptionKey` mask was dropped, registering a bare
+`K` that fired alone. A keyboard `CGEventTap` reads the side from each
+key event's flags (⌘ `0x08`/`0x10`, ⌥ `0x20`/`0x40`, ⇧ `0x02`/`0x04`,
+⌃ `0x01`/`0x2000`), and an active tap and a listen-only one both ran
+with Accessibility alone: the probe was under no Input Monitoring
+grant, and both were refused before Accessibility was granted.
+
+So the switch **Tell left and right modifiers apart** (Settings ▸
+Shortcuts ▸ Hyper key, `set_modifier_sides`) admits the tap, bounded
+three ways. Every either-side shortcut stays a Carbon hotkey. The tap
+runs only while the switch is on and a side-specific shortcut exists,
+so a default install, and one that never records a side, sees no
+keystroke. It swallows only a press matching a side-specific shortcut
+and passes every other key on, and it re-enables itself after
+`tapDisabledByTimeout`, watched, since macOS disables a slow tap
+silently. The recorder reads the side from the key event's own
+device flags and needs no tap.
+
+The switch is the Mac's, in `gui.json` beside `hyper.key`: a keyboard
+is a desk's hardware, not a profile's. No per-profile value preceded
+it, so it crosses nothing. Switching it off migrates nothing — a
+stored `rcmd+h` stays `rcmd+h` and fires from either side through
+Carbon until the switch is back on — and a pair that collapses onto
+one chord (`lcmd+h`, `rcmd+h`) shows as a duplicate in the conflict
+list, the switch being the way to separate them. While the switch is
+on the recorder records no either-side shortcut: one is recorded with
+the switch off, or written in Lua as `cmd+h`. Accepted.
+
+What it unblocks: #1874's "tap Hyper alone for Escape" was held
+back on the belief that any keyboard tap needs Input Monitoring.
+Reading keys does not; whether posting the Escape does is #1874's
+to measure.
+:::
 
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get

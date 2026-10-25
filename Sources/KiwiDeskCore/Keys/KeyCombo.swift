@@ -65,9 +65,9 @@ public struct KeyCombo: Hashable, Sendable {
 
     /// Formats key code and modifiers into a readable combo
     /// string (`"control+option+r"`; `parse` round-trips it).
-    /// Carbon hotkeys cannot tell left from right modifiers (that
-    /// needs an event tap + Input Monitoring, which KiwiDesk
-    /// avoids), so the two sides are deliberately unified.
+    /// Carbon hotkeys cannot tell left from right modifiers, so
+    /// the two sides are unified here; telling them apart takes a
+    /// keyboard tap, which Accessibility alone allows (#2601).
     /// `hyper` (#1870) leads, as its glyph does.
     public static func comboString(
         keyCode: UInt32,
