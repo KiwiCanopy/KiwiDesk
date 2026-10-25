@@ -22,6 +22,9 @@ extension KiwiCore {
         // The whole stored group, so a field v3 adds re-draws too.
         if new.vision != old.vision, before == after { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }
+        if new.modifierSides != old.modifierSides {
+            keys.modifierSides = new.modifierSides
+        }
         onAppWideChange()
     }
 

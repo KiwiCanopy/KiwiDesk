@@ -22,26 +22,44 @@ public struct KeyCombo: Hashable, Sendable {
             return nil
         }
         var modifiers: HotkeyModifiers = []
+        var named: Set<String> = []
         for part in parts.dropLast() {
-            switch part {
-            case "cmd", "command":
-                modifiers.insert(.command)
-            case "alt", "opt", "option":
-                modifiers.insert(.option)
-            case "ctrl", "control":
-                modifiers.insert(.control)
-            case "shift":
-                modifiers.insert(.shift)
-            case "hyper":
-                modifiers.insert(.hyper)
-            default:
-                return nil
-            }
+            guard let token = modifierToken(part) else { return nil }
+            // One token per modifier: `lcmd+rcmd` or `cmd+rcmd`
+            // names nothing a key press can be (#2601).
+            guard named.insert(token.name).inserted else { return nil }
+            modifiers.formUnion(token.bits)
         }
         return KeyCombo(
             keyCode: keyCode,
             modifiers: modifiers
         )
+    }
+
+    /// A modifier spelling's bits and the modifier it names, nil
+    /// for none. `l`/`r` before a name is that side (#2601).
+    private static func modifierToken(
+        _ part: String
+    ) -> (name: String, bits: HotkeyModifiers)? {
+        if part == "hyper" { return ("hyper", .hyper) }
+        if let kind = plainKinds[part] { return ("\(kind)", kind.plain) }
+        guard let first = part.first, first == "l" || first == "r",
+            let kind = plainKinds[String(part.dropFirst())]
+        else { return nil }
+        let side: ModifierSide = first == "l" ? .left : .right
+        return ("\(kind)", kind.plain.union(.side(side, of: kind)))
+    }
+
+    private static let plainKinds: [String: ModifierKind] = [
+        "cmd": .command, "command": .command,
+        "alt": .option, "opt": .option, "option": .option,
+        "ctrl": .control, "control": .control,
+        "shift": .shift,
+    ]
+
+    /// The chord with its sides forgotten (#2601).
+    public var unsided: KeyCombo {
+        KeyCombo(keyCode: keyCode, modifiers: modifiers.unsided)
     }
 
     /// The chord Carbon registers: a Hyper combo is registered
@@ -88,16 +106,37 @@ public struct KeyCombo: Hashable, Sendable {
         return parts.joined(separator: "+")
     }
 
-    /// Formats combo as canonical string (#4).
+    /// Formats combo as canonical string (#4); a sided modifier
+    /// takes its Lua token (`rcmd`, `lopt`, #2601), which `parse`
+    /// round-trips.
     public func comboString() -> String? {
-        Self.comboString(
-            keyCode: keyCode,
-            command: modifiers.contains(.command),
-            option: modifiers.contains(.option),
-            control: modifiers.contains(.control),
-            shift: modifiers.contains(.shift),
-            hyper: modifiers.contains(.hyper)
-        )
+        guard modifiers.isSided else {
+            return Self.comboString(
+                keyCode: keyCode,
+                command: modifiers.contains(.command),
+                option: modifiers.contains(.option),
+                control: modifiers.contains(.control),
+                shift: modifiers.contains(.shift),
+                hyper: modifiers.contains(.hyper)
+            )
+        }
+        guard let key = Self.keyName(for: keyCode) else { return nil }
+        var parts: [String] = []
+        if modifiers.contains(.hyper) { parts.append("hyper") }
+        let names: [(ModifierKind, String, String)] = [
+            (.control, "control", "ctrl"), (.option, "option", "opt"),
+            (.shift, "shift", "shift"), (.command, "command", "cmd"),
+        ]
+        for (kind, long, short) in names
+        where modifiers.contains(kind.plain) {
+            switch modifiers.side(of: kind) {
+            case .left: parts.append("l" + short)
+            case .right: parts.append("r" + short)
+            case nil: parts.append(long)
+            }
+        }
+        parts.append(key)
+        return parts.joined(separator: "+")
     }
 
     /// Returns canonical display name for key code (`KeypadKeys`, #1074).

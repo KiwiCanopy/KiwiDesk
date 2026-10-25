@@ -61,6 +61,8 @@ extension KiwiCore {
             // KiwiHub's keys likewise (#2600): a line moved or
             // removed reads as written, not as the last load left it.
             appWideLedger.live.kiwiHubKeys = KiwiHubKeys()
+            // The sides likewise (#2601): a line removed reads off.
+            appWideLedger.live.modifierSides = false
             return
         }
         guard let config = guiConfigStore.load() else { return }

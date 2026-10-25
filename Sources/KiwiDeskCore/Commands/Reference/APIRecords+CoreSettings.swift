@@ -71,6 +71,11 @@ extension APIReference {
                 + "session, or `off`; it becomes F18 until quit.",
             .choice("key", HyperSourceKey.self)
         ),
+        "set_modifier_sides": APIRecord(
+            "Tells left and right modifiers apart in shortcuts, such "
+                + "as rcmd+h, for this session.",
+            .boolean("enabled")
+        ),
         KiwiCore.takeOverHyperRemapCommand: APIRecord(
             "Takes over a leftover Hyper remap that matches "
                 + "KiwiDesk's own; it is cleared at quit."

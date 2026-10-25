@@ -62,11 +62,11 @@ editing here:
   Accessibility-class `PostEvent` service alone, never
   `ListenEvent` (tccd log, device build, 2026-09-28). Seven
   obligations:
-  - **One tap, scroll-only.** A second `tapCreate(`, or a mask
-    widened past `.scrollWheel`, is where an Input Monitoring
-    prompt would come from (`ScrollTapSeamTests` for the one tap
-    and its one mask constant, `ScrollSampleTests` for the
-    constant's value).
+  - **One tap, scroll-only.** A mask widened past `.scrollWheel`
+    asks macOS for more than the gesture needs; the only other tap
+    is the side tap below (`ScrollTapSeamTests` for one tap per
+    file and each one mask constant, `ScrollSampleTests` for the
+    scroll constant's value).
   - **The tap installs on its own thread and decides there.**
     Every scroll on the Mac waits on the callback, and the main
     actor can block on a slow app's AX reply for seconds; the
@@ -109,6 +109,25 @@ editing here:
     built only through `tapSettings`, read by the door alone, or
     a path hands the tap a value that skipped the override
     (`ScrollGestureConfigureSeamTests`).
+- **Left and right modifiers take ONE keyboard tap,
+  `ModifierSideTap`, owned by `KeybindingManager` (#2601).**
+  Every either-side shortcut stays a Carbon hotkey; the tap
+  answers only the chords a sided row names, and only while
+  `modifierSides` is on (`ModifierSideRoutingTests`). Obligations:
+  - **No sided row, no tap.** `armSideTap` stops it with its last
+    row; a new path that routes rows to it goes through
+    `tappedChords`, never a row list of its own.
+  - **A suspended manager answers nothing** — `deactivate` empties
+    the rows, or the tap swallows the sided press the recorder
+    reads (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
+  - **Key-down only, on its own thread**, deciding from the rows
+    `setRows` handed it and passing every press no row answers;
+    the live factory is pinned inert in both `makeTestCore`
+    twins (`ScrollTapSeamTests`).
+  - **Carbon reads a sided chord either-side**: `carbonMask`
+    strips the side bits, so the switch off fires every sided
+    shortcut through Carbon and a collapsing pair is refused as
+    a duplicate (`ModifierSideComboTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`
