@@ -35,17 +35,21 @@ suite a change runs locally:
   to them has already shipped a dangling citation; code, tests and
   `site/` need it besides.
 - **A change that lands through a PR runs the full suite locally
-  once, before its first push** (owner, 2026-10-24, replacing the
-  2026-10-21 rule that left it to CI). While a lane is still
-  moving, run step 1, step 3 (its catalog checks included) and the
-  ratchet check below, and in place of step 2 `swift test
-  --filter` over the suites the diff touches. When the lane is
-  done and reviewed, run step 2 whole, then push and arm the
-  merge. The whole-tree census suites (a symbol lookup, a button
-  style, a seam's `allowed` map) read files no filter names, and
-  four PR rounds went red on them in one day while every filtered
-  suite was green. A fix pushed after that runs the filtered
-  suites plus whichever suite CI named.
+  once, alongside its first push** (owner, 2026-10-25, amending
+  the 2026-10-24 rule that held the push until the run was
+  green). While a lane is still moving, run step 1, step 3 (its
+  catalog checks included) and the ratchet check below, and in
+  place of step 2 `swift test --filter` over the suites the diff
+  touches. When the lane is done and reviewed, push, open the PR
+  and arm the merge, and start step 2 whole in the background at
+  the same time, so CI's run and the local one report together.
+  The whole-tree census suites (a symbol lookup, a button style,
+  a seam's `allowed` map) read files no filter names, and four PR
+  rounds went red on them in one day while every filtered suite
+  was green; the local run names the failing test in full where
+  CI's log has to be dug through. A red from either is fixed
+  locally and pushed again, and that push runs the filtered
+  suites plus whichever suite went red.
 - **Run step 2 whole, locally,** when no PR gates the push
   (`scripts/release.sh`, a direct push), when CI is unavailable,
   or when a late red would be expensive — for example right
