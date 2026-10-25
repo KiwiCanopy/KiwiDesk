@@ -203,7 +203,7 @@ final class StickyMarkOverlay {
         currentWidth = width
         pillShown = nameShown
         let rect = markRect(for: frame, width: width)
-        guard let panel else { return }
+        guard let panel, let placed = placement.frame else { return }
 
         if reduceMotion {
             place(rect, in: panel)
@@ -213,7 +213,6 @@ final class StickyMarkOverlay {
         // The room spans where the plate rests now AND where it
         // lands, set at once: only the plate animates inside it,
         // so the pop has room at every point of the resize.
-        let placed = placement.frame ?? panel.frame
         let shown = plate.frame.offsetBy(dx: placed.minX, dy: placed.minY)
         let room = Self.panelFrame(for: shown.union(rect))
         placement.place(panel, at: room, display: true)

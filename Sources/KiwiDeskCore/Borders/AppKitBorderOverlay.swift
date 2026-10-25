@@ -83,17 +83,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// The ring's place in its panel, AppKit coordinates.
     var ringFrameInPanel: CGRect { container.frame }
 
-    /// The panel's frame for a ring: `room` while it holds the
-    /// whole ring, else the ring's own. A panel resize hands
-    /// WindowServer a fenced transaction the main actor waits on,
-    /// per frame of an animation (#1937).
-    nonisolated static func panelFrame(
-        for ring: CGRect,
-        room: CGRect?
-    ) -> CGRect {
-        PanelPlacement.panelFrame(for: ring, room: room)
-    }
-
     /// The panel's window number, nil before the first render.
     var panelNumber: Int? { panel?.windowNumber }
 

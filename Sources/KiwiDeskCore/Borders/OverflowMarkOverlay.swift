@@ -84,6 +84,7 @@ final class OverflowMarkOverlay {
     init(mark: OverflowMark, movePanel: @escaping PanelPlacement.Move) {
         self.mark = mark
         placement = PanelPlacement(movePanel: movePanel)
+        view.placedFrame = { [weak self] in self?.placedFrame }
     }
 
     /// Takes `mark`'s count and bounds, drawn in `shelf`.

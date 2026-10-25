@@ -138,6 +138,11 @@ extension BarPeek {
         guard let window = view.window, window.isVisible,
             !view.isHiddenOrHasHiddenAncestor
         else { return nil }
+        if let anchor = view as? any BarPeekMorphAnchor,
+            let placed = anchor.placedScreenFrame
+        {
+            return placed
+        }
         return window.convertToScreen(
             view.convert(view.bounds, to: nil)
         )

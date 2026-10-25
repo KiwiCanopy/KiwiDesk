@@ -161,9 +161,14 @@ extension BorderManager {
     /// resizing, which waits on WindowServer every frame (#1937):
     /// its screen outset by up to a screen each way, so a ring at
     /// an edge or sliding in from a parked corner still fits
-    /// (#1956). Nil once settled, which takes an exact panel.
+    /// (#1956). A ring that took it keeps it until the late resync
+    /// (`roomsHeld`, #2531); nil after, which takes an exact panel.
     func room(for id: WindowID, screen: NSScreen?) -> CGRect? {
-        guard isAnimating(id) else { return nil }
+        if isAnimating(id) {
+            heldRooms.insert(id)
+        } else if !roomsHeld || !heldRooms.contains(id) {
+            return nil
+        }
         var frame = screen?.frame
         #if DEBUG
             frame = roomScreenOverride ?? frame

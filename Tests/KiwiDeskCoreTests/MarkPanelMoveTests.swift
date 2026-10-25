@@ -71,6 +71,26 @@ struct MarkPanelMoveTests {
         #expect(spy.moves.isEmpty)
     }
 
+    /// Placed a pass earlier with nothing ordered in, so only the
+    /// order-in's own stamp keeps the move out of the pass AppKit
+    /// creates the window in (`BorderPanelMoveTests`' ring twin).
+    @Test("The pass that first orders an overflow mark in stays AppKit's")
+    func overflowOrderInStampsThePass() {
+        let spy = Spy()
+        let overlay = OverflowMarkOverlay(
+            mark: mark(anchor: start),
+            movePanel: spy.move
+        )
+        defer { overlay.hide() }
+        overlay.ordersPanel = false
+        overlay.update(frame: start)
+        endPass()
+        overlay.ordersPanel = true
+        overlay.update(frame: start)
+        overlay.update(frame: moved)
+        #expect(spy.moves.isEmpty)
+    }
+
     @Test("A sticky mark's follow keeps its size and skips AppKit")
     func stickyFollowMovesThroughSkyLight() {
         let spy = Spy()
@@ -90,5 +110,60 @@ struct MarkPanelMoveTests {
         overlay.update(frame: start)
         overlay.update(frame: moved)
         #expect(spy.moves.isEmpty)
+    }
+}
+
+/// The managers hand each overlay they make their own move, so a
+/// `movePanel` wired in Bootstrap reaches every mark (#2531).
+@Suite("Mark managers hand their move to each mark", .serialized)
+@MainActor
+struct MarkManagerMoveTests {
+    private let start = CGRect(x: -9_000, y: -9_000, width: 400, height: 300)
+    private var moved: CGRect { start.offsetBy(dx: 60, dy: 40) }
+
+    @Test("A sticky mark made by its manager moves through its move")
+    func stickyManagerHandsTheMove() {
+        var moves = 0
+        let manager = StickyMarkManager()
+        manager.movePanel = { _, _ in
+            moves += 1
+            return true
+        }
+        defer { manager.sync([]) }
+        manager.sync([.init(window: WindowID(1), frame: start, glass: false)])
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        manager.reposition(WindowID(1), windowFrame: moved)
+        #expect(moves == 1)
+    }
+
+    @Test("An overflow mark made by its manager moves through its move")
+    func overflowManagerHandsTheMove() {
+        var moves = 0
+        let manager = OverflowMarkManager()
+        manager.movePanel = { _, _ in
+            moves += 1
+            return true
+        }
+        defer { manager.sync([]) }
+        let mark = OverflowMark(
+            space: SpaceID("1"),
+            anchor: WindowID(1),
+            end: .right,
+            windows: [WindowID(2)],
+            bounds: start.insetBy(dx: -500, dy: -500),
+            zoneOrigin: .zero
+        )
+        manager.sync([
+            .init(
+                mark: mark,
+                frame: start,
+                name: "",
+                shelf: KiwiShelf(),
+                spans: false
+            )
+        ])
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        manager.reposition(WindowID(1), windowFrame: moved)
+        #expect(moves == 1)
     }
 }

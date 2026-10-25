@@ -196,7 +196,7 @@ extension KiwiCore {
         overflowMarks.commandedFrame = commandedInstant
         // Both marks move through the ring's one panel move, so a
         // test core's pin reaches them too (#2531).
-        let movePanel: (CGWindowID, CGPoint) -> Bool = {
+        let movePanel: PanelPlacement.Move = {
             [weak self] window, origin in
             MainActor.assumeIsolated {
                 self?.borders.movePanel(window, origin) ?? false

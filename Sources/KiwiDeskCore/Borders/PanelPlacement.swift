@@ -1,11 +1,9 @@
 import AppKit
 
 /// Where an overlay panel that follows a window sits, and how it
-/// gets there: the ring's and both marks' one placement (#1956,
-/// #2531). A move that keeps the panel's size goes through
-/// SkyLight, which WindowServer applies without the fence an
-/// AppKit `setFrame` ties to the next commit — a fence that waits
-/// up to ~500 ms on a slow app's held window transaction.
+/// gets there (#1956, #2531): a move that keeps the panel's size
+/// goes through SkyLight, without the fence an AppKit `setFrame`
+/// ties to the next commit (borders.md).
 @MainActor
 final class PanelPlacement {
     /// Moves a panel's window to a top-left origin; false means
