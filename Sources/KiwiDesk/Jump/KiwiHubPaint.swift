@@ -16,10 +16,13 @@ struct KiwiHubPaint {
     var hoverInk: Color?
     /// Whether the shelf paints KiwiHub (the toggle is on).
     var tinted = false
+    /// A divider's hairline under the toggle (#2596); nil keeps the
+    /// system separator.
+    var divider: Color?
 
     init() {}
 
-    init(_ shelf: PanelHighlight) {
+    init(_ shelf: PanelHighlight, divider: String) {
         tinted = true
         selection = Color(kiwiHex: shelf.selection)
         selectionInk = Color(kiwiHex: shelf.selectionInk)
@@ -27,12 +30,28 @@ struct KiwiHubPaint {
         rowHover = Color(kiwiHex: shelf.hover)
         chipHover = rowHover
         hoverInk = Color(kiwiHex: shelf.hoverInk)
+        self.divider = Color(kiwiHex: divider)
     }
 
-    /// The paint KiwiHub wears on `glass` as drawn.
-    static func of(_ glass: PanelGlass) -> KiwiHubPaint {
-        glass.shelf
-            .map { KiwiHubPaint($0.panelHighlight) } ?? KiwiHubPaint()
+    /// The paint KiwiHub wears on `glass` as drawn, its divider from
+    /// `ink`, the inks the panel chrome resolved for that glass.
+    static func of(_ glass: PanelGlass, ink: PanelInk?) -> KiwiHubPaint {
+        guard let shelf = glass.shelf, let ink else { return KiwiHubPaint() }
+        return KiwiHubPaint(shelf.panelHighlight, divider: ink.divider)
+    }
+}
+
+/// A KiwiHub divider: the look's hairline under the toggle, the
+/// system separator off it (#2596).
+struct PanelDivider: View {
+    @Environment(\.kiwiHubPaint) private var paint
+
+    var body: some View {
+        if let hairline = paint.divider {
+            Rectangle().fill(hairline).frame(height: 1)
+        } else {
+            Divider()
+        }
     }
 }
 

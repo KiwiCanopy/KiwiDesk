@@ -289,7 +289,6 @@ extension SpaceBarOverlay {
         let slot = min(Self.titleSlot(style, depth: depth), available)
         frontNameEnd = offset + slot
         let span = BarTitleSlot.span(
-            frontName,
             natural: frontName.frame.width,
             slotStart: offset,
             slot: slot

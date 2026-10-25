@@ -1872,7 +1872,11 @@ Obligations:
   `SettingsThemeContrastTests` measures; tinted, the shelf's highlight, whose
   ink `PanelHighlightTests` measures, and hover pair, held to the reading
   floor by `GlassPaintTests` ▸ `hubInksHoldTheFloor` (`PanelGlassTests` ▸
-  `rowsReadThePaint`).
+  `rowsReadThePaint`). A divider in KiwiHub or a cue plate is a
+  `PanelDivider`, which draws the paint's hairline tinted and the system
+  separator untinted, never a bare `Divider()` (#2596,
+  `KiwiHubDividerTests`, which scans `Jump/` and `CuePlate/`;
+  `PanelDividerContrastTests`).
 - **A surface states its `.tint` BELOW its glass**, so the
   ground is not inside the tinted environment. Otherwise
   "untinted" rests on `glassEffect` not reading the environment's

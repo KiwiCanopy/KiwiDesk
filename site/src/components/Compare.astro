@@ -32,7 +32,7 @@
 // ONE ROW WE LOSE, on purpose. `ecosystem` hands yabai a plain
 // win. If every row favoured KiwiDesk a reader would discount all
 // of them, including the true ones; the row is what makes the
-// other nine legible as reporting rather than marketing. Do not
+// other rows legible as reporting rather than marketing. Do not
 // "fix" it.
 //
 // THE LAYOUT CELLS ARE COUNTS, and the count comes from each
@@ -104,6 +104,12 @@ const src = {
   yabai: "https://github.com/koekeishiya/yabai",
   yabaiSip:
     "https://github.com/koekeishiya/yabai/wiki/Disabling-System-Integrity-Protection",
+  // "Displays have separate Spaces" per tool (#2505).
+  yabaiSeparate:
+    "https://github.com/asmvik/yabai#requirements-and-caveats",
+  riftSeparate: "https://acsandmann.github.io/rift-docs/installation/",
+  aerospaceSeparate:
+    "https://nikitabobko.github.io/AeroSpace/guide#a-note-on-displays-have-separate-spaces",
   rift: "https://github.com/acsandmann/rift",
   omniwm: "https://github.com/BarutSRB/OmniWM",
   magnet: "https://magnet.crowdcafe.com/",
@@ -186,6 +192,8 @@ const rows = [
   "permissions",
   "sip",
   "desktops",
+  // Apple's own control name, quoted from macOS's loctable (#2505).
+  "separatespaces",
   "tabs",
   "hotkeys",
   "scripting",
@@ -378,7 +386,13 @@ const jsonLd = [
           .replace("{sip}", `<a href="${src.sipDecision}">`)
           .replace("{/sip}", "</a>")
           .replace("{omni}", `<a href="${src.omniwm}" target="_blank" rel="noopener">`)
-          .replace("{/omni}", `<span aria-hidden="true"> ↗</span></a>`)} />
+          .replace("{/omni}", `<span aria-hidden="true"> ↗</span></a>`)
+          .replace("{yabai}", `<a href="${src.yabaiSeparate}" target="_blank" rel="noopener">`)
+          .replace("{/yabai}", `<span aria-hidden="true"> ↗</span></a>`)
+          .replace("{rift}", `<a href="${src.riftSeparate}" target="_blank" rel="noopener">`)
+          .replace("{/rift}", `<span aria-hidden="true"> ↗</span></a>`)
+          .replace("{aero}", `<a href="${src.aerospaceSeparate}" target="_blank" rel="noopener">`)
+          .replace("{/aero}", `<span aria-hidden="true"> ↗</span></a>`)} />
       </p>
     </div>
   </section>

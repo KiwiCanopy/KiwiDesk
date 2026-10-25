@@ -3260,7 +3260,7 @@ title shrinks, never the icon.
 Every slot is as long as this many characters of the bar's font
 beside the icon, whatever the titles read — at least the icon
 square and at most a quarter of the whole KiwiShelf edge — so a
-longer title ends in "…", a shorter one is centred in its slot,
+longer title ends in "…", a shorter one starts right after the icon,
 and a change of title never moves the App Bar or the shelf
 beside it. The cap is the App Bar's one size control; items that
 do not fit scroll instead of shrinking.
@@ -3658,9 +3658,13 @@ front-app segment shows. Inert while `show_front_app` is off —
 nothing else on the Space Bar draws a title.
 
 The segment is always as long as this many characters of the
-bar's font: a longer title ends in "…", a shorter one is centred
-after the icon, so a change of focus or title never moves the
-Space Bar or the shelf beside it.
+bar's font: a longer title ends in "…", so a change of focus or
+title never moves the Space Bar or the shelf beside it.
+
+:::unreleased
+A shorter title starts right after the icon, the rest of the
+segment left empty.
+:::
 
 **Example:**
 

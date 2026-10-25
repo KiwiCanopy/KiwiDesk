@@ -12473,7 +12473,15 @@ three reasons are answered one by one:
    and the look's inks are the ones measured on it. The system
    labels stay for the toggle off. The reading floor (▸ Liquid
    Glass, *Reading surfaces fade above a floor*) measures these
-   inks at the faint end (`GlassPaintTests`).
+   inks at the faint end (`GlassPaintTests`). KiwiHub's dividers
+   take the tertiary ink at 0.35 of its alpha, 0.6 under Increase
+   Contrast, never the system separator, which a dark Fill pins
+   to the light rule meant for dark system chrome (#2596). A
+   hairline is not text: it holds 1.15:1 at the faint end over
+   white, 1.5:1 under Increase Contrast, rather than raising the
+   Fill's floor for itself — no opacity under 1 reaches 1.5
+   there, since the floor holds the tertiary ink at exactly 1.5
+   (`PanelDividerContrastTests`).
 3. *A green ground erases the accent.* There is no kiwi on the
    tinted panel. The selected row takes KiwiShelf's highlight
    with black or white ink, whichever reads on it
@@ -16378,6 +16386,19 @@ the App Bar leaving or joining a fused shelf hands it the place
 plate glide, the motion a joining section makes (#1903), so the
 two changes of one plan move together rather than one gliding
 while the other pops.
+
+:::unreleased
+**Amended by #2587 (owner ruling 2026-10-24): a title starts right
+after its icon.** A short title in the fixed slot, on the
+front-app segment and on every App Bar item (#2545), sits at
+the slot's start, the trailing end of the slot left empty; a long
+one still fills the slot and cuts with "…". Centred, a short title
+floated away from its icon, so a row of pills started their titles
+at as many offsets as there were title lengths. The trailing gap
+under an indicator that spans the chip is the accepted cost of the
+fixed width, bought for every title starting at one offset. The
+icon still never moves and no frame changes with a title.
+:::
 
 **The bars honour Reduce Motion, and the ring MARKS rather than
 counts down.** (#1078.) A bar is chrome KiwiDesk draws, so it

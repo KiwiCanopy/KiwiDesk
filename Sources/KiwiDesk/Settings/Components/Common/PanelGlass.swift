@@ -78,9 +78,11 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
 
     /// The look's three inks while the panel wears the Fill; the
     /// untinted panel keeps SwiftUI's own hierarchy, untouched.
-    @ViewBuilder private func inked(_ content: Content) -> some View {
-        if let shelf = drawn.shelf {
-            let ink = shelf.panelInk(increaseContrast: increased)
+    @ViewBuilder private func inked(
+        _ content: Content,
+        _ ink: PanelInk?
+    ) -> some View {
+        if let ink {
             content.foregroundStyle(
                 Color(kiwiHex: ink.primary),
                 Color(kiwiHex: ink.secondary),
@@ -92,8 +94,10 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        inked(content)
-            .environment(\.kiwiHubPaint, KiwiHubPaint.of(drawn))
+        // The one place Increase Contrast becomes the panel's inks.
+        let ink = drawn.shelf?.panelInk(increaseContrast: increased)
+        inked(content, ink)
+            .environment(\.kiwiHubPaint, KiwiHubPaint.of(drawn, ink: ink))
             .glassChrome(
                 in: shape,
                 enabled: drawn.enabled,

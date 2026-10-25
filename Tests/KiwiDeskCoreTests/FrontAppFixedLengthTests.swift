@@ -83,7 +83,7 @@ struct FrontAppFixedLengthTests {
     }
 
     private func frames(_ overlay: SpaceBarOverlay) -> [CGRect] {
-        // The name itself centres in its slot; the slot, the icon
+        // The name itself leads its slot; the slot, the icon
         // and the chip around them never move.
         [
             overlay.contentFrame, overlay.plateFrame,
@@ -174,14 +174,11 @@ struct FrontAppFixedLengthTests {
         )
     }
 
-    /// A short name's INK centres on its slot, the icon never
-    /// moving (owner ruling on #2086, option B); a long one fills
-    /// the slot from its start and cuts. A script face, where the
-    /// ink and the advance do not share a centre — in the system
-    /// face they do to under a point, which a slot-wide centred
-    /// frame would pass.
-    @Test("A short name centres its ink in its slot; a long one fills")
-    func shortNameCentres() throws {
+    /// A short name starts at its slot's start, right after the
+    /// icon, the trailing end left empty (#2587, amending #2086); a
+    /// long one fills the slot from its start and cuts.
+    @Test("A short name starts after its icon; a long one fills")
+    func shortNameLeads() throws {
         let overlay = SpaceBarOverlay()
         var look = Self.look
         look.shelf.fontFamily = "Apple Chancery"
@@ -198,19 +195,12 @@ struct FrontAppFixedLengthTests {
                 )
             )
         }
-        // Ink offset from the advance's centre, opposite ways.
         for title in ["Tf", "fly"] {
             place(title)
-            let name = overlay.frontName
+            let name = overlay.frontName.frame
             let start = overlay.frontNameEnd - slot
-            let metrics = BarTextGlyph.metrics(of: name)
-            let ink = metrics.inkSpan(in: name.frame)
-            let mid = (ink.lowerBound + ink.upperBound) / 2
-            #expect(abs(mid - (start + slot / 2)) < 0.5, "\(title)")
-            // The two centres differ in this face, so the clause
-            // tells the ink's from the advance's.
-            let inkOff = metrics.ink.midX - metrics.advance / 2
-            try #require(abs(inkOff) >= 0.5, "\(title)")
+            #expect(abs(name.minX - start) < 0.5, "\(title)")
+            try #require(name.width < slot - 1, "\(title)")
         }
         place(String(repeating: "A long title ", count: 6))
         let name = overlay.frontName.frame

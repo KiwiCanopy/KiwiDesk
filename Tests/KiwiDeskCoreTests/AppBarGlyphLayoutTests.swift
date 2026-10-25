@@ -151,16 +151,14 @@ struct AppBarGlyphLayoutTests {
         // Ten capitals pass the slot, so the label fills it and cuts.
         #expect(abs(views[1].label.frame.width - titleSlot) <= 0.5)
         #expect(!views[1].drawsTextInFull)
-        // A short title's ink is centred on the slot.
-        let short = views[2]
-        let placed = short.horizontalPlacement(in: short.bounds.size)
-        let mid =
-            placed.x + placed.moon + placed.side + placed.spacing
-            + titleSlot / 2
-        let ink = BarTextGlyph.metrics(of: short.label).inkSpan(
-            in: short.label.frame
-        )
-        #expect(abs((ink.lowerBound + ink.upperBound) / 2 - mid) <= 1)
+        // Every title starts right after its icon, a short one
+        // leaving the slot's trailing end empty (#2587).
+        for view in views {
+            let placed = view.horizontalPlacement(in: view.bounds.size)
+            let start = placed.x + placed.moon + placed.side + placed.spacing
+            #expect(abs(view.label.frame.minX - start) <= 0.5)
+        }
+        #expect(views[2].label.frame.width < titleSlot - 1)
     }
 
     /// A REUSED view that flips to a vertical bar hides its

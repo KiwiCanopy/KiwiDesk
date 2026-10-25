@@ -309,8 +309,8 @@ twice, was a question the user answered twice. The argument is
   read the one `SpaceBarOverlay.titleSlot`, the title cap in the
   bar font, so a focus change moves no frame — the chip ending at
   the slot's end (`frontNameEnd`), never the name's, and a short
-  name's INK centred in the slot through `BarTitleSlot.span`, the icon
-  never moving. A show that keeps
+  name starting at the slot's start through `BarTitleSlot.span`,
+  right after the icon, which never moves (#2587). A show that keeps
   every frame — `keepsGeometry`, which compares the front extent
   beside the item lengths — redraws content alone
   (`redrawContent`) and never the frame pass; a new stored field
@@ -323,16 +323,17 @@ twice, was a question the user answered twice. The argument is
   a title** (#2545): `autoSlotWidth` and the item's label read
   the one `AppBarOverlay.titleSlot` — `title_cap` through the
   shared `BarTitleSlot`, which the front-app slot takes too — so
-  a rename moves no frame, a short title's ink centred in the
-  slot through `BarTitleSlot.span` and the icon never moving. A
+  a rename moves no frame, the title placed by the same
+  `BarTitleSlot.span` and the icon never moving. A
   show whose titles alone changed — `AppBarOverlay.keepsGeometry`
   — redraws content alone; a new stored field of a show or an
   item is classified as compared there or content-only, and a
   content redraw lands a full render's frames
   (`AppBarTitleSlotTests`, `AppBarGlyphLayoutTests` ▸
   `titlesDrawInTheFixedSlot`). The Settings Bars preview frames
-  each App Bar title at the same `BarTitleSlot` length, read at
-  the frame's own font size (`TitleSlotPreviewTests`).
+  each App Bar title at the same `BarTitleSlot` length, leading
+  as the live bar draws it, read at the frame's own font size
+  (`TitleSlotPreviewTests`).
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
   never a single-bar sync.** It builds each display's plan once
   from both bars' content and syncs both managers from it, so a
