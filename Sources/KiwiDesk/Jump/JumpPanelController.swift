@@ -93,19 +93,17 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             modifiers: NSEvent.modifierFlags
         )
         model.chords = liveChords()
+        model.settings = core.tiler.settings
         let panel = self.panel ?? makePanel()
         self.panel = panel
         self.currentModel = model
         let presence = PanelPresence()
         self.presence = presence
         wire(model, panel)
-        let glass = core.tiler.settings.shortcutPanelLiquidGlass
         let width = Self.width(visibleWidth: area.width)
         if scope != .windows { model.setScope(scope) }
         let root = JumpPanelView(
             model: model,
-            settings: core.tiler.settings,
-            liquidGlass: glass,
             presence: presence,
             width: width
         )
@@ -138,6 +136,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         handBack.present(panel) { [weak self, presence] in
             self?.presence === presence && !presence.leaving
         }
+    }
+
+    /// Repaints the shown panel on a settings change by any door,
+    /// as the bars repaint (#2604); a closed one keeps its model.
+    func settingsChanged(_ settings: TilingSettings) {
+        guard !presence.leaving else { return }
+        currentModel?.settings = settings
     }
 
     /// Each side's chord from the live bindings.
