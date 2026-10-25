@@ -70,7 +70,7 @@ final class SpaceBarItemView: NSView {
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.make()
     /// Active mark corner clip (owner 2026-07-20).
-    let accentClip = AppBarOverlay.FlippedView()
+    let accentClip = AppBarOverlay.PassThroughFlippedView()
     /// The run's ends: they set the rounded ends' insets (#1763).
     var isFirstInRun = false {
         didSet { if oldValue != isFirstInRun { needsLayout = true } }

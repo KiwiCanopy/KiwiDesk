@@ -28,6 +28,20 @@ extension SpaceBarItemView {
         styleAccent()
     }
 
+    /// Keeps the border and outline above a hosting glass's rim
+    /// (`GlassBox.seatStrokes`, #2595).
+    override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        GlassBox.seatStrokes([boxBorder, accentClip], of: self) {
+            addSubview(boxBorder, positioned: .below, relativeTo: nil)
+            addSubview(
+                accentClip,
+                positioned: .above,
+                relativeTo: markerView
+            )
+        }
+    }
+
     /// Structural divider between identifier and app glyphs (QA 2026-07-19).
     private func styleDivider() {
         identifierDivider.isHidden = apps.isEmpty

@@ -167,6 +167,45 @@ enum GlassBox {
         GlassPlate.fitContent(glass)
     }
 
+    /// Seats a box's strokes — its border and outline, in that
+    /// order — in its host above the glass while a glass hosts
+    /// `item`, since the glass's key-window rim draws over its
+    /// content (#2595); `home` puts them back in the item once
+    /// none does. The item calls it as it moves.
+    static func seatStrokes(
+        _ strokes: [NSView],
+        of item: NSView,
+        home: () -> Void
+    ) {
+        guard let host = host(holding: item) else {
+            if strokes.contains(where: { $0.superview !== item }) {
+                home()
+            }
+            return
+        }
+        for stroke in strokes where stroke.superview !== host {
+            host.addSubview(stroke)
+            stroke.frame = host.bounds
+        }
+    }
+
+    /// The host whose glass holds `item`, in its tint or directly.
+    /// The glass nests its content in views of its own, so the
+    /// host is found by ancestry.
+    static func host(holding item: NSView) -> GlassBoxHost? {
+        var view = item.superview
+        while let ancestor = view {
+            if let host = ancestor as? GlassBoxHost {
+                let holds = host.subviews.contains {
+                    GlassPlate.holds($0, item)
+                }
+                return holds ? host : nil
+            }
+            view = ancestor.superview
+        }
+        return nil
+    }
+
     /// Takes a box out for good — glass released (#1730), tint and
     /// host removed.
     static func drop(_ glass: NSView, _ tint: GlassBackdrop?) {

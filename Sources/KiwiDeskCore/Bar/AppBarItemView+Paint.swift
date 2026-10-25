@@ -48,6 +48,16 @@ extension AppBarItemView {
         )
     }
 
+    /// Keeps the border and outline above a hosting glass's rim
+    /// (`GlassBox.seatStrokes`, #2595).
+    override func viewDidMoveToSuperview() {
+        super.viewDidMoveToSuperview()
+        GlassBox.seatStrokes([boxBorder, accentClip], of: self) {
+            addSubview(boxBorder, positioned: .below, relativeTo: nil)
+            addSubview(accentClip, positioned: .below, relativeTo: badge)
+        }
+    }
+
     /// The corners this item rounds (`ItemCornerMask`, #1763).
     var maskedCorners: CACornerMask {
         ItemCornerMask.mask(

@@ -26,7 +26,7 @@ final class AppBarItemView: NSView {
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.make()
     /// Clips active accent indicator to item bounds (owner 2026-07-20).
-    let accentClip = AppBarOverlay.FlippedView()
+    let accentClip = AppBarOverlay.PassThroughFlippedView()
     let badge: NSTextField = {
         let tf = NSTextField(labelWithString: "")
         let cell = IndicatorBarBadgeCell(textCell: "")

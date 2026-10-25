@@ -1647,7 +1647,13 @@ Boxed.
   `borderColor`, never the stored width. The rim is its own
   fill-less, click-through view framed to the surface, so it
   strokes on the edge, never inset: above the plate or the
-  chip's glass. A box's rim stands down under an active indicator
+  chip's glass. **A box a glass hosts strokes in its
+  `GlassBoxHost` above the glass, never inside the glass's
+  content**, whose key-window rim draws over it (#2595): the
+  item's border and outline clip move there through the one
+  `GlassBox.seatStrokes` as the item moves, and back when no
+  glass holds it (`BoxStrokeAboveGlassTests`); a new stroke on
+  a hosted box joins that list. A box's rim stands down under an active indicator
   that strokes the box's own edge — the outline, never the edge
   mark — through the one `ShelfBorder.yields`, each site handing
   the painter the indicator it draws over the rim, never a
