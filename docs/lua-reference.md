@@ -6089,6 +6089,15 @@ KiwiDesk.bind("ctrl+alt+r", function()
 end)
 ```
 
+#### switch_layer
+
+**Expects:** a layer name: one `define_layer` declared, or
+`"default"`.
+
+**Does:** makes that layer the active one, so only its bindings
+fire until the next switch. An unknown name changes nothing and
+is logged.
+
 #### resize
 
 **Expects:**
@@ -6728,7 +6737,8 @@ call keeps running. Halt a script with an explicit `return` or
 
 ## Startup Scripts
 
-Commands at `init.lua` top level run on load and on reload; see
+Commands at `init.lua` top level run on load and on
+[reload](#reload_config); see
 [External Commands](#external-commands) for `KiwiDesk.exec`
 semantics. Any tiling commands at top level are applied before
 profiles load, as base state.
@@ -6745,6 +6755,22 @@ KiwiDesk.exec("sketchybar --reload")
 -- Subscribe to an event:
 KiwiDesk.on("space_change", function(space_id)
     print("Switched to space: " .. space_id)
+end)
+```
+
+### reload_config
+
+**Expects:** nothing.
+
+**Does:** reads the configuration from disk again once the
+calling function returns, running `init.lua`'s top level as at
+launch.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+r", function()
+    KiwiDesk.reload_config()
 end)
 ```
 

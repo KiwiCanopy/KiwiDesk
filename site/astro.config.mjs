@@ -142,6 +142,7 @@ export default defineConfig({
           items: [
             { label: "Lua Reference", slug: "docs/lua-reference" },
             { label: "CLI & IPC", slug: "docs/cli" },
+            { label: "Actions", slug: "docs/commands" },
             {
               // A user-facing page of its own (bugs-by-design):
               // split out of the contributor Design Decisions doc

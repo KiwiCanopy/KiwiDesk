@@ -66,7 +66,7 @@ below, so it corrects itself when a seventh is added.
   again in the probe, which reads the sink before any lifecycle
   runs.
 - **The API surface describes itself, and an enum's values are
-  READ rather than typed (#1033).** Five obligations, all on
+  READ rather than typed (#1033).** Six obligations, all on
   `Commands/`:
   - **A new command owes a record** in the matching
     `Commands/Reference/APIRecords+*` table — group, arguments,
@@ -87,6 +87,15 @@ below, so it corrects itself when a seventh is added.
     tool (#1685). `APIDestructiveCensusTests` holds a command whose
     name reads destructive to the register or its `ruledSafe` map;
     one named otherwise is outside that net and is review's.
+  - **A new command answers its kind** — action, setting or
+    query (#2610): its name answers (`set_*` sets; `get_*`,
+    `list_*` and `current_*` ask; anything else acts), and a name
+    that misreads it takes a row in `APIReference.kindExceptions`.
+    `APIKindCensusTests` holds a command whose first word reads
+    either way to that register or its `ruledDerived` map, and
+    refuses a row its name already reads right; a misread named
+    otherwise is listed under the wrong kind, on the actions page
+    included, and is review's.
   - **An enum-valued argument names the TYPE, never the values**
     — `.choice("anchor", ScrollingParams.Anchor.self)`.
     `APIChoice` has exactly one initializer and it reads

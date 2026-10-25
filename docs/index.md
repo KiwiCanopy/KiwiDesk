@@ -23,6 +23,8 @@ the Settings app, or in Lua (`~/.config/KiwiDesk/init.lua`).
   form.
 - **[CLI & IPC](cli.md)** — every command, the event stream,
   and the raw socket protocol.
+- **[Actions](commands.md)** — every action a key can run, each
+  linked to its Lua reference entry.
 - **[Recipes](recipes/index.md)** — ready-to-copy integrations:
   [SketchyBar](recipes/sketchybar.md),
   [JankyBorders](recipes/jankyborders.md), and

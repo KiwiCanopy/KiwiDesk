@@ -3,12 +3,16 @@ import Foundation
 /// Help and command listing response generation
 /// (`CLIHelp`, `CLIHelpSeamTests`, #1033).
 extension APIReference {
-    /// Command listing or detailed single command record (#1033).
+    /// Command listing or detailed single command record (#1033);
+    /// `kind` keeps only that kind's commands in a listing (#2610)
+    /// and is ignored beside a name, which answers whatever its
+    /// kind.
     public static func helpResponse(
-        for name: String? = nil
+        for name: String? = nil,
+        kind: APIKind? = nil
     ) -> CommandResponse {
         guard let name, !name.isEmpty else {
-            return .ok(listingJSON)
+            return .ok(listingJSON(kind: kind))
         }
         guard let entry = entry(named: name) else {
             // A retired verb is not a typo: name what replaced it
@@ -27,9 +31,10 @@ extension APIReference {
         return .ok(json(for: entry))
     }
 
-    /// Full grouped command listing as JSON.
-    static var listingJSON: JSONValue {
-        let all = groups
+    /// The grouped command listing as JSON, narrowed to `kind`;
+    /// a group with no command of that kind is left out.
+    static func listingJSON(kind: APIKind? = nil) -> JSONValue {
+        let all = groups(of: kind)
         return .object([
             "commands": .number(
                 Double(all.reduce(0) { $0 + $1.entries.count })
@@ -59,6 +64,7 @@ extension APIReference {
                 entry.record.arguments.map(json(for:))
             ),
             "destructive": .bool(isDestructive(entry)),
+            "kind": .string(kind(of: entry).rawValue),
         ]
         if let command = entry.command {
             object["command"] = .string(command)

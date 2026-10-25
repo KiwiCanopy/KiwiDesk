@@ -10,14 +10,23 @@ enum CLIHelp {
         "help", "--help", "-h", "list_commands",
     ]
 
-    /// The one option these verbs take.
+    /// Forces JSON output.
     static let jsonFlag = "--json"
+
+    /// Narrows the listing to one `APIKind`; takes its value as the
+    /// next argument (#2610).
+    static let kindFlag = "--kind"
 
     /// Runs a help invocation. `arguments` is the full process
     /// argument list.
     static func run(_ arguments: [String]) -> Int32 {
         let verb = arguments[1]
-        let rest = arguments.dropFirst(2).map { $0 }
+        var rest = arguments.dropFirst(2).map { $0 }
+        let kind: APIKind?
+        switch takeKind(from: &rest) {
+        case .success(let taken): kind = taken
+        case .failure(let refusal): return fail(refusal.message)
+        }
         let wantsJSON = rest.contains(jsonFlag)
         let topic = rest.first { !$0.hasPrefix("-") }
 
@@ -26,36 +35,69 @@ enum CLIHelp {
             $0.hasPrefix("-") && $0 != jsonFlag
         }
         if let flag = unknown.first {
-            FileHandle.standardError.write(
-                Data("unknown option: \(flag)\n".utf8)
-            )
-            return 1
+            return fail("unknown option: \(flag)")
+        }
+        if kind != nil, topic != nil {
+            return fail("\(kindFlag) lists commands; it takes no name")
         }
 
         // Print usage block when invoked without topic or JSON flag.
-        if topic == nil, !wantsJSON, verb != "list_commands" {
+        if topic == nil, kind == nil, !wantsJSON,
+            verb != "list_commands"
+        {
             print(cliUsage)
             return 0
         }
 
-        let response = APIReference.helpResponse(for: topic)
+        let response = APIReference.helpResponse(for: topic, kind: kind)
         guard response.isSuccess, let data = response.data else {
-            FileHandle.standardError.write(
-                Data(
-                    "error: \(response.error ?? "no answer")\n"
-                        .utf8
+            return fail("error: \(response.error ?? "no answer")")
+        }
+        print(rendered(data, topic: topic, kind: kind, json: wantsJSON))
+        return 0
+    }
+
+    /// A refused `--kind`, worded for stderr.
+    struct KindRefusal: Error { let message: String }
+
+    /// Removes `--kind <value>` from `rest` and parses the value;
+    /// nil where the flag is absent.
+    static func takeKind(
+        from rest: inout [String]
+    ) -> Result<APIKind?, KindRefusal> {
+        guard let at = rest.firstIndex(of: kindFlag) else {
+            return .success(nil)
+        }
+        let kinds = APIKind.expectedList
+        guard at + 1 < rest.endIndex else {
+            return .failure(
+                KindRefusal(
+                    message: "\(kindFlag) needs a value: \(kinds)"
                 )
             )
-            return 1
         }
-        print(rendered(data, topic: topic, json: wantsJSON))
-        return 0
+        let value = rest[at + 1]
+        rest.removeSubrange(at...(at + 1))
+        guard let kind = APIKind(rawValue: value) else {
+            return .failure(
+                KindRefusal(
+                    message: "unknown kind: \(value) (expected \(kinds))"
+                )
+            )
+        }
+        return .success(kind)
+    }
+
+    private static func fail(_ message: String) -> Int32 {
+        FileHandle.standardError.write(Data("\(message)\n".utf8))
+        return 1
     }
 
     /// Returns formatted help string, using JSON for pipes or explicit flag.
     private static func rendered(
         _ data: JSONValue,
         topic: String?,
+        kind: APIKind?,
         json: Bool
     ) -> String {
         let asJSON = json || !CLIOutput.stdoutIsTerminal
@@ -69,6 +111,6 @@ enum CLIHelp {
         if let topic, let entry = APIReference.entry(named: topic) {
             return CLIHelpText.detail(of: entry)
         }
-        return CLIHelpText.listing(of: APIReference.groups)
+        return CLIHelpText.listing(of: APIReference.groups(of: kind))
     }
 }

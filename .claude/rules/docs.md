@@ -17,6 +17,7 @@ different behavior.
 | `docs/user-guide.md` | What the GUI cannot answer about the Settings app — admission is the owner's ruling (Prose budget, below) |
 | `docs/spaces-and-desktops.md` | How screens, macOS Desktops, profiles and KiwiDesk Spaces relate — the user-facing mental model, not a flow and not a pipeline |
 | `docs/cli.md` | Commands, events, IPC |
+| `docs/commands.md` | GENERATED from the `APIRecords+*` summaries and the kind register (#2610), never edited by hand: a wording fix goes in the record, and the page is rewritten with the command `ActionsPage.regenerate` names, which `ActionsPageDriftTests` prints when the two drift |
 | `docs/recipes/` | Integration recipes |
 | `docs/architecture.md` | End-to-end pipelines at directory altitude |
 | `docs/design-decisions.md` | Durable product/UX decisions (see charter below) |
