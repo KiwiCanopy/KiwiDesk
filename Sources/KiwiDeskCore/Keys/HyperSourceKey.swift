@@ -94,3 +94,39 @@ public enum HyperSourceKey: String, CaseIterable, Sendable {
             .f19: (80, 0x6E), .f20: (90, 0x6F),
         ]
 }
+
+extension HyperSourceKey {
+    /// The sided modifier key this is, nil for any other key
+    /// (#2601): the one mapping the recorder and the spoken form
+    /// read.
+    public var modifierSide: (kind: ModifierKind, side: ModifierSide)? {
+        switch self {
+        case .leftCommand: (.command, .left)
+        case .rightCommand: (.command, .right)
+        case .leftOption: (.option, .left)
+        case .rightOption: (.option, .right)
+        case .leftControl: (.control, .left)
+        case .rightControl: (.control, .right)
+        case .leftShift: (.shift, .left)
+        case .rightShift: (.shift, .right)
+        default: nil
+        }
+    }
+
+    /// The key that is `side` of `kind`.
+    public static func key(
+        _ side: ModifierSide,
+        of kind: ModifierKind
+    ) -> HyperSourceKey {
+        switch (kind, side) {
+        case (.command, .left): .leftCommand
+        case (.command, .right): .rightCommand
+        case (.option, .left): .leftOption
+        case (.option, .right): .rightOption
+        case (.control, .left): .leftControl
+        case (.control, .right): .rightControl
+        case (.shift, .left): .leftShift
+        case (.shift, .right): .rightShift
+        }
+    }
+}
