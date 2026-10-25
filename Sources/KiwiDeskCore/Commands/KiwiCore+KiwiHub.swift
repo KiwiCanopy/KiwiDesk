@@ -19,8 +19,10 @@ extension KiwiHubSide: APIChoiceType {}
 extension KiwiCore {
     /// The `kiwihub.*` verbs (#2265). `show` opens KiwiHub on a
     /// side, switches it there, or closes it when that side is
-    /// up; the GUI answers through `uiBridge`. No window moves,
-    /// so no retile.
+    /// up; the GUI answers through `uiBridge`. `set_key` sets a
+    /// navigation key's alternative (#2600), the running value as
+    /// every app-wide verb (#1741), which the panel reads at each
+    /// press. No window moves, so no retile.
     func kiwiHubCommand(
         _ command: String,
         _ args: [JSONValue]
@@ -32,8 +34,40 @@ extension KiwiCore {
             else { return CommandResponse.expected(KiwiHubSide.self) }
             uiBridge.onKiwihubShow(side)
             return .ok()
+        case "kiwihub.set_key":
+            return setKiwiHubKey(args)
         default:
             return .fail("unknown command: \(command)")
         }
+    }
+}
+
+extension KiwiCore {
+    /// `kiwihub.set_key(key, combo)`: a missing or empty combo
+    /// clears the alternative; one the panel cannot take is
+    /// refused with its reason.
+    fileprivate func setKiwiHubKey(_ args: [JSONValue]) -> CommandResponse {
+        guard let raw = args.first?.stringValue,
+            let key = KiwiHubKey(rawValue: raw)
+        else { return CommandResponse.expected(KiwiHubKey.self) }
+        let text = args.dropFirst().first?.stringValue ?? ""
+        guard !text.isEmpty else {
+            setAppWide(persisting: false) { $0.kiwiHubKeys[key] = nil }
+            return .ok()
+        }
+        guard let combo = KeyCombo.parse(text),
+            let canonical = combo.comboString()
+        else { return .fail("expected a key combo, e.g. ctrl+n") }
+        if let refusal = KiwiHubKeyRefusal.of(
+            combo,
+            as: key,
+            in: appWide.kiwiHubKeys
+        ) {
+            return .fail(refusal.message)
+        }
+        setAppWide(persisting: false) {
+            $0.kiwiHubKeys[key] = canonical
+        }
+        return .ok()
     }
 }

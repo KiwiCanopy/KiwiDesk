@@ -62,6 +62,9 @@ public struct AppWideSettings: Equatable, Sendable {
     /// (`hyper.key`, #1870). Per install, never per profile: it
     /// remaps a physical key, and a profile can change on a swipe.
     public var hyperKey: HyperSourceKey?
+    /// Lua's alternatives to KiwiHub's navigation keys
+    /// (`kiwihub.key`, #2600). None by default.
+    public var kiwiHubKeys = KiwiHubKeys()
 
     public init() {}
 
@@ -213,6 +216,12 @@ extension AppWideSettings {
         }
     }
 
+    /// `gui.json`'s `kiwihub` group (#2600) — additive, as
+    /// `desktop`.
+    struct KiwiHub: Codable, Equatable {
+        var key: KiwiHubKeys?
+    }
+
     /// `gui.json`'s `kiwivision` group (#2103) — additive, as
     /// `desktop`; v3's lenses joined it with no crossing.
     struct Vision: Codable, Equatable {
@@ -240,8 +249,9 @@ extension AppWideSettings {
     /// The stored value, or nil when neither #1741 group is
     /// present — the file predates #1741 and the crossing is still
     /// owed. The `desktop` (#2142), `space` (#2228), `mode`
-    /// (#2144), `kiwivision` (#2103) and `hyper` (#1870) groups
-    /// crossed nothing, so they never decide that.
+    /// (#2144), `kiwivision` (#2103), `hyper` (#1870) and
+    /// `kiwihub` (#2600) groups crossed nothing, so they never
+    /// decide that.
     init?(
         refusal: Refusal?,
         quit: Quit?,
@@ -249,7 +259,8 @@ extension AppWideSettings {
         space: Space? = nil,
         mode: Mode? = nil,
         vision: Vision? = nil,
-        hyper: Hyper? = nil
+        hyper: Hyper? = nil,
+        kiwihub: KiwiHub? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
@@ -262,6 +273,7 @@ extension AppWideSettings {
         }
         if let cue = mode?.cue { modeCue = cue }
         hyperKey = hyper?.key
+        if let keys = kiwihub?.key { kiwiHubKeys = keys }
         if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
         if let blur = vision?.blur { visionBlur = blur }
         if let appearance = vision?.appearance {
@@ -298,6 +310,7 @@ extension AppWideSettings {
     }
     var mode: Mode { Mode(cue: modeCue) }
     var hyper: Hyper { Hyper(key: hyperKey) }
+    var kiwihub: KiwiHub { KiwiHub(key: kiwiHubKeys) }
     var vision: Vision {
         Vision(
             dim: visionDim,

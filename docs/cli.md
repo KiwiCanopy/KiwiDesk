@@ -717,6 +717,13 @@ KiwiHub on that side, so a launcher reaches it without a shortcut;
 any other side is refused, naming the three. See
 [kiwihub.show](lua-reference.md#kiwihubshow).
 
+:::unreleased
+`kiwihub.set_key` takes a built-in KiwiHub key (`up`, `down`,
+`page_up`, `page_down`, `left`, `right`) and a combo, and makes the
+combo a second key for it while KiwiHub is open; no combo clears it.
+See [kiwihub.set_key](lua-reference.md#kiwihubset_key).
+:::
+
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
 where the Desktop bridge is present; it never launches the app, and

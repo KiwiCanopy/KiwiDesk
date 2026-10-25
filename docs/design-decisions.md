@@ -11072,6 +11072,24 @@ press (measured 2026-10-20), so a take-over beside such a tool
 arms both. A mapping the other tool later removes is written again
 at the next apply; one it replaces is refused.
 
+:::unreleased
+**KiwiHub's navigation keys take alternatives from Lua, never a
+Settings row, and they are the Mac's (#2600).** A user whose hands
+stay on the home row wants ⌃N/⌃P beside ↑/↓; the built-in keys keep
+working, so an alternative adds a chord and replaces nothing. The
+panel reads them after every built-in key, and the verb refuses a
+chord the panel or its field already answers, so no alternative can
+take a key away. They are app-wide because they are muscle memory,
+not a desk: stored per profile, a Desktop-bound switch would drop
+them mid-task. No per-profile value preceded them, so `kiwihub.key`
+crosses nothing (#1741's app-wide rule). They are the first app-wide
+member with no Settings row, which costs one trade: adopting an
+`init.lua` setup into Settings writes its keys into `gui.json`, and
+nothing in the window changes them after. `init.lua`'s
+`kiwihub.set_key` still sets them for the session at every load,
+and Reset clears them.
+:::
+
 **An absent capability is not a greyed one, and an absent
 Desktop is.** Two states look alike from a distance and get
 opposite treatments, so the line is drawn here rather than
