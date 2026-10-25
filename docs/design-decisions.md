@@ -16390,7 +16390,7 @@ while the other pops.
 :::unreleased
 **Amended by #2587 (owner ruling 2026-10-24): a title starts right
 after its icon.** A short title in the fixed slot, on the
-front-app segment and on every App Bar item (#2545), now sits at
+front-app segment and on every App Bar item (#2545), sits at
 the slot's start, the trailing end of the slot left empty; a long
 one still fills the slot and cuts with "…". Centred, a short title
 floated away from its icon, so a row of pills started their titles

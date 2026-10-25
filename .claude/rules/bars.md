@@ -323,16 +323,17 @@ twice, was a question the user answered twice. The argument is
   a title** (#2545): `autoSlotWidth` and the item's label read
   the one `AppBarOverlay.titleSlot` — `title_cap` through the
   shared `BarTitleSlot`, which the front-app slot takes too — so
-  a rename moves no frame, a short title starting at the slot's
-  start through `BarTitleSlot.span` and the icon never moving. A
+  a rename moves no frame, the title placed by the same
+  `BarTitleSlot.span` and the icon never moving. A
   show whose titles alone changed — `AppBarOverlay.keepsGeometry`
   — redraws content alone; a new stored field of a show or an
   item is classified as compared there or content-only, and a
   content redraw lands a full render's frames
   (`AppBarTitleSlotTests`, `AppBarGlyphLayoutTests` ▸
   `titlesDrawInTheFixedSlot`). The Settings Bars preview frames
-  each App Bar title at the same `BarTitleSlot` length, read at
-  the frame's own font size (`TitleSlotPreviewTests`).
+  each App Bar title at the same `BarTitleSlot` length, leading
+  as the live bar draws it, read at the frame's own font size
+  (`TitleSlotPreviewTests`).
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
   never a single-bar sync.** It builds each display's plan once
   from both bars' content and syncs both managers from it, so a
