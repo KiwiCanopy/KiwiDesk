@@ -130,9 +130,6 @@ extension SettingsValueReadout {
                     new: after.mouse.hoverFocus
                 )
             ]
-        case .kiwiHubKeyUp, .kiwiHubKeyDown, .kiwiHubKeyPageUp,
-            .kiwiHubKeyPageDown, .kiwiHubKeyLeft, .kiwiHubKeyRight:
-            return kiwiHubKeyRows(key, census, before, after)
         }
     }
 

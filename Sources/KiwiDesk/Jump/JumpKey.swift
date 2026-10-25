@@ -66,13 +66,6 @@ enum JumpKey: Equatable {
         if naming {
             return namingKey(keyCode, held)
         }
-        // ⇧ previews Move here, so an alternative moves under it
-        // too, as the arrows do.
-        if let bound = keys.key(for: combo(keyCode, held))
-            ?? keys.key(for: combo(keyCode, held.subtracting(.shift)))
-        {
-            return alternative(bound, scope: scope)
-        }
         if scope == .view, let key = layouts(keyCode, held) {
             return key
         }
@@ -96,7 +89,10 @@ enum JumpKey: Equatable {
             guard held.subtracting(.shift).isEmpty else { return nil }
             return .pick(moveHere: held.contains(.shift))
         default:
+            // A Lua alternative is read after every built-in key,
+            // so none can shadow one (#2600).
             return quick(keyCode, held)
+                ?? alternative(keyCode, held, scope: scope, keys: keys)
         }
     }
 
@@ -149,12 +145,20 @@ enum JumpKey: Equatable {
         return KeyCombo(keyCode: UInt32(keyCode), modifiers: modifiers)
     }
 
-    /// What a Lua alternative does: its built-in key's move. ← and →
-    /// move only in View, so elsewhere theirs is typing.
+    /// What a Lua alternative does: its built-in key's move. ⇧
+    /// previews Move here, so an alternative moves under it too, as
+    /// the arrows do. ← and → move only in View, so elsewhere
+    /// theirs is typing.
     private static func alternative(
-        _ key: KiwiHubKey,
-        scope: JumpScope
+        _ keyCode: UInt16,
+        _ held: NSEvent.ModifierFlags,
+        scope: JumpScope,
+        keys: KiwiHubKeys
     ) -> JumpKey? {
+        guard
+            let key = keys.key(for: combo(keyCode, held))
+                ?? keys.key(for: combo(keyCode, held.subtracting(.shift)))
+        else { return nil }
         switch key {
         case .up: return .step(-1)
         case .down: return .step(1)

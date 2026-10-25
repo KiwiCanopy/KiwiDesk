@@ -248,6 +248,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             .canJoinAllSpaces, .fullScreenAuxiliary,
         ]
         panel.delegate = self
+        panel.keys = { [core] in core.appWide.kiwiHubKeys }
         panel.onCancel = { [weak self] in
             self?.close()
         }
@@ -294,7 +295,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         }
         panel.scope = { [weak model] in model?.scope ?? .windows }
         panel.naming = { [weak model] in model?.isNaming ?? false }
-        panel.keys = { [core] in core.tiler.settings.kiwihub.key }
         wireView(model)
         wireShortcuts(model)
     }

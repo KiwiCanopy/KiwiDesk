@@ -422,7 +422,6 @@
   "diff.label.hover_focus_delay": "Задержка указателя до фокуса",
   "diff.label.ignore_rule": "Правило игнорирования",
   "diff.label.instance": "%1$@ · %2$@",
-  "diff.label.kiwihub_key": "Клавиша KiwiHub для %1$@",
   "diff.label.layer": "Слой",
   "diff.label.layers": "Слои",
   "diff.label.min_size_override": "Переопределение минимального размера",

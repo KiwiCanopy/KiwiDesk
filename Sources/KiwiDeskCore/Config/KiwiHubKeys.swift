@@ -1,27 +1,6 @@
 import Carbon.HIToolbox
 import Foundation
 
-/// KiwiHub's own settings (`kiwihub.*`, #2600). Lua-only: the GUI
-/// offers no row for them (#2600 ▸ Ruling).
-public struct KiwiHubSettings: Sendable, Equatable, Codable {
-    /// Alternatives to the panel's navigation keys
-    /// (`kiwihub.key`); the built-in keys keep working.
-    public var key = KiwiHubKeys()
-
-    public init() {}
-
-    /// A file written before this key existed reads as no
-    /// alternatives.
-    public init(from decoder: Decoder) throws {
-        let container = try decoder.container(keyedBy: CodingKeys.self)
-        key =
-            try container.decodeIfPresent(
-                KiwiHubKeys.self,
-                forKey: .key
-            ) ?? KiwiHubKeys()
-    }
-}
-
 /// A built-in KiwiHub key a binding stands in for, by the key it
 /// mirrors (`kiwihub.set_key`'s first argument, #2600).
 public enum KiwiHubKey: String, Sendable, CaseIterable, Equatable {
@@ -35,7 +14,9 @@ public enum KiwiHubKey: String, Sendable, CaseIterable, Equatable {
 
 extension KiwiHubKey: APIChoiceType {}
 
-/// One alternative chord per built-in key, each the canonical
+/// Lua's alternatives to KiwiHub's navigation keys (`kiwihub.key`,
+/// #2600): app-wide, since a key is the hand's and not the desk's.
+/// One chord per built-in key, each the canonical
 /// `KeyCombo.comboString()`; nil leaves only the built-in key.
 public struct KiwiHubKeys: Sendable, Equatable, Codable {
     public var up: String?
@@ -71,10 +52,16 @@ public struct KiwiHubKeys: Sendable, Equatable, Codable {
         set { self[keyPath: Self.path(key)] = newValue }
     }
 
-    /// The built-in key whose alternative `combo` is, if any.
+    /// The built-in key whose alternative `combo` is. A stored
+    /// chord the verb would refuse — a file edited by hand — never
+    /// answers.
     public func key(for combo: KeyCombo) -> KiwiHubKey? {
         KiwiHubKey.allCases.first { key in
-            self[key].flatMap(KeyCombo.parse) == combo
+            guard let stored = self[key].flatMap(KeyCombo.parse) else {
+                return false
+            }
+            return stored == combo
+                && KiwiHubKeyRefusal.ofChord(stored) == nil
         }
     }
 }
@@ -82,7 +69,8 @@ public struct KiwiHubKeys: Sendable, Equatable, Codable {
 /// Why `kiwihub.set_key` refuses a chord (#2600). English, a CLI
 /// contract (core-boundaries.md).
 public enum KiwiHubKeyRefusal: Equatable, Sendable {
-    /// No ⌃, ⌥ or ⌘: the press would type into the search field.
+    /// No ⌃ or ⌘: the press would type into the search field,
+    /// ⌥ included, which types a character.
     case typesIntoField
     /// The Hyper key, which the panel cannot read.
     case hyper
@@ -94,7 +82,7 @@ public enum KiwiHubKeyRefusal: Equatable, Sendable {
     public var message: String {
         switch self {
         case .typesIntoField:
-            return "a KiwiHub key needs ctrl, alt or cmd"
+            return "a KiwiHub key needs ctrl or cmd"
         case .hyper:
             return "KiwiHub cannot read hyper"
         case .panelKey:
@@ -111,28 +99,33 @@ public enum KiwiHubKeyRefusal: Equatable, Sendable {
         as key: KiwiHubKey,
         in keys: KiwiHubKeys
     ) -> KiwiHubKeyRefusal? {
-        if combo.modifiers.contains(.hyper) { return .hyper }
-        let held = combo.modifiers.intersection(
-            [.control, .option, .command]
-        )
-        if held.isEmpty { return .typesIntoField }
-        if panelKeeps(combo) { return .panelKey }
+        if let refusal = ofChord(combo) { return refusal }
         if let other = keys.key(for: combo), other != key {
             return .taken(other)
         }
         return nil
     }
 
+    /// The refusal the chord earns on its own, whatever else is set.
+    static func ofChord(_ combo: KeyCombo) -> KiwiHubKeyRefusal? {
+        if combo.modifiers.contains(.hyper) { return .hyper }
+        if combo.modifiers.isDisjoint(with: [.control, .command]) {
+            return .typesIntoField
+        }
+        return panelKeeps(combo) ? .panelKey : nil
+    }
+
     /// The keys the panel answers itself: ↩ Esc ⇥ and the arrows
     /// and page keys under any modifier, the ⌘ digits, and the ⌘
     /// chords it keeps (⌘S ⌘, ⌘W) or hands to the field's Edit
-    /// menu.
+    /// menu. Matched by key code, as the panel's own ⌘S is;
+    /// `KiwiHubKeyParityTests` holds it to the panel.
     static func panelKeeps(_ combo: KeyCombo) -> Bool {
         let code = Int(combo.keyCode)
         if anyModifier.contains(code) { return true }
+        guard combo.modifiers.contains(.command) else { return false }
         let row = KeypadKeys.rowTwin(of: combo.keyCode) ?? combo.keyCode
         let digit = KeypadKeys.digits.contains { $0.row == row }
-        guard combo.modifiers.contains(.command) else { return false }
         return digit || commandKeeps.contains(code)
     }
 

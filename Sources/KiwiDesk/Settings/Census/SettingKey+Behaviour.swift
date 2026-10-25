@@ -1,5 +1,3 @@
-import KiwiDeskCore
-
 /// Top-level `TilingSettings` behavior knobs.
 
 enum BehaviourKey: String, CaseIterable, Hashable {
@@ -26,28 +24,6 @@ enum BehaviourKey: String, CaseIterable, Hashable {
     case mouseFollowsFocus = "settings.mouse.followsFocus"
     case mouseHoverFocus = "settings.mouse.hoverFocus"
     case mouseHoverFocusDelay = "settings.mouse.hoverFocusDelayMS"
-    // KiwiHub's navigation key alternatives (#2600), Lua-only.
-    case kiwiHubKeyUp = "settings.kiwihub.key.up"
-    case kiwiHubKeyDown = "settings.kiwihub.key.down"
-    case kiwiHubKeyPageUp = "settings.kiwihub.key.pageUp"
-    case kiwiHubKeyPageDown = "settings.kiwihub.key.pageDown"
-    case kiwiHubKeyLeft = "settings.kiwihub.key.left"
-    case kiwiHubKeyRight = "settings.kiwihub.key.right"
-}
-
-extension BehaviourKey {
-    /// The built-in KiwiHub key a census row mirrors, if any.
-    var kiwiHubKey: KiwiHubKey? {
-        switch self {
-        case .kiwiHubKeyUp: return .up
-        case .kiwiHubKeyDown: return .down
-        case .kiwiHubKeyPageUp: return .pageUp
-        case .kiwiHubKeyPageDown: return .pageDown
-        case .kiwiHubKeyLeft: return .left
-        case .kiwiHubKeyRight: return .right
-        default: return nil
-        }
-    }
 }
 
 extension BehaviourKey {
@@ -81,9 +57,7 @@ extension BehaviourKey {
                 gate: .setting(.spaces(.spaceModes))
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride,
-            .kiwiHubKeyUp, .kiwiHubKeyDown, .kiwiHubKeyPageUp,
-            .kiwiHubKeyPageDown, .kiwiHubKeyLeft, .kiwiHubKeyRight:
+            .floatScaleOnDisplayChange, .placementOverride:
             return .luaOnly
         case .mouseResize, .mouseFollowsFocus, .mouseHoverFocus,
             .mouseHoverFocusDelay:
@@ -129,9 +103,7 @@ extension BehaviourKey {
                 help: "space_override.min_size.help"
             )
         case .resizeStep, .swapSkipsCascade, .floatPlacement,
-            .floatScaleOnDisplayChange, .placementOverride,
-            .kiwiHubKeyUp, .kiwiHubKeyDown, .kiwiHubKeyPageUp,
-            .kiwiHubKeyPageDown, .kiwiHubKeyLeft, .kiwiHubKeyRight:
+            .floatScaleOnDisplayChange, .placementOverride:
             return .none
         case .mouseHoverFocusDelay:
             return .text("behavior.mouse.hover_focus_delay")

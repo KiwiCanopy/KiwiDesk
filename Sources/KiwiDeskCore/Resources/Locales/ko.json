@@ -422,7 +422,6 @@
   "diff.label.hover_focus_delay": "포인터가 머물 때 포커스 지연",
   "diff.label.ignore_rule": "무시 규칙",
   "diff.label.instance": "%1$@ · %2$@",
-  "diff.label.kiwihub_key": "%1$@용 KiwiHub 키",
   "diff.label.layer": "레이어",
   "diff.label.layers": "레이어",
   "diff.label.min_size_override": "최소 크기 오버라이드",

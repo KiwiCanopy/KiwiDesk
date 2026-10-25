@@ -422,7 +422,6 @@
   "diff.label.hover_focus_delay": "指標停留取得焦點的延遲",
   "diff.label.ignore_rule": "忽略規則",
   "diff.label.instance": "%1$@ · %2$@",
-  "diff.label.kiwihub_key": "%1$@ 的 KiwiHub 按鍵",
   "diff.label.layer": "層",
   "diff.label.layers": "層",
   "diff.label.min_size_override": "最小尺寸覆寫",

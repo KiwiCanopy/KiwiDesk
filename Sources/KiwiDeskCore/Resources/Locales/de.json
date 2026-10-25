@@ -422,7 +422,6 @@
   "diff.label.hover_focus_delay": "Fokus-Verzögerung beim Ruhen",
   "diff.label.ignore_rule": "Ignorier-Regel",
   "diff.label.instance": "%1$@ · %2$@",
-  "diff.label.kiwihub_key": "KiwiHub-Taste für %1$@",
   "diff.label.layer": "Ebene",
   "diff.label.layers": "Ebenen",
   "diff.label.min_size_override": "Mindestgrößen-Überschreibung",

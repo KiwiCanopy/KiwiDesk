@@ -27,7 +27,6 @@ extension TilingSettings: Codable {
         case placementOverride =
             "new_window_placement_override"
         case mouse
-        case kiwihub
         case mouseResize = "mouse_resize"
         case shortcutPanel = "shortcut_panel"
         case resize
@@ -151,11 +150,6 @@ extension TilingSettings: Codable {
                 MouseSettings.self,
                 forKey: .mouse
             ) ?? MouseSettings()
-        kiwihub =
-            try container.decodeIfPresent(
-                KiwiHubSettings.self,
-                forKey: .kiwihub
-            ) ?? KiwiHubSettings()
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)

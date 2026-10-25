@@ -422,7 +422,6 @@
   "diff.label.hover_focus_delay": "Ritardo del focus a puntatore fermo",
   "diff.label.ignore_rule": "Regola di esclusione",
   "diff.label.instance": "%1$@ · %2$@",
-  "diff.label.kiwihub_key": "Tasto KiwiHub per %1$@",
   "diff.label.layer": "Livello",
   "diff.label.layers": "Livelli",
   "diff.label.min_size_override": "Personalizzazione della dimensione minima",

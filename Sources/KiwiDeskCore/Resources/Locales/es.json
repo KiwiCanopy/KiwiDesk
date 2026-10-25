@@ -422,7 +422,6 @@
   "diff.label.hover_focus_delay": "Retardo del foco al detenerse el puntero",
   "diff.label.ignore_rule": "Regla de exclusión",
   "diff.label.instance": "%1$@ · %2$@",
-  "diff.label.kiwihub_key": "Tecla de KiwiHub para %1$@",
   "diff.label.layer": "Capa",
   "diff.label.layers": "Capas",
   "diff.label.min_size_override": "Anulación de tamaño mínimo",

@@ -19,9 +19,10 @@ extension KiwiHubSide: APIChoiceType {}
 extension KiwiCore {
     /// The `kiwihub.*` verbs (#2265). `show` opens KiwiHub on a
     /// side, switches it there, or closes it when that side is
-    /// up; the GUI answers through `uiBridge`. `set_key` stores a
-    /// navigation key's alternative (#2600), which the panel reads
-    /// at each press. No window moves, so no retile.
+    /// up; the GUI answers through `uiBridge`. `set_key` sets a
+    /// navigation key's alternative (#2600), the running value as
+    /// every app-wide verb (#1741), which the panel reads at each
+    /// press. No window moves, so no retile.
     func kiwiHubCommand(
         _ command: String,
         _ args: [JSONValue]
@@ -51,7 +52,7 @@ extension KiwiCore {
         else { return CommandResponse.expected(KiwiHubKey.self) }
         let text = args.dropFirst().first?.stringValue ?? ""
         guard !text.isEmpty else {
-            tiler.settings.kiwihub.key[key] = nil
+            setAppWide(persisting: false) { $0.kiwiHubKeys[key] = nil }
             return .ok()
         }
         guard let combo = KeyCombo.parse(text),
@@ -60,11 +61,13 @@ extension KiwiCore {
         if let refusal = KiwiHubKeyRefusal.of(
             combo,
             as: key,
-            in: tiler.settings.kiwihub.key
+            in: appWide.kiwiHubKeys
         ) {
             return .fail(refusal.message)
         }
-        tiler.settings.kiwihub.key[key] = canonical
+        setAppWide(persisting: false) {
+            $0.kiwiHubKeys[key] = canonical
+        }
         return .ok()
     }
 }

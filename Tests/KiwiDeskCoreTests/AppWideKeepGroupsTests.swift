@@ -15,10 +15,18 @@ struct AppWideKeepGroupsTests {
 
     @Test("every member is one leaf of its gui.json group")
     func everyMemberIsALeaf() {
-        let settings = AppWideSettings()
+        var settings = AppWideSettings()
+        // KiwiHub's keys are one member and a leaf per key (#2600),
+        // each present only once set.
+        for key in KiwiHubKey.allCases {
+            settings.kiwiHubKeys[key] = "control+n"
+        }
         let members = Mirror(reflecting: settings).children.count
         #expect(members > 0)
-        #expect(leaves(settings.groupsJSON).count == members)
+        #expect(
+            leaves(settings.groupsJSON).count
+                == members - 1 + KiwiHubKey.allCases.count
+        )
     }
 
     @Test("a member is named by its stored key")

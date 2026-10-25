@@ -50,14 +50,6 @@ extension SettingsRevertRegister {
         .behaviour(.mouseHoverFocus): .leaf(\.settings.mouse.hoverFocus),
         .behaviour(.mouseHoverFocusDelay):
             .leaf(\.settings.mouse.hoverFocusDelayMS),
-        .behaviour(.kiwiHubKeyUp): .leaf(\.settings.kiwihub.key.up),
-        .behaviour(.kiwiHubKeyDown): .leaf(\.settings.kiwihub.key.down),
-        .behaviour(.kiwiHubKeyPageUp):
-            .leaf(\.settings.kiwihub.key.pageUp),
-        .behaviour(.kiwiHubKeyPageDown):
-            .leaf(\.settings.kiwihub.key.pageDown),
-        .behaviour(.kiwiHubKeyLeft): .leaf(\.settings.kiwihub.key.left),
-        .behaviour(.kiwiHubKeyRight): .leaf(\.settings.kiwihub.key.right),
         .borders(.borderEnabled): .leaf(\.settings.borderStyle.enabled),
         .borders(.borderFocusedColor):
             .leaf(\.settings.borderStyle.focusedColor),

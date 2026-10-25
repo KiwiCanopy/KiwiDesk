@@ -43,7 +43,6 @@ extension TilingSettings {
         try container.encode(animations, forKey: .animations)
         try container.encode(mouseResize, forKey: .mouseResize)
         try container.encode(mouse, forKey: .mouse)
-        try container.encode(kiwihub, forKey: .kiwihub)
         var gap = container.nestedContainer(
             keyedBy: GapKeys.self,
             forKey: .gap

@@ -120,7 +120,8 @@ struct ShortcutsFamilyRows {
             .`import`, .restoreDefaults, .scrollPan, .scrollLongSwipes,
             .scrollStepDistance, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
-            .focusWrap, .modeCycle, .modeCue, .hyperKey, .shortcutBase:
+            .focusWrap, .modeCycle, .modeCue, .hyperKey, .shortcutBase,
+            .kiwiHubKeys:
             return nil
         }
     }
