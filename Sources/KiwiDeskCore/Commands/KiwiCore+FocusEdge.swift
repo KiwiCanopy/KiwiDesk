@@ -38,7 +38,8 @@ extension KiwiCore {
             if let hop = hopScreens(
                 from: edge.space.id,
                 in: edge.direction,
-                band: edge.frame
+                band: edge.frame,
+                leaving: edge.focused
             ) {
                 return hop
             }
@@ -73,7 +74,12 @@ extension KiwiCore {
             let target = Navigation.neighbor(
                 from: seed,
                 in: edge.direction,
-                candidates: others
+                candidates: others,
+                tie: navigationTie(
+                    from: edge.focused,
+                    tiled: state.effectiveTiledMembers(of: edge.space),
+                    swapping: false
+                )
             )
         else { return nil }
         focusWindow(target, warp: edge.warp)
@@ -105,7 +111,12 @@ extension KiwiCore {
         guard (wrap ?? focusWrap.mode) == .allScreens,
             let band = screenFrame(of: space.id)
         else { return nil }
-        return hopTarget(from: space.id, in: direction, band: band)
+        return hopTarget(
+            from: space.id,
+            in: direction,
+            band: band,
+            leaving: nil
+        )
     }
 
     /// The hop, switched to through the one `followSwitch`, which
@@ -113,20 +124,29 @@ extension KiwiCore {
     private func hopScreens(
         from origin: SpaceID,
         in direction: Direction,
-        band: CGRect
+        band: CGRect,
+        leaving: WindowID
     ) -> CommandResponse? {
-        guard let hop = hopTarget(from: origin, in: direction, band: band)
+        guard
+            let hop = hopTarget(
+                from: origin,
+                in: direction,
+                band: band,
+                leaving: leaving
+            )
         else { return nil }
         followSwitch(to: hop.space, focusing: hop.window)
         return .ok()
     }
 
     /// The first screen in `hopOrder` whose shown Space has a window
-    /// to land on, and that window.
+    /// to land on, and that window; `leaving` is the window the
+    /// press left, nil from an empty Space.
     private func hopTarget(
         from origin: SpaceID,
         in direction: Direction,
-        band: CGRect
+        band: CGRect,
+        leaving: WindowID?
     ) -> (space: SpaceID, window: WindowID)? {
         guard let here = state.workspaces.display(of: origin)
         else { return nil }
@@ -148,7 +168,8 @@ extension KiwiCore {
                     in: space,
                     entering: direction,
                     band: band,
-                    bounds: bounds
+                    bounds: bounds,
+                    leaving: leaving
                 )
             else { continue }
             return (shown, landing)
@@ -161,12 +182,14 @@ extension KiwiCore {
     /// edge at the band's cross position — the whole screen's where
     /// the band meets none. A lens's skipped windows and a run's
     /// hidden ones are never landed on; a Space with no tiled
-    /// window offers its floats.
+    /// window offers its floats. A tie returns to the window that
+    /// held focus before `leaving` (#2619).
     func landing(
         in space: Space,
         entering direction: Direction,
         band: CGRect,
-        bounds: CGRect
+        bounds: CGRect,
+        leaving: WindowID?
     ) -> WindowID? {
         let skip = lensKeySkip() ?? { _ in false }
         let hidden = runHidden
@@ -197,7 +220,10 @@ extension KiwiCore {
             if let found = Navigation.neighbor(
                 from: seed,
                 in: direction,
-                candidates: candidates
+                candidates: candidates,
+                tie: Navigation.TieBreak(
+                    returnTo: leaving.flatMap(state.lastStep(before:))
+                )
             ) {
                 return found
             }

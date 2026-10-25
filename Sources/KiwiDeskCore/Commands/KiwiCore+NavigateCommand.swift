@@ -100,9 +100,9 @@ extension KiwiCore {
             return response
         }
         // Track spaces step in array order too (#128): within
-        // the track along the axis, across tracks on the other
-        // one — pure index math, the maintainer-preferred
-        // scrolling precedent. Nil falls through like above.
+        // the track along the axis, and across tracks to the next
+        // track's window nearest by centre (#2619). Nil falls
+        // through like above.
         if space.mode == .track,
             let response = trackStep(
                 direction,
@@ -206,7 +206,12 @@ extension KiwiCore {
             let target = Navigation.neighbor(
                 from: frame,
                 in: direction,
-                candidates: searchCandidates
+                candidates: searchCandidates,
+                tie: navigationTie(
+                    from: focused,
+                    tiled: tiled,
+                    swapping: swapping
+                )
             )
                 ?? floatTierTarget(
                     from: frame,

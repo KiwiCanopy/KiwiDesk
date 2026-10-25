@@ -14,17 +14,19 @@ public enum Navigation {
     /// Candidates must overlap the origin on the cross axis —
     /// otherwise a full-height master would jump diagonally
     /// into the stack — and lateral offset is penalized so
-    /// straight neighbors beat diagonal ones.
+    /// straight neighbors beat diagonal ones. A tie goes to
+    /// `tie` (#2619).
     public static func neighbor(
         from origin: CGRect,
         in direction: Direction,
-        candidates: [(id: WindowID, frame: CGRect)]
+        candidates: [(id: WindowID, frame: CGRect)],
+        tie: TieBreak = .none
     ) -> WindowID? {
         let originCenter = CGPoint(
             x: origin.midX,
             y: origin.midY
         )
-        var best: (id: WindowID, score: CGFloat)?
+        var scored: [Scored] = []
         for candidate in candidates {
             switch direction {
             case .left, .right:
@@ -44,26 +46,40 @@ public enum Navigation {
             let dy = center.y - originCenter.y
             let forward: CGFloat
             let lateral: CGFloat
+            let edge: CGFloat
             switch direction {
             case .left:
                 forward = -dx
                 lateral = abs(dy)
+                edge = origin.minX - candidate.frame.maxX
             case .right:
                 forward = dx
                 lateral = abs(dy)
+                edge = candidate.frame.minX - origin.maxX
             case .up:
                 forward = -dy
                 lateral = abs(dx)
+                edge = origin.minY - candidate.frame.maxY
             case .down:
                 forward = dy
                 lateral = abs(dx)
+                edge = candidate.frame.minY - origin.maxY
             }
             guard forward > 0.5 else { continue }
-            let score = forward + lateral * 2
-            if best == nil || score < best!.score {
-                best = (candidate.id, score)
-            }
+            scored.append(
+                Scored(
+                    id: candidate.id,
+                    frame: candidate.frame,
+                    score: forward + lateral * 2,
+                    edge: edge
+                )
+            )
         }
-        return best?.id
+        return settle(
+            scored,
+            origin: origin,
+            crossIsY: direction == .left || direction == .right,
+            tie: tie
+        )
     }
 }

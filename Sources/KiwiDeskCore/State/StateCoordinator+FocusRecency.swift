@@ -24,4 +24,11 @@ extension StateCoordinator {
     func focusRecencyRank(of id: WindowID) -> UInt64 {
         focusRecency[id]?.tick ?? 0
     }
+
+    /// The window that held focus last apart from `id` — where a
+    /// step to `id` came from (#2619); nil with no other stamp.
+    func lastStep(before id: WindowID) -> WindowID? {
+        focusRecency.filter { $0.key != id }
+            .max { $0.value.tick < $1.value.tick }?.key
+    }
 }
