@@ -32,7 +32,6 @@ struct ListWindowsStackingTests {
                 )
         )
         core.tiler.visibleBounds = { _ in Self.bounds }
-        core.frontStack = { [] }
         core.execute("set_mode", args: [.string("1"), .string("stack")])
         for (id, frame) in [
             (main, Self.bounds),
@@ -170,6 +169,24 @@ struct ListWindowsStackingTests {
         #expect(seen[2]?["frame"] == .null)
         #expect(seen[2]?["z"] == .null)
         #expect(seen[1]?["z"] == .number(0))
+    }
+
+    /// `visibility` is the App Bar's verdict over KiwiDesk's own
+    /// order; `z` is what macOS shows, and never feeds it.
+    @Test("An app raising a monocle's back member parts z from visibility")
+    func zNeverFeedsVisibility() throws {
+        let core = makeCore()
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("monocle")]
+        )
+        core.state.apply(.windowFocused(WindowID(1)))
+        core.frontStack = { self.listed([2, 1]) }
+        let seen = try entries(core)
+        #expect(seen[2]?["visibility"] == .string("hidden"))
+        #expect(seen[2]?["z"] == .number(0))
+        #expect(seen[1]?["visibility"] == .string("visible"))
+        #expect(seen[1]?["z"] == .number(1))
     }
 
     @Test("A window listed twice takes one rank")
