@@ -1833,6 +1833,13 @@ reaches.
   `windowPlacements` it is built on, which also judges the layouts
   no App Bar hosts — so a change to a layout's arm, the bar's or
   not, owes `ListWindowsTests` or `ListWindowsLayoutTests` a case.
+  **Its `z` is a compositor read beside the verdict, never in it
+  (#2546)**: the rank comes from the `frontStack` seam and stays
+  out of `windowPlacements` and `BarVisibility.judge`, so
+  `visibility` never reads it and the CLI and the App Bar keep one
+  verdict (`ListWindowsStackingTests`); the trade is
+  `docs/design-decisions.md` ▸ *A window's frame is reported from
+  KiwiDesk's own placement*.
 - **A bar click, menu row or drop is user motion (#804)** and
   opens `withUserMotion`; a held layout pass still refreshes the
   bars at once — state-and-layout.md ▸ Window motion says whose
