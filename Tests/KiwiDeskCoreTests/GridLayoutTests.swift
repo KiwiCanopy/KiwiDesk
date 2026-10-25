@@ -313,5 +313,7 @@ struct GridLayoutTests {
         )
         let xs = Set(frames.values.map(\.minX))
         #expect(xs.count == 1)
+        // The grid itself declines: not even one cell fits.
+        #expect(GridLayout.shape(count: 4, in: context) == nil)
     }
 }

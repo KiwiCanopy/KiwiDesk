@@ -82,6 +82,22 @@ extension KiwiCore {
             return .fail("no focused tiled window")
         }
         let horizontal = axis == "x"
+        // An auto-sized grid lays its run by floor and weight, not
+        // by column, so a press along it moves the run's own
+        // weights (#2541).
+        if shape.scrolls, context.grid.autoSize,
+            horizontal == shape.rowMajor,
+            index >= GridLayout.runStart(of: shape),
+            let response = resizeInRun(
+                window,
+                axis: axis,
+                delta: delta,
+                space: space,
+                otherAxisDivides: true
+            )
+        {
+            return response
+        }
         let cell = GridLayout.cell(index, of: shape)
         let span = horizontal ? cell.columns : cell.rows
         let across = horizontal ? cell.rows : cell.columns
@@ -153,7 +169,7 @@ extension KiwiCore {
         if delta < 0 {
             reportResizeRefusal(
                 focused: window,
-                bindingCarrier: floors[grown].carrier,
+                bindingCarrier: shown(floors[grown].carrier, cells),
                 fallbackAnchor: grownMembers.first {
                     $0 != window
                 },
@@ -165,7 +181,7 @@ extension KiwiCore {
         } else {
             reportResizeRefusal(
                 focused: window,
-                bindingCarrier: floors[neighbor].carrier,
+                bindingCarrier: shown(floors[neighbor].carrier, cells),
                 fallbackAnchor: neighborMembers.first,
                 focusedIsBinding: false,
                 axis: axis
@@ -190,6 +206,15 @@ extension KiwiCore {
         case .trailing: return trailing
         case nil: return trailing ?? leading
         }
+    }
+
+    /// `carrier` where it is drawn: a run member waiting off screen
+    /// lifts the last track (#2541) but takes no pill.
+    private func shown(
+        _ carrier: WindowID?,
+        _ cells: [WindowID: Int]
+    ) -> WindowID? {
+        carrier.flatMap { cells[$0] == nil ? nil : $0 }
     }
 
     /// The shown windows whose cell lies in `track` alone on the

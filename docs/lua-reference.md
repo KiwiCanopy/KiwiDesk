@@ -1923,7 +1923,7 @@ grid.set_split_direction("horizontal")
 **Expects:** two positive integers (columns, rows).
 
 **Does:** sets the grid's columns and rows: a rigid grid lays
-exactly these, and a dynamic grid balances up to them.
+these, and a dynamic grid balances up to them.
 
 :::unreleased
 The columns and rows are a limit: where a cell would fall under
@@ -1946,13 +1946,9 @@ grid.set_dimensions(3, 2)
 **Does:** when true, derives the grid's dimensions from the
 screen over the typed `columns`/`rows`. It caps a dynamic grid
 and fixes a rigid one alike. Windows past the resulting
-capacity cascade in the last cell.
-
-:::unreleased
-Windows past the resulting capacity scroll through the last
-track instead
-([When windows no longer fit](#when-windows-no-longer-fit)).
-:::
+capacity overflow as
+[When windows no longer fit](#when-windows-no-longer-fit)
+describes.
 
 The grid takes as many columns as fit at Grid's minimum window
 width and as many rows as fit at its minimum height

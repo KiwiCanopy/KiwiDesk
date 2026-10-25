@@ -189,17 +189,20 @@ struct GridSchematic: View {
     private var rigidCaption: String {
         if autoSize {
             return L(
-                "layout.schematic.grid.caption_rigid_auto",
+                "layout.schematic.grid.caption_rigid_auto_scroll",
                 "A fixed grid sized to your screen (about %1$d × "
-                    + "%2$d); each window shrinks to a cell.",
+                    + "%2$d); each window shrinks to a cell, windows "
+                    + "past that wait off screen, and moving focus "
+                    + "scrolls them in.",
                 LayoutSchematic.gridAutoSizeCap.columns,
                 LayoutSchematic.gridAutoSizeCap.rows
             )
         }
         return L(
-            "layout.schematic.grid.caption_rigid_scroll",
-            "A grid of up to %1$d × %2$d; each window shrinks to a "
-                + "cell, and moving focus scrolls the rest in.",
+            "layout.schematic.grid.caption_rigid_limit",
+            "A fixed grid of up to %1$d × %2$d; each window shrinks "
+                + "to a cell, windows past that wait off screen, and "
+                + "moving focus scrolls them in.",
             cap.columns,
             cap.rows
         )

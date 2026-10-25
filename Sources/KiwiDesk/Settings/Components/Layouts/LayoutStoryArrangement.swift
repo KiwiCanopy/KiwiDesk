@@ -62,9 +62,10 @@ enum LayoutStoryArrangement {
     }
 
     /// The most windows, up to `ruled`, that `mode` lays out
-    /// under `settings` without piling any: a story rests there,
-    /// so a layout tuned to fit fewer (a 2 × 1 grid) tells its
-    /// arrival within what it fits rather than onto a pile.
+    /// under `settings` all on its canvas and none over another: a
+    /// story rests there, so a layout tuned to fit fewer (a 2 × 1
+    /// grid) tells its arrival within what it fits rather than
+    /// with windows waiting off screen (#2541) or piled.
     static func fitting(
         _ mode: LayoutMode,
         settings: TilingSettings,
@@ -83,6 +84,11 @@ enum LayoutStoryArrangement {
                     frames(mode, settings: settings, count: count, in: canvas)
                         .values
                 )
+                let bounds = CGRect(origin: .zero, size: canvas)
+                    .insetBy(dx: -0.5, dy: -0.5)
+                guard rects.allSatisfy({ bounds.contains($0) }) else {
+                    return false
+                }
                 return !rects.indices.contains { i in
                     rects.indices.contains { j in
                         j > i

@@ -153,7 +153,7 @@ struct LayoutSchematicCapacityTests {
             if case .scrolled(_, let n) = cell.kind { return n }
             return nil
         }
-        #expect(run.count == schematic.lineLength)
+        #expect(run.count == schematic.dims.columns)
         #expect(run.reduce(0, +) == schematic.hiddenCount)
         #expect(cells.count + run.reduce(0, +) == schematic.ids.count)
         for cell in cells {
@@ -202,6 +202,51 @@ struct LayoutSchematicCapacityTests {
         )
         #expect(!auto.caption.contains("5 × 3"))
     }
+
+    /// The incoming window takes the focus, so the run ends at it
+    /// (`.last`) or starts at it (`.afterFocused` at the run's
+    /// first cell), and the windows beyond are counted on the end
+    /// they wait at (#2541).
+    @Test("the incoming window scrolls in, counted from its ends")
+    func incomingWindowScrollsIn() {
+        func run(
+            _ placement: SpawnPlacement
+        ) -> [(TileKindName, Int)] {
+            let schematic = GridSchematic(
+                columns: 2,
+                rows: 2,
+                type: .rigid,
+                fillEmptyCells: false,
+                autoSize: false,
+                splitDirection: .horizontal,
+                placement: placement,
+                windows: 12
+            )
+            return schematic.gridCells(
+                CGSize(width: 600, height: 228),
+                cols: schematic.dims.columns,
+                rows: schematic.dims.rows,
+                ids: schematic.ids
+            ).compactMap { cell in
+                guard case .scrolled(let tile, let n) = cell.kind
+                else { return nil }
+                return (tile == .new ? .new : .other, n)
+            }
+        }
+        // Eleven windows and the new one: 12 - 4 cells wait.
+        let last = run(.last)
+        #expect(last.count == 2)
+        #expect(last.last?.0 == .new)
+        #expect(last.first?.1 == 8)
+        #expect(last.last?.1 == 0)
+        let after = run(.afterFocused)
+        #expect(after.count == 2)
+        #expect(after.first?.0 == .new)
+        #expect(after.first?.1 == 0)
+        #expect(after.last?.1 == 8)
+    }
+
+    private enum TileKindName { case new, other }
 
     /// A rows-first grid fills down its columns and scrolls its
     /// LAST COLUMN, along the fill order like the engine (#2541).

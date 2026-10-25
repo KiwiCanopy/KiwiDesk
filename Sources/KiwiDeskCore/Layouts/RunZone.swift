@@ -12,7 +12,9 @@ public struct RunZone: Sendable, Equatable {
     public let vertical: Bool
     /// Fixed cells the run shows, in drawn order — a fixed Grid's
     /// last track (#2541): at most this many windows, each in its
-    /// cell. Nil sizes the run from its members' floors alone.
+    /// cell only where its floor fits that cell, else the run lays
+    /// them by floor and weight. Nil sizes the run from its
+    /// members' floors alone.
     public let slots: [CGRect]?
 
     public init(
@@ -67,7 +69,7 @@ public struct RunZone: Sendable, Equatable {
             )
         }
         let rects =
-            cellRects(run)
+            cellRects(run, in: context)
             ?? run.frames(
                 floors: plan.floors,
                 weights: plan.weights,
@@ -95,10 +97,18 @@ public struct RunZone: Sendable, Equatable {
 
     /// The fixed cells as the run's frames, a hidden member handed
     /// the edge cell it waits beyond; nil unless every cell is
-    /// filled — a floor too wide for its cell shows fewer.
-    private func cellRects(_ run: ZoneRun) -> [CGRect]? {
+    /// filled by a window whose floor fits it — the cells' lengths
+    /// differ once a column is lifted or resized (#763).
+    private func cellRects(
+        _ run: ZoneRun,
+        in context: LayoutContext
+    ) -> [CGRect]? {
         guard let slots, let first = slots.first, let last = slots.last,
-            run.visible.count == slots.count
+            run.visible.count == slots.count,
+            zip(run.visible, slots).allSatisfy({ index, slot in
+                context.runFloor(of: members[index], horizontal: !vertical)
+                    <= (vertical ? slot.height : slot.width)
+            })
         else { return nil }
         return members.indices.map { index in
             if index < run.visible.lowerBound { return first }

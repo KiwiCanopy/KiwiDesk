@@ -66,7 +66,11 @@ extension GridSchematic {
         capacity: Int,
         cell: (Int) -> CGRect
     ) -> [(rect: CGRect, kind: CellKind)] {
-        let start = capacity - lineLength
+        let start = GridLayout.runStart(
+            columns: dims.columns,
+            rows: dims.rows,
+            rowMajor: columnsFirst
+        )
         var cells = ids.prefix(start).enumerated().map {
             (rect: cell($0.offset), kind: CellKind.window(kind($0.element)))
         }

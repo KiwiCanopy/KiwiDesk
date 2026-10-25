@@ -420,9 +420,10 @@ synonym:
   right now. `stack.set_master_count` is a retained exception —
   the user names how many windows are masters, and it shipped
   that way. Grid's `columns`/`rows` (`grid.set_dimensions`) are
-  a second: a limit since #2541, kept on the wire because a
-  dynamic grid already read them as one, and labelled *Column
-  limit* / *Row limit*, never a bare count. A **span** is a
+  a second: a limit since #2541 whose wire names stay (the ruling
+  is `docs/design-decisions.md` ▸ A full Grid scrolls its overflow
+  through its last track); label them as limits — *Column limit*
+  / *Row limit* — never as a bare count. A **span** is a
   count shown around a focus, where an end of the row shows one
   more (`space_bar.set_glyph_span`, #1528) — a cap it is not,
   since nothing stops at it.

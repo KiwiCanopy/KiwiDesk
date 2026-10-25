@@ -1,12 +1,12 @@
 import Foundation
 
-/// Persists where the shown Spaces' scrolled Stack zones and Track
-/// tracks rest (#2235), the `ScrollRest` loop's twin: the layout
+/// Persists where the shown Spaces' scrolled runs rest (#2235,
+/// #2541), the `ScrollRest` loop's twin: the layout
 /// reads `Space.runHeads` and this writes back the heads the pass
 /// drew, read off the engine's own record of it.
 extension KiwiCore {
-    /// The cover the active Space drew in the last retile, nil off
-    /// Stack and Track.
+    /// The cover the active Space drew in the last retile, nil for
+    /// a layout that scrolls no run.
     var activeRunCover: RunCover? {
         state.workspaces.activeSpace.flatMap { tiler.runCovers[$0] }
     }

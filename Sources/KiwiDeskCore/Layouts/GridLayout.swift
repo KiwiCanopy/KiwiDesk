@@ -86,21 +86,7 @@ public struct GridLayout: LayoutSystem {
                 minSize: context.minWindowSize
             )
         }
-        let tracks = Self.trackLengths(
-            windows: windows,
-            shape: shape,
-            context: context
-        )
-        let cells = Self.cellFrames(
-            count: shape.cells,
-            widths: tracks.widths,
-            heights: tracks.heights,
-            in: context.usable,
-            gapH: context.gaps.inner.horizontal,
-            gapV: context.gaps.inner.vertical,
-            rowMajor: shape.rowMajor,
-            fillLast: shape.fillLast
-        )
+        let cells = Self.cells(for: windows, shape: shape, in: context)
         guard shape.scrolls else {
             return Dictionary(
                 uniqueKeysWithValues: zip(windows, cells)

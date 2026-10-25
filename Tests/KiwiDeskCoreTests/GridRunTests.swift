@@ -6,6 +6,14 @@ import Testing
 private let ids = (1...9).map { WindowID(UInt32($0)) }
 private let screen = CGRect(x: 0, y: 0, width: 1920, height: 1080)
 
+/// A corroborated learned floor of `span` (two refused asks).
+private func floor(_ span: CGFloat) -> [EffectiveSizeBound.Axis] {
+    [
+        .init(asked: 250, answered: span),
+        .init(asked: 200, answered: span),
+    ]
+}
+
 @MainActor
 private func isParked(_ frame: CGRect?) -> Bool {
     guard let frame else { return false }
@@ -61,7 +69,7 @@ struct GridRunTests {
         let ctx = context(focused: ids[8])
         let frames = GridLayout().calculateGeometry(for: ids, in: ctx)
         let last = try #require(frames[ids[8]])
-        #expect(abs(last.maxX - 1910) < 0.01)
+        #expect(abs(last.maxX - ctx.usable.maxX) < 0.01)
         #expect(isParked(frames[ids[3]]))
         #expect(isParked(frames[ids[5]]))
         #expect(!isParked(frames[ids[6]]))
@@ -101,34 +109,69 @@ struct GridRunTests {
     func typedColumnsAreALimit() throws {
         let ctx = context(columns: 9, rows: 9)
         let shape = try #require(GridLayout.shape(count: 9, in: ctx))
-        // floor(1900 / 310) = 6 columns, floor(1060 / 310) = 3.
-        #expect(shape.columns == 6)
-        #expect(shape.rows == 3)
+        let fit = { (span: CGFloat) in
+            Int((span / (300 + 10)).rounded(.down))
+        }
+        #expect(ctx.minWindowSize == 300)
+        #expect(shape.columns == fit(ctx.usable.width))
+        #expect(shape.rows == fit(ctx.usable.height))
+        #expect(shape.columns < 9 && shape.rows < 9)
     }
 
     @Test("An auto-sized last track shows as many as fit")
     func autoSizeRunsByFloor() throws {
-        // Auto-size: 6 × 3 cells at 300 pt; 20 windows overflow.
+        // Auto-size: 6 x 3 cells at 300 pt; 20 windows overflow.
+        let ctx = context(autoSize: true)
         let many = (1...20).map { WindowID(UInt32($0)) }
         let auto = try #require(
-            GridLayout.zones(for: many, in: context(autoSize: true))?
-                .first
+            GridLayout.zones(for: many, in: ctx)?.first
         )
         #expect(auto.slots == nil)
+        let run = try #require(auto.run(in: ctx))
+        // As many 300 pt floors as the row holds with its gaps.
+        let fits = Int(((ctx.usable.width + 10) / 310).rounded(.down))
+        #expect(run.visible.count == fits)
         let fixed = try #require(
             GridLayout.zones(for: ids, in: context())?.first
         )
         #expect(fixed.slots?.count == 3)
     }
 
+    @Test("Last-row cells line up with resized columns")
+    func cellsFollowTheColumns() throws {
+        var ctx = context()
+        ctx.grid.columnWeights = [2, 1, 1]
+        let frames = GridLayout().calculateGeometry(for: ids, in: ctx)
+        for column in 0..<3 {
+            let top = try #require(frames[ids[column]])
+            let below = try #require(frames[ids[column + 3]])
+            #expect(abs(top.minX - below.minX) < 0.01)
+            #expect(abs(top.width - below.width) < 0.01)
+        }
+    }
+
+    @Test("A floor wider than its cell lays the run by floor")
+    func floorWiderThanItsCell() throws {
+        var ctx = context()
+        ctx.grid.columnWeights = [2, 1, 1]
+        // Column 2 draws about 470 pt; 550 is under the equal share.
+        ctx.sizeBounds = [ids[4]: EffectiveSizeBound(width: floor(550))]
+        let frames = GridLayout().calculateGeometry(for: ids, in: ctx)
+        let wide = try #require(frames[ids[4]])
+        #expect(wide.width >= 550)
+        let above = try #require(frames[ids[1]])
+        #expect(above.width < 550)
+    }
+
     @Test("A hidden member's floor lifts the last row's height")
     func hiddenFloorLiftsTheRow() throws {
         var ctx = context()
         ctx.sizeBounds = [
-            ids[8]: EffectiveSizeBound(height: [
-                .init(asked: 520, answered: 700),
-                .init(asked: 400, answered: 700),
-            ])
+            ids[8]: EffectiveSizeBound(
+                width: floor(700),
+                height: floor(700)
+            ),
+            ids[4]: EffectiveSizeBound(width: floor(700)),
         ]
         let shape = try #require(GridLayout.shape(count: 9, in: ctx))
         let floors = GridLayout.trackFloors(
@@ -147,6 +190,15 @@ struct GridRunTests {
             context: ctx
         )
         #expect(columns.allSatisfy { $0.carrier == nil })
+        // Control: a window in the rows above lifts its own.
+        ctx.sizeBounds[ids[1]] = EffectiveSizeBound(width: floor(700))
+        let lifted = GridLayout.trackFloors(
+            windows: ids,
+            shape: shape,
+            horizontal: true,
+            context: ctx
+        )
+        #expect(lifted[1].carrier == ids[1])
     }
 
     @Test("A resize finds a shown run member's cell, not a hidden one")

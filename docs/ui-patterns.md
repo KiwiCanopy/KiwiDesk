@@ -1014,7 +1014,7 @@ fields the toggle gates**:
   "Auto font size" over **Font size**, "Auto track limit" over
   **Track limit**. The pair reads top-to-bottom.
 - **A gate over a *set* of fields → verb + object** naming the
-  composite: **"Auto-size grid"** gates Columns *and* Rows, so
+  composite: **"Auto-size grid"** gates Column limit *and* Row limit, so
   no single field name exists — "Auto grid size" would name a
   field that appears on no row. Do not "fix" it into the first
   shape.
@@ -1259,7 +1259,7 @@ control shares their shape.
 
 **Inapplicable controls are greyed, not hidden.** When a
 setting makes another control inert — Auto-size grid overrides
-the Columns/Rows steppers (#171), Auto track limit overrides the
+the Column limit / Row limit steppers (#171), Auto track limit overrides the
 Track limit stepper (#178), Fill empty cells does nothing in a
 rigid grid, the scroll-duration row is dead when Animate focus
 shifts is off, the bars' Content picker is inert on a vertical

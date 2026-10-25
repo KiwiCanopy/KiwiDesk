@@ -20,17 +20,19 @@ public enum SplitOverflow {
         frames: [WindowID: CGRect],
         context: LayoutContext
     ) -> [WindowID: CGRect] {
-        switch mode {
-        case .bsp, .stack:
-            return inward(
-                frames,
-                in: context.usable,
-                bounds: context.sizeBounds,
-                generalizing: !context.probesBeyondBounds
-            )
-        default:
-            return frames
-        }
+        guard movesInward(mode) else { return frames }
+        return inward(
+            frames,
+            in: context.usable,
+            bounds: context.sizeBounds,
+            generalizing: !context.probesBeyondBounds
+        )
+    }
+
+    /// Whether a pass for `mode` takes the inward post-pass — the
+    /// question a scrolled run's park keep asks too (#2235).
+    public static func movesInward(_ mode: LayoutMode) -> Bool {
+        mode == .bsp || mode == .stack
     }
 
     /// `frames` with every floor-bound slot widened to the span

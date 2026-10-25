@@ -152,8 +152,15 @@ a grid column or row is drawn at least as long as Grid's
 sits in it alone, taking the room from the other tracks by their
 weights. So the split-layout row's "a Grid cell" means only a
 cell that spans several tracks — the last cell of a short row
-under `fill_empty_cells`, or the overflow pile — and KiwiDesk's
-own Settings window widens its grid column like any other app.
+under `fill_empty_cells` — and KiwiDesk's own Settings window
+widens its grid column like any other app.
+
+:::unreleased
+A Grid's scrolling last track instead takes, across its scroll
+axis, the largest learned minimum of every member, hidden ones
+included, and its members lift no column or row along it
+([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
+:::
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
 
@@ -231,8 +238,9 @@ the move is the app's.
 :::
 
 :::unreleased
-A Stack zone or Track track — the overflow track included —
-whose windows do not all fit at their minimums, an app's own
+A Stack zone, a Track track — the overflow track included — or
+a Grid's last track (#2541), whose windows do not all fit at
+their minimums, an app's own
 learned minimum among them, shows only the windows that do
 ([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
 Each hidden window waits off screen, parked at the screen's
