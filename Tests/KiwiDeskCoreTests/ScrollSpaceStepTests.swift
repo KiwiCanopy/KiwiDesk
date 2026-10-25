@@ -7,7 +7,8 @@ import Testing
 
 /// ⌃⌥⌘ + scroll (#1519, rulings 2026-09-28/29): one Space per
 /// swipe or wheel notch, in the Space order of the screen under the
-/// pointer, stopping at the ends, never warping — and a spinning
+/// pointer, wrapping past the ends unless Wrap focus is Off, never
+/// warping — and a spinning
 /// wheel steps once (`ScrollStepMeterTests`).
 @Suite("Scroll Space step gesture", .serialized)
 @MainActor

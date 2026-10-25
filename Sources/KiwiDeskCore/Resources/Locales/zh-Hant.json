@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "搜尋快速鍵",
   "shortcuts.focus_wrap": "焦點循環",
   "shortcuts.focus_wrap.all_screens": "所有螢幕",
-  "shortcuts.focus_wrap.help": "%1$@：越過最後一個視窗後，焦點回到同一螢幕上的第一個視窗。%2$@：焦點繼續移到下一個螢幕，越過最後一個螢幕後回到第一個。只有一個螢幕時，兩者效果相同。無論哪種方式，下一個／上一個空間的快速鍵都會在該螢幕的空間之間循環；選擇%3$@時，則停在最後一個。",
+  "shortcuts.focus_wrap.help": "%1$@：越過最後一個視窗後，焦點回到同一螢幕上的第一個視窗。%2$@：焦點繼續移到下一個螢幕，越過最後一個螢幕後回到第一個。只有一個螢幕時，兩者效果相同。無論哪種方式，下一個／上一個空間的快速鍵都會在該螢幕的空間之間循環；選擇「%3$@」時，則停在最後一個。",
   "shortcuts.focus_wrap.off": "關閉",
   "shortcuts.focus_wrap.this_screen": "此螢幕",
   "shortcuts.fold.focus_directions": "聚焦左側、下方、上方、右側的視窗",

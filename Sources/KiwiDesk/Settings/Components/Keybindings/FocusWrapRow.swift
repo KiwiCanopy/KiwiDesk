@@ -71,7 +71,7 @@ enum FocusWrapWords {
                 + "screen, and past the last screen back to the first. "
                 + "With one screen, both work the same. Either way, the "
                 + "next and previous Space keys go round the screen's "
-                + "Spaces, and %3$@ stops them at the last one.",
+                + "Spaces, and “%3$@” stops them at the last one.",
             value(.thisScreen),
             value(.allScreens),
             value(.off)

@@ -20,7 +20,11 @@ struct SpaceWrapWiringTests {
     @Test("the step is handed from the key to the slide")
     func stepReachesTheSlide() throws {
         let step = try Self.squashed("App/KiwiCore+ScrollSpaceStep.swift")
-        #expect(step.contains("warp:warp,step:step)"))
+        // Blind to a shadowed `step`, as any needle is; the
+        // behaviour is `SpaceWrapTests`'.
+        #expect(
+            step.contains("switchSpace(to:order[next],warp:warp,step:step)")
+        )
         let switchBody = try Self.squashed(
             "Commands/KiwiCore+SpaceSwitch.swift"
         )

@@ -1887,7 +1887,7 @@
   "shortcuts.field.label": "Search shortcuts",
   "shortcuts.focus_wrap": "Wrap focus",
   "shortcuts.focus_wrap.all_screens": "All screens",
-  "shortcuts.focus_wrap.help": "%1$@: past the last window, focus returns to the first on the same screen. %2$@: it continues to the next screen, and past the last screen back to the first. With one screen, both work the same. Either way, the next and previous Space keys go round the screen's Spaces, and %3$@ stops them at the last one.",
+  "shortcuts.focus_wrap.help": "%1$@: past the last window, focus returns to the first on the same screen. %2$@: it continues to the next screen, and past the last screen back to the first. With one screen, both work the same. Either way, the next and previous Space keys go round the screen's Spaces, and “%3$@” stops them at the last one.",
   "shortcuts.focus_wrap.off": "Off",
   "shortcuts.focus_wrap.this_screen": "This screen",
   "shortcuts.fold.focus_directions": "Focus window left, down, up, right",

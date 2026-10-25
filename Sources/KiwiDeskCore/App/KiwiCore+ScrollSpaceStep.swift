@@ -76,7 +76,9 @@ extension KiwiCore {
         else { return false }
         var next = index + step
         if !order.indices.contains(next) {
-            guard focusWrap.mode != .off, order.count > 1 else {
+            guard focusWrap.mode.withinScreen == .thisScreen,
+                order.count > 1
+            else {
                 bumpAtSpaceEnd(step, on: display)
                 return false
             }

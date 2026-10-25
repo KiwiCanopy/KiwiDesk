@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "단축키 검색",
   "shortcuts.focus_wrap": "포커스 루프",
   "shortcuts.focus_wrap.all_screens": "모든 화면",
-  "shortcuts.focus_wrap.help": "%1$@: 마지막 윈도우를 지나면 같은 화면의 첫 번째 윈도우로 포커스가 돌아갑니다. %2$@: 다음 화면으로 이어지고, 마지막 화면을 지나면 첫 번째 화면으로 돌아갑니다. 화면이 하나이면 두 옵션이 동일하게 작동합니다. 어느 경우든 다음/이전 공간으로 이동하는 단축키는 그 화면의 공간을 순환하며, %3$@ 상태에서는 마지막 공간에서 멈춥니다.",
+  "shortcuts.focus_wrap.help": "%1$@: 마지막 윈도우를 지나면 같은 화면의 첫 번째 윈도우로 포커스가 돌아갑니다. %2$@: 다음 화면으로 이어지고, 마지막 화면을 지나면 첫 번째 화면으로 돌아갑니다. 화면이 하나이면 두 옵션이 동일하게 작동합니다. 어느 경우든 다음/이전 공간으로 이동하는 단축키는 그 화면의 공간을 순환하며, ‘%3$@’ 상태에서는 마지막 공간에서 멈춥니다.",
   "shortcuts.focus_wrap.off": "끔",
   "shortcuts.focus_wrap.this_screen": "이 화면",
   "shortcuts.fold.focus_directions": "왼쪽, 아래, 위, 오른쪽 윈도우에 포커스",

@@ -756,7 +756,14 @@ editing here:
   the switch activates (`SpaceSlideSwitchTests` ▸
   `onlyNavigationPlays` holds the display follow; boot, wake and
   a restore pass none through `spaceSwitchRetile`'s nil default,
-  which review holds). The Space cue (#2143) rides the same
+  which review holds). A switch a Space STEP made hands its step
+  to the intent (`switchSpace(to:warp:step:)`), and the slide
+  reads its direction through `SpaceSlideIntent.direction` alone,
+  so a wrap slides in the key's direction (#2592,
+  `SpaceWrapWiringTests` ▸ `stepReachesTheSlide`, `SpaceWrapTests`
+  ▸ `slideFollowsTheKey`); a new step-made door that omits the
+  step slides a wrap backward, which the nil default compiles.
+  The Space cue (#2143) rides the same
   intent: `spaceSwitchRetile` is its one payer, where no slide
   ran, and the slide and the cue ask the one
   `drawnSpaceTransition` — the one Core reader of the stored

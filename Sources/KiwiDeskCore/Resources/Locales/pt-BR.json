@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "Buscar atalhos",
   "shortcuts.focus_wrap": "Foco circular",
   "shortcuts.focus_wrap.all_screens": "Todas as telas",
-  "shortcuts.focus_wrap.help": "%1$@: depois da última janela, o foco volta à primeira na mesma tela. %2$@: ele continua na próxima tela e, depois da última tela, volta à primeira. Com uma só tela, as duas opções funcionam igual. Em ambos os casos, os atalhos de espaço seguinte e anterior percorrem em ciclo os espaços da tela, e %3$@ os para no último.",
+  "shortcuts.focus_wrap.help": "%1$@: depois da última janela, o foco volta à primeira na mesma tela. %2$@: ele continua na próxima tela e, depois da última tela, volta à primeira. Com uma só tela, as duas opções funcionam igual. Em ambos os casos, os atalhos de espaço seguinte e anterior percorrem em ciclo os espaços da tela, e com “%3$@” eles param no último.",
   "shortcuts.focus_wrap.off": "Desativado",
   "shortcuts.focus_wrap.this_screen": "Esta tela",
   "shortcuts.fold.focus_directions": "Focar a janela à esquerda, abaixo, acima, à direita",

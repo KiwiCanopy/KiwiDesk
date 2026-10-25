@@ -260,7 +260,8 @@ Past the last Space it wraps to the first, and past the first to
 the last, on the same screen — never onto another one. With
 [Wrap focus](#set_focus_wrap) `off` it stops there instead: the
 focused window's ring bumps toward the step, as at the end of a
-row, and nothing switches. A wrap slides in the key's direction.
+row, and nothing switches. A screen with one Space stops there
+too. A wrap slides in the key's direction.
 :::
 
 Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
@@ -1076,9 +1077,8 @@ crossing like any
 
 It also decides whether
 [`focus_space_previous` / `focus_space_next`](#focus_space_previous--focus_space_next)
-and the ⌃⌥⌘ + scroll step wrap: under `this_screen` and
-`all_screens` they go round the focused screen's Spaces alone,
-and under `off` they stop at its first and last Space.
+and the ⌃⌥⌘ + scroll step wrap at a screen's first and last
+Space.
 
 It is stored like the Space history: `focus_wrap` in `gui.json`
 is the value every profile uses, and a profile may keep its own,

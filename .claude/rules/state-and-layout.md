@@ -2410,6 +2410,13 @@ neither wraps nor crosses screens itself, leaving both to
 `Navigation.neighbor` from `ScreenHop.entrySeed`, never a search of
 their own, and the screens are tried in `ScreenHop.hopOrder`
 (`FocusWrapTests`, `FocusWrapScreensTests`, `ScreenHopOrderTests`).
+**A Space step past its screen's last Space answers the same
+setting through `stepSpace` alone (#2592)**, read `withinScreen`,
+never a reading of its own: it wraps round that screen's order,
+never onto another screen, and under Off stops with the bump; a
+new Space-step door calls `stepSpace` rather than spelling the
+wrap (`SpaceWrapTests` ▸ `wrapsOnTheScreen`, `ScrollSpaceStepTests`
+▸ `wrapsAtTheEnds`).
 **A keyboard-made Space switch or follow that can move focus onto
 another screen — `switchSpace`, `followSwitch`, `handFollowFocus`,
 the AX focus follow's landing — hands the pointer over through

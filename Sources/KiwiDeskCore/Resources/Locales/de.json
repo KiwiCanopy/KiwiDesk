@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "Tastenkürzel suchen",
   "shortcuts.focus_wrap": "Fokus umlaufen lassen",
   "shortcuts.focus_wrap.all_screens": "Alle Bildschirme",
-  "shortcuts.focus_wrap.help": "%1$@: Nach dem letzten Fenster springt der Fokus zurück zum ersten auf demselben Bildschirm. %2$@: Er geht weiter zum nächsten Bildschirm und nach dem letzten Bildschirm zurück zum ersten. Mit einem Bildschirm verhalten sich beide gleich. In beiden Fällen laufen die Tastenkürzel für den nächsten und vorherigen Space reihum durch die Spaces des Bildschirms, und %3$@ hält sie beim letzten an.",
+  "shortcuts.focus_wrap.help": "%1$@: Nach dem letzten Fenster springt der Fokus zurück zum ersten auf demselben Bildschirm. %2$@: Er geht weiter zum nächsten Bildschirm und nach dem letzten Bildschirm zurück zum ersten. Mit einem Bildschirm verhalten sich beide gleich. In beiden Fällen laufen die Tastenkürzel für den nächsten und vorherigen Space reihum durch die Spaces des Bildschirms, und bei „%3$@“ halten sie beim letzten an.",
   "shortcuts.focus_wrap.off": "Aus",
   "shortcuts.focus_wrap.this_screen": "Dieser Bildschirm",
   "shortcuts.fold.focus_directions": "Fenster links, unten, oben, rechts fokussieren",
