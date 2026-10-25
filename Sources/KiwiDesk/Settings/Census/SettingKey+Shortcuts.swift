@@ -50,7 +50,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case hyperKey = "appWide.hyperKey"
     /// KiwiHub's navigation key alternatives (#2600): app-wide,
     /// Lua-only.
-    case kiwiHubKeys = "appWide.kiwiHubKeys"
+    case kiwiHubNavigationKeys = "appWide.kiwiHubKeys"
     /// The "Shortcuts use" switch's base (#2460), drafted with the
     /// layers it moves.
     case shortcutBase = "config.shortcutBase"
@@ -84,7 +84,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
 extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
-        case .kiwiHubKeys:
+        case .kiwiHubNavigationKeys:
             return .luaOnly
         case .layers, .layersIcon, .layersReach, .switchToLayer:
             // Surfaces at rest when configured layers exist.
@@ -195,7 +195,7 @@ extension ShortcutsKey {
 extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
-        case .kiwiHubKeys:
+        case .kiwiHubNavigationKeys:
             return .none
         case .layers, .openApplications, .advanced, .focusDir,
             .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,

@@ -152,4 +152,29 @@ struct KiwiHubKeyTests {
         )
         #expect(back.appWide?.kiwiHubKeys == KiwiHubKeys())
     }
+
+    @Test("a Lua-owned reload reads the keys init.lua sets now")
+    func luaReloadReadsTheFile() throws {
+        let core = core()
+        let write = { (lua: String) in
+            try FileManager.default.createDirectory(
+                at: core.configURL.deletingLastPathComponent(),
+                withIntermediateDirectories: true
+            )
+            try lua.write(
+                to: core.configURL,
+                atomically: true,
+                encoding: .utf8
+            )
+            core.loadConfig()
+        }
+        try write("kiwihub.set_key(\"down\", \"ctrl+n\")\n")
+        #expect(!core.isGuiManaged)
+        #expect(core.appWide.kiwiHubKeys.down == "control+n")
+        try write("kiwihub.set_key(\"up\", \"ctrl+n\")\n")
+        #expect(core.appWide.kiwiHubKeys.up == "control+n")
+        #expect(core.appWide.kiwiHubKeys.down == nil)
+        try write("-- no keys\n")
+        #expect(core.appWide.kiwiHubKeys == KiwiHubKeys())
+    }
 }

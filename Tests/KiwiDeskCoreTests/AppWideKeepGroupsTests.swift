@@ -5,8 +5,9 @@ import Testing
 
 /// The keep document's `app_wide` root names each value by its
 /// `gui.json` group and key (#1685): every stored member of
-/// `AppWideSettings` is one leaf there, so a member added without
-/// its group reds the count.
+/// `AppWideSettings` reaches its group — one leaf, or one per field
+/// for KiwiHub's keys (#2600) — so a member added without its group
+/// reds the count.
 @Suite("App-wide keep groups")
 struct AppWideKeepGroupsTests {
     private func leaves(_ value: JSONValue) -> [[String]] {

@@ -58,6 +58,9 @@ extension KiwiCore {
             // The change only owes a deferred remap, so `init.lua`
             // setting it again remaps nothing in between (#1870).
             appWideLedger.live.hyperKey = nil
+            // KiwiHub's keys likewise (#2600): a line moved or
+            // removed reads as written, not as the last load left it.
+            appWideLedger.live.kiwiHubKeys = KiwiHubKeys()
             return
         }
         guard let config = guiConfigStore.load() else { return }
