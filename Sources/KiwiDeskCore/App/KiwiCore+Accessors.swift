@@ -44,6 +44,13 @@ extension KiwiCore {
         set { spaceBars.onLiveOnlyChange = newValue }
     }
 
+    /// The live settings after a write that changed them, by any
+    /// door — a command, Lua, a profile apply (#2604).
+    public var onSettingsChange: @MainActor (TilingSettings) -> Void {
+        get { tiler.onSettingsChange }
+        set { tiler.onSettingsChange = newValue }
+    }
+
     public var activeSpace: Space? {
         state.workspaces.activeSpace.flatMap {
             state.workspaces[$0]

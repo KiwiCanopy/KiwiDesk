@@ -37,6 +37,11 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         self.core = core
         handBack = PanelHandBack(core: core)
         super.init()
+        // The open panel repaints on a CLI or Lua look change as
+        // the bars do (#2604); this is the hook's one consumer.
+        core.onSettingsChange = { [weak self] in
+            self?.currentModel?.settings = $0
+        }
     }
 
     /// Up and not leaving: a toggle during the exit fade opens a
@@ -93,19 +98,17 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             modifiers: NSEvent.modifierFlags
         )
         model.chords = liveChords()
+        model.settings = core.tiler.settings
         let panel = self.panel ?? makePanel()
         self.panel = panel
         self.currentModel = model
         let presence = PanelPresence()
         self.presence = presence
         wire(model, panel)
-        let glass = core.tiler.settings.shortcutPanelLiquidGlass
         let width = Self.width(visibleWidth: area.width)
         if scope != .windows { model.setScope(scope) }
         let root = JumpPanelView(
             model: model,
-            settings: core.tiler.settings,
-            liquidGlass: glass,
             presence: presence,
             width: width
         )

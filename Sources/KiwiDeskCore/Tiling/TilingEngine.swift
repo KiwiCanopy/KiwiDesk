@@ -34,12 +34,15 @@ public final class TilingEngine {
             if settings.mouse != oldValue.mouse {
                 onMouseSettings?(settings.mouse)
             }
+            if settings != oldValue { onSettingsChange(settings) }
         }
     }
 
     /// Told when `settings.mouse` changes, by whichever write —
     /// the pointer rest's switch rides it (#1869).
     var onMouseSettings: (@MainActor (MouseSettings) -> Void)?
+    /// Told when the settings change, by whichever write (#2604).
+    var onSettingsChange: @MainActor (TilingSettings) -> Void = { _ in }
 
     /// Applies frames off the main thread with frame-dropping
     /// and per-app EnhancedUserInterface toggling. Internal,
