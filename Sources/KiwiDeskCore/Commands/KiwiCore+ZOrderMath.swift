@@ -48,11 +48,9 @@ extension KiwiCore {
     /// Raise order for a cascading region: ascending `minY` —
     /// piles always cascade downward, so the most-buried
     /// (topmost) frame raises first and each later raise lands
-    /// on top of it. Frame order, not array order: the render
-    /// can reorder a pile (`OverlapStack.stickyExempt`, #414
-    /// v2), and raising in array order would bury the displaced
-    /// window's title bar under the promoted sticky's full
-    /// slot. Non-overlapping members sort in too (harmless —
+    /// on top of it. Frame order, not array order: the frames
+    /// are what the cascade draws. Non-overlapping members sort
+    /// in too (harmless —
     /// nothing they cover). Ties keep the input order. Pure
     /// math, unit-tested.
     nonisolated static func cascadeRaiseOrder(

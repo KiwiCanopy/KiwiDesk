@@ -13,7 +13,7 @@ struct LayoutStoryArrangementTests {
 
     /// Settings a story is drawn under: the defaults, the
     /// starter's tunings, and a grid too small for the story,
-    /// whose extra windows pile.
+    /// whose extra windows wait off screen.
     static var variants: [TilingSettings] {
         var small = TilingSettings()
         small.grid.columns = 2
@@ -32,9 +32,9 @@ struct LayoutStoryArrangementTests {
 
     /// The engine lays a story out at screen size and the frames
     /// are scaled to the thumbnail, so an unpiled arrangement
-    /// fills its canvas and stays inside it. (A pile hangs past
-    /// the screen edge on a real screen too; the canvas clips it,
-    /// `LayoutStoryWiringTests`.)
+    /// fills its canvas and stays inside it. (A parked window hangs
+    /// past the screen edge on a real screen too; the canvas clips
+    /// it, `LayoutStoryWiringTests`.)
     @Test("an unpiled story lies inside its canvas", arguments: tiling)
     func framesStayInside(mode: LayoutMode) {
         let bounds = CGRect(origin: .zero, size: Self.canvas)
@@ -66,28 +66,21 @@ struct LayoutStoryArrangementTests {
         }
     }
 
-    /// A pile's cascade step is scaled from a 1280-pt screen, so
-    /// it moves a piled window a few points on the thumbnail and
-    /// the pile reads inside the cell it fills (#1750).
-    @Test("a pile cascades by a screen's proportion")
-    func pileStepsInProportion() throws {
+    /// A grid too small for the story shows what its cells hold
+    /// and parks the rest off the canvas (#2541), which is why the
+    /// story rests within what it fits.
+    @Test("a full grid's surplus waits off the canvas")
+    func surplusWaitsOffCanvas() {
+        let bounds = CGRect(origin: .zero, size: Self.canvas)
+            .insetBy(dx: -0.5, dy: -0.5)
         let frames = LayoutStoryArrangement.frames(
             .grid,
             settings: Self.variants[2],
             count: 4,
             in: Self.canvas
         )
-        let piled = frames.values.filter { $0.minX > 1 }
-            .map(\.minY).sorted()
-        try #require(piled.count == 3)
-        let step = piled[1] - piled[0]
-        let scaled =
-            OverlapStack.offset * Self.canvas.width
-            / LayoutStoryArrangement.screenWidth
-        #expect(abs(step - scaled) < 0.5)
-        // And the screen is a screen, not the thumbnail: laid out at
-        // thumbnail size the step is the whole unscaled offset.
-        #expect(step < OverlapStack.offset / 4)
+        #expect(frames.count == 4)
+        #expect(frames.values.filter { bounds.contains($0) }.count == 2)
     }
 
     /// Windows keep their identity as one arrives: the earlier

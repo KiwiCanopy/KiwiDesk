@@ -73,16 +73,31 @@ extension KiwiCore {
             refuseNothingToDivide(window, otherAxisDivides: false)
             return .fail("the grid is a single pile")
         }
-        let ordered = GridLayout.laidOrder(
-            tiled,
+        let cells = GridLayout.cellIndices(
+            of: tiled,
             shape: shape,
-            sticky: context.sticky
+            in: context
         )
-        let cells = cellIndices(ordered, shape: shape)
         guard let index = cells[window] else {
             return .fail("no focused tiled window")
         }
         let horizontal = axis == "x"
+        // A run that lays its members by floor and weight, not by
+        // column, takes a press along it as a run weight (#2541).
+        if shape.scrolls, horizontal == shape.rowMajor,
+            index >= GridLayout.runStart(of: shape),
+            GridLayout.zones(for: tiled, in: context)?.first?
+                .drawsSlots(in: context) == false,
+            let response = resizeInRun(
+                window,
+                axis: axis,
+                delta: delta,
+                space: space,
+                otherAxisDivides: true
+            )
+        {
+            return response
+        }
         let cell = GridLayout.cell(index, of: shape)
         let span = horizontal ? cell.columns : cell.rows
         let across = horizontal ? cell.rows : cell.columns
@@ -105,7 +120,7 @@ extension KiwiCore {
             return .fail("the cell spans the grid on this axis")
         }
         let floors = GridLayout.trackFloors(
-            windows: ordered,
+            windows: tiled,
             shape: shape,
             horizontal: horizontal,
             context: context
@@ -113,13 +128,15 @@ extension KiwiCore {
         let grownMembers = members(
             ofTrack: grown,
             horizontal: horizontal,
-            ordered: ordered,
+            ordered: tiled,
+            cells: cells,
             shape: shape
         )
         let neighborMembers = members(
             ofTrack: neighbor,
             horizontal: horizontal,
-            ordered: ordered,
+            ordered: tiled,
+            cells: cells,
             shape: shape
         )
         // The context carries the session layer over the
@@ -152,7 +169,7 @@ extension KiwiCore {
         if delta < 0 {
             reportResizeRefusal(
                 focused: window,
-                bindingCarrier: floors[grown].carrier,
+                bindingCarrier: shown(floors[grown].carrier, cells),
                 fallbackAnchor: grownMembers.first {
                     $0 != window
                 },
@@ -164,7 +181,7 @@ extension KiwiCore {
         } else {
             reportResizeRefusal(
                 focused: window,
-                bindingCarrier: floors[neighbor].carrier,
+                bindingCarrier: shown(floors[neighbor].carrier, cells),
                 fallbackAnchor: neighborMembers.first,
                 focusedIsBinding: false,
                 axis: axis
@@ -191,31 +208,27 @@ extension KiwiCore {
         }
     }
 
-    /// Each laid window's cell index; the pile shares the last.
-    private func cellIndices(
-        _ ordered: [WindowID],
-        shape: GridLayout.Shape
-    ) -> [WindowID: Int] {
-        var out: [WindowID: Int] = [:]
-        for (offset, window) in ordered.enumerated() {
-            out[window] = min(offset, shape.cells - 1)
-        }
-        return out
+    /// `carrier` where it is drawn: a run member waiting off screen
+    /// lifts the last track (#2541) but takes no pill.
+    private func shown(
+        _ carrier: WindowID?,
+        _ cells: [WindowID: Int]
+    ) -> WindowID? {
+        carrier.flatMap { cells[$0] == nil ? nil : $0 }
     }
 
-    /// The windows whose cell lies in `track` alone on the axis,
-    /// the pile's included — a refusal's anchor.
+    /// The shown windows whose cell lies in `track` alone on the
+    /// axis — a refusal's anchor.
     private func members(
         ofTrack track: Int,
         horizontal: Bool,
         ordered: [WindowID],
+        cells: [WindowID: Int],
         shape: GridLayout.Shape
     ) -> [WindowID] {
-        ordered.enumerated().compactMap { offset, window in
-            let cell = GridLayout.cell(
-                min(offset, shape.cells - 1),
-                of: shape
-            )
+        ordered.compactMap { window in
+            guard let index = cells[window] else { return nil }
+            let cell = GridLayout.cell(index, of: shape)
             let span = horizontal ? cell.columns : cell.rows
             return span.first == track && span.last == track
                 ? window : nil

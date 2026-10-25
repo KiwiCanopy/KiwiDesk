@@ -1,19 +1,32 @@
 import CoreGraphics
 
-/// One region a Stack zone or a Track track lays its members
-/// along (#2235): the shared placement both layouts take, so a
-/// zone that overflows scrolls the same way in either.
+/// One region a Stack zone, a Track track or a Grid's last track
+/// lays its members along (#2235, #2541): the shared placement
+/// each takes, so a zone that overflows scrolls the same way in
+/// any.
 public struct RunZone: Sendable, Equatable {
     /// Members in drawn order.
     public let members: [WindowID]
     public let region: CGRect
     /// Members stack top to bottom when true, else left to right.
     public let vertical: Bool
+    /// Fixed cells the run shows, in drawn order — a fixed Grid's
+    /// last track (#2541): at most this many windows, each in its
+    /// cell only where its floor fits that cell, else the run lays
+    /// them by floor and weight. Nil sizes the run from its
+    /// members' floors alone.
+    public let slots: [CGRect]?
 
-    public init(members: [WindowID], region: CGRect, vertical: Bool) {
+    public init(
+        members: [WindowID],
+        region: CGRect,
+        vertical: Bool,
+        slots: [CGRect]? = nil
+    ) {
         self.members = members
         self.region = region
         self.vertical = vertical
+        self.slots = slots
     }
 
     /// The zones `mode` lays `tiled` along, nil for a layout that
@@ -27,6 +40,7 @@ public struct RunZone: Sendable, Equatable {
         switch mode {
         case .stack: StackLayout.zones(for: tiled, in: context)
         case .track: TrackLayout.zones(for: tiled, in: context)
+        case .grid: GridLayout.zones(for: tiled, in: context)
         default: nil
         }
     }
@@ -54,13 +68,15 @@ public struct RunZone: Sendable, Equatable {
                 uniqueKeysWithValues: zip(members, weightedRects(plan))
             )
         }
-        let rects = run.frames(
-            floors: plan.floors,
-            weights: plan.weights,
-            in: region,
-            vertical: vertical,
-            gap: plan.gap
-        )
+        let rects =
+            cellRects(run, in: context)
+            ?? run.frames(
+                floors: plan.floors,
+                weights: plan.weights,
+                in: region,
+                vertical: vertical,
+                gap: plan.gap
+            )
         let corner = TilingEngine.optimalHideCorner(
             neighbors: context.screenNeighbors
         )
@@ -77,6 +93,39 @@ public struct RunZone: Sendable, Equatable {
                 )
         }
         return frames
+    }
+
+    /// Whether the run draws its fixed cells — every shown member's
+    /// floor fits its cell — rather than laying its members by
+    /// floor and weight. The one verdict the render and a resize
+    /// press share (#2541); false for a zone with no `slots`.
+    public func drawsSlots(in context: LayoutContext) -> Bool {
+        guard let run = placement(in: context).run else {
+            return slots != nil
+        }
+        return cellRects(run, in: context) != nil
+    }
+
+    /// The fixed cells as the run's frames, a hidden member handed
+    /// the edge cell it waits beyond; nil unless every cell is
+    /// filled by a window whose floor fits it — the cells' lengths
+    /// differ once a column is lifted or resized (#763).
+    private func cellRects(
+        _ run: ZoneRun,
+        in context: LayoutContext
+    ) -> [CGRect]? {
+        guard let slots, let first = slots.first, let last = slots.last,
+            run.visible.count == slots.count,
+            zip(run.visible, slots).allSatisfy({ index, slot in
+                context.runFloor(of: members[index], horizontal: !vertical)
+                    <= (vertical ? slot.height : slot.width)
+            })
+        else { return nil }
+        return members.indices.map { index in
+            if index < run.visible.lowerBound { return first }
+            if index >= run.visible.upperBound { return last }
+            return slots[index - run.visible.lowerBound]
+        }
     }
 
     /// A hidden window's frame: its own learned size at the slot
@@ -121,15 +170,16 @@ public struct RunZone: Sendable, Equatable {
 
     /// Every reading a placement takes, each computed once.
     private func placement(in context: LayoutContext) -> Plan {
+        let gap =
+            vertical
+            ? context.gaps.inner.vertical : context.gaps.inner.horizontal
+        let cell = cellFloor(gap: gap)
         let floors = members.map {
-            context.runFloor(of: $0, horizontal: !vertical)
+            max(context.runFloor(of: $0, horizontal: !vertical), cell)
         }
         let weights = members.map {
             max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
         }
-        let gap =
-            vertical
-            ? context.gaps.inner.vertical : context.gaps.inner.horizontal
         // The emergency whole-zone pile (#44): not even one window
         // fits at the minimum size.
         let piles =
@@ -164,6 +214,14 @@ public struct RunZone: Sendable, Equatable {
     }
 
     private var span: CGFloat { vertical ? region.height : region.width }
+
+    /// Every member's floor under fixed cells: an equal cell's
+    /// extent, rounded down so exactly `slots.count` fit the span.
+    private func cellFloor(gap: CGFloat) -> CGFloat {
+        guard let count = slots?.count, count > 0 else { return 0 }
+        return ((span - gap * CGFloat(count - 1)) / CGFloat(count))
+            .rounded(.down)
+    }
 
     /// Every member's weighted share keeps the minimum size (#67)
     /// and its own floor; otherwise the run places them, each at

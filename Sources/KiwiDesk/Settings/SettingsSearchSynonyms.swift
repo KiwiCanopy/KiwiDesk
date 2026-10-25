@@ -63,6 +63,12 @@ enum SettingsSearchSynonyms {
         // are the alternate vocabulary that has to reach it.
         case .appRules(.appRules):
             return ["space", "pin"]
+        // The rows were "Columns" and "Rows" until #2541 made them
+        // a limit.
+        case .layout(.gridColumns):
+            return ["columns"]
+        case .layout(.gridRows):
+            return ["rows"]
         // What other tilers call ⌃⌥ + scroll (#1656): niri's
         // column scroll, and the words a mouse user searches.
         case .shortcuts(.scrollPan):

@@ -65,13 +65,13 @@ extension SpaceOverrideRows {
         )
         Group {
             OverrideStepperRow(
-                label: L("scroll_grid.columns", "Columns"),
+                label: L("scroll_grid.column_limit", "Column limit"),
                 value: binding(\.grid.override, space, \.columns),
                 global: g.grid.columns,
                 range: 1...10
             )
             OverrideStepperRow(
-                label: L("scroll_grid.rows", "Rows"),
+                label: L("scroll_grid.row_limit", "Row limit"),
                 value: binding(\.grid.override, space, \.rows),
                 global: g.grid.rows,
                 range: 1...10

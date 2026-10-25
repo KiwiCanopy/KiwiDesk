@@ -30,17 +30,15 @@ extension GridSchematic {
                 ? (slot % cols, slot / cols)
                 : (slot / rows, slot % rows)
         }
-        // Mirror engine's row-major overflow layout
-        // (`GridLayout.calculateGeometry`).
-        func overflowAt(_ i: Int) -> (Int, Int) {
-            (i % cols, i / cols)
-        }
         var cells: [(CGRect, CellKind)] = []
-        let overflowing = ids.count > capacity
-        // OverlapStack overflow rendering in last cell (#712).
-        let tiled = overflowing ? capacity - 1 : ids.count
-        for (i, id) in ids.prefix(tiled).enumerated() {
-            let (c, r) = overflowing ? overflowAt(i) : at(i)
+        guard ids.count <= capacity else {
+            return scrolledCells(ids, cols: cols, rows: rows) {
+                let (c, r) = at($0)
+                return rect(c, r, 1, 1)
+            }
+        }
+        for (i, id) in ids.enumerated() {
+            let (c, r) = at(i)
             if i == ids.count - 1 && spansLeftover {
                 let cs = columnsFirst ? cols - c : 1
                 let rs = columnsFirst ? 1 : rows - r
@@ -49,10 +47,7 @@ extension GridSchematic {
                 cells.append((rect(c, r, 1, 1), .window(kind(id))))
             }
         }
-        if overflowing {
-            let last = rect(cols - 1, rows - 1, 1, 1)
-            cells.append(contentsOf: pileCells(in: last, ids: ids))
-        } else if !spansLeftover, ids.count < capacity {
+        if !spansLeftover, ids.count < capacity {
             for i in ids.count..<capacity {
                 let (c, r) = at(i)
                 cells.append((rect(c, r, 1, 1), .gap))
@@ -61,40 +56,49 @@ extension GridSchematic {
         return cells
     }
 
-    /// Computes cascading cell stack in last cell
-    /// (`LayoutSchematic.cascadeOffset`, `SchematicMoreChip`).
-    func pileCells(
-        in cell: CGRect,
-        ids: [Int]
+    /// A full grid's cells (#2541): every cell before the last
+    /// track holds its window, and the rest scroll through that
+    /// track as the engine's own run places them (`ZoneRun`), the
+    /// incoming window taking the focus; each end that hides
+    /// windows counts them. One unit floor per cell over a span of
+    /// `line` cells is the fixed grid's run: equal cells, no app
+    /// floors to learn.
+    func scrolledCells(
+        _ ids: [Int],
+        cols: Int,
+        rows: Int,
+        cell: (Int) -> CGRect
     ) -> [(rect: CGRect, kind: CellKind)] {
-        let off = LayoutSchematic.cascadeOffset
-        let minTile: CGFloat = 8
-        let pile = Array(ids.dropFirst(max(0, ids.count - piledCount)))
-        // How many reveals the cell can hold with a legible tile
-        // still under them.
-        let room = max(
-            1,
-            Int(((cell.height - minTile) / off).rounded(.down)) + 1
+        let start = GridLayout.runStart(
+            columns: cols,
+            rows: rows,
+            rowMajor: columnsFirst
         )
-        let drawn = min(pile.count, room)
-        let hidden = pile.count - drawn
-        let height = max(
-            minTile,
-            cell.height - off * CGFloat(drawn - 1)
+        let line = columnsFirst ? cols : rows
+        var cells = ids.prefix(start).enumerated().map {
+            (rect: cell($0.offset), kind: CellKind.window(kind($0.element)))
+        }
+        let members = Array(ids[start...])
+        let run = ZoneRun.resolve(
+            floors: Array(repeating: 1, count: members.count),
+            span: CGFloat(line),
+            gap: 0,
+            head: nil,
+            focus: members.firstIndex(of: newID)
         )
-        return pile.suffix(drawn).enumerated().map { k, id in
-            (
-                CGRect(
-                    x: cell.minX,
-                    y: cell.minY + CGFloat(k) * off,
-                    width: cell.width,
-                    height: height
-                ),
-                CellKind.piled(
-                    kind(id),
-                    hidden: k == drawn - 1 ? hidden : 0
+        let before = run.visible.lowerBound
+        let after = members.count - run.visible.upperBound
+        for (k, index) in run.visible.enumerated() {
+            let hidden =
+                (k == 0 ? before : 0)
+                + (k == run.visible.count - 1 ? after : 0)
+            cells.append(
+                (
+                    cell(start + k),
+                    .scrolled(kind(members[index]), hidden: hidden)
                 )
             )
         }
+        return cells
     }
 }

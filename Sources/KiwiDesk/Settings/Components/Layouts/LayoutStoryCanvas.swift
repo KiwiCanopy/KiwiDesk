@@ -23,7 +23,7 @@ struct LayoutStoryCanvas: View {
             axLabel: axLabel,
             showsCaption: false
         ) {
-            // Clipped at the screen edge: a piled window hangs
+            // Clipped at the screen edge: a parked window hangs
             // past it on a real screen too.
             GeometryReader { geo in
                 tiles(in: geo.size)

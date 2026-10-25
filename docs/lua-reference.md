@@ -1926,7 +1926,16 @@ grid.set_split_direction("horizontal")
 
 **Expects:** two positive integers (columns, rows).
 
-**Does:** for rigid grids, locks the layout to this size.
+**Does:** sets the grid's columns and rows: a rigid grid lays
+these, and a dynamic grid balances up to them.
+
+:::unreleased
+The columns and rows are a limit: where a cell would fall under
+the grid's [minimum window size](#set_min_window_size), the grid
+lays as many as fit, as [auto-size](#gridset_auto_size) does,
+and the windows past its cells scroll through its last track
+([When windows no longer fit](#when-windows-no-longer-fit)).
+:::
 
 **Example:**
 
@@ -1941,7 +1950,9 @@ grid.set_dimensions(3, 2)
 **Does:** when true, derives the grid's dimensions from the
 screen over the typed `columns`/`rows`. It caps a dynamic grid
 and fixes a rigid one alike. Windows past the resulting
-capacity cascade in the last cell.
+capacity overflow as
+[When windows no longer fit](#when-windows-no-longer-fit)
+describes.
 
 The grid takes as many columns as fit at Grid's minimum window
 width and as many rows as fit at its minimum height
@@ -4893,6 +4904,18 @@ A zone cascades whole only when not even one window fits in it
 at `min_window_size`, and the whole Space cascades when the
 master and stack zones, or Track's tracks side by side, cannot
 all keep that size.
+
+A Grid scrolls the windows past its cells through its last track
+along the fill order: the last row when columns fill first, the
+last column when rows fill first. A grid with fixed columns and
+rows shows exactly that track's cells, lined up with the tracks
+above; an [auto-sized](#gridset_auto_size) grid shows as many
+windows there as fit at their minimum size. The track is as deep
+as the largest minimum of every window in it, hidden ones
+included, so it keeps its size as it scrolls. Focus, `swap`, the
+overflow marks and their list work as in a Stack zone. A Grid
+cascades whole only when not even one cell fits at
+`min_window_size`.
 :::
 
 For a cascade to read correctly, upper windows must sit *behind*

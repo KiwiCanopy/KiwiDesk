@@ -639,7 +639,7 @@ every lens with why it cannot turn on.
 | Grid | `grid.set_type` | `dynamic\|rigid` |
 | | `grid.set_fill_empty_cells` | true\|false |
 | | `grid.set_split_direction` | `horizontal\|vertical` |
-| | `grid.set_dimensions` | columns, rows (upper bound in dynamic) |
+| | `grid.set_dimensions` | columns, rows (an upper bound, capped where a cell falls under `min_window_size`) |
 | | `grid.set_auto_size` | true\|false (default `false`; dims from screen) |
 | | `grid.set_new_window_placement` | placement¹ (default `last`) |
 | Monocle | `monocle.set_orientation` | `horizontal\|vertical` |

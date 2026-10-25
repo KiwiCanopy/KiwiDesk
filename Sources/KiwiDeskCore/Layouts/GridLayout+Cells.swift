@@ -13,10 +13,12 @@ extension GridLayout {
 
     /// Each column's floor (`horizontal`) or each row's: the
     /// configured minimum, raised by the learned minimum of every
-    /// window whose cell lies in that track alone (#763). The pile
-    /// holds several windows, so none of them lifts a track, and a
-    /// forced pass probes past learned bounds (#1055). The one
-    /// reading the render and the resize share.
+    /// window whose cell lies in that track alone (#763). A run's
+    /// members move along the last track, so none lifts a track
+    /// along it; across it, the last track takes the largest floor
+    /// of all of them, hidden ones included, as a Track track does
+    /// (#2541). A forced pass probes past learned bounds (#1055).
+    /// The one reading the render and the resize share.
     public static func trackFloors(
         windows: [WindowID],
         shape: Shape,
@@ -31,9 +33,9 @@ extension GridLayout {
             repeating: TrackFloor(size: configured, carrier: nil),
             count: count
         )
-        let alone = shape.piles ? shape.cells - 1 : shape.cells
-        let learned =
-            context.probesBeyondBounds ? 0 : min(alone, windows.count)
+        guard !context.probesBeyondBounds else { return floors }
+        let alone = shape.scrolls ? runStart(of: shape) : shape.cells
+        let learned = min(alone, windows.count)
         for index in 0..<learned {
             let cell = cell(index, of: shape)
             let span = horizontal ? cell.columns : cell.rows
@@ -47,6 +49,21 @@ extension GridLayout {
                     size: floor,
                     carrier: windows[index]
                 )
+            }
+        }
+        // The run's cross axis: rows under a row run, columns
+        // under a column run.
+        if shape.scrolls, horizontal != shape.rowMajor,
+            let last = floors.indices.last
+        {
+            for id in windows[alone...] {
+                let floor = context.learnedFloor(
+                    of: id,
+                    horizontal: horizontal
+                )
+                if floor > floors[last].size {
+                    floors[last] = TrackFloor(size: floor, carrier: id)
+                }
             }
         }
         return floors

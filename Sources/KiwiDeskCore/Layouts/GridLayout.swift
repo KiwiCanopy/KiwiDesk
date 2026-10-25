@@ -2,18 +2,20 @@ import CoreGraphics
 
 /// Grid layout system supporting dynamic and rigid tiling.
 /// Both types share one ceiling: `columns`×`rows` (or the
-/// auto-size screen-computed dimensions) is the most cells the
-/// grid splits into — rigid fills it, dynamic balances up to it,
-/// and the excess cascades in the last cell (`OverlapStack`).
+/// auto-size screen-computed dimensions, both capped at what fits
+/// `min_window_size`) is the most cells the grid splits into —
+/// rigid fills it, dynamic balances up to it, and the excess
+/// scrolls through the last track (#2541, `GridLayout+Run`).
 public struct GridLayout: LayoutSystem {
     public init() {}
 
     /// What the grid draws for `count` windows: its dimensions,
-    /// fill order and how many cells it lays — the last holding
-    /// the overflow pile when `piles`. Nil where an equal cell
-    /// would fall under `min_window_size`, which cascades the
-    /// whole Space instead. The resize reads this too (#763), so
-    /// a press finds a window's tracks where they were drawn.
+    /// fill order and how many cells it lays — the last track
+    /// scrolling the excess when `scrolls`. Nil where an equal
+    /// cell would fall under `min_window_size` even at 1 × 1,
+    /// which cascades the whole Space instead. The resize reads
+    /// this too (#763), so a press finds a window's tracks where
+    /// they were drawn.
     public struct Shape: Equatable, Sendable {
         public let columns: Int
         public let rows: Int
@@ -22,7 +24,8 @@ public struct GridLayout: LayoutSystem {
         /// Cells laid: the window count, or the capacity once it
         /// overflows.
         public let cells: Int
-        public let piles: Bool
+        /// More windows than cells: the last track scrolls.
+        public let scrolls: Bool
     }
 
     public static func shape(
@@ -56,41 +59,17 @@ public struct GridLayout: LayoutSystem {
         guard size.width >= floor.width, size.height >= floor.height
         else { return nil }
         let capacity = columns * rows
-        if count > capacity {
-            return Shape(
-                columns: columns,
-                rows: rows,
-                rowMajor: true,
-                fillLast: false,
-                cells: capacity,
-                piles: true
-            )
-        }
-        // Both grid types honor arrangement order (#217).
+        let scrolls = count > capacity
+        // Both grid types honor arrangement order (#217); the
+        // overflow scrolls along it too (#2541).
         return Shape(
             columns: columns,
             rows: rows,
             rowMajor: params.splitDirection == .horizontal,
-            fillLast: params.type == .dynamic && params.fillEmptyCells,
-            cells: count,
-            piles: false
-        )
-    }
-
-    /// `windows` in the order the grid lays them: a sticky window
-    /// keeps a fully-tiled cell ahead of the pile (#414 v2).
-    public static func laidOrder(
-        _ windows: [WindowID],
-        shape: Shape,
-        sticky: Set<WindowID>
-    ) -> [WindowID] {
-        guard shape.piles else { return windows }
-        return Array(
-            OverlapStack.stickyExempt(
-                windows,
-                tiled: shape.cells - 1,
-                sticky: sticky
-            )
+            fillLast: !scrolls && params.type == .dynamic
+                && params.fillEmptyCells,
+            cells: min(count, capacity),
+            scrolls: scrolls
         )
     }
 
@@ -107,41 +86,23 @@ public struct GridLayout: LayoutSystem {
                 minSize: context.minWindowSize
             )
         }
-        let ordered = Self.laidOrder(
-            windows,
-            shape: shape,
-            sticky: context.sticky
-        )
-        let tracks = Self.trackLengths(
-            windows: ordered,
-            shape: shape,
-            context: context
-        )
-        let cells = Self.cellFrames(
-            count: shape.cells,
-            widths: tracks.widths,
-            heights: tracks.heights,
-            in: context.usable,
-            gapH: context.gaps.inner.horizontal,
-            gapV: context.gaps.inner.vertical,
-            rowMajor: shape.rowMajor,
-            fillLast: shape.fillLast
-        )
-        guard shape.piles else {
+        let cells = Self.cells(for: windows, shape: shape, in: context)
+        guard shape.scrolls else {
             return Dictionary(
-                uniqueKeysWithValues: zip(ordered, cells)
+                uniqueKeysWithValues: zip(windows, cells)
             )
         }
-        var result: [WindowID: CGRect] = [:]
-        for (index, window) in ordered[..<(shape.cells - 1)].enumerated() {
-            result[window] = cells[index]
-        }
+        let start = Self.runStart(of: shape)
+        var result = Dictionary(
+            uniqueKeysWithValues: zip(windows[..<start], cells)
+        )
         result.merge(
-            OverlapStack.frames(
-                for: ordered[(shape.cells - 1)...],
-                in: cells[shape.cells - 1],
-                minSize: context.minWindowSize
-            )
+            Self.runZone(
+                windows,
+                shape: shape,
+                cells: cells,
+                context: context
+            ).frames(in: context)
         ) { _, new in new }
         return result
     }
@@ -162,7 +123,9 @@ public struct GridLayout: LayoutSystem {
         )
     }
 
-    /// Computes cell capacity ceiling under auto-size or fixed parameters.
+    /// The cell ceiling: as many columns and rows as fit at
+    /// `min_window_size`, or the fixed ones capped at that — a
+    /// fixed grid's dimensions are a maximum (#2541).
     func capDimensions(
         params: GridParams,
         usable: CGRect,
@@ -170,16 +133,21 @@ public struct GridLayout: LayoutSystem {
         gapV: CGFloat,
         minSize: MinSize
     ) -> (columns: Int, rows: Int) {
+        let cols = max(
+            1,
+            Int((usable.width / (minSize.width + gapH)).rounded(.down))
+        )
+        let rows = max(
+            1,
+            Int((usable.height / (minSize.height + gapV)).rounded(.down))
+        )
         guard params.autoSize else {
-            return (max(1, params.columns), max(1, params.rows))
+            return (
+                min(max(1, params.columns), cols),
+                min(max(1, params.rows), rows)
+            )
         }
-        let cols = Int(
-            (usable.width / (minSize.width + gapH)).rounded(.down)
-        )
-        let rows = Int(
-            (usable.height / (minSize.height + gapV)).rounded(.down)
-        )
-        return (max(1, cols), max(1, rows))
+        return (cols, rows)
     }
 
     /// Resolves grid dimensions bounded by the cap — the cap

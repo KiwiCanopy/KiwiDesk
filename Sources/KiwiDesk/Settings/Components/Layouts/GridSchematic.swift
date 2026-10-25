@@ -1,8 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Grid layout visual preview showing dynamic/rigid cell tiling and overflow
-/// piles (#125, #712).
+/// Grid layout visual preview showing dynamic/rigid cell tiling and the
+/// overflow scrolling through the last track (#125, #712, #2541).
 /// It draws equal tracks: the column and row weights (#763) are
 /// Lua-only and the resize's own, with no Settings row whose
 /// draft this picture could follow.
@@ -67,13 +67,17 @@ struct GridSchematic: View {
     enum CellKind {
         case window(TileKind)
         case gap
-        case piled(TileKind, hidden: Int)
+        /// A window in the scrolling last track; `hidden` counts
+        /// the windows waiting beyond it.
+        case scrolled(TileKind, hidden: Int)
     }
 
     /// Cell ceiling derived from params or auto-size cap (#712) —
     /// deliberately NOT clamped to what the canvas can draw: a
     /// legibility clamp made one config draw two pictures. The
-    /// drawing may be clamped; the rule may not.
+    /// drawing may be clamped; the rule may not. The screen's own
+    /// lowering of a typed limit (#2541) is not drawn: the
+    /// stand-in is no real screen.
     var cap: (columns: Int, rows: Int) {
         autoSize
             ? LayoutSchematic.gridAutoSizeCap
@@ -94,13 +98,9 @@ struct GridSchematic: View {
 
     var capacity: Int { max(1, dims.columns * dims.rows) }
 
-    /// Number of overflow windows stacked in the last cell — zero
-    /// until the count EXCEEDS capacity: the engine piles
-    /// `capacity - 1` plus the rest only past full, and nothing
-    /// at exactly full.
-    var piledCount: Int {
-        ids.count > capacity ? ids.count - (capacity - 1) : 0
-    }
+    /// Windows waiting off screen beyond the last track — zero
+    /// until the count EXCEEDS capacity (#2541).
+    var hiddenCount: Int { max(0, ids.count - capacity) }
 
     /// Window IDs with incoming window spliced via engine placement (#702).
     var ids: [Int] {
@@ -159,12 +159,9 @@ struct GridSchematic: View {
         switch kind {
         case .gap: SchematicGap()
         case .window(let tile): tileView(tile)
-        case .piled(let tile, let hidden):
+        case .scrolled(let tile, let hidden):
             ZStack(alignment: .bottomTrailing) {
-                SchematicPileTile(
-                    active: tile == .focus,
-                    isNew: tile == .new
-                )
+                tileView(tile)
                 if hidden > 0 {
                     SchematicMoreChip(hidden: hidden).padding(2)
                 }
@@ -188,17 +185,20 @@ struct GridSchematic: View {
     private var rigidCaption: String {
         if autoSize {
             return L(
-                "layout.schematic.grid.caption_rigid_auto",
+                "layout.schematic.grid.caption_rigid_auto_scroll",
                 "A fixed grid sized to your screen (about %1$d × "
-                    + "%2$d); each window shrinks to a cell.",
+                    + "%2$d); each window shrinks to a cell, windows "
+                    + "past that wait off screen, and moving focus "
+                    + "scrolls them in.",
                 LayoutSchematic.gridAutoSizeCap.columns,
                 LayoutSchematic.gridAutoSizeCap.rows
             )
         }
         return L(
-            "layout.schematic.grid.caption_rigid",
-            "A fixed %1$d × %2$d grid; each window shrinks to a "
-                + "cell, extras stack in the last.",
+            "layout.schematic.grid.caption_rigid_limit",
+            "A fixed grid of up to %1$d × %2$d; each window shrinks "
+                + "to a cell, windows past that wait off screen, and "
+                + "moving focus scrolls them in.",
             cap.columns,
             cap.rows
         )
@@ -216,9 +216,9 @@ struct GridSchematic: View {
                 "New windows fill down a column, then wrap across."
             )
         return L(
-            "layout.schematic.grid.order_capped",
-            "%1$@ It balances up to %2$d × %3$d, then the surplus "
-                + "stacks in the last cell.",
+            "layout.schematic.grid.order_capped_scroll",
+            "%1$@ It balances up to %2$d × %3$d; windows past that "
+                + "wait off screen, and moving focus scrolls them in.",
             order,
             cap.columns,
             cap.rows

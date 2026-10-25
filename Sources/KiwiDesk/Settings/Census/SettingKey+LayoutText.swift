@@ -67,9 +67,9 @@ extension LayoutKey {
         case .gridAutoSize:
             return .text("scroll_grid.auto_size")
         case .gridColumns, .gridOverrideColumns:
-            return .text("scroll_grid.columns")
+            return .text("scroll_grid.column_limit")
         case .gridRows, .gridOverrideRows:
-            return .text("scroll_grid.rows")
+            return .text("scroll_grid.row_limit")
         case .monocleOrientation:
             return .text("monocle.focus_orientation")
         case .monocleHideStyle:

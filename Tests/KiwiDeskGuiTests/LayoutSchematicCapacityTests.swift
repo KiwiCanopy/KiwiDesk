@@ -5,21 +5,18 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Grid preview's capacity ceiling and the pile past it
-/// (#712).
+/// The Grid preview's capacity ceiling and the run past it
+/// (#712, #2541).
 ///
 /// `GridLayout` gives both grid types one ceiling — the typed
 /// columns × rows, or the screen-computed dimensions under
-/// `auto_size` — and cascades the excess in the last cell. The
-/// preview modelled none of it: `dynamicDims` called
-/// `GridLayout.balanced` alone, so dragging the count subdivided
-/// forever, and the rigid arm mapped every overflow window to one
-/// rect, which read as the cell darkening rather than as a pile.
+/// `auto_size` — and scrolls the excess through the last track.
 ///
 /// **What these assert is the ceiling's *consequences*, not the
 /// call.** A schematic that called `dimensions` and then drew a
 /// constant would satisfy a scan; it cannot satisfy "the grid
-/// stops growing" and "the surplus is piled" at every count.
+/// stops growing" and "the surplus waits beyond the last track"
+/// at every count.
 @Suite("Layout preview grid capacity")
 @MainActor
 struct LayoutSchematicCapacityTests {
@@ -49,7 +46,7 @@ struct LayoutSchematicCapacityTests {
             panel.scale = .panel
             #expect(panel.cap == schematic.cap)
             #expect(panel.capacity == schematic.capacity)
-            #expect(panel.piledCount == schematic.piledCount)
+            #expect(panel.hiddenCount == schematic.hiddenCount)
             #expect(schematic.dims.columns <= 8)
             #expect(schematic.dims.rows <= 1)
         }
@@ -94,12 +91,11 @@ struct LayoutSchematicCapacityTests {
         #expect(typed.cap == (columns: 9, rows: 9))
     }
 
-    /// Past capacity the engine tiles `capacity - 1` and piles
-    /// the rest. The pile has to *grow* with the count — the
-    /// defect was a pile that existed in the cell list and looked
-    /// identical at every count.
-    @Test("the surplus piles, and the pile deepens")
-    func theSurplusPiles() {
+    /// Past capacity the last track scrolls: the windows waiting
+    /// beyond it grow with the count, and none waits at or under
+    /// capacity (#2541).
+    @Test("the surplus waits beyond the last track, and grows")
+    func theSurplusScrolls() {
         var previous = 0
         var overflowed = 0
         for count in LayoutSchematic.windowCountRange {
@@ -109,31 +105,25 @@ struct LayoutSchematicCapacityTests {
                 type: .rigid,
                 windows: count
             )
-            let piled = schematic.piledCount
+            let hidden = schematic.hiddenCount
             if count <= schematic.capacity {
-                // Exactly zero, not "at most one": the engine
-                // takes its overflow branch only PAST capacity,
-                // and a `<= 1` here was written around an
-                // off-by-one in `piledCount` rather than
-                // catching it (code review, 2026-08-03).
-                #expect(piled == 0)
+                #expect(hidden == 0)
             } else {
                 overflowed += 1
-                #expect(piled > 1)
-                #expect(piled > previous)
+                #expect(hidden > previous)
             }
-            previous = piled
+            previous = hidden
         }
         // The else branch has to have run, or the loop asserted
         // `0 == 0` twelve times and called it coverage.
         #expect(overflowed > 0)
     }
 
-    /// Every piled tile gets its own rect. Identical rects are
-    /// what made the last cell darken instead of pile: the tiles
-    /// were there, stacked, summing their accent alpha (#712).
-    @Test("piled tiles are offset, never drawn at one rect")
-    func piledTilesAreOffset() {
+    /// A full grid draws every cell once — the last track's cells
+    /// holding the run, each its own rect — and every window is
+    /// either drawn or counted by a `+N` chip (#2541).
+    @Test("the last track shows its cells and counts the rest")
+    func lastTrackShowsItsCells() {
         let schematic = grid(
             columns: 2,
             rows: 2,
@@ -142,59 +132,7 @@ struct LayoutSchematicCapacityTests {
         )
         // The panel's real drawing area, not an invented size —
         // a fixture that reasons from geometry pins it
-        // (`.claude/rules/tests.md`). Width is the pane's, so a
-        // representative one; the height is the scale's own, less
-        // the 6 pt padding the body applies.
-        let cells = schematic.gridCells(
-            CGSize(
-                width: 600,
-                height: SchematicScale.panel.height - 12
-            ),
-            cols: schematic.dims.columns,
-            rows: schematic.dims.rows,
-            ids: schematic.ids
-        )
-        // Only the pile: tiled cells legitimately share a row's
-        // y, so asserting over every cell would be asserting the
-        // grid, not the cascade.
-        let piled = cells.filter {
-            if case .piled = $0.kind { return true }
-            return false
-        }
-        // A filter result with no floor passes over zero
-        // elements — every assertion below would then hold
-        // vacuously (guard-prover, 2026-08-03).
-        #expect(piled.count > 0)
-        #expect(piled.count == schematic.piledCount)
-        let origins = piled.map(\.rect.origin.y)
-        #expect(Set(origins).count == origins.count)
-        // Each reveals the one beneath by exactly the family's
-        // offset, so the pile reads the same as Stack's and
-        // Track's rather than as a colour.
-        for (a, b) in zip(origins, origins.dropFirst()) {
-            #expect(b - a == LayoutSchematic.cascadeOffset)
-        }
-        // Nothing is dropped on the way into the pile: every
-        // window is either a cell or counted by a `+N` chip.
-        let hidden = cells.reduce(0) { sum, cell in
-            if case .piled(_, let n) = cell.kind { return sum + n }
-            return sum
-        }
-        #expect(cells.count + hidden == schematic.ids.count)
-    }
-
-    /// The pile stays inside the cell that owns it. Reveals that
-    /// outrun the cell height march the tiles off the canvas,
-    /// where the clip eats them and the picture shows fewer
-    /// windows than the caption claims (code review, 2026-08-03).
-    @Test("the pile never leaves its cell")
-    func thePileStaysInItsCell() {
-        let schematic = grid(
-            columns: 1,
-            rows: 6,
-            type: .rigid,
-            windows: 12
-        )
+        // (`.claude/rules/tests.md`).
         let size = CGSize(
             width: 600,
             height: SchematicScale.panel.height - 12
@@ -205,21 +143,23 @@ struct LayoutSchematicCapacityTests {
             rows: schematic.dims.rows,
             ids: schematic.ids
         )
+        #expect(cells.count == schematic.capacity)
+        let origins = cells.map(\.rect.origin)
+        #expect(
+            Set(origins.map { "\($0.x),\($0.y)" }).count
+                == cells.count
+        )
+        let run = cells.compactMap { cell -> Int? in
+            if case .scrolled(_, let n) = cell.kind { return n }
+            return nil
+        }
+        #expect(run.count == schematic.dims.columns)
+        #expect(run.reduce(0, +) == schematic.hiddenCount)
+        #expect(cells.count + run.reduce(0, +) == schematic.ids.count)
         for cell in cells {
             #expect(cell.rect.maxY <= size.height + 0.5)
             #expect(cell.rect.maxX <= size.width + 0.5)
         }
-        // What did not fit is accounted for, not dropped — and
-        // something did not fit, or this proves nothing.
-        let piled = cells.compactMap { cell -> Int? in
-            if case .piled(_, let hidden) = cell.kind {
-                return hidden
-            }
-            return nil
-        }
-        #expect(piled.count > 0)
-        #expect(piled.reduce(0, +) > 0)
-        #expect(piled.reduce(0, +) + piled.count == schematic.piledCount)
     }
 
     /// The captions state the ceiling in words. Nothing else
@@ -263,14 +203,57 @@ struct LayoutSchematicCapacityTests {
         #expect(!auto.caption.contains("5 × 3"))
     }
 
-    /// The engine's OVERFLOW branch lays its tiled prefix out
-    /// row-major whatever `splitDirection` says, unlike its
-    /// normal fill. Only a rows-first grid past capacity can tell
-    /// the two apart — every other fixture here is columns-first,
-    /// where the expressions coincide, so this was watched by
-    /// nothing tree-wide (guard-prover, 2026-08-03).
-    @Test("a rows-first grid overflows the way the engine does")
-    func rowsFirstOverflowFollowsTheEngine() {
+    /// The incoming window takes the focus, so the run ends at it
+    /// (`.last`) or starts at it (`.afterFocused` at the run's
+    /// first cell), and the windows beyond are counted on the end
+    /// they wait at (#2541).
+    @Test("the incoming window scrolls in, counted from its ends")
+    func incomingWindowScrollsIn() {
+        func run(
+            _ placement: SpawnPlacement
+        ) -> [(TileKindName, Int)] {
+            let schematic = GridSchematic(
+                columns: 2,
+                rows: 2,
+                type: .rigid,
+                fillEmptyCells: false,
+                autoSize: false,
+                splitDirection: .horizontal,
+                placement: placement,
+                windows: 12
+            )
+            return schematic.gridCells(
+                CGSize(width: 600, height: 228),
+                cols: schematic.dims.columns,
+                rows: schematic.dims.rows,
+                ids: schematic.ids
+            ).compactMap { cell in
+                guard case .scrolled(let tile, let n) = cell.kind
+                else { return nil }
+                return (tile == .new ? .new : .other, n)
+            }
+        }
+        // Eleven windows and the new one: 12 - 4 cells wait.
+        let last = run(.last)
+        #expect(last.count == 2)
+        #expect(last.last?.0 == .new)
+        #expect(last.first?.1 == 8)
+        #expect(last.last?.1 == 0)
+        let after = run(.afterFocused)
+        #expect(after.count == 2)
+        #expect(after.first?.0 == .new)
+        #expect(after.first?.1 == 0)
+        #expect(after.last?.1 == 8)
+    }
+
+    private enum TileKindName { case new, other }
+
+    /// A rows-first grid fills down its columns and scrolls its
+    /// LAST COLUMN, along the fill order like the engine (#2541).
+    /// Every other fixture here is columns-first, where a row run
+    /// and a column run cannot be told apart.
+    @Test("a rows-first grid scrolls its last column")
+    func rowsFirstScrollsTheLastColumn() {
         let schematic = GridSchematic(
             columns: 3,
             rows: 2,
@@ -288,20 +271,14 @@ struct LayoutSchematicCapacityTests {
             rows: schematic.dims.rows,
             ids: schematic.ids
         )
-        let tiled = cells.filter {
-            if case .window = $0.kind { return true }
+        let run = cells.filter {
+            if case .scrolled = $0.kind { return true }
             return false
         }
-        #expect(tiled.count == schematic.capacity - 1)
-        // Row-major: the first `cols` tiles share a row, so their
-        // y origins repeat before x does. Column-major would put
-        // the first `rows` in one column instead.
-        let firstRow = tiled.prefix(schematic.dims.columns)
-        #expect(Set(firstRow.map(\.rect.origin.y)).count == 1)
-        #expect(
-            Set(firstRow.map(\.rect.origin.x)).count
-                == schematic.dims.columns
-        )
+        #expect(run.count == schematic.dims.rows)
+        #expect(Set(run.map(\.rect.origin.x)).count == 1)
+        let lastX = cells.map(\.rect.origin.x).max()
+        #expect(run.first?.rect.origin.x == lastX)
     }
 
     private func grid(

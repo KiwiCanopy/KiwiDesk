@@ -1,15 +1,16 @@
 import Foundation
 
-/// Stack-mode array stepping inside a zone that scrolls (#2235),
-/// split out of `KiwiCore+NavigateCommand` for file size.
+/// Array stepping inside a Stack zone or a Grid's last track that
+/// scrolls (#2235, #2541), split out of `KiwiCore+NavigateCommand`
+/// for file size.
 extension KiwiCore {
-    /// Steps `focus`/`swap` along a Stack zone that hides windows,
+    /// Steps `focus`/`swap` along a run that hides windows,
     /// in drawn order, so the step at the edge of the shown run
-    /// continues into the hidden windows — which share the edge
-    /// slot's frame and so are no geometric neighbour. Nil (→ the
+    /// continues into the hidden windows — which wait parked and
+    /// so are no geometric neighbour. Nil (→ the
     /// geometric search, which skips hidden windows) across the
     /// zone, at its ends, and in a zone that hides nothing.
-    func stackStep(
+    func runStep(
         _ direction: Direction,
         space: Space,
         focused: WindowID,

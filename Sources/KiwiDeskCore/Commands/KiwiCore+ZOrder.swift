@@ -156,10 +156,8 @@ extension KiwiCore {
     /// Track (#193): an overflow cascade piles windows — the
     /// windows inside one track, or the merged overflow track —
     /// with the title-bar offset. Raise order follows the
-    /// RENDERED cascade, not the array: `stickyExempt` (#414
-    /// v2) can promote a piled sticky out of its array slot, so
-    /// array order no longer equals cascade order; the frames
-    /// themselves do (`cascadeRaiseOrder`), putting each pile's
+    /// RENDERED cascade, not the array: the frames carry the
+    /// cascade order (`cascadeRaiseOrder`), putting each pile's
     /// top window behind and its bottom in front, keeping every
     /// title bar visible.
     ///
