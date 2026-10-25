@@ -134,13 +134,29 @@ struct ModifierSideRoutingTests {
         #expect(manager.sideTapStatus == .off)
     }
 
-    @Test("a refused tap reads refused")
-    func refusedTap() throws {
-        let (manager, _, _) = rig()
-        manager.makeSideTap = { _, _ in nil }
-        manager.bind(try combo("rcmd+h"), ref: 1)
+    @Test("a refused tap falls back to Carbon and is asked once")
+    func refusedTapFallsBack() throws {
+        let (manager, registrar, _) = rig()
+        var asked = 0
+        manager.makeSideTap = { _, _ in
+            asked += 1
+            return nil
+        }
+        var changes = 0
+        manager.onSideTapStatusChange = { changes += 1 }
+        manager.bind(try combo("cmd+h"), ref: 1)
         manager.modifierSides = true
+        manager.bind(try combo("rcmd+h"), ref: 2)
+        manager.bind(try combo("cmd+j"), ref: 3)
         #expect(manager.sideTapStatus == .refused)
+        #expect(asked == 1)
+        #expect(changes >= 1)
+        // cmd+h and cmd+j on Carbon; rcmd+h collapses and fails.
+        #expect(registrar.live.count == 2)
+        #expect(manager.activationFailures == [try combo("rcmd+h")])
+        manager.modifierSides = false
+        manager.modifierSides = true
+        #expect(asked == 2)
     }
 
     @Test("a keypad digit's twin rides the tap too")

@@ -23,13 +23,22 @@ extension KeybindingManager {
         activationFailures = []
         noteHyperShortcuts()
         guard !isSuspended else {
-            armSideTap([])
+            _ = armSideTap([])
             return
         }
         var hyperRows: [(KeyCombo, Int32)] = []
         var sideRows: [(KeyCombo, Int32)] = []
         let tapped = tappedChords(in: layer)
-        for (combo, ref) in bindings(for: layer) {
+        // Either-side rows first, so a pair collapsing onto one
+        // Carbon chord keeps the same one every launch (#2601).
+        let rows = bindings(for: layer).sorted {
+            ($0.key.modifiers.isSided ? 1 : 0, $0.key.comboString() ?? "")
+                < (
+                    $1.key.modifiers.isSided ? 1 : 0,
+                    $1.key.comboString() ?? ""
+                )
+        }
+        for (combo, ref) in rows {
             // A Hyper combo registers only while the key is held.
             if combo.modifiers.contains(.hyper) {
                 hyperRows.append((combo, ref))
@@ -71,7 +80,18 @@ extension KeybindingManager {
             }
         }
         armHyper(hyperRows)
-        armSideTap(sideRows)
+        if !armSideTap(sideRows) {
+            // No tap: the chord falls back to Carbon either-side,
+            // as with the switch off, and a collapse is refused.
+            for (combo, ref) in sideRows
+            where !registerPhysical(
+                code: combo.keyCode,
+                combo: combo,
+                ref: ref
+            ) {
+                activationFailures.insert(combo)
+            }
+        }
     }
 
     /// Registers ONE physical key for combo. Each physical key

@@ -11001,8 +11001,8 @@ recordable — the first non-modifier key locks the combo
 
 **The Hyper key is a modifier KiwiDesk owns, and needs no
 Input Monitoring (#1870).** The usual hyper key is an event
-tap rewriting Caps Lock into `⌃⌥⇧⌘`. KiwiDesk instead remaps the
-chosen key to F18
+tap rewriting Caps Lock into `⌃⌥⇧⌘`. KiwiDesk runs no tap on a
+default install, so it instead remaps the chosen key to F18
 with `hidutil` — per user, no permission, gone at a restart —
 and watches F18 with a Carbon hotkey, which hears both its press
 and its release. Only while it is held are the `hyper+…`
@@ -11018,7 +11018,7 @@ setup turns the same key into Hyper on the new Mac. KiwiDesk touches a key mappi
 only where it is exactly the one KiwiDesk recorded writing —
 Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted
-key event, so it stays with #1874.
+key event, which is #1874's to measure.
 
 The one way past that refusal is the user's own consent (#2471).
 An entry that is exactly KiwiDesk's own for the chosen key — what
@@ -11044,16 +11044,19 @@ key event's flags (⌘ `0x08`/`0x10`, ⌥ `0x20`/`0x40`, ⇧ `0x02`/`0x04`,
 with Accessibility alone: the probe was under no Input Monitoring
 grant, and both were refused before Accessibility was granted.
 
-So the switch **Tell left and right modifiers apart** (Settings ▸
-Shortcuts ▸ Hyper key, `set_modifier_sides`) admits the tap, bounded
-three ways. Every either-side shortcut stays a Carbon hotkey. The tap
-runs only while the switch is on and a side-specific shortcut exists,
-so a default install, and one that never records a side, sees no
-keystroke. It swallows only a press matching a side-specific shortcut
-and passes every other key on, and it re-enables itself after
-`tapDisabledByTimeout`, watched, since macOS disables a slow tap
-silently. The recorder reads the side from the key event's own
-device flags and needs no tap.
+So the switch **Tell left and right modifiers apart** (Shortcuts &
+Gestures ▸ Modifier keys, `set_modifier_sides`) admits the tap,
+bounded three ways. Every either-side shortcut stays a Carbon hotkey,
+save one on the same keys as a sided shortcut, which moves to the tap
+with it so the two never race for one press. The tap runs only while
+the switch is on and a side-specific shortcut exists, so a default
+install, and one that never records a side, sees no keystroke. It
+swallows only a press matching one of its shortcuts and passes every
+other key on, and it re-enables itself after `tapDisabledByTimeout`,
+since macOS disables a slow tap silently; a tap macOS refuses hands
+its shortcuts back to Carbon, either-side. A shortcut the tap answers
+does not glide, since the tap hears no release. The recorder reads
+the side from the key event's own device flags and needs no tap.
 
 The switch is the Mac's, in `gui.json` beside `hyper.key`: a keyboard
 is a desk's hardware, not a profile's. No per-profile value preceded
@@ -11065,10 +11068,9 @@ list, the switch being the way to separate them. While the switch is
 on the recorder records no either-side shortcut: one is recorded with
 the switch off, or written in Lua as `cmd+h`. Accepted.
 
-What it unblocks: #1874's "tap Hyper alone for Escape" was held
-back on the belief that any keyboard tap needs Input Monitoring.
-Reading keys does not; whether posting the Escape does is #1874's
-to measure.
+What it unblocks: reading keys needs no Input Monitoring, so
+#1874's "tap Hyper alone for Escape" turns on whether posting the
+Escape does, which is #1874's to measure.
 :::
 
 **An absent capability is not a greyed one, and an absent

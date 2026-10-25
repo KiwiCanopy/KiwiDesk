@@ -15,10 +15,9 @@ paths:
 Canonical for this subsystem (AGENTS.md §5 indexes it). When
 editing here:
 
-- Hotkeys use the **Carbon API** (`RegisterEventHotKey`); a
-  keyboard tap is admitted only for side-specific shortcuts, and
-  runs only while one exists (`docs/design-decisions.md` ▸ *Left
-  and right modifiers are told apart by one keyboard tap*, #2601).
+- Hotkeys use the **Carbon API** (`RegisterEventHotKey`); the one
+  keyboard tap is the side tap below (`docs/design-decisions.md` ▸
+  *Left and right modifiers are told apart by one keyboard tap*).
   Mouse presses are read through `NSEvent` monitors.
 - **The running hotkey table is written only from saved files.**
   A new writer — a caller of `applyStructuredKeybindings`, of
@@ -111,23 +110,32 @@ editing here:
     (`ScrollGestureConfigureSeamTests`).
 - **Left and right modifiers take ONE keyboard tap,
   `ModifierSideTap`, owned by `KeybindingManager` (#2601).**
-  Every either-side shortcut stays a Carbon hotkey; the tap
-  answers only the chords a sided row names, and only while
-  `modifierSides` is on (`ModifierSideRoutingTests`). Obligations:
+  The tap answers only the chords a sided row names, the
+  either-side row on such a chord included, and only while
+  `modifierSides` is on; every other shortcut stays a Carbon
+  hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`). Obligations:
   - **No sided row, no tap.** `armSideTap` stops it with its last
     row; a new path that routes rows to it goes through
-    `tappedChords`, never a row list of its own.
+    `tappedChords`, never a row list of its own
+    (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`).
+  - **A refused tap hands its chords back to Carbon** either-side
+    and is asked again only when the switch moves
+    (`ModifierSideRoutingTests` ▸ `refusedTapFallsBack`).
   - **A suspended manager answers nothing** — `deactivate` empties
     the rows, or the tap swallows the sided press the recorder
     reads (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
   - **Key-down only, on its own thread**, deciding from the rows
     `setRows` handed it and passing every press no row answers;
     the live factory is pinned inert in both `makeTestCore`
-    twins (`ScrollTapSeamTests`).
-  - **Carbon reads a sided chord either-side**: `carbonMask`
-    strips the side bits, so the switch off fires every sided
-    shortcut through Carbon and a collapsing pair is refused as
-    a duplicate (`ModifierSideComboTests`).
+    twins (`ScrollTapSeamTests` ▸ `installsOffMain`,
+    `keyboardMask`, `liveFactoryPinned`).
+  - **Carbon reads a sided chord either-side**: `carbonMask` and
+    `KeyCombo.registered` strip the side bits
+    (`ModifierSideComboTests` ▸ `carbonReadsEitherSide`), so the
+    switch off fires every sided shortcut through Carbon and a
+    collapsing pair is refused as a duplicate
+    (`ModifierSideRoutingTests` ▸ `offCollapses`) and named a
+    `sideCollapse` conflict (`ModifierSideConflictTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

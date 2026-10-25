@@ -62,8 +62,9 @@ extension HotkeyModifiers {
     }
 
     /// The modifiers a key event holds, sides included, read from
-    /// its device flags (⌃ 0x01/0x2000, ⇧ 0x02/0x04, ⌘ 0x08/0x10,
-    /// ⌥ 0x20/0x40; measured on macOS 27, #2601).
+    /// its device flags (⌘ 0x08/0x10 and ⌥ 0x20/0x40 measured on
+    /// macOS 27, #2601; ⌃ 0x01/0x2000 and ⇧ 0x02/0x04 IOKit's
+    /// `NX_DEVICE*` masks). The one reader of those bits.
     public static func held(by flags: CGEventFlags) -> HotkeyModifiers {
         let raw = flags.rawValue
         var held: HotkeyModifiers = []

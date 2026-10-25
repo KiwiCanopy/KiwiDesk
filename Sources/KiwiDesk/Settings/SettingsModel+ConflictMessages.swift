@@ -108,7 +108,7 @@ extension SettingsModel {
                     + "shortcut.",
                 name(conflict.binding)
             )
-        case .otherBinding(let who):
+        case .otherBinding(let who), .sideCollapse(let who):
             return L(
                 "keybinding.conflict.other_binding",
                 "Shortcut for \"%1$@\" is also bound to "
@@ -165,7 +165,7 @@ extension SettingsModel {
                 "\"%1$@\" isn't a recognized shortcut",
                 name(conflict.binding)
             )
-        case .otherBinding(let who):
+        case .otherBinding(let who), .sideCollapse(let who):
             return L(
                 "keybinding.conflict.bullet.with",
                 "\"%1$@\" and \"%2$@\" share a shortcut — "

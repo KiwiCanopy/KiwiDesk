@@ -58,7 +58,8 @@ extension KiwiCore {
             // The change only owes a deferred remap, so `init.lua`
             // setting it again remaps nothing in between (#1870).
             appWideLedger.live.hyperKey = nil
-            // The sides likewise (#2601): a line removed reads off.
+            // The sides too (#2601), applied at once: a line removed
+            // reads off, and init.lua setting it again re-arms.
             appWideLedger.live.modifierSides = false
             return
         }
