@@ -194,6 +194,16 @@ extension KiwiCore {
         borders.commandedFrame = commandedInstant
         stickyMarks.commandedFrame = commandedInstant
         overflowMarks.commandedFrame = commandedInstant
+        // Both marks move through the ring's one panel move, so a
+        // test core's pin reaches them too (#2531).
+        let movePanel: (CGWindowID, CGPoint) -> Bool = {
+            [weak self] window, origin in
+            MainActor.assumeIsolated {
+                self?.borders.movePanel(window, origin) ?? false
+            }
+        }
+        stickyMarks.movePanel = movePanel
+        overflowMarks.movePanel = movePanel
 
         socket.handler = { [weak self] request in
             self?.answer(request) ?? .fail("core unavailable")

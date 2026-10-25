@@ -94,7 +94,7 @@ struct StickyMarkPopTests {
 
     /// An overlay showing its collapsed mark, Reduce Motion off.
     private func overlay() -> StickyMarkOverlay {
-        let overlay = StickyMarkOverlay(window: 1)
+        let overlay = StickyMarkOverlay(window: 1) { _, _ in false }
         overlay.readReduceMotion = { false }
         overlay.update(
             frame: CGRect(x: 200, y: 200, width: 900, height: 600)
@@ -171,7 +171,7 @@ struct StickyMarkPopTests {
     /// content view: a plate the panel's size clips its own pop.
     @Test("the plate rests inside a room with space for the pop")
     func plateRestsInTheRoom() throws {
-        let overlay = StickyMarkOverlay(window: 1)
+        let overlay = StickyMarkOverlay(window: 1) { _, _ in false }
         overlay.update(frame: CGRect(x: 200, y: 200, width: 800, height: 600))
         defer { overlay.hide() }
         let panel = try #require(overlay.panelFrameForTest)

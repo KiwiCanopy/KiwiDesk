@@ -223,18 +223,22 @@ these:
   macOS 27.0.1, 2026-10-05). The first show, a size change and a missing symbol
   take AppKit (`BorderPanelMoveTests`; the move landing is
   `BorderPanelMoveLiveTests`', the seams `BorderPanelSeamTests`').
-  **Keep the backend's `placedFrame` the panel's frame of record,
-  and read no decision off `panel.frame`**: AppKit's cache follows
+  **Keep `PanelPlacement.frame` the panel's frame of record, and
+  read no decision off `panel.frame`**: AppKit's cache follows
   a SkyLight move only once WindowServer's moved event reaches its
-  event loop, and a `setFrame` equal to a stale cache is skipped.
-  The sticky mark's panel still takes `setFrame` per tick,
-  unmeasured on the switch path. **A second panel moved this way
-  shares the ring's whole placement** — the frame of record, the
-  pass gate, the stamp on the order-in that creates the window —
-  never the move alone, which a same-pass `setFrame` or
-  `orderFrontRegardless` loses; its move is a closure over
-  `BorderManager.movePanel` wired once in Core, not a second
-  live seam.
+  event loop, and a `setFrame` equal to a stale cache is skipped
+  (the #2563 move check reads the overflow mark's `placedFrame`).
+  **A panel that follows a window takes the one `PanelPlacement`**
+  — the ring, the sticky mark and the overflow mark do (#2531) —
+  for its moves and its AppKit orders (`order(_:_:)`, which stamps
+  the order-in that creates the window), never the move alone,
+  which a same-pass `setFrame` or `orderFrontRegardless` loses; a
+  mark's per-follow `setFrame` held the main actor ~500 ms on a
+  slow app while an overflow scrolled (device, 2026-10-25). Its
+  move is a closure over `BorderManager.movePanel` wired once in
+  `KiwiCore+Bootstrap`, not a second live seam
+  (`BorderPanelSeamTests` ▸ `marksTakeTheRingsMove`,
+  `MarkPanelMoveTests`).
 - **An animating ring that changes size moves inside its panel
   rather than resizing it** — a panel resize hands WindowServer a
   fenced transaction the main actor waits on, every frame, GPU

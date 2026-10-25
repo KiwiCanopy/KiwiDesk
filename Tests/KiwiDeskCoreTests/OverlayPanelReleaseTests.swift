@@ -57,7 +57,7 @@ struct OverlayPanelReleaseTests {
     @Test("a sticky mark")
     func stickyMark() {
         let result = panels {
-            let overlay = StickyMarkOverlay(window: 1)
+            let overlay = StickyMarkOverlay(window: 1) { _, _ in false }
             overlay.update(
                 frame: CGRect(x: 100, y: 100, width: 400, height: 300)
             )

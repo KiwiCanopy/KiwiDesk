@@ -93,6 +93,27 @@ struct BorderPanelSeamTests {
         )
     }
 
+    /// #2531: a mark left on its manager's AppKit default compiles
+    /// and draws, and puts the fenced `setFrame` back on every follow.
+    @Test("both marks move through the ring manager's panel move")
+    func marksTakeTheRingsMove() throws {
+        let source = Self.flattened(
+            try SourceScan.strippedSource(
+                at: Self.core.appendingPathComponent(
+                    "App/KiwiCore+Bootstrap.swift"
+                )
+            )
+        )
+        try #require(!source.isEmpty)
+        #expect(source.contains("self?.borders.movePanel(window, origin)"))
+        for manager in ["stickyMarks", "overflowMarks"] {
+            #expect(
+                source.contains("\(manager).movePanel = movePanel"),
+                "\(manager) keeps its AppKit default"
+            )
+        }
+    }
+
     /// One live move in Core: an inner initializer that defaulted
     /// it as well would hand every direct construction the live
     /// write, unpinned.

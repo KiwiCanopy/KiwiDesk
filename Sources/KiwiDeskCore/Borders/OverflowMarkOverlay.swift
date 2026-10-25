@@ -48,6 +48,11 @@ final class OverflowMarkOverlay {
         _ in
     }
     private(set) var panel: OverflowMarkPanel?
+    /// The panel's placement, the ring's (#2531).
+    private let placement: PanelPlacement
+    /// The panel's frame of record, AppKit coordinates; AppKit's
+    /// `panel.frame` lags a SkyLight move.
+    var placedFrame: CGRect? { placement.frame }
     private(set) var mark: OverflowMark
     private var size = CGSize(
         width: OverflowMark.depth,
@@ -76,8 +81,9 @@ final class OverflowMarkOverlay {
     /// Whether a sync owes this mark a stack.
     var needsOrder: Bool { !hasOrdered }
 
-    init(mark: OverflowMark) {
+    init(mark: OverflowMark, movePanel: @escaping PanelPlacement.Move) {
         self.mark = mark
+        placement = PanelPlacement(movePanel: movePanel)
     }
 
     /// Takes `mark`'s count and bounds, drawn in `shelf`.
@@ -142,12 +148,10 @@ final class OverflowMarkOverlay {
             mark.bounds,
             primaryHeight: GeometryUtils.primaryHeight
         )
-        if panel.frame != flipped {
-            panel.setFrame(flipped, display: false)
-        }
+        placement.place(panel, at: flipped)
         view.frame = CGRect(origin: .zero, size: flipped.size)
         if !panel.isVisible, mayOrder {
-            panel.orderFrontRegardless()
+            placement.order(panel) { panel.orderFrontRegardless() }
             hasOrdered = false
         }
     }
@@ -158,7 +162,9 @@ final class OverflowMarkOverlay {
     /// Stacks the mark above its anchor window.
     func order() {
         guard let panel, mayOrder else { return }
-        panel.order(.above, relativeTo: Int(mark.anchor.raw))
+        placement.order(panel) {
+            panel.order(.above, relativeTo: Int(mark.anchor.raw))
+        }
         hasOrdered = true
     }
 

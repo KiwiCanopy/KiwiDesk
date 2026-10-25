@@ -82,6 +82,10 @@ public final class StickyMarkManager {
         _ in nil
     }
 
+    /// A mark panel's move, wired to `BorderManager.movePanel` in
+    /// `KiwiCore+Bootstrap` (#2531); unwired it takes AppKit.
+    var movePanel: PanelPlacement.Move = { _, _ in false }
+
     public init() {}
 
     /// Windows currently displaying a mark.
@@ -110,7 +114,8 @@ public final class StickyMarkManager {
             let overlay =
                 overlays[spec.window]
                 ?? StickyMarkOverlay(
-                    window: spec.window.raw
+                    window: spec.window.raw,
+                    movePanel: movePanel
                 )
             overlays[spec.window] = overlay
             overlay.setGlass(spec.glass)
