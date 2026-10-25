@@ -61,7 +61,8 @@ extension KiwiCore {
             // KiwiHub's keys likewise (#2600): a line moved or
             // removed reads as written, not as the last load left it.
             appWideLedger.live.kiwiHubKeys = KiwiHubKeys()
-            // The sides likewise (#2601): a line removed reads off.
+            // The sides too (#2601), applied at once: a line removed
+            // reads off, and init.lua setting it again re-arms.
             appWideLedger.live.modifierSides = false
             return
         }

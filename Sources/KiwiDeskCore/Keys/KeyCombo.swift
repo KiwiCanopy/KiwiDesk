@@ -30,6 +30,9 @@ public struct KeyCombo: Hashable, Sendable {
             guard named.insert(token.name).inserted else { return nil }
             modifiers.formUnion(token.bits)
         }
+        // Hyper registers its row bare, so a side under it could
+        // never be told (#2601).
+        if modifiers.contains(.hyper), modifiers.isSided { return nil }
         return KeyCombo(
             keyCode: keyCode,
             modifiers: modifiers
@@ -37,16 +40,13 @@ public struct KeyCombo: Hashable, Sendable {
     }
 
     /// A modifier spelling's bits and the modifier it names, nil
-    /// for none. `l`/`r` before a name is that side (#2601).
+    /// for none.
     private static func modifierToken(
         _ part: String
     ) -> (name: String, bits: HotkeyModifiers)? {
         if part == "hyper" { return ("hyper", .hyper) }
         if let kind = plainKinds[part] { return ("\(kind)", kind.plain) }
-        guard let first = part.first, first == "l" || first == "r",
-            let kind = plainKinds[String(part.dropFirst())]
-        else { return nil }
-        let side: ModifierSide = first == "l" ? .left : .right
+        guard let (kind, side) = sideTokens[part] else { return nil }
         return ("\(kind)", kind.plain.union(.side(side, of: kind)))
     }
 
@@ -57,17 +57,27 @@ public struct KeyCombo: Hashable, Sendable {
         "shift": .shift,
     ]
 
+    /// The side spellings (#2601 ▸ Ruling): the short names only.
+    private static let sideTokens: [String: (ModifierKind, ModifierSide)] = [
+        "lcmd": (.command, .left), "rcmd": (.command, .right),
+        "lopt": (.option, .left), "ropt": (.option, .right),
+        "lalt": (.option, .left), "ralt": (.option, .right),
+        "lshift": (.shift, .left), "rshift": (.shift, .right),
+        "lctrl": (.control, .left), "rctrl": (.control, .right),
+    ]
+
     /// The chord with its sides forgotten (#2601).
     public var unsided: KeyCombo {
         KeyCombo(keyCode: keyCode, modifiers: modifiers.unsided)
     }
 
     /// The chord Carbon registers: a Hyper combo is registered
-    /// bare while the Hyper key is held (#1870).
+    /// bare while the Hyper key is held (#1870), and a sided one
+    /// either-side (#2601).
     public var registered: KeyCombo {
         KeyCombo(
             keyCode: keyCode,
-            modifiers: modifiers.subtracting(.hyper)
+            modifiers: modifiers.subtracting(.hyper).unsided
         )
     }
 

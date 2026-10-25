@@ -44,7 +44,7 @@ enum ConflictSeverity: Equatable {
             if disabled.contains(shortcut) { return .dormant(shortcut) }
             return shortcut.isUniversalAccelerator
                 ? .shadowsApps(shortcut) : .dead(shortcut)
-        case .otherBinding(let who):
+        case .otherBinding(let who), .sideCollapse(let who):
             return .duplicate(who)
         case .unrecognized:
             return .unrecognized

@@ -1,5 +1,8 @@
+import CoreGraphics
 import Foundation
 import Testing
+
+@testable import KiwiDeskCore
 
 /// The one scroll-wheel event tap stays one, scroll-only, off the
 /// main actor and out of the test run (#1656, #1519).
@@ -63,19 +66,35 @@ struct ScrollTapSeamTests {
         #expect(source.components(separatedBy: "eventsOfInterest:").count == 2)
     }
 
-    @Test("the tap installs inside its own thread's closure")
+    @Test("each tap installs inside its own thread's closure")
     func installsOffMain() throws {
-        let body = try SourceScan.functionBody(
-            of: "start",
-            in: "ScrollGestureTap.swift",
-            under: "Events"
-        )
-        let closure = try #require(Self.closure(after: "Thread {", in: body))
-        #expect(closure.contains("install()"))
-        let source = try SourceScan.strippedSource(at: Self.tapFile)
-        // One call beside the declaration: a second call site
-        // could install on whatever thread it runs on.
-        #expect(source.components(separatedBy: "install()").count == 3)
+        let taps = [
+            ("ScrollGestureTap.swift", "Events", Self.tapFile),
+            (
+                "ModifierSideTap.swift", "Keys",
+                Self.root.appendingPathComponent(
+                    "Sources/KiwiDeskCore/Keys/ModifierSideTap.swift"
+                )
+            ),
+        ]
+        for (name, directory, url) in taps {
+            let body = try SourceScan.functionBody(
+                of: "start",
+                in: name,
+                under: directory
+            )
+            let closure = try #require(
+                Self.closure(after: "Thread {", in: body)
+            )
+            #expect(closure.contains("install()"), "\(name)")
+            let source = try SourceScan.strippedSource(at: url)
+            // One call beside the declaration: a second call site
+            // could install on whatever thread it runs on.
+            #expect(
+                source.components(separatedBy: "install()").count == 3,
+                "\(name)"
+            )
+        }
     }
 
     /// The brace-balanced body that opens at `marker`'s `{`.
@@ -143,5 +162,11 @@ struct ScrollTapSeamTests {
             )
         )
         #expect(source.components(separatedBy: "CGEventMask(").count == 2)
+        // The value too: a mask widened by a second term keeps the
+        // spelling above.
+        #expect(
+            ModifierSideTap.mask
+                == CGEventMask(1) << CGEventType.keyDown.rawValue
+        )
     }
 }

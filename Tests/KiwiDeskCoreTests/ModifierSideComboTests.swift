@@ -31,10 +31,13 @@ struct ModifierSideComboTests {
         #expect(try !parse("cmd+h").modifiers.isSided)
     }
 
-    @Test("two tokens for one modifier name nothing")
+    @Test(
+        "a doubled modifier, a sided Hyper or a long side name: nothing"
+    )
     func oneTokenPerModifier() {
         for text in [
             "lcmd+rcmd+h", "cmd+rcmd+h", "lalt+ropt+h", "cmd+command+h",
+            "hyper+rcmd+k", "lcommand+h", "roption+h", "rcontrol+h",
         ] {
             #expect(KeyCombo.parse(text) == nil, "\(text)")
         }
@@ -42,7 +45,7 @@ struct ModifierSideComboTests {
 
     @Test("a sided chord round-trips and is told from either-side")
     func roundTrip() throws {
-        for text in ["rcmd+h", "lopt+space", "control+ropt+h", "hyper+rcmd+k"]
+        for text in ["rcmd+h", "lopt+space", "control+ropt+h", "shift+lcmd+k"]
         {
             let combo = try parse(text)
             let canonical = try #require(combo.comboString())
@@ -134,5 +137,30 @@ struct ModifierSideComboTests {
         #expect(SideTapRow.match(rows, keyCode: 4, held: right)?.id == 2)
         #expect(SideTapRow.match(rows, keyCode: 4, held: left)?.id == 1)
         #expect(SideTapRow.match(rows, keyCode: 5, held: left) == nil)
+    }
+
+    @Test("Carbon's registered chord forgets the side")
+    func registeredIsEitherSide() throws {
+        #expect(try parse("rcmd+h").registered == parse("cmd+h"))
+        #expect(try parse("ctrl+lopt+h").registered == parse("ctrl+opt+h"))
+    }
+
+    @Test("a tie between rows breaks the same way whatever their order")
+    func tieIsDeterministic() throws {
+        let a = SideTapRow(
+            keyCode: 4,
+            modifiers: try parse("lcmd+opt+h").modifiers,
+            id: 1
+        )
+        let b = SideTapRow(
+            keyCode: 4,
+            modifiers: try parse("cmd+lopt+h").modifiers,
+            id: 2
+        )
+        let held = a.modifiers.union(b.modifiers)
+        let first = SideTapRow.match([a, b], keyCode: 4, held: held)?.id
+        let second = SideTapRow.match([b, a], keyCode: 4, held: held)?.id
+        #expect(first != nil)
+        #expect(first == second)
     }
 }

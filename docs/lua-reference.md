@@ -1175,13 +1175,10 @@ KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
 
 **Does:** `true` makes a shortcut written with a side keep that
 side: `rcmd+h` fires from the right ⌘ alone, `lcmd+h` from the left
-one. A side is `l` or `r` before `cmd`, `opt` (or `alt`), `shift`
-or `ctrl`: `lcmd` / `rcmd`, `lopt` / `ropt`, `lalt` / `ralt`,
-`lshift` / `rshift`, `lctrl` / `rctrl`. A shortcut without a side
-fires from either. A shortcut with a side and one without it on
-the same keys both work: the sided one on its side, the other on
-the other side. Two spellings of one modifier in a combo, such as
-`lcmd+rcmd+h` or `cmd+rcmd+h`, are unrecognized.
+one; the spellings are under [Modifiers and Keys](#modifiers-and-keys).
+A shortcut without a side fires from either. A shortcut with a side
+and one without it on the same keys both work: the sided one on its
+side, the other on the other side.
 
 `false` fires every shortcut from either side, sides written or
 not. Nothing is rewritten, so turning it on again brings the sides
@@ -1190,11 +1187,13 @@ back. Two shortcuts that then fall on the same keys, such as
 
 To tell the sides apart, KiwiDesk reads key presses, but only while
 this is `true` and at least one shortcut keeps a side, and it acts
-only on those shortcuts. A shortcut with a side does not glide
-when held.
+only on the shortcuts on those keys. If macOS refuses that
+(Accessibility not granted), those shortcuts fire from either side,
+as with `false`. They fire once per press when held
+([resize](#resize)).
 
 The GUI twin is **Tell left and right modifiers apart** in
-**Shortcuts & Gestures ▸ Hyper key**. Like
+**Shortcuts & Gestures ▸ Modifier keys**. Like
 [`set_hyper_key`](#set_hyper_key), the setting is app-wide, stored
 in `gui.json` as `modifier.sides`; the verb changes the running
 value only.
@@ -6069,6 +6068,15 @@ any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
 its chord without `hyper`, so an enabled macOS shortcut on that
 chord (`hyper+cmd+space` is Spotlight's) still wins.
 
+:::unreleased
+A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
+`lopt` / `ropt`, `lalt` / `ralt`, `lshift` / `rshift`, `lctrl` /
+`rctrl` (`"rcmd+h"`). It counts only while
+[`set_modifier_sides`](#set_modifier_sides) is on. Two spellings
+of one modifier (`"lcmd+rcmd+h"`, `"cmd+rcmd+h"`) and a side with
+`hyper` are unrecognized.
+:::
+
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
 `return`/`enter`, `tab`, `escape`/`esc`, `f1`–`f12`, and
@@ -6259,6 +6267,12 @@ by what its press **did**: a body that runs two commands, or a
 different verb, fires once per press, and `focus`/`swap` never
 glide. A body that rebuilds its own bindings (`bind` inside the
 body) arms nothing.
+
+:::unreleased
+While [`set_modifier_sides`](#set_modifier_sides) is on, a
+shortcut whose keys a sided shortcut also uses — sided or not —
+fires once per press.
+:::
 
 A refusal that cues (#933/#1055) ends the run, so a held shrink
 parked on a minimum flashes its pill once; scrolling's wordless

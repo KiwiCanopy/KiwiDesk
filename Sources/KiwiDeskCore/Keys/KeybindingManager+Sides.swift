@@ -7,7 +7,9 @@ public enum SideTapStatus: Equatable, Sendable {
     case off
     case running
     /// macOS refused the tap, which a missing Accessibility grant
-    /// looks like; sided shortcuts fire from neither side.
+    /// looks like; its chords fall back to Carbon either-side. A
+    /// tap macOS disabled as slow turns itself back on, so this is
+    /// the one trouble the Settings row narrates.
     case refused
 }
 
@@ -31,13 +33,18 @@ extension KeybindingManager {
     }
 
     /// Hands the tap its rows, building it for the first and
-    /// stopping it with the last, so no row means no tap.
-    func armSideTap(_ rows: [(KeyCombo, Int32)]) {
+    /// stopping it with the last, so no row means no tap. False
+    /// where rows wanted a tap macOS refused.
+    func armSideTap(_ rows: [(KeyCombo, Int32)]) -> Bool {
         guard !rows.isEmpty else {
             sideTap?.stop()
             sideTap = nil
             sideTapStatus = .off
-            return
+            return true
+        }
+        guard !sideTapRefused || sideTap != nil else {
+            sideTapStatus = .refused
+            return false
         }
         var tapRows: [SideTapRow] = []
         for (combo, ref) in rows {
@@ -77,8 +84,15 @@ extension KeybindingManager {
                     : "modifier side tap: installed"
             )
         }
-        sideTapStatus = sideTap == nil ? .refused : .running
-        sideTap?.setRows(tapRows)
+        guard let sideTap else {
+            sideTapRefused = true
+            sideBindings = [:]
+            sideTapStatus = .refused
+            return false
+        }
+        sideTapStatus = .running
+        sideTap.setRows(tapRows)
+        return true
     }
 
     /// A press the tap answered: fires the binding as a Carbon

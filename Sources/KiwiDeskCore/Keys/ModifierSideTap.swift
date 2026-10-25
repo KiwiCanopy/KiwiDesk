@@ -20,10 +20,12 @@ struct SideTapRow: Hashable, Sendable {
         rows.filter {
             $0.keyCode == keyCode && $0.modifiers.answers(held)
         }
-        .max {
-            $0.modifiers.intersection(.sides).rawValue.nonzeroBitCount
-                < $1.modifiers.intersection(.sides).rawValue
-                .nonzeroBitCount
+        .max { lhs, rhs in
+            let left = lhs.modifiers.intersection(.sides).rawValue
+            let right = rhs.modifiers.intersection(.sides).rawValue
+            // A tie breaks on the bits, never the rows' order.
+            return (left.nonzeroBitCount, left)
+                < (right.nonzeroBitCount, right)
         }
     }
 }
