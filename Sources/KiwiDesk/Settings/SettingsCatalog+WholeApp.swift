@@ -115,10 +115,21 @@ struct ShortcutsControls: Sendable {
         "shortcuts.mode_cue",
         "Show the layout after cycling"
     )
+    /// The card above the layer header (#2601 ▸ Ruling 7): Apple's
+    /// own name for these keys, as each catalog's macOS spells it.
+    let modifierKeys = SettingsControl(
+        "shortcuts.section.modifier_keys",
+        "Modifier keys"
+    )
     /// The Hyper key's recorder row (#1870), on its census label.
     let hyperKey = SettingsControl(
         "shortcuts.hyper_key",
         "Hyper key"
+    )
+    /// The card's sides switch (#2601), on its census label.
+    let modifierSides = SettingsControl(
+        "shortcuts.modifier_sides",
+        "Tell left and right modifiers apart"
     )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",

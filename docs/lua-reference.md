@@ -1149,14 +1149,15 @@ the same keys still wins. If a key mapping KiwiDesk did not set is already in pl
 and leaves it alone.
 
 When that mapping is exactly the one KiwiDesk would write for the
-chosen key, the Hyper key card's **Take Over** and
+chosen key, the Hyper key row's **Take Over** and
 [`take_over_hyper_remap`](cli.md#commands) make it KiwiDesk's.
 
 While no shortcut in the active layer uses `hyper`, pressing the
 key does nothing and draws a short note saying so.
 
-The GUI twin is **Shortcuts & Gestures ▸ Hyper key**, a recorder
-that takes one key — left and right apart. Like
+The GUI twin is the **Hyper key** row in **Shortcuts & Gestures ▸
+Modifier keys**, a recorder that takes one key — left and right
+apart. Like
 [`set_desktop_cue`](#set_desktop_cue), the setting is app-wide,
 stored in `gui.json` as `hyper.key`; the verb changes the running
 value only.

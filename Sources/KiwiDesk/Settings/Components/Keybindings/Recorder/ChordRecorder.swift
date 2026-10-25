@@ -12,7 +12,8 @@ import KiwiDeskCore
 /// In `.sourceKey` mode (the Hyper key, #1870) the first physical
 /// key pressed commits, a modifier by its own sided key code.
 /// With Hyper on, `.combo` mode reads the remapped key's F18 as
-/// the `hyper` modifier while it is held (#1870).
+/// the `hyper` modifier while it is held (#1870); with sides handed
+/// in, it records the side each modifier was pressed on (#2601).
 @MainActor
 final class ChordRecorder {
     enum Outcome {
@@ -56,6 +57,8 @@ final class ChordRecorder {
     /// `.combo` mode: whether F18 is the Hyper key, and held.
     private var hyperOn = false
     private var hyperHeld = false
+    /// `.combo` mode: what a press keeps of a side, nil for none.
+    private var sides: RecorderSides?
     var onPreview: (String) -> Void = { _ in }
     var onFinish: (Outcome) -> Void = { _ in }
     var isSuppressingKeyUp: Bool { releaseMonitor != nil }
@@ -64,6 +67,7 @@ final class ChordRecorder {
     func start(
         mode: Mode = .combo,
         hyper: Bool = false,
+        sides: RecorderSides? = nil,
         preview: @escaping (String) -> Void,
         finish: @escaping (Outcome) -> Void
     ) {
@@ -72,6 +76,7 @@ final class ChordRecorder {
         heldMost = []
         hyperOn = hyper
         hyperHeld = false
+        self.sides = sides
         onPreview = preview
         onFinish = finish
         keyMonitor = NSEvent.addLocalMonitorForEvents(
@@ -172,13 +177,11 @@ final class ChordRecorder {
             }
             guard mode == .combo else { return true }
             guard
-                let combo = KeyCombo.comboString(
-                    keyCode: UInt32(keyCode),
-                    command: flags.contains(.command),
-                    option: flags.contains(.option),
-                    control: flags.contains(.control),
-                    shift: flags.contains(.shift),
-                    hyper: hyperHeld
+                let combo = Self.combo(
+                    keyCode: keyCode,
+                    flags: flags,
+                    hyper: hyperHeld,
+                    sides: sides
                 )
             else {
                 return true
@@ -233,10 +236,8 @@ final class ChordRecorder {
     /// The key code the Hyper key arrives as (`HyperKeyRemap`).
     static let hyperCode = HyperSourceKey.trigger.keyCode
 
-    /// `.combo` mode's preview: the held modifiers, Hyper leading.
     private func previewSymbols(_ flags: NSEvent.ModifierFlags) -> String {
-        (hyperHeld ? ComboSymbols.hyperGlyph : "")
-            + Self.modifierSymbols(flags)
+        Self.preview(flags, hyper: hyperHeld, sides: sides)
     }
 
     /// Suppresses trailing key-up events following recording completion.

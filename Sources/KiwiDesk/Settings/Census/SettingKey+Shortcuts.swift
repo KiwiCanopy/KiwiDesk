@@ -87,7 +87,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
 extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
-        case .kiwiHubNavigationKeys, .modifierSides:
+        case .kiwiHubNavigationKeys:
             return .luaOnly
         case .layers, .layersIcon, .layersReach, .switchToLayer:
             // Surfaces at rest when configured layers exist.
@@ -146,14 +146,14 @@ extension ShortcutsKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
-        case .hyperKey, .shortcutBase:
+        case .hyperKey, .shortcutBase, .modifierSides:
             // Above the layer header: it belongs to no layer
-            // (#1870). The key is written at once, the base into
-            // the draft (#2460); both grey where init.lua owns the
-            // config.
+            // (#1870). The key and the sides switch (#2601) are
+            // written at once, the base into the draft (#2460); all
+            // grey where init.lua owns the config.
             return .row(
                 .shortcuts,
-                .hyperKey,
+                .modifierKeys,
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
@@ -198,7 +198,7 @@ extension ShortcutsKey {
 extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
-        case .kiwiHubNavigationKeys, .modifierSides:
+        case .kiwiHubNavigationKeys:
             return .none
         case .layers, .openApplications, .advanced, .focusDir,
             .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
@@ -295,6 +295,11 @@ extension ShortcutsKey {
             )
         case .shortcutBase:
             return .text("shortcuts.base", help: "shortcuts.base.help")
+        case .modifierSides:
+            return .text(
+                "shortcuts.modifier_sides",
+                help: "shortcuts.modifier_sides.help"
+            )
         }
     }
 }

@@ -17,7 +17,7 @@ struct HyperTakeOverOfferTests {
 
     @Test("the offer follows Core's claimable verdict")
     func offerFollowsVerdict() {
-        let offer = HyperKeyRow.takeOverOffer
+        let offer = ModifierKeysCard.takeOverOffer
         #expect(
             offer(.refused(Self.claimable), false) == Self.claimable
         )
@@ -35,7 +35,7 @@ struct HyperTakeOverOfferTests {
                 contentsOf: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent(
                         "Sources/KiwiDesk/Settings/Components/"
-                            + "Keybindings/HyperKeyRow.swift"
+                            + "Keybindings/ModifierKeysCard.swift"
                     ),
                 encoding: .utf8
             )

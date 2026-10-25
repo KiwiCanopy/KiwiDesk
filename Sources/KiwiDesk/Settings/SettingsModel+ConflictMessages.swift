@@ -110,7 +110,17 @@ extension SettingsModel {
                     + "shortcut.",
                 name(conflict.binding)
             )
-        case .otherBinding(let who), .sideCollapse(let who):
+        case .sideCollapse(let who):
+            return L(
+                "keybinding.conflict.side_collapse",
+                "Shortcut for \"%1$@\" differs from \"%2$@\" only in "
+                    + "a modifier's side — only one of the two will "
+                    + "fire until %3$@ is on.",
+                name(conflict.binding),
+                name(who),
+                ModifierSidesWords.title
+            )
+        case .otherBinding(let who):
             return L(
                 "keybinding.conflict.other_binding",
                 "Shortcut for \"%1$@\" is also bound to "
@@ -142,7 +152,7 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .sideCollapse, .unrecognized:
                 break
             }
             return L(
@@ -167,7 +177,16 @@ extension SettingsModel {
                 "\"%1$@\" isn't a recognized shortcut",
                 name(conflict.binding)
             )
-        case .otherBinding(let who), .sideCollapse(let who):
+        case .sideCollapse(let who):
+            return L(
+                "keybinding.conflict.bullet.side_collapse",
+                "\"%1$@\" and \"%2$@\" differ only in a modifier's "
+                    + "side — only one will fire until %3$@ is on",
+                name(conflict.binding),
+                name(who),
+                ModifierSidesWords.title
+            )
+        case .otherBinding(let who):
             return L(
                 "keybinding.conflict.bullet.with",
                 "\"%1$@\" and \"%2$@\" share a shortcut — "
@@ -195,7 +214,7 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .sideCollapse, .unrecognized:
                 break
             }
             return L(

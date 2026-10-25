@@ -97,6 +97,19 @@ enum ConflictText {
                     config: config
                 )
             )
+        case .sideCollapse(let who):
+            return L(
+                "keybinding.conflict.tooltip.side_collapse",
+                "Also bound in this layer to %1$@ on the other side. "
+                    + "While left and right modifiers aren't told "
+                    + "apart, only one of the two will fire. Turn on "
+                    + "%2$@ to separate them.",
+                KeybindingCatalog.localizedName(
+                    of: who,
+                    config: config
+                ),
+                ModifierSidesWords.title
+            )
         case .dead(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system_dead",

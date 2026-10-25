@@ -51,7 +51,8 @@ struct ShortcutsGates {
         case .shortcuts(.moveWindowToTrack),
             .shortcuts(.swapWithTrack):
             return trackIsUsed ? nil : .trackUnused
-        case .shortcuts(.modeCue), .shortcuts(.hyperKey):
+        case .shortcuts(.modeCue), .shortcuts(.hyperKey),
+            .shortcuts(.modifierSides):
             return guiManaged ? nil : .appWideLuaOwned
         case .shortcuts(.shortcutBase):
             guard guiManaged else { return .appWideLuaOwned }
@@ -117,6 +118,7 @@ struct ShortcutsGates {
         .shortcuts(.swapWithTrack),
         .shortcuts(.modeCue),
         .shortcuts(.hyperKey),
+        .shortcuts(.modifierSides),
         .shortcuts(.shortcutBase),
     ]
 

@@ -17,7 +17,8 @@ struct ScopeChip: View {
                 .choiceChip(selected: isOn)
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(label)
+        .accessibilityLabel(SidedChordWords.label(label))
+        .help(SidedChordWords.help(label))
         .accessibilityAddTraits(isOn ? [.isSelected] : [])
     }
 }

@@ -8,7 +8,7 @@ import Testing
 /// mode, the words the row draws and where it is offered.
 @Suite("Hyper key row")
 @MainActor
-struct HyperKeyRowTests {
+struct ModifierKeysCardTests {
     private final class Capture {
         var outcomes: [ChordRecorder.Outcome] = []
         var code: UInt16? {
@@ -121,9 +121,9 @@ struct HyperKeyRowTests {
 
     @Test("offered in Power User, and in Simple once a key is set")
     func offer() {
-        #expect(HyperKeyRow.isOffered(in: .powerUser, key: nil))
-        #expect(!HyperKeyRow.isOffered(in: .simple, key: nil))
-        #expect(HyperKeyRow.isOffered(in: .simple, key: .capsLock))
+        #expect(ModifierKeysCard.isOffered(in: .powerUser, key: nil))
+        #expect(!ModifierKeysCard.isOffered(in: .simple, key: nil))
+        #expect(ModifierKeysCard.isOffered(in: .simple, key: .capsLock))
     }
 
     @Test("the cap and the spoken board read one predicate")
@@ -187,7 +187,7 @@ struct HyperKeyRowTests {
         let row = SourceScan.stripComments(
             try String(
                 contentsOf: root.appendingPathComponent(
-                    "HyperKeyRow.swift"
+                    "ModifierKeysCard.swift"
                 ),
                 encoding: .utf8
             )
@@ -202,7 +202,7 @@ struct HyperKeyRowTests {
     @Test("the caption names the state the key is in")
     func captionStates() {
         LocalizationManager.shared.select("en")
-        let text = HyperKeyRow.captionText
+        let text = ModifierKeysCard.captionText
         #expect(
             text(.capsLock, .refused(nil), true, false)
                 == HyperKeyWords.trouble(.refused(nil))

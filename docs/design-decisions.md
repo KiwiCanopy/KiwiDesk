@@ -11108,7 +11108,8 @@ with it so the two never race for one press. The tap runs only while
 the switch is on and a side-specific shortcut exists, so a default
 install, and one that never records a side, sees no keystroke. It
 swallows only a press matching one of its shortcuts and passes every
-other key on, and it re-enables itself after `tapDisabledByTimeout`,
+other key on, recording and storing none of them, and it re-enables
+itself after `tapDisabledByTimeout`,
 since macOS disables a slow tap silently; a tap macOS refuses hands
 its shortcuts back to Carbon, either-side. A shortcut the tap answers
 does not glide, since the tap hears no release. The recorder reads

@@ -189,15 +189,43 @@ enum KeyboardCensus {
 
     // MARK: - Conflict-class predicates
 
-    /// System-reserved keys under shown modifier (#1094).
+    /// Whether the shown scope holds `source`'s cap down (#2601): a
+    /// modifier its chip names, on the named side, or on either
+    /// side where it names none. The board's bar and the spoken
+    /// "Holding" both read this. The Hyper key's cap is held by a
+    /// ✦ chip alone, since it no longer makes its modifier.
+    static func holds(
+        _ source: HyperSourceKey?,
+        scope: Scope,
+        hyper: HyperSourceKey?
+    ) -> Bool {
+        guard case .one(let layer) = scope, let source else { return false }
+        if source == hyper { return layer.modifiers.contains(.hyper) }
+        guard let (kind, side) = source.modifierSide,
+            layer.modifiers.contains(kind.plain)
+        else { return false }
+        let named = layer.modifiers.side(of: kind)
+        return named == nil || named == side
+    }
+
+    /// The sided keys the shown scope holds, for the spoken board;
+    /// an either-side modifier is named by the chip already.
+    static func heldSides(scope: Scope) -> [HyperSourceKey] {
+        guard case .one(let layer) = scope else { return [] }
+        return ModifierKind.allCases.compactMap { kind in
+            layer.modifiers.side(of: kind).map {
+                HyperSourceKey.key($0, of: kind)
+            }
+        }
+    }
+
+    /// System-reserved keys under shown modifier (#1094). A sided
+    /// chord meets the either-side reservation, as Carbon reads it.
     static func reservedKeys(scope: Scope) -> Set<UInt32> {
         guard case .one(let layer) = scope else { return [] }
         return Set(
             SystemShortcuts.map.keys
-                .filter {
-                    ModifierLayer(modifiers: $0.modifiers)
-                        == layer
-                }
+                .filter { $0.modifiers == layer.modifiers.unsided }
                 .map(\.keyCode)
         )
     }
@@ -246,7 +274,7 @@ enum KeyboardCensus {
         else { return nil }
         let combo = SystemShortcuts.map.keys.first {
             $0.keyCode == code
-                && ModifierLayer(modifiers: $0.modifiers) == layer
+                && $0.modifiers == layer.modifiers.unsided
         }
         return combo.flatMap { SystemShortcuts.map[$0] }
     }

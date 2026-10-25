@@ -104,6 +104,7 @@ struct KeyboardBoardSpokenTests {
             scopeLabel: "All",
             layerLabel: nil,
             hyperName: "Caps Lock",
+            holding: [],
             conflictDetail: []
         )
         #expect(named.contains("The Hyper key is Caps Lock."))
@@ -132,6 +133,7 @@ struct KeyboardBoardSpokenTests {
             scopeLabel: "All",
             layerLabel: nil,
             hyperName: nil,
+            holding: [],
             conflictDetail: []
         )
         #expect(
@@ -146,6 +148,7 @@ struct KeyboardBoardSpokenTests {
             scopeLabel: "⌘",
             layerLabel: nil,
             hyperName: nil,
+            holding: [],
             conflictDetail: []
         )
         #expect(full.hasPrefix("Keyboard preview, showing ⌘. Bound: Q"))
@@ -167,6 +170,7 @@ struct KeyboardBoardSpokenTests {
             scopeLabel: "All",
             layerLabel: "media",
             hyperName: nil,
+            holding: [],
             conflictDetail: []
         )
         #expect(
@@ -179,6 +183,7 @@ struct KeyboardBoardSpokenTests {
                 scopeLabel: "All",
                 layerLabel: nil,
                 hyperName: nil,
+                holding: [],
                 conflictDetail: []
             ).contains("layer")
         )
@@ -199,6 +204,7 @@ struct KeyboardBoardSpokenTests {
             scopeLabel: "⌃⌥",
             layerLabel: nil,
             hyperName: nil,
+            holding: [],
             conflictDetail: [
                 "⌃⌥J — Focus left", "⌃⌥J — Swap left",
             ]
@@ -212,6 +218,7 @@ struct KeyboardBoardSpokenTests {
             scopeLabel: "⌃⌥",
             layerLabel: nil,
             hyperName: nil,
+            holding: [],
             conflictDetail: ["⌃⌥J — Focus left"]
         )
         #expect(!quiet.contains("Focus left"))

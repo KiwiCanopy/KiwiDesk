@@ -29,6 +29,7 @@ struct KiwiVisionLensPage: View {
         }
         .environment(\.keybindingLayerName, KeyLayer.defaultName)
         .environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
+        .environment(\.recorderSides, model.recorderSides)
         .environment(
             \.disabledSystemShortcuts,
             model.disabledSystemShortcuts()

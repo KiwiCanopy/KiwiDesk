@@ -24,3 +24,23 @@ extension SettingsModel {
         core.withUserMotion { core.setAppWide(persisting: true, change) }
     }
 }
+
+/// The sides switch's live reads (#2601).
+extension SettingsModel {
+    /// What a recording keeps of a side, nil while the switch is
+    /// off.
+    var recorderSides: RecorderSides? {
+        appWide.modifierSides
+            ? RecorderSides(hyperKey: appWide.hyperKey) : nil
+    }
+
+    /// What the side tap last did, read live.
+    var sideTapStatus: SideTapStatus { core.keys.sideTapStatus }
+
+    /// The draft's rows that keep a modifier's side, every layer.
+    var sidedShortcutCount: Int {
+        config.layers.flatMap(\.bindings).count {
+            KeyCombo.parse($0.combo)?.modifiers.isSided == true
+        }
+    }
+}

@@ -29,6 +29,10 @@ enum ConflictSeverity: Equatable {
     /// Another row of the same layer holds the chord: one of the
     /// two fires, the other is silent.
     case duplicate(KeyBinding)
+    /// Another row differs only in a modifier's side, and sides are
+    /// not told apart (#2601 ▸ Ruling 5): one of the two fires, and
+    /// the switch separates them.
+    case sideCollapse(KeyBinding)
     /// The chord string does not parse.
     case unrecognized
 
@@ -44,8 +48,10 @@ enum ConflictSeverity: Equatable {
             if disabled.contains(shortcut) { return .dormant(shortcut) }
             return shortcut.isUniversalAccelerator
                 ? .shadowsApps(shortcut) : .dead(shortcut)
-        case .otherBinding(let who), .sideCollapse(let who):
+        case .otherBinding(let who):
             return .duplicate(who)
+        case .sideCollapse(let who):
+            return .sideCollapse(who)
         case .unrecognized:
             return .unrecognized
         }

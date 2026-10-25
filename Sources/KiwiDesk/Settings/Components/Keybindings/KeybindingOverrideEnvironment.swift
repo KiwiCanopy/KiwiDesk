@@ -34,7 +34,19 @@ private struct HyperKeyIsOffKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+/// What a recording keeps of a modifier's side (#2601), read once
+/// per section render beside `hyperKeyIsOff`: nil while the switch
+/// is off, so a mount outside the wiring sites records either-side.
+private struct RecorderSidesKey: EnvironmentKey {
+    static let defaultValue: RecorderSides? = nil
+}
+
 extension EnvironmentValues {
+    var recorderSides: RecorderSides? {
+        get { self[RecorderSidesKey.self] }
+        set { self[RecorderSidesKey.self] = newValue }
+    }
+
     var hyperKeyIsOff: Bool {
         get { self[HyperKeyIsOffKey.self] }
         set { self[HyperKeyIsOffKey.self] = newValue }

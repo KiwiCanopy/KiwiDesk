@@ -91,7 +91,12 @@ struct KeyboardBoard: View {
                 ?? false,
             isOverwritten: key.code
                 .map(overwritten.contains) ?? false,
-            legend: KeyboardMatrix.legend(of: key, hyper: hyperKey)
+            legend: KeyboardMatrix.legend(of: key, hyper: hyperKey),
+            held: KeyboardCensus.holds(
+                key.source,
+                scope: scope,
+                hyper: hyperKey
+            )
         )
         .frame(width: max(width, 0), height: unit)
         .onHover { inside in
@@ -128,6 +133,8 @@ struct KeyCap: View {
     let isConflicted: Bool
     let isOverwritten: Bool
     let legend: String?
+    /// A modifier cap the shown chip holds down (#2601).
+    var held = false
 
     var body: some View {
         RoundedRectangle(cornerRadius: 4)
@@ -140,6 +147,19 @@ struct KeyCap: View {
                     .foregroundStyle(ink)
                     .padding(.horizontal, 1)
             )
+            .overlay(alignment: .bottom) { heldBar }
+    }
+
+    /// A short bar under the legend in the legend's own ink: no new
+    /// hue and no stroke, so it never reads as a ring (#2601).
+    @ViewBuilder private var heldBar: some View {
+        if held {
+            Capsule()
+                .fill(SettingsTheme.plateInk.opacity(0.75))
+                .frame(width: 8, height: 1.5)
+                .padding(.bottom, 2.5)
+                .accessibilityHidden(true)
+        }
     }
 
     @ViewBuilder private var border: some View {

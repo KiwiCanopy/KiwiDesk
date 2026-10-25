@@ -285,7 +285,7 @@ struct ShortcutsCensusRenderTests {
             Self.containers(of: .shortcuts) == [
                 .showHide, .focus, .moveWindows, .layout, .sizeAndFloat,
                 .openApplications, .layers,
-                .luaBindings, .defaultShortcuts, .gestures, .hyperKey,
+                .luaBindings, .defaultShortcuts, .gestures, .modifierKeys,
             ]
         )
     }
