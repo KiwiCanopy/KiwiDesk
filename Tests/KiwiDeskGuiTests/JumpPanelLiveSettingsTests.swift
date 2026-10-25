@@ -9,7 +9,7 @@ import Testing
 /// with (#2604): a CLI colour or glass change reaches the shown
 /// panel's model, the view reads its glass from that model, and the
 /// app hands the one settings hook to KiwiHub through its fan-out.
-/// The panel is built for real but never ordered in.
+/// The panel is built for real; only the close test orders it in.
 @Suite("KiwiHub live settings (#2604)")
 @MainActor
 struct JumpPanelLiveSettingsTests {
@@ -64,6 +64,7 @@ struct JumpPanelLiveSettingsTests {
         let panel = try #require(controller.panel)
         panel.orderFrontRegardless()
         defer { panel.orderOut(nil) }
+        try #require(panel.isVisible)
         controller.close()
         #expect(!controller.isOpen)
         core.tiler.settings.shortcutPanelLiquidGlass.toggle()
@@ -73,25 +74,36 @@ struct JumpPanelLiveSettingsTests {
     /// The hook is one slot, so a second assignment would unhook
     /// KiwiHub with every behavioural test above still green: the
     /// GUI assigns it once, in the app's fan-out, which hands it to
-    /// the panel.
+    /// the panel, and Core only in the accessor's setter.
     @Test("the app wires the hook once, through its fan-out")
     func hookIsWiredOnce() throws {
-        let gui = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk")
+        let root = SourceScan.repoRoot(from: #filePath)
+        let gui = root.appendingPathComponent("Sources/KiwiDesk")
         let assign = try NSRegularExpression(
             pattern: #"\.onSettingsChange\s*="#
         )
         var sites: [String] = []
-        let files = try SourceScan.swiftSources(under: gui)
-        #expect(!files.isEmpty)
-        for file in files {
-            let source = try SourceScan.strippedSource(at: file)
-            let range = NSRange(source.startIndex..., in: source)
-            if assign.numberOfMatches(in: source, range: range) > 0 {
-                sites.append(file.lastPathComponent)
+        for tree in ["Sources/KiwiDeskCore", "Sources/KiwiDesk"] {
+            let files = try SourceScan.swiftSources(
+                under: root.appendingPathComponent(tree)
+            )
+            #expect(!files.isEmpty)
+            for file in files {
+                let source = try SourceScan.strippedSource(at: file)
+                let range = NSRange(source.startIndex..., in: source)
+                let count = assign.numberOfMatches(
+                    in: source,
+                    range: range
+                )
+                sites += Array(repeating: file.lastPathComponent, count: count)
             }
         }
-        #expect(sites == ["AppDelegate+SettingsReaders.swift"])
+        #expect(
+            sites == [
+                "KiwiCore+Accessors.swift",
+                "AppDelegate+SettingsReaders.swift",
+            ]
+        )
         let fanOut = try SourceScan.strippedSource(
             at: gui.appendingPathComponent(
                 "AppDelegate+SettingsReaders.swift"
