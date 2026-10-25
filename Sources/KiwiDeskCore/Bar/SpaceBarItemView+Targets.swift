@@ -109,7 +109,9 @@ extension SpaceBarItemView {
         }) {
             return hit
         }
-        return super.hitTest(point)
+        // Every other press is the item's, as the outline clip
+        // covering it once made it (#2595).
+        return super.hitTest(point) == nil ? nil : self
     }
 
     /// A glyph speaks as its app; a group adds its window count.
@@ -136,7 +138,9 @@ extension SpaceBarItemView {
             label: label
         )
         target.actions = glyphActions
-        addSubview(target)
+        // Beneath the stroke stack, hosted or not (#2595); the
+        // item's hit test finds a target wherever it lies.
+        addSubview(target, positioned: .below, relativeTo: overflowBadge)
         return target
     }
 

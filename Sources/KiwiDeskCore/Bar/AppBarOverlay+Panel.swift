@@ -35,6 +35,13 @@ extension AppBarOverlay {
         #endif
     }
 
+    /// A flipped view blind to the pointer, riding an item's glass
+    /// host while hosted: its outline clip and what draws above
+    /// the outline (#2595).
+    final class PassThroughFlippedView: FlippedView, GlassBoxRider {
+        override func hitTest(_ point: NSPoint) -> NSView? { nil }
+    }
+
     /// Resolves the section's own glass hosting (#407).
     func glassHosting(_ style: AppBarLook) -> GlassHosting {
         GlassHosting.resolve(

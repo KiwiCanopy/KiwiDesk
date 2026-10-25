@@ -1371,6 +1371,23 @@ Obligations:
   pins subview identity, never a view-side callback (#1314 too).
   The tint wraps once and is never re-wrapped on a render
   (`GlassFillOnTopTests` ▸ `settledTintStays`).
+- **Seat a glass-hosted box's stroke stack in its
+  `GlassBoxHost` above the glass, never inside the glass's
+  content**, which the glass's key-window rim draws over (#2595).
+  The stack is each item's `strokes` — the border, the outline
+  clip (the drop ring rides in it) and `aboveOutline`, which holds
+  whatever draws over the outline — so its order is the same
+  hosted or not. It follows the item's own move, through the one
+  `GlassBox.seatStrokes` its `viewDidMoveToSuperview` and `init`
+  call, so a host-changing arm names only the item's move. The
+  item frames its riders in its own coordinates and the host
+  sizes none of them (`GlassBoxRider`); the item answers its own
+  presses, since its riders take none. A new stroke on a box, or
+  a view that must draw over the outline, joins that stack in
+  both items; a view an item adds after `init` goes into
+  `aboveOutline` or below a named sibling, never a bare
+  `addSubview` on the item, whose place would then depend on
+  whether the item was ever hosted (`BoxStrokeAboveGlassTests`).
 - **A view a glass hosted leaves it only through
   `GlassPlate.release`, and a bar tears its per-item glass down
   BEFORE the frame pass that places the items it hosted** (#1730).
@@ -1647,7 +1664,9 @@ Boxed.
   `borderColor`, never the stored width. The rim is its own
   fill-less, click-through view framed to the surface, so it
   strokes on the edge, never inset: above the plate or the
-  chip's glass. A box's rim stands down under an active indicator
+  chip's glass, and on a hosted box above its glass
+  (`BoxStrokeAboveGlassTests`). A
+  box's rim stands down under an active indicator
   that strokes the box's own edge — the outline, never the edge
   mark — through the one `ShelfBorder.yields`, each site handing
   the painter the indicator it draws over the rim, never a

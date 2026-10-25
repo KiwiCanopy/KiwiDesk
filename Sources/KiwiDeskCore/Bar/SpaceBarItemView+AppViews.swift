@@ -118,7 +118,7 @@ extension SpaceBarItemView {
         if let sibling {
             addSubview(view, positioned: .below, relativeTo: sibling)
         } else {
-            addSubview(view)
+            aboveOutline.addSubview(view)
         }
     }
 }
