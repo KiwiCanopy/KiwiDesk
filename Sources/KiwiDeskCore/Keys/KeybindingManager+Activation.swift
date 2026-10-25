@@ -12,18 +12,31 @@ extension KeybindingManager {
             registrar.unregister(id: id)
         }
         activeBindings = [:]
+        // The tap answers nothing while suspended, or it would
+        // swallow the sided press the recorder reads (#2601).
+        sideBindings = [:]
+        sideTap?.setRows([])
     }
 
     func activate(_ layer: String) {
         deactivate()
         activationFailures = []
         noteHyperShortcuts()
-        guard !isSuspended else { return }
+        guard !isSuspended else {
+            armSideTap([])
+            return
+        }
         var hyperRows: [(KeyCombo, Int32)] = []
+        var sideRows: [(KeyCombo, Int32)] = []
+        let tapped = tappedChords(in: layer)
         for (combo, ref) in bindings(for: layer) {
             // A Hyper combo registers only while the key is held.
             if combo.modifiers.contains(.hyper) {
                 hyperRows.append((combo, ref))
+                continue
+            }
+            if tapped.contains(combo.unsided) {
+                sideRows.append((combo, ref))
                 continue
             }
             guard
@@ -58,6 +71,7 @@ extension KeybindingManager {
             }
         }
         armHyper(hyperRows)
+        armSideTap(sideRows)
     }
 
     /// Registers ONE physical key for combo. Each physical key

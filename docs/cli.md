@@ -454,6 +454,12 @@ that way, stopping at the edge; neither takes other arguments
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 
+:::unreleased
+`set_modifier_sides` takes `true|false` (default `false`) and
+makes a shortcut written with a side, such as `rcmd+h`, keep it
+([`set_modifier_sides`](lua-reference.md#set_modifier_sides)).
+:::
+
 `take_over_hyper_remap` takes over a Hyper remap another tool
 left in place when it is exactly the one KiwiDesk would write for
 the chosen key ([`set_hyper_key`](lua-reference.md#set_hyper_key)).

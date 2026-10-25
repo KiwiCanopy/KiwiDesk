@@ -1165,6 +1165,50 @@ KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
 ```
 
 :::unreleased
+### set_modifier_sides
+
+**Expects:** `true` or `false` (default `false`).
+
+**Does:** `true` makes a shortcut written with a side keep that
+side: `rcmd+h` fires from the right ⌘ alone, `lcmd+h` from the left
+one. A side is `l` or `r` before `cmd`, `opt` (or `alt`), `shift`
+or `ctrl`: `lcmd` / `rcmd`, `lopt` / `ropt`, `lalt` / `ralt`,
+`lshift` / `rshift`, `lctrl` / `rctrl`. A shortcut without a side
+fires from either. A shortcut with a side and one without it on
+the same keys both work: the sided one on its side, the other on
+the other side. Two spellings of one modifier in a combo, such as
+`lcmd+rcmd+h` or `cmd+rcmd+h`, are unrecognized.
+
+`false` fires every shortcut from either side, sides written or
+not. Nothing is rewritten, so turning it on again brings the sides
+back. Two shortcuts that then fall on the same keys, such as
+`lcmd+h` and `rcmd+h`, are a conflict, and only one of them works.
+
+To tell the sides apart, KiwiDesk reads key presses, but only while
+this is `true` and at least one shortcut keeps a side, and it acts
+only on those shortcuts. A shortcut with a side does not glide
+when held.
+
+The GUI twin is **Tell left and right modifiers apart** in
+**Shortcuts & Gestures ▸ Hyper key**. Like
+[`set_hyper_key`](#set_hyper_key), the setting is app-wide, stored
+in `gui.json` as `modifier.sides`; the verb changes the running
+value only.
+
+**Example:**
+
+```lua
+KiwiDesk.set_modifier_sides(true)
+KiwiDesk.bind("lalt+space", function()
+    KiwiDesk.focus_or_spawn("com.mitchellh.ghostty")
+end)
+KiwiDesk.bind("ralt+space", function()
+    KiwiDesk.focus_or_spawn("com.apple.Safari")
+end)
+```
+:::
+
+:::unreleased
 ### set_space_transition
 
 **Expects:** `"slide"`, `"show"` or `"none"` (default `"slide"`).

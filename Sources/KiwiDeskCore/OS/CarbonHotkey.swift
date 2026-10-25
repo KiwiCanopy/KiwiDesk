@@ -32,8 +32,9 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
     /// is held (`KeybindingManager+Hyper`), never with this bit.
     public static let hyper = Self(rawValue: 1 << 20)
 
-    /// The mask Carbon reads: everything but `hyper`.
-    var carbonMask: UInt32 { subtracting(.hyper).rawValue }
+    /// The mask Carbon reads: everything but `hyper` and the side
+    /// bits, so a sided chord registers as either-side (#2601).
+    var carbonMask: UInt32 { subtracting(.hyper).unsided.rawValue }
 }
 
 /// C callback for Carbon hotkey events. Carbon delivers exactly

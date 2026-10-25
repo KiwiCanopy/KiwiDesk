@@ -48,6 +48,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case modeCue = "appWide.modeCue"
     /// The key turned into Hyper (#1870): app-wide, per Mac.
     case hyperKey = "appWide.hyperKey"
+    /// Whether shortcuts keep a modifier's side (#2601): app-wide.
+    case modifierSides = "appWide.modifierSides"
     /// The "Shortcuts use" switch's base (#2460), drafted with the
     /// layers it moves.
     case shortcutBase = "config.shortcutBase"
@@ -81,6 +83,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
 extension ShortcutsKey {
     var placement: SettingPlacement {
         switch self {
+        case .modifierSides:
+            return .luaOnly
         case .layers, .layersIcon, .layersReach, .switchToLayer:
             // Surfaces at rest when configured layers exist.
             return .row(
@@ -190,6 +194,8 @@ extension ShortcutsKey {
 extension ShortcutsKey {
     var text: SettingRowText {
         switch self {
+        case .modifierSides:
+            return .none
         case .layers, .openApplications, .advanced, .focusDir,
             .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
             .swapDir,
