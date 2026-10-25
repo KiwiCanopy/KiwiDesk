@@ -99,12 +99,29 @@ extension KiwiCore {
             frame: frame,
             bounds: bounds
         )
-        applyResizeAdjustment(
-            adjustment,
-            for: id,
-            in: space,
-            bounds: bounds
-        )
+        // A drag along a scrolled BSP chain is a run weight, handed
+        // the points the drag measured (#2542).
+        let along: (axis: String, points: CGFloat)? =
+            switch adjustment {
+            case .bspRatioH: ("x", frame.width - slot.width)
+            case .bspRatioV: ("y", frame.height - slot.height)
+            default: nil
+            }
+        if along.flatMap({
+            resizeBspChain(
+                id,
+                axis: $0.axis,
+                delta: Double($0.points),
+                space: space
+            )
+        }) == nil {
+            applyResizeAdjustment(
+                adjustment,
+                for: id,
+                in: space,
+                bounds: bounds
+            )
+        }
         // **No sizing promise here**, unlike the keyboard verb —
         // and the difference is not taste, it is the definition
         // (#593). `.allSpringSized` asserts that every window in

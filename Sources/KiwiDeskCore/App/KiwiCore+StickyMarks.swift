@@ -133,49 +133,6 @@ extension KiwiCore {
         return true
     }
 
-    /// Refuses a swap that would push a sticky FOCUSED window into
-    /// the overflow pile (#438). A sticky window is pile-exempt
-    /// (#414 v2) — it always keeps a tiled cell, so swapping it onto
-    /// a piled `target` is futile: the retile snaps it straight back
-    /// and only reshuffles a neighbour into the pile. Detect the
-    /// piled target with the shared cascade detector (#172), flash a
-    /// cue on the sticky window, and report the refusal so the caller
-    /// skips the dead swap. A third, distinct vocabulary from the
-    /// traveler pill (#435) and the dead-end bounce (#436). Returns
-    /// `false` for any normal swap (non-sticky focus, or a tiled
-    /// target).
-    func refuseStickyIntoPile(
-        _ focused: WindowID,
-        target: WindowID,
-        among slots: [(id: WindowID, frame: CGRect)]
-    ) -> Bool {
-        guard state.windows[focused]?.isSticky == true,
-            !Navigation.pileMates(of: target, among: slots).isEmpty
-        else { return false }
-        flashStickyCannotPile(focused)
-        return true
-    }
-
-    /// Expands a sticky window's mark into a pill explaining it can't
-    /// be sent to the overflow pile (#438). Gated by the same
-    /// `sticky.mark` as the mark; a no-op for a non-sticky
-    /// window or when the mark is off. No relayout precedes it (the
-    /// swap is refused outright), so it appears at once.
-    func flashStickyCannotPile(_ id: WindowID) {
-        guard tiler.settings.stickyStyle.mark else { return }
-        soundIfDrawn(
-            stickyMarks.flash(
-                id,
-                format: L(
-                    "sticky.pile.pill",
-                    "Sticky windows can't be moved to the pile"
-                ),
-                mark: .text(""),
-                delay: 0.05
-            )
-        )
-    }
-
     /// Whether moving `window` to `target` is refused because it is
     /// sticky (#445), flashing the matching pill when it is. The
     /// single sticky-move gate, shared by EVERY membership-mutation

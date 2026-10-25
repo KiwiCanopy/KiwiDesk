@@ -119,18 +119,17 @@ struct VisibleBoundsSeamTests {
         #expect(abs(right.minX - 657) < 1)
     }
 
-    @Test("A rect below 2 * min_window_size piles instead")
-    func narrowBoundsPileThePair() {
+    @Test("A rect below 2 * min_window_size scrolls the pair")
+    func narrowBoundsScrollThePair() {
         // No screen at all means the injected closure is
         // never consulted (the layout resolves no screen to
         // pass it), so there is nothing here to assert.
         guard NSScreen.main != nil else { return }
         // 500pt cannot seat two 300pt regions side by side, so
-        // BspLayout falls back to an OverlapStack cascade
-        // (#383/#44) — the failure mode a narrow CI display used
-        // to produce by accident (#523). Its signature is equal
-        // minX with midYs exactly `OverlapStack.offset` (40pt,
-        // vertical-only) apart.
+        // BspLayout scrolls them (#2542): the focused window takes
+        // the whole width and the other parks at the hide corner
+        // — the shape a narrow CI display produces by accident
+        // (#523).
         let core = makeCore(
             bounds: CGRect(x: 0, y: 0, width: 500, height: 900)
         )
@@ -148,12 +147,13 @@ struct VisibleBoundsSeamTests {
         )
         let first = frames[WindowID(1)]!
         let second = frames[WindowID(2)]!
-        #expect(abs(first.minX - second.minX) < 1)
-        #expect(
-            abs(
-                abs(first.midY - second.midY)
-                    - OverlapStack.offset
-            ) < 1
-        )
+        // One shows across the whole width; the other parks at
+        // the real screen's corner, off the pinned rect but for
+        // the peek.
+        let inside = CGRect(x: 0, y: 0, width: 500, height: 900)
+            .insetBy(dx: 2, dy: 2)
+        let shown = [first, second].filter { inside.intersects($0) }
+        #expect(shown.count == 1)
+        #expect(shown.allSatisfy { abs($0.width - 500) < 1 })
     }
 }

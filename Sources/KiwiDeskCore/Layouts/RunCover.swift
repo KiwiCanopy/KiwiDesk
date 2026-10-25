@@ -12,9 +12,8 @@ public struct RunCover: Sendable, Equatable {
         /// What the weights divide once the shown members' floors
         /// are set aside (`RunZone.runExtra`).
         public let extra: CGFloat
-        /// The bounds this run's ends sit flush with — the layout
-        /// bounds, outer gap included, for a Stack zone or a Track
-        /// track; a later pile's own cell (#2235).
+        /// The bounds this run's ends sit flush with
+        /// (`RunZone.markBounds`, #2235, #2542).
         public let bounds: CGRect
 
         /// Members shown, in drawn order.
@@ -87,13 +86,22 @@ public struct RunCover: Sendable, Equatable {
             guard let run = zone.run(in: context), run.hides else {
                 return nil
             }
-            return Run(
-                zone: zone,
-                run: run,
-                extra: zone.runExtra(in: context) ?? 0,
-                bounds: context.bounds
-            )
+            return Run(zone: zone, run: run, in: context)
         }
         return RunCover(space: space, runs: runs)
+    }
+}
+
+extension RunCover.Run {
+    /// `run` as `zone` draws it in `context` — the one assembly
+    /// `RunCover.of` and a BSP press over a run no cover records
+    /// share (#2542).
+    public init(zone: RunZone, run: ZoneRun, in context: LayoutContext) {
+        self.init(
+            zone: zone,
+            run: run,
+            extra: zone.runExtra(in: context) ?? 0,
+            bounds: zone.markBounds(in: context)
+        )
     }
 }

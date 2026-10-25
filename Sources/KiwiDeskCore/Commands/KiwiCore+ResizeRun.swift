@@ -22,6 +22,27 @@ extension KiwiCore {
                 $0.shown.contains(focused)
             })
         else { return nil }
+        return resizeInRun(
+            focused,
+            run: run,
+            axis: axis,
+            delta: delta,
+            space: space,
+            otherAxisDivides: otherAxisDivides
+        )
+    }
+
+    /// The write for `focused` inside `run` — the recorded one, or
+    /// a BSP chain's own run, which shows every window when no
+    /// cover records it (#2542).
+    func resizeInRun(
+        _ focused: WindowID,
+        run: RunCover.Run,
+        axis: String,
+        delta: Double,
+        space: Space,
+        otherAxisDivides: Bool
+    ) -> CommandResponse {
         let shown = Array(run.shown)
         guard shown.count > 1, let index = shown.firstIndex(of: focused)
         else {

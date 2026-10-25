@@ -1187,11 +1187,21 @@ editing here:
   `RunZone.zones` alone, and a run reader — the focus step
   (`runStep`), the park keep beside the inward post-pass, the
   readers above — reads a `RunCover` (the recorded one, or
-  `RunCover.of` on a pass that records none), never a list of
+  `RunCover.of` on a pass that records none, or a zone's own run
+  through `RunCover.Run(zone:run:in:)` where no cover records a
+  run that hides nothing), never a list of
   layout modes; a mode write clears every sizing store — the
   session ratios, the track weights and `stackWeights`, which
   every run reads — never a list of the modes it leaves or
-  enters (#2541, the #458 reseed). A new scrolling layout then needs no
+  enters (#2541, the #458 reseed). A layout whose stored ratios
+  sit beside a run — BSP's chain (#2542) — routes every ratio door
+  (the keyboard press, the mouse drag, the capped writer, the
+  floor heal) through the run first: a press or drag along the
+  chain takes a run weight through the one `resizeBspChain`, and a
+  side classifier counts the chain as one block at its region
+  through `BspSplit.sides(…, chain:)`, never its members' slots,
+  so no ratio moves for a window no ratio places
+  (`BspRunCommandTests`). A new scrolling layout then needs no
   second wiring (`GridRunCommandTests` ▸ `focusStepsIntoTheRun`
   holds Grid's focus step; that no mode list returns is
   review's):
@@ -1774,7 +1784,7 @@ editing here:
   the other axis divides.
   Two obligations on that judgement, both learned the same way.
   **Judge it on what the layout DREW, never on a member count**:
-  a bsp region too small for two minimum-size windows piles them
+  a bsp region too small for one minimum-size window piles them
   and answers to no ratio at all, which a cardinality test
   cannot see, and the extent test cannot either — the pile's
   cascade offsets each copy, so the union outgrows every slot

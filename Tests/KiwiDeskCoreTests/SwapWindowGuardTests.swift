@@ -7,8 +7,7 @@ import Testing
 
 /// The nets a window-id swap owes beside its membership (#2509):
 /// the no-follow latch and move settle for the window that LEFT,
-/// the z-order restore a trade into the active Space arms, and
-/// the #438 refusal of a sticky window into a pile.
+/// and the z-order restore a trade into the active Space arms.
 @Suite("swap by window id: latch, settle, restack (#2509)", .serialized)
 @MainActor
 struct SwapWindowGuardTests {
@@ -106,29 +105,5 @@ struct SwapWindowGuardTests {
         core.execute("swap_here", args: [.number(900_101)])
         #expect(core.pendingZOrderRestore)
         core.tiler.animation.cancelAll(snapToTargets: false)
-    }
-
-    /// A screen too small for three tiles piles them; a sticky
-    /// window is never swapped into that pile.
-    @Test("a sticky window is refused a swap into a pile")
-    func stickyIntoPileRefused() throws {
-        let core = makeCore(
-            active: 3,
-            bounds: CGRect(x: 0, y: 25, width: 400, height: 300)
-        )
-        core.state.windows.setSticky(WindowID(900_003), .global)
-        let space = try #require(core.activeSpace)
-        let frames = core.tiler.calculatedFrames(state: core.state)
-        let slots = space.windows.compactMap { id in
-            frames[id].map { (id: id, frame: $0) }
-        }
-        let pile = Navigation.pileMates(
-            of: WindowID(900_001),
-            among: slots
-        )
-        try #require(!pile.isEmpty)
-        let before = space.windows
-        core.execute("swap", args: [.number(900_001)])
-        #expect(core.state.workspaces[Self.one]?.windows == before)
     }
 }

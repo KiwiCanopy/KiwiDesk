@@ -59,7 +59,7 @@ public enum BspSplit {
         let placed = windows.compactMap { id in
             slots[id].map { (id: id, slot: $0) }
         }
-        // A region too small for two minimum-size windows makes
+        // A region too small for one minimum-size window makes
         // the layout give up and PILE them (`OverlapStack`). A
         // piled window's size answers to no ratio, so it takes
         // no part in the split — the same verdict as a full-span
@@ -118,5 +118,44 @@ public enum BspSplit {
             }
         }
         return (first, second)
+    }
+
+    /// `sides` for a Space whose overflow scrolls (#2542): the
+    /// chain counts as one block at its region, never at its
+    /// members' slots, a hidden one's being parked. Across the
+    /// chain every member in `windows` sits on the block's side;
+    /// along it none answers to a ratio, since the run divides
+    /// the line by weight.
+    public static func sides(
+        of windows: [WindowID],
+        slots: [WindowID: CGRect],
+        bounds: CGRect,
+        horizontal: Bool,
+        chain: RunZone?
+    ) -> (first: [WindowID], second: [WindowID]) {
+        guard let chain, let block = chain.members.first else {
+            return sides(
+                of: windows,
+                slots: slots,
+                bounds: bounds,
+                horizontal: horizontal
+            )
+        }
+        let members = Set(chain.members)
+        var framed = slots.filter { !members.contains($0.key) }
+        framed[block] = chain.region
+        let placed = windows.filter { !members.contains($0) } + [block]
+        let split = sides(
+            of: placed,
+            slots: framed,
+            bounds: bounds,
+            horizontal: horizontal
+        )
+        let across = horizontal == chain.vertical
+        let listed = chain.members.filter(windows.contains)
+        func expand(_ side: [WindowID]) -> [WindowID] {
+            side.flatMap { $0 == block ? (across ? listed : []) : [$0] }
+        }
+        return (expand(split.first), expand(split.second))
     }
 }

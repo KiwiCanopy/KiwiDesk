@@ -75,10 +75,6 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+TrackNavigate.swift": (
             .slots, "navigation is geometric over shown regions"
         ),
-        "KiwiCore+SwapCommand.swift": (
-            .slots,
-            "an id swap's #438 refusal classifies a shown pile (#2509)"
-        ),
         "KiwiCore+NavigateCommand.swift": (
             .slots, "navigation is geometric over shown regions"
         ),
@@ -93,6 +89,9 @@ struct FrameSetReaderCensusTests {
         ),
         "KiwiCore+ResizeBsp.swift": (
             .slots, "the focus sign reads the slot's side"
+        ),
+        "KiwiCore+ResizeBspChain.swift": (
+            .slots, "a drag's side and the other axis read the slots"
         ),
         "KiwiCore+RunRest.swift": (
             .slots,
@@ -112,7 +111,6 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+NavigateCommand.swift",
         "KiwiCore+FocusEdge.swift",
         "KiwiCore+TrackNavigate.swift",
-        "KiwiCore+SwapCommand.swift",
     ]
 
     /// The `.slots` readers that may take the raw slots, each with
@@ -132,8 +130,12 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+ZOrder.swift":
             "a whole-zone pile's cascade; a run takes its own restore",
         "KiwiCore+ResizeScrollSlot.swift": "Scrolling draws no run",
-        "KiwiCore+RatioWriters.swift": "bsp draws no run",
-        "KiwiCore+ResizeBsp.swift": "bsp draws no run",
+        "KiwiCore+RatioWriters.swift":
+            "a scrolled chain classifies by its region (#2542)",
+        "KiwiCore+ResizeBspChain.swift":
+            "a scrolled chain classifies by its region (#2542)",
+        "KiwiCore+ResizeBsp.swift":
+            "the focused window's own side, which a run always shows",
     ]
 
     @Test("Every slots reader says whether a run can mislead it")

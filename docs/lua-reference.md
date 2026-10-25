@@ -4912,6 +4912,21 @@ included, so it keeps its size as it scrolls. Focus, `swap`, the
 overflow marks and their list work as in a Stack zone. A Grid
 cascades whole only when not even one cell fits at
 `min_window_size`.
+
+In BSP, where a split cannot hold two windows at their minimum
+size, the windows from the last run of splits in one direction
+scroll along that direction as one line: a line of side-by-side
+windows scrolls left and right, a stacked one up and down.
+Windows split off in the other direction stay where they are.
+The line is at least as thick as the largest minimum of every
+window in it, hidden ones included, as far as the window split
+off beside it keeps `min_window_size`. Focus, `swap`, `resize`
+along the line, the overflow marks and their list work as in a
+Stack zone. Where the line starts beside a fixed window, under
+either [strategy](#bspset_strategy), the mark at that end sits
+across the gap between them and covers a few points of that
+window. BSP cascades whole only when not even one window fits at
+`min_window_size`.
 :::
 
 For a cascade to read correctly, upper windows must sit *behind*
@@ -5550,9 +5565,8 @@ KiwiDesk.override_sticky_reach("on")
 
 **Does:** shows or hides the on-window sticky mark — the small
 glyph at a sticky window's top-right corner, and the carrier
-for sticky's refusal pills (home-space, can't-pile,
-move-blocked), which go silent with it. Off while the Space Bar
-is not shown leaves sticky state with no mark at all; neither
+for sticky's refusal pills (home-space, move-blocked), which
+go silent with it. Off while the Space Bar is not shown leaves sticky state with no mark at all; neither
 this setting nor the Settings app's toggle refuses that.
 
 **Example:**
