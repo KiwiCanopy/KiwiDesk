@@ -171,10 +171,16 @@ struct BoxStrokeAboveGlassTests {
             active.strokes,
             glass: try #require(overlay.boxGlasses.first)
         )
-        // Every press inside the item is the item's.
-        let centre = CGPoint(x: active.bounds.midX, y: active.bounds.midY)
-        let inParent = active.convert(centre, to: active.superview)
-        #expect(active.hitTest(inParent) === active)
+        // A press on its content is the item's, never a child's.
+        let content: [NSView] = [
+            active.iconView, active.label, active.glyphLabel,
+        ].filter { !$0.isHidden && !$0.frame.isEmpty }
+        #expect(!content.isEmpty, "no content to press")
+        for child in content {
+            let centre = CGPoint(x: child.frame.midX, y: child.frame.midY)
+            let point = active.convert(centre, to: active.superview)
+            #expect(active.hitTest(point) === active)
+        }
 
         overlay.teardownBoxGlasses()
 
