@@ -7,8 +7,45 @@ import Testing
 /// name, and `APIReference.kindExceptions` hand-keeps the names
 /// that misread. A row naming no entry, or one its name already
 /// reads right, is dead weight that hides the next real exception.
+///
+/// No guard can read what a verb does, so the net for a NEW misread
+/// is the name, as `APIDestructiveCensusTests`' is: a command whose
+/// first word is one that reads either way is an exception or ruled
+/// to keep its derived kind below. A misread named otherwise is
+/// review's (core-boundaries.md).
 @Suite("API kind register")
 struct APIKindCensusTests {
+    /// First words that do not say whether a verb acts, sets or
+    /// asks.
+    static let ambiguousVerbs = [
+        "explain", "describe", "enable", "disable", "define",
+        "declare", "bind", "unbind", "on", "pin", "unpin", "save",
+        "load", "delete", "remove", "apply", "keep", "revert",
+        "subscribe", "self", "help", "version", "debug", "override",
+        "fit", "reset", "create", "register", "show", "hide",
+    ]
+
+    /// Commands the net catches that keep their derived kind, each
+    /// with its reason.
+    static let ruledDerived: [String: String] = [
+        "debug_log": "writes a line to the log, settles nothing "
+            + "(owner, #2610)",
+        "save_profile": "a key that saves the arrangement acts "
+            + "(owner, #2610)",
+        "load_profile": "switching arrangement is the act a key "
+            + "runs (owner, #2610)",
+        "delete_profile": "kept beside save and load (owner, #2610)",
+        "create_space": "the session scope is the default "
+            + "(architect, #2610)",
+        "delete_space": "the session scope is the default "
+            + "(architect, #2610)",
+        "override_sticky_reach": "a live per-window override, "
+            + "beside make_sticky (architect, #2610)",
+        "reset_layout_sizing": "clears session sizing, as a resize "
+            + "press writes it (#764)",
+        "kiwihub.show": "opens a panel",
+    ]
+
     @Test("the name reads the kind")
     func derivation() {
         #expect(APIReference.derivedKind(of: "set_gaps") == .setting)
@@ -22,11 +59,40 @@ struct APIKindCensusTests {
         #expect(APIReference.derivedKind(of: "listen") == .action)
     }
 
-    @Test("every entry resolves to a kind, each kind is used")
-    func everyEntryResolves() {
+    @Test("each kind is used")
+    func everyKindIsUsed() {
         let kinds = APIReference.entries.map(APIReference.kind(of:))
-        #expect(kinds.count == APIReference.entries.count)
         #expect(Set(kinds) == Set(APIKind.allCases))
+    }
+
+    @Test("a name that reads either way is ruled")
+    func ambiguousNamesAreRuled() {
+        #expect(!APIReference.entries.isEmpty)
+        for entry in APIReference.entries {
+            let name = entry.name
+            guard
+                Self.ambiguousVerbs.contains(where: {
+                    name == $0 || name.hasPrefix($0 + "_")
+                })
+            else { continue }
+            let qualified = entry.qualifiedName
+            let message =
+                "\(qualified) may misread its kind: add it to "
+                + "APIReference.kindExceptions or rule it here"
+            #expect(
+                APIReference.kindExceptions[qualified] != nil
+                    || Self.ruledDerived[qualified] != nil,
+                "\(message)"
+            )
+        }
+    }
+
+    @Test("ruled names are entries outside the exceptions")
+    func ruledDerivedIsDisjoint() {
+        for name in Self.ruledDerived.keys {
+            #expect(APIReference.entry(named: name) != nil, "\(name)")
+            #expect(APIReference.kindExceptions[name] == nil, "\(name)")
+        }
     }
 
     @Test("every exception names an entry")
@@ -52,7 +118,6 @@ struct APIKindCensusTests {
                 APIReference.derivedKind(of: entry.name) != kind,
                 "\(message)"
             )
-            #expect(APIReference.kind(of: entry) == kind)
         }
     }
 

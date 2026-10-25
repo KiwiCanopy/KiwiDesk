@@ -1,6 +1,6 @@
 ---
 title: Actions
-description: The actions KiwiDesk can run from a key, generated from its command records.
+description: The actions KiwiDesk can run from a key.
 ---
 
 # Actions

@@ -68,8 +68,7 @@ enum CLIHelp {
         guard let at = rest.firstIndex(of: kindFlag) else {
             return .success(nil)
         }
-        let kinds = APIKind.allCases.map(\.rawValue)
-            .joined(separator: "|")
+        let kinds = APIKind.expectedList
         guard at + 1 < rest.endIndex else {
             return .failure(
                 KindRefusal(

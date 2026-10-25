@@ -4,7 +4,9 @@ import Foundation
 /// (`CLIHelp`, `CLIHelpSeamTests`, #1033).
 extension APIReference {
     /// Command listing or detailed single command record (#1033);
-    /// `kind` keeps only that kind's commands in a listing (#2610).
+    /// `kind` keeps only that kind's commands in a listing (#2610)
+    /// and is ignored beside a name, which answers whatever its
+    /// kind.
     public static func helpResponse(
         for name: String? = nil,
         kind: APIKind? = nil

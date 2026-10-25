@@ -6697,7 +6697,8 @@ call keeps running. Halt a script with an explicit `return` or
 
 ## Startup Scripts
 
-Commands at `init.lua` top level run on load and on reload; see
+Commands at `init.lua` top level run on load and on
+[reload](#reload_config); see
 [External Commands](#external-commands) for `KiwiDesk.exec`
 semantics. Any tiling commands at top level are applied before
 profiles load, as base state.
@@ -6723,7 +6724,7 @@ end)
 
 **Does:** reads the configuration from disk again once the
 calling function returns, running `init.lua`'s top level as at
-launch. A callback disabled after an error runs again.
+launch.
 
 **Example:**
 

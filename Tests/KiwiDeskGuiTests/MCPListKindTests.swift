@@ -56,9 +56,11 @@ struct MCPListKindTests {
 
     @Test("an unknown kind is refused")
     func unknownKindRefuses() throws {
-        let answer = try Self.structured(["kind": .string("verb")])
-        #expect(answer.isError)
-        #expect(answer.rows.isEmpty)
+        for kind: JSONValue in [.string("verb"), .number(1), .null] {
+            let answer = try Self.structured(["kind": kind])
+            #expect(answer.isError, "\(kind)")
+            #expect(answer.rows.isEmpty, "\(kind)")
+        }
     }
 
     @Test("the schema offers exactly the register's kinds")

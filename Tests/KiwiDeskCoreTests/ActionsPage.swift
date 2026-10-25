@@ -83,8 +83,7 @@ enum ActionsPage {
     private static let header = """
         ---
         title: Actions
-        description: The actions KiwiDesk can run from a key, \
-        generated from its command records.
+        description: The actions KiwiDesk can run from a key.
         ---
 
         # Actions
@@ -117,7 +116,10 @@ enum ActionsPage {
             omittingEmptySubsequences: false
         )
         for line in lines {
-            if line.hasPrefix("```") { fenced.toggle() }
+            let lead = line.drop { $0 == " " }
+            if lead.hasPrefix("```") || lead.hasPrefix("~~~") {
+                fenced.toggle()
+            }
             guard !fenced, line.hasPrefix("#") else { continue }
             let hashes = line.prefix { $0 == "#" }
             guard line.dropFirst(hashes.count).hasPrefix(" ") else {

@@ -3,7 +3,7 @@ import Foundation
 /// What a command is for (#2610): `list_commands --kind`, the MCP
 /// listing's filter and the generated actions page read it.
 /// Whether a command can be bound is its channel, not its kind.
-public enum APIKind: String, Sendable, CaseIterable {
+public enum APIKind: String, Sendable, APIChoiceType {
     /// Does something: the commands a key usually runs.
     case action
     /// Changes a stored or live value.

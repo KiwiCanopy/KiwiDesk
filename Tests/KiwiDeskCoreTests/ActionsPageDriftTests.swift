@@ -10,6 +10,13 @@ import Testing
 ///
 /// Run with `KIWIDESK_WRITE_ACTIONS_PAGE=1` to rewrite the page
 /// instead; the comparison then passes against what it wrote.
+///
+/// The `:::unreleased` marker follows the committed page, so the
+/// release strip can retire it in place. The trade: a marker
+/// deleted by hand before a release goes unnoticed, and an action
+/// added after the strip reaches the page unmarked — its own
+/// `lua-reference.md` entry, where the row links, carries the
+/// marker that release owes.
 @Suite("actions page drift")
 struct ActionsPageDriftTests {
     private var docs: URL {

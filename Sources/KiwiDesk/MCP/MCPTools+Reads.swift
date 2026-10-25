@@ -29,7 +29,7 @@ extension MCPTools {
         handle: { _, arguments in
             listing(
                 filter: arguments["filter"]?.stringValue,
-                kind: arguments["kind"]?.stringValue
+                kind: arguments["kind"]
             )
         }
     )
@@ -66,12 +66,15 @@ extension MCPTools {
         }
     )
 
-    static func listing(filter: String?, kind: String? = nil) -> JSONValue {
-        let wanted = kind.flatMap(APIKind.init(rawValue:))
-        if let kind, wanted == nil {
-            let kinds = APIKind.allCases.map(\.rawValue)
-                .joined(separator: ", ")
-            return failure("unknown kind: \(kind) (expected \(kinds))")
+    /// `kind` is the tool argument as sent: absent lists every
+    /// kind, and anything but one of `APIKind`'s spellings refuses.
+    static func listing(
+        filter: String?,
+        kind: JSONValue? = nil
+    ) -> JSONValue {
+        let wanted = kind?.stringValue.flatMap(APIKind.init(rawValue:))
+        if kind != nil, wanted == nil {
+            return failure("kind expects \(APIKind.expectedList)")
         }
         let needle = filter?.lowercased() ?? ""
         let entries = APIReference.groups(of: wanted).flatMap(\.entries)
