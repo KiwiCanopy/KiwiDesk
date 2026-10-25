@@ -216,6 +216,10 @@ extension KiwiCore {
         retireFontSet()
         retireHyperKey()
         payOwedShortcutDrops()  // nothing carries the debt (#1827)
+        // A quit takes the pocket window out ahead of the capture,
+        // so the gather lays it out as a plain float (#2446); an
+        // in-place restart keeps it pocketed.
+        if !inPlace { releasePocketForQuit() }
         // Captured BEFORE the gather moves anything: each float's
         // record is the frame the next launch gives back (#1864,
         // `StopCaptureOrderTests`).

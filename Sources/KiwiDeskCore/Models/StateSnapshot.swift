@@ -197,6 +197,9 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// Written by a logout's freeze (#1385): the one file a later
     /// boot may match by stable key, once.
     public var frozenForLogout = false
+    /// The pocket (#2446), written by the in-place stop's capture
+    /// alone: an update relaunch keeps a pocketed window pocketed.
+    public var pocket: PocketSlot?
 
     public init(
         windows: [WindowRecord],
@@ -215,6 +218,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
         case arrangementRecords, loginSession, frozenForLogout
+        case pocket
     }
 
     public init(from decoder: Decoder) throws {
@@ -244,6 +248,8 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         frozenForLogout =
             (try? c.decodeIfPresent(Bool.self, forKey: .frozenForLogout))
             ?? false
+        // On its own: an unreadable one empties the pocket.
+        pocket = try? c.decodeIfPresent(PocketSlot.self, forKey: .pocket)
     }
 }
 
@@ -300,6 +306,7 @@ extension StateCoordinator {
             adoptSession(of: record)
             adoptStopFloat(of: record)
         }
+        adoptPocket(snapshot.pocket)
         if let active = snapshot.activeSpace,
             workspaces[SpaceID(active)] != nil
         {

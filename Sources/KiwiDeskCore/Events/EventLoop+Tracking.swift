@@ -213,7 +213,7 @@ extension EventLoop {
         guard !ownProcess else { return structural }
         switch verdict.reason {
         case .panel, .raisedLayer, .accessoryApp: return true
-        case .rule, .fixedSize, nil: return false
+        case .rule, .fixedSize, .pocket, nil: return false
         }
     }
 

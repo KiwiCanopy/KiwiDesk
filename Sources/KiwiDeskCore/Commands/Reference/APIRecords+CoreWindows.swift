@@ -159,6 +159,10 @@ extension APIReference {
             "Fills the screen with the focused tiled window until "
                 + "pressed again or focus moves on."
         ),
+        "pocket": APIRecord(
+            "Pockets the focused window, or takes the pocket window "
+                + "out onto this screen, or puts it back."
+        ),
         "override_sticky_reach": APIRecord(
             "Overrides Desktop reach for the focused sticky "
                 + "window; auto follows sticky.set_desktop_reach.",

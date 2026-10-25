@@ -28,7 +28,8 @@ extension StateCoordinator {
             rememberDepartedSlot(of: id, in: space)
             handedTo = departedSlots[id]?.handedTo
         }
-        if let window = windows[id] {
+        // A pocket window's flags are the slot's (#2446).
+        if let window = windows[id], pocketPhase(of: id) == nil {
             rememberFloatOverride(of: window)
             rememberStickyIntent(of: window)
         }

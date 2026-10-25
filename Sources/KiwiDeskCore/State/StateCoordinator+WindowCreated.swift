@@ -32,14 +32,19 @@ extension StateCoordinator {
         // window outside that branch.
         defer { departedSlots[window.id]?.handedTo = nil }
         windows.upsert(window)
-        if restored?.floating == true { floatByHand(window.id) }
-        restoreFloatOverride(of: window)
-        restoreStickyIntent(of: window)
+        // A pocket window's flags are the slot's (#2446).
+        if pocketPhase(of: window.id) == nil {
+            if restored?.floating == true { floatByHand(window.id) }
+            restoreFloatOverride(of: window)
+            restoreStickyIntent(of: window)
+        }
         // Screen wins on multi-monitor Desktop moves (#1010).
         let arrival = arrivalDisplay
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
+        // A pocketed window comes back to the slot, filed nowhere.
+        if readoptPocketWindow(window.id) { return }
         let remembered = rememberedSpaces[window.id]
         let preferred = arrivalScreenHome(
             of: windows[window.id],
