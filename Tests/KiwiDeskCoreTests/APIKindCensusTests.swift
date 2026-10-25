@@ -45,6 +45,8 @@ struct APIKindCensusTests {
         "reset_layout_sizing": "clears session sizing, as a resize "
             + "press writes it (#764)",
         "kiwihub.show": "opens a panel",
+        "restore_setup": "replaces the setup from a backup, as "
+            + "load_profile replaces the arrangement (architect, #2610)",
     ]
 
     @Test("the name reads the kind")
