@@ -314,7 +314,6 @@ GLOSSARY = {
     "space",
     "spaces",
     # Literal values and format tokens the user types or reads.
-    "cmd",  # a Lua modifier token, as in `cmd+h` (#2601)
     "default",  # the standard shortcut mode's literal name
     "pt",  # the unit
     "rrggbb",

@@ -2037,8 +2037,8 @@ every machine that runs the suite).
 
 **A surface drawing a chord that can keep a side names it for
 VoiceOver and on hover through `SidedChordWords`**, which reads
-the `R⌘H` `ComboSymbols` draws back as "Right ⌘ H" with the Hyper
-card's key names — never a second spelling of the sides beside
+the `R⌘H` `ComboSymbols` draws back as "Right ⌘ H" with
+`HyperKeyWords`' key names — never a second spelling of the sides beside
 it. A new chord surface joins `SidedChordWordsTests` ▸
 `surfacesSpeakTheSide` in the change that adds it. **The recorder
 takes a side only from the `\.recorderSides` environment value**,

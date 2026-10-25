@@ -44,6 +44,47 @@ struct ModifierSidesCardTests {
         )
     }
 
+    @Test("the card's order list holds every row placed on it")
+    func orderListIsTheContainer() {
+        let placed = SettingKey.allCases.filter {
+            $0.placement.container == .modifierKeys
+        }
+        #expect(placed.contains(.shortcuts(.modifierSides)))
+        #expect(Set(ShortcutsRowOrder.modifierKeysList) == Set(placed))
+    }
+
+    @Test("the card offers itself on the sides the model reads")
+    func cardWiresTheOffer() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "ModifierKeysCard.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        )
+        #expect(
+            source.contains(
+                "model.appWide.modifierSides || model.sidedShortcutCount > 0"
+            )
+        )
+        // Both the offer and the mode-gated frame take it.
+        #expect(
+            source.components(separatedBy: "keepsSides: keepsSides").count
+                == 3
+        )
+        #expect(source.contains("ModifierSidesRow(model: model)"))
+        let row = SourceScan.stripComments(
+            try String(
+                contentsOf: file.deletingLastPathComponent()
+                    .appendingPathComponent("ModifierSidesRow.swift"),
+                encoding: .utf8
+            )
+        )
+        #expect(row.contains(".inertReason(for: .shortcuts(.modifierSides))"))
+        #expect(row.contains("disabled: reason == .appWideLuaOwned"))
+    }
+
     @Test("the model counts sided rows and hands the recorder its sides")
     func modelReads() {
         let model = makeTestModel()
@@ -57,9 +98,9 @@ struct ModifierSidesCardTests {
             $0.modifierSides = true
             $0.hyperKey = .rightCommand
         }
-        #expect(
-            model.recorderSides == RecorderSides(hyperKey: .rightCommand)
-        )
+        // The test core's remap never ran, so right ⌘ is still ⌘.
+        #expect(model.hyperStatus != .on)
+        #expect(model.recorderSides == RecorderSides(hyperKey: nil))
     }
 
     @Test("a side collapse is its own tier, pointing at the switch")

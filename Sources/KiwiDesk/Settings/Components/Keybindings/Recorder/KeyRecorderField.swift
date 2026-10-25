@@ -128,8 +128,22 @@ struct KeyRecorderField: View {
     /// key, or a sided chord while sides are not told apart, which
     /// keeps full ink (#2601 ▸ Ruling).
     private var hint: String? {
+        Self.rowHint(
+            combo: combo,
+            sidesOn: recorderSides != nil,
+            recording: recording,
+            hyperDormant: hyperDormant
+        )
+    }
+
+    static func rowHint(
+        combo: String,
+        sidesOn: Bool,
+        recording: Bool,
+        hyperDormant: Bool
+    ) -> String? {
         if hyperDormant { return ShortcutBaseWords.dormantHint }
-        if recorderSides == nil, !recording,
+        if !sidesOn, !recording,
             KeyCombo.parse(combo)?.modifiers.isSided == true
         {
             return ModifierSidesWords.eitherSideHint
@@ -147,14 +161,22 @@ struct KeyRecorderField: View {
     }
 
     private var recordHelp: String {
-        guard recorderSides != nil else { return Self.recordHelp }
-        return Self.recordHelp + " " + Self.sidesHelp
+        recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
     }
 
-    @MainActor private static var sidesHelp: String {
+    /// The help with sides kept: one frame, so no translation has
+    /// to join two sentences (localization.md).
+    @MainActor private static var recordSidesHelp: String {
         L(
-            "key_recorder.help_sides",
-            "The side you press is kept: right ⌘ is recorded as R⌘."
+            "key_recorder.help_press_sides",
+            "A shortcut is one key plus any of "
+                + "⌃ Control, ⌥ Option, ⇧ Shift, "
+                + "and ⌘ Command — it locks in the "
+                + "moment you press the key. Add a layer "
+                + "to give one key a second meaning. The side "
+                + "you press is kept: %1$@ is recorded as %2$@.",
+            HyperKeyWords.name(.rightCommand),
+            ModifierSidesWords.drawn("rcmd")
         )
     }
 

@@ -26,12 +26,18 @@ struct SidedChordWordsTests {
         #expect(SidedChordWords.help("⌘H").isEmpty)
     }
 
-    @Test("what ComboSymbols draws, the words read back")
-    func readsTheDrawnForm() throws {
+    @Test("what ComboSymbols draws, the words read back, every side")
+    func readsTheDrawnForm() {
         LocalizationManager.shared.select("en")
-        let combo = try #require(KeyCombo.parse("ralt+space"))
-        let drawn = ComboSymbols.modifierSymbols(combo.modifiers)
-        #expect(SidedChordWords.spoken(drawn + "X") == "Right ⌥ X")
+        for kind in ModifierKind.allCases {
+            for side in ModifierSide.allCases {
+                let drawn = ComboSymbols.modifierSymbols(
+                    kind.plain.union(.side(side, of: kind))
+                )
+                let name = HyperKeyWords.name(.key(side, of: kind))
+                #expect(SidedChordWords.spoken(drawn + "X") == name + " X")
+            }
+        }
     }
 
     @Test("a chip holds its own side's cap, and either-side holds both")
@@ -117,8 +123,34 @@ struct SidedChordWordsTests {
                 ".accessibilityValue(SidedChordWords.label(label))"
             )
         )
+        #expect(
+            try read("Jump/LayoutPickText.swift").contains(
+                "SidedChordWords.label(chord)"
+            )
+        )
+        #expect(
+            try read(keys + "KeyboardPreviewPanel+Slot.swift").contains(
+                "read($0).lines.map(SidedChordWords.label)"
+            )
+        )
+        #expect(
+            try read("Shortcuts/ShortcutsBands.swift").contains(
+                ".help(SidedChordWords.help(row.combo))"
+            )
+        )
+        #expect(
+            try read(keys + "KeyboardChrome.swift").contains(
+                ".help(SidedChordWords.help(label))"
+            )
+        )
         let board = try read(keys + "KeyboardBoardSpoken.swift")
         #expect(board.contains("KeyboardCensus.heldSides(scope: scope)"))
+        #expect(
+            board.contains(
+                "return SidedChordWords.label(\n"
+                    + "                KeyboardKeyLabel.chipLabel(for: layer)"
+            )
+        )
         let caps = try read(keys + "KeyboardBoard.swift")
         #expect(caps.contains("held: KeyboardCensus.holds("))
     }

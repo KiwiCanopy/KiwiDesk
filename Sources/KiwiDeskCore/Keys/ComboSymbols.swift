@@ -28,19 +28,34 @@ public enum ComboSymbols {
     ) -> String {
         var out = ""
         if modifiers.contains(.hyper) { out += hyperGlyph }
-        let glyphs: [(ModifierKind, String)] = [
-            (.control, "⌃"), (.option, "⌥"),
-            (.shift, "⇧"), (.command, "⌘"),
-        ]
-        for (kind, glyph) in glyphs where modifiers.contains(kind.plain) {
-            switch modifiers.side(of: kind) {
-            case .left: out += "L"
-            case .right: out += "R"
-            case nil: break
+        // `ModifierKind.allCases` is the canonical order.
+        for kind in ModifierKind.allCases
+        where modifiers.contains(kind.plain) {
+            if let side = modifiers.side(of: kind) {
+                out += sideLetter(side)
             }
-            out += glyph
+            out += glyph(of: kind)
         }
         return out
+    }
+
+    /// A modifier's glyph, the one table every reader of a drawn
+    /// chord shares (the GUI speaks `R⌘` back from it, #2601).
+    public static func glyph(of kind: ModifierKind) -> String {
+        switch kind {
+        case .control: "⌃"
+        case .option: "⌥"
+        case .shift: "⇧"
+        case .command: "⌘"
+        }
+    }
+
+    /// The letter a sided modifier draws before its glyph.
+    public static func sideLetter(_ side: ModifierSide) -> String {
+        switch side {
+        case .left: "L"
+        case .right: "R"
+        }
     }
 
     /// The Hyper modifier's glyph (#1870); macOS has none.

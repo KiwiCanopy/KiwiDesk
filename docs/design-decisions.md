@@ -7895,7 +7895,7 @@ The header `?` stays the shape for a greyed block.
 *A whole card an OS accessibility switch greys also says so in a
 warning box* (owner ruling, 2026-10-21). The Animations card under
 Reduce Motion keeps its header `?`, and adds the yellow box the
-Hyper key's card uses, at the top of the card and only while the
+Modifier keys card uses, at the top of the card and only while the
 switch is on, with the one fix — a button to System Settings ▸
 Accessibility. A `?` is found by a reader looking for
 why; a card whose every row is grey by a setting KiwiDesk cannot
@@ -11109,8 +11109,8 @@ the switch is on and a side-specific shortcut exists, so a default
 install, and one that never records a side, sees no keystroke. It
 swallows only a press matching one of its shortcuts and passes every
 other key on, recording and storing none of them, and it re-enables
-itself after `tapDisabledByTimeout`,
-since macOS disables a slow tap silently; a tap macOS refuses hands
+itself after macOS disables it (`tapDisabledByTimeout`, or by user
+input), since macOS disables a slow tap silently; a tap macOS refuses hands
 its shortcuts back to Carbon, either-side. A shortcut the tap answers
 does not glide, since the tap hears no release. The recorder reads
 the side from the key event's own device flags and needs no tap.
@@ -11119,11 +11119,14 @@ The switch is the Mac's, in `gui.json` beside `hyper.key`: a keyboard
 is a desk's hardware, not a profile's. No per-profile value preceded
 it, so it crosses nothing. Switching it off migrates nothing — a
 stored `rcmd+h` stays `rcmd+h` and fires from either side through
-Carbon until the switch is back on — and a pair that collapses onto
-one chord (`lcmd+h`, `rcmd+h`) shows as a duplicate in the conflict
-list, the switch being the way to separate them. While the switch is
-on the recorder records no either-side shortcut: one is recorded with
-the switch off, or written in Lua as `cmd+h`. Accepted.
+Carbon until the switch is back on — and a pair that falls on one
+chord (`lcmd+h` and `rcmd+h`, or `cmd+h` and `rcmd+h`) is a conflict
+tier of its own, whose sentence names the switch as the way to
+separate them. While the switch is on the recorder records no
+either-side shortcut, save under a held Hyper and on the other side
+of a one-sided Hyper key, which only one key can produce: one is
+recorded with the switch off, or written in Lua as `cmd+h`.
+Accepted.
 
 What it unblocks: reading keys needs no Input Monitoring, so
 #1874's "tap Hyper alone for Escape" turns on whether posting the
@@ -11798,7 +11801,7 @@ four-modifier chord serves are the ones whose own tool already
 presses all four.
 
 **One switch puts KiwiDesk's shortcuts on `⌃⌥` or on `✦` (#2460,
-owner ruling 2026-10-20).** The Hyper key card carries "Shortcuts
+owner ruling 2026-10-20).** The Modifier keys card carries "Shortcuts
 use: `⌃⌥` | `✦`", and its value is one stored base, `gui.json`'s
 `shortcut_base`, which every writer of a default row reads: the
 seed, Restore Defaults, and the three top-ups — a new Space's

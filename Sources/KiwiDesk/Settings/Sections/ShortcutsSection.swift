@@ -60,6 +60,7 @@ struct ShortcutsSection: View {
         }
         .onAppear {
             ensureSelection()
+            coordinator.scrollsInPlace = true
             // Suspend hotkeys while capturing to avoid trigger during edit
             // (#213).
             coordinator.onArmedChange = { [model] armed in
@@ -99,9 +100,7 @@ struct ShortcutsSection: View {
                 \.disabledSystemShortcuts,
                 model.disabledSystemShortcuts()
             )
-            // Hyper rows dim in place while no key is set (#1870).
-            .environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
-            .environment(\.recorderSides, model.recorderSides)
+            .recorderKeys(model)
             .environmentObject(coordinator)
         }
         .shortcutsJumpSlot(.viewport)

@@ -69,16 +69,17 @@ extension KeyRecorderField {
     }
 
     /// A side collapse's way out: the switch the sentence names
-    /// (#2601 ▸ Ruling 5).
+    /// (#2601 ▸ Ruling 5), offered only where the page scrolls to it.
     @ViewBuilder private var sideSwitchLink: some View {
-        if case .sideCollapse = reading?.severity {
+        if case .sideCollapse = reading?.severity,
+            coordinator.scrollsInPlace
+        {
             Button(L("key_recorder.go_to", "Go to")) {
                 conflictPopoverShown = false
                 coordinator.scrollTarget =
                     SettingsCatalog.shortcuts.modifierSides.id
             }
             .buttonStyle(.link)
-            .pointingHandCursor()
             .font(.callout)
         }
     }

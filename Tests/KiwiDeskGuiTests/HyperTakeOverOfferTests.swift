@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Hyper key card's take-over offer (#2471): drawn from Core's
+/// The Modifier keys card's take-over offer (#2471): drawn from Core's
 /// `claimable` verdict alone, and its alert names the remap.
 @Suite("Hyper take-over offer")
 @MainActor

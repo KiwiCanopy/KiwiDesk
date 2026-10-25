@@ -13,6 +13,9 @@ final class RecorderCoordinator: ObservableObject {
     @Published private(set) var generation = 0
     /// Target shortcut row ID to scroll to upon rejection navigation.
     @Published var scrollTarget: String?
+    /// Whether the page consumes `scrollTarget`; only the Shortcuts
+    /// section does, so a Go to elsewhere would do nothing.
+    var scrollsInPlace = false
 
     /// Suspends/restores live hotkeys while any recorder is armed
     /// (#213): testing an existing shortcut mid-capture must not

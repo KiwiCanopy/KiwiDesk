@@ -192,7 +192,8 @@ enum KeyboardCensus {
     /// Whether the shown scope holds `source`'s cap down (#2601): a
     /// modifier its chip names, on the named side, or on either
     /// side where it names none. The board's bar and the spoken
-    /// "Holding" both read this. The Hyper key's cap is held by a
+    /// "Holding" read this, the sentence through `heldSides`, its
+    /// sided subset. The Hyper key's cap is held by a
     /// ✦ chip alone, since it no longer makes its modifier.
     static func holds(
         _ source: HyperSourceKey?,

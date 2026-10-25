@@ -28,10 +28,13 @@ extension SettingsModel {
 /// The sides switch's live reads (#2601).
 extension SettingsModel {
     /// What a recording keeps of a side, nil while the switch is
-    /// off.
+    /// off. The Hyper key frees its modifier's other side only
+    /// while its remap is live; refused, that key is still itself.
     var recorderSides: RecorderSides? {
-        appWide.modifierSides
-            ? RecorderSides(hyperKey: appWide.hyperKey) : nil
+        guard appWide.modifierSides else { return nil }
+        return RecorderSides(
+            hyperKey: hyperStatus == .on ? appWide.hyperKey : nil
+        )
     }
 
     /// What the side tap last did, read live.

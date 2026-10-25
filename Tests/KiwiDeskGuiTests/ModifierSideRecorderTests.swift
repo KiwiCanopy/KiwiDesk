@@ -89,6 +89,29 @@ struct ModifierSideRecorderTests {
             ChordRecorder.preview(rightCommand, hyper: false, sides: nil)
                 == "⌘"
         )
+        #expect(
+            ChordRecorder.preview(
+                rightCommand,
+                hyper: true,
+                sides: RecorderSides()
+            ) == "✦⌘"
+        )
+    }
+
+    @Test("a sided row hints it works either-side while sides are off")
+    func eitherSideHint() {
+        LocalizationManager.shared.select("en")
+        func hint(_ combo: String, on: Bool) -> String? {
+            KeyRecorderField.rowHint(
+                combo: combo,
+                sidesOn: on,
+                recording: false,
+                hyperDormant: false
+            )
+        }
+        #expect(hint("rcmd+h", on: false) == ModifierSidesWords.eitherSideHint)
+        #expect(hint("rcmd+h", on: true) == nil)
+        #expect(hint("cmd+h", on: false) == nil)
     }
 
     @Test("the live recorder records through the sides it was handed")
@@ -107,28 +130,51 @@ struct ModifierSideRecorderTests {
         #expect(locked == "rcmd+h")
     }
 
-    @Test("both recorder mounts hand the sides down to the field")
+    @Test("every recorder mount hands the sides down to the field")
     func mountsWireTheSides() throws {
-        let settings = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
-        func read(_ path: String) throws -> String {
-            SourceScan.stripComments(
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let files = try FileManager.default
+            .subpathsOfDirectory(atPath: tree.path)
+            .filter { $0.hasSuffix(".swift") }
+        var mounts = 0
+        for file in files {
+            let source = SourceScan.stripComments(
                 try String(
-                    contentsOf: settings.appendingPathComponent(path),
+                    contentsOf: tree.appendingPathComponent(file),
                     encoding: .utf8
                 )
             )
+            guard source.contains("RecorderCoordinator()") else {
+                continue
+            }
+            mounts += 1
+            #expect(source.contains(".recorderKeys(model)"), "\(file)")
         }
-        let needle = ".environment(\\.recorderSides, model.recorderSides)"
-        #expect(
-            try read("Sections/ShortcutsSection.swift").contains(needle)
+        // Non-vacuity: the Shortcuts section and a lens page.
+        #expect(mounts >= 2)
+        let helper = SourceScan.stripComments(
+            try String(
+                contentsOf: tree.appendingPathComponent(
+                    "Settings/Components/Keybindings/"
+                        + "KeybindingOverrideEnvironment.swift"
+                ),
+                encoding: .utf8
+            )
         )
         #expect(
-            try read("Components/KiwiVision/KiwiVisionLensPage.swift")
-                .contains(needle)
+            helper.contains(
+                ".environment(\\.recorderSides, model.recorderSides)"
+            )
         )
-        let field = try read(
-            "Components/Keybindings/Recorder/KeyRecorderField.swift"
+        let field = SourceScan.stripComments(
+            try String(
+                contentsOf: tree.appendingPathComponent(
+                    "Settings/Components/Keybindings/Recorder/"
+                        + "KeyRecorderField.swift"
+                ),
+                encoding: .utf8
+            )
         )
         #expect(field.contains("sides: recorderSides,"))
     }

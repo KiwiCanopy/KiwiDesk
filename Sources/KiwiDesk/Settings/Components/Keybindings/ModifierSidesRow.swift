@@ -72,26 +72,50 @@ enum ModifierSidesWords {
         L(
             "shortcuts.modifier_sides.help",
             "When this is on, a shortcut you record keeps the side you "
-                + "pressed: right ⌘ with H is recorded as R⌘H, so it and "
-                + "L⌘H can do different things. Shortcuts recorded "
+                + "pressed: %1$@ with H is recorded as %2$@, so it and "
+                + "%3$@ can do different things. Shortcuts recorded "
                 + "earlier still work from either side. While this is "
                 + "on, every new recording keeps its side; for one that "
                 + "works from either side, record it with this off or "
-                + "write cmd+h in Lua. To tell the sides apart, KiwiDesk "
+                + "write %4$@ in Lua. To tell the sides apart, KiwiDesk "
                 + "reads key presses, but only while at least one "
                 + "shortcut keeps a side, and it acts only on the "
-                + "shortcuts on those keys."
+                + "shortcuts on those keys.",
+            HyperKeyWords.name(.rightCommand),
+            drawn("rcmd+h"),
+            drawn("lcmd+h"),
+            "cmd+h"
         )
     }
 
+    /// A chord as every surface draws it (`ComboSymbols`), so the
+    /// help shows `R⌘H` the way the rows do; a bare modifier token
+    /// draws its glyphs alone.
+    static func drawn(_ combo: String) -> String {
+        if let parsed = KeyCombo.parse(combo) {
+            return ComboSymbols.render(
+                parsed,
+                layoutChar: LayoutKeyGlyph.char
+            )
+        }
+        return KeyCombo.parse(combo + "+a").map {
+            ComboSymbols.modifierSymbols($0.modifiers)
+        } ?? combo
+    }
+
     /// Off, with shortcuts that keep a side: they fire either-side.
+    /// The count ends its own line (localization.md ▸ a COUNT).
     static func waiting(_ count: Int) -> String {
         L(
             "shortcuts.modifier_sides.waiting",
-            "Shortcuts keeping a side: %1$d. They work from either "
-                + "side until this is on.",
+            "Shortcuts keeping a side: %1$d",
             count
         )
+            + "\n"
+            + L(
+                "shortcuts.modifier_sides.waiting_detail",
+                "They work from either side until this is on."
+            )
     }
 
     /// On, but macOS refused the tap: the sided shortcuts fall back

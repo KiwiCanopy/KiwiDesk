@@ -80,3 +80,16 @@ extension View {
             .accessibilityHint(unavailable ?? "")
     }
 }
+
+extension View {
+    /// What every recorder mount hands its fields about the keys:
+    /// whether a Hyper key is set (#1870) and which sides a recording
+    /// keeps (#2601). Each file hosting a `RecorderCoordinator`
+    /// calls it (`ModifierSideRecorderTests` ▸ `mountsWireTheSides`).
+    @MainActor
+    func recorderKeys(_ model: SettingsModel) -> some View {
+        // Hyper rows dim in place while no key is set (#1870).
+        environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
+            .environment(\.recorderSides, model.recorderSides)
+    }
+}

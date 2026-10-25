@@ -12,6 +12,8 @@ enum SidedChordWords {
     /// modifier's glyph, so a letter before a glyph is a side.
     static func spoken(_ glyphs: String) -> String? {
         let chars = Array(glyphs)
+        let kinds = Self.kinds
+        let sides = Self.sides
         var words: [String] = []
         var index = 0
         var sided = false
@@ -48,11 +50,20 @@ enum SidedChordWords {
         spoken(glyphs) ?? ""
     }
 
-    private static let kinds: [Character: ModifierKind] = [
-        "⌃": .control, "⌥": .option, "⇧": .shift, "⌘": .command,
-    ]
+    /// Read off Core's own glyph table, never a second spelling.
+    private static var kinds: [Character: ModifierKind] {
+        Dictionary(
+            uniqueKeysWithValues: ModifierKind.allCases.map {
+                (Character(ComboSymbols.glyph(of: $0)), $0)
+            }
+        )
+    }
 
-    private static let sides: [Character: ModifierSide] = [
-        "L": .left, "R": .right,
-    ]
+    private static var sides: [Character: ModifierSide] {
+        Dictionary(
+            uniqueKeysWithValues: ModifierSide.allCases.map {
+                (Character(ComboSymbols.sideLetter($0)), $0)
+            }
+        )
+    }
 }
