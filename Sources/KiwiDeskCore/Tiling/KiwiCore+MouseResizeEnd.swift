@@ -99,12 +99,29 @@ extension KiwiCore {
             frame: frame,
             bounds: bounds
         )
-        applyResizeAdjustment(
-            adjustment,
-            for: id,
-            in: space,
-            bounds: bounds
-        )
+        // A drag along a scrolled BSP chain is a run weight, handed
+        // the points the drag measured (#2542).
+        let along: (axis: String, points: CGFloat)? =
+            switch adjustment {
+            case .bspRatioH: ("x", frame.width - slot.width)
+            case .bspRatioV: ("y", frame.height - slot.height)
+            default: nil
+            }
+        if along.flatMap({
+            resizeBspChain(
+                id,
+                axis: $0.axis,
+                delta: Double($0.points),
+                space: space
+            )
+        }) == nil {
+            applyResizeAdjustment(
+                adjustment,
+                for: id,
+                in: space,
+                bounds: bounds
+            )
+        }
         // **No sizing promise here**, unlike the keyboard verb —
         // and the difference is not taste, it is the definition
         // (#593). `.allSpringSized` asserts that every window in
@@ -167,18 +184,6 @@ extension KiwiCore {
         // per-side effective minimums, and the refusal cues
         // when the drag ran into one.
         case .bspRatioH(let delta):
-            // A drag along a scrolled chain is a run weight (#2542).
-            if let window,
-                resizeBspChain(
-                    window,
-                    axis: "x",
-                    ratioDelta: delta,
-                    bounds: bounds,
-                    space: space
-                )
-            {
-                break
-            }
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioH
@@ -190,17 +195,6 @@ extension KiwiCore {
                 focused: window
             )
         case .bspRatioV(let delta):
-            if let window,
-                resizeBspChain(
-                    window,
-                    axis: "y",
-                    ratioDelta: delta,
-                    bounds: bounds,
-                    space: space
-                )
-            {
-                break
-            }
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioV

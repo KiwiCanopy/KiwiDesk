@@ -86,13 +86,22 @@ public struct RunCover: Sendable, Equatable {
             guard let run = zone.run(in: context), run.hides else {
                 return nil
             }
-            return Run(
-                zone: zone,
-                run: run,
-                extra: zone.runExtra(in: context) ?? 0,
-                bounds: zone.markBounds(in: context)
-            )
+            return Run(zone: zone, run: run, in: context)
         }
         return RunCover(space: space, runs: runs)
+    }
+}
+
+extension RunCover.Run {
+    /// `run` as `zone` draws it in `context` — the one assembly
+    /// `RunCover.of` and a BSP press over a run no cover records
+    /// share (#2542).
+    public init(zone: RunZone, run: ZoneRun, in context: LayoutContext) {
+        self.init(
+            zone: zone,
+            run: run,
+            extra: zone.runExtra(in: context) ?? 0,
+            bounds: zone.markBounds(in: context)
+        )
     }
 }

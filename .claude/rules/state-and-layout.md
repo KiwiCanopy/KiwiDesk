@@ -1187,7 +1187,9 @@ editing here:
   `RunZone.zones` alone, and a run reader — the focus step
   (`runStep`), the park keep beside the inward post-pass, the
   readers above — reads a `RunCover` (the recorded one, or
-  `RunCover.of` on a pass that records none), never a list of
+  `RunCover.of` on a pass that records none, or a zone's own run
+  through `RunCover.Run(zone:run:in:)` where no cover records a
+  run that hides nothing), never a list of
   layout modes; a mode write clears every sizing store — the
   session ratios, the track weights and `stackWeights`, which
   every run reads — never a list of the modes it leaves or

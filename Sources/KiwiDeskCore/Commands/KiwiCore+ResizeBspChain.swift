@@ -35,8 +35,9 @@ extension KiwiCore {
 
     /// Grows `window` by `delta` points as a run weight where it
     /// sits in a chain lying along `axis` — the one check the
-    /// keyboard and mouse doors share; nil otherwise, and the
-    /// caller then takes the ratio.
+    /// keyboard press and the mouse drag share, each handing the
+    /// points it measured; nil otherwise, and the caller then
+    /// takes the ratio.
     func resizeBspChain(
         _ window: WindowID,
         axis: String,
@@ -66,20 +67,15 @@ extension KiwiCore {
         if let run = chain.run(in: context) {
             return resizeInRun(
                 window,
-                run: RunCover.Run(
-                    zone: chain,
-                    run: run,
-                    extra: chain.runExtra(in: context) ?? 0,
-                    bounds: chain.markBounds(in: context)
-                ),
+                run: RunCover.Run(zone: chain, run: run, in: context),
                 axis: axis,
                 delta: delta,
                 space: space,
                 otherAxisDivides: otherAxisDivides
             )
         }
-        // A chain that fits whole shares its line by weight alone,
-        // as a Stack zone does.
+        // A chain that fits whole shares its line by weight alone:
+        // the Stack zone writer's step (`resizeStackMember`).
         let gap =
             chain.vertical
             ? context.gaps.inner.vertical : context.gaps.inner.horizontal
@@ -110,34 +106,5 @@ extension KiwiCore {
             $0.stackWeights[window] = outcome.value
         }
         return .ok()
-    }
-
-    /// The mouse door's twin: a `.bspRatioH`/`.bspRatioV` drag
-    /// of `window`, read back as the points it grew, taken by
-    /// the chain where it lies along the drag. True where it was.
-    func resizeBspChain(
-        _ window: WindowID,
-        axis: String,
-        ratioDelta: CGFloat,
-        bounds: CGRect,
-        space: Space
-    ) -> Bool {
-        guard let slot = tiler.calculatedFrames(state: state)[window]
-        else { return false }
-        let horizontal = axis == "x"
-        // `MouseResize.translate` signed the drag by the slot's
-        // side and divided it by the span; undo both.
-        let side = BspSplit.side(
-            slot: slot,
-            bounds: bounds,
-            horizontal: horizontal
-        )
-        let extent = horizontal ? bounds.width : bounds.height
-        return resizeBspChain(
-            window,
-            axis: axis,
-            delta: Double(ratioDelta * extent * side),
-            space: space
-        ) != nil
     }
 }

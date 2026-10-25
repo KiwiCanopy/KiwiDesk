@@ -149,4 +149,26 @@ struct BspRunTests {
         #expect(zone.members == Array(ids.prefix(3)))
         #expect(zone.run(in: ctx)?.visible == 0..<1)
     }
+
+    @Test("Any run's end inside the screen straddles; one at it, not")
+    func markBoundsAreLayoutAgnostic() throws {
+        // A Stack master zone beside its stack zone takes the
+        // same reading as a BSP chain (#2542).
+        let ctx = context()
+        let usable = ctx.usable
+        let inner = RunZone(
+            members: Array(ids.prefix(2)),
+            region: rect(usable.minX, usable.minY, 400, usable.height),
+            vertical: false
+        )
+        let bounds = inner.markBounds(in: ctx)
+        #expect(bounds.minX == ctx.bounds.minX)
+        #expect(bounds.maxX == usable.minX + 400 + 5 + OverflowMark.depth / 2)
+        let column = RunZone(
+            members: Array(ids.prefix(2)),
+            region: usable,
+            vertical: true
+        )
+        #expect(column.markBounds(in: ctx) == ctx.bounds)
+    }
 }
