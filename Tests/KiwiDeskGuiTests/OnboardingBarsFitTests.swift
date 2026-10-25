@@ -5,7 +5,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The tour window is a fixed 560 × 620 (#828), and every copy
+/// The tour window is a fixed 560 × 660 (#828, #2446), and every copy
 /// tier wraps rather than truncates, so a page that grows past it
 /// pushes its Continue button out of the window. The bars step
 /// (#2515) and the keys step it grew by two rows are measured in

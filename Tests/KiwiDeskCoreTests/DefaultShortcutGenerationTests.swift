@@ -13,10 +13,10 @@ struct DefaultShortcutGenerationTests {
     private let forward = "KiwiDesk.focus_space_forward()"
     private let previous = "KiwiDesk.focus_space_previous()"
     private let next = "KiwiDesk.focus_space_next()"
-    /// Generations 2 to 7: 3.0.0's layout keys (#453, #762), the
+    /// Generations 2 to 8: 3.0.0's layout keys (#453, #762), the
     /// window switcher (#1875), KiwiVision (#2103), 3.1.0's Reset
-    /// sizes (#2303), the bars' shortcuts (#761) and Maximize
-    /// (#2448).
+    /// sizes (#2303), the bars' shortcuts (#761), Maximize (#2448)
+    /// and Pocket (#2446).
     private let layoutKeys = [
         "KiwiDesk.cycle_mode()", "KiwiDesk.cycle_mode(\"prev\")",
         "kiwihub.show(\"view\")",
@@ -25,6 +25,7 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.reset_layout_sizing()",
         "space_bar.toggle_reveal()", "app_bar.toggle_reveal()",
         "KiwiDesk.toggle_maximized()",
+        "KiwiDesk.pocket()",
     ]
 
     /// 2.2.0's swap, on the ⌃⌥⌘ arrows the Space steps now take.
@@ -138,7 +139,7 @@ struct DefaultShortcutGenerationTests {
         "KiwiDesk.resize(\"x\", 10)", "KiwiDesk.resize(\"x\", -10)",
         "KiwiDesk.resize(\"y\", 10)", "KiwiDesk.resize(\"y\", -10)",
         "KiwiDesk.toggle_floating()", "KiwiDesk.toggle_sticky()",
-        "KiwiDesk.toggle_display_sticky()",
+        // Pin left the seed by ruling (#2446): ⌃⌥P is Pocket's.
         "kiwihub.show(\"shortcuts\")", "KiwiDesk.open_settings()",
     ]
 

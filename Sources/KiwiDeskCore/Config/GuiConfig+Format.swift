@@ -70,5 +70,8 @@ extension GuiConfig {
     ///
     /// **16 (#2493)**: the per-layout `wrap_focus` switches retired
     /// for `focus_wrap` (`migratingRetiredWrapFocus`).
-    public static let currentFormat = 16
+    ///
+    /// **17 (#2446)**: the seeded pin row on ⌃⌥P runs Pocket
+    /// (`migratingPinChordOntoPocket`).
+    public static let currentFormat = 17
 }

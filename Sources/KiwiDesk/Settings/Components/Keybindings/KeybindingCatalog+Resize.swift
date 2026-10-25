@@ -10,7 +10,7 @@ extension KeybindingCatalog {
                 maximize,
                 toggleFloating,
                 toggleSticky,
-                toggleDisplaySticky,
+                pocket,
             ]
     }
 
@@ -26,6 +26,7 @@ extension KeybindingCatalog {
         makeFloating,
         toggleSticky,
         toggleDisplaySticky,
+        pocket,
         makeSticky,
         makeDisplaySticky,
         makeUnsticky,
@@ -145,7 +146,28 @@ extension KeybindingCatalog {
         }
     )
 
-    /// Toggle sticky on current display (#445).
+    /// `pocket` (#2446): pockets the focused window, takes it out
+    /// and puts it back.
+    static let pocket = NavCommand(
+        label: "Pocket this window",
+        lua: "KiwiDesk.pocket()",
+        displayLabel: {
+            L("keybinding.pocket", "Pocket this window")
+        },
+        help: {
+            L(
+                "keybinding.pocket.help",
+                "The first press pockets the focused window. After "
+                    + "that, the same key takes it out of your "
+                    + "pocket and puts it back. Close the window "
+                    + "to empty your pocket."
+            )
+        }
+    )
+
+    /// Toggle sticky on current display (#445): no Settings row
+    /// since #2446 gave its chord to Pocket — bound through Lua,
+    /// and kept here for the import classifier.
     static let toggleDisplaySticky = NavCommand(
         label: "Toggle display sticky",
         lua: "KiwiDesk.toggle_display_sticky()",
