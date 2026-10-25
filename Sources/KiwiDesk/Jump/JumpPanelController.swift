@@ -37,11 +37,6 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         self.core = core
         handBack = PanelHandBack(core: core)
         super.init()
-        // The open panel repaints on a CLI or Lua look change as
-        // the bars do (#2604); this is the hook's one consumer.
-        core.onSettingsChange = { [weak self] in
-            self?.currentModel?.settings = $0
-        }
     }
 
     /// Up and not leaving: a toggle during the exit fade opens a
@@ -141,6 +136,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         handBack.present(panel) { [weak self, presence] in
             self?.presence === presence && !presence.leaving
         }
+    }
+
+    /// Repaints the shown panel on a settings change by any door,
+    /// as the bars repaint (#2604); a closed one keeps its model.
+    func settingsChanged(_ settings: TilingSettings) {
+        guard !presence.leaving else { return }
+        currentModel?.settings = settings
     }
 
     /// Each side's chord from the live bindings.

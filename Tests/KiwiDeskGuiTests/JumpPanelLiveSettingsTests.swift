@@ -1,4 +1,5 @@
 import AppKit
+import Foundation
 import Testing
 
 @testable import KiwiDesk
@@ -6,7 +7,8 @@ import Testing
 
 /// An open KiwiHub draws the live settings, not the ones it opened
 /// with (#2604): a CLI colour or glass change reaches the shown
-/// panel's model, and the view reads its glass from that model.
+/// panel's model, the view reads its glass from that model, and the
+/// app hands the one settings hook to KiwiHub through its fan-out.
 /// The panel is built for real but never ordered in.
 @Suite("KiwiHub live settings (#2604)")
 @MainActor
@@ -17,6 +19,9 @@ struct JumpPanelLiveSettingsTests {
         controller.reduceMotion = { true }
         controller.handBack.isAppActive = { true }
         controller.handBack.nextTurn = { _ in }
+        core.onSettingsChange = { [weak controller] in
+            controller?.settingsChanged($0)
+        }
         controller.show(.view)
         return (controller, core)
     }
@@ -45,5 +50,63 @@ struct JumpPanelLiveSettingsTests {
         core.tiler.settings.shortcutPanelLiquidGlass = !opened
         #expect(view.panelGlass.enabled == !opened)
         #expect(view.panelGlass == PanelGlass(settings: core.tiler.settings))
+    }
+
+    @Test("a closed panel's model keeps its settings")
+    func closedPanelIsLeftAlone() throws {
+        let (controller, core) = shown()
+        let model = try #require(controller.currentModel)
+        let opened = model.settings
+        // `close` refuses a panel that never came up.
+        let panel = try #require(controller.panel)
+        panel.orderFrontRegardless()
+        defer { panel.orderOut(nil) }
+        controller.close()
+        #expect(!controller.isOpen)
+        core.tiler.settings.shortcutPanelLiquidGlass.toggle()
+        #expect(model.settings == opened)
+    }
+
+    /// The hook is one slot, so a second assignment would unhook
+    /// KiwiHub with every behavioural test above still green: the
+    /// GUI assigns it once, in the app's fan-out, which hands it to
+    /// the panel.
+    @Test("the app wires the hook once, through its fan-out")
+    func hookIsWiredOnce() throws {
+        let gui = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let assign = try NSRegularExpression(
+            pattern: #"\.onSettingsChange\s*="#
+        )
+        var sites: [String] = []
+        let files = try SourceScan.swiftSources(under: gui)
+        #expect(!files.isEmpty)
+        for file in files {
+            let source = try SourceScan.strippedSource(at: file)
+            let range = NSRange(source.startIndex..., in: source)
+            if assign.numberOfMatches(in: source, range: range) > 0 {
+                sites.append(file.lastPathComponent)
+            }
+        }
+        #expect(sites == ["AppDelegate+SettingsReaders.swift"])
+        let fanOut = try SourceScan.strippedSource(
+            at: gui.appendingPathComponent(
+                "AppDelegate+SettingsReaders.swift"
+            )
+        )
+        let wiring = try NSRegularExpression(
+            pattern: #"onSettingsChange\s*=\s*\{[\s\S]{0,80}?"#
+                + #"settingsReadersChanged\(\s*\$0\s*\)"#
+                + #"[\s\S]*jumpPanel\?\.settingsChanged\(\s*settings\s*\)"#
+        )
+        let range = NSRange(fanOut.startIndex..., in: fanOut)
+        #expect(
+            wiring.numberOfMatches(in: fanOut, range: range) == 1,
+            "the fan-out no longer hands the settings to KiwiHub"
+        )
+        let delegate = try SourceScan.strippedSource(
+            at: gui.appendingPathComponent("AppDelegate.swift")
+        )
+        #expect(delegate.contains("wireSettingsReaders()"))
     }
 }

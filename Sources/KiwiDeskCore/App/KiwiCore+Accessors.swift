@@ -45,7 +45,8 @@ extension KiwiCore {
     }
 
     /// The live settings after a write that changed them, by any
-    /// door — a command, Lua, a profile apply (#2604).
+    /// door — a command, Lua, a profile apply (#2604). One slot:
+    /// the app assigns it once and fans it out to its readers.
     public var onSettingsChange: @MainActor (TilingSettings) -> Void {
         get { tiler.onSettingsChange }
         set { tiler.onSettingsChange = newValue }
