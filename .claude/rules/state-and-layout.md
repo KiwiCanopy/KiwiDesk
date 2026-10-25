@@ -2427,7 +2427,11 @@ only `wraps`, true under This screen alone, so a new array-order
 layout wraps its own order on that flag and otherwise returns nil
 at its end, a run's hidden windows included; a geometric layout
 neither wraps nor crosses screens itself, leaving both to
-`focusPastEdge`. A geometric wrap and a hop's landing seed
+`focusPastEdge`. A run's step stays `wrap: false`: its wrap is
+decided after the geometric target, in `wrapThisScreen` through
+`runWrapLanding`, which reaches the run's far end only where that
+target lies in the run, so a wrap leaving the run keeps it (#2618,
+`FocusWrapRunTests` ▸ `alongTheRunOutOfIt`). A geometric wrap and a hop's landing seed
 `Navigation.neighbor` from `ScreenHop.entrySeed`, never a search of
 their own, and the screens are tried in `ScreenHop.hopOrder`
 (`FocusWrapTests`, `FocusWrapScreensTests`, `ScreenHopOrderTests`).

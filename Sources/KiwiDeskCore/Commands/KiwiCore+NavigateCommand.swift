@@ -228,6 +228,7 @@ extension KiwiCore {
                     focused: focused,
                     frame: frame,
                     candidates: searchCandidates,
+                    skip: skip,
                     warp: warp,
                     origin: origin
                 )

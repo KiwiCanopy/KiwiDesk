@@ -21,11 +21,17 @@ private func makeCore() -> KiwiCore {
     return core
 }
 
-private func window(_ id: UInt32) -> ManagedWindow {
+private let lensApp = "test.kiwi.notes"
+
+private func window(
+    _ id: UInt32,
+    bundle: String = lensApp
+) -> ManagedWindow {
     ManagedWindow(
         id: WindowID(id),
         pid: pid_t(910_000 + id),
         appName: "App\(id)",
+        appBundleID: bundle,
         frame: CGRect(x: 0, y: 25, width: 700, height: 875)
     )
 }
@@ -38,14 +44,18 @@ private func window(_ id: UInt32) -> ManagedWindow {
 @MainActor
 struct FocusWrapRunTests {
     /// One master and a stack column too short for its members.
-    private func stack() throws -> (KiwiCore, RunZone) {
+    /// Window 7 belongs to another app than the lens's.
+    private func stack(
+        wrap: String = "this_screen"
+    ) throws -> (KiwiCore, RunZone) {
         let core = makeCore()
         for id in UInt32(1)...7 {
-            core.state.apply(.windowCreated(window(id)))
+            let bundle = id == 7 ? "test.kiwi.other" : lensApp
+            core.state.apply(.windowCreated(window(id, bundle: bundle)))
         }
         core.execute("set_mode", args: [.string("stack")])
         core.execute("set_min_window_size", args: [.number(300)])
-        core.execute("set_focus_wrap", args: [.string("this_screen")])
+        core.execute("set_focus_wrap", args: [.string(wrap)])
         let space = try #require(core.state.workspaces.activeSpace)
         core.retile(animated: false)
         let zone = try #require(core.tiler.runCovers[space]?.runs.first)
@@ -68,6 +78,43 @@ struct FocusWrapRunTests {
         try #require(core.runHidden.contains(last))
         #expect(core.navigate([.string("up")], swapping: false).isSuccess)
         #expect(core.state.workspaces.lastFocused == last)
+    }
+
+    /// All screens on one screen wraps through This screen's path.
+    @Test("All screens on one screen reaches the run's end too")
+    func allScreensOnOneScreen() throws {
+        let (core, zone) = try stack(wrap: "all_screens")
+        let first = try #require(zone.members.first)
+        let last = try #require(zone.members.last)
+        focus(core, first)
+        try #require(core.runHidden.contains(last))
+        #expect(core.navigate([.string("up")], swapping: false).isSuccess)
+        #expect(core.state.workspaces.lastFocused == last)
+    }
+
+    /// A lens on the other app's last window: the wrap skips it to
+    /// the nearest member the lens keeps (#2103).
+    @Test("a lens skips a run end it leaves out")
+    func lensSkipsTheEnd() throws {
+        let (core, zone) = try stack()
+        try #require(zone.members.last == WindowID(7))
+        let kept = zone.members[zone.members.count - 2]
+        core.execute(
+            "kiwivision.define_lens",
+            args: [
+                .object([
+                    "name": .string("Writing"),
+                    "apps": .array([.string(lensApp)]),
+                    "keep_focus": .bool(true),
+                ])
+            ]
+        )
+        core.setKiwiVision(.lens("Writing"))
+        let first = try #require(zone.members.first)
+        focus(core, first)
+        try #require(core.runHidden.contains(kept))
+        #expect(core.navigate([.string("up")], swapping: false).isSuccess)
+        #expect(core.state.workspaces.lastFocused == kept)
     }
 
     @Test("↓ at the run's end wraps to its hidden first window")
@@ -102,9 +149,7 @@ struct FocusWrapRunTests {
     @Test("a wrap along a run that leaves it keeps its target")
     func alongTheRunOutOfIt() throws {
         let core = makeCore()
-        #expect(
-            core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300)
-        )
+        core.execute("set_min_window_size", args: [.number(300)])
         core.execute("bsp.set_strategy", args: [.string("alternating")])
         for id in UInt32(1)...6 {
             core.state.apply(.windowCreated(window(id)))

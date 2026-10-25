@@ -47,13 +47,13 @@ extension KiwiCore {
         _ target: WindowID,
         from focused: WindowID,
         in space: Space,
-        direction: Direction
+        direction: Direction,
+        skip: (WindowID) -> Bool
     ) -> WindowID {
         guard
             let zone = runZone(holding: focused, in: space),
             zone.members.contains(target)
         else { return target }
-        let skip = lensKeySkip() ?? { _ in false }
         return runNeighbor(
             direction,
             space: space,
