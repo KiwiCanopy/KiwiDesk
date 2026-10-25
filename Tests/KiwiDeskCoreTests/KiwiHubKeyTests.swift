@@ -69,6 +69,7 @@ struct KiwiHubKeyTests {
             ("hyper+ctrl+n", .hyper),
             ("ctrl+return", .panelKey),
             ("ctrl+enter", .panelKey),
+            ("ctrl+keypadenter", .panelKey),
             ("ctrl+tab", .panelKey),
             ("ctrl+down", .panelKey),
             ("ctrl+pageup", .panelKey),

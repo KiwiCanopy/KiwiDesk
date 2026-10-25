@@ -123,4 +123,35 @@ struct KiwiHubKeyParityTests {
         panel.sendEvent(event)
         #expect(keys == [.step(1)])
     }
+
+    @Test("a ⌘ alternative reaches the panel as a key equivalent")
+    func commandAlternativeIsAKeyEquivalent() throws {
+        let core = makeTestCore()
+        let panel = JumpPanelController(core: core).makePanel()
+        panel.keyedForTesting = true
+        var keys: [JumpKey] = []
+        panel.onKey = { keys.append($0) }
+        #expect(
+            core.execute(
+                "kiwihub.set_key",
+                args: [.string("down"), .string("cmd+j")]
+            ).isSuccess
+        )
+        let event = try #require(
+            NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: .command,
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                characters: "j",
+                charactersIgnoringModifiers: "j",
+                isARepeat: false,
+                keyCode: 38
+            )
+        )
+        #expect(panel.performKeyEquivalent(with: event))
+        #expect(keys == [.step(1)])
+    }
 }
