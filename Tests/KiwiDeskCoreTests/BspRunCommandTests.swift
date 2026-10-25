@@ -70,6 +70,33 @@ struct BspRunCommandTests {
         return (core, space)
     }
 
+    /// Teaches a corroborated minimum on one axis: two asks, each
+    /// refused twice with the same answer.
+    private func seed(
+        _ core: KiwiCore,
+        _ window: WindowID,
+        width: CGFloat? = nil,
+        height: CGFloat? = nil
+    ) {
+        let answer = CGSize(width: width ?? 585, height: height ?? 385)
+        for step in [CGFloat(60), CGFloat(110)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    window,
+                    size: CGSize(
+                        width: answer.width - (width == nil ? 0 : step),
+                        height: answer.height - (height == nil ? 0 : step)
+                    )
+                )
+                core.tiler.boundLearner.observe(
+                    window,
+                    currentSize: answer,
+                    settledRead: true
+                )
+            }
+        }
+    }
+
     @Test("A focus key steps into the chain's hidden window")
     func focusStepsIntoTheRun() throws {
         let (core, id) = makeCore(focus: 3)
@@ -117,19 +144,7 @@ struct BspRunCommandTests {
         // A floor on the parked w4 that fits beside w2's would
         // move the stacked ratio for a window no ratio places.
         let w4 = WindowID(4)
-        for step in [CGFloat(60), CGFloat(110)] {
-            for _ in 0..<2 {
-                core.tiler.boundLearner.recordAsk(
-                    w4,
-                    size: CGSize(width: 585, height: 370 - step)
-                )
-                core.tiler.boundLearner.observe(
-                    w4,
-                    currentSize: CGSize(width: 585, height: 370),
-                    settledRead: true
-                )
-            }
-        }
+        seed(core, w4, height: 370)
         #expect(core.tiler.sizeBound(for: w4)?.minHeight == 370)
         core.retile(animated: false)
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
@@ -184,6 +199,50 @@ struct BspRunCommandTests {
         #expect(
             core.tiler.settings.resolvedBsp(for: space).splitRatioV
                 == ratio
+        )
+    }
+
+    @Test("A press along a run that shows every window moves weights")
+    func showingRunTakesWeights() throws {
+        // w3's learned 450 breaks the equal shares, so the line is
+        // laid by floor and weight, yet all three still fit: a run
+        // that hides nothing, which no cover records.
+        let (core, id) = makeCore(focus: 2, height: 1100)
+        seed(core, WindowID(3), height: 450)
+        core.retile(animated: false)
+        #expect(core.tiler.runCovers[id]?.runs.isEmpty == true)
+        let before = try #require(core.state.workspaces[id])
+        let ratio = core.tiler.settings.resolvedBsp(for: before)
+            .splitRatioV
+        #expect(
+            core.execute(
+                "resize",
+                args: [.string("y"), .number(20)]
+            ).isSuccess
+        )
+        let space = try #require(core.state.workspaces[id])
+        #expect(space.stackWeights[WindowID(2)] != nil)
+        #expect(
+            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+                == ratio
+        )
+    }
+
+    @Test("Across the chain the heal counts its hidden members")
+    func healCountsTheChainAcross() throws {
+        let (core, id) = makeCore(focus: 2)
+        // The parked w4 is as wide as 600: the split beside the
+        // chain yields so the line can hold it.
+        let w4 = WindowID(4)
+        seed(core, w4, width: 600)
+        #expect(core.tiler.sizeBound(for: w4)?.minWidth == 600)
+        core.retile(animated: false)
+        let run = try #require(core.tiler.runCovers[id]?.runs.first)
+        #expect(!run.shown.contains(w4))
+        let space = try #require(core.state.workspaces[id])
+        #expect(
+            core.tiler.settings.resolvedBsp(for: space).splitRatioH
+                < 0.5
         )
     }
 }

@@ -81,8 +81,7 @@ extension KiwiCore {
         switch space.mode {
         case .bsp:
             // The scrolled chain classifies as one block (#2542).
-            let chain = BspLayout.zones(for: input.tiled, in: context)?
-                .first.flatMap { $0.piles(in: context) ? nil : $0 }
+            let chain = bspChain(input)?.zone
             for axis in ["x", "y"] {
                 let horizontal = axis == "x"
                 let sides = BspSplit.sides(

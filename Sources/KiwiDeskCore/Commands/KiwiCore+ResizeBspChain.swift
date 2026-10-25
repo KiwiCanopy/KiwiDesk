@@ -13,11 +13,16 @@ extension KiwiCore {
         of space: Space,
         on screen: NSScreen
     ) -> (zone: RunZone, context: LayoutContext)? {
-        let input = tiler.layoutInput(
-            state: state,
-            space: space,
-            screen: screen
+        bspChain(
+            tiler.layoutInput(state: state, space: space, screen: screen)
         )
+    }
+
+    /// The chain `input` lays out — the one reading the ratio
+    /// doors share, the heal included.
+    func bspChain(
+        _ input: (space: Space, tiled: [WindowID], context: LayoutContext)
+    ) -> (zone: RunZone, context: LayoutContext)? {
         guard
             let zone = BspLayout.zones(
                 for: input.tiled,
@@ -56,9 +61,17 @@ extension KiwiCore {
         )
         let otherAxisDivides =
             !across.first.isEmpty || !across.second.isEmpty
-        guard chain.run(in: context) == nil else {
+        // A line laid by floor and weight, whether it hides a
+        // window or not, takes the run's own step.
+        if let run = chain.run(in: context) {
             return resizeInRun(
                 window,
+                run: RunCover.Run(
+                    zone: chain,
+                    run: run,
+                    extra: chain.runExtra(in: context) ?? 0,
+                    bounds: chain.markBounds(in: context)
+                ),
                 axis: axis,
                 delta: delta,
                 space: space,
