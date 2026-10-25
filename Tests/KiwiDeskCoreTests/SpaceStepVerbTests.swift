@@ -62,9 +62,10 @@ struct SpaceStepVerbTests {
         core.execute(verb, args: []).isSuccess
     }
 
-    @Test("previous and next step the focused screen, ends bump")
+    @Test("previous and next step the focused screen; Off bumps at ends")
     func orderStep() {
         let core = makeCore(shown: "2")
+        core.execute("set_focus_wrap", args: [.string("off")])
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
         #expect(run(core, "focus_space_next"))

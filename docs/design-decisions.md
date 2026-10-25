@@ -1933,7 +1933,10 @@ Space under the pointer and never leaves its screen. The setting
 is the Space history's shape — a `gui.json` base with a sparse
 per-profile override — because a profile may want the screen
 wall its arrangement was made around, and no layout wants a
-different answer than another on the same keys.
+different answer than another on the same keys. The Space step
+reads the same setting (#2592): any value but Off wraps it round
+its own screen's Spaces, so one row answers what every key does
+at its end.
 
 The three switches cross to the default, All screens, whatever
 they stored, and a one-shot step drops them from every file (owner
@@ -13417,6 +13420,22 @@ Space, having no ring, stays still — and a wrap would only make
 an overshoot worse. There is no long-swipe
 option: a Space switch redraws the whole screen, so counting
 distance would repaint it several times for one hand.
+
+:::unreleased
+**Amended by #2592 (owner ruling 2026-10-25): the step wraps
+unless Wrap focus is Off.** The gesture and the next / previous
+Space keys take one step, so they answer an end alike, and a
+second switch for one question would be the three per-layout
+answers #2493 retired. The meter still bounds a spin to one step;
+a deliberate step too many now lands on the far end, the accepted
+cost, and Off is the wall for whoever wants one. Under This screen
+and All screens the step goes round the screen's own Space order
+and never onto another screen — the order the bar shows is the
+one being stepped, and another screen's Spaces are reached by
+focusing that screen. Off keeps the stop and its bump, never a
+pill. The slide plays in the key's direction, so last → first
+moves forward with the hand rather than rewinding the strip.
+:::
 
 **A wheel steps once per notch, and a spinning wheel once per
 spin, on both scroll gestures.** A free-spinning wheel reports a burst of notches after a

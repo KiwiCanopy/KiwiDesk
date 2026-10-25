@@ -6,6 +6,20 @@ import Foundation
 struct SpaceSlideIntent: Equatable {
     let display: DisplayID
     let leaving: SpaceID?
+    /// The key's step where a step made the switch (#2592), so a
+    /// wrap from the last Space to the first slides forward; nil
+    /// lets the Space order decide.
+    var step: Int?
+
+    /// +1 where the target's page enters from the trailing side.
+    func direction(to target: SpaceID, order: [SpaceID]) -> CGFloat {
+        if let step { return step < 0 ? -1 : 1 }
+        return SpaceSlidePlan.direction(
+            from: leaving,
+            to: target,
+            order: order
+        )
+    }
 }
 
 /// The plate slide's place in an explicit Space switch (#1956):
@@ -14,13 +28,21 @@ struct SpaceSlideIntent: Equatable {
 /// it lands. One AX write per window, as the instant switch.
 extension KiwiCore {
     /// The slide a switch to `target` would play; nil where its
-    /// screen already shows it, so nothing parks.
-    func spaceSlideIntent(to target: SpaceID) -> SpaceSlideIntent? {
+    /// screen already shows it, so nothing parks. `step` is the
+    /// key's, where a Space step made the switch.
+    func spaceSlideIntent(
+        to target: SpaceID,
+        step: Int? = nil
+    ) -> SpaceSlideIntent? {
         guard let display = state.workspaces.display(of: target)
         else { return nil }
         let leaving = state.workspaces.activeSpace(on: display)
         guard leaving != target else { return nil }
-        return SpaceSlideIntent(display: display, leaving: leaving)
+        return SpaceSlideIntent(
+            display: display,
+            leaving: leaving,
+            step: step
+        )
     }
 
     /// How this switch shows itself (#2524): the stored
@@ -73,8 +95,7 @@ extension KiwiCore {
                 display: intent.display,
                 screen: screen.frame,
                 axis: spaceSlideAxis(on: intent.display),
-                direction: SpaceSlidePlan.direction(
-                    from: intent.leaving,
+                direction: intent.direction(
                     to: target,
                     order: state.workspaces.order
                 ),

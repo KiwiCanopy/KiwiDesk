@@ -19,8 +19,9 @@ struct SpaceHistoryState {
 /// `focus_space_back` / `focus_space_forward` walk the history;
 /// `focus_space_previous` / `focus_space_next` step the Space
 /// order (#1655, rulings 2026-10-09). All four act on the focused
-/// screen, never create a Space, and refuse at an end with the
-/// row-end bump the ⌃⌥⌘ + scroll step makes (#1519).
+/// screen and never create a Space; the history refuses at an end
+/// with the row-end bump the ⌃⌥⌘ + scroll step makes (#1519), and
+/// the order step wraps unless Wrap focus is Off (#2592).
 extension KiwiCore {
     /// Records what every screen shows now, and what the focused
     /// screen shows, as visits. Every arrival — a key, a click, a

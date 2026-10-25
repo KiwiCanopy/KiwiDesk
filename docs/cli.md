@@ -533,7 +533,7 @@ every lens with why it cannot turn on.
 | | `focus_window` | window id |
 | | `swap` | `left\|right\|up\|down` |
 | | `focus_space` | space id |
-| | `focus_space_previous` / `focus_space_next` | — (the focused screen's order; stops at the ends) |
+| | `focus_space_previous` / `focus_space_next` | — (the focused screen's order; past an end, see `set_focus_wrap`) |
 | | `focus_space_back` / `focus_space_forward` | — (the Spaces you visited; see `set_space_history`) |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
@@ -660,7 +660,9 @@ last window that way in every layout — stop, wrap within the
 screen, or continue onto the next screen
 ([Lua reference](lua-reference.md#set_focus_wrap)). It replaces
 `scroll.set_wrap_focus`, `monocle.set_wrap_focus` and
-`track.set_wrap_focus`, which now fail naming it.
+`track.set_wrap_focus`, which now fail naming it. It also decides
+whether `focus_space_previous` / `focus_space_next` wrap
+([Lua reference](lua-reference.md#focus_space_previous--focus_space_next)).
 :::
 
 `set_min_window_size`'s layout is `stack`, `grid`, `track`,

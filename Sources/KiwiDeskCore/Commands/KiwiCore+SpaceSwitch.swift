@@ -14,8 +14,9 @@ extension KiwiCore {
     }
 
     /// `focus_space`'s switch. `warp: false` is a pointer gesture's
-    /// (#1519): the pointer stays where the hand holds it.
-    func switchSpace(to space: SpaceID, warp: Bool) {
+    /// (#1519): the pointer stays where the hand holds it. `step` is
+    /// a Space step's direction, which the slide plays (#2592).
+    func switchSpace(to space: SpaceID, warp: Bool, step: Int? = nil) {
         // Who is frontmost BEFORE the switch: the settle uses it
         // to tell "the handoff's activate never landed" (#463)
         // apart from "the user moved on since".
@@ -26,7 +27,7 @@ extension KiwiCore {
         // of the slide's read, so it slides too (#1994).
         state.workspaces.ensureSpace(space)
         placeUnplacedSpaces()
-        let slide = spaceSlideIntent(to: space)
+        let slide = spaceSlideIntent(to: space, step: step)
         state.workspaces.activate(space)
         logSpaceContents(space)
         spaceSwitchRetile(asSwitch: true, slide: slide)

@@ -7,7 +7,8 @@ import Testing
 
 /// ⌃⌥⌘ + scroll (#1519, rulings 2026-09-28/29): one Space per
 /// swipe or wheel notch, in the Space order of the screen under the
-/// pointer, stopping at the ends, never warping — and a spinning
+/// pointer, wrapping past the ends unless Wrap focus is Off, never
+/// warping — and a spinning
 /// wheel steps once (`ScrollStepMeterTests`).
 @Suite("Scroll Space step gesture", .serialized)
 @MainActor
@@ -166,15 +167,17 @@ struct ScrollSpaceStepTests {
         #expect(shown(core) == "3")
     }
 
-    @Test("the first and last Space stop the step, with a bump")
+    @Test("Wrap focus Off stops the step at the ends, with a bump")
     func stopsAtTheEnds() {
         let (core, session) = makeCore(shown: "3")
+        core.execute("set_focus_wrap", args: [.string("off")])
         var bumps: [Direction] = []
         core.borders.deadEndProbe = { bumps.append($1) }
         swipe(core, session, dx: -80)
         #expect(shown(core) == "3")
         #expect(bumps == [.right])
         let (first, firstSession) = makeCore(shown: "1")
+        first.execute("set_focus_wrap", args: [.string("off")])
         var firstBumps: [Direction] = []
         first.borders.deadEndProbe = { firstBumps.append($1) }
         swipe(first, firstSession, dx: 80)
@@ -185,12 +188,35 @@ struct ScrollSpaceStepTests {
     @Test("an empty Space at the end has no ring, and says nothing")
     func emptyEndIsSilent() {
         let (core, session) = makeCore(shown: "3")
+        core.execute("set_focus_wrap", args: [.string("off")])
         core.state.apply(.windowDestroyed(WindowID(3), wasMinimized: false))
         var bumps = 0
         core.borders.deadEndProbe = { _, _ in bumps += 1 }
         swipe(core, session, dx: -80)
         #expect(shown(core) == "3")
         #expect(bumps == 0)
+    }
+
+    /// The gesture wraps as the keys do (#2592), on the screen under
+    /// the pointer, under either wrapping value.
+    @Test(
+        "past an end the gesture wraps on its own screen",
+        arguments: ["all_screens", "this_screen"]
+    )
+    func wrapsAtTheEnds(mode: String) {
+        let (core, session) = makeCore(shown: "3")
+        core.execute("set_focus_wrap", args: [.string(mode)])
+        var bumps = 0
+        core.borders.deadEndProbe = { _, _ in bumps += 1 }
+        swipe(core, session, dx: -80)
+        #expect(shown(core) == "1")
+        swipe(core, session, dx: 80)
+        #expect(shown(core) == "3")
+        #expect(bumps == 0)
+        let (other, otherSession) = makeCore(shown: "8", under: Self.displayB)
+        other.execute("set_focus_wrap", args: [.string(mode)])
+        swipe(other, otherSession, dx: -80)
+        #expect(other.state.workspaces.activeSpace(on: Self.displayB) == "7")
     }
 
     @Test("it steps the Spaces of the screen under the pointer")

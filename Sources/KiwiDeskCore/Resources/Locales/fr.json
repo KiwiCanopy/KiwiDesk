@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "Rechercher des raccourcis",
   "shortcuts.focus_wrap": "Boucler le focus",
   "shortcuts.focus_wrap.all_screens": "Tous les écrans",
-  "shortcuts.focus_wrap.help": "%1$@ : après la dernière fenêtre, le focus revient à la première du même écran. %2$@ : il continue sur l'écran suivant, et après le dernier écran revient au premier. Avec un seul écran, les deux fonctionnent de la même façon.",
+  "shortcuts.focus_wrap.help": "%1$@ : après la dernière fenêtre, le focus revient à la première du même écran. %2$@ : il continue sur l'écran suivant, et après le dernier écran revient au premier. Avec un seul écran, les deux fonctionnent de la même façon. Dans les deux cas, les raccourcis d'espace suivant et précédent parcourent en boucle les espaces de l'écran, et avec « %3$@ », ils s'arrêtent au dernier.",
   "shortcuts.focus_wrap.off": "Désactivé",
   "shortcuts.focus_wrap.this_screen": "Cet écran",
   "shortcuts.fold.focus_directions": "Cibler la fenêtre de gauche, du dessous, du dessus, de droite",

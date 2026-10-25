@@ -251,11 +251,18 @@ KiwiDesk.focus_space("mail")
 
 **Does:** switches the focused window's screen to the previous or
 next Space in that screen's order — the Space Bar's, an empty
-Space included where the bar hides it. It stops at the first and
-last Space: there the focused window's ring bumps toward the
-step, as at the end of a row, and nothing switches. It never
-creates a Space. The ⌃⌥⌘ + scroll gesture takes the same step on
-the screen under the pointer.
+Space included where the bar hides it. It never creates a Space.
+The ⌃⌥⌘ + scroll gesture takes the same step on the screen under
+the pointer.
+
+:::unreleased
+Past the last Space it wraps to the first, and past the first to
+the last, on the same screen — never onto another one. With
+[Wrap focus](#set_focus_wrap) `off` it stops there instead: the
+focused window's ring bumps toward the step, as at the end of a
+row, and nothing switches. A screen with one Space stops there
+too. A wrap slides in the key's direction.
+:::
 
 Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
 gets them through **Restore Defaults…**.
@@ -1067,6 +1074,11 @@ order, not the screen edge, and a Stack or Track run that hides
 windows is walked to its end first. The pointer follows the
 crossing like any
 [Space switch onto another screen](#focus_space).
+
+It also decides whether
+[`focus_space_previous` / `focus_space_next`](#focus_space_previous--focus_space_next)
+and the ⌃⌥⌘ + scroll step wrap at a screen's first and last
+Space.
 
 It is stored like the Space history: `focus_wrap` in `gui.json`
 is the value every profile uses, and a profile may keep its own,
@@ -4706,9 +4718,15 @@ the pointer, in that screen's Space order — the Space Bar's, empty
 Spaces included. A swipe steps one Space, and so does a notch of a
 mouse wheel; a fast roll or a free-spinning wheel steps one for the
 whole burst, and each notch counts again once the wheel pauses
-between notches. It stops at the first and last Space rather than
-wrapping, where the focused window's border, if the shown Space
-has one, bumps toward the step, and the pointer does not move.
+between notches. The pointer does not move.
+
+:::unreleased
+Past the first or last Space it wraps or stops as
+[`focus_space_next`](#focus_space_previous--focus_space_next)
+does; where it stops, the focused window's border, if the shown
+Space has one, bumps toward the step.
+:::
+
 The direction follows
 [Natural scrolling](#scroll_gestureset_natural_scrolling), as
 the window step's does.

@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "Cerca scorciatoie",
   "shortcuts.focus_wrap": "Focus circolare",
   "shortcuts.focus_wrap.all_screens": "Tutti gli schermi",
-  "shortcuts.focus_wrap.help": "%1$@: dopo l'ultima finestra, il focus torna alla prima sullo stesso schermo. %2$@: prosegue sullo schermo successivo e, dopo l'ultimo schermo, torna al primo. Con un solo schermo, le due opzioni funzionano allo stesso modo.",
+  "shortcuts.focus_wrap.help": "%1$@: dopo l'ultima finestra, il focus torna alla prima sullo stesso schermo. %2$@: prosegue sullo schermo successivo e, dopo l'ultimo schermo, torna al primo. Con un solo schermo, le due opzioni funzionano allo stesso modo. In entrambi i casi, le scorciatoie per lo spazio successivo e precedente scorrono ciclicamente gli spazi dello schermo, e con «%3$@» si fermano all'ultimo.",
   "shortcuts.focus_wrap.off": "Disattivato",
   "shortcuts.focus_wrap.this_screen": "Questo schermo",
   "shortcuts.fold.focus_directions": "Sposta il focus sulla finestra a sinistra, in basso, in alto, a destra",
