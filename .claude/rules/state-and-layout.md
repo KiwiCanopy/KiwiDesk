@@ -685,21 +685,42 @@ editing here:
   `space.windows` owes it no exclusion, and the pocket never
   becomes a Space or a flag on a member. The obligations run the
   other way:
-  - **A new path that files a window into a Space on its
-    arrival or re-adoption consults the slot first**, as the
-    create fold does through `readoptPocketWindow` — an unhide, a
-    boot scan, a replay — or it files the pocketed window and
-    draws it (`PocketCommandTests` ▸ `hideKeeps`,
+  - **A new pass over EVERY tracked window — `state.windows.all`,
+    as the stash park, the marks, the Desktop carry, the window
+    switcher and `get_state` walk — asks `pocketPhase(of:)` and
+    rules on the window in both phases**: it reaches the window
+    where a Space reader does not, so forgetting it there acts on a
+    parked window rather than hiding one.
+  - **A new path that files a window into a Space consults the
+    slot first** — on an arrival or re-adoption, as the create
+    fold does through `readoptPocketWindow` (an unhide, a boot
+    scan, a replay), and on a re-file, as the profile
+    partitioning restore (`restorePartitioning`) skips
+    `pocketedWindow` — or it files the pocketed window and draws
+    it (`PocketCommandTests` ▸ `hideKeeps`,
     `outReadoptKeepsFlags`). A new per-window flag memory that a
     close writes and an arrival restores skips the pocket window,
-    whose flags are the slot's (`PocketCommandTests` ▸
-    `closeLeavesNoMemory`).
+    whose flags are the slot's; `PocketCommandTests` ▸
+    `closeLeavesNoMemory` holds the sticky memory alone, since
+    pocketing clears `userFloated` and the float memory never
+    records the window.
   - **Ask whether a window is the pocket's through
     `StateCoordinator.pocketPhase(of:)`**, which answers the phase
     too, or `pocketedWindow`; a new consumer that draws, refuses
-    or skips for it states which phase it means.
+    or skips for it states which phase it means. **The screen a
+    pocketed window waits on is `pocketHomeDisplay`**, the active
+    Space's, which the stash park and the Desktop carry both read;
+    a new reader of that screen takes it rather than deriving one.
+  - **macOS focusing the pocketed window takes it out in
+    `handleWindowFocused`, after every distrust arm** — the
+    ignored-panel re-report, the z-order echo, the #958 and #1532
+    returns — so a report one of them claims never takes it out; a
+    new focus distrust sits ahead of `consumePocketedFocus`, and
+    the move latch stamped by `putInPocket` swallows the pocketing's
+    own echo (`PocketCommandTests` ▸ `activationTakesOut`).
   - **The slot crosses an in-place restart in
-    `StateSnapshot.pocket`, written by that capture alone**; a quit
+    `StateSnapshot.pocket`, written by that capture alone**, and is
+    adopted only for a window the boot scan tracked; a quit
     releases the pocket ahead of its capture
     (`releasePocketForQuit`), so no other snapshot carries one
     (`PocketSurfaceTests` ▸ `inPlaceCarries`,
@@ -827,6 +848,13 @@ editing here:
   the arm itself is accessibility.md's).
   `StickyReachCarryTests` drives the handler, the settle and the
   verdicts through the fake bridge; `StickyReachOverrideTests` the pin.
+  **The carried set, `stickyReachCarried`, also holds the pocket
+  window in both phases whatever `sticky.desktop_reach` says
+  (#2446)**, the pocketed one carried to `pocketHomeDisplay`'s
+  Desktop; every reader of the set — the carry, the in-flight
+  stamp, and the readers that inherit it — takes the pocket window
+  with it, so a new reader states whether it means that window
+  too.
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes
@@ -1915,7 +1943,10 @@ editing here:
   `detectionVerdict(for:)` or the detection beside it, and the
   verdict is composed only in `EventLoop.autoFloatVerdict` —
   `TileRefusalSeamTests` holds all three by census, so a new
-  reader names itself there. A user-float record never stands on
+  reader names itself there. `tileRefusal` lays one state verdict
+  ahead of detection: the pocket window answers `.pocket` (#2446),
+  a reason detection never composes, so a new STATE reason joins
+  it there and never `autoFloatVerdict`. A user-float record never stands on
   a window detection floats, from any door (`userFloated`'s
   fold, the reopen memory, the in-place restore;
   `TileReturnsToRulesTests`); the argument is

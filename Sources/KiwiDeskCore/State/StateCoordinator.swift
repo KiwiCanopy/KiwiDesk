@@ -246,7 +246,7 @@ public struct StateCoordinator: Sendable {
                 rememberStickyIntent(of: window)
             }
             if let id = pocket?.window, windows[id]?.pid == pid {
-                pocket = nil
+                emptyPocket()
             }
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)

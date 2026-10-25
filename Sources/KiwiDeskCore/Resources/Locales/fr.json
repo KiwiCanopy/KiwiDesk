@@ -1544,7 +1544,7 @@
   "onboarding.keys.move_and_follow": "Déplacer la fenêtre vers un espace et suivre",
   "onboarding.keys.move_to_space": "Déplacer la fenêtre vers un espace",
   "onboarding.keys.none": "Vos raccourcis vous appartiennent, et aucun n'est encore configuré. Les Réglages contiennent la liste complète dès que vous le souhaitez.",
-  "onboarding.keys.pocket": "Fenêtre dans la Pocket, puis retour",
+  "onboarding.keys.pocket": "Mettre la fenêtre dans la Pocket, puis l'en sortir",
   "onboarding.keys.swap": "Échanger la fenêtre",
   "onboarding.keys.tier": "%1$@ déplace le focus. Ajoutez %2$@ pour déplacer la fenêtre.",
   "onboarding.keys.title": "Vos raccourcis",

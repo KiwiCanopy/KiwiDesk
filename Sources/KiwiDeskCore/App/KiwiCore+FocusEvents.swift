@@ -243,15 +243,14 @@ extension KiwiCore {
         }
         // The accessibility-steal return (#958): LAST among the
         // consumes, so a report an earlier machine claims never
-        // spends the one-shot debt; gated on `!selfEcho` because
-        // a stamped self-raise echo can fall past the drop block
-        // above while still being our own fallout (re-review,
-        // 2026-08-27).
+        // spends the one-shot debt; gated on `!selfEcho`, since a
+        // stamped self-raise echo can fall past the drop block above.
         if !selfEcho,
             returnAccessibilitySteal(id: id, now: now)
         {
             return
         }
+        if consumePocketedFocus(id) { return }  // past the distrusts
         // A real focus echo (a user click mid-pan) or a self
         // echo that matches the intended focus supersedes the
         // deferred raise (#143): the OS already raised whatever

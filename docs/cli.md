@@ -680,6 +680,12 @@ every lens with why it cannot turn on.
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
 :::unreleased
+`get_state`'s window objects carry `pocket`: `"pocketed"` or
+`"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
+for every other.
+:::
+
+:::unreleased
 `set_focus_wrap` takes `off`, `this_screen` or `all_screens`
 (default `all_screens`): what `focus <direction>` does at the
 last window that way in every layout — stop, wrap within the

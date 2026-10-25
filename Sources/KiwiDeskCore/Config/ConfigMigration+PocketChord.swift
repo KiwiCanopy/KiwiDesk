@@ -4,7 +4,10 @@ import Foundation
 /// a stored row still running the seeded "Toggle sticky on this
 /// screen" on its seeded chord — `⌃⌥P`, or `✦P` on the Hyper base —
 /// runs `KiwiDesk.pocket()` instead, in every `bindings` list a file
-/// carries. A chord the user moved or bound to pin themselves stays.
+/// carries. A chord the user moved or bound to pin themselves stays:
+/// where a root states its `shortcut_base` (gui.json, a backup's
+/// config) only that base's chord moves; a profile states none, so
+/// either moves there.
 /// A meaning change, so the step reads the format and stands down
 /// at the floor it introduced (#1354): a pin the user puts back on
 /// `⌃⌥P` afterwards is theirs.
@@ -24,14 +27,18 @@ extension ConfigMigration {
 
     @Sendable
     static func migratingPinChordOntoPocket(_ data: Data) -> Data? {
-        surgicallyApplying(
+        var moved: Set<String> = []
+        return surgicallyApplying(
             data,
             gate: {
                 $0.range(of: Data(pinLua.utf8)) != nil
                     && belowPocketChordFloor($0)
             },
-            rewriting: withPocketChord,
-            editing: surgicallyPocketing
+            rewriting: {
+                moved = []
+                return withPocketChord($0, base: nil, moved: &moved)
+            },
+            editing: { surgicallyPocketing($0, combos: moved) }
         )
     }
 
@@ -50,9 +57,15 @@ extension ConfigMigration {
     }
 
     /// The tree with every seeded pin row in a `bindings` list
-    /// moved onto Pocket.
-    static func withPocketChord(_ node: Any) -> (Any, Bool) {
+    /// moved onto Pocket, under the nearest `shortcut_base` above
+    /// it; `moved` collects the chords the walk moved.
+    static func withPocketChord(
+        _ node: Any,
+        base: String?,
+        moved: inout Set<String>
+    ) -> (Any, Bool) {
         if let dict = node as? [String: Any] {
+            let base = dict[shortcutBaseKey] as? String ?? base
             var out: [String: Any] = [:]
             var changed = false
             for (key, value) in dict {
@@ -60,15 +73,20 @@ extension ConfigMigration {
                     var did = false
                     out[key] = rows.map { row -> Any in
                         guard let binding = row as? [String: Any],
-                            let moved = pocketed(binding)
+                            let pocket = pocketed(binding, base: base)
                         else { return row }
                         did = true
-                        return moved
+                        moved.insert(binding["combo"] as? String ?? "")
+                        return pocket
                     }
                     changed = changed || did
                     continue
                 }
-                let (child, did) = withPocketChord(value)
+                let (child, did) = withPocketChord(
+                    value,
+                    base: base,
+                    moved: &moved
+                )
                 out[key] = child
                 changed = changed || did
             }
@@ -77,7 +95,11 @@ extension ConfigMigration {
         if let array = node as? [Any] {
             var changed = false
             let out = array.map { value -> Any in
-                let (child, did) = withPocketChord(value)
+                let (child, did) = withPocketChord(
+                    value,
+                    base: base,
+                    moved: &moved
+                )
                 changed = changed || did
                 return child
             }
@@ -86,15 +108,25 @@ extension ConfigMigration {
         return (node, false)
     }
 
-    /// `row` running Pocket, or nil where it is no seeded pin row.
-    static func pocketed(_ row: [String: Any]) -> [String: Any]? {
+    /// `row` running Pocket, or nil where it is no seeded pin row on
+    /// `base` — either base where nil.
+    static func pocketed(
+        _ row: [String: Any],
+        base: String?
+    ) -> [String: Any]? {
         guard row["lua"] as? String == pinLua,
             let text = row["combo"] as? String,
             let combo = KeyCombo.parse(text),
-            let seeded = KeyCombo.parse(pinSeedChord),
-            combo == seeded
-                || combo == ShortcutBase.moved(seeded, to: .hyper)
+            let seeded = KeyCombo.parse(pinSeedChord)
         else { return nil }
+        let hyper = ShortcutBase.moved(seeded, to: .hyper)
+        let seededOnBase: Bool
+        switch base.flatMap(ShortcutBase.init(rawValue:)) {
+        case .standard?: seededOnBase = combo == seeded
+        case .hyper?: seededOnBase = combo == hyper
+        case nil: seededOnBase = combo == seeded || combo == hyper
+        }
+        guard seededOnBase else { return nil }
         var out = row
         out["lua"] = pocketLua
         if row["label"] as? String == pinSeedLabel {
@@ -103,9 +135,13 @@ extension ConfigMigration {
         return out
     }
 
-    /// The textual edit: each seeded pin row's `lua` and seeded
-    /// label rewritten inside its own object.
-    static func surgicallyPocketing(_ text: String) -> Data? {
+    /// The textual edit: each seeded pin row the walk moved — its
+    /// chord among `combos` — has its `lua` and seeded label
+    /// rewritten inside its own object.
+    static func surgicallyPocketing(
+        _ text: String,
+        combos: Set<String>
+    ) -> Data? {
         guard
             let regex = try? NSRegularExpression(pattern: "\\{[^{}]*\\}")
         else { return nil }
@@ -116,7 +152,8 @@ extension ConfigMigration {
                 let object = try? JSONSerialization.jsonObject(
                     with: Data(out[range].utf8)
                 ) as? [String: Any],
-                pocketed(object) != nil
+                pocketed(object, base: nil) != nil,
+                combos.contains(object["combo"] as? String ?? "")
             else { continue }
             var edited = out[range].replacingOccurrences(
                 of: "(\"lua\"\\s*:\\s*)\"[^\"]*\"",

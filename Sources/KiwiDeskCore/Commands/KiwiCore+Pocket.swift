@@ -4,15 +4,18 @@ import Foundation
 /// `pocket` (#2446): the one key that pockets the focused window,
 /// takes it out and puts it back. The slot is
 /// `StateCoordinator.pocket`; this file moves windows in and out
-/// of it. Not a #292 focused command: taking the window out acts
-/// on no focus, an empty Space included.
+/// of it. A #292 focused command whose filled slot passes the
+/// preflight: taking the window out acts on no focus.
 extension KiwiCore {
     func pocketCommand() -> CommandResponse {
         switch state.pocket?.phase {
         case .pocketed?:
             return takePocketOut() ? .ok() : .fail("pocket is unreachable")
         case .out?:
-            if let id = state.pocket?.window { putInPocket(id) }
+            // Its app hidden: the unhide brings it back to the slot.
+            guard let id = state.pocket?.window, state.windows[id] != nil
+            else { return .fail("pocket is unreachable") }
+            putInPocket(id)
             return .ok()
         case nil:
             guard let id = focusedWindowID,
@@ -36,7 +39,7 @@ extension KiwiCore {
         let heldFocus = state.workspaces.lastFocused == id
         tiler.forgetStash(id)
         state.pocketWindow(id)
-        moveLatch.stamp(id)
+        moveLatch.stamp(id, at: wallClock())
         onLog("pocket: w\(id.raw) pocketed")
         if heldFocus {
             let next =
@@ -90,12 +93,14 @@ extension KiwiCore {
     /// it is out.
     private func rememberPocketFrame(of id: WindowID) {
         guard state.pocketPhase(of: id) == .out,
-            let window = state.windows[id],
-            let space = state.renderSpace(of: window),
-            let display = state.workspaces.display(of: space),
-            let screen = screenFingerprint(of: display)
+            let window = state.windows[id]
         else { return }
         let frame = tiler.commandedFrame(of: id) ?? window.frame
+        guard
+            let display = TilingEngine.screen(containing: frame)?
+                .kiwiDisplayID,
+            let screen = screenFingerprint(of: display)
+        else { return }
         state.rememberPocketFrame(frame, on: screen)
     }
 
@@ -137,6 +142,7 @@ extension KiwiCore {
         if slot.phase == .pocketed,
             let target = state.workspaces.activeSpace
         {
+            // A quit's filing, no user's: the gather lays it out.
             state.workspaces.add(id, to: target)
         }
         state.setFloating(id, true)

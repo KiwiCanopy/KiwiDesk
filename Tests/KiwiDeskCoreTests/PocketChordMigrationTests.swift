@@ -56,9 +56,59 @@ struct PocketChordMigrationTests {
 
     @Test("the seeded pin on ✦P runs Pocket")
     func hyperChordMoves() throws {
-        let data = try gui([row("hyper+p", pin)], format: guiBefore)
+        var config = GuiConfig()
+        config.format = guiBefore
+        config.shortcutBase = .hyper
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [row("hyper+p", pin)]
+            )
+        ]
+        let data = try JSONEncoder().encode(config)
         let out = try #require(ConfigMigration.migrated(data))
         #expect(try rows(out).first?.lua == "KiwiDesk.pocket()")
+    }
+
+    @Test("on the ⌃⌥ base, a ✦P the user gave pin stays pin")
+    func otherBaseChordStays() throws {
+        var config = GuiConfig()
+        config.format = guiBefore
+        config.shortcutBase = .standard
+        config.layers = [
+            KeyLayer(
+                name: KeyLayer.defaultName,
+                bindings: [row("hyper+p", pin)]
+            )
+        ]
+        let data = try JSONEncoder().encode(config)
+        let out = ConfigMigration.migrated(data) ?? data
+        #expect(try rows(out).first?.lua == pin)
+    }
+
+    @Test("a profile or backup at the step's floor keeps its pin")
+    func profileAndBundleFloors() throws {
+        let rows: [[String: Any]] = [
+            ["combo": "control+option+p", "lua": pin, "label": ""]
+        ]
+        let layers: [[String: Any]] = [["name": "default", "bindings": rows]]
+        let profile: [String: Any] = [
+            "format": ConfigMigration.pocketChordProfileFormat,
+            "monitor_sets": [], "layers": ["layers": layers],
+        ]
+        let bundle: [String: Any] = [
+            SetupBundle.shapeMarker: 1,
+            "format": ConfigMigration.pocketChordBundleFormat,
+            "config": ["layers": layers],
+        ]
+        for root in [profile, bundle] {
+            let data = try JSONSerialization.data(withJSONObject: root)
+            #expect(ConfigMigration.migratingPinChordOntoPocket(data) == nil)
+            var below = root
+            below["format"] = (root["format"] as? Int ?? 0) - 1
+            let old = try JSONSerialization.data(withJSONObject: below)
+            #expect(ConfigMigration.migratingPinChordOntoPocket(old) != nil)
+        }
     }
 
     @Test("a chord the user gave pin stays pin")
@@ -125,11 +175,16 @@ struct PocketChordMigrationTests {
         )
         let text = try #require(String(data: data, encoding: .utf8))
         let edited = try #require(
-            ConfigMigration.surgicallyPocketing(text)
+            ConfigMigration.surgicallyPocketing(
+                text,
+                combos: ["control+option+p"]
+            )
         )
         let out = String(decoding: edited, as: UTF8.self)
         #expect(!out.contains(pin))
         #expect(out.contains("KiwiDesk.toggle_floating()"))
         #expect(out.contains("\"Pocket this window\""))
+        // The step takes the surgical edit, not a re-encode.
+        #expect(ConfigMigration.migratingPinChordOntoPocket(data) == edited)
     }
 }

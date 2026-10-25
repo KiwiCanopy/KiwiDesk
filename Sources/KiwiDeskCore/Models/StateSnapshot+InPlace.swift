@@ -166,11 +166,11 @@ extension StateCoordinator {
         stickyReachOverrides[id] = session.stickyReach
     }
 
-    /// Takes back an in-place capture's pocket (#2446). A window the
-    /// boot scan already filed leaves its Space again; one not yet
-    /// tracked is re-adopted unfiled by the create fold.
+    /// Takes back an in-place capture's pocket (#2446) for a window
+    /// the boot scan tracked, which leaves its Space again; a window
+    /// that closed across the relaunch empties it.
     mutating func adoptPocket(_ slot: PocketSlot?) {
-        guard let slot else { return }
+        guard let slot, windows[slot.window] != nil else { return }
         pocket = slot
         if readoptPocketWindow(slot.window) {
             workspaces.remove(slot.window)

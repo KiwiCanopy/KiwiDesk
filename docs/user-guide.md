@@ -699,6 +699,14 @@ layout wears no floating mark. Glyphs wearing the floating badge
 come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 
+:::unreleased
+A window out of the [pocket](lua-reference.md#pocket) wears the
+**pocket mark** half over its top-right corner, in place of its
+sticky and floating marks, and its glyph wears the **pocket badge**
+on the bottom-left, in place of the floating badge; that glyph
+comes last in its row too.
+:::
+
 **Drag a window onto a Space** to move it there:
 
 - **Flick and drop** — release before the ring fills; the window
@@ -983,15 +991,11 @@ under Shortcuts & Gestures ▸ Size & float.
 :::
 
 :::unreleased
-`⌃⌥P` pockets the focused window: it leaves the screen and every
-bar. Press it again to take the window out on the screen you are
-on, floating and on every Space, and again to put it back; `⌘-Tab`
-to its app takes it out too
-([`pocket`](lua-reference.md#pocket)). Out of the pocket it wears
-the pocket mark on its top-right corner. It is listed under
-Shortcuts & Gestures ▸ Size & float, and KiwiHub's window switcher
-lists a pocketed window under **Pocket**. Closing the window
-empties the pocket.
+`⌃⌥P` is **Pocket this window**, under Shortcuts & Gestures ▸ Size
+& float ([`pocket`](lua-reference.md#pocket)). A pocketed window
+leaves the screen and every bar, and comes out on the screen you
+are on, floating on every Space. `⌘-Tab` to its app takes it out
+too, and KiwiHub's window switcher lists it under **Pocket**.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

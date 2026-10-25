@@ -899,7 +899,7 @@
   "keybinding.next_layout": "Alternar para o layout seguinte",
   "keybinding.open_settings": "Abrir Ajustes",
   "keybinding.pocket": "Guardar esta janela no Pocket",
-  "keybinding.pocket.help": "O primeiro toque guarda a janela com foco no Pocket. Depois, a mesma tecla a tira do seu Pocket e a guarda de volta. Feche a janela para esvaziar seu Pocket.",
+  "keybinding.pocket.help": "Ao pressionar pela primeira vez, você guarda a janela com foco no Pocket. Depois, a mesma tecla a tira do seu Pocket e a guarda de volta. Feche a janela para esvaziar seu Pocket.",
   "keybinding.previous_layout": "Alternar para o layout anterior",
   "keybinding.reset_sizes": "Redefinir os tamanhos deste espaço",
   "keybinding.show_shortcuts": "Mostrar o painel de atalhos",

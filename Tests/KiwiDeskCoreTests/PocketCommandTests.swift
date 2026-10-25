@@ -77,6 +77,7 @@ struct PocketCommandTests {
         #expect(core.state.pocketPhase(of: two) == nil)
         #expect(!isFiled(core, one))
         #expect(isFiled(core, two))
+        #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
     }
 
     @Test("an app's exit empties the pocket")
@@ -126,6 +127,10 @@ struct PocketCommandTests {
         core.execute("pocket")
         #expect(!core.execute("make_unsticky").isSuccess)
         #expect(!core.execute("toggle_sticky").isSuccess)
+        #expect(
+            !core.execute("override_sticky_reach", args: [.string("off")])
+                .isSuccess
+        )
         #expect(core.state.windows[one]?.stickyScope == .global)
         #expect(!core.execute("toggle_floating").isSuccess)
         #expect(!core.execute("make_tiled").isSuccess)
@@ -148,6 +153,28 @@ struct PocketCommandTests {
         core.execute("pocket")
         core.state.apply(.windowDestroyed(one, wasMinimized: false))
         core.state.pocket = nil
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(5),
+                    pid: 900_001,
+                    appName: "App1",
+                    title: "Window 1"
+                )
+            )
+        )
+        #expect(
+            core.state.windows[WindowID(5)]?.stickyScope
+                == StickyScope.none
+        )
+    }
+
+    @Test("an app's exit leaves no memory of the pocket's flags")
+    func appExitLeavesNoMemory() {
+        let core = makeCore()
+        core.execute("pocket")
+        core.execute("pocket")
+        core.state.apply(.appTerminated(pid: 900_001))
         core.state.apply(
             .windowCreated(
                 ManagedWindow(

@@ -14,6 +14,9 @@ extension KiwiCore {
         switch commandTarget("focus_window", args) {
         case .refused(let response): return response
         case .window(let id):
+            if state.pocketedWindow == id {
+                return takePocketOut() ? .ok() : .fail("pocket is unreachable")
+            }
             guard let window = state.windows[id] else {
                 return .fail("unknown window: \(id.raw)")
             }

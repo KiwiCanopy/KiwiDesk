@@ -12,6 +12,12 @@ extension StateCoordinator {
         pocket?.window == id ? pocket?.phase : nil
     }
 
+    /// The screen a pocketed window waits on: the active Space's.
+    /// The park and the Desktop carry both read it.
+    var pocketHomeDisplay: DisplayID? {
+        workspaces.activeSpace.flatMap { workspaces.display(of: $0) }
+    }
+
     /// The pocketed window, while one is in the pocket.
     public var pocketedWindow: WindowID? {
         pocket?.phase == .pocketed ? pocket?.window : nil

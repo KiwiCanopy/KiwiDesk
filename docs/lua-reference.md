@@ -3788,6 +3788,11 @@ stays the group count). A grouped glyph aggregates its
 windows' states — the badge means "at least one". Lua-only; the
 Settings app offers no toggle for these badges.
 
+:::unreleased
+A window out of the [pocket](#pocket) wears the pocket badge on the
+bottom-left instead, and no sticky badge.
+:::
+
 **Example:**
 
 ```lua
@@ -5556,10 +5561,11 @@ global-sticky window switches it to screen sticky.
 It has no default shortcut and no row in Settings ▸ Shortcuts &
 Gestures; bind it in `init.lua` or the Lua bindings drawer, where
 a shortcut you gave it is listed. A stored `⌃⌥P` running it —
-`✦P` with **Shortcuts use** set to `✦` — is moved to
-[`pocket`](#pocket) once, the first time this version reads the
-file: `gui.json`, each profile and a backup's copies. A shortcut
-you give it after that stays.
+`✦P` with **Shortcuts use** set to `✦`, and either one in a
+profile's own shortcuts — is moved to [`pocket`](#pocket) once,
+the first time this version reads the file: `gui.json`, each
+profile and a backup's copies. A shortcut you give it after that
+stays.
 :::
 
 **Example:**
@@ -5606,45 +5612,62 @@ end)
 **Does:** keeps one window one key away. The pocket holds one
 window, and each call takes the next step:
 
-- **Empty:** pockets the focused window. It is parked off-screen
-  — not minimized — belongs to no Space and is drawn on no bar,
-  and focus moves on within the Space. Fails on a window in native
-  full screen and on a transient panel or popup.
+- **Empty:** pockets the focused window, a focused-window command
+  like `make_floating`. It is parked off-screen — not minimized —
+  belongs to no Space and is drawn on no bar, and focus moves on
+  within the Space. Fails on a window in native full screen and on
+  a transient panel or popup.
 - **Pocketed:** takes it out onto the active Space's screen at the
   frame it last had on that screen, else centred, floating and
-  focused. Fails while its app is hidden.
+  focused.
 - **Out:** puts it back in the pocket, focused or not. If it had
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
   window.
 
+While the window's app is hidden, taking it out or putting it back
+fails with `pocket is unreachable` until the app is shown again.
+
 Out of the pocket the window floats on every Space, as a
-[global sticky](#make_sticky) window does, and comes along when
-you switch macOS Desktops whatever
-[`sticky.set_desktop_reach`](#stickyset_desktop_reach) says,
-where KiwiDesk can drive Desktops. It wears the pocket mark half
-over its top-right corner, and its Space Bar glyph wears the
-pocket badge in place of the floating badge. Move and resize it
-like any float; the frame it has when you put it back is the one
-it comes out at on that screen.
+[global sticky](#make_sticky) window does, and a move to another
+Space is refused with the same pill. It comes along when you switch
+macOS Desktops whatever
+[`sticky.set_desktop_reach`](#stickyset_desktop_reach) says, in
+either state, where KiwiDesk can drive Desktops. Move and resize it
+like any float: the frame it has when you put it back is kept for
+the screen that frame sits on, and it comes out at that frame on
+that screen.
+
+Out of the pocket it wears the pocket mark half over its top-right
+corner, whatever [`sticky.set_mark`](#stickyset_mark) and
+[`floating.set_mark`](#floatingset_mark) say, and no mark while it
+is maximized or presenting. Its Space Bar glyph wears the pocket
+badge where the floating badge goes and no sticky badge;
+[`space_bar.set_sticky_badge(false)`](#space_barset_sticky_badge)
+hides it with the others.
 
 macOS focusing a pocketed window — `⌘-Tab` to its app, a Dock
-click, a notification — takes it out as a call would, and so
-does picking it with Return or **⇧Return** under **Pocket** in
-KiwiHub's [window switcher](#kiwihubshow).
+click, a notification — takes it out as a call would, and so do
+[`focus_window`](#focus_window) with its id and picking it with
+Return or **⇧Return** under **Pocket** in KiwiHub's
+[window switcher](#kiwihubshow).
 
-Closing the window or quitting its app empties the pocket; hiding
-the app keeps it. While the window is in the pocket or out of it,
-`make_tiled`, `toggle_floating`, every `make_*sticky` and
-`toggle_*sticky` verb and `override_sticky_reach` are refused,
-with a pill: "Pocket windows always float" or "Pocket windows are
-always sticky". While it is out, KiwiVision keeps it and the window
-it came out over clear, and a lens's focus keys never skip it.
+Closing the window, minimizing it or quitting its app empties the
+pocket; hiding the app keeps it. While the window is in the pocket
+or out of it, `make_tiled`, `toggle_floating`, every
+`make_*sticky` and `toggle_*sticky` verb and
+`override_sticky_reach` are refused, with a pill: "Pocket windows
+always float" or "Pocket windows are always sticky";
+`make_floating` succeeds and changes nothing. While it is out,
+KiwiVision keeps it and the window it came out over clear, and a
+lens's focus keys skip neither. [`get_state`](#get_state) names
+the window's state in its `pocket` field.
 
 Quitting KiwiDesk files a pocketed window into the active Space as
 a float, laid out with the others, and leaves a window that is out
-where it is, as a float. An update's relaunch keeps it in the
-pocket. Bound to `⌃⌥P` by default
+where it is, as a float. An update's relaunch and
+`kiwidesk service restart` keep it in the pocket. Bound to `⌃⌥P`
+by default
 ([#2446](https://github.com/KiwiCanopy/KiwiDesk/issues/2446)).
 
 **Example:**
@@ -7844,6 +7867,11 @@ carry `track_breaks` (ids of the windows that start a track,
 
 Each window object has: `id`, `app`, `bundle_id`, `title`,
 `floating` (boolean).
+
+:::unreleased
+Each window object also has `pocket`: `"pocketed"` or `"out"` for
+the [pocket](#pocket)'s window, `nil` for every other.
+:::
 
 **Example:**
 

@@ -62,7 +62,7 @@ extension KiwiCore {
             state.floatFrames[id] = nil
             state.focusRecency[id] = nil
             // Closing the window empties the pocket (#2446).
-            if state.pocket?.window == id { state.emptyPocket() }
+            if state.pocketPhase(of: id) != nil { state.emptyPocket() }
         }
         if reason == .vanished,
             case .hosted(let space, _) = presence

@@ -204,12 +204,11 @@ extension KiwiCore {
     ) -> String? {
         let uuids = Set(spaces.map(\.displayUUID))
         if uuids.count <= 1 { return uuids.first }
-        // A pocketed window waits on the active Space's screen.
-        let pocketed = state.pocketedWindow == window.id
-        return
-            (state.stickyRenderSpace(of: window)
-            ?? (pocketed ? state.workspaces.activeSpace : nil))
-            .flatMap { state.workspaces.display(of: $0) }
-            .flatMap { NativeSpaces.displayUUID(for: $0) }
+        let display =
+            state.pocketedWindow == window.id
+            ? state.pocketHomeDisplay
+            : state.stickyRenderSpace(of: window)
+                .flatMap { state.workspaces.display(of: $0) }
+        return display.flatMap { NativeSpaces.displayUUID(for: $0) }
     }
 }

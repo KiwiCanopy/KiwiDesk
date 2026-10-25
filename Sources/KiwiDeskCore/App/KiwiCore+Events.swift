@@ -88,8 +88,6 @@ extension KiwiCore {
                 emitMonitorChange()
             }
         case .windowFocused(let id):
-            // macOS focusing the pocketed window takes it out (#2446).
-            if consumePocketedFocus(id) { break }
             handleWindowFocused(id, effects: effects)
         case .windowCreated(let window):
             // A brand-new window supersedes a pending follow
