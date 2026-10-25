@@ -19,13 +19,21 @@ extension APIReference {
     /// does.
     static func derivedKind(of name: String) -> APIKind {
         func starts(_ prefix: String) -> Bool {
-            name == prefix || name.hasPrefix(prefix + "_")
+            firstWord(of: name, is: prefix)
         }
         if starts("set") { return .setting }
         if ["get", "list", "current"].contains(where: starts) {
             return .query
         }
         return .action
+    }
+
+    /// True when `word` is the name's first word — the whole name,
+    /// or the part before its first `_` — never a stem: `settle`
+    /// does not start with `set`. The name-pattern censuses read
+    /// it too.
+    static func firstWord(of name: String, is word: String) -> Bool {
+        name == word || name.hasPrefix(word + "_")
     }
 
     /// Qualified names whose kind their name misreads (#2610).

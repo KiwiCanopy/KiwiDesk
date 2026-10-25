@@ -23,6 +23,7 @@ struct APIKindCensusTests {
         "load", "delete", "remove", "apply", "keep", "revert",
         "subscribe", "self", "help", "version", "debug", "override",
         "fit", "reset", "create", "register", "show", "hide",
+        "add", "clear", "restore", "rename", "assign", "update",
     ]
 
     /// Commands the net catches that keep their derived kind, each
@@ -72,7 +73,7 @@ struct APIKindCensusTests {
             let name = entry.name
             guard
                 Self.ambiguousVerbs.contains(where: {
-                    name == $0 || name.hasPrefix($0 + "_")
+                    APIReference.firstWord(of: name, is: $0)
                 })
             else { continue }
             let qualified = entry.qualifiedName
@@ -90,8 +91,18 @@ struct APIKindCensusTests {
     @Test("ruled names are entries outside the exceptions")
     func ruledDerivedIsDisjoint() {
         for name in Self.ruledDerived.keys {
-            #expect(APIReference.entry(named: name) != nil, "\(name)")
             #expect(APIReference.kindExceptions[name] == nil, "\(name)")
+            guard let entry = APIReference.entry(named: name) else {
+                Issue.record("\(name) is ruled but no entry")
+                continue
+            }
+            // A ruling the net no longer reaches is dead weight.
+            #expect(
+                Self.ambiguousVerbs.contains {
+                    APIReference.firstWord(of: entry.name, is: $0)
+                },
+                "\(name) is ruled but no ambiguous verb names it"
+            )
         }
     }
 

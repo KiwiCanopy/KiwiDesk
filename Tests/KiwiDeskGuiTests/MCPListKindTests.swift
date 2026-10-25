@@ -38,6 +38,8 @@ struct MCPListKindTests {
             }
         }
         let all = try Self.structured([:]).rows
+        // A client may send null for an omitted optional argument.
+        #expect(try Self.structured(["kind": .null]).rows == all)
         let actions = try Self.structured(["kind": .string("action")])
         #expect(actions.rows.count < all.count)
         #expect(all.allSatisfy { $0["kind"] != nil })
@@ -56,7 +58,7 @@ struct MCPListKindTests {
 
     @Test("an unknown kind is refused")
     func unknownKindRefuses() throws {
-        for kind: JSONValue in [.string("verb"), .number(1), .null] {
+        for kind: JSONValue in [.string("verb"), .number(1)] {
             let answer = try Self.structured(["kind": kind])
             #expect(answer.isError, "\(kind)")
             #expect(answer.rows.isEmpty, "\(kind)")

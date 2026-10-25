@@ -94,8 +94,8 @@ below, so it corrects itself when a seventh is added.
     `APIKindCensusTests` holds a command whose first word reads
     either way to that register or its `ruledDerived` map, and
     refuses a row its name already reads right; a misread named
-    otherwise lands on the generated actions page and is
-    review's.
+    otherwise is listed under the wrong kind, on the actions page
+    included, and is review's.
   - **An enum-valued argument names the TYPE, never the values**
     — `.choice("anchor", ScrollingParams.Anchor.self)`.
     `APIChoice` has exactly one initializer and it reads

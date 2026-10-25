@@ -64,7 +64,7 @@ struct APIDestructiveCensusTests {
             let verb = entry.name
             guard
                 Self.destructiveVerbs.contains(where: {
-                    verb == $0 || verb.hasPrefix($0 + "_")
+                    APIReference.firstWord(of: verb, is: $0)
                 })
             else { continue }
             let name = entry.qualifiedName

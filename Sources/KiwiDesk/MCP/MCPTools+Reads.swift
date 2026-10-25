@@ -66,14 +66,15 @@ extension MCPTools {
         }
     )
 
-    /// `kind` is the tool argument as sent: absent lists every
-    /// kind, and anything but one of `APIKind`'s spellings refuses.
+    /// `kind` is the tool argument as sent: absent or null lists
+    /// every kind, and anything but one of `APIKind`'s spellings
+    /// refuses.
     static func listing(
         filter: String?,
         kind: JSONValue? = nil
     ) -> JSONValue {
         let wanted = kind?.stringValue.flatMap(APIKind.init(rawValue:))
-        if kind != nil, wanted == nil {
+        if let kind, kind != .null, wanted == nil {
             return failure("kind expects \(APIKind.expectedList)")
         }
         let needle = filter?.lowercased() ?? ""
