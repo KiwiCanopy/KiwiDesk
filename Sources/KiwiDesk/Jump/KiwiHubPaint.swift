@@ -33,17 +33,11 @@ struct KiwiHubPaint {
         self.divider = Color(kiwiHex: divider)
     }
 
-    /// The paint KiwiHub wears on `glass` as drawn.
-    static func of(
-        _ glass: PanelGlass,
-        increaseContrast: Bool
-    ) -> KiwiHubPaint {
-        guard let shelf = glass.shelf else { return KiwiHubPaint() }
-        return KiwiHubPaint(
-            shelf.panelHighlight,
-            divider: shelf.panelInk(increaseContrast: increaseContrast)
-                .divider
-        )
+    /// The paint KiwiHub wears on `glass` as drawn, its divider from
+    /// `ink`, the inks the panel chrome resolved for that glass.
+    static func of(_ glass: PanelGlass, ink: PanelInk?) -> KiwiHubPaint {
+        guard let shelf = glass.shelf, let ink else { return KiwiHubPaint() }
+        return KiwiHubPaint(shelf.panelHighlight, divider: ink.divider)
     }
 }
 

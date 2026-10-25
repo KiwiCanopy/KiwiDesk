@@ -30,16 +30,19 @@ struct KiwiHubDividerTests {
         var settings = TilingSettings()
         settings.kiwishelf.tintHubAndPlates = tinted
         let glass = PanelGlass(settings: settings)
+        // The chrome's own resolution: no inks for an untinted glass.
         for increased in [false, true] {
-            let paint = KiwiHubPaint.of(glass, increaseContrast: increased)
+            let ink = glass.shelf?.panelInk(increaseContrast: increased)
+            let paint = KiwiHubPaint.of(glass, ink: ink)
             guard tinted else {
+                #expect(ink == nil)
                 #expect(paint.divider == nil)
                 continue
             }
-            let ink = settings.kiwishelf.panelInk(
+            let drawn = settings.kiwishelf.panelInk(
                 increaseContrast: increased
             )
-            #expect(paint.divider == Color(kiwiHex: ink.divider))
+            #expect(paint.divider == Color(kiwiHex: drawn.divider))
         }
     }
 
@@ -49,9 +52,26 @@ struct KiwiHubDividerTests {
     @Test("KiwiHub draws its dividers through the panel divider")
     func dividersRouteThroughThePaint() throws {
         let panel = try Self.source("Jump/JumpPanelView.swift")
-        // Every `Divider()` is a `PanelDivider()`, which it spells.
         #expect(panel.occurrences(of: "PanelDivider()") == 2)
-        #expect(panel.occurrences(of: "Divider()") == 2)
+        // No file of KiwiHub or a cue plate draws a bare `Divider()`
+        // but the panel divider's own untinted fallback; every
+        // `Divider()` elsewhere is a `PanelDivider()`, which spells it.
+        var scanned = 0
+        for directory in ["Jump", "CuePlate"] {
+            let files = try FileManager.default.contentsOfDirectory(
+                atPath: Self.gui.appendingPathComponent(directory).path
+            ).filter { $0.hasSuffix(".swift") }
+            for file in files where file != "KiwiHubPaint.swift" {
+                let body = try Self.source("\(directory)/\(file)")
+                scanned += 1
+                #expect(
+                    body.occurrences(of: "Divider()")
+                        == body.occurrences(of: "PanelDivider()"),
+                    "\(directory)/\(file)"
+                )
+            }
+        }
+        #expect(scanned > 2)
         let paint = try Self.source("Jump/KiwiHubPaint.swift")
             .filter { !$0.isWhitespace }
         #expect(paint.contains("iflethairline=paint.divider{"))

@@ -17,7 +17,8 @@ struct PanelDividerContrastTests {
     /// a non-text hairline, so below the reading floor, which pins
     /// the dim ink at exactly 1.5 at the far end over white — no
     /// opacity under 1 reaches 1.5 there. A retune of
-    /// `readingInkFloor` moves the normal floor with it.
+    /// `readingInkFloor` moves the divider's contrast against this
+    /// floor, so it is re-measured with that retune.
     private static let floor = 1.15
     private static let increasedFloor = 1.5
 
