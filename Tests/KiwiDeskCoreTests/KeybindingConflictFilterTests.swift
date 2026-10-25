@@ -35,12 +35,14 @@ struct KeybindingConflictFilterTests {
     func disabledSetRulesTheVerdict() {
         let all = KeybindingConflicts.actionable(
             in: layers,
-            disabledSystemShortcuts: []
+            disabledSystemShortcuts: [],
+            distinguishingSides: false
         )
         #expect(all.count == 2)
         let filtered = KeybindingConflicts.actionable(
             in: layers,
-            disabledSystemShortcuts: [.invertColors]
+            disabledSystemShortcuts: [.invertColors],
+            distinguishingSides: false
         )
         #expect(filtered.count == 1)
         #expect(
@@ -73,7 +75,8 @@ struct KeybindingConflictFilterTests {
             in: [layer],
             disabledSystemShortcuts: Set(
                 SystemShortcut.allCases
-            )
+            ),
+            distinguishingSides: false
         )
         #expect(conflicts.count == 2)
     }

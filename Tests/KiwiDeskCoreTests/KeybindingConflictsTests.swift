@@ -11,11 +11,14 @@ struct KeybindingConflictsTests {
             KeyBinding(combo: "cmd+alt+h", lua: "a"),
             KeyBinding(combo: "cmd+alt+h", lua: "b"),
         ]
-        #expect(KeybindingConflicts.hasAny(bindings))
+        #expect(
+            KeybindingConflicts.hasAny(bindings, distinguishingSides: false)
+        )
         #expect(
             KeybindingConflicts.conflict(
                 for: bindings[0],
-                in: bindings
+                in: bindings,
+                distinguishingSides: false
             ) != nil
         )
     }
@@ -26,7 +29,9 @@ struct KeybindingConflictsTests {
             KeyBinding(combo: "cmd+alt+h", lua: "a"),
             KeyBinding(combo: "cmd+alt+l", lua: "b"),
         ]
-        #expect(!KeybindingConflicts.hasAny(bindings))
+        #expect(
+            !KeybindingConflicts.hasAny(bindings, distinguishingSides: false)
+        )
     }
 
     @Test(
@@ -44,7 +49,10 @@ struct KeybindingConflictsTests {
             ),
         ]
         #expect(
-            !KeybindingConflicts.hasAnyAcrossLayers(layers)
+            !KeybindingConflicts.hasAnyAcrossLayers(
+                layers,
+                distinguishingSides: false
+            )
         )
     }
 
@@ -63,7 +71,12 @@ struct KeybindingConflictsTests {
                 ]
             ),
         ]
-        #expect(KeybindingConflicts.hasAnyAcrossLayers(layers))
+        #expect(
+            KeybindingConflicts.hasAnyAcrossLayers(
+                layers,
+                distinguishingSides: false
+            )
+        )
     }
 
     @Test("conflicts(in:) names a system-shortcut clash")
@@ -80,7 +93,10 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: layers)
+        let list = KeybindingConflicts.conflicts(
+            in: layers,
+            distinguishingSides: false
+        )
         #expect(list.count == 1)
         #expect(list[0].binding.label == "Close")
         // The case, never its English name (#96): Core cannot
@@ -107,7 +123,10 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: layers)
+        let list = KeybindingConflicts.conflicts(
+            in: layers,
+            distinguishingSides: false
+        )
         #expect(list.count == 2)
         // Each side carries the BINDING; the GUI names it (#2116).
         #expect(list[0].binding == layers[0].bindings[0])
@@ -129,7 +148,10 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: layers)
+        let list = KeybindingConflicts.conflicts(
+            in: layers,
+            distinguishingSides: false
+        )
         #expect(list.count == 1)
         #expect(list[0].binding == layers[0].bindings[0])
     }
@@ -148,7 +170,10 @@ struct KeybindingConflictsTests {
                 ]
             )
         ]
-        let list = KeybindingConflicts.conflicts(in: layers)
+        let list = KeybindingConflicts.conflicts(
+            in: layers,
+            distinguishingSides: false
+        )
         #expect(list.count == 1)
         #expect(list[0].binding.label == "Bad")
         #expect(list[0].target == .unrecognized)

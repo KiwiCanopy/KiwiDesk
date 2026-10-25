@@ -16,7 +16,11 @@ struct ModifierSideConflictTests {
     func collapse() {
         let left = row("a", "lcmd+opt+y")
         let right = row("b", "rcmd+opt+y")
-        let off = KeybindingConflicts.conflict(for: left, in: [left, right])
+        let off = KeybindingConflicts.conflict(
+            for: left,
+            in: [left, right],
+            distinguishingSides: false
+        )
         #expect(off?.target == .sideCollapse(right))
         let on = KeybindingConflicts.conflict(
             for: left,
@@ -26,8 +30,12 @@ struct ModifierSideConflictTests {
         #expect(on == nil)
         let plain = row("c", "cmd+opt+y")
         #expect(
-            KeybindingConflicts.conflict(for: plain, in: [plain, right])?
-                .target == .sideCollapse(right)
+            KeybindingConflicts.conflict(
+                for: plain,
+                in: [plain, right],
+                distinguishingSides: false
+            )?
+            .target == .sideCollapse(right)
         )
     }
 

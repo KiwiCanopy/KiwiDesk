@@ -94,7 +94,8 @@ extension KeyboardHoverReading {
         scope: KeyboardCensus.Scope,
         selected: Set<KeyboardCensus.ModifierLayer>,
         config: GuiConfig,
-        disabled: Set<SystemShortcut>
+        disabled: Set<SystemShortcut>,
+        sides: Bool
     ) -> KeyboardHoverReading {
         let all = layers.flatMap(\.bindings)
         let ringed = KeyboardCensus.ringedKeys(
@@ -120,7 +121,8 @@ extension KeyboardHoverReading {
                         for: entry.binding,
                         in: all,
                         config: config,
-                        disabled: disabled
+                        disabled: disabled,
+                        sides: sides
                     )?.sentence
                     : nil
             )

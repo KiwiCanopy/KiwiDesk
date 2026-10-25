@@ -42,7 +42,8 @@ struct HyperConflictTests {
         let plain = KeyBinding(combo: "shift+x", lua: "b")
         let hit = KeybindingConflicts.conflict(
             for: hyper,
-            in: [hyper, plain]
+            in: [hyper, plain],
+            distinguishingSides: false
         )
         #expect(hit?.target == .otherBinding(plain))
     }
@@ -53,7 +54,8 @@ struct HyperConflictTests {
         #expect(
             KeybindingConflicts.conflict(
                 for: spotlight,
-                in: [spotlight]
+                in: [spotlight],
+                distinguishingSides: false
             )?.target == .systemShortcut(.spotlight)
         )
     }
@@ -62,7 +64,11 @@ struct HyperConflictTests {
     func freeRowIsClean() {
         let free = KeyBinding(combo: "hyper+h", lua: "a")
         #expect(
-            KeybindingConflicts.conflict(for: free, in: [free]) == nil
+            KeybindingConflicts.conflict(
+                for: free,
+                in: [free],
+                distinguishingSides: false
+            ) == nil
         )
     }
 }

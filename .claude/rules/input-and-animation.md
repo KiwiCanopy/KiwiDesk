@@ -119,7 +119,8 @@ editing here:
     `tappedChords`, never a row list of its own
     (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`).
   - **A refused tap hands its chords back to Carbon** either-side
-    and is asked again only when the switch moves
+    and is asked again only when the switch moves or at
+    `KiwiCore.start()`, the grant's door
     (`ModifierSideRoutingTests` ▸ `refusedTapFallsBack`).
   - **A suspended manager answers nothing** — `deactivate` empties
     the rows, or the tap swallows the sided press the recorder
@@ -131,7 +132,8 @@ editing here:
     `keyboardMask`, `liveFactoryPinned`).
   - **Carbon reads a sided chord either-side**: `carbonMask` and
     `KeyCombo.registered` strip the side bits
-    (`ModifierSideComboTests` ▸ `carbonReadsEitherSide`), so the
+    (`ModifierSideComboTests` ▸ `carbonReadsEitherSide`,
+    `registeredIsEitherSide`), so the
     switch off fires every sided shortcut through Carbon and a
     collapsing pair is refused as a duplicate
     (`ModifierSideRoutingTests` ▸ `offCollapses`) and named a

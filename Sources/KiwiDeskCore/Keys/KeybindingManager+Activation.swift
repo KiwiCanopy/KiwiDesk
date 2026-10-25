@@ -83,13 +83,20 @@ extension KeybindingManager {
         if !armSideTap(sideRows) {
             // No tap: the chord falls back to Carbon either-side,
             // as with the switch off, and a collapse is refused.
-            for (combo, ref) in sideRows
-            where !registerPhysical(
-                code: combo.keyCode,
-                combo: combo,
-                ref: ref
-            ) {
-                activationFailures.insert(combo)
+            for (combo, ref) in sideRows {
+                guard
+                    registerPhysical(
+                        code: combo.keyCode,
+                        combo: combo,
+                        ref: ref
+                    )
+                else {
+                    activationFailures.insert(combo)
+                    continue
+                }
+                if let twin = KeypadKeys.keypadTwin(of: combo.keyCode) {
+                    _ = registerPhysical(code: twin, combo: combo, ref: ref)
+                }
             }
         }
     }

@@ -122,7 +122,8 @@ struct SystemShortcutNamesTests {
                 for: bindings[0],
                 in: bindings,
                 config: GuiConfig(),
-                disabled: []
+                disabled: [],
+                sides: false
             )
         else {
             Issue.record("⌘W did not report a system conflict")
@@ -150,7 +151,8 @@ struct SystemShortcutNamesTests {
                 for: bindings[0],
                 in: bindings,
                 config: GuiConfig(),
-                disabled: []
+                disabled: [],
+                sides: false
             ) == "Not a recognized shortcut."
         )
     }

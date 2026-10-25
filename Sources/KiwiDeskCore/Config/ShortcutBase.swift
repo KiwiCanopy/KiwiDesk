@@ -48,15 +48,14 @@ public enum ShortcutBase: String, Codable, Sendable, CaseIterable {
     ]
     private static let kept: HotkeyModifiers = [.shift, .command]
 
-    /// A sided row stays: Hyper registers bare, so no side could
-    /// ride onto `✦` (#2601).
     private static func toHyper(_ combo: KeyCombo) -> KeyCombo? {
         let modifiers = combo.modifiers
         guard modifiers.isSuperset(of: standardModifiers),
-            !modifiers.contains(.hyper),
-            !modifiers.isSided
+            !modifiers.contains(.hyper)
         else { return nil }
         let rest = modifiers.subtracting(standardModifiers)
+        // `kept` holds no side bit, so a sided row stays: Hyper
+        // registers bare, and no side could ride onto `✦` (#2601).
         guard kept.isSuperset(of: rest) else { return nil }
         let target: HotkeyModifiers =
             rest == kept && isDigit(combo)

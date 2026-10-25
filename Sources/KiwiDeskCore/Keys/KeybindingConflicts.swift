@@ -5,7 +5,7 @@ public enum KeybindingConflicts {
     /// Whether any row in layer contains a conflict.
     public static func hasAny(
         _ bindings: [KeyBinding],
-        distinguishingSides: Bool = false
+        distinguishingSides: Bool
     ) -> Bool {
         bindings.contains { binding in
             conflict(
@@ -19,7 +19,7 @@ public enum KeybindingConflicts {
     /// Whether any layer contains conflicting keybindings.
     public static func hasAnyAcrossLayers(
         _ layers: [KeyLayer],
-        distinguishingSides: Bool = false
+        distinguishingSides: Bool
     ) -> Bool {
         layers.contains {
             hasAny($0.bindings, distinguishingSides: distinguishingSides)
@@ -29,7 +29,7 @@ public enum KeybindingConflicts {
     /// Structured conflicts across all layers.
     public static func conflicts(
         in layers: [KeyLayer],
-        distinguishingSides: Bool = false
+        distinguishingSides: Bool
     ) -> [Conflict] {
         layers.flatMap { layer in
             layer.bindings.compactMap { binding in
@@ -49,7 +49,7 @@ public enum KeybindingConflicts {
     public static func conflict(
         for binding: KeyBinding,
         in bindings: [KeyBinding],
-        distinguishingSides: Bool = false
+        distinguishingSides: Bool
     ) -> Conflict? {
         guard !binding.combo.isEmpty else { return nil }
         guard let parsed = KeyCombo.parse(binding.combo) else {
@@ -97,9 +97,13 @@ public enum KeybindingConflicts {
     /// pure description of chords (#96 split).
     public static func actionable(
         in layers: [KeyLayer],
-        disabledSystemShortcuts: Set<SystemShortcut>
+        disabledSystemShortcuts: Set<SystemShortcut>,
+        distinguishingSides: Bool
     ) -> [Conflict] {
-        conflicts(in: layers).filter { conflict in
+        conflicts(
+            in: layers,
+            distinguishingSides: distinguishingSides
+        ).filter { conflict in
             guard case .systemShortcut(let s) = conflict.target
             else { return true }
             return !disabledSystemShortcuts.contains(s)
