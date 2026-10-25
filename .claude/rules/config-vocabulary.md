@@ -176,7 +176,7 @@ synonym:
   so Family C rule 1 retires it whatever its count.
 - **pill** — two ruled senses, deliberately (2026-08-10): a
   transient worded on-window cue — the sticky mark's EXPANDED
-  state (#435/#438) and, since #933, the size-limit refusal
+  state (#435) and, since #933, the size-limit refusal
   flash (`SizeLimitOverlay`) — and the Settings window's
   floating **save pill** (#678 turn 9, always with "save"
   attached in copy and code). The contexts cannot collide —

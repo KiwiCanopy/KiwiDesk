@@ -1774,7 +1774,7 @@ editing here:
   the other axis divides.
   Two obligations on that judgement, both learned the same way.
   **Judge it on what the layout DREW, never on a member count**:
-  a bsp region too small for two minimum-size windows piles them
+  a bsp region too small for one minimum-size window piles them
   and answers to no ratio at all, which a cardinality test
   cannot see, and the extent test cannot either — the pile's
   cascade offsets each copy, so the union outgrows every slot

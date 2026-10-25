@@ -71,6 +71,11 @@ extension KiwiCore {
         )
         let context = input.context
         guard !context.probesBeyondBounds else { return }
+        // A BSP run's parked window answers to no ratio, and its
+        // slot at the hide corner would sort it onto a side; the
+        // chain's thickness is the layout's (#2542).
+        let parked = parkedByRun(input)
+        let placed = tiled.filter { !parked.contains($0) }
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let slots = LayoutEngine.calculate(
             mode: input.space.mode,
@@ -83,7 +88,7 @@ extension KiwiCore {
             for axis in ["x", "y"] {
                 let horizontal = axis == "x"
                 let sides = BspSplit.sides(
-                    of: tiled,
+                    of: placed,
                     slots: slots,
                     bounds: bounds,
                     horizontal: horizontal

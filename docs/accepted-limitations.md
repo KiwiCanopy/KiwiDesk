@@ -160,6 +160,10 @@ A Grid's scrolling last track instead takes, across its scroll
 axis, the largest learned minimum of every member, hidden ones
 included, and its members lift no column or row along it
 ([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
+BSP's scrolling line does the same across its axis
+([#2542](https://github.com/KiwiCanopy/KiwiDesk/issues/2542)),
+so a window in it is not one the split-layout row's "deeper BSP
+split" leaves at its minimum on that axis.
 :::
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
@@ -238,9 +242,10 @@ the move is the app's.
 :::
 
 :::unreleased
-A Stack zone, a Track track — the overflow track included — or
-a Grid's last track (#2541), whose windows do not all fit at
-their minimums, an app's own
+A Stack zone, a Track track — the overflow track included —, a
+Grid's last track (#2541) or BSP's scrolling line
+([#2542](https://github.com/KiwiCanopy/KiwiDesk/issues/2542)),
+whose windows do not all fit at their minimums, an app's own
 learned minimum among them, shows only the windows that do
 ([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
 Each hidden window waits off screen, parked at the screen's
@@ -258,7 +263,11 @@ KiwiDesk cannot read another app's minimum size and learns it
 from the sizes the app refuses
 ([#677](https://github.com/KiwiCanopy/KiwiDesk/issues/677)), and
 a hidden window is one focus step away, so it needs no slot of
-its own.
+its own. Under BSP's `alternating` strategy the line can start
+beside a fixed window, and the overflow mark at that end sits
+across the gap, covering a few points of that window: the mark
+rides the line's edge window, and the gap is narrower than the
+mark.
 :::
 
 The focus ring disappears with the desktop when Mission Control

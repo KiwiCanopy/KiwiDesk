@@ -4912,6 +4912,20 @@ included, so it keeps its size as it scrolls. Focus, `swap`, the
 overflow marks and their list work as in a Stack zone. A Grid
 cascades whole only when not even one cell fits at
 `min_window_size`.
+
+In BSP, where a split cannot hold two windows at their minimum
+size, the windows from the last run of splits in one direction
+scroll along that direction as one line: on a wide screen the
+row scrolls left and right, and where the last splits stack
+windows, the column scrolls up and down. Windows split off in
+the other direction stay where they are. The line is as thick as
+the largest minimum of every window in it, hidden ones included.
+Focus, `swap`, `resize` along the line, the overflow marks and
+their list work as in a Stack zone. Under
+[`alternating`](#bspset_strategy) the line can start beside a
+fixed window; the mark at that end sits across the gap between
+them and covers a few points of that window. BSP cascades whole
+only when not even one window fits at `min_window_size`.
 :::
 
 For a cascade to read correctly, upper windows must sit *behind*

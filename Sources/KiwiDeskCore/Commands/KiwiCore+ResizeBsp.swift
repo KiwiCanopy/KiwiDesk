@@ -18,6 +18,25 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
+        // A press along a scrolled chain is a run weight: no ratio
+        // divides the chain (#2542). The other axis divides only
+        // where a window was split off beside the chain.
+        if let focused = space.focused,
+            let run = tiler.runCovers[space.id]?.runs.first(where: {
+                $0.shown.contains(focused)
+            }),
+            run.zone.vertical == (axis == "y"),
+            let response = resizeInRun(
+                focused,
+                axis: axis,
+                delta: delta,
+                space: space,
+                otherAxisDivides: state.effectiveTiledMembers(of: space)
+                    .count > run.zone.members.count
+            )
+        {
+            return response
+        }
         let bsp = tiler.settings.resolvedBsp(for: space)
         let signed =
             bspFocusSign(axis: axis, space: space)

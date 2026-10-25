@@ -202,7 +202,8 @@ extension KiwiCore {
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
         let horizontal = axis == "x"
         let screen = TilingEngine.screen(for: space.id, in: state)
-        let slots = tiler.calculatedFrames(state: state)
+        // A run's parked windows answer to no ratio (#2542).
+        let slots = shownSlots()
         let tiled = state.effectiveTiledMembers(of: space)
         // No display to classify against: the caps still hold on
         // the global floor, and nothing here can name a window.

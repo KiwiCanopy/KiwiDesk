@@ -1876,7 +1876,7 @@ detail:
 
 | Layout | Model | How it walks | Overflow → pile? |
 |---|---|---|---|
-| **BSP** | geometric | `Navigation.neighbor` over slots | yes — an extreme stored ratio cascades the whole space (`BspLayout` → `OverlapStack`) |
+| **BSP** | geometric | `Navigation.neighbor` over slots, which sees only the shown windows of the scrolling line; along that line, focus and swap step in drawn order (`runStep`, #2542) | where a split cannot hold two windows at min-size, the trailing chain of same-direction splits scrolls along the last split (`BspLayout+Run`, #2542); a whole-space cascade only where not even one window fits at min-size |
 | **Stack** | geometric | `Navigation.neighbor` over slots, which sees only a zone's shown windows; along a zone that hides windows, focus and swap step in drawn order (`runStep`, #2235) | a zone that overflows scrolls (`ZoneRun`, #2235); the emergency pile — a zone that cannot hold one window at min-size, or two zones that cannot coexist — cascades downward, whatever the arrangement (#222) |
 | **Grid** | geometric | `Navigation.neighbor` over slots, which sees only the shown windows of the last track; along that track, focus and swap step in drawn order (`runStep`, #2541) | the last track scrolls the windows past the cells (`GridLayout+Run`, #2541); a whole-grid cascade only where not even one cell fits at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142; walled at a screen seam, #878) is a viewport pin, not an `OverlapStack` fallback |
@@ -4330,6 +4330,43 @@ axis no member lifts a column or row, since the members move.
 *Rejected.* Scrolling the whole grid, or any track but the last:
 every other cell would move on a focus step, where the last
 track alone keeps the rest of the grid still.
+:::
+
+:::unreleased
+**A full BSP Space scrolls its last line rather than piling it
+(#2542).** Where a split cannot hold two windows at
+`min_window_size`, the trailing chain of same-direction splits
+becomes one run (`RunZone`), as Grid's last track does, and
+every run reader takes it from `RunCover` unchanged.
+
+*Along the last split, never across it.* The last split made is
+known to hold two windows at the floor, so along it a window
+whose learned minimum is larger than the floor still fits; across
+it the region holds one floor, and an app whose minimum exceeds
+the floor — common — could not fit there at all (owner,
+2026-10-25). The whole chain scrolls, not the last slot alone, so
+on a wide screen under `longest_side` the row scrolls and on a
+laptop the right column does. Windows split off in the other
+direction stay put, and before anything overflows the dwindle is
+unchanged.
+
+*The line is as thick as its widest member needs.* Across the
+scroll axis the split before the chain gives the line the
+largest learned minimum of all its members, hidden ones included,
+so it keeps its size as it scrolls; the window split off there
+keeps `min_window_size`.
+
+*A mark facing a fixed window straddles the gap.* Under
+`alternating` the line can start beside a fixed window, so that
+end's mark sits across the inner gap and covers a few points of
+the neighbour, rather than inside the line, where it would cover
+more of the edge window (owner, 2026-10-25).
+
+*The pile stays the last resort.* Only a region that cannot hold
+one window at `min_window_size` still cascades, matching the
+whole-zone pile of the other runs. With no layout piling part of
+a Space, the "Sticky windows can't be moved to the pile" refusal
+(#438) has nothing left to refuse and is retired.
 :::
 
 **The stack cascade is a last resort; extreme ratios clamp at
@@ -13783,17 +13820,13 @@ all-day tool with constantly-hammered directional keys makes an
 audible per-wall tick worse than silence.
 
 A third refusal — swapping a *sticky focused* window onto a target
-buried in an overflow pile the sticky is itself exempt from — gets
-its own worded pill (`Sticky windows can't be moved to the pile`,
-#438), since the retile would snap it straight back and only
-reshuffle a neighbour into the pile. It fires on the **geometric**
-swap path only, where the piled target is found via the shared
-cascade detector (#172). This scope is deliberate, not an
-oversight: Scrolling needs no such cue (its overflow is the scroll,
-not an `OverlapStack` pile — a sticky sits in a clamped edge column
-like any other slot), and the rarer array-order case (a track swap
-stepping toward a folded overflow) is left uncued for now rather
-than duplicate the geometric detector against the array-step model.
+buried in an overflow pile the sticky is itself exempt from — had
+its own worded pill (#438) while a layout piled part of a Space.
+
+:::unreleased
+Since every overflow scrolls and only a whole Space piles (#2542),
+no pile has a sticky exemption to refuse, and the pill is retired.
+:::
 
 **The sticky/floating marks are a filled state-color pair,
 defaulting to Automatic.** The one sticky glyph reads the one

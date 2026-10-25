@@ -3,7 +3,9 @@ import CoreGraphics
 /// Binary space partitioning layout over flat window array
 /// (dwindle). Two per-space ratio scalars, not per-node ratios —
 /// those need stable split identity, i.e. a tree, which the flat
-/// array forbids (#56).
+/// array forbids (#56). Where a split no longer fits two windows
+/// at `min_window_size`, the trailing chain scrolls instead
+/// (`BspLayout+Run`, #2542).
 public struct BspLayout: LayoutSystem {
     public init() {}
 
@@ -11,138 +13,92 @@ public struct BspLayout: LayoutSystem {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
-        var result: [WindowID: CGRect] = [:]
-        place(
-            windows[...],
-            in: context.usable,
-            depth: 0,
-            context: context,
-            into: &result
-        )
+        let plan = Self.plan(windows, in: context)
+        var result = plan.fixed
+        if let zone = plan.zone {
+            result.merge(zone.frames(in: context)) { _, new in new }
+        }
         return result
     }
 
-    private func place(
-        _ windows: ArraySlice<WindowID>,
-        in region: CGRect,
+    /// Whether the split at `depth` puts its two sides next to
+    /// each other (a vertical line) rather than one above the
+    /// other.
+    static func sideBySide(
+        _ region: CGRect,
         depth: Int,
-        context: LayoutContext,
-        into result: inout [WindowID: CGRect]
-    ) {
-        guard let first = windows.first else { return }
-        guard windows.count > 1 else {
-            result[first] = region
-            return
-        }
-
-        let sideBySide: Bool
+        _ context: LayoutContext
+    ) -> Bool {
         switch context.bsp.strategy {
         case .longestSide:
             // Split the longer side to stay square-ish.
-            sideBySide = region.width >= region.height
+            region.width >= region.height
         case .alternating:
-            sideBySide = depth.isMultiple(of: 2)
+            depth.isMultiple(of: 2)
         }
-
-        let firstRegion: CGRect
-        let restRegion: CGRect
-
-        if sideBySide {
-            let gap = context.gaps.inner.horizontal
-            let available = region.width - gap
-            // Clamp the shared ratio into this region's own
-            // effective range (#383): a value too extreme for the
-            // region pins the neighbor to min_window_size instead
-            // of collapsing the subtree into an OverlapStack. The
-            // pile stays reserved for a region genuinely too
-            // narrow for two min-size windows (range nil), the
-            // honest last resort — matching the stack (#44).
-            guard
-                let range = SplitDomain.effectiveRatioRange(
-                    available: Double(available),
-                    minSize: Double(context.minWindowSize.width)
-                )
-            else {
-                overlap(windows, in: region, context, &result)
-                return
-            }
-            let ratio = CGFloat(
-                min(
-                    max(context.bsp.splitRatioH, range.lowerBound),
-                    range.upperBound
-                )
-            )
-            let firstWidth = available * ratio
-            let restWidth = available - firstWidth
-            firstRegion = CGRect(
-                x: region.minX,
-                y: region.minY,
-                width: firstWidth,
-                height: region.height
-            )
-            restRegion = CGRect(
-                x: region.minX + firstWidth + gap,
-                y: region.minY,
-                width: restWidth,
-                height: region.height
-            )
-        } else {
-            let gap = context.gaps.inner.vertical
-            let available = region.height - gap
-            // Same per-region clamp on the stacked axis (#383).
-            guard
-                let range = SplitDomain.effectiveRatioRange(
-                    available: Double(available),
-                    minSize: Double(context.minWindowSize.height)
-                )
-            else {
-                overlap(windows, in: region, context, &result)
-                return
-            }
-            let ratio = CGFloat(
-                min(
-                    max(context.bsp.splitRatioV, range.lowerBound),
-                    range.upperBound
-                )
-            )
-            let firstHeight = available * ratio
-            let restHeight = available - firstHeight
-            firstRegion = CGRect(
-                x: region.minX,
-                y: region.minY,
-                width: region.width,
-                height: firstHeight
-            )
-            restRegion = CGRect(
-                x: region.minX,
-                y: region.minY + firstHeight + gap,
-                width: region.width,
-                height: restHeight
-            )
-        }
-
-        result[first] = firstRegion
-        place(
-            windows.dropFirst(),
-            in: restRegion,
-            depth: depth + 1,
-            context: context,
-            into: &result
-        )
     }
 
-    private func overlap(
-        _ windows: ArraySlice<WindowID>,
-        in region: CGRect,
-        _ context: LayoutContext,
-        _ result: inout [WindowID: CGRect]
-    ) {
-        result.merge(
-            OverlapStack.frames(
-                for: windows,
-                in: region,
-                minSize: context.minWindowSize
+    /// `region` divided at the shared ratio, clamped into the
+    /// region's own range (#383) so neither side falls under
+    /// `min_window_size` and the rest under `restFloor`; nil
+    /// where the region cannot hold two windows at the minimum.
+    static func divide(
+        _ region: CGRect,
+        sideBySide: Bool,
+        restFloor: CGFloat = 0,
+        _ context: LayoutContext
+    ) -> (first: CGRect, rest: CGRect)? {
+        let gap =
+            sideBySide
+            ? context.gaps.inner.horizontal : context.gaps.inner.vertical
+        let available =
+            (sideBySide ? region.width : region.height) - gap
+        let floor = context.minWindowSize.along(horizontal: sideBySide)
+        // A rest floor past what the first window leaves is held
+        // to that much: the first window keeps the minimum.
+        let restMin = max(floor, min(restFloor, available - floor))
+        guard
+            let range = SplitDomain.effectiveRatioRange(
+                available: Double(available),
+                minLow: Double(floor),
+                minHigh: Double(restMin)
             )
-        ) { _, new in new }
+        else { return nil }
+        let stored =
+            sideBySide ? context.bsp.splitRatioH : context.bsp.splitRatioV
+        let ratio = CGFloat(
+            min(max(stored, range.lowerBound), range.upperBound)
+        )
+        let lead = available * ratio
+        if sideBySide {
+            return (
+                CGRect(
+                    x: region.minX,
+                    y: region.minY,
+                    width: lead,
+                    height: region.height
+                ),
+                CGRect(
+                    x: region.minX + lead + gap,
+                    y: region.minY,
+                    width: available - lead,
+                    height: region.height
+                )
+            )
+        }
+        return (
+            CGRect(
+                x: region.minX,
+                y: region.minY,
+                width: region.width,
+                height: lead
+            ),
+            CGRect(
+                x: region.minX,
+                y: region.minY + lead + gap,
+                width: region.width,
+                height: available - lead
+            )
+        )
     }
 }

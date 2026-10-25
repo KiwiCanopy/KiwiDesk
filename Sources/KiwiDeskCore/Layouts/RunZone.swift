@@ -1,9 +1,9 @@
 import CoreGraphics
 
-/// One region a Stack zone, a Track track or a Grid's last track
-/// lays its members along (#2235, #2541): the shared placement
-/// each takes, so a zone that overflows scrolls the same way in
-/// any.
+/// One region a Stack zone, a Track track, a Grid's last track or
+/// a BSP chain lays its members along (#2235, #2541, #2542): the
+/// shared placement each takes, so a zone that overflows scrolls
+/// the same way in any.
 public struct RunZone: Sendable, Equatable {
     /// Members in drawn order.
     public let members: [WindowID]
@@ -16,17 +16,23 @@ public struct RunZone: Sendable, Equatable {
     /// them by floor and weight. Nil sizes the run from its
     /// members' floors alone.
     public let slots: [CGRect]?
+    /// The bounds the run's overflow marks sit flush with; nil
+    /// takes the layout bounds. A BSP chain inside the screen sets
+    /// it so an end facing a fixed window straddles the gap (#2542).
+    public let markBounds: CGRect?
 
     public init(
         members: [WindowID],
         region: CGRect,
         vertical: Bool,
-        slots: [CGRect]? = nil
+        slots: [CGRect]? = nil,
+        markBounds: CGRect? = nil
     ) {
         self.members = members
         self.region = region
         self.vertical = vertical
         self.slots = slots
+        self.markBounds = markBounds
     }
 
     /// The zones `mode` lays `tiled` along, nil for a layout that
@@ -41,6 +47,7 @@ public struct RunZone: Sendable, Equatable {
         case .stack: StackLayout.zones(for: tiled, in: context)
         case .track: TrackLayout.zones(for: tiled, in: context)
         case .grid: GridLayout.zones(for: tiled, in: context)
+        case .bsp: BspLayout.zones(for: tiled, in: context)
         default: nil
         }
     }
