@@ -678,6 +678,37 @@ editing here:
   left all three cases green until the away-resolving lookup
   came back too. A reviewer reading a half-revert as harmless is
   the failure mode; the pair is the guard, not either half.
+- **A pocketed window is KNOWN in the slot, tracked, and never a
+  member (#2446).** `StateCoordinator.pocket` names it and
+  `windows` keeps it, but no Space lists it — the away ledger's
+  shape above, for the same reason. So a new reader of
+  `space.windows` owes it no exclusion, and the pocket never
+  becomes a Space or a flag on a member. The obligations run the
+  other way:
+  - **A new path that files a window into a Space on its
+    arrival or re-adoption consults the slot first**, as the
+    create fold does through `readoptPocketWindow` — an unhide, a
+    boot scan, a replay — or it files the pocketed window and
+    draws it (`PocketCommandTests` ▸ `hideKeeps`,
+    `outReadoptKeepsFlags`). A new per-window flag memory that a
+    close writes and an arrival restores skips the pocket window,
+    whose flags are the slot's (`PocketCommandTests` ▸
+    `closeLeavesNoMemory`).
+  - **Ask whether a window is the pocket's through
+    `StateCoordinator.pocketPhase(of:)`**, which answers the phase
+    too, or `pocketedWindow`; a new consumer that draws, refuses
+    or skips for it states which phase it means.
+  - **The slot crosses an in-place restart in
+    `StateSnapshot.pocket`, written by that capture alone**; a quit
+    releases the pocket ahead of its capture
+    (`releasePocketForQuit`), so no other snapshot carries one
+    (`PocketSurfaceTests` ▸ `inPlaceCarries`,
+    `plainSnapshotCarriesNone`). The slot follows a native-tab
+    re-key through `rekeyPocket` (`PocketCommandTests` ▸
+    `rekeyFollows`).
+
+  The argument is `docs/design-decisions.md` ▸ *The pocket is one
+  slot beside the Spaces, not a Space*.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in

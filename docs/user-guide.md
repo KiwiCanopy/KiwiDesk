@@ -521,15 +521,23 @@ the bars. A sticky window keeps its own Space.
 
 ### Sticky Windows
 
-A **sticky** window stays visible on every space. Two scopes,
-both shortcuts under Size & float (stickiness is per window;
-there is no app-rule list):
+A **sticky** window stays visible on every space. Two scopes
+(stickiness is per window; there is no app-rule list):
 
 - **Toggle sticky everywhere** — every space of every screen
   (∞ mark).
 - **Toggle sticky on this screen** — every space of the one
   screen it lives on (📌 mark). Moving it to a space on another
   screen re-homes it there.
+
+**Toggle sticky everywhere** is a shortcut under Size & float.
+
+:::unreleased
+**Toggle sticky on this screen** has no default key and no row
+there; bind
+[`toggle_display_sticky`](lua-reference.md#toggle_display_sticky)
+in the Lua bindings drawer.
+:::
 
 Moving a ∞ window anywhere, or a 📌 window to another space on
 the same screen, is refused with a brief pill. On a single
@@ -938,7 +946,6 @@ and the same setup is always available as a preset of that name.
 | Grow / Shrink height | `⌥⌘5` / `⌥⌘4` |
 | Toggle floating | `⌃⌥F` |
 | Toggle sticky everywhere | `⌃⌥S` |
-| Toggle sticky on this screen | `⌃⌥P` |
 | Toggle KiwiVision | `⌃⌥V` |
 | Show shortcuts panel | `⌃⌥K` |
 
@@ -973,6 +980,18 @@ listed under Shortcuts & Gestures ▸ Size & float.
 there, until you press it again or move focus to another window
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)), listed
 under Shortcuts & Gestures ▸ Size & float.
+:::
+
+:::unreleased
+`⌃⌥P` pockets the focused window: it leaves the screen and every
+bar. Press it again to take the window out on the screen you are
+on, floating and on every Space, and again to put it back; `⌘-Tab`
+to its app takes it out too
+([`pocket`](lua-reference.md#pocket)). Out of the pocket it wears
+the pocket mark on its top-right corner. It is listed under
+Shortcuts & Gestures ▸ Size & float, and KiwiHub's window switcher
+lists a pocketed window under **Pocket**. Closing the window
+empties the pocket.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

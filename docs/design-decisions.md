@@ -5936,6 +5936,77 @@ already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 :::
 
+:::unreleased
+### The pocket is one slot beside the Spaces, not a Space (#2446)
+
+**[Rationale]**
+
+**One window, one key, three states — empty, pocketed, out — and
+the window is never a member of a Space while it is pocketed.**
+The slot (`StateCoordinator.pocket`) knows the window, and the
+window stays tracked, so its frame, its app and its focus reports
+keep flowing; but no Space lists it. That is the away ledger's
+shape (#1146) for the same reason: a member with a "pocketed"
+flag would owe an exclusion in every reader of a Space's windows
+— the layouts, the bars, navigation, KiwiVision, the quit gather
+— and the one reader that forgot it would draw the window back.
+Outside every Space, a reader that forgets the pocket leaves the
+window hidden, which is the failure a user can recover from with
+the key.
+
+**Out of the pocket it is a global sticky float, borrowed whole.**
+"Comes with me wherever I go" is what the global sticky scope
+already does — every Space of every screen, carried across macOS
+Desktops (#1145) — so the out window takes that scope and the
+float flag rather than a third rendering rule. The pocket window is
+carried across Desktops in both states whatever
+`sticky.set_desktop_reach` says, since a pocketed window left on
+another Desktop is one the key can no longer reach. It follows that
+the sticky and float verbs are refused on it, with their own pills:
+their scope is the pocket's, and letting `make_tiled` or
+`make_unsticky` through would leave a window the pocket still
+claims tiled, or held to one Space, which is neither state.
+
+**Not minimize, not ⌘H, not a Space.** Minimize animates into the
+Dock, changes the Dock's state, and drops the window from
+KiwiDesk's state, so the window and everything known about it
+would leave together; un-minimizing also lands it back where it
+was, not where you are. ⌘H hides every window of the app, and a
+hidden app's windows leave tracking (#913). A dedicated scratch
+Space shows the window by switching you to it, which is the trip
+the key exists to save. Sticky is the opposite want: always
+visible rather than visible on call. So the pocketed window is
+parked off-screen by the same stash that hides any window of an
+unshown Space.
+
+**macOS activating a pocketed window takes it out.** `⌘-Tab`, a
+Dock click or a notification hands focus to a window parked
+off-screen; left there, the user types into a window they cannot
+see. Taking it out at that report gives the activation the
+meaning the user meant, and the pocket's own put-back is told
+apart from it by the move latch, so pocketing a window does not
+undo itself.
+
+**The window switcher lists the pocket last.** The switcher's first
+row is preselected and is the window you were in before, so
+`⌃⌥J` Return keeps meaning "back"; a pocketed window has its own
+key and would otherwise sit on that row whenever it was the last
+thing you used. It sits after the hidden apps, as the one more
+window a search may want.
+
+**A quit leaves no window parked.** The pocket does not survive a
+quit, so a quit files a pocketed window into the active Space as
+the user's float, where the quit gather lays it out with the
+others, and leaves an out window where it is as a plain float — a
+next launch with no pocket would otherwise hold a window off-screen
+that no key can bring back. An update's in-place relaunch carries
+the slot (`StateSnapshot.pocket`), since that restart is meant to
+be invisible.
+
+**One pocket in this release.** A pocket per app, each on its own
+key, is #2612.
+:::
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**
@@ -11535,11 +11606,11 @@ way to focus or move a window until they author every combo.
 Control-Option scheme** (#270): `⌃⌥` arrows focus / `⌃⌥⇧` arrows
 swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move /
 move-and-follow, `⌃⌥F` float, `⌃⌥S` sticky everywhere, `⌃⌥P`
-sticky to this screen (#1094) — plus `⌥⌘` `1`/`2` and `4`/`5` for
-size on a base of its own (#1075) — with one guard everywhere:
-**only when no layer carries a single binding** — a user- or
-Lua-authored binding anywhere blocks the seed, making it
-idempotent and never destructive.
+(#1094, amended below in *`⇧` has one meaning*) — plus `⌥⌘`
+`1`/`2` and `4`/`5` for size on a base of its own (#1075) —
+with one guard everywhere: **only when no layer carries a single
+binding** — a user- or Lua-authored binding anywhere blocks the
+seed, making it idempotent and never destructive.
 
 **Why Control-Option, not bare Option (#270).** On macOS Option is the
 special-character (AltGr) modifier, so a *global* `⌥`+key hotkey
@@ -12084,6 +12155,19 @@ shown, "Toggle sticky everywhere"), and the screen-scoped one
 `⌃⌥P`, named for the `pin.fill` mark `StickyStyle` draws rather
 than for a label — because a label-derived mnemonic only works in
 the language the label was written in, while a mark is a picture.
+
+:::unreleased
+Amended by #2446 and #2611: `⌃⌥P` belongs to Pocket, P for the
+pocket, and the screen-scoped toggle keeps no default chord. It
+also leaves the Settings shortcut list, the one row #2611 moved to
+Lua-only: an action with no default that few people bind costs
+every reader of the list a line, while the Lua bindings drawer
+keeps it bindable. The move reaches existing installs once, through
+a stored-binding step that rewrites only a `⌃⌥P` (or `✦P`) still
+running the toggle, in a file below the format that step introduced
+— so a chord the user puts back on it afterwards is theirs, and a
+chord they gave it on another key was never touched.
+:::
 
 **`D`, the obvious letter, is refused** on three counts: *Desktop*
 is a first-class noun in this app with its own catalog rows, so
