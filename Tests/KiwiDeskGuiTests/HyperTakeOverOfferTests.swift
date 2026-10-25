@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The Hyper key card's take-over offer (#2471): drawn from Core's
+/// The Modifier keys card's take-over offer (#2471): drawn from Core's
 /// `claimable` verdict alone, and its alert names the remap.
 @Suite("Hyper take-over offer")
 @MainActor
@@ -17,7 +17,7 @@ struct HyperTakeOverOfferTests {
 
     @Test("the offer follows Core's claimable verdict")
     func offerFollowsVerdict() {
-        let offer = HyperKeyRow.takeOverOffer
+        let offer = ModifierKeysCard.takeOverOffer
         #expect(
             offer(.refused(Self.claimable), false) == Self.claimable
         )
@@ -35,7 +35,7 @@ struct HyperTakeOverOfferTests {
                 contentsOf: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent(
                         "Sources/KiwiDesk/Settings/Components/"
-                            + "Keybindings/HyperKeyRow.swift"
+                            + "Keybindings/ModifierKeysCard.swift"
                     ),
                 encoding: .utf8
             )

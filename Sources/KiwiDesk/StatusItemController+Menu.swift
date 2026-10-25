@@ -156,6 +156,9 @@ extension StatusItemController {
         _ combo: KeyCombo,
         to item: NSMenuItem
     ) {
+        // A menu key equivalent has no side, so drawing `R⌘H` as
+        // `⌘H` would promise the left key too (#2601).
+        guard !combo.modifiers.isSided else { return }
         var modifiers: NSEvent.ModifierFlags = []
         if combo.modifiers.contains(.control) {
             modifiers.insert(.control)

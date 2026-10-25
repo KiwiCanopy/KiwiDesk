@@ -44,6 +44,9 @@ extension KiwiCore {
         keys.onHyperShortcutsChange = { [weak self] in
             self?.onAppWideChange()
         }
+        keys.onSideTapStatusChange = { [weak self] in
+            self?.onAppWideChange()
+        }
         exec.onLog = log
         profiles.onLog = log
         profiles.onActiveChange = { [weak self] in

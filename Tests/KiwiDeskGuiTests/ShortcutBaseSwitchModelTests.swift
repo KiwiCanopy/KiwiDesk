@@ -118,7 +118,7 @@ struct ShortcutBaseSwitchModelTests {
                 )
             )
         }
-        let card = try source("Components/Keybindings/HyperKeyRow.swift")
+        let card = try source("Components/Keybindings/ModifierKeysCard.swift")
         #expect(
             card.contains(
                 "ShortcutBaseRow(model: model, reason: offerReason)"

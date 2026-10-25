@@ -20,16 +20,42 @@ public enum ComboSymbols {
 
     /// Formats modifiers in canonical macOS `⌃⌥⇧⌘` order
     /// (`ChordRecorder`).
+    /// A sided modifier takes a capital L or R just before its
+    /// glyph, `R⌘` (#2601 ▸ Ruling): a key never precedes a
+    /// modifier, so the letter can only be that modifier's side.
     public static func modifierSymbols(
         _ modifiers: HotkeyModifiers
     ) -> String {
         var out = ""
         if modifiers.contains(.hyper) { out += hyperGlyph }
-        if modifiers.contains(.control) { out += "⌃" }
-        if modifiers.contains(.option) { out += "⌥" }
-        if modifiers.contains(.shift) { out += "⇧" }
-        if modifiers.contains(.command) { out += "⌘" }
+        // `ModifierKind.allCases` is the canonical order.
+        for kind in ModifierKind.allCases
+        where modifiers.contains(kind.plain) {
+            if let side = modifiers.side(of: kind) {
+                out += sideLetter(side)
+            }
+            out += glyph(of: kind)
+        }
         return out
+    }
+
+    /// A modifier's glyph, the one table every reader of a drawn
+    /// chord shares (the GUI speaks `R⌘` back from it, #2601).
+    public static func glyph(of kind: ModifierKind) -> String {
+        switch kind {
+        case .control: "⌃"
+        case .option: "⌥"
+        case .shift: "⇧"
+        case .command: "⌘"
+        }
+    }
+
+    /// The letter a sided modifier draws before its glyph.
+    public static func sideLetter(_ side: ModifierSide) -> String {
+        switch side {
+        case .left: "L"
+        case .right: "R"
+        }
     }
 
     /// The Hyper modifier's glyph (#1870); macOS has none.

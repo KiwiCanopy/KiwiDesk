@@ -13,7 +13,7 @@ enum ShortcutsRowOrder {
         .luaBindings,
         .defaultShortcuts,
         .gestures,
-        .hyperKey,
+        .modifierKeys,
     ]
 
     /// The Mouse & trackpad drawer's settings, in entry order
@@ -130,11 +130,13 @@ enum ShortcutsRowOrder {
         .shortcuts(.modeCue),
     ]
 
-    /// The Hyper key card's rows (#1870), drawn by `HyperKeyRow`:
-    /// the recorder, then the move offer under it.
-    static let hyperKeyList: [SettingKey] = [
+    /// The Modifier keys card's rows, drawn by `ModifierKeysCard`:
+    /// the Hyper key's recorder (#1870), the move offer under it
+    /// (#2460), then the sides switch (#2601).
+    static let modifierKeysList: [SettingKey] = [
         .shortcuts(.hyperKey),
         .shortcuts(.shortcutBase),
+        .shortcuts(.modifierSides),
     ]
 
     /// Layout group order (#453): `KeybindingCatalog

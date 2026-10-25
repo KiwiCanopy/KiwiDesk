@@ -10,9 +10,8 @@ import Carbon.HIToolbox
 //   2. No new permission prompt appears on first registration.
 //   3. GetEventDispatcherTarget still delivers on the main
 //      run loop.
-// If Carbon breaks, the fallback is a CGEventTap, which DOES
-// require Input Monitoring — a UX regression to surface
-// prominently in release notes.
+// If Carbon breaks, the fallback is a keyboard CGEventTap, which
+// Accessibility alone allows (measured on macOS 27, #2601).
 
 /// Modifier mask for Carbon hotkeys.
 public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
@@ -33,8 +32,9 @@ public struct HotkeyModifiers: OptionSet, Sendable, Hashable {
     /// is held (`KeybindingManager+Hyper`), never with this bit.
     public static let hyper = Self(rawValue: 1 << 20)
 
-    /// The mask Carbon reads: everything but `hyper`.
-    var carbonMask: UInt32 { subtracting(.hyper).rawValue }
+    /// The mask Carbon reads: everything but `hyper` and the side
+    /// bits, so a sided chord registers as either-side (#2601).
+    var carbonMask: UInt32 { subtracting(.hyper).unsided.rawValue }
 }
 
 /// C callback for Carbon hotkey events. Carbon delivers exactly

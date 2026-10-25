@@ -80,9 +80,10 @@ struct KeyboardHoverWiringTests {
             "letdisabled=model.disabledSystemShortcuts()"
             + "letlayers=shownletscope=liveScope"
             + "letselection=selectedletconfig=model.config"
+            + "letsides=model.appWide.modifierSides"
             + "return{codeinKeyboardHoverReading.of("
             + "code,in:layers,scope:scope,selected:selection,"
-            + "config:config,disabled:disabled)}"
+            + "config:config,disabled:disabled,sides:sides)}"
         #expect(
             panel.contains(carried),
             Comment(
@@ -99,7 +100,8 @@ struct KeyboardHoverWiringTests {
     func oneBuilderFeedsBothChannels() throws {
         let panel = try Self.panelSource()
         #expect(
-            panel.occurrences(of: "KeyboardHoverReading.of(") == 1
+            panel.occurrences(of: "KeyboardHoverReading.of(")
+                == 1
         )
         // …the drawn half, and the spoken half, both through
         // the ONE reader closure — which is also what holds the

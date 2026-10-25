@@ -3,7 +3,7 @@ import Foundation
 /// The Hyper key's layer (#1870): the remapped key arrives as
 /// F18, a Carbon hotkey on F18 hears its press and release, and
 /// the layer's `hyper+…` combos are registered BARE only while
-/// it is held. No keyboard tap, so no Input Monitoring.
+/// it is held. No keyboard tap.
 struct HyperLayer {
     /// The active layer's rows, registered on each press.
     var rows: [(KeyCombo, Int32)] = []

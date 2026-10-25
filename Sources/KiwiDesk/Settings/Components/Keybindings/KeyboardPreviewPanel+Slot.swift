@@ -114,7 +114,8 @@ extension KeyboardPreviewPanel {
     var conflictDetail: [String] {
         let read = reader
         return ringedKeys.intersection(drawnCodes).sorted()
-            .flatMap { read($0).lines }
+            // Each line leads with its chord: spoken in words (#2601).
+            .flatMap { read($0).lines.map(SidedChordWords.label) }
     }
 
     /// The keys the board rings, from the census's one
@@ -155,6 +156,7 @@ extension KeyboardPreviewPanel {
         let scope = liveScope
         let selection = selected
         let config = model.config
+        let sides = model.appWide.modifierSides
         return { code in
             KeyboardHoverReading.of(
                 code,
@@ -162,7 +164,8 @@ extension KeyboardPreviewPanel {
                 scope: scope,
                 selected: selection,
                 config: config,
-                disabled: disabled
+                disabled: disabled,
+                sides: sides
             )
         }
     }

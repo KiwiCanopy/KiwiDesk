@@ -43,7 +43,9 @@ struct SpokenKeyboardBoard: View {
         switch scope {
         case .all: return L("keyboard.scope.all", "All")
         case .one(let layer):
-            return KeyboardKeyLabel.chipLabel(for: layer)
+            return SidedChordWords.label(
+                KeyboardKeyLabel.chipLabel(for: layer)
+            )
         }
     }
 
@@ -68,6 +70,8 @@ struct SpokenKeyboardBoard: View {
                 scopeLabel: scopeLabel,
                 layerLabel: layerLabel,
                 hyperName: Self.hyperName(hyperKey, on: type),
+                holding: KeyboardCensus.heldSides(scope: scope)
+                    .map(HyperKeyWords.name),
                 conflictDetail: conflictDetail
             )
         )
@@ -122,6 +126,7 @@ enum KeyboardBoardSpoken {
         scopeLabel: String,
         layerLabel: String?,
         hyperName: String?,
+        holding: [String],
         conflictDetail: [String]
     ) -> String {
         var parts = [
@@ -147,6 +152,17 @@ enum KeyboardBoardSpoken {
                     "keyboard.ax.hyper",
                     "The Hyper key is %1$@.",
                     hyperName
+                )
+            )
+        }
+        // The sided caps the board bars (#2601), as the Hyper card
+        // names them.
+        if !holding.isEmpty {
+            parts.append(
+                L(
+                    "keyboard.ax.holding",
+                    "Holding %1$@.",
+                    join(holding)
                 )
             )
         }

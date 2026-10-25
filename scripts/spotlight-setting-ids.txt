@@ -65,6 +65,7 @@ UserDefaults.language
 appWide.desktopCue
 appWide.hyperKey
 appWide.modeCue
+appWide.modifierSides
 appWide.quitGridTargetDepth
 appWide.refusalSound
 appWide.spaceSlideDuration

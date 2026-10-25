@@ -14,7 +14,8 @@ extension AppWideSettings {
             mode: mode,
             kiwivision: vision,
             hyper: hyper,
-            kiwihub: kiwihub
+            kiwihub: kiwihub,
+            modifier: modifier
         )
         return JSONValue(encoding: groups) ?? .object([:])
     }
@@ -28,5 +29,6 @@ extension AppWideSettings {
         let kiwivision: Vision
         let hyper: Hyper
         let kiwihub: KiwiHub
+        let modifier: Modifier
     }
 }

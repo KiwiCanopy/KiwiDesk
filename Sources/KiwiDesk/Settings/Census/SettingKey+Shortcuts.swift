@@ -51,6 +51,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// KiwiHub's navigation key alternatives (#2600): app-wide,
     /// Lua-only.
     case kiwiHubNavigationKeys = "appWide.kiwiHubKeys"
+
+    /// Whether shortcuts keep a modifier's side (#2601): app-wide.
+    case modifierSides = "appWide.modifierSides"
     /// The "Shortcuts use" switch's base (#2460), drafted with the
     /// layers it moves.
     case shortcutBase = "config.shortcutBase"
@@ -143,14 +146,14 @@ extension ShortcutsKey {
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
-        case .hyperKey, .shortcutBase:
+        case .hyperKey, .shortcutBase, .modifierSides:
             // Above the layer header: it belongs to no layer
-            // (#1870). The key is written at once, the base into
-            // the draft (#2460); both grey where init.lua owns the
-            // config.
+            // (#1870). The key and the sides switch (#2601) are
+            // written at once, the base into the draft (#2460); all
+            // grey where init.lua owns the config.
             return .row(
                 .shortcuts,
-                .hyperKey,
+                .modifierKeys,
                 .atRest,
                 gate: .runtime(.luaOwnsConfig)
             )
@@ -292,6 +295,11 @@ extension ShortcutsKey {
             )
         case .shortcutBase:
             return .text("shortcuts.base", help: "shortcuts.base.help")
+        case .modifierSides:
+            return .text(
+                "shortcuts.modifier_sides",
+                help: "shortcuts.modifier_sides.help"
+            )
         }
     }
 }
