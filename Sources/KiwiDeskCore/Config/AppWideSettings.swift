@@ -65,6 +65,9 @@ public struct AppWideSettings: Equatable, Sendable {
     /// Lua's alternatives to KiwiHub's navigation keys
     /// (`kiwihub.key`, #2600). None by default.
     public var kiwiHubKeys = KiwiHubKeys()
+    /// Whether shortcuts tell left and right modifiers apart
+    /// (`modifier.sides`, #2601). Off by default: no keyboard tap.
+    public var modifierSides = false
 
     public init() {}
 
@@ -222,6 +225,12 @@ extension AppWideSettings {
         var key: KiwiHubKeys?
     }
 
+    /// `gui.json`'s `modifier` group (#2601) — additive, as
+    /// `desktop`.
+    struct Modifier: Codable, Equatable {
+        var sides: Bool?
+    }
+
     /// `gui.json`'s `kiwivision` group (#2103) — additive, as
     /// `desktop`; v3's lenses joined it with no crossing.
     struct Vision: Codable, Equatable {
@@ -250,7 +259,8 @@ extension AppWideSettings {
     /// present — the file predates #1741 and the crossing is still
     /// owed. The `desktop` (#2142), `space` (#2228), `mode`
     /// (#2144), `kiwivision` (#2103), `hyper` (#1870) and
-    /// `kiwihub` (#2600) groups crossed nothing, so they never
+    /// `kiwihub` (#2600) and `modifier` (#2601) groups crossed
+    /// nothing, so they never
     /// decide that.
     init?(
         refusal: Refusal?,
@@ -260,7 +270,8 @@ extension AppWideSettings {
         mode: Mode? = nil,
         vision: Vision? = nil,
         hyper: Hyper? = nil,
-        kiwihub: KiwiHub? = nil
+        kiwihub: KiwiHub? = nil,
+        modifier: Modifier? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
@@ -274,6 +285,7 @@ extension AppWideSettings {
         if let cue = mode?.cue { modeCue = cue }
         hyperKey = hyper?.key
         if let keys = kiwihub?.key { kiwiHubKeys = keys }
+        if let sides = modifier?.sides { modifierSides = sides }
         if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
         if let blur = vision?.blur { visionBlur = blur }
         if let appearance = vision?.appearance {
@@ -311,6 +323,7 @@ extension AppWideSettings {
     var mode: Mode { Mode(cue: modeCue) }
     var hyper: Hyper { Hyper(key: hyperKey) }
     var kiwihub: KiwiHub { KiwiHub(key: kiwiHubKeys) }
+    var modifier: Modifier { Modifier(sides: modifierSides) }
     var vision: Vision {
         Vision(
             dim: visionDim,

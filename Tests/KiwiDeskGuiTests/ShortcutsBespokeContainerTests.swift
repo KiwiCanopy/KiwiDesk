@@ -104,10 +104,10 @@ struct ShortcutsBespokeContainerTests {
                 "gesturesMore", .gestures,
                 ShortcutsRowOrder.gesturesMore
             ),
-            // The Hyper key card's one recorder row (#1870).
+            // The Modifier keys card's rows (#1870, #2601).
             (
-                "hyperKeyList", .hyperKey,
-                ShortcutsRowOrder.hyperKeyList
+                "modifierKeysList", .modifierKeys,
+                ShortcutsRowOrder.modifierKeysList
             ),
             // Walked by `DesktopShortcutsOffer`, which takes its
             // list as a `keys:` PARAMETER rather than walking it

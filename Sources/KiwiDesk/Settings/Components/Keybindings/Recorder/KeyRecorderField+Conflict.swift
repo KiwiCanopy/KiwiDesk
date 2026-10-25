@@ -50,21 +50,37 @@ extension KeyRecorderField {
                     // sentence takes an ideal-width proposal and
                     // TRUNCATES to one line instead of wrapping
                     // (owner, on device 2026-09-03).
-                    Text(sentence)
-                        .font(.callout)
-                        .foregroundStyle(SettingsTheme.ink)
-                        .fixedSize(
-                            horizontal: false,
-                            vertical: true
-                        )
-                        .frame(
-                            maxWidth: 320,
-                            alignment: .leading
-                        )
-                        .padding(14)
-                        .settingsPopoverChrome()
+                    VStack(alignment: .leading, spacing: 8) {
+                        Text(sentence)
+                            .font(.callout)
+                            .foregroundStyle(SettingsTheme.ink)
+                            .fixedSize(
+                                horizontal: false,
+                                vertical: true
+                            )
+                        sideSwitchLink
+                    }
+                    .frame(maxWidth: 320, alignment: .leading)
+                    .padding(14)
+                    .settingsPopoverChrome()
                 }
             }
+        }
+    }
+
+    /// A side collapse's way out: the switch the sentence names
+    /// (#2601 ▸ Ruling 5), offered only where the page scrolls to it.
+    @ViewBuilder private var sideSwitchLink: some View {
+        if case .sideCollapse = reading?.severity,
+            coordinator.scrollsInPlace
+        {
+            Button(L("key_recorder.go_to", "Go to")) {
+                conflictPopoverShown = false
+                coordinator.scrollTarget =
+                    SettingsCatalog.shortcuts.modifierSides.id
+            }
+            .buttonStyle(.link)
+            .font(.callout)
         }
     }
 

@@ -60,6 +60,11 @@ enum LayoutPickText {
 
     /// A button's chord, spoken as a hint rather than its name.
     static func chordHint(_ chord: String) -> String {
-        L("layout_picker.ax.chord", "Shortcut: %1$@", chord)
+        // A sided chord in words, "Right ⌘ K" (#2601).
+        L(
+            "layout_picker.ax.chord",
+            "Shortcut: %1$@",
+            SidedChordWords.label(chord)
+        )
     }
 }

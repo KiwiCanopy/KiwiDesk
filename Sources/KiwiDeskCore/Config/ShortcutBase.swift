@@ -54,6 +54,8 @@ public enum ShortcutBase: String, Codable, Sendable, CaseIterable {
             !modifiers.contains(.hyper)
         else { return nil }
         let rest = modifiers.subtracting(standardModifiers)
+        // `kept` holds no side bit, so a sided row stays: Hyper
+        // registers bare, and no side could ride onto `✦` (#2601).
         guard kept.isSuperset(of: rest) else { return nil }
         let target: HotkeyModifiers =
             rest == kept && isDigit(combo)

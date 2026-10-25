@@ -30,6 +30,9 @@ struct ShortcutRowView: View {
             Text(row.combo)
                 .font(.callout)
                 .foregroundStyle(.secondary)
+                // `R⌘H` reads as a bare letter (#2601).
+                .accessibilityLabel(SidedChordWords.label(row.combo))
+                .help(SidedChordWords.help(row.combo))
         }
         .help(row.monospaced ? row.label : "")
         .opacity(row.unavailable ? 0.55 : 1)

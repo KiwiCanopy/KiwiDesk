@@ -159,8 +159,9 @@ struct SettingsCatalogTests {
         // the Animations card, KiwiShelf's Show the Space gone.
         // 208 with #2507: the Space Bar's Fine-tuning drawer and
         // its four rows, KiwiShelf's Order and Space Bar minimum
-        // as Style children.
-        #expect(allEntries.count == 210)
+        // as Style children. 212 with #2601: the Modifier keys
+        // card's title and its sides switch.
+        #expect(allEntries.count == 212)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

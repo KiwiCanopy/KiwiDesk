@@ -34,7 +34,19 @@ private struct HyperKeyIsOffKey: EnvironmentKey {
     static let defaultValue = false
 }
 
+/// What a recording keeps of a modifier's side (#2601), read once
+/// per section render beside `hyperKeyIsOff`: nil while the switch
+/// is off, so a mount outside the wiring sites records either-side.
+private struct RecorderSidesKey: EnvironmentKey {
+    static let defaultValue: RecorderSides? = nil
+}
+
 extension EnvironmentValues {
+    var recorderSides: RecorderSides? {
+        get { self[RecorderSidesKey.self] }
+        set { self[RecorderSidesKey.self] = newValue }
+    }
+
     var hyperKeyIsOff: Bool {
         get { self[HyperKeyIsOffKey.self] }
         set { self[HyperKeyIsOffKey.self] = newValue }
@@ -66,5 +78,18 @@ extension View {
     func keybindingRowStyle(unavailable: String?) -> some View {
         opacity(unavailable != nil ? 0.55 : 1)
             .accessibilityHint(unavailable ?? "")
+    }
+}
+
+extension View {
+    /// What every recorder mount hands its fields about the keys:
+    /// whether a Hyper key is set (#1870) and which sides a recording
+    /// keeps (#2601). Each file hosting a `RecorderCoordinator`
+    /// calls it (`ModifierSideRecorderTests` ▸ `mountsWireTheSides`).
+    @MainActor
+    func recorderKeys(_ model: SettingsModel) -> some View {
+        // Hyper rows dim in place while no key is set (#1870).
+        environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
+            .environment(\.recorderSides, model.recorderSides)
     }
 }

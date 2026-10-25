@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// "Shortcuts use: ⌃⌥ | ✦" (#2460), the Hyper key card's second row
+/// "Shortcuts use: ⌃⌥ | ✦" (#2460), the Modifier keys card's second row
 /// in the shortcut rows' shape (`SpaceHistoryRow`): two named peers,
 /// neither an "off", in the recorder column. Greyed on `⌃⌥` with its
 /// reason while no key is set, since the key field above turns it on

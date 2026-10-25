@@ -60,12 +60,14 @@ struct ConflictRowTreatmentTests {
         "KeybindingNavRow.swift": [
             "returnConflictText.reading(for:bindings[index],"
                 + "in:bindings,config:model.config,"
-                + "disabled:disabledSystemShortcuts)"
+                + "disabled:disabledSystemShortcuts,"
+                + "sides:model.appWide.modifierSides)"
         ],
         "KeybindingAppGroup+Row.swift": [
             "reading:ConflictText.reading(for:binding.wrappedValue,"
                 + "in:bindings,config:model.config,"
-                + "disabled:disabledSystemShortcuts)"
+                + "disabled:disabledSystemShortcuts,"
+                + "sides:model.appWide.modifierSides)"
         ],
     ]
 
@@ -109,7 +111,8 @@ struct ConflictRowTreatmentTests {
             source.contains(
                 "reading:ConflictText.reading(for:binding.wrappedValue,"
                     + "in:bindings,config:model.config,"
-                    + "disabled:disabledSystemShortcuts)"
+                    + "disabled:disabledSystemShortcuts,"
+                    + "sides:model.appWide.modifierSides)"
             )
         )
     }

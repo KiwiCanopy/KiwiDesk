@@ -11,7 +11,8 @@ extension SettingsModel {
     func actionableConflicts() -> [Conflict] {
         KeybindingConflicts.actionable(
             in: config.layers,
-            disabledSystemShortcuts: disabledSystemShortcuts()
+            disabledSystemShortcuts: disabledSystemShortcuts(),
+            distinguishingSides: appWide.modifierSides
         )
     }
 
@@ -43,7 +44,8 @@ extension SettingsModel {
         let list = actionableConflicts()
         if KeybindingConflicts.conflict(
             for: binding,
-            in: bindings
+            in: bindings,
+            distinguishingSides: appWide.modifierSides
         ) != nil {
             keybindingWarning = formatConflicts(list)
         } else if list.isEmpty {
@@ -108,6 +110,16 @@ extension SettingsModel {
                     + "shortcut.",
                 name(conflict.binding)
             )
+        case .sideCollapse(let who):
+            return L(
+                "keybinding.conflict.side_collapse",
+                "Shortcut for \"%1$@\" differs from \"%2$@\" only in "
+                    + "a modifier's side — only one of the two will "
+                    + "fire until %3$@ is on.",
+                name(conflict.binding),
+                name(who),
+                ModifierSidesWords.title
+            )
         case .otherBinding(let who):
             return L(
                 "keybinding.conflict.other_binding",
@@ -140,7 +152,7 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .sideCollapse, .unrecognized:
                 break
             }
             return L(
@@ -164,6 +176,15 @@ extension SettingsModel {
                 "keybinding.conflict.bullet.unrecognized",
                 "\"%1$@\" isn't a recognized shortcut",
                 name(conflict.binding)
+            )
+        case .sideCollapse(let who):
+            return L(
+                "keybinding.conflict.bullet.side_collapse",
+                "\"%1$@\" and \"%2$@\" differ only in a modifier's "
+                    + "side — only one will fire until %3$@ is on",
+                name(conflict.binding),
+                name(who),
+                ModifierSidesWords.title
             )
         case .otherBinding(let who):
             return L(
@@ -193,7 +214,7 @@ extension SettingsModel {
                     name(conflict.binding),
                     shortcut.localizedName
                 )
-            case .dormant, .duplicate, .unrecognized:
+            case .dormant, .duplicate, .sideCollapse, .unrecognized:
                 break
             }
             return L(

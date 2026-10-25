@@ -155,10 +155,10 @@ func makeTestCore(
     core.eventLoop.shadows.focusedWindow = { _ in nil }
     core.windowActions.newWindow = { _, _ in }
     core.windowActions.close = { _, _ in }
-    // The scroll-gesture tap (#1656): a live one would take a
-    // real session-wide event tap in any suite that binds a
-    // chord. A suite that means the tap injects its own.
+    // The event taps (#1656, #2601) are session-wide when live;
+    // a suite that means one injects its own.
     core.mouse.scroll.makeTap = { _ in nil }
+    core.keys.makeSideTap = { _, _ in nil }
     // The pointer rest's mouse-moved monitor (#1869).
     core.mouse.rest.makeMonitor = { _ in nil }
     // The hiding shelves' pointer monitor (#761) hears the

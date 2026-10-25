@@ -7895,7 +7895,7 @@ The header `?` stays the shape for a greyed block.
 *A whole card an OS accessibility switch greys also says so in a
 warning box* (owner ruling, 2026-10-21). The Animations card under
 Reduce Motion keeps its header `?`, and adds the yellow box the
-Hyper key's card uses, at the top of the card and only while the
+Modifier keys card uses, at the top of the card and only while the
 switch is on, with the one fix — a button to System Settings ▸
 Accessibility. A `?` is found by a reader looking for
 why; a card whose every row is grey by a setting KiwiDesk cannot
@@ -11041,8 +11041,8 @@ recordable — the first non-modifier key locks the combo
 
 **The Hyper key is a modifier KiwiDesk owns, and needs no
 Input Monitoring (#1870).** The usual hyper key is an event
-tap rewriting Caps Lock into `⌃⌥⇧⌘`, which needs the permission
-this app refuses. KiwiDesk instead remaps the chosen key to F18
+tap rewriting Caps Lock into `⌃⌥⇧⌘`. KiwiDesk runs no tap on a
+default install, so it instead remaps the chosen key to F18
 with `hidutil` — per user, no permission, gone at a restart —
 and watches F18 with a Carbon hotkey, which hears both its press
 and its release. Only while it is held are the `hyper+…`
@@ -11058,7 +11058,7 @@ setup turns the same key into Hyper on the new Mac. KiwiDesk touches a key mappi
 only where it is exactly the one KiwiDesk recorded writing —
 Caps Lock → F18 is also a common Hammerspoon setup — and refuses
 otherwise. The trade: "tap Hyper alone for Escape" needs a posted
-key event, which is Input Monitoring, so it stays with #1874.
+key event, which is #1874's to measure.
 
 The one way past that refusal is the user's own consent (#2471).
 An entry that is exactly KiwiDesk's own for the chosen key — what
@@ -11088,6 +11088,49 @@ member with no Settings row, which costs one trade: adopting an
 nothing in the window changes them after. `init.lua`'s
 `kiwihub.set_key` still sets them for the session at every load,
 and Reset clears them.
+
+**Left and right modifiers are told apart by one keyboard tap, and
+only while it has something to do (#2601).** Carbon cannot tell the
+sides: measured on macOS 27 (2026-10-25), a `⌘J` hotkey fired for
+both ⌘ keys with identical modifiers, Carbon.h has no right-⌘
+constant, and a `rightOptionKey` mask was dropped, registering a bare
+`K` that fired alone. A keyboard `CGEventTap` reads the side from each
+key event's flags (⌘ `0x08`/`0x10`, ⌥ `0x20`/`0x40`, ⇧ `0x02`/`0x04`,
+⌃ `0x01`/`0x2000`), and an active tap and a listen-only one both ran
+with Accessibility alone: the probe was under no Input Monitoring
+grant, and both were refused before Accessibility was granted.
+
+So the switch **Tell left and right modifiers apart** (Shortcuts &
+Gestures ▸ Modifier keys, `set_modifier_sides`) admits the tap,
+bounded three ways. Every either-side shortcut stays a Carbon hotkey,
+save one on the same keys as a sided shortcut, which moves to the tap
+with it so the two never race for one press. The tap runs only while
+the switch is on and a side-specific shortcut exists, so a default
+install, and one that never records a side, sees no keystroke. It
+swallows only a press matching one of its shortcuts and passes every
+other key on, recording and storing none of them, and it re-enables
+itself after macOS disables it (`tapDisabledByTimeout`, or by user
+input), since macOS disables a slow tap silently; a tap macOS refuses hands
+its shortcuts back to Carbon, either-side. A shortcut the tap answers
+does not glide, since the tap hears no release. The recorder reads
+the side from the key event's own device flags and needs no tap.
+
+The switch is the Mac's, in `gui.json` beside `hyper.key`: a keyboard
+is a desk's hardware, not a profile's. No per-profile value preceded
+it, so it crosses nothing. Switching it off migrates nothing — a
+stored `rcmd+h` stays `rcmd+h` and fires from either side through
+Carbon until the switch is back on — and a pair that falls on one
+chord (`lcmd+h` and `rcmd+h`, or `cmd+h` and `rcmd+h`) is a conflict
+tier of its own, whose sentence names the switch as the way to
+separate them. While the switch is on the recorder records no
+either-side shortcut, save under a held Hyper and on the other side
+of a one-sided Hyper key, which only one key can produce: one is
+recorded with the switch off, or written in Lua as `cmd+h`.
+Accepted.
+
+What it unblocks: reading keys needs no Input Monitoring, so
+#1874's "tap Hyper alone for Escape" turns on whether posting the
+Escape does, which is #1874's to measure.
 :::
 
 **An absent capability is not a greyed one, and an absent
@@ -11758,7 +11801,7 @@ four-modifier chord serves are the ones whose own tool already
 presses all four.
 
 **One switch puts KiwiDesk's shortcuts on `⌃⌥` or on `✦` (#2460,
-owner ruling 2026-10-20).** The Hyper key card carries "Shortcuts
+owner ruling 2026-10-20).** The Modifier keys card carries "Shortcuts
 use: `⌃⌥` | `✦`", and its value is one stored base, `gui.json`'s
 `shortcut_base`, which every writer of a default row reads: the
 seed, Restore Defaults, and the three top-ups — a new Space's

@@ -77,6 +77,8 @@ struct GateReasonPlacementTests {
                 .shortcuts(.hyperKey),
                 // #1870: its move offer, on the same card.
                 .shortcuts(.shortcutBase),
+                // #2601: the sides switch, on the same card.
+                .shortcuts(.modifierSides),
                 // #2524: the Space switch picker and the slide's
                 // pace, the same shape on Colors ▸ Animations.
                 .colours(.spaceTransition),
