@@ -422,6 +422,7 @@
   "diff.label.hover_focus_delay": "Atraso do foco com o cursor em repouso",
   "diff.label.ignore_rule": "Regra de exclusão",
   "diff.label.instance": "%1$@ · %2$@",
+  "diff.label.kiwihub_key": "Tecla do KiwiHub para %1$@",
   "diff.label.layer": "Camada",
   "diff.label.layers": "Camadas",
   "diff.label.min_size_override": "Substituição de tamanho mínimo",

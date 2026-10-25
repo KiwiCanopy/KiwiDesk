@@ -430,6 +430,7 @@
   "diff.label.hover_focus_delay": "Hover focus delay",
   "diff.label.ignore_rule": "Ignore rule",
   "diff.label.instance": "%1$@ · %2$@",
+  "diff.label.kiwihub_key": "KiwiHub key for %1$@",
   "diff.label.layer": "Layer",
   "diff.label.layers": "Layers",
   "diff.label.min_size_override": "Minimum size override",

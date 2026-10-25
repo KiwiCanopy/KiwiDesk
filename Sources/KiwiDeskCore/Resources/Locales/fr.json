@@ -422,6 +422,7 @@
   "diff.label.hover_focus_delay": "Délai du focus à l'arrêt du pointeur",
   "diff.label.ignore_rule": "Règle d'exclusion",
   "diff.label.instance": "%1$@ · %2$@",
+  "diff.label.kiwihub_key": "Touche KiwiHub pour %1$@",
   "diff.label.layer": "Calque",
   "diff.label.layers": "Calques",
   "diff.label.min_size_override": "Surcharge de taille minimale",

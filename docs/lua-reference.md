@@ -5893,6 +5893,42 @@ KiwiDesk.bind("alt+space", function()
 end)
 ```
 
+:::unreleased
+### kiwihub.set_key
+
+**Expects:** a built-in KiwiHub key — `"up"`, `"down"`,
+`"page_up"`, `"page_down"`, `"left"` or `"right"` — and a combo
+string; no combo, or `""`, clears it.
+
+**Does:** makes the combo a second key for that built-in key
+while KiwiHub is open: `"down"` moves the selection down as **↓**
+does, `"page_down"` a page as **Page Down** does. `"left"` and
+`"right"` move only on the View side, as **←** and **→** do;
+elsewhere their combo types into the search field. The built-in
+keys keep working, holding **⇧** with a combo moves as with the
+arrows, and the combo does nothing outside KiwiHub. While the
+field names a profile, every combo types.
+
+Refused, naming the reason: a combo without **ctrl**, **alt** or
+**cmd**, which would type into the search field; one with
+**hyper**; **Return**, **Escape**, **Tab**, an arrow or a page key
+under any modifier, **cmd** with a digit or with **S**, **,**,
+**W**, **A**, **C**, **V**, **X** or **Z**, which KiwiHub or its
+search field already uses; and a combo already set for another
+key.
+
+Lua-only: no Settings row shows these. Stored as `kiwihub.key`.
+
+**Example:**
+
+```lua
+kiwihub.set_key("down", "ctrl+n")
+kiwihub.set_key("up", "ctrl+p")
+kiwihub.set_key("page_down", "ctrl+d")
+kiwihub.set_key("page_up", "ctrl+u")
+```
+:::
+
 ### Retired panel verbs
 
 `show_shortcuts`, `show_jump_to_window` and `show_layout_picker`

@@ -422,6 +422,7 @@
   "diff.label.hover_focus_delay": "ポインタを止めたときのフォーカス遅延",
   "diff.label.ignore_rule": "除外ルール",
   "diff.label.instance": "%1$@ · %2$@",
+  "diff.label.kiwihub_key": "%1$@ の KiwiHub キー",
   "diff.label.layer": "レイヤー",
   "diff.label.layers": "レイヤー",
   "diff.label.min_size_override": "最小サイズのオーバーライド",

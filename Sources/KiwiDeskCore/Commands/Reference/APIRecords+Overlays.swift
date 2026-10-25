@@ -275,6 +275,11 @@ extension APIReference {
             "Opens KiwiHub on a side, switches it there, or closes "
                 + "it if that side is open.",
             .choice("side", KiwiHubSide.self)
-        )
+        ),
+        "set_key": APIRecord(
+            "Sets a second chord for one of KiwiHub's navigation keys.",
+            .choice("key", KiwiHubKey.self),
+            .text("combo", optional: true)
+        ),
     ]
 }

@@ -76,6 +76,8 @@ public struct TilingSettings: Sendable, Equatable {
     public var mouseResize: MouseResizeMode = .layout
     /// Mouse tracking and focus settings (`mouse.*`, #186).
     public var mouse = MouseSettings()
+    /// KiwiHub's own settings (`kiwihub.*`, #2600).
+    public var kiwihub = KiwiHubSettings()
     /// Optional display icon per space (`space.icon[space_id]`, #68).
     public var spaceIcons: [SpaceID: String] = [:]
 
