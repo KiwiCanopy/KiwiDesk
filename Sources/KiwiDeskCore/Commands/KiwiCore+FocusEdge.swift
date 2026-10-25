@@ -13,6 +13,8 @@ struct FocusEdge {
     let frame: CGRect
     /// The tiled windows the search looked at, in their slots.
     let candidates: [(WindowID, CGRect)]
+    /// What the lens leaves out, as `navigate` asked it (#2103).
+    let skip: (WindowID) -> Bool
     /// The pointer's say on a wrap within the screen; a hop always
     /// hands it over (#2548), and no caller passing false reaches
     /// one, the scroll gesture reading All screens as This screen.
@@ -83,7 +85,14 @@ extension KiwiCore {
                 )
             )
         else { return nil }
-        focusWindow(target, warp: edge.warp)
+        let landing = runWrapLanding(
+            target,
+            from: edge.focused,
+            in: edge.space,
+            direction: edge.direction,
+            skip: edge.skip
+        )
+        focusWindow(landing, warp: edge.warp)
         return .ok()
     }
 

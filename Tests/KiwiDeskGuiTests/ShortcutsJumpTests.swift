@@ -43,8 +43,8 @@ struct ShortcutsJumpTests {
             .layers,
             // The header's restore row.
             .defaultShortcuts,
-            // One row above the first chip's card (#1870).
-            .hyperKey,
+            // One card above the first chip's card (#1870).
+            .modifierKeys,
         ]
         let chipped = Set(ShortcutsJumpGroup.allCases.map(\.container))
         let rendered = ShortcutsCensusRenderTests.containers(

@@ -121,7 +121,7 @@ struct ShortcutsFamilyRows {
             .scrollStepDistance, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
             .focusWrap, .modeCycle, .modeCue, .hyperKey, .shortcutBase,
-            .kiwiHubNavigationKeys:
+            .kiwiHubNavigationKeys, .modifierSides:
             return nil
         }
     }

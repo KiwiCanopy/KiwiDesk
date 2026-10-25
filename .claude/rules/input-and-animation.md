@@ -15,9 +15,10 @@ paths:
 Canonical for this subsystem (AGENTS.md §5 indexes it). When
 editing here:
 
-- Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
-  CGEventTap — a keyboard tap needs Input Monitoring. Mouse
-  presses are read through `NSEvent` monitors.
+- Hotkeys use the **Carbon API** (`RegisterEventHotKey`); the one
+  keyboard tap is the side tap below (`docs/design-decisions.md` ▸
+  *Left and right modifiers are told apart by one keyboard tap*).
+  Mouse presses are read through `NSEvent` monitors.
 - **The running hotkey table is written only from saved files.**
   A new writer — a caller of `applyStructuredKeybindings`, of
   `KeybindingManager.replaceLayers`, or of `keys.bind` /
@@ -60,11 +61,11 @@ editing here:
   Accessibility-class `PostEvent` service alone, never
   `ListenEvent` (tccd log, device build, 2026-09-28). Seven
   obligations:
-  - **One tap, scroll-only.** A second `tapCreate(`, or a mask
-    widened past `.scrollWheel`, is where an Input Monitoring
-    prompt would come from (`ScrollTapSeamTests` for the one tap
-    and its one mask constant, `ScrollSampleTests` for the
-    constant's value).
+  - **One tap, scroll-only.** A mask widened past `.scrollWheel`
+    asks macOS for more than the gesture needs; the only other tap
+    is the side tap below (`ScrollTapSeamTests` for one tap per
+    file and each one mask constant, `ScrollSampleTests` for the
+    scroll constant's value).
   - **The tap installs on its own thread and decides there.**
     Every scroll on the Mac waits on the callback, and the main
     actor can block on a slow app's AX reply for seconds; the
@@ -107,6 +108,36 @@ editing here:
     built only through `tapSettings`, read by the door alone, or
     a path hands the tap a value that skipped the override
     (`ScrollGestureConfigureSeamTests`).
+- **Left and right modifiers take ONE keyboard tap,
+  `ModifierSideTap`, owned by `KeybindingManager` (#2601).**
+  The tap answers only the chords a sided row names, the
+  either-side row on such a chord included, and only while
+  `modifierSides` is on; every other shortcut stays a Carbon
+  hotkey (`ModifierSideRoutingTests` ▸ `onRoutes`). Obligations:
+  - **No sided row, no tap.** `armSideTap` stops it with its last
+    row; a new path that routes rows to it goes through
+    `tappedChords`, never a row list of its own
+    (`ModifierSideRoutingTests` ▸ `onWithoutSidesHasNoTap`).
+  - **A refused tap hands its chords back to Carbon** either-side
+    and is asked again only when the switch moves or at
+    `KiwiCore.start()`, the grant's door
+    (`ModifierSideRoutingTests` ▸ `refusedTapFallsBack`).
+  - **A suspended manager answers nothing** — `deactivate` empties
+    the rows, or the tap swallows the sided press the recorder
+    reads (`ModifierSideRoutingTests` ▸ `offStopsTheTap`).
+  - **Key-down only, on its own thread**, deciding from the rows
+    `setRows` handed it and passing every press no row answers;
+    the live factory is pinned inert in both `makeTestCore`
+    twins (`ScrollTapSeamTests` ▸ `installsOffMain`,
+    `keyboardMask`, `liveFactoryPinned`).
+  - **Carbon reads a sided chord either-side**: `carbonMask` and
+    `KeyCombo.registered` strip the side bits
+    (`ModifierSideComboTests` ▸ `carbonReadsEitherSide`,
+    `registeredIsEitherSide`), so the
+    switch off fires every sided shortcut through Carbon and a
+    collapsing pair is refused as a duplicate
+    (`ModifierSideRoutingTests` ▸ `offCollapses`) and named a
+    `sideCollapse` conflict (`ModifierSideConflictTests`).
 - **A keypad digit is the same key as its number-row twin
   (#1074), and `KeypadKeys` is the one place that says so.** Both
   readers come to it — hotkey registration and `KeyCombo.keyName`

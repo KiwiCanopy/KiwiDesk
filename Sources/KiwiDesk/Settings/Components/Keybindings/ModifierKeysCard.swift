@@ -1,14 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Hyper key card (#1870), above the layer header: it belongs
-/// to no layer. Two rows in the shortcut rows' shape: the key's
-/// recorder, app-wide and written at once like the layout cue
-/// (#1741), greyed with its sentence only where `init.lua` owns the
-/// config; and "Shortcuts use" (#2460), drafted with the layers.
-/// Offered in Power User, and in Simple once a key is set or the
-/// draft uses Hyper (config presence expands Simple).
-struct HyperKeyRow: View {
+/// The Modifier keys card (#2601 ▸ Ruling 7), above the layer
+/// header: it belongs to no layer. Three rows in the shortcut rows'
+/// shape: the Hyper key's recorder (#1870), app-wide and written at
+/// once like the layout cue (#1741), greyed with its sentence only
+/// where `init.lua` owns the config; "Shortcuts use" (#2460),
+/// drafted with the layers; and the sides switch (#2601). Offered
+/// in Power User, and in Simple once a key is set, the draft uses
+/// Hyper, the switch is on or a row keeps a side (config presence
+/// expands Simple).
+struct ModifierKeysCard: View {
     @ObservedObject var model: SettingsModel
     /// The take-over's focus destination (#816): the button leaves
     /// once the remap is KiwiDesk's, and the recorder stays drawn.
@@ -19,9 +21,15 @@ struct HyperKeyRow: View {
     static func isOffered(
         in mode: SettingsMode,
         key: HyperSourceKey?,
-        usesHyper: Bool = false
+        usesHyper: Bool = false,
+        keepsSides: Bool = false
     ) -> Bool {
-        mode == .powerUser || key != nil || usesHyper
+        mode == .powerUser || key != nil || usesHyper || keepsSides
+    }
+
+    /// The switch is on or a draft row keeps a side (#2601).
+    private var keepsSides: Bool {
+        model.appWide.modifierSides || model.sidedShortcutCount > 0
     }
 
     private var reason: ShortcutsGates.InertReason? {
@@ -41,7 +49,8 @@ struct HyperKeyRow: View {
         if Self.isOffered(
             in: model.settingsMode,
             key: model.appWide.hyperKey,
-            usesHyper: model.draftUsesHyper
+            usesHyper: model.draftUsesHyper,
+            keepsSides: keepsSides
         ) {
             card
         }
@@ -49,18 +58,20 @@ struct HyperKeyRow: View {
 
     private var card: some View {
         SettingsSection(
-            SettingsCatalog.shortcuts.hyperKey,
-            help: HyperKeyWords.help,
+            SettingsCatalog.shortcuts.modifierKeys,
             modeGated: !Self.isOffered(
                 in: .simple,
                 key: model.appWide.hyperKey,
-                usesHyper: model.draftUsesHyper
+                usesHyper: model.draftUsesHyper,
+                keepsSides: keepsSides
             )
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 keyRow
                 captions
                 ShortcutBaseRow(model: model, reason: offerReason)
+                    .padding(.top, 6)
+                ModifierSidesRow(model: model)
                     .padding(.top, 6)
             }
         }
@@ -77,6 +88,10 @@ struct HyperKeyRow: View {
             // The recorder names itself; this is its drawn twin.
             Text(HyperKeyWords.useAs)
                 .accessibilityHidden(true)
+            HelpButton(
+                explanation: HyperKeyWords.help,
+                subject: HyperKeyWords.title
+            )
             Spacer()
             HyperKeyField(
                 key: Binding(

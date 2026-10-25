@@ -32,7 +32,8 @@ struct DesktopSwitchShortcutTests {
             let conflict = try #require(
                 KeybindingConflicts.conflict(
                     for: binding,
-                    in: [binding]
+                    in: [binding],
+                    distinguishingSides: false
                 )
             )
             #expect(conflict.target == .systemShortcut(shortcut))

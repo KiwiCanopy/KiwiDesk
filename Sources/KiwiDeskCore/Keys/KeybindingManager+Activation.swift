@@ -12,18 +12,40 @@ extension KeybindingManager {
             registrar.unregister(id: id)
         }
         activeBindings = [:]
+        // The tap answers nothing while suspended, or it would
+        // swallow the sided press the recorder reads (#2601).
+        sideBindings = [:]
+        sideTap?.setRows([])
     }
 
     func activate(_ layer: String) {
         deactivate()
         activationFailures = []
         noteHyperShortcuts()
-        guard !isSuspended else { return }
+        guard !isSuspended else {
+            _ = armSideTap([])
+            return
+        }
         var hyperRows: [(KeyCombo, Int32)] = []
-        for (combo, ref) in bindings(for: layer) {
+        var sideRows: [(KeyCombo, Int32)] = []
+        let tapped = tappedChords(in: layer)
+        // Either-side rows first, so a pair collapsing onto one
+        // Carbon chord keeps the same one every launch (#2601).
+        let rows = bindings(for: layer).sorted {
+            ($0.key.modifiers.isSided ? 1 : 0, $0.key.comboString() ?? "")
+                < (
+                    $1.key.modifiers.isSided ? 1 : 0,
+                    $1.key.comboString() ?? ""
+                )
+        }
+        for (combo, ref) in rows {
             // A Hyper combo registers only while the key is held.
             if combo.modifiers.contains(.hyper) {
                 hyperRows.append((combo, ref))
+                continue
+            }
+            if tapped.contains(combo.unsided) {
+                sideRows.append((combo, ref))
                 continue
             }
             guard
@@ -58,6 +80,25 @@ extension KeybindingManager {
             }
         }
         armHyper(hyperRows)
+        if !armSideTap(sideRows) {
+            // No tap: the chord falls back to Carbon either-side,
+            // as with the switch off, and a collapse is refused.
+            for (combo, ref) in sideRows {
+                guard
+                    registerPhysical(
+                        code: combo.keyCode,
+                        combo: combo,
+                        ref: ref
+                    )
+                else {
+                    activationFailures.insert(combo)
+                    continue
+                }
+                if let twin = KeypadKeys.keypadTwin(of: combo.keyCode) {
+                    _ = registerPhysical(code: twin, combo: combo, ref: ref)
+                }
+            }
+        }
     }
 
     /// Registers ONE physical key for combo. Each physical key

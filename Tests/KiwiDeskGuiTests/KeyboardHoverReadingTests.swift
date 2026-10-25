@@ -59,7 +59,8 @@ struct KeyboardHoverReadingTests {
             scope: scope,
             selected: selected,
             config: config(l),
-            disabled: []
+            disabled: [],
+            sides: false
         )
     }
 
@@ -188,7 +189,8 @@ struct KeyboardHoverReadingTests {
             for: l[0].bindings[0],
             in: l[0].bindings,
             config: config(l),
-            disabled: []
+            disabled: [],
+            sides: false
         )?.sentence
         #expect(expected != nil)
         // Claim, its cost, claim, its cost — never both costs

@@ -52,7 +52,8 @@ struct HomeCardConflictShoutTests {
         #expect(
             KeybindingConflicts.conflict(
                 for: bindings[0],
-                in: bindings
+                in: bindings,
+                distinguishingSides: false
             ) != nil
         )
         // …and the card stays quiet about it —

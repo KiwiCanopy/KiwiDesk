@@ -67,7 +67,8 @@ struct KeybindingBannerLocaleTests {
             for: bindings[0],
             in: bindings,
             config: model.config,
-            disabled: []
+            disabled: [],
+            sides: false
         )
         // Pinned non-nil first: `?.contains != true` alone
         // passes on a vanished tooltip (guard-prover's

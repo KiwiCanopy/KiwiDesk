@@ -14,10 +14,9 @@ enum HyperKeyWords {
             "Hyper is an extra modifier key that no app uses. A "
                 + "shortcut on Hyper alone never collides; combined "
                 + "with ⌘, ⌥ or ⌃, an enabled macOS shortcut on the "
-                + "same keys still wins. Unlike shortcut recording, "
-                + "this row "
-                + "tells left from right: Right ⌘ can be Hyper while "
-                + "Left ⌘ stays ⌘. While KiwiDesk manages your "
+                + "same keys still wins. This row always tells left "
+                + "from right: Right ⌘ can be Hyper while Left ⌘ "
+                + "stays ⌘. While KiwiDesk manages your "
                 + "windows, the key you pick stops doing its own job."
         )
     }

@@ -22,7 +22,7 @@ struct ShortcutsSection: View {
     /// subscribe to the reading only the bar draws (#1520).
     @State var jumpTracker = ShortcutsJumpTracker()
     @StateObject private var coordinator =
-        RecorderCoordinator()
+        RecorderCoordinator(scrollsInPlace: true)
 
     /// The selected layer lives on `nav` rather than here
     /// (#1127): the live preview panel is this section's
@@ -99,8 +99,7 @@ struct ShortcutsSection: View {
                 \.disabledSystemShortcuts,
                 model.disabledSystemShortcuts()
             )
-            // Hyper rows dim in place while no key is set (#1870).
-            .environment(\.hyperKeyIsOff, model.appWide.hyperKey == nil)
+            .recorderKeys(model)
             .environmentObject(coordinator)
         }
         .shortcutsJumpSlot(.viewport)
@@ -120,7 +119,7 @@ struct ShortcutsSection: View {
         // after its chip, so nothing in it reads as per-layer
         // (#1726, #1520; amending the 2026-08-04 ruling that the
         // layers card leads the section).
-        HyperKeyRow(model: model)
+        ModifierKeysCard(model: model)
         GesturesDrawer(model: model, expanded: $gesturesExpanded)
         ShortcutsHeader(model: model, selected: selection)
         layersCard

@@ -84,6 +84,8 @@ extension KiwiCore {
         wireReduceTransparency()
         wireFontSet()
         applyHyperKey()
+        // A tap refused before the grant is asked for again (#2601).
+        keys.retrySideTap()
         // One retile for the whole scan instead of one per
         // discovered window (#672): windows fold into state as
         // the events arrive, geometry lands once in the tail.

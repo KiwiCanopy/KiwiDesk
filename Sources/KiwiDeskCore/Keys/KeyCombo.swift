@@ -22,34 +22,62 @@ public struct KeyCombo: Hashable, Sendable {
             return nil
         }
         var modifiers: HotkeyModifiers = []
+        var named: Set<String> = []
         for part in parts.dropLast() {
-            switch part {
-            case "cmd", "command":
-                modifiers.insert(.command)
-            case "alt", "opt", "option":
-                modifiers.insert(.option)
-            case "ctrl", "control":
-                modifiers.insert(.control)
-            case "shift":
-                modifiers.insert(.shift)
-            case "hyper":
-                modifiers.insert(.hyper)
-            default:
-                return nil
-            }
+            guard let token = modifierToken(part) else { return nil }
+            // One token per modifier: `lcmd+rcmd` or `cmd+rcmd`
+            // names nothing a key press can be (#2601).
+            guard named.insert(token.name).inserted else { return nil }
+            modifiers.formUnion(token.bits)
         }
+        // Hyper registers its row bare, so a side under it could
+        // never be told (#2601).
+        if modifiers.contains(.hyper), modifiers.isSided { return nil }
         return KeyCombo(
             keyCode: keyCode,
             modifiers: modifiers
         )
     }
 
+    /// A modifier spelling's bits and the modifier it names, nil
+    /// for none.
+    private static func modifierToken(
+        _ part: String
+    ) -> (name: String, bits: HotkeyModifiers)? {
+        if part == "hyper" { return ("hyper", .hyper) }
+        if let kind = plainKinds[part] { return ("\(kind)", kind.plain) }
+        guard let (kind, side) = sideTokens[part] else { return nil }
+        return ("\(kind)", kind.plain.union(.side(side, of: kind)))
+    }
+
+    private static let plainKinds: [String: ModifierKind] = [
+        "cmd": .command, "command": .command,
+        "alt": .option, "opt": .option, "option": .option,
+        "ctrl": .control, "control": .control,
+        "shift": .shift,
+    ]
+
+    /// The side spellings (#2601 ▸ Ruling): the short names only.
+    private static let sideTokens: [String: (ModifierKind, ModifierSide)] = [
+        "lcmd": (.command, .left), "rcmd": (.command, .right),
+        "lopt": (.option, .left), "ropt": (.option, .right),
+        "lalt": (.option, .left), "ralt": (.option, .right),
+        "lshift": (.shift, .left), "rshift": (.shift, .right),
+        "lctrl": (.control, .left), "rctrl": (.control, .right),
+    ]
+
+    /// The chord with its sides forgotten (#2601).
+    public var unsided: KeyCombo {
+        KeyCombo(keyCode: keyCode, modifiers: modifiers.unsided)
+    }
+
     /// The chord Carbon registers: a Hyper combo is registered
-    /// bare while the Hyper key is held (#1870).
+    /// bare while the Hyper key is held (#1870), and a sided one
+    /// either-side (#2601).
     public var registered: KeyCombo {
         KeyCombo(
             keyCode: keyCode,
-            modifiers: modifiers.subtracting(.hyper)
+            modifiers: modifiers.subtracting(.hyper).unsided
         )
     }
 
@@ -65,9 +93,9 @@ public struct KeyCombo: Hashable, Sendable {
 
     /// Formats key code and modifiers into a readable combo
     /// string (`"control+option+r"`; `parse` round-trips it).
-    /// Carbon hotkeys cannot tell left from right modifiers (that
-    /// needs an event tap + Input Monitoring, which KiwiDesk
-    /// avoids), so the two sides are deliberately unified.
+    /// Carbon hotkeys cannot tell left from right modifiers, so
+    /// the two sides are unified here; telling them apart takes a
+    /// keyboard tap, which Accessibility alone allows (#2601).
     /// `hyper` (#1870) leads, as its glyph does.
     public static func comboString(
         keyCode: UInt32,
@@ -88,16 +116,37 @@ public struct KeyCombo: Hashable, Sendable {
         return parts.joined(separator: "+")
     }
 
-    /// Formats combo as canonical string (#4).
+    /// Formats combo as canonical string (#4); a sided modifier
+    /// takes its Lua token (`rcmd`, `lopt`, #2601), which `parse`
+    /// round-trips.
     public func comboString() -> String? {
-        Self.comboString(
-            keyCode: keyCode,
-            command: modifiers.contains(.command),
-            option: modifiers.contains(.option),
-            control: modifiers.contains(.control),
-            shift: modifiers.contains(.shift),
-            hyper: modifiers.contains(.hyper)
-        )
+        guard modifiers.isSided else {
+            return Self.comboString(
+                keyCode: keyCode,
+                command: modifiers.contains(.command),
+                option: modifiers.contains(.option),
+                control: modifiers.contains(.control),
+                shift: modifiers.contains(.shift),
+                hyper: modifiers.contains(.hyper)
+            )
+        }
+        guard let key = Self.keyName(for: keyCode) else { return nil }
+        var parts: [String] = []
+        if modifiers.contains(.hyper) { parts.append("hyper") }
+        let names: [(ModifierKind, String, String)] = [
+            (.control, "control", "ctrl"), (.option, "option", "opt"),
+            (.shift, "shift", "shift"), (.command, "command", "cmd"),
+        ]
+        for (kind, long, short) in names
+        where modifiers.contains(kind.plain) {
+            switch modifiers.side(of: kind) {
+            case .left: parts.append("l" + short)
+            case .right: parts.append("r" + short)
+            case nil: parts.append(long)
+            }
+        }
+        parts.append(key)
+        return parts.joined(separator: "+")
     }
 
     /// Returns canonical display name for key code (`KeypadKeys`, #1074).

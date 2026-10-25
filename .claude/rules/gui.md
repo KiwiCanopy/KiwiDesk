@@ -2033,6 +2033,21 @@ with a stand-in the floor has** (`ShortcutSymbolFloorTests`, read
 from the OS's availability table, since a newer name resolves on
 every machine that runs the suite).
 
+## A sided chord is drawn once and spoken in words (#2601)
+
+**A surface drawing a chord that can keep a side names it for
+VoiceOver and on hover through `SidedChordWords`**, which reads
+the `R⌘H` `ComboSymbols` draws back as "Right ⌘ H" with
+`HyperKeyWords`' key names — never a second spelling of the sides beside
+it. A new chord surface joins `SidedChordWordsTests` ▸
+`surfacesSpeakTheSide` in the change that adds it. **The recorder
+takes a side only from the `\.recorderSides` environment value**,
+which each recorder mount sets beside `\.hyperKeyIsOff`
+(`ModifierSideRecorderTests` ▸ `mountsWireTheSides`); a new mount
+joins that needle. **A menu key equivalent never carries a sided
+chord**, since it has no side to draw
+(`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
+
 ## SwiftUI traps
 
 - **A field that keeps its typing local commits through the one

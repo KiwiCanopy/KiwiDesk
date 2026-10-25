@@ -24,8 +24,9 @@ struct KeyRecorderField: View {
     let onRecord: (String) -> Void
     let onClear: () -> Void
 
-    @EnvironmentObject private var coordinator: RecorderCoordinator
+    @EnvironmentObject var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
+    @Environment(\.recorderSides) private var recorderSides
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""
@@ -114,13 +115,69 @@ struct KeyRecorderField: View {
         // Dim, never disable: re-recording is how a row leaves
         // Hyper (#1870, `keybindingRowStyle`'s rule).
         .opacity(hyperDormant ? 0.55 : 1)
-        .help(hyperDormant ? ShortcutBaseWords.dormantHint : Self.recordHelp)
-        .accessibilityHint(hyperDormant ? ShortcutBaseWords.dormantHint : "")
+        .help(helpText)
+        .accessibilityHint(hint ?? "")
         .accessibilityLabel(name)
         // The cost is announced ONCE, by the badge that precedes
         // this button in the row (#1126) — a second copy here
         // read the same sentence on two adjacent VoiceOver stops.
-        .accessibilityValue(label)
+        .accessibilityValue(SidedChordWords.label(label))
+    }
+
+    /// Why the row would not fire as drawn: a Hyper chord with no
+    /// key, or a sided chord while sides are not told apart, which
+    /// keeps full ink (#2601 ▸ Ruling).
+    private var hint: String? {
+        Self.rowHint(
+            combo: combo,
+            sidesOn: recorderSides != nil,
+            recording: recording,
+            hyperDormant: hyperDormant
+        )
+    }
+
+    static func rowHint(
+        combo: String,
+        sidesOn: Bool,
+        recording: Bool,
+        hyperDormant: Bool
+    ) -> String? {
+        if hyperDormant { return ShortcutBaseWords.dormantHint }
+        if !sidesOn, !recording,
+            KeyCombo.parse(combo)?.modifiers.isSided == true
+        {
+            return ModifierSidesWords.eitherSideHint
+        }
+        return nil
+    }
+
+    /// The hover text: a sided chord in words, then the hint or how
+    /// recording works.
+    private var helpText: String {
+        let spoken = recording ? nil : SidedChordWords.spoken(label)
+        return [spoken, hint ?? recordHelp]
+            .compactMap { $0 }
+            .joined(separator: "\n")
+    }
+
+    private var recordHelp: String {
+        recorderSides == nil ? Self.recordHelp : Self.recordSidesHelp
+    }
+
+    /// The help with sides kept: one frame, so no translation has
+    /// to join two sentences (localization.md).
+    @MainActor private static var recordSidesHelp: String {
+        L(
+            "key_recorder.help_press_sides",
+            "A shortcut is one key plus any of "
+                + "⌃ Control, ⌥ Option, ⇧ Shift, "
+                + "and ⌘ Command — it locks in the "
+                + "moment you press the key. Add a layer "
+                + "to give one key a second meaning. The side "
+                + "you press is kept: %1$@ is recorded as %2$@.",
+            HyperKeyWords.name(.rightCommand),
+            ModifierSidesWords.drawn(.right)
+        )
     }
 
     // Computed: a localized value stored for the life of the
@@ -215,6 +272,7 @@ struct KeyRecorderField: View {
         }
         recorder.start(
             hyper: !hyperKeyIsOff,
+            sides: recorderSides,
             preview: { display in
                 preview = display
             },

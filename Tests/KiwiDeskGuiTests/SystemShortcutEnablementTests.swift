@@ -180,13 +180,7 @@ struct ConflictAccessorRoutingTests {
                 + "SettingsModel+ConflictMessages.swift"
         )
         #expect(
-            accessor.contains(
-                "funcactionableConflicts()->[Conflict]{"
-                    + "KeybindingConflicts.actionable("
-                    + "in:config.layers,"
-                    + "disabledSystemShortcuts:"
-                    + "disabledSystemShortcuts())}"
-            )
+            accessor.contains(Self.actionableBody)
         )
         #expect(
             accessor.contains(
@@ -253,4 +247,13 @@ struct ConflictAccessorRoutingTests {
             )
         )
     }
+
+    /// The accessor's whole body, one literal so the type-checker
+    /// has no concatenation to solve.
+    private static let actionableBody = """
+        funcactionableConflicts()->[Conflict]{\
+        KeybindingConflicts.actionable(in:config.layers,\
+        disabledSystemShortcuts:disabledSystemShortcuts(),\
+        distinguishingSides:appWide.modifierSides)}
+        """
 }
