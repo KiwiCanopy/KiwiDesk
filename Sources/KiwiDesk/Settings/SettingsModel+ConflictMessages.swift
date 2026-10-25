@@ -11,7 +11,8 @@ extension SettingsModel {
     func actionableConflicts() -> [Conflict] {
         KeybindingConflicts.actionable(
             in: config.layers,
-            disabledSystemShortcuts: disabledSystemShortcuts()
+            disabledSystemShortcuts: disabledSystemShortcuts(),
+            distinguishingSides: appWide.modifierSides
         )
     }
 
@@ -43,7 +44,8 @@ extension SettingsModel {
         let list = actionableConflicts()
         if KeybindingConflicts.conflict(
             for: binding,
-            in: bindings
+            in: bindings,
+            distinguishingSides: appWide.modifierSides
         ) != nil {
             keybindingWarning = formatConflicts(list)
         } else if list.isEmpty {

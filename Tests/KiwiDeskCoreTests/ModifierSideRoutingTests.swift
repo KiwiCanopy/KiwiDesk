@@ -157,6 +157,25 @@ struct ModifierSideRoutingTests {
         manager.modifierSides = false
         manager.modifierSides = true
         #expect(asked == 2)
+        // The grant's door asks again too, and only after a refusal.
+        manager.retrySideTap()
+        #expect(asked == 3)
+        manager.makeSideTap = { _, _ in FakeSideTap() }
+        manager.retrySideTap()
+        #expect(manager.sideTapStatus == .running)
+        manager.retrySideTap()
+        #expect(manager.sideTapStatus == .running)
+    }
+
+    @Test("a refused tap's keypad digit falls back with its twin")
+    func refusedKeypadTwin() throws {
+        let (manager, registrar, _) = rig()
+        manager.makeSideTap = { _, _ in nil }
+        manager.bind(try combo("rcmd+1"), ref: 1)
+        manager.modifierSides = true
+        let row = try combo("rcmd+1").keyCode
+        let twin = try #require(KeypadKeys.keypadTwin(of: row))
+        #expect(Set(registrar.live.values.map(\.code)) == [row, twin])
     }
 
     @Test("a keypad digit's twin rides the tap too")

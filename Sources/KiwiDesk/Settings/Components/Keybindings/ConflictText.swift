@@ -15,15 +15,18 @@ struct ConflictReading: Equatable {
 enum ConflictText {
     /// The row's reading of its conflict (#1126), or nil when
     /// the row has none. `disabled` is the section's one live
-    /// read (`\.disabledSystemShortcuts`).
+    /// read (`\.disabledSystemShortcuts`), and `sides` the Mac's
+    /// `modifier.sides` switch (#2601).
     static func severity(
         for binding: KeyBinding,
         in bindings: [KeyBinding],
-        disabled: Set<SystemShortcut>
+        disabled: Set<SystemShortcut>,
+        sides: Bool
     ) -> ConflictSeverity? {
         KeybindingConflicts.conflict(
             for: binding,
-            in: bindings
+            in: bindings,
+            distinguishingSides: sides
         ).map { ConflictSeverity.of($0, disabled: disabled) }
     }
 
@@ -34,13 +37,15 @@ enum ConflictText {
         for binding: KeyBinding,
         in bindings: [KeyBinding],
         config: GuiConfig,
-        disabled: Set<SystemShortcut>
+        disabled: Set<SystemShortcut>,
+        sides: Bool
     ) -> ConflictReading? {
         guard
             let severity = severity(
                 for: binding,
                 in: bindings,
-                disabled: disabled
+                disabled: disabled,
+                sides: sides
             )
         else { return nil }
         return ConflictReading(
@@ -57,13 +62,15 @@ enum ConflictText {
         for binding: KeyBinding,
         in bindings: [KeyBinding],
         config: GuiConfig,
-        disabled: Set<SystemShortcut>
+        disabled: Set<SystemShortcut>,
+        sides: Bool
     ) -> String? {
         reading(
             for: binding,
             in: bindings,
             config: config,
-            disabled: disabled
+            disabled: disabled,
+            sides: sides
         )?.sentence
     }
 

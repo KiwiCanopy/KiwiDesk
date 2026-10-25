@@ -33,7 +33,8 @@ struct ConflictSeverityTests {
         let binding = row(combo, "Focus window left")
         return KeybindingConflicts.conflict(
             for: binding,
-            in: [binding] + others
+            in: [binding] + others,
+            distinguishingSides: false
         )
     }
 
@@ -114,14 +115,16 @@ struct ConflictSeverityTests {
             ConflictText.severity(
                 for: row,
                 in: [row],
-                disabled: [.invertColors]
+                disabled: [.invertColors],
+                sides: false
             ) == .dormant(.invertColors)
         )
         #expect(
             ConflictText.severity(
                 for: row,
                 in: [row],
-                disabled: []
+                disabled: [],
+                sides: false
             ) == .dead(.invertColors)
         )
     }
@@ -192,14 +195,16 @@ struct ConflictSeverityTests {
             ConflictText.severity(
                 for: left,
                 in: [left, right],
-                disabled: []
+                disabled: [],
+                sides: false
             ) == .duplicate(right)
         )
         #expect(
             ConflictText.severity(
                 for: clean,
                 in: [left, right, clean],
-                disabled: []
+                disabled: [],
+                sides: false
             ) == nil
         )
         let commandSpace = row("command+space", "Focus window left")
@@ -207,7 +212,8 @@ struct ConflictSeverityTests {
             ConflictText.severity(
                 for: commandSpace,
                 in: [commandSpace],
-                disabled: []
+                disabled: [],
+                sides: false
             ) == .dead(.spotlight)
         )
     }

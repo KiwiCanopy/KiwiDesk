@@ -155,6 +155,7 @@ extension KeyboardPreviewPanel {
         let scope = liveScope
         let selection = selected
         let config = model.config
+        let sides = model.appWide.modifierSides
         return { code in
             KeyboardHoverReading.of(
                 code,
@@ -162,7 +163,8 @@ extension KeyboardPreviewPanel {
                 scope: scope,
                 selected: selection,
                 config: config,
-                disabled: disabled
+                disabled: disabled,
+                sides: sides
             )
         }
     }

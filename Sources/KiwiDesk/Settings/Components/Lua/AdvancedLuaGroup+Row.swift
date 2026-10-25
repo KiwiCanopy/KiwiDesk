@@ -172,7 +172,8 @@ extension AdvancedLuaGroup {
                 for: binding.wrappedValue,
                 in: bindings,
                 config: model.config,
-                disabled: disabledSystemShortcuts
+                disabled: disabledSystemShortcuts,
+                sides: model.appWide.modifierSides
             ),
             preflight: { combo in
                 RecorderPreflight.rejection(

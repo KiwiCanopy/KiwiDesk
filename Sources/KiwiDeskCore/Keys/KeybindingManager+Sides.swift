@@ -95,6 +95,14 @@ extension KeybindingManager {
         return true
     }
 
+    /// Asks macOS for the tap again — at `KiwiCore.start()`, the
+    /// door a granted Accessibility comes through.
+    func retrySideTap() {
+        guard sideTapRefused else { return }
+        sideTapRefused = false
+        activate(currentLayer)
+    }
+
     /// A press the tap answered: fires the binding as a Carbon
     /// press does, with no hold glide, since the tap reports no
     /// release.

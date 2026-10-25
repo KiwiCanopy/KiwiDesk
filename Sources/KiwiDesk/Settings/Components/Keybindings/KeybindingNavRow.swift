@@ -93,7 +93,8 @@ struct NavRow: View {
             for: bindings[index],
             in: bindings,
             config: model.config,
-            disabled: disabledSystemShortcuts
+            disabled: disabledSystemShortcuts,
+            sides: model.appWide.modifierSides
         )
     }
 
