@@ -1213,6 +1213,10 @@ windows on the screen a window's `display` names, so a menu or
 another app's popup covers without counting, and the list keeps
 its Space order rather than turning into the stacking order,
 since the rank is per screen and the list spans every screen.
+`visibility` stays the App Bar's verdict over KiwiDesk's own
+order, so the two fields can disagree where an app raised a
+window by itself; the rank never feeds the verdict, or the CLI
+and the bar would part on Monocle and Scrolling.
 :::
 
 ### Whether a setting lasts is not a fact about its command
@@ -15005,7 +15009,9 @@ A WindowServer read would see real overlap, but it would put a
 compositor round trip on a refresh path that runs on every switch
 and focus report, and that read stalls under GPU load (#1925). So
 a window KiwiDesk does not manage covering a tile leaves its item
-lit. While a held pass waits for the hand to rest, the frames are
+lit. `list_windows`' stacking rank is the one compositor read
+beside the verdict, on demand only (*A window's frame is reported
+from KiwiDesk's own placement*). While a held pass waits for the hand to rest, the frames are
 the ones it owes rather than the ones on screen, and the bars lead
 them as they lead every held pass.
 

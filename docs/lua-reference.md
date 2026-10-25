@@ -7735,8 +7735,14 @@ reports it. A window no screen shows — on a Space no screen shows,
 parked out of sight or minimized — has `z` `null`. The list's own
 order is the Spaces' rows, not the stacking order: sort by `z` for
 that. A window KiwiDesk does not track, such as a menu, counts
-toward no rank, though it may cover a window; how much of a
-window is in view is yours to compute from `frame` and `z`.
+toward no rank, though it may cover a window.
+
+`z` and `visibility` can disagree. `visibility` follows the order
+KiwiDesk arranged, as the App Bar does, while `z` is the order
+macOS shows now: a tile an app raised over its pile by itself
+reads `hidden` with `z` `0`. To work out how much of a window is
+in view as macOS draws it, compare its `frame` with those of the
+windows of lower `z` on its screen.
 :::
 
 **Example:**

@@ -32,6 +32,7 @@ struct ListWindowsStackingTests {
                 )
         )
         core.tiler.visibleBounds = { _ in Self.bounds }
+        core.frontStack = { [] }
         core.execute("set_mode", args: [.string("1"), .string("stack")])
         for (id, frame) in [
             (main, Self.bounds),
@@ -112,16 +113,72 @@ struct ListWindowsStackingTests {
         #expect(seen[3]?["z"] == .number(0))
     }
 
+    /// A sticky window of Space 3 draws on the main screen, so it
+    /// ranks there whichever Space the call lists.
+    @Test("A Space filter leaves every rank as it was")
+    func filterKeepsRanks() throws {
+        let core = makeCore()
+        var traveler = window(6, floating: true)
+        traveler.stickyScope = .global
+        core.state.apply(.windowCreated(traveler))
+        core.state.workspaces.add(WindowID(6), to: "3")
+        core.frontStack = { self.listed([6, 4, 1, 2]) }
+        let all = try entries(core)
+        #expect(all[6]?["z"] == .number(0))
+        #expect(all[4]?["z"] == .number(1))
+        let response = core.execute("list_windows", args: [.string("1")])
+        guard case .array(let list)? = response.data else {
+            Issue.record("list_windows answered \(response)")
+            return
+        }
+        for case .object(let entry) in list {
+            let id = try #require(entry["id"]?.numberValue)
+            #expect(entry["z"] == all[UInt32(id)]?["z"])
+        }
+        #expect(list.count == 3)
+    }
+
     /// A Space no screen shows sits parked, and a parked window is
     /// on screen to the WindowServer — at its corner.
     @Test("A window no screen shows has no z, though listed")
     func unshownHasNoRank() throws {
         let core = makeCore()
-        core.frontStack = { self.listed([5, 1, 2]) }
+        core.frontStack = { self.listed([5, 3, 1, 2]) }
         let seen = try entries(core)
         #expect(seen[5]?["z"] == .null)
+        #expect(seen[3]?["z"] == .number(0))
         #expect(seen[1]?["z"] == .number(0))
         #expect(seen[2]?["z"] == .number(1))
+    }
+
+    /// A monocle's back member is parked behind the front one, on
+    /// screen to the WindowServer all the same.
+    @Test("A monocle park has no z")
+    func monocleParkHasNoRank() throws {
+        let core = makeCore()
+        core.execute(
+            "set_mode",
+            args: [.string("1"), .string("monocle")]
+        )
+        // The park check measures against the topology seam,
+        // which the factory pins to no screens.
+        core.tiler.allScreenBounds = { [Self.bounds] }
+        core.execute("monocle.set_hide_style", args: [.string("park")])
+        core.state.apply(.windowFocused(WindowID(1)))
+        core.frontStack = { self.listed([2, 1, 4]) }
+        let seen = try entries(core)
+        #expect(seen[2]?["frame"] == .null)
+        #expect(seen[2]?["z"] == .null)
+        #expect(seen[1]?["z"] == .number(0))
+    }
+
+    @Test("A window listed twice takes one rank")
+    func duplicateTakesOneRank() throws {
+        let core = makeCore()
+        core.frontStack = { self.listed([2, 2, 1]) }
+        let seen = try entries(core)
+        #expect(seen[2]?["z"] == .number(0))
+        #expect(seen[1]?["z"] == .number(1))
     }
 
     @Test("A window the WindowServer does not list has no z")

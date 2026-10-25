@@ -11,6 +11,7 @@ extension KiwiCore {
     /// not.
     private struct ListedSite {
         let home: SpaceID?
+        let drawn: SpaceID?
         let display: DisplayID?
         let isShown: Bool
         let frame: CGRect?
@@ -128,6 +129,7 @@ extension KiwiCore {
             : nil
         return ListedSite(
             home: state.workspaces.space(of: window.id),
+            drawn: drawn,
             display: drawn.flatMap { state.workspaces.display(of: $0) },
             isShown: isShown,
             frame: frame
@@ -141,7 +143,6 @@ extension KiwiCore {
         z: Int?
     ) -> JSONValue {
         let id = window.id
-        let drawn = state.renderSpace(of: window)
         let index = site.home
             .flatMap { state.workspaces[$0]?.windows.firstIndex(of: id) }
         return .object([
@@ -161,7 +162,7 @@ extension KiwiCore {
             "floats": .bool(
                 EffectiveFloat.applies(
                     isFloating: window.isFloating,
-                    mode: drawn.flatMap { state.workspaces[$0]?.mode }
+                    mode: site.drawn.flatMap { state.workspaces[$0]?.mode }
                 )
             ),
             "focused": .bool(focusedWindowID == id),
