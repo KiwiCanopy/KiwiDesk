@@ -69,12 +69,6 @@ extension KiwiCore {
         let skip: (WindowID) -> Bool = {
             pile.contains($0) || lensSkip($0)
         }
-        let slots = shownSlots()
-        let tie = navigationTie(
-            from: focused,
-            tiled: tiled,
-            swapping: swapping
-        )
         let target: WindowID?
         switch direction {
         case .up where vertical, .left where !vertical:
@@ -101,12 +95,12 @@ extension KiwiCore {
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
-                slots: slots,
-                origin: slots[focused],
+                focused: focused,
+                space: space,
+                swapping: swapping,
                 vertical: vertical,
                 wrap: wraps,
-                skip: skip,
-                tie: tie
+                skip: skip
             )
         case .right where vertical, .down where !vertical:
             target = acrossTarget(
@@ -114,12 +108,12 @@ extension KiwiCore {
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
-                slots: slots,
-                origin: slots[focused],
+                focused: focused,
+                space: space,
+                swapping: swapping,
                 vertical: vertical,
                 wrap: wraps,
-                skip: skip,
-                tie: tie
+                skip: skip
             )
         default:
             target = nil
@@ -175,25 +169,28 @@ extension KiwiCore {
         ).map { tiled[base + $0] }
     }
 
-    /// The window beside `origin` in the nearest track holding a
+    /// The window beside `focused` in the nearest track holding a
     /// shown window `skip` accepts — a whole cascaded track is all
     /// pile-mates — wrapping last <-> first when asked, never onto
     /// the origin's track: the nearest by centre, a tie to `tie`
-    /// (#2619). `slots` are the shown ones, so a run's hidden
-    /// windows are never landed on.
+    /// (#2619). Only shown windows are candidates, so a run's
+    /// hidden ones are never landed on; a focus with no shown slot —
+    /// one no pass placed yet — falls through to the geometric
+    /// search from its frame.
     private func acrossTarget(
         step: Int,
         track: Int,
         ranges: [Range<Int>],
         tiled: [WindowID],
-        slots: [WindowID: CGRect],
-        origin: CGRect?,
+        focused: WindowID,
+        space: Space,
+        swapping: Bool,
         vertical: Bool,
         wrap: Bool,
-        skip: (WindowID) -> Bool,
-        tie: Navigation.TieBreak
+        skip: (WindowID) -> Bool
     ) -> WindowID? {
-        guard let origin else { return nil }
+        let slots = shownSlots()
+        guard let origin = slots[focused] else { return nil }
         func shown(_ track: Int) -> [(id: WindowID, frame: CGRect)] {
             tiled[ranges[track]].compactMap { id in
                 guard !skip(id), let frame = slots[id] else { return nil }
@@ -213,7 +210,12 @@ extension KiwiCore {
             origin,
             crossIsY: vertical,
             candidates: shown(next),
-            tie: tie
+            tie: navigationTie(
+                from: focused,
+                tiled: tiled,
+                in: space,
+                swapping: swapping
+            )
         )
     }
 

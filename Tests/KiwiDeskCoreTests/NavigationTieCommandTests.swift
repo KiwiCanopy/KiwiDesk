@@ -101,8 +101,8 @@ struct NavigationTieCommandTests {
     @Test("A step back into the stack returns where it came from")
     func roundTripReturns() {
         let (core, _) = stackCore()
-        core.state.stampFocusRecency(WindowID(1))
-        core.state.stampFocusRecency(WindowID(4))
+        core.rememberHonoredFocus(WindowID(1))
+        core.rememberHonoredFocus(WindowID(4))
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )
@@ -112,8 +112,8 @@ struct NavigationTieCommandTests {
     @Test("A swap takes the first window, never the last step")
     func swapIgnoresHistory() {
         let (core, space) = stackCore()
-        core.state.stampFocusRecency(WindowID(1))
-        core.state.stampFocusRecency(WindowID(4))
+        core.rememberHonoredFocus(WindowID(1))
+        core.rememberHonoredFocus(WindowID(4))
         #expect(
             core.execute("swap", args: [.string("right")]).isSuccess
         )
@@ -154,8 +154,8 @@ struct NavigationTieCommandTests {
     func loneTrackRoundTrip() {
         let heads = [WindowID(1), WindowID(2)]
         let core = trackCore(windows: 4, heads: heads, focus: WindowID(1))
-        core.state.stampFocusRecency(WindowID(4))
-        core.state.stampFocusRecency(WindowID(1))
+        core.rememberHonoredFocus(WindowID(4))
+        core.rememberHonoredFocus(WindowID(1))
         #expect(
             core.execute("focus", args: [.string("right")]).isSuccess
         )

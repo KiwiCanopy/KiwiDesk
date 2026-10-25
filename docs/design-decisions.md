@@ -1881,7 +1881,7 @@ detail:
 | **Grid** | geometric | `Navigation.neighbor` over slots, which sees only the shown windows of the last track; along that track, focus and swap step in drawn order (`runStep`, #2541) | the last track scrolls the windows past the cells (`GridLayout+Run`, #2541); a whole-grid cascade only where not even one cell fits at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142; walled at a screen seam, #878) is a viewport pin, not an `OverlapStack` fallback |
 | **Monocle** | array-order | steps along the orientation (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
-| **Track** | array-order | steps both axes (`trackStep`); across tracks it lands on the next track's shown window nearest by centre, ties as the geometric search's (`Navigation.beside`, #2619) | surplus tracks merge into one far-edge **overflow track** (#192), and every track that overflows scrolls (`ZoneRun`, #2235); only a track that cannot hold one window at min-size, or tracks that cannot keep it side by side, pile (`OverlapStack`) |
+| **Track** | array-order | steps both axes (`trackStep`) | surplus tracks merge into one far-edge **overflow track** (#192), and every track that overflows scrolls (`ZoneRun`, #2235); only a track that cannot hold one window at min-size, or tracks that cannot keep it side by side, pile (`OverlapStack`) |
 | **Floating** | geometric (live frames) | `Navigation.neighbor` with no slots: every member navigates by its live frame (the slot→frame fallback), flagged floats via the #488 float tier | n/a |
 
 The two models need different handling for anything pile-aware:
@@ -1905,38 +1905,6 @@ nothing could navigate back in. Array-order layouts reach the
 float tier through their existing edge fall-through to the
 geometric search.
 
-:::unreleased
-**A tie goes back to where the last step came from, else to the
-first in window order
-([#2619](https://github.com/KiwiCanopy/KiwiDesk/issues/2619)).**
-The geometric score is forward distance plus twice the lateral
-offset, so a full-height master facing a stack of three found
-every candidate at one distance and the lateral term alone
-picked the MIDDLE window — an accident of the score, not a
-choice anyone could read off the screen. A tie is therefore
-named, and only two shapes are one: the origin's cross span
-wholly contains two or more of the nearest candidates, or two
-or more share the best score. A short origin or a partial
-straddle keeps the score's pick, since its position already
-says which window is meant. A `focus` tie returns to the window
-focused just before the origin when it is among the tied ones,
-so stack → master → back lands where it left; otherwise the
-first tied window in the Space's flat order. One step of
-history and no further: a deeper or timed recency picks by
-state nobody can see once a while has passed, which is the
-reason the score's own middle pick was rejected. The first in
-order, not the one nearest the origin's number, so a tie lands
-on the same window from either side. A `swap` takes the first
-in order alone — history never chooses what is displaced. Track
-lands its step across tracks the same way, over the shown
-windows only, instead of at the same position in the track,
-which could name a window a run had scrolled away. A hop onto
-another screen keeps the step back and nothing else, another
-Space's order meaning nothing from here; the float tier keeps
-the plain score, a hand-placed float's order meaning nothing
-either.
-:::
-
 A KiwiVision lens that keeps focus on its apps adds one more
 filter, orthogonal to both models like the float tier
 ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)):
@@ -1947,12 +1915,57 @@ float tier drop them from their candidates, Scrolling and Monocle
 step past their indices through `Navigation.arrayStep`, and Track
 folds the predicate into the skip its pile handling already
 takes, its wraps through the same `arrayStep` — an across step
-passing over a track with no shown window the predicate
-accepts, as it does a pile. The scroll
+judging each track by the window at the focus's position in it,
+as it does a pile. The scroll
 gesture's steps skip too, through `navigate` on a row and its
 own-order step everywhere else. A new layout's navigation takes
 that predicate too, or the lens stops steering the keys on it
 ([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
+
+:::unreleased
+**A tie goes back to where the last step came from, else to the
+first in window order
+([#2619](https://github.com/KiwiCanopy/KiwiDesk/issues/2619)).**
+The geometric score is forward distance plus twice the lateral
+offset, so where a full-height master faces a stack of three,
+every candidate lies at one distance and the lateral term alone
+picks the middle window — an accident of the score that nobody
+can read off the screen. So a tie has a definition, and only two
+shapes meet it: the origin's cross span wholly contains two or
+more of the nearest candidates, or two or more share the best
+score. A short origin or a partial straddle keeps the score's
+pick, since its position already says which window is meant.
+
+A `focus` tie returns to the window focused just before the
+origin when that window is among the tied ones, so stack →
+master → back lands where it left; otherwise it takes the first
+tied window in the Space's flat order. The history is one step
+and no further: a deeper or timed recency picks by state nobody
+can see once a while has passed, which is the very defect of the
+score's middle pick. It takes the first in order rather than the
+one nearest the origin's number, so a tie lands on the same
+window from either side. A `swap` takes the first in order alone:
+a swap moves a window, and letting a focus history the user
+cannot see choose which window moves makes the same key displace
+different windows.
+
+Track's step across tracks still picks the track by array order,
+but the window it lands on there is the shown one nearest by
+centre on the cross axis, with the same tie rule
+(`Navigation.beside`) — never a window at the same position in
+the track, which could be one a run had scrolled away. Under a
+lens, that step passes over a track only when the lens skips every
+shown window in it. A hop onto another screen keeps the step back
+and nothing else, another Space's order meaning nothing from
+here; the float tier and a Floating Space keep the plain score,
+a hand-placed float's order meaning nothing either.
+
+The step back reads the honored-focus record, which a focus
+REPORT writes: two presses faster than the first one's report, or
+a focus whose report was distrusted, leave the step before them
+as the last one. The one-step reading accepts that residue rather
+than keep a second, command-side history.
+:::
 
 :::unreleased
 **One setting decides what a focus key does at its last window,

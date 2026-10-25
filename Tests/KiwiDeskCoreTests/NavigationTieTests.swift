@@ -25,7 +25,8 @@ struct NavigationTieTests {
             Navigation.neighbor(
                 from: master,
                 in: .right,
-                candidates: stack
+                candidates: stack,
+                tie: .none
             ) == WindowID(3)
         )
         #expect(
@@ -129,6 +130,24 @@ struct NavigationTieTests {
                         _ in first
                     }
                 )
+            ) == WindowID(2)
+        )
+    }
+
+    @Test("Rounding in the slots still ties")
+    func roundingStillTies() {
+        let origin = CGRect(x: 0, y: 0.4, width: 500, height: 899.2)
+        let rounded: [(id: WindowID, frame: CGRect)] = [
+            (WindowID(2), CGRect(x: 511.5, y: 0, width: 300, height: 290)),
+            (WindowID(3), CGRect(x: 510.3, y: 300, width: 300, height: 300)),
+            (WindowID(4), CGRect(x: 511, y: 610, width: 300, height: 290)),
+        ]
+        #expect(
+            Navigation.neighbor(
+                from: origin,
+                in: .right,
+                candidates: rounded,
+                tie: .init(order: order)
             ) == WindowID(2)
         )
     }

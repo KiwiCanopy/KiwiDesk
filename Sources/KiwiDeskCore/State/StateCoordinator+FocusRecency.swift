@@ -2,9 +2,10 @@ import Foundation
 
 /// When each window last held an honored focus (#1840): the
 /// first press of Open or Focus lands on the app's most recent
-/// one. It picks a target only — the cycle's ring order stays
-/// fixed (design-decisions ▸ Open or Focus lands on the window
-/// you used last).
+/// one, and a directional tie returns to the window the last
+/// step left (#2619). It picks a target only — the cycle's ring
+/// order stays fixed (design-decisions ▸ Open or Focus lands on
+/// the window you used last).
 extension StateCoordinator {
     /// One honored focus and the process that owns the window —
     /// so the app's exit ends a hidden window's stamp too.

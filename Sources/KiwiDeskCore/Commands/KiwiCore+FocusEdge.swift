@@ -78,6 +78,7 @@ extension KiwiCore {
                 tie: navigationTie(
                     from: edge.focused,
                     tiled: state.effectiveTiledMembers(of: edge.space),
+                    in: edge.space,
                     swapping: false
                 )
             )
@@ -203,7 +204,15 @@ extension KiwiCore {
         var candidates = tiled.compactMap { id in
             (slots[id] ?? state.windows[id]?.frame).map { (id, $0) }
         }
+        // Floats keep the plain score, as the float tier does.
+        var tie = navigationTie(
+            from: leaving,
+            tiled: [],
+            in: space,
+            swapping: false
+        )
         if candidates.isEmpty {
+            tie = .none
             candidates = state.floatingFocusCandidates(of: space)
                 .filter { !skip($0) }
                 .compactMap { id in
@@ -221,9 +230,7 @@ extension KiwiCore {
                 from: seed,
                 in: direction,
                 candidates: candidates,
-                tie: Navigation.TieBreak(
-                    returnTo: leaving.flatMap(state.lastStep(before:))
-                )
+                tie: tie
             ) {
                 return found
             }

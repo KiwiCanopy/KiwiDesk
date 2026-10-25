@@ -210,6 +210,7 @@ extension KiwiCore {
                 tie: navigationTie(
                     from: focused,
                     tiled: tiled,
+                    in: space,
                     swapping: swapping
                 )
             )

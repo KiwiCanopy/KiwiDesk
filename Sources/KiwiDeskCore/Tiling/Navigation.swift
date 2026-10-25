@@ -20,7 +20,7 @@ public enum Navigation {
         from origin: CGRect,
         in direction: Direction,
         candidates: [(id: WindowID, frame: CGRect)],
-        tie: TieBreak = .none
+        tie: TieBreak
     ) -> WindowID? {
         let originCenter = CGPoint(
             x: origin.midX,
@@ -71,7 +71,7 @@ public enum Navigation {
                     id: candidate.id,
                     frame: candidate.frame,
                     score: forward + lateral * 2,
-                    edge: edge
+                    edge: max(edge, 0)
                 )
             )
         }

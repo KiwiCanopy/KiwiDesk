@@ -35,10 +35,12 @@ extension KiwiCore {
                 else { return nil }
                 return (id, frame)
             }
+        // A hand-placed float's order means nothing (#2619).
         return Navigation.neighbor(
             from: origin,
             in: direction,
-            candidates: candidates
+            candidates: candidates,
+            tie: .none
         )
     }
 }

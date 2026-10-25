@@ -41,7 +41,7 @@ extension Navigation {
         _ origin: CGRect,
         crossIsY: Bool,
         candidates: [(id: WindowID, frame: CGRect)],
-        tie: TieBreak = .none
+        tie: TieBreak
     ) -> WindowID? {
         let scored = candidates.map { candidate in
             Scored(
@@ -61,7 +61,7 @@ extension Navigation {
         let frame: CGRect
         let score: CGFloat
         /// Distance from the origin's leading edge to the
-        /// candidate's near edge.
+        /// candidate's near edge; an overlapping frame counts 0.
         let edge: CGFloat
     }
 
