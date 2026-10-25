@@ -1075,7 +1075,9 @@ pressed direction, in every layout. `swap` never wraps.
 
 In Scrolling and Monocle the edge is the end of the window
 order, not the screen edge, and a Stack or Track run that hides
-windows is walked to its end first. The pointer follows the
+windows is walked to its end first. A wrap within the screen
+that lands back in the same run goes to the run's far end, even
+a window the run hides. The pointer follows the
 crossing like any
 [Space switch onto another screen](#focus_space).
 

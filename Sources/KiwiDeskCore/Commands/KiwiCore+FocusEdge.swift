@@ -76,7 +76,13 @@ extension KiwiCore {
                 candidates: others
             )
         else { return nil }
-        focusWindow(target, warp: edge.warp)
+        let landing = runWrapLanding(
+            target,
+            from: edge.focused,
+            in: edge.space,
+            direction: edge.direction
+        )
+        focusWindow(landing, warp: edge.warp)
         return .ok()
     }
 
