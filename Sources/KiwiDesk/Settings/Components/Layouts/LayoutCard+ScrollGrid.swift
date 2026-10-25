@@ -172,12 +172,12 @@ extension LayoutCard {
             ) ?? ""
         ) {
             StepperRow(
-                label: L("scroll_grid.columns", "Columns"),
+                label: L("scroll_grid.column_limit", "Column limit"),
                 value: grid.columns,
                 in: 1...10
             )
             StepperRow(
-                label: L("scroll_grid.rows", "Rows"),
+                label: L("scroll_grid.row_limit", "Row limit"),
                 value: grid.rows,
                 in: 1...10
             )

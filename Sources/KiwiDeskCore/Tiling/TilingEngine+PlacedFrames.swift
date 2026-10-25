@@ -51,9 +51,12 @@ extension TilingEngine {
                 screen: placement.screen
             )
             // One cover per space: the record and the hidden
-            // windows' slots read the same value.
+            // windows' slots read the same value. A placed pass
+            // the inward post-pass moves owes it, whatever layout
+            // scrolls (#2541).
+            let inward = SplitOverflow.movesInward(input.space.mode)
             let cover =
-                recordingCovers || placed && input.space.mode == .stack
+                recordingCovers || placed && inward
                 ? Self.cover(of: input) : nil
             if recordingCovers { runCovers[input.space.id] = cover }
             var computed = laidOut(input, placed: placed, cover: cover)
@@ -114,7 +117,7 @@ extension TilingEngine {
         // A run's parked window keeps its park: the inward pass
         // would pull it, an overhang outside the zone, back onto
         // the screen (#2235).
-        if input.space.mode == .stack, let cover {
+        if let cover {
             for id in cover.behind.keys { issued[id] = slots[id] }
         }
         return issued

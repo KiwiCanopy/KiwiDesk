@@ -40,7 +40,7 @@ extension KiwiCore {
             tiler.visiblePlacements(state: state).map(\.space.id)
         )
         for space in state.workspaces.allSpaces
-        where space.mode == .bsp || space.mode == .stack {
+        where SplitOverflow.movesInward(space.mode) {
             healSpaceSplitFloors(
                 of: space,
                 shown: shown.contains(space.id)

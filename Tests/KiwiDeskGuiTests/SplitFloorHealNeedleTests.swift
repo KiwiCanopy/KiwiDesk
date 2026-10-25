@@ -165,8 +165,14 @@ struct SplitFloorHealNeedleTests {
             in: "SplitOverflow.swift",
             under: "Layouts"
         )
-        #expect(placed.contains("case .bsp, .stack:"))
+        #expect(placed.contains("movesInward(mode)"))
         #expect(placed.contains("inward("))
+        let modes = try SourceScan.functionBody(
+            of: "movesInward",
+            in: "SplitOverflow.swift",
+            under: "Layouts"
+        )
+        #expect(modes.contains(".bsp") && modes.contains(".stack"))
         // One mechanism per store (owner ruling 2026-09-14): the
         // math has one consumer, the post-pass one caller, and
         // the layout dispatcher stays bound-blind.

@@ -1183,7 +1183,18 @@ editing here:
   out what `parkedByRun` names, and a classifier of the last
   pass's slots takes `shownSlots()` (`RunRestWiringTests`); a
   run's two ends are written together by `persistRunHeads`
-  (▸ `retileKeepsTheTail`):
+  (▸ `retileKeepsTheTail`). A layout joins the runs through
+  `RunZone.zones` alone, and a run reader — the focus step
+  (`runStep`), the park keep beside the inward post-pass, the
+  readers above — reads a `RunCover` (the recorded one, or
+  `RunCover.of` on a pass that records none), never a list of
+  layout modes; a mode write clears every sizing store — the
+  session ratios, the track weights and `stackWeights`, which
+  every run reads — never a list of the modes it leaves or
+  enters (#2541, the #458 reseed). A new scrolling layout then needs no
+  second wiring (`GridRunCommandTests` ▸ `focusStepsIntoTheRun`
+  holds Grid's focus step; that no mode list returns is
+  review's):
   `TilingSettings.context` defaults the flags to all-open (the
   single-screen verdict), and nothing scans for the omitted
   parameter, so a new site that computes real scrolling frames

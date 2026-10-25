@@ -419,15 +419,20 @@ synonym:
   `trackCap` / `normalCap` in code); a `count` is how many exist
   right now. `stack.set_master_count` is a retained exception —
   the user names how many windows are masters, and it shipped
-  that way. A **span** is a count shown around a focus, where an
-  end of the row shows one more (`space_bar.set_glyph_span`,
-  #1528) — a cap it is not, since nothing stops at it.
+  that way. Grid's `columns`/`rows` (`grid.set_dimensions`) are
+  a second: a limit since #2541 whose wire names stay (the ruling
+  is `docs/design-decisions.md` ▸ A full Grid scrolls its overflow
+  through its last track); label them as limits — *Column limit*
+  / *Row limit* — never as a bare count. A **span** is a
+  count shown around a focus, where an end of the row shows one
+  more (`space_bar.set_glyph_span`, #1528) — a cap it is not,
+  since nothing stops at it.
 - **sizing** — the collective of a layout's size adjustments:
   the BSP and stack ratios, the scrolling slot size and the
   stack/track weights — what `resize` writes and
   `reset_layout_sizing` clears (#764, `ResetLayoutSizingTests`).
   A single extent stays a *size* (`slot_size`,
-  `min_window_size`), and a *count* (`master_count`,
+  `min_window_size`), and a *count* or *limit* (`master_count`,
   `track.set_limit`, grid `columns`/`rows`) is structure rather
   than sizing; the ruling is `docs/design-decisions.md` ▸ A
   reset of layout sizing. Do not coin *dimensions*,

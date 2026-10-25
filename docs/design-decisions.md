@@ -1877,8 +1877,8 @@ detail:
 | Layout | Model | How it walks | Overflow → pile? |
 |---|---|---|---|
 | **BSP** | geometric | `Navigation.neighbor` over slots | yes — an extreme stored ratio cascades the whole space (`BspLayout` → `OverlapStack`) |
-| **Stack** | geometric | `Navigation.neighbor` over slots, which sees only a zone's shown windows; along a zone that hides windows, focus and swap step in drawn order (`stackStep`, #2235) | a zone that overflows scrolls (`ZoneRun`, #2235); the emergency pile — a zone that cannot hold one window at min-size, or two zones that cannot coexist — cascades downward, whatever the arrangement (#222) |
-| **Grid** | geometric | `Navigation.neighbor` over slots | yes — a last-cell pile (rigid/dynamic past the cap) or a whole-grid cascade at min-size (`GridLayout`) |
+| **Stack** | geometric | `Navigation.neighbor` over slots, which sees only a zone's shown windows; along a zone that hides windows, focus and swap step in drawn order (`runStep`, #2235) | a zone that overflows scrolls (`ZoneRun`, #2235); the emergency pile — a zone that cannot hold one window at min-size, or two zones that cannot coexist — cascades downward, whatever the arrangement (#222) |
+| **Grid** | geometric | `Navigation.neighbor` over slots, which sees only the shown windows of the last track; along that track, focus and swap step in drawn order (`runStep`, #2541) | the last track scrolls the windows past the cells (`GridLayout+Run`, #2541); a whole-grid cascade only where not even one cell fits at min-size (`GridLayout`) |
 | **Scrolling** | array-order | steps along the scroll axis (`scrollingStep`), geometric fallback cross-axis | no min-size cascade — the edge pile (#142; walled at a screen seam, #878) is a viewport pin, not an `OverlapStack` fallback |
 | **Monocle** | array-order | steps along the orientation (`monocleCycle`) — same 1-D shape as scrolling | no — every window shares one frame |
 | **Track** | array-order | steps both axes (`trackStep`) | surplus tracks merge into one far-edge **overflow track** (#192), and every track that overflows scrolls (`ZoneRun`, #2235); only a track that cannot hold one window at min-size, or tracks that cannot keep it side by side, pile (`OverlapStack`) |
@@ -2014,13 +2014,17 @@ expansion read `KiwiCore.appBarFocused`, which on the active space
 prefers the system frontmost (`lastFocused`) so a traveler's item
 lights up, while every inactive-display space keeps its own
 remembered `focused`; the Space Bar reads raw `lastFocused`
-because its items are spaces (#414). What *does* differ per
-layout is the overflow pile: a sticky window keeps a
-fully-tiled slot, so the grid's last-cell pile clamps it below
-the boundary via `OverlapStack.stickyExempt` (a trailing
-non-sticky window piles in its place). Whole-region cascades
-(the emergency min-size fallback) exempt nothing (no fully-tiled
-slot exists — see Accepted limitations); Scrolling has no
+because its items are spaces (#414).
+
+:::unreleased
+No layout exempts a sticky window from its overflow: a scrolled
+run — a Stack zone, a Track track (#2235) or a Grid's last track
+(#2541) — hides it like any other member, and a whole-region
+cascade (the emergency min-size fallback) has no fully-tiled
+slot to give it (see Accepted limitations).
+:::
+
+Scrolling has no
 `OverlapStack` pile at all — its overflow is the scroll, and the clamped edge columns (#142/#150)
 are scroll-reachable viewport pins a sticky may sit in like any
 other slot, not cascades — and Monocle overlaps everything at
@@ -4291,6 +4295,43 @@ appearing and going still ride the park snap and its window's
 glide, with no motion of their own.
 :::
 
+:::unreleased
+**A full Grid scrolls its overflow through its last track
+rather than piling it (#2541).** The last track along the fill
+order — the last
+row when columns fill first, the last column when rows fill
+first — becomes one run (`RunZone`), so Grid adds a zone rather
+than a second scrolling mechanism: focus drives it, the hidden
+windows park at the hide corner, the overflow marks count each
+end, and every run reader takes it from `RunCover` unchanged.
+
+*Fixed cells or floors.* A grid with fixed columns and rows shows
+exactly its last track's cells, lined up with the tracks above,
+so the run never reflows the grid's columns (`RunZone.slots`); an
+auto-sized grid's cells already are the minimum size, so its
+track shows as many windows as fit at their floors (owner,
+2026-10-25). An app's own minimum still wins inside the track: a
+window too wide for its cell shows with fewer beside it.
+
+*The typed columns and rows are a limit.* Where a cell would fall
+under `min_window_size`, the grid lays only as many columns and
+rows as fit, the way auto-size already caps, and the rest
+scrolls (owner, 2026-10-25). The cascade is left for a screen
+too small for even one cell. The names stay: `set_dimensions`
+already meant "up to" for a dynamic grid, nothing stored changes
+value, and the Settings rows read "Column limit" and "Row limit".
+
+*The scrolling track is as deep as its widest member needs.*
+Across the scroll axis the last track takes the largest learned
+minimum of all its members, hidden ones included, as a Track
+track does (#1355), so it keeps its size as it scrolls; along the
+axis no member lifts a column or row, since the members move.
+
+*Rejected.* Scrolling the whole grid, or any track but the last:
+every other cell would move on a focus step, where the last
+track alone keeps the rest of the grid still.
+:::
+
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
 An out-of-range `master_ratio` would collapse the whole space
@@ -6320,6 +6361,13 @@ row because a laptop alone reaches the same tuning when a Space
 is switched to Grid, and a two-cell cap piles the third window
 into the last cell, which reads as a broken Grid; the dynamic
 grid still lays two windows side by side (#2171).
+
+:::unreleased
+A two-cell cap now scrolls the third window through the last
+track rather than piling it (#2541); the laptop Grid stays two by
+two because it shows four windows where a single row would show
+two and hide the rest.
+:::
 
 **Every screen opens in Scrolling but the smallest, which opens
 in Monocle.** The shape rule above decides what a screen is good

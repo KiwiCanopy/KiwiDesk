@@ -116,8 +116,12 @@ extension KiwiCore {
         {
             return response
         }
-        if space.mode == .stack,
-            let response = stackStep(
+        // A run that hides windows steps through them in drawn
+        // order, whatever layout drew it (#2235, #2541) — Track's
+        // own step above already walked its tracks; a Space with
+        // no run falls through.
+        if space.mode != .track,
+            let response = runStep(
                 direction,
                 space: space,
                 focused: focused,

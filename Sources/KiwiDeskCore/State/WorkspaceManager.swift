@@ -80,6 +80,9 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.runTails = []
         spaces[id]?.sessionRatios = SessionRatios()
         spaces[id]?.trackWeights = [:]
+        // Every run weighs by `stackWeights` (#2541): one layout's
+        // run weights must not reshape another's.
+        spaces[id]?.stackWeights = [:]
         spaces[id]?.handedBreaks = []
         let seed: Set<WindowID> =
             mode == .track

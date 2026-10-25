@@ -187,6 +187,8 @@ struct SettingsSearchAnchorTests {
             $0.key == .layout(.gridColumns)
         }
         #expect(row != nil)
+        // The rows' old labels still find them (#2541).
+        #expect(rows("Rows").contains { $0.key == .layout(.gridRows) })
         #expect(row?.anchor.anchor == nil)
         #expect(row?.anchor.surface == .layoutMode(.grid))
         #expect(row?.path == ["Layout Defaults", "Grid"])
