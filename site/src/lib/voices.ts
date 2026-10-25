@@ -30,7 +30,17 @@ const API_VERSION = "2025-02-19";
 
 const QUERY = `*[_type == "kiwideskVoice"]
   | order(order asc, _createdAt asc)
-  { name, role, quote, link, source, photo }`;
+  { name, role, quote, link, channel, source, photo }`;
+
+/** Where a voice was said: the Studio's `channel` dropdown, and
+ * the label the page shows when the document carries no `source`
+ * (#2613). `other` has no icon and no label of its own. */
+const CHANNELS = {
+  github: "GitHub",
+  linkedin: "LinkedIn",
+  reddit: "Reddit",
+} as const;
+export type Channel = keyof typeof CHANNELS;
 
 /**
  * One voice. `quote` stays English on every locale — a translated
@@ -46,6 +56,9 @@ export interface Voice {
   quote: string;
   avatar: string | null;
   link: string;
+  /** The channel whose icon the page draws; `null` for `other`. */
+  channel: Channel | null;
+  /** Where they said it, as shown ("Reddit · r/MacOS"). */
   source: string;
 }
 
@@ -66,7 +79,10 @@ function toVoice(row: any): Voice | null {
   const name = text(row?.name);
   const quote = text(row?.quote);
   const link = text(row?.link);
-  const source = text(row?.source);
+  const channel: Channel | null = Object.hasOwn(CHANNELS, row?.channel)
+    ? row.channel
+    : null;
+  const source = text(row?.source) ?? (channel && CHANNELS[channel]);
   if (!name || !quote || !link?.startsWith("https://") || !source) {
     return null;
   }
@@ -83,7 +99,15 @@ function toVoice(row: any): Voice | null {
       avatar = null;
     }
   }
-  return { name, role: text(row.role), quote, avatar, link, source };
+  return {
+    name,
+    role: text(row.role),
+    quote,
+    avatar,
+    link,
+    channel,
+    source,
+  };
 }
 
 /** `voice` with its photo dropped unless the CDN serves it now. */

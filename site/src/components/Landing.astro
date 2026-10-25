@@ -938,7 +938,13 @@ const jsonLd = [
                     {v.role && (
                       <span class="voice__role" lang="en">{v.role}</span>
                     )}
-                    <span class="voice__src">{v.source}</span>
+                    <span class="voice__src">
+                      {v.channel && (
+                        <Icon name={`simple-icons:${v.channel}`}
+                          width={12} height={12} aria-hidden="true" />
+                      )}
+                      {v.source}
+                    </span>
                   </span>
                 </figcaption>
               </figure>
