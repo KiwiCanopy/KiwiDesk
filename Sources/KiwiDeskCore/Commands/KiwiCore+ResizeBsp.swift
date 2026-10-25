@@ -18,6 +18,17 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
+        // A press along a scrolled chain is a run weight (#2542).
+        if let focused = space.focused,
+            let response = resizeBspChain(
+                focused,
+                axis: axis,
+                delta: delta,
+                space: space
+            )
+        {
+            return response
+        }
         let bsp = tiler.settings.resolvedBsp(for: space)
         let signed =
             bspFocusSign(axis: axis, space: space)

@@ -172,12 +172,28 @@ struct BspLayoutTests {
         #expect(abs(b.height - 1050 * 0.3) < 0.01)
     }
 
-    @Test("Overlap stack kicks in below min window size")
-    func minSizeFallback() throws {
+    @Test("Two that do not fit side by side scroll")
+    func belowTwoMinimumsScrolls() throws {
         // 500pt wide: halves would be ~235pt, below the 300pt
-        // minimum, so BSP must stop splitting.
+        // minimum, so the pair scrolls along the split (#2542).
         let context = makeContext(
             bounds: CGRect(x: 0, y: 0, width: 500, height: 400)
+        )
+        let frames = layout.calculateGeometry(
+            for: [w1, w2],
+            in: context
+        )
+        #expect(frames[w1] == context.usable)
+        let parked = try #require(frames[w2])
+        #expect(!parked.intersects(context.usable))
+    }
+
+    @Test("Overlap stack kicks in below one window's minimum")
+    func minSizeFallback() throws {
+        // 250pt wide cannot hold even one 300pt window, so the
+        // emergency pile stays.
+        let context = makeContext(
+            bounds: CGRect(x: 0, y: 0, width: 250, height: 400)
         )
         let frames = layout.calculateGeometry(
             for: [w1, w2],

@@ -1,9 +1,9 @@
 import CoreGraphics
 
-/// One region a Stack zone, a Track track or a Grid's last track
-/// lays its members along (#2235, #2541): the shared placement
-/// each takes, so a zone that overflows scrolls the same way in
-/// any.
+/// One region a Stack zone, a Track track, a Grid's last track or
+/// a BSP chain lays its members along (#2235, #2541, #2542): the
+/// shared placement each takes, so a zone that overflows scrolls
+/// the same way in any.
 public struct RunZone: Sendable, Equatable {
     /// Members in drawn order.
     public let members: [WindowID]
@@ -30,8 +30,10 @@ public struct RunZone: Sendable, Equatable {
     }
 
     /// The zones `mode` lays `tiled` along, nil for a layout that
-    /// scrolls none or where every window piles over the whole
-    /// area. The one switch every run reader takes.
+    /// scrolls none or, for Stack, Track and Grid, where every
+    /// window piles over the whole area — BSP hands that pile in
+    /// as a zone that piles. The one switch every run reader
+    /// takes.
     public static func zones(
         mode: LayoutMode,
         tiled: [WindowID],
@@ -41,6 +43,7 @@ public struct RunZone: Sendable, Equatable {
         case .stack: StackLayout.zones(for: tiled, in: context)
         case .track: TrackLayout.zones(for: tiled, in: context)
         case .grid: GridLayout.zones(for: tiled, in: context)
+        case .bsp: BspLayout.zones(for: tiled, in: context)
         default: nil
         }
     }
@@ -50,6 +53,12 @@ public struct RunZone: Sendable, Equatable {
     /// even one window at the minimum size and piles whole.
     public func run(in context: LayoutContext) -> ZoneRun? {
         placement(in: context).run
+    }
+
+    /// Whether the zone cannot hold even one window at the
+    /// minimum size and piles whole (#44).
+    public func piles(in context: LayoutContext) -> Bool {
+        placement(in: context).piles
     }
 
     /// Frames for every member.

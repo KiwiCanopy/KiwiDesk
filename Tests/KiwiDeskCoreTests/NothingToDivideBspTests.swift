@@ -115,7 +115,7 @@ struct NothingToDivideBspTests {
 
     @Test("An overflow pile answers to no ratio")
     func bspOverflowPileDividesNothing() {
-        // A display too narrow for two minimum-size windows
+        // A display too narrow for one minimum-size window
         // makes the layout give up and pile them, and a pile
         // answers to neither ratio. The extent test cannot see
         // that — the cascade offsets each copy, so the union
@@ -128,7 +128,7 @@ struct NothingToDivideBspTests {
         // watches nothing (guard-prover, 2026-09-05: the first
         // version of this test could not red, and deleting the
         // drop left the whole suite green).
-        let core = makeCore(width: 500, height: 800)
+        let core = makeCore(width: 250, height: 800)
         _ = space(core, windows: 2, mode: "bsp")
         let frames = core.tiler.calculatedFrames(state: core.state)
         let piled = frames[WindowID(1)]!

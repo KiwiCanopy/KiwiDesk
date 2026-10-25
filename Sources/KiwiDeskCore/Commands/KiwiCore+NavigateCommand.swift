@@ -248,15 +248,6 @@ extension KiwiCore {
             if refuseSwapOntoTraveler(target, in: space) {
                 return .ok()
             }
-            // A sticky focused window can't enter the overflow pile
-            // (it is pile-exempt): explain, don't dead-swap (#438).
-            if refuseStickyIntoPile(
-                focused,
-                target: target,
-                among: candidates
-            ) {
-                return .ok()
-            }
             commitSwap(focused, target, in: space)
         } else {
             focusWindow(target, warp: warp)

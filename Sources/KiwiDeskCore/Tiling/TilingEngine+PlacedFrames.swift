@@ -93,7 +93,7 @@ extension TilingEngine {
     /// One space's frames from its layout input: the slots, or the
     /// issued frames with the split layouts' residue placed.
     /// `cover` is that input's `RunCover.of`, read on a placed
-    /// stack pass.
+    /// pass the inward post-pass moves.
     private func laidOut(
         _ input: (space: Space, tiled: [WindowID], context: LayoutContext),
         placed: Bool,
@@ -106,8 +106,8 @@ extension TilingEngine {
         )
         guard placed else { return slots }
         assert(
-            input.space.mode != .stack || cover != nil,
-            "a placed stack pass owes laidOut its cover"
+            !SplitOverflow.movesInward(input.space.mode) || cover != nil,
+            "a placed inward pass owes laidOut its cover"
         )
         var issued = SplitOverflow.placed(
             mode: input.space.mode,

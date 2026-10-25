@@ -10,8 +10,8 @@ private let w3 = WindowID(3)
 
 /// #383: an extreme BSP split ratio is clamped at render time to
 /// the widest value that keeps BOTH sides ≥ `min_window_size` —
-/// the overlap cascade stays reserved for a region genuinely too
-/// narrow for two min-size windows at any ratio. The clamp runs
+/// a region genuinely too narrow for two min-size windows at any
+/// ratio scrolls instead (#2542). The clamp runs
 /// per region, so it holds at every recursion depth despite the
 /// shared per-space scalar ratio. Mirrors the stack (#44).
 @Suite("BSP split-ratio clamp (#383)")
@@ -67,11 +67,12 @@ struct BspRatioClampTests {
 
     @Test("A too-narrow region still cascades (honest last resort)")
     func genuineCascade() throws {
-        // 500 wide can't hold two 300-pt windows at any ratio →
-        // the overlap pile is correct here.
+        // 250 wide can't hold even one 300-pt window → the
+        // overlap pile is correct here; two that do not fit
+        // side by side scroll instead (#2542).
         let frames = layout.calculateGeometry(
             for: [w1, w2],
-            in: makeContext(ratioH: 0.5, width: 500, height: 1080)
+            in: makeContext(ratioH: 0.5, width: 250, height: 1080)
         )
         let a = try #require(frames[w1])
         let b = try #require(frames[w2])

@@ -144,7 +144,6 @@ extension KiwiCore {
         guard let space = state.workspaces[home] else {
             return .fail("window is in no Space")
         }
-        if refusesPileSwap(lead, partner, in: space) { return .ok() }
         commitSwap(lead, partner, in: space)
         if focus == .staysHere {
             focusWindow(lead, warp: true)
@@ -163,22 +162,5 @@ extension KiwiCore {
             return .fail("window \(id.raw) is floating")
         }
         return nil
-    }
-
-    /// The directional swap's #438 refusal, asked both ways: a
-    /// sticky window is never swapped into an overflow pile.
-    private func refusesPileSwap(
-        _ a: WindowID,
-        _ b: WindowID,
-        in space: Space
-    ) -> Bool {
-        // A run's hidden windows are no pile (#2235).
-        let frames = shownSlots()
-        let slots = state.effectiveTiledMembers(of: space)
-            .compactMap { id -> (id: WindowID, frame: CGRect)? in
-                frames[id].map { (id, $0) }
-            }
-        return refuseStickyIntoPile(a, target: b, among: slots)
-            || refuseStickyIntoPile(b, target: a, among: slots)
     }
 }

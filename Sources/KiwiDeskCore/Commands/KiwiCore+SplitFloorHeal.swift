@@ -80,13 +80,16 @@ extension KiwiCore {
         var cues: Set<SplitFloorCue> = []
         switch space.mode {
         case .bsp:
+            // The scrolled chain classifies as one block (#2542).
+            let chain = bspChain(input)?.zone
             for axis in ["x", "y"] {
                 let horizontal = axis == "x"
                 let sides = BspSplit.sides(
                     of: tiled,
                     slots: slots,
                     bounds: bounds,
-                    horizontal: horizontal
+                    horizontal: horizontal,
+                    chain: chain
                 )
                 healSplit(
                     axis: axis,
