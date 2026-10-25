@@ -24,6 +24,9 @@ public struct JumpEntry: Sendable, Equatable {
         case away(desktop: Int?)
         case minimized
         case fullscreen
+        /// In the pocket (#2446): listed under its own section,
+        /// after Hidden; a pick takes it out.
+        case pocketed
     }
 
     public let target: Target
@@ -106,6 +109,9 @@ extension JumpEntry {
     public var tier: JumpTier {
         status == .minimized ? .minimized : .open
     }
+
+    /// Whether the row is the pocketed window's (#2446).
+    public var isPocketed: Bool { status == .pocketed }
 
     /// Whether the row is a hidden app's rather than a window's.
     public var isHiddenApp: Bool {

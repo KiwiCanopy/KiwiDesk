@@ -127,6 +127,7 @@ final class StickyMarkOverlay {
     private static func image(
         _ glyph: StickyMarkManager.Glyph
     ) -> NSImage? {
+        if glyph.kind == .pocket { return pocketImage() }
         let label =
             glyph.kind == .sticky
             ? L("sticky.mark.ax", "Sticky window")
@@ -292,12 +293,15 @@ final class StickyMarkOverlay {
         for frame: CGRect,
         width: CGFloat
     ) -> CGRect {
-        let mark = CGRect(
+        var mark = CGRect(
             x: frame.maxX - width - Self.inset,
             y: frame.minY + Self.inset,
             width: width,
             height: Self.size
         )
+        if glyphs.first?.kind == .pocket {
+            mark = Self.overCorner(of: frame, width: width)
+        }
         return GeometryUtils.flip(
             mark,
             primaryHeight: GeometryUtils.primaryHeight

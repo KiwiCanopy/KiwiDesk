@@ -162,6 +162,8 @@ extension KiwiCore {
                 )
         }
         let members = group.compactMap { state.windows[$0] }
+        // A pocket window wears the pocket badge alone (#2446).
+        let plain = members.filter { state.pocketPhase(of: $0.id) == nil }
         return SpaceBarItemView.App(
             name: name,
             icon: icon,
@@ -174,11 +176,12 @@ extension KiwiCore {
             count: group.count,
             // Badge inheritance (#414): a group aggregates its
             // children's states — an "at least one" signal.
-            sticky: members.contains(where: \.isSticky),
-            floating: members.contains(where: \.isFloating),
+            sticky: plain.contains(where: \.isSticky),
+            floating: plain.contains(where: \.isFloating),
+            pocket: plain.count < members.count,
             // The run's first sticky member picks the badge glyph
             // (#445): global → infinity, display → pin.fill.
-            stickyScope: members.first(where: \.isSticky)?
+            stickyScope: plain.first(where: \.isSticky)?
                 .stickyScope ?? .none,
             windows: group
         )

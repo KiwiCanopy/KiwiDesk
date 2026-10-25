@@ -156,3 +156,12 @@ extension KiwiCore {
         return true
     }
 }
+
+extension KiwiCore {
+    /// The windows KiwiVision keeps clear for the pocket while it is
+    /// out (#2446): the pocket window and the one it came out over.
+    func visionPocketPair() -> Set<WindowID> {
+        guard let slot = state.pocket, slot.phase == .out else { return [] }
+        return Set([slot.window] + (slot.cameFrom.map { [$0] } ?? []))
+    }
+}

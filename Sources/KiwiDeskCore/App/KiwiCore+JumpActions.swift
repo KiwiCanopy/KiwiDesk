@@ -31,6 +31,10 @@ extension KiwiCore {
                 jump(to: target)
                 return true
             }
+            // Out of the pocket and here is the pocket's own way.
+            if case .window(let id) = target, state.pocketedWindow == id {
+                return takePocketOut()
+            }
             guard case .window(let id) = target else {
                 if case .hiddenApp(let pid) = target {
                     moveHiddenApp(pid, into: active, matching: nil)
@@ -56,6 +60,11 @@ extension KiwiCore {
     }
 
     private func jumpToWindow(_ id: WindowID) {
+        // A pick takes the pocket out (#2446).
+        if state.pocketedWindow == id {
+            takePocketOut()
+            return
+        }
         if let window = state.windows[id] {
             // A full-screen window keeps its own macOS Space, which
             // no KiwiDesk Space switch reaches (#670); its app comes

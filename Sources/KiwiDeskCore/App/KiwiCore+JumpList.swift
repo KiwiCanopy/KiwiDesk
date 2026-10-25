@@ -32,9 +32,13 @@ extension KiwiCore {
         let focused = jumpFocusedWindow().map {
             JumpEntry.Target.window($0)
         }
+        let listed = ordered.map(\.element).filter {
+            $0.target != focused
+        }
+        // The pocket after Hidden (#2446).
         let rows =
-            ordered.map(\.element).filter { $0.target != focused }
-            + hiddenAppJumpEntries()
+            listed.filter { !$0.isPocketed } + hiddenAppJumpEntries()
+            + listed.filter(\.isPocketed)
         return lensOrdered(rows)
     }
 
@@ -84,7 +88,9 @@ extension KiwiCore {
                     title: window.title,
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
-                    status: window.isFullscreen ? .fullscreen : .shown,
+                    status: state.pocketedWindow == window.id
+                        ? .pocketed
+                        : window.isFullscreen ? .fullscreen : .shown,
                     movesHere: jumpMovesHere(window, from: space),
                     isOtherApp: jumpIsOtherApp(window.appRef)
                 )
