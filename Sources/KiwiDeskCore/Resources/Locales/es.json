@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "Buscar atajos",
   "shortcuts.focus_wrap": "Foco circular",
   "shortcuts.focus_wrap.all_screens": "Todas las pantallas",
-  "shortcuts.focus_wrap.help": "%1$@: después de la última ventana, el foco vuelve a la primera de la misma pantalla. %2$@: continúa en la siguiente pantalla y, después de la última pantalla, vuelve a la primera. Con una sola pantalla, ambas opciones funcionan igual.",
+  "shortcuts.focus_wrap.help": "%1$@: después de la última ventana, el foco vuelve a la primera de la misma pantalla. %2$@: continúa en la siguiente pantalla y, después de la última pantalla, vuelve a la primera. Con una sola pantalla, ambas opciones funcionan igual. En ambos casos, los atajos de espacio siguiente y anterior recorren en ciclo los espacios de la pantalla, y %3$@ los detiene en el último.",
   "shortcuts.focus_wrap.off": "Desactivado",
   "shortcuts.focus_wrap.this_screen": "Esta pantalla",
   "shortcuts.fold.focus_directions": "Enfocar ventana: izquierda, abajo, arriba, derecha",

@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "搜索快捷键",
   "shortcuts.focus_wrap": "焦点循环",
   "shortcuts.focus_wrap.all_screens": "所有显示器",
-  "shortcuts.focus_wrap.help": "%1$@：越过最后一个窗口后，焦点回到同一屏幕上的第一个窗口。%2$@：焦点继续移到下一台显示器，越过最后一台显示器后回到第一台。只有一个显示器时，两者效果相同。",
+  "shortcuts.focus_wrap.help": "%1$@：越过最后一个窗口后，焦点回到同一屏幕上的第一个窗口。%2$@：焦点继续移到下一台显示器，越过最后一台显示器后回到第一台。只有一个显示器时，两者效果相同。无论哪种方式，下一个/上一个空间的快捷键都会在该显示器的空间之间循环；选择%3$@时，则停在最后一个。",
   "shortcuts.focus_wrap.off": "关闭",
   "shortcuts.focus_wrap.this_screen": "此显示器",
   "shortcuts.fold.focus_directions": "聚焦左侧、下方、上方、右侧的窗口",

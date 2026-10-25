@@ -1862,7 +1862,7 @@
   "shortcuts.field.label": "ショートカットを検索",
   "shortcuts.focus_wrap": "フォーカスをループ",
   "shortcuts.focus_wrap.all_screens": "すべての画面",
-  "shortcuts.focus_wrap.help": "%1$@：最後のウインドウの先へ進むと、同じ画面の最初のウインドウにフォーカスが戻ります。%2$@：次の画面へ進み、最後の画面の先では最初の画面に戻ります。画面が1つの場合、どちらも同じように動作します。",
+  "shortcuts.focus_wrap.help": "%1$@：最後のウインドウの先へ進むと、同じ画面の最初のウインドウにフォーカスが戻ります。%2$@：次の画面へ進み、最後の画面の先では最初の画面に戻ります。画面が1つの場合、どちらも同じように動作します。どちらの場合も、次のスペース・前のスペースへ移動するショートカットはその画面のスペースを循環し、%3$@にすると最後のスペースで止まります。",
   "shortcuts.focus_wrap.off": "オフ",
   "shortcuts.focus_wrap.this_screen": "この画面",
   "shortcuts.fold.focus_directions": "左・下・上・右のウインドウにフォーカス",

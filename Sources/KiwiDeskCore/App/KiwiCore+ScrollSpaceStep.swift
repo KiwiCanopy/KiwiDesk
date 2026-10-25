@@ -25,10 +25,10 @@ final class ScrollSpaceStepSession {
 /// ⌃⌥⌘ + scroll (#1519, rulings 2026-09-28/29): steps to the
 /// previous or next Space in the Space order of the screen under
 /// the pointer — one per trackpad swipe, one per wheel notch, a
-/// fast roll or a spinning wheel once (`ScrollStepMeter`). It
-/// stops at the first and last Space, where the shown Space's
-/// focus bumps its ring toward the step as a row end does (#436),
-/// and never moves the pointer.
+/// fast roll or a spinning wheel once (`ScrollStepMeter`). Past
+/// an end it wraps as the keys do (#2592), or under Wrap focus Off
+/// stops, where the shown Space's focus bumps its ring toward the
+/// step as a row end does (#436), and it never moves the pointer.
 extension KiwiCore {
     /// Wires the consumer; once, at bootstrap.
     func wireScrollSpaceStep() {
@@ -61,7 +61,9 @@ extension KiwiCore {
     /// where `hide_empty` leaves them off the bar, which is a
     /// display setting and never changes reach (#1519 ruling).
     /// The one step the gesture and `focus_space_previous` /
-    /// `_next` (#1655) share; false at an end, which bumps.
+    /// `_next` (#1655) share. Past an end it wraps round that
+    /// screen's order unless Wrap focus is Off, never onto another
+    /// screen (#2592); false where it stops, which bumps.
     @discardableResult
     func stepSpace(
         on display: DisplayID,
@@ -72,11 +74,15 @@ extension KiwiCore {
         guard let shown = state.workspaces.activeSpace(on: display),
             let index = order.firstIndex(of: shown)
         else { return false }
-        guard order.indices.contains(index + step) else {
-            bumpAtSpaceEnd(step, on: display)
-            return false
+        var next = index + step
+        if !order.indices.contains(next) {
+            guard focusWrap.mode != .off, order.count > 1 else {
+                bumpAtSpaceEnd(step, on: display)
+                return false
+            }
+            next = (next % order.count + order.count) % order.count
         }
-        switchSpace(to: order[index + step], warp: warp)
+        switchSpace(to: order[next], warp: warp, step: step)
         return true
     }
 }
