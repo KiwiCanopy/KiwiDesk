@@ -34,6 +34,7 @@ extension AppBarItemView {
         layer?.cornerRadius = radius
         layer?.maskedCorners = maskedCorners
         accentClip.frame = bounds
+        aboveOutline.frame = bounds
         accentClip.layer?.masksToBounds = true
         accentClip.layer?.cornerRadius = radius
         accentClip.layer?.maskedCorners = maskedCorners
@@ -48,14 +49,19 @@ extension AppBarItemView {
         )
     }
 
-    /// Keeps the border and outline above a hosting glass's rim
-    /// (`GlassBox.seatStrokes`, #2595).
+    /// The border, the outline and what draws over it: seated
+    /// above a hosting glass's rim (#2595).
+    var strokes: [GlassBoxRider] { [boxBorder, accentClip, aboveOutline] }
+
     override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
-        GlassBox.seatStrokes([boxBorder, accentClip], of: self) {
-            addSubview(boxBorder, positioned: .below, relativeTo: nil)
-            addSubview(accentClip, positioned: .below, relativeTo: badge)
-        }
+        GlassBox.seatStrokes(strokes, of: self)
+    }
+
+    /// Takes every press inside it, as the outline clip covering
+    /// it did before the clip could ride the glass host (#2595).
+    override func hitTest(_ point: NSPoint) -> NSView? {
+        super.hitTest(point) == nil ? nil : self
     }
 
     /// The corners this item rounds (`ItemCornerMask`, #1763).

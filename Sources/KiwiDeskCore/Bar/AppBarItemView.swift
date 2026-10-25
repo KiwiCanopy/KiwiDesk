@@ -27,6 +27,9 @@ final class AppBarItemView: NSView {
     let boxBorder = ShelfBorder.make()
     /// Clips active accent indicator to item bounds (owner 2026-07-20).
     let accentClip = AppBarOverlay.PassThroughFlippedView()
+    /// What draws over the outline — the count badge and the
+    /// half-moon — riding with it (#2595).
+    let aboveOutline = AppBarOverlay.PassThroughFlippedView()
     let badge: NSTextField = {
         let tf = NSTextField(labelWithString: "")
         let cell = IndicatorBarBadgeCell(textCell: "")
@@ -96,15 +99,13 @@ final class AppBarItemView: NSView {
         badge.wantsLayer = true
         badge.alignment = .center
         badge.setAccessibilityElement(false)
-        boxBorder.autoresizingMask = [.width, .height]
-        addSubview(boxBorder)
         addSubview(iconView)
         addSubview(glyphLabel)
         addSubview(label)
-        addSubview(accentClip)
         accentClip.addSubview(accent)
-        addSubview(badge)
-        addSubview(halfMoon)
+        aboveOutline.addSubview(badge)
+        aboveOutline.addSubview(halfMoon)
+        GlassBox.seatStrokes(strokes, of: self)
     }
 
     @available(*, unavailable)

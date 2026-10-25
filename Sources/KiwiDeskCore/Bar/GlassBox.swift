@@ -1,7 +1,14 @@
 import AppKit
 
+/// A view an item seats in its box's host above the glass
+/// (`GlassBox.seatStrokes`, #2595): the item frames it, and the
+/// host sizes it never.
+@MainActor
+protocol GlassBoxRider: NSView {}
+
 /// One box's glass and tint composited in a host of their own —
-/// every travelling glass's one mint, place and drop. The host is
+/// every travelling glass's one mint, place and drop — with the
+/// hosted item's riders above the glass. The host is
 /// what fades (a glass's own alpha shows the tint bare, #1842) and
 /// what moves: a glass and its backdrop animating their own frames
 /// drift a frame apart and trail (#2095). It lets presses through
@@ -9,15 +16,17 @@ import AppKit
 final class GlassBoxHost: NSView {
     override var isFlipped: Bool { true }
 
-    /// The host writes its pair to every size it takes, glass and
-    /// tint alike: autoresizing left a hosted glass at the fused
+    /// The host writes its pair, never a rider, to every size it
+    /// takes: autoresizing left a hosted glass at the fused
     /// plate's width when the host shrank (#2388, device).
     override func setFrameSize(_ newSize: NSSize) {
         super.setFrameSize(newSize)
-        for view in subviews where view.frame != bounds {
+        for view in subviews
+        where view.frame != bounds && !(view is GlassBoxRider) {
             view.frame = bounds
         }
-        subviews.forEach(GlassPlate.fitContent)
+        subviews.filter { !($0 is GlassBoxRider) }
+            .forEach(GlassPlate.fitContent)
     }
 
     /// Bumped by every glide `GlassBox.place` starts, so only the
@@ -167,25 +176,26 @@ enum GlassBox {
         GlassPlate.fitContent(glass)
     }
 
-    /// Seats a box's strokes — its border and outline, in that
-    /// order — in its host above the glass while a glass hosts
-    /// `item`, since the glass's key-window rim draws over its
-    /// content (#2595); `home` puts them back in the item once
-    /// none does. The item calls it as it moves.
+    /// Seats an item's stroke stack in its box's host above the
+    /// glass while a glass hosts `item`, since the glass's
+    /// key-window rim draws over its content (#2595), and in the
+    /// item otherwise: the first rider beneath the item's content,
+    /// the rest above it, in order. The item calls it as it moves
+    /// and frames the riders in its own coordinates, the host's
+    /// while it fills it.
     static func seatStrokes(
-        _ strokes: [NSView],
-        of item: NSView,
-        home: () -> Void
+        _ riders: [GlassBoxRider],
+        of item: NSView
     ) {
-        guard let host = host(holding: item) else {
-            if strokes.contains(where: { $0.superview !== item }) {
-                home()
+        let parent = host(holding: item) ?? item
+        guard riders.contains(where: { $0.superview !== parent })
+        else { return }
+        for (index, rider) in riders.enumerated() {
+            if index == 0, parent === item {
+                item.addSubview(rider, positioned: .below, relativeTo: nil)
+            } else {
+                parent.addSubview(rider)
             }
-            return
-        }
-        for stroke in strokes where stroke.superview !== host {
-            host.addSubview(stroke)
-            stroke.frame = host.bounds
         }
     }
 

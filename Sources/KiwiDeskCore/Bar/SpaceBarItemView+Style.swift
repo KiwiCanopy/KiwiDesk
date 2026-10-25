@@ -8,6 +8,7 @@ extension SpaceBarItemView {
         layer?.maskedCorners = maskedCorners
         layer?.backgroundColor = fillColor.cgColor
         accentClip.frame = bounds
+        aboveOutline.frame = bounds
         accentClip.layer?.masksToBounds = true
         accentClip.layer?.cornerRadius = cornerRadius
         accentClip.layer?.maskedCorners = maskedCorners
@@ -28,18 +29,13 @@ extension SpaceBarItemView {
         styleAccent()
     }
 
-    /// Keeps the border and outline above a hosting glass's rim
-    /// (`GlassBox.seatStrokes`, #2595).
+    /// The border, the outline and what draws over it: seated
+    /// above a hosting glass's rim (#2595).
+    var strokes: [GlassBoxRider] { [boxBorder, accentClip, aboveOutline] }
+
     override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
-        GlassBox.seatStrokes([boxBorder, accentClip], of: self) {
-            addSubview(boxBorder, positioned: .below, relativeTo: nil)
-            addSubview(
-                accentClip,
-                positioned: .above,
-                relativeTo: markerView
-            )
-        }
+        GlassBox.seatStrokes(strokes, of: self)
     }
 
     /// Structural divider between identifier and app glyphs (QA 2026-07-19).

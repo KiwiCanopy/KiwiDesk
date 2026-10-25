@@ -76,13 +76,17 @@ struct SpaceBarItemReuseTests {
             Self.app(3, sticky: true, floating: true),
         ]
         Self.configure(view, apps: apps, active: true)
-        let before = view.subviews
+        // Minted badges ride above the outline (#2595).
+        let before = view.subviews + view.aboveOutline.subviews
         let glyphs = view.appViews
         let badges = view.badgeViews
         let sticky = view.stickyBadgeViews
         let floating = view.floatingBadgeViews
         Self.configure(view, apps: apps, active: false)
-        let keepsSubviews = Self.same(view.subviews, before)
+        let keepsSubviews = Self.same(
+            view.subviews + view.aboveOutline.subviews,
+            before
+        )
         let keepsGlyphs = Self.same(view.appViews, glyphs)
         let keepsBadges = Self.same(view.badgeViews, badges)
         let keepsSticky = Self.same(view.stickyBadgeViews, sticky)
@@ -111,7 +115,7 @@ struct SpaceBarItemReuseTests {
         #expect(
             view.floatingBadgeViews.map { $0 != nil } == [false, false, true]
         )
-        let marks = view.subviews.filter { $0 is StateBadgeView }
+        let marks = view.aboveOutline.subviews.filter { $0 is StateBadgeView }
         #expect(marks.count == 2)
     }
 
@@ -144,9 +148,11 @@ struct SpaceBarItemReuseTests {
         #expect(sticky.superview == nil)
         #expect(view.stickyBadgeViews.allSatisfy { $0 == nil })
         #expect(view.appViews.allSatisfy { $0.superview === view })
-        #expect(view.badgeViews.allSatisfy { $0.superview === view })
         #expect(
-            view.subviews.filter { $0 is StateBadgeView }.isEmpty
+            view.badgeViews.allSatisfy { $0.superview === view.aboveOutline }
+        )
+        #expect(
+            view.aboveOutline.subviews.filter { $0 is StateBadgeView }.isEmpty
         )
     }
 

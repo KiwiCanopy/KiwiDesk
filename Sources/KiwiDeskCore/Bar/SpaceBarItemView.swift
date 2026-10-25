@@ -71,6 +71,9 @@ final class SpaceBarItemView: NSView {
     let boxBorder = ShelfBorder.make()
     /// Active mark corner clip (owner 2026-07-20).
     let accentClip = AppBarOverlay.PassThroughFlippedView()
+    /// What draws over the outline — the minted count and state
+    /// badges — riding with it (#2595).
+    let aboveOutline = AppBarOverlay.PassThroughFlippedView()
     /// The run's ends: they set the rounded ends' insets (#1763).
     var isFirstInRun = false {
         didSet { if oldValue != isFirstInRun { needsLayout = true } }
@@ -128,8 +131,6 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
-        boxBorder.autoresizingMask = [.width, .height]
-        addSubview(boxBorder)
         addSubview(identifierImage)
         addSubview(identifierLabel)
         addSubview(identifierDivider)
@@ -138,12 +139,14 @@ final class SpaceBarItemView: NSView {
         markerView.imageScaling = .scaleProportionallyUpOrDown
         markerView.setAccessibilityElement(false)
         addSubview(markerView)
-        addSubview(accentClip)
         accentClip.addSubview(accent)
         springRing.fillColor = nil
         springRing.strokeEnd = 0
         springRing.isHidden = true
-        layer?.addSublayer(springRing)
+        // In the clip, so the drop ring rides above the glass with
+        // the outline it morphs into (#2595).
+        accentClip.layer?.addSublayer(springRing)
+        GlassBox.seatStrokes(strokes, of: self)
     }
 
     /// Creates badge label with circular indicator background.
