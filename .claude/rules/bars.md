@@ -1384,7 +1384,10 @@ Obligations:
   sizes none of them (`GlassBoxRider`); the item answers its own
   presses, since its riders take none. A new stroke on a box, or
   a view that must draw over the outline, joins that stack in
-  both items (`BoxStrokeAboveGlassTests`).
+  both items; a view an item adds after `init` goes into
+  `aboveOutline` or below a named sibling, never a bare
+  `addSubview` on the item, whose place would then depend on
+  whether the item was ever hosted (`BoxStrokeAboveGlassTests`).
 - **A view a glass hosted leaves it only through
   `GlassPlate.release`, and a bar tears its per-item glass down
   BEFORE the frame pass that places the items it hosted** (#1730).
@@ -1661,7 +1664,8 @@ Boxed.
   `borderColor`, never the stored width. The rim is its own
   fill-less, click-through view framed to the surface, so it
   strokes on the edge, never inset: above the plate or the
-  chip's glass, and on a hosted box above its glass (below). A
+  chip's glass, and on a hosted box above its glass
+  (`BoxStrokeAboveGlassTests`). A
   box's rim stands down under an active indicator
   that strokes the box's own edge — the outline, never the edge
   mark — through the one `ShelfBorder.yields`, each site handing

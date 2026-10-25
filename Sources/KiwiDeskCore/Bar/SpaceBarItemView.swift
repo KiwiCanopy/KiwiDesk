@@ -68,7 +68,7 @@ final class SpaceBarItemView: NSView {
     let accent = SheenRimView()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
-    let boxBorder = ShelfBorder.make()
+    let boxBorder = ShelfBorder.makeSeated()
     /// Active mark corner clip (owner 2026-07-20).
     let accentClip = AppBarOverlay.PassThroughFlippedView()
     /// What draws over the outline — the minted count and state

@@ -138,7 +138,9 @@ extension SpaceBarItemView {
             label: label
         )
         target.actions = glyphActions
-        addSubview(target)
+        // Beneath the stroke stack, hosted or not (#2595); the
+        // item's hit test finds a target wherever it lies.
+        addSubview(target, positioned: .below, relativeTo: overflowBadge)
         return target
     }
 

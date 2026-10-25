@@ -24,7 +24,7 @@ final class AppBarItemView: NSView {
     let halfMoon = AppBarHalfMoon()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
-    let boxBorder = ShelfBorder.make()
+    let boxBorder = ShelfBorder.makeSeated()
     /// Clips active accent indicator to item bounds (owner 2026-07-20).
     let accentClip = AppBarOverlay.PassThroughFlippedView()
     /// What draws over the outline — the count badge and the

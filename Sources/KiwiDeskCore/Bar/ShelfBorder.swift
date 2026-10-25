@@ -76,8 +76,17 @@ enum ShelfBorder {
     /// A border view: layer-backed, fill-less, blind to the
     /// pointer so the surface beneath keeps its clicks.
     @MainActor
-    static func make() -> PassThroughView {
+    static func make() -> SheenRimView {
         let view = PassThroughView()
+        view.wantsLayer = true
+        view.isHidden = true
+        return view
+    }
+
+    /// A box's border an item seats above its glass (#2595).
+    @MainActor
+    static func makeSeated() -> SeatedRim {
+        let view = SeatedRim()
         view.wantsLayer = true
         view.isHidden = true
         return view
@@ -85,7 +94,10 @@ enum ShelfBorder {
 
     /// Hit-tests to nothing: a rim above an item must not take
     /// the item's clicks, hover or drag.
-    final class PassThroughView: SheenRimView, GlassBoxRider {
+    class PassThroughView: SheenRimView {
         override func hitTest(_ point: NSPoint) -> NSView? { nil }
     }
+
+    /// An item box's rim, riding the box's glass host while hosted.
+    final class SeatedRim: PassThroughView, GlassBoxRider {}
 }

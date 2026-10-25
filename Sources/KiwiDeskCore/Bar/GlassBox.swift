@@ -2,7 +2,9 @@ import AppKit
 
 /// A view an item seats in its box's host above the glass
 /// (`GlassBox.seatStrokes`, #2595): the item frames it, and the
-/// host sizes it never.
+/// host sizes it never. It takes no press — its `hitTest` answers
+/// nil and the item answers its own — since outside the item a
+/// hit on it would reach no item.
 @MainActor
 protocol GlassBoxRider: NSView {}
 

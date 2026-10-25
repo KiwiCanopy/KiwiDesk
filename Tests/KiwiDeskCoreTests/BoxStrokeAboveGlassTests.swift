@@ -92,6 +92,12 @@ struct BoxStrokeAboveGlassTests {
             GlassBox.host(of: glass),
             sourceLocation: sourceLocation
         )
+        // The item fills its host, so its coordinates are the
+        // host's.
+        #expect(
+            GlassPlate.fills(item.convert(item.bounds, to: host), host.bounds),
+            sourceLocation: sourceLocation
+        )
         let order = host.subviews
         var last = try #require(
             order.firstIndex(of: glass),
@@ -147,6 +153,46 @@ struct BoxStrokeAboveGlassTests {
         #expect(
             Array(order.suffix(2)) == [clip, above],
             sourceLocation: sourceLocation
+        )
+    }
+
+    /// A Space item never hosted keeps the stack on top: nothing it
+    /// adds after `init` draws above the outline.
+    @Test("A bare item's later views stay beneath its stroke stack")
+    func bareItemKeepsTheStackOnTop() throws {
+        var style = SpaceBarLook()
+        style.backgroundStyle = .boxed
+        style.activeIndicator = .outline
+        style.stickyBadge = true
+        let view = SpaceBarItemView(
+            frame: CGRect(x: 0, y: 0, width: 120, height: 30)
+        )
+        view.configure(
+            identity: .space(SpaceID("1")),
+            spaceGlyph: .text("1", tinted: true),
+            apps: [
+                SpaceBarItemView.App(
+                    name: "App",
+                    icon: nil,
+                    glyph: nil,
+                    focused: true,
+                    count: 2,
+                    sticky: true
+                )
+            ],
+            active: true,
+            horizontal: true,
+            style: style,
+            stateMarkColors: StateMarkColors(
+                sticky: "#ffffff",
+                floating: "#ffffff"
+            )
+        )
+        view.layout()
+        #expect(!view.glyphTargets.isEmpty, "the fixture mints a target")
+        #expect(
+            Array(view.subviews.suffix(2))
+                == [view.accentClip, view.aboveOutline]
         )
     }
 
