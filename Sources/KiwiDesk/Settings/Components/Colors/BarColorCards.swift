@@ -12,7 +12,7 @@ struct KiwiShelfColorCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.colors.colorsAndGlass.children
+            SettingsCatalog.colors.colorsDrawer.children
                 .kiwishelfGroup,
             subsection: true,
             plated: false

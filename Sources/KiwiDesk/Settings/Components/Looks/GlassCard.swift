@@ -2,10 +2,10 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The one Liquid Glass switch, over both bars and the ⌃⌥K
-/// shortcuts panel (#1307), the Fill's two rows beneath it —
-/// "Tint KiwiHub and plates" and "Fill fade" (#2569) — and the
-/// sheen's own row last (#1644), which alone shows below macOS 26
-/// — the first group of Colors & glass (#2389).
+/// shortcuts panel (#1307), the Fill and the two rows it greys —
+/// "Tint KiwiHub and plates" and "Fill fade" (#2569, #2593) — and
+/// the sheen's own row last (#1644); the Fill and the sheen alone
+/// show below macOS 26. The open group of Colors & glass (#2389).
 struct GlassCard: View {
     @ObservedObject var model: SettingsModel
     /// The same OS value the glass surfaces read live (#1374);
@@ -20,8 +20,7 @@ struct GlassCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.colors.colorsAndGlass.children
-                .liquidGlassGroup,
+            SettingsCatalog.colors.liquidGlassGroup,
             caption: AppBarStyle.glassAvailable ? caption : nil,
             subsection: true,
             plated: false
@@ -32,7 +31,12 @@ struct GlassCard: View {
             // (gui.md).
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(Self.rows, id: \.id) { key in
-                    row(key).modifier(GreyOut(active: greyed(key)))
+                    if key == .kiwishelf(.fillColor) {
+                        // A colour row, greyed by its own verdict.
+                        ColorsAndGlassRows(model: model, keys: [key])
+                    } else {
+                        row(key).modifier(GreyOut(active: greyed(key)))
+                    }
                     reasonCaption(for: key)
                 }
             }
@@ -71,20 +75,13 @@ struct GlassCard: View {
 
     /// The Reduce-transparency reason, under the switch it greys
     /// and outside that grey so it survives the dim (#527) — never
-    /// on the header, which would claim it for the sheen too.
+    /// on the header, which would claim it for the sheen too. The
+    /// Fill's grey needs none: the Fill sits right above (#2593).
     @ViewBuilder private func reasonCaption(
         for key: SettingKey
     ) -> some View {
         if reduceTransparency, key == .colours(.liquidGlassMaster) {
             Text(reduceTransparencyHelp)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-        } else if !reduceTransparency, key == .kiwishelf(.fillFade),
-            model.liquidGlassMaster.wrappedValue, !shelf.hasFill
-        {
-            // The cause is on another group's row (#815): said
-            // inline, outside the grey, under the last row it greys.
-            Text(noColourHelp)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -100,8 +97,7 @@ struct GlassCard: View {
             )
         case .kiwishelf(.tintHubAndPlates):
             ToggleRow(
-                label: SettingsCatalog.colors.colorsAndGlass.children
-                    .tintHubAndPlates.text,
+                label: SettingsCatalog.colors.tintHubAndPlates.text,
                 isOn: $model.config.settings.kiwishelf.tintHubAndPlates,
                 help: L(
                     "kiwishelf.tint_hub_and_plates.help",
@@ -113,38 +109,19 @@ struct GlassCard: View {
                     L("kiwishelf.color.fill", "Fill")
                 )
             )
-            .searchAnchored(
-                SettingsCatalog.colors.colorsAndGlass.children
-                    .tintHubAndPlates
-            )
+            .searchAnchored(SettingsCatalog.colors.tintHubAndPlates)
         case .kiwishelf(.fillFade):
             FillFadeRow(fade: $model.config.settings.kiwishelf.fillFade)
-                .searchAnchored(
-                    SettingsCatalog.colors.colorsAndGlass.children
-                        .fillFade
-                )
+                .searchAnchored(SettingsCatalog.colors.fillFade)
         case .colours(.borderSheen):
             SheenRow(strength: $model.config.settings.borderStyle.sheen)
-                .searchAnchored(
-                    SettingsCatalog.colors.colorsAndGlass.children
-                        .sheenStrength
-                )
+                .searchAnchored(SettingsCatalog.colors.sheenStrength)
         default:
             let _ = assertionFailure(
                 "unrendered Glass census key: \(key.id)"
             )
             EmptyView()
         }
-    }
-
-    /// Why the Fill's rows grey while the Fill has no colour.
-    private var noColourHelp: String {
-        L(
-            "kiwishelf.no_color.reason",
-            "The KiwiShelf %1$@ is set to \u{201C}%2$@\u{201D}.",
-            L("kiwishelf.color.fill", "Fill"),
-            L("color_field.no_color", "No Color")
-        )
     }
 
     /// Quotes Apple's own control (config-vocabulary.md) so the
@@ -193,8 +170,7 @@ struct GlassCard: View {
             L("kiwishelf.color.fill", "Fill"),
             JumpScope.panelName,
             L("kiwishelf.fill_fade", "Fill fade"),
-            SettingsCatalog.colors.colorsAndGlass.children
-                .tintHubAndPlates.text
+            SettingsCatalog.colors.tintHubAndPlates.text
         )
     }
 

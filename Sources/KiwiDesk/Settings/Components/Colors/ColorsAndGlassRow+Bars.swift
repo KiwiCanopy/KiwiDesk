@@ -22,9 +22,7 @@ extension ColorsAndGlassRow {
                         + "is \u{201C}%3$@\u{201D}. \u{201C}%4$@\u{201D} "
                         + "leaves plain glass.",
                     JumpScope.panelName,
-                    SettingsCatalog.colors.colorsAndGlass.children
-                        .tintHubAndPlates
-                        .text,
+                    SettingsCatalog.colors.tintHubAndPlates.text,
                     L("kiwishelf.fill_fade", "Fill fade"),
                     L("color_field.no_color", "No Color")
                 )

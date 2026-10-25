@@ -139,7 +139,6 @@ extension InterpolatedLabelTests {
         // the toggle's label comes from the catalog, not an `L()`,
         // so it goes uncounted.
         "kiwishelf.tint_hub_and_plates.help": 1,
-        "kiwishelf.no_color.reason": 2,
         "kiwishelf.fill_fade.help": 2,
         "kiwishelf.color.fill.help": 2,
         // #1745: the switch by its own key, then the pane.

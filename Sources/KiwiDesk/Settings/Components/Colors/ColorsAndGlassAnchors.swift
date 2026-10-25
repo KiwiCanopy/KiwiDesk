@@ -4,8 +4,8 @@ import KiwiDeskCore
 /// #1250): one arm per row the section draws, named outright so
 /// the catalog's site guards see each declaration referenced.
 enum ColorsAndGlassAnchors {
-    private static var rows: ColorsAndGlassControls {
-        SettingsCatalog.colors.colorsAndGlass.children
+    private static var rows: ColorsDrawerControls {
+        SettingsCatalog.colors.colorsDrawer.children
     }
 
     static func control(for key: SettingKey) -> SettingsControl? {
@@ -25,7 +25,7 @@ enum ColorsAndGlassAnchors {
         case .activeItemColor: return rows.tintActiveItem
         case .highlightColor: return rows.tintHighlight
         case .hoverFillColor: return rows.tintHoverFill
-        case .fillColor: return rows.tintShelfFill
+        case .fillColor: return SettingsCatalog.colors.tintShelfFill
         case .itemColor: return rows.tintShelfItem
         case .hoverItemColor: return rows.tintShelfHoverItem
         case .borderColor: return rows.tintShelfBorder

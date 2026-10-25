@@ -55,7 +55,7 @@ extension ColoursKey {
             return .row(
                 .coloursAndMotion,
                 .glass,
-                .showMore,
+                .atRest,
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .shortcutPanelLiquidGlass, .dragLiquidGlass,
@@ -70,7 +70,7 @@ extension ColoursKey {
             return .row(
                 .coloursAndMotion,
                 .glass,
-                .showMore,
+                .atRest,
                 exemptFromContainerGate: true
             )
         case .animationsMaster:

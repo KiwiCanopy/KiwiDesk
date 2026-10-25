@@ -77,24 +77,20 @@ struct SettingsSearchDrawerAnchorTests {
                 [SettingsCatalog.colors.motionMore]
             ),
             (
-                .looks, "Looks & Animations", .glass,
-                [SettingsCatalog.colors.colorsAndGlass]
-            ),
-            (
                 .looks, "Looks & Animations", .accent,
-                [SettingsCatalog.colors.colorsAndGlass]
+                [SettingsCatalog.colors.colorsDrawer]
             ),
             (
                 .looks, "Looks & Animations", .secondAccent,
-                [SettingsCatalog.colors.colorsAndGlass]
+                [SettingsCatalog.colors.colorsDrawer]
             ),
             (
                 .looks, "Looks & Animations", .kiwishelf,
-                [SettingsCatalog.colors.colorsAndGlass]
+                [SettingsCatalog.colors.colorsDrawer]
             ),
             (
                 .looks, "Looks & Animations", .windowMarks,
-                [SettingsCatalog.colors.colorsAndGlass]
+                [SettingsCatalog.colors.colorsDrawer]
             ),
             (
                 .shortcuts, "Shortcuts & Gestures", .gestures,
@@ -296,8 +292,7 @@ struct SettingsSearchDrawerAnchorTests {
             $0.anchor.anchor == top
         }
         #expect(after.isEmpty, Comment(rawValue: "\(after.map(\.id))"))
-        let glass = SettingsCatalog.colors.colorsAndGlass.children
-            .liquidGlassGroup.id
+        let glass = SettingsCatalog.colors.liquidGlassGroup.id
         let glassRow = SettingsSearchIndex.rows().first {
             $0.anchor.anchor == glass
         }

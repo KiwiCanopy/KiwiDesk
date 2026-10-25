@@ -35,16 +35,21 @@ struct GlassSettingsRowsTests {
 
     @Test("The Fill's rows are the Tint switch and Fill fade")
     @MainActor
-    func fillRows() {
+    func fillRows() throws {
         let rows = ColorsRowOrder.glassRows.filter {
             GlassCard.followsTheFill($0)
         }
         #expect(
             rows == [.kiwishelf(.tintHubAndPlates), .kiwishelf(.fillFade)]
         )
+        // The Fill sits right above the rows it greys (#2593), so
+        // their grey needs no sentence of its own.
+        let order = ColorsRowOrder.glassRows
+        let fill = try #require(order.firstIndex(of: .kiwishelf(.fillColor)))
+        #expect(Array(order[(fill + 1)...].prefix(2)) == rows)
     }
 
-    @Test("The rows grey on the switch and the Fill, and say why")
+    @Test("The rows grey on the switch and the Fill")
     func greysAreWired() throws {
         let card = try Self.squashed("Components/Looks/GlassCard.swift")
         #expect(card.contains("(Self.followsTheFill(key)&&fillIdle)"))
@@ -53,13 +58,6 @@ struct GlassSettingsRowsTests {
                 "!model.liquidGlassMaster.wrappedValue||!shelf.hasFill"
             )
         )
-        #expect(
-            card.contains(
-                "key==.kiwishelf(.fillFade),model.liquidGlassMaster"
-                    + ".wrappedValue,!shelf.hasFill"
-            )
-        )
-        #expect(card.contains("Text(noColourHelp)"))
     }
 
     /// 0 reads "Off" on the row and in the diff row alike.

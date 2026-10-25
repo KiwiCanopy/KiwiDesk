@@ -126,13 +126,36 @@ struct ColorsControls: Sendable {
         "colors.scene.title",
         "Current colors"
     )
-    /// Every colour, Liquid Glass and the sheen, in one shut
-    /// section under the palette (#2389), declared with its
-    /// rows so a hit inside it opens it (#1250).
-    let colorsAndGlass = SettingsDrawer(
+    /// Every colour, Liquid Glass and the sheen, in one section
+    /// under the palette (#2389): the finish open (#2593), the
+    /// colours in its one drawer.
+    let colorsAndGlass = SettingsControl(
         "colors.colors_and_glass.title",
-        "Colors & glass",
-        children: ColorsAndGlassControls()
+        "Colors & glass"
+    )
+    /// The Liquid Glass group AND its master row: one key for
+    /// both (`GlassCard.title`).
+    let liquidGlassGroup = SettingsControl(
+        "colors.liquid_glass",
+        "Liquid Glass"
+    )
+    /// The Fill, above the two rows it greys (#2593).
+    let tintShelfFill = SettingsControl("kiwishelf.color.fill", "Fill")
+    /// The Liquid Glass group's Fill rows (#2569).
+    let tintHubAndPlates = SettingsControl(
+        "kiwishelf.tint_hub_and_plates",
+        "Tint %1$@ and plates",
+        namesKiwiHub: true
+    )
+    let fillFade = SettingsControl("kiwishelf.fill_fade", "Fill fade")
+    let sheenStrength = SettingsControl("colors.sheen", "Sheen")
+    /// Every colour group but the Fill, shut on every visit
+    /// (#2593), declared with its rows so a hit inside it opens
+    /// it (#1250).
+    let colorsDrawer = SettingsDrawer(
+        "colors.colors_drawer.title",
+        "Colors",
+        children: ColorsDrawerControls()
     )
     let motionCard = SettingsControl(
         "behavior.animations.title",
@@ -177,25 +200,11 @@ struct MotionMoreControls: Sendable {
     )
 }
 
-/// Looks & Animations ▸ Colors & glass (#2389): each group's
-/// title, then its rows keyed on their census label keys, in
-/// the section's order. Each role group's colour lands on its
-/// group's title, since the two wells share one drawn label.
-struct ColorsAndGlassControls: Sendable {
-    /// The Liquid Glass group AND its master row: one key for
-    /// both (`GlassCard.title`).
-    let liquidGlassGroup = SettingsControl(
-        "colors.liquid_glass",
-        "Liquid Glass"
-    )
-    /// The Liquid Glass group's Fill rows (#2569).
-    let tintHubAndPlates = SettingsControl(
-        "kiwishelf.tint_hub_and_plates",
-        "Tint %1$@ and plates",
-        namesKiwiHub: true
-    )
-    let fillFade = SettingsControl("kiwishelf.fill_fade", "Fill fade")
-    let sheenStrength = SettingsControl("colors.sheen", "Sheen")
+/// Colors & glass ▸ Colors (#2389, #2593): each group's title,
+/// then its rows keyed on their census label keys, in the
+/// drawer's order. Each role group's colour lands on its group's
+/// title, since the two wells share one drawn label.
+struct ColorsDrawerControls: Sendable {
     /// The two role groups (#1857).
     let accentGroup = SettingsControl("colors.accent.title", "Accent")
     let secondAccentGroup = SettingsControl(
@@ -240,7 +249,6 @@ struct ColorsAndGlassControls: Sendable {
         "kiwishelf.colors.title",
         "KiwiShelf colors"
     )
-    let tintShelfFill = SettingsControl("kiwishelf.color.fill", "Fill")
     let tintShelfItem = SettingsControl("kiwishelf.color.item", "Item")
     let tintShelfHoverItem = SettingsControl(
         "kiwishelf.color.hover_item",
