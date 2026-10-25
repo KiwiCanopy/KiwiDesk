@@ -1557,7 +1557,8 @@ section {
 }
 /* Each card spans the track's two rows through subgrid, so every
    byline rule sits on one line whatever the quote or role wraps
-   to. */
+   to; the source line pins to the byline's foot the same way
+   (#2613). */
 .voices__track > li,
 .voice {
   display: grid;
@@ -1632,6 +1633,7 @@ section {
 }
 .voice__meta {
   min-width: 0;
+  align-self: stretch;
   display: flex;
   flex-direction: column;
   line-height: 1.3;
@@ -1659,10 +1661,17 @@ section {
   margin-top: 0.15rem;
 }
 .voice__src {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
   color: var(--text-faint);
   font-size: 0.78rem;
-  margin-top: 0.2rem;
+  margin-top: auto;
+  padding-top: 0.2rem;
   overflow-wrap: anywhere;
+}
+.voice__src svg {
+  flex: none;
 }
 :root[data-mode="dev"] .voice__mono {
   font-family: var(--mono);
