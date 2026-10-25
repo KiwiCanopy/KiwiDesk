@@ -10,6 +10,18 @@ enum MCPToolSchema {
         ])
     }
 
+    /// A string property limited to `values`.
+    static func choice(
+        _ description: String,
+        _ values: [String]
+    ) -> JSONValue {
+        .object([
+            "type": .string("string"),
+            "description": .string(description),
+            "enum": .array(values.map(JSONValue.string)),
+        ])
+    }
+
     /// One record argument as a property: its JSON type from the
     /// argument's kind, a choice's values as its enum.
     static func property(

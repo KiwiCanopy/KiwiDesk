@@ -214,6 +214,7 @@ struct ShortcutsSection: View {
                 Text(advancedDrawerCaption)
                     .font(.caption)
                     .foregroundStyle(.secondary)
+                ActionsListLink()
                 AdvancedLuaGroup(
                     model: model,
                     bindings: bindingsBinding

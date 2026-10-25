@@ -98,7 +98,9 @@ struct CLIHelpSeamTests {
     func oneImplementation() throws {
         let help = try Self.source("CLIHelp.swift")
         #expect(
-            help.contains("APIReference.helpResponse(for: topic)"),
+            help.contains(
+                "APIReference.helpResponse(for: topic, kind: kind)"
+            ),
             "the payload must be the dispatcher's own answer"
         )
     }

@@ -141,6 +141,20 @@ Each command object also carries `destructive`: `true` for a
 command that cannot be undone
 ([Using KiwiDesk from AI Apps](#using-kiwidesk-from-ai-apps)).
 
+:::unreleased
+Each command object carries `kind`: `action` for a command that
+does something, `setting` for one that changes a value, `query`
+for one that only answers. `--kind action`, `--kind setting` or
+`--kind query` keeps only that kind, in text or JSON:
+
+```sh
+kiwidesk list_commands --kind action
+```
+
+`--kind` lists; with a command name it is an error. The
+[Actions](commands.md) page lists every action a key can run.
+:::
+
 The Swift type an enum's values were read from is **not** a JSON
 field; it appears in the terminal rendering only. `values` is
 what answers "what may I send".
@@ -233,6 +247,11 @@ hint, which an AI app that honours it turns into a question to you
 before the command runs. A shortcut verb saves at once, so `run`
 tells the AI app to show you the mapping and ask first. `subscribe` and the Lua-only verbs are
 not offered.
+
+:::unreleased
+The `list_commands` tool also takes `kind` (`action`, `setting` or
+`query`), and each row it returns carries its `kind`.
+:::
 
 An AI app reads Config Issues and the sync folder's status by
 sending `get_config_status` through `run`. When `keep` cannot write

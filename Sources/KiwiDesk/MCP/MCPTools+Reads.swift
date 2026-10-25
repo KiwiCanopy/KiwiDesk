@@ -15,14 +15,22 @@ extension MCPTools {
             title: "List KiwiDesk commands",
             "Lists the commands run can send, one line each. Pass "
                 + "filter to keep only names, groups or summaries "
-                + "containing it.",
+                + "containing it, and kind to keep only actions, "
+                + "settings or queries.",
             properties: [
-                "filter": MCPToolSchema.string("Text to match, any case.")
+                "filter": MCPToolSchema.string("Text to match, any case."),
+                "kind": MCPToolSchema.choice(
+                    "What the command is for.",
+                    APIKind.allCases.map(\.rawValue)
+                ),
             ],
             readOnly: true
         ),
         handle: { _, arguments in
-            listing(filter: arguments["filter"]?.stringValue)
+            listing(
+                filter: arguments["filter"]?.stringValue,
+                kind: arguments["kind"]?.stringValue
+            )
         }
     )
 
@@ -58,11 +66,16 @@ extension MCPTools {
         }
     )
 
-    static func listing(filter: String?) -> JSONValue {
+    static func listing(filter: String?, kind: String? = nil) -> JSONValue {
+        let wanted = kind.flatMap(APIKind.init(rawValue:))
+        if let kind, wanted == nil {
+            let kinds = APIKind.allCases.map(\.rawValue)
+                .joined(separator: ", ")
+            return failure("unknown kind: \(kind) (expected \(kinds))")
+        }
         let needle = filter?.lowercased() ?? ""
-        let rows = APIReference.groups.flatMap(\.entries).filter {
-            isRunnable($0)
-        }.filter { entry in
+        let entries = APIReference.groups(of: wanted).flatMap(\.entries)
+        let rows = entries.filter(isRunnable).filter { entry in
             needle.isEmpty
                 || [entry.qualifiedName, entry.group, entry.record.summary]
                     .contains { $0.lowercased().contains(needle) }
@@ -81,6 +94,7 @@ extension MCPTools {
                 "name": .string(entry.qualifiedName),
                 "summary": .string(entry.record.summary),
                 "destructive": .bool(APIReference.isDestructive(entry)),
+                "kind": .string(APIReference.kind(of: entry).rawValue),
             ])
         }
         return result(

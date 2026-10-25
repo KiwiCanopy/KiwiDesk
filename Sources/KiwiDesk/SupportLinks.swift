@@ -27,6 +27,13 @@ enum SupportLinks {
         site.appendingPathComponent("changelog", isDirectory: true)
     }
 
+    /// The generated list of actions a key can run (#2610),
+    /// English-only like every reference page.
+    static var actions: URL {
+        site.appendingPathComponent("docs", isDirectory: true)
+            .appendingPathComponent("commands", isDirectory: true)
+    }
+
     /// GitHub Releases — KiwiDesk's changelog (#570). Linked for
     /// the NOTES, not as a download: `docs/design-decisions.md` ▸
     /// "No distribution channel without an update path" governs
