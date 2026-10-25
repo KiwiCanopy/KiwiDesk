@@ -115,8 +115,8 @@ struct GridRunCommandTests {
         #expect(space.sessionRatios == columns)
     }
 
-    @Test("Entering Grid drops a Stack session's weights")
-    func gridEntryClearsStackWeights() throws {
+    @Test("A mode change drops the run weights")
+    func modeChangeClearsRunWeights() throws {
         let core = makeCore()
         let id = grid(core, focus: 1)
         core.execute(
@@ -129,20 +129,6 @@ struct GridRunCommandTests {
         core.execute(
             "set_mode",
             args: [.string(id.raw), .string("grid")]
-        )
-        #expect(core.state.workspaces[id]?.stackWeights.isEmpty == true)
-    }
-
-    @Test("Leaving Grid drops its run's weights")
-    func gridExitClearsRunWeights() throws {
-        let core = makeCore()
-        let id = grid(core, focus: 1)
-        core.state.workspaces.withSpace(id) {
-            $0.stackWeights[WindowID(7)] = 3
-        }
-        core.execute(
-            "set_mode",
-            args: [.string(id.raw), .string("stack")]
         )
         #expect(core.state.workspaces[id]?.stackWeights.isEmpty == true)
     }

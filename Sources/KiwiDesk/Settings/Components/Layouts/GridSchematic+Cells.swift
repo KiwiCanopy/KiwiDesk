@@ -60,7 +60,9 @@ extension GridSchematic {
     /// track holds its window, and the rest scroll through that
     /// track as the engine's own run places them (`ZoneRun`), the
     /// incoming window taking the focus; each end that hides
-    /// windows counts them.
+    /// windows counts them. One unit floor per cell over a span of
+    /// `line` cells is the fixed grid's run: equal cells, no app
+    /// floors to learn.
     func scrolledCells(
         _ ids: [Int],
         cols: Int,

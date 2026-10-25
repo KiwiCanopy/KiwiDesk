@@ -82,12 +82,12 @@ extension KiwiCore {
             return .fail("no focused tiled window")
         }
         let horizontal = axis == "x"
-        // An auto-sized grid lays its run by floor and weight, not
-        // by column, so a press along it moves the run's own
-        // weights (#2541).
-        if shape.scrolls, context.grid.autoSize,
-            horizontal == shape.rowMajor,
+        // A run that lays its members by floor and weight, not by
+        // column, takes a press along it as a run weight (#2541).
+        if shape.scrolls, horizontal == shape.rowMajor,
             index >= GridLayout.runStart(of: shape),
+            GridLayout.zones(for: tiled, in: context)?.first?
+                .drawsSlots(in: context) == false,
             let response = resizeInRun(
                 window,
                 axis: axis,

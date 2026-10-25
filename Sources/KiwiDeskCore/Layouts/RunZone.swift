@@ -95,6 +95,17 @@ public struct RunZone: Sendable, Equatable {
         return frames
     }
 
+    /// Whether the run draws its fixed cells — every shown member's
+    /// floor fits its cell — rather than laying its members by
+    /// floor and weight. The one verdict the render and a resize
+    /// press share (#2541); false for a zone with no `slots`.
+    public func drawsSlots(in context: LayoutContext) -> Bool {
+        guard let run = placement(in: context).run else {
+            return slots != nil
+        }
+        return cellRects(run, in: context) != nil
+    }
+
     /// The fixed cells as the run's frames, a hidden member handed
     /// the edge cell it waits beyond; nil unless every cell is
     /// filled by a window whose floor fits it — the cells' lengths
