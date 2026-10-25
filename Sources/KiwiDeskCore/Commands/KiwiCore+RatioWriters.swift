@@ -202,9 +202,10 @@ extension KiwiCore {
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
         let horizontal = axis == "x"
         let screen = TilingEngine.screen(for: space.id, in: state)
-        // A run's parked windows answer to no ratio (#2542).
-        let slots = shownSlots()
+        let slots = tiler.calculatedFrames(state: state)
         let tiled = state.effectiveTiledMembers(of: space)
+        // The scrolled chain classifies as one block (#2542).
+        let chain = screen.flatMap { bspChain(of: space, on: $0)?.zone }
         // No display to classify against: the caps still hold on
         // the global floor, and nothing here can name a window.
         let sides = screen.map { screen in
@@ -212,7 +213,8 @@ extension KiwiCore {
                 of: tiled,
                 slots: slots,
                 bounds: tiler.layoutBounds(on: screen, for: space),
-                horizontal: horizontal
+                horizontal: horizontal,
+                chain: chain
             )
         }
         let lowMin = effectiveMinSize(
@@ -252,7 +254,8 @@ extension KiwiCore {
                 of: tiled,
                 slots: slots,
                 bounds: tiler.layoutBounds(on: screen, for: space),
-                horizontal: !horizontal
+                horizontal: !horizontal,
+                chain: chain
             )
             if !across.first.isEmpty || !across.second.isEmpty {
                 refuseAxisAbsent(focused, axis: axis)

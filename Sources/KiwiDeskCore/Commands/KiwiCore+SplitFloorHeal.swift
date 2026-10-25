@@ -71,11 +71,6 @@ extension KiwiCore {
         )
         let context = input.context
         guard !context.probesBeyondBounds else { return }
-        // A BSP run's parked window answers to no ratio, and its
-        // slot at the hide corner would sort it onto a side; the
-        // chain's thickness is the layout's (#2542).
-        let parked = parkedByRun(input)
-        let placed = tiled.filter { !parked.contains($0) }
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let slots = LayoutEngine.calculate(
             mode: input.space.mode,
@@ -85,13 +80,17 @@ extension KiwiCore {
         var cues: Set<SplitFloorCue> = []
         switch space.mode {
         case .bsp:
+            // The scrolled chain classifies as one block (#2542).
+            let chain = BspLayout.zones(for: input.tiled, in: context)?
+                .first.flatMap { $0.piles(in: context) ? nil : $0 }
             for axis in ["x", "y"] {
                 let horizontal = axis == "x"
                 let sides = BspSplit.sides(
-                    of: placed,
+                    of: tiled,
                     slots: slots,
                     bounds: bounds,
-                    horizontal: horizontal
+                    horizontal: horizontal,
+                    chain: chain
                 )
                 healSplit(
                     axis: axis,

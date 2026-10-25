@@ -6,7 +6,7 @@ import Testing
 
 /// `list_windows` per layout (#2492): a floating-mode Space judges
 /// its members as floats, a scrolling cut names its side, a bsp pile
-/// reads its covered member covered, a monocle park reports no
+/// reads its covered member's top band, a monocle park reports no
 /// frame, a full-screen window no verdict — and the keys it shares
 /// with `explain_window` answer alike.
 @Suite("list_windows layouts", .serialized)
@@ -98,17 +98,18 @@ struct ListWindowsLayoutTests {
         #expect(seen[2]?["visibility"] == .string("partly_left"))
     }
 
-    /// Two minimum-size windows do not fit side by side, so bsp
-    /// piles them, the second 40 pt lower. Focused, the lower one is
-    /// in front and covers the upper one, which the screen's edge
-    /// does not cut — so only the coverage judgement hides it.
-    @Test("A pile's covered member reads hidden")
+    /// Not even one minimum-size window fits, so bsp piles them,
+    /// the second 40 pt lower (two that only miss side by side
+    /// scroll instead, #2542). Focused, the lower one is in front
+    /// and covers the upper one but for its top band, so the
+    /// coverage judgement reads that band, not the whole window.
+    @Test("A pile's covered member reads only its top band")
     func pileCoveredMember() throws {
         let core = makeCore(mode: "bsp", windows: [window(1), window(2)])
-        core.execute("set_min_window_size", args: [.number(600)])
+        core.execute("set_min_window_size", args: [.number(1100)])
         core.state.apply(.windowFocused(WindowID(2)))
         let seen = try entries(core)
-        #expect(seen[1]?["visibility"] == .string("hidden"))
+        #expect(seen[1]?["visibility"] == .string("partly_top"))
         #expect(seen[1]?["shown"] == .bool(true))
     }
 

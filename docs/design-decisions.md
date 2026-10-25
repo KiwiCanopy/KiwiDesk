@@ -4345,22 +4345,25 @@ whose learned minimum is larger than the floor still fits; across
 it the region holds one floor, and an app whose minimum exceeds
 the floor — common — could not fit there at all (owner,
 2026-10-25). The whole chain scrolls, not the last slot alone, so
-on a wide screen under `longest_side` the row scrolls and on a
-laptop the right column does. Windows split off in the other
-direction stay put, and before anything overflows the dwindle is
-unchanged.
+every window the last same-direction splits placed moves as one
+line, the way a Grid's last track does. Windows split off in the
+other direction stay put, and before anything overflows the
+dwindle is unchanged.
 
 *The line is as thick as its widest member needs.* Across the
 scroll axis the split before the chain gives the line the
 largest learned minimum of all its members, hidden ones included,
 so it keeps its size as it scrolls; the window split off there
-keeps `min_window_size`.
+keeps `min_window_size`, which caps the line where the two
+cannot both be met.
 
-*A mark facing a fixed window straddles the gap.* Under
-`alternating` the line can start beside a fixed window, so that
-end's mark sits across the inner gap and covers a few points of
-the neighbour, rather than inside the line, where it would cover
-more of the edge window (owner, 2026-10-25).
+*A mark facing a fixed window straddles the gap.* The line can
+start beside a fixed window — under `alternating` once two
+splits precede it, and under `longest_side` too wherever the
+splits turned and turned back — so that end's mark sits across
+the inner gap and covers a few points of the neighbour, rather
+than inside the line, where it would cover more of the edge
+window (owner, 2026-10-25).
 
 *The pile stays the last resort.* Only a region that cannot hold
 one window at `min_window_size` still cascades, matching the
@@ -4394,9 +4397,9 @@ rather than piling — the shared per-space scalar ratio needs no
 per-node tree for this, because the clamp runs against each
 region's own span. Both BSP interactive paths (keyboard `resize`,
 mouse drag) cap their writes too
-(`SplitDomain.cappedRatioWrite`), and the pile stays reserved for
-a region genuinely too narrow for two min-size windows at any
-ratio. (#44, #383)
+(`SplitDomain.cappedRatioWrite`), and a region genuinely too
+narrow for two min-size windows at any ratio is the overflow's to
+answer, never the ratio's (#2542, above). (#44, #383)
 
 **BSP keyboard resize is focus-aware in *direction* only — and
 some nested windows cannot grow. Accepted, by architecture.**
@@ -13820,8 +13823,9 @@ all-day tool with constantly-hammered directional keys makes an
 audible per-wall tick worse than silence.
 
 A third refusal — swapping a *sticky focused* window onto a target
-buried in an overflow pile the sticky is itself exempt from — had
-its own worded pill (#438) while a layout piled part of a Space.
+buried in an overflow pile the sticky is itself exempt from — gets
+its own worded pill (#438) wherever a layout piles part of a
+Space.
 
 :::unreleased
 Since every overflow scrolls and only a whole Space piles (#2542),

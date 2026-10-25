@@ -90,6 +90,9 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+ResizeBsp.swift": (
             .slots, "the focus sign reads the slot's side"
         ),
+        "KiwiCore+ResizeBspChain.swift": (
+            .slots, "a drag's side and the other axis read the slots"
+        ),
         "KiwiCore+RunRest.swift": (
             .slots,
             "`shownSlots()`, the slots without a run's hidden windows "
@@ -108,7 +111,6 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+NavigateCommand.swift",
         "KiwiCore+FocusEdge.swift",
         "KiwiCore+TrackNavigate.swift",
-        "KiwiCore+RatioWriters.swift",
     ]
 
     /// The `.slots` readers that may take the raw slots, each with
@@ -128,6 +130,10 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+ZOrder.swift":
             "a whole-zone pile's cascade; a run takes its own restore",
         "KiwiCore+ResizeScrollSlot.swift": "Scrolling draws no run",
+        "KiwiCore+RatioWriters.swift":
+            "a scrolled chain classifies by its region (#2542)",
+        "KiwiCore+ResizeBspChain.swift":
+            "a scrolled chain classifies by its region (#2542)",
         "KiwiCore+ResizeBsp.swift":
             "the focused window's own side, which a run always shows",
     ]

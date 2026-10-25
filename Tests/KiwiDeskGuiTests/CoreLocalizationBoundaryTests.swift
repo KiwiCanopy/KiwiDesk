@@ -74,10 +74,10 @@ struct CoreLocalizationBoundaryTests {
         // a `KiwiCore` extension authoring pill sentences that
         // it hands to `StickyMarkManager.flash`. It is exempt
         // because the renderer is also in Core, so if the
-        // overlays ever move to `Sources/KiwiDesk` these four
+        // overlays ever move to `Sources/KiwiDesk` these three
         // become real violations, with no compiler event to say
         // so. Re-check this entry if that move happens.
-        "App/KiwiCore+StickyMarks.swift": 4,
+        "App/KiwiCore+StickyMarks.swift": 3,
         // The refusal pills (#933, #1055, #1091, widened #1255,
         // #1258) are the same shape as `+StickyMarks`: sentences
         // authored in Core for the Core-drawn `SizeLimitOverlay`,

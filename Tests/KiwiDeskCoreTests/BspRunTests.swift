@@ -117,7 +117,7 @@ struct BspRunTests {
         let zone = try #require(BspLayout.zones(for: six, in: ctx)?.first)
         #expect(!zone.vertical)
         #expect(zone.members == Array(ids[2..<6]))
-        let bounds = try #require(zone.markBounds)
+        let bounds = zone.markBounds(in: ctx)
         #expect(bounds.minX == zone.region.minX - 5 - OverflowMark.depth / 2)
         #expect(bounds.maxX == ctx.bounds.maxX)
         let cover = try #require(

@@ -19,10 +19,10 @@ bite large test PRs:
   pinned (parking and bar geometry run against the real display).
   Reproduce a CI-only geometry failure by raising
   `min_window_size` until the same threshold trips — below
-  `2 * min_window_size` BSP scrolls the pair (#2542), and below
-  `min_window_size` it falls back to an `OverlapStack` pile; the
-  pile is how three reachability assertions failed on a narrow
-  runner and passed on a dev Mac (#523). A pile's signature is
+  `2 * min_window_size` BSP scrolls the whole Space (#2542), and
+  below `min_window_size` it falls back to an `OverlapStack` pile;
+  the pile is how three reachability assertions failed on a
+  narrow runner and passed on a dev Mac (#523). A pile's signature is
   equal `minX` with midYs exactly `OverlapStack.offset` (40 pt,
   vertical-only) apart; a scroll's is one window across the
   region and the rest parked at the hide corner.

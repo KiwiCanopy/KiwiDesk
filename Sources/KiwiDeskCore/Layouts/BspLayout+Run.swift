@@ -98,44 +98,8 @@ extension BspLayout {
             zone: RunZone(
                 members: members,
                 region: region,
-                vertical: vertical,
-                markBounds: markBounds(region, vertical: vertical, context)
+                vertical: vertical
             )
         )
-    }
-
-    /// The bounds the chain's marks sit flush with: the layout
-    /// bounds, save an end facing a fixed window, where the mark
-    /// straddles the inner gap (owner, 2026-10-25).
-    private static func markBounds(
-        _ region: CGRect,
-        vertical: Bool,
-        _ context: LayoutContext
-    ) -> CGRect {
-        let usable = context.usable
-        let reach =
-            (vertical
-                ? context.gaps.inner.vertical
-                : context.gaps.inner.horizontal) / 2
-            + OverflowMark.depth / 2
-        var bounds = context.bounds
-        if vertical {
-            if region.minY > usable.minY + 0.5 {
-                bounds.origin.y = region.minY - reach
-                bounds.size.height = context.bounds.maxY - bounds.minY
-            }
-            if region.maxY < usable.maxY - 0.5 {
-                bounds.size.height = region.maxY + reach - bounds.minY
-            }
-        } else {
-            if region.minX > usable.minX + 0.5 {
-                bounds.origin.x = region.minX - reach
-                bounds.size.width = context.bounds.maxX - bounds.minX
-            }
-            if region.maxX < usable.maxX - 0.5 {
-                bounds.size.width = region.maxX + reach - bounds.minX
-            }
-        }
-        return bounds
     }
 }

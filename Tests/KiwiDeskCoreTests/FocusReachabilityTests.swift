@@ -109,10 +109,10 @@ struct BspFocusReachabilityTests {
         // the pinned 1920pt display the bottom-right region is
         // 929pt wide (the 32pt Space Bar strip and the 10pt gaps
         // come off first), well clear of the 2 * min threshold
-        // below which BspLayout correctly falls back to an
-        // OverlapStack pile (#383/#44) instead of the pair
-        // asserted here. That threshold is what a narrow host
-        // display used to trip. Pinned, not assumed — this suite
+        // below which BspLayout scrolls the region (#2542)
+        // instead of tiling the pair asserted here. That
+        // threshold is what a narrow host display used to trip.
+        // Pinned, not assumed — this suite
         // now describes something else if the default moves.
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         spawn(core, count: 4)

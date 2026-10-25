@@ -16,28 +16,56 @@ public struct RunZone: Sendable, Equatable {
     /// them by floor and weight. Nil sizes the run from its
     /// members' floors alone.
     public let slots: [CGRect]?
-    /// The bounds the run's overflow marks sit flush with; nil
-    /// takes the layout bounds. A BSP chain inside the screen sets
-    /// it so an end facing a fixed window straddles the gap (#2542).
-    public let markBounds: CGRect?
 
     public init(
         members: [WindowID],
         region: CGRect,
         vertical: Bool,
-        slots: [CGRect]? = nil,
-        markBounds: CGRect? = nil
+        slots: [CGRect]? = nil
     ) {
         self.members = members
         self.region = region
         self.vertical = vertical
         self.slots = slots
-        self.markBounds = markBounds
+    }
+
+    /// The bounds the run's overflow marks sit flush with: the
+    /// layout bounds, save an end facing a window inside the
+    /// usable area, where the mark straddles the inner gap
+    /// (#2542, owner 2026-10-25).
+    public func markBounds(in context: LayoutContext) -> CGRect {
+        let usable = context.usable
+        let reach =
+            (vertical
+                ? context.gaps.inner.vertical
+                : context.gaps.inner.horizontal) / 2
+            + OverflowMark.depth / 2
+        var bounds = context.bounds
+        if vertical {
+            if region.minY > usable.minY + 0.5 {
+                bounds.size.height = bounds.maxY - (region.minY - reach)
+                bounds.origin.y = region.minY - reach
+            }
+            if region.maxY < usable.maxY - 0.5 {
+                bounds.size.height = region.maxY + reach - bounds.minY
+            }
+        } else {
+            if region.minX > usable.minX + 0.5 {
+                bounds.size.width = bounds.maxX - (region.minX - reach)
+                bounds.origin.x = region.minX - reach
+            }
+            if region.maxX < usable.maxX - 0.5 {
+                bounds.size.width = region.maxX + reach - bounds.minX
+            }
+        }
+        return bounds
     }
 
     /// The zones `mode` lays `tiled` along, nil for a layout that
-    /// scrolls none or where every window piles over the whole
-    /// area. The one switch every run reader takes.
+    /// scrolls none or, for Stack, Track and Grid, where every
+    /// window piles over the whole area — BSP hands that pile in
+    /// as a zone that piles. The one switch every run reader
+    /// takes.
     public static func zones(
         mode: LayoutMode,
         tiled: [WindowID],
@@ -57,6 +85,12 @@ public struct RunZone: Sendable, Equatable {
     /// even one window at the minimum size and piles whole.
     public func run(in context: LayoutContext) -> ZoneRun? {
         placement(in: context).run
+    }
+
+    /// Whether the zone cannot hold even one window at the
+    /// minimum size and piles whole (#44).
+    public func piles(in context: LayoutContext) -> Bool {
+        placement(in: context).piles
     }
 
     /// Frames for every member.

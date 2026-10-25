@@ -167,6 +167,18 @@ extension KiwiCore {
         // per-side effective minimums, and the refusal cues
         // when the drag ran into one.
         case .bspRatioH(let delta):
+            // A drag along a scrolled chain is a run weight (#2542).
+            if let window,
+                resizeBspChain(
+                    window,
+                    axis: "x",
+                    ratioDelta: delta,
+                    bounds: bounds,
+                    space: space
+                )
+            {
+                break
+            }
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioH
@@ -178,6 +190,17 @@ extension KiwiCore {
                 focused: window
             )
         case .bspRatioV(let delta):
+            if let window,
+                resizeBspChain(
+                    window,
+                    axis: "y",
+                    ratioDelta: delta,
+                    bounds: bounds,
+                    space: space
+                )
+            {
+                break
+            }
             let base =
                 tiler.settings.resolvedBsp(for: space)
                 .splitRatioV

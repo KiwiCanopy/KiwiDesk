@@ -20,7 +20,10 @@ struct BspRunCommandTests {
     /// Four windows over 1000 × 720 at 10-pt gaps, alternating:
     /// w1 stays left, and the vertical chain w2…w4 shows two and
     /// parks the third.
-    private func makeCore(focus: UInt32) -> (KiwiCore, SpaceID) {
+    private func makeCore(
+        focus: UInt32,
+        height: CGFloat = 720
+    ) -> (KiwiCore, SpaceID) {
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -29,7 +32,7 @@ struct BspRunCommandTests {
                 )
         )
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1000, height: 720)
+            CGRect(x: 0, y: 0, width: 1000, height: height)
         }
         core.tiler.settings.gapsGlobal = Gaps.uniform(10)
         // No shelf strip, so the pinned rect is the layout's.
@@ -111,23 +114,23 @@ struct BspRunCommandTests {
     @Test("The split floor heal reads no parked window")
     func healSkipsTheParkedWindow() throws {
         let (core, id) = makeCore(focus: 2)
-        // A tall floor on the parked w4 would move the stacked
-        // ratio for a window no ratio places.
+        // A floor on the parked w4 that fits beside w2's would
+        // move the stacked ratio for a window no ratio places.
         let w4 = WindowID(4)
         for step in [CGFloat(60), CGFloat(110)] {
             for _ in 0..<2 {
                 core.tiler.boundLearner.recordAsk(
                     w4,
-                    size: CGSize(width: 585, height: 500 - step)
+                    size: CGSize(width: 585, height: 370 - step)
                 )
                 core.tiler.boundLearner.observe(
                     w4,
-                    currentSize: CGSize(width: 585, height: 500),
+                    currentSize: CGSize(width: 585, height: 370),
                     settledRead: true
                 )
             }
         }
-        #expect(core.tiler.sizeBound(for: w4)?.minHeight == 500)
+        #expect(core.tiler.sizeBound(for: w4)?.minHeight == 370)
         core.retile(animated: false)
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(run.hiddenAfter.contains(w4))
@@ -135,6 +138,52 @@ struct BspRunCommandTests {
         #expect(
             core.tiler.settings.resolvedBsp(for: space).splitRatioV
                 == 0.5
+        )
+    }
+
+    @Test("A press along a chain that fits moves its weights")
+    func fittingChainTakesWeights() throws {
+        // 1100 tall: the chain w2…w4 fits whole, so no run hides
+        // and the line is shared by weight alone.
+        let (core, id) = makeCore(focus: 2, height: 1100)
+        #expect(core.tiler.runCovers[id]?.runs.isEmpty == true)
+        let before = try #require(core.state.workspaces[id])
+        let ratio = core.tiler.settings.resolvedBsp(for: before)
+            .splitRatioV
+        #expect(
+            core.execute(
+                "resize",
+                args: [.string("y"), .number(40)]
+            ).isSuccess
+        )
+        let space = try #require(core.state.workspaces[id])
+        #expect((space.stackWeights[WindowID(2)] ?? 1) > 1)
+        #expect(
+            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+                == ratio
+        )
+    }
+
+    @Test("A drag along the chain moves its weights, not a ratio")
+    func dragAlongTheChainTakesRunWeights() throws {
+        let (core, id) = makeCore(focus: 2)
+        core.tiler.settings.mouseResize = .layout
+        let run = try #require(core.tiler.runCovers[id]?.runs.first)
+        let window = try #require(run.shown.first)
+        let slot = try #require(
+            core.tiler.calculatedFrames(state: core.state)[window]
+        )
+        let before = try #require(core.state.workspaces[id])
+        let ratio = core.tiler.settings.resolvedBsp(for: before)
+            .splitRatioV
+        var grown = slot
+        grown.size.height += 40
+        core.handleResizeEnd(window, slot: slot, frame: grown, in: before)
+        let space = try #require(core.state.workspaces[id])
+        #expect((space.stackWeights[window] ?? 1) > 1)
+        #expect(
+            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+                == ratio
         )
     }
 }

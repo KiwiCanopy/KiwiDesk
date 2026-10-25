@@ -10,8 +10,8 @@ private let w3 = WindowID(3)
 
 /// #383: an extreme BSP split ratio is clamped at render time to
 /// the widest value that keeps BOTH sides ≥ `min_window_size` —
-/// the overlap cascade stays reserved for a region genuinely too
-/// narrow for two min-size windows at any ratio. The clamp runs
+/// a region genuinely too narrow for two min-size windows at any
+/// ratio scrolls instead (#2542). The clamp runs
 /// per region, so it holds at every recursion depth despite the
 /// shared per-space scalar ratio. Mirrors the stack (#44).
 @Suite("BSP split-ratio clamp (#383)")
