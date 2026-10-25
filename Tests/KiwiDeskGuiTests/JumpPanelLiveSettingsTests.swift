@@ -15,6 +15,8 @@ import Testing
 struct JumpPanelLiveSettingsTests {
     private func shown() -> (JumpPanelController, KiwiCore) {
         let core = makeTestCore()
+        // Off the default, so the read at open is seen.
+        core.tiler.settings.kiwishelf.fillColor = "#102030B3"
         let controller = JumpPanelController(core: core)
         controller.reduceMotion = { true }
         controller.handBack.isAppActive = { true }
@@ -30,6 +32,7 @@ struct JumpPanelLiveSettingsTests {
     func fillReachesThePanel() throws {
         let (controller, core) = shown()
         let model = try #require(controller.currentModel)
+        #expect(model.settings == core.tiler.settings)
         let hex = "#3A1F5CB3"
         #expect(model.settings.kiwishelf.fillColor != hex)
         _ = core.execute("kiwishelf.set_fill_color", args: [.string(hex)])
