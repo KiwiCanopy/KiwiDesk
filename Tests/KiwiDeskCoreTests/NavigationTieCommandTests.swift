@@ -123,6 +123,33 @@ struct NavigationTieCommandTests {
         )
     }
 
+    /// #2603's laptop case under `alternating`: 1 on the left,
+    /// 2 over the bottom-right pair 3 | 4.
+    @Test("BSP: the big neighbour first, then the tree's pairs")
+    func bspAlternating() {
+        let core = makeCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 0, width: 1440, height: 900)
+        }
+        core.execute("bsp.set_strategy", args: [.string("alternating")])
+        core.execute("set_mode", args: [.string("1"), .string("bsp")])
+        add(4, to: core)
+        let space = core.state.workspaces.space(of: WindowID(1))!
+        let steps: [(UInt32, String, UInt32)] = [
+            (1, "right", 2), (2, "down", 3), (4, "left", 3), (3, "up", 2),
+        ]
+        for (from, key, to) in steps {
+            core.state.workspaces.focus(WindowID(from), in: space)
+            #expect(
+                core.execute("focus", args: [.string(key)]).isSuccess
+            )
+            #expect(
+                core.activeSpace?.focused == WindowID(to),
+                "\(key) from \(from)"
+            )
+        }
+    }
+
     @Test("Across tracks, top maps to top and bottom to bottom")
     func trackMapsByCentre() {
         // Tracks [1, 2] and [3, 4, 5].
