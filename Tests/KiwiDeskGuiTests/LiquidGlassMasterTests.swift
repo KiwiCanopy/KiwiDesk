@@ -120,7 +120,9 @@ struct LiquidGlassMasterTests {
     /// stop HANDING it to the material.
     ///
     /// The key panel (#1875) wears the leaf the retired ⌃⌥K sheet
-    /// wore, the Shortcuts side now one of its sides (#2246).
+    /// wore, the Shortcuts side now one of its sides (#2246); it
+    /// reads it through `PanelGlass` over the live settings
+    /// (#2604, `JumpPanelLiveSettingsTests`).
     @Test("the panels are wired to the setting they store")
     func panelReadsTheSetting() throws {
         let gui = SourceScan.repoRoot(from: #filePath)
@@ -143,13 +145,13 @@ struct LiquidGlassMasterTests {
         }
         #expect(
             try source("JumpPanelController.swift")
-                .contains("settings.shortcutPanelLiquidGlass"),
-            "Jump to window no longer reads the stored leaf."
+                .contains("model.settings=core.tiler.settings"),
+            "KiwiHub no longer reads the stored settings."
         )
         #expect(
             try source("JumpPanelView.swift")
-                .contains("glass.enabled=liquidGlass"),
-            "Jump to window no longer hands its setting on."
+                .contains("PanelGlass(settings:model.settings)"),
+            "KiwiHub no longer hands its settings to the glass."
         )
     }
 

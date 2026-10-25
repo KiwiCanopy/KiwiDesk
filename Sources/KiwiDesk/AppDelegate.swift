@@ -177,6 +177,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate,
         wireBootNotice()
         wireCuePlate()
         wireKiwiVision()
+        wireSettingsReaders()
 
         // The error surface (#68 §3.7): the badge and the
         // standalone panel track the last config load.

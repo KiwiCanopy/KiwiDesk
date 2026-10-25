@@ -8,11 +8,6 @@ import SwiftUI
 /// Native like the shortcuts panel — system font, untinted glass.
 struct JumpPanelView: View {
     @ObservedObject var model: JumpModel
-    /// The live tuning the layout tiles draw.
-    let settings: TilingSettings
-    /// The #1307 switch's keyboard-panel leaf, read by the
-    /// controller from the active profile.
-    let liquidGlass: Bool
     /// This opening, which the entrance and the fade out read.
     let presence: PanelPresence
     /// The panel's width on its screen, from the controller.
@@ -56,12 +51,8 @@ struct JumpPanelView: View {
             .panelEntrance(presence)
     }
 
-    /// The settings' panel glass, on the leaf the controller read.
-    private var panelGlass: PanelGlass {
-        var glass = PanelGlass(settings: settings)
-        glass.enabled = liquidGlass
-        return glass
-    }
+    /// The live settings' panel glass (#2604).
+    var panelGlass: PanelGlass { PanelGlass(settings: model.settings) }
 
     private var side: some View {
         VStack(spacing: 0) {
@@ -143,7 +134,7 @@ struct JumpPanelView: View {
             } else if let view = model.view {
                 JumpViewSide(
                     list: view,
-                    settings: settings,
+                    settings: model.settings,
                     commandHeld: model.commandHeld,
                     hover: model.hover,
                     onApply: { model.clickItem($0) },

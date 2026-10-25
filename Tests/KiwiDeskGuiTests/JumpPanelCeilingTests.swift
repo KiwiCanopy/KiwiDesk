@@ -49,8 +49,6 @@ struct JumpPanelCeilingTests {
         if scope != .windows { model.setScope(scope) }
         let view = JumpPanelView(
             model: model,
-            settings: TilingSettings(),
-            liquidGlass: false,
             presence: PanelPresence(),
             width: JumpPanelView.width
         )

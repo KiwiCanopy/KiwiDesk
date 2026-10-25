@@ -1877,6 +1877,15 @@ Obligations:
   separator untinted, never a bare `Divider()` (#2596,
   `KiwiHubDividerTests`, which scans `Jump/` and `CuePlate/`;
   `PanelDividerContrastTests`).
+- **A panel held open over the settings draws them live**
+  (#2604). KiwiHub reads its glass, Fill and tiles from its
+  model's `settings`, which `AppDelegate.settingsReadersChanged`
+  refreshes off Core's one `onSettingsChange`; a further surface
+  that stays up over `TilingSettings` joins that fan-out rather
+  than drawing a copy taken when it opened, and never assigns the
+  hook a second time (`JumpPanelLiveSettingsTests` ▸
+  `hookIsWiredOnce`). A cue plate is up for a moment and keeps
+  the settings it was shown with.
 - **A surface states its `.tint` BELOW its glass**, so the
   ground is not inside the tinted environment. Otherwise
   "untinted" rests on `glassEffect` not reading the environment's
