@@ -1947,7 +1947,10 @@ window nearest the entering edge, and along a Scrolling or
 Monocle row's axis the end of its order on that side. The edge is reached only past each
 layout's own steps, so a Scrolling row, a Monocle cycle and a
 Stack or Track run that hides windows are walked to their end
-before focus leaves the screen. The scroll gesture acts on the
+before focus leaves the screen. A geometric wrap that lands back
+in the run it left goes on to that run's far end, a hidden window
+included, as a Scrolling row's wrap reaches its far end (#2618);
+one that lands outside the run keeps its target. The scroll gesture acts on the
 Space under the pointer and never leaves its screen. The setting
 is the Space history's shape — a `gui.json` base with a sparse
 per-profile override — because a profile may want the screen

@@ -19,9 +19,62 @@ extension KiwiCore {
         skip: (WindowID) -> Bool
     ) -> CommandResponse? {
         guard
-            let zone = tiler.runCovers[space.id]?.runs.first(where: {
-                $0.zone.members.contains(focused)
-            })?.zone,
+            let target = runNeighbor(
+                direction,
+                space: space,
+                focused: focused,
+                wrap: false,
+                skip: skip
+            )
+        else { return nil }
+        if swapping {
+            if refuseSwapOntoTraveler(target, in: space) {
+                return .ok()
+            }
+            commitSwap(focused, target, in: space)
+        } else {
+            focusWindow(target, warp: warp)
+        }
+        return .ok()
+    }
+
+    /// Where a This screen wrap from `focused` lands when its
+    /// geometric `target` is back in `focused`'s own run (#2618):
+    /// the run's far end, hidden or not, as Scrolling's wrap reaches
+    /// its row's (#168). `target` itself where the wrap leaves the
+    /// run or crosses it.
+    func runWrapLanding(
+        _ target: WindowID,
+        from focused: WindowID,
+        in space: Space,
+        direction: Direction,
+        skip: (WindowID) -> Bool
+    ) -> WindowID {
+        guard
+            let zone = runZone(holding: focused, in: space),
+            zone.members.contains(target)
+        else { return target }
+        return runNeighbor(
+            direction,
+            space: space,
+            focused: focused,
+            wrap: true,
+            skip: skip
+        ) ?? target
+    }
+
+    /// The next member along the run holding `focused`, in drawn
+    /// order, past what `skip` refuses; nil across the zone, at an
+    /// end `wrap` refuses, and outside a run that hides windows.
+    private func runNeighbor(
+        _ direction: Direction,
+        space: Space,
+        focused: WindowID,
+        wrap: Bool,
+        skip: (WindowID) -> Bool
+    ) -> WindowID? {
+        guard
+            let zone = runZone(holding: focused, in: space),
             let index = zone.members.firstIndex(of: focused)
         else { return nil }
         let step: Int
@@ -33,24 +86,21 @@ extension KiwiCore {
         default:
             return nil
         }
-        guard
-            let next = Navigation.arrayStep(
-                from: index,
-                step: step,
-                count: zone.members.count,
-                wrap: false,
-                skip: { skip(zone.members[$0]) }
-            )
-        else { return nil }
-        let target = zone.members[next]
-        if swapping {
-            if refuseSwapOntoTraveler(target, in: space) {
-                return .ok()
-            }
-            commitSwap(focused, target, in: space)
-        } else {
-            focusWindow(target, warp: warp)
-        }
-        return .ok()
+        return Navigation.arrayStep(
+            from: index,
+            step: step,
+            count: zone.members.count,
+            wrap: wrap,
+            skip: { skip(zone.members[$0]) }
+        ).map { zone.members[$0] }
+    }
+
+    private func runZone(
+        holding focused: WindowID,
+        in space: Space
+    ) -> RunZone? {
+        tiler.runCovers[space.id]?.runs.first(where: {
+            $0.zone.members.contains(focused)
+        })?.zone
     }
 }
