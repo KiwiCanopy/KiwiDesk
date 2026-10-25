@@ -15,9 +15,11 @@ paths:
 Canonical for this subsystem (AGENTS.md §5 indexes it). When
 editing here:
 
-- Hotkeys use the **Carbon API** (`RegisterEventHotKey`), not
-  CGEventTap — a keyboard tap needs Input Monitoring. Mouse
-  presses are read through `NSEvent` monitors.
+- Hotkeys use the **Carbon API** (`RegisterEventHotKey`); a
+  keyboard tap is admitted only for side-specific shortcuts, and
+  runs only while one exists (`docs/design-decisions.md` ▸ *Left
+  and right modifiers are told apart by one keyboard tap*, #2601).
+  Mouse presses are read through `NSEvent` monitors.
 - **The running hotkey table is written only from saved files.**
   A new writer — a caller of `applyStructuredKeybindings`, of
   `KeybindingManager.replaceLayers`, or of `keys.bind` /
