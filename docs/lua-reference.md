@@ -79,6 +79,10 @@ the GUI** instead. Settings are:
 
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
 
+:::unreleased
+A [`kiwihub.set_key`](#kiwihubset_key) call counts as a setting too.
+:::
+
 ```lua
 -- Any one of these makes init.lua the config owner:
 KiwiDesk.set_mode(1, "stack")
@@ -5929,6 +5933,42 @@ KiwiDesk.bind("alt+space", function()
     kiwihub.show("windows")
 end)
 ```
+
+:::unreleased
+### kiwihub.set_key
+
+**Expects:** a built-in KiwiHub key — `"up"`, `"down"`,
+`"page_up"`, `"page_down"`, `"left"` or `"right"` — and a combo
+string; no combo, or `""`, clears it.
+
+**Does:** makes the combo a second key for that built-in key
+while KiwiHub is open: `"down"` moves the selection down as **↓**
+does, `"page_down"` a page as **Page Down** does. `"left"` and
+`"right"` move only on the View side, as **←** and **→** do;
+elsewhere their combo types into the search field. The built-in
+keys keep working, holding **⇧** with a combo moves as with the
+arrows, and the combo does nothing outside KiwiHub. While the
+field names a profile, every combo types. A KiwiDesk shortcut on
+the same combo runs instead.
+
+Refused, naming the reason: a combo it cannot read; one without
+**ctrl** or **cmd**; one with **hyper**; **Return**, **Enter**,
+**Escape**, **Tab**, an arrow or a page key under any modifier;
+**cmd** with a digit or with **S**, **,**, **W**, **A**, **C**,
+**V**, **X** or **Z**; and a combo already set for another key.
+
+The keys are the Mac's, not a profile's. Lua-only: no Settings
+row shows them.
+
+**Example:**
+
+```lua
+kiwihub.set_key("down", "ctrl+n")
+kiwihub.set_key("up", "ctrl+p")
+kiwihub.set_key("page_down", "ctrl+d")
+kiwihub.set_key("page_up", "ctrl+u")
+```
+:::
 
 ### Retired panel verbs
 

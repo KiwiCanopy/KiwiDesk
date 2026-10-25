@@ -16,6 +16,9 @@ final class JumpPanel: NSPanel {
     /// Whether the field names a profile, so only ↩, Esc and ⇥
     /// are the panel's keys (#2359).
     var naming: () -> Bool = { false }
+    /// Lua's alternatives to the navigation keys, read per press
+    /// so a `kiwihub.set_key` takes effect at once (#2600).
+    var keys: () -> KiwiHubKeys = { KiwiHubKeys() }
 
     override var canBecomeKey: Bool { true }
 
@@ -48,7 +51,8 @@ final class JumpPanel: NSPanel {
                 keyCode: event.keyCode,
                 modifiers: event.modifierFlags,
                 scope: scope(),
-                naming: naming()
+                naming: naming(),
+                keys: keys()
             )
         {
             onKey(key)
@@ -87,7 +91,8 @@ final class JumpPanel: NSPanel {
                     keyCode: event.keyCode,
                     modifiers: event.modifierFlags,
                     scope: scope(),
-                    naming: naming()
+                    naming: naming(),
+                    keys: keys()
                 )
             {
                 onKey(key)

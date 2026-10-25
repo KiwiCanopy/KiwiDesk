@@ -248,6 +248,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             .canJoinAllSpaces, .fullScreenAuxiliary,
         ]
         panel.delegate = self
+        panel.keys = { [core] in core.appWide.kiwiHubKeys }
         panel.onCancel = { [weak self] in
             self?.close()
         }

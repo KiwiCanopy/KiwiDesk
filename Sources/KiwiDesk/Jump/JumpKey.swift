@@ -2,8 +2,9 @@ import AppKit
 import KiwiDeskCore
 
 /// What a key press means inside Jump to window (#1875 ▸ Ruling —
-/// keys; #2229, #2309 for the View side's): fixed, never rebindable.
-/// Pure, so every chord is testable without a panel. A press this
+/// keys; #2229, #2309 for the View side's): fixed, with Lua's
+/// alternatives to the navigation keys beside them (#2600). Pure,
+/// so every chord is testable without a panel. A press this
 /// answers nil for goes to the search field as typing.
 enum JumpKey: Equatable {
     /// ↑ / ↓: one row, never wrapping.
@@ -53,7 +54,8 @@ enum JumpKey: Equatable {
         keyCode: UInt16,
         modifiers: NSEvent.ModifierFlags,
         scope: JumpScope = .windows,
-        naming: Bool
+        naming: Bool,
+        keys: KiwiHubKeys = KiwiHubKeys()
     ) -> JumpKey? {
         let held = modifiers.intersection(
             [.shift, .command, .option, .control]
@@ -87,7 +89,10 @@ enum JumpKey: Equatable {
             guard held.subtracting(.shift).isEmpty else { return nil }
             return .pick(moveHere: held.contains(.shift))
         default:
+            // A Lua alternative is read after every built-in key,
+            // so none can shadow one (#2600).
             return quick(keyCode, held)
+                ?? alternative(keyCode, held, scope: scope, keys: keys)
         }
     }
 
@@ -124,6 +129,43 @@ enum JumpKey: Equatable {
             return held == .command ? .keep : nil
         default:
             return nil
+        }
+    }
+
+    /// The press as `KiwiHubKeys` spells it.
+    private static func combo(
+        _ keyCode: UInt16,
+        _ held: NSEvent.ModifierFlags
+    ) -> KeyCombo {
+        var modifiers: HotkeyModifiers = []
+        if held.contains(.control) { modifiers.insert(.control) }
+        if held.contains(.option) { modifiers.insert(.option) }
+        if held.contains(.shift) { modifiers.insert(.shift) }
+        if held.contains(.command) { modifiers.insert(.command) }
+        return KeyCombo(keyCode: UInt32(keyCode), modifiers: modifiers)
+    }
+
+    /// What a Lua alternative does: its built-in key's move. ⇧
+    /// previews Move here, so an alternative moves under it too, as
+    /// the arrows do. ← and → move only in View, so elsewhere
+    /// theirs is typing.
+    private static func alternative(
+        _ keyCode: UInt16,
+        _ held: NSEvent.ModifierFlags,
+        scope: JumpScope,
+        keys: KiwiHubKeys
+    ) -> JumpKey? {
+        guard
+            let key = keys.key(for: combo(keyCode, held))
+                ?? keys.key(for: combo(keyCode, held.subtracting(.shift)))
+        else { return nil }
+        switch key {
+        case .up: return .step(-1)
+        case .down: return .step(1)
+        case .pageUp: return .page(-1)
+        case .pageDown: return .page(1)
+        case .left: return scope == .view ? .side(-1) : nil
+        case .right: return scope == .view ? .side(1) : nil
         }
     }
 
