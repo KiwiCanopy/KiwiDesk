@@ -131,6 +131,8 @@ struct ScreenCoveringCallerCensusTests {
         // The display follow's Dock hit test at a press: an
         // auto-hidden Dock reserves no visible frame.
         "Commands/KiwiCore+DisplayFocus.swift": 1,
+        // `list_windows`' stacking rank, on demand only (#2546).
+        "Commands/KiwiCore+WindowList.swift": 1,
     ]
 
     @Test("every front-window seam reader is ruled")
