@@ -22,7 +22,7 @@ struct ShortcutsSection: View {
     /// subscribe to the reading only the bar draws (#1520).
     @State var jumpTracker = ShortcutsJumpTracker()
     @StateObject private var coordinator =
-        RecorderCoordinator()
+        RecorderCoordinator(scrollsInPlace: true)
 
     /// The selected layer lives on `nav` rather than here
     /// (#1127): the live preview panel is this section's
@@ -60,7 +60,6 @@ struct ShortcutsSection: View {
         }
         .onAppear {
             ensureSelection()
-            coordinator.scrollsInPlace = true
             // Suspend hotkeys while capturing to avoid trigger during edit
             // (#213).
             coordinator.onArmedChange = { [model] armed in

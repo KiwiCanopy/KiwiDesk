@@ -98,9 +98,12 @@ struct ModifierSidesCardTests {
             $0.modifierSides = true
             $0.hyperKey = .rightCommand
         }
-        // The test core's remap never ran, so right ⌘ is still ⌘.
+        // Keyed on the key being set, whatever its remap's status:
+        // the test core's remap never ran.
         #expect(model.hyperStatus != .on)
-        #expect(model.recorderSides == RecorderSides(hyperKey: nil))
+        #expect(
+            model.recorderSides == RecorderSides(hyperKey: .rightCommand)
+        )
     }
 
     @Test("a side collapse is its own tier, pointing at the switch")

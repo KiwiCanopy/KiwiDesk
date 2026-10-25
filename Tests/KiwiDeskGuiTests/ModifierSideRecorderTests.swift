@@ -145,7 +145,7 @@ struct ModifierSideRecorderTests {
                     encoding: .utf8
                 )
             )
-            guard source.contains("RecorderCoordinator()") else {
+            guard source.contains("RecorderCoordinator(") else {
                 continue
             }
             mounts += 1

@@ -82,25 +82,19 @@ enum ModifierSidesWords {
                 + "shortcut keeps a side, and it acts only on the "
                 + "shortcuts on those keys.",
             HyperKeyWords.name(.rightCommand),
-            drawn("rcmd+h"),
-            drawn("lcmd+h"),
+            drawn(.right) + "H",
+            drawn(.left) + "H",
             "cmd+h"
         )
     }
 
-    /// A chord as every surface draws it (`ComboSymbols`), so the
-    /// help shows `R⌘H` the way the rows do; a bare modifier token
-    /// draws its glyphs alone.
-    static func drawn(_ combo: String) -> String {
-        if let parsed = KeyCombo.parse(combo) {
-            return ComboSymbols.render(
-                parsed,
-                layoutChar: LayoutKeyGlyph.char
-            )
-        }
-        return KeyCombo.parse(combo + "+a").map {
-            ComboSymbols.modifierSymbols($0.modifiers)
-        } ?? combo
+    /// A sided ⌘ as every surface draws it (`ComboSymbols`), `R⌘`;
+    /// the example's key stays the frame's own H, whatever the
+    /// keyboard layout draws for it.
+    static func drawn(_ side: ModifierSide) -> String {
+        ComboSymbols.modifierSymbols(
+            HotkeyModifiers.command.union(.side(side, of: .command))
+        )
     }
 
     /// Off, with shortcuts that keep a side: they fire either-side.

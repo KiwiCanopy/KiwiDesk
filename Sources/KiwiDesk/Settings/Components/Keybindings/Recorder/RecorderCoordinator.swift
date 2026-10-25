@@ -15,7 +15,11 @@ final class RecorderCoordinator: ObservableObject {
     @Published var scrollTarget: String?
     /// Whether the page consumes `scrollTarget`; only the Shortcuts
     /// section does, so a Go to elsewhere would do nothing.
-    var scrollsInPlace = false
+    let scrollsInPlace: Bool
+
+    init(scrollsInPlace: Bool = false) {
+        self.scrollsInPlace = scrollsInPlace
+    }
 
     /// Suspends/restores live hotkeys while any recorder is armed
     /// (#213): testing an existing shortcut mid-capture must not

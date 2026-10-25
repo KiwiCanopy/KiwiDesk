@@ -176,7 +176,7 @@ struct KeyRecorderField: View {
                 + "to give one key a second meaning. The side "
                 + "you press is kept: %1$@ is recorded as %2$@.",
             HyperKeyWords.name(.rightCommand),
-            ModifierSidesWords.drawn("rcmd")
+            ModifierSidesWords.drawn(.right)
         )
     }
 
