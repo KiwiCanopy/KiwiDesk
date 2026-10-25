@@ -1200,6 +1200,25 @@ answer one window; a script picks one with `jq`. The trade: an
 app that refuses its size shows the frame the layout asked for,
 and a float an app moved itself shows its last report.
 
+:::unreleased
+The stacking rank `z` (#2546) is the one field read from the
+WindowServer, its public front-to-back list of on-screen windows,
+once per call. KiwiDesk's own order cannot give it: it knows no
+order inside a pile or among floats, nor an app raising itself.
+The App Bar's rule that a bar takes issued frames, never a
+compositor read, does not reach this verb: that rule exists
+because the bars refresh on every switch (#1925), while
+`list_windows` runs only when asked. The rank counts the tracked
+windows on the screen a window's `display` names, so a menu or
+another app's popup covers without counting, and the list keeps
+its Space order rather than turning into the stacking order,
+since the rank is per screen and the list spans every screen.
+`visibility` stays the App Bar's verdict over KiwiDesk's own
+order, so the two fields can disagree where an app raised a
+window by itself; the rank never feeds the verdict, or the CLI
+and the bar would part on Monocle and Scrolling.
+:::
+
 ### Whether a setting lasts is not a fact about its command
 
 **[Rationale]**
@@ -15038,7 +15057,9 @@ A WindowServer read would see real overlap, but it would put a
 compositor round trip on a refresh path that runs on every switch
 and focus report, and that read stalls under GPU load (#1925). So
 a window KiwiDesk does not manage covering a tile leaves its item
-lit. While a held pass waits for the hand to rest, the frames are
+lit. `list_windows`' stacking rank is the one compositor read
+beside the verdict, on demand only (*A window's frame is reported
+from KiwiDesk's own placement*). While a held pass waits for the hand to rest, the frames are
 the ones it owes rather than the ones on screen, and the bars lead
 them as they lead every held pass.
 
