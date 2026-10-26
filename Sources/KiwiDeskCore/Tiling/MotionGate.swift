@@ -9,7 +9,8 @@ import Foundation
 /// a closed window is judged afresh, and the layout loop records
 /// its asks and stamps its placements only for frames it sends. A
 /// pass a KiwiDesk control makes right now runs, carrying the debt
-/// with it. Asked once, by `KiwiCore.retile`.
+/// with it. Asked once, by `KiwiCore.retile`; an owed write holds a
+/// pass of its own through the same hold.
 ///
 /// A frame an ambient writer sends outside a pass waits here too,
 /// as a WINDOW owed, never a frame (#2627): the write is
@@ -47,12 +48,14 @@ final class MotionGate {
     }
 
     /// A direct frame write outside a pass, owed for one window
-    /// until a pass runs (#2627). A later owe for the same window
-    /// replaces the earlier one; a second case rules its precedence
-    /// over the first before it lands (#2628).
-    enum OwedWrite: Equatable {
+    /// until a pass runs (#2627). Declaration order is precedence:
+    /// the payer tries a window's owed writes in this order and
+    /// stops at the first that writes.
+    enum OwedWrite: CaseIterable {
         /// A detection flip's float placement.
         case floatPlacement
+        /// A float's move onto its Space's screen (#2628).
+        case reanchor
     }
 
     let quiescence = InputQuiescence()
@@ -75,10 +78,11 @@ final class MotionGate {
     private(set) var owed: Owed?
     /// The owed direct writes, written through `KiwiCore`'s one
     /// `oweAmbientWrite` door and taken by its one payer.
-    private(set) var owedWrites: [WindowID: OwedWrite] = [:]
+    private(set) var owedWrites: [WindowID: Set<OwedWrite>] = [:]
     private var owedSince: TimeInterval?
     private var armed = false
     private var releasing = false
+    private var payingWrites = false
     private var switching = false
     /// Whether a watched switch's pass is running now.
     var isSwitching: Bool { switching }
@@ -108,29 +112,58 @@ final class MotionGate {
             settle(why: user ? "a user pass" : "the hand rests")
             return run
         }
+        hold(pass, cause: cause)
+        return nil
+    }
+
+    private func hold(_ pass: Owed, cause: MotionCause) {
         owed = owed.map { $0.merged(with: pass) } ?? pass
         if owedSince == nil {
             owedSince = clock()
             onLog("layout held: \(Self.describe(cause))")
         }
         arm()
-        return nil
     }
 
     /// Whether a pass asked now would wait — `admit`'s verdict,
     /// read without owing anything.
     var holdsNow: Bool {
-        !releasing && !verdict(cause()).runs
+        !releasing && !payingWrites && !verdict(cause()).runs
     }
 
-    func owe(_ write: OwedWrite, for id: WindowID) {
-        owedWrites[id] = write
+    /// Owes `write` for `id` while the gate holds, holding a pass of
+    /// its own when none is owed, so the release that pays it is
+    /// armed; returns whether it owed.
+    func owe(_ write: OwedWrite, for id: WindowID) -> Bool {
+        guard holdsNow else { return false }
+        owedWrites[id, default: []].insert(write)
+        if owed == nil { hold(Self.bareEvent, cause: cause()) }
+        return true
     }
 
-    /// Every owed write, forgotten as it is handed over.
-    func takeWrites() -> [WindowID: OwedWrite] {
-        defer { owedWrites = [:] }
-        return owedWrites
+    /// The pass a write owed alone holds: an event pass with no
+    /// window and no promise.
+    private static let bareEvent = Owed(
+        animated: nil,
+        pass: .event,
+        newlyCreatedWindow: nil,
+        sizing: .mayInstantSize
+    )
+
+    /// Hands every owed write to `pay`, in precedence order, until
+    /// one writes (`pay` returns whether it did) — inside a scope
+    /// where nothing holds, so a payment writes rather than owing
+    /// again.
+    func payWrites(_ pay: (WindowID, OwedWrite) -> Bool) {
+        let due = owedWrites
+        owedWrites = [:]
+        payingWrites = true
+        defer { payingWrites = false }
+        for (id, writes) in due {
+            for write in OwedWrite.allCases where writes.contains(write) {
+                if pay(id, write) { break }
+            }
+        }
     }
 
     /// A drag owns the window's frame from its first move on.

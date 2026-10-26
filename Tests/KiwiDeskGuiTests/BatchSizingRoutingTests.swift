@@ -122,9 +122,10 @@ struct BatchSizingRoutingTests {
             Site(names: 4, promises: 0),
         // The motion gate (#804) owes a held pass; merging two keeps
         // a promise only both made, and the release re-runs it
-        // through `retile` — it promises nothing of its own.
+        // through `retile` — it promises nothing of its own. The
+        // pass an owed write holds alone (#2628) asks the default.
         "KiwiDeskCore/Tiling/MotionGate.swift":
-            Site(names: 6, promises: 0),
+            Site(names: 7, promises: 0),
         "KiwiDeskCore/App/KiwiCore+MotionCause.swift":
             Site(names: 2, promises: 0),
         // Two more names since the #677 placement pass: the
