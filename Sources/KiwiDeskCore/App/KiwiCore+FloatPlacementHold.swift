@@ -8,7 +8,6 @@ extension KiwiCore {
     /// The one door an ambient writer owes through: it owes `write`
     /// for `id` only while the motion gate holds, and returns
     /// whether it did, so the caller writes when it did not.
-    @discardableResult
     func oweAmbientWrite(
         _ write: MotionGate.OwedWrite,
         for id: WindowID

@@ -42,7 +42,7 @@ struct MotionGateOwedWriteTests {
         #expect(gate.owed != nil)
     }
 
-    @Test("a placement is paid ahead of a re-anchor, which then waits")
+    @Test("a placement paid ahead of a re-anchor drops the re-anchor")
     func placementPaysFirst() {
         let gate = gate(moving: true)
         gate.owe(.reanchor, for: window)

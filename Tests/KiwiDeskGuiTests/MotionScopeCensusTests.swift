@@ -177,7 +177,11 @@ struct MotionScopeCensusTests {
         let opens = try #require(
             arm.range(of: "if window.isSticky || !window.isFloating {")
         )
-        let owe = try #require(arm.range(of: "oweAmbientWrite(.reanchor"))
+        let owe = try #require(
+            arm.range(
+                of: "if oweAmbientWrite(.reanchor, for: id) { return }"
+            )
+        )
         let writes = try #require(arm.range(of: "tiler.applyFrame("))
         #expect(opens.upperBound <= owe.lowerBound)
         #expect(owe.upperBound <= writes.lowerBound)
