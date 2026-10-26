@@ -19171,7 +19171,7 @@ captioned with its title; the rest follow by recency, capped at
 persisted. A Dock-less app is recorded whatever the checkbox
 and the Tile rules say, so a profile whose live counterpart already
 tiles it still finds it; a fixed-size window is seen only where
-the live guess reads its zoom button. *Other…* and Lua reach the
+the live guess reads its zoom, close and Cancel buttons. *Other…* and Lua reach the
 rest.
 
 **This reverses "a rule is a sentence, and the sentence is the

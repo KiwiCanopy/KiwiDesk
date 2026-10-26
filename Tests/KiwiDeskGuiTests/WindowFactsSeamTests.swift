@@ -84,12 +84,56 @@ struct WindowFactsSeamTests {
         #expect(door.contains("AXHelper.subrole(of: element)"))
         #expect(door.contains("{ AXHelper.title(of: element) }"))
         #expect(door.occurrences(of: "AXHelper.title(") == 1)
-        // The zoom button (#2070) is read live through the door
-        // too, deferred like the title: a door handing every
-        // producer `{ nil }` would tile every fixed-size window.
-        #expect(door.contains("kAXZoomButtonAttribute"))
-        #expect(door.contains("kAXEnabledAttribute"))
-        #expect(door.contains("zoomable: {"))
+        // The zoom button (#2070) and Cancel in place of close
+        // (#2653) are read live through the door too, deferred
+        // like the title: a door handing every producer `{ nil }`
+        // or `{ false }` would tile every window they float.
+        #expect(door.contains("WindowButtons(element)"))
+        #expect(
+            door.contains(
+                "zoomable: { buttons.zoom.flatMap(WindowButtons.enabled) }"
+            )
+        )
+        #expect(door.contains("hasCancel: buttons.cancel != nil"))
+        #expect(
+            door.contains("{ buttons.close.flatMap(WindowButtons.enabled) }")
+        )
+    }
+
+    /// The buttons the door asks are the ones the batched read
+    /// fetches, in the order its accessors index (#2653).
+    @Test("the button read fetches zoom, close and Cancel")
+    func buttonReadFetchesTheButtons() throws {
+        let fetch = try SourceScan.functionBody(
+            of: "fetch",
+            in: "WindowFacts.swift",
+            under: "AX"
+        )
+        let order = [
+            "kAXZoomButtonAttribute", "kAXCloseButtonAttribute",
+            "kAXCancelButtonAttribute",
+        ].map { fetch.range(of: $0)?.lowerBound }
+        #expect(!order.contains(nil), "a button is not fetched")
+        #expect(order.compactMap { $0 } == order.compactMap { $0 }.sorted())
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/AX/WindowFacts.swift"
+            )
+        )
+        for (index, name) in ["zoom", "close", "cancel"].enumerated() {
+            #expect(
+                source.contains(
+                    "var \(name): AXUIElement? { buttons[\(index)] }"
+                ),
+                "\(name) reads another button"
+            )
+        }
+        let enabled = try SourceScan.functionBody(
+            of: "enabled",
+            in: "WindowFacts.swift",
+            under: "AX"
+        )
+        #expect(enabled.contains("kAXEnabledAttribute"))
     }
 
     /// Every `FloatDetection*` file, qualified or not (an
