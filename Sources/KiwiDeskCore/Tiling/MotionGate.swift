@@ -137,6 +137,14 @@ final class MotionGate {
         owedWrites[id] = nil
     }
 
+    /// Told of every frame the engine writes: one the user's own
+    /// act writes owns the window, so its owed write is forgotten.
+    /// A pass pays its debt before it lays out, so its own writes
+    /// forget none.
+    func frameWritten(_ id: WindowID) {
+        if case .user = cause() { owedWrites[id] = nil }
+    }
+
     /// A native tab switch re-keys the window its write is owed for.
     func rekeyWrite(old: WindowID, new: WindowID) {
         guard let write = owedWrites.removeValue(forKey: old) else {

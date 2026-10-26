@@ -112,6 +112,9 @@ extension KiwiCore {
         // so the pass's own restore delivers it — one delivery
         // path, and the stash refuses the corner meanwhile.
         recoverStrandedFloats()
+        // Owed direct writes, ahead of the layout so the pass's own
+        // parks cannot forget them (#2627).
+        payOwedWrites()
         tiler.retile(
             state: state,
             animated: animated
@@ -144,7 +147,6 @@ extension KiwiCore {
         }
         _ = tiler.takePendingBoundPlacement()
         narrateCorroborationProbes()
-        payOwedWrites()  // #2627
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op
         // for them.

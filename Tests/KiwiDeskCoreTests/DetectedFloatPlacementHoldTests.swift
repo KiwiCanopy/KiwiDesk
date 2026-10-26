@@ -140,13 +140,37 @@ struct DetectedFloatPlacementHoldTests {
         #expect(desk.gate.owedWrites.isEmpty)
     }
 
-    /// A drag owns the frame from its first move: nothing owed.
-    @Test("a window dragged while owed keeps its frame")
-    func draggedWhileOwedKeeps() {
+    /// The user's own act owns the frame: a drag from its first
+    /// move, a flick whose moves land after the release (#1798) at
+    /// its end, and any frame written under user motion.
+    enum UserAct: CaseIterable {
+        case dragMove, dragEnd, write
+    }
+
+    @Test(
+        "a window the user moved while owed keeps its frame",
+        arguments: UserAct.allCases
+    )
+    func userActWhileOwedKeeps(_ act: UserAct) {
         let desk = held()
         let moved = CGRect(x: 500, y: 300, width: 640, height: 480)
-        desk.core.handleDragMove(window, start: slot, frame: moved)
-        desk.core.tiler.dragExemptWindow = nil
+        switch act {
+        case .dragMove:
+            desk.core.handleDragMove(window, start: slot, frame: moved)
+            desk.core.tiler.dragExemptWindow = nil
+        case .dragEnd:
+            desk.core.handleDragEnd(window, start: slot, frame: moved)
+        case .write:
+            desk.core.withUserMotion {
+                desk.core.tiler.applyFrame(
+                    window,
+                    from: slot,
+                    to: moved,
+                    animated: false
+                )
+            }
+        }
+        desk.frames = [:]
         desk.rest()
         #expect(desk.frames[window] == nil)
         #expect(desk.gate.owedWrites.isEmpty)
@@ -181,6 +205,19 @@ struct DetectedFloatPlacementHoldTests {
         desk.rest()
         #expect(desk.frames[window] == nil)
         #expect(desk.gate.owedWrites.isEmpty)
+    }
+
+    /// A switch away is a user pass: it pays before its own park,
+    /// so the placement is the frame the Space keeps for the return.
+    @Test("a switch away pays the debt before it parks")
+    func switchAwayPaysFirst() throws {
+        let desk = held()
+        desk.core.withUserMotion {
+            _ = desk.core.execute("focus_space", args: [.string("2")])
+        }
+        #expect(desk.gate.owedWrites.isEmpty)
+        let kept = try #require(desk.core.tiler.stashedFrames[window])
+        #expect(kept.width == FloatPlacement.longFloor)
     }
 
     /// A frame that moves with no drag — our own echo, or the app

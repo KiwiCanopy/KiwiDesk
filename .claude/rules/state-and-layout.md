@@ -2404,8 +2404,9 @@ editing here:
   pre-render heals ride the pass. An ambient frame written
   outside a layout pass waits by owing the WINDOW through the one
   `oweAmbientWrite`, a `MotionGate.OwedWrite` case carrying no
-  frame, whose payment in `payOwedWrites` re-derives the write and
-  which a drag forgets (`handleDragMove`) (#2627,
+  frame, paid by `payOwedWrites` ahead of the pass's layout and
+  re-derived there, and forgotten by a drag or by any frame written
+  under user motion (`MotionGate.frameWritten`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
   owes through that door, and one left ungated is a ruling (the
   restore's #2626, the re-anchor's #2628). The
