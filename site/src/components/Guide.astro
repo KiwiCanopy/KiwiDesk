@@ -36,6 +36,7 @@ import logoMark from "../assets/brand/logo.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
+import { locales, ogLocales, ogLocaleAlternates, localePath, type Lang } from "../lib/locales";
 import { publisher } from "../lib/publisher";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
@@ -51,7 +52,7 @@ import "../styles/learn.css";
 
 interface Props {
   t: Record<string, string>;
-  lang: "en" | "de" | "ja";
+  lang: Lang;
 }
 const { t, lang } = Astro.props;
 
@@ -64,8 +65,7 @@ const s = { ...en, ...t } as Record<string, string>;
 
 // Home path for the active locale (landing), and the guide path
 // pair the language switcher toggles between.
-const homeHref =
-  lang === "de" ? "/de/" : lang === "ja" ? "/ja/" : "/";
+const homeHref = localePath(lang);
 
 // Locale-aware quotation marks for the footer aside (German opens
 // low „…“, English high “…”), mirroring Landing.astro.
@@ -257,22 +257,12 @@ const scenarios = [
 // SEO/head: absolute URLs derived from Astro.site so they survive
 // the pages.dev → custom-domain switch. `canonical` is this
 // locale's own guide page; the hreflang pair links EN ↔ DE.
-const guideHref =
-  lang === "de"
-    ? "/de/guide/"
-    : lang === "ja"
-      ? "/ja/guide/"
-      : "/guide/";
-const canonical = new URL(guideHref, Astro.site).href;
-const enURL = new URL("/guide/", Astro.site).href;
-const deURL = new URL("/de/guide/", Astro.site).href;
-const jaURL = new URL("/ja/guide/", Astro.site).href;
+const canonical = new URL(localePath(lang, "/guide/"), Astro.site).href;
+const altURL = (l: Lang): string =>
+  new URL(localePath(l, "/guide/"), Astro.site).href;
 const ogImageURL = new URL(ogImage.src, Astro.site).href;
-const ogLocale =
-  lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
-const ogLocaleAlts = ["en_US", "de_DE", "ja_JP"].filter(
-  (l) => l !== ogLocale,
-);
+const ogLocale = ogLocales[lang];
+const ogLocaleAlts = ogLocaleAlternates(lang);
 
 // Structured data: the site (WebSite) plus this guide as a
 // TechArticle, emitted as one JSON-LD graph in the head. The
@@ -324,10 +314,10 @@ const jsonLd = [
     <meta name="twitter:image" content={ogImageURL} />
     <ThemeHead />
     <FaviconLinks />
-    <link rel="alternate" hreflang="en" href={enURL} />
-    <link rel="alternate" hreflang="de" href={deURL} />
-    <link rel="alternate" hreflang="ja" href={jaURL} />
-    <link rel="alternate" hreflang="x-default" href={enURL} />
+    {locales.map((l) => (
+      <link rel="alternate" hreflang={l} href={altURL(l)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={altURL("en")} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
     {/* The theme resolve lives in <ThemeHead /> above. No mode key

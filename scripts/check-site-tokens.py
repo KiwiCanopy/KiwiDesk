@@ -686,6 +686,95 @@ def check_guide_routes(dist: pathlib.Path) -> None:
     )
 
 
+def check_locales(dist: pathlib.Path) -> None:
+    """The locale list is one list, and every hreflang link lands.
+
+    `site/src/lib/locales.ts` is the list the head metadata and the
+    sitemap derive from. It must name exactly the catalogs in
+    `site/src/i18n/`: a catalog the list omits is a language no
+    page advertises, and a list entry with no catalog advertises
+    pages that do not exist. Then, on the BUILT pages and the
+    marketing sitemap, every hreflang cluster names every locale
+    plus x-default and nothing else, every link points at a page
+    this build emits on the published host, and a page's own
+    canonical is one of its alternates.
+    """
+    source_path = REPO / "site/src/lib/locales.ts"
+    match = re.search(
+        r"export const locales\s*=\s*\[([^\]]*)\]",
+        source_path.read_text(encoding="utf-8"),
+    )
+    if match is None:
+        fail("could not read the locale list in site/src/lib/locales.ts")
+    locales = re.findall(r'"([^"]+)"', match.group(1))
+    catalogs = sorted(
+        p.stem for p in (REPO / "site/src/i18n").glob("*.json")
+    )
+    if sorted(locales) != catalogs:
+        fail(
+            f"locales.ts lists {locales} but site/src/i18n holds "
+            f"catalogs {catalogs}"
+        )
+    want = set(locales) | {"x-default"}
+    host = canonical_host()
+
+    def lands(href: str, where: str) -> None:
+        url = urllib.parse.urlparse(href)
+        if url.netloc != host:
+            fail(f"{where}: hreflang link {href} is not on {host}")
+        if not url.path.endswith("/"):
+            fail(f"{where}: hreflang link {href} lacks its slash")
+        page = dist / url.path.lstrip("/") / "index.html"
+        if not page.is_file():
+            fail(f"{where}: hreflang link {href} names a page "
+                 "this build does not emit")
+
+    link = re.compile(r"<link\b[^>]*>", re.I)
+    attr = re.compile(r'([a-z:-]+)="([^"]*)"', re.I)
+    pages = 0
+    for page in sorted(dist.rglob("*.html")):
+        text = page.read_text(encoding="utf-8")
+        where = str(page.relative_to(dist))
+        alternates = {}
+        canonical = None
+        for tag in link.findall(text):
+            attrs = dict(attr.findall(tag))
+            rel = attrs.get("rel", "").lower()
+            if rel == "alternate" and "hreflang" in attrs:
+                alternates[attrs["hreflang"]] = attrs.get("href", "")
+            elif rel == "canonical":
+                canonical = attrs.get("href")
+        if not alternates:
+            continue
+        pages += 1
+        if set(alternates) != want:
+            fail(f"{where}: hreflang names {sorted(alternates)}, "
+                 f"not {sorted(want)}")
+        for href in alternates.values():
+            lands(href, where)
+        if canonical not in alternates.values():
+            fail(f"{where}: canonical {canonical} is not among its "
+                 "own hreflang alternates")
+
+    sitemap = (dist / "sitemap.xml").read_text(encoding="utf-8")
+    urls = re.findall(r"<url>(.*?)</url>", sitemap, re.S)
+    for entry in urls:
+        loc = re.search(r"<loc>([^<]+)</loc>", entry).group(1)
+        alternates = dict(re.findall(
+            r'<xhtml:link rel="alternate" hreflang="([^"]+)"'
+            r' href="([^"]+)"/>', entry,
+        ))
+        if set(alternates) != want:
+            fail(f"sitemap.xml {loc}: hreflang names "
+                 f"{sorted(alternates)}, not {sorted(want)}")
+        for href in [loc, *alternates.values()]:
+            lands(href, f"sitemap.xml {loc}")
+    print(
+        f"locales: {', '.join(locales)} match the catalogs; hreflang "
+        f"clusters land on {pages} page(s) and {len(urls)} sitemap URL(s)"
+    )
+
+
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
     """The site ships two sitemaps, and they must not overlap.
 
@@ -1521,6 +1610,7 @@ def main() -> None:
     check_promoted_download(dist)
     check_guide_routes(dist)
     check_sitemaps_disjoint(dist)
+    check_locales(dist)
     check_var_references(dist)
     check_markdown_pipeline(dist)
     check_unreleased_markers(dist)

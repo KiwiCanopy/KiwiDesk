@@ -23,7 +23,8 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 
-export type Lang = "en" | "de" | "ja";
+import { locales, ogLocales, ogLocaleAlternates, localePath, type Lang } from "../lib/locales";
+export type { Lang };
 
 interface Props {
   lang: Lang;
@@ -58,11 +59,6 @@ const LANGS: Record<Lang, string> = {
   ja: "日本語",
 };
 
-// English lives at /, German at /de, Japanese at /ja.
-function localePath(l: Lang, sub = "/"): string {
-  const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}`;
-}
 
 // Per-locale strings, English-fallback (mirrors Landing/Guide).
 const dict = { ...en, ...{ en, de, ja }[lang] } as Record<string, string>;
@@ -71,7 +67,7 @@ const t = (k: string): string =>
 
 const site = Astro.site?.toString().replace(/\/$/, "") ?? "";
 const canonical = `${site}${localePath(lang, slug)}`;
-const ogLocale = { en: "en_US", de: "de_DE", ja: "ja_JP" }[lang];
+const ogLocale = ogLocales[lang];
 const repo = "https://github.com/KiwiCanopy/KiwiDesk";
 const kofi = "https://ko-fi.com/kiwicanopy";
 const kiwiCanopyUrl = "https://kiwicanopy.com";
@@ -93,7 +89,7 @@ const makerProfile = "https://github.com/hajiboy95";
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="KiwiDesk" />
     <meta property="og:locale" content={ogLocale} />
-    {["en_US", "de_DE", "ja_JP"].filter((l) => l !== ogLocale).map((l) => (
+    {ogLocaleAlternates(lang).map((l) => (
       <meta property="og:locale:alternate" content={l} />
     ))}
     {ogImage && <meta property="og:image" content={ogImage} />}
@@ -107,9 +103,9 @@ const makerProfile = "https://github.com/hajiboy95";
     )}
     <ThemeHead />
     <FaviconLinks />
-    <link rel="alternate" hreflang="en" href={`${site}${localePath("en", slug)}`} />
-    <link rel="alternate" hreflang="de" href={`${site}${localePath("de", slug)}`} />
-    <link rel="alternate" hreflang="ja" href={`${site}${localePath("ja", slug)}`} />
+    {locales.map((l) => (
+      <link rel="alternate" hreflang={l} href={`${site}${localePath(l, slug)}`} />
+    ))}
     <link rel="alternate" hreflang="x-default" href={`${site}${localePath("en", slug)}`} />
 
     {/* Language resolve (anti-redirect-loop). Preserves the sub-path
