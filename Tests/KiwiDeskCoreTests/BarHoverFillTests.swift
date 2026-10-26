@@ -19,6 +19,9 @@ struct BarHoverFillTests {
     ) -> KiwiShelf {
         var shelf = KiwiShelf()
         shelf.liquidGlass = glass
+        // A Fill whose alpha differs from the hover's, so a hover
+        // painted with the Fill reads apart.
+        shelf.fillColor = "#14201CB3"
         shelf.hoverFillColor = hover
         shelf.fillFade = fade
         return shelf
@@ -48,7 +51,9 @@ struct BarHoverFillTests {
 
     private func spaceItem(
         _ shelf: KiwiShelf,
-        hovered: Bool
+        hovered: Bool,
+        dragHovered: Bool = false,
+        active: Bool = false
     ) -> SpaceBarItemView {
         let view = SpaceBarItemView(
             frame: NSRect(x: 0, y: 0, width: 60, height: 32)
@@ -57,12 +62,13 @@ struct BarHoverFillTests {
             identity: .space(SpaceID("2")),
             spaceGlyph: .text("2", tinted: false),
             apps: [],
-            active: false,
+            active: active,
             horizontal: true,
             style: SpaceBarLook(shelf: shelf, bar: SpaceBarStyle(), sheen: 0),
             stateMarkColors: StateMarkColors(sticky: "", floating: "")
         )
         view.isHovered = hovered
+        view.isDragHovered = dragHovered
         view.layout()
         view.restyle()
         return view
@@ -131,5 +137,32 @@ struct BarHoverFillTests {
         let reduced = appItem(Self.shelf(glass: true), hovered: true)
         #expect(reduced.hoverFill.isHidden)
         #expect(abs(layerAlpha(reduced) - 0.5) < 0.01)
+    }
+
+    /// The Space Bar reads its one `showsHover`: a drag hover shows
+    /// the glass hover, the current Space never does.
+    @Test("A drag hover shows it; the current Space never does")
+    func spaceHoverFollowsShowsHover() {
+        let shelf = Self.shelf(glass: true)
+        let dragged = spaceItem(shelf, hovered: false, dragHovered: true)
+        #expect(!dragged.hoverFill.isHidden)
+        let current = spaceItem(shelf, hovered: true, active: true)
+        #expect(current.hoverFill.isHidden)
+    }
+
+    /// The box border draws over the hover on an item no glass
+    /// hosts, as it does hosted (#2595).
+    @Test("The hover sits below the box border")
+    func hoverSitsBelowTheBorder() throws {
+        let app = appItem(Self.shelf(glass: true), hovered: true)
+        let space = spaceItem(Self.shelf(glass: true), hovered: true)
+        for (order, hover, rim) in [
+            (app.subviews, app.hoverFill as NSView, app.boxBorder as NSView),
+            (space.subviews, space.hoverFill, space.boxBorder),
+        ] {
+            let below = try #require(order.firstIndex(of: hover))
+            let above = try #require(order.firstIndex(of: rim))
+            #expect(below < above)
+        }
     }
 }

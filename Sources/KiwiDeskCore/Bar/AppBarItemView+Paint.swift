@@ -18,7 +18,7 @@ extension AppBarItemView {
         halfMoon.show(visibility, ink: NSColor(kiwiHex: textColorHex))
         let glassHover = BarHoverFill.paint(
             hoverFill,
-            hovered: isHovered,
+            showsHover: showsHover,
             hex: style.hoverFillColor,
             shelf: style.shelf,
             edge: edge,
@@ -67,6 +67,7 @@ extension AppBarItemView {
     override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
         GlassBox.seatStrokes(strokes, of: self)
+        BarHoverFill.seat(hoverFill, below: boxBorder, in: self)
     }
 
     /// Takes every press inside it, as the outline clip covering
@@ -114,9 +115,13 @@ extension AppBarItemView {
     // keep the two in step when the box or accent rules change
     // (#793).
     var boxColorHex: String {
-        if isHovered { return style.hoverFillColor }
+        if showsHover { return style.hoverFillColor }
         return style.hasBox ? style.fillColor : "#00000000"
     }
+
+    /// Whether the item draws its hover — the one answer the flat
+    /// and the glass paints read (#2645).
+    var showsHover: Bool { isHovered }
 
     /// The indicator this item draws, nil while inactive — read by
     /// the accent paint and layout, and the rim beneath it.

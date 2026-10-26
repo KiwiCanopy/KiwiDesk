@@ -17902,6 +17902,9 @@ a flat hover as pointer feedback, one even pill as macOS draws
 one; the owner judged the faded hover the better read. A solid
 shelf keeps its flat hover, its Fill not fading, and Reduce
 transparency returns the flat hover with the rest of the glass.
+Each layer takes the cap, not the stack: under Boxed the hover
+draws over the box's own faded tint, as the flat hover did, and
+that layered look is the one the owner compared and chose.
 
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two

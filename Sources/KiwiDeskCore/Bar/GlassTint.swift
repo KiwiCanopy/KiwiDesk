@@ -234,14 +234,20 @@ public enum GlassTint {
     /// ends. Returns whether it painted: false where the hover has
     /// no colour or no glass draws, and the item keeps its flat one.
     @MainActor
-    @discardableResult
     static func applyHover(
         _ backdrop: GlassBackdrop,
         cornerRadius: CGFloat,
+        corners: CACornerMask,
         fill: GlassFill,
         edge: AppBarEdge
     ) -> Bool {
-        colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
+        backdrop.gradient?.maskedCorners = corners
+        return colour(
+            backdrop,
+            cornerRadius: cornerRadius,
+            fill: fill,
+            edge: edge
+        )
     }
 
     /// The backdrop's gradient: the capped ends fading from `edge`,

@@ -1359,16 +1359,23 @@ Obligations:
 - **A bar item paints its hover on glass through
   `BarHoverFill.paint`**, never a flat layer colour: it hands
   `GlassTint.applyHover` the hover from
-  `KiwiShelf.glassFill(hover:)`, so it fades with the Fill and
-  takes the cap (#2645, `BarHoverFillTests`,
+  `KiwiShelf.glassFill(hover:)`, so it fades with the Fill and its
+  own colour takes the cap (#2645, `BarHoverFillTests`,
   `GlassTintCensusTests`); where no glass draws, it paints nothing
-  and the item keeps its flat hover.
+  and the item keeps its flat hover. Each layer is capped, never
+  the composite: under Boxed the hover draws over the box's faded
+  tint, by ruling. The item seats the backdrop below its box
+  border through `BarHoverFill.seat`, and whether the item shows a
+  hover is its one `showsHover`, which the flat colour reads too.
+  A new hover-bearing bar item is review's, and owes
+  `BarHoverFillTests` a clause.
 - **The Fill draws on the glass, beneath its content: the
   backdrop is the glass's `contentView` and what the glass hosts
   rides inside it** (#2569). Behind the glass, the key window's
   denser material covered the colour (#2569 ▸ Ruling). Only
   `GlassPlate` and `GlassTint` place the backdrop or reach
-  through it — `setContent`, `holds`, `release` and `fitContent`
+  through it, save a bar item's hover backdrop, which is no
+  glass's content and which its item places (#2645) — `setContent`, `holds`, `release` and `fitContent`
   look through it, and `GlassTint.apply` takes the glass, never a
   frame, so the gradient is the glass's bounds. A clear Fill
   clears the gradient and never hides the backdrop, which carries

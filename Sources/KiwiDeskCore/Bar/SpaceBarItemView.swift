@@ -69,11 +69,11 @@ final class SpaceBarItemView: NSView {
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = SheenRimView()
-    /// The hover on glass, fading with the Fill (#2645): below the
-    /// content and the strokes.
+    /// The hover on glass, fading with the Fill (#2645): under the
+    /// content and the box border (`BarHoverFill.seat`).
     let hoverFill = GlassBackdrop()
-    /// The box's border under Boxed (#1679): the bottom subview,
-    /// so the active outline strokes over it.
+    /// The box's border under Boxed (#1679): the bottom stroke,
+    /// above only the hover, so the active outline strokes over it.
     let boxBorder = ShelfBorder.makeSeated()
     /// Active mark corner clip (owner 2026-07-20).
     let accentClip = AppBarOverlay.PassThroughFlippedView()
@@ -137,7 +137,6 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
-        addSubview(hoverFill)
         addSubview(identifierImage)
         addSubview(identifierLabel)
         addSubview(identifierDivider)
@@ -154,6 +153,7 @@ final class SpaceBarItemView: NSView {
         // the outline it morphs into (#2595).
         accentClip.layer?.addSublayer(springRing)
         GlassBox.seatStrokes(strokes, of: self)
+        BarHoverFill.seat(hoverFill, below: boxBorder, in: self)
     }
 
     /// Creates badge label with circular indicator background.
