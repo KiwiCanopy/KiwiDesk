@@ -134,21 +134,12 @@ struct ColorsControls: Sendable {
         "Colors & glass"
     )
     /// The Liquid Glass group AND its master row: one key for
-    /// both (`GlassCard.title`).
+    /// both (`GlassCard.title`). The group's other rows are at
+    /// rest, so they take no anchor (#277, #2593).
     let liquidGlassGroup = SettingsControl(
         "colors.liquid_glass",
         "Liquid Glass"
     )
-    /// The Fill, above the two rows it greys (#2593).
-    let tintShelfFill = SettingsControl("kiwishelf.color.fill", "Fill")
-    /// The Liquid Glass group's Fill rows (#2569).
-    let tintHubAndPlates = SettingsControl(
-        "kiwishelf.tint_hub_and_plates",
-        "Tint %1$@ and plates",
-        namesKiwiHub: true
-    )
-    let fillFade = SettingsControl("kiwishelf.fill_fade", "Fill fade")
-    let sheenStrength = SettingsControl("colors.sheen", "Sheen")
     /// Every colour group but the Fill, shut on every visit
     /// (#2593), declared with its rows so a hit inside it opens
     /// it (#1250).

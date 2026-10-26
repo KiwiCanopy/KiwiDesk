@@ -289,7 +289,8 @@ spelled with one word: a page whose `SettingsArea.minimumMode` is
 "advanced", so no drawer may re-use the word to mean *which rows
 are hidden*. The colours' own section is **"Colors & glass"**
 (#2389), named for what it holds, after the Power User page it
-replaced was called Advanced Colors.
+replaced was called Advanced Colors, and its one drawer is
+**Colors** (#2593).
 
 A connector (`Advanced: Lua bindings`) is not the fix: it
 restores the tier reading but re-splits the format. Dropping

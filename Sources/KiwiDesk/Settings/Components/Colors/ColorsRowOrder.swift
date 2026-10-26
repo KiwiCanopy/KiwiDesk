@@ -74,7 +74,7 @@ enum ColorsRowOrder {
         .spaceBar(.spaceBarFocusedHighlightColor),
     ]
 
-    /// The shelf's own colours but the Fill, which leads the
+    /// The shelf's own colours but the Fill, which sits in the
     /// Liquid Glass group (#1857, #2593).
     static let kiwishelfColorRows: [SettingKey] = [
         .kiwishelf(.itemColor),

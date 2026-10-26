@@ -31,8 +31,10 @@ struct GlassCard: View {
             // (gui.md).
             VStack(alignment: .leading, spacing: 8) {
                 ForEach(Self.rows, id: \.id) { key in
-                    if key == .kiwishelf(.fillColor) {
-                        // A colour row, greyed by its own verdict.
+                    if key.isColourRow {
+                        // The Fill: a colour row, outside the
+                        // Reduce-transparency grey (it tints the
+                        // bars without glass too).
                         ColorsAndGlassRows(model: model, keys: [key])
                     } else {
                         row(key).modifier(GreyOut(active: greyed(key)))
@@ -97,7 +99,7 @@ struct GlassCard: View {
             )
         case .kiwishelf(.tintHubAndPlates):
             ToggleRow(
-                label: SettingsCatalog.colors.tintHubAndPlates.text,
+                label: Self.tintLabel,
                 isOn: $model.config.settings.kiwishelf.tintHubAndPlates,
                 help: L(
                     "kiwishelf.tint_hub_and_plates.help",
@@ -109,13 +111,10 @@ struct GlassCard: View {
                     L("kiwishelf.color.fill", "Fill")
                 )
             )
-            .searchAnchored(SettingsCatalog.colors.tintHubAndPlates)
         case .kiwishelf(.fillFade):
             FillFadeRow(fade: $model.config.settings.kiwishelf.fillFade)
-                .searchAnchored(SettingsCatalog.colors.fillFade)
         case .colours(.borderSheen):
             SheenRow(strength: $model.config.settings.borderStyle.sheen)
-                .searchAnchored(SettingsCatalog.colors.sheenStrength)
         default:
             let _ = assertionFailure(
                 "unrendered Glass census key: \(key.id)"
@@ -140,6 +139,15 @@ struct GlassCard: View {
     /// holds in step (localization-auditor, 2026-09-07).
     static var title: String {
         L("colors.liquid_glass", "Liquid Glass")
+    }
+
+    /// The Tint switch's label, KiwiHub named by its key (#2265).
+    static var tintLabel: String {
+        L(
+            "kiwishelf.tint_hub_and_plates",
+            "Tint %1$@ and plates",
+            JumpScope.panelName
+        )
     }
 
     private var caption: String {
@@ -170,7 +178,7 @@ struct GlassCard: View {
             L("kiwishelf.color.fill", "Fill"),
             JumpScope.panelName,
             L("kiwishelf.fill_fade", "Fill fade"),
-            SettingsCatalog.colors.tintHubAndPlates.text
+            Self.tintLabel
         )
     }
 

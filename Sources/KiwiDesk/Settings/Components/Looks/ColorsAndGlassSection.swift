@@ -47,7 +47,8 @@ struct ColorsAndGlassSection: View {
         )
     }
 
-    /// The drawer's groups, by their own titles (#818).
+    /// The drawer's groups by their titles (#818), KiwiShelf's
+    /// shortened to the product name (#2593).
     private var summary: String {
         let groups = SettingsCatalog.colors.colorsDrawer.children
         return L(

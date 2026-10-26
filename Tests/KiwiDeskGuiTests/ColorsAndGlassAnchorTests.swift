@@ -11,12 +11,13 @@ import Testing
 @Suite("Colors & glass row anchors")
 @MainActor
 struct ColorsAndGlassAnchorTests {
-    /// Every colour row the section draws, the two role-group
-    /// wells aside: they draw no `ColorsAndGlassRow` and land on
-    /// their group's title through the group's own section.
+    /// Every colour row the Colors drawer draws, the two
+    /// role-group wells aside: they draw no `ColorsAndGlassRow`
+    /// and land on their group's title through the group's own
+    /// section. The Fill is at rest and anchors nothing (#277).
     private var rows: [SettingKey] {
         SettingKey.allCases.filter {
-            $0.isColourRow
+            $0.isColourRow && $0.placement.tier == .showMore
                 && $0 != ColorRole.accent.paint
                 && $0 != ColorRole.secondAccent.paint
         }
@@ -25,6 +26,10 @@ struct ColorsAndGlassAnchorTests {
     @Test("each colour row anchors on its own label key")
     func rowsAnchorOnTheirLabelKey() {
         #expect(!rows.isEmpty)
+        #expect(
+            ColorsAndGlassAnchors.control(for: .kiwishelf(.fillColor))
+                == nil
+        )
         for key in rows {
             guard case .key(let label) = key.text.label else {
                 Issue.record("\(key.id) has no label key")

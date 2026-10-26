@@ -217,8 +217,9 @@ struct SettingsSearchIndexTests {
                 // 17: #2143's picker and duration, at rest; 15
                 // since #2228 took both out. 14 since #2389: the
                 // Sheen row sits in the shut Colors & glass
-                // section, so it carries an anchor.
-                .looks: 14,
+                // section, so it carries an anchor. 16 since
+                // #2593: the Sheen and the Fill at rest again.
+                .looks: 16,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the

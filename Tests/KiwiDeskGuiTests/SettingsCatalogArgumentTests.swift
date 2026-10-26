@@ -235,10 +235,10 @@ struct SettingsCatalogArgumentTests {
         // the indirect parameter above. 102 since #2228: KiwiShelf's
         // Show the Space switch. 106 since #1685: the AI page's
         // three cards and its setup row. 107: #2265's KiwiHub group.
-        // 112-118: #2103, #1870, #2103 v2. 119 #1869, 120 #2258,
-        // 121 #2312, 122 #2103, 123 #2379, 125 #2417, 126 #2237, 129 #761, 130
-        // Show & hide, 131 #2389, 132 #2497, 134 #2524, 141 #2507, 144 #2601.
-        #expect(direct.values.reduce(0, +) == 144)
+        // 112-118 #2103, #1870, #2103 v2; 119 #1869, 120 #2258, 121 #2312, 122
+        // #2103, 123 #2379, 125 #2417, 126 #2237, 129 #761, 130 Show & hide,
+        // 131 #2389, 132 #2497, 134 #2524, 141 #2507, 144 #2601. 142 #2593.
+        #expect(direct.values.reduce(0, +) == 142)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

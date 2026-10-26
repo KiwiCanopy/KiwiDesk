@@ -1,8 +1,9 @@
 import KiwiDeskCore
 
 /// Which catalog child a colour row lands a search on (#2389,
-/// #1250): one arm per row the section draws, named outright so
-/// the catalog's site guards see each declaration referenced.
+/// #1250): one arm per row the Colors drawer draws, named
+/// outright so the catalog's site guards see each declaration
+/// referenced. The Fill is at rest and takes none (#277, #2593).
 enum ColorsAndGlassAnchors {
     private static var rows: ColorsDrawerControls {
         SettingsCatalog.colors.colorsDrawer.children
@@ -25,7 +26,6 @@ enum ColorsAndGlassAnchors {
         case .activeItemColor: return rows.tintActiveItem
         case .highlightColor: return rows.tintHighlight
         case .hoverFillColor: return rows.tintHoverFill
-        case .fillColor: return SettingsCatalog.colors.tintShelfFill
         case .itemColor: return rows.tintShelfItem
         case .hoverItemColor: return rows.tintShelfHoverItem
         case .borderColor: return rows.tintShelfBorder
