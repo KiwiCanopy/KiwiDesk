@@ -26,10 +26,17 @@ struct ColorsAndGlassAnchorTests {
     @Test("each colour row anchors on its own label key")
     func rowsAnchorOnTheirLabelKey() {
         #expect(!rows.isEmpty)
-        #expect(
-            ColorsAndGlassAnchors.control(for: .kiwishelf(.fillColor))
-                == nil
-        )
+        // A colour row at rest takes no anchor (#277).
+        let atRest = SettingKey.allCases.filter {
+            $0.isColourRow && $0.placement.tier == .atRest
+        }
+        #expect(!atRest.isEmpty)
+        for key in atRest {
+            #expect(
+                ColorsAndGlassAnchors.control(for: key) == nil,
+                Comment(rawValue: key.id)
+            )
+        }
         for key in rows {
             guard case .key(let label) = key.text.label else {
                 Issue.record("\(key.id) has no label key")

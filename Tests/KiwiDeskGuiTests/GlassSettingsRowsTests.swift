@@ -49,6 +49,19 @@ struct GlassSettingsRowsTests {
         #expect(Array(order[(fill + 1)...].prefix(2)) == rows)
     }
 
+    /// The card draws the label search shows for the row: the
+    /// card's `L()` is the English the census resolver reads back.
+    @Test("The Tint label is the census label")
+    @MainActor
+    func tintLabelIsTheCensusLabel() {
+        #expect(
+            GlassCard.tintLabel
+                == SettingsCensusLabel.label(
+                    for: .kiwishelf(.tintHubAndPlates)
+                )
+        )
+    }
+
     @Test("The rows grey on the switch and the Fill")
     func greysAreWired() throws {
         let card = try Self.squashed("Components/Looks/GlassCard.swift")
