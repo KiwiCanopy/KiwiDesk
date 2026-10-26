@@ -174,9 +174,7 @@ struct ShortcutsTrackOfferTests {
         #expect(source.contains("subject:drawer.control.text"))
         #expect(source.occurrences(of: "HelpButton(") == 1)
 
-        // ONE mount, in Move windows, with its own list and door —
-        // the card's one drawer since the Desktop moves left for
-        // their own section (#2655).
+        // ONE mount, in Move windows, with its own list and door.
         let groups = try squashed("KeybindingGroups.swift")
         #expect(groups.occurrences(of: "TrackShortcutsOffer(") == 1)
         let mount = groups.range(
@@ -184,6 +182,5 @@ struct ShortcutsTrackOfferTests {
                 + "drawer:SettingsCatalog.shortcuts.moveWindowsTracks"
         )
         #expect(mount != nil)
-        #expect(groups.occurrences(of: "SettingsDisclosure(") == 0)
     }
 }

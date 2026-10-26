@@ -1168,21 +1168,25 @@ must keep:
   wiring; `ConflictSeverityTests` ▸ `classesArePartitioned`
   holds the two chord facts disjoint.
 - **An offer drawer stays mounted once bound, and its unlock
-  reads only the verbs it holds** (#1125, #2655). The drawer
-  never swaps for a bare list once bound — a container that
-  changes kind under the user's own commit tears down the
-  control they committed with — and it opens on arrival from the
-  resolver's verdict, never forced shut. The verdict asks about
-  the drawer's own rows: the Desktop drawers once opened on a
-  seeded Go-to row, so the move offer opened on every install
-  (#2655). The macOS Desktops section's moves drawer
+  asks about the drawer's own concept, never a sibling's rows**
+  (#1125, #2655). The drawer never swaps for a bare list once
+  bound — a container that changes kind under the user's own
+  commit tears down the control they committed with — and it
+  opens on arrival from the resolver's verdict, never forced
+  shut. The concept may be wider than the rows (the Track
+  drawer's is the layout in play, #1440); what it may not be is
+  a neighbour's rows, such as a seeded Go-to row opening the move
+  offer. The macOS Desktops section's moves drawer
   (`MacOSDesktopsSectionTests`, `MacOSDesktopsPredicateTests`)
   and the Track drawer in Move windows (#1440,
   `ShortcutsTrackOfferTests`) are the instances; where a
-  container's `.immediate` tier holds an offer, its order list is
-  the census rows carrying exactly the gate its `bound` consults
-  (`ShortcutsCensusRenderTests ▸ moveWindowsTier`), and a family
-  joining a drawer takes that gate.
+  container's `.immediate` tier holds an offer (the Track
+  drawer), its order list is the census rows carrying exactly the
+  gate its `bound` consults (`ShortcutsCensusRenderTests ▸
+  moveWindowsTier`), and a family joining that drawer takes that
+  gate. A drawer over a `.showMore` tier carries no census gate,
+  and its hold-open is a resolver reading of its own verbs
+  (`ShortcutsGates.desktopMovesBound`).
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell

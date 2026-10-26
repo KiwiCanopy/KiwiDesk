@@ -2067,7 +2067,6 @@
   "shortcuts.modifier_sides.refused": "macOS non ha permesso a KiwiDesk di leggere la pressione dei tasti, quindi per ora le scorciatoie che conservano un lato funzionano da entrambi i lati. KiwiDesk lo chiederà di nuovo la prossima volta che inizierà a gestire le tue finestre.",
   "shortcuts.modifier_sides.waiting": "Scorciatoie che conservano un lato: %1$d",
   "shortcuts.modifier_sides.waiting_detail": "Funzionano da entrambi i lati finché questa opzione non è attiva.",
-  "shortcuts.move_to_desktop": "Sposta sulla Scrivania",
   "shortcuts.move_to_space": "Sposta nello spazio",
   "shortcuts.other_ellipsis": "Altro…",
   "shortcuts.panel.apps": "App",

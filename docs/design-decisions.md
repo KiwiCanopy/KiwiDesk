@@ -11375,18 +11375,15 @@ without a gate is meaningless.
 
 **And the same tier answers the question one step earlier: a row
 for a concept the app has not introduced is an OFFER, not a
-setting** (#1125). The Desktop shortcut families were the worked
-case until #2655 retired their drawers (below); the argument is
-kept because the Track drawer still rests on it. Nothing seeded
-them then, a **Desktop** is macOS's arrangement rather than
-KiwiDesk's, and they scale per Desktop — so a four-Desktop Mac
-drew twelve rows about a thing a first-run user had never met, in
-the area whose own ordering already says KiwiDesk's Spaces lead
-and a Desktop row is the escape into macOS's. They sat behind a
-disclosure in each card, which stayed mounted and simply OPENED
-on arrival once one was bound — in both
-modes, which is the paragraph above applied to a capability rather
-than to a layer.
+setting** (#1125). Moving a window to a macOS Desktop is the
+worked case. Nothing seeds it, a **Desktop** is macOS's
+arrangement rather than KiwiDesk's, and its rows scale per
+Desktop — so a four-Desktop Mac would draw eight move rows about
+a thing a first-run user has never met. They sit behind a
+disclosure in the macOS Desktops section (#2655, below), which
+stays mounted and simply OPENS on arrival once a move is bound —
+in both modes, which is the paragraph above applied to a
+capability rather than to a layer.
 
 The drawer stays rather than giving way to a bare list, and that
 is not a detail: the flip would fire at the instant the user
@@ -11418,21 +11415,16 @@ on that same capability, the way a bridge-gated census row
 already is.
 
 The second instance (#1440, owner ruling 2026-09-14) is the
-Track shortcut families, a drawer in Move windows — ruled one
-below the Desktop drawer, and the card's only drawer since #2655
-— and it settles two things the first did not have to. The offer's condition is "the layout is in play" — a Track
-space in the config this window edits, or a Track verb bound in
-any layer — because the concept the user has met is the LAYOUT
-rather than a binding, and a user can meet a Track space without
-ever having chosen the word, so that user must meet the drawer
-open. And it ranks BELOW Desktop: Desktop
-rows apply to everyone with macOS Spaces, Track rows to one
-layout, so the group reads from the widest audience down. (The
-alternative — Track above Desktop, since Track is KiwiDesk's own
-and a Desktop row is the escape into macOS's — was argued by
-design review and is defensible; the owner ruled audience size,
-and the reason is stated so the order is a decision rather than
-an accident.)
+Track shortcut families, a drawer in Move windows, and it
+settles a thing the first did not have to. The offer's condition
+is "the layout is in play" — a Track space in the config this
+window edits, or a Track verb bound in any layer — because the
+concept the user has met is the LAYOUT rather than a binding,
+and a user can meet a Track space without ever having chosen the
+word, so that user must meet the drawer open. #1440 also ranked
+it below a Desktop drawer in the same card, by audience size;
+#2655 below supersedes that ranking, and the Track drawer is the
+card's only one.
 
 **The Desktop verbs share one always-mounted macOS Desktops
 section (#2655, owner ruling 2026-10-26), superseding the two
@@ -11455,8 +11447,8 @@ interleaved, sit behind the section's one drawer, so a
 four-Desktop Mac shows four rows at rest rather than twelve. That
 drawer opens on arrival only when a MOVE is bound: counting the
 seeded Go-to rows would reopen it on every install again. The
-name matches the help sentence and the Profiles card, and the
-section's title takes the old drawer titles' place as the
+name carries the noun the help sentence and the Profiles card
+use, a macOS Desktop, and the section's title takes the old drawer titles' place as the
 families' search name, their rows' labels being dynamic.
 
 What #1125 argued for the door still holds and is kept. The
@@ -11469,6 +11461,16 @@ refuses its two names on the bridge question, since a grey would
 invite an action with no path. What is retired is the door per
 card and the unlock shared across them: one section has one door,
 and a Go-to row no longer answers for the moves.
+
+It also reverses #1440's ranking. That ruling ordered two drawers
+inside Move windows by audience — Desktop rows apply to everyone
+with macOS Desktops, Track rows to one layout — and set aside
+"KiwiDesk's own first" as the alternative. Once the owner ruled
+one place for every Desktop action, the Desktop rows leave the
+card altogether, and the question becomes where a whole section
+sits on the page. There the page's own order decides, Spaces
+before the way out of them, and audience size has nothing left
+to rank inside Move windows.
 
 The Desktop switch cue moves with them, to the section's first
 row (amended the same day). It marks a switch KiwiDesk itself
@@ -12005,7 +12007,8 @@ Desktop verb a user presses as often as they swipe, so it is the
 exception to the offer rule above: it ships bound, at rest in the
 macOS Desktops section (#2655), while moving a window to a
 Desktop, with or without following it, stays an offer behind that
-section's drawer for the reason that rule gives. `⇧` here does not act on the window: on
+section's drawer for the reason that rule gives. `⇧` here does
+not act on the window: on
 top of `⌃⌥⌘` it lifts the whole ladder one tier, from KiwiDesk's
 Spaces to macOS's Desktops, which is the second sense of `⇧` the
 rule above otherwise refuses — accepted because the four modifiers

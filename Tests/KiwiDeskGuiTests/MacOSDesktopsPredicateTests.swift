@@ -167,4 +167,23 @@ struct MacOSDesktopsSearchTests {
             SettingsSearchIndex.bridgeGatedControls == doorIDs()
         )
     }
+
+    /// The switch cue is a census row inside the section, so it
+    /// is refused at `indexes` on the same bridge question — a
+    /// hit for it would land on a section nothing draws.
+    @Test("the switch cue is indexed only where its section draws")
+    func cueFollowsTheBridge() {
+        LocalizationManager.shared.select("en")
+        let before = SettingsSearchIndex.canDriveDesktops
+        defer { SettingsSearchIndex.canDriveDesktops = before }
+        func indexed() -> Bool {
+            SettingsSearchIndex.rows().contains {
+                $0.key == .shortcuts(.desktopCue)
+            }
+        }
+        SettingsSearchIndex.canDriveDesktops = true
+        #expect(indexed())
+        SettingsSearchIndex.canDriveDesktops = false
+        #expect(!indexed())
+    }
 }

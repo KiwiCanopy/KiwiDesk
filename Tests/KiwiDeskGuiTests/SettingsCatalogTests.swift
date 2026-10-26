@@ -162,7 +162,9 @@ struct SettingsCatalogTests {
         // as Style children. 212 with #2601: the Modifier keys
         // card's title and its sides switch. 209 with #2593: the
         // Colors drawer in, the Fill, Tint, Fill fade and Sheen
-        // out — at rest, they take no anchor (#277).
+        // out — at rest, they take no anchor (#277). 209 with
+        // #2655: the macOS Desktops section in for the Focus
+        // card's Desktop drawer, the switch cue moved, net zero.
         #expect(allEntries.count == 209)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {

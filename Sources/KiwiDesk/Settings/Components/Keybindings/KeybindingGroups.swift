@@ -87,8 +87,9 @@ struct KeybindingFamilyRows: View {
     }
 }
 
-/// Headings for shortcut census families (#188). The Track
-/// families carry none: their drawer title says it (#1440).
+/// Headings for shortcut census families (#188). The Track and
+/// Desktop families carry none: their drawer or section title
+/// says it (#1440, #2655).
 @MainActor
 enum ShortcutsFamilyHeading {
     static func title(for key: SettingKey) -> String? {
@@ -97,13 +98,6 @@ enum ShortcutsFamilyHeading {
             return L("shortcuts.go_to_space", "Go to Space")
         case .shortcuts(.moveToSpace):
             return L("shortcuts.move_to_space", "Move to Space")
-        case .shortcuts(.focusDesktop):
-            return L("shortcuts.go_to_desktop", "Go to Desktop")
-        case .shortcuts(.moveToDesktop):
-            return L(
-                "shortcuts.move_to_desktop",
-                "Move to Desktop"
-            )
         default:
             return nil
         }

@@ -124,12 +124,15 @@ extension ShortcutsKey {
         // Go to Desktop at rest, the moves behind its drawer.
         case .desktopCue:
             // Written at once; greys where init.lua owns the
-            // config, as the layout plate's switch does (#2142).
+            // config, as the layout plate's switch does (#2142),
+            // and hides with its section without the bridge.
             return .row(
                 .shortcuts,
                 .macosDesktops,
                 .atRest,
-                gate: .runtime(.luaOwnsConfig)
+                gate: .runtimeAnyOf([
+                    .luaOwnsConfig, .desktopBridgeAbsent,
+                ])
             )
         case .focusDesktop:
             return .row(.shortcuts, .macosDesktops, .atRest)

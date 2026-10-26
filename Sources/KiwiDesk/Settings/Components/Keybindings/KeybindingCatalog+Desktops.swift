@@ -129,13 +129,13 @@ extension KeybindingCatalog {
     }
 
     /// Whether a binding records a MOVE to a Desktop, with or
-    /// without following it — `recordsDesktop` less Go to Desktop
-    /// (#2655).
+    /// without following it: one of the rows the macOS Desktops
+    /// drawer draws (#2655).
     static func recordsDesktopMove(_ binding: KeyBinding) -> Bool {
         guard recordsDesktop(binding),
             let number = desktopNumber(from: binding.lua)
         else { return false }
-        return !goToDesktop([number]).contains {
+        return moveToDesktop([number]).contains {
             $0.lua == binding.lua
         }
     }

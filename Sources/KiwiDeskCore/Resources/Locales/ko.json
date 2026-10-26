@@ -2067,7 +2067,6 @@
   "shortcuts.modifier_sides.refused": "macOS가 KiwiDesk의 키 입력 읽기를 거부했으므로, 누른 쪽을 유지하는 단축키는 당분간 양쪽 어디서나 작동합니다. KiwiDesk는 다음에 윈도우 관리를 시작할 때 다시 요청합니다.",
   "shortcuts.modifier_sides.waiting": "누른 쪽을 유지하는 단축키: %1$d",
   "shortcuts.modifier_sides.waiting_detail": "이 옵션을 켤 때까지 양쪽 어디서나 작동합니다.",
-  "shortcuts.move_to_desktop": "윈도우를 데스크탑으로 이동",
   "shortcuts.move_to_space": "윈도우를 공간으로 이동",
   "shortcuts.other_ellipsis": "기타…",
   "shortcuts.panel.apps": "앱",

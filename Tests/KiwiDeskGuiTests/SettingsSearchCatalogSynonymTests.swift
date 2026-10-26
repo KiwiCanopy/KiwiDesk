@@ -47,8 +47,9 @@ struct SettingsSearchCatalogSynonymTests {
     /// for — one silently borrowing ANOTHER's vocabulary, which
     /// would send "help" somewhere other than the guide.
     ///
-    /// It was a single-element pin until #1125, when the two
-    /// Desktop offers earned terms of their own: they are the
+    /// It was a single-element pin until #1125, when the Desktop
+    /// families' doors — since #2655 the macOS Desktops section's
+    /// title and its drawer — earned terms of their own: they are the
     /// entire search surface for families whose rows are
     /// `.dynamic` and therefore unindexable, so the vocabulary a
     /// user arrives with — Apple's "Mission Control", the
