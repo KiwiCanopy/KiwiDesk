@@ -165,4 +165,24 @@ struct BarHoverFillTests {
             #expect(below < above)
         }
     }
+
+    /// The hover rounds the corners its item rounds: a run's first
+    /// item on a plate rounds its leading end alone.
+    @Test("The hover takes its item's corners")
+    func hoverTakesTheCorners() throws {
+        let view = appItem(Self.shelf(glass: true), hovered: true)
+        view.isFirstInRun = true
+        view.isLastInRun = false
+        view.layout()
+        let item = try #require(view.layer?.maskedCorners)
+        #expect(item != CACornerMask.allCorners)
+        #expect(view.hoverFill.gradient?.maskedCorners == item)
+    }
+}
+
+extension CACornerMask {
+    fileprivate static let allCorners: CACornerMask = [
+        .layerMinXMinYCorner, .layerMaxXMinYCorner,
+        .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
+    ]
 }
