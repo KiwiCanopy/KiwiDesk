@@ -65,6 +65,18 @@ enum BarPeekSource: Equatable {
     /// Whether a click alone opens and holds this source's list.
     var opensOnClick: Bool { clickGrowth != nil }
 
+    /// What the peek's group header carries (#2649): a list its
+    /// app's icon and name; a one-window label drops what its item
+    /// already shows — an App Bar label both, a Space Bar glyph's
+    /// the icon, its name the one app identity a glyph lacks.
+    var header: BarPeekContent.Header {
+        guard !isList else { return .full }
+        switch self {
+        case .appItem: return .none
+        default: return .name
+        }
+    }
+
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per
@@ -80,9 +92,22 @@ struct BarPeekContent: Equatable {
         var focused = false
     }
 
+    /// What a group's header draws (#2649).
+    enum Header: Equatable {
+        /// The app's icon and name: every list's groups (#2571).
+        case full
+        /// The name alone: a Space Bar glyph's label.
+        case name
+        /// No header: an App Bar label, the title row alone.
+        case none
+    }
+
     struct Group: Equatable {
         let app: String
-        /// The app's icon, on every group, a one-app list's too.
+        /// Whether the header draws the app's name (#2649).
+        var showsName = true
+        /// The app's icon on a list's group, a one-app list's too
+        /// (#2571); nil on a label's (#2649).
         let icon: NSImage?
         /// One per window shown, in row order.
         let rows: [Row]
@@ -124,6 +149,7 @@ struct BarPeekContent: Equatable {
             kept.append(
                 Group(
                     app: group.app,
+                    showsName: group.showsName,
                     icon: group.icon,
                     rows: rows,
                     windowCount: group.windowCount
@@ -139,14 +165,17 @@ struct BarPeekContent: Equatable {
     /// Groups `rows` per app NAME in first-seen order, every row
     /// kept — a lone window titled as its app included (owner,
     /// #1946) — on the key the bars group by, so a glyph standing
-    /// for sibling processes of one app (#1785) is one group. Every
-    /// group wears its app's icon, a one-app list's too (#2571). A
-    /// list (`checks`) checks the row of `focus` (#2063).
+    /// for sibling processes of one app (#1785) is one group.
+    /// `header` sets what each group's header draws: a list's wears
+    /// its app's icon, a one-app list's too (#2571); a label's drops
+    /// what its item shows (#2649). A list (`checks`) checks the row
+    /// of `focus` (#2063).
     @MainActor
     init(
         rows: [BarWindowRow],
         checks: Bool = false,
-        focus: WindowID? = nil
+        focus: WindowID? = nil,
+        header: Header = .full
     ) {
         self.checks = checks
         var order: [BarWindowRow] = []
@@ -165,7 +194,8 @@ struct BarPeekContent: Equatable {
             let all = grouped[first.app] ?? []
             return Group(
                 app: first.app,
-                icon: first.icon,
+                showsName: header != .none,
+                icon: header == .full ? first.icon : nil,
                 rows: all,
                 windowCount: all.count
             )

@@ -114,7 +114,8 @@ final class BarPeekBody: NSView {
                 group: group,
                 // A derived step under the titles, full ink where
                 // the palette cannot hold it (owner ruling, #1946).
-                header: Self.label(group.app, headerFont, headerInk),
+                header: group.showsName
+                    ? Self.label(group.app, headerFont, headerInk) : nil,
                 rows: group.titles.map { Self.label($0, textFont, ink) }
             )
         }
@@ -175,14 +176,15 @@ final class BarPeekBody: NSView {
     /// One group's views before placement.
     private struct Built {
         let group: BarPeekContent.Group
-        let header: NSTextField
+        /// Nil where the group draws no header (#2649).
+        let header: NSTextField?
         let rows: [NSTextField]
 
         /// The width it reads at on one line each.
         @MainActor
         func need(indent: CGFloat) -> CGFloat {
             let iconPart = group.icon == nil ? 0 : indent
-            let name = BarPeekBody.natural(header)
+            let name = header.map { BarPeekBody.natural($0) } ?? 0
             let row = rows.map { BarPeekBody.natural($0) }.max() ?? 0
             return max(iconPart + name, indent + row)
         }
@@ -197,19 +199,47 @@ final class BarPeekBody: NSView {
         indent: CGFloat,
         column: CGFloat
     ) -> CGFloat {
+        var y = top
+        if let header = built.header {
+            y = placeHeader(
+                header,
+                of: built,
+                at: top,
+                width: width,
+                indent: indent
+            )
+        }
+        return placeRows(
+            built,
+            from: y,
+            width: width,
+            indent: indent,
+            column: column
+        )
+    }
+
+    /// Places a group's header and its icon from `top`; returns
+    /// where its rows start.
+    private func placeHeader(
+        _ header: NSTextField,
+        of built: Built,
+        at top: CGFloat,
+        width: CGFloat,
+        indent: CGFloat
+    ) -> CGFloat {
         let lead = Metrics.padH
         let iconPart = built.group.icon == nil ? 0 : indent
         let nameWidth = max(width - iconPart, 1)
-        let nameHeight = Self.height(of: built.header, width: nameWidth)
-        built.header.frame = CGRect(
+        let nameHeight = Self.height(of: header, width: nameWidth)
+        header.frame = CGRect(
             x: lead + iconPart,
             y: top,
             width: nameWidth,
             height: nameHeight
         )
-        add(built.header)
+        add(header)
         // The icon sits on the header's first line.
-        let line = Self.lineHeight(built.header.font)
+        let line = Self.lineHeight(header.font)
         if let image = built.group.icon {
             let icon = NSImageView(image: image)
             icon.imageScaling = .scaleProportionallyUpOrDown
@@ -224,7 +254,20 @@ final class BarPeekBody: NSView {
             icons.append(icon)
         }
         let gap = built.rows.isEmpty ? 0 : Metrics.headerGap
-        var y = top + max(nameHeight, line) + gap
+        return top + max(nameHeight, line) + gap
+    }
+
+    /// Places a group's rows from `top`, `column` the check's past
+    /// `width`; returns where they end.
+    private func placeRows(
+        _ built: Built,
+        from top: CGFloat,
+        width: CGFloat,
+        indent: CGFloat,
+        column: CGFloat
+    ) -> CGFloat {
+        let lead = Metrics.padH
+        var y = top
         let rowWidth = max(width - indent, 1)
         for (index, row) in built.rows.enumerated() {
             if index > 0 {
