@@ -113,6 +113,7 @@ export default defineConfig({
       // default docs footer (see src/components/Footer.astro).
       components: {
         Footer: "./src/components/Footer.astro",
+        Head: "./src/components/DocsHead.astro",
       },
       customCss: ["./src/styles/theme.css"],
       // src/pages/404.astro owns the 404 (#635). A user page already

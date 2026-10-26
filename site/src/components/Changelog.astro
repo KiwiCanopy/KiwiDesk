@@ -49,9 +49,9 @@ interface Props {
 const { lang } = Astro.props;
 
 // English lives at /, German at /de, Japanese at /ja.
-function localePath(l: Lang, sub = ""): string {
+function localePath(l: Lang, sub = "/"): string {
   const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}` || "/";
+  return `${prefix}${sub}`;
 }
 
 // Per-key English fallback, exactly as Landing/Guide/Legal do it:
