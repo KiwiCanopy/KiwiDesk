@@ -664,7 +664,9 @@
   justify-content: center;
   padding-block: clamp(0.25rem, 1.5vw, 1rem);
 }
-.perks--stacked {
+/* Doubled class: `.perks` is declared below and would otherwise
+   win the column count, spilling the list past its half. */
+.perks.perks--stacked {
   grid-template-columns: 1fr;
   gap: 0.9rem;
   margin-top: 1.1rem;
