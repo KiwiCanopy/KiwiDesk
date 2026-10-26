@@ -152,6 +152,28 @@ struct NavigationTieTests {
         )
     }
 
+    @Test("A candidate overlapping along the step stays nearest-edge 0")
+    func overlapCountsAsTouching() {
+        // Stepping left: A and B touch the origin, C reaches past
+        // its left edge along the step and lies 100 pt inside it.
+        let origin = CGRect(x: 500, y: 0, width: 300, height: 900)
+        let candidates: [(id: WindowID, frame: CGRect)] = [
+            (WindowID(1), CGRect(x: 100, y: 0, width: 400, height: 440)),
+            (WindowID(2), CGRect(x: 100, y: 450, width: 400, height: 450)),
+            (WindowID(3), CGRect(x: 0, y: 0, width: 600, height: 100)),
+        ]
+        #expect(
+            Navigation.neighbor(
+                from: origin,
+                in: .left,
+                candidates: candidates,
+                tie: .init(order: [
+                    WindowID(1): 0, WindowID(2): 1, WindowID(3): 2,
+                ])
+            ) == WindowID(1)
+        )
+    }
+
     @Test("Beside maps by centre: top to top, bottom to bottom")
     func besideMapsByCentre() {
         let top = CGRect(x: 0, y: 0, width: 500, height: 445)
