@@ -5049,6 +5049,12 @@ automatically too, and a window of an app with no Dock icon that
 carries its own title-bar buttons on a raised layer (a system
 "Join Network" sheet, for one) is floated rather than ignored.
 
+:::unreleased
+A standard window that offers Cancel in place of a close button —
+Archive Utility's progress window while it unzips — floats
+automatically too.
+:::
+
 This table is the global base. A profile may add rules or remove
 inherited ones with its sparse `float_rules` object (`true` adds,
 `null` removes). The same profile diff resolves whether the base is

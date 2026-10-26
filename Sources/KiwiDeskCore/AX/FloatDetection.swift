@@ -261,11 +261,13 @@ public enum FloatDetection {
             structural: structural,
             // Asked only where structure tiles: a standard window
             // on the normal layer, the one shape a disabled zoom
-            // button marks as fixed-size — and only where a guess
-            // may float the app (#2173).
+            // button, or Cancel offered in place of close (#2653),
+            // marks as fixed-size — and only where a guess may
+            // float the app (#2173).
             fixedSize: {
                 rules.guess.applies(to: bundleID)
-                    && facts.zoomable() == false
+                    && (facts.zoomable() == false
+                        || facts.cancelsInsteadOfClosing())
             },
             ruleMatches: {
                 rules.matches(bundleID: bundleID, title: facts.title())

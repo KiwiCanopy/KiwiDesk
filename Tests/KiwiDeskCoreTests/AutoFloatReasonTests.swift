@@ -84,6 +84,38 @@ struct AutoFloatReasonTests {
         )
     }
 
+    /// A window offering Cancel in place of close is a progress
+    /// window (#2653): the fixed-size guess, whatever its zoom
+    /// button says, and a Tile rule escapes it like any guess.
+    @Test("Cancel in place of close floats on the fixed-size guess")
+    func cancelInsteadOfClose() {
+        func reason(
+            _ subrole: String = kAXStandardWindowSubrole,
+            cancels: Bool,
+            rules: FloatRules = FloatRules()
+        ) -> AutoFloatReason? {
+            FloatDetection.autoFloatReason(
+                WindowFacts(
+                    role: kAXWindowRole,
+                    subrole: subrole,
+                    layer: 0,
+                    zoomable: { true },
+                    cancelsInsteadOfClosing: { cancels }
+                ) { "Archive Utility" },
+                bundleID: "com.apple.archiveutility",
+                rules: rules
+            )
+        }
+        #expect(reason(cancels: true) == .fixedSize)
+        #expect(reason(cancels: false) == nil)
+        #expect(reason(kAXDialogSubrole, cancels: true) == .panel)
+        let tiled = FloatRules(
+            [],
+            guess: FloatGuess(tileRules: ["com.apple.archiveutility"])
+        )
+        #expect(reason(cancels: true, rules: tiled) == nil)
+    }
+
     @Test("a third-party app with no Dock icon is the accessory reason")
     func accessoryApp() {
         #expect(

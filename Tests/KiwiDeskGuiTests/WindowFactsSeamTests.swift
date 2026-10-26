@@ -90,6 +90,8 @@ struct WindowFactsSeamTests {
         #expect(door.contains("kAXZoomButtonAttribute"))
         #expect(door.contains("kAXEnabledAttribute"))
         #expect(door.contains("zoomable: {"))
+        // So is Cancel in place of close (#2653).
+        #expect(door.contains("cancelsInsteadOfClosing: {"))
     }
 
     /// Every `FloatDetection*` file, qualified or not (an

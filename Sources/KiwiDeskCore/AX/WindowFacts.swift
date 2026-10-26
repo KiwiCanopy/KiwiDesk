@@ -15,18 +15,25 @@ public struct WindowFacts {
     /// window that cannot be resized, nil where it has no zoom
     /// button or the read failed. Asked like the title.
     public let zoomable: () -> Bool?
+    /// Whether the window offers Cancel in place of close — its
+    /// close button disabled and a window-level `AXCancelButton`:
+    /// a progress window such as Archive Utility's (#2653). Asked
+    /// like the zoom button, and only where it answers no.
+    public let cancelsInsteadOfClosing: () -> Bool
 
     public init(
         role: String,
         subrole: String,
         layer: Int?,
         zoomable: @escaping () -> Bool? = { nil },
+        cancelsInsteadOfClosing: @escaping () -> Bool = { false },
         title: @escaping () -> String
     ) {
         self.role = role
         self.subrole = subrole
         self.layer = layer
         self.zoomable = zoomable
+        self.cancelsInsteadOfClosing = cancelsInsteadOfClosing
         self.title = title
     }
 
@@ -53,7 +60,35 @@ public struct WindowFacts {
                         as: Bool.self
                     )
                 }
+            },
+            cancelsInsteadOfClosing: {
+                cancelsInsteadOfClosing(element)
             }
         ) { AXHelper.title(of: element) }
+    }
+
+    /// The close button reads disabled and the window carries a
+    /// Cancel button; the second read only where the first holds.
+    private static func cancelsInsteadOfClosing(
+        _ element: AXUIElement
+    ) -> Bool {
+        let close = AXHelper.attribute(
+            element,
+            kAXCloseButtonAttribute,
+            as: AXUIElement.self
+        )
+        guard
+            let close,
+            AXHelper.attribute(
+                close,
+                kAXEnabledAttribute,
+                as: Bool.self
+            ) == false
+        else { return false }
+        return AXHelper.attribute(
+            element,
+            kAXCancelButtonAttribute,
+            as: AXUIElement.self
+        ) != nil
     }
 }
