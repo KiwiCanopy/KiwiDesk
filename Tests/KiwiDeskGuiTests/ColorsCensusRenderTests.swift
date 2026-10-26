@@ -9,7 +9,11 @@ import Testing
 /// `.coloursAndMotion` census key appears in exactly the order
 /// list its placement names, so a census row added, retiered or
 /// moved without a renderer update is a red test, not a silently
-/// missing control.
+/// missing control. One row draws in another container's list:
+/// the Fill keeps `.kiwishelf`, which owns its colour membership
+/// and spares it the `.glass` gate, while it draws in the Liquid
+/// Glass group (#2593). Such a row is pinned apart by key; a
+/// further one owes the same reason.
 ///
 /// Set equality, not sequence: ORDER is the renderer's to own and
 /// is deliberately not pinned here, exactly as in
@@ -179,19 +183,29 @@ struct ColorsCensusRenderTests {
 
     // MARK: - Colors & glass
 
-    /// Every Colors & glass group's rows sit behind the section's
-    /// one disclosure (#2389), and none behind a second: since
-    /// #1857 the colours are a browse that hides nothing once
-    /// open.
+    /// The Liquid Glass group is at rest, the Fill leading the
+    /// rows it greys (#2593); every other colour sits behind the
+    /// section's one drawer (#2389), and none behind a second:
+    /// since #1857 the colours are a browse that hides nothing
+    /// once open.
     @Test("each Colors & glass group's rows are the census's")
     func colorsAndGlassGroups() {
+        let fill = SettingKey.kiwishelf(.fillColor)
         pin(
-            ColorsRowOrder.glassRows,
+            ColorsRowOrder.glassRows.filter { $0 != fill },
             .coloursAndMotion,
             .glass,
-            .showMore,
+            .atRest,
             "glass"
         )
+        pin(
+            [fill],
+            .coloursAndMotion,
+            .kiwishelf,
+            .atRest,
+            "the Fill"
+        )
+        #expect(ColorsRowOrder.glassRows.contains(fill))
         // Each role group draws its colour above its rows.
         pin(
             [ColorRole.accent.paint] + ColorsRowOrder.accentRows,
@@ -223,12 +237,20 @@ struct ColorsCensusRenderTests {
             "window marks"
         )
         let section = SettingsContainer.colourGroups.union([.glass])
+        let rendered = Set(
+            ColorsRowOrder.glassRows
+                + [ColorRole.accent.paint] + ColorsRowOrder.accentRows
+                + [ColorRole.secondAccent.paint]
+                + ColorsRowOrder.secondAccentRows
+                + ColorsRowOrder.kiwishelfColorRows
+                + ColorsRowOrder.windowMarksRows
+        )
         #expect(
             SettingKey.allCases.filter {
                 $0.placement.area == .coloursAndMotion
                     && $0.placement.container.map(section.contains)
                         == true
-                    && $0.placement.tier != .showMore
+                    && !rendered.contains($0)
             }
             .isEmpty
         )

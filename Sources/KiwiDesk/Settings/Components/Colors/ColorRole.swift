@@ -9,10 +9,10 @@ enum ColorRole: CaseIterable {
     @MainActor var control: SettingsControl {
         switch self {
         case .accent:
-            return SettingsCatalog.colors.colorsAndGlass.children
+            return SettingsCatalog.colors.colorsDrawer.children
                 .accentGroup
         case .secondAccent:
-            return SettingsCatalog.colors.colorsAndGlass.children
+            return SettingsCatalog.colors.colorsDrawer.children
                 .secondAccentGroup
         }
     }

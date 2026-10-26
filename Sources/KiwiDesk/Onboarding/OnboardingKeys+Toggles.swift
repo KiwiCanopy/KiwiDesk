@@ -89,6 +89,23 @@ extension OnboardingKeys {
         }
     }
 
+    /// The keys step's Pocket row (#2446, the tenth by owner
+    /// ruling 2026-10-23).
+    static func pocketFamily(layer: KeyLayer) -> OnboardingKeyFamily? {
+        single(
+            combo: combo(KeybindingCatalog.pocket, in: layer)
+        ).map {
+            OnboardingKeyFamily(
+                id: "pocket",
+                label: L(
+                    "onboarding.keys.pocket",
+                    "Pocket the window, then bring it back"
+                ),
+                chord: $0
+            )
+        }
+    }
+
     /// The keys step's KiwiVision row, saying what a press does
     /// for a reader who has not met the word.
     static func kiwiVisionFamily(layer: KeyLayer) -> OnboardingKeyFamily? {

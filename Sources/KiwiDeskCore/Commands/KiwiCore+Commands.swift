@@ -80,6 +80,8 @@ extension KiwiCore {
             return toggleFocusedSticky(.display)
         case "toggle_maximized":
             return toggleMaximized()
+        case "pocket":
+            return pocketCommand()
         case "override_sticky_reach":
             return setFocusedStickyReach(args)
         case "resize":
@@ -259,6 +261,9 @@ extension KiwiCore {
     ) -> CommandResponse {
         guard let focused = focusedWindowID else {
             return .fail("no focused window")
+        }
+        if state.pocketPhase(of: focused) != nil {
+            return refusePocketSticky(focused)
         }
         state.setSticky(focused, scope)
         retile()

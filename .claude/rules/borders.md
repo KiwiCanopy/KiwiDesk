@@ -521,7 +521,11 @@ Obligations:
   the cache has not seen; a source that judges a window rather
   than its app — a lens member, whose title rule may clear some
   windows and not others — is read per window in the walk through
-  the one `visionLensClear`, keyed the same way (`KiwiVisionClearAppTests` ▸
+  the one `visionLensClear`, keyed the same way, and the pocket's
+  clear pair (#2446) is the second per-window source, read through
+  the one `visionPocketPair` by both the walk and `lensKeySkip`, so
+  the plates and the lens's keys never disagree about it
+  (`PocketSurfaceTests` ▸ `visionPair`; `KiwiVisionClearAppTests` ▸
   `siblingProcessIsClear`, `KiwiVisionNeverDimmedTests` ▸
   `neverDimmedAreHoles`, `bundleLookupsAreBounded`,
   `KiwiVisionLensActivationTests` ▸ `membersAreClear`). The mask
@@ -595,7 +599,8 @@ Obligations:
   navigation model takes `skip:` with no default, so a new model
   or caller threads it rather than inheriting "skip nothing" —
   review's, since nothing scans for a default. Membership is the
-  plates' per-window `visionLensClear`, never an app-set test,
+  plates' per-window `visionLensClear` and `visionPocketPair`,
+  never an app-set test,
   while the window switcher's split stays by app (`lensHolds`,
   ruling 36). A click, a bar item, hover focus and the window
   switcher are picks and never ask it (`KiwiVisionLensFocusTests`,

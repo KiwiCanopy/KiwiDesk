@@ -678,6 +678,61 @@ editing here:
   left all three cases green until the away-resolving lookup
   came back too. A reviewer reading a half-revert as harmless is
   the failure mode; the pair is the guard, not either half.
+- **A pocketed window is KNOWN in the slot, tracked, and never a
+  member (#2446).** `StateCoordinator.pocket` names it and
+  `windows` keeps it, but no Space lists it — the away ledger's
+  shape above, for the same reason. So a new reader of
+  `space.windows` owes it no exclusion, and the pocket never
+  becomes a Space or a flag on a member. The obligations run the
+  other way:
+  - **A new pass over EVERY tracked window — `state.windows.all`,
+    as the stash park, the marks, the Desktop carry, the window
+    switcher and `get_state` walk — asks `pocketPhase(of:)` and
+    rules on the window in both phases**: it reaches the window
+    where a Space reader does not, so forgetting it there acts on a
+    parked window rather than hiding one.
+  - **A new path that files a window into a Space consults the
+    slot first** — on an arrival or re-adoption, as the create
+    fold does through `readoptPocketWindow` (an unhide, a boot
+    scan, a replay), and on a re-file, as the profile
+    partitioning restore (`restorePartitioning`) skips
+    `pocketedWindow` — or it files the pocketed window and draws
+    it (`PocketCommandTests` ▸ `hideKeeps`,
+    `outReadoptKeepsFlags`). A new per-window flag memory that a
+    close writes and an arrival restores skips the pocket window,
+    whose flags are the slot's; `PocketCommandTests` ▸
+    `closeLeavesNoMemory` holds the sticky memory alone, since
+    pocketing clears `userFloated` and the float memory never
+    records the window.
+  - **Ask whether a window is the pocket's through
+    `StateCoordinator.pocketPhase(of:)`**, which answers the phase
+    too, or `pocketedWindow`; a new consumer that draws, refuses
+    or skips for it states which phase it means. **The screen a
+    pocketed window waits on is `pocketHomeDisplay`**, the active
+    Space's, which the stash park and the Desktop carry both read;
+    a new reader of that screen takes it rather than deriving one.
+  - **macOS focusing the pocketed window takes it out in
+    `handleWindowFocused`, after every distrust arm** — the
+    ignored-panel re-report, the z-order echo, the #958 and #1532
+    returns — so a report one of them claims never takes it out; a
+    new focus distrust sits ahead of `consumePocketedFocus`, and
+    the move latch stamped by `putInPocket` swallows the pocketing's
+    own echo (`PocketCommandTests` ▸ `activationTakesOut`).
+  - **The slot crosses an in-place restart in
+    `StateSnapshot.pocket`, written by that capture alone**, and a
+    slow app's window adopted after the replay comes back to it
+    unfiled (`PocketEdgeTests` ▸ `adoptWaitsForSlowWindow`); a
+    verb naming the pocketed window's id files it nowhere
+    (`explicitMoveRefused`); a quit
+    releases the pocket ahead of its capture
+    (`releasePocketForQuit`), so no other snapshot carries one
+    (`PocketSurfaceTests` ▸ `inPlaceCarries`,
+    `plainSnapshotCarriesNone`). The slot follows a native-tab
+    re-key through `rekeyPocket` (`PocketCommandTests` ▸
+    `rekeyFollows`).
+
+  The argument is `docs/design-decisions.md` ▸ *The pocket is one
+  slot beside the Spaces, not a Space*.
 - **The ignored-panel distrust mutates through its ONE state
   machine** (#21/#244/#951): `armIgnoredPanel` and
   `shouldConsumeIgnoredPanelReport` in
@@ -796,6 +851,13 @@ editing here:
   the arm itself is accessibility.md's).
   `StickyReachCarryTests` drives the handler, the settle and the
   verdicts through the fake bridge; `StickyReachOverrideTests` the pin.
+  **The carried set, `stickyReachCarried`, also holds the pocket
+  window in both phases whatever `sticky.desktop_reach` says
+  (#2446)**, the pocketed one carried to `pocketHomeDisplay`'s
+  Desktop; every reader of the set — the carry, the in-flight
+  stamp, and the readers that inherit it — takes the pocket window
+  with it, so a new reader states whether it means that window
+  too.
 - A **native-fullscreen window keeps its `space.windows` slot
   but leaves both tiled-member derivations** (#670) — a layout,
   navigation or z-order consumer of the tiled members routes
@@ -1884,7 +1946,10 @@ editing here:
   `detectionVerdict(for:)` or the detection beside it, and the
   verdict is composed only in `EventLoop.autoFloatVerdict` —
   `TileRefusalSeamTests` holds all three by census, so a new
-  reader names itself there. A user-float record never stands on
+  reader names itself there. `tileRefusal` lays one state verdict
+  ahead of detection: the pocket window answers `.pocket` (#2446),
+  a reason detection never composes, so a new STATE reason joins
+  it there and never `autoFloatVerdict`. A user-float record never stands on
   a window detection floats, from any door (`userFloated`'s
   fold, the reopen memory, the in-place restore;
   `TileReturnsToRulesTests`); the argument is
@@ -2109,7 +2174,9 @@ editing here:
   coding, `ScrollRest`'s and `StickyScope`'s raw values are
   stored values in AGENTS.md §5's sense — and so are the held
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
-  `HeldOrigin.Arrangement` keys and the snapshot's own
+  `HeldOrigin.Arrangement` keys, the pocket's `PocketSlot` keys and
+  `Phase` raw values (#2446, `PocketEdgeTests` ▸
+  `storedKeysArePinned`), and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
   profiles.md), each window record's `app` and `title` — the
   stable key a cross-session match reads (#1385) — and its
@@ -2419,6 +2486,15 @@ A new navigation model, or a new caller of one, also threads a
 KiwiVision lens's skip; the obligation is
 [borders.md](borders.md)'s ▸ "A step KiwiDesk's own navigation
 takes".
+
+**A geometric step settles a tie through `navigationTie`
+(#2619)**, the one home of "the last step for a focus, never for
+a swap, then the first in order, nothing in a Floating Space": a
+new caller of `Navigation.neighbor` or `Navigation.beside` hands
+it that tie, or states `.none` with its reason as the float tier
+does — the argument has no default, so the compiler asks
+(`NavigationTieTests`, `NavigationTieCommandTests`,
+`NavigationTieEdgeTests`).
 
 **A focus key past its last window answers the focus-wrap setting
 through `navigate` (#2493), never a layout's own reading of it.**

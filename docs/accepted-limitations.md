@@ -306,3 +306,34 @@ Bar or App Bar that overlaps it — a revealed shelf, a peek — since
 the bars sit at the floating window level, below it; they show
 again as soon as the prompt closes or Brave loses focus.
 :::
+
+:::unreleased
+A window in the [pocket](lua-reference.md#pocket) cannot be taken
+out, or put back, while its app is hidden: the `pocket` command
+answers `pocket is unreachable`
+([#2446](https://github.com/KiwiCanopy/KiwiDesk/issues/2446)). A
+hidden app's windows leave KiwiDesk's tracking, and a window
+KiwiDesk does not track cannot be moved. Show the app again —
+`⌘-Tab`, a Dock click, its row in KiwiHub's window switcher — and
+the pocket answers as before.
+:::
+
+:::unreleased
+Where macOS does not expose the window-management bridge, the
+pocket window is not carried across macOS Desktops: a window left
+in the pocket on another Desktop can be taken out only from that
+Desktop ([#2446](https://github.com/KiwiCanopy/KiwiDesk/issues/2446)).
+Moving a window between Desktops needs that bridge, the same one
+sticky windows' Desktop reach needs; on a Mac that has it, the
+pocket window comes along with every switch.
+:::
+
+:::unreleased
+Switching to the app of a window you pocketed — `⌘-Tab`, a Dock
+click — within a second of pocketing it leaves the focus on the
+parked window instead of taking it out
+([#2446](https://github.com/KiwiCanopy/KiwiDesk/issues/2446)).
+For that second KiwiDesk reads a focus report for the pocketed
+window as the echo of pocketing it, which an app can still send,
+and swallows it. Press `⌃⌥P` to take the window out.
+:::

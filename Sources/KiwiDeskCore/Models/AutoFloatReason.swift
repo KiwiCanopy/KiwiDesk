@@ -18,13 +18,16 @@ public enum AutoFloatReason: Sendable, Equatable {
     /// A standard window that cannot be resized — its zoom button
     /// is disabled: Settings and About windows (#2070).
     case fixedSize
+    /// The window is in the pocket (#2446), which always floats
+    /// it — a state, not a detection.
+    case pocket
 
     /// Whether the reason is a GUESS a Tile rule or the switch can
     /// escape (#2173), rather than structure or the user's rule.
     public var isGuess: Bool {
         switch self {
         case .accessoryApp, .fixedSize: true
-        case .rule, .panel, .raisedLayer: false
+        case .rule, .panel, .raisedLayer, .pocket: false
         }
     }
 }

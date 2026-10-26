@@ -28,6 +28,8 @@ struct CrossSessionSeamTests {
             (2, "bulk — a profile's Spaces re-filed"),
         "KiwiCore+HeldSpaces.swift":
             (1, "bulk — a held Space sent home"),
+        "KiwiCore+Pocket.swift":
+            (1, "quit — the pocketed window filed for the gather"),
     ]
 
     private func counts(of needle: String) throws -> [String: Int] {

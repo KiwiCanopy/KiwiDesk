@@ -27,6 +27,9 @@ final class SpaceBarItemView: NSView {
         let count: Int
         var sticky = false
         var floating = false
+        /// Out of the pocket: its badge replaces the float one
+        /// (#2446).
+        var pocket = false
         var stickyScope: StickyScope = .none
         /// The windows this glyph stands for, in row order (#1528).
         var windows: [WindowID] = []

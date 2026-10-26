@@ -31,10 +31,10 @@ struct BarMenuLandingTests {
                     anchor: ColorsAndGlassSection.head.id
                 )
         )
-        // The head opens the section: a drawer expands only for
-        // its children, never its own label (#1250).
+        // The head is the open Liquid Glass group, so the
+        // Colors drawer stays shut (#2593).
         #expect(
-            SettingsCatalog.colors.colorsAndGlass.shouldExpand(
+            !SettingsCatalog.colors.colorsDrawer.shouldExpand(
                 revealing: ColorsAndGlassSection.head.id
             )
         )

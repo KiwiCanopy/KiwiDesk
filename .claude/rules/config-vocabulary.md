@@ -136,6 +136,15 @@ synonym:
   *saved* or *pinned*, which would collide with a Screen pin.
   A *temporary layout* (#1179) is a different thing — a mode not
   kept in the profile — so a sentence naming either says which.
+- **pocket** — the one slot that keeps a window one key away
+  (#2446; Lua and CLI `pocket`, `StateCoordinator.pocket`). Its
+  window is the **pocket window**, the verb is *pocket*, and its
+  two states are *pocketed* and *out*. Copy writes **Pocket** as
+  a Family A name, verbatim in every catalog
+  (`docs/localization-naming.md`). Never a *scratchpad*, the
+  other window managers' word; a *stash*, the park that hides a
+  window at a corner (`TilingEngine` stash), which the pocket
+  uses but is not; or a *drawer*, Settings' Lua bindings drawer.
 - **pin** — two relations, and only ONE of them still spends the
   word (#1022). A **Screen pin** binds a Space to a screen and
   takes the word in its labels (`diff.label.space_pin`,

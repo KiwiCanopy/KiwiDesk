@@ -1923,6 +1923,51 @@ that predicate too, or the lens stops steering the keys on it
 ([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
 
 :::unreleased
+**A tie goes back to where the last step came from, else to the
+first in window order
+([#2619](https://github.com/KiwiCanopy/KiwiDesk/issues/2619)).**
+The geometric score is forward distance plus twice the lateral
+offset, so where a full-height master faces a stack of three,
+every candidate lies at one distance and the lateral term alone
+picks the middle window — an accident of the score that nobody
+can read off the screen. So a tie has a definition, and only two
+shapes meet it: the origin's cross span wholly contains two or
+more of the nearest candidates, or two or more share the best
+score. A short origin or a partial straddle keeps the score's
+pick, since its position already says which window is meant.
+
+A `focus` tie returns to the window focused just before the
+origin when that window is among the tied ones, so stack →
+master → back lands where it left; otherwise it takes the first
+tied window in the Space's flat order. The history is one step
+and no further: a deeper or timed recency picks by state nobody
+can see once a while has passed, which is the very defect of the
+score's middle pick. It takes the first in order rather than the
+one nearest the origin's number, so a tie lands on the same
+window from either side. A `swap` takes the first in order alone:
+a swap moves a window, and letting a focus history the user
+cannot see choose which window moves makes the same key displace
+different windows.
+
+Track's step across tracks still picks the track by array order,
+but the window it lands on there is the shown one nearest by
+centre on the cross axis, with the same tie rule
+(`Navigation.beside`) — never a window at the same position in
+the track, which could be one a run had scrolled away. Under a
+lens, that step passes over a track only when the lens skips every
+shown window in it. A hop onto another screen keeps the step back
+and nothing else, another Space's order meaning nothing from
+here; the float tier and a Floating Space keep the plain score,
+a hand-placed float's order meaning nothing either.
+
+The step back reads the honored-focus record, which a focus
+REPORT writes: two presses faster than the first one's report, or
+a focus whose report was distrusted, leave the step before them
+as the last one. The one-step reading accepts that residue rather
+than keep a second, command-side history.
+:::
+
+:::unreleased
 **One setting decides what a focus key does at its last window,
 in every layout: Off, This screen or All screens
 ([#2493](https://github.com/KiwiCanopy/KiwiDesk/issues/2493)).**
@@ -5936,6 +5981,96 @@ already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 :::
 
+:::unreleased
+### The pocket is one slot beside the Spaces, not a Space (#2446)
+
+**[Rationale]**
+
+**One window, one key, three states — empty, pocketed, out — and
+the window is never a member of a Space while it is pocketed.**
+The slot (`StateCoordinator.pocket`) knows the window, and the
+window stays tracked, so its frame, its app and its focus reports
+keep flowing; but no Space lists it. That is the away ledger's
+shape (#1146) for the same reason: a member with a "pocketed"
+flag would owe an exclusion in every reader of a Space's windows
+— the layouts, the bars, navigation, KiwiVision, the quit gather
+— and the one reader that forgot it would draw the window back.
+Outside every Space, a reader of a Space's members that forgets the
+pocket leaves the window hidden, which is the failure a user can
+recover from with the key. That covers only the Space readers: a
+walk over every tracked window — the stash park, the marks, the
+Desktop carry, the window switcher, `get_state` — reaches the window
+in both states, so each such walk rules on it, and forgetting it
+there draws a mark on a parked window or parks it on the wrong
+screen.
+
+**A pocketed window waits on one screen, the active Space's**
+(`StateCoordinator.pocketHomeDisplay`), and the park and the Desktop
+carry both read that one answer; two answers would park the window
+on one screen and carry it to the Desktop of another. Pocketing is
+a focused-window command and takes the #292 foreground check; taking
+the window out and putting it back act on no focus, so a filled
+pocket passes that check.
+
+**Out of the pocket it is a global sticky float, borrowed whole.**
+"Comes with me wherever I go" is what the global sticky scope
+already does — every Space of every screen, carried across macOS
+Desktops (#1145) — so the out window takes that scope and the
+float flag rather than a third rendering rule. The pocket window is
+carried across Desktops in both states whatever
+`sticky.set_desktop_reach` says, since a pocketed window left on
+another Desktop is one the key can no longer reach. It follows that
+the sticky verbs, and the float verbs that would tile it
+(`make_tiled`, `toggle_floating`), are refused on it with their own
+pills: their scope is the pocket's, and letting `make_tiled` or
+`make_unsticky` through would leave a window the pocket still
+claims tiled, or held to one Space, which is neither state.
+`make_floating` asks for what the window already is and succeeds
+without a pill.
+
+**Not minimize, not ⌘H, not a Space.** Minimize animates into the
+Dock, changes the Dock's state, and drops the window from
+KiwiDesk's state, so the window and everything known about it
+would leave together; un-minimizing also lands it back where it
+was, not where you are. ⌘H hides every window of the app, and a
+hidden app's windows leave tracking (#913). A dedicated scratch
+Space shows the window by switching you to it, which is the trip
+the key exists to save. Sticky is the opposite want: always
+visible rather than visible on call. So the pocketed window is
+parked off-screen by the same stash that hides any window of an
+unshown Space.
+
+**macOS activating a pocketed window takes it out.** `⌘-Tab`, a
+Dock click or a notification hands focus to a window parked
+off-screen; left there, the user types into a window they cannot
+see. Taking it out at that report gives the activation the
+meaning the user meant. The take-out is asked after every distrust
+the focus handler runs — the ignored-panel re-report, KiwiDesk's
+own z-order echo, the accessibility-steal and menu-bar reveal
+returns — so a report one of them claims is never read as the
+user's activation. And a report inside the move latch's second
+after pocketing is swallowed, since the window's own focus report
+can still arrive after it was pocketed; the trade is that a real
+`⌘-Tab` to the app inside that second leaves the focus on the
+parked window ([Accepted limitations](accepted-limitations.md)).
+
+**The window switcher lists the pocket after the hidden apps.**
+The switcher's first row is preselected and is the window you were
+in before, so `⌃⌥J` Return keeps meaning "back"; a pocketed window
+has its own key and would otherwise sit on that row whenever it
+was the last thing you used. After the hidden apps, it is the one more window a
+search may want.
+
+**A quit leaves no window parked.** The pocket does not survive a
+quit, so a quit files a pocketed window into the active Space as
+the user's float, where the quit gather lays it out with the
+others, and leaves an out window where it is as a plain float — a
+next launch with no pocket would otherwise hold a window off-screen
+that no key can bring back. An update's in-place relaunch carries
+the slot (`StateSnapshot.pocket`), since that restart is meant to
+be invisible.
+:::
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**
@@ -8396,17 +8531,18 @@ and the line is drawn where the harm is:
   the ground that colour is a browse — nobody types "group
   badge text colour", they open the page and look — but that
   held only while they had a page of their own at rest. Since
-  #2389 they sit in Looks & Animations' shut Colors & glass
-  section, so a hit with no anchor lands on a page that does
-  not show them, the one failure this split exists to prevent.
-  The browse argument survives inside the section: open, it
-  hides nothing, and the anchor only opens it. The two role
+  #2389 they sit in Looks & Animations' Colors & glass section,
+  since #2593 every colour but the Fill in its shut Colors drawer, so a hit with no anchor
+  lands on a page that does not show them, the one failure this
+  split exists to prevent. The browse argument survives inside
+  the drawer: open, it hides nothing, and the anchor only opens
+  it. The two role
   groups' wells both draw "Ticked rows", which the label-key join
   cannot tell apart, so their census label is their group's title
   instead: the hit lands on the group, the drawn words reach them
   as a search synonym — the one place the census label is not the
   drawn one, ruled rather than left anchor-less, since anchor-less
-  inside a shut section is the failure itself.
+  inside a shut drawer is the failure itself.
 
 The split is keyed on the census TIER, so a row moves across it
 by correcting the census, never by an anchor added beside it —
@@ -11535,11 +11671,12 @@ way to focus or move a window until they author every combo.
 Control-Option scheme** (#270): `⌃⌥` arrows focus / `⌃⌥⇧` arrows
 swap, `⌃⌥` / `⌃⌥⇧` / `⌃⌥⌘` digit per-space go / move /
 move-and-follow, `⌃⌥F` float, `⌃⌥S` sticky everywhere, `⌃⌥P`
-sticky to this screen (#1094) — plus `⌥⌘` `1`/`2` and `4`/`5` for
-size on a base of its own (#1075) — with one guard everywhere:
-**only when no layer carries a single binding** — a user- or
-Lua-authored binding anywhere blocks the seed, making it
-idempotent and never destructive.
+sticky to this screen (#1094; the chord is amended below, in *`⇧`
+has one meaning*) — plus `⌥⌘` `1`/`2` and `4`/`5` for size on a
+base of its own (#1075) —
+with one guard everywhere: **only when no layer carries a single
+binding** — a user- or Lua-authored binding anywhere blocks the
+seed, making it idempotent and never destructive.
 
 **Why Control-Option, not bare Option (#270).** On macOS Option is the
 special-character (AltGr) modifier, so a *global* `⌥`+key hotkey
@@ -12084,6 +12221,24 @@ shown, "Toggle sticky everywhere"), and the screen-scoped one
 `⌃⌥P`, named for the `pin.fill` mark `StickyStyle` draws rather
 than for a label — because a label-derived mnemonic only works in
 the language the label was written in, while a mark is a picture.
+
+:::unreleased
+Amended by #2446 and #2611: `⌃⌥P` belongs to Pocket, P for the
+pocket, and the screen-scoped toggle keeps no default chord. It
+also leaves the Settings shortcut list, the one row #2611 moved to
+Lua-only: an action with no default that few people bind costs
+every reader of the list a line, while the Lua bindings drawer
+keeps it bindable. The move reaches existing installs once, through
+a stored-binding step that rewrites only the seeded chord still
+running the toggle, in a file below the format that step introduced
+— so a chord the user puts back on it afterwards is theirs, and a
+chord they gave it on another key was never touched. The seeded
+chord is read on the file's own `shortcut_base`, `⌃⌥P` or `✦P`,
+where the file carries one (`gui.json`, a backup's config). A
+profile file carries no base, so there both `⌃⌥P` and `✦P` move:
+the trade is that a pin a user bound by hand to the other base's
+chord inside a profile moves with them.
+:::
 
 **`D`, the obvious letter, is refused** on three counts: *Desktop*
 is a first-class noun in this app with its own catalog rows, so
@@ -14586,9 +14741,11 @@ mutually-exclusive set, so a strip would misapply the #205 "tabs
 fit a fixed exclusive set" principle. The bar colors live in
 Looks & Animations ▸ Colors & glass (#678 Phase 3, #2389, "Colour
 collects in one area" below). Since #1857 none of them sits
-behind a second drawer: once the section is open, the accent ones
-lead in its role groups and the rest are all shown under KiwiShelf
-colors, because a browse should not hide half its subject.
+behind a second drawer: once the Colors drawer is open (#2593),
+the accent ones lead in its role groups and the rest are all
+shown under KiwiShelf colors — the Fill aside, which sits in the
+open Liquid Glass group above the two rows it greys — because a
+browse should not hide half its subject.
 
 **[Principle] Colour collects in one area, and a colour renders
 there and nowhere else.** (#678 Phase 3, 2026-08-02; #2389.) Filing a
@@ -14683,6 +14840,23 @@ add a decision and a second search hop for no new protection.
 The section's rows are `.showMore` and take search anchors (the
 #277 entry above), and "Advanced Colors" stays a search synonym
 of the page that took its content, per the title rule below.
+
+:::unreleased
+**Amended by #2593 (2026-10-26): the finish is open, the colours
+are the one drawer.** Since #2569 Liquid Glass, the Fill, *Tint
+KiwiHub and plates*, *Fill fade* and the sheen are choices made
+for the whole look, like the palette above them, so Colors &
+glass is now an always-open section that shows them at rest — the
+Fill directly above the two rows it greys, so their grey needs no
+sentence naming another group. Every other colour sits below them
+in ONE drawer, **Colors**, shut on every visit with no stored
+flag, as Motion's is. This is still one drawer, so #1857 holds:
+the colours remain the one "on demand" step, and search stays one
+hop, since a hit on a colour opens the drawer (#1250). What moved
+out of hiding is the finish alone, for Simple and Power User
+alike. Its rows are `.atRest`, so by #277 they take no search
+anchor: a hit lands on the page, where they are already shown.
+:::
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**

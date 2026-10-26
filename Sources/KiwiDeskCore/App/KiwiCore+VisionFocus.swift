@@ -15,7 +15,10 @@ extension KiwiCore {
     func lensKeySkip() -> ((WindowID) -> Bool)? {
         guard visionLook.lens?.keepFocus == true else { return nil }
         return { [self] id in
-            guard let window = state.windows[id] else { return false }
+            // The pocket's clear pair is never skipped (#2446).
+            guard let window = state.windows[id],
+                !visionPocketPair().contains(id)
+            else { return false }
             return !visionLensClear(window.appRef)
                 .clears(title: window.title)
         }

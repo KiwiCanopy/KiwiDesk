@@ -11,7 +11,8 @@ extension KiwiCore {
     /// beside a verb. The bar menu's row and the refusal pill both
     /// read it.
     func tileRefusal(of id: WindowID) -> AutoFloatReason? {
-        eventLoop.detectionVerdict(for: id)?.reason
+        if state.pocketPhase(of: id) != nil { return .pocket }
+        return eventLoop.detectionVerdict(for: id)?.reason
     }
 
     /// `make_floating` / `make_tiled`: the named window, else the

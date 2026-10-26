@@ -33,13 +33,17 @@ extension KiwiCore {
     /// The windows the carry follows — those a pass moves. A
     /// native-fullscreen window keeps its scope but travels
     /// nowhere (#670): a move would yank it out of its own space.
+    /// The pocket window travels in either phase, whatever the
+    /// toggle (#2446): left on another Desktop, it is out of reach.
     func stickyReachCarried() -> Set<WindowID> {
         guard canDriveDesktops else { return [] }
         return Set(
             state.windows.all
                 .filter {
-                    $0.stickyScope != .none && !$0.isFullscreen
-                        && stickyReachEnabled(for: $0.id)
+                    !$0.isFullscreen
+                        && (state.pocketPhase(of: $0.id) != nil
+                            || ($0.stickyScope != .none
+                                && stickyReachEnabled(for: $0.id)))
                 }
                 .map(\.id)
         )
@@ -171,6 +175,9 @@ extension KiwiCore {
         guard let focused = focusedWindowID else {
             return .fail("no focused window")
         }
+        if state.pocketPhase(of: focused) != nil {
+            return refusePocketSticky(focused)
+        }
         switch choice {
         case .on:
             state.stickyReachOverrides[focused] = true
@@ -197,8 +204,11 @@ extension KiwiCore {
     ) -> String? {
         let uuids = Set(spaces.map(\.displayUUID))
         if uuids.count <= 1 { return uuids.first }
-        return state.stickyRenderSpace(of: window)
-            .flatMap { state.workspaces.display(of: $0) }
-            .flatMap { NativeSpaces.displayUUID(for: $0) }
+        let display =
+            state.pocketedWindow == window.id
+            ? state.pocketHomeDisplay
+            : state.stickyRenderSpace(of: window)
+                .flatMap { state.workspaces.display(of: $0) }
+        return display.flatMap { NativeSpaces.displayUUID(for: $0) }
     }
 }

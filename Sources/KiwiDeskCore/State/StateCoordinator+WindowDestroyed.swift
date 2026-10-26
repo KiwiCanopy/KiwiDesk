@@ -23,12 +23,15 @@ extension StateCoordinator {
             rememberedSpaces[id] = nil
             closedDepartures.remove(id)
             rememberMinimized(id)
+            // A minimize puts it in the Dock, not the pocket (#2446).
+            if pocketPhase(of: id) != nil { emptyPocket() }
         } else if let space = workspaces.space(of: id) {
             rememberedSpaces[id] = .departed(space)
             rememberDepartedSlot(of: id, in: space)
             handedTo = departedSlots[id]?.handedTo
         }
-        if let window = windows[id] {
+        // A pocket window's flags are the slot's (#2446).
+        if let window = windows[id], pocketPhase(of: id) == nil {
             rememberFloatOverride(of: window)
             rememberStickyIntent(of: window)
         }

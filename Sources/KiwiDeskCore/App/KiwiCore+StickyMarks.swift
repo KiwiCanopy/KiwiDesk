@@ -39,7 +39,11 @@ extension KiwiCore {
         let hidden = runHidden
         return state.windows.all.compactMap { window in
             var glyphs: [StickyMarkManager.Glyph] = []
-            if stickyMark, window.isSticky {
+            // Out of the pocket, its own mark stands in for the
+            // sticky and floating glyphs (#2446).
+            if state.pocketPhase(of: window.id) == .out {
+                glyphs = [.pocket]
+            } else if stickyMark, window.isSticky {
                 glyphs.append(
                     .sticky(
                         StickyStyle.symbolName(for: window.stickyScope)
@@ -48,7 +52,9 @@ extension KiwiCore {
                     )
                 )
             }
-            if shown.contains(window.id) {
+            if shown.contains(window.id),
+                state.pocketPhase(of: window.id) == nil
+            {
                 glyphs.append(.floating(color: floating.color))
             }
             // A presenting window wears no mark over its show

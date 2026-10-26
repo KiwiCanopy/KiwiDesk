@@ -12,7 +12,7 @@ struct WindowMarksColorCard: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.colors.colorsAndGlass.children
+            SettingsCatalog.colors.colorsDrawer.children
                 .windowMarksGroup,
             caption: L(
                 "colors.window_marks.caption",

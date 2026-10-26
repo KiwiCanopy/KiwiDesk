@@ -11,6 +11,8 @@ public final class StickyMarkManager {
         public enum Kind: Equatable {
             case sticky
             case floating
+            /// The pocket window's, alone on its plate (#2446).
+            case pocket
         }
 
         public let kind: Kind
@@ -25,6 +27,12 @@ public final class StickyMarkManager {
             color: String = ""
         ) -> Glyph {
             Glyph(kind: .sticky, symbolName: symbolName, color: color)
+        }
+
+        /// The pocket mark, drawn by `PocketMark` rather than a
+        /// symbol (#2446).
+        public static var pocket: Glyph {
+            Glyph(kind: .pocket, symbolName: "", color: "")
         }
 
         public static func floating(color: String = "") -> Glyph {

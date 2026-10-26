@@ -42,6 +42,9 @@ enum JumpRowText {
             return entry.space.map {
                 Place(glyph: entry.spaceIcon, text: spaceName($0))
             }
+        // Its header says where it is.
+        case .pocketed:
+            return nil
         }
     }
 
@@ -77,10 +80,17 @@ enum JumpRowText {
         L("jump.section.other_apps", "Other apps")
     }
 
+    /// The Pocket section's header (#2446): "Pocket" stays English
+    /// in every catalog, as Sticky does.
+    static var pocket: String {
+        L("jump.section.pocket", "Pocket")
+    }
+
     static func header(_ section: JumpList.Section) -> String {
         switch section {
         case .minimized: return minimized
         case .hidden: return hidden
+        case .pocket: return pocket
         case .otherApps: return otherApps
         }
     }
@@ -162,6 +172,9 @@ enum JumpRowText {
         }
         if entry.status == .minimized {
             return L("jump.status.minimized", "Minimized")
+        }
+        if entry.isPocketed {
+            return L("jump.status.pocketed", "In your pocket")
         }
         guard case .away(let desktop?) = entry.status,
             !entry.isHiddenApp

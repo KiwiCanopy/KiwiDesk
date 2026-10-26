@@ -41,7 +41,9 @@ extension SpaceBarItemView {
                 : nil
         }
         floatingBadgeViews = syncStateBadges(floatingBadgeViews) {
-            style.stickyBadge && $0.floating ? Self.floatingSymbol : nil
+            guard style.stickyBadge else { return nil }
+            if $0.pocket { return StateBadgeView.pocketName }
+            return $0.floating ? Self.floatingSymbol : nil
         }
     }
 

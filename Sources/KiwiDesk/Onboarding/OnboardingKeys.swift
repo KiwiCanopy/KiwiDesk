@@ -95,6 +95,7 @@ enum OnboardingKeys {
         // way into everything else (#2515).
         families += [
             maximizeFamily(layer: layer),
+            pocketFamily(layer: layer),
             kiwiVisionFamily(layer: layer),
             revealFamily(layer: layer, showsBar: showsBar),
             kiwiHubFamily(layer: layer),

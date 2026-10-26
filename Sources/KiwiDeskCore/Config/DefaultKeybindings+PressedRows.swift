@@ -72,6 +72,17 @@ extension DefaultKeybindings {
         )
     }
 
+    /// Pocket on `⌃⌥P` (#2446), P for pocket: the chord pin held
+    /// until 3.3.0, which keeps no default (owner, 2026-10-20).
+    public static func pocketRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+p",
+            lua: "KiwiDesk.pocket()",
+            kind: .navigation,
+            label: "Pocket this window"
+        )
+    }
+
     /// The bars' shortcuts (#761): the Space Bar on `⌃⌥G`, the App
     /// Bar on `⌃⌥H` — the home row beside KiwiHub's J K L, the keys
     /// that show something (owner, 2026-10-19). Free in the seed and

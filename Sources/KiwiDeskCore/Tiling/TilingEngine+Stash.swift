@@ -154,20 +154,9 @@ extension TilingEngine {
                     // Fullscreen (#670) and sticky (#445) stay.
                     state.parksOnInactive(window, in: space.id)
                 else { continue }
-                let screen =
-                    ScreenList.all.first {
-                        GeometryUtils.axVisibleFrame(of: $0)
-                            .intersects(window.frame)
-                    } ?? fallback
-                let bounds = GeometryUtils.axVisibleFrame(
-                    of: screen
-                )
-                // No self-filter: `detect` excludes the screen
-                // geometrically (a rect cannot lie past its own
-                // edge), and a rect *equal* to `bounds` overlaps
-                // it entirely, so it can qualify on no side.
-                let corner = Self.optimalHideCorner(
-                    for: bounds,
+                let (bounds, corner) = parkTarget(
+                    of: window,
+                    fallback: fallback,
                     among: allVisible
                 )
                 stash(
@@ -187,6 +176,49 @@ extension TilingEngine {
                 )
             }
         }
+        // The pocketed window is in no Space, so none shows it
+        // (#2446). Its frame out of the pocket is the slot's, never
+        // a capture.
+        if let id = state.pocketedWindow, id != dragExemptWindow,
+            let window = state.windows[id]
+        {
+            let (bounds, corner) = parkTarget(
+                of: window,
+                on: state.pocketHomeDisplay.flatMap(Self.screen(for:)),
+                fallback: fallback,
+                among: allVisible
+            )
+            stash(
+                window,
+                in: bounds,
+                corner: corner,
+                force: false,
+                capturesOriginal: false
+            )
+        }
+    }
+
+    /// The screen bounds and corner `window` parks at: `screen`,
+    /// else the screen it sits on, else `fallback`. No self-filter
+    /// in the corner scan: `detect` excludes the screen geometrically (a rect
+    /// cannot lie past its own edge), and a rect *equal* to the
+    /// bounds overlaps it entirely, so it qualifies on no side.
+    private func parkTarget(
+        of window: ManagedWindow,
+        on screen: NSScreen? = nil,
+        fallback: NSScreen,
+        among allVisible: [CGRect]
+    ) -> (CGRect, HideCorner) {
+        let screen =
+            screen ?? ScreenList.all.first {
+                GeometryUtils.axVisibleFrame(of: $0)
+                    .intersects(window.frame)
+            } ?? fallback
+        let bounds = GeometryUtils.axVisibleFrame(of: screen)
+        return (
+            bounds,
+            Self.optimalHideCorner(for: bounds, among: allVisible)
+        )
     }
 
     /// Parks one window at the stash corner of `bounds`. Sticky

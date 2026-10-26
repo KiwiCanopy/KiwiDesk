@@ -121,6 +121,7 @@ extension StateCoordinator {
             }
             return record
         }
+        snapshot.pocket = pocket
         return snapshot
     }
 
@@ -163,5 +164,17 @@ extension StateCoordinator {
         let id = record.windowID
         setSticky(id, session.sticky)
         stickyReachOverrides[id] = session.stickyReach
+    }
+
+    /// Takes back an in-place capture's pocket (#2446). A window the
+    /// boot scan already filed leaves its Space again; a slow app's
+    /// window not yet tracked is re-adopted unfiled by the create
+    /// fold, and a press finds an exited app's slot and empties it.
+    mutating func adoptPocket(_ slot: PocketSlot?) {
+        guard let slot else { return }
+        pocket = slot
+        if readoptPocketWindow(slot.window) {
+            workspaces.remove(slot.window)
+        }
     }
 }

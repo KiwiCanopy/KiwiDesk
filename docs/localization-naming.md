@@ -92,6 +92,18 @@ fingerprints**) — so the qualifier and the destination name one
 concept, Family C's one concept, one word; a *display* or
 *monitor* word beside them would read as a second one.
 
+:::unreleased
+**Pocket** (#2446) is the second single-word member, admitted the
+way Sticky was, by product decision: the owner ruled at the design
+preview (2026-10-20) that it stays English in every catalog, and
+all eleven ship `jump.section.pocket` as "Pocket". It passes the
+descriptive-occurrence check in *Adding a name*: every "pocket" in
+`en.json` names this feature, and no `system_shortcut.*` row uses
+the word. A sentence keeps "Pocket" and translates the verb around
+it — "Dieses Fenster in die Pocket stecken", "このウインドウを
+Pocket に入れる".
+:::
+
 **`zh-Hans` is the measured exception.** It splits the English
 "screen" by countability — 屏幕 where the sense is mass, 显示器
 for a countable one (`presets.screen_name.main` 主显示器,
@@ -550,9 +562,9 @@ unsticky" already demands verbatim "Sticky", which every locale
 honors). The two bar names are two-word coinages that only ever
 occur referentially, so the question never arises for them,
 nor for **KiwiShelf**, a coinage no other text can contain.
-**Sticky** is the single word where it had to be asked: every
-key in `en.json` carrying `sticky`/`Sticky` names *this*
-feature, none a different one — unlike
+**Sticky** and **Pocket** are the single words where it had to be
+asked: every key in `en.json` carrying either word, in either
+case, names *that* feature, none a different one — unlike
 `app`/`space`/`bar`, common words that needed the per-token
 glossary carve-outs. The collision to keep re-checking is macOS's
 own **Sticky Keys** accessibility feature: if a

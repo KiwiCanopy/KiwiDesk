@@ -94,11 +94,16 @@ struct CoreLocalizationBoundaryTests {
         // window-is-fullscreen (#1298). Same caveat as
         // `+StickyMarks` if the overlays ever move out of Core.
         "Commands/ResizeRefusal+Rendering.swift": 12,
-        // The Tile refusal's three reasons (#1810), drawn on the
-        // same pill and on the bar menu's greyed row, both Core's.
-        "Commands/AutoFloatReason+Rendering.swift": 5,
+        // The Tile refusal's reasons (#1810), the pocket's among
+        // them (#2446), drawn on the same pill and on the bar
+        // menu's greyed row, both Core's.
+        "Commands/AutoFloatReason+Rendering.swift": 6,
+        // The pocket's sticky refusal, on the same pill (#2446).
+        "Commands/PocketRefusal.swift": 1,
         // The two marks' VoiceOver names (#1799).
         "Borders/StickyMarkOverlay.swift": 2,
+        // The pocket mark's VoiceOver name (#2446).
+        "Borders/StickyMarkOverlay+Pocket.swift": 1,
         // The overflow mark's VoiceOver name, one key per direction
         // (#2235); the mark is drawn by Core.
         "App/KiwiCore+OverflowMarks.swift": 4,

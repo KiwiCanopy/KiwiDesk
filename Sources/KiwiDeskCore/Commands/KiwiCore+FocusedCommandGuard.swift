@@ -45,6 +45,9 @@ extension KiwiCore {
         if command == "focus", focusHopsOffEmptySpace(args, front: front) {
             return nil
         }
+        // A filled pocket is the press's target, not the focus
+        // (#2446): only pocketing the focused window owns one.
+        if command == "pocket", state.pocket != nil { return nil }
         // The wake heal (#1130), one-shot and time-bounded: the
         // wake payment's activation can be refused, so re-seed
         // from the real frontmost (a blocking AX read, paid at

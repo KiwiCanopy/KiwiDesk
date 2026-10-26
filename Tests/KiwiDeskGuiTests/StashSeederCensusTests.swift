@@ -43,6 +43,11 @@ struct StashSeederCensusTests {
         // The cross-session title pass's carried float, never a
         // corner (#1864).
         "App/KiwiCore+CrossSession.swift": 1,
+        // The pocket's take-out (#2446): the frame it last had on
+        // that screen, or centred — no corner, since a pocketed
+        // window takes no capture; seeded after its filing, ahead
+        // of the retile whose restore delivers it.
+        "Commands/KiwiCore+Pocket.swift": 1,
         // The replay of a parked record, and the late arrival's
         // owed frame (#1352, #1362); and a replayed float's record
         // beside its set, never a corner, so a park ahead of the

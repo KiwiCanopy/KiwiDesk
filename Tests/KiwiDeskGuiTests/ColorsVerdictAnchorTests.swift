@@ -25,6 +25,12 @@ struct ColorsVerdictAnchorTests {
     }
 
     private let cards = [
+        // The Liquid Glass group draws the Fill (#2593).
+        Card(
+            keys: ColorsRowOrder.glassRows.filter(\.isColourRow),
+            ownSentences: [],
+            drawsPageLinks: false
+        ),
         Card(
             keys: ColorRole.accent.keys,
             ownSentences: [],
@@ -130,6 +136,9 @@ struct ColorsVerdictAnchorTests {
                 && SettingsDraftDiff.namesModelPath($0.id)
         }
         #expect(keys.count == 19)
+        // Every such row is on a card the walk above reads, so a
+        // row moved between groups cannot leave it (#2593).
+        #expect(Set(keys).isSubset(of: cards.flatMap(\.keys)))
         let all = states()
         for key in keys {
             let ever = all.contains {

@@ -91,6 +91,7 @@ extension KiwiCore {
         }
         let clear = visionClearPids(target: targetPid, among: apps)
         let lens = apps.mapValues(visionLensClear)
+        let pocket = visionPocketPair()
         let height = GeometryUtils.primaryHeight
         // A held target sits directly below the plates: hazed, in
         // front of every other window (#2103 ruling 12).
@@ -114,6 +115,7 @@ extension KiwiCore {
                         ?? windowRadius(id, reading: refreshingList),
                     clear: clear.contains(pid)
                         || lens[pid]?.clears(title: title) == true
+                        || pocket.contains(id)
                 )
             }
     }
