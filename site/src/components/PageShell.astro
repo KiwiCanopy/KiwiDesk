@@ -23,7 +23,13 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 
-import { locales, ogLocales, ogLocaleAlternates, localePath, type Lang } from "../lib/locales";
+import {
+  locales,
+  ogLocales,
+  ogLocaleAlternates,
+  localePath,
+  type Lang,
+} from "../lib/locales";
 export type { Lang };
 
 interface Props {
@@ -58,7 +64,6 @@ const LANGS: Record<Lang, string> = {
   de: "Deutsch",
   ja: "日本語",
 };
-
 
 // Per-locale strings, English-fallback (mirrors Landing/Guide).
 const dict = { ...en, ...{ en, de, ja }[lang] } as Record<string, string>;
