@@ -140,6 +140,19 @@ extension FloatDetection {
         )
     }
 
+    /// The layer of each window an off-main list read names: one
+    /// SkyLight level per window, else the whole-list read once.
+    /// The list read waits on this process's pending window updates
+    /// while holding the connection lock, which a main-actor commit
+    /// then waits ~500 ms behind (#2531).
+    static func layerReader(pid: pid_t) -> (WindowID) -> Int? {
+        guard SkyLight.readsWindowLevel else {
+            let layers = windowLayers(pid: pid)
+            return { layers[$0] }
+        }
+        return { SkyLight.windowLevel(CGWindowID($0.raw)) }
+    }
+
     /// Batch queries CGWindow layers for all windows of process `pid`
     /// in one call (AGENTS.md).
     public static func windowLayers(

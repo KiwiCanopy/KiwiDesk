@@ -93,7 +93,7 @@ struct ArrivalAdoptionTests {
             AXUIElementCreateApplication(902_001 + pid_t($0))
         }
         let listing = Listing()
-        loop.offMain.readLayers = { _ in listing.layers }
+        loop.offMain.readLayers = { _ in { listing.layers[$0] } }
         loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }

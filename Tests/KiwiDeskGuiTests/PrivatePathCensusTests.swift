@@ -38,6 +38,7 @@ struct PrivatePathCensusTests {
         "SLSMainConnectionID", "SLSGetActiveSpace",
         "SLSCopyManagedDisplaySpaces",
         "SLSManagedDisplayGetCurrentSpace", "SLSGetWindowBounds",
+        "SLSGetWindowLevel",
         "SLSCopyWindowsWithOptionsAndTags", "SLSCopySpacesForWindows",
         "SLSWindowQueryWindows", "SLSWindowQueryResultCopyWindows",
         "SLSWindowIteratorGetCount", "SLSWindowIteratorAdvance",

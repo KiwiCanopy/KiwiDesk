@@ -82,7 +82,7 @@ struct WindowListReading: @unchecked Sendable {
     let elements: [AXUIElement]
     /// Parallel to `elements`.
     let windows: [ListedWindow]
-    /// The app's WindowServer layers, one snapshot for the pass.
+    /// The listed windows' WindowServer layers.
     let layers: [WindowID: Int]
     /// LaunchServices' policy and hidden state, read beside the
     /// list so the main actor asks neither (#1936); nil policy
@@ -120,21 +120,33 @@ struct ListedWindowReader: @unchecked Sendable {
     let ownProcess: Bool
     let shadowed: Set<WindowID>
 
+    /// Each element's window, and the layers read for them.
     func read(
         _ elements: [AXUIElement],
-        layers: [WindowID: Int]
-    ) -> [ListedWindow] {
-        elements.map { read($0, layers: layers, many: elements.count > 1) }
+        layer: (WindowID) -> Int?
+    ) -> ([ListedWindow], [WindowID: Int]) {
+        var layers: [WindowID: Int] = [:]
+        let windows = elements.map { element in
+            let id = resolve(element)
+            let listed = id.flatMap(layer)
+            if let id, let listed { layers[id] = listed }
+            return read(
+                element,
+                id: id,
+                listedLayer: listed,
+                many: elements.count > 1
+            )
+        }
+        return (windows, layers)
     }
 
     private func read(
         _ element: AXUIElement,
-        layers: [WindowID: Int],
+        id: WindowID?,
+        listedLayer: Int?,
         many: Bool
     ) -> ListedWindow {
-        let id = resolve(element)
         let minimized = AXHelper.isMinimized(element)
-        let listedLayer = id.flatMap { layers[$0] }
         let facts = facts(element, listedLayer)
         let layer = listedLayer ?? 0
         let asksButton = FloatDetection.needsTitlebarButton(
@@ -284,10 +296,13 @@ extension EventLoop {
                 )
             }
             let elements = read(pid)
-            let layers = readLayers(pid)
+            let (windows, layers) = reader.read(
+                elements,
+                layer: readLayers(pid)
+            )
             return WindowListReading(
                 elements: elements,
-                windows: reader.read(elements, layers: layers),
+                windows: windows,
                 layers: layers,
                 policy: readPolicy(pid),
                 hidden: hidden,
