@@ -5626,7 +5626,10 @@ window, and each call takes the next step:
   window.
 
 While the window's app is hidden, taking it out or putting it back
-fails with `pocket is unreachable` until the app is shown again.
+fails with `pocket is unreachable` until the app is shown again; an
+app that quit while hidden empties the pocket at the next call. A
+`move_to_space` or `swap` naming the pocketed window's id is
+refused.
 
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another

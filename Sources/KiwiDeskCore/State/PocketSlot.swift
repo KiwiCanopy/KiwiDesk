@@ -13,6 +13,10 @@ public struct PocketSlot: Sendable, Equatable, Codable {
     }
 
     public var window: WindowID
+    /// Its app's process, for a slot whose window is not tracked
+    /// (an in-place relaunch, a hidden app): an exited process
+    /// empties it.
+    public var pid: pid_t?
     public var phase: Phase
     /// Where the window last sat out of the pocket, per screen,
     /// keyed by `Display.fingerprint`.
@@ -23,11 +27,13 @@ public struct PocketSlot: Sendable, Equatable, Codable {
 
     public init(
         window: WindowID,
+        pid: pid_t? = nil,
         phase: Phase,
         frames: [String: CGRect] = [:],
         cameFrom: WindowID? = nil
     ) {
         self.window = window
+        self.pid = pid
         self.phase = phase
         self.frames = frames
         self.cameFrom = cameFrom
@@ -35,6 +41,7 @@ public struct PocketSlot: Sendable, Equatable, Codable {
 
     private enum CodingKeys: String, CodingKey {
         case window
+        case pid
         case phase
         case frames
         case cameFrom = "came_from"

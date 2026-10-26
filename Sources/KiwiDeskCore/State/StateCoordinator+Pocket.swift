@@ -32,7 +32,12 @@ extension StateCoordinator {
         windows.setSticky(id, .none)
         userFloated.remove(id)
         workspaces.remove(id)
-        pocket = PocketSlot(window: id, phase: .pocketed, frames: frames)
+        pocket = PocketSlot(
+            window: id,
+            pid: windows[id]?.pid,
+            phase: .pocketed,
+            frames: frames
+        )
     }
 
     /// Marks the slot's window out: floating and on every Space.

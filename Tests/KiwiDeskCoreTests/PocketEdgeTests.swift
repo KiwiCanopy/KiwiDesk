@@ -1,0 +1,122 @@
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// The pocket's edges (#2446): who may file or focus the pocketed
+/// window, what ends the slot, and the #292 preflight.
+@Suite("Pocket edges", .serialized)
+@MainActor
+struct PocketEdgeTests {
+    private let one = WindowID(1)
+    private let two = WindowID(2)
+
+    private func makeCore() -> KiwiCore {
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-pocket-edge-\(UUID().uuidString)"
+                )
+        )
+        for raw: UInt32 in [2, 1] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(
+                        id: WindowID(raw),
+                        pid: 900_000 + pid_t(raw),
+                        appName: "App\(raw)",
+                        title: "Window \(raw)"
+                    )
+                )
+            )
+        }
+        core.state.apply(.windowFocused(one))
+        return core
+    }
+
+    @Test("a minimize empties the pocket")
+    func minimizeEmpties() {
+        let core = makeCore()
+        core.execute("pocket")
+        core.execute("pocket")
+        core.state.apply(.windowDestroyed(one, wasMinimized: true))
+        #expect(core.state.pocket == nil)
+    }
+
+    @Test("out, with its app hidden, the key refuses and keeps it")
+    func hiddenOutRefuses() {
+        let core = makeCore()
+        core.execute("pocket")
+        core.execute("pocket")
+        core.state.apply(.windowHidden(one))
+        #expect(!core.execute("pocket").isSuccess)
+        #expect(core.state.pocket?.window == one)
+    }
+
+    @Test("an exited app's untracked slot empties at the press")
+    func exitedAppEmpties() {
+        let core = makeCore()
+        core.execute("pocket")
+        core.state.apply(.windowHidden(one))
+        core.eventLoop.processIdentity.runs = { _ in false }
+        core.state.apply(.windowFocused(two))
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.state.pocketPhase(of: two) == .pocketed)
+    }
+
+    @Test("focus_window on the pocketed window takes it out")
+    func focusWindowTakesOut() {
+        let core = makeCore()
+        core.execute("pocket")
+        let response = core.execute(
+            "focus_window",
+            args: [.number(Double(one.raw))]
+        )
+        #expect(response.isSuccess)
+        #expect(core.state.pocketPhase(of: one) == .out)
+    }
+
+    @Test("an explicit move never files the pocketed window")
+    func explicitMoveRefused() {
+        let core = makeCore()
+        core.execute("pocket")
+        let response = core.execute(
+            "move_to_space",
+            args: [.string("2"), .number(Double(one.raw))]
+        )
+        #expect(!response.isSuccess)
+        #expect(core.state.workspaces.space(of: one) == nil)
+    }
+
+    @Test("a filled pocket passes the #292 preflight; pocketing does not")
+    func preflight() {
+        let core = makeCore()
+        core.frontmostPIDProvider = { 1 }
+        #expect(!core.execute("pocket").isSuccess)
+        #expect(core.state.pocket == nil)
+        core.frontmostPIDProvider = nil
+        core.execute("pocket")
+        core.frontmostPIDProvider = { 1 }
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.state.pocketPhase(of: one) == .out)
+    }
+
+    @Test("an in-place slot waits for a window not yet tracked")
+    func adoptWaitsForSlowWindow() {
+        let core = makeCore()
+        let late = WindowID(7)
+        var snapshot = core.state.snapshot()
+        snapshot.pocket = PocketSlot(window: late, phase: .pocketed)
+        core.state.adopt(snapshot)
+        #expect(core.state.pocket?.window == late)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: late, pid: 900_007, appName: "Late")
+            )
+        )
+        #expect(core.state.pocketPhase(of: late) == .pocketed)
+        #expect(core.state.workspaces.space(of: late) == nil)
+    }
+}

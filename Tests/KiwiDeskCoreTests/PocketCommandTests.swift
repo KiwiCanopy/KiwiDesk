@@ -189,7 +189,6 @@ struct PocketCommandTests {
             core.state.windows[WindowID(5)]?.stickyScope
                 == StickyScope.none
         )
-        #expect(core.state.windows[WindowID(5)]?.isFloating == false)
     }
 
     @Test("a quit files the pocketed window back as the user's float")

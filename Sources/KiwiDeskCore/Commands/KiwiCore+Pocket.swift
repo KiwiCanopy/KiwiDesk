@@ -8,6 +8,12 @@ import Foundation
 /// preflight: taking the window out acts on no focus.
 extension KiwiCore {
     func pocketCommand() -> CommandResponse {
+        // An untracked window whose app is gone empties the slot.
+        if let slot = state.pocket, state.windows[slot.window] == nil,
+            let pid = slot.pid, !eventLoop.processIdentity.runs(pid)
+        {
+            state.emptyPocket()
+        }
         switch state.pocket?.phase {
         case .pocketed?:
             return takePocketOut() ? .ok() : .fail("pocket is unreachable")

@@ -719,8 +719,11 @@ editing here:
     the move latch stamped by `putInPocket` swallows the pocketing's
     own echo (`PocketCommandTests` ▸ `activationTakesOut`).
   - **The slot crosses an in-place restart in
-    `StateSnapshot.pocket`, written by that capture alone**, and is
-    adopted only for a window the boot scan tracked; a quit
+    `StateSnapshot.pocket`, written by that capture alone**, and a
+    slow app's window adopted after the replay comes back to it
+    unfiled (`PocketEdgeTests` ▸ `adoptWaitsForSlowWindow`); a
+    verb naming the pocketed window's id files it nowhere
+    (`explicitMoveRefused`); a quit
     releases the pocket ahead of its capture
     (`releasePocketForQuit`), so no other snapshot carries one
     (`PocketSurfaceTests` ▸ `inPlaceCarries`,
