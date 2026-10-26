@@ -14,6 +14,9 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
     var onClick: @MainActor () -> Void = {}
     /// VoiceOver's press.
     var onPress: @MainActor () -> Void = {}
+    /// The panel's frame of record, which the view fills (#2531).
+    var placedFrame: @MainActor () -> CGRect? = { nil }
+    var placedScreenFrame: CGRect? { placedFrame() }
 
     let label = NSTextField(labelWithString: "")
     private let content = NSView()
@@ -204,10 +207,11 @@ final class OverflowMarkView: NSView, BarPeekMorphAnchor {
             return
         }
         window.alphaValue = 1
-        let point = convert(
-            window.convertPoint(fromScreen: pointer),
-            from: nil
-        )
+        let point =
+            placedFrame().map {
+                CGPoint(x: pointer.x - $0.minX, y: pointer.y - $0.minY)
+            }
+            ?? convert(window.convertPoint(fromScreen: pointer), from: nil)
         setHovered(bounds.contains(point))
     }
 

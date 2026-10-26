@@ -95,6 +95,12 @@ public final class BorderManager {
         KiwiCore.postAnnouncement
     /// True while local animation drives this window (#594).
     var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
+    /// Rings that took their room while animating keep it until the
+    /// late resync, so a focus jump between steps resizes no panel
+    /// (#2531); set by `scheduleBorderResync`, cleared as it runs.
+    var roomsHeld = false
+    /// Rings that took a room since the last resync.
+    var heldRooms: Set<WindowID> = []
     #if DEBUG
         /// Test-only: the screen frame `room(for:screen:)` uses in
         /// place of the host's. Production must not read it.
@@ -207,6 +213,8 @@ public final class BorderManager {
         specs = [:]
         cornerRadii = [:]
         arrival = nil
+        roomsHeld = false
+        heldRooms = []
         watch.request([], for: .ring)
     }
 

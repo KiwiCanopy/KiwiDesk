@@ -16,6 +16,7 @@ final class StickyMarkOverlay {
     private static let holdDuration: TimeInterval = 1.6
     private static let collapseDuration: TimeInterval = 0.16
     private var panel: NSPanel?
+    private let placement: PanelPlacement
 
     /// AppKit keeps a visible panel alive after its owner is gone,
     /// so a dropped overlay would leave it on screen (#1868).
@@ -46,8 +47,9 @@ final class StickyMarkOverlay {
         func orderOutForTest() { panel?.orderOut(nil) }
     #endif
 
-    init(window: CGWindowID) {
+    init(window: CGWindowID, movePanel: @escaping PanelPlacement.Move) {
         target = window
+        placement = PanelPlacement(movePanel: movePanel)
     }
 
     /// Positions mark at top-right corner of `frame` (owner QA 2026-07-21).
@@ -58,7 +60,7 @@ final class StickyMarkOverlay {
         fitGlyphs(to: frame)
         place(markRect(for: frame, width: currentWidth), in: panel)
         if !panel.isVisible {
-            panel.orderFrontRegardless()
+            placement.order(panel) { panel.orderFrontRegardless() }
             // In front of every app, not against its window yet.
             hasOrdered = false
         }
@@ -71,7 +73,9 @@ final class StickyMarkOverlay {
     /// Stacks mark above target window.
     func order() {
         guard let panel else { return }
-        panel.order(.above, relativeTo: Int(target))
+        placement.order(panel) {
+            panel.order(.above, relativeTo: Int(target))
+        }
         hasOrdered = true
         #if DEBUG
             orderCount += 1
@@ -200,7 +204,7 @@ final class StickyMarkOverlay {
         currentWidth = width
         pillShown = nameShown
         let rect = markRect(for: frame, width: width)
-        guard let panel else { return }
+        guard let panel, let placed = placement.frame else { return }
 
         if reduceMotion {
             place(rect, in: panel)
@@ -210,12 +214,9 @@ final class StickyMarkOverlay {
         // The room spans where the plate rests now AND where it
         // lands, set at once: only the plate animates inside it,
         // so the pop has room at every point of the resize.
-        let shown = plate.frame.offsetBy(
-            dx: panel.frame.minX,
-            dy: panel.frame.minY
-        )
+        let shown = plate.frame.offsetBy(dx: placed.minX, dy: placed.minY)
         let room = Self.panelFrame(for: shown.union(rect))
-        panel.setFrame(room, display: true)
+        placement.place(panel, at: room, display: true)
         plate.frame = PopRoom.plateFrame(plate: shown, in: room)
         let plateRect = PopRoom.plateFrame(plate: rect, in: room)
         NSAnimationContext.runAnimationGroup { ctx in
@@ -271,7 +272,7 @@ final class StickyMarkOverlay {
     /// fitted to it.
     private func place(_ mark: CGRect, in panel: NSPanel) {
         let room = Self.panelFrame(for: mark)
-        panel.setFrame(room, display: false)
+        placement.place(panel, at: room)
         plate.frame = PopRoom.plateFrame(plate: mark, in: room)
     }
 

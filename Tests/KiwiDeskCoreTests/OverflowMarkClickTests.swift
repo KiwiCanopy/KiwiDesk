@@ -26,7 +26,7 @@ struct OverflowMarkClickTests {
         /// The morph's landings, run by `land()` rather than a timer.
         var landings: [@MainActor () -> Void] = []
 
-        init() {
+        init(skyLight: Bool = false) {
             core = makeTestCore(
                 configDirectory:
                     testTemporaryDirectory
@@ -39,6 +39,9 @@ struct OverflowMarkClickTests {
                 CGRect(x: 0, y: 25, width: 1440, height: 800)
             }
             core.overflowMarks.ordersPanels = true
+            // A move that lands while AppKit's cache stays put, as a
+            // SkyLight move leaves it until the moved event (#2531).
+            if skyLight { core.borders.movePanel = { _, _ in true } }
             for id in 1...6 {
                 core.state.apply(
                     .windowCreated(
@@ -227,6 +230,23 @@ struct OverflowMarkClickTests {
         let rig = Rig()
         defer { rig.close() }
         try rig.click()
+        let overlay = try rig.overlay
+        let frame = try #require(overlay.lastFrame)
+        rig.core.overflowMarks.reposition(
+            overlay.mark.anchor,
+            windowFrame: frame.offsetBy(dx: 0, dy: 40)
+        )
+        #expect(rig.peek.shown == nil)
+    }
+
+    /// #2531: the move check reads the mark's frame of record, which
+    /// a SkyLight move updates and AppKit's cached frame does not.
+    @Test("A mark moved through SkyLight closes the list too")
+    func skyLightMoveCloses() throws {
+        let rig = Rig(skyLight: true)
+        defer { rig.close() }
+        try rig.click()
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         let overlay = try rig.overlay
         let frame = try #require(overlay.lastFrame)
         rig.core.overflowMarks.reposition(

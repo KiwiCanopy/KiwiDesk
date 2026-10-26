@@ -93,6 +93,24 @@ enum PrivatePathVerify {
         return .works("window \(own.id)'s frame matches")
     }
 
+    /// A SkyLight level against the public window list's layer.
+    static func level(
+        _ sky: Int?,
+        of own: PrivatePathContext.OwnWindow?
+    ) -> PrivatePathVerdict {
+        guard let own else { return noOwnWindow }
+        guard let sky else {
+            return .failed("answered no level for window \(own.id)")
+        }
+        guard sky == own.layer else {
+            return .failed(
+                "window \(own.id): level \(sky) against the public "
+                    + "list's layer \(own.layer)"
+            )
+        }
+        return .works("window \(own.id)'s level matches")
+    }
+
     /// The compositor's per-window Space read for our own window.
     static func hostedSpace(
         _ reading: WindowSpaceReading,

@@ -50,12 +50,12 @@ struct BorderMovingRoomTests {
     func panelFrameRule() {
         let room = CGRect(x: 0, y: 0, width: 2000, height: 1200)
         let ring = CGRect(x: 100, y: 100, width: 400, height: 300)
-        #expect(AppKitBorderOverlay.panelFrame(for: ring, room: room) == room)
-        #expect(AppKitBorderOverlay.panelFrame(for: ring, room: nil) == ring)
+        #expect(PanelPlacement.panelFrame(for: ring, room: room) == room)
+        #expect(PanelPlacement.panelFrame(for: ring, room: nil) == ring)
         // Straddling the room's edge is outside it.
         let outside = ring.offsetBy(dx: 1800, dy: 0)
         #expect(
-            AppKitBorderOverlay.panelFrame(for: outside, room: room)
+            PanelPlacement.panelFrame(for: outside, room: room)
                 == outside
         )
     }

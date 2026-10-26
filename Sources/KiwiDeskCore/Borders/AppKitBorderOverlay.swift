@@ -14,14 +14,8 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     /// Holds the ring's layers where the ring sits in its panel,
     /// which may be larger than the ring while it moves (#1937).
     private let container = CALayer()
-    /// The panel's frame of record, in AppKit coordinates. AppKit's
-    /// own `panel.frame` lags a SkyLight move until WindowServer's
-    /// moved event lands, so no decision reads it (#1956).
-    private var placedFrame: CGRect?
-    /// The main run loop pass in which AppKit last set the frame or
-    /// first ordered the panel in; AppKit sends both at that pass's
-    /// commit, over a SkyLight move issued before it (#1956).
-    private var appKitPass: UInt64?
+    /// The panel's placement, shared with both marks (#1956, #2531).
+    private let placement: PanelPlacement
     let shape = CAShapeLayer()
     /// Secondary shadow layer stacked under ring for edge bloom density
     /// (#533).
@@ -44,9 +38,10 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     private let levelOf: (CGWindowID) -> Int?
     /// Moves the panel's window to a top-left origin without
     /// AppKit's fence (#1956); false sends it through AppKit.
-    var movePanel: (CGWindowID, CGPoint) -> Bool
-    /// The main run loop's pass count (`MainRunLoopPass`).
-    private let pass: @MainActor () -> UInt64
+    var movePanel: (CGWindowID, CGPoint) -> Bool {
+        get { placement.movePanel }
+        set { placement.movePanel = newValue }
+    }
     /// Ordered in by AppKit and not ordered out since: the panel's
     /// physical state, beside `BorderOverlay.needsOrder`, which is
     /// the manager's policy — keep the two apart.
@@ -56,9 +51,9 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         /// read it.
         private(set) var appKitOrders = 0
         /// Test-only: panel frames handed to AppKit.
-        private(set) var frameSets = 0
+        var frameSets: Int { placement.frameSets }
         /// Test-only: panel moves handed to SkyLight.
-        private(set) var skyLightMoves = 0
+        var skyLightMoves: Int { placement.skyLightMoves }
     #endif
 
     init(
@@ -71,8 +66,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     ) {
         orderMode = order
         self.levelOf = levelOf
-        self.movePanel = movePanel
-        self.pass = pass
+        placement = PanelPlacement(movePanel: movePanel, pass: pass)
     }
 
     /// The panel's Spaces/Exposé behavior, nil before the first
@@ -83,23 +77,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
 
     #if DEBUG
         /// Test-only: AppKit's cached frame, which lags a SkyLight
-        /// move; production reads `placedFrame` (#1956).
+        /// move; production reads the placement's frame (#1956).
         var panelFrame: CGRect? { panel?.frame }
     #endif
     /// The ring's place in its panel, AppKit coordinates.
     var ringFrameInPanel: CGRect { container.frame }
-
-    /// The panel's frame for a ring: `room` while it holds the
-    /// whole ring, else the ring's own. A panel resize hands
-    /// WindowServer a fenced transaction the main actor waits on,
-    /// per frame of an animation (#1937).
-    nonisolated static func panelFrame(
-        for ring: CGRect,
-        room: CGRect?
-    ) -> CGRect {
-        guard let room, room.contains(ring) else { return ring }
-        return room
-    }
 
     /// The panel's window number, nil before the first render.
     var panelNumber: Int? { panel?.windowNumber }
@@ -150,7 +132,7 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
             geometry.overlayFrame,
             primaryHeight: GeometryUtils.primaryHeight
         )
-        let frame = place(panel, holding: ring, room: room)
+        let frame = placement.place(panel, at: ring, room: room)
         container.frame = ring.offsetBy(dx: -frame.minX, dy: -frame.minY)
         let bounds = CGRect(
             origin: .zero,
@@ -179,53 +161,6 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         CATransaction.commit()
     }
 
-    /// Puts the panel where it holds `ring` and returns its frame:
-    /// a panel the ring's size moves through SkyLight, mid-animation
-    /// too, once WindowServer has its window (a window number, kept
-    /// through an order-out) and AppKit has not set its frame this
-    /// pass (#1956); else AppKit, the room while it holds the ring
-    /// (#1937).
-    private func place(
-        _ panel: NSPanel,
-        holding ring: CGRect,
-        room: CGRect?
-    ) -> CGRect {
-        if panel.windowNumber > 0, appKitPass != pass(),
-            let placed = placedFrame,
-            placed.size == ring.size,
-            placed == ring || moveThroughSkyLight(panel, to: ring)
-        {
-            placedFrame = ring
-            return ring
-        }
-        let frame = Self.panelFrame(for: ring, room: room)
-        if frame != placedFrame {
-            panel.setFrame(frame, display: false)
-            placedFrame = frame
-            appKitPass = pass()
-            #if DEBUG
-                frameSets += 1
-            #endif
-        }
-        return frame
-    }
-
-    private func moveThroughSkyLight(
-        _ panel: NSPanel,
-        to frame: CGRect
-    ) -> Bool {
-        let topLeft = GeometryUtils.flip(
-            frame,
-            primaryHeight: GeometryUtils.primaryHeight
-        ).origin
-        guard movePanel(CGWindowID(panel.windowNumber), topLeft)
-        else { return false }
-        #if DEBUG
-            skyLightMoves += 1
-        #endif
-        return true
-    }
-
     /// Orders the ring in directly behind or above the target.
     func order(relativeTo windowNumber: CGWindowID) {
         guard let panel else { return }
@@ -238,17 +173,15 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
         }
         // AppKit's order, every time: WindowServer applies no
         // SkyLight order to an AppKit panel (#1962).
-        let createsWindow = panel.windowNumber <= 0
-        panel.order(
-            orderMode == .above ? .above : .below,
-            relativeTo: Int(windowNumber)
-        )
+        placement.order(panel) {
+            panel.order(
+                orderMode == .above ? .above : .below,
+                relativeTo: Int(windowNumber)
+            )
+        }
         #if DEBUG
             appKitOrders += 1
         #endif
-        if createsWindow {
-            appKitPass = pass()
-        }
         isOrderedIn = true
     }
 

@@ -141,6 +141,7 @@ struct PrivatePathContext {
     struct OwnWindow: Equatable {
         let id: CGWindowID
         let bounds: CGRect
+        var layer = 0
     }
 
     var ownWindow: () -> OwnWindow?
@@ -173,7 +174,10 @@ struct PrivatePathContext {
                 bounds.width > 1, bounds.height > 1
             else { return nil }
             let layer = entry[kCGWindowLayer as String] as? Int ?? 0
-            return (layer, OwnWindow(id: number, bounds: bounds))
+            return (
+                layer,
+                OwnWindow(id: number, bounds: bounds, layer: layer)
+            )
         }
         return own.min { $0.0 < $1.0 }?.1
     }

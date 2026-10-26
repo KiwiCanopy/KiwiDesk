@@ -16,6 +16,8 @@ paths:
   - "Sources/KiwiDeskCore/OS/SkyLightWindowEvent*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+WindowServer.swift"
   - "Sources/KiwiDeskCore/App/DeferredTasks.swift"
+  # The marks' panel move is wired once here (#2531).
+  - "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
   # The window stroke below is derived and stored beside the drag
   # markers, where a per-stroke store would be re-added.
   - "Sources/KiwiDeskCore/Tiling/WindowStroke.swift"
@@ -209,7 +211,7 @@ these:
   its `order()` owes its ruling in the census's mark clause (#2026,
   `BorderOrderCensusTests` ▸ `markOrderSitesAreCensused`,
   `StickyMarkOrderTests`).
-- **A ring panel that keeps the ring's size moves through
+- **A panel that follows a window and keeps its size moves through
   `SkyLight.moveWindow`, never AppKit's `setFrame`** — mid-animation
   too, so it takes no room — once WindowServer has its window and
   AppKit has not set its frame in the current main run loop pass
@@ -223,18 +225,24 @@ these:
   macOS 27.0.1, 2026-10-05). The first show, a size change and a missing symbol
   take AppKit (`BorderPanelMoveTests`; the move landing is
   `BorderPanelMoveLiveTests`', the seams `BorderPanelSeamTests`').
-  **Keep the backend's `placedFrame` the panel's frame of record,
-  and read no decision off `panel.frame`**: AppKit's cache follows
+  **Keep `PanelPlacement.frame` the panel's frame of record, and
+  read no decision off `panel.frame`**: AppKit's cache follows
   a SkyLight move only once WindowServer's moved event reaches its
   event loop, and a `setFrame` equal to a stale cache is skipped.
-  The sticky mark's panel still takes `setFrame` per tick,
-  unmeasured on the switch path. **A second panel moved this way
-  shares the ring's whole placement** — the frame of record, the
-  pass gate, the stamp on the order-in that creates the window —
-  never the move alone, which a same-pass `setFrame` or
-  `orderFrontRegardless` loses; its move is a closure over
-  `BorderManager.movePanel` wired once in Core, not a second
-  live seam.
+  A move check and every reader of such a panel's screen frame —
+  a peek anchored on it included (`BarPeekMorphAnchor`'s
+  `placedScreenFrame`) — read the frame of record
+  (`OverflowMarkClickTests` ▸ `skyLightMoveCloses`).
+  **A panel that follows a window takes a `PanelPlacement`** for
+  its moves and its AppKit orders (`order(_:_:)`, which stamps the
+  order-in that creates the window), never the move alone, which
+  a same-pass `setFrame` or `orderFrontRegardless` loses. A
+  follower that kept AppKit's `setFrame` paid the ~500 ms wait on
+  every follow while an overflow scrolled (device, 2026-10-25,
+  #2531). Its move is a closure over `BorderManager.movePanel`
+  wired once in `KiwiCore+Bootstrap` and handed on by its
+  manager, not a second live seam (`BorderPanelSeamTests` ▸
+  `marksTakeTheRingsMove`, `MarkPanelMoveTests`).
 - **An animating ring that changes size moves inside its panel
   rather than resizing it** — a panel resize hands WindowServer a
   fenced transaction the main actor waits on, every frame, GPU
@@ -252,11 +260,15 @@ these:
   desk the caps cut first and a parked ring can fall outside.
   The panel takes the room once and the ring's layers move
   inside; a ring outside it takes an exact panel for those
-  frames. A live ring's panel returns to the ring's own frame at
-  the first render after `isAnimating` ends — the late resync at
-  the latest — while a ring retired mid-flight keeps the room,
-  alpha 0, until it returns, since shrinking it would put the
-  resize back on the switch path (`BorderMovingRoomTests`). A
+  frames. A ring that took the room keeps it until the late
+  resync runs (`roomsHeld`, armed by `scheduleBorderResync`), so a
+  focus jump between scroll steps resizes no panel (#2531,
+  `BorderRoomHoldTests`), and a ring that never animated takes
+  none for it; a live ring's panel returns to the ring's own frame
+  at the resync's first render, while a ring retired mid-flight
+  keeps the room, alpha 0, until it returns, since shrinking it
+  would put the resize back on the switch path
+  (`BorderMovingRoomTests`). A
   room-sized panel spans its screen, so a reader of the front
   windows leaves KiwiDesk's chrome out — every own window but a
   tiled one (`FloatDetection.normalFrames`,

@@ -15,6 +15,10 @@ protocol BarPeekMorphAnchor: NSView {
     /// lands, re-reading its hover from the resting `pointer` (AppKit
     /// screen coordinates).
     func setMorphed(_ morphed: Bool, pointer: CGPoint)
+    /// The anchor's frame on screen when its panel moves outside
+    /// AppKit, whose cached window frame lags such a move (#2531);
+    /// nil reads the window.
+    var placedScreenFrame: CGRect? { get }
 }
 
 /// Where the list the pill grows into stands (#2563 ▸ Ruling), in

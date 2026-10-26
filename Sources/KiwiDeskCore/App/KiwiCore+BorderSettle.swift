@@ -67,6 +67,7 @@ extension KiwiCore {
     /// this pass reads the state the window actually has and glues
     /// the ring and mark back onto it.
     func scheduleBorderResync() {
+        borders.roomsHeld = true
         deferred.schedule(
             .borderResync,
             after: .milliseconds(Self.borderResyncDelayMS)
@@ -106,6 +107,8 @@ extension KiwiCore {
     /// cause; the shape of the exposure is why this stays
     /// ungated rather than growing a second guard.
     func runBorderResync() {
+        borders.roomsHeld = false
+        borders.heldRooms.removeAll()
         updateBorders(reassertOrder: true)
         updateMarks(reassertOrder: true)
     }

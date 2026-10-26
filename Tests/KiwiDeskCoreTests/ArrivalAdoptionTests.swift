@@ -93,7 +93,7 @@ struct ArrivalAdoptionTests {
             AXUIElementCreateApplication(902_001 + pid_t($0))
         }
         let listing = Listing()
-        loop.offMain.readLayers = { _ in listing.layers }
+        loop.offMain.readLayers = { _ in { listing.layers[$0] } }
         loop.axWindows = { _ in Array(elements.prefix(listing.count)) }
         loop.resolveWindowID = { element in
             elements.firstIndex { CFEqual($0, element) }.map { ids[$0] }
@@ -162,6 +162,24 @@ struct ArrivalAdoptionTests {
         )
         loop.elements[pid] = [tracked: elements[0]]
         return (loop, box, elements, listing)
+    }
+
+    /// The reconcile reads the reading's map, never the server,
+    /// for every listed window (#2531).
+    @Test("the reading carries the layers the reader took")
+    func readingCarriesTheLayers() {
+        let (loop, _, elements, listing) = makeLoop()
+        listing.layers = [arrivals[0]: 3]
+        let reader = loop.listedWindowReader(
+            pid: pid,
+            bundleID: ref.bundleID,
+            tracked: [tracked]
+        )
+        let (windows, layers) = reader.read(elements) {
+            listing.layers[$0]
+        }
+        #expect(windows.count == elements.count)
+        #expect(layers == [arrivals[0]: 3])
     }
 
     @Test("an arrival costs the main actor no AX call")

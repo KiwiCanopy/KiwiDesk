@@ -21,6 +21,7 @@ struct BarPeekGrownPanelTests {
             CGRect(x: 0, y: 0, width: 1920, height: 1200)
         }
         var morphText: String { "+2" }
+        var placedScreenFrame: CGRect? { nil }
         func setMorphed(_ morphed: Bool, pointer: CGPoint) {
             self.morphed = morphed
         }

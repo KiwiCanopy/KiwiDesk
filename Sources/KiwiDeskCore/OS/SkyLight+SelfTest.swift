@@ -85,6 +85,13 @@ extension SkyLight {
                     of: own
                 )
             },
+            .read(getWindowLevelSymbol.resolution, home: home) {
+                let own = context.ownWindow()
+                return PrivatePathVerify.level(
+                    own.flatMap { windowLevel($0.id) },
+                    of: own
+                )
+            },
             .read(
                 copyWindowsWithOptionsAndTagsSymbol.resolution,
                 home: home

@@ -40,6 +40,9 @@ public final class OverflowMarkManager {
     /// The engine's pending target frame (#881).
     var commandedFrame: @MainActor (WindowID) -> CGRect? = { _ in nil }
 
+    /// A mark panel's move, wired to `BorderManager.movePanel` in
+    /// `KiwiCore+Bootstrap` (#2531); unwired it takes AppKit.
+    var movePanel: PanelPlacement.Move = { _, _ in false }
     #if DEBUG
         /// Whether a mark orders its panel in; off in both
         /// `makeTestCore` twins (#1894's shape, as the shelf's).
@@ -123,9 +126,9 @@ public final class OverflowMarkManager {
     /// the mark's placed frame, since its channels hand frames that
     /// differ while the mark stays put.
     private func place(_ overlay: OverflowMarkOverlay, frame: CGRect) {
-        let was = overlay.panel?.frame
+        let was = overlay.placedFrame
         overlay.update(frame: frame)
-        if let was, was != overlay.panel?.frame,
+        if let was, was != overlay.placedFrame,
             peek?.shown?.view === overlay.view
         {
             peek?.dismiss()
@@ -167,7 +170,7 @@ public final class OverflowMarkManager {
     }
 
     private func made(_ mark: OverflowMark) -> OverflowMarkOverlay {
-        let overlay = OverflowMarkOverlay(mark: mark)
+        let overlay = OverflowMarkOverlay(mark: mark, movePanel: movePanel)
         #if DEBUG
             overlay.ordersPanel = ordersPanels
         #endif
