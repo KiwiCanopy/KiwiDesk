@@ -2661,9 +2661,7 @@ switch is never held, wherever it comes from: holding it would
 show the new Space in the bar while the old windows stay up. The windows'
 records, the bars and the rings move at once, and a held pass
 stamps nothing, no placement and no size ask, so a frame that was
-never written is never judged against an echo. A restore's own
-writes ([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626))
-are not held. Of two
+never written is never judged against an echo. Of two
 windows arriving during one hold, only the newer keeps its
 start-at-target entrance. The cost: after you stop the
 mouse, an ambient reflow lands up to ~300 ms later than it did,
@@ -2684,6 +2682,21 @@ its target worked out again from the Space it then belongs to; any
 other float's move already rides the held pass. A
 window owed both is placed, or re-anchored where the placement is
 no longer due.
+:::
+
+:::unreleased
+The frames a restore puts back, at launch or after a wake or an
+unlock, wait the same way
+([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)):
+each is read again from the saved arrangement when the hand rests,
+and only while the same screens are connected and the window is
+still in the Space the restore filed it in. A newer restore, a
+sleep or lock, quitting, or discarding the saved arrangement drops
+what an older one was still waiting to put back. A floating window
+comes back with the held layout pass, as it did before. A window
+you drag meanwhile, or one placed or moved onto its Space's screen,
+keeps that move: it reflects the desk as it is now, and the saved
+frame does not.
 :::
 
 ### A placement bounce is the app's answer, not the user's (#1161)
