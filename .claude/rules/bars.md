@@ -684,14 +684,16 @@ render content into it (#1517). Obligations:
   run and its items' content by its own amounts, so the gutter
   middle reads off-centre. A bar reports its drawn span as
   `contentFrame` — the item boxes on a boxed shelf, else the
-  content inside each end item — read from the same end-inset
+  content inside each end item, an App item's title taken at its
+  full slot so a rename moves no divider (#2643) — read from the
+  same end-inset
   readings its layout and measurement take
   (`SpaceBarItemView.contentInset`, `AppBarItemView.horizontalPlacement`
   and `verticalIconSquare`),
   never a copy beside them; `ShelfManager` hands it on beside the
   plate. `ShelfDividerCentringTests` ▸ `dividerHalvesTheDrawnGap`
-  measures the real bars' glyphs and boxes either side, in both
-  orders. The Settings shelf preview keeps `dividerMiddle`: its
+  measures the real bars' glyphs and boxes either side, an App
+  item's title at its full slot, in both orders. The Settings shelf preview keeps `dividerMiddle`: its
   runs are schematics padded alike at both ends, so its gutter IS
   its drawn middle.
 - **Wire a section's `onRendered` in `ShelfManager.sync` alone,

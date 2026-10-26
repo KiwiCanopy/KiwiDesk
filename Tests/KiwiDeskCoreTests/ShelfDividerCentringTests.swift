@@ -226,7 +226,9 @@ struct ShelfDividerCentringTests {
             width: placed.side + placed.spacing + placed.text.width,
             height: item.bounds.height
         )
-        return [(item, group)]
+        // The drawn icon stays in the union, so real ink is
+        // measured; it lies inside the filled group.
+        return [icon, (item, group)]
     }
 
     @Test(
