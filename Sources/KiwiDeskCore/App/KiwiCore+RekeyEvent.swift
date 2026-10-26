@@ -80,6 +80,7 @@ extension KiwiCore {
         // shown member must not park it.
         tiler.rekeySizeBound(oldID: old, newID: new)
         tiler.rekeyMonocleShown(oldID: old, newID: new)
+        tiler.motionGate.rekeyWrite(old: old, new: new)  // #2627
         // A live display crossing's bookkeeping (#504) must
         // follow the id swap, or a rekey after a crossing
         // strands the (new) window on the destination space
