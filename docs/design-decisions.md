@@ -17899,8 +17899,10 @@ reads as one with the pill under it rather than a flat patch on a faded
 plate; under Boxed, a flat hover made the box look as if it
 stopped fading beneath the pointer. A `ui-designer` read preferred
 a flat hover as pointer feedback, one even pill as macOS draws
-one; the owner judged the faded hover the better read. A solid
-shelf keeps its flat hover, its Fill not fading, and Reduce
+one; the owner judged the faded hover the better read. The
+overflow count at a run's end follows too (owner, 2026-10-26): it
+sits on the faded plate, so its hover chip fades as an item's
+does. A solid shelf keeps its flat hover, its Fill not fading, and Reduce
 transparency returns the flat hover with the rest of the glass.
 Each layer takes the cap, not the stack: under Boxed the hover
 draws over the box's own faded tint, as the flat hover did, and

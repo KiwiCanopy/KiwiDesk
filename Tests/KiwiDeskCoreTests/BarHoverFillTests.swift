@@ -12,7 +12,7 @@ import Testing
 struct BarHoverFillTests {
     init() { LiquidGlassGate.override = { false } }
 
-    private static func shelf(
+    static func shelf(
         glass: Bool,
         hover: String = "#FFFFFF80",
         fade: CGFloat = 100
@@ -75,7 +75,7 @@ struct BarHoverFillTests {
     }
 
     /// The two ends' alphas the hover backdrop paints.
-    private func ends(_ backdrop: GlassBackdrop) throws -> [CGFloat] {
+    func ends(_ backdrop: GlassBackdrop) throws -> [CGFloat] {
         let colours = try #require(backdrop.gradient?.colors)
         return colours.map {
             NSColor(cgColor: $0 as! CGColor)?.alphaComponent ?? -1
@@ -177,6 +177,41 @@ struct BarHoverFillTests {
         let item = try #require(view.layer?.maskedCorners)
         #expect(item != CACornerMask.allCorners)
         #expect(view.hoverFill.gradient?.maskedCorners == item)
+    }
+}
+
+// The overflow count's hover chip follows the same door.
+extension BarHoverFillTests {
+    private func count(_ shelf: KiwiShelf) -> ShelfCountView {
+        let view = ShelfCountView(side: .after)
+        view.frame = CGRect(x: 0, y: 0, width: 30, height: 32)
+        view.configure(
+            count: 3,
+            horizontal: true,
+            fontSize: 12,
+            shelf: shelf,
+            ink: .white,
+            hoverInk: .white,
+            hoverFill: NSColor(kiwiHex: shelf.hoverFillColor),
+            hoverHex: shelf.hoverFillColor,
+            edge: .top,
+            chipRadius: 8
+        )
+        view.setHovered(true)
+        view.layout()
+        return view
+    }
+
+    /// On glass the count's chip fades like an item's hover; on a
+    /// solid shelf the flat chip shows instead.
+    @Test("The overflow count's hover fades on glass")
+    func countHoverFades() throws {
+        let glass = count(Self.shelf(glass: true))
+        #expect(!glass.glassChip.isHidden)
+        let alphas = try ends(glass.glassChip)
+        #expect(abs(alphas[1] - 0.5 * GlassTint.farShare(fade: 100)) < 0.01)
+        let solid = count(Self.shelf(glass: false))
+        #expect(solid.glassChip.isHidden)
     }
 }
 

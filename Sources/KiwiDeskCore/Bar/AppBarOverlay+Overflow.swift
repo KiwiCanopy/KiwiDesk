@@ -43,6 +43,8 @@ extension AppBarOverlay {
                 ink: ink,
                 hoverInk: hoverInk,
                 hoverFill: hoverFill,
+                hoverHex: style.hoverFillColor,
+                edge: style.edge,
                 chipRadius: chipRadius
             )
             view.place(in: itemContainer.frame, atEnd: view === forwardCount)

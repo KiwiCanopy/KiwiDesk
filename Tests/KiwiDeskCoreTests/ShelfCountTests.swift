@@ -110,7 +110,10 @@ struct ShelfCountTests {
         let label = try #require(
             count.subviews.first { $0 is NSTextField } as? NSTextField
         )
-        let chip = try #require(count.subviews.first)
+        // The flat chip: the glass one stays hidden off glass.
+        let chip = try #require(
+            count.subviews.first { !($0 is GlassBackdrop) }
+        )
         #expect(label.textColor == .white)
         #expect(chip.isHidden)
         count.setHovered(true)

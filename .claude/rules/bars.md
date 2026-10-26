@@ -1356,8 +1356,8 @@ Obligations:
   colour on glass earns a second named mint, on the shelf beside
   `glassFill` (as the hover's, #2645) or inside `GlassTint`, never
   a colour parameter on a door.
-- **A bar item paints its hover on glass through
-  `BarHoverFill.paint`**, never a flat layer colour: it hands
+- **A bar item, and an overflow count's chip, paints its hover on
+  glass through `BarHoverFill.paint`**, never a flat layer colour: it hands
   `GlassTint.applyHover` the hover from
   `KiwiShelf.glassFill(hover:)`, so it fades with the Fill and its
   own colour takes the cap (#2645, `BarHoverFillTests`,

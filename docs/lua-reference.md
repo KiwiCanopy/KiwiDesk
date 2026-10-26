@@ -2764,7 +2764,8 @@ at the far end. It sets the bars' fill, a hovered bar item's
 [`hover_fill_color`](#kiwishelf-colours), a hidden shelf's handle,
 the overflow marks and their list, the hover peek, and the panels
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
-tints. On glass a hovered bar item's fill is held under the
+tints. A hovered overflow count's chip fades the same way. On
+glass a hovered bar item's fill is held under the
 same ceiling as `fill_color`, and the stored value is unchanged.
 The drag visuals and the sticky mark keep their own fade.
 The hover peek, the overflow mark's list, KiwiHub and the Space,

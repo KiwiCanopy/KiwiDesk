@@ -56,6 +56,8 @@ extension SpaceBarOverlay {
             ink: ink,
             hoverInk: hoverInk,
             hoverFill: hoverFill,
+            hoverHex: style.hoverFillColor,
+            edge: style.edge,
             chipRadius: chipRadius
         )
         forwardCount.configure(
@@ -66,6 +68,8 @@ extension SpaceBarOverlay {
             ink: ink,
             hoverInk: hoverInk,
             hoverFill: hoverFill,
+            hoverHex: style.hoverFillColor,
+            edge: style.edge,
             chipRadius: chipRadius
         )
         let container = itemContainer.frame
