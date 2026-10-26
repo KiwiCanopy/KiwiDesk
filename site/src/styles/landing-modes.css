@@ -302,8 +302,9 @@
    whole nav cluster (brand mark + Learn + lang + mode + theme)
    room to fit 320–460px without overflow. */
 @media (max-width: 460px) {
+  /* 64px: "Normalo" at this size is ~44px beside a 16px gutter. */
   .mode-toggle {
-    --seg-w: 58px;
+    --seg-w: 64px;
   }
   /* Shrink the lead kiwi and tuck it flush to the far left so the
      gutter it needs shrinks with it — the segment text then clears
@@ -339,8 +340,9 @@
    floor. The labels stay legible ("Normalo" is the widest) beside
    the lead kiwi. Extra dots are already hidden at ≤460 (M1). */
 @media (max-width: 365px) {
+  /* 58px: "Normalo" is ~42px here beside a 15px gutter. */
   .mode-toggle {
-    --seg-w: 54px;
+    --seg-w: 58px;
   }
   .mode-toggle__kiwi-lead .mode-toggle__kiwi {
     width: 10px;
