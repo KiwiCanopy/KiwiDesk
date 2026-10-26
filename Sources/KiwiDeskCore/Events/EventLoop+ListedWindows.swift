@@ -215,9 +215,10 @@ struct ListedWindowReader: @unchecked Sendable {
 
     /// Per arrival, what `track` asked on the main actor — the
     /// title, frame, fullscreen state, batched traits, children
-    /// and each child's role, and detection's title and zoom
+    /// and each child's role, and detection's title and button
     /// reads where it asks them: about 6 + children AX messages
-    /// moved off the main actor per arriving window.
+    /// moved off the main actor per arriving window, one more for
+    /// a window carrying a Cancel button (#2653).
     private func arrival(
         _ id: WindowID,
         _ element: AXUIElement,

@@ -84,6 +84,57 @@ struct AutoFloatReasonTests {
         )
     }
 
+    /// A window offering Cancel in place of close is a progress
+    /// window (#2653): the fixed-size guess, whatever its zoom
+    /// button says, and a Tile rule escapes it like any guess.
+    @Test("Cancel in place of close floats on the fixed-size guess")
+    func cancelInsteadOfClose() {
+        func reason(
+            _ subrole: String = kAXStandardWindowSubrole,
+            cancels: Bool,
+            rules: FloatRules = FloatRules()
+        ) -> AutoFloatReason? {
+            FloatDetection.autoFloatReason(
+                WindowFacts(
+                    role: kAXWindowRole,
+                    subrole: subrole,
+                    layer: 0,
+                    zoomable: { true },
+                    cancelsInsteadOfClosing: { cancels }
+                ) { "Archive Utility" },
+                bundleID: "com.apple.archiveutility",
+                rules: rules
+            )
+        }
+        #expect(reason(cancels: true) == .fixedSize)
+        #expect(reason(cancels: false) == nil)
+        #expect(reason(kAXDialogSubrole, cancels: true) == .panel)
+        let tiled = FloatRules(
+            [],
+            guess: FloatGuess(tileRules: ["com.apple.archiveutility"])
+        )
+        #expect(reason(cancels: true, rules: tiled) == nil)
+    }
+
+    /// The predicate the live read and the corpus share (#2653):
+    /// a disabled close beside Cancel, the close read only where
+    /// a Cancel button is.
+    @Test("Cancel in place of close needs both, and asks close last")
+    func cancelPredicate() {
+        let ask = WindowFacts.cancelsInsteadOfClosing
+        #expect(ask(true) { false })
+        #expect(!ask(true) { true })
+        #expect(!ask(true) { nil })
+        var asked = false
+        #expect(
+            !ask(false) {
+                asked = true
+                return false
+            }
+        )
+        #expect(!asked)
+    }
+
     @Test("a third-party app with no Dock icon is the accessory reason")
     func accessoryApp() {
         #expect(

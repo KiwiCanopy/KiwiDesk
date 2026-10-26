@@ -800,8 +800,8 @@ peeks instant; see
 
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and
-`toggle_floating` towards tiled, fail on a window that a float
-rule, dialog and panel detection or a missing Dock icon floats
+`toggle_floating` towards tiled, fail on a window that detection
+or a float rule floats
 ([`make_tiled`](lua-reference.md#make_tiled)).
 
 `set_float_placement` replaces `set_float_nudge`: a saved setting

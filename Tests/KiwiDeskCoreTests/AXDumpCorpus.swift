@@ -14,7 +14,8 @@ struct AXDump {
         "AXRole", "AXSubrole", "AXTitle", "AXChildren",
         "AXTitleUIElement",
         "AXCloseButton", "AXMinimizeButton", "AXZoomButton",
-        "AXFullScreenButton", "Aero.App.appBundleId",
+        "AXFullScreenButton", "AXCancelButton",
+        "Aero.App.appBundleId",
         "Aero.App.nsApp.activationPolicy", "Aero.windowLevel",
         "Aero.AxFailed",
     ]
@@ -98,6 +99,14 @@ struct AXDump {
         return (zoom["AXEnabled"] as? Int).map { $0 != 0 }
     }
 
+    /// The recorded buttons through the live predicate (#2653).
+    var cancelsInsteadOfClosing: Bool {
+        let close = values["AXCloseButton"] as? [String: Any]
+        return WindowFacts.cancelsInsteadOfClosing(
+            hasCancel: values["AXCancelButton"] is [String: Any]
+        ) { (close?["AXEnabled"] as? Int).map { $0 != 0 } }
+    }
+
     /// AeroSpace skips `AXChildren`, so this is nil throughout
     /// the pinned corpus. Nil too beside a recorded
     /// `AXTitleUIElement`: live reads leave that child out by
@@ -155,13 +164,15 @@ extension AXDump {
         else { return nil }
         let title = title
         let zoomable = zoomable
+        let cancels = cancelsInsteadOfClosing
         return EventLoop.composeVerdict(
             .facts(
                 WindowFacts(
                     role: role,
                     subrole: subrole,
                     layer: layer,
-                    zoomable: { zoomable }
+                    zoomable: { zoomable },
+                    cancelsInsteadOfClosing: { cancels }
                 ) { title }
             ),
             pid: Self.foreignPID,

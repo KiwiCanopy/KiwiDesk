@@ -43,7 +43,13 @@ extension AXDumpExpected {
             .furnished,
             .ruled(issue: 2070)
         ),
-        .row("archiveutility", .tiles, .kept, .furnished),
+        .row(
+            "archiveutility",
+            .floats(.fixedSize),
+            .kept,
+            .furnished,
+            .ruled(issue: 2653)
+        ),
         .row("brave", .tiles, .kept, .furnished),
         .row(
             "brave_pip",
