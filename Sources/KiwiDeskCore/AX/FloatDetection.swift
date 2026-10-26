@@ -173,8 +173,13 @@ public enum FloatDetection {
     /// "current Space" reading lags through a switch (#1023). A
     /// closed window lingers in the list for a while
     /// (os-private-apis.md) and reads false; nil is a window the
-    /// server never had.
+    /// server never had. SkyLight's per-window read answers first;
+    /// the public list read waits on this process's pending window
+    /// updates (#2531, #2634).
     public static func isOnScreen(_ id: WindowID) -> Bool? {
+        if let drawn = SkyLight.windowOnScreen(CGWindowID(id.raw)) {
+            return drawn
+        }
         let list = WindowListRead.copy(
             "isOnScreen",
             [.optionIncludingWindow],

@@ -181,7 +181,13 @@ Every one of the following binds whoever touches them:
   moving such a read off the main actor does not take it off the
   main actor's path: a per-window layer reads `SLSGetWindowLevel`
   (`FloatDetection.windowLayer(of:)`, `layerReader`, the public
-  read their fallback), and a new whole-list read states its
+  read their fallback), the raise gate's on-screen flag reads
+  `SLSWindowIsVisible` for a window `SLSWindowIsOrderedIn` reads
+  ordered in — ordered in alone reads true on an unshown Desktop,
+  and an ordered-out window has no public entry to abstain on —
+  with the public read its fallback (`FloatDetection.isOnScreen`,
+  `RaiseGateOnScreenSeamTests`, `WindowVisibilityReadTests`), and
+  a new whole-list read states its
   cadence and why no per-window read answers it. Every public
   list read goes through `WindowListRead.copy` with a site name,
   which logs a read past 50 ms with its site and thread, so a
