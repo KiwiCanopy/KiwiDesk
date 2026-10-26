@@ -1,14 +1,13 @@
 import CoreGraphics
 
-/// One window's on-screen flag, the `kCGWindowIsOnscreen` the public
-/// window list reports, read without that list's wait on this
-/// process's pending window updates (#2531, #2634). Probed on macOS
-/// 27.0.1 against the flag on every window of two Desktops and
-/// through held and cancelled swipes: `SLSWindowIsVisible` matched
-/// it wherever `SLSWindowIsOrderedIn` reads true. Ordered in alone
-/// is not the flag: a window on a Desktop no display shows reads
-/// ordered in. A window ordered out (minimized, hidden, closing) is
-/// left to the public read, whose missing entry the gate abstains on.
+/// One window's `kCGWindowIsOnscreen`, read without the public
+/// list's wait on this process's pending window updates (#2531).
+/// The canonical home of why it takes two reads (#2634, probed on
+/// macOS 27.0.1): ordered in alone reads true for a window on a
+/// Desktop no display shows, and visible reads false for a window
+/// ordered out (minimized, hidden) where the public read has no
+/// entry at all. So visible answers only for a window ordered in;
+/// every other window is nil, left to the public read.
 extension SkyLight {
     typealias WindowFlagFn =
         @convention(c) (
@@ -26,6 +25,13 @@ extension SkyLight {
         as: WindowFlagFn.self
     )
 
+    /// Whether `windowOnScreen` can answer at all.
+    static var readsWindowOnScreen: Bool {
+        windowIsOrderedInSymbol.function != nil
+            && windowIsVisibleSymbol.function != nil
+            && connection != nil
+    }
+
     /// Whether `wid` is ordered in, or nil where unanswered.
     static func windowOrderedIn(_ wid: CGWindowID) -> Bool? {
         flag(windowIsOrderedInSymbol.function, wid)
@@ -36,11 +42,22 @@ extension SkyLight {
         flag(windowIsVisibleSymbol.function, wid)
     }
 
-    /// `wid`'s on-screen flag where SkyLight answers it: nil for a
-    /// window ordered out, unknown, or a host without the symbols.
+    /// `wid`'s on-screen flag where SkyLight answers it.
     static func windowOnScreen(_ wid: CGWindowID) -> Bool? {
-        guard windowOrderedIn(wid) == true else { return nil }
-        return windowVisible(wid)
+        onScreen(
+            orderedIn: windowOrderedIn(wid),
+            visible: { windowVisible(wid) }
+        )
+    }
+
+    /// The two reads combined; `visible` is asked only for a window
+    /// ordered in.
+    static func onScreen(
+        orderedIn: Bool?,
+        visible: () -> Bool?
+    ) -> Bool? {
+        guard orderedIn == true else { return nil }
+        return visible()
     }
 
     private static func flag(

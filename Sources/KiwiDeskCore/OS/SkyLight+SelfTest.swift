@@ -99,10 +99,12 @@ extension SkyLight {
                     of: own
                 )
             },
+            // Positive only: no own window is ordered in off
+            // screen; the composite the gate reads is judged.
             .read(windowIsVisibleSymbol.resolution, home: home) {
                 let own = context.ownWindow()
                 return PrivatePathVerify.onScreen(
-                    own.flatMap { windowVisible($0.id) },
+                    own.flatMap { windowOnScreen($0.id) },
                     of: own
                 )
             },

@@ -1132,8 +1132,8 @@ editing here:
   behind the swipe (Electron, measured 2026-09-08 — the argument
   is the design-decisions entry). So the verdict is TWO compositor
   reads, and either refuses (#1410): the draw list's on-screen
-  flag (`kCGWindowIsOnscreen`, read per window through SkyLight
-  where it answers — os-private-apis.md, #2634), which composites
+  flag (`kCGWindowIsOnscreen`, whose per-window stand-in owes the
+  public read's nil — os-private-apis.md, #2634), which composites
   every neighbouring Desktop's windows for the second a gesture runs
   (measured 2026-09-13), AND the Space the compositor hosts the
   window on — ANY of them, since an all-Desktops window is hosted

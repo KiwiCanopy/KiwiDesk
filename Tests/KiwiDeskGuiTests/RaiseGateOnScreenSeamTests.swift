@@ -4,9 +4,8 @@ import Testing
 /// The raise gate's on-screen read asks SkyLight one window at a
 /// time before the public list (#2634), whose read waits on this
 /// process's pending window updates while holding the WindowServer
-/// connection lock (#2531). Ordered in alone is not the flag, and a
-/// window ordered out has no public entry the gate abstains on, so
-/// the SkyLight answer is only taken for a window ordered in.
+/// connection lock (#2531); why it takes two reads is
+/// `SkyLight+WindowVisibility.swift`'s docstring.
 @Suite("Raise gate on-screen read seam (#2634)")
 struct RaiseGateOnScreenSeamTests {
     private static var core: URL {
@@ -29,31 +28,37 @@ struct RaiseGateOnScreenSeamTests {
         )
     }
 
-    @Test("isOnScreen asks SkyLight before the public list")
+    /// Needled on the returning statement, so an answer read and
+    /// dropped reds; trades a false red on an equivalent rewrite.
+    @Test("isOnScreen returns SkyLight's answer before the public list")
     func skyLightAnswersFirst() throws {
         let body = try Self.body(
             "static func isOnScreen(",
             in: "AX/FloatDetection.swift"
-        )
+        ).filter { !$0.isWhitespace }
         let sky = try #require(
-            body.range(of: "SkyLight.windowOnScreen(")
+            body.range(
+                of: "ifletdrawn=SkyLight.windowOnScreen("
+                    + "CGWindowID(id.raw)){returndrawn}"
+            )
         )
         let list = try #require(body.range(of: "WindowListRead.copy("))
-        #expect(sky.lowerBound < list.lowerBound)
+        #expect(sky.upperBound <= list.lowerBound)
     }
 
-    @Test("the visible read is taken only for a window ordered in")
-    func visibleNeedsOrderedIn() throws {
+    /// The composite's truth table is `WindowVisibilityReadTests`';
+    /// this holds that the live read hands it the right two reads.
+    @Test("windowOnScreen hands the composite both reads")
+    func compositeTakesBothReads() throws {
         let body = try Self.body(
             "static func windowOnScreen(",
             in: "OS/SkyLight+WindowVisibility.swift"
         ).filter { !$0.isWhitespace }
-        let guarded = try #require(
-            body.range(
-                of: "guardwindowOrderedIn(wid)==trueelse{returnnil}"
+        #expect(
+            body.contains(
+                "onScreen(orderedIn:windowOrderedIn(wid),"
+                    + "visible:{windowVisible(wid)})"
             )
         )
-        let visible = try #require(body.range(of: "windowVisible(wid)"))
-        #expect(guarded.upperBound <= visible.lowerBound)
     }
 }
