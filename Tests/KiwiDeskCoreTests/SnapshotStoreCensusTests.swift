@@ -145,6 +145,8 @@ struct SnapshotStoreCensusTests {
             (.behind, "a restart's adoptions are no new windows (#2478)"),
         "tiler.placements.entries":
             (.behind, "an age-bounded echo ledger (#1161)"),
+        "tiler.motionGate.owedWrites":
+            (.behind, "a write owed until the hand rests (#2627)"),
         "tiler.applier.instantTargets.entries":
             (.behind, "an age-bounded echo ledger (#881)"),
         "tiler.applier.recent.stamps":
@@ -237,6 +239,11 @@ struct SnapshotStoreCensusTests {
             shown: [shown],
             forcing: false
         )
+        // A direct write owed while the hand moves (#2627).
+        core.tiler.motionGate.owe(
+            .floatPlacement(guardFrame: .zero),
+            for: WindowID(1)
+        )
         return core
     }
 
@@ -256,7 +263,7 @@ struct SnapshotStoreCensusTests {
             "state.floatFrames", "tiler.boundLearner.lastAsks",
             "state.userFloated", "tiler.monocleShownMembers",
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",
-            "tiler.stashDepartures.owed",
+            "tiler.stashDepartures.owed", "tiler.motionGate.owedWrites",
             "state.profilePartitioning.byArrangement[][]",
             "state.crossSession.placed",
         ] {

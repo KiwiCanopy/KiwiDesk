@@ -2662,8 +2662,11 @@ show the new Space in the bar while the old windows stay up. The windows'
 records, the bars and the rings move at once, and a held pass
 stamps nothing, no placement and no size ask, so a frame that was
 never written is never judged against an echo. A frame written
-outside a layout pass, such as a restore's own writes or a
-float's re-anchor onto another screen, is not held yet. Of two
+outside a layout pass, such as a restore's own writes
+([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)) or a
+float's re-anchor onto another screen
+([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)), is
+not held. Of two
 windows arriving during one hold, only the newer keeps its
 start-at-target entrance. The cost: after you stop the
 mouse, an ambient reflow lands up to ~300 ms later than it did,

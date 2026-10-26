@@ -2401,13 +2401,14 @@ editing here:
   `spaceSwitchRetile` caller states `asSwitch`, boot, wake and a
   sweep stating false; a z-order restore waits for an owed pass
   as for an animation. State, bars and rings move at once; the
-  pre-render heals ride the pass. A frame written outside a
-  layout pass waits only where its writer owes the WINDOW and
-  re-derives the write when a pass runs: a detection flip's
-  float placement does (#2627, `DetectedFloatPlacementHoldTests`),
-  and a new ambient direct writer takes the same shape; the
-  restore's and the re-anchor's writes stay ungated until #2626
-  and #2628. The
+  pre-render heals ride the pass. An ambient frame written
+  outside a layout pass waits by owing the WINDOW through the one
+  `oweAmbientWrite`, a `MotionGate.OwedWrite` case whose payment
+  in `payOwedWrites` re-derives the write and whose frame is a
+  "has it moved" guard, never sent (#2627,
+  `DetectedFloatPlacementHoldTests`); a new ambient direct writer
+  owes through that door, and one left ungated is a ruling (the
+  restore's #2626, the re-anchor's #2628). The
   engine's pass is driven only from that door
   (`MotionScopeCensusTests` ▸ `passesAskTheGate`,
   `MotionGateTests`).

@@ -32,9 +32,7 @@ extension KiwiCore {
     /// activation, as `placeEnteringFloat` does.
     func placeFloating(_ id: WindowID) {
         guard let window = state.windows[id] else { return }
-        if let space = floatPlacementSpace(of: id),
-            !state.workspaces.visibleSpaces.contains(space)
-        {
+        if placementIsSeed(id) {
             if seedsPlacement(id),
                 let target = floatPlacementTarget(for: id)
             {
@@ -54,6 +52,23 @@ extension KiwiCore {
         // must not read as the app refusing the last tiled ask, or
         // the next tiled space places the float's size as residue.
         tiler.forgetSizeBound(id)
+    }
+
+    /// Whether `placeFloating` only seeds `id`'s placement: its
+    /// Space is one no screen shows.
+    func placementIsSeed(_ id: WindowID) -> Bool {
+        floatPlacementSpace(of: id).map {
+            !state.workspaces.visibleSpaces.contains($0)
+        } ?? false
+    }
+
+    /// Whether a detected float may be placed now: not while event
+    /// retiles are deferred (boot, a sweep chunk: the frame is the
+    /// app's, not a slot), never a window a drag holds or in its
+    /// own macOS Space (#670) — asked at the flip and at its
+    /// held payment (#2627).
+    func detectedFloatPlaceable(_ id: WindowID) -> Bool {
+        !defersEventRetiles && seedsPlacement(id)
     }
 
     /// What a detection flip owes (#1820), read before the fold:
@@ -76,16 +91,12 @@ extension KiwiCore {
     }
 
     /// Pays `detectedFlip`'s debt once the fold has run: a float
-    /// flip always lands, a tile one only where the fold really
-    /// tiled the window. The placement stands down while event
-    /// retiles are deferred (boot, a sweep chunk: the frame is the
-    /// app's, not a slot) and for a window a drag holds or in its
-    /// own macOS Space (#670).
+    /// flip lands where `detectedFloatPlaceable`, a tile one only
+    /// where the fold really tiled the window.
     func settleDetectedFlip(_ flip: DetectedFlip?) {
         switch flip {
         case .floats(let id):
-            guard !defersEventRetiles, seedsPlacement(id)
-            else { return }
+            guard detectedFloatPlaceable(id) else { return }
             placeDetectedFloat(id)
         case .tiles(let id, let frame):
             guard let frame, !isEffectiveFloatForPlacement(id)
@@ -119,7 +130,7 @@ extension KiwiCore {
     /// remembered frame. Never a window in its own macOS Space
     /// (#670): nothing parks it, so a seed would be re-delivered
     /// every retile; never one a drag holds.
-    func seedsPlacement(_ id: WindowID) -> Bool {
+    private func seedsPlacement(_ id: WindowID) -> Bool {
         guard let window = state.windows[id] else { return false }
         return !window.isFullscreen && tiler.dragExemptWindow != id
     }

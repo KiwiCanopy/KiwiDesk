@@ -22,6 +22,7 @@ struct DetectedFloatPlacementHoldTests {
         var stillFor: TimeInterval = 10
         var polls: [@MainActor () -> Void] = []
         var frames: [WindowID: CGRect] = [:]
+        var lines: [String] = []
 
         init(slot: CGRect, window: WindowID) {
             let dir =
@@ -65,6 +66,7 @@ struct DetectedFloatPlacementHoldTests {
                 self.stillFor
             }
             gate.onLog = { _ in }
+            core.onLog = { [unowned self] in self.lines.append($0) }
         }
 
         var gate: MotionGate { core.tiler.motionGate }
@@ -79,6 +81,10 @@ struct DetectedFloatPlacementHoldTests {
             let due = polls
             polls = []
             for work in due { work() }
+        }
+
+        var held: Bool {
+            lines.contains { $0.hasPrefix("direct write held") }
         }
 
         func isCentred(_ id: WindowID) -> Bool {
@@ -102,10 +108,10 @@ struct DetectedFloatPlacementHoldTests {
     func movingMouseOwes() {
         let desk = held()
         #expect(desk.frames[window] == nil)
-        #expect(desk.gate.owedPlacements[window] != nil)
+        #expect(desk.gate.owedWrites[window] != nil)
         desk.rest()
         #expect(desk.isCentred(window))
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(desk.gate.owedWrites.isEmpty)
     }
 
     @Test("a flip with the hand at rest is placed at once")
@@ -113,7 +119,17 @@ struct DetectedFloatPlacementHoldTests {
         let desk = Desk(slot: slot, window: window)
         desk.flip(window, true)
         #expect(desk.isCentred(window))
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(!desk.held)
+    }
+
+    /// A flip under a control's own scope is the user's: never held.
+    @Test("a flip under user motion is placed at once")
+    func userFlipPlaces() {
+        let desk = Desk(slot: slot, window: window)
+        desk.stillFor = 0.05
+        desk.core.withUserMotion { desk.flip(window, true) }
+        #expect(desk.isCentred(window))
+        #expect(!desk.held)
     }
 
     @Test("a control's own pass pays the owed placement")
@@ -121,7 +137,7 @@ struct DetectedFloatPlacementHoldTests {
         let desk = held()
         desk.core.withUserMotion { desk.core.retile() }
         #expect(desk.isCentred(window))
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(desk.gate.owedWrites.isEmpty)
     }
 
     /// Moved by hand or by its app while owed: that frame stands.
@@ -132,7 +148,7 @@ struct DetectedFloatPlacementHoldTests {
         desk.core.state.apply(.windowMoved(window, moved))
         desk.rest()
         #expect(desk.frames[window] == nil)
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(desk.gate.owedWrites.isEmpty)
     }
 
     @Test("a window tiled again while owed is not placed")
@@ -140,10 +156,84 @@ struct DetectedFloatPlacementHoldTests {
         let desk = held()
         desk.flip(window, false)
         desk.rest()
-        #expect(!desk.isCentred(window))
-        #expect(desk.gate.owedPlacements.isEmpty)
+        // A placement would consume the frame the tile filed.
+        #expect(desk.core.state.floatFrames[window] != nil)
+        #expect(desk.gate.owedWrites.isEmpty)
     }
 
+    enum StandDown: CaseIterable {
+        case dragged, fullscreen, deferred
+    }
+
+    @Test(
+        "a window no placement may reach while owed keeps its frame",
+        arguments: StandDown.allCases
+    )
+    func standDownWhileOwedSkips(_ standDown: StandDown) {
+        let desk = held()
+        switch standDown {
+        case .dragged: desk.core.tiler.dragExemptWindow = window
+        case .fullscreen:
+            desk.core.state.windows.setFullscreen(window, true)
+        case .deferred: desk.core.defersEventRetiles = true
+        }
+        desk.rest()
+        #expect(desk.frames[window] == nil)
+        #expect(desk.gate.owedWrites.isEmpty)
+    }
+
+    /// Our own echo landing during the hold is no move: the guard
+    /// is the frame we last sent, never the state frame at the flip.
+    @Test("our own echo landing while owed keeps the debt")
+    func ownEchoKeepsTheDebt() throws {
+        let desk = Desk(slot: slot, window: window)
+        // An instant pass at rest sends the slot through the applier,
+        // which records it as commanded; its echo has not landed.
+        desk.core.tiler.settings.animations.onRelayout = false
+        desk.core.retile()
+        desk.core.tiler.settings.animations.onRelayout = true
+        desk.stillFor = 0.05
+        desk.frames = [:]
+        desk.flip(window, true)
+        guard case .floatPlacement(let sent)? = desk.gate.owedWrites[window]
+        else {
+            Issue.record("no write owed")
+            return
+        }
+        try #require(!TilingEngine.close(sent, to: slot))
+        desk.core.state.apply(.windowMoved(window, sent))
+        desk.rest()
+        #expect(desk.isCentred(window))
+    }
+
+    /// A write owed while no pass is owed owes one, or nothing would
+    /// release it until an unrelated pass.
+    @Test("a write owed with no pass owed arms its own release")
+    func owedAloneArmsTheRelease() {
+        let desk = Desk(slot: slot, window: window)
+        desk.core.state.setFloating(window, true)
+        desk.stillFor = 0.05
+        desk.frames = [:]
+        #expect(desk.gate.owed == nil)
+        desk.core.placeDetectedFloat(window)
+        #expect(desk.gate.owed != nil)
+        desk.rest()
+        #expect(desk.isCentred(window))
+    }
+
+    @Test("a tab switch while owed carries the debt to the new id")
+    func rekeyCarriesTheDebt() {
+        let desk = held()
+        let tab = WindowID(7)
+        desk.core.handle(.windowRekeyed(window, tab))
+        #expect(desk.gate.owedWrites[window] == nil)
+        #expect(desk.gate.owedWrites[tab] != nil)
+        desk.rest()
+        #expect(desk.isCentred(tab))
+    }
+
+    /// `placeFloating` refuses an untracked window too, so this
+    /// holds that the debt is dropped, not which clause drops it.
     @Test("a window closed while owed is forgotten")
     func closedWhileOwedForgets() {
         let desk = held()
@@ -152,7 +242,7 @@ struct DetectedFloatPlacementHoldTests {
         )
         desk.rest()
         #expect(desk.frames[window] == nil)
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(desk.gate.owedWrites.isEmpty)
     }
 
     @Test("a flip on an unshown Space seeds at once")
@@ -164,7 +254,7 @@ struct DetectedFloatPlacementHoldTests {
         )
         desk.stillFor = 0.05
         desk.flip(window, true)
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(desk.gate.owedWrites.isEmpty)
         let seed = try #require(desk.core.tiler.stashedFrames[window])
         #expect(seed.width == FloatPlacement.longFloor)
     }
@@ -173,6 +263,6 @@ struct DetectedFloatPlacementHoldTests {
     func dropAllForgets() {
         let desk = held()
         desk.gate.dropAll()
-        #expect(desk.gate.owedPlacements.isEmpty)
+        #expect(desk.gate.owedWrites.isEmpty)
     }
 }

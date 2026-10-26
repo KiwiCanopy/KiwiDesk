@@ -10,6 +10,11 @@ import Foundation
 /// its asks and stamps its placements only for frames it sends. A
 /// pass a KiwiDesk control makes right now runs, carrying the debt
 /// with it. Asked once, by `KiwiCore.retile`.
+///
+/// A frame an ambient writer sends outside a pass waits here too,
+/// as a WINDOW owed (#2627): the write is re-derived when a pass
+/// runs. The frame an `OwedWrite` carries is a "has it moved"
+/// guard, never sent.
 @MainActor
 final class MotionGate {
     /// One owed pass: the strongest of the passes it stands for.
@@ -42,6 +47,15 @@ final class MotionGate {
         }
     }
 
+    /// A direct frame write outside a pass, owed for one window
+    /// until a pass runs (#2627). A later owe for the same window
+    /// replaces the earlier one.
+    enum OwedWrite: Equatable {
+        /// A detection flip's float placement, guarded by the frame
+        /// we last sent the window when it was owed.
+        case floatPlacement(guardFrame: CGRect)
+    }
+
     let quiescence = InputQuiescence()
     /// The cause of the pass being asked about — the applier's one
     /// reading.
@@ -60,10 +74,9 @@ final class MotionGate {
     var onLog: @MainActor (String) -> Void = CoreLog.write
 
     private(set) var owed: Owed?
-    /// Detected floats whose placement waits with the pass (#2627),
-    /// each with the state frame it stood at when owed; paid by
-    /// `KiwiCore.payOwedFloatPlacements` in the pass that runs.
-    var owedPlacements: [WindowID: CGRect] = [:]
+    /// The owed direct writes, written through `KiwiCore`'s one
+    /// `oweAmbientWrite` door and taken by its one payer.
+    private(set) var owedWrites: [WindowID: OwedWrite] = [:]
     private var owedSince: TimeInterval?
     private var armed = false
     private var releasing = false
@@ -90,8 +103,8 @@ final class MotionGate {
     func admit(_ pass: Owed) -> Owed? {
         if releasing { return pass }
         let cause = cause()
-        let user = isUser(cause)
-        if user || restsNow {
+        let (runs, user) = verdict(cause)
+        if runs {
             let run = owed.map { $0.merged(with: pass) } ?? pass
             settle(why: user ? "a user pass" : "the hand rests")
             return run
@@ -108,24 +121,46 @@ final class MotionGate {
     /// Whether a pass asked now would wait — `admit`'s verdict,
     /// read without owing anything.
     var holdsNow: Bool {
-        !releasing && !isUser(cause()) && !restsNow
+        !releasing && !verdict(cause()).runs
+    }
+
+    func owe(_ write: OwedWrite, for id: WindowID) {
+        owedWrites[id] = write
+    }
+
+    /// Every owed write, forgotten as it is handed over.
+    func takeWrites() -> [WindowID: OwedWrite] {
+        defer { owedWrites = [:] }
+        return owedWrites
+    }
+
+    /// A native tab switch re-keys the window its write is owed for.
+    func rekeyWrite(old: WindowID, new: WindowID) {
+        guard let write = owedWrites.removeValue(forKey: old) else {
+            return
+        }
+        owedWrites[new] = write
     }
 
     /// Forgets the debt: KiwiDesk is stopping, and the gather owns
     /// the motion now.
     func dropAll() {
         owed = nil
-        owedPlacements = [:]
+        owedWrites = [:]
         owedSince = nil
     }
 
-    private func isUser(_ cause: MotionCause) -> Bool {
-        if case .user(_, late: false) = cause { return true }
-        return switching
-    }
-
-    private var restsNow: Bool {
-        quiescence.admits(heldFor: owedSince.map { clock() - $0 })
+    /// Whether a pass under `cause` runs now, and whether it runs
+    /// as the user's — the one verdict `admit` and `holdsNow` read.
+    private func verdict(
+        _ cause: MotionCause
+    ) -> (runs: Bool, user: Bool) {
+        var user = switching
+        if case .user(_, late: false) = cause { user = true }
+        let rests = quiescence.admits(
+            heldFor: owedSince.map { clock() - $0 }
+        )
+        return (user || rests, user)
     }
 
     private func arm() {
