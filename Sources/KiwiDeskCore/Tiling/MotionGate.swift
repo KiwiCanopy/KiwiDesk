@@ -60,6 +60,10 @@ final class MotionGate {
     var onLog: @MainActor (String) -> Void = CoreLog.write
 
     private(set) var owed: Owed?
+    /// Detected floats whose placement waits with the pass (#2627),
+    /// each with the state frame it stood at when owed; paid by
+    /// `KiwiCore.payOwedFloatPlacements` in the pass that runs.
+    var owedPlacements: [WindowID: CGRect] = [:]
     private var owedSince: TimeInterval?
     private var armed = false
     private var releasing = false
@@ -86,10 +90,8 @@ final class MotionGate {
     func admit(_ pass: Owed) -> Owed? {
         if releasing { return pass }
         let cause = cause()
-        let heldFor = owedSince.map { clock() - $0 }
-        var user = switching
-        if case .user(_, late: false) = cause { user = true }
-        if user || quiescence.admits(heldFor: heldFor) {
+        let user = isUser(cause)
+        if user || restsNow {
             let run = owed.map { $0.merged(with: pass) } ?? pass
             settle(why: user ? "a user pass" : "the hand rests")
             return run
@@ -103,11 +105,27 @@ final class MotionGate {
         return nil
     }
 
+    /// Whether a pass asked now would wait — `admit`'s verdict,
+    /// read without owing anything.
+    var holdsNow: Bool {
+        !releasing && !isUser(cause()) && !restsNow
+    }
+
     /// Forgets the debt: KiwiDesk is stopping, and the gather owns
     /// the motion now.
     func dropAll() {
         owed = nil
+        owedPlacements = [:]
         owedSince = nil
+    }
+
+    private func isUser(_ cause: MotionCause) -> Bool {
+        if case .user(_, late: false) = cause { return true }
+        return switching
+    }
+
+    private var restsNow: Bool {
+        quiescence.admits(heldFor: owedSince.map { clock() - $0 })
     }
 
     private func arm() {

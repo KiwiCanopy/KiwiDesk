@@ -86,7 +86,7 @@ extension KiwiCore {
         case .floats(let id):
             guard !defersEventRetiles, seedsPlacement(id)
             else { return }
-            placeFloating(id)
+            placeDetectedFloat(id)
         case .tiles(let id, let frame):
             guard let frame, !isEffectiveFloatForPlacement(id)
             else { return }
@@ -119,7 +119,7 @@ extension KiwiCore {
     /// remembered frame. Never a window in its own macOS Space
     /// (#670): nothing parks it, so a seed would be re-delivered
     /// every retile; never one a drag holds.
-    private func seedsPlacement(_ id: WindowID) -> Bool {
+    func seedsPlacement(_ id: WindowID) -> Bool {
         guard let window = state.windows[id] else { return false }
         return !window.isFullscreen && tiler.dragExemptWindow != id
     }

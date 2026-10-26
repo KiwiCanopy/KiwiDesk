@@ -144,6 +144,7 @@ extension KiwiCore {
         }
         _ = tiler.takePendingBoundPlacement()
         narrateCorroborationProbes()
+        payOwedFloatPlacements()  // #2627
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op
         // for them.
