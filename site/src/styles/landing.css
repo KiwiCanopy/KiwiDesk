@@ -267,7 +267,9 @@ body {
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
-  overflow-x: hidden;
+  /* clip, never hidden: hidden makes body a scroll container that
+     never scrolls, and every position: sticky (the nav) goes inert. */
+  overflow-x: clip;
 }
 
 html {
@@ -435,7 +437,7 @@ body::before {
    clear 320px with ~60px of slack at 500px, and this link is 95px
    in English and 132px in Japanese — so it does not fit at any
    width the rules below are defending, and `.nav__links` neither
-   wraps nor scrolls (the body is `overflow-x: hidden`, so an
+   wraps nor scrolls (the body is `overflow-x: clip`, so an
    overflow is CLIPPED: the theme toggle simply leaves the screen).
    Shed at 720px rather than at the tight breakpoints, because the
    ja label overflows well before them. The footer link is the
