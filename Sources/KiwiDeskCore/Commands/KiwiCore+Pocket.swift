@@ -8,11 +8,15 @@ import Foundation
 /// preflight: taking the window out acts on no focus.
 extension KiwiCore {
     func pocketCommand() -> CommandResponse {
-        // An untracked window whose app is gone empties the slot.
+        // An untracked window whose app is gone empties the slot,
+        // and the press ends there: a filled slot passed the #292
+        // preflight, so it never acts on the focus.
         if let slot = state.pocket, state.windows[slot.window] == nil,
             let pid = slot.pid, !eventLoop.processIdentity.runs(pid)
         {
             state.emptyPocket()
+            onLog("pocket: w\(slot.window.raw) gone with its app — emptied")
+            return .ok()
         }
         switch state.pocket?.phase {
         case .pocketed?:

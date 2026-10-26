@@ -55,15 +55,41 @@ struct PocketEdgeTests {
         #expect(core.state.pocket?.window == one)
     }
 
-    @Test("an exited app's untracked slot empties at the press")
+    @Test("an exited app's slot empties, and that press ends there")
     func exitedAppEmpties() {
         let core = makeCore()
         core.execute("pocket")
         core.state.apply(.windowHidden(one))
         core.eventLoop.processIdentity.runs = { _ in false }
         core.state.apply(.windowFocused(two))
+        // A stale anchor: the filled slot passes the preflight, so
+        // the purge must not go on to pocket the focus.
+        core.frontmostPIDProvider = { 1 }
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketPhase(of: two) == .pocketed)
+        #expect(core.state.pocket == nil)
+        #expect(!core.execute("pocket").isSuccess)
+        #expect(core.state.pocket == nil)
+    }
+
+    @Test("the in-place slot's stored keys are pinned")
+    func storedKeysArePinned() throws {
+        let slot = PocketSlot(
+            window: one,
+            pid: 7,
+            phase: .out,
+            frames: ["A": .zero],
+            cameFrom: two
+        )
+        let object = try #require(
+            JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(slot)
+            ) as? [String: Any]
+        )
+        #expect(
+            Set(object.keys)
+                == ["window", "pid", "phase", "frames", "came_from"]
+        )
+        #expect(object["phase"] as? String == "out")
     }
 
     @Test("focus_window on the pocketed window takes it out")

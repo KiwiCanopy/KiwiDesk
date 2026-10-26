@@ -2174,7 +2174,9 @@ editing here:
   coding, `ScrollRest`'s and `StickyScope`'s raw values are
   stored values in AGENTS.md §5's sense — and so are the held
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
-  `HeldOrigin.Arrangement` keys and the snapshot's own
+  `HeldOrigin.Arrangement` keys, the pocket's `PocketSlot` keys and
+  `Phase` raw values (#2446, `PocketEdgeTests` ▸
+  `storedKeysArePinned`), and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
   profiles.md), each window record's `app` and `title` — the
   stable key a cross-session match reads (#1385) — and its
