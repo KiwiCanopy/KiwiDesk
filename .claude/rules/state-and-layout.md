@@ -2403,9 +2403,9 @@ editing here:
   as for an animation. State, bars and rings move at once; the
   pre-render heals ride the pass. An ambient frame written
   outside a layout pass waits by owing the WINDOW through the one
-  `oweAmbientWrite`, a `MotionGate.OwedWrite` case whose payment
-  in `payOwedWrites` re-derives the write and whose frame is a
-  "has it moved" guard, never sent (#2627,
+  `oweAmbientWrite`, a `MotionGate.OwedWrite` case carrying no
+  frame, whose payment in `payOwedWrites` re-derives the write and
+  which a drag forgets (`handleDragMove`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
   owes through that door, and one left ungated is a ruling (the
   restore's #2626, the re-anchor's #2628). The

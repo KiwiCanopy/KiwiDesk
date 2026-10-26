@@ -12,9 +12,8 @@ import Foundation
 /// with it. Asked once, by `KiwiCore.retile`.
 ///
 /// A frame an ambient writer sends outside a pass waits here too,
-/// as a WINDOW owed (#2627): the write is re-derived when a pass
-/// runs. The frame an `OwedWrite` carries is a "has it moved"
-/// guard, never sent.
+/// as a WINDOW owed, never a frame (#2627): the write is
+/// re-derived when a pass runs, and a drag forgets it.
 @MainActor
 final class MotionGate {
     /// One owed pass: the strongest of the passes it stands for.
@@ -51,9 +50,8 @@ final class MotionGate {
     /// until a pass runs (#2627). A later owe for the same window
     /// replaces the earlier one.
     enum OwedWrite: Equatable {
-        /// A detection flip's float placement, guarded by the frame
-        /// we last sent the window when it was owed.
-        case floatPlacement(guardFrame: CGRect)
+        /// A detection flip's float placement.
+        case floatPlacement
     }
 
     let quiescence = InputQuiescence()
@@ -132,6 +130,11 @@ final class MotionGate {
     func takeWrites() -> [WindowID: OwedWrite] {
         defer { owedWrites = [:] }
         return owedWrites
+    }
+
+    /// A drag owns the window's frame from its first move on.
+    func forgetWrite(for id: WindowID) {
+        owedWrites[id] = nil
     }
 
     /// A native tab switch re-keys the window its write is owed for.

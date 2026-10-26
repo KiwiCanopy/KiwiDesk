@@ -2676,9 +2676,10 @@ and while you hold a button it does not land at all.
 A window a float rule or a detection just floated waits the same
 way ([#2627](https://github.com/KiwiCanopy/KiwiDesk/issues/2627)):
 what is owed is the window, never its frame, and it is placed when
-the hand rests only if it is still a float at the frame it stood
-at. A window moved meanwhile, by you or by its app, stays where
-it was put.
+the hand rests only if it is still a float. A window you drag
+meanwhile stays where you put it. A frame that moves without a
+drag decides nothing: an app answering a size it refused and a
+hand move look alike from outside.
 :::
 
 ### A placement bounce is the app's answer, not the user's (#1161)

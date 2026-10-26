@@ -140,12 +140,13 @@ struct DetectedFloatPlacementHoldTests {
         #expect(desk.gate.owedWrites.isEmpty)
     }
 
-    /// Moved by hand or by its app while owed: that frame stands.
-    @Test("a window moved while owed keeps its frame")
-    func movedWhileOwedKeeps() {
+    /// A drag owns the frame from its first move: nothing owed.
+    @Test("a window dragged while owed keeps its frame")
+    func draggedWhileOwedKeeps() {
         let desk = held()
         let moved = CGRect(x: 500, y: 300, width: 640, height: 480)
-        desk.core.state.apply(.windowMoved(window, moved))
+        desk.core.handleDragMove(window, start: slot, frame: moved)
+        desk.core.tiler.dragExemptWindow = nil
         desk.rest()
         #expect(desk.frames[window] == nil)
         #expect(desk.gate.owedWrites.isEmpty)
@@ -182,26 +183,13 @@ struct DetectedFloatPlacementHoldTests {
         #expect(desk.gate.owedWrites.isEmpty)
     }
 
-    /// Our own echo landing during the hold is no move: the guard
-    /// is the frame we last sent, never the state frame at the flip.
-    @Test("our own echo landing while owed keeps the debt")
-    func ownEchoKeepsTheDebt() throws {
-        let desk = Desk(slot: slot, window: window)
-        // An instant pass at rest sends the slot through the applier,
-        // which records it as commanded; its echo has not landed.
-        desk.core.tiler.settings.animations.onRelayout = false
-        desk.core.retile()
-        desk.core.tiler.settings.animations.onRelayout = true
-        desk.stillFor = 0.05
-        desk.frames = [:]
-        desk.flip(window, true)
-        guard case .floatPlacement(let sent)? = desk.gate.owedWrites[window]
-        else {
-            Issue.record("no write owed")
-            return
-        }
-        try #require(!TilingEngine.close(sent, to: slot))
-        desk.core.state.apply(.windowMoved(window, sent))
+    /// A frame that moves with no drag — our own echo, or the app
+    /// answering a refused ask (#677) — decides nothing.
+    @Test("a frame moved with no drag still takes the placement")
+    func undraggedMoveKeepsTheDebt() {
+        let desk = held()
+        let clamped = CGRect(x: 40, y: 60, width: 420, height: 880)
+        desk.core.state.apply(.windowMoved(window, clamped))
         desk.rest()
         #expect(desk.isCentred(window))
     }

@@ -21,10 +21,8 @@ extension KiwiCore {
     func payOwedWrites() {
         for (id, write) in tiler.motionGate.takeWrites() {
             switch write {
-            case .floatPlacement(let guardFrame):
-                if owesPlacement(id, guardFrame: guardFrame) {
-                    placeFloating(id)
-                }
+            case .floatPlacement:
+                if owesPlacement(id) { placeFloating(id) }
             }
         }
     }
@@ -34,24 +32,20 @@ extension KiwiCore {
     /// waits.
     func placeDetectedFloat(_ id: WindowID) {
         guard tiler.motionGate.holdsNow,
-            let window = state.windows[id],
+            state.windows[id] != nil,
             !placementIsSeed(id)
         else { return placeFloating(id) }
-        let sent = tiler.commandedFrame(of: id) ?? window.frame
-        oweAmbientWrite(.floatPlacement(guardFrame: sent), for: id)
+        oweAmbientWrite(.floatPlacement, for: id)
     }
 
     /// Whether an owed placement is still due: the window still a
-    /// placeable float, standing where we last sent it — a window
-    /// moved meanwhile, by the user or its app, keeps its frame.
-    private func owesPlacement(
-        _ id: WindowID,
-        guardFrame: CGRect
-    ) -> Bool {
-        guard let window = state.windows[id],
-            detectedFloatPlaceable(id),
-            isEffectiveFloatForPlacement(id)
-        else { return false }
-        return TilingEngine.close(window.frame, to: guardFrame)
+    /// placeable float. One the user dragged meanwhile owes nothing
+    /// (`handleDragMove` forgets it); a frame its app or our own
+    /// echo moved decides nothing, since a refused ask (#677) and a
+    /// hand move read alike.
+    private func owesPlacement(_ id: WindowID) -> Bool {
+        state.windows[id] != nil
+            && detectedFloatPlaceable(id)
+            && isEffectiveFloatForPlacement(id)
     }
 }

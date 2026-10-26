@@ -21,6 +21,8 @@ extension KiwiCore {
         // gesture's life, so a Space Bar spring can't stash it
         // mid-drag (#372). Cleared at drop.
         tiler.dragExemptWindow = id
+        // The user's hand now places it: no ambient write (#2627).
+        tiler.motionGate.forgetWrite(for: id)
         // A drag rearranges: it ends the window's maximize, and
         // the drop's retile places it (#2448).
         if endMaximize(of: id) { tiler.maximizeEndedByDrag = id }

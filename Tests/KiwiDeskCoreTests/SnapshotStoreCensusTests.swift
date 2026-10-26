@@ -240,10 +240,7 @@ struct SnapshotStoreCensusTests {
             forcing: false
         )
         // A direct write owed while the hand moves (#2627).
-        core.tiler.motionGate.owe(
-            .floatPlacement(guardFrame: .zero),
-            for: WindowID(1)
-        )
+        core.tiler.motionGate.owe(.floatPlacement, for: WindowID(1))
         return core
     }
 
