@@ -17871,8 +17871,9 @@ draw whatever the Fill, so an even Fill is a colour on glass, not
 glass undone. How much colour reaches the far end is then the
 user's taste. The far end is never fully clear, as #1622 ruled.
 The anchor stays capped at `maxAlpha`. Fill fade governs
-KiwiShelf's Fill alone: the bars, the overflow marks and their
-list, the peek, and the panels the toggle tints. The drag ghost,
+KiwiShelf's Fill and the hover drawn on it: the bars, a hovered
+bar item, the overflow marks and their list, the peek, and the
+panels the toggle tints. The drag ghost,
 the drop zone and the sticky mark have colours of their own and
 keep #1622's fade. No crossing is owed, because an absent key
 decodes 100, which is the look every file already had.
@@ -17887,6 +17888,25 @@ draw no glass, so a fade there would change nothing and they set
 none. A lower fade only raises the far end's alpha toward the Fill
 the inks were chosen against, so the contrast suites' fade-100 case
 stays the worst one.
+
+**A hovered bar item's fill fades with the Fill** (#2645, owner
+ruling 2026-10-26, after comparing flat and faded hover live). On
+glass the hover colour fades along the same edge by the same Fill
+fade, capped and floored as the Fill is. Fill fade so reaches one
+colour that is not the Fill, because the hover draws on the Fill;
+a colour drawn on no Fill keeps its own fade. The hovered item
+reads as one with the pill under it rather than a flat patch on a faded
+plate; under Boxed, a flat hover made the box look as if it
+stopped fading beneath the pointer. A `ui-designer` read preferred
+a flat hover as pointer feedback, one even pill as macOS draws
+one; the owner judged the faded hover the better read. The
+overflow count at a run's end follows too (owner, 2026-10-26): it
+sits on the faded plate, so its hover chip fades as an item's
+does. A solid shelf keeps its flat hover, its Fill not fading, and Reduce
+transparency returns the flat hover with the rest of the glass.
+Each layer takes the cap, not the stack: under Boxed the hover
+draws over the box's own faded tint, as the flat hover did, and
+that layered look is the one the owner compared and chose.
 
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two

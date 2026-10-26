@@ -5,7 +5,9 @@ import AppKit
 extension AppBarItemView {
     override func layout() {
         super.layout()
-        applyCornerRadius()
+        hoverFill.frame = bounds
+        // The hover's corners follow a new size or run place.
+        applyColors()
         layoutAccent()
         if horizontal {
             layoutHorizontal()

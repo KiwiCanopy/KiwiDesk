@@ -153,6 +153,12 @@ public struct KiwiShelf: Sendable, Equatable {
         GlassFill(hex: fillColor, fade: fillFade)
     }
 
+    /// A bar's hover colour as glass paints it (#2645): fading by
+    /// the same `fill_fade` as the Fill it sits over.
+    public func glassFill(hover hex: String) -> GlassFill {
+        GlassFill(hex: hex, fade: fillFade)
+    }
+
     /// Floor of `thickness` (QA 2026-07-19): below it the plate
     /// stroke and glyph run collide. Decode, setter and the GUI
     /// slider all derive from it (#1359, `BarSliderBandTests`).

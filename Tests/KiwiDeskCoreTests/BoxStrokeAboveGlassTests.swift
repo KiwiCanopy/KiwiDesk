@@ -148,8 +148,14 @@ struct BoxStrokeAboveGlassTests {
         above: NSView,
         sourceLocation: SourceLocation = #_sourceLocation
     ) {
-        let order = item.subviews
+        // Only the hover backdrop sits beneath the border (#2645).
+        let order = item.subviews.filter { !($0 is GlassBackdrop) }
         #expect(order.first === border, sourceLocation: sourceLocation)
+        #expect(
+            item.subviews.prefix(while: { $0 is GlassBackdrop }).count
+                == item.subviews.filter { $0 is GlassBackdrop }.count,
+            sourceLocation: sourceLocation
+        )
         #expect(
             Array(order.suffix(2)) == [clip, above],
             sourceLocation: sourceLocation

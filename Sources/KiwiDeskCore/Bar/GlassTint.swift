@@ -228,24 +228,49 @@ public enum GlassTint {
         colour(backdrop, cornerRadius: cornerRadius, fill: fill, edge: edge)
     }
 
-    /// The backdrop's gradient: the capped ends fading from `edge`,
-    /// clear where the Fill reaches no colour.
+    /// A hovered bar item's fill on glass (#2645): `fill`, the
+    /// hover colour minted by `KiwiShelf.glassFill(hover:)`, fading
+    /// from `edge` like the Fill beneath it through the same capped
+    /// ends. Returns whether it painted: false where the hover has
+    /// no colour or no glass draws, and the item keeps its flat one.
     @MainActor
+    static func applyHover(
+        _ backdrop: GlassBackdrop,
+        cornerRadius: CGFloat,
+        corners: CACornerMask,
+        fill: GlassFill,
+        edge: AppBarEdge
+    ) -> Bool {
+        backdrop.gradient?.maskedCorners = corners
+        return colour(
+            backdrop,
+            cornerRadius: cornerRadius,
+            fill: fill,
+            edge: edge
+        )
+    }
+
+    /// The backdrop's gradient: the capped ends fading from `edge`,
+    /// clear where the Fill reaches no colour. Returns whether it
+    /// painted.
+    @MainActor
+    @discardableResult
     private static func colour(
         _ backdrop: GlassBackdrop,
         cornerRadius: CGFloat,
         fill: GlassFill,
         edge: AppBarEdge
-    ) {
-        guard let gradient = backdrop.gradient else { return }
+    ) -> Bool {
+        guard let gradient = backdrop.gradient else { return false }
         gradient.cornerRadius = cornerRadius
         guard let ends = rendered(fill) else {
             gradient.colors = nil
-            return
+            return false
         }
         let direction = fade(from: edge)
         gradient.startPoint = direction.start
         gradient.endPoint = direction.end
         gradient.colors = [ends.anchor.cgColor, ends.floor.cgColor]
+        return true
     }
 }
