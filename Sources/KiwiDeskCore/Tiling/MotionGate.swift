@@ -48,7 +48,8 @@ final class MotionGate {
 
     /// A direct frame write outside a pass, owed for one window
     /// until a pass runs (#2627). A later owe for the same window
-    /// replaces the earlier one.
+    /// replaces the earlier one; a second case rules its precedence
+    /// over the first before it lands (#2628).
     enum OwedWrite: Equatable {
         /// A detection flip's float placement.
         case floatPlacement
@@ -138,9 +139,10 @@ final class MotionGate {
     }
 
     /// Told of every frame the engine writes: one the user's own
-    /// act writes owns the window, so its owed write is forgotten.
-    /// A pass pays its debt before it lays out, so its own writes
-    /// forget none.
+    /// act writes owns the window, so its owed write is forgotten —
+    /// a late tail's too, which still carries that act though its
+    /// pass waits. A pass pays its debt before it lays out, so its
+    /// own writes forget none.
     func frameWritten(_ id: WindowID) {
         if case .user = cause() { owedWrites[id] = nil }
     }

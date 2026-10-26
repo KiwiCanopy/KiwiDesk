@@ -144,7 +144,7 @@ struct DetectedFloatPlacementHoldTests {
     /// move, a flick whose moves land after the release (#1798) at
     /// its end, and any frame written under user motion.
     enum UserAct: CaseIterable {
-        case dragMove, dragEnd, write
+        case dragMove, dragEnd, write, instantWrite
     }
 
     @Test(
@@ -166,8 +166,12 @@ struct DetectedFloatPlacementHoldTests {
                     window,
                     from: slot,
                     to: moved,
-                    animated: false
+                    animated: true
                 )
+            }
+        case .instantWrite:
+            desk.core.withUserMotion {
+                desk.core.tiler.setFrame(window, moved)
             }
         }
         desk.frames = [:]
@@ -220,13 +224,15 @@ struct DetectedFloatPlacementHoldTests {
         #expect(kept.width == FloatPlacement.longFloor)
     }
 
-    /// A frame that moves with no drag — our own echo, or the app
-    /// answering a refused ask (#677) — decides nothing.
-    @Test("a frame moved with no drag still takes the placement")
+    /// A frame that moves with no user act — our own echo, the app
+    /// answering a refused ask (#677), an ambient engine write —
+    /// decides nothing.
+    @Test("a frame moved with no user act still takes the placement")
     func undraggedMoveKeepsTheDebt() {
         let desk = held()
         let clamped = CGRect(x: 40, y: 60, width: 420, height: 880)
         desk.core.state.apply(.windowMoved(window, clamped))
+        desk.core.tiler.setFrame(window, clamped)
         desk.rest()
         #expect(desk.isCentred(window))
     }

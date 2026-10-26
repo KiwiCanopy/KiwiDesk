@@ -17,7 +17,10 @@ extension KiwiCore {
         if tiler.motionGate.owed == nil { retile() }
     }
 
-    /// Pays every owed write still due, from the pass that runs.
+    /// Pays every owed write still due, from the pass that runs,
+    /// ahead of its layout and so against the strips the last pass
+    /// painted: a pass that changes the shelf on that screen lets
+    /// the bar clamp move the placement once more.
     func payOwedWrites() {
         for (id, write) in tiler.motionGate.takeWrites() {
             switch write {
