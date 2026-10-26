@@ -182,7 +182,11 @@ Every one of the following binds whoever touches them:
   main actor's path: a per-window layer reads `SLSGetWindowLevel`
   (`FloatDetection.windowLayer(of:)`, `layerReader`, the public
   read their fallback), and a new whole-list read states its
-  cadence and why no per-window read answers it.
+  cadence and why no per-window read answers it. Every public
+  list read goes through `WindowListRead.copy` with a site name,
+  which logs a read past 50 ms with its site and thread, so a
+  stalled turn is attributed to the read that held it
+  (`WindowListReadSeamTests`, `WindowListReadTests`; #2634).
 - **WindowServer's window create/destroy notifications are a
   WAKE-UP, never a source of truth (#1877).** Codes 1325/1326
   through `SLSRegisterNotifyProc`, window id at payload offset 8
