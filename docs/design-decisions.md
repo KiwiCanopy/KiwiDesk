@@ -8441,17 +8441,18 @@ and the line is drawn where the harm is:
   the ground that colour is a browse — nobody types "group
   badge text colour", they open the page and look — but that
   held only while they had a page of their own at rest. Since
-  #2389 they sit in Looks & Animations' shut Colors & glass
-  section, so a hit with no anchor lands on a page that does
-  not show them, the one failure this split exists to prevent.
-  The browse argument survives inside the section: open, it
-  hides nothing, and the anchor only opens it. The two role
+  #2389 they sit in Looks & Animations' Colors & glass section,
+  since #2593 every colour but the Fill in its shut Colors drawer, so a hit with no anchor
+  lands on a page that does not show them, the one failure this
+  split exists to prevent. The browse argument survives inside
+  the drawer: open, it hides nothing, and the anchor only opens
+  it. The two role
   groups' wells both draw "Ticked rows", which the label-key join
   cannot tell apart, so their census label is their group's title
   instead: the hit lands on the group, the drawn words reach them
   as a search synonym — the one place the census label is not the
   drawn one, ruled rather than left anchor-less, since anchor-less
-  inside a shut section is the failure itself.
+  inside a shut drawer is the failure itself.
 
 The split is keyed on the census TIER, so a row moves across it
 by correcting the census, never by an anchor added beside it —
@@ -14631,9 +14632,11 @@ mutually-exclusive set, so a strip would misapply the #205 "tabs
 fit a fixed exclusive set" principle. The bar colors live in
 Looks & Animations ▸ Colors & glass (#678 Phase 3, #2389, "Colour
 collects in one area" below). Since #1857 none of them sits
-behind a second drawer: once the section is open, the accent ones
-lead in its role groups and the rest are all shown under KiwiShelf
-colors, because a browse should not hide half its subject.
+behind a second drawer: once the Colors drawer is open (#2593),
+the accent ones lead in its role groups and the rest are all
+shown under KiwiShelf colors — the Fill aside, which sits in the
+open Liquid Glass group above the two rows it greys — because a
+browse should not hide half its subject.
 
 **[Principle] Colour collects in one area, and a colour renders
 there and nowhere else.** (#678 Phase 3, 2026-08-02; #2389.) Filing a
@@ -14728,6 +14731,23 @@ add a decision and a second search hop for no new protection.
 The section's rows are `.showMore` and take search anchors (the
 #277 entry above), and "Advanced Colors" stays a search synonym
 of the page that took its content, per the title rule below.
+
+:::unreleased
+**Amended by #2593 (2026-10-26): the finish is open, the colours
+are the one drawer.** Since #2569 Liquid Glass, the Fill, *Tint
+KiwiHub and plates*, *Fill fade* and the sheen are choices made
+for the whole look, like the palette above them, so Colors &
+glass is now an always-open section that shows them at rest — the
+Fill directly above the two rows it greys, so their grey needs no
+sentence naming another group. Every other colour sits below them
+in ONE drawer, **Colors**, shut on every visit with no stored
+flag, as Motion's is. This is still one drawer, so #1857 holds:
+the colours remain the one "on demand" step, and search stays one
+hop, since a hit on a colour opens the drawer (#1250). What moved
+out of hiding is the finish alone, for Simple and Power User
+alike. Its rows are `.atRest`, so by #277 they take no search
+anchor: a hit lands on the page, where they are already shown.
+:::
 
 Two consequences bind future work. **A destination's title is a
 search key, so content moving out moves the title with it.**

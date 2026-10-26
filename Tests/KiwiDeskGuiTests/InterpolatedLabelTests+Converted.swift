@@ -139,7 +139,6 @@ extension InterpolatedLabelTests {
         // the toggle's label comes from the catalog, not an `L()`,
         // so it goes uncounted.
         "kiwishelf.tint_hub_and_plates.help": 1,
-        "kiwishelf.no_color.reason": 2,
         "kiwishelf.fill_fade.help": 2,
         "kiwishelf.color.fill.help": 2,
         // #1745: the switch by its own key, then the pane.
@@ -164,6 +163,10 @@ extension InterpolatedLabelTests {
         "colors.kiwishelf_border_off.xref": 1,
         "kiwishelf.border.help": 2,
         "colors.colors_and_glass.place": 1,
+        // #2593: the Colors drawer's summary names KiwiShelf by
+        // its key; the group titles come from the catalog,
+        // uncounted.
+        "colors.colors_drawer.summary": 1,
         "kiwishelf.border_width.border_off": 1,
         "layout_defaults.spaces_using.none": 1,
         // The `i18n/residue-round` batch (#830), in three

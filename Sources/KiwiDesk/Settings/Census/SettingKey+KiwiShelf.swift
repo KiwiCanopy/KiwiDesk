@@ -129,14 +129,18 @@ extension KiwiShelfKey {
             return .row(
                 .coloursAndMotion,
                 .glass,
-                .showMore,
+                .atRest,
                 gate: .runtime(.liquidGlassUnavailable)
             )
         case .activeItemColor, .highlightColor, .hoverFillColor:
             // The accent's bar half (#1857).
             return .row(.coloursAndMotion, .accent, .showMore)
-        case .fillColor, .itemColor, .hoverItemColor,
-            .groupBadgeColor, .groupBadgeTextColor:
+        case .fillColor:
+            // Drawn in the Liquid Glass group, above the rows it
+            // greys, outside the Colors drawer (#2593).
+            return .row(.coloursAndMotion, .kiwishelf, .atRest)
+        case .itemColor, .hoverItemColor, .groupBadgeColor,
+            .groupBadgeTextColor:
             return .row(.coloursAndMotion, .kiwishelf, .showMore)
         case .borderColor:
             // Inert while the border is off (#1679).

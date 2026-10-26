@@ -21,9 +21,6 @@ struct SettingsControl: Hashable, Sendable {
     /// A layout whose name the label interpolates at `%1$@`
     /// (#818, Family B): the mode's own name, never typed.
     let namedMode: LayoutMode?
-    /// The label interpolates KiwiHub's name at `%1$@`, through its
-    /// one key (config-vocabulary.md ▸ KiwiHub).
-    var namesKiwiHub = false
 
     /// Tuple literal shape scanned by `scripts/extract-keys`.
     init(
@@ -31,14 +28,12 @@ struct SettingsControl: Hashable, Sendable {
         _ english: String,
         surface: SettingsSurface = .main,
         instance: String? = nil,
-        naming mode: LayoutMode? = nil,
-        namesKiwiHub: Bool = false
+        naming mode: LayoutMode? = nil
     ) {
         self.label = .tuple(key: key, english: english)
         self.surface = surface
         self.instanceTag = instance
         self.namedMode = mode
-        self.namesKiwiHub = namesKiwiHub
     }
 
     /// Layout Defaults mode tab descriptor.
@@ -76,7 +71,6 @@ struct SettingsControl: Hashable, Sendable {
     @MainActor var text: String {
         switch label {
         case .tuple(let key, let english):
-            if namesKiwiHub { return L(key, english, JumpScope.panelName) }
             guard let namedMode else { return L(key, english) }
             return L(key, english, namedMode.displayName)
         case .mode(let mode):
