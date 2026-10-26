@@ -212,20 +212,23 @@ struct ShelfDividerCentringTests {
     }
 
     /// What an App item shows: its icon, and on a horizontal
-    /// titled item the title's fixed slot, which a short title
-    /// sits inside (#2545) — the count badge hangs off either.
+    /// titled item the title's fixed slot (#2545) — the count badge
+    /// hangs off either. A titled item is read with its title at the
+    /// full slot, where a short title's group would sit were it
+    /// cut, so a rename moves no divider (#2643).
     private func appInk(_ item: AppBarItemView) -> [(NSView, CGRect)] {
         let icon = (item.iconView as NSView, item.iconView.bounds)
         guard !item.label.isHidden else { return [icon] }
         let placed = item.horizontalPlacement(in: item.bounds.size)
-        let start = placed.x + placed.moon + placed.side + placed.spacing
-        let title = CGRect(
-            x: start,
+        let group = CGRect(
+            x: placed.filledIconStart,
             y: 0,
-            width: placed.text.width,
+            width: placed.side + placed.spacing + placed.text.width,
             height: item.bounds.height
         )
-        return [icon, (item, title)]
+        // The drawn icon stays in the union, so real ink is
+        // measured; it lies inside the filled group.
+        return [icon, (item, group)]
     }
 
     @Test(

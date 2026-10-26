@@ -309,9 +309,11 @@ twice, was a question the user answered twice. The argument is
   read the one `SpaceBarOverlay.titleSlot`, the title cap in the
   bar font, so a focus change moves no frame — the chip ending at
   the slot's end (`frontNameEnd`), never the name's, and a short
-  name starting at the slot's start through `BarTitleSlot.span`,
-  right after the icon, which never moves (#2587). A show that keeps
-  every frame — `keepsGeometry`, which compares the front extent
+  name drawing right after the icon through `BarTitleSlot.span`,
+  the two centred in the fixed length by `BarTitleSlot.centring`,
+  and the move on a title change is a snap, never a glide —
+  review's, since no suite times it (#2587, #2643). A show that
+  keeps every frame — `keepsGeometry`, which compares the front extent
   beside the item lengths — redraws content alone
   (`redrawContent`) and never the frame pass; a new stored field
   of a show is classified as compared there or content-only, and
@@ -324,15 +326,24 @@ twice, was a question the user answered twice. The argument is
   the one `AppBarOverlay.titleSlot` — `title_cap` through the
   shared `BarTitleSlot`, which the front-app slot takes too — so
   a rename moves no frame, the title placed by the same
-  `BarTitleSlot.span` and the icon never moving. A
+  `BarTitleSlot.span` and the icon, drawn title and count badge
+  centred between the insets, the half-moon hanging before the
+  icon outside the centring (#2643). **The item's drawn span
+  (`HorizontalPlacement.span`, which `drawnSpan` and the section's
+  `contentFrame` read) takes the title at its full slot, never the
+  drawn title**: a content redraw never rewrites `contentFrame`,
+  so a span that followed the title left the divider and plate
+  stale after a rename (`AppBarTitleSlotTests` ▸
+  `redrawMatchesAFullRender`). A
   show whose titles alone changed — `AppBarOverlay.keepsGeometry`
   — redraws content alone; a new stored field of a show or an
   item is classified as compared there or content-only, and a
   content redraw lands a full render's frames
   (`AppBarTitleSlotTests`, `AppBarGlyphLayoutTests` ▸
   `titlesDrawInTheFixedSlot`). The Settings Bars preview frames
-  each App Bar title at the same `BarTitleSlot` length, leading
-  as the live bar draws it, read at the frame's own font size
+  each App Bar title at the same `BarTitleSlot` length, centred
+  with its icon as the live bar draws it, read at the frame's own
+  font size
   (`TitleSlotPreviewTests`).
 - **Refresh both bars through the one `KiwiCore.updateBars()`,
   never a single-bar sync.** It builds each display's plan once
@@ -673,14 +684,16 @@ render content into it (#1517). Obligations:
   run and its items' content by its own amounts, so the gutter
   middle reads off-centre. A bar reports its drawn span as
   `contentFrame` — the item boxes on a boxed shelf, else the
-  content inside each end item — read from the same end-inset
+  content inside each end item, an App item's title taken at its
+  full slot so a rename moves no divider (#2643) — read from the
+  same end-inset
   readings its layout and measurement take
   (`SpaceBarItemView.contentInset`, `AppBarItemView.horizontalPlacement`
   and `verticalIconSquare`),
   never a copy beside them; `ShelfManager` hands it on beside the
   plate. `ShelfDividerCentringTests` ▸ `dividerHalvesTheDrawnGap`
-  measures the real bars' glyphs and boxes either side, in both
-  orders. The Settings shelf preview keeps `dividerMiddle`: its
+  measures the real bars' glyphs and boxes either side, an App
+  item's title at its full slot, in both orders. The Settings shelf preview keeps `dividerMiddle`: its
   runs are schematics padded alike at both ends, so its gutter IS
   its drawn middle.
 - **Wire a section's `onRendered` in `ShelfManager.sync` alone,

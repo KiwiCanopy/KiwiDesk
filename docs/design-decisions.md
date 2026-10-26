@@ -16781,16 +16781,30 @@ two changes of one plan move together rather than one gliding
 while the other pops.
 
 :::unreleased
-**Amended by #2587 (owner ruling 2026-10-24): a title starts right
-after its icon.** A short title in the fixed slot, on the
-front-app segment and on every App Bar item (#2545), sits at
-the slot's start, the trailing end of the slot left empty; a long
-one still fills the slot and cuts with "…". Centred, a short title
-floated away from its icon, so a row of pills started their titles
-at as many offsets as there were title lengths. The trailing gap
-under an indicator that spans the chip is the accepted cost of the
-fixed width, bought for every title starting at one offset. The
-icon still never moves and no frame changes with a title.
+**Amended by #2587 and #2643 (owner rulings 2026-10-24,
+2026-10-26): the icon and title centre as one group.** A title
+draws right after its icon, on the front-app segment and on every
+App Bar item (#2545), and the icon, the drawn title and an App Bar
+group's count badge centre together in the fixed length; a long
+title still fills the slot and cuts with "…". A title centred by
+its ink beside a fixed icon floated away from that icon, so a row
+of pills started their titles at as many offsets as there were
+title lengths; a group held at the slot's start kept each title on
+its icon but left an empty trailing end under an indicator that
+spans the chip. Centring the group keeps the title on its icon and
+leaves no gap. The price is that a short title's icon moves when
+the title's length changes, and that icons of neighbouring pills
+no longer share one offset. A cut title fills its slot, so its
+group stays put, and no frame moves for any title. The group snaps
+to its new place, never glides: titles change all the time, and
+motion at the screen edge would pull the eye for nothing. The App
+Bar's half-moon stays outside the centring, hanging just before
+the icon, so a window turning partly visible moves nothing; a
+partly visible pill reads a little left of centre, accepted. The
+section divider reads an App Bar end item with its title at the
+full slot (owner, 2026-10-26), so a rename never moves it; beside
+a short title the App Bar side of the divider reads wider than the
+other, accepted over a divider that jumps with every title.
 :::
 
 **The bars honour Reduce Motion, and the ring MARKS rather than

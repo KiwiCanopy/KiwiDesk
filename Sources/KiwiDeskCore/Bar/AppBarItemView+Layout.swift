@@ -1,7 +1,7 @@
 import AppKit
 
-/// Slot layout: the icon, then the name from its slot's start (#2587),
-/// scaled with thickness.
+/// Slot layout: the icon and name centred as one group, the name
+/// right after the icon (#2587, #2643), scaled with thickness.
 extension AppBarItemView {
     override func layout() {
         super.layout()

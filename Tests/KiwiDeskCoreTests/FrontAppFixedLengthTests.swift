@@ -83,12 +83,11 @@ struct FrontAppFixedLengthTests {
     }
 
     private func frames(_ overlay: SpaceBarOverlay) -> [CGRect] {
-        // The name itself leads its slot; the slot, the icon
-        // and the chip around them never move.
+        // The icon and name centre in the slot; the slot's end and
+        // the chip around them never move (#2643).
         [
             overlay.contentFrame, overlay.plateFrame,
-            overlay.itemRun.frame, overlay.frontIcon.frame,
-            overlay.frontBox.frame,
+            overlay.itemRun.frame, overlay.frontBox.frame,
             CGRect(x: overlay.frontNameEnd, y: 0, width: 0, height: 0),
         ] + overlay.itemViews.map(\.frame)
     }
@@ -164,8 +163,11 @@ struct FrontAppFixedLengthTests {
             Self.look,
             depth: Self.strip.height
         )
+        // The icon sits in by the centring shift, which the name
+        // leaves after its end (#2643).
         let start = overlay.frontIcon.frame.maxX + SpaceBarItemView.pad
-        #expect(abs(overlay.frontNameEnd - start - slot) < 0.5)
+        let shift = overlay.frontNameEnd - overlay.frontName.frame.maxX
+        #expect(abs(overlay.frontNameEnd - start + shift - slot) < 0.5)
         var wider = Self.look
         wider.bar.frontAppTitleCap = 40
         #expect(
@@ -174,11 +176,11 @@ struct FrontAppFixedLengthTests {
         )
     }
 
-    /// A short name starts at its slot's start, right after the
-    /// icon, the trailing end left empty (#2587, amending #2086); a
+    /// A short name draws right after its icon, the two centred
+    /// in the segment's fixed length (#2643, amending #2587); a
     /// long one fills the slot from its start and cuts.
-    @Test("A short name starts after its icon; a long one fills")
-    func shortNameLeads() throws {
+    @Test("A short name centres with its icon; a long one fills")
+    func shortNameCentres() throws {
         let overlay = SpaceBarOverlay()
         var look = Self.look
         look.shelf.fontFamily = "Apple Chancery"
@@ -195,16 +197,26 @@ struct FrontAppFixedLengthTests {
                 )
             )
         }
+        place(String(repeating: "A long title ", count: 6))
+        let long = overlay.frontName.frame
+        let icon = overlay.frontIcon.frame
+        #expect(abs(long.minX - (overlay.frontNameEnd - slot)) < 0.5)
+        #expect(abs(long.width - slot) < 0.5)
+        // The cut name's group spans icon to slot end; a short
+        // one's centres on the same middle.
+        let centre = (icon.minX + overlay.frontNameEnd) / 2
+        let gap = long.minX - icon.maxX
         for title in ["Tf", "fly"] {
             place(title)
             let name = overlay.frontName.frame
-            let start = overlay.frontNameEnd - slot
-            #expect(abs(name.minX - start) < 0.5, "\(title)")
+            let shortIcon = overlay.frontIcon.frame
             try #require(name.width < slot - 1, "\(title)")
+            #expect(
+                abs(name.minX - shortIcon.maxX - gap) < 0.5,
+                "\(title)"
+            )
+            let mid = (shortIcon.minX + name.maxX) / 2
+            #expect(abs(mid - centre) < 0.5, "\(title)")
         }
-        place(String(repeating: "A long title ", count: 6))
-        let name = overlay.frontName.frame
-        #expect(abs(name.minX - (overlay.frontNameEnd - slot)) < 0.5)
-        #expect(abs(name.width - slot) < 0.5)
     }
 }

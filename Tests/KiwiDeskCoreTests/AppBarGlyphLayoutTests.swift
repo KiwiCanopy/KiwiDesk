@@ -87,8 +87,8 @@ struct AppBarGlyphLayoutTests {
     /// Every title draws in one slot as long as the title cap in
     /// the bar font's average glyph (#2545, owner ruling): the
     /// slot never reads the titles, a capped title of capitals —
-    /// wider than lower-case — is cut by width, a short one sits
-    /// inside by its ink, and the icon beside them never moves.
+    /// wider than lower-case — is cut by width, and a short one
+    /// draws right after its icon, the two centred (#2643).
     /// Parameterized over the formula's font branch: auto (`0`)
     /// and fixed.
     @Test(
@@ -121,7 +121,8 @@ struct AppBarGlyphLayoutTests {
         #expect(width([upper, "zsh"]) == slot)
         #expect(width(["Mail", "TanStack Start: Full-Stack React"]) == slot)
         let titleSlot = AppBarOverlay.titleSlot(style, thickness: thickness)
-        let drawn = { (text: String) -> AppBarItemView in
+        let drawn = {
+            (text: String, seen: BarVisibility) -> AppBarItemView in
             let view = AppBarItemView(
                 frame: NSRect(x: 0, y: 0, width: slot, height: thickness)
             )
@@ -131,6 +132,7 @@ struct AppBarGlyphLayoutTests {
                 icon: nil,
                 glyph: ":settings:",
                 count: 1,
+                visibility: seen,
                 active: false,
                 horizontal: true,
                 style: style
@@ -138,9 +140,7 @@ struct AppBarGlyphLayoutTests {
             view.layout()
             return view
         }
-        let views = [lower, upper, "Mail"].map(drawn)
-        let icons = views.map(\.glyphLabel.frame)
-        #expect(icons.allSatisfy { $0 == icons[0] })
+        let views = [lower, upper, "Mail"].map { drawn($0, .visible) }
         for view in views {
             let placed = view.horizontalPlacement(in: view.bounds.size)
             #expect(placed.text.width == titleSlot)
@@ -151,14 +151,36 @@ struct AppBarGlyphLayoutTests {
         // Ten capitals pass the slot, so the label fills it and cuts.
         #expect(abs(views[1].label.frame.width - titleSlot) <= 0.5)
         #expect(!views[1].drawsTextInFull)
-        // Every title starts right after its icon, a short one
-        // leaving the slot's trailing end empty (#2587).
+        // Every title starts right after its icon (#2587).
         for view in views {
             let placed = view.horizontalPlacement(in: view.bounds.size)
             let start = placed.x + placed.moon + placed.side + placed.spacing
             #expect(abs(view.label.frame.minX - start) <= 0.5)
         }
-        #expect(views[2].label.frame.width < titleSlot - 1)
+        // A short title's group centres between the insets, its
+        // icon in from the cut title's (#2643).
+        let short = views[2]
+        #expect(short.label.frame.width < titleSlot - 1)
+        let ends = AppBarItemView.endPadding(
+            style,
+            depth: thickness,
+            first: short.isFirstInRun,
+            last: short.isLastInRun
+        )
+        let placed = short.horizontalPlacement(in: short.bounds.size)
+        let iconStart = placed.x + placed.moon
+        let mid = (iconStart + short.label.frame.maxX) / 2
+        let centre = (slot + ends.leading - ends.trailing) / 2
+        #expect(abs(mid - centre) <= 0.5)
+        #expect(
+            short.glyphLabel.frame.minX
+                > views[1].glyphLabel.frame.minX + 1
+        )
+        // The half-moon hangs outside the centring: drawing it
+        // moves neither the icon nor the title.
+        let partly = drawn("Mail", .partly(shown: .left))
+        #expect(partly.glyphLabel.frame == short.glyphLabel.frame)
+        #expect(partly.label.frame == short.label.frame)
     }
 
     /// A REUSED view that flips to a vertical bar hides its
