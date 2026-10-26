@@ -1090,9 +1090,11 @@ the caps print, not which key fires.
 
 ### Actions
 
-- **macOS Desktop rows** (under Focus and Move windows) are one
-  per Desktop you have, on every screen, and ship unbound. They
-  appear only where macOS exposes the window-management bridge
+- **macOS Desktop rows** sit in their own **macOS Desktops**
+  section, one per Desktop you have, on every screen: Go to
+  Desktop ships bound, and the moves, under **Move windows to a
+  macOS Desktop**, ship unbound. They appear only where macOS
+  exposes the window-management bridge
   ([macOS Desktops](#macos-desktops-mission-control)). A bound
   row whose Desktop leaves with its screen stays in place,
   dimmed, and works again when the screen is back; a Desktop

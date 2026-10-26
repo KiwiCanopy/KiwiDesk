@@ -5,10 +5,9 @@ import Testing
 @testable import KiwiDesk
 
 /// The Track shortcut families' offer (#1440): withheld behind
-/// a drawer below the Desktop one until the Track layout is in
-/// play — a Track space in the config, or a Track verb bound —
-/// then opened on arrival. The Desktop offer's shape
-/// (`ShortcutsDesktopOfferTests`), one mount.
+/// a drawer in Move windows until the Track layout is in play —
+/// a Track space in the config, or a Track verb bound — then
+/// opened on arrival. The #1125 door shape, one mount.
 @Suite("Track shortcuts offer")
 struct ShortcutsTrackOfferTests {
     private func reason(
@@ -98,9 +97,9 @@ struct ShortcutsTrackOfferTests {
     }
 
     /// The surfacing branches, needled through their bodies the
-    /// way the Desktop offer's are — nothing else can see an
-    /// `if` inside a `body`.
-    @Test("the Track offer draws its branches, once, below Desktop")
+    /// way the macOS Desktops section's are — nothing else can
+    /// see an `if` inside a `body`.
+    @Test("the Track offer draws its branches, once")
     func trackOfferBranchesAreDrawn() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -125,7 +124,7 @@ struct ShortcutsTrackOfferTests {
         )
         // ONE container in both states, seeded open once in
         // play, never forced shut. No `hasRows` arm: the rows
-        // are static, so the Desktop offer's empty case has no
+        // are static, so the Desktop section's empty case has no
         // counterpart here.
         #expect(
             source.contains(
@@ -175,8 +174,9 @@ struct ShortcutsTrackOfferTests {
         #expect(source.contains("subject:drawer.control.text"))
         #expect(source.occurrences(of: "HelpButton(") == 1)
 
-        // ONE mount, in Move windows, with its own list and door,
-        // BELOW the Desktop offer (owner ruling 2026-09-14).
+        // ONE mount, in Move windows, with its own list and door —
+        // the card's one drawer since the Desktop moves left for
+        // their own section (#2655).
         let groups = try squashed("KeybindingGroups.swift")
         #expect(groups.occurrences(of: "TrackShortcutsOffer(") == 1)
         let mount = groups.range(
@@ -184,12 +184,6 @@ struct ShortcutsTrackOfferTests {
                 + "drawer:SettingsCatalog.shortcuts.moveWindowsTracks"
         )
         #expect(mount != nil)
-        let desktopMount = groups.range(
-            of: "keys:ShortcutsRowOrder.moveWindowsDesktopFamilies,"
-        )
-        #expect(desktopMount != nil)
-        if let mount, let desktopMount {
-            #expect(desktopMount.lowerBound < mount.lowerBound)
-        }
+        #expect(groups.occurrences(of: "SettingsDisclosure(") == 0)
     }
 }

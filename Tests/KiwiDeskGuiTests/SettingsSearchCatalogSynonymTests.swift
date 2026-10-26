@@ -67,15 +67,14 @@ struct SettingsSearchCatalogSynonymTests {
                 "guide",
                 "the app's one permanent route to the guide"
             ),
-            SettingsCatalog.shortcuts.focusDesktops.control.id: (
+            SettingsCatalog.shortcuts.desktopsSection.id: (
                 "macos-desktops",
-                "the only search-reachable name its family has"
+                "the only search-reachable name Go to Desktop has"
             ),
-            SettingsCatalog.shortcuts.moveWindowsDesktops.control
-                .id: (
-                    "macos-desktops",
-                    "likewise, the move half of the pair"
-                ),
+            SettingsCatalog.shortcuts.desktopMoves.control.id: (
+                "macos-desktops",
+                "likewise, the moves behind its drawer"
+            ),
         ]
     }
 

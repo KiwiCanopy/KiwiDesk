@@ -21,11 +21,14 @@ struct SettingsCatalogDrawerTests {
         // Monitor fingerprints are per-display readouts, labelled
         // by the display.
         "monitors.advanced.title",
-        // The Desktop and Track families' rows are `.dynamic`
-        // (#1125, #1440); the door is the one searchable name.
-        "shortcuts.desktops.focus",
+        // The Desktop moves' and Track families' rows are
+        // `.dynamic` (#2655, #1440); the door is a searchable name.
         "shortcuts.desktops.move",
         "shortcuts.tracks.move",
+        // Profiles per macOS Desktop: one binding row per Desktop,
+        // `.dynamic`, since the switch cue left for Shortcuts ▸
+        // macOS Desktops (#2655).
+        "desktops.title",
         // Raw Lua bindings: rows are the user's own bindings.
         "shortcuts.advanced.title",
     ]

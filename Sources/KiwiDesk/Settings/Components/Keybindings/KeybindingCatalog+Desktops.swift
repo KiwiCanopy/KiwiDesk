@@ -119,15 +119,25 @@ extension KeybindingCatalog {
         static let none = DesktopOffer()
     }
 
-    /// Whether a binding RECORDS a Desktop verb (#1125) — the one
-    /// answer to "is a Desktop shortcut bound", so the offer and
-    /// the census gate that withholds it cannot disagree about
-    /// the same binding. An empty combo is a row nobody
-    /// finished: clearing a row deletes it, so a blank one never
-    /// came from the recorder.
+    /// Whether a binding RECORDS a Desktop verb (#1125), the one
+    /// answer every Desktop reader asks. An empty combo is a row
+    /// nobody finished: clearing a row deletes it, so a blank one
+    /// never came from the recorder.
     static func recordsDesktop(_ binding: KeyBinding) -> Bool {
         !binding.combo.isEmpty
             && desktopNumber(from: binding.lua) != nil
+    }
+
+    /// Whether a binding records a MOVE to a Desktop, with or
+    /// without following it — `recordsDesktop` less Go to Desktop
+    /// (#2655).
+    static func recordsDesktopMove(_ binding: KeyBinding) -> Bool {
+        guard recordsDesktop(binding),
+            let number = desktopNumber(from: binding.lua)
+        else { return false }
+        return !goToDesktop([number]).contains {
+            $0.lua == binding.lua
+        }
     }
 
     /// Builds desktop offer from live topology and bound shortcuts (#92).

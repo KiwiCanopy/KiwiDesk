@@ -174,8 +174,8 @@ struct LayerRowWriterCensusTests {
             + "OrphanedShortcutsGroup.swift":
             (1, "Inactive rows: hands the holder to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/"
-            + "DesktopShortcutsOffer.swift":
-            (1, "an offer: hands the holder to its rows"),
+            + "MacOSDesktopsGroup.swift":
+            (1, "a section: hands the holder to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "TrackShortcutsOffer.swift":
             (1, "an offer: hands the holder to its rows"),

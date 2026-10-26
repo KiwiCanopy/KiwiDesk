@@ -4705,9 +4705,10 @@ General is the home of an app-wide value with no feature of its
 own — this sound, the quit layout — and not of every app-wide
 value (owner ruling 2026-10-11). A switch that belongs to a
 feature sits beside that feature, where someone setting the
-feature up looks for it: the Desktop switch cue in Profiles ▸
-Desktops (#2142), the layout plate's in Shortcuts & Gestures ▸
-Layout under the cycle list (#2144). Such a switch is still
+feature up looks for it: the Desktop switch cue first in
+Shortcuts & Gestures ▸ macOS Desktops, above the shortcuts whose
+switches it marks (#2142, #2655), the layout plate's in Shortcuts
+& Gestures ▸ Layout under the cycle list (#2144). Such a switch is still
 written the moment it changes, on a page whose other rows wait
 for Save, so it says in its `?` that it applies at once and to
 every profile.
@@ -11374,14 +11375,16 @@ without a gate is meaningless.
 
 **And the same tier answers the question one step earlier: a row
 for a concept the app has not introduced is an OFFER, not a
-setting** (#1125). The Desktop shortcut families are the worked
-case. Nothing seeds them, a **Desktop** is macOS's arrangement
-rather than KiwiDesk's, and they scale per Desktop — so a
-four-Desktop Mac draws twelve rows about a thing a first-run user
-has never met, in the area whose own ordering already says
-KiwiDesk's Spaces lead and a Desktop row is the escape into
-macOS's. They sit behind a disclosure in each card, which stays
-mounted and simply OPENS on arrival once one is bound — in both
+setting** (#1125). The Desktop shortcut families were the worked
+case until #2655 retired their drawers (below); the argument is
+kept because the Track drawer still rests on it. Nothing seeded
+them then, a **Desktop** is macOS's arrangement rather than
+KiwiDesk's, and they scale per Desktop — so a four-Desktop Mac
+drew twelve rows about a thing a first-run user had never met, in
+the area whose own ordering already says KiwiDesk's Spaces lead
+and a Desktop row is the escape into macOS's. They sat behind a
+disclosure in each card, which stayed mounted and simply OPENED
+on arrival once one was bound — in both
 modes, which is the paragraph above applied to a capability rather
 than to a layer.
 
@@ -11415,9 +11418,9 @@ on that same capability, the way a bridge-gated census row
 already is.
 
 The second instance (#1440, owner ruling 2026-09-14) is the
-Track shortcut families, one drawer below the Desktop one in
-Move windows, and it settles two things the first did not have
-to. The offer's condition is "the layout is in play" — a Track
+Track shortcut families, a drawer in Move windows — ruled one
+below the Desktop drawer, and the card's only drawer since #2655
+— and it settles two things the first did not have to. The offer's condition is "the layout is in play" — a Track
 space in the config this window edits, or a Track verb bound in
 any layer — because the concept the user has met is the LAYOUT
 rather than a binding, and a user can meet a Track space without
@@ -11430,6 +11433,55 @@ and a Desktop row is the escape into macOS's — was argued by
 design review and is defensible; the owner ruled audience size,
 and the reason is stated so the order is a decision rather than
 an accident.)
+
+**The Desktop verbs share one always-mounted macOS Desktops
+section (#2655, owner ruling 2026-10-26), superseding the two
+Desktop drawers above.** Seeding Go to Desktop (2026-10-10, below)
+broke the drawers in both directions. Every install now records a
+Desktop verb, so the area-wide unlock opened both drawers on every
+visit: the Move drawer, meant to stay an offer, opened only
+because a Go-to row existed, and since the open state lives for
+one visit, a collapse the user chose never stuck. For the users
+the seed does not reach — an `init.lua` binding no Desktop verb,
+rows deleted — the drawers stayed shut on a capability that works
+with no setup. The drawer was chrome for most users and a hiding
+place for the rest.
+
+So Shortcuts carries one section, **macOS Desktops**, after Move
+windows: KiwiDesk's own Spaces lead and a Desktop is the way out
+into macOS, which the old in-card order already said. Go to
+Desktop sits at rest; Move window to Desktop and Move and follow,
+interleaved, sit behind the section's one drawer, so a
+four-Desktop Mac shows four rows at rest rather than twelve. That
+drawer opens on arrival only when a MOVE is bound: counting the
+seeded Go-to rows would reopen it on every install again. The
+name matches the help sentence and the Profiles card, and the
+section's title takes the old drawer titles' place as the
+families' search name, their rows' labels being dynamic.
+
+What #1125 argued for the door still holds and is kept. The
+drawer is permanent and never swaps for a bare list, so recording
+the first move inside it does not tear the recorder down. Nothing
+gates on how many Desktops the Mac has. And where the families
+expand to nothing — no window-management bridge, no reachable
+Desktop — the section is removed rather than greyed, and search
+refuses its two names on the bridge question, since a grey would
+invite an action with no path. What is retired is the door per
+card and the unlock shared across them: one section has one door,
+and a Go-to row no longer answers for the moves.
+
+The Desktop switch cue moves with them, to the section's first
+row (amended the same day). It marks a switch KiwiDesk itself
+performs, which is what these shortcuts are, so it shows only for
+a user who presses them, and that user sets it up here. It keeps
+its own gate: it greys, with its sentence, only where `init.lua`
+owns the config, apart from anything that greys the shortcut
+rows. Looks & Animations was the other candidate and lost twice:
+that card greys under Reduce Motion, where the cue must keep
+working since it replaces the motion, and a look is per profile
+while the cue is app-wide. Profiles ▸ Desktops, left with the
+bindings alone, stays collapsed while nothing is bound
+(2026-09-24).
 
 **Overrides always resolve; the Simple/Power User mode never
 changes what runs.** There is no stored flag deciding whether a
@@ -11950,10 +12002,10 @@ under cover of the first. Before seeding, the owner pressed
 **The Desktop tier is seeded: `⌃⌥⇧⌘` + digit goes to that macOS
 Desktop (owner ruling 2026-10-10).** Going to a Desktop is the one
 Desktop verb a user presses as often as they swipe, so it is the
-exception to the offer rule above: it ships bound, its drawer
-opening with it, while moving a window to a Desktop, with or
-without following it, stays an offer behind its drawer for the
-reason that rule gives. `⇧` here does not act on the window: on
+exception to the offer rule above: it ships bound, at rest in the
+macOS Desktops section (#2655), while moving a window to a
+Desktop, with or without following it, stays an offer behind that
+section's drawer for the reason that rule gives. `⇧` here does not act on the window: on
 top of `⌃⌥⌘` it lifts the whole ladder one tier, from KiwiDesk's
 Spaces to macOS's Desktops, which is the second sense of `⇧` the
 rule above otherwise refuses — accepted because the four modifiers

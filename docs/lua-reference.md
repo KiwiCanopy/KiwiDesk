@@ -1134,7 +1134,7 @@ second, and stays away from a screen showing a full-screen app
 or a presentation. A swipe or Mission Control switch shows nothing; macOS
 animates those itself.
 
-The GUI twin is **Profiles ▸ Profiles per macOS Desktop ▸ Show
+The GUI twin is **Shortcuts & Gestures ▸ macOS Desktops ▸ Show
 the Desktop's number after a switch**. Like
 [`set_refusal_sound`](#set_refusal_sound), the setting is
 app-wide, stored in `gui.json` as `desktop.cue`; the verb

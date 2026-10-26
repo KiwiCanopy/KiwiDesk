@@ -46,6 +46,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case modeCycle = "config.modeCycle"
     /// The plate shown after a cycle (#2144): app-wide (#1741).
     case modeCue = "appWide.modeCue"
+    /// The plate shown after a Desktop switch KiwiDesk makes
+    /// (#2142): app-wide (#1741), first in macOS Desktops (#2655).
+    case desktopCue = "appWide.desktopCue"
     /// The key turned into Hyper (#1870): app-wide, per Mac.
     case hyperKey = "appWide.hyperKey"
     /// KiwiHub's navigation key alternatives (#2600): app-wide,
@@ -117,25 +120,21 @@ extension ShortcutsKey {
                 .immediate,
                 gate: .runtime(.trackInUse)
             )
-        // An OFFER until the user takes it (#1125): a Desktop is
-        // macOS's arrangement rather than KiwiDesk's, the seed
-        // binds none of these, and they scale per Desktop — so
-        // they sit behind their own disclosure until one is
-        // bound, and at rest in BOTH modes once one is.
+        // One section for every Desktop verb (#2655): the seeded
+        // Go to Desktop at rest, the moves behind its drawer.
+        case .desktopCue:
+            // Written at once; greys where init.lua owns the
+            // config, as the layout plate's switch does (#2142).
+            return .row(
+                .shortcuts,
+                .macosDesktops,
+                .atRest,
+                gate: .runtime(.luaOwnsConfig)
+            )
         case .focusDesktop:
-            return .row(
-                .shortcuts,
-                .focus,
-                .immediate,
-                gate: .runtime(.desktopBindingsExist)
-            )
+            return .row(.shortcuts, .macosDesktops, .atRest)
         case .moveToDesktop, .moveToDesktopFollow:
-            return .row(
-                .shortcuts,
-                .moveWindows,
-                .immediate,
-                gate: .runtime(.desktopBindingsExist)
-            )
+            return .row(.shortcuts, .macosDesktops, .showMore)
         case .layoutCycle, .modeCycle:
             return .row(.shortcuts, .layout, .atRest)
         case .modeCue:
@@ -289,6 +288,8 @@ extension ShortcutsKey {
                 "shortcuts.mode_cue",
                 help: "shortcuts.mode_cue.help"
             )
+        case .desktopCue:
+            return .text("desktops.cue", help: "desktops.cue.help")
         case .hyperKey:
             return .text(
                 "shortcuts.hyper_key",

@@ -11,8 +11,8 @@ struct KeybindingFamilyRows: View {
     let key: SettingKey
     let expander: ShortcutsFamilyRows
     /// A heading separates a family from its SIBLINGS in a
-    /// shared card; a family alone under its own drawer title
-    /// has none to separate it from (#1125).
+    /// shared card; a family under its own section or drawer
+    /// title has none to separate it from (#1125, #2655).
     var showsHeading = true
 
     var body: some View {
@@ -132,13 +132,6 @@ struct FocusGroup: View {
                     )
                 }
             }
-            DesktopShortcutsOffer(
-                model: model,
-                bindings: $bindings,
-                keys: ShortcutsRowOrder.focusDesktopFamilies,
-                drawer: SettingsCatalog.shortcuts.focusDesktops,
-                expander: expander
-            )
         }
     }
 }
@@ -163,15 +156,6 @@ struct MoveWindowsGroup: View {
                     expander: expander
                 )
             }
-            DesktopShortcutsOffer(
-                model: model,
-                bindings: $bindings,
-                keys: ShortcutsRowOrder
-                    .moveWindowsDesktopFamilies,
-                drawer: SettingsCatalog.shortcuts
-                    .moveWindowsDesktops,
-                expander: expander
-            )
             TrackShortcutsOffer(
                 model: model,
                 bindings: $bindings,

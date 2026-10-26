@@ -102,35 +102,36 @@ struct ShortcutsGateTests {
 
     /// The two named readings, and that they stay independent.
     /// Each is written against its OWN case rather than against
-    /// nil, so a third `InertReason` cannot silently stop the
-    /// preview caption naming its layer, or shut the Desktop
-    /// offer, for an unrelated cause (architect re-review
-    /// 2026-09-04). With two live cases this is a real test
-    /// rather than the tripwire it started as.
+    /// nil, so a further `InertReason` cannot silently stop the
+    /// preview caption naming its layer, or shut the Track offer,
+    /// for an unrelated cause (architect re-review 2026-09-04).
+    /// The Desktop drawer's hold-open (#2655) is no census gate,
+    /// but it answers beside them and must not be answered by
+    /// them.
     @Test("each named reading answers its own question")
     func namedReadingsAreCaseWise() {
         var layered = config(layers: [KeyLayer.defaultName, "resize"])
         #expect(ShortcutsGates(config: layered).layersExist)
         #expect(
-            !ShortcutsGates(config: layered).desktopBindingsExist,
+            !ShortcutsGates(config: layered).desktopMovesBound,
             "a layer is not a Desktop binding"
         )
         var desktop = config(layers: [KeyLayer.defaultName])
         desktop.layers[0].bindings = [
             KeyBinding(
                 combo: "ctrl+alt+1",
-                lua: "KiwiDesk.focus_desktop(1)",
+                lua: "KiwiDesk.move_to_desktop(1)",
                 kind: .navigation
             )
         ]
-        #expect(ShortcutsGates(config: desktop).desktopBindingsExist)
+        #expect(ShortcutsGates(config: desktop).desktopMovesBound)
         #expect(
             !ShortcutsGates(config: desktop).layersExist,
             "a Desktop binding is not a layer"
         )
         layered.layers[0].bindings = desktop.layers[0].bindings
         #expect(ShortcutsGates(config: layered).layersExist)
-        #expect(ShortcutsGates(config: layered).desktopBindingsExist)
+        #expect(ShortcutsGates(config: layered).desktopMovesBound)
         // The third reading (#1440) answers neither of the
         // other two questions, and they do not answer it.
         #expect(
@@ -142,16 +143,16 @@ struct ShortcutsGateTests {
         track.spaceModes = ["1": .track]
         #expect(ShortcutsGates(config: track).trackInUse)
         #expect(!ShortcutsGates(config: track).layersExist)
-        #expect(!ShortcutsGates(config: track).desktopBindingsExist)
+        #expect(!ShortcutsGates(config: track).desktopMovesBound)
         // All cases are spoken for above, the plate switch's
-        // greying reason (#2144) answering none of the three
+        // greying reasons (#2144, #2460) answering none of the
         // readings; a FIFTH reds here — check what each named
         // reading should answer for it before extending, since
         // none is written against nil.
         #expect(
             Set(ShortcutsGates.InertReason.allCases)
                 == [
-                    .onlyDefaultLayer, .noDesktopBinding, .trackUnused,
+                    .onlyDefaultLayer, .trackUnused,
                     .appWideLuaOwned, .storedProfilePage,
                 ]
         )
@@ -234,6 +235,55 @@ struct ShortcutsGateTests {
             "LayoutCueRow no longer asks ShortcutsGates"
         )
         #expect(source.contains("disabled:luaOwned"))
+    }
+
+    /// The Desktop switch cue is app-wide (#2142, #1741): it greys
+    /// only where init.lua owns the config, whatever page is
+    /// edited, and its row asks this resolver (#2655).
+    @Test("the Desktop cue greys only under a Lua-owned config")
+    func desktopCueGreysUnderLua() throws {
+        let key = SettingKey.shortcuts(.desktopCue)
+        for editing in [false, true] {
+            #expect(
+                ShortcutsGates(
+                    config: GuiConfig(),
+                    guiManaged: true,
+                    editingStoredProfile: editing
+                ).inertReason(for: key) == nil
+            )
+            #expect(
+                ShortcutsGates(
+                    config: GuiConfig(),
+                    guiManaged: false,
+                    editingStoredProfile: editing
+                ).inertReason(for: key) == .appWideLuaOwned
+            )
+        }
+        let source = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(
+                        "Sources/KiwiDesk/Settings/Components/"
+                            + "Keybindings/DesktopCueRow.swift"
+                    ),
+                encoding: .utf8
+            )
+        )
+        .split(whereSeparator: \.isWhitespace)
+        .joined()
+        #expect(
+            source.contains(
+                "ShortcutsGates(config:model.config,"
+                    + "guiManaged:model.guiManaged)"
+                    + ".inertReason(for:.shortcuts(.desktopCue))"
+            )
+        )
+        #expect(source.contains("disabled:luaOwned"))
+        #expect(
+            source.contains(
+                "ifluaOwned{Text(GeneralGateHelp.sentence(for:.luaOwned))"
+            )
+        )
     }
 
     /// `LayersCard` must ASK the resolver, not re-derive the

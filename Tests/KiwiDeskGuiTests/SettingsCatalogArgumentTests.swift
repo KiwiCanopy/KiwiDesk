@@ -51,21 +51,15 @@ struct SettingsCatalogArgumentTests {
         // future DIRECT mounts, which is where a duplicate id
         // would actually come from.
         "GapsEditor.swift: control",
-        // The Desktop offer takes its drawer as a parameter so
-        // one view can serve both shortcut groups (#1125). The
-        // net is `ShortcutsDesktopOfferTests`, which pins the
-        // mount COUNT at two and each mount's own `keys:` and
-        // `drawer:` pair — the sibling sweep in
-        // `SettingsCatalogSiteTests` only asks for one reference
-        // apiece, which a swapped pair satisfies.
-        "DesktopShortcutsOffer.swift: drawer",
         // #2237's axis fields: `MinSizeText.control`'s children
         // (`MinWindowSizeMasterTests` ▸ `anchorsAreOneToOne`).
         "MinSizeFields.swift: optional: anchor(.width)",
         "MinSizeFields.swift: optional: anchor(.height)",
-        // The Track offer takes the same shape (#1440); its one
-        // mount's `keys:` / `drawer:` pair is pinned by
-        // `ShortcutsTrackOfferTests`.
+        // The Track offer takes its drawer as a parameter
+        // (#1440); its one mount's `keys:` / `drawer:` pair is
+        // pinned by `ShortcutsTrackOfferTests`, since the sibling
+        // sweep in `SettingsCatalogSiteTests` only asks for one
+        // reference apiece.
         "TrackShortcutsOffer.swift: drawer",
         // The Mac Checklist's two row views take their
         // declaration as a parameter, handed down by the
@@ -238,7 +232,8 @@ struct SettingsCatalogArgumentTests {
         // 112-118 #2103, #1870, #2103 v2; 119 #1869, 120 #2258, 121 #2312, 122
         // #2103, 123 #2379, 125 #2417, 126 #2237, 129 #761, 130 Show & hide,
         // 131 #2389, 132 #2497, 134 #2524, 141 #2507, 144 #2601. 142 #2593.
-        #expect(direct.values.reduce(0, +) == 142)
+        // 144 #2655: the macOS Desktops section and its drawer.
+        #expect(direct.values.reduce(0, +) == 144)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

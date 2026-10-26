@@ -65,10 +65,6 @@ struct SettingsSearchDrawerAnchorTests {
                 [SettingsCatalog.bars.spaceBarTuning]
             ),
             (
-                .profiles, "Profiles", .profilesPerMacOSSpace,
-                [SettingsCatalog.profiles.desktops]
-            ),
-            (
                 .layoutDefaults, "Layout Defaults", .general,
                 [SettingsCatalog.layoutDefaults.minSizePerLayout]
             ),
