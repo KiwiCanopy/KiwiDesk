@@ -22,8 +22,11 @@ final class AppBarItemView: NSView {
     let accent = SheenRimView()
     /// Where a partly visible window sits (#2234).
     let halfMoon = AppBarHalfMoon()
-    /// The box's border under Boxed (#1679): the bottom subview,
-    /// so the active outline strokes over it.
+    /// The hover on glass, fading with the Fill (#2645): under the
+    /// content and the box border (`BarHoverFill.seat`).
+    let hoverFill = GlassBackdrop()
+    /// The box's border under Boxed (#1679): the bottom stroke,
+    /// above only the hover, so the active outline strokes over it.
     let boxBorder = ShelfBorder.makeSeated()
     /// Clips active accent indicator to item bounds (owner 2026-07-20).
     let accentClip = AppBarOverlay.PassThroughFlippedView()
@@ -106,6 +109,7 @@ final class AppBarItemView: NSView {
         aboveOutline.addSubview(badge)
         aboveOutline.addSubview(halfMoon)
         GlassBox.seatStrokes(strokes, of: self)
+        BarHoverFill.seat(hoverFill, below: boxBorder, in: self)
     }
 
     @available(*, unavailable)

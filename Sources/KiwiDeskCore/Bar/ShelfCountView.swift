@@ -16,6 +16,12 @@ final class ShelfCountView: NSView {
     /// The hover chip — the Space items' hover fill, only under
     /// the pointer, so the count reads as clickable (ui-designer).
     private let chip = NSView()
+    /// The hover on glass, fading with the Fill under the count
+    /// (#2645); the flat `chip` shows where no glass draws.
+    let glassChip = GlassBackdrop()
+    private var hoverHex: String?
+    /// The shelf edge its glass hover fades from.
+    private var fadeEdge = AppBarEdge.top
     private var chipRadius: CGFloat = 0
     private let label = NSTextField(labelWithString: "")
     private let chevron = NSImageView()
@@ -55,6 +61,7 @@ final class ShelfCountView: NSView {
         chevron.imageScaling = .scaleNone
         chip.wantsLayer = true
         chip.isHidden = true
+        addSubview(glassChip)
         addSubview(chip)
         addSubview(label)
         addSubview(chevron)
@@ -78,9 +85,13 @@ final class ShelfCountView: NSView {
         ink: NSColor,
         hoverInk: NSColor,
         hoverFill: NSColor = .clear,
+        hoverHex: String?,
+        edge: AppBarEdge,
         chipRadius: CGFloat = 0
     ) {
         chip.layer?.backgroundColor = hoverFill.cgColor
+        self.hoverHex = hoverHex
+        fadeEdge = edge
         self.chipRadius = chipRadius
         self.count = count
         self.ink = ink
@@ -245,10 +256,12 @@ final class ShelfCountView: NSView {
             )
         }
         chip.frame = Self.chipFrame(in: bounds, horizontal: horizontal)
+        glassChip.frame = chip.frame
         chip.layer?.cornerRadius = min(
             chipRadius,
             min(chip.frame.width, chip.frame.height) / 2
         )
+        applyInk()
         label.frame.origin = CGPoint(
             x: numberCenter.x - label.frame.width / 2,
             y: BarTextGlyph.originY(
@@ -275,7 +288,19 @@ final class ShelfCountView: NSView {
     /// takes them.
     private func applyInk() {
         let hovered = isHovered || isDragHovered
-        chip.isHidden = !hovered
+        let glass = BarHoverFill.paint(
+            glassChip,
+            showsHover: hovered && hoverHex != nil,
+            hex: hoverHex ?? "",
+            shelf: shelf,
+            edge: fadeEdge,
+            cornerRadius: chip.layer?.cornerRadius ?? 0,
+            corners: [
+                .layerMinXMinYCorner, .layerMaxXMinYCorner,
+                .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
+            ]
+        )
+        chip.isHidden = !hovered || glass
         let color = hovered ? hoverInk : ink
         label.textColor = color
         chevron.contentTintColor = color

@@ -45,7 +45,9 @@ struct ShelfCountTests {
             fontSize: 14,
             shelf: KiwiShelf(),
             ink: .white,
-            hoverInk: .red
+            hoverInk: .red,
+            hoverHex: nil,
+            edge: .top
         )
         let container =
             horizontal
@@ -110,7 +112,10 @@ struct ShelfCountTests {
         let label = try #require(
             count.subviews.first { $0 is NSTextField } as? NSTextField
         )
-        let chip = try #require(count.subviews.first)
+        // The flat chip: the glass one stays hidden off glass.
+        let chip = try #require(
+            count.subviews.first { !($0 is GlassBackdrop) }
+        )
         #expect(label.textColor == .white)
         #expect(chip.isHidden)
         count.setHovered(true)
@@ -135,7 +140,9 @@ struct ShelfCountTests {
             fontSize: 12,
             shelf: KiwiShelf(),
             ink: .white,
-            hoverInk: .white
+            hoverInk: .white,
+            hoverHex: nil,
+            edge: .top
         )
         #expect(!view.isHidden)
         #expect(view.accessibilityRole() == .button)
@@ -148,7 +155,9 @@ struct ShelfCountTests {
             fontSize: 12,
             shelf: KiwiShelf(),
             ink: .white,
-            hoverInk: .white
+            hoverInk: .white,
+            hoverHex: nil,
+            edge: .top
         )
         #expect(view.isHidden)
     }

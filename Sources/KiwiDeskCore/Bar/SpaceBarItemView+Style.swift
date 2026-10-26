@@ -6,7 +6,17 @@ extension SpaceBarItemView {
         layer?.masksToBounds = false
         layer?.cornerRadius = cornerRadius
         layer?.maskedCorners = maskedCorners
-        layer?.backgroundColor = fillColor.cgColor
+        hoverFill.frame = bounds
+        let glassHover = BarHoverFill.paint(
+            hoverFill,
+            showsHover: showsHover,
+            hex: style.hoverFillColor,
+            shelf: style.shelf,
+            edge: style.edge,
+            cornerRadius: cornerRadius,
+            corners: maskedCorners
+        )
+        layer?.backgroundColor = (glassHover ? .clear : fillColor).cgColor
         accentClip.frame = bounds
         aboveOutline.frame = bounds
         accentClip.layer?.masksToBounds = true
@@ -36,6 +46,7 @@ extension SpaceBarItemView {
     override func viewDidMoveToSuperview() {
         super.viewDidMoveToSuperview()
         GlassBox.seatStrokes(strokes, of: self)
+        BarHoverFill.seat(hoverFill, below: boxBorder, in: self)
     }
 
     /// Structural divider between identifier and app glyphs (QA 2026-07-19).
@@ -177,12 +188,17 @@ extension SpaceBarItemView {
         )
     }
 
+    /// Whether the item draws its hover — the one answer the flat
+    /// and the glass paints read; the current Space never does
+    /// (#2645).
+    var showsHover: Bool { !isActive && (isHovered || isDragHovered) }
+
     private var fillColor: NSColor {
         if isActive, style.hasBox {
             return NSColor(kiwiFill: style.fillColor)
         }
         if isActive { return .clear }
-        if isHovered || isDragHovered {
+        if showsHover {
             return NSColor(kiwiHex: style.hoverFillColor)
         }
         guard style.hasBox else {

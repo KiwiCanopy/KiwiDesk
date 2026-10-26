@@ -136,7 +136,9 @@ struct BarTextBaselineSiteTests {
             fontSize: 40,
             shelf: shelf,
             ink: .white,
-            hoverInk: .red
+            hoverInk: .red,
+            hoverHex: nil,
+            edge: .top
         )
         view.place(
             in: CGRect(x: 0, y: 0, width: 100, height: 300),
