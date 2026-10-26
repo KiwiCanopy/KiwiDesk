@@ -84,7 +84,7 @@ private enum LensNavFixture {
 /// while it is on with "Keep focus on these apps", `focus` and
 /// `swap` skip every window the lens keeps hazed in every
 /// navigation model — the geometric search and its float tier,
-/// scrolling's and monocle's rows, and track's index math — a
+/// scrolling's and monocle's rows, and track's steps — a
 /// titled member's unmatched windows included, while a lens with
 /// the switch off and plain KiwiVision skip nothing.
 @Suite("KiwiVision lens focus keys", .serialized)
