@@ -3,8 +3,9 @@ import AppKit
 /// A bar title's fixed slot (#2086, #2545, owner rulings): a title
 /// draws in a slot as long as the title cap in the bar font's
 /// average glyph, so a title change moves no frame — a longer
-/// title cuts with "…", a shorter one starts at the slot's start.
-/// The Space Bar's front-app name and every App Bar item take it.
+/// title cuts with "…", a shorter one draws right after its icon,
+/// the two centred as a group in the fixed length (#2643). The
+/// Space Bar's front-app name and every App Bar item take it.
 @MainActor
 public enum BarTitleSlot {
     /// The slot's length for `cap` characters in `font`: the
@@ -30,15 +31,22 @@ public enum BarTitleSlot {
     }
 
     /// Where a title draws inside its slot: from the slot's start,
-    /// right after the icon, whether it fits or is cut with "…", so
-    /// every title starts at one offset and a short one leaves the
-    /// trailing end empty (#2587). `natural` is the fitted width.
+    /// right after the icon, whether it fits or is cut with "…"
+    /// (#2587). `natural` is the fitted width.
     static func span(
         natural: CGFloat,
         slotStart: CGFloat,
         slot: CGFloat
     ) -> ClosedRange<CGFloat> {
         slotStart...(slotStart + min(natural, slot))
+    }
+
+    /// How far a title's icon-and-title group moves in from the
+    /// slot's leading place to centre in its fixed length: half
+    /// what the drawn title leaves of the slot, 0 for a cut one
+    /// (#2643). It snaps with the title; no frame moves.
+    static func centring(natural: CGFloat, slot: CGFloat) -> CGFloat {
+        max(slot - min(natural, slot), 0) / 2
     }
 
     /// The width `sizeToFit` gives `text` in `font` — the label's

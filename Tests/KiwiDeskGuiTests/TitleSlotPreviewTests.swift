@@ -43,9 +43,9 @@ struct TitleSlotPreviewTests {
         #expect(tile.spaceSpec(tile.settings.spaceBarLook).titleSlot == nil)
     }
 
-    /// The strip frames its title text in the spec's slot, at that
-    /// width exactly and leading, as the live bar draws it (#2587):
-    /// a bound on one side alone lets a short title size to itself.
+    /// The strip holds each title's fixed slot with a hidden twin
+    /// and draws the title up to it, so the icon and title centre
+    /// in the slot's length as the live bar draws them (#2643).
     @Test("The strip frames a title in the slot")
     func stripFramesTheTitle() throws {
         let file = SourceScan.repoRoot(from: #filePath)
@@ -53,7 +53,14 @@ struct TitleSlotPreviewTests {
                 "Sources/KiwiDesk/Settings/HomeCardPlate+BarStrip.swift"
             )
         let source = try SourceScan.strippedSource(at: file)
-        let needle = ".frame(width: spec.titleSlot, alignment: .leading)"
-        #expect(source.occurrences(of: needle) == 1)
+        let needles = [
+            "iconAndTitle(item, slotHolder: true).hidden()",
+            "iconAndTitle(item, slotHolder: false)",
+            "Color.clear.frame(width: spec.titleSlot, height: 1)",
+            ".frame(maxWidth: spec.titleSlot)",
+        ]
+        for needle in needles {
+            #expect(source.occurrences(of: needle) == 1, "\(needle)")
+        }
     }
 }

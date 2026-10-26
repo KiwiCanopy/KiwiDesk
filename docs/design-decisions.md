@@ -16774,6 +16774,24 @@ at as many offsets as there were title lengths. The trailing gap
 under an indicator that spans the chip is the accepted cost of the
 fixed width, bought for every title starting at one offset. The
 icon still never moves and no frame changes with a title.
+
+**Amended by #2643 (owner ruling 2026-10-26): the icon and title
+centre as one group.** The title still draws right after its
+icon, and the icon, the drawn title and an App Bar group's count
+badge centre in the fixed length on both bars, so a short title
+leaves no empty trailing end under an indicator that spans the
+chip. That keeps what #2587 bought — no title drifts from its
+icon — and drops its cost. The price is that a short title's
+icon moves when the title's length changes, and that icons of
+neighbouring pills no longer share one offset; fixed-width tabs
+in Safari and Finder accept both. A cut title fills its slot,
+so its group stays put, and no frame moves for any title. The
+group snaps to its new place, never glides: titles change all
+the time, and motion at the screen edge would pull the eye for
+nothing. The App Bar's half-moon stays outside the centring,
+hanging just before the icon, so a window turning partly
+visible moves nothing; a partly visible pill reads a little left
+of centre, accepted.
 :::
 
 **The bars honour Reduce Motion, and the ring MARKS rather than

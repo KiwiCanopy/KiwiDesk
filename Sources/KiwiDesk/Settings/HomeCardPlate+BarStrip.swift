@@ -150,21 +150,11 @@ struct BarStripView: View {
             // cross), so the Thickness slider moves the
             // symbols with the plate; the glyph steps down by
             // the Space Bar's own glyph ratio.
-            HStack(spacing: 2 * scale) {
-                if let glyph = item.glyph {
-                    Image(systemName: glyph)
-                        .font(
-                            .system(
-                                size: spec.fontSize * item.glyphRatio
-                            )
-                        )
-                }
-                if let text = item.label {
-                    Text(text)
-                        .font(spec.textFont(size: spec.fontSize))
-                        .lineLimit(1)
-                        .frame(width: spec.titleSlot, alignment: .leading)
-                }
+            // The hidden twin holds the title's fixed slot, so the
+            // drawn group centres in it as the live bar's (#2643).
+            ZStack {
+                iconAndTitle(item, slotHolder: true).hidden()
+                iconAndTitle(item, slotHolder: false)
             }
             .foregroundStyle(Color(kiwiHex: item.color))
             .padding(.horizontal, 2.5 * scale)
@@ -185,6 +175,32 @@ struct BarStripView: View {
                     width: vertical ? pipCross : item.length,
                     height: vertical ? item.length : pipCross
                 )
+        }
+    }
+
+    /// An item's icon and title; `slotHolder` swaps the title for
+    /// its empty fixed slot, the real title drawing up to it.
+    private func iconAndTitle(
+        _ item: HomeCardBarsTile.BarItem,
+        slotHolder: Bool
+    ) -> some View {
+        HStack(spacing: 2 * scale) {
+            if let glyph = item.glyph {
+                Image(systemName: glyph)
+                    .font(
+                        .system(size: spec.fontSize * item.glyphRatio)
+                    )
+            }
+            if let text = item.label {
+                if slotHolder {
+                    Color.clear.frame(width: spec.titleSlot, height: 1)
+                } else {
+                    Text(text)
+                        .font(spec.textFont(size: spec.fontSize))
+                        .lineLimit(1)
+                        .frame(maxWidth: spec.titleSlot)
+                }
+            }
         }
     }
 

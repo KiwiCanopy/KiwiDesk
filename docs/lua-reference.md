@@ -3347,9 +3347,9 @@ title shrinks, never the icon.
 Every slot is as long as this many characters of the bar's font
 beside the icon, whatever the titles read — at least the icon
 square and at most a quarter of the whole KiwiShelf edge — so a
-longer title ends in "…", a shorter one starts right after the icon,
-and a change of title never moves the App Bar or the shelf
-beside it. The cap is the App Bar's one size control; items that
+longer title ends in "…", a shorter one draws right after the
+icon with the two centred in the slot, and a change of title
+never moves the App Bar or the shelf beside it. The cap is the App Bar's one size control; items that
 do not fit scroll instead of shrinking.
 :::
 
@@ -3749,8 +3749,8 @@ bar's font: a longer title ends in "…", so a change of focus or
 title never moves the Space Bar or the shelf beside it.
 
 :::unreleased
-A shorter title starts right after the icon, the rest of the
-segment left empty.
+A shorter title draws right after the icon, the two centred in
+the segment.
 :::
 
 **Example:**

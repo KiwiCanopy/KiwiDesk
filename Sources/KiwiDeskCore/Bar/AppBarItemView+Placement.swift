@@ -20,19 +20,24 @@ extension AppBarItemView {
         /// The title's slot (`AppBarOverlay.titleSlot`), cut to
         /// what the item has room for; zero where none draws.
         var text: CGSize
-        /// The title's own fitted width, which the slot centres by
-        /// its ink or cuts (`BarTitleSlot.span`).
+        /// The title's own fitted width, which the slot cuts
+        /// (`BarTitleSlot.span`).
         var natural: CGFloat
         /// The group-count badge's reach past the title.
         var badgeExtent: CGFloat
         var showsLabel: Bool
+        /// Where the icon would start were the title to fill its
+        /// slot: the span reads it, so a rename moves no divider
+        /// (#2643).
+        var filledIconStart: CGFloat
 
-        /// The icon and title's span along the slot; the count
-        /// badge hangs off them, sized by its own text, and is not
-        /// part of it (#1779).
+        /// The icon and title's span along the slot, the title
+        /// taken at its full slot; the count badge hangs off them,
+        /// sized by its own text, and is not part of it (#1779).
         var span: ClosedRange<CGFloat> {
-            (moonShown ? x : x + moon)...(x + moon + side + spacing
-                + text.width)
+            let start = filledIconStart
+            let end = start + side + spacing + text.width
+            return (moonShown ? start - moon : start)...end
         }
     }
 
@@ -47,10 +52,11 @@ extension AppBarItemView {
     }
 
     /// The icon-and-title group in a horizontal slot of `size`,
-    /// centred between the two ends' insets, which differ where
-    /// only one end is drawn rounded (#1763), the title taking its
-    /// fixed slot whatever it reads (#2545). Sets the label's font
-    /// and text, which the measurement reads.
+    /// centred by the title's drawn width between the two ends'
+    /// insets, which differ where only one end is drawn rounded
+    /// (#1763, #2643); the title's slot is fixed whatever it reads
+    /// (#2545). Sets the label's font and text, which the
+    /// measurement reads.
     func horizontalPlacement(in size: CGSize) -> HorizontalPlacement {
         let pad = Self.contentPadding
         let depth = size.height
@@ -97,11 +103,17 @@ extension AppBarItemView {
             badgeReserve > 0 && textSize.width > 0
             ? badgeReserve - pad + 2
             : 0
-        let x = max(
-            (size.width - moon - side - spacing - textSize.width
-                - badgeExtent + edge.leading - edge.trailing) / 2,
-            edge.leading
-        )
+        let natural = ceil(cell.width)
+        // The icon, drawn title and badge centre; the half-moon
+        // hangs before the icon, outside the centring (#2643).
+        let iconStart = { (title: CGFloat) in
+            max(
+                (size.width - side - spacing - title - badgeExtent
+                    + edge.leading - edge.trailing) / 2,
+                edge.leading + moon
+            )
+        }
+        let x = iconStart(min(natural, textSize.width)) - moon
         return HorizontalPlacement(
             x: x,
             moon: moon,
@@ -109,9 +121,10 @@ extension AppBarItemView {
             side: side,
             spacing: spacing,
             text: textSize,
-            natural: ceil(cell.width),
+            natural: natural,
             badgeExtent: badgeExtent,
-            showsLabel: textSize.width > 0
+            showsLabel: textSize.width > 0,
+            filledIconStart: iconStart(textSize.width)
         )
     }
 

@@ -41,9 +41,12 @@ struct RoundedItemEndPadChipTests {
                 let box = overlay.frontBox.frame
                 let icon = overlay.frontIcon.frame
                 // The name's SLOT ends the chip, whatever the name's
-                // own width (#2086).
+                // own width (#2086); the icon and name centre in it,
+                // as much room before the icon as after the name
+                // (#2643).
                 let slotEnd = overlay.frontNameEnd
-                #expect(abs(icon.minX - box.minX - end) <= 0.5)
+                let after = slotEnd - overlay.frontName.frame.maxX
+                #expect(abs(icon.minX - box.minX - end - after) <= 0.5)
                 #expect(abs(box.maxX - slotEnd - end) <= 0.5)
             }
         }
@@ -167,17 +170,25 @@ struct RoundedItemEndPadChipTests {
                 let view = appItem(width: slot, look: look, depth: depth)
                 let title = ceil(view.label.cell?.cellSize.width ?? 0)
                 #expect(view.label.frame.width >= title)
-                #expect(abs(view.halfMoon.frame.minX - ends.leading) <= 0.5)
-                // The title's fixed slot ends at the trailing inset,
-                // its short title inside it (#2545).
+                #expect(view.halfMoon.frame.minX >= ends.leading - 0.5)
+                // The title's fixed slot, taken full, ends at the
+                // trailing inset (#2545); its short title centres
+                // with the icon, as much room before the icon as
+                // after the title (#2643).
                 let placed = view.horizontalPlacement(
                     in: view.bounds.size
                 )
-                let titleEnd =
-                    placed.x + placed.moon + placed.side + placed.spacing
-                    + placed.text.width
+                let filledEnd =
+                    placed.filledIconStart + placed.side
+                    + placed.spacing + placed.text.width
                 #expect(
-                    abs(slot - titleEnd - ends.trailing) <= 0.5,
+                    abs(slot - filledEnd - ends.trailing) <= 0.5,
+                    "depth \(depth), roundness \(roundness)"
+                )
+                let before = placed.x + placed.moon - ends.leading
+                let after = slot - ends.trailing - view.label.frame.maxX
+                #expect(
+                    abs(before - after) <= 0.5,
                     "depth \(depth), roundness \(roundness)"
                 )
             }

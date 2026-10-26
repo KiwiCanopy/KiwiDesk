@@ -41,20 +41,22 @@ extension SpaceBarOverlay {
             style: style
         )
         let contentStart = offset
-        offset += layoutFrontGlyph(
+        // The name is placed first: its drawn width decides how far
+        // the icon-and-name group moves in to centre (#2643).
+        let shift = layoutFrontName(
             app,
-            at: offset,
+            at: offset + cell + SpaceBarItemView.pad,
             depth: depth,
-            cell: cell,
+            viewport: nameBound,
             horizontal: horizontal,
             accent: accent,
             style: style
         )
-        layoutFrontName(
+        layoutFrontGlyph(
             app,
-            at: offset,
+            at: offset + shift,
             depth: depth,
-            viewport: nameBound,
+            cell: cell,
             horizontal: horizontal,
             accent: accent,
             style: style
@@ -184,7 +186,7 @@ extension SpaceBarOverlay {
         horizontal: Bool,
         accent: NSColor,
         style: SpaceBarLook
-    ) -> CGFloat {
+    ) {
         let inset = (depth - cell) / 2
         let frame =
             horizontal
@@ -252,10 +254,12 @@ extension SpaceBarOverlay {
             frontIcon.setAccessibilityLabel(axLabel)
             frontIcon.actions = { [weak self] in self?.shelfActions ?? [] }
         }
-        return cell + SpaceBarItemView.pad
     }
 
-    /// Front app window title layout for horizontal bars.
+    /// Front app window title layout for horizontal bars, its slot
+    /// starting at `offset`. Returns how far the icon-and-name
+    /// group moves in to centre in the fixed length (#2643); the
+    /// slot's end, `frontNameEnd`, never moves.
     private func layoutFrontName(
         _ app: SpaceBarItemView.App,
         at offset: CGFloat,
@@ -264,10 +268,10 @@ extension SpaceBarOverlay {
         horizontal: Bool,
         accent: NSColor,
         style: SpaceBarLook
-    ) {
+    ) -> CGFloat {
         guard horizontal else {
             frontName.isHidden = true
-            return
+            return 0
         }
         frontName.isHidden = false
         frontName.stringValue = app.title ?? app.name
@@ -288,9 +292,13 @@ extension SpaceBarOverlay {
         let available = max(viewport - offset - trailing, 0)
         let slot = min(Self.titleSlot(style, depth: depth), available)
         frontNameEnd = offset + slot
+        let shift = BarTitleSlot.centring(
+            natural: frontName.frame.width,
+            slot: slot
+        )
         let span = BarTitleSlot.span(
             natural: frontName.frame.width,
-            slotStart: offset,
+            slotStart: offset + shift,
             slot: slot
         )
         frontName.frame = CGRect(
@@ -304,6 +312,7 @@ extension SpaceBarOverlay {
             width: span.upperBound - span.lowerBound,
             height: height
         )
+        return shift
     }
 
     /// The segment's menu as VoiceOver actions (#1518, #2024): the
