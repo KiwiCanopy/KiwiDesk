@@ -111,6 +111,25 @@ enum PrivatePathVerify {
         return .works("window \(own.id)'s level matches")
     }
 
+    /// A per-window on-screen flag against the public list, which
+    /// listed our own window as on screen.
+    static func onScreen(
+        _ sky: Bool?,
+        of own: PrivatePathContext.OwnWindow?
+    ) -> PrivatePathVerdict {
+        guard let own else { return noOwnWindow }
+        guard let sky else {
+            return .failed("answered nothing for window \(own.id)")
+        }
+        guard sky else {
+            return .failed(
+                "window \(own.id): reads off screen, the public "
+                    + "list shows it"
+            )
+        }
+        return .works("window \(own.id) reads on screen")
+    }
+
     /// The compositor's per-window Space read for our own window.
     static func hostedSpace(
         _ reading: WindowSpaceReading,

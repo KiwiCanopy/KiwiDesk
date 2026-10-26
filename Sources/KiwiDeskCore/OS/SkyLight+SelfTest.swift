@@ -92,6 +92,22 @@ extension SkyLight {
                     of: own
                 )
             },
+            .read(windowIsOrderedInSymbol.resolution, home: home) {
+                let own = context.ownWindow()
+                return PrivatePathVerify.onScreen(
+                    own.flatMap { windowOrderedIn($0.id) },
+                    of: own
+                )
+            },
+            // Positive only: no own window is ordered in off
+            // screen; the composite the gate reads is judged.
+            .read(windowIsVisibleSymbol.resolution, home: home) {
+                let own = context.ownWindow()
+                return PrivatePathVerify.onScreen(
+                    own.flatMap { windowOnScreen($0.id) },
+                    of: own
+                )
+            },
             .read(
                 copyWindowsWithOptionsAndTagsSymbol.resolution,
                 home: home
