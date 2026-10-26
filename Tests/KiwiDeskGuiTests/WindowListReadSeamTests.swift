@@ -38,4 +38,26 @@ struct WindowListReadSeamTests {
     func noSiblingRead() throws {
         #expect(try Self.hits(of: "CGWindowListCreate").isEmpty)
     }
+
+    /// The door's own read runs inside `timed`: a bare call left in
+    /// `copy` still counts as the one allowed hit above, so the
+    /// subject here is the `copy` body, not the file.
+    @Test("the door's read is timed")
+    func copyTimesItsRead() throws {
+        let door = Self.trees[0].appendingPathComponent(
+            "OS/WindowListRead.swift"
+        )
+        let text = try SourceScan.strippedSource(at: door)
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "static func copy(",
+                in: text
+            )
+        )
+        let timed = try #require(body.range(of: "timed("))
+        let read = try #require(
+            body.range(of: "CGWindowListCopyWindowInfo(")
+        )
+        #expect(timed.lowerBound < read.lowerBound)
+    }
 }
