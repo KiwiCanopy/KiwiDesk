@@ -44,7 +44,8 @@ extension KiwiCore {
         return BarPeekContent(
             rows: rows,
             checks: source.isList,
-            focus: barFocus(on: space)
+            focus: barFocus(on: space),
+            header: source.header
         )
     }
 

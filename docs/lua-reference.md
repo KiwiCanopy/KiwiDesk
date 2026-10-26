@@ -3713,6 +3713,12 @@ Lua-only, clamped. Independent of the shelf's `dim_factor`: no
 ordering is enforced, so a value below the outer tier inverts
 the ladder.
 
+:::unreleased
+The focused app's count badge on the active Space rests at this
+opacity too while its icon stays full, and comes to full while
+the pointer is on its glyph.
+:::
+
 **Example:**
 
 ```lua
