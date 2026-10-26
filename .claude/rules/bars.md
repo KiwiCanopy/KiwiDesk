@@ -1348,19 +1348,21 @@ Obligations:
   could substitute one for the capped one and every guard stayed
   green — the same bypass one level up from the one that was
   being closed. A KiwiShelf surface mints its `GlassFill` from the
-  shelf (`glassFill`, or `readingGlassFill` / `panelGlassFill`
-  for a reading surface), never field by field. A SwiftUI surface
-  takes the same Fill as a `GlassPaint`, minted only by
-  `GlassTint.paint` (`GlassPaintTests`). A surface that genuinely
-  needs a non-Fill colour on glass earns a second mint inside
-  `GlassTint`, never a colour parameter.
-- **A bar item's hover on glass goes through the one
-  `BarHoverFill.paint`**, which hands `GlassTint.applyHover` the
-  hover minted by `KiwiShelf.glassFill(hover:)`, so it fades with
-  the Fill and takes the cap (#2645, `BarHoverFillTests`); where
-  no glass draws it paints nothing and the item keeps its flat
-  hover. A new hover-bearing bar item takes the same door, never
-  a flat layer colour on glass.
+  shelf (`glassFill`, `readingGlassFill` / `panelGlassFill` for
+  a reading surface, `glassFill(hover:)` for a bar item's hover),
+  never field by field. A SwiftUI surface takes the same Fill as a
+  `GlassPaint`, minted only by `GlassTint.paint`
+  (`GlassPaintTests`). A surface that genuinely needs a non-Fill
+  colour on glass earns a second named mint, on the shelf beside
+  `glassFill` (as the hover's, #2645) or inside `GlassTint`, never
+  a colour parameter on a door.
+- **A bar item paints its hover on glass through
+  `BarHoverFill.paint`**, never a flat layer colour: it hands
+  `GlassTint.applyHover` the hover from
+  `KiwiShelf.glassFill(hover:)`, so it fades with the Fill and
+  takes the cap (#2645, `BarHoverFillTests`,
+  `GlassTintCensusTests`); where no glass draws, it paints nothing
+  and the item keeps its flat hover.
 - **The Fill draws on the glass, beneath its content: the
   backdrop is the glass's `contentView` and what the glass hosts
   rides inside it** (#2569). Behind the glass, the key window's

@@ -17871,8 +17871,9 @@ draw whatever the Fill, so an even Fill is a colour on glass, not
 glass undone. How much colour reaches the far end is then the
 user's taste. The far end is never fully clear, as #1622 ruled.
 The anchor stays capped at `maxAlpha`. Fill fade governs
-KiwiShelf's Fill alone: the bars, the overflow marks and their
-list, the peek, and the panels the toggle tints. The drag ghost,
+KiwiShelf's Fill and the hover drawn on it: the bars, a hovered
+bar item, the overflow marks and their list, the peek, and the
+panels the toggle tints. The drag ghost,
 the drop zone and the sticky mark have colours of their own and
 keep #1622's fade. No crossing is owed, because an absent key
 decodes 100, which is the look every file already had.
@@ -17891,8 +17892,10 @@ stays the worst one.
 **A hovered bar item's fill fades with the Fill** (#2645, owner
 ruling 2026-10-26, after comparing flat and faded hover live). On
 glass the hover colour fades along the same edge by the same Fill
-fade, through the same capped ends, so the hovered item reads as
-one with the pill under it rather than a flat patch on a faded
+fade, capped and floored as the Fill is. Fill fade so reaches one
+colour that is not the Fill, because the hover draws on the Fill;
+a colour drawn on no Fill keeps its own fade. The hovered item
+reads as one with the pill under it rather than a flat patch on a faded
 plate; under Boxed, a flat hover made the box look as if it
 stopped fading beneath the pointer. A `ui-designer` read preferred
 a flat hover as pointer feedback, one even pill as macOS draws
