@@ -420,6 +420,14 @@
 :root[data-mode="dev"] #features .card:nth-child(8) { animation-delay: 0.48s; }
 :root[data-mode="dev"] #features .card:nth-child(9) { animation-delay: 0.54s; }
 :root[data-mode="dev"] #features .card:nth-child(10) { animation-delay: 0.60s; }
+:root[data-mode="dev"] #features .card:nth-child(11) { animation-delay: 0.66s; }
+:root[data-mode="dev"] #features .card:nth-child(12) { animation-delay: 0.72s; }
+:root[data-mode="dev"] #features .card:nth-child(13) { animation-delay: 0.78s; }
+:root[data-mode="dev"] #features .card:nth-child(14) { animation-delay: 0.84s; }
+:root[data-mode="dev"] #features .card:nth-child(15) { animation-delay: 0.90s; }
+:root[data-mode="dev"] #features .card:nth-child(16) { animation-delay: 0.96s; }
+:root[data-mode="dev"] #features .card:nth-child(17) { animation-delay: 1.02s; }
+:root[data-mode="dev"] #features .card:nth-child(18) { animation-delay: 1.08s; }
 
 /* Nav accent-glow sweep (added briefly by the toggle handler). */
 .mode-flourish .nav__inner {
