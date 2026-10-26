@@ -983,6 +983,11 @@ sides.
 ([`reset_layout_sizing`](lua-reference.md#reset_layout_sizing)),
 listed under Shortcuts & Gestures ▸ Size & float.
 
+`⌃⌥G` shows or hides the Space Bar and `⌃⌥H` the App Bar
+([`space_bar.toggle_reveal`](lua-reference.md#space_bartoggle_reveal),
+[`app_bar.toggle_reveal`](lua-reference.md#app_bartoggle_reveal)),
+listed under Shortcuts & Gestures ▸ Show & hide ▸ KiwiShelf.
+
 :::unreleased
 `⌃⌥M` makes the focused window fill its screen and hides the bars
 there, until you press it again or move focus to another window
@@ -1057,7 +1062,8 @@ Save, like every other setting; Revert discards it.
 The spelling a stored combo uses (`gui.json`, Lua):
 
 **Modifiers**: `cmd`/`command`, `alt`/`opt`/`option`,
-`ctrl`/`control`, `shift`.
+`ctrl`/`control`, `shift`, and `hyper` (`✦`, live once a Hyper
+key is set; see [`set_hyper_key`](lua-reference.md#set_hyper_key)).
 
 **Keys**: letters (a–z), digits (0–9), arrows, `home`, `end`,
 `pageup`, `pagedown`, `space`, `return`, `tab`, `escape`,
