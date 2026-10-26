@@ -16526,21 +16526,6 @@ monochrome mark, so a bare "Untitled" or "main" would not say whose
 it is. This also retires #1946's "the app on top" for an App Bar
 label. The cost is two label shapes, which a source never switches
 between, against a header that only repeated the item.
-
-**The focused app's count badge rests dim until hovered** (#2650,
-owner ruling 2026-10-26, against a `ui-designer` read). In the
-current Space, a multi-window glyph's badge on the focused app sits
-at the chip's glyph dim while its icon stays full, and comes to
-full under the pointer. The designer held that a glyph's strength
-marks the focused app, so a dim badge there would read half
-unfocused and a hover would reuse the focus channel, and preferred
-a neutral plate behind the glyph. The owner's answer carries it:
-the badge stands for the app's other windows, which are unfocused
-behind the one in front, so its dim states that truly while the
-full icon keeps saying the app has the focus; and the cue is owed
-exactly where a badge is, since a one-window glyph already answers
-a hover with its label and only a list glyph, opening on a click,
-showed nothing.
 :::
 
 The peek's glass takes ONE tint over its whole height, the ruled
@@ -16692,6 +16677,26 @@ tint" while still reading as inactive), so color is never the only
 signal. A thin divider (the front-app segment's rule, shared
 helper) separates the identifier from the glyph row inside every
 occupied item.
+
+:::unreleased
+**The focused app's count badge rests dim until hovered** (#2650,
+owner ruling 2026-10-26, against a `ui-designer` read). In the
+current Space, a multi-window glyph's badge on the focused app sits
+at the Space Bar's middle dim (`active_dim_factor`) while its icon
+stays full, and comes to full under the pointer. The designer held that a glyph's strength
+marks the focused app, so a dim badge there would read half
+unfocused and a hover would reuse the focus channel, and preferred
+a neutral plate behind the glyph. The owner's answer carries it:
+the badge stands for the app's other windows, which are unfocused
+behind the one in front, so its dim states that truly while the
+full icon keeps saying the app has the focus; and the cue is owed
+exactly where a badge is, since a one-window glyph already answers
+a hover with its label and only a list glyph, opening on a click,
+showed nothing. This retires the entry above's "puts the focused
+app's badge uniquely at full alpha" for a count badge at rest: the
+full icon now carries the focus, and a state badge keeps the
+ladder.
+:::
 
 **The front-app segment wears the active indicator in its own
 colour** ([#1856](https://github.com/KiwiCanopy/KiwiDesk/issues/1856)).

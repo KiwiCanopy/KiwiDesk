@@ -880,10 +880,13 @@ Obligations:
   feeds the same peek through `BarPeekSource.run`. Every LIST
   group wears its app's icon, a one-app list's too (#2571,
   `BarPeekContentTests` ▸ `oneAppKeepsItsIcon`,
-  `OverflowMarkWiringTests` ▸ `coreAsksForIcons`); a one-window
-  label drops what its item shows — the header the one
-  `BarPeekSource.header` decides, an App Bar label none, a Space
-  Bar glyph's the name alone (#2649, `BarPeekLabelHeaderTests`). No bar view registers
+  `OverflowMarkWiringTests` ▸ `coreAsksForIcons`). **What a
+  group's header draws is asked of the one
+  `BarPeekSource.header`**, never a source check beside it: a
+  one-window label drops what its item shows, an App Bar label
+  drawing no header and a Space Bar glyph's the name alone
+  (#2649, `BarPeekLabelHeaderTests` ▸ `sourcesStateTheirHeader`,
+  `coreWiresTheHeader`). No bar view registers
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one

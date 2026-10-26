@@ -43,8 +43,7 @@ struct BarPeekLabelHeaderTests {
             rows: [row(1, title: "Hover peek")],
             header: .none
         )
-        #expect(content.groups.first?.showsName == false)
-        #expect(content.groups.first?.icon == nil)
+        #expect(content.header == .none)
         let body = BarPeekBody()
         _ = body.build(content, shelf: KiwiShelf())
         #expect(body.labels.map(\.stringValue) == ["Hover peek"])
@@ -87,11 +86,10 @@ struct BarPeekLabelHeaderTests {
         let app = try #require(
             core.barPeekContent(.appItem([WindowID(1)]), on: nil)
         )
-        #expect(app.groups.first?.showsName == false)
+        #expect(app.header == .none)
         let glyph = try #require(
             core.barPeekContent(.glyph([WindowID(1)]), on: nil)
         )
-        #expect(glyph.groups.first?.showsName == true)
-        #expect(glyph.groups.first?.icon == nil)
+        #expect(glyph.header == .name)
     }
 }

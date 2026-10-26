@@ -25,7 +25,10 @@ struct SpaceBarCountBadgeHoverTests {
         return app
     }
 
-    private func item(active: Bool) -> SpaceBarItemView {
+    private func item(
+        active: Bool,
+        after: SpaceBarStrip.Disc = .none
+    ) -> SpaceBarItemView {
         let view = SpaceBarItemView(
             frame: NSRect(x: 0, y: 0, width: 120, height: 32)
         )
@@ -36,7 +39,8 @@ struct SpaceBarCountBadgeHoverTests {
             active: active,
             horizontal: true,
             style: SpaceBarLook(),
-            stateMarkColors: StateMarkColors(sticky: "", floating: "")
+            stateMarkColors: StateMarkColors(sticky: "", floating: ""),
+            after: after
         )
         view.layout()
         view.restyle()
@@ -73,5 +77,27 @@ struct SpaceBarCountBadgeHoverTests {
         let other = item(active: false)
         let away = try #require(other.badgeViews.first)
         #expect(abs(away.alphaValue - other.style.dimFactor) < 0.01)
+    }
+
+    /// A drag over the chip lifts the badge with the rest of the
+    /// ladder.
+    @Test("A drag hover lifts the focused badge")
+    func dragLiftsTheBadge() throws {
+        let view = item(active: true)
+        view.isDragHovered = true
+        view.restyle()
+        #expect(view.badgeViews.first?.alphaValue == 1)
+    }
+
+    /// A `+n` disc holding the focus keeps full strength: only a
+    /// glyph's count badge rests dim.
+    @Test("A focused +n disc keeps full strength")
+    func focusedDiscStaysFull() {
+        var disc = SpaceBarStrip.Disc()
+        disc.windows = [WindowID(7)]
+        disc.holdsFocus = true
+        let view = item(active: true, after: disc)
+        #expect(!view.overflowBadge.isHidden)
+        #expect(view.overflowBadge.alphaValue == 1)
     }
 }

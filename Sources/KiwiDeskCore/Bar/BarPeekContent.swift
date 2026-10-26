@@ -73,14 +73,16 @@ enum BarPeekSource: Equatable {
         guard !isList else { return .full }
         switch self {
         case .appItem: return .none
-        default: return .name
+        case .glyph: return .name
+        case .overflow, .space, .run: return .full
         }
     }
 
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per
-/// app, its header above its windows, every window a row — an
+/// app, its header above its windows — what a header draws is the
+/// source's `header` (#2649) — every window a row — an
 /// untitled one named as the glyph menu names it (#1947) — and
 /// each row its window's button.
 struct BarPeekContent: Equatable {
@@ -104,10 +106,8 @@ struct BarPeekContent: Equatable {
 
     struct Group: Equatable {
         let app: String
-        /// Whether the header draws the app's name (#2649).
-        var showsName = true
-        /// The app's icon on a list's group, a one-app list's too
-        /// (#2571); nil on a label's (#2649).
+        /// The app's icon; the content's `header` says whether it
+        /// draws (#2571, #2649).
         let icon: NSImage?
         /// One per window shown, in row order.
         let rows: [Row]
@@ -119,6 +119,8 @@ struct BarPeekContent: Equatable {
     }
 
     let groups: [Group]
+    /// What every group's header draws, the source's (#2649).
+    let header: Header
     /// A list's peek reserves the trailing check column on every
     /// row, checked or not, so no title moves with focus (#2063).
     let checks: Bool
@@ -129,8 +131,9 @@ struct BarPeekContent: Equatable {
     /// Every window the peek stands for.
     var windowCount: Int { groups.reduce(0) { $0 + $1.windowCount } }
 
-    private init(groups: [Group], checks: Bool) {
+    private init(groups: [Group], header: Header, checks: Bool) {
         self.groups = groups
+        self.header = header
         self.checks = checks
     }
 
@@ -149,7 +152,6 @@ struct BarPeekContent: Equatable {
             kept.append(
                 Group(
                     app: group.app,
-                    showsName: group.showsName,
                     icon: group.icon,
                     rows: rows,
                     windowCount: group.windowCount
@@ -158,6 +160,7 @@ struct BarPeekContent: Equatable {
         }
         return BarPeekContent(
             groups: fromEnd ? kept.reversed() : kept,
+            header: header,
             checks: checks
         )
     }
@@ -178,6 +181,7 @@ struct BarPeekContent: Equatable {
         header: Header = .full
     ) {
         self.checks = checks
+        self.header = header
         var order: [BarWindowRow] = []
         var grouped: [String: [Row]] = [:]
         for row in rows {
@@ -194,8 +198,7 @@ struct BarPeekContent: Equatable {
             let all = grouped[first.app] ?? []
             return Group(
                 app: first.app,
-                showsName: header != .none,
-                icon: header == .full ? first.icon : nil,
+                icon: first.icon,
                 rows: all,
                 windowCount: all.count
             )
