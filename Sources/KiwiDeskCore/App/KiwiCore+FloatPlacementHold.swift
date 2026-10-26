@@ -27,14 +27,12 @@ extension KiwiCore {
             switch write {
             case .floatPlacement:
                 guard owesPlacement(id) else { return false }
-                placeFloating(id)
-                return true
+                return placeFloating(id)
             case .reanchor:
                 guard let space = state.workspaces.space(of: id) else {
                     return false
                 }
-                reanchorFloat(id, to: space)
-                return true
+                return reanchorFloat(id, to: space)
             }
         }
     }
@@ -45,7 +43,10 @@ extension KiwiCore {
     func placeDetectedFloat(_ id: WindowID) {
         guard state.windows[id] != nil, !placementIsSeed(id),
             oweAmbientWrite(.floatPlacement, for: id)
-        else { return placeFloating(id) }
+        else {
+            placeFloating(id)
+            return
+        }
     }
 
     /// Whether an owed placement is still due: the window still a

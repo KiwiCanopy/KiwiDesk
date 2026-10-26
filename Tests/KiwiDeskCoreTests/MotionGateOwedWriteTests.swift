@@ -38,15 +38,15 @@ struct MotionGateOwedWriteTests {
     func oweAloneHoldsAPass() {
         let gate = gate(moving: true)
         #expect(gate.owed == nil)
-        gate.owe(.reanchor, for: window)
+        _ = gate.owe(.reanchor, for: window)
         #expect(gate.owed != nil)
     }
 
     @Test("a placement paid ahead of a re-anchor drops the re-anchor")
     func placementPaysFirst() {
         let gate = gate(moving: true)
-        gate.owe(.reanchor, for: window)
-        gate.owe(.floatPlacement, for: window)
+        _ = gate.owe(.reanchor, for: window)
+        _ = gate.owe(.floatPlacement, for: window)
         var paid: [MotionGate.OwedWrite] = []
         gate.payWrites { _, write in
             paid.append(write)
@@ -59,8 +59,8 @@ struct MotionGateOwedWriteTests {
     @Test("a placement no longer due falls through to the re-anchor")
     func placementFallsThrough() {
         let gate = gate(moving: true)
-        gate.owe(.floatPlacement, for: window)
-        gate.owe(.reanchor, for: window)
+        _ = gate.owe(.floatPlacement, for: window)
+        _ = gate.owe(.reanchor, for: window)
         var paid: [MotionGate.OwedWrite] = []
         gate.payWrites { _, write in
             paid.append(write)
@@ -74,7 +74,7 @@ struct MotionGateOwedWriteTests {
     @Test("nothing holds while the writes are paid")
     func paymentHoldsNothing() {
         let gate = gate(moving: true)
-        gate.owe(.reanchor, for: window)
+        _ = gate.owe(.reanchor, for: window)
         var heldInside = true
         gate.payWrites { _, _ in
             heldInside = gate.holdsNow

@@ -158,6 +158,10 @@ struct MotionScopeCensusTests {
                 "KiwiDeskCore/App/KiwiCore+FloatReanchor.swift": 1,
             ]
         )
+        let gate = try Self.counts(of: "motionGate.owe(")
+        #expect(
+            gate == ["KiwiDeskCore/App/KiwiCore+FloatPlacementHold.swift": 1]
+        )
         let pays = try Self.counts(of: "\n        payOwedWrites()")
         #expect(pays == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 1])
         let reanchors = try Self.counts(of: "reanchorFloat(id, to: space)")
@@ -179,7 +183,7 @@ struct MotionScopeCensusTests {
         )
         let owe = try #require(
             arm.range(
-                of: "if oweAmbientWrite(.reanchor, for: id) { return }"
+                of: "if oweAmbientWrite(.reanchor, for: id) { return false }"
             )
         )
         let writes = try #require(arm.range(of: "tiler.applyFrame("))

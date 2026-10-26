@@ -83,7 +83,7 @@ final class MotionGate {
     private var owedSince: TimeInterval?
     private var armed = false
     private var releasing = false
-    private var paying = false
+    private var payingWrites = false
     private var switching = false
     /// Whether a watched switch's pass is running now.
     var isSwitching: Bool { switching }
@@ -129,13 +129,12 @@ final class MotionGate {
     /// Whether a pass asked now would wait — `admit`'s verdict,
     /// read without owing anything.
     var holdsNow: Bool {
-        !releasing && !paying && !verdict(cause()).runs
+        !releasing && !payingWrites && !verdict(cause()).runs
     }
 
     /// Owes `write` for `id` while the gate holds, holding a pass of
     /// its own when none is owed, so the release that pays it is
     /// armed; returns whether it owed.
-    @discardableResult
     func owe(_ write: OwedWrite, for id: WindowID) -> Bool {
         guard holdsNow else { return false }
         owedWrites[id, default: []].insert(write)
@@ -159,8 +158,8 @@ final class MotionGate {
     func payWrites(_ pay: (WindowID, OwedWrite) -> Bool) {
         let due = owedWrites
         owedWrites = [:]
-        paying = true
-        defer { paying = false }
+        payingWrites = true
+        defer { payingWrites = false }
         for (id, writes) in due {
             for write in OwedWrite.allCases where writes.contains(write) {
                 if pay(id, write) { break }

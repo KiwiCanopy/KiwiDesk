@@ -24,23 +24,26 @@ extension KiwiCore {
         )
     }
 
-    /// Places a just-floated `id` per `float_placement`. Callers
+    /// Places a just-floated `id` per `float_placement`, returning
+    /// whether it wrote or seeded a frame. Callers
     /// gate the transition on `isEffectiveFloatForPlacement`
     /// read before the flip; the setting gate lives here. On a
     /// Space no screen shows — a verb naming its window (#1518) —
     /// the frame is seeded as its pending capture, paid at the
     /// activation, as `placeEnteringFloat` does.
-    func placeFloating(_ id: WindowID) {
-        guard let window = state.windows[id] else { return }
+    @discardableResult
+    func placeFloating(_ id: WindowID) -> Bool {
+        guard let window = state.windows[id] else { return false }
         if placementIsSeed(id) {
-            if seedsPlacement(id),
+            guard seedsPlacement(id),
                 let target = floatPlacementTarget(for: id)
-            {
-                seedPlacement(id, target)
-            }
-            return
+            else { return false }
+            seedPlacement(id, target)
+            return true
         }
-        guard let target = floatPlacementTarget(for: id) else { return }
+        guard let target = floatPlacementTarget(for: id) else {
+            return false
+        }
         let base = currentFrame(of: id, fallback: window.frame)
         tiler.applyFrame(
             id,
@@ -52,6 +55,7 @@ extension KiwiCore {
         // must not read as the app refusing the last tiled ask, or
         // the next tiled space places the float's size as residue.
         tiler.forgetSizeBound(id)
+        return true
     }
 
     /// Whether `placeFloating` only seeds `id`'s placement: its

@@ -26,8 +26,10 @@ extension KiwiCore {
     /// generalized; the quick chip drop is unaffected, its
     /// exemption clears before `moveWindow` runs). Callers run
     /// this AFTER the membership move so the target space
-    /// resolves the bars.
-    func reanchorFloat(_ id: WindowID, to target: SpaceID) {
+    /// resolves the bars. Returns whether it wrote or seeded a
+    /// frame; one it owes (#2628) writes nothing yet.
+    @discardableResult
+    func reanchorFloat(_ id: WindowID, to target: SpaceID) -> Bool {
         guard let window = state.windows[id],
             EffectiveFloat.applies(
                 isFloating: window.isFloating,
@@ -35,7 +37,7 @@ extension KiwiCore {
             ),
             window.stickyScope != .global,
             tiler.dragExemptWindow != id
-        else { return }
+        else { return false }
         // A parked float's state frame is the stash corner; the
         // pending capture is the real frame to translate.
         let base = tiler.stashOriginal(id) ?? window.frame
@@ -47,12 +49,12 @@ extension KiwiCore {
             let sourceScreen = TilingEngine.screen(
                 containing: base
             ) ?? ScreenList.mainOrFirst
-        else { return }
+        else { return false }
         let source = GeometryUtils.axVisibleFrame(
             of: sourceScreen
         )
         let dest = GeometryUtils.axVisibleFrame(of: targetScreen)
-        guard source != dest else { return }
+        guard source != dest else { return false }
         let translated = FloatReanchor.target(
             frame: base,
             from: source,
@@ -83,7 +85,7 @@ extension KiwiCore {
         // (#1178), and stands.
         if window.isSticky || !window.isFloating {
             // Re-derived from the window's Space when paid (#2628).
-            if oweAmbientWrite(.reanchor, for: id) { return }
+            if oweAmbientWrite(.reanchor, for: id) { return false }
             tiler.forgetStash(id)
             tiler.applyFrame(
                 id,
@@ -94,6 +96,7 @@ extension KiwiCore {
         } else {
             tiler.seedStash(id, frame: clamped)
         }
+        return true
     }
 
     /// Re-anchors every floating member of `space` onto its

@@ -241,7 +241,7 @@ struct SnapshotStoreCensusTests {
         )
         // A direct write owed while the hand moves (#2627).
         core.tiler.motionGate.quiescence.sinceMouseMoved = { 0 }
-        core.tiler.motionGate.owe(.floatPlacement, for: WindowID(1))
+        _ = core.tiler.motionGate.owe(.floatPlacement, for: WindowID(1))
         return core
     }
 
