@@ -21,13 +21,6 @@ extension KiwiCore {
     /// waiting the delay out.
     static let borderResyncDelayMS = 300
 
-    /// Asks this close are one burst of steps (#2659); the step
-    /// pace measured was 0.5 s.
-    static let dropSettleBurstGap: Duration = .seconds(1)
-
-    /// The longest a burst defers the visibility pass (#2659).
-    static let dropSettleMaxWait: Duration = .seconds(3)
-
     /// WindowServer can briefly order the swap target out while a
     /// drag/drop retile and focus raise overlap. Its hide
     /// notification hides that target's ring, but macOS does not
@@ -53,29 +46,24 @@ extension KiwiCore {
     /// would be far too slow for a hidden ring. Separate deferred
     /// keys, so neither can cancel the other.
     ///
-    /// A burst of steps re-stacks once, `dropSettleBurstGap` after
-    /// its last ask and at least every `dropSettleMaxWait`: on
-    /// device every per-step pass was a no-op (160 of 160, #2659),
-    /// so a ring hidden mid-burst returns when the burst rests.
+    /// Inside a burst of steps it waits per `DropSettleBurst`: every
+    /// per-step pass was a no-op on device (160 of 160, #2659).
     func scheduleBorderDropReconcile() {
-        let now = wallClock()
-        let burst = borders.dropSettleAskedAt.map {
-            now.timeIntervalSince($0) * 1_000
-                < Double(Self.dropSettleBurstGap.wholeMilliseconds)
-        }
-        borders.dropSettleAskedAt = now
         let animationMS =
             tiler.animation.activeCount > 0
             ? tiler.settings.animations.durationMS : 0
+        let wait = borders.dropSettleBurst.wait(
+            asking: wallClock(),
+            early: Double(animationMS + 50) / 1_000
+        )
         deferred.schedule(
             .borderDropSettle,
-            after: burst == true
-                ? Self.dropSettleBurstGap
-                : .milliseconds(animationMS + 50),
-            maxWait: Self.dropSettleMaxWait
+            after: .milliseconds(Int((wait * 1_000).rounded()))
         ) { [weak self] in
-            self?.updateBorders(reassertOrder: true)
-            self?.updateMarks(reassertOrder: true)
+            guard let self else { return }
+            borders.dropSettleBurst.ran(at: wallClock())
+            updateBorders(reassertOrder: true)
+            updateMarks(reassertOrder: true)
         }
     }
 

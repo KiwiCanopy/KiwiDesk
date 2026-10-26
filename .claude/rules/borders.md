@@ -150,10 +150,11 @@ second cancel the other:
   ring, exactly as the `updateBorders()` at the end of each
   `retile()` does, and that includes the residual named below: a
   window the user is dragging under a live WindowServer stream is
-  not guarded here either. **A burst of asks re-stacks once**: an
-  ask inside `KiwiCore.dropSettleBurstGap` of the last one waits
-  the gap out, bounded by `dropSettleMaxWait`, so a ring hidden
-  mid-burst returns when the steps rest — every per-step pass was a
+  not guarded here either. **Time it through the one
+  `DropSettleBurst`**, measured from the pass's last RUN and never
+  its last ask, so the asks one gesture makes before the pass runs
+  (a drop's retile and its own defer) keep the early wait; a burst
+  waits its gap and runs by `maxWait` — every per-step pass was a
   no-op on device (#2659, `BorderDropSettleBurstTests`).
 - **Geometry, late** (`scheduleBorderResync`, `.borderResync`).
   Rides `AnimationEngine.onAllAnimationsEnded`, never a duration
@@ -201,11 +202,13 @@ these:
   `FloatRaiseLandingWiringTests`); that landing pays one ring
   order per raise even where a front-order ring needed none,
   accepted. **An event's restack is owed to the run loop turn's
-  end** and paid once per window there, a hide in the same turn
-  dropping it, since one raise sends a reorder and an unhide and
-  each ordered the ring again (#2659, `WindowServerTurnEndTests`,
-  `WindowServerWatchSeamTests` ▸ `eventRestackIsOwed`); a new
-  event arm owes through `oweRestack`, never `restack` itself. A new caller is a new round
+  end** and paid once per window there, skipping a consumer whose
+  hide landed since, since one raise sends a reorder and an unhide
+  and each ordered the ring again (#2659,
+  `WindowServerTurnEndTests`, `WindowServerWatchSeamTests` ▸
+  `eventRestackIsOwed`); a new event arm owes through
+  `oweRestack`, never `restack` itself. A new caller of a ring's
+  order is a new round
   trip on the switch path and owes its ruling in
   `BorderOrderCensusTests`' `allowed` map; a front-order ring's
   level read is a second one (`levelOf`). The order is AppKit's
@@ -438,7 +441,8 @@ Obligations:
   (#2287), so while a plate shows, KiwiVision's consumer also hears
   the float tier and a float's own reorder event re-stacks the
   target's overlays through the one watch door, the plate landing
-  above the float at once rather than at the raise's end. Gate it
+  above the float in that event's turn rather than at the raise's
+  end. Gate it
   on a shown plate, since each call is a ring and mark order on the
   switch path (#1925) (`KiwiVisionFloatLandingTests`,
   `BorderOrderCensusTests` ▸ `watchRestackSitesAreCensused`).

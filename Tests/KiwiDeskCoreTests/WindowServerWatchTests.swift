@@ -17,7 +17,6 @@ struct WindowServerWatchTests {
     /// A watch recording every hook call, in order.
     private func recordingWatch() -> (WindowServerWatch, () -> [String]) {
         let watch = WindowServerWatch()
-        watch.atTurnEnd = { $0() }
         watch.readWindowBounds = { [frame] _ in frame }
         final class Log { var calls: [String] = [] }
         let log = Log()

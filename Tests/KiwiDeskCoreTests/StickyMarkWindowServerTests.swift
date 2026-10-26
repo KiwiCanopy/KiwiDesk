@@ -16,7 +16,6 @@ struct StickyChipWindowServerTeeTests {
     /// A watch whose mark consumer records its restacks.
     private func markWatch() -> (WindowServerWatch, () -> [WindowID]) {
         let watch = WindowServerWatch()
-        watch.atTurnEnd = { $0() }
         var reasserted: [WindowID] = []
         watch.connect(
             .mark,
@@ -54,7 +53,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("The mark hears only its own windows, on a live stream")
     func markTrackingReflectsItsRequest() {
         let watch = WindowServerWatch()
-        watch.atTurnEnd = { $0() }
         watch.override = { _ in true }
         watch.request([WindowID(7)], for: .mark)
         #expect(watch.requested(by: .mark) == [WindowID(7)])
@@ -68,7 +66,6 @@ struct StickyChipWindowServerTeeTests {
     @Test("A dead stream never claims WS tracking")
     func noTrackingWhenStreamDown() {
         let watch = WindowServerWatch()
-        watch.atTurnEnd = { $0() }
         watch.request([WindowID(7)], for: .mark)
         // Not started: the mark keeps following AX echoes, never
         // stands down waiting on a stream that is off.

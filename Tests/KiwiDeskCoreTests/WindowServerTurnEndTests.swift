@@ -1,4 +1,5 @@
 import CoreGraphics
+import Foundation
 import Testing
 
 @testable import KiwiDeskCore
@@ -15,7 +16,7 @@ struct WindowServerTurnEndTests {
 
     /// A watch whose turn end the test runs by hand, recording
     /// every hook call in order.
-    private func turnWatch() -> (
+    private func turnWatch(markHides: Bool = true) -> (
         WindowServerWatch, endTurn: () -> Void, calls: () -> [String]
     ) {
         final class Box {
@@ -32,8 +33,10 @@ struct WindowServerTurnEndTests {
             hooks.restack = { id in
                 box.calls.append("\(name).restack w\(id.raw)")
             }
-            hooks.hide = { id in
-                box.calls.append("\(name).hide w\(id.raw)")
+            if consumer != .mark || markHides {
+                hooks.hide = { id in
+                    box.calls.append("\(name).hide w\(id.raw)")
+                }
             }
             watch.connect(consumer, hooks)
         }
@@ -85,6 +88,19 @@ struct WindowServerTurnEndTests {
         #expect(calls() == ["ring.hide w1", "ring.restack w2"])
     }
 
+    /// The mark and overflow mark take no hide: a reorder then a
+    /// hide still owes them their re-assert.
+    @Test("a hide drops only the consumers that took it")
+    func hideKeepsConsumersWithoutAHide() {
+        let (watch, endTurn, calls) = turnWatch(markHides: false)
+        watch.request([w1], for: .mark)
+        watch.request([w1], for: .ring)
+        watch.handle(.reorder, window: w1)
+        watch.handle(.hide, window: w1)
+        endTurn()
+        #expect(calls() == ["ring.hide w1", "mark.restack w1"])
+    }
+
     @Test("an unhide after a hide still restacks")
     func unhideAfterHideRestacks() {
         let (watch, endTurn, calls) = turnWatch()
@@ -114,5 +130,25 @@ struct WindowServerTurnEndTests {
         watch.request([w1], for: .ring)
         endTurn()
         #expect(calls().isEmpty)
+    }
+}
+
+/// The live turn end the bootstrap wires (#2659): work waits for
+/// the main run loop's turn to end, and work queued while it
+/// drains runs in the same drain.
+@Suite("Main run loop turn end")
+@MainActor
+struct MainRunLoopTurnEndTests {
+    @Test("work runs when the turn ends, nested work included")
+    func runsAtTheTurnsEnd() {
+        @MainActor final class Box { var ran: [String] = [] }
+        let box = Box()
+        MainRunLoopTurnEnd.schedule {
+            box.ran.append("first")
+            MainRunLoopTurnEnd.schedule { box.ran.append("nested") }
+        }
+        #expect(box.ran.isEmpty)
+        RunLoop.main.run(until: Date().addingTimeInterval(0.05))
+        #expect(box.ran == ["first", "nested"])
     }
 }

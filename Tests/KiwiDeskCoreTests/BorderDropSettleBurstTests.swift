@@ -4,62 +4,80 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The visibility settle pass re-stacks once per burst of steps
-/// (#2659): an ask inside `dropSettleBurstGap` of the last one
-/// waits the gap out, and a lone ask keeps its early timing.
+/// (#2659): an ask within the gap of the pass last running waits
+/// the gap out, asks before a pass runs are one ask, and a burst
+/// runs its pass at least every `maxWait`.
 @Suite("Border drop settle burst")
 @MainActor
 struct BorderDropSettleBurstTests {
-    /// The waits the drop settle slot slept, read after it ran.
-    private func recordWaits(_ core: KiwiCore) -> () -> [Duration] {
-        @MainActor final class Box { var waits: [Duration] = [] }
-        let box = Box()
-        core.deferred.sleep = { wait in
-            await MainActor.run { box.waits.append(wait) }
-        }
-        return { box.waits }
-    }
-
-    private func ask(_ core: KiwiCore) async {
-        core.scheduleBorderDropReconcile()
-        let pass = core.deferred.task(for: .borderDropSettle)
-        #expect(pass != nil)
-        await pass?.value
-    }
+    private let t0 = Date(timeIntervalSinceReferenceDate: 1_000)
+    private let early: TimeInterval = 0.05
 
     @Test("a lone ask settles early")
-    func loneAskIsEarly() async {
-        let core = makeTestCore()
-        let waits = recordWaits(core)
-        await ask(core)
-        #expect(waits() == [.milliseconds(50)])
+    func loneAskIsEarly() {
+        var burst = DropSettleBurst()
+        #expect(burst.wait(asking: t0, early: early) == early)
     }
 
-    @Test("an ask inside the gap waits the burst out")
-    func burstWaitsTheGap() async {
-        let core = makeTestCore()
-        let waits = recordWaits(core)
-        await ask(core)
-        await ask(core)
-        #expect(
-            waits() == [.milliseconds(50), KiwiCore.dropSettleBurstGap]
-        )
-        #expect(core.borders.lastSyncReassertedOrder == true)
+    @Test("asks before the pass runs are one lone ask")
+    func asksBeforeARunAreOne() {
+        var burst = DropSettleBurst()
+        #expect(burst.wait(asking: t0, early: early) == early)
+        #expect(burst.wait(asking: t0, early: early) == early)
+    }
+
+    @Test("an ask inside the gap after a run waits the burst out")
+    func askAfterARunWaitsTheGap() {
+        var burst = DropSettleBurst()
+        burst.ran(at: t0)
+        let ask = t0.addingTimeInterval(0.25)
+        #expect(burst.wait(asking: ask, early: early) == DropSettleBurst.gap)
+        let next = ask.addingTimeInterval(1.2)
+        #expect(burst.wait(asking: next, early: early) == DropSettleBurst.gap)
     }
 
     @Test("an ask past the gap is lone again")
-    func pastTheGapIsLone() async {
-        let core = makeTestCore()
-        let waits = recordWaits(core)
-        let start = core.wallClock()
-        await ask(core)
-        core.wallClock = { start.addingTimeInterval(1.5) }
-        await ask(core)
-        #expect(waits() == [.milliseconds(50), .milliseconds(50)])
+    func pastTheGapIsLone() {
+        var burst = DropSettleBurst()
+        burst.ran(at: t0)
+        let ask = t0.addingTimeInterval(DropSettleBurst.gap + 0.5)
+        #expect(burst.wait(asking: ask, early: early) == early)
     }
 
-    @Test("the gap fits a step pace and the bound outlasts it")
-    func boundsAreOrdered() {
-        #expect(KiwiCore.dropSettleBurstGap >= .milliseconds(500))
-        #expect(KiwiCore.dropSettleMaxWait > KiwiCore.dropSettleBurstGap)
+    @Test("a burst runs its pass by maxWait")
+    func burstIsBounded() {
+        var burst = DropSettleBurst()
+        burst.ran(at: t0)
+        let start = t0.addingTimeInterval(0.5)
+        _ = burst.wait(asking: start, early: early)
+        let late = start.addingTimeInterval(DropSettleBurst.maxWait - 0.4)
+        let wait = burst.wait(asking: late, early: early)
+        #expect(abs(wait - 0.4) < 0.001)
+        let over = start.addingTimeInterval(DropSettleBurst.maxWait + 1)
+        #expect(burst.wait(asking: over, early: early) == early)
+        burst.ran(at: over)
+        #expect(burst.burstSince == nil)
+    }
+
+    /// The core asks through the type and stamps the run in the
+    /// pass's own body, so a drop's two asks keep the early wait.
+    @Test("the core's pass stamps its run and a drop stays early")
+    func coreStampsTheRun() async {
+        @MainActor final class Box { var waits: [Duration] = [] }
+        let box = Box()
+        let core = makeTestCore()
+        core.deferred.sleep = { wait in
+            await MainActor.run { box.waits.append(wait) }
+        }
+        core.scheduleBorderDropReconcile()
+        core.scheduleBorderDropReconcile()
+        await core.deferred.task(for: .borderDropSettle)?.value
+        #expect(box.waits.last == .milliseconds(50))
+        #expect(core.borders.dropSettleBurst.ranAt == core.wallClock())
+        #expect(core.borders.lastSyncReassertedOrder == true)
+        core.scheduleBorderDropReconcile()
+        let pass = core.deferred.task(for: .borderDropSettle)
+        await pass?.value
+        #expect(box.waits.last == .seconds(1))
     }
 }

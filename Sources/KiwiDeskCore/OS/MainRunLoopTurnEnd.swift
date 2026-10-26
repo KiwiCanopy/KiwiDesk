@@ -2,7 +2,8 @@ import CoreFoundation
 
 /// Runs work once at the end of the current main run loop turn,
 /// ahead of Core Animation's commit, so an order it issues lands
-/// in that turn's commit (#2659).
+/// in that turn's commit (#2659). `MainRunLoopPass` is its
+/// opposite: it counts AFTER the commit, and never on exit.
 @MainActor
 enum MainRunLoopTurnEnd {
     private static var pending: [@MainActor () -> Void] = []
