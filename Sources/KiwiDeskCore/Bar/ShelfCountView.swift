@@ -84,8 +84,8 @@ final class ShelfCountView: NSView {
         ink: NSColor,
         hoverInk: NSColor,
         hoverFill: NSColor = .clear,
-        hoverHex: String? = nil,
-        edge: AppBarEdge = .top,
+        hoverHex: String?,
+        edge: AppBarEdge,
         chipRadius: CGFloat = 0
     ) {
         chip.layer?.backgroundColor = hoverFill.cgColor

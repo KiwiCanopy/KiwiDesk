@@ -45,7 +45,9 @@ struct ShelfCountTests {
             fontSize: 14,
             shelf: KiwiShelf(),
             ink: .white,
-            hoverInk: .red
+            hoverInk: .red,
+            hoverHex: nil,
+            edge: .top
         )
         let container =
             horizontal
@@ -138,7 +140,9 @@ struct ShelfCountTests {
             fontSize: 12,
             shelf: KiwiShelf(),
             ink: .white,
-            hoverInk: .white
+            hoverInk: .white,
+            hoverHex: nil,
+            edge: .top
         )
         #expect(!view.isHidden)
         #expect(view.accessibilityRole() == .button)
@@ -151,7 +155,9 @@ struct ShelfCountTests {
             fontSize: 12,
             shelf: KiwiShelf(),
             ink: .white,
-            hoverInk: .white
+            hoverInk: .white,
+            hoverHex: nil,
+            edge: .top
         )
         #expect(view.isHidden)
     }
