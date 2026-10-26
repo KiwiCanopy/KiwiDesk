@@ -77,6 +77,8 @@ struct TitleSlotPreviewTests {
 
     /// The strip holds the slot in a hidden twin and draws its title
     /// through `BarStripSlotTitle`, never framed to the slot itself.
+    /// Syntax only: a strip that stretches or leads its group some
+    /// other way stays green here, since no clause renders the strip.
     @Test("The strip frames a title in the slot")
     func stripFramesTheTitle() throws {
         let file = SourceScan.repoRoot(from: #filePath)
@@ -90,5 +92,20 @@ struct TitleSlotPreviewTests {
                 of: "BarStripSlotTitle(slot: spec.titleSlot)"
             ) == 1
         )
+        // The group centres in the twin, and the title is never
+        // stretched past its own width.
+        #expect(source.occurrences(of: "ZStack(alignment:") == 0)
+        let start = try #require(
+            source.range(of: "func iconAndTitle(")
+        )
+        let end = try #require(
+            source.range(
+                of: "func indicatorMark(",
+                range: start.upperBound..<source.endIndex
+            )
+        )
+        let body = String(source[start.upperBound..<end.lowerBound])
+        #expect(body.contains("BarStripSlotTitle("))
+        #expect(!body.contains("maxWidth:"))
     }
 }
