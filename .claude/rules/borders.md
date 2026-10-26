@@ -6,6 +6,7 @@ paths:
   # for the exact file where someone would re-merge the two keys.
   - "Sources/KiwiDeskCore/App/KiwiCore+Borders.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
+  - "Sources/KiwiDeskCore/App/DropSettleBurst.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
@@ -154,7 +155,8 @@ second cancel the other:
   `DropSettleBurst`**, measured from the pass's last RUN and never
   its last ask, so the asks one gesture makes before the pass runs
   (a drop's retile and its own defer) keep the early wait; a burst
-  waits its gap and runs by `maxWait` — every per-step pass was a
+  waits its gap, and no ask waits past `maxWait` from the first
+  one no pass has answered — every per-step pass was a
   no-op on device (#2659, `BorderDropSettleBurstTests`).
 - **Geometry, late** (`scheduleBorderResync`, `.borderResync`).
   Rides `AnimationEngine.onAllAnimationsEnded`, never a duration

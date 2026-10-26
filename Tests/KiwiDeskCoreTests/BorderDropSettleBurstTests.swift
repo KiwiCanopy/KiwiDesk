@@ -54,9 +54,27 @@ struct BorderDropSettleBurstTests {
         let wait = burst.wait(asking: late, early: early)
         #expect(abs(wait - 0.4) < 0.001)
         let over = start.addingTimeInterval(DropSettleBurst.maxWait + 1)
-        #expect(burst.wait(asking: over, early: early) == early)
+        #expect(burst.wait(asking: over, early: early) == 0)
         burst.ran(at: over)
-        #expect(burst.burstSince == nil)
+        #expect(burst.pendingSince == nil)
+        let next = over.addingTimeInterval(DropSettleBurst.gap + 1)
+        #expect(burst.wait(asking: next, early: early) == early)
+    }
+
+    /// Asks closer than the early wait never let a pass run; the
+    /// bound still does.
+    @Test("asks faster than the early wait are bounded too")
+    func fastLoneAsksAreBounded() {
+        var burst = DropSettleBurst()
+        var ask = t0
+        var waits: [TimeInterval] = []
+        let end = t0.addingTimeInterval(DropSettleBurst.maxWait + 0.1)
+        while ask <= end {
+            waits.append(burst.wait(asking: ask, early: early))
+            ask = ask.addingTimeInterval(0.04)
+        }
+        #expect(waits.first == early)
+        #expect(waits.last == 0)
     }
 
     /// The core asks through the type and stamps the run in the
