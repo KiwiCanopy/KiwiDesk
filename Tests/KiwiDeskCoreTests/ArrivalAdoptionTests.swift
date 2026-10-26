@@ -164,6 +164,24 @@ struct ArrivalAdoptionTests {
         return (loop, box, elements, listing)
     }
 
+    /// The reconcile reads the reading's map, never the server,
+    /// for every listed window (#2531).
+    @Test("the reading carries the layers the reader took")
+    func readingCarriesTheLayers() {
+        let (loop, _, elements, listing) = makeLoop()
+        listing.layers = [arrivals[0]: 3]
+        let reader = loop.listedWindowReader(
+            pid: pid,
+            bundleID: ref.bundleID,
+            tracked: [tracked]
+        )
+        let (windows, layers) = reader.read(elements) {
+            listing.layers[$0]
+        }
+        #expect(windows.count == elements.count)
+        #expect(layers == [arrivals[0]: 3])
+    }
+
     @Test("an arrival costs the main actor no AX call")
     func arrivalAsksNothingOnMain() {
         let (loop, box, _, _) = makeLoop()

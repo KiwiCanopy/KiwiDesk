@@ -172,6 +172,17 @@ Every one of the following binds whoever touches them:
   `allNormalWindowOwners`' docstring. And the census is
   downstream of the removal: the sweep never reads it
   ([accessibility.md](accessibility.md)).
+- **A public window-list read can stall the main actor from any
+  thread (#2531).** `CGWindowListCopyWindowInfo` first waits for
+  WindowServer to take this process's pending window updates, and
+  holds the connection lock while it waits; a main-actor
+  CATransaction commit then waits on that lock — ~500 ms per read
+  while a slow app held WindowServer (sampled 2026-10-26). So
+  moving such a read off the main actor does not take it off the
+  main actor's path: a per-window layer reads `SLSGetWindowLevel`
+  (`FloatDetection.windowLayer(of:)`, `layerReader`, the public
+  read their fallback), and a new whole-list read states its
+  cadence and why no per-window read answers it.
 - **WindowServer's window create/destroy notifications are a
   WAKE-UP, never a source of truth (#1877).** Codes 1325/1326
   through `SLSRegisterNotifyProc`, window id at payload offset 8

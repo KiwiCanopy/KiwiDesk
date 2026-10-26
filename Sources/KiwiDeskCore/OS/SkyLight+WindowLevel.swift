@@ -20,7 +20,7 @@ extension SkyLight {
 
     /// Whether `windowLevel` can answer at all.
     static var readsWindowLevel: Bool {
-        getWindowLevelSymbol.function != nil
+        getWindowLevelSymbol.function != nil && connection != nil
     }
 
     /// `wid`'s level, or nil where the server knows no such window.

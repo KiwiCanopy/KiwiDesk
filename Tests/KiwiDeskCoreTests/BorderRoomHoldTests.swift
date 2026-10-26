@@ -53,6 +53,25 @@ struct BorderRoomHoldTests {
         #expect(backend.rooms.last == .some(nil))
     }
 
+    /// A focus jump between scroll steps re-syncs the rings; the
+    /// held room must survive that sync, not only `apply`.
+    @Test("A focus jump's sync keeps a held room")
+    func syncKeepsTheHeldRoom() {
+        let backend = RoomBackend()
+        let border = manager(backend)
+        defer { border.clear() }
+        border.sync([spec(9)], alive: nil, reassertOrder: false)
+        border.isAnimating = { _ in true }
+        border.apply(WindowID(9), windowFrame: frame)
+        let room = BorderManager.room(around: screen, scale: 2)
+        border.isAnimating = { _ in false }
+        border.roomsHeld = true
+        let before = backend.rooms.count
+        border.sync([spec(9)], alive: nil, reassertOrder: true)
+        #expect(backend.rooms.count > before)
+        #expect(backend.rooms.last == room)
+    }
+
     @Test("A ring that never animated takes no held room")
     func stillRingTakesNoRoom() {
         let backend = RoomBackend()
@@ -74,6 +93,18 @@ struct BorderRoomHoldTests {
         #expect(!core.borders.roomsHeld)
         #expect(core.borders.heldRooms.isEmpty)
         core.deferred.cancel(.borderResync)
+    }
+
+    /// A stop drops the owed resync, so the clear lets the rooms go.
+    @Test("Clearing the rings lets a held room go")
+    func clearLetsTheHoldGo() {
+        let core = makeTestCore()
+        core.borders.heldRooms = [WindowID(9)]
+        core.scheduleBorderResync()
+        core.deferred.cancel(.borderResync)
+        core.borders.clear()
+        #expect(!core.borders.roomsHeld)
+        #expect(core.borders.heldRooms.isEmpty)
     }
 }
 

@@ -138,14 +138,11 @@ editing AX code:
   synchronous reconcile reads it.
   `ReconcileOffMainTests`, `ReconcileOffMainDebtTests`,
   `ReconcileOffMainRecheckTests` and `ReconcileSnapshotTests`
-  hold the behaviour. **The read takes each listed window's layer
-  through `FloatDetection.layerReader`, never the whole window
-  list** (#2531): `CGWindowListCopyWindowInfo` waits on this
-  process's pending window updates while holding the WindowServer
-  connection lock, and the ring's commit on the main actor waited
-  ~500 ms behind it while a slow app held WindowServer (sampled
-  2026-10-26). A new whole-list read joins `ListLayerReadSeamTests`'
-  `allowed` map with its reason.
+  hold the behaviour. **A list read, off the main actor or on it,
+  takes each listed window's layer through
+  `FloatDetection.layerReader`, never a public window-list read** —
+  the instance of os-private-apis.md's WindowServer-read rule
+  (#2531, `ListLayerReadSeamTests`).
 - **Float detection reads one plain input, `WindowFacts`, and
   every live producer builds it through `WindowFacts.read`
   (#1883)** — `track`, the float recheck and the list read, held

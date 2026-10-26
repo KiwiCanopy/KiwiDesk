@@ -213,6 +213,8 @@ public final class BorderManager {
         specs = [:]
         cornerRadii = [:]
         arrival = nil
+        roomsHeld = false
+        heldRooms = []
         watch.request([], for: .ring)
     }
 

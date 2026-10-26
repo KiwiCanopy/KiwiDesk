@@ -1,11 +1,11 @@
 import Foundation
 import Testing
 
-/// The off-main list read takes its layers one window at a time
-/// (#2531). The whole-list read waits on this process's pending
-/// window updates while holding the WindowServer connection lock,
-/// and the ring's commit on the main actor waited ~500 ms behind
-/// it, so it stays out of every read that runs on a focus change.
+/// A list read takes its layers one window at a time (#2531). The
+/// public window list waits on this process's pending window
+/// updates while holding the WindowServer connection lock, and the
+/// ring's commit on the main actor waited ~500 ms behind it, so the
+/// list read's files ask the server through `layerReader` alone.
 @Suite("List layer read seams (#2531)")
 struct ListLayerReadSeamTests {
     private static var core: URL {
@@ -13,64 +13,98 @@ struct ListLayerReadSeamTests {
             .appendingPathComponent("Sources/KiwiDeskCore")
     }
 
-    /// Who may read a whole app's layers, and why.
-    private static let allowed: [String: String] = [
-        "FloatDetection+Ignore.swift":
-            "its declaration, and the per-window reader's fallback "
-            + "where SkyLight has no level read",
-        "EventLoop+Reconcile.swift":
-            "the main-actor reconcile with no off-main reading, for "
-            + "an app with an ignore rule",
-    ]
-
-    @Test("the whole-list layer read has its ruled callers only")
-    func wholeListReadIsRuled() throws {
-        var callers: Set<String> = []
-        for file in try SourceScan.swiftSources(under: Self.core) {
-            let source = try SourceScan.strippedSource(at: file)
-            if source.contains("windowLayers(pid:") {
-                callers.insert(file.lastPathComponent)
-            }
-        }
-        #expect(callers == Set(Self.allowed.keys))
+    private static func source(_ path: String) throws -> String {
+        try SourceScan.strippedSource(
+            at: core.appendingPathComponent(path)
+        )
     }
 
-    @Test("the off-main read defaults to the per-window reader")
-    func offMainSeamIsPerWindow() throws {
-        let source = try SourceScan.strippedSource(
-            at: Self.core.appendingPathComponent(
-                "Events/EventLoop+ReconcileOffMain.swift"
-            )
-        )
-        let compact = source.filter { !$0.isWhitespace }
+    /// The files a list read runs through, off the main actor or
+    /// on it, and the reads that wait on the public window list.
+    private static let listReadFiles = [
+        "Events/EventLoop+ListedWindows.swift",
+        "Events/EventLoop+ReconcileOffMain.swift",
+        "Events/EventLoop+SwitchReconcile.swift",
+        "Events/EventLoop+Reconcile.swift",
+    ]
+    private static let wholeListReads = [
+        "CGWindowListCopyWindowInfo", "windowLayers",
+        "serverSnapshot", "onScreenNormalWindowIDs",
+        "frontToBackWindows",
+    ]
+
+    @Test("a list read names no public window-list read")
+    func listReadFilesTakeTheReader() throws {
+        for file in Self.listReadFiles {
+            let text = try Self.source(file)
+            #expect(!text.isEmpty, "\(file) read empty")
+            for read in Self.wholeListReads {
+                #expect(!text.contains(read), "\(file) reads \(read)")
+            }
+        }
+    }
+
+    /// The whole app's layers have one reader: the fallback.
+    @Test("the whole-list layer read has one caller")
+    func wholeListReadHasOneCaller() throws {
+        var callers: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: Self.core) {
+            let text = try SourceScan.strippedSource(at: file)
+            let hits =
+                text.components(separatedBy: "windowLayers")
+                .count - 1
+            if hits > 0 { callers[file.lastPathComponent] = hits }
+        }
+        // The declaration and the fallback's call.
+        #expect(callers == ["FloatDetection+Ignore.swift": 2])
+    }
+
+    @Test("both list paths read layers through the reader")
+    func listPathsTakeTheReader() throws {
+        let offMain = try Self.source(
+            "Events/EventLoop+ReconcileOffMain.swift"
+        ).filter { !$0.isWhitespace }
         #expect(
-            compact.contains(
+            offMain.contains(
                 "varreadLayers:(pid_t)->(WindowID)->Int?="
                     + "FloatDetection.layerReader"
             )
         )
+        let reconcile = try Self.source(
+            "Events/EventLoop+Reconcile.swift"
+        )
+        #expect(reconcile.contains("FloatDetection.layerReader(pid:"))
     }
 
-    @Test("the per-window reader prefers SkyLight's level read")
-    func readerPrefersTheLevel() throws {
-        let body = try #require(
-            SourceScan.declarationBody(
-                after: "static func layerReader(",
-                in: try SourceScan.strippedSource(
-                    at: Self.core.appendingPathComponent(
-                        "AX/FloatDetection+Ignore.swift"
-                    )
-                )
+    /// The level answers first, in both one-window readers; the
+    /// public read is only what it does not answer.
+    @Test("the readers ask SkyLight's level before the public list")
+    func readersPreferTheLevel() throws {
+        let readers = [
+            (
+                "AX/FloatDetection+Ignore.swift",
+                "static func layerReader(", "windowLayers(pid:"
             ),
-            "FloatDetection.layerReader is gone"
-        )
-        let text = String(body)
-        let guardAt = try #require(
-            text.range(of: "guard SkyLight.readsWindowLevel else")
-        )
-        let fallback = try #require(text.range(of: "windowLayers(pid:"))
-        let level = try #require(text.range(of: "SkyLight.windowLevel("))
-        #expect(guardAt.lowerBound < fallback.lowerBound)
-        #expect(fallback.lowerBound < level.lowerBound)
+            (
+                "AX/FloatDetection.swift",
+                "func windowLayer(of", "serverSnapshot(of:"
+            ),
+        ]
+        for (file, declaration, fallback) in readers {
+            let body = String(
+                try #require(
+                    SourceScan.declarationBody(
+                        after: declaration,
+                        in: try Self.source(file)
+                    ),
+                    "\(declaration) is gone"
+                )
+            )
+            let level = try #require(
+                body.range(of: "SkyLight.windowLevel(")
+            )
+            let listRead = try #require(body.range(of: fallback))
+            #expect(level.lowerBound < listRead.lowerBound, "\(file)")
+        }
     }
 }

@@ -133,15 +133,16 @@ extension EventLoop {
             pid: pid,
             activationPolicy: activationPolicy
         )
-        // One window-server snapshot for the whole pass; only
-        // apps with an ignore rule need layers at all.
-        // A prefetched read carries the app's whole map (#1933).
-        let layers =
-            prefetched?.layers
+        // Only apps with an ignore rule need layers at all; a
+        // prefetched read carries its listed windows' (#1933), and
+        // a live read takes them per window (#2531).
+        let prefetchedLayers = prefetched?.layers
+        let layerOf: (WindowID) -> Int? =
+            prefetchedLayers.map { layers in { layers[$0] } }
             ?? (FloatDetection.requiresWindowLayers(
                 bundleID: app.bundleID,
                 isAccessory: isAccessory
-            ) ? FloatDetection.windowLayers(pid: pid) : [:])
+            ) ? FloatDetection.layerReader(pid: pid) : { _ in nil })
         // A queued boot step bounds this app's blocking AX work
         // and completes it after the pass (#803) — see
         // `openAppBudget`, which is inert for an OS-driven
@@ -215,7 +216,7 @@ extension EventLoop {
                 id: read == nil ? nil : id,
                 pid: pid,
                 app: app,
-                layer: read == nil ? layers[id] : layers[id] ?? 0,
+                layer: read == nil ? layerOf(id) : layerOf(id) ?? 0,
                 isAccessory: isAccessory,
                 tracked: elements[pid]?[id] != nil,
                 subrole: read?.subrole,

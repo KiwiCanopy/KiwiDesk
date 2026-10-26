@@ -21,10 +21,6 @@ protocol BarPeekMorphAnchor: NSView {
     var placedScreenFrame: CGRect? { get }
 }
 
-extension BarPeekMorphAnchor {
-    var placedScreenFrame: CGRect? { nil }
-}
-
 /// Where the list the pill grows into stands (#2563 ▸ Ruling), in
 /// AppKit screen coordinates: its outer edge flush with the pill's,
 /// growing inward into the run; on a top or bottom end centred on

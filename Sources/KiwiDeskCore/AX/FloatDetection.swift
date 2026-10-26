@@ -25,9 +25,12 @@ public enum FloatDetection {
         layer != 0 || shouldFloat(role: role, subrole: subrole)
     }
 
-    /// Returns CGWindow layer for window ID, or nil if unlisted.
+    /// Returns CGWindow layer for window ID, or nil if unlisted:
+    /// SkyLight's level, else the public list's read, which waits on
+    /// this process's pending window updates (#2531).
     public static func windowLayer(of id: WindowID) -> Int? {
-        serverSnapshot(of: id).layer
+        SkyLight.windowLevel(CGWindowID(id.raw))
+            ?? serverSnapshot(of: id).layer
     }
 
     /// Snapshot of window properties from WindowServer
