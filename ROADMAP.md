@@ -8,11 +8,9 @@ the full picture, and the
 [Discord](https://discord.gg/bYeTrJyZyS) is the place to talk about
 any of it.
 
-2.2.0 made the inside fast: a switch now does a fraction of the
-work it used to. Next, KiwiDesk learns to keep your desk the way you
-left it, and to take its setup from your own AI assistant. After that
-comes input: focus that follows the mouse, a hyper key and trackpad
-gestures. Further out, KiwiDesk is growing from a window tiler into a
+KiwiDesk now keeps your desk the way you left it, takes its setup
+from your own AI assistant, and has focus that follows the mouse and
+a hyper key. Further out, KiwiDesk is growing from a window tiler into a
 way of shaping how you work with your whole desk, and something new
 is taking shape there.
 
