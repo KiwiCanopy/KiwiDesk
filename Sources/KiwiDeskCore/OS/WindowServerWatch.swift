@@ -5,6 +5,8 @@ import AppKit
 /// under its own `Consumer`, the watch requests their union, and
 /// an event fans out by phase — frames, then restacks, then hides
 /// — in `Consumer` declaration order (borders.md ▸ KiwiVision).
+/// An event's restack is paid at the turn's end, once per window
+/// (#2659); a hide in the same turn drops it.
 @MainActor
 public final class WindowServerWatch {
     /// Declaration order IS the fan-out order in every phase: the
@@ -40,6 +42,11 @@ public final class WindowServerWatch {
         SkyLight.windowBounds($0.raw)
     }
     var onLog: @MainActor (String) -> Void = CoreLog.write
+    /// Where an event's restack is paid: once per window at the
+    /// turn's end, so the reorder and unhide one raise sends order
+    /// a ring once (#2659). A test core pays at once.
+    var atTurnEnd: @MainActor (@escaping @MainActor () -> Void) -> Void =
+        MainRunLoopTurnEnd.schedule
     #if DEBUG
         /// Test-only: stands in for the WindowServer request.
         /// Production must not set it.
@@ -59,6 +66,9 @@ public final class WindowServerWatch {
     /// false, since a live stream would heal the drift it exposes.
     private(set) var triedSource = false
     private var reported: Bool?
+    /// Windows whose event owes a restack this turn, in arrival
+    /// order.
+    private var owedRestacks: [WindowID] = []
 
     public init() {}
 
@@ -114,6 +124,7 @@ public final class WindowServerWatch {
     func stop() {
         heard = [:]
         kept = [:]
+        owedRestacks = []
         // A best-effort clear outside the verdict path: a quit
         // reports no tracking state.
         if started { _ = source?.watch([]) }
@@ -137,9 +148,11 @@ public final class WindowServerWatch {
             )
         }
         if action == .reorder || action == .followAndReorder {
-            restack(id)
+            oweRestack(id)
         }
         if action == .hide {
+            // A hide after a reorder ends the turn hidden.
+            owedRestacks.removeAll { $0 == id }
             for consumer in heardBy { hooks[consumer]?.hide?(id) }
         }
     }
@@ -149,6 +162,20 @@ public final class WindowServerWatch {
     /// overlays and sent `id` no event of its own (#2284).
     func restack(_ id: WindowID) {
         for consumer in hearers(of: id) { hooks[consumer]?.restack?(id) }
+    }
+
+    private func oweRestack(_ id: WindowID) {
+        guard !owedRestacks.contains(id) else { return }
+        owedRestacks.append(id)
+        guard owedRestacks.count == 1 else { return }
+        atTurnEnd { [weak self] in self?.payOwedRestacks() }
+    }
+
+    private func payOwedRestacks() {
+        while let id = owedRestacks.first {
+            owedRestacks.removeFirst()
+            restack(id)
+        }
     }
 
     private func hearers(of id: WindowID) -> [Consumer] {

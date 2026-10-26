@@ -97,6 +97,25 @@ struct WindowServerWatchSeamTests {
         #expect(body.occurrences(of: "onLog(") == 0)
     }
 
+    /// An event's restack pays at the run loop turn's end (#2659):
+    /// both test twins pay at once, so no Core suite sees a default
+    /// that went immediate or an event arm that orders directly.
+    @Test("an event's restack is owed to the turn's end")
+    func eventRestackIsOwed() throws {
+        #expect(
+            try sites(of: "MainRunLoopTurnEnd.schedule")
+                == ["WindowServerWatch.swift": 1]
+        )
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent("OS/WindowServerWatch.swift")
+        )
+        let handle = try #require(
+            SourceScan.declarationBody(after: "func handle(", in: source)
+        )
+        #expect(handle.occurrences(of: "oweRestack(id)") == 1)
+        #expect(handle.occurrences(of: "restack(id)") == 0)
+    }
+
     @Test("the watch is built in one place")
     func oneConstructionSite() throws {
         // The core builds its watch; BorderManager's default is a

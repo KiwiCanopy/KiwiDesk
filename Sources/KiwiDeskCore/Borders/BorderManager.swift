@@ -101,6 +101,10 @@ public final class BorderManager {
     var roomsHeld = false
     /// Rings that took a room since the last resync.
     var heldRooms: Set<WindowID> = []
+    /// When the visibility settle pass was last asked for, on the
+    /// core's wall clock: a second ask inside
+    /// `KiwiCore.dropSettleBurstGap` is a burst (#2659).
+    var dropSettleAskedAt: Date?
     #if DEBUG
         /// Test-only: the screen frame `room(for:screen:)` uses in
         /// place of the host's. Production must not read it.
