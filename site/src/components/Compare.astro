@@ -62,6 +62,7 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
+import { publisher } from "../lib/publisher";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 
@@ -89,9 +90,9 @@ const ogImage = new URL(
   Astro.site,
 ).href;
 
-function localePath(l: Lang, sub = ""): string {
+function localePath(l: Lang, sub = "/"): string {
   const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}` || "/";
+  return `${prefix}${sub}`;
 }
 
 // Source links. Named here rather than inline so a URL that moves
@@ -211,11 +212,7 @@ const jsonLd = [
     url: canonical,
     inLanguage: lang,
     image: ogImage,
-    author: {
-      "@type": "Organization",
-      name: "KiwiCanopy",
-      url: "https://kiwicanopy.com",
-    },
+    author: publisher,
   },
   {
     "@context": "https://schema.org",

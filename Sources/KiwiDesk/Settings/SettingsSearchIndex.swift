@@ -154,17 +154,17 @@ enum SettingsSearchIndex {
     /// one joins it with its reason, and its entry is what says
     /// the row would land on a page drawing nothing.
     ///
-    /// The two Desktop offers are the ONLY search-reachable name
-    /// their families have (the rows are `.dynamic`), so an
-    /// unfiltered entry is not a stray hit: it is the door to a
-    /// capability, offered on a Mac that has none. A control a
-    /// census row NAMES needs no entry here: `build()` claims it
-    /// for that row whether or not the row is indexed.
+    /// The macOS Desktops section's title and drawer are the ONLY
+    /// search-reachable names their families have (the rows are
+    /// `.dynamic`, #2655), so an unfiltered entry is not a stray
+    /// hit: it is the door to a capability, offered on a Mac that
+    /// has none. A control a census row NAMES needs no entry
+    /// here: `build()` claims it for that row whether or not the
+    /// row is indexed.
     static var bridgeGatedControls: Set<String> {
         [
-            SettingsCatalog.shortcuts.focusDesktops.control.id,
-            SettingsCatalog.shortcuts.moveWindowsDesktops.control
-                .id,
+            SettingsCatalog.shortcuts.desktopsSection.id,
+            SettingsCatalog.shortcuts.desktopMoves.control.id,
         ]
     }
 

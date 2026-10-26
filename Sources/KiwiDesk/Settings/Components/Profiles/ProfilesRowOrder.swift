@@ -12,8 +12,7 @@ enum ProfilesRowOrder {
 
     /// Desktop to profile bindings setting.
     static let profilesPerMacOSSpace: [SettingKey] = [
-        .profiles(.desktopCue),
-        .profiles(.profileBindings),
+        .profiles(.profileBindings)
     ]
 
     /// Preset card actions in visual order (#859).

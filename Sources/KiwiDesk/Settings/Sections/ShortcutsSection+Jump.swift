@@ -11,7 +11,8 @@ extension ShortcutsSection {
             readout: editingReadout(ShortcutsJumpBar.shownName(selected)),
             spokenReadout: editingReadout(selected),
             groups: ShortcutsJumpGroup.shown(
-                luaDrawerOffered: offersAdvancedDrawer
+                luaDrawerOffered: offersAdvancedDrawer,
+                desktopsDrawn: MacOSDesktopsGroup.hasRows(expander)
             )
         ) { group in
             jump(to: group, proxy: proxy)

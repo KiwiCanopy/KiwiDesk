@@ -48,9 +48,6 @@ enum SettingRuntimeGate: Hashable {
     case defaultsToRestore
     /// Non-default layer exists in configuration.
     case layersExist
-    /// A Desktop shortcut is bound (#1125) — the rows are an
-    /// OFFER until one is, the seed authoring none of them.
-    case desktopBindingsExist
     /// Some app rule matches windows by a title fragment
     /// (#1022) — the float facet's titled choice is an OFFER
     /// until one does, since matching windows on a title

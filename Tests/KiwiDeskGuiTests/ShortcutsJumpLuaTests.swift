@@ -25,14 +25,34 @@ struct ShortcutsJumpLuaTests {
     @Test("the chip is last, and only while the drawer is offered")
     func chipFollowsTheOffer() {
         #expect(
-            ShortcutsJumpGroup.shown(luaDrawerOffered: true)
-                == ShortcutsJumpGroup.allCases
+            ShortcutsJumpGroup.shown(
+                luaDrawerOffered: true,
+                desktopsDrawn: true
+            ) == ShortcutsJumpGroup.allCases
         )
         #expect(ShortcutsJumpGroup.allCases.last == .luaBindings)
         #expect(
-            ShortcutsJumpGroup.shown(luaDrawerOffered: false)
+            ShortcutsJumpGroup.shown(
+                luaDrawerOffered: false,
+                desktopsDrawn: true
+            )
                 == ShortcutsJumpGroup.allCases.filter {
                     $0 != .luaBindings
+                }
+        )
+    }
+
+    /// The macOS Desktops chip follows its section (#2655): a
+    /// section removed for want of a bridge has nowhere to jump.
+    @Test("the Desktops chip shows only while its section draws")
+    func desktopsChipFollowsTheSection() {
+        #expect(
+            ShortcutsJumpGroup.shown(
+                luaDrawerOffered: true,
+                desktopsDrawn: false
+            )
+                == ShortcutsJumpGroup.allCases.filter {
+                    $0 != .macosDesktops
                 }
         )
     }
@@ -47,7 +67,9 @@ struct ShortcutsJumpLuaTests {
         #expect(
             jump.contains(
                 "groups:ShortcutsJumpGroup.shown("
-                    + "luaDrawerOffered:offersAdvancedDrawer)"
+                    + "luaDrawerOffered:offersAdvancedDrawer,"
+                    + "desktopsDrawn:MacOSDesktopsGroup"
+                    + ".hasRows(expander))"
             )
         )
         #expect(

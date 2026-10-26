@@ -109,22 +109,24 @@ struct ShortcutsBespokeContainerTests {
                 "modifierKeysList", .modifierKeys,
                 ShortcutsRowOrder.modifierKeysList
             ),
-            // Walked by `DesktopShortcutsOffer`, which takes its
+            // The macOS Desktops section (#2655): the switch cue
+            // drawn by its own view, then the walked families.
+            (
+                "macosDesktopsList", .macosDesktops,
+                ShortcutsRowOrder.macosDesktopsList
+            ),
+            (
+                "macosDesktopsAtRest", .macosDesktops,
+                ShortcutsRowOrder.macosDesktopsAtRest
+            ),
+            (
+                "macosDesktopsMore", .macosDesktops,
+                ShortcutsRowOrder.macosDesktopsMore
+            ),
+            // Walked by `TrackShortcutsOffer`, which takes its
             // list as a `keys:` PARAMETER rather than walking it
             // here — so `isWalked` reads the `ForEach` inside
-            // that view. Without these two rows the register
-            // silently stops being the census of this area's
-            // order lists (#1125, architect + code review).
-            (
-                "focusDesktopFamilies", .focus,
-                ShortcutsRowOrder.focusDesktopFamilies
-            ),
-            (
-                "moveWindowsDesktopFamilies", .moveWindows,
-                ShortcutsRowOrder.moveWindowsDesktopFamilies
-            ),
-            // Same shape, one mount: `TrackShortcutsOffer(keys:)`
-            // (#1440).
+            // that view (#1125, #1440).
             (
                 "moveWindowsTrackFamilies", .moveWindows,
                 ShortcutsRowOrder.moveWindowsTrackFamilies
@@ -263,7 +265,7 @@ struct ShortcutsBespokeContainerTests {
     /// parentheses so an unrelated mention nearby cannot count.
     ///
     /// A list handed to a view as a parameter counts as walked
-    /// too (#1125): `DesktopShortcutsOffer(keys:)` puts the
+    /// too (#1125): `TrackShortcutsOffer(keys:)` puts the
     /// `ForEach` one file over, and reading only the literal
     /// walk would classify a rendered container as bespoke.
     private func isWalked(

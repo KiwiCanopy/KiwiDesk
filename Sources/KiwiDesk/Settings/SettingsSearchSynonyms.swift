@@ -9,17 +9,14 @@ enum SettingsSearchSynonyms {
         if id == SettingsCatalog.macChecklist.guideLink.id {
             return ["help", "docs", "documentation", "manual"]
         }
-        // The two Desktop offers are the whole search surface
-        // for their families (#1125), so the vocabulary a user
-        // arrives with has to reach them: Apple names the
-        // container "Mission Control", and the retired nouns are
-        // what other tilers call a Desktop.
-        if id
-            == SettingsCatalog.shortcuts.focusDesktops.control
-            .id
+        // The macOS Desktops section's two names are the whole
+        // search surface for their families (#2655), so the
+        // vocabulary a user arrives with has to reach them: Apple
+        // names the container "Mission Control", and the retired
+        // nouns are what other tilers call a Desktop.
+        if id == SettingsCatalog.shortcuts.desktopsSection.id
             || id
-                == SettingsCatalog.shortcuts.moveWindowsDesktops
-                .control.id
+                == SettingsCatalog.shortcuts.desktopMoves.control.id
         {
             return [
                 "mission control", "workspace", "virtual desktop",

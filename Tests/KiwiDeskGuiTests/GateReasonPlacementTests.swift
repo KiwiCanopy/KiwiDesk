@@ -66,12 +66,12 @@ struct GateReasonPlacementTests {
                 // General, so each draws its sentence.
                 .general(.refusalSound),
                 .general(.quitGridTargetDepth),
-                // #2142: the app-wide Desktop switch cue greys the
-                // same way, a cause shown nowhere on Profiles.
-                .profiles(.desktopCue),
                 // #2144: the layout plate's switch, the same
                 // shape on Shortcuts ▸ Layout.
                 .shortcuts(.modeCue),
+                // #2142: the app-wide Desktop switch cue, the same
+                // shape on Shortcuts ▸ macOS Desktops (#2655).
+                .shortcuts(.desktopCue),
                 // #1870: the Hyper key's recorder, the same shape
                 // on its own card above the layer header.
                 .shortcuts(.hyperKey),

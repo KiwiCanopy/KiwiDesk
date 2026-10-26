@@ -74,6 +74,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.focusWrap),
             .shortcuts(.modeCycle),
             .shortcuts(.modeCue),
+            .shortcuts(.desktopCue),
             .shortcuts(.hyperKey),
             .shortcuts(.shortcutBase),
             .shortcuts(.modifierSides),
