@@ -37,7 +37,7 @@ extension KiwiCore {
                 return payRestoreWrite(id)
             }
         }
-        restoreDebt = nil
+        dropRestoreDebt()
     }
 
     /// Places detected float `id` now, or owes it while the gate

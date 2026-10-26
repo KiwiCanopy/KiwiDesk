@@ -2685,13 +2685,16 @@ no longer due.
 :::
 
 :::unreleased
-The frames a restore puts back, at launch or after a wake, wait
-the same way ([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)):
+The frames a restore puts back, at launch or after a wake or an
+unlock, wait the same way
+([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)):
 each is read again from the saved arrangement when the hand rests,
 and only while the same screens are connected and the window is
 still in the Space the restore filed it in. A newer restore, a
-sleep or a stop drops what an older one was still waiting to put
-back. A window placed or moved onto its Space's screen meanwhile
+sleep or lock, quitting, or discarding the saved arrangement drops
+what an older one was still waiting to put back. A floating window
+comes back with the held layout pass, as it did before. A window
+you drag meanwhile, or one placed or moved onto its Space's screen,
 keeps that move: it reflects the desk as it is now, and the saved
 frame does not.
 :::

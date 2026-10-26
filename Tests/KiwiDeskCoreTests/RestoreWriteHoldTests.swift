@@ -101,6 +101,20 @@ struct RestoreWriteHoldTests {
         return desk
     }
 
+    /// The same replay on a floating Space, its window a float.
+    private func heldFloat() -> Desk {
+        let desk = Desk(window: window, start: start)
+        desk.core.execute(
+            "set_mode",
+            args: [.string("1"), .string("floating")]
+        )
+        desk.stillFor = 0.05
+        desk.core.restore(
+            desk.snapshot(window, at: saved, mode: .floating)
+        )
+        return desk
+    }
+
     @Test("a replay under a moving mouse is owed, then written at rest")
     func movingMouseOwes() {
         let desk = held()
@@ -144,19 +158,31 @@ struct RestoreWriteHoldTests {
     /// declines, so the saved frame is sent once.
     @Test("a held float is delivered once, by its seed")
     func heldFloatSendsOnce() {
-        let desk = Desk(window: window, start: start)
-        desk.core.execute(
-            "set_mode",
-            args: [.string("1"), .string("floating")]
-        )
-        desk.stillFor = 0.05
-        desk.core.restore(
-            desk.snapshot(window, at: saved, mode: .floating)
-        )
+        let desk = heldFloat()
         #expect(desk.sends(saved, to: window) == 0)
         #expect(desk.gate.owedWrites[window] == [.restore])
         desk.rest()
         #expect(desk.sends(saved, to: window) == 1)
+    }
+
+    /// A move that forgets the seed (#412) is not paid over.
+    @Test("a held float moved by its app keeps the move")
+    func heldFloatMovedKeeps() {
+        let desk = heldFloat()
+        let moved = CGRect(x: 500, y: 300, width: 640, height: 480)
+        desk.core.handle(.windowMoved(window, moved))
+        desk.rest()
+        #expect(desk.sends(saved, to: window) == 0)
+    }
+
+    @Test("a tab switch while owed carries the debt to the new id")
+    func rekeyCarriesTheDebt() {
+        let desk = held()
+        let tab = WindowID(7)
+        desk.core.handle(.windowRekeyed(window, tab))
+        #expect(desk.gate.owedWrites[tab] == [.restore])
+        desk.rest()
+        #expect(desk.sends(saved, to: tab) == 1)
     }
 
     @Test("a newer replay without the window drops the owed write")
@@ -169,8 +195,8 @@ struct RestoreWriteHoldTests {
         #expect(desk.sends(saved, to: window) == 0)
     }
 
-    /// The wake task's cancellations void what its replay owed: a
-    /// new rest, a stop, a dropped capture.
+    /// What supersedes the replay voids what it owed: a new rest,
+    /// a stop, a discarded arrangement.
     enum Voiding: CaseIterable {
         case rest, stop, drop
     }
@@ -183,8 +209,8 @@ struct RestoreWriteHoldTests {
         let desk = held()
         switch void {
         case .rest: desk.core.sleepWake.systemWillRest(.direct)
-        case .stop: desk.core.sleepWake.stop()
-        case .drop: desk.core.sleepWake.dropHeldSnapshot()
+        case .stop: desk.core.stop()
+        case .drop: desk.core.discardSavedArrangement()
         }
         #expect(desk.gate.owedWrites[window] == nil)
         #expect(desk.core.restoreDebt == nil)

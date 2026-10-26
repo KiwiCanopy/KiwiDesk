@@ -109,7 +109,7 @@ extension KiwiCore {
             if float {
                 tiler.seedStash(record.windowID, frame: record.frame)
             }
-            writeRestoredFrame(record, from: snapshot)
+            writeRestoredFrame(record, from: snapshot, seeded: float)
         }
         if missing > 0 {
             onLog(
