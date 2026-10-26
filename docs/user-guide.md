@@ -955,6 +955,10 @@ and the same setup is always available as a preset of that name.
 | Toggle floating | `⌃⌥F` |
 | Toggle sticky everywhere | `⌃⌥S` |
 | Toggle KiwiVision | `⌃⌥V` |
+| Next / previous layout | `⌃⌥C` / `⌃⌥⇧C` |
+| Reset the space's sizes | `⌃⌥R` |
+| Show / hide Space Bar, App Bar | `⌃⌥G`, `⌃⌥H` |
+| Window switcher / view picker | `⌃⌥J` / `⌃⌥L` |
 | Show shortcuts panel | `⌃⌥K` |
 
 **Open Settings** ships on `⌃⌥,` as well.

@@ -142,17 +142,18 @@ function kiwiSvg(size: number): string {
 // Ordered by whether a card is the page's ONLY statement of its
 // fact — the ones with a section further down sit later (#1335).
 const features = [
-  { title: t.feat_1_title, body: t.feat_1_body, icon: "lucide:columns-3" },
   { title: t.feat_2_title, body: t.feat_2_body, icon: "lucide:layout-dashboard" },
   { title: t.feat_12_title, body: t.feat_12_body, icon: "lucide:binoculars" },
   { title: t.feat_13_title, body: t.feat_13_body, icon: "lucide:app-window" },
   { title: t.feat_14_title, body: t.feat_14_body, icon: "lucide:bot" },
+  { title: t.feat_16_title, body: t.feat_16_body, icon: "lucide:panel-top" },
   { title: t.feat_10_title, body: t.feat_10_body, icon: "lucide:layers" },
+  { title: t.feat_15_title, body: t.feat_15_body, icon: "lucide:history" },
   { title: t.feat_6_title, body: t.feat_6_body, icon: "lucide:shield-check" },
   { title: t.feat_11_title, body: t.feat_11_body, icon: "lucide:refresh-cw" },
   { title: t.feat_9_title, body: t.feat_9_body, icon: "lucide:app-window-mac" },
-  { title: t.feat_7_title, body: t.feat_7_body, icon: "lucide:pin" },
-  { title: t.feat_3_title, body: t.feat_3_body, icon: "lucide:code" },
+  { title: t.feat_7_title, body: t.feat_7_body, icon: "lucide:infinity" },
+  { title: t.feat_3_title, body: t.feat_3_body, icon: "lucide:code-xml" },
   { title: t.feat_4_title, body: t.feat_4_body, icon: "lucide:square-terminal" },
   { title: t.feat_8_title, body: t.feat_8_body, icon: "lucide:accessibility" },
   { title: t.feat_5_title, body: t.feat_5_body, icon: "lucide:gauge" },
@@ -178,6 +179,7 @@ const perks = [
   t.calm_point_8,
   t.calm_point_9,
   t.calm_point_7,
+  t.calm_point_10,
   t.calm_point_6,
   t.calm_point_4,
   t.calm_point_5,
@@ -1147,8 +1149,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           {/* Named, because it speaks in the first person. An
                unattributed "I haven't dragged a window since"
                reads as a testimonial from a user who does not
-               exist — KiwiDesk is in public beta and has no
-               public ones to quote. */}
+               exist; real ones live in Voices. */}
           <blockquote class="quote-aside quote-aside--left">
             <p>{oq}{t.quote_cli}{cq}</p>
             <footer class="quote-aside__byline">
