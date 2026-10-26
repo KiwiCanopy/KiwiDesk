@@ -143,6 +143,9 @@ extension KiwiCore {
                 } ?? .null,
                 "title": .string(window.title),
                 "floating": .bool(window.isFloating),
+                // "pocketed" / "out", null outside the pocket (#2446).
+                "pocket": state.pocketPhase(of: window.id)
+                    .map { .string($0.rawValue) } ?? .null,
             ])
         }
         // Every away window, the unfiled ones included (#1146);

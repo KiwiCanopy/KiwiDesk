@@ -73,14 +73,7 @@ public enum DefaultKeybindings {
                 label: "Toggle sticky"
             )
         )
-        rows.append(
-            KeyBinding(
-                combo: "control+option+p",
-                lua: "KiwiDesk.toggle_display_sticky()",
-                kind: .navigation,
-                label: "Toggle display sticky"
-            )
-        )
+        rows.append(pocketRow())
         rows.append(nextLayoutRow())
         rows.append(previousLayoutRow())
         rows.append(layoutPickerRow())

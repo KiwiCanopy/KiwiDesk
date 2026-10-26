@@ -180,9 +180,13 @@ below, so it corrects itself when a seventh is added.
   every other such press keeps #1336's sentence
   (`FocusWrapScreensTests` ▸ `preflightPassesTheHop`,
   `EmptyActiveSpaceRefusalTests` ▸
-  `oneScreenFocusKeepsTheSentence`). A further verb of that shape
-  asks its own predicate the same way, never a copy of its
-  condition in the preflight, and is a ruling here.
+  `oneScreenFocusKeepsTheSentence`). `pocket` is the second
+  (#2446): a filled slot is its target, and every arm a filled slot
+  reaches acts on the slot, never the focus, so it passes while
+  `state.pocket` holds one (`PocketEdgeTests` ▸ `preflight`,
+  `exitedAppEmpties`). A further verb of that shape asks its own
+  predicate the same way, never a copy of its condition in the
+  preflight, and is a ruling here.
 
   **The preflight's remaining bypass is a verb list, and a verb
   joins it only if it changes no window's content, size or

@@ -521,15 +521,23 @@ the bars. A sticky window keeps its own Space.
 
 ### Sticky Windows
 
-A **sticky** window stays visible on every space. Two scopes,
-both shortcuts under Size & float (stickiness is per window;
-there is no app-rule list):
+A **sticky** window stays visible on every space. Two scopes
+(stickiness is per window; there is no app-rule list):
 
 - **Toggle sticky everywhere** — every space of every screen
   (∞ mark).
 - **Toggle sticky on this screen** — every space of the one
   screen it lives on (📌 mark). Moving it to a space on another
   screen re-homes it there.
+
+**Toggle sticky everywhere** is a shortcut under Size & float.
+
+:::unreleased
+**Toggle sticky on this screen** has no default key and no row
+there; bind
+[`toggle_display_sticky`](lua-reference.md#toggle_display_sticky)
+in the Lua bindings drawer.
+:::
 
 Moving a ∞ window anywhere, or a 📌 window to another space on
 the same screen, is refused with a brief pill. On a single
@@ -690,6 +698,14 @@ A window that floats only because its Space is in Floating
 layout wears no floating mark. Glyphs wearing the floating badge
 come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
+
+:::unreleased
+A window out of the [pocket](lua-reference.md#pocket) wears the
+**pocket mark** half over its top-right corner, in place of its
+sticky and floating marks, and its glyph wears the **pocket badge**
+on the bottom-left, in place of the floating badge; that glyph
+comes last in its row too.
+:::
 
 **Drag a window onto a Space** to move it there:
 
@@ -938,7 +954,6 @@ and the same setup is always available as a preset of that name.
 | Grow / Shrink height | `⌥⌘5` / `⌥⌘4` |
 | Toggle floating | `⌃⌥F` |
 | Toggle sticky everywhere | `⌃⌥S` |
-| Toggle sticky on this screen | `⌃⌥P` |
 | Toggle KiwiVision | `⌃⌥V` |
 | Show shortcuts panel | `⌃⌥K` |
 
@@ -973,6 +988,14 @@ listed under Shortcuts & Gestures ▸ Size & float.
 there, until you press it again or move focus to another window
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)), listed
 under Shortcuts & Gestures ▸ Size & float.
+:::
+
+:::unreleased
+`⌃⌥P` is **Pocket this window**, under Shortcuts & Gestures ▸ Size
+& float ([`pocket`](lua-reference.md#pocket)). A pocketed window
+leaves the screen and every bar, and comes out on the screen you
+are on, floating on every Space. `⌘-Tab` to its app takes it out
+too, and KiwiHub's window switcher lists it under **Pocket**.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

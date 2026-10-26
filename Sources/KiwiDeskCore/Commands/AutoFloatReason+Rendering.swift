@@ -28,6 +28,8 @@ extension AutoFloatReason {
                     + "Change it in %1$@.",
                 Self.appRules
             )
+        case .pocket:
+            L("pocket.refusal.float", "Pocket windows always float")
         }
     }
 
@@ -49,6 +51,7 @@ extension AutoFloatReason {
         case .raisedLayer: "raised_layer"
         case .accessoryApp: "accessory_app"
         case .fixedSize: "fixed_size"
+        case .pocket: "pocket"
         }
     }
 
@@ -61,7 +64,7 @@ extension AutoFloatReason {
         case .accessoryApp, .fixedSize:
             ["set_float_automatically", "tile_rule"]
         case .rule: ["app_rule.remove_float"]
-        case .panel, .raisedLayer: []
+        case .panel, .raisedLayer, .pocket: []
         }
     }
 
@@ -74,6 +77,7 @@ extension AutoFloatReason {
             "apps without a Dock icon float automatically"
         case .fixedSize:
             "windows that can't be resized float automatically"
+        case .pocket: "pocket windows always float"
         }
     }
 }

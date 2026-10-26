@@ -55,8 +55,15 @@ final class StateBadgeView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
+    /// Stands for the pocket badge, drawn by `PocketMark` rather
+    /// than a symbol (#2446).
+    static let pocketName = "kiwidesk.pocket"
+
     private static func image(_ name: String) -> NSImage? {
-        NSImage(systemSymbolName: name, accessibilityDescription: nil)
+        if name == pocketName {
+            return PocketMark.badge.image(size: 12, ink: .labelColor)
+        }
+        return NSImage(systemSymbolName: name, accessibilityDescription: nil)
     }
 
     override var isFlipped: Bool { true }

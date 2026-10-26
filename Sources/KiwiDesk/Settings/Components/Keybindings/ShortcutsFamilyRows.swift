@@ -104,8 +104,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.toggleFloating]
         case .toggleSticky:
             return [KeybindingCatalog.toggleSticky]
-        case .toggleDisplaySticky:
-            return [KeybindingCatalog.toggleDisplaySticky]
+        case .pocket:
+            return [KeybindingCatalog.pocket]
         case .showShortcuts:
             return [KeybindingCatalog.showShortcuts]
         case .openSettings:

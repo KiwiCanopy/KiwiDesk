@@ -578,6 +578,7 @@ every lens with why it cannot turn on.
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
 | | `toggle_maximized` | — the focused tiled window fills its screen, bars hidden, until called again |
+| | `pocket` | — pockets the focused window, takes the pocket window out onto this screen, or puts it back ([`pocket`](lua-reference.md#pocket)) |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
@@ -677,6 +678,12 @@ every lens with why it cannot turn on.
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`get_state`'s window objects carry `pocket`: `"pocketed"` or
+`"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
+for every other.
+:::
 
 :::unreleased
 `set_focus_wrap` takes `off`, `this_screen` or `all_screens`

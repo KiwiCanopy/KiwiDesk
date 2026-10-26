@@ -152,8 +152,10 @@ enum SettingsSearchSynonyms {
             return ["login item", "autostart", "launch"]
         case .general(.installUpdatesAutomatically):
             return ["auto update", "automatic updates", "sparkle"]
-        case .shortcuts(.toggleSticky),
-            .shortcuts(.toggleDisplaySticky):
+        case .shortcuts(.pocket):
+            // The competitors' words (#2446 design preview).
+            return ["scratchpad", "summon", "hotkey window", "stash"]
+        case .shortcuts(.toggleSticky):
             // The SHORTCUTS carry "pin", not the appearance rows
             // (owner 2026-08-26): someone typing it wants to pin
             // a window, not style the mark that says one is

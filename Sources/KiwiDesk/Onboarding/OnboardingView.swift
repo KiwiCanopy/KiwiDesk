@@ -7,7 +7,9 @@ struct OnboardingView: View {
     @EnvironmentObject private var localization: LocalizationManager
     @Environment(\.colorScheme) var colorScheme
 
-    static let size = CGSize(width: 560, height: 620)
+    /// 660 tall since Pocket's tenth Keys row (#2446, owner
+    /// 2026-10-25).
+    static let size = CGSize(width: 560, height: 660)
     /// Padding on each side, horizontal then vertical.
     static let inset = CGSize(width: 30, height: 26)
     /// Room between the progress row and the page.

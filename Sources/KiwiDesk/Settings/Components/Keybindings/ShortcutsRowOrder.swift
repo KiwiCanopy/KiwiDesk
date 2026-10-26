@@ -156,7 +156,7 @@ enum ShortcutsRowOrder {
         .shortcuts(.maximize),
         .shortcuts(.toggleFloating),
         .shortcuts(.toggleSticky),
-        .shortcuts(.toggleDisplaySticky),
+        .shortcuts(.pocket),
     ]
 
     /// Size & float's `.showMore` tier, empty since #1255 took

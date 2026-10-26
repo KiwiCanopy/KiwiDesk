@@ -164,7 +164,7 @@ struct DefaultKeybindingLadderTests {
         #expect(reversed == Self.reversals.count)
     }
 
-    @Test("sticky seeds ⌃⌥S global and ⌃⌥P screen-scoped")
+    @Test("sticky seeds ⌃⌥S global; ⌃⌥P is Pocket, pin unseeded")
     func stickyToggleLetters() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
@@ -176,15 +176,13 @@ struct DefaultKeybindingLadderTests {
             uniquingKeysWith: { a, _ in a }
         )
         // S takes the UNQUALIFIED verb, matching the label a
-        // GUI-first user is shown; P names the `pin.fill` mark
-        // rather than the label, so no translation can orphan it.
+        // GUI-first user is shown; P is Pocket's since #2446, and
+        // pin keeps no default chord.
         #expect(
             byLua["KiwiDesk.toggle_sticky()"]
                 == "control+option+s"
         )
-        #expect(
-            byLua["KiwiDesk.toggle_display_sticky()"]
-                == "control+option+p"
-        )
+        #expect(byLua["KiwiDesk.pocket()"] == "control+option+p")
+        #expect(byLua["KiwiDesk.toggle_display_sticky()"] == nil)
     }
 }

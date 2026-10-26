@@ -155,6 +155,9 @@ public struct StateCoordinator: Sendable {
     /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
+    /// The pocket (#2446): `StateCoordinator+Pocket`.
+    public internal(set) var pocket: PocketSlot?
+
     /// The id a first launch seeds before any config declares one.
     public static let placeholderID = SpaceID(1)
 
@@ -223,6 +226,7 @@ public struct StateCoordinator: Sendable {
         if let rank = focusRecency.removeValue(forKey: old) {
             focusRecency[new] = rank
         }
+        rekeyPocket(old, to: new)
     }
 
     /// Folds an event into state and returns side-effect facts (#166).
@@ -236,9 +240,13 @@ public struct StateCoordinator: Sendable {
             break
 
         case .appTerminated(let pid):
-            for window in windows.windows(pid: pid) {
+            for window in windows.windows(pid: pid)
+            where pocketPhase(of: window.id) == nil {
                 rememberFloatOverride(of: window)
                 rememberStickyIntent(of: window)
+            }
+            if let id = pocket?.window, windows[id]?.pid == pid {
+                emptyPocket()
             }
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)
@@ -294,7 +302,7 @@ public struct StateCoordinator: Sendable {
             let floatBefore = windows[id]?.isFloating
             windows.updateTitle(id, title: title)
             // Retry lazy-title app overrides once real title lands (#160).
-            if let window = windows[id] {
+            if let window = windows[id], pocketPhase(of: id) == nil {
                 restoreFloatOverride(of: window)
                 restoreStickyIntent(of: window)
             }
@@ -305,6 +313,8 @@ public struct StateCoordinator: Sendable {
             }
 
         case .windowFloatChanged(let id, let floating):
+            // A pocket window always floats (#2446).
+            if pocketPhase(of: id) != nil { break }
             // A user float beats a TILE verdict (#160); where
             // detection floats the window, no record stands (#1810),
             // or removing the rule later would not tile it.

@@ -7,7 +7,7 @@ import Foundation
 extension DefaultKeybindings {
     /// The newest generation. A release that adds a default row
     /// bumps it and lists the rows in `rows(ofGeneration:)`.
-    public static let newestGeneration = 7
+    public static let newestGeneration = 8
 
     /// The rows generation `number` introduced, built from today's
     /// rows: an install not yet topped up gets the current chord
@@ -29,6 +29,8 @@ extension DefaultKeybindings {
         case 6: barRevealRows()
         // Maximize (#2448).
         case 7: [maximizeRow()]
+        // Pocket (#2446).
+        case 8: [pocketRow()]
         default: []
         }
     }

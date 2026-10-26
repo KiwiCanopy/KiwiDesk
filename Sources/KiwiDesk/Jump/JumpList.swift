@@ -90,21 +90,27 @@ struct JumpList {
         }
     }
 
+    /// Where the Pocket section starts, nil without one (#2446).
+    var pocketStart: Int? {
+        tiered.firstIndex { $0.entry.isPocketed }
+    }
+
     /// The section header drawn above row `index`, if one starts
     /// there.
     func section(at index: Int) -> Section? {
         if index == minimizedStart { return .minimized }
         if index == hiddenStart { return .hidden }
+        if index == pocketStart { return .pocket }
         if index == otherAppsStart { return .otherApps }
         return nil
     }
 
     /// How many section headers the list draws.
     var sectionCount: Int {
-        [minimizedStart, hiddenStart, otherAppsStart]
+        [minimizedStart, hiddenStart, pocketStart, otherAppsStart]
             .compactMap { $0 }.count
     }
 
-    enum Section { case minimized, hidden, otherApps }
+    enum Section { case minimized, hidden, pocket, otherApps }
 
 }

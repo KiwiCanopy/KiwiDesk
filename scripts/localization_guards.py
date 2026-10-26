@@ -303,6 +303,9 @@ GLOSSARY = {
     # is told it is allowed. (It is NOT a layout mode; not in
     # `MODE_NAME_KEYS`.)
     "sticky",
+    # "Pocket" (#2446) stays English in every catalog, as Sticky
+    # does, and is in `PRODUCT_NAMES` for the same reason.
+    "pocket",
     # Nouns the shipped UI renders untranslated in the GUI's own
     # feature names — "App Bar", "Space Bar", "Gaps" — so prose
     # referring to them keeps the word. These are the entries most
@@ -354,6 +357,8 @@ PRODUCT_NAMES = (
     # "Display-Sticky"), "display" being an ordinary qualifier that
     # compounds per locale around the fixed "Sticky" atom.
     "Sticky",
+    # Pocket (#2446, owner ruling: English in every catalog).
+    "Pocket",
     # The one edge both bars sit on (#1517, owner ruling 2026-09-24):
     # a coined name like the bars, kept verbatim in every locale.
     "KiwiShelf",

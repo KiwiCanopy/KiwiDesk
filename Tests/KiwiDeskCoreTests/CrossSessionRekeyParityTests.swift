@@ -29,6 +29,7 @@ struct CrossSessionRekeyParityTests {
             (.dropped, "the #1230 records name only old ids"),
         "loginSession": (.dropped, "the gate's stamp; read already"),
         "frozenForLogout": (.dropped, "the file's mark; read already"),
+        "pocket": (.dropped, "in-place only, never another session's"),
     ]
 
     static let spaceFields: [String: (Fate, String)] = [
@@ -103,6 +104,7 @@ struct CrossSessionRekeyParityTests {
         snapshot.arrangementRecords = .init([.profile("P"): ["3": [w]]])
         snapshot.loginSession = 4
         snapshot.frozenForLogout = true
+        snapshot.pocket = PocketSlot(window: w, phase: .pocketed)
         return snapshot
     }
 

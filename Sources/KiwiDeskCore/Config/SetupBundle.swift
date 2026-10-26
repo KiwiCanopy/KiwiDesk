@@ -93,7 +93,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// `config` and its `[Profile]` alike.
     /// 39 = the per-layout `wrap_focus` retired for `focus_wrap`
     /// (#2493), in a bundle's `config` and its `[Profile]` alike.
-    public static let currentFormat = 39
+    /// 40 = the seeded pin row on ⌃⌥P runs Pocket (#2446), in a
+    /// bundle's `config` and its `[Profile]` alike.
+    public static let currentFormat = 40
 
     public let format: Int
 
