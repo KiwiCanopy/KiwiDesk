@@ -114,6 +114,9 @@ extension KiwiCore {
         frame: CGRect
     ) {
         tiler.dragExemptWindow = nil
+        // A late flick reaches no drag move (#1798): it forgets the
+        // owed write here, where its drop may write nothing (#2627).
+        tiler.motionGate.forgetWrite(for: id)
         let endedMaximize = tiler.maximizeEndedByDrag == id
         tiler.maximizeEndedByDrag = nil
         // Whether this gesture live-crossed displays (#504);
