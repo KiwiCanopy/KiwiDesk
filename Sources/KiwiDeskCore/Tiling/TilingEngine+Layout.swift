@@ -246,6 +246,7 @@ extension TilingEngine {
         // ever asked.
         boundLearner.supersedeAsk(id)
         placements.stamp(id, target: target)
+        motionGate.frameWritten(id)
         // Reduce Motion takes the instant set, whose EUI hold the
         // engine's no-animation write lacks (#2187).
         if animated, !animation.reduceMotion(),
@@ -300,6 +301,7 @@ extension TilingEngine {
     ) {
         boundLearner.supersedeAsk(id)  // as `applyFrame`, #1694
         placements.stamp(id, target: frame)
+        motionGate.frameWritten(id)
         applier.applyInstant(
             id,
             frame,

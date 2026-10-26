@@ -2662,12 +2662,25 @@ show the new Space in the bar while the old windows stay up. The windows'
 records, the bars and the rings move at once, and a held pass
 stamps nothing, no placement and no size ask, so a frame that was
 never written is never judged against an echo. A frame written
-outside a layout pass, such as a restore's own writes or a new
-float's placement, is not held: those are #1991's. Of two
+outside a layout pass, such as a restore's own writes
+([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)) or a
+float's re-anchor onto another screen
+([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)), is
+not held. Of two
 windows arriving during one hold, only the newer keeps its
 start-at-target entrance. The cost: after you stop the
 mouse, an ambient reflow lands up to ~300 ms later than it did,
 and while you hold a button it does not land at all.
+
+:::unreleased
+A window a float rule or a detection just floated waits the same
+way ([#2627](https://github.com/KiwiCanopy/KiwiDesk/issues/2627)):
+what is owed is the window, never its frame, and it is placed when
+the hand rests only if it is still a float. A window you drag or
+resize meanwhile stays where you put it. A frame that moves without a
+drag decides nothing: an app answering a size it refused and a
+hand move look alike from outside.
+:::
 
 ### A placement bounce is the app's answer, not the user's (#1161)
 
