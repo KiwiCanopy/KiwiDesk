@@ -42,10 +42,8 @@ final class DisplayWatch {
     static func liveMenuBars() -> [CGRect] {
         let level = Int(CGWindowLevelForKey(.mainMenuWindow))
         let list =
-            CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
+            WindowListRead.copy("liveMenuBars", [.optionOnScreenOnly])
+            ?? []
         return list.compactMap { info in
             guard
                 info[kCGWindowOwnerName as String] as? String

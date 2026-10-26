@@ -32,10 +32,10 @@ final class SpaceSlideOverlay {
     /// first — one read per press; pinned empty by `makeTestCore`.
     var stackOrder: @MainActor () -> [UInt32: Int] = {
         let list =
-            CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
+            WindowListRead.copy(
+                "spaceSlideStackOrder",
+                [.optionOnScreenOnly, .excludeDesktopElements]
+            ) ?? []
         var order: [UInt32: Int] = [:]
         for (index, info) in list.enumerated() {
             if let number = info[kCGWindowNumber as String] as? UInt32 {
