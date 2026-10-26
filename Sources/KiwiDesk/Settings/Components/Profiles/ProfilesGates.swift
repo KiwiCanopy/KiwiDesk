@@ -25,9 +25,6 @@ struct ProfilesGates {
         case noSidecar
         case presetSwitchesLiveLayout
         case screenCountMismatch(screens: Int)
-        /// `init.lua` owns the config, so the app-wide switch cue
-        /// has no store to write (#1741, #2142).
-        case appWideLuaOwned
     }
 
     /// Evaluates inert reason for setting key. Fail-OPEN on a
@@ -43,8 +40,6 @@ struct ProfilesGates {
                 return nil
             }
             return sidecarExists ? .bindingsOwnedByLua : .noSidecar
-        case .profiles(.desktopCue):
-            return guiManaged ? nil : .appWideLuaOwned
         case .profiles(.presetsApply):
             if editingStoredProfile {
                 return .presetSwitchesLiveLayout
@@ -70,7 +65,6 @@ struct ProfilesGates {
     static let resolved: Set<SettingKey> = [
         .profiles(.profileBindings),
         .profiles(.presetsApply),
-        .profiles(.desktopCue),
     ]
 
     /// Gated setting keys resolved outside this type.
@@ -109,8 +103,6 @@ enum ProfilesGateHelp {
                     + "which editing a saved profile never does. "
                     + "Switch to Live to apply one."
             )
-        case .appWideLuaOwned:
-            return GeneralGateHelp.sentence(for: .luaOwned)
         case .screenCountMismatch(let screens):
             return L(
                 "presets.needs_screens",

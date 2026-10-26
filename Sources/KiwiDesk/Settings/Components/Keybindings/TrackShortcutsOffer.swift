@@ -3,7 +3,7 @@ import SwiftUI
 
 /// The Track families in the Move windows group: behind their
 /// own offer, opened on arrival once the layout is in play
-/// (#1440) — the Desktop offer's shape (#1125), one mount.
+/// (#1440) — the #1125 door shape, one mount.
 ///
 /// The rows mean nothing outside the Track layout, and the seed
 /// binds none of them; the door keeps them reachable (grey
@@ -19,15 +19,15 @@ struct TrackShortcutsOffer: View {
 
     /// Whether the layout is in play, asked of the resolver
     /// rather than re-derived (`ShortcutsGates`). It seeds the
-    /// drawer OPEN and never swaps the container, for the
-    /// Desktop offer's reason: a recorder focused inside it must
-    /// survive the first recorded combo.
+    /// drawer OPEN and never swaps the container (#1125): a
+    /// recorder focused inside it must survive the first recorded
+    /// combo.
     var bound: Bool {
         ShortcutsGates(config: model.config).trackInUse
     }
 
-    /// No `hasRows` arm, unlike the Desktop offer: these rows
-    /// are static, so there is always something to draw.
+    /// No `hasRows` arm, unlike the macOS Desktops section: these
+    /// rows are static, so there is always something to draw.
     var body: some View {
         SettingsDisclosure(
             drawer,

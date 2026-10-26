@@ -14,6 +14,7 @@ enum ShortcutsRowOrder {
         .defaultShortcuts,
         .gestures,
         .modifierKeys,
+        .macosDesktops,
     ]
 
     /// The Mouse & trackpad drawer's settings, in entry order
@@ -73,27 +74,26 @@ enum ShortcutsRowOrder {
         .shortcuts(.moveToSpaceFollow),
     ]
 
-    /// The Desktop families, last in each group and behind their
-    /// own offer until one is bound (#1125). Named apart from
-    /// the catalog's `focusDesktops` / `moveWindowsDesktops`
-    /// drawers: `SettingsCatalogSiteTests` greps a bare
-    /// `.<name>`, so a byte-identical name here would satisfy
-    /// the dead-declaration guard on this mention alone. KiwiDesk's own
-    /// Spaces lead — a Desktop row is the escape into macOS's
-    /// arrangement — which is what `focusAtRest`'s ordering
-    /// already said and this extends from ORDER into VISIBILITY.
-    static let focusDesktopFamilies: [SettingKey] = [
+    /// The macOS Desktops section (#2655), after Move windows:
+    /// KiwiDesk's own Spaces lead, and a Desktop row is the way
+    /// out into macOS. The switch cue first, drawn by
+    /// `DesktopCueRow` (#2142); Go to Desktop at rest; the moves,
+    /// one interleaved run, behind the section's drawer.
+    static let macosDesktopsList: [SettingKey] = [
+        .shortcuts(.desktopCue)
+    ]
+
+    static let macosDesktopsAtRest: [SettingKey] = [
         .shortcuts(.focusDesktop)
     ]
 
-    static let moveWindowsDesktopFamilies: [SettingKey] = [
+    static let macosDesktopsMore: [SettingKey] = [
         .shortcuts(.moveToDesktop),
         .shortcuts(.moveToDesktopFollow),
     ]
 
-    /// The Track families, behind their own offer BELOW the
-    /// Desktop one — ruled, `docs/design-decisions.md` ▸ #1125's
-    /// second instance (#1440).
+    /// The Track families, behind their own offer in Move windows
+    /// (#1440).
     static let moveWindowsTrackFamilies: [SettingKey] = [
         .shortcuts(.moveWindowToTrack),
         .shortcuts(.swapWithTrack),

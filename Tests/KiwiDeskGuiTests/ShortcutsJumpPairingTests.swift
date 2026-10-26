@@ -48,6 +48,14 @@ struct ShortcutsJumpPairingTests {
                 ShortcutsRowOrder.moveWindowsAtRest
             ),
             (
+                "ShortcutsRowOrder.macosDesktopsAtRest",
+                ShortcutsRowOrder.macosDesktopsAtRest
+            ),
+            (
+                "ShortcutsRowOrder.macosDesktopsMore",
+                ShortcutsRowOrder.macosDesktopsMore
+            ),
+            (
                 "ShortcutsRowOrder.layoutAtRest",
                 ShortcutsRowOrder.layoutAtRest
             ),

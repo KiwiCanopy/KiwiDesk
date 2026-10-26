@@ -11,8 +11,8 @@ struct KeybindingFamilyRows: View {
     let key: SettingKey
     let expander: ShortcutsFamilyRows
     /// A heading separates a family from its SIBLINGS in a
-    /// shared card; a family alone under its own drawer title
-    /// has none to separate it from (#1125).
+    /// shared card; a family under its own section or drawer
+    /// title has none to separate it from (#1125, #2655).
     var showsHeading = true
 
     var body: some View {
@@ -87,8 +87,9 @@ struct KeybindingFamilyRows: View {
     }
 }
 
-/// Headings for shortcut census families (#188). The Track
-/// families carry none: their drawer title says it (#1440).
+/// Headings for shortcut census families (#188). The Track and
+/// Desktop families carry none: their drawer or section title
+/// says it (#1440, #2655).
 @MainActor
 enum ShortcutsFamilyHeading {
     static func title(for key: SettingKey) -> String? {
@@ -97,13 +98,6 @@ enum ShortcutsFamilyHeading {
             return L("shortcuts.go_to_space", "Go to Space")
         case .shortcuts(.moveToSpace):
             return L("shortcuts.move_to_space", "Move to Space")
-        case .shortcuts(.focusDesktop):
-            return L("shortcuts.go_to_desktop", "Go to Desktop")
-        case .shortcuts(.moveToDesktop):
-            return L(
-                "shortcuts.move_to_desktop",
-                "Move to Desktop"
-            )
         default:
             return nil
         }
@@ -132,13 +126,6 @@ struct FocusGroup: View {
                     )
                 }
             }
-            DesktopShortcutsOffer(
-                model: model,
-                bindings: $bindings,
-                keys: ShortcutsRowOrder.focusDesktopFamilies,
-                drawer: SettingsCatalog.shortcuts.focusDesktops,
-                expander: expander
-            )
         }
     }
 }
@@ -163,15 +150,6 @@ struct MoveWindowsGroup: View {
                     expander: expander
                 )
             }
-            DesktopShortcutsOffer(
-                model: model,
-                bindings: $bindings,
-                keys: ShortcutsRowOrder
-                    .moveWindowsDesktopFamilies,
-                drawer: SettingsCatalog.shortcuts
-                    .moveWindowsDesktops,
-                expander: expander
-            )
             TrackShortcutsOffer(
                 model: model,
                 bindings: $bindings,

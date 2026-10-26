@@ -1167,29 +1167,26 @@ must keep:
   which is hue alone. `ConflictRowTreatmentTests` pins the
   wiring; `ConflictSeverityTests` ▸ `classesArePartitioned`
   holds the two chord facts disjoint.
-- **A capability may wear one door per container while its
-  UNLOCK stays area-wide** (#1125). The Desktop shortcut
-  families are the worked case: two cards each carry their own
-  offer, because "go to Desktop 3" and "throw this window to
-  Desktop 3" are different questions asked in different places
-  — but one binding anywhere retires both offers, since the
-  thing the user has met is the concept, not the card. Read
-  alongside the list-scoping rule above rather than against it:
-  that one bans an unlock LEAKING to another area, and this one
-  says a single capability split across two containers of one
-  area answers as one. The obligation a new instance takes: the
-  door is per container, the gate is per area, and the drawer
-  never swaps for a bare list once bound — a container that
-  changes kind under the user's own commit tears down the
-  control they committed with. `ShortcutsDesktopOfferTests`
-  holds the mounts and the predicates. And where two offers
-  share one container's `.immediate` tier — the Track drawer
-  below the Desktop one in Move windows (#1440,
-  `ShortcutsTrackOfferTests`) — the tier alone no longer places
-  a key, so each offer's order list is the census rows carrying
-  exactly the gate that offer's `bound` consults, derived in
-  `ShortcutsCensusRenderTests ▸ moveWindowsTier` rather than
-  restated; a family joining either drawer takes that gate.
+- **An offer drawer stays mounted once bound, and its unlock
+  asks about the drawer's own concept, never a sibling's rows**
+  (#1125, #2655). The drawer never swaps for a bare list once
+  bound — a container that changes kind under the user's own
+  commit tears down the control they committed with — and it
+  opens on arrival from the resolver's verdict, never forced
+  shut. The concept may be wider than the rows (the Track
+  drawer's is the layout in play, #1440); what it may not be is
+  a neighbour's rows, such as a seeded Go-to row opening the move
+  offer. The macOS Desktops section's moves drawer
+  (`MacOSDesktopsSectionTests`, `MacOSDesktopsPredicateTests`)
+  and the Track drawer in Move windows (#1440,
+  `ShortcutsTrackOfferTests`) are the instances; where a
+  container's `.immediate` tier holds an offer (the Track
+  drawer), its order list is the census rows carrying exactly the
+  gate its `bound` consults (`ShortcutsCensusRenderTests ▸
+  moveWindowsTier`), and a family joining that drawer takes that
+  gate. A drawer over a `.showMore` tier carries no census gate,
+  and its hold-open is a resolver reading of its own verbs
+  (`ShortcutsGates.desktopMovesBound`).
 - **A new surfacing branch or one-line wiring decision in the
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell

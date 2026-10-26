@@ -13,13 +13,10 @@ struct ProfilesControls: Sendable {
         "profiles.which_loads.title",
         "Which profile loads"
     )
-    /// Desktop-specific profile bindings drawer (#678 turn 13a),
-    /// declared with its one static child so a hit on the switch
-    /// cue's row opens it (#2142, #1250).
+    /// Desktop-specific profile bindings drawer (#678 turn 13a).
     let desktops = SettingsDrawer(
         "desktops.title",
-        "Profiles per macOS Desktop",
-        children: DesktopsControls()
+        "Profiles per macOS Desktop"
     )
     let presetsCard = SettingsControl(
         "presets.title",
@@ -29,15 +26,6 @@ struct ProfilesControls: Sendable {
     let presetsOther = SettingsDrawer(
         "presets.other_setups",
         "For other setups"
-    )
-}
-
-/// Profiles ▸ Desktops rows a search can name — the binding rows'
-/// labels are per-Desktop, so only the switch cue is here (#2142).
-struct DesktopsControls: Sendable {
-    let switchCue = SettingsControl(
-        "desktops.cue",
-        "Show the Desktop's number after a switch"
     )
 }
 
@@ -82,23 +70,28 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.move_windows",
         "Move windows"
     )
-    /// The Desktop families' offer in each group (#1125): the
-    /// door to a capability the rows themselves are withheld
-    /// behind, and — the rows carrying dynamic labels no search
-    /// index can name — the only one search can offer either.
-    let focusDesktops = SettingsDrawer(
-        "shortcuts.desktops.focus",
-        "Go to a macOS Desktop"
-    )
-    let moveWindowsDesktops = SettingsDrawer(
-        "shortcuts.desktops.move",
-        "Move windows to a macOS Desktop"
-    )
     /// The Track families' door (#1440) — their only
     /// search-reachable name, the rows' labels being dynamic.
     let moveWindowsTracks = SettingsDrawer(
         "shortcuts.tracks.move",
         "Move windows in the track layout"
+    )
+    /// The macOS Desktops section (#2655). Its title and its
+    /// drawer's are the Desktop families' only search-reachable
+    /// names, the rows' labels being dynamic.
+    let desktopsSection = SettingsControl(
+        "shortcuts.section.macos_desktops",
+        "macOS Desktops"
+    )
+    /// The section's first row, the Desktop switch cue (#2142),
+    /// on its census label.
+    let desktopCue = SettingsControl(
+        "desktops.cue",
+        "Show the Desktop's number after a switch"
+    )
+    let desktopMoves = SettingsDrawer(
+        "shortcuts.desktops.move",
+        "Move windows to a macOS Desktop"
     )
     let layoutKeys = SettingsControl(
         "shortcuts.section.layout",
