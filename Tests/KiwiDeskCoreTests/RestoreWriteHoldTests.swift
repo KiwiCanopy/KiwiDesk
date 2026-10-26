@@ -265,6 +265,15 @@ struct RestoreWriteHoldTests {
         #expect(desk.gate.owedWrites.isEmpty)
     }
 
+    /// Two identical monitors share a fingerprint: losing one is
+    /// a change a set would swallow (#633).
+    @Test("the screens compare as a multiset")
+    func screensCompareAsMultiset() {
+        let one = ["Studio:0,0,1920,1080"]
+        #expect(!SleepWakeManager.sameTopology(one, one + one))
+        #expect(SleepWakeManager.sameTopology(["b", "a"], ["a", "b"]))
+    }
+
     @Test("a window moved to another Space while owed is not written")
     func refiledWhileOwedSkips() {
         let desk = held()

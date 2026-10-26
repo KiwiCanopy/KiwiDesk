@@ -26,21 +26,24 @@ extension KiwiCore {
     }
 
     /// Writes a tracked window's replayed frame now, or owes it
-    /// while the motion gate holds. A `seeded` float owes nothing
-    /// of its own: its stash seed rides the held pass (#1864), and
-    /// what forgets the seed must not be paid over.
+    /// while the motion gate holds. A `seeded` float's owe only
+    /// holds the pass and files nothing to pay: its stash seed is
+    /// the held write (#1864), and what forgets the seed must not
+    /// be paid over. A window in no Space is written at once.
     func writeRestoredFrame(
         _ record: StateSnapshot.WindowRecord,
         from snapshot: StateSnapshot,
         seeded: Bool
     ) {
         let id = record.windowID
-        guard oweAmbientWrite(.restore, for: id) else {
+        let space = state.workspaces.space(of: id)
+        guard seeded || space != nil,
+            oweAmbientWrite(.restore, for: id)
+        else {
             tiler.setFrame(id, record.frame)
             return
         }
-        guard !seeded, let space = state.workspaces.space(of: id)
-        else { return }
+        guard !seeded, let space else { return }
         if restoreDebt == nil {
             restoreDebt = RestoreDebt(
                 snapshot: snapshot,

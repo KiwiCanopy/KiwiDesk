@@ -2412,8 +2412,8 @@ editing here:
   snapshot restore owes its tracked-window writes there too, paid
   from the replay's record only while the screens it was owed
   under (#633) and the Space it filed the window in still hold —
-  a float's seed rides the held pass instead, so it owes nothing
-  to pay — and a newer replay, a rest, a stop or a discarded
+  a float's seed rides the held pass instead, so its owe files
+  nothing to pay — and a newer replay, a rest, a stop or a discarded
   arrangement voids it (#2626, `RestoreWriteHoldTests`). A new `OwedWrite` case takes
   its place in the declaration order the payer ranks by, and its
   payment says
