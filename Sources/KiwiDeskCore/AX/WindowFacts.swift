@@ -69,12 +69,10 @@ public struct WindowFacts {
     }
 }
 
-/// The zoom, close and Cancel buttons of one window, fetched in
-/// ONE batched round trip on first ask and kept (#2653). The zoom
-/// read cost that trip before, so a window carrying no Cancel
-/// button pays no extra message — on a Desktop switch's list read
-/// included; one carrying one pays one more, its close button's
-/// `AXEnabled`.
+/// The zoom, close and Cancel buttons of one window: ONE batched
+/// AX round trip on first ask, kept for the reading (#2653). A
+/// window carrying a Cancel button pays one more message, its
+/// close button's `AXEnabled`.
 final class WindowButtons {
     private let element: AXUIElement
     private var fetched: [AXUIElement?]?

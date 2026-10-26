@@ -115,11 +115,10 @@ struct WindowFactsSeamTests {
         ].map { fetch.range(of: $0)?.lowerBound }
         #expect(!order.contains(nil), "a button is not fetched")
         #expect(order.compactMap { $0 } == order.compactMap { $0 }.sorted())
-        let source = try String(
-            contentsOf: Self.root.appendingPathComponent(
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
                 "Sources/KiwiDeskCore/AX/WindowFacts.swift"
-            ),
-            encoding: .utf8
+            )
         )
         for (index, name) in ["zoom", "close", "cancel"].enumerated() {
             #expect(
