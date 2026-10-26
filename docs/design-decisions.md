@@ -2681,8 +2681,9 @@ hand move look alike from outside. A float moved onto another
 screen after a display change or a move into another Space's
 screen waits the same way
 ([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)), its
-target worked out again from the Space it then belongs to; a
-window owed both lands by its placement.
+target worked out again from the Space it then belongs to. A
+window owed both is placed, or re-anchored where the placement is
+no longer due.
 :::
 
 ### A placement bounce is the app's answer, not the user's (#1161)

@@ -165,6 +165,22 @@ struct MotionScopeCensusTests {
             reanchors["KiwiDeskCore/App/KiwiCore+FloatPlacementHold.swift"]
                 == 1
         )
+        // The re-anchor owes inside its direct arm, ahead of the write.
+        let arm = SourceScan.stripComments(
+            try String(
+                contentsOf: Self.sources.appendingPathComponent(
+                    "KiwiDeskCore/App/KiwiCore+FloatReanchor.swift"
+                ),
+                encoding: .utf8
+            )
+        )
+        let opens = try #require(
+            arm.range(of: "if window.isSticky || !window.isFloating {")
+        )
+        let owe = try #require(arm.range(of: "oweAmbientWrite(.reanchor"))
+        let writes = try #require(arm.range(of: "tiler.applyFrame("))
+        #expect(opens.upperBound <= owe.lowerBound)
+        #expect(owe.upperBound <= writes.lowerBound)
     }
 
     /// Core doors that move windows when the GUI calls them.

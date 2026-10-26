@@ -2409,9 +2409,10 @@ editing here:
   under user motion (`MotionGate.frameWritten`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
   owes through that door, and one left ungated is a ruling (the
-  restore's #2626). The re-anchor's direct arm (#2628) owes too,
-  and a second `OwedWrite` case states its rank in `outranks`
-  (`MotionGateOwedWriteTests`, `MotionScopeCensusTests` ▸
+  restore's #2626). A new `OwedWrite` case takes its place in the
+  declaration order the payer ranks by, and its payment says
+  whether it wrote, so a write no longer due falls through to the
+  next (`MotionGateOwedWriteTests`, `MotionScopeCensusTests` ▸
   `directWritesOweThroughTheDoor`). The
   engine's pass is driven only from that door
   (`MotionScopeCensusTests` ▸ `passesAskTheGate`,

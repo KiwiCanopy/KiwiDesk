@@ -83,9 +83,7 @@ extension KiwiCore {
         // (#1178), and stands.
         if window.isSticky || !window.isFloating {
             // Re-derived from the window's Space when paid (#2628).
-            if tiler.motionGate.holdsNow {
-                return oweAmbientWrite(.reanchor, for: id)
-            }
+            if oweAmbientWrite(.reanchor, for: id) { return }
             tiler.forgetStash(id)
             tiler.applyFrame(
                 id,

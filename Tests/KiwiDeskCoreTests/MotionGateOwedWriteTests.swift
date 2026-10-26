@@ -4,11 +4,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The motion gate's owed direct writes (#2627, #2628): an owed
-/// placement outranks a re-anchor for the same window, and a write
-/// owed while nothing is owed holds a pass of its own, so the
-/// release that pays it is armed. The gate stands alone, its hand
-/// and clock driven by hand.
+/// The motion gate's owed direct writes (#2627, #2628): a write is
+/// owed only while the gate holds and holds a pass of its own; the
+/// payer tries a window's writes in precedence order, falling
+/// through to the next where one writes nothing, inside a scope
+/// where nothing holds. The gate stands alone, its hand and clock
+/// driven by hand.
 @Suite("Motion gate owed writes")
 @MainActor
 struct MotionGateOwedWriteTests {
@@ -23,16 +24,14 @@ struct MotionGateOwedWriteTests {
         return gate
     }
 
-    @Test("an owed placement outranks a re-anchor, whichever came first")
-    func placementOutranksReanchor() {
-        let first = gate(moving: true)
-        first.owe(.floatPlacement, for: window)
-        first.owe(.reanchor, for: window)
-        #expect(first.owedWrites[window] == .floatPlacement)
-        let second = gate(moving: true)
-        second.owe(.reanchor, for: window)
-        second.owe(.floatPlacement, for: window)
-        #expect(second.owedWrites[window] == .floatPlacement)
+    @Test("a write is owed only while the gate holds")
+    func owesOnlyWhileHolding() {
+        let resting = gate(moving: false)
+        #expect(!resting.owe(.reanchor, for: window))
+        #expect(resting.owedWrites.isEmpty)
+        let moving = gate(moving: true)
+        #expect(moving.owe(.reanchor, for: window))
+        #expect(moving.owedWrites[window] == [.reanchor])
     }
 
     @Test("a write owed while nothing is owed holds a pass")
@@ -41,5 +40,47 @@ struct MotionGateOwedWriteTests {
         #expect(gate.owed == nil)
         gate.owe(.reanchor, for: window)
         #expect(gate.owed != nil)
+    }
+
+    @Test("a placement is paid ahead of a re-anchor, which then waits")
+    func placementPaysFirst() {
+        let gate = gate(moving: true)
+        gate.owe(.reanchor, for: window)
+        gate.owe(.floatPlacement, for: window)
+        var paid: [MotionGate.OwedWrite] = []
+        gate.payWrites { _, write in
+            paid.append(write)
+            return true
+        }
+        #expect(paid == [.floatPlacement])
+        #expect(gate.owedWrites.isEmpty)
+    }
+
+    @Test("a placement no longer due falls through to the re-anchor")
+    func placementFallsThrough() {
+        let gate = gate(moving: true)
+        gate.owe(.floatPlacement, for: window)
+        gate.owe(.reanchor, for: window)
+        var paid: [MotionGate.OwedWrite] = []
+        gate.payWrites { _, write in
+            paid.append(write)
+            return write == .reanchor
+        }
+        #expect(paid == [.floatPlacement, .reanchor])
+    }
+
+    /// A payment re-enters its writer, which asks the gate again:
+    /// inside the payment nothing holds, so it writes.
+    @Test("nothing holds while the writes are paid")
+    func paymentHoldsNothing() {
+        let gate = gate(moving: true)
+        gate.owe(.reanchor, for: window)
+        var heldInside = true
+        gate.payWrites { _, _ in
+            heldInside = gate.holdsNow
+            return true
+        }
+        #expect(!heldInside)
+        #expect(gate.holdsNow)
     }
 }
