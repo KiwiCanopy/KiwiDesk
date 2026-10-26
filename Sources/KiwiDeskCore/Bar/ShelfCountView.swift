@@ -20,7 +20,8 @@ final class ShelfCountView: NSView {
     /// (#2645); the flat `chip` shows where no glass draws.
     let glassChip = GlassBackdrop()
     private var hoverHex: String?
-    private var edge = AppBarEdge.top
+    /// The shelf edge its glass hover fades from.
+    private var fadeEdge = AppBarEdge.top
     private var chipRadius: CGFloat = 0
     private let label = NSTextField(labelWithString: "")
     private let chevron = NSImageView()
@@ -90,7 +91,7 @@ final class ShelfCountView: NSView {
     ) {
         chip.layer?.backgroundColor = hoverFill.cgColor
         self.hoverHex = hoverHex
-        self.edge = edge
+        fadeEdge = edge
         self.chipRadius = chipRadius
         self.count = count
         self.ink = ink
@@ -292,7 +293,7 @@ final class ShelfCountView: NSView {
             showsHover: hovered && hoverHex != nil,
             hex: hoverHex ?? "",
             shelf: shelf,
-            edge: edge,
+            edge: fadeEdge,
             cornerRadius: chip.layer?.cornerRadius ?? 0,
             corners: [
                 .layerMinXMinYCorner, .layerMaxXMinYCorner,
