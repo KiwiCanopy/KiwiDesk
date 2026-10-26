@@ -957,6 +957,8 @@ and the same setup is always available as a preset of that name.
 | Toggle KiwiVision | `⌃⌥V` |
 | Next / previous layout | `⌃⌥C` / `⌃⌥⇧C` |
 | Reset the space's sizes | `⌃⌥R` |
+| Maximize the window | `⌃⌥M` |
+| Pocket this window | `⌃⌥P` |
 | Show / hide Space Bar, App Bar | `⌃⌥G`, `⌃⌥H` |
 | Window switcher / view picker | `⌃⌥J` / `⌃⌥L` |
 | Show shortcuts panel | `⌃⌥K` |
