@@ -2409,7 +2409,10 @@ editing here:
   under user motion (`MotionGate.frameWritten`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
   owes through that door, and one left ungated is a ruling (the
-  restore's #2626, the re-anchor's #2628). The
+  restore's #2626). The re-anchor's direct arm (#2628) owes too,
+  and a second `OwedWrite` case states its rank in `outranks`
+  (`MotionGateOwedWriteTests`, `MotionScopeCensusTests` ▸
+  `directWritesOweThroughTheDoor`). The
   engine's pass is driven only from that door
   (`MotionScopeCensusTests` ▸ `passesAskTheGate`,
   `MotionGateTests`).

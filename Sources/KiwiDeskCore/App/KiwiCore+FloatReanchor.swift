@@ -82,6 +82,10 @@ extension KiwiCore {
         // the restore pass delivering such a member's seed
         // (#1178), and stands.
         if window.isSticky || !window.isFloating {
+            // Re-derived from the window's Space when paid (#2628).
+            if tiler.motionGate.holdsNow {
+                return oweAmbientWrite(.reanchor, for: id)
+            }
             tiler.forgetStash(id)
             tiler.applyFrame(
                 id,

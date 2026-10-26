@@ -48,11 +48,18 @@ final class MotionGate {
 
     /// A direct frame write outside a pass, owed for one window
     /// until a pass runs (#2627). A later owe for the same window
-    /// replaces the earlier one; a second case rules its precedence
-    /// over the first before it lands (#2628).
+    /// replaces the earlier one unless the earlier `outranks` it.
     enum OwedWrite: Equatable {
         /// A detection flip's float placement.
         case floatPlacement
+        /// A float's move onto its Space's screen (#2628).
+        case reanchor
+
+        /// A placement lands the float on its own Space's screen,
+        /// which is all a re-anchor would do, so it is kept.
+        func outranks(_ other: OwedWrite) -> Bool {
+            self == .floatPlacement && other == .reanchor
+        }
     }
 
     let quiescence = InputQuiescence()
@@ -124,8 +131,20 @@ final class MotionGate {
     }
 
     func owe(_ write: OwedWrite, for id: WindowID) {
+        if owedWrites[id]?.outranks(write) == true { return }
         owedWrites[id] = write
+        // The release that pays it is armed by an owed pass.
+        if owed == nil, holdsNow { _ = admit(Self.bareEvent) }
     }
+
+    /// The pass a write owed alone holds: an event pass with no
+    /// window and no promise.
+    private static let bareEvent = Owed(
+        animated: nil,
+        pass: .event,
+        newlyCreatedWindow: nil,
+        sizing: .mayInstantSize
+    )
 
     /// Every owed write, forgotten as it is handed over.
     func takeWrites() -> [WindowID: OwedWrite] {

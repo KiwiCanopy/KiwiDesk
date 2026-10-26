@@ -6,15 +6,14 @@ import CoreGraphics
 /// from the window as it then is.
 extension KiwiCore {
     /// The one door an ambient writer owes through while the motion
-    /// gate holds. The release that pays it is armed by an owed
-    /// pass, so a write owed with none owes one.
+    /// gate holds; the gate holds a pass of its own to pay it when
+    /// none is owed, so a caller inside a pass re-enters nothing.
     func oweAmbientWrite(
         _ write: MotionGate.OwedWrite,
         for id: WindowID
     ) {
         tiler.motionGate.owe(write, for: id)
         onLog("direct write held: w\(id.raw)")
-        if tiler.motionGate.owed == nil { retile() }
     }
 
     /// Pays every owed write still due, from the pass that runs,
@@ -26,6 +25,10 @@ extension KiwiCore {
             switch write {
             case .floatPlacement:
                 if owesPlacement(id) { placeFloating(id) }
+            case .reanchor:
+                if let space = state.workspaces.space(of: id) {
+                    reanchorFloat(id, to: space)
+                }
             }
         }
     }

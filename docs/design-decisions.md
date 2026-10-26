@@ -2663,9 +2663,7 @@ records, the bars and the rings move at once, and a held pass
 stamps nothing, no placement and no size ask, so a frame that was
 never written is never judged against an echo. A frame written
 outside a layout pass, such as a restore's own writes
-([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)) or a
-float's re-anchor onto another screen
-([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)), is
+([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)), is
 not held. Of two
 windows arriving during one hold, only the newer keeps its
 start-at-target entrance. The cost: after you stop the
@@ -2679,7 +2677,12 @@ what is owed is the window, never its frame, and it is placed when
 the hand rests only if it is still a float. A window you drag or
 resize meanwhile stays where you put it. A frame that moves without a
 drag decides nothing: an app answering a size it refused and a
-hand move look alike from outside.
+hand move look alike from outside. A float moved onto another
+screen after a display change or a move into another Space's
+screen waits the same way
+([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)), its
+target worked out again from the Space it then belongs to; a
+window owed both lands by its placement.
 :::
 
 ### A placement bounce is the app's answer, not the user's (#1161)

@@ -146,6 +146,27 @@ struct MotionScopeCensusTests {
         #expect(passes == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 2])
     }
 
+    /// An ambient direct write owes through the one door (#2627):
+    /// the detected float's placement and the re-anchor's direct
+    /// arm (#2628), each paid in the pass before it lays out.
+    @Test("ambient direct writes owe through the one door")
+    func directWritesOweThroughTheDoor() throws {
+        let owes = try Self.counts(of: "oweAmbientWrite(.")
+        #expect(
+            owes == [
+                "KiwiDeskCore/App/KiwiCore+FloatPlacementHold.swift": 1,
+                "KiwiDeskCore/App/KiwiCore+FloatReanchor.swift": 1,
+            ]
+        )
+        let pays = try Self.counts(of: "\n        payOwedWrites()")
+        #expect(pays == ["KiwiDeskCore/App/KiwiCore+Retile.swift": 1])
+        let reanchors = try Self.counts(of: "reanchorFloat(id, to: space)")
+        #expect(
+            reanchors["KiwiDeskCore/App/KiwiCore+FloatPlacementHold.swift"]
+                == 1
+        )
+    }
+
     /// Core doors that move windows when the GUI calls them.
     private static let motionDoors = [
         "execute", "loadConfig", "saveGuiConfig",
