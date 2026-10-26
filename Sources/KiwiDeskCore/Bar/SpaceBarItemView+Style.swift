@@ -76,7 +76,8 @@ extension SpaceBarItemView {
             applyBadge(
                 badge,
                 appFocused: app.focused,
-                lit: glyphIsHovered(index)
+                lit: glyphIsHovered(index),
+                count: true
             )
         }
         overflowBadge.isHidden =
@@ -143,18 +144,27 @@ extension SpaceBarItemView {
     }
 
     /// Group badge styling with 3-tier alpha ladder
-    /// (#470, #955, owner 2026-07-20).
+    /// (#470, #955, owner 2026-07-20). A `count` badge on the
+    /// focused app's glyph in the current Space rests at the chip's
+    /// glyph dim and comes to full under the pointer: it stands for
+    /// the app's other windows, unfocused behind the one in front,
+    /// and its fill says the glyph opens their list (#2650).
     private func applyBadge(
         _ badge: NSTextField,
         appFocused: Bool,
-        lit: Bool
+        lit: Bool,
+        count: Bool = false
     ) {
         badge.layer?.backgroundColor =
             NSColor(kiwiHex: style.groupBadgeColor).cgColor
         badge.textColor =
             NSColor(kiwiHex: style.groupBadgeTextColor)
+        let resting = untintedAppAlpha(focused: appFocused)
+        let behind =
+            count && isActive && appFocused && resting == 1
+            && !(hoveredTarget == nil && (isHovered || isDragHovered))
         badge.alphaValue =
-            lit ? 1 : untintedAppAlpha(focused: appFocused)
+            lit ? 1 : (behind ? style.activeDimFactor : resting)
     }
 
     var cornerRadius: CGFloat {
