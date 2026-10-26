@@ -62,6 +62,7 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
+import { publisher } from "../lib/publisher";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 
@@ -89,9 +90,9 @@ const ogImage = new URL(
   Astro.site,
 ).href;
 
-function localePath(l: Lang, sub = ""): string {
+function localePath(l: Lang, sub = "/"): string {
   const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}` || "/";
+  return `${prefix}${sub}`;
 }
 
 // Source links. Named here rather than inline so a URL that moves
@@ -211,11 +212,7 @@ const jsonLd = [
     url: canonical,
     inLanguage: lang,
     image: ogImage,
-    author: {
-      "@type": "Organization",
-      name: "KiwiCanopy",
-      url: "https://kiwicanopy.com",
-    },
+    author: publisher,
   },
   {
     "@context": "https://schema.org",
@@ -401,7 +398,7 @@ const jsonLd = [
     <h2 id="tools">{t("compare_tools_title")}</h2>
 
     <article class="cmp__tool" id="yabai">
-      <h3>
+      <h3 id="yabai">
         <a href={src.yabai} target="_blank" rel="noopener">yabai<span aria-hidden="true"> ↗</span></a>
       </h3>
       <p class="cmp__label">{t("compare_tool_good_label")}</p>
@@ -415,7 +412,7 @@ const jsonLd = [
     </article>
 
     <article class="cmp__tool" id="aerospace">
-      <h3>
+      <h3 id="aerospace">
         <a href={src.aerospace} target="_blank" rel="noopener">AeroSpace<span aria-hidden="true"> ↗</span></a>
       </h3>
       <p class="cmp__label">{t("compare_tool_good_label")}</p>
@@ -425,7 +422,7 @@ const jsonLd = [
     </article>
 
     <article class="cmp__tool" id="rift">
-      <h3>
+      <h3 id="rift">
         <a href={src.rift} target="_blank" rel="noopener">Rift<span aria-hidden="true"> ↗</span></a>
       </h3>
       <p class="cmp__label">{t("compare_tool_good_label")}</p>
@@ -435,7 +432,7 @@ const jsonLd = [
     </article>
 
     <article class="cmp__tool" id="omniwm">
-      <h3>
+      <h3 id="omniwm">
         <a href={src.omniwm} target="_blank" rel="noopener">OmniWM<span aria-hidden="true"> ↗</span></a>
       </h3>
       <p class="cmp__label">{t("compare_tool_good_label")}</p>
@@ -445,7 +442,7 @@ const jsonLd = [
     </article>
 
     <article class="cmp__tool" id="magnet">
-      <h3>
+      <h3 id="magnet">
         <a href={src.magnet} target="_blank" rel="noopener">Magnet<span aria-hidden="true"> ↗</span></a>{" "}
         <span class="cmp__also">{t("compare_magnet_also")}</span>
       </h3>

@@ -34,6 +34,7 @@ import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
+import { publisher } from "../lib/publisher";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
@@ -209,7 +210,9 @@ const metaDesc = isDev ? t.meta_desc_nerd : t.meta_desc;
 const ogImageURL = new URL(ogImage.src, Astro.site).href;
 const ogLocale =
   lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
-const ogLocaleAlt = lang === "en" ? "de_DE" : "en_US";
+const ogLocaleAlts = ["en_US", "de_DE", "ja_JP"].filter(
+  (l) => l !== ogLocale,
+);
 
 // The hero trailer: served from this origin (media-src 'self'), with
 // the same cut on YouTube for sharing. A link is navigation, so the
@@ -256,20 +259,21 @@ const jsonLd = [
       ? { downloadUrl: downloadHref, installUrl: downloadHref }
       : {}),
     ...(downloadVersion ? { softwareVersion: downloadVersion } : {}),
-    author: {
-      "@type": "Organization",
-      name: "KiwiCanopy",
-      url: makerProfile,
-    },
+    author: publisher,
   },
-  {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "KiwiDesk",
-    url: canonical,
-    inLanguage: lang,
-    description: metaDesc,
-  },
+  // The site's own node belongs to its root, never to /nerd/.
+  ...(isDev
+    ? []
+    : [
+        {
+          "@context": "https://schema.org",
+          "@type": "WebSite",
+          name: "KiwiDesk",
+          url: canonical,
+          inLanguage: lang,
+          description: metaDesc,
+        },
+      ]),
   {
     "@context": "https://schema.org",
     "@type": "VideoObject",
@@ -302,7 +306,9 @@ const jsonLd = [
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="KiwiDesk" />
     <meta property="og:locale" content={ogLocale} />
-    <meta property="og:locale:alternate" content={ogLocaleAlt} />
+    {ogLocaleAlts.map((l) => (
+      <meta property="og:locale:alternate" content={l} />
+    ))}
     <meta property="og:image" content={ogImageURL} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={metaTitle} />
@@ -441,7 +447,7 @@ const jsonLd = [
           {/* Guide: shown in BOTH modes — newcomers arriving in
                Simple mode need the single-scroll /guide/ page, and
                it's useful in Nerd mode too. */}
-          <a class="nav__link nav__link--guide" href="/guide/"
+          <a class="nav__link nav__link--guide" href={`${homeHref}guide/`}
             >{t.nav_guide}</a>
           {/* No Comparison entry here (design + site review,
                2026-08-30). A global nav asks every visitor on every
@@ -824,7 +830,7 @@ const jsonLd = [
             <h2>{t.what_title}</h2>
             <p>{t.what_body}</p>
             <p class="what__fork">
-              <a class="link-arrow" href="/guide/#getting-started">
+              <a class="link-arrow" href={`${homeHref}guide/#getting-started`}>
                 {t.what_learn}
                 <Icon name="lucide:arrow-right" width={15} height={15}
                   aria-hidden="true" />
