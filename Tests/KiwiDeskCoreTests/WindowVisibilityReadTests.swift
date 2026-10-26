@@ -56,11 +56,12 @@ struct WindowVisibilityReadTests {
             compared += 1
             // A window toggled twice between the snapshots is read
             // again once rather than judged on the stale pair.
-            guard read != was else { continue }
-            #expect(
-                SkyLight.windowOnScreen(raw) == Self.publicFlag(raw),
-                "window \(raw)"
-            )
+            // A window ordered out by then is out of scope: the
+            // composite reads nil and leaves it to the public read.
+            guard read != was,
+                let again = SkyLight.windowOnScreen(raw)
+            else { continue }
+            #expect(again == Self.publicFlag(raw), "window \(raw)")
         }
         #expect(compared > 0)
     }

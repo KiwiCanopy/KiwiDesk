@@ -47,18 +47,33 @@ struct RaiseGateOnScreenSeamTests {
     }
 
     /// The composite's truth table is `WindowVisibilityReadTests`';
-    /// this holds that the live read hands it the right two reads.
+    /// this holds that the live read is that call and nothing else,
+    /// so a fallback wrapped around it reds. Trades a false red on
+    /// any reformatting beyond whitespace.
     @Test("windowOnScreen hands the composite both reads")
     func compositeTakesBothReads() throws {
         let body = try Self.body(
             "static func windowOnScreen(",
             in: "OS/SkyLight+WindowVisibility.swift"
         ).filter { !$0.isWhitespace }
+        let statement =
+            body.hasPrefix("{") && body.hasSuffix("}")
+            ? String(body.dropFirst().dropLast()) : body
         #expect(
-            body.contains(
-                "onScreen(orderedIn:windowOrderedIn(wid),"
-                    + "visible:{windowVisible(wid)})"
-            )
+            statement
+                == "onScreen(orderedIn:windowOrderedIn(wid),"
+                + "visible:{windowVisible(wid)})"
         )
+    }
+
+    /// The visible row judges the composite the gate reads, not the
+    /// bare symbol, which reads true for our own window either way.
+    @Test("the visible self_test row judges the composite")
+    func selfTestJudgesTheComposite() throws {
+        let body = try Self.body(
+            ".read(windowIsVisibleSymbol.resolution",
+            in: "OS/SkyLight+SelfTest.swift"
+        ).filter { !$0.isWhitespace }
+        #expect(body.contains("own.flatMap{windowOnScreen($0.id)}"))
     }
 }
