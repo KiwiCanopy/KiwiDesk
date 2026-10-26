@@ -36,6 +36,17 @@ struct BorderDropSettleBurstTests {
         #expect(burst.wait(asking: next, early: early) == DropSettleBurst.gap)
     }
 
+    /// A drop's ask un-hides its swap target, so a pass run for an
+    /// earlier retile of the same gesture never delays it.
+    @Test("a lone ask settles early right after a run")
+    func loneAskAfterARunIsEarly() {
+        var burst = DropSettleBurst()
+        burst.ran(at: t0)
+        let ask = t0.addingTimeInterval(0.25)
+        #expect(burst.wait(asking: ask, early: early, lone: true) == early)
+        #expect(burst.wait(asking: ask, early: early) == DropSettleBurst.gap)
+    }
+
     @Test("an ask past the gap is lone again")
     func pastTheGapIsLone() {
         var burst = DropSettleBurst()

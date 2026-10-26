@@ -121,6 +121,17 @@ struct WindowServerWatchSeamTests {
         #expect(handle.occurrences(of: ".restack?(") == 0)
     }
 
+    /// The drop asks the visibility pass lone (#2659): its swap
+    /// target is the hide the pass exists to heal, and no fixture
+    /// drives a drag through its commit.
+    @Test("the drop's settle ask is lone")
+    func dropAsksLone() throws {
+        #expect(
+            try sites(of: "scheduleBorderDropReconcile(lone: true)")
+                == ["KiwiCore+Drag.swift": 1]
+        )
+    }
+
     @Test("the watch is built in one place")
     func oneConstructionSite() throws {
         // The core builds its watch; BorderManager's default is a

@@ -47,14 +47,16 @@ extension KiwiCore {
     /// keys, so neither can cancel the other.
     ///
     /// Inside a burst of steps it waits per `DropSettleBurst`: every
-    /// per-step pass was a no-op on device (160 of 160, #2659).
-    func scheduleBorderDropReconcile() {
+    /// per-step pass was a no-op on device (160 of 160, #2659). A
+    /// drop asks `lone`, since its swap target is the case above.
+    func scheduleBorderDropReconcile(lone: Bool = false) {
         let animationMS =
             tiler.animation.activeCount > 0
             ? tiler.settings.animations.durationMS : 0
         let wait = borders.dropSettleBurst.wait(
             asking: wallClock(),
-            early: Double(animationMS + 50) / 1_000
+            early: Double(animationMS + 50) / 1_000,
+            lone: lone
         )
         deferred.schedule(
             .borderDropSettle,
