@@ -32,16 +32,15 @@ struct AppBarHoverTitleTests {
         )
     }
 
-    @Test("The peek is the app, then the full title")
+    @Test("The peek is the full title alone")
     func titleShape() throws {
         let core = core(title: "Downloads")
         let content = try #require(
             core.barPeekContent(.appItem([WindowID(1)]), on: nil)
         )
-        #expect(content.groups.map(\.app) == ["Finder"])
         #expect(content.groups.map(\.titles) == [["Downloads"]])
-        // An App Bar header carries no icon; `+n` alone mixes apps.
-        #expect(content.groups.first?.icon == nil)
+        // A one-window label draws its title alone (#2649).
+        #expect(content.header == .none)
         #expect(core.barPeekContent(.appItem([WindowID(99)]), on: nil) == nil)
     }
 

@@ -76,7 +76,8 @@ extension SpaceBarItemView {
             applyBadge(
                 badge,
                 appFocused: app.focused,
-                lit: glyphIsHovered(index)
+                lit: glyphIsHovered(index),
+                count: true
             )
         }
         overflowBadge.isHidden =
@@ -87,14 +88,16 @@ extension SpaceBarItemView {
         applyBadge(
             overflowBadge,
             appFocused: after.holdsFocus,
-            lit: overflowTarget.map { $0 === hoveredTarget } ?? false
+            lit: overflowTarget.map { $0 === hoveredTarget } ?? false,
+            count: false
         )
         leadingBadge.isHidden = collapse != nil || before.windows.isEmpty
         leadingBadge.stringValue = "+\(before.windows.count)"
         applyBadge(
             leadingBadge,
             appFocused: before.holdsFocus,
-            lit: leadingTarget.map { $0 === hoveredTarget } ?? false
+            lit: leadingTarget.map { $0 === hoveredTarget } ?? false,
+            count: false
         )
         styleStateBadges()
     }
@@ -143,18 +146,20 @@ extension SpaceBarItemView {
     }
 
     /// Group badge styling with 3-tier alpha ladder
-    /// (#470, #955, owner 2026-07-20).
+    /// (#470, #955, owner 2026-07-20); a `count` badge takes the
+    /// ladder's count tier (#2650).
     private func applyBadge(
         _ badge: NSTextField,
         appFocused: Bool,
-        lit: Bool
+        lit: Bool,
+        count: Bool
     ) {
         badge.layer?.backgroundColor =
             NSColor(kiwiHex: style.groupBadgeColor).cgColor
         badge.textColor =
             NSColor(kiwiHex: style.groupBadgeTextColor)
         badge.alphaValue =
-            lit ? 1 : untintedAppAlpha(focused: appFocused)
+            lit ? 1 : untintedAppAlpha(focused: appFocused, count: count)
     }
 
     var cornerRadius: CGFloat {
@@ -276,7 +281,8 @@ extension SpaceBarItemView {
 
     /// Three-tier alpha ladder for untinted app glyphs (QA 2026-07-19).
     private func untintedAppAlpha(
-        focused: Bool
+        focused: Bool,
+        count: Bool = false
     ) -> CGFloat {
         // A hovered glyph stands out against its dimmed siblings,
         // so the chip's own hover lifts them only while no glyph
@@ -288,7 +294,9 @@ extension SpaceBarItemView {
         guard isActive else {
             return style.dimFactor
         }
-        return focused
+        // The focused app's count badge rests at the middle tier
+        // beside its full icon (#2650).
+        return focused && !count
             ? 1 : style.activeDimFactor
     }
 
