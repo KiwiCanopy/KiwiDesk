@@ -188,40 +188,18 @@ struct SettingsSearchTests {
         }
     }
 
-    /// The pill's predicate is the ONE offer predicate
-    /// (`HomeCardOrder.isOffered`), never a hand-negated copy:
-    /// a Power-User-only area flips in Simple mode, stays quiet
-    /// in Power User mode, and the Screens screen-count
-    /// promotion silences its pill exactly when it silences its
-    /// gate.
-    @Test("the mode pill derives from the offer predicate")
-    func modePillFollowsOfferPredicate() {
+    /// Screens' Home card needs a second screen, but search
+    /// still finds it on one (#2654): it holds the pins for
+    /// screens that are not connected, so an undocked laptop is
+    /// exactly when a user goes looking.
+    @Test("Screens stays searchable on one screen")
+    func screensSearchableOnOneScreen() {
         pinEnglish()
         defer { reset() }
-        let simple = SettingsSearchContext(mode: .simple)
-        let power = SettingsSearchContext(mode: .powerUser)
-        let screens = SettingsSearchResult.destination(.screens)
-        #expect(
-            SettingsSearch.switchesMode(screens, context: simple)
+        let hits = SettingsSearch.results(
+            query: SettingsDestination.screens.title,
+            context: SettingsSearchContext()
         )
-        #expect(
-            !SettingsSearch.switchesMode(screens, context: power)
-        )
-        #expect(
-            !SettingsSearch.switchesMode(
-                screens,
-                context: SettingsSearchContext(
-                    mode: .simple,
-                    displayCount: 2
-                )
-            )
-        )
-        let simpleArea = SettingsSearchResult.destination(.bars)
-        #expect(
-            !SettingsSearch.switchesMode(
-                simpleArea,
-                context: simple
-            )
-        )
+        #expect(hits.settings.contains(.destination(.screens)))
     }
 }

@@ -26,7 +26,7 @@ struct SettingsNavigationResetTests {
     /// counters are monotonic by construction — the trail's
     /// focus request (#2038) is a change signal, never a value.
     private static let survivesReset: Set<String> = [
-        "pendingReveal", "pendingModeNotice", "pendingScroll",
+        "pendingReveal", "pendingScroll",
         "flash", "flashToken", "revealTarget", "homeReturnFocus",
         "trailFocusRequest",
     ]
@@ -36,7 +36,6 @@ struct SettingsNavigationResetTests {
     private func dirtied() -> SettingsNavigation {
         var nav = SettingsNavigation()
         nav.pendingReveal = SettingsAnchor(destination: .shortcuts)
-        nav.pendingModeNotice = .shortcuts
         nav.pendingScroll = "anchor"
         nav.setRevealTarget("anchor")
         _ = nav.startFlash("anchor")

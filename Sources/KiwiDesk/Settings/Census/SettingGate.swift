@@ -48,12 +48,6 @@ enum SettingRuntimeGate: Hashable {
     case defaultsToRestore
     /// Non-default layer exists in configuration.
     case layersExist
-    /// Some app rule matches windows by a title fragment
-    /// (#1022) — the float facet's titled choice is an OFFER
-    /// until one does, since matching windows on a title
-    /// fragment is power-user work that sat one click from the
-    /// two choices a newcomer wants.
-    case titlePatternsExist
     /// A Track space exists or a Track verb is bound (#1440) —
     /// the rows are an OFFER until the layout is in play.
     case trackInUse

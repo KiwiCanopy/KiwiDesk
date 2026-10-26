@@ -5,8 +5,7 @@ import Testing
 
 /// The update window's gold (#1542, #2038) marks — the Highlights
 /// edge, its ★, the spotlight symbols — and never inks, so its
-/// floor is colour-vision separation, as the mode-gated frame's
-/// is (`ModeGatedFrameSeparationTests`), rather than a luminance
+/// floor is colour-vision separation rather than a luminance
 /// ratio: against the gold-washed card every mark sits on. (The
 /// failed state's `warningInk` glyph never shares the window with
 /// the gold — Failed steps the panel back to ink3.) Every input

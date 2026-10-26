@@ -94,7 +94,8 @@ extension ShortcutsKey {
         case .kiwiHubNavigationKeys:
             return .luaOnly
         case .layers, .layersIcon, .layersReach, .switchToLayer:
-            // Surfaces at rest when configured layers exist.
+            // Behind the Layers card's disclosure until a layer
+            // exists; the card then opens on arrival (#2654).
             return .row(
                 .shortcuts,
                 .layers,
@@ -151,13 +152,14 @@ extension ShortcutsKey {
             )
         case .hyperKey, .shortcutBase, .modifierSides:
             // Above the layer header: it belongs to no layer
-            // (#1870). The key and the sides switch (#2601) are
-            // written at once, the base into the draft (#2460); all
-            // grey where init.lua owns the config.
+            // (#1870). Behind the card's disclosure, which opens on
+            // arrival once in use (#2654). The key and the sides
+            // switch (#2601) are written at once, the base into the
+            // draft (#2460); all grey where init.lua owns the config.
             return .row(
                 .shortcuts,
                 .modifierKeys,
-                .atRest,
+                .showMore,
                 gate: .runtime(.luaOwnsConfig)
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,

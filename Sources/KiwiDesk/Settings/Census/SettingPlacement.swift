@@ -1,11 +1,5 @@
 /// Placement vocabulary of the settings census (#678).
 
-/// Settings modes: "Simple" and "Power User".
-enum SettingsMode: String, CaseIterable, Hashable {
-    case simple
-    case powerUser
-}
-
 /// A Home-level area card in the Settings window.
 enum SettingsArea: CaseIterable, Hashable {
     case gapsAndBorders
@@ -22,27 +16,18 @@ enum SettingsArea: CaseIterable, Hashable {
     case general
     case macChecklist
 
-    /// The mode an area first appears in.
-    var minimumMode: SettingsMode {
+    /// Whether the Mac can use the area: Screens needs a second
+    /// screen. A capability, never a depth setting (#2654).
+    func isAvailable(displayCount: Int) -> Bool {
         switch self {
         case .screens:
-            return .powerUser
+            return displayCount >= 2
         case .layoutDefaults, .gapsAndBorders, .shortcuts,
             .coloursAndMotion, .bars, .spacesAndLayouts,
             .profiles, .appRules, .kiwiVision, .ai, .general,
             .macChecklist:
-            return .simple
+            return true
         }
-    }
-
-    /// Effective minimum mode, promoting Screens to Simple for multi-screen.
-    func effectiveMinimumMode(
-        displayCount: Int
-    ) -> SettingsMode {
-        if self == .screens, displayCount >= 2 {
-            return .simple
-        }
-        return minimumMode
     }
 }
 

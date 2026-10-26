@@ -130,10 +130,6 @@ extension HeaderSearch {
             result: result,
             onCursor: onCursor,
             value: value,
-            switchesMode: SettingsSearch.switchesMode(
-                result,
-                context: context
-            ),
             badged: spotlightProfiles
                 && result.destination == .profiles,
             badgeValue: badgeValue(for: result.destination),

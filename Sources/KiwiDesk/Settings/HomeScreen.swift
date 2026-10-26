@@ -8,8 +8,6 @@ struct HomeScreen: View {
     @FocusState private var focusedCard: SettingsDestination?
     /// Visibility state of first-run guidance banner (14c).
     @State private var firstRunVisible = false
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
     /// Current window width classification band (17a).
     @Environment(\.settingsWidth) private var band
 
@@ -107,21 +105,6 @@ struct HomeScreen: View {
             // small-caps heading needs air above it to read as a
             // heading rather than as a caption on the bar.
             .padding(.top, Self.topGutter)
-            // The flip's reflow (#760): Simple's order is a
-            // subsequence of Power User's, so the motion is pure
-            // insertion (in) or removal (out) — legible either
-            // way, and the way out is the plain fade the issue
-            // asks for, never a highlight. Reduce Motion drops
-            // the reflow; the wash and border weight still
-            // answer.
-            .animation(
-                reduceMotion
-                    ? nil
-                    : .easeOut(
-                        duration: SettingsReveal.scroll
-                    ),
-                value: model.settingsMode
-            )
         }
         .onAppear {
             firstRunVisible = HomeFirstRunState.shouldShow(
@@ -146,7 +129,6 @@ struct HomeScreen: View {
     ) -> [SettingsDestination] {
         HomeCardOrder.offered(
             group,
-            mode: model.settingsMode,
             displayCount: model.displays.count,
             editingStoredProfile: model.editingStoredProfile
         )

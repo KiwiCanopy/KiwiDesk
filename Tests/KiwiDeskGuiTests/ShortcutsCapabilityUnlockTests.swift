@@ -198,36 +198,23 @@ struct ShortcutsCapabilityUnlockTests {
         )
     }
 
-    /// Nothing in the Shortcuts area is read-only or withheld
-    /// because of a mode: mode depth is per AREA and the census
-    /// says so with `SettingsArea.minimumMode`. Shortcuts is a
-    /// `.simple` area, so every row it places is reachable in
-    /// both modes — item 15's "nothing is ever read-only because
-    /// of the mode", stated where a Phase 4 change would have to
-    /// edit it.
-    @Test("Shortcuts is reachable in both modes")
-    func shortcutsIsNotModeGated() {
-        #expect(SettingsArea.shortcuts.minimumMode == .simple)
+    /// Nothing in the Shortcuts area is withheld by a depth
+    /// setting (#2654): the census tiers say where a row sits, and
+    /// a tier invented to mean "experts only" fails here rather
+    /// than shipping as row-level depth.
+    @Test("Shortcuts places rows on the three drawn tiers only")
+    func shortcutsTiersAreDrawn() {
         let placed = SettingKey.allCases.filter {
             $0.placement.area == .shortcuts
         }
         #expect(!placed.isEmpty)
-        // No row-level mode depth exists to check because the
-        // tier enum carries none — assert the tiers actually used
-        // instead, so a tier invented to mean "nerd only" fails
-        // here rather than shipping as row-level mode depth.
-        //
-        // `.immediate` is in the set and is the opposite of mode
-        // depth: it surfaces a row the moment the user's config
-        // contains the thing, in BOTH modes. That is the rule it
-        // carries — config presence expands the simple surface —
-        // so its presence here is the point, not an exception.
+        // `.immediate` surfaces a row the moment the config holds
+        // the thing — config presence expands the surface.
         let tiers = Set(placed.map(\.placement.tier))
         #expect(
             tiers.isSubset(of: [.atRest, .showMore, .immediate])
         )
-        // Vacuity: `.immediate` must actually be in use, or the
-        // sentence above describes nothing.
+        // Vacuity: `.immediate` must actually be in use.
         #expect(tiers.contains(.immediate))
     }
 }

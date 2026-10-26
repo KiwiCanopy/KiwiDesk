@@ -75,13 +75,6 @@ struct AppRulesSection: View {
     /// Whether the rows draw the "Applies to" column (#1393).
     var showsReach: Bool { model.offersReachColumn }
 
-    var offersTitles: Bool {
-        AppRuleTitleOffer.isOffered(
-            mode: model.settingsMode,
-            gates: gates
-        )
-    }
-
     /// With both lists empty the card says what an unruled app
     /// does — once, for the whole area.
     var hasNoRules: Bool { spaceApps.isEmpty && floatApps.isEmpty }

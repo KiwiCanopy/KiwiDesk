@@ -32,18 +32,6 @@ struct ModifierSidesCardTests {
         )
     }
 
-    @Test("Simple offers the card once sides are in play")
-    func simpleOffer() {
-        #expect(!ModifierKeysCard.isOffered(in: .simple, key: nil))
-        #expect(
-            ModifierKeysCard.isOffered(
-                in: .simple,
-                key: nil,
-                keepsSides: true
-            )
-        )
-    }
-
     @Test("the card's order list holds every row placed on it")
     func orderListIsTheContainer() {
         let placed = SettingKey.allCases.filter {
@@ -53,7 +41,7 @@ struct ModifierSidesCardTests {
         #expect(Set(ShortcutsRowOrder.modifierKeysList) == Set(placed))
     }
 
-    @Test("the card offers itself on the sides the model reads")
+    @Test("the card holds open on the sides the model reads")
     func cardWiresTheOffer() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
@@ -68,10 +56,10 @@ struct ModifierSidesCardTests {
                 "model.appWide.modifierSides || model.sidedShortcutCount > 0"
             )
         )
-        // Both the offer and the mode-gated frame take it.
+        // The hold-open takes it.
         #expect(
             source.components(separatedBy: "keepsSides: keepsSides").count
-                == 3
+                == 2
         )
         #expect(source.contains("ModifierSidesRow(model: model)"))
         let row = SourceScan.stripComments(
@@ -150,7 +138,8 @@ struct ModifierSidesCardTests {
             source.contains(
                 "coordinator.scrollTarget =\n"
                     + "                    SettingsCatalog.shortcuts"
-                    + ".modifierSides.id"
+                    + ".modifierKeys.children\n"
+                    + "                    .modifierSides.id"
             )
         )
         #expect(source.contains("sideSwitchLink\n"))

@@ -47,11 +47,9 @@ struct SettingsThemeMetricTests {
         "paletteCardStroke": "PaletteTile.swift",
         "paletteCardStrokeApplied": "PaletteTile.swift",
         "containerStroke": "HomeCard.swift",
-        "containerStrokeModeGated": "HomeCard.swift",
-        "modeGatedStrokeOpacity": "HomeCard.swift",
         "panelWidth": "SettingsDetailPanel.swift",
         "contentMaxWidth": "SettingsView+Detail.swift",
-        "searchNoticeFillOpacity": "SettingsSearchNotice.swift",
+        "searchNoticeFillOpacity": "WhatsNewTrailBanner.swift",
         "chipMarkedOpacity": "ButtonChipStyle.swift",
         "highlightWashOpacity": "UpdateNotesGroups.swift",
     ]

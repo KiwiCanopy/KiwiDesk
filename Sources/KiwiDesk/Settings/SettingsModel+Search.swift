@@ -1,6 +1,6 @@
 import KiwiDeskCore
 
-/// Search enrichment and mode-switch confirmation for SettingsModel (#678).
+/// Search enrichment for SettingsModel (#678).
 extension SettingsModel {
     /// Staged value for a census key, as the diff rows narrate
     /// it — `SettingsValueReadout` with the draft on BOTH sides,
@@ -16,21 +16,4 @@ extension SettingsModel {
         .newValue
     }
 
-    /// Displays self-clearing confirmation when search flips to
-    /// Power User mode.
-    func noteSearchModeSwitch(
-        _ destination: SettingsDestination
-    ) {
-        searchModeNotice = L(
-            "search.mode_switched",
-            "Power User mode on — %1$@ is now on Home.",
-            destination.title
-        )
-        searchNoticeTask?.cancel()
-        searchNoticeTask = Task { @MainActor [weak self] in
-            try? await Task.sleep(for: .seconds(5))
-            guard !Task.isCancelled else { return }
-            self?.searchModeNotice = nil
-        }
-    }
 }

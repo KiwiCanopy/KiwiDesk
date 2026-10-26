@@ -119,13 +119,6 @@ struct ModifierKeysCardTests {
         #expect(HyperKeyWords.trouble(.on) == nil)
     }
 
-    @Test("offered in Power User, and in Simple once a key is set")
-    func offer() {
-        #expect(ModifierKeysCard.isOffered(in: .powerUser, key: nil))
-        #expect(!ModifierKeysCard.isOffered(in: .simple, key: nil))
-        #expect(ModifierKeysCard.isOffered(in: .simple, key: .capsLock))
-    }
-
     @Test("the cap and the spoken board read one predicate")
     func boardMarksTheHyperKey() {
         let rows = KeyboardMatrix.rows(for: .ansi).flatMap { $0 }

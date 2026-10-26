@@ -30,13 +30,10 @@ struct ProfilesControls: Sendable {
 }
 
 struct ShortcutsControls: Sendable {
-    /// Layer definition and switching card. A `SettingsControl`,
-    /// not a `SettingsDrawer`: since the 2026-08-04 owner ruling
-    /// the card is always open when shown at all and withholds
-    /// itself entirely when not (`LayersCard`) — a drawer
-    /// declaration would promise a disclosure that no longer
-    /// exists.
-    let layersCard = SettingsControl(
+    /// Layer definition and switching, a collapsible card (#2654).
+    /// Childless: its rows are `.dynamic` or `.immediate` on
+    /// `layersExist`, which opens the card on arrival.
+    let layersCard = SettingsDrawer(
         "shortcuts.section.layers",
         "Layers"
     )
@@ -108,21 +105,13 @@ struct ShortcutsControls: Sendable {
         "shortcuts.mode_cue",
         "Show the layout after cycling"
     )
-    /// The card above the layer header (#2601 ▸ Ruling 7): Apple's
-    /// own name for these keys, as each catalog's macOS spells it.
-    let modifierKeys = SettingsControl(
+    /// The collapsible card above the layer header (#2601 ▸
+    /// Ruling 7, #2654): Apple's own name for these keys, as each
+    /// catalog's macOS spells it.
+    let modifierKeys = SettingsDrawer(
         "shortcuts.section.modifier_keys",
-        "Modifier keys"
-    )
-    /// The Hyper key's recorder row (#1870), on its census label.
-    let hyperKey = SettingsControl(
-        "shortcuts.hyper_key",
-        "Hyper key"
-    )
-    /// The card's sides switch (#2601), on its census label.
-    let modifierSides = SettingsControl(
-        "shortcuts.modifier_sides",
-        "Tell left and right modifiers apart"
+        "Modifier keys",
+        children: ModifierKeysControls()
     )
     let sizeFloat = SettingsControl(
         "shortcuts.section.size_float",
@@ -158,6 +147,26 @@ struct ShortcutsControls: Sendable {
         "shortcuts.gestures.title",
         "Mouse & trackpad",
         children: GesturesControls()
+    )
+}
+
+/// Shortcuts ▸ Modifier keys rows, keyed on their census label
+/// keys so a search hit opens the card (#2654).
+struct ModifierKeysControls: Sendable {
+    /// The Hyper key's recorder row (#1870).
+    let hyperKey = SettingsControl(
+        "shortcuts.hyper_key",
+        "Hyper key"
+    )
+    /// "Shortcuts use" (#2460).
+    let shortcutBase = SettingsControl(
+        "shortcuts.base",
+        "Shortcuts use"
+    )
+    /// The sides switch (#2601).
+    let modifierSides = SettingsControl(
+        "shortcuts.modifier_sides",
+        "Tell left and right modifiers apart"
     )
 }
 

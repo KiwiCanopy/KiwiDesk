@@ -417,6 +417,11 @@ value. A field greyed by a switch on another page (Grid's
 auto-size, Track's auto limit) says so and links Layout
 Defaults.
 
+:::unreleased
+Until any space has an override, **Customize…** is in each space
+row's actions menu instead of on the row.
+:::
+
 Changing a space's layout never deletes overrides; each layout
 keeps its own, and a **Saved for _N_ other layouts** card at the
 foot lists them. **Reset All Layout Overrides** there clears
@@ -818,10 +823,6 @@ layout its screen suits. Applying a preset saves it as a real,
 editable profile; presets cannot be deleted.
 
 ## App Rules
-
-**Windows titled…** is a Power User choice in the Float list's
-menu. Once any rule uses it, the choice stays listed in Simple as
-well.
 
 **The title match is case-sensitive**, and "Info" also catches
 "Information"; the live window list under the chips shows what

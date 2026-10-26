@@ -92,6 +92,10 @@ struct SettingsSearchDrawerAnchorTests {
                 .shortcuts, "Shortcuts & Gestures", .gestures,
                 [SettingsCatalog.shortcuts.gestures]
             ),
+            (
+                .shortcuts, "Shortcuts & Gestures", .modifierKeys,
+                [SettingsCatalog.shortcuts.modifierKeys]
+            ),
         ]
     }
 

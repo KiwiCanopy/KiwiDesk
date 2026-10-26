@@ -48,8 +48,6 @@ struct SettingsSearchPlace: Identifiable, Equatable {
 /// In-memory search evaluation context.
 struct SettingsSearchContext {
     var editingStoredProfile = false
-    var mode: SettingsMode = .simple
-    var displayCount = 1
     var spaces: [String] = []
     var profiles: [String] = []
     var appRules: [String] = []
@@ -104,20 +102,6 @@ enum SettingsSearch {
         return SettingsSearchResults(
             settings: settingsResults(query, context),
             places: placeResults(query, context)
-        )
-    }
-
-    /// Whether selecting result triggers Power User mode promotion
-    /// (`HomeCardOrder.isOffered`, `ensureModeAdmits`).
-    static func switchesMode(
-        _ result: SettingsSearchResult,
-        context: SettingsSearchContext
-    ) -> Bool {
-        !HomeCardOrder.isOffered(
-            result.destination,
-            mode: context.mode,
-            displayCount: context.displayCount,
-            editingStoredProfile: context.editingStoredProfile
         )
     }
 

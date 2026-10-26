@@ -788,7 +788,7 @@ update after 2.0.0.
 **The Highlights gold marks, never inks (#2038).** The panel's
 edge, its ★ and the spotlight rows' symbols are gold; no text is.
 So its separation from the washed card is measured with
-`ColorVision`, as the mode-gated frame's is, rather than held to a
+`ColorVision` rather than held to a
 luminance ratio: the house floors no card boundary, and the text
 beside every mark carries the meaning. The relaxed floor holds only
 while the gold colours no text.
@@ -852,8 +852,7 @@ Leaving What's new open behind Settings fails on this app: it is
 an own floating window, so the float-tier raise either lifts it
 back over the control just landed on or leaves it buried under the
 tiles. So What's new hides without being answered, Settings lands
-on the control the way a search pick does — switching to the
-Power User mode where the control lives there — and a banner across
+on the control the way a search pick does, and a banner across
 the Settings shell offers the next linked row, the way back, and a
 dismissal. It survives navigation inside Settings and has no
 timeout, because a reader exploring a setting is not done with the
@@ -6378,9 +6377,9 @@ just told the moment it is told; a draft-and-Save row there
 would be the only one that does not. That was #1255's argument
 for keeping the alert sound off General, and it still holds —
 what changed is the storage, which made the immediate write
-possible. General is a Simple-mode page, so the switch now
-reaches a Simple user, where Behaviour, Power-User-only, gave
-that user the pill and not the switch. With both rows gone,
+possible. General is on every user's Home, so the switch now
+reaches everyone, where Behaviour, then Power-User-only, gave
+most users the pill and not the switch. With both rows gone,
 Behaviour held nothing, and the destination is retired rather
 than kept for an empty card: This Profile on Home now holds
 exactly the profile-scoped cards, which is what its heading
@@ -8013,7 +8012,7 @@ keyboard user re-walks the list after every deletion. The
 destination is read BEFORE the mutation (afterwards the list names
 whichever row slid into the gap, right by accident and wrong at
 the end of a list), and it must be a control that is always DRAWN
-and non-destructive: binding the spaces list to a mode-gated
+and non-destructive: binding the spaces list to an offered
 button, which on a fresh install is not drawn at all, sends focus
 to the top by a second road.
 
@@ -8522,19 +8521,11 @@ window's reload and never lazily from the search path; the store
 keeps its contract, and `PaletteCacheTests` holds the reader by
 construction and the writers.
 
-**The pill is the only place the mode is mentioned.** Search
-indexes both modes, always. A result whose area the current
-mode withholds carries a quiet "Power User" tag — derived from
-the one offer predicate (`HomeCardOrder.isOffered`), never a
-hand-negated copy, so the Monitors display-count promotion
-silences its pill exactly when it silences its gate — and
-opening it flips the mode silently (`ensureModeAdmits`) with a
-one-line, self-clearing confirmation strip as the only
-announcement. Ranking is deliberately NOT mode-aware: results
-keep one stable destination order in both modes, because an
-exact match the user asked for must not sink for living in a
-Power-User area, and a list that reorders on a mode flip reads
-as random.
+**Ranking is one stable destination order.** An exact match the
+user asked for never sinks for the page it lives on, and a list
+that reorders on some other state reads as random. (#2654
+retired the "Power User" tag and the mode flip a pick once
+made.)
 
 ### A search hit lands on the control only where the section hides it (#277)
 
@@ -9403,8 +9394,8 @@ exists to stop. The search declaration sits with it, so "guide"
 typed into the field lands on the pointer (`GuideLinkSurfaceTests`
 is the register of the two sites, the one URL reader, and the
 mount count). The pointer is permanent only where the checklist is
-OFFERED — in Simple, on every display count, withheld only while a
-stored profile is edited (`HomeCardOrderTests` ▸ `modeCounts`,
+OFFERED — on every display count, withheld only while a
+stored profile is edited (`HomeCardOrderTests` ▸ `cardCounts`,
 `DestinationParityTests` ▸
 `profileContextExcludesOnlyProfileless`) — so a change that
 withholds the checklist further owes the pointer a new home in the
@@ -9536,7 +9527,7 @@ naming `kiwidesk service stop`. That is the one place Settings
 prints a shell command, and it is sound because the gate
 decides the audience: the caption cannot render for anyone who
 did not run the CLI to get there. The same reasoning as *config
-presence expands the Simple surface* — show what someone has,
+presence expands the surface* — show what someone has,
 withhold only the offer.
 
 Onboarding's closing card keeps its own pre-checked box, "Start
@@ -10035,56 +10026,54 @@ rulings, both 2026-08-09:
   fallback rather than drawing dark-on-dark, guarded by
   `HomeCardChromeTests`.
 
-**The Simple/Power User segment gates whole cards, and navigation
-into a withheld card switches the mode rather than refusing.**
-(#678 turns 4/9.) Mode depth is per area
-(`SettingsArea.minimumMode`) — never per row, and never an
-input to anything that resolves behavior. Monitors is the one
-COMPUTED promotion: it joins Simple while 2+ displays are
-connected, decided at read so a disconnect cannot strand a
-stored flag. Search and cross-references index both modes, so
-a landing in a Power-User-only area flips the segment (visible in
-the header) instead of dead-ending; flipping Power User → Simple
-while standing in a Power-User-only area pops to Home, because the
-area ceased to exist — mode gates cards, so this is the
-"which cards exist" rule, not a grey-don't-hide violation.
-The pick persists like the appearance choice (`UserDefaults`,
-absent = Simple, never `gui.json` — a sidecar write would
-flip config ownership).
+**Settings is one surface: depth grows in place, never by a
+mode.** (#2654, owner ruling 2026-10-26, superseding #678's
+Simple / Power User segment and #760's reveal wash and
+mode-gated frame.) The segment gated whole cards per area. By
+4.0.0 its whole effect was one card, Screens, on a Mac with one
+screen, plus six "first one" offers that already showed in
+Simple once the config used them (*config presence*, below). A
+header-level choice that changes almost nothing is a decision
+the user makes for no result, and the machinery serving it —
+the segment, the wash, the accent frame and its colour-vision
+guard, the search tag, the silent flip with its notice, the pop
+back to Home, a stored preference — outweighed what it gated.
 
-**The flip to Power User answers with motion plus an
-accent-tinted weight — the mode's own colour, at reduced
-strength.** (#760, owner ruling 2026-08-09.) Without an
-answer, the flip changes the page silently and users toggle
-twice to compare — the tell that the transition carries no
-information. So the moment washes the *containers* it
-inserted (the search reveal's own transient accent wash, on
-title bands alone — a per-row control offer the mode also
-unlocks has no border to weight, and washing a dozen sibling
-rows is shouting, so those appear plainly and stay
-enumerated as data), the pane the user is standing in
-animates the insertion, and the durable half is the frame:
-1.5 pt of the accent at `modeGatedStrokeOpacity` against the
-1 pt hairline rest.
+Two alternatives were weighed and refused. A truly stripped
+Simple, a curated second menu, contradicts config presence (a
+user's own layer cannot vanish from the smaller menu) and
+doubles the surface every change must maintain. Keeping the
+toggle keeps a visible decision with almost no effect.
 
-"Weight, never a hue" fails on real hardware: a weight step on the
-hairline is a step in a stroke whose contrast is ~1.2:1 —
-invisible in both appearances — and a stronger *neutral* reads as
-"different" without saying *which* different. The frame borrows
-THE accent, not a second hue, and that distinction is what keeps
-the weight argument's teeth: no ok/warn misread, because the
-accent's meaning here is "the mode whose segment wears this
-colour" — the wash paints it on exactly the containers that then
-keep the tinted frame, so the continuity from wash to frame to the
-active Power User segment is the legend, drawn nowhere. Hue still
-never carries alone: the weight step stays, and the strength is
-measured, not felt — 0.5 sat exactly on the CVD separation floor
-against the light hairline; the shipped value clears the hairline
-it neighbours on that edge over both grounds a card is drawn on,
-in both appearances, and `ModeGatedFrameSeparationTests` derives
-those floors from the shipped tokens. The weight stays below the
-doubling the Monitors (1.5→3 pt) and palette (1→2 pt) pairs spend
-on selected/applied — a mode-gated card is present, not picked.
+What replaces it is the offer shape this file already rules.
+Each offer sits behind its own container's disclosure
+(`SettingTier.showMore`) and opens on arrival once the config
+uses it, the container never swapped (#1125): Layers and
+Modifier keys are collapsible cards, Lua bindings keeps its
+drawer. Where a drawer would hide one control, the offer takes
+the row's own menu instead: per-Space Customize is in each Space
+row's actions menu until an override exists, and title matching
+is always a choice in the App Rules float menu and a KiwiVision
+lens's scope menu — a menu item already behind a click costs
+nothing at rest, and a drawer around it is chrome.
+
+**Screens is a capability, not a depth.**
+`SettingsArea.isAvailable(displayCount:)` keeps its card off
+Home on a one-screen Mac, computed at read so a disconnect
+cannot strand a stored flag, and with no selection repair: an
+unplugged screen never pops the open page. Search and links
+still land there, because the page holds the pins and
+fingerprints of screens that are not connected, and an
+undocked laptop is exactly when a user goes looking — so the
+link guard consults the stored-profile axis only.
+
+The retired preference leaves its `settingsMode` key in the
+app's `UserDefaults` unread. That key is a display choice, not a
+config or profile value, so the stored-value guardrail owes it
+no `ConfigMigration`; a stray key in the app's own defaults
+domain is inert. **A new depth goes behind its container's
+disclosure or its row's menu, opened on arrival when the config
+uses it — never behind a window-wide switch.**
 
 **A persistent statement and a transient one never share a
 property.** (#1173.) Hover on the full-strength accent of that
@@ -10095,7 +10084,7 @@ card reads as permanently hovered — and pointing at a marked card
 OVERWRITES the one channel carrying its marking, which no ceiling
 can fix, because a statement a pointer can delete is not a
 statement. So the channels split by what they answer: the border
-says which mode a card belongs to, the fill says where the pointer
+says what a card is, the fill says where the pointer
 is (`cardHover`, `card` stepped one notch toward the ground in
 each appearance — opaque, so the inks above it are measured
 against what they actually sit on). The two facts compose, which
@@ -10103,24 +10092,6 @@ is the whole prize: a marked card under the pointer keeps its
 frame AND lifts. It also returns the Home card to the idiom the
 rest of the tree already keeps — a neutral lift for the pointer,
 the accent reserved for what a thing IS.
-
-**Only the user's own flip glows; the implicit promotion
-stays silent.** (#760.) A search or cross-reference landing
-that flips the mode is a means to a destination the user
-already named, and that landing owns its wash — a second,
-simultaneous mode wash would dilute the one they asked for.
-The reverse trip draws no attention at all: content that is
-leaving is not worth pointing at, so Power User → Simple is
-a plain fade. And the mode-gated flag is *computed* from the
-site's own offer predicate at `.simple`, never remembered or
-hand-negated — so the border states the same fact as
-presence on exactly the surfaces where that fact moves
-(Monitors on a laptop vs a desk, the Layers card before and
-after the first layer). Under Reduce Motion the wash shows
-flat and the reflow stands down — dropping the wash entirely
-would take the answer from precisely the users who lose the
-motion channel. `ModeGatedChromeTests` and
-`SettingsModeRevealTests` hold the two halves.
 
 **One draft, three views — and the save surface is the floating
 pill.** (#678 turn 9; Phase 4 shell.) Three views of one draft on
@@ -11351,25 +11322,25 @@ caption promises the key still fires — and it takes the caption
 Settings puts over the same rows, so both surfaces say the same
 thing about them.
 
-**Config presence expands the Simple surface.** The simple
-mode is not a smaller product, it is a smaller *offer*. Anything
+**Config presence expands the surface.** A first-week Settings
+is not a smaller product, it is a smaller *offer*. Anything
 already in the user's config — a shortcut layer, an imported Lua
-binding, a per-profile override — shows in both modes and makes
-the simple one richer; what Simple withholds is only the
-invitation to create the first one, and that invitation retires
-itself the moment it is accepted.
+binding, a per-profile override — shows at rest; what a
+disclosure withholds is only the invitation to create the first
+one, and the disclosure opens on arrival the moment that
+invitation is accepted. (Written for #678's Simple mode, which
+#2654 retired; the rule outlived the mode it was written
+against.)
 
 The failure this prevents: a user creates a layer, then finds the
-Layers card gone because they are in the simple mode. Hiding a
-control the user has never used is curation. Hiding something they
-*made* is losing their work as far as they can tell, and it
-teaches them that the mode switch is dangerous — which costs the
-mode its whole purpose. Nothing a user has configured is ever
-hidden by a mode.
+Layers card folded away on the next visit. Hiding a control the
+user has never used is curation. Hiding something they *made* is
+losing their work as far as they can tell. Nothing a user has
+configured is ever folded away on arrival.
 
-It follows that "which mode is this row in" is the wrong
-question for such a row; the right one is "does the thing
-exist yet", which is a runtime gate rather than a depth. That is
+It follows that "how deep is this row" is the wrong question for
+such a row; the right one is "does the thing exist yet", which
+is a runtime gate rather than a depth. That is
 what `SettingTier.immediate` is for, and why an `.immediate` row
 without a gate is meaningless.
 
@@ -11382,8 +11353,8 @@ Desktop — so a four-Desktop Mac would draw eight move rows about
 a thing a first-run user has never met. They sit behind a
 disclosure in the macOS Desktops section (#2655, below), which
 stays mounted and simply OPENS on arrival once a move is bound —
-in both modes, which is the paragraph above applied to a
-capability rather than to a layer.
+the paragraph above applied to a capability rather than to a
+layer.
 
 The drawer stays rather than giving way to a bare list, and that
 is not a detail: the flip would fire at the instant the user
@@ -11395,9 +11366,7 @@ worse still, clearing the last binding shutting a door on rows
 being edited. A permanent drawer also gives the title, the
 search anchor and a future `?` one home instead of two.
 
-Three things this is NOT, each considered and refused. It is not
-a **mode** gate: mode depth is per area and Shortcuts is a
-Simple area, so the depth does not exist to spend. It is not
+Two things this is NOT, each considered and refused. It is not
 gated on **how many Desktops the Mac has** — that gates on the
 machine where the honest condition is the user's own intent, and
 a three-Desktop user who does not want KiwiDesk driving them is
@@ -11485,41 +11454,38 @@ while the cue is app-wide. Profiles ▸ Desktops, left with the
 bindings alone, stays collapsed while nothing is bound
 (2026-09-24).
 
-**Overrides always resolve; the Simple/Power User mode never
-changes what runs.** There is no stored flag deciding whether a
+**Overrides always resolve; no display setting changes what
+runs.** There is no stored flag deciding whether a
 profile's shortcut overrides apply (a redesign draft specified
 one, with a default and an upgrade migration): a preference that
 changes *which shortcuts fire* is not a preference, it is a second
 config the user cannot see, and the first time a shortcut goes
 dead because of a display setting the app has lied. So the
 resolver takes a base list and a sparse override and nothing else,
-and nothing in the Settings window is read-only because of the
-mode a user picked.
+and nothing in the Settings window is read-only because of how
+it is shown.
 
-What the mode may decide is only whether *creating* an override
-is offered — and that offer retires itself. **A used capability
+What a disclosure may decide is only whether *creating* an
+override is offered at rest — and that offer retires itself. **A used capability
 unlocks its whole list.** The moment a profile carries one
 shortcut override, the override column is live on every row of
 that list, because a user who has overridden one key is a user
 who overrides keys and making them re-earn the affordance per
 row is busywork dressed as simplicity. **The scope is the list,
 not the app**: overriding a shortcut must not turn a deeper
-surface on in App Rules or anywhere else, or the mode becomes
-something users lose by accident and stop trusting.
-`ShortcutsCapabilityUnlockTests` holds both halves plus the
-mode-independence. All three already hold by construction, and
-the suite exists because the cheapest way to build mode
-mechanics later is to gate the override column on a mode —
-which would break every one of them while breaking no test.
-The resolver clause is guarded by the signature rather than by
-that suite: `KeyLayerOverride.resolved(onto:)` takes a base
-list and nothing else, so the obligation is simply never to
-add a mode parameter to it.
+surface on in App Rules or anywhere else, or the unlock becomes
+something users trip by accident and stop trusting.
+`ShortcutsCapabilityUnlockTests` holds both halves. The resolver
+clause is guarded by the signature rather than by that suite:
+`KeyLayerOverride.resolved(onto:)` takes a base list and nothing
+else, so the obligation is simply never to add a display
+parameter to it.
 
 **A named alternate keybinding set is a LAYER, never a
 mode.** "Mode" was already carrying two unrelated meanings —
 a space's layout (monocle, grid, …) and the Settings window's
-Simple/Power-User depth — and a third sense made every sentence
+Simple/Power-User depth, which #2654 later retired — and a third
+sense made every sentence
 about any of them ambiguous: "switch mode" could mean three
 things, and "only the active mode's shortcuts fire" had to
 name which kind of mode it meant to be read at all. Layer
@@ -13878,8 +13844,9 @@ refused too: it trades one group's discoverability for
 another's, and the group's rank is fine once a map exists.
 
 **Layers gets no chip.** It picks which layer every group below
-edits — scope, not a destination — and it is absent in Simple,
-so a chip for it would come and go. The bar carries the edited
+edits — scope, not a destination — and it sits above the
+groups it scopes, so a chip for it would point at its own
+neighbour. The bar carries the edited
 layer's name instead, in words, at the trailing end of the
 caption line over the chips, and that line is the first thing a
 narrowing window drops since it is header chrome. **Mouse &
@@ -14235,9 +14202,9 @@ override class to have a screen.*
 does not entitle every override class to a GUI.** Two
 boundaries rescope #68 §3.4 (they do not repeal it — wherever
 an override column renders, the dimmed-inheritance shape above
-still holds exactly). First: Simple mode withholds only the
+still holds exactly). First: a disclosure withholds only the
 *offer* to create a first override; once any override exists,
-the column shows on every peer row in both modes, because an
+the column shows on every peer row at rest, because an
 existing thing that ran yesterday must never be invisible
 today.
 
@@ -14846,7 +14813,7 @@ changes it in one place has no way to learn the other exists.
 So the split is by KIND, not by subsystem — **structure** (does
 this get drawn, how wide, how round) stays with its feature;
 **colour** (what is it painted with) collects onto two pages.
-A Simple user's whole colour surface is then a shelf of
+A user's whole colour surface at rest is then a shelf of
 palettes and one live scene of what they are running — no
 individual hex, and no reason to open the other page. A user
 who does want the individual tints meets them grouped by
@@ -14913,14 +14880,14 @@ outright — the page was Power User only, so a palette could be
 picked but never one of its colours fixed — and cost a Power
 User a crossing between pages for every retint. So the colours
 moved into a collapsible section, **Colors & glass**, directly
-under the palette shelf they refine, shown in both modes and
+under the palette shelf they refine, shown to everyone and
 shut by default; Liquid Glass and the sheen moved in beside
 them, first, since the finish changes how every colour below it
 reads. "A colour renders in exactly one area" holds unchanged —
 the area is now Looks & Animations (`SettingsColorSurfaceTests`).
-What keeps the Simple surface simple is the shut section, not
-the mode: opening it is the "on demand" step, so nothing inside
-is gated by mode or hidden behind a second "More", which would
+What keeps the surface simple is the shut section: opening it
+is the "on demand" step, so nothing inside is hidden behind a
+second "More", which would
 add a decision and a second search hop for no new protection.
 The section's rows are `.showMore` and take search anchors (the
 #277 entry above), and "Advanced Colors" stays a search synonym
@@ -14938,8 +14905,7 @@ in ONE drawer, **Colors**, shut on every visit with no stored
 flag, as Motion's is. This is still one drawer, so #1857 holds:
 the colours remain the one "on demand" step, and search stays one
 hop, since a hit on a colour opens the drawer (#1250). What moved
-out of hiding is the finish alone, for Simple and Power User
-alike. Its rows are `.atRest`, so by #277 they take no search
+out of hiding is the finish alone, for everyone. Its rows are `.atRest`, so by #277 they take no search
 anchor: a hit lands on the page, where they are already shown.
 :::
 
@@ -17083,8 +17049,8 @@ row both bars would read belongs on the shelf card, not twice.
 
 :::unreleased
 **Choices stay open; numbers go in one drawer per bar card (#2507,
-owner ruling 2026-10-21).** Settings modes hide whole pages, never
-rows, so every open row on Bars is in front of someone who just
+owner ruling 2026-10-21).** Nothing hides rows by experience
+level, so every open row on Bars is in front of someone who just
 installed KiwiDesk, and the accordion is the page's one density
 tool. So a bar card draws its choices open and its numbers in one
 drawer at its foot, under its last open choice — the Space Bar's
@@ -19284,18 +19250,14 @@ complete rule and never a row with a defaulted facet
 the apps its own list holds, since an app may carry both rules
 (`AppRuleListsWiringTests` ▸ `pickersExcludeTheirOwnList`).
 
-**Matching windows by title is a capability, not a mode tier.**
-Placing an app in a Space is one of the most teachable things
-KiwiDesk does, so the area stays Simple whole and the *Windows
-titled…* choice is an offer instead — present in Power User, and
-present in Simple from the moment any rule in the Float list
-carries a pattern. It is the shape [Shortcuts](#shortcuts) ▸ *A used
-capability unlocks its whole list* already rules, and all three of
-its properties hold here unchanged. The one thing to get right is
-the third of them: a pattern saved in Power User keeps matching in
-Simple, so this offer's predicate reads saved state and not the
-mode alone, or a Simple user can neither see nor clear a rule that
-is still firing (`AppRuleTitleOffer`, `AppRuleTitleOfferTests`).
+**Matching windows by title is one choice in the Float menu,
+never a tier.** Placing an app in a Space is one of the most
+teachable things KiwiDesk does, so the area is shown whole, and
+*Windows titled…* sits in each Float row's menu beside *All
+windows* (#2654). It was an offer once, unlocked list-wide by the
+first pattern; with no mode left to withhold it, a menu item
+already behind a click costs nothing at rest, and hiding it would
+leave a saved pattern's own scope unexplained.
 
 **The word order of a sentence with controls in it is the
 translator's.** Such a sentence is one localized frame with

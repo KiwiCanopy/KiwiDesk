@@ -4,10 +4,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The "Made by you" group (#678 spec 11a, `place` in code) and
-/// the mode-switch notice:
-/// the user's own named things as capped results, and the
-/// one-line confirmation a Power-User pick leaves behind.
+/// The "Made by you" group (#678 spec 11a, `place` in code): the
+/// user's own named things as capped results.
 @Suite("Settings search places", .serialized)
 @MainActor
 struct SettingsSearchPlacesTests {
@@ -128,57 +126,5 @@ struct SettingsSearchPlacesTests {
         #expect(
             places("grosse", context: context).count == 1
         )
-    }
-
-    /// The confirmation line (#678 4c): set with the flipped
-    /// destination's title in it, superseded by a second flip,
-    /// and self-clearing — the only place search mentions the
-    /// mode.
-    @Test("the mode-switch notice names the destination")
-    func modeNoticeNamesDestination() async {
-        pinEnglish()
-        defer { reset() }
-        let model = makeTestModel()
-        #expect(model.searchModeNotice == nil)
-        model.noteSearchModeSwitch(.screens)
-        let notice = model.searchModeNotice
-        #expect(notice != nil)
-        #expect(notice?.contains("Screens") == true)
-        // A second flip supersedes the first: a fresh notice on
-        // its own timeline. Screens is the one Power User page.
-        let first = model.searchNoticeTask
-        model.noteSearchModeSwitch(.screens)
-        #expect(model.searchNoticeTask != first)
-        #expect(
-            model.searchModeNotice?.contains("Screens") == true
-        )
-        model.searchNoticeTask?.cancel()
-    }
-
-    /// The self-clear half, previously unguarded: guard-prover
-    /// (2026-08-10) showed the clear task could be deleted with
-    /// this suite green.
-    ///
-    /// Awaits the timeline rather than polling for its effect —
-    /// the same fix as #979 on this same model, made in the same
-    /// change because it is the same defect: the clear runs on
-    /// the main actor, so a wall clock measured how long the
-    /// scanning suites held it (`tests.md` ▸ Async tests). The
-    /// handle is read straight after the switch that schedules
-    /// it and asserted non-nil, because `await nil?.value`
-    /// returns instantly and would pass on a clear that was
-    /// never scheduled — which is precisely what guard-prover
-    /// caught here once already.
-    @Test("the mode-switch notice clears itself")
-    func modeNoticeSelfClears() async {
-        pinEnglish()
-        defer { reset() }
-        let model = makeTestModel()
-        model.noteSearchModeSwitch(.screens)
-        #expect(model.searchModeNotice != nil)
-        let timeline = model.searchNoticeTask
-        #expect(timeline != nil, "no self-clear was scheduled")
-        await timeline?.value
-        #expect(model.searchModeNotice == nil)
     }
 }

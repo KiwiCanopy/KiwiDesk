@@ -15,7 +15,7 @@ struct SettingsGroupHeader: View {
 }
 
 /// Titled container card for settings sections with search anchoring (#527,
-/// #760, #573).
+/// #573).
 struct SettingsSection<Content: View>: View {
     let title: String
     private let control: SettingsControl?
@@ -23,7 +23,6 @@ struct SettingsSection<Content: View>: View {
     let caption: String?
     let subsection: Bool
     let help: String?
-    let modeGated: Bool
     /// A short readout at the header's trailing edge — the Mac
     /// Checklist's "2 of 4 done" (#1365). Text, not a control:
     /// a header accessory that acts needs a name and a value.
@@ -40,7 +39,6 @@ struct SettingsSection<Content: View>: View {
         caption: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
-        modeGated: Bool = false,
         trailing: String? = nil,
         @ViewBuilder content: () -> Content
     ) {
@@ -51,7 +49,6 @@ struct SettingsSection<Content: View>: View {
         self.caption = caption
         self.subsection = subsection
         self.help = help
-        self.modeGated = modeGated
         self.trailing = trailing
         self.content = content()
     }
@@ -63,14 +60,10 @@ struct SettingsSection<Content: View>: View {
         caption: String? = nil,
         subsection: Bool = false,
         help: String? = nil,
-        modeGated: Bool = false,
         trailing: String? = nil,
         plated: Bool = true,
         @ViewBuilder content: () -> Content
     ) {
-        // A group drawn inside another card has no frame to carry
-        // the mode-gated stroke (#760), so the two never combine.
-        assert(plated || !modeGated, "unplated group with modeGated")
         self.title = control.text
         self.control = control
         self.plated = plated
@@ -78,7 +71,6 @@ struct SettingsSection<Content: View>: View {
         self.caption = caption
         self.subsection = subsection
         self.help = help
-        self.modeGated = modeGated
         self.trailing = trailing
         self.content = content()
     }
@@ -135,14 +127,8 @@ struct SettingsSection<Content: View>: View {
                     cornerRadius: SettingsTheme.sectionRadius
                 )
                 .strokeBorder(
-                    modeGated
-                        ? SettingsTheme.accent.opacity(
-                            SettingsTheme.modeGatedStrokeOpacity
-                        )
-                        : SettingsTheme.hairline,
-                    lineWidth: modeGated
-                        ? SettingsTheme.containerStrokeModeGated
-                        : SettingsTheme.containerStroke
+                    SettingsTheme.hairline,
+                    lineWidth: SettingsTheme.containerStroke
                 )
             )
     }
@@ -165,15 +151,12 @@ struct SettingsSection<Content: View>: View {
         .allowsHitTesting(false)
     }
 
-    /// Header view with search flash and mode-reveal highlighting (#277,
-    /// #760).
+    /// Header view with search flash highlighting (#277).
     @ViewBuilder private var flashedHeader: some View {
         if let control {
-            header
-                .searchFlashHeader(control)
-                .modeRevealWash(modeGated)
+            header.searchFlashHeader(control)
         } else {
-            header.modeRevealWash(modeGated)
+            header
         }
     }
 

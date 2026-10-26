@@ -183,28 +183,7 @@ struct SettingsView: View {
                         model.editingStoredProfile
                 )
             else { return }
-            ensureModeAdmits(destination)
             selection = destination
-        }
-    }
-
-    /// Switches Simple to Power User mode when navigation targets advanced
-    /// section (#678).
-    func ensureModeAdmits(
-        _ destination: SettingsDestination
-    ) {
-        if !HomeCardOrder.isOffered(
-            destination,
-            mode: model.settingsMode,
-            displayCount: model.displays.count,
-            editingStoredProfile: model.editingStoredProfile
-        ),
-            destination.isReachable(
-                editingStoredProfile:
-                    model.editingStoredProfile
-            )
-        {
-            model.setSettingsMode(.powerUser)
         }
     }
 

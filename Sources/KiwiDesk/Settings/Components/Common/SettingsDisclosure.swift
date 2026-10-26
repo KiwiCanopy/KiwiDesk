@@ -3,7 +3,7 @@ import SwiftUI
 /// Settings drawer with search reveal anchoring and auto-expansion (#277).
 ///
 /// Anchors via `SettingsReveal`, auto-expanding when an interior
-/// child is targeted (#610, #760).
+/// child is targeted (#610).
 struct SettingsDisclosure<Content: View, Accessory: View>: View {
     /// Container chrome variant (`SettingsDisclosureSizeTests`, #1021).
     enum Chrome {
@@ -21,8 +21,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     private let chrome: Chrome
     /// Hoists scroll anchor to enclosing section top (#610).
     private let scrollHoisted: Bool
-    /// Mode-gated presence (#760).
-    private let modeGated: Bool
     private let externalExpansion: Binding<Bool>?
     @State private var internalExpansion = false
     /// Summary phrase displayed while collapsed (#1028).
@@ -39,7 +37,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         chrome: Chrome = .inline,
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
-        modeGated: Bool = false,
         summary: String? = nil,
         locked: Bool = false,
         @ViewBuilder content: @escaping () -> Content,
@@ -50,7 +47,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         self.childIDs = drawer.childIDs
         self.chrome = chrome
         self.scrollHoisted = scrollHoisted
-        self.modeGated = modeGated
         self.summary = summary
         self.externalExpansion = isExpanded
         self.content = content
@@ -62,7 +58,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
         chrome: Chrome = .inline,
         isExpanded: Binding<Bool>? = nil,
         scrollHoisted: Bool = false,
-        modeGated: Bool = false,
         summary: String? = nil,
         locked: Bool = false,
         @ViewBuilder content: @escaping () -> Content
@@ -72,7 +67,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             chrome: chrome,
             isExpanded: isExpanded,
             scrollHoisted: scrollHoisted,
-            modeGated: modeGated,
             summary: summary,
             locked: locked,
             content: content,
@@ -105,16 +99,8 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
                                 SettingsTheme.sectionRadius
                         )
                         .strokeBorder(
-                            modeGated
-                                ? SettingsTheme.accent.opacity(
-                                    SettingsTheme
-                                        .modeGatedStrokeOpacity
-                                )
-                                : SettingsTheme.hairline,
-                            lineWidth: modeGated
-                                ? SettingsTheme
-                                    .containerStrokeModeGated
-                                : SettingsTheme.containerStroke
+                            SettingsTheme.hairline,
+                            lineWidth: SettingsTheme.containerStroke
                         )
                     )
                 )
@@ -160,7 +146,6 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
             Text(control.text)
                 .font(SettingsDrawerHeader.tier.weight(.semibold))
                 .searchFlashHeader(control)
-                .modeRevealWash(modeGated)
         }
         .disclosureGroupStyle(
             SettingsDisclosureStyle(

@@ -193,9 +193,9 @@ struct KeyboardActionParityTests {
                 ".focused($returningRow, equals: space)",
                 "the row's ALWAYS-drawn control is the return "
                     + "destination — the Overrides button that "
-                    + "opens the editor is mode-gated, so binding "
-                    + "there sent focus to the top of the list on "
-                    + "a Simple-mode install"
+                    + "opens the editor is withheld until an "
+                    + "override exists, so binding there sent "
+                    + "focus to the top of the list"
             ),
             Wiring(
                 "SpacesSection+Remove.swift",
@@ -268,19 +268,10 @@ struct KeyboardActionParityTests {
             ),
             Wiring(
                 "LayerStripEditor.swift",
-                // The whole expression, both arms: stopping at
-                // the condition let the ternary be INVERTED —
-                // focus named INTO a card that just retired —
-                // and stay green (guard-prover, 2026-08-12).
-                "focusedChip = stripSurvivesDeletion "
-                    + "? KeyLayer.defaultName : nil",
+                "focusedChip = KeyLayer.defaultName",
                 "and deleting the selected layer moves focus "
-                    + "WITH the selection to the base chip — but "
-                    + "only where the card survives the "
-                    + "deletion, since in Simple mode losing the "
-                    + "last custom layer retires the strip and "
-                    + "naming a chip inside it lands at the top "
-                    + "of the window"
+                    + "WITH the selection to the base chip, which "
+                    + "the card always draws (#2654)"
             ),
             Wiring(
                 "PaletteShelf.swift",

@@ -81,20 +81,18 @@ extension AppRulesSection {
                     + "window you floated yourself stays floating "
                     + "until you tile it."
             )
-        if offersTitles {
-            text +=
-                "\n\n"
-                + L(
-                    "app_rules.section.help.titles",
-                    "**%1$@** matches a fragment of a window's "
-                        + "title, so an app can float some of "
-                        + "its windows and tile the rest.",
-                    L(
-                        "app_rules.float.scope.titled.resting",
-                        "Windows titled"
-                    )
+        text +=
+            "\n\n"
+            + L(
+                "app_rules.section.help.titles",
+                "**%1$@** matches a fragment of a window's "
+                    + "title, so an app can float some of "
+                    + "its windows and tile the rest.",
+                L(
+                    "app_rules.float.scope.titled.resting",
+                    "Windows titled"
                 )
-        }
+            )
         return text
     }
 }
