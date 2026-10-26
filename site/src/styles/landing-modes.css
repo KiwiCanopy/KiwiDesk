@@ -640,9 +640,16 @@
   grid-template-columns: 1fr;
   margin-bottom: clamp(1.5rem, 4vw, 2.25rem);
 }
-@media (min-width: 720px) {
+/* Side by side only where the answer column stays wide enough to
+   read; the card rides along while the longer list scrolls past. */
+@media (min-width: 960px) {
   .ba {
     grid-template-columns: 1fr 1fr;
+  }
+  .ba__card {
+    align-self: start;
+    position: sticky;
+    top: 6rem;
   }
 }
 .ba__card {
