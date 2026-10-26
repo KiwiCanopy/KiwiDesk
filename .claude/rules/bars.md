@@ -877,10 +877,16 @@ Obligations:
   asks only where it hides text — Core's cut verdict
   (`barItemTitle`, the one branch the item text also takes) or a
   label it did not draw in full (#1514). An overflow mark (#2235)
-  feeds the same peek through `BarPeekSource.run`. Every peek
-  group wears its app's icon, a one-app list's too, never gated
-  on the source (#2571, `BarPeekContentTests` ▸ `oneAppKeepsItsIcon`,
-  `OverflowMarkWiringTests` ▸ `coreAsksForIcons`). No bar view registers
+  feeds the same peek through `BarPeekSource.run`. Every LIST
+  group wears its app's icon, a one-app list's too (#2571,
+  `BarPeekContentTests` ▸ `oneAppKeepsItsIcon`,
+  `OverflowMarkWiringTests` ▸ `coreAsksForIcons`). **What a
+  group's header draws is asked of the one
+  `BarPeekSource.header`**, never a source check beside it: a
+  one-window label drops what its item shows, an App Bar label
+  drawing no header and a Space Bar glyph's the name alone
+  (#2649, `BarPeekLabelHeaderTests` ▸ `sourcesStateTheirHeader`,
+  `coreWiresTheHeader`). No bar view registers
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one

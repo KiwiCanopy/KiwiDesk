@@ -65,10 +65,24 @@ enum BarPeekSource: Equatable {
     /// Whether a click alone opens and holds this source's list.
     var opensOnClick: Bool { clickGrowth != nil }
 
+    /// What the peek's group header carries (#2649): a list its
+    /// app's icon and name; a one-window label drops what its item
+    /// already shows — an App Bar label both, a Space Bar glyph's
+    /// the icon, its name the one app identity a glyph lacks.
+    var header: BarPeekContent.Header {
+        guard !isList else { return .full }
+        switch self {
+        case .appItem: return .none
+        case .glyph: return .name
+        case .overflow, .space, .run: return .full
+        }
+    }
+
 }
 
 /// What a peek shows (#1946, the owner's ruling): one group per
-/// app, its header above its windows, every window a row — an
+/// app, its header above its windows — what a header draws is the
+/// source's `header` (#2649) — every window a row — an
 /// untitled one named as the glyph menu names it (#1947) — and
 /// each row its window's button.
 struct BarPeekContent: Equatable {
@@ -80,9 +94,20 @@ struct BarPeekContent: Equatable {
         var focused = false
     }
 
+    /// What a group's header draws (#2649).
+    enum Header: Equatable {
+        /// The app's icon and name: every list's groups (#2571).
+        case full
+        /// The name alone: a Space Bar glyph's label.
+        case name
+        /// No header: an App Bar label, the title row alone.
+        case none
+    }
+
     struct Group: Equatable {
         let app: String
-        /// The app's icon, on every group, a one-app list's too.
+        /// The app's icon; the content's `header` says whether it
+        /// draws (#2571, #2649).
         let icon: NSImage?
         /// One per window shown, in row order.
         let rows: [Row]
@@ -94,6 +119,8 @@ struct BarPeekContent: Equatable {
     }
 
     let groups: [Group]
+    /// What every group's header draws, the source's (#2649).
+    let header: Header
     /// A list's peek reserves the trailing check column on every
     /// row, checked or not, so no title moves with focus (#2063).
     let checks: Bool
@@ -104,8 +131,9 @@ struct BarPeekContent: Equatable {
     /// Every window the peek stands for.
     var windowCount: Int { groups.reduce(0) { $0 + $1.windowCount } }
 
-    private init(groups: [Group], checks: Bool) {
+    private init(groups: [Group], header: Header, checks: Bool) {
         self.groups = groups
+        self.header = header
         self.checks = checks
     }
 
@@ -132,6 +160,7 @@ struct BarPeekContent: Equatable {
         }
         return BarPeekContent(
             groups: fromEnd ? kept.reversed() : kept,
+            header: header,
             checks: checks
         )
     }
@@ -139,16 +168,20 @@ struct BarPeekContent: Equatable {
     /// Groups `rows` per app NAME in first-seen order, every row
     /// kept — a lone window titled as its app included (owner,
     /// #1946) — on the key the bars group by, so a glyph standing
-    /// for sibling processes of one app (#1785) is one group. Every
-    /// group wears its app's icon, a one-app list's too (#2571). A
-    /// list (`checks`) checks the row of `focus` (#2063).
+    /// for sibling processes of one app (#1785) is one group.
+    /// `header` sets what each group's header draws: a list's wears
+    /// its app's icon, a one-app list's too (#2571); a label's drops
+    /// what its item shows (#2649). A list (`checks`) checks the row
+    /// of `focus` (#2063).
     @MainActor
     init(
         rows: [BarWindowRow],
         checks: Bool = false,
-        focus: WindowID? = nil
+        focus: WindowID? = nil,
+        header: Header = .full
     ) {
         self.checks = checks
+        self.header = header
         var order: [BarWindowRow] = []
         var grouped: [String: [Row]] = [:]
         for row in rows {
