@@ -87,6 +87,10 @@ struct SpaceBarCountBadgeHoverTests {
         view.isDragHovered = true
         view.restyle()
         #expect(view.badgeViews.first?.alphaValue == 1)
+        // A drag over another glyph lifts it too.
+        view.hoveredTarget = view.glyphTargets.last
+        view.restyle()
+        #expect(view.badgeViews.first?.alphaValue == 1)
     }
 
     /// A `+n` disc holding the focus keeps full strength: only a

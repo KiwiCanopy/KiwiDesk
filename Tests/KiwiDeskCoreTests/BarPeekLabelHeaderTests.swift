@@ -44,6 +44,8 @@ struct BarPeekLabelHeaderTests {
             header: .none
         )
         #expect(content.header == .none)
+        // A peek cut to fit keeps its header.
+        #expect(content.keeping(1).header == .none)
         let body = BarPeekBody()
         _ = body.build(content, shelf: KiwiShelf())
         #expect(body.labels.map(\.stringValue) == ["Hover peek"])
