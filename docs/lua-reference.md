@@ -3349,8 +3349,9 @@ beside the icon, whatever the titles read — at least the icon
 square and at most a quarter of the whole KiwiShelf edge — so a
 longer title ends in "…", a shorter one draws right after the
 icon with the two centred in the slot, and a change of title
-never moves the App Bar or the shelf beside it. The cap is the App Bar's one size control; items that
-do not fit scroll instead of shrinking.
+never moves the App Bar or the shelf beside it. The cap is the
+App Bar's one size control; items that do not fit scroll instead
+of shrinking.
 :::
 
 **Example:**

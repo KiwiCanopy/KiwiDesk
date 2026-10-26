@@ -185,10 +185,12 @@ struct RoundedItemEndPadChipTests {
                     abs(slot - filledEnd - ends.trailing) <= 0.5,
                     "depth \(depth), roundness \(roundness)"
                 )
+                // Room before the icon matches the room after the
+                // title, unless the half-moon's room is the floor.
                 let before = placed.x + placed.moon - ends.leading
                 let after = slot - ends.trailing - view.label.frame.maxX
                 #expect(
-                    abs(before - after) <= 0.5,
+                    abs(before - max(after, placed.moon)) <= 0.5,
                     "depth \(depth), roundness \(roundness)"
                 )
             }

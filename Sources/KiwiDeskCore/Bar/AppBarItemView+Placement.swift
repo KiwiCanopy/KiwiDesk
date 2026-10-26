@@ -104,16 +104,20 @@ extension AppBarItemView {
             ? badgeReserve - pad + 2
             : 0
         let natural = ceil(cell.width)
-        // The icon, drawn title and badge centre; the half-moon
-        // hangs before the icon, outside the centring (#2643).
-        let iconStart = { (title: CGFloat) in
-            max(
-                (size.width - side - spacing - title - badgeExtent
-                    + edge.leading - edge.trailing) / 2,
-                edge.leading + moon
-            )
-        }
-        let x = iconStart(min(natural, textSize.width)) - moon
+        // The group with the title at its full slot centres, and a
+        // short title moves it in by the shared rule; the half-moon
+        // hangs before the icon, outside the centring, and is never
+        // pushed past the leading inset (#2643).
+        let centred =
+            (size.width - side - spacing - textSize.width - badgeExtent
+                + edge.leading - edge.trailing) / 2
+        let floor = edge.leading + moon
+        let filled = max(centred, floor)
+        let shift = BarTitleSlot.centring(
+            natural: natural,
+            slot: textSize.width
+        )
+        let x = max(centred + shift, floor) - moon
         return HorizontalPlacement(
             x: x,
             moon: moon,
@@ -124,7 +128,7 @@ extension AppBarItemView {
             natural: natural,
             badgeExtent: badgeExtent,
             showsLabel: textSize.width > 0,
-            filledIconStart: iconStart(textSize.width)
+            filledIconStart: filled
         )
     }
 
@@ -148,9 +152,10 @@ extension AppBarItemView {
     }
 
     /// The span this item draws along a slot of `size`: its box on
-    /// a boxed shelf, else its icon and title; the whole slot where it draws
-    /// nothing. Reads the placements the layout draws, so it sets
-    /// the label's font and text as `horizontalPlacement` does.
+    /// a boxed shelf, else its icon and title with the title taken
+    /// at its full slot, so a rename moves no divider (#2643); the
+    /// whole slot where it draws nothing. Sets the label's font and
+    /// text as `horizontalPlacement` does.
     func drawnSpan(in size: CGSize) -> ClosedRange<CGFloat> {
         let length = horizontal ? size.width : size.height
         guard style.shelf.drawsPlate else { return 0...length }

@@ -163,8 +163,11 @@ struct FrontAppFixedLengthTests {
             Self.look,
             depth: Self.strip.height
         )
+        // The icon sits in by the centring shift, which the name
+        // leaves after its end (#2643).
         let start = overlay.frontIcon.frame.maxX + SpaceBarItemView.pad
-        #expect(abs(overlay.frontNameEnd - start - slot) < 0.5)
+        let shift = overlay.frontNameEnd - overlay.frontName.frame.maxX
+        #expect(abs(overlay.frontNameEnd - start + shift - slot) < 0.5)
         var wider = Self.look
         wider.bar.frontAppTitleCap = 40
         #expect(

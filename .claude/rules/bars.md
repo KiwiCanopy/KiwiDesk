@@ -311,8 +311,9 @@ twice, was a question the user answered twice. The argument is
   the slot's end (`frontNameEnd`), never the name's, and a short
   name drawing right after the icon through `BarTitleSlot.span`,
   the two centred in the fixed length by `BarTitleSlot.centring`,
-  snapping as a title changes (#2587, #2643). A show that keeps
-  every frame — `keepsGeometry`, which compares the front extent
+  and the move on a title change is a snap, never a glide —
+  review's, since no suite times it (#2587, #2643). A show that
+  keeps every frame — `keepsGeometry`, which compares the front extent
   beside the item lengths — redraws content alone
   (`redrawContent`) and never the frame pass; a new stored field
   of a show is classified as compared there or content-only, and
@@ -327,7 +328,13 @@ twice, was a question the user answered twice. The argument is
   a rename moves no frame, the title placed by the same
   `BarTitleSlot.span` and the icon, drawn title and count badge
   centred between the insets, the half-moon hanging before the
-  icon outside the centring (#2643). A
+  icon outside the centring (#2643). **The item's drawn span
+  (`HorizontalPlacement.span`, which `drawnSpan` and the section's
+  `contentFrame` read) takes the title at its full slot, never the
+  drawn title**: a content redraw never rewrites `contentFrame`,
+  so a span that followed the title left the divider and plate
+  stale after a rename (`AppBarTitleSlotTests` ▸
+  `redrawMatchesAFullRender`). A
   show whose titles alone changed — `AppBarOverlay.keepsGeometry`
   — redraws content alone; a new stored field of a show or an
   item is classified as compared there or content-only, and a

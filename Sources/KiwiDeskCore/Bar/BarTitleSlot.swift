@@ -30,9 +30,10 @@ public enum BarTitleSlot {
         return slot
     }
 
-    /// Where a title draws inside its slot: from the slot's start,
-    /// right after the icon, whether it fits or is cut with "…"
-    /// (#2587). `natural` is the fitted width.
+    /// Where a title draws from `slotStart`, right after its icon,
+    /// whether it fits or is cut with "…" (#2587); the caller moves
+    /// `slotStart` in by `centring` (#2643). `natural` is the
+    /// fitted width.
     static func span(
         natural: CGFloat,
         slotStart: CGFloat,

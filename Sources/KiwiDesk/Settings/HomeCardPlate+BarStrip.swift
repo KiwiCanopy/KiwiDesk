@@ -151,7 +151,8 @@ struct BarStripView: View {
             // symbols with the plate; the glyph steps down by
             // the Space Bar's own glyph ratio.
             // The hidden twin holds the title's fixed slot, so the
-            // drawn group centres in it as the live bar's (#2643).
+            // drawn icon and title centre in it as the live bar's
+            // (#2643); the half-moon and count badge are not drawn.
             ZStack {
                 iconAndTitle(item, slotHolder: true).hidden()
                 iconAndTitle(item, slotHolder: false)
@@ -195,10 +196,11 @@ struct BarStripView: View {
                 if slotHolder {
                     Color.clear.frame(width: spec.titleSlot, height: 1)
                 } else {
-                    Text(text)
-                        .font(spec.textFont(size: spec.fontSize))
-                        .lineLimit(1)
-                        .frame(maxWidth: spec.titleSlot)
+                    BarStripSlotTitle(slot: spec.titleSlot) {
+                        Text(text)
+                            .font(spec.textFont(size: spec.fontSize))
+                            .lineLimit(1)
+                    }
                 }
             }
         }
