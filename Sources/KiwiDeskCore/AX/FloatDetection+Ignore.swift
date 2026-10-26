@@ -163,10 +163,7 @@ extension FloatDetection {
         pid: pid_t
     ) -> [WindowID: Int] {
         let list =
-            CGWindowListCopyWindowInfo(
-                [.optionAll],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
+            WindowListRead.copy("allLayers", [.optionAll]) ?? []
         var layers: [WindowID: Int] = [:]
         for info in list
         where info[kCGWindowOwnerPID as String] as? pid_t
@@ -213,10 +210,10 @@ extension FloatDetection {
             return false
         }
         let list =
-            CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
+            WindowListRead.copy(
+                "hasVisibleIgnoredPanel",
+                [.optionOnScreenOnly]
+            ) ?? []
         return list.contains { info in
             guard info[kCGWindowOwnerPID as String] as? pid_t == pid
             else { return false }

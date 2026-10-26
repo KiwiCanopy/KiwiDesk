@@ -156,13 +156,13 @@ struct PrivatePathContext {
     )
 
     /// This process's lowest-layer on-screen window, from
-    /// `CGWindowListCopyWindowInfo` — public, and read-only.
+    /// the public window list — read-only.
     static func firstOwnWindow() -> OwnWindow? {
         guard
-            let info = CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]]
+            let info = WindowListRead.copy(
+                "firstOwnWindow",
+                [.optionOnScreenOnly, .excludeDesktopElements]
+            )
         else { return nil }
         let pid = ProcessInfo.processInfo.processIdentifier
         let own = info.compactMap { entry -> (Int, OwnWindow)? in
