@@ -4,14 +4,14 @@ import Foundation
 /// Track-mode navigation (#128): array-order focus/swap stepping
 /// and `move_to_track`, split out of `KiwiCore+NavigateCommand`
 /// for file size. Array order IS spatial order inside a track
-/// (and track order across them), so stepping is pure index math
-/// — the maintainer-preferred scrolling precedent (#147); no
-/// geometric search.
+/// (and track order across them), so stepping is index math —
+/// the scrolling precedent (#147) — save the window a step
+/// across lands on, nearest by centre (#2619).
 extension KiwiCore {
     /// Steps `focus`/`swap` in a track space: directions along
     /// the axis move within the focused track, directions
-    /// across it jump to the same relative position in the
-    /// adjacent track. Past an end, `focus` wraps when
+    /// across it jump to the adjacent track's window nearest by
+    /// centre (#2619). Past an end, `focus` wraps when
     /// `wraps` (#168 twin, This screen, #2493: within the track along
     /// the axis, last <-> first track across it); `swap` never
     /// wraps. Nil falls through to the geometric search — which
@@ -92,20 +92,26 @@ extension KiwiCore {
         case .left where vertical, .up where !vertical:
             target = acrossTarget(
                 step: -1,
-                index: index,
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
+                focused: focused,
+                space: space,
+                swapping: swapping,
+                vertical: vertical,
                 wrap: wraps,
                 skip: skip
             )
         case .right where vertical, .down where !vertical:
             target = acrossTarget(
                 step: 1,
-                index: index,
                 track: track,
                 ranges: ranges,
                 tiled: tiled,
+                focused: focused,
+                space: space,
+                swapping: swapping,
+                vertical: vertical,
                 wrap: wraps,
                 skip: skip
             )
@@ -163,33 +169,54 @@ extension KiwiCore {
         ).map { tiled[base + $0] }
     }
 
-    /// The window at the same relative position (clamped) in the
-    /// nearest track whose window there `skip` accepts — a whole
-    /// cascaded track is all pile-mates — wrapping last <-> first
-    /// when asked, a wrap asking `skip` too and never landing on
-    /// the origin's track. A track is judged by that one window, so
-    /// a lens member elsewhere in a skipped track is passed over.
+    /// The window beside `focused` in the nearest track holding a
+    /// shown window `skip` accepts — a whole cascaded track is all
+    /// pile-mates — wrapping last <-> first when asked, never onto
+    /// the origin's track: the nearest by centre, a tie to `tie`
+    /// (#2619). Only shown windows are candidates, so a run's
+    /// hidden ones are never landed on; a focus with no shown slot —
+    /// one no pass placed yet — falls through to the geometric
+    /// search from its frame.
     private func acrossTarget(
         step: Int,
-        index: Int,
         track: Int,
         ranges: [Range<Int>],
         tiled: [WindowID],
+        focused: WindowID,
+        space: Space,
+        swapping: Bool,
+        vertical: Bool,
         wrap: Bool,
         skip: (WindowID) -> Bool
     ) -> WindowID? {
-        let offset = index - ranges[track].lowerBound
-        func mapped(_ track: Int) -> WindowID {
-            let range = ranges[track]
-            return tiled[range.lowerBound + min(offset, range.count - 1)]
+        let slots = shownSlots()
+        guard let origin = slots[focused] else { return nil }
+        func shown(_ track: Int) -> [(id: WindowID, frame: CGRect)] {
+            tiled[ranges[track]].compactMap { id in
+                guard !skip(id), let frame = slots[id] else { return nil }
+                return (id, frame)
+            }
         }
-        return Navigation.arrayStep(
-            from: track,
-            step: step,
-            count: ranges.count,
-            wrap: wrap,
-            skip: { skip(mapped($0)) }
-        ).map(mapped)
+        guard
+            let next = Navigation.arrayStep(
+                from: track,
+                step: step,
+                count: ranges.count,
+                wrap: wrap,
+                skip: { shown($0).isEmpty }
+            )
+        else { return nil }
+        return Navigation.beside(
+            origin,
+            crossIsY: vertical,
+            candidates: shown(next),
+            tie: navigationTie(
+                from: focused,
+                tiled: tiled,
+                in: space,
+                swapping: swapping
+            )
+        )
     }
 
     /// The focused window's overflow-cascade pile in a track

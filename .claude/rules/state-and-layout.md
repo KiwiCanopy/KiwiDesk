@@ -2487,6 +2487,15 @@ KiwiVision lens's skip; the obligation is
 [borders.md](borders.md)'s ▸ "A step KiwiDesk's own navigation
 takes".
 
+**A geometric step settles a tie through `navigationTie`
+(#2619)**, the one home of "the last step for a focus, never for
+a swap, then the first in order, nothing in a Floating Space": a
+new caller of `Navigation.neighbor` or `Navigation.beside` hands
+it that tie, or states `.none` with its reason as the float tier
+does — the argument has no default, so the compiler asks
+(`NavigationTieTests`, `NavigationTieCommandTests`,
+`NavigationTieEdgeTests`).
+
 **A focus key past its last window answers the focus-wrap setting
 through `navigate` (#2493), never a layout's own reading of it.**
 `navigate` resolves the mode once and hands an array-order step

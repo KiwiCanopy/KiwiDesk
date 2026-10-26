@@ -110,9 +110,18 @@ monocle and scrolling layouts, directions on the layout's
 orientation axis follow the window order instead: monocle
 cycles and scrolling steps to the previous/next window.
 Cross-axis directions keep the geometric search. The track
-layout steps in window order on both axes: along the axis
-within the focused track, across it to the neighboring track
-(same relative position).
+layout steps in window order along its axis, within the
+focused track, and across it to the neighboring track.
+
+:::unreleased
+Across tracks, focus lands on the window nearest by centre. Where
+the focused window faces several windows on its screen alike —
+it spans more than one of them, or two lie equally near — focus
+returns to the window it came from when that is one of them,
+and otherwise takes the first of them in window order. A hop
+onto another screen keeps only the return; floating windows keep
+the nearest by position.
+:::
 
 :::unreleased
 What happens past the last window that way is
@@ -177,6 +186,11 @@ track spaces, where a cross-axis swap trades the two windows
 between their tracks and the track boundaries stay put. `swap`
 never wraps at the ends, whatever
 [`set_focus_wrap`](#set_focus_wrap) says.
+
+:::unreleased
+Where several windows tie, `swap` takes the first of them in
+window order and never the window focus came from.
+:::
 
 **Example:**
 
