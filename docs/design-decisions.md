@@ -2661,12 +2661,9 @@ switch is never held, wherever it comes from: holding it would
 show the new Space in the bar while the old windows stay up. The windows'
 records, the bars and the rings move at once, and a held pass
 stamps nothing, no placement and no size ask, so a frame that was
-never written is never judged against an echo. A frame written
-outside a layout pass, such as a restore's own writes
-([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626)) or a
-float's re-anchor onto another screen
-([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)), is
-not held. Of two
+never written is never judged against an echo. A restore's own
+writes ([#2626](https://github.com/KiwiCanopy/KiwiDesk/issues/2626))
+are not held. Of two
 windows arriving during one hold, only the newer keeps its
 start-at-target entrance. The cost: after you stop the
 mouse, an ambient reflow lands up to ~300 ms later than it did,
@@ -2679,7 +2676,14 @@ what is owed is the window, never its frame, and it is placed when
 the hand rests only if it is still a float. A window you drag or
 resize meanwhile stays where you put it. A frame that moves without a
 drag decides nothing: an app answering a size it refused and a
-hand move look alike from outside.
+hand move look alike from outside. A sticky window, or one
+floating because its Space floats, moved onto another screen after
+a display change or a move into a Space shown there waits the same
+way ([#2628](https://github.com/KiwiCanopy/KiwiDesk/issues/2628)),
+its target worked out again from the Space it then belongs to; any
+other float's move already rides the held pass. A
+window owed both is placed, or re-anchored where the placement is
+no longer due.
 :::
 
 ### A placement bounce is the app's answer, not the user's (#1161)
