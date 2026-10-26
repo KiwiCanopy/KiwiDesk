@@ -63,6 +63,10 @@ struct WindowServerTurnEndTests {
         #expect(calls() == ["ring.restack w1", "vision.restack w1"])
         endTurn()
         #expect(calls().count == 2)
+        // A later turn owes and pays again.
+        watch.handle(.reorder, window: w1)
+        endTurn()
+        #expect(calls().count == 4)
     }
 
     @Test("windows restack in the order their events arrived")
@@ -99,6 +103,17 @@ struct WindowServerTurnEndTests {
         watch.handle(.hide, window: w1)
         endTurn()
         #expect(calls() == ["ring.hide w1", "mark.restack w1"])
+    }
+
+    @Test("a reorder after a hide in the turn re-owes every consumer")
+    func reorderAfterHideReowes() {
+        let (watch, endTurn, calls) = turnWatch()
+        watch.request([w1], for: .ring)
+        watch.handle(.reorder, window: w1)
+        watch.handle(.hide, window: w1)
+        watch.handle(.reorder, window: w1)
+        endTurn()
+        #expect(calls() == ["ring.hide w1", "ring.restack w1"])
     }
 
     @Test("an unhide after a hide still restacks")
@@ -148,6 +163,10 @@ struct MainRunLoopTurnEndTests {
             MainRunLoopTurnEnd.schedule { box.ran.append("nested") }
         }
         #expect(box.ran.isEmpty)
+        // A timer gives the run loop a source, or it returns at once
+        // without a turn.
+        let tick = Timer(timeInterval: 0.01, repeats: false) { _ in }
+        RunLoop.main.add(tick, forMode: .default)
         RunLoop.main.run(until: Date().addingTimeInterval(0.05))
         #expect(box.ran == ["first", "nested"])
     }

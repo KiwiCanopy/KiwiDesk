@@ -107,6 +107,9 @@ struct WindowServerWatchSeamTests {
             try sites(of: "MainRunLoopTurnEnd.schedule")
                 == ["KiwiCore+Bootstrap.swift": 1]
         )
+        #expect(
+            try sites(of: "atTurnEnd =") == ["KiwiCore+Bootstrap.swift": 1]
+        )
         let source = try SourceScan.strippedSource(
             at: Self.core.appendingPathComponent("OS/WindowServerWatch.swift")
         )
