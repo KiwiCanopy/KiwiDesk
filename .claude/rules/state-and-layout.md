@@ -2408,9 +2408,14 @@ editing here:
   re-derived there, and forgotten by a drag or by any frame written
   under user motion (`MotionGate.frameWritten`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
-  owes through that door, and one left ungated is a ruling (the
-  restore's #2626). A new `OwedWrite` case takes its place in the
-  declaration order the payer ranks by, and its payment says
+  owes through that door, and one left ungated is a ruling. The
+  snapshot restore owes its tracked-window writes there too, paid
+  from the replay's snapshot only while the screens it was owed
+  under (#633) and the Space it filed the window in still hold;
+  a newer replay, a rest, a stop or a dropped capture voids it
+  (#2626, `RestoreWriteHoldTests`). A new `OwedWrite` case takes
+  its place in the declaration order the payer ranks by, and its
+  payment says
   whether it wrote, so a write no longer due falls through to the
   next (`MotionGateOwedWriteTests`, `MotionScopeCensusTests` ▸
   `directWritesOweThroughTheDoor`). The

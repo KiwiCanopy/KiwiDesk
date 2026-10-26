@@ -69,6 +69,35 @@ struct MotionGateOwedWriteTests {
         #expect(paid == [.floatPlacement, .reanchor])
     }
 
+    /// The replay's frame is a capture from before the rest: a
+    /// write derived from the state as it now is outranks it.
+    @Test("a restore ranks last")
+    func restoreRanksLast() {
+        #expect(
+            MotionGate.OwedWrite.allCases.last == .restore
+        )
+        let gate = gate(moving: true)
+        _ = gate.owe(.restore, for: window)
+        _ = gate.owe(.reanchor, for: window)
+        var paid: [MotionGate.OwedWrite] = []
+        gate.payWrites { _, write in
+            paid.append(write)
+            return true
+        }
+        #expect(paid == [.reanchor])
+    }
+
+    @Test("forgetting one kind keeps the others owed")
+    func forgetOneKind() {
+        let gate = gate(moving: true)
+        let other = WindowID(5)
+        _ = gate.owe(.restore, for: window)
+        _ = gate.owe(.reanchor, for: window)
+        _ = gate.owe(.restore, for: other)
+        gate.forgetWrites(.restore)
+        #expect(gate.owedWrites == [window: [.reanchor]])
+    }
+
     /// A payment re-enters its writer, which asks the gate again:
     /// inside the payment nothing holds, so it writes.
     @Test("nothing holds while the writes are paid")

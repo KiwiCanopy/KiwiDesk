@@ -13,6 +13,7 @@ extension KiwiCore {
     /// so the resulting AX echoes are not mistaken for user
     /// drags.
     func restore(_ snapshot: StateSnapshot) {
+        dropRestoreDebt()  // a newer replay supersedes (#2626)
         // Modes before adopt, never after: a runtime `set_mode`
         // was captured but silently reverted on every restore
         // (#633) — and entering track mode seeds a default
@@ -108,7 +109,7 @@ extension KiwiCore {
             if float {
                 tiler.seedStash(record.windowID, frame: record.frame)
             }
-            tiler.setFrame(record.windowID, record.frame)
+            writeRestoredFrame(record, from: snapshot)
         }
         if missing > 0 {
             onLog(

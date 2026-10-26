@@ -22,6 +22,10 @@ public final class SleepWakeManager {
     /// session rested is not evidence (#1285).
     public var onReturn: @MainActor () -> Void = {}
 
+    /// A replay's held work is void (#2626): a rest, a stop or a
+    /// drop supersedes the replay it was owed by.
+    public var onReplayVoided: @MainActor () -> Void = {}
+
     /// Display topology of a held snapshot, re-read when the
     /// delayed restore fires — replaying onto changed geometry is
     /// what scrambled wakes (#633). Compared as a sorted MULTISET,
@@ -89,10 +93,12 @@ public final class SleepWakeManager {
         tokens = []
         restoreTask?.cancel()
         restoreTask = nil
+        onReplayVoided()
     }
 
     /// Cancels pending wake/unlock restore and drops held snapshot (#634).
     public func dropHeldSnapshot() {
+        onReplayVoided()
         restoreTask?.cancel()
         restoreTask = nil
         snapshot = nil
@@ -135,6 +141,7 @@ public final class SleepWakeManager {
     }
 
     func systemWillRest(_ leg: Leg) {
+        onReplayVoided()
         guard isEnabled else { return }
         restoreTask?.cancel()
         restoreTask = nil

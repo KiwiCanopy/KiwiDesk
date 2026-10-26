@@ -33,8 +33,11 @@ extension KiwiCore {
                     return false
                 }
                 return reanchorFloat(id, to: space)
+            case .restore:
+                return payRestoreWrite(id)
             }
         }
+        restoreDebt = nil
     }
 
     /// Places detected float `id` now, or owes it while the gate

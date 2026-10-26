@@ -156,6 +156,7 @@ struct MotionScopeCensusTests {
             owes == [
                 "KiwiDeskCore/App/KiwiCore+FloatPlacementHold.swift": 1,
                 "KiwiDeskCore/App/KiwiCore+FloatReanchor.swift": 1,
+                "KiwiDeskCore/App/KiwiCore+RestoreHold.swift": 1,
             ]
         )
         let gate = try Self.counts(of: "motionGate.owe(")
@@ -189,6 +190,10 @@ struct MotionScopeCensusTests {
         let writes = try #require(arm.range(of: "tiler.applyFrame("))
         #expect(opens.upperBound <= owe.lowerBound)
         #expect(owe.upperBound <= writes.lowerBound)
+        // The replay writes a tracked window only through its owe.
+        let replay = try Self.counts(of: "writeRestoredFrame(record")
+        #expect(replay == ["KiwiDeskCore/App/KiwiCore+Restore.swift": 1])
+        #expect(try Self.counts(of: "setFrame(record.").isEmpty)
     }
 
     /// Core doors that move windows when the GUI calls them.

@@ -56,6 +56,10 @@ final class MotionGate {
         case floatPlacement
         /// A float's move onto its Space's screen (#2628).
         case reanchor
+        /// A replayed snapshot frame (#2626). Last: it is a capture
+        /// from before the rest, while the two above are derived
+        /// from the state as it is now.
+        case restore
     }
 
     let quiescence = InputQuiescence()
@@ -178,6 +182,15 @@ final class MotionGate {
     /// own writes forget none.
     func frameWritten(_ id: WindowID) {
         if case .user = cause() { owedWrites[id] = nil }
+    }
+
+    /// Forgets every window's owed `write`: what it was owed from
+    /// is gone.
+    func forgetWrites(_ write: OwedWrite) {
+        for id in owedWrites.keys {
+            owedWrites[id]?.remove(write)
+            if owedWrites[id]?.isEmpty == true { owedWrites[id] = nil }
+        }
     }
 
     /// A native tab switch re-keys the window its write is owed for.
