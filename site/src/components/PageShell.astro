@@ -59,9 +59,9 @@ const LANGS: Record<Lang, string> = {
 };
 
 // English lives at /, German at /de, Japanese at /ja.
-function localePath(l: Lang, sub = ""): string {
+function localePath(l: Lang, sub = "/"): string {
   const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}` || "/";
+  return `${prefix}${sub}`;
 }
 
 // Per-locale strings, English-fallback (mirrors Landing/Guide).
@@ -93,6 +93,9 @@ const makerProfile = "https://github.com/hajiboy95";
     <meta property="og:url" content={canonical} />
     <meta property="og:site_name" content="KiwiDesk" />
     <meta property="og:locale" content={ogLocale} />
+    {["en_US", "de_DE", "ja_JP"].filter((l) => l !== ogLocale).map((l) => (
+      <meta property="og:locale:alternate" content={l} />
+    ))}
     {ogImage && <meta property="og:image" content={ogImage} />}
     {ogImage && <meta name="twitter:card" content="summary_large_image" />}
     {ogImage && <meta name="twitter:title" content={title} />}
@@ -212,13 +215,13 @@ const makerProfile = "https://github.com/hajiboy95";
       </a>
       <p class="tag">{t("footer_tag")}</p>
       <nav class="flinks" aria-label={t("footer_nav_aria")}>
-        <a href="/docs">{t("footer_docs")}</a>
+        <a href="/docs/">{t("footer_docs")}</a>
         <a href={localePath(lang)}>{t("guide_footer_home")}</a>
         <a href={localePath(lang, "/compare/")}>{t("nav_compare")}</a>
         <a href={localePath(lang, "/changelog/")}>{t("footer_changelog")}</a>
-        <a href={localePath(lang, "/imprint")}>{t("footer_impressum")}</a>
-        <a href={localePath(lang, "/privacy")}>{t("footer_privacy")}</a>
-        <a href={localePath(lang, "/terms")}>{t("footer_terms")}</a>
+        <a href={localePath(lang, "/imprint/")}>{t("footer_impressum")}</a>
+        <a href={localePath(lang, "/privacy/")}>{t("footer_privacy")}</a>
+        <a href={localePath(lang, "/terms/")}>{t("footer_terms")}</a>
         <a href={repo} target="_blank" rel="noopener">{t("footer_github")}<span aria-hidden="true"> ↗</span></a>
         <a href={kofi} target="_blank" rel="noopener">{t("footer_kofi")}<span aria-hidden="true"> ↗</span></a>
       </nav>
