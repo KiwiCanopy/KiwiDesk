@@ -22,6 +22,10 @@ public final class SleepWakeManager {
     /// session rested is not evidence (#1285).
     public var onReturn: @MainActor () -> Void = {}
 
+    /// Every rest leg (sleep, lock), whether or not `isEnabled` is
+    /// on: what a replay still owes is void (#2626).
+    public var onRest: @MainActor () -> Void = {}
+
     /// Display topology of a held snapshot, re-read when the
     /// delayed restore fires — replaying onto changed geometry is
     /// what scrambled wakes (#633). Compared as a sorted MULTISET,
@@ -135,6 +139,7 @@ public final class SleepWakeManager {
     }
 
     func systemWillRest(_ leg: Leg) {
+        onRest()
         guard isEnabled else { return }
         restoreTask?.cancel()
         restoreTask = nil
@@ -171,9 +176,10 @@ public final class SleepWakeManager {
             let note =
                 "\(self.sessionPresence().summary), "
                 + self.age(of: saved)
-            if self.displayFingerprints().sorted()
-                == self.snapshotFingerprints
-            {
+            if Self.sameTopology(
+                self.displayFingerprints(),
+                self.snapshotFingerprints
+            ) {
                 self.restoreState(saved)
                 self.onLog(
                     "wake restore: \(leg.rawValue) replayed "
@@ -187,6 +193,13 @@ public final class SleepWakeManager {
             }
             self.snapshot = nil
         }
+    }
+
+    /// Whether two fingerprint lists name the same screens, as a
+    /// sorted multiset (#633): the wake replay and a held restore
+    /// write ask it alike.
+    static func sameTopology(_ live: [String], _ held: [String]) -> Bool {
+        live.sorted() == held.sorted()
     }
 
     private func describe(_ snapshot: StateSnapshot?) -> String {

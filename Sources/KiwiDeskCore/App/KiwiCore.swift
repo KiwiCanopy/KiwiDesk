@@ -179,12 +179,12 @@ public final class KiwiCore {
     /// When each sticky window was last put IN FLIGHT — a carry
     /// or our own switch (#1145/#1213); `KiwiCore+StickyReach` owns it.
     var stickyReachInFlightAt: [WindowID: Date] = [:]
-
     /// #958 steal debt; `KiwiCore+AccessibilityReturn.swift`.
     var accessibilityReturn: AccessibilityReturnDebt?
     /// #2002 delayed-close debt; `KiwiCore+DelayedCloseReturn`.
     var delayedCloseDebt: DelayedCloseDebt?
-
+    /// #2626 held restore writes' source; `KiwiCore+RestoreHold`.
+    var restoreDebt: RestoreDebt?
     /// #1532/#2224 reveal state; `KiwiCore+MenuBarRevealReturn`.
     var menuBarReveal = MenuBarRevealState()
 

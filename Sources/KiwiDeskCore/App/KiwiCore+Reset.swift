@@ -13,6 +13,7 @@ extension KiwiCore {
     public func discardSavedArrangement() {
         crash.discardSavedSnapshots()
         sleepWake.dropHeldSnapshot()
+        dropRestoreDebt()  // #2626
         // The match first, through its door, so a restore line ends.
         closeCrossSession()
         state.forgetRememberedSpaces()

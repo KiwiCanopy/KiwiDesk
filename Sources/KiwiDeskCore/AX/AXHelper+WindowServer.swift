@@ -69,10 +69,10 @@ extension AXHelper {
     /// never counts: the caller's census keys on identity.
     public static func onScreenStackingOrder() -> [WindowID] {
         guard
-            let list = CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly, .excludeDesktopElements],
-                kCGNullWindowID
-            ) as? [[String: Any]]
+            let list = WindowListRead.copy(
+                "onScreenStackingOrder",
+                [.optionOnScreenOnly, .excludeDesktopElements]
+            )
         else { return [] }
         return list.compactMap { info in
             guard
@@ -97,10 +97,10 @@ extension AXHelper {
         options: CGWindowListOption
     ) -> [(id: WindowID, pid: pid_t)] {
         guard
-            let list = CGWindowListCopyWindowInfo(
-                options,
-                kCGNullWindowID
-            ) as? [[String: Any]]
+            let list = WindowListRead.copy(
+                "normalWindowRows",
+                options
+            )
         else { return [] }
         return list.compactMap { info in
             guard

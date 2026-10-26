@@ -293,6 +293,9 @@ extension KiwiCore {
         sleepWake.restoreState = { [weak self] snapshot in
             self?.restoreAndSettleAfterWake(snapshot)
         }
+        sleepWake.onRest = { [weak self] in
+            self?.dropRestoreDebt()
+        }
         sleepWake.displayFingerprints = { [weak self] in
             self?.liveFingerprints ?? []
         }

@@ -68,10 +68,8 @@ public final class MouseTracker {
         let level = Int(CGWindowLevelForKey(.popUpMenuWindow))
         let screens = ScreenList.all.map(\.frame)
         let list =
-            CGWindowListCopyWindowInfo(
-                [.optionOnScreenOnly],
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
+            WindowListRead.copy("menuOpen", [.optionOnScreenOnly])
+            ?? []
         return list.contains { info in
             guard info[kCGWindowOwnerPID as String] as? pid_t == pid,
                 info[kCGWindowLayer as String] as? Int == level,

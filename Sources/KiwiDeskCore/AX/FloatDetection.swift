@@ -46,11 +46,11 @@ public enum FloatDetection {
     public static func serverSnapshot(
         of id: WindowID
     ) -> WindowServerSnapshot {
-        let list =
-            CGWindowListCopyWindowInfo(
-                [.optionIncludingWindow],
-                CGWindowID(id.raw)
-            ) as? [[String: Any]]
+        let list = WindowListRead.copy(
+            "serverSnapshot",
+            [.optionIncludingWindow],
+            relativeTo: CGWindowID(id.raw)
+        )
         guard let info = list?.first else {
             return WindowServerSnapshot(
                 layer: nil,
@@ -108,12 +108,12 @@ public enum FloatDetection {
         isOwnChrome: (pid_t, Int) -> Bool
     ) -> [ListedWindow] {
         let list =
-            CGWindowListCopyWindowInfo(
+            WindowListRead.copy(
+                "frontToBack",
                 listOptions(
                     includingDesktopElements: includingDesktopElements
-                ),
-                kCGNullWindowID
-            ) as? [[String: Any]] ?? []
+                )
+            ) ?? []
         return listedWindows(in: list, isOwnChrome: isOwnChrome)
     }
 
@@ -175,11 +175,11 @@ public enum FloatDetection {
     /// (os-private-apis.md) and reads false; nil is a window the
     /// server never had.
     public static func isOnScreen(_ id: WindowID) -> Bool? {
-        let list =
-            CGWindowListCopyWindowInfo(
-                [.optionIncludingWindow],
-                CGWindowID(id.raw)
-            ) as? [[String: Any]]
+        let list = WindowListRead.copy(
+            "isOnScreen",
+            [.optionIncludingWindow],
+            relativeTo: CGWindowID(id.raw)
+        )
         guard let info = list?.first else { return nil }
         return info[kCGWindowIsOnscreen as String] as? Bool ?? false
     }
