@@ -109,7 +109,7 @@ public enum FloatDetection {
     ) -> [ListedWindow] {
         let list =
             WindowListRead.copy(
-                "frontToBackWindows",
+                "frontToBack",
                 listOptions(
                     includingDesktopElements: includingDesktopElements
                 )
