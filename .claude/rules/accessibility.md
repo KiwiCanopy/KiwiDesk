@@ -190,7 +190,11 @@ editing AX code:
   removal would read as a close (`ScreenSaverLayerWiringTests`).
   A fixed size (#2070) is judged at adoption: a recheck never
   floats a tiled window on a disabled zoom button alone, since a
-  sheet can grey it for a moment. Judge a raised layer at
+  sheet can grey it for a moment. The latch is keyed on the
+  reason, so every fact folded into `.fixedSize` — Cancel in
+  place of close (#2653) among them — is judged at adoption
+  only; a fact that must float a tiled window on a recheck takes
+  a reason of its own. Judge a raised layer at
   adoption too (#2572): a recheck may keep a raised-layer float
   floating, but must never float a tiled window — or one whose
   verdict a changed guess forgot — on `.raisedLayer`, and

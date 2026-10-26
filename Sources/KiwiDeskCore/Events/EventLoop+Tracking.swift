@@ -224,10 +224,11 @@ extension EventLoop {
     ) {
         let before = detectedFloating[id]
         var verdict = read
-        // A fixed size is judged at adoption (#2070): a sheet can
-        // grey the zoom button for a moment, and a recheck never
-        // floats a tiled window on that reading alone — save one
-        // whose verdict a changed guess forgot (#2173).
+        // A fixed size is judged at adoption (#2070, #2653): a
+        // sheet can grey the zoom or close button for a moment,
+        // and a recheck never floats a tiled window on that
+        // reading alone — save one whose verdict a changed guess
+        // forgot (#2173).
         if verdict == .floats(.fixedSize), let before, before != verdict {
             return
         }

@@ -99,13 +99,12 @@ struct AXDump {
         return (zoom["AXEnabled"] as? Int).map { $0 != 0 }
     }
 
-    /// The close button recorded disabled beside a window-level
-    /// `AXCancelButton` (#2653); false where either is missing.
+    /// The recorded buttons through the live predicate (#2653).
     var cancelsInsteadOfClosing: Bool {
-        guard let close = values["AXCloseButton"] as? [String: Any],
-            close["AXEnabled"] as? Int == 0
-        else { return false }
-        return values["AXCancelButton"] is [String: Any]
+        let close = values["AXCloseButton"] as? [String: Any]
+        return WindowFacts.cancelsInsteadOfClosing(
+            hasCancel: values["AXCancelButton"] is [String: Any]
+        ) { (close?["AXEnabled"] as? Int).map { $0 != 0 } }
     }
 
     /// AeroSpace skips `AXChildren`, so this is nil throughout

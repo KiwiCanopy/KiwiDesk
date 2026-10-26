@@ -5050,9 +5050,12 @@ carries its own title-bar buttons on a raised layer (a system
 "Join Network" sheet, for one) is floated rather than ignored.
 
 :::unreleased
-A standard window that offers Cancel in place of a close button —
-Archive Utility's progress window while it unzips — floats
-automatically too.
+A standard window whose close button is disabled and that offers a
+Cancel button instead — Archive Utility's progress window while it
+unzips — floats automatically too, and counts as a window that
+can't be resized for [`tile_rules`](#tile_rules),
+[`set_float_automatically`](#set_float_automatically) and
+`explain_window`'s `fixed_size` reason.
 :::
 
 This table is the global base. A profile may add rules or remove

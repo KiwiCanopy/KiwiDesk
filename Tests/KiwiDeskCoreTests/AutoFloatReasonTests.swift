@@ -116,6 +116,25 @@ struct AutoFloatReasonTests {
         #expect(reason(cancels: true, rules: tiled) == nil)
     }
 
+    /// The predicate the live read and the corpus share (#2653):
+    /// a disabled close beside Cancel, the close read only where
+    /// a Cancel button is.
+    @Test("Cancel in place of close needs both, and asks close last")
+    func cancelPredicate() {
+        let ask = WindowFacts.cancelsInsteadOfClosing
+        #expect(ask(true) { false })
+        #expect(!ask(true) { true })
+        #expect(!ask(true) { nil })
+        var asked = false
+        #expect(
+            !ask(false) {
+                asked = true
+                return false
+            }
+        )
+        #expect(!asked)
+    }
+
     @Test("a third-party app with no Dock icon is the accessory reason")
     func accessoryApp() {
         #expect(

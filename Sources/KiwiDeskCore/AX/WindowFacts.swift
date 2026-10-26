@@ -15,10 +15,9 @@ public struct WindowFacts {
     /// window that cannot be resized, nil where it has no zoom
     /// button or the read failed. Asked like the title.
     public let zoomable: () -> Bool?
-    /// Whether the window offers Cancel in place of close — its
-    /// close button disabled and a window-level `AXCancelButton`:
-    /// a progress window such as Archive Utility's (#2653). Asked
-    /// like the zoom button, and only where it answers no.
+    /// Whether the window offers Cancel in place of close (#2653):
+    /// a progress window such as Archive Utility's. Asked only
+    /// where the zoom button does not already answer fixed-size.
     public let cancelsInsteadOfClosing: () -> Bool
 
     public init(
@@ -44,51 +43,86 @@ public struct WindowFacts {
         role: String? = nil,
         layer: Int?
     ) -> WindowFacts {
-        WindowFacts(
+        let buttons = WindowButtons(element)
+        return WindowFacts(
             role: role ?? AXHelper.role(of: element),
             subrole: AXHelper.subrole(of: element),
             layer: layer,
-            zoomable: {
-                AXHelper.attribute(
-                    element,
-                    kAXZoomButtonAttribute,
-                    as: AXUIElement.self
-                ).flatMap {
-                    AXHelper.attribute(
-                        $0,
-                        kAXEnabledAttribute,
-                        as: Bool.self
-                    )
-                }
-            },
+            zoomable: { buttons.zoom.flatMap(WindowButtons.enabled) },
             cancelsInsteadOfClosing: {
-                cancelsInsteadOfClosing(element)
+                WindowFacts.cancelsInsteadOfClosing(
+                    hasCancel: buttons.cancel != nil
+                ) { buttons.close.flatMap(WindowButtons.enabled) }
             }
         ) { AXHelper.title(of: element) }
     }
 
-    /// The close button reads disabled and the window carries a
-    /// Cancel button; the second read only where the first holds.
-    private static func cancelsInsteadOfClosing(
-        _ element: AXUIElement
+    /// Cancel offered in place of close (#2653): a close button
+    /// that reads disabled beside a window-level Cancel button.
+    /// The one predicate the live read and the dump corpus ask;
+    /// `closeEnabled` is asked only where a Cancel button is.
+    static func cancelsInsteadOfClosing(
+        hasCancel: Bool,
+        closeEnabled: () -> Bool?
     ) -> Bool {
-        let close = AXHelper.attribute(
-            element,
-            kAXCloseButtonAttribute,
-            as: AXUIElement.self
-        )
-        guard
-            let close,
-            AXHelper.attribute(
-                close,
-                kAXEnabledAttribute,
-                as: Bool.self
-            ) == false
-        else { return false }
-        return AXHelper.attribute(
-            element,
+        hasCancel && closeEnabled() == false
+    }
+}
+
+/// The zoom, close and Cancel buttons of one window, fetched in
+/// ONE batched round trip on first ask and kept (#2653). The zoom
+/// read cost that trip before, so a window carrying no Cancel
+/// button pays no extra message — on a Desktop switch's list read
+/// included; one carrying one pays one more, its close button's
+/// `AXEnabled`.
+final class WindowButtons {
+    private let element: AXUIElement
+    private var fetched: [AXUIElement?]?
+
+    init(_ element: AXUIElement) {
+        self.element = element
+    }
+
+    var zoom: AXUIElement? { buttons[0] }
+    var close: AXUIElement? { buttons[1] }
+    var cancel: AXUIElement? { buttons[2] }
+
+    private var buttons: [AXUIElement?] {
+        if let fetched { return fetched }
+        let read = Self.fetch(element)
+        fetched = read
+        return read
+    }
+
+    private static func fetch(_ element: AXUIElement) -> [AXUIElement?] {
+        let names = [
+            kAXZoomButtonAttribute, kAXCloseButtonAttribute,
             kAXCancelButtonAttribute,
-            as: AXUIElement.self
-        ) != nil
+        ]
+        var values: CFArray?
+        let error = WorkMeter.shared.ax {
+            AXUIElementCopyMultipleAttributeValues(
+                element,
+                names as CFArray,
+                AXCopyMultipleAttributeOptions(rawValue: 0),
+                &values
+            )
+        }
+        guard error == .success,
+            let items = values as? [AnyObject],
+            items.count == names.count
+        else { return [nil, nil, nil] }
+        return items.map { item in
+            guard CFGetTypeID(item) == AXUIElementGetTypeID() else {
+                return nil
+            }
+            // swift-format-ignore: NeverForceUnwrap
+            return (item as! AXUIElement)
+        }
+    }
+
+    /// A button's `AXEnabled`; nil where the read failed.
+    static func enabled(_ button: AXUIElement) -> Bool? {
+        AXHelper.attribute(button, kAXEnabledAttribute, as: Bool.self)
     }
 }
