@@ -1923,6 +1923,51 @@ that predicate too, or the lens stops steering the keys on it
 ([A lens steers the keys, never a pick](#a-lens-steers-the-keys-never-a-pick-2103)).
 
 :::unreleased
+**A tie goes back to where the last step came from, else to the
+first in window order
+([#2619](https://github.com/KiwiCanopy/KiwiDesk/issues/2619)).**
+The geometric score is forward distance plus twice the lateral
+offset, so where a full-height master faces a stack of three,
+every candidate lies at one distance and the lateral term alone
+picks the middle window — an accident of the score that nobody
+can read off the screen. So a tie has a definition, and only two
+shapes meet it: the origin's cross span wholly contains two or
+more of the nearest candidates, or two or more share the best
+score. A short origin or a partial straddle keeps the score's
+pick, since its position already says which window is meant.
+
+A `focus` tie returns to the window focused just before the
+origin when that window is among the tied ones, so stack →
+master → back lands where it left; otherwise it takes the first
+tied window in the Space's flat order. The history is one step
+and no further: a deeper or timed recency picks by state nobody
+can see once a while has passed, which is the very defect of the
+score's middle pick. It takes the first in order rather than the
+one nearest the origin's number, so a tie lands on the same
+window from either side. A `swap` takes the first in order alone:
+a swap moves a window, and letting a focus history the user
+cannot see choose which window moves makes the same key displace
+different windows.
+
+Track's step across tracks still picks the track by array order,
+but the window it lands on there is the shown one nearest by
+centre on the cross axis, with the same tie rule
+(`Navigation.beside`) — never a window at the same position in
+the track, which could be one a run had scrolled away. Under a
+lens, that step passes over a track only when the lens skips every
+shown window in it. A hop onto another screen keeps the step back
+and nothing else, another Space's order meaning nothing from
+here; the float tier and a Floating Space keep the plain score,
+a hand-placed float's order meaning nothing either.
+
+The step back reads the honored-focus record, which a focus
+REPORT writes: two presses faster than the first one's report, or
+a focus whose report was distrusted, leave the step before them
+as the last one. The one-step reading accepts that residue rather
+than keep a second, command-side history.
+:::
+
+:::unreleased
 **One setting decides what a focus key does at its last window,
 in every layout: Off, This screen or All screens
 ([#2493](https://github.com/KiwiCanopy/KiwiDesk/issues/2493)).**

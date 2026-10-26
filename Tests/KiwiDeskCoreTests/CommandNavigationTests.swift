@@ -26,14 +26,16 @@ struct NavigationTests {
             Navigation.neighbor(
                 from: master,
                 in: .up,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == nil
         )
         #expect(
             Navigation.neighbor(
                 from: master,
                 in: .down,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == nil
         )
         // Right still finds the stack (rows overlap).
@@ -41,7 +43,8 @@ struct NavigationTests {
             Navigation.neighbor(
                 from: master,
                 in: .right,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) != nil
         )
     }
@@ -59,28 +62,32 @@ struct NavigationTests {
             Navigation.neighbor(
                 from: origin,
                 in: .left,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == WindowID(1)
         )
         #expect(
             Navigation.neighbor(
                 from: origin,
                 in: .right,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == WindowID(2)
         )
         #expect(
             Navigation.neighbor(
                 from: origin,
                 in: .up,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == WindowID(3)
         )
         #expect(
             Navigation.neighbor(
                 from: origin,
                 in: .down,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == WindowID(4)
         )
     }
@@ -96,7 +103,8 @@ struct NavigationTests {
             Navigation.neighbor(
                 from: origin,
                 in: .right,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == WindowID(2)
         )
     }
@@ -111,7 +119,8 @@ struct NavigationTests {
             Navigation.neighbor(
                 from: origin,
                 in: .left,
-                candidates: candidates
+                candidates: candidates,
+                tie: .none
             ) == nil
         )
     }
