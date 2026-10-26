@@ -21,8 +21,6 @@ struct ShortcutsGates {
     enum InertReason: Hashable, CaseIterable {
         /// Only default layer configured (`.layersExist`).
         case onlyDefaultLayer
-        /// No Desktop shortcut bound yet (`.desktopBindingsExist`).
-        case noDesktopBinding
         /// No Track space and no Track verb bound (`.trackInUse`).
         case trackUnused
         /// `init.lua` owns the config, so the app-wide plate switch
@@ -44,15 +42,11 @@ struct ShortcutsGates {
             // "the user configured a layer" means — presence, not
             // a count.
             return config.layers.count > 1 ? nil : .onlyDefaultLayer
-        case .shortcuts(.focusDesktop),
-            .shortcuts(.moveToDesktop),
-            .shortcuts(.moveToDesktopFollow):
-            return desktopBindingExists ? nil : .noDesktopBinding
         case .shortcuts(.moveWindowToTrack),
             .shortcuts(.swapWithTrack):
             return trackIsUsed ? nil : .trackUnused
-        case .shortcuts(.modeCue), .shortcuts(.hyperKey),
-            .shortcuts(.modifierSides):
+        case .shortcuts(.modeCue), .shortcuts(.desktopCue),
+            .shortcuts(.hyperKey), .shortcuts(.modifierSides):
             return guiManaged ? nil : .appWideLuaOwned
         case .shortcuts(.shortcutBase):
             guard guiManaged else { return .appWideLuaOwned }
@@ -76,18 +70,12 @@ struct ShortcutsGates {
             != .onlyDefaultLayer
     }
 
-    /// Whether any layer RECORDS a Desktop verb (#1125) — named,
-    /// because the offer is the area's while the rows are per
-    /// family: a consumer reading one family's verdict and
-    /// applying it to its siblings encodes that positionally.
-    var desktopBindingsExist: Bool {
-        inertReason(for: .shortcuts(.focusDesktop))
-            != .noDesktopBinding
-    }
-
-    private var desktopBindingExists: Bool {
+    /// Whether any layer records a move to a Desktop (#2655): the
+    /// macOS Desktops drawer's hold-open, not a census gate. Go to
+    /// Desktop is seeded, so it never opens the drawer.
+    var desktopMovesBound: Bool {
         config.layers.flatMap(\.bindings)
-            .contains(where: KeybindingCatalog.recordsDesktop)
+            .contains(where: KeybindingCatalog.recordsDesktopMove)
     }
 
     /// Whether the Track layout is in play (#1440): a Track
@@ -111,12 +99,10 @@ struct ShortcutsGates {
         .shortcuts(.layersIcon),
         .shortcuts(.layersReach),
         .shortcuts(.switchToLayer),
-        .shortcuts(.focusDesktop),
-        .shortcuts(.moveToDesktop),
-        .shortcuts(.moveToDesktopFollow),
         .shortcuts(.moveWindowToTrack),
         .shortcuts(.swapWithTrack),
         .shortcuts(.modeCue),
+        .shortcuts(.desktopCue),
         .shortcuts(.hyperKey),
         .shortcuts(.modifierSides),
         .shortcuts(.shortcutBase),

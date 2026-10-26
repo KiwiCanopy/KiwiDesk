@@ -150,6 +150,11 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        MacOSDesktopsGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         LayoutGroup(
             model: model,
             bindings: bindingsBinding,
@@ -240,7 +245,7 @@ struct ShortcutsSection: View {
     /// selected one's: a row existing only while its layer is
     /// selected would vanish from under the duplicate block's
     /// "Go to", which may point into another layer.
-    private var expander: ShortcutsFamilyRows {
+    var expander: ShortcutsFamilyRows {
         return ShortcutsFamilyRows(
             spaces: model.config.spaces,
             icons: model.config.settings.spaceIcons,

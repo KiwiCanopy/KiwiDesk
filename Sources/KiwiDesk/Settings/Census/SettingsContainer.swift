@@ -56,6 +56,9 @@ enum SettingsContainer: CaseIterable, Hashable {
     /// key (#1870), the base (#2460) and the sides switch (#2601).
     case modifierKeys
     case moveWindows
+    /// Shortcuts' macOS Desktops section (#2655): Go to Desktop at
+    /// rest, the moves behind its drawer.
+    case macosDesktops
     case openApplications
     case optionalSettings
     case palettes
@@ -108,7 +111,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .layout,
             .looks, .luaBindings,
             .screenFingerprints, .monocle, .gestures, .modifierKeys,
-            .moveWindows, .openApplications,
+            .moveWindows, .macosDesktops, .openApplications,
             .optionalSettings, .palettes, .perSpaceOverrides,
             .pinnedToDisconnectedScreens, .presets,
             .profilesPerMacOSSpace, .floatRules, .secondAccent,

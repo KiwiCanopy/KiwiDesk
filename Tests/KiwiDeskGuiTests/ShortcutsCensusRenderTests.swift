@@ -51,12 +51,7 @@ struct ShortcutsCensusRenderTests {
 
     // MARK: - The action containers
 
-    /// Two tiers per group since #1125: the Desktop families are
-    /// `.immediate` — an OFFER until one is bound, then at rest
-    /// in both modes — so each group's list pair must partition
-    /// its container, or a family drops off the screen with the
-    /// census still naming its place.
-    @Test("Focus renders exactly the census's two tiers")
+    @Test("Focus renders exactly the census's one tier")
     func focusTier() {
         pin(
             ShortcutsRowOrder.focusAtRest,
@@ -64,20 +59,12 @@ struct ShortcutsCensusRenderTests {
             .atRest,
             "focus"
         )
-        pin(
-            ShortcutsRowOrder.focusDesktopFamilies,
-            .focus,
-            .immediate,
-            "focus desktops"
-        )
+        #expect(censusRows(.focus, .immediate).isEmpty)
         #expect(censusRows(.focus, .showMore).isEmpty)
     }
 
-    /// Two offers share `.immediate` here since #1440, so the
-    /// tier alone no longer places a key: each offer's list is
-    /// the census rows carrying the GATE its offer consults,
-    /// derived — a family moved between the lists would draw
-    /// under the wrong door with the union still whole.
+    /// The Track offer is the container's one `.immediate` list
+    /// (#1440); its gate is the one its `bound` consults.
     @Test("Move windows renders exactly the census's two tiers")
     func moveWindowsTier() {
         pin(
@@ -86,18 +73,33 @@ struct ShortcutsCensusRenderTests {
             .atRest,
             "move windows"
         )
-        let offers = censusRows(.moveWindows, .immediate)
-        func gated(_ gate: SettingRuntimeGate) -> Set<SettingKey> {
-            offers.filter { $0.placement.gate == .runtime(gate) }
-        }
-        let desktops = ShortcutsRowOrder.moveWindowsDesktopFamilies
         let tracks = ShortcutsRowOrder.moveWindowsTrackFamilies
-        #expect(Set(desktops) == gated(.desktopBindingsExist))
-        #expect(Set(tracks) == gated(.trackInUse))
-        #expect(!desktops.isEmpty && !tracks.isEmpty)
-        #expect(Set(desktops + tracks) == offers)
-        #expect(desktops.count + tracks.count == offers.count)
+        pin(tracks, .moveWindows, .immediate, "move windows tracks")
+        #expect(
+            tracks.allSatisfy {
+                $0.placement.gate == .runtime(.trackInUse)
+            }
+        )
         #expect(censusRows(.moveWindows, .showMore).isEmpty)
+    }
+
+    /// The switch cue and Go to Desktop at rest, the moves behind
+    /// the section's drawer (#2655). The cue is drawn by its own
+    /// view, so the pair partitions the tier.
+    @Test("macOS Desktops renders exactly the census's two tiers")
+    func macosDesktopsTiers() {
+        let list = ShortcutsRowOrder.macosDesktopsList
+        let keys = ShortcutsRowOrder.macosDesktopsAtRest
+        pin(list + keys, .macosDesktops, .atRest, "macOS Desktops")
+        #expect(!list.isEmpty && !keys.isEmpty)
+        pin(
+            ShortcutsRowOrder.macosDesktopsMore,
+            .macosDesktops,
+            .showMore,
+            "macOS Desktops drawer"
+        )
+        #expect(censusRows(.macosDesktops, .immediate).isEmpty)
+        #expect(!ShortcutsRowOrder.macosDesktopsMore.isEmpty)
     }
 
     @Test("Layout's one tier is the census's (#453)")
@@ -279,11 +281,12 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the eleven rendered containers")
+    @Test("Shortcuts holds exactly the twelve rendered containers")
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
-                .showHide, .focus, .moveWindows, .layout, .sizeAndFloat,
+                .showHide, .focus, .moveWindows, .macosDesktops,
+                .layout, .sizeAndFloat,
                 .openApplications, .layers,
                 .luaBindings, .defaultShortcuts, .gestures, .modifierKeys,
             ]

@@ -4,12 +4,14 @@ import SwiftUI
 /// A group the Shortcuts & Gestures jump chips lead to (#1520), in
 /// page order. Layers takes no chip: it scopes the groups below
 /// rather than being a destination, and is absent in Simple. Lua
-/// bindings takes one only while its drawer is offered (#2544).
+/// bindings takes one only while its drawer is offered (#2544),
+/// macOS Desktops only while its section draws (#2655).
 enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case gestures
     case showHide
     case focus
     case moveWindows
+    case macosDesktops
     case layout
     case sizeFloat
     case openApplications
@@ -25,6 +27,8 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .showHide: return SettingsCatalog.shortcuts.showHideKeys
         case .focus: return SettingsCatalog.shortcuts.focusKeys
         case .moveWindows: return SettingsCatalog.shortcuts.moveWindows
+        case .macosDesktops:
+            return SettingsCatalog.shortcuts.desktopsSection
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
         case .openApplications:
@@ -41,6 +45,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .showHide: return .showHide
         case .focus: return .focus
         case .moveWindows: return .moveWindows
+        case .macosDesktops: return .macosDesktops
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
         case .openApplications: return .openApplications
@@ -52,10 +57,20 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     /// one layer, this card to none.
     var ruledAfter: Bool { self == .gestures }
 
-    /// The chips drawn: a drawer not offered has nowhere to jump,
-    /// so its chip is left out rather than greyed (#2544).
-    static func shown(luaDrawerOffered: Bool) -> [ShortcutsJumpGroup] {
-        allCases.filter { $0 != .luaBindings || luaDrawerOffered }
+    /// The chips drawn: a drawer or section not drawn has nowhere
+    /// to jump, so its chip is left out rather than greyed (#2544,
+    /// #2655).
+    static func shown(
+        luaDrawerOffered: Bool,
+        desktopsDrawn: Bool
+    ) -> [ShortcutsJumpGroup] {
+        allCases.filter {
+            switch $0 {
+            case .luaBindings: return luaDrawerOffered
+            case .macosDesktops: return desktopsDrawn
+            default: return true
+            }
+        }
     }
 }
 
