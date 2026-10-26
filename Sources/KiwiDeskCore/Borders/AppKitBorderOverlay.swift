@@ -104,11 +104,11 @@ final class AppKitBorderOverlay: BorderOverlayBackend {
     nonisolated static func windowLayer(
         _ window: CGWindowID
     ) -> Int? {
-        let info =
-            CGWindowListCopyWindowInfo(
-                .optionIncludingWindow,
-                window
-            ) as? [[String: Any]]
+        let info = WindowListRead.copy(
+            "windowLayerFallback",
+            .optionIncludingWindow,
+            relativeTo: window
+        )
         return info?.first?[kCGWindowLayer as String] as? Int
     }
 
