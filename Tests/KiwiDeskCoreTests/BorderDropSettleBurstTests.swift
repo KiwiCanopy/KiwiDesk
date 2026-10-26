@@ -108,5 +108,8 @@ struct BorderDropSettleBurstTests {
         let pass = core.deferred.task(for: .borderDropSettle)
         await pass?.value
         #expect(box.waits.last == .seconds(1))
+        core.scheduleBorderDropReconcile(lone: true)
+        await core.deferred.task(for: .borderDropSettle)?.value
+        #expect(box.waits.last == .milliseconds(50))
     }
 }
