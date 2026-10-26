@@ -69,6 +69,9 @@ final class SpaceBarItemView: NSView {
     /// Divider between identifier and app glyphs (QA 2026-07-19).
     let identifierDivider = NSView()
     let accent = SheenRimView()
+    /// The hover on glass, fading with the Fill (#2645): below the
+    /// content and the strokes.
+    let hoverFill = GlassBackdrop()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.makeSeated()
@@ -134,6 +137,7 @@ final class SpaceBarItemView: NSView {
         accent.wantsLayer = true
         accentClip.wantsLayer = true
         identifierDivider.wantsLayer = true
+        addSubview(hoverFill)
         addSubview(identifierImage)
         addSubview(identifierLabel)
         addSubview(identifierDivider)

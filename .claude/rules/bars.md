@@ -1354,6 +1354,13 @@ Obligations:
   `GlassTint.paint` (`GlassPaintTests`). A surface that genuinely
   needs a non-Fill colour on glass earns a second mint inside
   `GlassTint`, never a colour parameter.
+- **A bar item's hover on glass goes through the one
+  `BarHoverFill.paint`**, which hands `GlassTint.applyHover` the
+  hover minted by `KiwiShelf.glassFill(hover:)`, so it fades with
+  the Fill and takes the cap (#2645, `BarHoverFillTests`); where
+  no glass draws it paints nothing and the item keeps its flat
+  hover. A new hover-bearing bar item takes the same door, never
+  a flat layer colour on glass.
 - **The Fill draws on the glass, beneath its content: the
   backdrop is the glass's `contentView` and what the glass hosts
   rides inside it** (#2569). Behind the glass, the key window's

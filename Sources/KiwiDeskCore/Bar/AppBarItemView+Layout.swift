@@ -5,6 +5,7 @@ import AppKit
 extension AppBarItemView {
     override func layout() {
         super.layout()
+        hoverFill.frame = bounds
         applyCornerRadius()
         layoutAccent()
         if horizontal {

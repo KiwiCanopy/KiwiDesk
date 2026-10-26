@@ -17888,6 +17888,18 @@ none. A lower fade only raises the far end's alpha toward the Fill
 the inks were chosen against, so the contrast suites' fade-100 case
 stays the worst one.
 
+**A hovered bar item's fill fades with the Fill** (#2645, owner
+ruling 2026-10-26, after comparing flat and faded hover live). On
+glass the hover colour fades along the same edge by the same Fill
+fade, through the same capped ends, so the hovered item reads as
+one with the pill under it rather than a flat patch on a faded
+plate; under Boxed, a flat hover made the box look as if it
+stopped fading beneath the pointer. A `ui-designer` read preferred
+a flat hover as pointer feedback, one even pill as macOS draws
+one; the owner judged the faded hover the better read. A solid
+shelf keeps its flat hover, its Fill not fading, and Reduce
+transparency returns the flat hover with the rest of the glass.
+
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two
 "unmeasured" clear-end sentences above. With the Fill on top and

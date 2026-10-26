@@ -6,7 +6,17 @@ extension SpaceBarItemView {
         layer?.masksToBounds = false
         layer?.cornerRadius = cornerRadius
         layer?.maskedCorners = maskedCorners
-        layer?.backgroundColor = fillColor.cgColor
+        hoverFill.frame = bounds
+        let glassHover = BarHoverFill.paint(
+            hoverFill,
+            hovered: !isActive && (isHovered || isDragHovered),
+            hex: style.hoverFillColor,
+            shelf: style.shelf,
+            edge: style.edge,
+            cornerRadius: cornerRadius,
+            corners: maskedCorners
+        )
+        layer?.backgroundColor = (glassHover ? .clear : fillColor).cgColor
         accentClip.frame = bounds
         aboveOutline.frame = bounds
         accentClip.layer?.masksToBounds = true

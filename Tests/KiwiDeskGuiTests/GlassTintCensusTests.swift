@@ -38,6 +38,8 @@ struct GlassTintCensusTests {
         "applyBehind": ["pinnedAppearance(", ".below", "colour("],
         // Both doors' one gradient, through the mint.
         "colour": ["rendered(", "fade("],
+        // A bar item's hover, fading with the Fill (#2645).
+        "applyHover": ["colour("],
     ]
 
     /// Ways a member puts a colour on screen. One whose body

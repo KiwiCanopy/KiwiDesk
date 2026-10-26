@@ -16,8 +16,19 @@ extension AppBarItemView {
         iconView.alphaValue = alpha
         badge.alphaValue = alpha
         halfMoon.show(visibility, ink: NSColor(kiwiHex: textColorHex))
+        let glassHover = BarHoverFill.paint(
+            hoverFill,
+            hovered: isHovered,
+            hex: style.hoverFillColor,
+            shelf: style.shelf,
+            edge: edge,
+            cornerRadius: style.resolvedCornerRadius(
+                forThickness: crossThickness
+            ),
+            corners: maskedCorners
+        )
         layer?.backgroundColor =
-            NSColor(kiwiHex: boxColorHex).cgColor
+            (glassHover ? .clear : NSColor(kiwiHex: boxColorHex)).cgColor
         applyCornerRadius()
     }
 

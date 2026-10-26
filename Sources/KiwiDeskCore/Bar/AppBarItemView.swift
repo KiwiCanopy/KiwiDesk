@@ -22,6 +22,9 @@ final class AppBarItemView: NSView {
     let accent = SheenRimView()
     /// Where a partly visible window sits (#2234).
     let halfMoon = AppBarHalfMoon()
+    /// The hover on glass, fading with the Fill (#2645): the bottom
+    /// subview, under the content and the strokes.
+    let hoverFill = GlassBackdrop()
     /// The box's border under Boxed (#1679): the bottom subview,
     /// so the active outline strokes over it.
     let boxBorder = ShelfBorder.makeSeated()
@@ -99,6 +102,7 @@ final class AppBarItemView: NSView {
         badge.wantsLayer = true
         badge.alignment = .center
         badge.setAccessibilityElement(false)
+        addSubview(hoverFill)
         addSubview(iconView)
         addSubview(glyphLabel)
         addSubview(label)

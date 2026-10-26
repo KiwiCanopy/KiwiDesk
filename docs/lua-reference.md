@@ -2760,9 +2760,9 @@ out-of-range values clamp.
 [`fill_color`](#kiwishelf-colours) fades across Liquid Glass
 (#2569). `100` fades to an eighth of the fill's strength at the
 far end. `0` draws one even color. The glass is never fully clear
-at the far end. It sets the fill of the bars, a hidden shelf's
-handle, the overflow marks and their list, the hover peek, and the
-panels
+at the far end. It sets the fill of the bars, a hovered bar item's
+fill, a hidden shelf's handle, the overflow marks and their list,
+the hover peek, and the panels
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 tints. The drag visuals and the sticky mark keep their own fade.
 The hover peek, the overflow mark's list, KiwiHub and the Space,
