@@ -151,6 +151,8 @@ struct NavigationTieEdgeTests {
         return true
     }
 
+    /// Both floats sit inside the band the hop enters with — the
+    /// leaving window's slot, inset by the outer gap — so they tie.
     @Test("A hop onto floats only keeps the nearest by position")
     func hopOntoFloatsKeepsTheScore() {
         let core = makeCore()
@@ -158,12 +160,12 @@ struct NavigationTieEdgeTests {
         core.state.workspaces.activate(SpaceID("2"))
         core.state.apply(
             .windowCreated(
-                float(21, CGRect(x: 0, y: 25, width: 500, height: 420))
+                float(21, CGRect(x: 0, y: 60, width: 500, height: 380))
             )
         )
         core.state.apply(
             .windowCreated(
-                float(22, CGRect(x: 0, y: 500, width: 500, height: 400))
+                float(22, CGRect(x: 0, y: 500, width: 500, height: 360))
             )
         )
         core.state.workspaces.activate(SpaceID("1"))
