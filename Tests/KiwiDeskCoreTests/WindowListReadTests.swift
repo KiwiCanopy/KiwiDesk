@@ -6,44 +6,50 @@ import Testing
 
 /// A slow public window-list read names its call site and thread
 /// (#2634), so a stalled run-loop turn is attributed to the read
-/// that held the connection lock.
-@Suite("Window-list read attribution (#2634)", .serialized)
+/// that held the connection lock. `timed` takes the clock and the
+/// sink, so no test swaps a global or waits on a real read.
+@Suite("Window-list read attribution (#2634)")
 struct WindowListReadTests {
-    private func lines(
-        run body: () -> Void
-    ) -> [String] {
-        nonisolated(unsafe) var seen: [String] = []
-        let saved = WindowListRead.onSlow
-        WindowListRead.onSlow = { seen.append($0) }
-        defer { WindowListRead.onSlow = saved }
-        body()
-        return seen
+    private func run(
+        takes duration: Duration,
+        onMain: Bool = true
+    ) -> (lines: [String], list: [[String: Any]]?) {
+        let base = ContinuousClock.now
+        var ticks = [base, base.advanced(by: duration)]
+        var lines: [String] = []
+        let list = WindowListRead.timed(
+            "probe",
+            now: { ticks.removeFirst() },
+            onMain: onMain,
+            log: { lines.append($0) },
+            read: { [["id": 1]] }
+        )
+        return (lines, list)
     }
 
-    @Test("a slow read logs its site, its time and its thread")
+    @Test("a read at the threshold logs its site, time and thread")
     func slowReadIsNamed() {
-        let seen = lines {
-            WindowListRead.report(site: "probe", elapsed: 0.5)
-        }
-        #expect(seen.count == 1)
-        let prefix = "window-list read probe: 500 ms"
-        #expect(seen.first?.hasPrefix(prefix) == true)
+        let slow = run(takes: .milliseconds(60))
+        #expect(slow.lines == ["window-list read probe: 60 ms main"])
+        let edge = run(takes: WindowListRead.slowThreshold)
+        #expect(edge.lines.count == 1)
     }
 
-    @Test("a fast read stays silent")
+    @Test("an off-main read says so")
+    func threadIsNamed() {
+        let slow = run(takes: .milliseconds(80), onMain: false)
+        #expect(slow.lines == ["window-list read probe: 80 ms off main"])
+    }
+
+    @Test("a fast read stays silent and returns the list")
     func fastReadIsSilent() {
-        let seen = lines {
-            _ = WindowListRead.copy("probe", [.optionOnScreenOnly])
-        }
-        // A real read on a loaded runner may pass the threshold;
-        // the control is that a log, if any, names the site.
-        for line in seen {
-            #expect(line.contains("probe"))
-        }
+        let fast = run(takes: .milliseconds(10))
+        #expect(fast.lines.isEmpty)
+        #expect(fast.list?.count == 1)
     }
 
-    @Test("the threshold sits under the run-loop stall the probe counts")
-    func thresholdUnderStall() {
-        #expect(WindowListRead.slowThreshold < 0.1)
+    @Test("a slow read still returns the list")
+    func slowReadReturnsTheList() {
+        #expect(run(takes: .seconds(1)).list?.count == 1)
     }
 }

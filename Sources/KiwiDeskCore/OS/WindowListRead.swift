@@ -1,45 +1,56 @@
 import CoreGraphics
 import Foundation
+import os
 
 /// The one door to the public window list (#2634). The read waits
 /// on this process's pending window updates while holding the
-/// WindowServer connection lock, so a slow app stalls whatever
-/// commits behind it (os-private-apis.md, #2531). Every read names
-/// its call site, and one that took `slowThreshold` or longer
-/// logs the site and the thread, which attributes a stalled
-/// run-loop turn to the read that held it.
+/// WindowServer connection lock (os-private-apis.md, #2531), so
+/// every read names its call site and one past `slowThreshold`
+/// logs the site and thread, attributing a stalled turn to the read
+/// that held it. The line goes to the unified log through
+/// own `Logger`, never `KiwiCore.onLog`: reads run off the main
+/// actor, which that seam's `@MainActor` closure cannot take.
 enum WindowListRead {
-    /// Seconds; below the 100 ms run-loop stall the probe counts.
-    static let slowThreshold: TimeInterval = 0.05
+    static let slowThreshold: Duration = .milliseconds(50)
 
-    /// Writes one `window-list read` line per slow read.
-    nonisolated(unsafe) static var onSlow: (String) -> Void =
-        CoreLog.write
+    private static let logger = Logger(
+        subsystem: KiwiLog.subsystem,
+        category: "window-list"
+    )
+
+    /// The `KiwiDesk: ` prefix is what capture tooling greps for.
+    static func write(_ message: String) {
+        logger.log("KiwiDesk: \(message, privacy: .public)")
+    }
 
     static func copy(
         _ site: String,
         _ options: CGWindowListOption,
         relativeTo window: CGWindowID = kCGNullWindowID
     ) -> [[String: Any]]? {
-        let clock = ContinuousClock()
-        var list: [[String: Any]]?
-        let took = clock.measure {
-            list =
-                CGWindowListCopyWindowInfo(options, window)
+        timed(site) {
+            CGWindowListCopyWindowInfo(options, window)
                 as? [[String: Any]]
         }
-        let elapsed =
-            Double(took.components.seconds)
-            + Double(took.components.attoseconds) / 1e18
-        if elapsed >= slowThreshold {
-            report(site: site, elapsed: elapsed)
-        }
-        return list
     }
 
-    static func report(site: String, elapsed: TimeInterval) {
-        let ms = Int((elapsed * 1000).rounded())
-        let thread = Thread.isMainThread ? "main" : "off main"
-        onSlow("window-list read \(site): \(ms) ms \(thread)")
+    /// `read`, timed; the clock, the sink and the thread are
+    /// parameters so a test drives the slow branch exactly.
+    static func timed(
+        _ site: String,
+        now: () -> ContinuousClock.Instant = { .now },
+        onMain: Bool = Thread.isMainThread,
+        log: (String) -> Void = WindowListRead.write,
+        read: () -> [[String: Any]]?
+    ) -> [[String: Any]]? {
+        let start = now()
+        let list = read()
+        let took = start.duration(to: now())
+        if took >= slowThreshold {
+            let ms = Int(took / .milliseconds(1))
+            let thread = onMain ? "main" : "off main"
+            log("window-list read \(site): \(ms) ms \(thread)")
+        }
+        return list
     }
 }

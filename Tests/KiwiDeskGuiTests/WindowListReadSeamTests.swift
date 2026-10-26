@@ -6,24 +6,36 @@ import Testing
 /// attributed in the log. A bare call beside it reads unnamed.
 @Suite("Window-list read door (#2634)")
 struct WindowListReadSeamTests {
-    private static var core: URL {
+    private static let trees = ["KiwiDeskCore", "KiwiDesk"].map {
         SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDeskCore")
+            .appendingPathComponent("Sources/\($0)")
+    }
+
+    /// Both trees; the sibling reads of the same lock-holding class
+    /// (`CGWindowListCreate*`) have no caller and take the door's
+    /// ruling before one appears.
+    private static func hits(of needle: String) throws -> [String: Int] {
+        var callers: [String: Int] = [:]
+        for tree in trees {
+            let files = try SourceScan.swiftSources(under: tree)
+            #expect(!files.isEmpty)
+            for file in files {
+                let text = try SourceScan.strippedSource(at: file)
+                let n = text.components(separatedBy: needle).count - 1
+                if n > 0 { callers[file.lastPathComponent] = n }
+            }
+        }
+        return callers
     }
 
     @Test("only the door calls CGWindowListCopyWindowInfo")
     func oneDoor() throws {
-        var callers: [String: Int] = [:]
-        let files = try SourceScan.swiftSources(under: Self.core)
-        #expect(!files.isEmpty)
-        for file in files {
-            let text = try SourceScan.strippedSource(at: file)
-            let hits =
-                text.components(
-                    separatedBy: "CGWindowListCopyWindowInfo("
-                ).count - 1
-            if hits > 0 { callers[file.lastPathComponent] = hits }
-        }
+        let callers = try Self.hits(of: "CGWindowListCopyWindowInfo(")
         #expect(callers == ["WindowListRead.swift": 1])
+    }
+
+    @Test("no sibling window-list read exists")
+    func noSiblingRead() throws {
+        #expect(try Self.hits(of: "CGWindowListCreate").isEmpty)
     }
 }
