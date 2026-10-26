@@ -50,8 +50,7 @@ final class MotionGate {
     /// A direct frame write outside a pass, owed for one window
     /// until a pass runs (#2627). Declaration order is precedence:
     /// the payer tries a window's owed writes in this order and
-    /// stops at the first that writes, so a new case is placed in
-    /// it deliberately.
+    /// stops at the first that writes.
     enum OwedWrite: CaseIterable {
         /// A detection flip's float placement.
         case floatPlacement
