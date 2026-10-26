@@ -286,12 +286,14 @@
    ~480px phone breakpoint. The control keeps BOTH labels — the
    whole point is they stay visible — just more compact. */
 @media (max-width: 680px) {
+  /* The full-size lead kiwi still rides here, so the gutter must
+     clear its 15px plus a gap; 84px keeps the desktop spacing. */
   .mode-toggle {
-    --seg-w: 74px;
+    --seg-w: 84px;
   }
   .mode-toggle__seg {
     font-size: 0.76rem;
-    padding-left: 16px;
+    padding-left: 18px;
   }
   .mode-toggle__tip {
     display: none;
@@ -302,9 +304,10 @@
    whole nav cluster (brand mark + Learn + lang + mode + theme)
    room to fit 320–460px without overflow. */
 @media (max-width: 460px) {
-  /* 64px: "Normalo" at this size is ~44px beside a 16px gutter. */
+  /* 66px: "Normalo" at this size is ~44px; the kiwi sits ~3.5px
+     from it and the text ~5.5px from the edge, as on desktop. */
   .mode-toggle {
-    --seg-w: 64px;
+    --seg-w: 66px;
   }
   /* Shrink the lead kiwi and tuck it flush to the far left so the
      gutter it needs shrinks with it — the segment text then clears
@@ -319,7 +322,7 @@
   }
   .mode-toggle__seg {
     font-size: 0.64rem;
-    padding-left: 16px;
+    padding-left: 11px;
   }
   /* M1: at these compact segment widths the extra kiwi dots landed
      on top of the "Nerd"/label text (a smudge, not a flourish), so
@@ -340,9 +343,10 @@
    floor. The labels stay legible ("Normalo" is the widest) beside
    the lead kiwi. Extra dots are already hidden at ≤460 (M1). */
 @media (max-width: 365px) {
-  /* 58px: "Normalo" is ~42px here beside a 15px gutter. */
+  /* 62px: "Normalo" is ~42px here; kiwi ~3px from it, text ~5px
+     from the edge. */
   .mode-toggle {
-    --seg-w: 58px;
+    --seg-w: 62px;
   }
   .mode-toggle__kiwi-lead .mode-toggle__kiwi {
     width: 10px;
@@ -350,7 +354,7 @@
   }
   .mode-toggle__seg {
     font-size: 0.6rem;
-    padding-left: 15px;
+    padding-left: 10px;
   }
 }
 /* Nerd mode adds Docs + GitHub to the nav; alongside the
