@@ -7,7 +7,8 @@ import SwiftUI
 struct AppRuleIdentity: View {
     let app: String
     /// The name to show, where the caller knows it better than
-    /// the bundle lookup does; an empty `app` draws no icon.
+    /// the bundle lookup does. An empty `app` holds a blank icon
+    /// slot and needs `name`.
     var name: String?
     @Environment(\.settingsWidth) private var width
 

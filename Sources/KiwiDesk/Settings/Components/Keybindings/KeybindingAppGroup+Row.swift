@@ -63,13 +63,19 @@ extension ApplicationsGroup {
     /// The App Rules icon and name; a binding whose Lua names
     /// no bundle keeps the icon slot, so its menu still lines up.
     private func identity(_ binding: KeyBinding) -> some View {
-        let bundleID = KeybindingCatalog.appBundleID(
-            from: binding.lua
+        AppRuleIdentity(
+            app: KeybindingCatalog.appBundleID(from: binding.lua) ?? "",
+            name: appName(binding)
         )
-        return AppRuleIdentity(
-            app: bundleID ?? "",
-            name: bundleID == nil ? binding.label : nil
-        )
+    }
+
+    /// The one name the row both draws and speaks: the stored
+    /// label, else the bundle's.
+    private func appName(_ binding: KeyBinding) -> String {
+        if !binding.label.isEmpty { return binding.label }
+        return KeybindingCatalog.appBundleID(from: binding.lua).map {
+            KeybindingCatalog.displayName(forBundleID: $0)
+        } ?? ""
     }
 
     /// The recorder is the row's one control naming what it binds,
@@ -81,7 +87,7 @@ extension ApplicationsGroup {
         return L(
             "shortcuts.apps.recorder_name",
             "%1$@, %2$@",
-            binding.label,
+            appName(binding),
             actionLabel(action)
         )
     }

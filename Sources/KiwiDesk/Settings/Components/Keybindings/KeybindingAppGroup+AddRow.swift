@@ -27,10 +27,9 @@ extension ApplicationsGroup {
                 },
                 exclude: fullyBoundBundleIDs()
             )
-            // Hug the content, like the per-row picker. Alone in
-            // the row it would otherwise stretch to the section
-            // width, read as a field rather than a control, and
-            // stop lining up with the row pickers above it.
+            // Hug the content: alone in the row it would otherwise
+            // stretch to the section width and read as a field
+            // rather than a control.
             .fixedSize()
             // The picker is the add affordance now that the
             // button is gone, so it carries the census's name —
@@ -64,7 +63,7 @@ extension ApplicationsGroup {
     /// notice. `refusal` only says which app to ask about.
     var allBoundNotice: String? {
         guard let refusal else { return nil }
-        return allBoundNotice(about: refusal.app)
+        return allBoundNotice(about: refusal)
     }
 
     /// The sentence for one app, asked of live state.
@@ -122,7 +121,7 @@ extension ApplicationsGroup {
     /// restated: a post landing in the same instant as a
     /// control's own announcement was dropped on device (#812).
     func refuse(_ app: KeybindingCatalog.InstalledApp) {
-        refusal = AppPickRefusal(app: app)
+        refusal = app
         refusalAnnouncement?.cancel()
         guard let sentence = allBoundNotice(about: app) else {
             return
