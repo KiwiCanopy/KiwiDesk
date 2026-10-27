@@ -9230,8 +9230,10 @@ stand on the other base, so a Hyper row is held to be no wider
 than the ⌃⌥ row (`OnboardingModifierNameTests` ▸
 `namesStayInsideTheirChip`). The name of the key the user actually
 holds (Caps Lock, say) is rejected: it is not what Settings calls
-this key anywhere. VoiceOver reads the glyph as a star, so the
-keycap speaks the same word in its place.
+this key anywhere. VoiceOver reads the glyph as a star, so every
+spoken chord — the tour's keycaps and Settings' chord surfaces
+alike — names ✦ by the same word, through
+`SidedChordWords.label`.
 :::
 
 **And the rule outranks the rows.** The seeded keymap is a tier
