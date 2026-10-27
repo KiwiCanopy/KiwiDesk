@@ -110,8 +110,11 @@ struct LayoutCycleModelTests {
         #expect(model.modeCycleCanRemove)
         model.removeCycleMode(.bsp)
         #expect(model.config.modeCycle == [.scrolling, .grid])
-        #expect(!model.modeCycleAddable.contains(.grid))
-        #expect(model.modeCycleAddable.contains(.bsp))
+        let addable = SettingsModel.cycleAddable(
+            besides: model.config.modeCycle
+        )
+        #expect(!addable.contains(.grid))
+        #expect(addable.contains(.bsp))
     }
 
     @Test("Move Up and Down swap neighbours and stop at the ends")
