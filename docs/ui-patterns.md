@@ -137,8 +137,9 @@ segments. Segmented under the
 rule: the App Bar fields, Stack's Master orientation / Stack
 position, and Corners. Menus where
 the rule keeps them: new-window placement (comparative labels), the
-seven-option Space layout mode, and the dynamic Language and
-Desktop→Profile lists.
+seven-option Space layout mode, the dynamic Language and
+Desktop→Profile lists, and Wrap focus, whose value sits in the
+key recorder's footprint on its Shortcuts row (#2670).
 
 The update window's notes tabs are one such strip (#1666): how
 many there are is set by the release feed rather than by us, so

@@ -49,6 +49,7 @@ extension BorderManager {
             restoreVisibility: restoreVisibility
         )
         noteArrivalReport(id, frame: frame)
+        noteStateChangeReport(id, frame: frame)
     }
 
     /// The ring's request: rings worn, plus dormant ones kept in

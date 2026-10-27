@@ -2,9 +2,10 @@ import Foundation
 import Testing
 
 /// The Per screen wiring no behaviour suite reaches (#1948): both
-/// drawers mount only while the profile holds more than one screen
-/// (hidden, never greyed), and a drawer held open by what it shows
-/// greys its chevron — Each bar's and each Per screen drawer's.
+/// drawers always mount, greyed shut with a `?` while the profile
+/// holds one screen (#2677), and a drawer held open by what it
+/// shows greys its chevron — Each bar's and each Per screen
+/// drawer's.
 @Suite("Per screen wiring (#1948)")
 struct ScreenEdgesWiringTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -23,20 +24,45 @@ struct ScreenEdgesWiringTests {
         text.components(separatedBy: needle).count - 1
     }
 
-    @Test("each drawer mounts only while the profile holds two screens")
-    func drawersHideOnOneScreen() throws {
+    @Test("each drawer greys its rows on one screen and says why")
+    func drawersGreyOnOneScreen() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
         #expect(count("ScreenEdgesDrawer(", in: card) == 2)
-        // Each mount is gated on, and edits, its own bar.
+        #expect(count("ifmodel.offersScreenEdges(", in: card) == 0)
         for bar in ["spaceBarStyle", "appBarStyle"] {
             #expect(
                 count(
-                    "ifmodel.offersScreenEdges(\\.\(bar)){"
-                        + "ScreenEdgesDrawer(model:model,bar:\\.\(bar),",
+                    "ScreenEdgesDrawer(model:model,bar:\\.\(bar),",
                     in: card
                 ) == 1
             )
         }
+        let drawer = try squashed(Self.bars + "Bars/ScreenEdgesDrawer.swift")
+        // The drawer asks for its own bar, once.
+        #expect(
+            count(
+                "privatevaroffered:Bool{model.offersScreenEdges(bar)}",
+                in: drawer
+            ) == 1
+        )
+        let help = "if!offered{HelpButton(explanation:Self.oneScreenHelp"
+        #expect(count(help, in: drawer) == 1)
+        // The rows grey, never the label (#527): the `?` sits in the
+        // header's own stack, and the one grey closes the rows' block.
+        #expect(count(".modifier(GreyOut(active:!offered))", in: drawer) == 1)
+        #expect(
+            count(
+                "HStack(spacing:6){header.fixedSize()if!offered{HelpButton(",
+                in: drawer
+            ) == 1
+        )
+        #expect(
+            count(
+                "ForEach(model.screenEdgeRows(bar)){rowinscreenRow(row)}}"
+                    + ".modifier(GreyOut(active:!offered))",
+                in: drawer
+            ) == 1
+        )
     }
 
     @Test("each bar row explains an empty selection")

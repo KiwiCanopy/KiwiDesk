@@ -3,8 +3,8 @@ import SwiftUI
 
 /// Focus ▸ Space history (#1655): a group headed like the per-Space
 /// families, whose first row names the current behaviour in a
-/// menu — two peers, neither an "off" — and whose "Applies to"
-/// control sits in the shortcut rows' reach column; the two
+/// menu — two peers, neither an "off" — in the shared setting
+/// row's shape (#2670); the two
 /// history shortcuts follow it. Greyed with its reason on a stored
 /// profile saved for one screen, where both choices walk the same
 /// history.
@@ -18,31 +18,21 @@ struct SpaceHistoryRow: View {
                 .foregroundStyle(.secondary)
                 .padding(.top, 4)
                 .accessibilityAddTraits(.isHeader)
-            HStack(alignment: .firstTextBaseline) {
-                // The icon slot every shortcut row reserves (#264).
-                Color.clear.frame(width: Self.iconSlot, height: 1)
-                // The menu names itself; this is its drawn twin.
-                Text(SpaceHistoryWords.kept)
-                    .accessibilityHidden(true)
-                menu
-                HelpButton(
-                    explanation: SpaceHistoryWords.help,
-                    subject: SpaceHistoryWords.title
-                )
-                Spacer()
-                reach
-                KeyRecorderField.footprint
-            }
+            ShortcutSettingRow(
+                title: SpaceHistoryWords.kept,
+                help: SpaceHistoryWords.help,
+                helpSubject: SpaceHistoryWords.title,
+                reach: { reach },
+                control: { menu }
+            )
             if oneScreen {
                 Text(reason)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
-                    .padding(.leading, Self.iconSlot + 8)
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
             }
         }
     }
-
-    private static let iconSlot = SettingsMetrics.shortcutIconSlot
 
     private var menu: some View {
         Picker(

@@ -97,8 +97,8 @@ extension ShortcutsReferenceBuilder {
     /// (#2303), the float and
     /// sticky toggles — wearing the marks the windows wear — a
     /// layer switch, and the KiwiVision toggle wearing its Settings
-    /// card's symbol (#2103). Panel-only; Settings draws glyphs only
-    /// where one names a thing.
+    /// card's symbol (#2103). Read through `icon(for:)`, which the
+    /// Settings rows draw from too (#2670).
     static func verbIcon(for lua: String) -> String? {
         switch lua {
         case "KiwiDesk.cycle_mode()":

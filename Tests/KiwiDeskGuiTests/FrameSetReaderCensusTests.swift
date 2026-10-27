@@ -19,7 +19,7 @@ struct FrameSetReaderCensusTests {
     /// File → (set, reason), for every production call site of
     /// either accessor outside the engine's own definitions.
     static let allowed: [String: (set: FrameSet, why: String)] = [
-        "TilingEngine.swift": (
+        "TilingEngine+Retile.swift": (
             .issued, "the retile applies what the pass issues"
         ),
         "KiwiCore+SizeLimitPill.swift": (

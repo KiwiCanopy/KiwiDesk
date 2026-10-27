@@ -4707,7 +4707,7 @@ feature sits beside that feature, where someone setting the
 feature up looks for it: the Desktop switch cue first in
 Shortcuts & Gestures ▸ macOS Desktops, above the shortcuts whose
 switches it marks (#2142, #2655), the layout plate's in Shortcuts
-& Gestures ▸ Layout under the cycle list (#2144). Such a switch is still
+& Gestures ▸ Layout under the Layouts to cycle row (#2144). Such a switch is still
 written the moment it changes, on a page whose other rows wait
 for Save, so it says in its `?` that it applies at once and to
 every profile.
@@ -6004,9 +6004,10 @@ rule of its own: a maximize ends where the new arrangement
 changes its Space's layout or files the window elsewhere, and
 stands where both stay. A sticky window is
 refused, since it draws on other Spaces' layouts too. It
-survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
-ordinary frame animation, governed by `animations.on_window_resize`
-with no setting of its own. Named "Maximize": "Zoom" and "Fill"
+survives KiwiDesk's own in-place restart and not a Quit. Its motion is
+the state-change animation ([a window changing
+state](#a-window-changing-state-animates-under-its-own-switch-2676)).
+Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 :::
@@ -6047,8 +6048,8 @@ user to the marked window, rather than silently moving the mark: the pocket wind
 carries a frame per screen and is the one window a key always
 reaches, so taking that away is an act on the marked window, not a
 side effect of pressing a key somewhere else. Marking floats the
-window at once, placed as the float placement places a floated
-tiled window, and leaves it out:
+window at once at the float placement, whether it floated before
+or not, and leaves it out:
 a marked window is the pocket window, and an out pocket window is
 a global sticky float, so a mark that left it tiled would be a
 fourth state. That is the only time the pocket sizes the window: a
@@ -6125,6 +6126,39 @@ next launch with no pocket would otherwise hold a window off-screen
 that no key can bring back. An update's in-place relaunch carries
 the slot (`StateSnapshot.pocket`), since that restart is meant to
 be invisible.
+:::
+
+### A window changing state animates under its own switch (#2676)
+
+:::unreleased
+**[Rationale]**
+
+**Floating and tiling back, maximizing and returning, and going
+into the pocket and out move under `animations.on_state_change`,
+and only the window changing state follows it.** These moves are
+bigger than a drag or a resize step and change what the window
+is, so a user who wants reflows calm can still watch a window
+float; its neighbours keep following `on_relayout`, so turning
+reflows off never takes this with it. A float the detection
+places is no verb of the user's and keeps `on_relayout`. The
+window changing state promises a full spring for itself
+(`BatchSizing.allSpringSized`): becoming floating shrinks both
+axes, and a shrinking axis otherwise takes its target on frame 1,
+leaving only the corner to travel. A slow app's window trails our
+spring, so its ring is held dormant until the window has landed
+rather than running ahead of it.
+
+**One toggle, not a choice of styles.** No style can capture
+another app's window, and none can set its transparency
+([Blocked by macOS (SIP)](#blocked-by-macos-sip)), so a "fade" is
+a tinted plate flashing over a jumping window: a glitch on float
+and maximize, not a style. A Genie stays refused because it means
+"minimized to the Dock" and needs a private API
+([the overflow mark's peek](#layout-and-resize-behavior)).
+Pocketing slides the real window to its park corner at its own
+size, position only, so slow apps and minimum sizes are not in
+play; a plate shrinking into an on-screen pocket waits for that
+pocket to exist (#2680).
 :::
 
 ### Spaces, profiles & config ownership
@@ -14003,6 +14037,25 @@ does not replace the edge — it labels the row once, where the
 edge tells each chip from a passive capsule on every look, and
 without the edge a dark jump chip is `chipSurface()` again.
 
+:::unreleased
+**Layouts to cycle is a button that opens a popover (#2673,
+owner 2026-10-27).** [Rationale] The row's value, "BSP › Scrolling ›
+Floating", is a bordered button in the recorder column; its
+popover lists all seven layouts, the cycle's ticked and in
+order with a drag handle, the rest unticked below in the Layout
+menu's order. A tick appends a layout and an untick takes it
+out; at two, the ticked boxes grey and a sentence under them
+says why.
+This reverses #453's inline list (2026-10-11), which unfolded a
+list with a ＋ menu and − buttons inside the Layout card and
+pushed every row below it down: the card is a column of
+one-line settings, and a list growing out of one of them read
+as a section of its own. Seven boxes also make the choice
+visible at once, where ＋ hid the layouts not yet chosen behind
+a menu. Move Up / Move Down stay on each ticked box's row menu
+for the keyboard.
+:::
+
 ### Overrides & appearance
 
 **[Principle]**
@@ -16285,13 +16338,9 @@ cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.
 
 In Settings each bar row under Each bar gets a Per screen drawer,
-one picker per screen of the profile's own monitor set, and those
-rows are HIDDEN while the profile holds one screen. That is a
-deliberate exception to "grey, don't hide": greying says "switch
-that on and I act", and no setting turns one screen into two —
-a dimmed drawer would promise a choice the profile cannot have.
+one picker per screen of the profile's own monitor set.
 A screen with no row of its own (one plugged in after the save)
-follows its bar, so hiding loses nothing. The rows list the
+follows its bar, so leaving it out loses nothing. The rows list the
 profile's screens, not the connected ones, since a profile names
 its own screens and an absent one is still part of it; connected
 screens come first and an absent one carries "not connected".
@@ -16302,6 +16351,19 @@ open by what it shows greys its chevron. Readers that ask
 whether a setting has any effect — order and minimum, the
 front-app colour — ask every screen and grey only where none is
 affected; the Home card pictures the main screen.
+
+:::unreleased
+On a profile that holds one screen the drawer's rows grey, its
+label staying live and its `?` saying it needs a profile with two
+or more screens (#2677),
+unless the bar's screens already differ, which the rows then
+show. Grey
+usually says "switch that on and I act", and no setting turns
+one screen into two; but a hidden drawer tells a one-screen user
+nothing about the option, while the `?` names the one thing that
+unlocks it, a profile for more screens, so the grey promises
+nothing a setting would have to keep.
+:::
 
 **The shelf's edge is absolute.** (#293, supersedes the #228
 axis-relative model.) The stored value is one of the four screen

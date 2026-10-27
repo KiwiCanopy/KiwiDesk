@@ -36,18 +36,18 @@ extension StateCoordinator {
     }
 
     /// Clears every stored maximize the verdict no longer honours,
-    /// so focus coming back never re-maximizes. Returns the Spaces
-    /// it cleared.
+    /// so focus coming back never re-maximizes. Returns the windows
+    /// whose maximize it ended.
     @discardableResult
-    mutating func retireEndedMaximize() -> [SpaceID] {
+    mutating func retireEndedMaximize() -> [WindowID] {
         let ended = workspaces.allSpaces.filter {
             guard let id = $0.maximized else { return false }
             return maximizedWindow(of: $0) == nil
                 && !awaitsMaximizedReturn(id, from: $0.id)
-        }.map(\.id)
-        for id in ended {
-            workspaces.withSpace(id) { $0.maximized = nil }
         }
-        return ended
+        for space in ended {
+            workspaces.withSpace(space.id) { $0.maximized = nil }
+        }
+        return ended.compactMap(\.maximized)
     }
 }

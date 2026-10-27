@@ -21,16 +21,17 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// Makes `id` the pocket window, out where it is, placed as the
-    /// float verbs place a window that was no effective float — the
-    /// one resize a pocket window takes; a take-out keeps its frame.
-    func markPocketWindow(_ id: WindowID) {
-        let wasFloating = isEffectiveFloatForPlacement(id)
+    /// Makes `id` the pocket window, out where it is, at the float
+    /// size there and then (#2672) — the one resize a pocket window
+    /// takes; a take-out keeps its frame. Out, it is placed where it
+    /// shows; the `pocket` fallback files the same frame through
+    /// `becomePocketWindow` instead.
+    private func markPocketWindow(_ id: WindowID) {
         guard state.markPocketWindow(id) else { return }
         onLog("pocket: w\(id.raw) marked")
         refreshStickyReach()
         retile()
-        if !wasFloating { placeFloating(id) }
+        placeFloating(id)
     }
 
     /// Empties the slot, leaving `id` a plain float on the active

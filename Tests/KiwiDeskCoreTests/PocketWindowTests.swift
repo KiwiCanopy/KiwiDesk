@@ -79,8 +79,10 @@ struct PocketWindowTests {
         #expect(frames[one] == FloatPlacement.centered(in: region))
     }
 
-    @Test("marking a window already floating keeps its frame")
-    func floatKeepsItsFrame() {
+    /// Becoming the pocket window is the resize (owner, #2675),
+    /// floating or not.
+    @Test("marking a window already floating places it too")
+    func floatIsPlacedToo() {
         var placed: [WindowID] = []
         let core = makeCore { id, _ in placed.append(id) }
         core.execute("toggle_floating")
@@ -88,7 +90,7 @@ struct PocketWindowTests {
         core.state.apply(.windowResized(one, slot))
         core.execute("toggle_pocket_window")
         #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(!placed.contains(one))
+        #expect(placed.contains(one))
     }
 
     @Test("pocket acts on the marked window, from any window")
@@ -204,19 +206,15 @@ struct PocketWindowTests {
         return made
     }
 
-    /// The fallback marks first, so the frame the park files is the
-    /// float placement — the frame the mark sent — not the tiled
-    /// slot the window had.
+    /// The fallback marks the window, so the frame the park files
+    /// is its float placement (#2672), not the tiled slot it had.
     @Test("the fallback files the float placement at the park")
     func fallbackPlacesBeforeThePark() throws {
-        var frames: [CGRect] = []
-        let core = makeFollowingCore { id, frame in
-            if id == WindowID(1) { frames.append(frame) }
-        }
+        let core = makeFollowingCore()
         _ = try pinHostScreen(core)
-        core.execute("pocket")
-        let placed = try #require(frames.first)
+        let placed = try #require(core.floatPlacementFrame(for: one))
         #expect(placed != slot)
+        core.execute("pocket")
         #expect(core.state.pocket?.frames.values.map(\.self) == [placed])
     }
 

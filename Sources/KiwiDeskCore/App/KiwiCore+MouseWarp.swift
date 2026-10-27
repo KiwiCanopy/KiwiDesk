@@ -105,11 +105,15 @@ extension KiwiCore {
         pointerWarp?(frame)
     }
 
-    /// Where a warp onto `id` aims: its layout slot, else its live
-    /// AX frame (a float), nil for a window with neither.
+    /// Where a warp onto `id` aims: its layout slot, else where our
+    /// spring is taking it (a float sliding out of the pocket,
+    /// #2676), else its live AX frame, nil for none of these.
     func warpFrame(of id: WindowID) -> CGRect? {
         if let slot = tiler.calculatedFrames(state: state)[id] {
             return slot
+        }
+        if let target = tiler.commandedFrame(of: id) {
+            return target
         }
         return eventLoop.element(for: id).map {
             AXHelper.frame(of: $0)

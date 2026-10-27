@@ -109,12 +109,20 @@ struct BatchSizingRoutingTests {
             Site(names: 2, promises: 0),
         "KiwiDeskCore/Animation/SizeStep.swift":
             Site(names: 3, promises: 0),
-        "KiwiDeskCore/Tiling/TilingEngine.swift":
+        "KiwiDeskCore/Tiling/TilingEngine+Retile.swift":
             Site(names: 5, promises: 0),
         // One window's turn in the retile (#1944): threads the
-        // retile's promise into `applyFrame` unchanged.
+        // retile's promise into `applyFrame` unchanged, save for the
+        // pass's one window changing state (#2676), which promises
+        // its own spring alone — its neighbours keep the pass's
+        // promise — and only where no newcomer shares the pass.
         "KiwiDeskCore/Tiling/TilingEngine+Issue.swift":
-            Site(names: 3, promises: 0),
+            Site(names: 4, promises: 1),
+        // The float verb's placement (#2676): a direct write outside
+        // any pass, so no newcomer shares it, and the float sits
+        // above the tiles; a detected float keeps the default.
+        "KiwiDeskCore/App/KiwiCore+FloatPlacement.swift":
+            Site(names: 2, promises: 1),
         // `applyFrame` (the animate-or-instant policy) moved
         // here when #677's additions hit the main file's line
         // ceiling; it still only threads the caller's promise.
@@ -203,7 +211,7 @@ struct BatchSizingRoutingTests {
         // the window shrinks in place; a newcomer was placed by its
         // own creation pass. The retile wrapper threads it.
         "KiwiDeskCore/App/KiwiCore+FocusEvents.swift":
-            Site(names: 7, promises: 1),
+            Site(names: 2, promises: 1),
         "KiwiDeskCore/Commands/KiwiCore+FocusRaise.swift":
             Site(names: 2, promises: 1),
         "KiwiDeskCore/Commands/KiwiCore+FocusRetile.swift":

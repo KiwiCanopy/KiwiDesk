@@ -2010,6 +2010,17 @@ with a stand-in the floor has** (`ShortcutSymbolFloorTests`, read
 from the OS's availability table, since a newer name resolves on
 every machine that runs the suite).
 
+**A Settings shortcut row draws the panel's glyph for its action
+through the one `ShortcutsReferenceBuilder.icon(for:)`**, never a
+glyph table of its own (#2670). **A Shortcuts row that holds a
+setting rather than a key lays out through `ShortcutSettingRow`**
+— its value control in the recorder's footprint, its "Applies to"
+in the reach column, text under it at
+`SettingsMetrics.shortcutTextIndent` — never a hand-built row
+beside it; a new one joins `ShortcutSettingRowSeamTests`' register
+only with its reason (`ShortcutSettingRowSeamTests` ▸
+`footprintHasOneHome`, `navRowReadsTheResolver`).
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord that can keep a side names it for

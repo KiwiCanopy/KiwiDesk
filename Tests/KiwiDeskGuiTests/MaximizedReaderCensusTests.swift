@@ -27,8 +27,9 @@ struct MaximizedReaderCensusTests {
         "Models/SpaceModel.swift": 1,
         // The in-place carry, written and adopted.
         "Models/StateSnapshot+InPlace.swift": 3,
-        // The verdict and the retire.
-        "State/StateCoordinator+Maximized.swift": 3,
+        // The verdict and the retire, which names the windows it
+        // ended (#2676).
+        "State/StateCoordinator+Maximized.swift": 4,
         // A close while away and a minimize end it; a Desktop
         // departure keeps the id for the return.
         "State/StateCoordinator+SpaceMemory.swift": 2,

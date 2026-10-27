@@ -132,7 +132,7 @@ struct ModifierKeysCard: View {
                     recorderFocused = true
                 }
             }
-            .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
         } else {
             caption(text)
         }
@@ -175,6 +175,6 @@ struct ModifierKeysCard: View {
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 }

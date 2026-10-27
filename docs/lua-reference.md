@@ -5646,17 +5646,17 @@ end)
 it with [`toggle_pocket_window`](#toggle_pocket_window); each
 `pocket` call takes the next step:
 
-- **Nothing marked:** marks the focused window, floating it as
-  `toggle_pocket_window` does, and pockets it, a focused-window
-  command like `make_floating`. It is parked
+- **Nothing marked:** marks the focused window and pockets it, a
+  focused-window command like `make_floating`. It is parked
   off-screen — not minimized — belongs to no Space and is drawn on
-  no bar, and focus moves on within the Space. Fails on a window
-  in native full screen and on a transient panel or popup.
-- **Pocketed:** takes it out onto the active Space's screen at the
-  frame it last had on that screen, else centred, floating and
-  focused. A take-out never resizes it; only marking a tiled window
-  places it at the float size
-  ([`set_float_placement`](#set_float_placement)).
+  no bar, and focus moves on within the Space. It takes the frame
+  [`set_float_placement`](#set_float_placement)'s `"center"` gives
+  a window turned floating; under `"keep"` it keeps its size. Fails
+  on a window in native full screen and on a transient panel or
+  popup.
+- **Pocketed:** takes it out onto the active Space's screen,
+  floating and focused, at the frame it last had on that screen,
+  else centred at its own size. A take-out never resizes it.
 - **Out:** puts it back in the pocket, focused or not. If it had
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
@@ -5725,10 +5725,10 @@ end)
 
 **Does:** marks the focused window as the [pocket](#pocket) window,
 or unmarks it, a focused-window command like `make_floating`.
-Marking floats it at once, placed as
-[`set_float_placement`](#set_float_placement) places a tiled window
-that is floated (a window already floating keeps its frame), and
-leaves it out of the pocket: on every Space, wearing the pocket
+Marking floats it at once at the frame
+[`set_float_placement`](#set_float_placement) gives a window turned
+floating, whether it floated before or not, and leaves it out of
+the pocket: on every Space, wearing the pocket
 mark. Unmarking leaves it a plain float on the active Space.
 
 While one window is marked, a call on another window fails with a
@@ -7535,6 +7535,12 @@ Shrinking splits by *what else is moving*, and only under
   **mouse resize**, where the window you dragged is already
   where you left it when the rest catches up.
 
+:::unreleased
+- A window changing state follows the animation whatever else
+  moves, unless a window opens in the same change
+  ([`animations.set_on_state_change`](#animationsset_on_state_change)).
+:::
+
 Under `"mid_slide"` a shrinking axis always takes the first
 frame. Either way the exact target lands on the settle frame.
 
@@ -7628,6 +7634,26 @@ changes.
 ```lua
 animations.set_on_relayout(true)
 ```
+
+:::unreleased
+### animations.set_on_state_change
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** enables or disables animation for a window changing
+state: floating and tiling back, maximizing and returning, and
+going into the Pocket and out. Floating and maximizing spring the
+window to its new frame, size included; pocketing slides it to
+its park corner and back. The windows around it, and a window
+float rules make floating, follow
+[`set_on_relayout`](#animationsset_on_relayout).
+
+**Example:**
+
+```lua
+animations.set_on_state_change(true)
+```
+:::
 
 ### Retired Monocle flip verbs
 

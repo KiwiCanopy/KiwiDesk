@@ -4,10 +4,9 @@ import KiwiDeskCore
 /// a cycle `ModeCycle.isValid` accepts, so the row can never
 /// stage a draft the decoder would refuse.
 extension SettingsModel {
-    /// The layouts not in the cycle, in the Layout menu's order —
-    /// what the ＋ menu offers.
-    var modeCycleAddable: [LayoutMode] {
-        LayoutMode.allCases.filter { !config.modeCycle.contains($0) }
+    /// The layouts not in `cycle`, in the Layout menu's order.
+    static func cycleAddable(besides cycle: [LayoutMode]) -> [LayoutMode] {
+        LayoutMode.allCases.filter { !cycle.contains($0) }
     }
 
     /// Whether a layout can leave the cycle: never below two.

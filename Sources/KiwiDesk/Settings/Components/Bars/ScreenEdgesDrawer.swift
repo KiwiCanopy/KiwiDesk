@@ -5,6 +5,8 @@ import SwiftUI
 /// of the draft profile, each showing the edge that screen gets.
 /// A pick of the bar's own edge stores nothing; the drawer opens
 /// by itself, held open, while a screen has an edge of its own.
+/// On a one-screen profile its rows grey, its `?` naming what
+/// unlocks them (#2677).
 /// Not a `SettingsDisclosure`: its key is a catalog CHILD of Each
 /// bar, which search opens, and its rows are dynamic, so a hit
 /// lands on this header.
@@ -19,6 +21,9 @@ struct ScreenEdgesDrawer<Bar: ScreenEdged>: View {
     let options: [(String, AppBarEdge)]
     @State private var expanded = false
 
+    /// Whether the profile has screens to tell apart.
+    private var offered: Bool { model.offersScreenEdges(bar) }
+
     /// Held open while what it shows differs from the bar.
     private var locked: Bool {
         model.config.settings[keyPath: bar].screensDiffer
@@ -26,31 +31,60 @@ struct ScreenEdgesDrawer<Bar: ScreenEdged>: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            SettingsDisclosureButton(
-                isExpanded: $expanded,
-                locked: locked,
-                isHeading: false
-            ) {
-                Text(title)
-                    .font(.callout)
-                    .foregroundStyle(SettingsTheme.ink)
+            // The `?` follows the label, so the header takes only
+            // its own width.
+            HStack(spacing: 6) {
+                header.fixedSize()
+                if !offered {
+                    HelpButton(
+                        explanation: Self.oneScreenHelp,
+                        subject: spokenTitle
+                    )
+                }
                 Spacer(minLength: 0)
             }
-            .accessibilityLabel(
-                L(
-                    "kiwishelf.edge.per_screen.ax",
-                    "%1$@, %2$@",
-                    barName,
-                    title
-                )
-            )
+            // The label stays live and only the rows grey (#527).
             if expanded || locked {
-                ForEach(model.screenEdgeRows(bar)) { row in
-                    screenRow(row)
+                VStack(alignment: .leading, spacing: 8) {
+                    ForEach(model.screenEdgeRows(bar)) { row in
+                        screenRow(row)
+                    }
                 }
+                .modifier(GreyOut(active: !offered))
             }
         }
         .padding(.leading, 14)
+    }
+
+    private var header: some View {
+        SettingsDisclosureButton(
+            isExpanded: $expanded,
+            locked: locked,
+            isHeading: false
+        ) {
+            Text(title)
+                .font(.callout)
+                .foregroundStyle(SettingsTheme.ink)
+            Spacer(minLength: 0)
+        }
+        .accessibilityLabel(spokenTitle)
+    }
+
+    /// The drawer's name with its bar's, which both drawers need.
+    private var spokenTitle: String {
+        L(
+            "kiwishelf.edge.per_screen.ax",
+            "%1$@, %2$@",
+            barName,
+            title
+        )
+    }
+
+    static var oneScreenHelp: String {
+        L(
+            "kiwishelf.edge.per_screen.one_screen",
+            "Needs a profile with two or more screens."
+        )
     }
 
     private func screenRow(_ row: ScreenEdgeRow) -> some View {

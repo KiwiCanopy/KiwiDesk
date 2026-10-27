@@ -31,7 +31,7 @@ struct ModifierSidesRow: View {
             )
             if let text = captionText { caption(text) }
         }
-        .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     private var captionText: String? {

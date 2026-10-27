@@ -97,8 +97,21 @@ extension TilingEngine {
             {
                 continue
             }
-            animation.cancel(window: id)
             stashSent[id] = original
+            // A window taken out of the pocket slides in (#2676).
+            if id == stateChangeWindow,
+                settings.animations.onStateChange
+            {
+                applyFrame(
+                    id,
+                    from: commandedFrame(of: id)
+                        ?? state.windows[id]?.frame ?? original,
+                    to: original,
+                    animated: true
+                )
+                continue
+            }
+            animation.cancel(window: id)
             setFrame(id, original)
         }
     }
