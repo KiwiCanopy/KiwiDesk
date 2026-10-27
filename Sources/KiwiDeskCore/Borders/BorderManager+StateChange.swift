@@ -18,6 +18,9 @@ extension BorderManager {
         var settledAt: CFTimeInterval?
         /// Set by the window's first report near its target.
         var arrived = false
+        /// Whether its ring has gone dormant: a window coming out
+        /// of the pocket has none until a later sync draws one.
+        var applied = false
     }
 
     /// The longest a ring stays dormant if no spring end reaches
@@ -30,17 +33,28 @@ extension BorderManager {
     /// Holds `window`'s ring dormant while its spring runs to
     /// `target`, revealing any ring an earlier change still holds.
     func holdStateChange(of window: WindowID, target: CGRect?) {
-        guard let overlay = overlays[window] else { return }
         if let old = stateChange, old.window != window {
             overlays[old.window]?.reveal(reduceMotion: reduceMotion())
         }
-        overlay.holdDormant()
         stateChange = StateChangeHold(
             window: window,
             target: target,
             start: arrivalClock()
         )
+        if let overlay = overlays[window] {
+            holdIfStateChanging(window, overlay: overlay)
+        }
         checkStateChange()
+    }
+
+    /// Puts a held window's ring dormant once it exists, ahead of
+    /// the order that would show it — `sync` asks per ring.
+    func holdIfStateChanging(_ window: WindowID, overlay: BorderOverlay) {
+        guard stateChange?.window == window,
+            stateChange?.applied == false
+        else { return }
+        overlay.holdDormant()
+        stateChange?.applied = true
     }
 
     /// `window`'s spring has ended: the ring shows once the window

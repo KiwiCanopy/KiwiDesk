@@ -36,9 +36,8 @@ extension APIReference {
             .boolean("enabled")
         ),
         "set_on_state_change": APIRecord(
-            "Enables or disables animation when a window floats "
-                + "or tiles, maximizes or returns, or is pocketed "
-                + "or taken out.",
+            "Enables or disables animation when a window floats, "
+                + "maximizes or goes into the Pocket and out.",
             .boolean("enabled")
         ),
         "set_on_expand": APIRecord(

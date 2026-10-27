@@ -64,6 +64,9 @@ extension InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // The state-change toggle names the reflow toggle its
+        // neighbours follow (#2676).
+        "behavior.animations.state_change.help": 1,
         // The key panel's Layout Defaults… button (#2229).
         "layout_picker.layout_defaults": 1,
         // The quick menu's Open KiwiHub… row names the product

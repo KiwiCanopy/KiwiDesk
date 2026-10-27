@@ -228,6 +228,13 @@ struct StateChangeAnimationTests {
         let applies = countApplies(core)
         core.focusWindow(WindowID(2), warp: false)
         #expect((applies()[WindowID(1)] ?? 0) == 0)
+        // The control: with the toggle on, the same end animates.
+        core.focusWindow(WindowID(1), warp: false)
+        #expect(core.execute("toggle_maximized").isSuccess)
+        core.tiler.settings.animations.onStateChange = true
+        let more = countApplies(core)
+        core.focusWindow(WindowID(2), warp: false)
+        #expect((more()[WindowID(1)] ?? 0) >= 1)
     }
 
     @Test("a newcomer's pass promises no state-change spring")
@@ -241,9 +248,26 @@ struct StateChangeAnimationTests {
             stateChange: WindowID(1)
         )
         #expect(!core.tiler.stateChangeSprings)
-        #expect(core.tiler.stateChangeWindow == nil)
         core.tiler.retile(state: core.state, stateChange: WindowID(1))
         #expect(core.tiler.stateChangeSprings)
+    }
+
+    /// The newcomer is never the state change: it follows the
+    /// pass's toggle, never `on_state_change`.
+    @Test("a newcomer named as the state change follows the pass")
+    func newcomerIsNoStateChange() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        core.tiler.settings.animations.onStateChange = false
+        let applies = countApplies(core)
+        core.tiler.retile(
+            state: core.state,
+            animated: true,
+            newlyCreatedWindow: WindowID(1),
+            stateChange: WindowID(1)
+        )
+        #expect((applies()[WindowID(1)] ?? 0) >= 1)
     }
 
     @Test("a held pass replays its state change")

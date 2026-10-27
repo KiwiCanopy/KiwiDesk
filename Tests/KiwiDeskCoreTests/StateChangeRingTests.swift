@@ -45,11 +45,12 @@ struct StateChangeRingTests {
         _ border: BorderManager
     ) throws -> AppKitBorderOverlay {
         let panel = try heldRingSpec(border)
+        #expect(panel.panelAlpha == 1)
         border.holdStateChange(of: WindowID(1), target: rest)
         return panel
     }
 
-    /// The ring shown at `rest`, not held.
+    /// The ring synced at `rest`; shown unless a hold is pending.
     private func heldRingSpec(
         _ border: BorderManager
     ) throws -> AppKitBorderOverlay {
@@ -63,9 +64,7 @@ struct StateChangeRingTests {
             )
         ])
         let ring = try #require(border.overlays[WindowID(1)])
-        let panel = try #require(ring.backend as? AppKitBorderOverlay)
-        #expect(panel.panelAlpha == 1)
-        return panel
+        return try #require(ring.backend as? AppKitBorderOverlay)
     }
 
     private func report(_ border: BorderManager, _ frame: CGRect) {
@@ -184,5 +183,20 @@ struct StateChangeRingTests {
         #expect(border.stateChange?.settledAt != nil)
         clock.advance(to: 100 + BorderManager.arrivalCap)
         #expect(!ring.isDormant)
+    }
+
+    /// A window with no ring yet — out of the pocket — has the hold
+    /// applied by the sync that draws its ring.
+    @Test("a hold armed before the ring exists applies at its sync")
+    func pendingHoldAppliesAtSync() throws {
+        let clock = Clock()
+        let border = manager(clock)
+        defer { border.clear() }
+        border.holdStateChange(of: WindowID(1), target: rest)
+        let panel = try heldRingSpec(border)
+        #expect(panel.panelAlpha == 0)
+        border.stateChangeSettled(WindowID(1))
+        report(border, rest)
+        #expect(panel.panelAlpha == 1)
     }
 }

@@ -78,6 +78,7 @@ extension BorderManager {
                 spansDesktops: spec.spansDesktops,
                 desktop: spec.desktop
             )
+            holdIfStateChanging(spec.window, overlay: overlay)
             let held = ordersDormant(spec.window, overlay: overlay)
             if Self.ordersOverlay(
                 reassert: reassertOrder,
