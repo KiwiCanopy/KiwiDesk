@@ -29,7 +29,8 @@ struct MinWindowSizeReadCensusTests {
             "a row's revert writes it back",
         "SettingsValueReadout+Behaviour.swift":
             "the unsaved-changes rows compare it",
-        "HomeCardContent.swift": "the card names the stored value",
+        "HomeCardContent+Subtitles.swift":
+            "the card names the stored value",
     ]
 
     /// File → why it may name a Space's own stored floor (#2422).

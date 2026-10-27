@@ -15,20 +15,6 @@ enum SettingsArea: CaseIterable, Hashable {
     case ai
     case general
     case macChecklist
-
-    /// Whether the Mac can use the area: Screens needs a second
-    /// screen. A capability, never a depth setting (#2654).
-    func isAvailable(displayCount: Int) -> Bool {
-        switch self {
-        case .screens:
-            return displayCount >= 2
-        case .layoutDefaults, .gapsAndBorders, .shortcuts,
-            .coloursAndMotion, .bars, .spacesAndLayouts,
-            .profiles, .appRules, .kiwiVision, .ai, .general,
-            .macChecklist:
-            return true
-        }
-    }
 }
 
 /// How deep a setting sits within its container.

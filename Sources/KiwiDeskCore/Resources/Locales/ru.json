@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "Всё основное готово",
   "home.card.mac_checklist.subtitle": "Основное готово: %1$d из %2$d",
   "home.card.monitors.subtitle": "%1$d подключено · %2$d пространств закреплено",
+  "home.card.monitors.subtitle_single": "Один экран · подключи ещё один, чтобы размещать пространства",
   "home.card.profiles.none": "Профилей пока нет — начни здесь",
   "home.card.profiles.subtitle": "%1$d сохранено · %2$@ по умолчанию",
   "home.card.profiles.subtitle_no_default": "%1$d сохранено",

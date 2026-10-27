@@ -4,9 +4,9 @@ import Testing
 
 /// Home's card offer (#678 turn 9): every destination has a
 /// card, the order is the frame's and stays stable, and one
-/// predicate decides who is offered — the Screens capability
-/// (#2654) and the #18 stored-profile rule, never a hand-negated
-/// copy.
+/// predicate decides who is offered — the #18 stored-profile
+/// rule, never a hand-negated copy. No card hangs on the screen
+/// count (#2690).
 @Suite("Home card order and offer")
 struct HomeCardOrderTests {
     @Test("every destination draws exactly one card")
@@ -37,29 +37,11 @@ struct HomeCardOrderTests {
     /// A literal over a derived value on purpose: this is the
     /// conscious-edit tripwire on the size of Home, and growing it
     /// should cost a deliberate edit here.
-    @Test("one screen offers twelve cards, two screens thirteen")
+    @Test("Home offers thirteen cards")
     func cardCounts() {
-        // 12 / 13 since #2654 retired the Simple / Power User
-        // toggle: Screens is the one capability-gated card.
-        #expect(offered(displays: 1).count == 12)
-        #expect(offered(displays: 2).count == 13)
-    }
-
-    @Test("Screens needs a second screen, computed at read")
-    func screensNeedsTwoScreens() {
-        #expect(!offered(displays: 1).contains(.screens))
-        #expect(offered(displays: 2).contains(.screens))
-        // Nothing stored the answer: one screen again, gone.
-        #expect(!offered(displays: 1).contains(.screens))
-    }
-
-    /// A card the Mac cannot use is left out of its slot, never
-    /// moved: one screen's sequence is two screens' minus Screens.
-    @Test("one screen's order is a subsequence of two screens'")
-    func stablePositions() {
-        let one = offered(displays: 1)
-        let two = offered(displays: 2)
-        #expect(two.filter { one.contains($0) } == one)
+        #expect(offered().count == 13)
+        // Screens shows on one screen too (#2690).
+        #expect(offered().contains(.screens))
     }
 
     /// The #18 axis rides the same predicate: editing a stored
@@ -70,7 +52,6 @@ struct HomeCardOrderTests {
     func storedProfileHidesGeneral() {
         let cards = HomeCardOrder.offered(
             HomeCardOrder.wholeApp,
-            displayCount: 1,
             editingStoredProfile: true
         )
         #expect(!cards.contains(.general))
@@ -80,15 +61,13 @@ struct HomeCardOrderTests {
         #expect(cards.count == 3)
     }
 
-    private func offered(displays: Int) -> [SettingsDestination] {
+    private func offered() -> [SettingsDestination] {
         HomeCardOrder.offered(
             HomeCardOrder.thisProfile,
-            displayCount: displays,
             editingStoredProfile: false
         )
             + HomeCardOrder.offered(
                 HomeCardOrder.wholeApp,
-                displayCount: displays,
                 editingStoredProfile: false
             )
     }

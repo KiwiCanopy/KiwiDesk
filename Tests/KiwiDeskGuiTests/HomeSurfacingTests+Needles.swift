@@ -20,8 +20,7 @@ extension HomeSurfacingTests {
             // Escape pops an area back to Home.
             ".onExitCommand{ifselection!=nil{selection=nil}}",
             // A link refuses only what the stored-profile axis
-            // hides, never a card the screen count hides: Screens
-            // stays one link away on one screen (#2654).
+            // hides; no screen count gates a destination (#2690).
             ".environment(\\.settingsNavigate){destinationin"
                 + "guarddestination.isReachable(editingStoredProfile:"
                 + "model.editingStoredProfile)else{return}"
@@ -165,9 +164,8 @@ extension HomeSurfacingTests {
                 + "rows:SettingsDiffRowSource.rows(for:model)",
         ],
         "Settings/SettingsView+Reveal.swift": [
-            // A resolved hit lands whatever the screen count:
-            // Screens' card hides on one screen, its search hits
-            // do not (#2654).
+            // A resolved hit lands whatever the screen count
+            // (#2654, #2690).
             "guardletrequestelse{return}"
                 + "model.nav.pendingReveal=nil"
                 + "guardletresolved=request.resolved("
