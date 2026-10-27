@@ -197,6 +197,11 @@ struct ShortcutsSection: View {
             bindings: bindingsBinding,
             expander: expander
         )
+        PocketGroup(
+            model: model,
+            bindings: bindingsBinding,
+            expander: expander
+        )
         ApplicationsGroup(
             model: model,
             bindings: bindingsBinding,

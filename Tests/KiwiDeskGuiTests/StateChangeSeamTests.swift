@@ -31,7 +31,7 @@ struct StateChangeSeamTests {
     func oneDoor() throws {
         #expect(
             try sites(of: "borders.holdStateChange(")
-                == ["KiwiCore+StateChange.swift": 1]
+                == ["KiwiCore+StateChange.swift": 2]
         )
     }
 
@@ -48,7 +48,11 @@ struct StateChangeSeamTests {
         )
         #expect(
             try sites(of: "borders.stateChangeSettled(")
-                == ["KiwiCore+Bootstrap.swift": 1]
+                == [
+                    "KiwiCore+Bootstrap.swift": 1,
+                    // A take-out's landing (#2680).
+                    "KiwiCore+StateChange.swift": 1,
+                ]
         )
         // The wrap still runs the engine's own end handler.
         #expect(

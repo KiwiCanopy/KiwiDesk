@@ -6,9 +6,9 @@ import Testing
 @testable import KiwiDeskCore
 
 /// Marking the pocket window (#2675): `toggle_pocket_window` marks
-/// the focused window and floats it as a Float does, unmarks it,
-/// and refuses a second window; `pocket` then acts on the marked
-/// window alone.
+/// the focused window and floats it as a Float does, unmarks it
+/// into the tiling (#2680), and refuses a second window; `pocket`
+/// then acts on the marked window alone.
 @Suite("Pocket window mark", .serialized)
 @MainActor
 struct PocketWindowTests {
@@ -137,15 +137,17 @@ struct PocketWindowTests {
         #expect(core.state.pocketPhase(of: one) == .pocketed)
     }
 
-    @Test("unmarking leaves a plain float on the Space shown")
+    /// Unmarking tiles the window, as a Tile does (owner, #2680).
+    @Test("unmarking tiles the window on the Space shown")
     func unmarks() {
         let core = makeCore()
         core.execute("toggle_pocket_window")
         #expect(core.execute("toggle_pocket_window").isSuccess)
         #expect(core.state.pocket == nil)
-        #expect(core.state.windows[one]?.isFloating == true)
+        #expect(core.state.windows[one]?.isFloating == false)
         #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
-        #expect(core.state.userFloated.contains(one))
+        #expect(!core.state.userFloated.contains(one))
+        #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
     }
 
     @Test("unmarked on another Space, it stays on that one")

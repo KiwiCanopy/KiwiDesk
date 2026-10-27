@@ -98,19 +98,8 @@ extension TilingEngine {
                 continue
             }
             stashSent[id] = original
-            // A window taken out of the pocket slides in (#2676).
-            if id == stateChangeWindow,
-                settings.animations.onStateChange
-            {
-                applyFrame(
-                    id,
-                    from: commandedFrame(of: id)
-                        ?? state.windows[id]?.frame ?? original,
-                    to: original,
-                    animated: true
-                )
-                continue
-            }
+            // One write, a take-out's held until the brief pocket's
+            // plate lands (#2680).
             animation.cancel(window: id)
             setFrame(id, original)
         }
