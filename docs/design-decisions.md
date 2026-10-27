@@ -8013,8 +8013,7 @@ destination is read BEFORE the mutation (afterwards the list names
 whichever row slid into the gap, right by accident and wrong at
 the end of a list), and it must be a control that is always DRAWN
 and non-destructive: binding the spaces list to a conditionally
-offered button (Customize…, as it once drew only after an
-override existed), which on a fresh install was not drawn at
+mode-gated button, which on a fresh install is not drawn at
 all, sends focus to the top by a second road.
 
 *A dim is not a sentence.* Greying keeps a control visible
@@ -14321,6 +14320,15 @@ A Floating space's cell never disables: its own minimum window
 size still applies there, so the cell offers **Customize…** with
 nothing saved, and counts as **N custom** once that value is set
 (#2422).
+
+:::unreleased
+Amended by #2674: the summary is now the badge on every Space
+row's Customize button, dimmed where this entry says muted and
+absent with no overrides; VoiceOver speaks it as "N custom",
+"N saved — they apply when it tiles again" or "None". The gaps
+row's place in that total, above, reads the same way. The rule
+it protects — never hidden, never disabled — is unchanged.
+:::
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge

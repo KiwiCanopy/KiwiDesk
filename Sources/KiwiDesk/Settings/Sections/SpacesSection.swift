@@ -169,7 +169,7 @@ struct SpacesSection: View {
                 customizeButton(space)
                 // Danger zone: set the destructive delete apart
                 // so the trash can't be hit reaching for the
-                // picker or Overrides (#205).
+                // picker or Customize (#205).
                 Divider()
                     .frame(height: 16)
                     .padding(.horizontal, 2)

@@ -409,8 +409,7 @@ pile on quit**.
 
 ### Per-Space Overrides
 
-A space's override editor (from its **Customize** button in
-Spaces) edits the layout the space currently uses. Each row's
+A space's override editor (from its row in Spaces) edits the layout the space currently uses. Each row's
 **Override** checkbox, unchecked, inherits the Layout Defaults
 value; checked, the control appears seeded with the current
 value. A field greyed by a switch on another page (Grid's

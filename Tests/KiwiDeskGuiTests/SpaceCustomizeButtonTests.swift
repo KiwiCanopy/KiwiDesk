@@ -26,15 +26,22 @@ struct SpaceCustomizeButtonTests {
         "Sources/KiwiDesk/Settings/Sections/"
         + "SpacesSection+Customize.swift"
 
-    /// A `@ViewBuilder` is what lets a body draw nothing; the
-    /// button's builder returns one `Button` on every row, and the
-    /// row mounts it unconditionally beside the layout menu.
+    /// The row mounts the button unconditionally beside the layout
+    /// menu, and the builder returns its `Button` straight after
+    /// the count reads, with no builder attribute to branch in.
     @Test("every row draws the button")
     func everyRowDrawsTheButton() throws {
         let cell = try stripped(customize)
         #expect(
             cell.contains(
                 "funccustomizeButton(_space:SpaceID)->someView{"
+            )
+        )
+        #expect(
+            cell.contains(
+                "isFloating:isFloating)returnButton{"
+                    + "model.nav.spaceOverridesFocus=space}label:{"
+                    + "Image(systemName:\"slider.horizontal.3\")"
             )
         )
         #expect(!cell.contains("@ViewBuilderfunccustomizeButton"))
@@ -69,7 +76,8 @@ struct SpaceCustomizeButtonTests {
         )
         #expect(
             body.contains(
-                ".accessibilityValue(Self.customizeSpokenValue(state))"
+                ".accessibilityValue("
+                    + "OverrideCountBadge.spokenValue(state))"
             )
         )
         #expect(
@@ -81,14 +89,14 @@ struct SpaceCustomizeButtonTests {
     func spokenValueMatchesTheBadge() {
         LocalizationManager.shared.select("en")
         #expect(
-            SpacesSection.customizeSpokenValue(.customize) == "None"
+            OverrideCountBadge.spokenValue(.customize) == "None"
         )
         #expect(
-            SpacesSection.customizeSpokenValue(.custom(3))
+            OverrideCountBadge.spokenValue(.custom(3))
                 == "3 custom"
         )
         #expect(
-            SpacesSection.customizeSpokenValue(.saved(2))
+            OverrideCountBadge.spokenValue(.saved(2))
                 == "2 saved — they apply when it tiles again"
         )
     }

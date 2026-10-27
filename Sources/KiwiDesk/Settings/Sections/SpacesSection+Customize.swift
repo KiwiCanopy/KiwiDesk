@@ -40,9 +40,9 @@ extension SpacesSection {
             Image(systemName: "slider.horizontal.3")
                 .overlay(alignment: .topTrailing) {
                     OverrideCountBadge(state: state)
-                        .offset(x: 7, y: -6)
+                        .offset(x: 5, y: -5)
                 }
-                .padding(.horizontal, 3)
+                .padding(.horizontal, 6)
         }
         .buttonStyle(.borderless)
         .iconHoverChip()
@@ -50,26 +50,7 @@ extension SpacesSection {
         .accessibilityLabel(
             L("spaces.customize.a11y", "Customize Space %1$@", space.raw)
         )
-        .accessibilityValue(Self.customizeSpokenValue(state))
-    }
-
-    /// What the badge says, in words: VoiceOver hears the button
-    /// as one element and the drawn count not at all.
-    static func customizeSpokenValue(
-        _ state: OverrideCellState
-    ) -> String {
-        switch state {
-        case .customize:
-            return L("spaces.customize.a11y_none", "None")
-        case .custom(let count):
-            return L("spaces.overrides.custom", "%1$d custom", count)
-        case .saved(let count):
-            return L(
-                "spaces.customize.a11y_saved",
-                "%1$d saved — they apply when it tiles again",
-                count
-            )
-        }
+        .accessibilityValue(OverrideCountBadge.spokenValue(state))
     }
 
     /// Prompts confirmation if space carries overrides before removing.
