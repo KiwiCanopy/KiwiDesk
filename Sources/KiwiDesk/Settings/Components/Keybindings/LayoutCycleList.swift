@@ -2,12 +2,12 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The layout cycle's popover (#2673, reversing #453's inline
-/// list): all seven layouts, the cycle's in order with a drag
-/// handle, the rest below in the Layout menu's order. A tick adds
-/// a layout at the end, an untick takes it out; at two the ticked
-/// boxes grey, the row's `?` saying why. Move Up / Move Down ride
-/// `rowActions` on each ticked box, which holds keyboard focus.
+/// The layout cycle's popover (#2673): all seven layouts, the
+/// cycle's in order with a drag handle, the rest below in the
+/// Layout menu's order. A tick adds a layout at the end, an untick
+/// takes it out; at two the ticked boxes grey, each saying why.
+/// Move Up / Move Down ride `rowActions` on each ticked row, which
+/// holds keyboard focus itself while its box is greyed.
 struct LayoutCycleList: View {
     @ObservedObject var model: SettingsModel
     @State private var dragOrder: [LayoutMode]?
@@ -41,7 +41,21 @@ struct LayoutCycleList: View {
         dragOrder ?? model.config.modeCycle
     }
 
-    private func item(_ mode: LayoutMode, in cycle: Bool) -> some View {
+    @ViewBuilder private func item(_ mode: LayoutMode, in cycle: Bool)
+        -> some View
+    {
+        if cycle {
+            // A greyed box takes no focus, so the row holds it then
+            // for the row menu's chord.
+            row(mode, in: true)
+                .focusable(!model.modeCycleCanRemove)
+                .rowActions { actions(mode) }
+        } else {
+            row(mode, in: false)
+        }
+    }
+
+    private func row(_ mode: LayoutMode, in cycle: Bool) -> some View {
         HStack(spacing: 6) {
             if cycle {
                 handle(mode)
@@ -80,15 +94,18 @@ struct LayoutCycleList: View {
                     .foregroundStyle(SettingsTheme.ink2)
                     .accessibilityHidden(true)
                 Text(mode.displayName)
-                    .foregroundStyle(SettingsTheme.ink)
             }
         }
         .toggleStyle(.checkbox)
         .accessibilityLabel(label(mode))
         if cycle {
             toggle
-                .disabled(!model.modeCycleCanRemove)
-                .rowActions { actions(mode) }
+                .modifier(
+                    GreyOut(
+                        active: !model.modeCycleCanRemove,
+                        help: LayoutCycleWords.minimum
+                    )
+                )
         } else {
             toggle
         }
@@ -100,8 +117,11 @@ struct LayoutCycleList: View {
         guard let index = list.firstIndex(of: mode) else {
             return mode.displayName
         }
-        return mode.displayName + ", "
-            + LayoutCycleWords.position(index, of: list.count)
+        return LayoutCycleWords.placed(
+            mode.displayName,
+            index,
+            of: list.count
+        )
     }
 
     private func tick(_ mode: LayoutMode, _ on: Bool) {

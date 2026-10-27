@@ -7,7 +7,8 @@ import Testing
 /// Layouts to cycle opens a popover (#2673): the row's value is a
 /// button handing `LayoutCycleList` to a `.popover(item:)` in the
 /// Settings chrome, the list draws all seven layouts — the cycle's
-/// ticked, the rest below — and the ticked boxes grey at two.
+/// ticked, the rest below — and the ticked boxes grey at two
+/// with their reason, the row keeping the keyboard's row menu.
 /// Source scans and one model read, all off the main actor but the
 /// model case.
 @Suite("Layout cycle popover (#2673)")
@@ -40,6 +41,7 @@ struct LayoutCyclePopoverTests {
                 "LayoutCycleList(model:model).settingsPopoverChrome()"
             )
         )
+        #expect(row.contains("Button{request=LayoutCycleRequest()}"))
         #expect(row.contains(".settingsActionButton()"))
         #expect(
             row.contains(
@@ -75,9 +77,19 @@ struct LayoutCyclePopoverTests {
             )
         )
         #expect(ticked.lowerBound < rest.lowerBound)
+        // Greyed with its reason, on the box alone; the row then
+        // holds focus for the row menu's chord.
         #expect(
             list.contains(
-                "ifcycle{toggle.disabled(!model.modeCycleCanRemove)"
+                "ifcycle{toggle.modifier(GreyOut(active:"
+                    + "!model.modeCycleCanRemove,"
+                    + "help:LayoutCycleWords.minimum))"
+            )
+        )
+        #expect(
+            list.contains(
+                "row(mode,in:true).focusable(!model.modeCycleCanRemove)"
+                    + ".rowActions{actions(mode)}"
             )
         )
     }

@@ -1,8 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Layout ▸ Layouts to cycle (#2673, owner ruling 2026-10-27,
-/// reversing #453's inline list): the label, and the list as a
+/// Layout ▸ Layouts to cycle (#2673): the label, and the list as a
 /// bordered button in the recorder column that opens
 /// `LayoutCycleList` in a popover. Its "Applies to" sits in the
 /// shortcut rows' reach column, as the Space history row's does.
@@ -24,7 +23,13 @@ struct LayoutCycleRow: View {
             )
             Spacer(minLength: 0)
             reach
-            KeyRecorderField.footprint.overlay { summary }
+            // The recorder's own button width, inside its icon slots.
+            KeyRecorderField.footprint.overlay {
+                summary.padding(
+                    .horizontal,
+                    KeyRecorderField.iconSlotWidth + 6
+                )
+            }
         }
         .searchAnchored(SettingsCatalog.shortcuts.modeCycle)
     }

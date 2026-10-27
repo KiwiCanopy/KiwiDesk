@@ -44,6 +44,26 @@ enum LayoutCycleWords {
         )
     }
 
+    /// A ticked box's spoken name: the layout, then its place.
+    static func placed(_ name: String, _ index: Int, of count: Int)
+        -> String
+    {
+        L(
+            "shortcuts.mode_cycle.ax.placed",
+            "%1$@, %2$@",
+            name,
+            position(index, of: count)
+        )
+    }
+
+    /// Why the ticked boxes grey at two, on each of them.
+    static var minimum: String {
+        L(
+            "shortcuts.mode_cycle.minimum",
+            "A cycle needs at least two layouts."
+        )
+    }
+
     static var moveUp: String {
         L("shortcuts.mode_cycle.move_up", "Move Up")
     }

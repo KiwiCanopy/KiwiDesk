@@ -4707,7 +4707,7 @@ feature sits beside that feature, where someone setting the
 feature up looks for it: the Desktop switch cue first in
 Shortcuts & Gestures ▸ macOS Desktops, above the shortcuts whose
 switches it marks (#2142, #2655), the layout plate's in Shortcuts
-& Gestures ▸ Layout under the cycle list (#2144). Such a switch is still
+& Gestures ▸ Layout under the Layouts to cycle row (#2144). Such a switch is still
 written the moment it changes, on a page whose other rows wait
 for Save, so it says in its `?` that it applies at once and to
 every profile.
@@ -13965,12 +13965,13 @@ without the edge a dark jump chip is `chipSurface()` again.
 
 :::unreleased
 **Layouts to cycle is a button that opens a popover (#2673,
-owner 2026-10-27).** The row's value, "BSP › Scrolling ›
+owner 2026-10-27).** [Rationale] The row's value, "BSP › Scrolling ›
 Floating", is a bordered button in the recorder column; its
 popover lists all seven layouts, the cycle's ticked and in
 order with a drag handle, the rest unticked below in the Layout
 menu's order. A tick appends a layout and an untick takes it
-out; at two, the ticked boxes grey and the row's `?` says why.
+out; at two, the ticked boxes grey, each with the reason on its
+tooltip.
 This reverses #453's inline list (2026-10-11), which unfolded a
 list with a ＋ menu and − buttons inside the Layout card and
 pushed every row below it down: the card is a column of
