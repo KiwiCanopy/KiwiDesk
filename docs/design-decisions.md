@@ -16229,11 +16229,13 @@ cannot know, and a screen's own edge is the most specific choice
 the user made, so it stays the strongest.
 
 In Settings each bar row under Each bar gets a Per screen drawer,
-one picker per screen of the profile's own monitor set, and those
-rows are HIDDEN while the profile holds one screen. That is a
-deliberate exception to "grey, don't hide": greying says "switch
-that on and I act", and no setting turns one screen into two —
-a dimmed drawer would promise a choice the profile cannot have.
+one picker per screen of the profile's own monitor set. On a
+profile that holds one screen the drawer greys shut, its `?`
+saying it needs a profile with two or more screens (#2677,
+amending #1948, which hid it): a hidden drawer taught a
+one-screen user nothing about the option, and the `?` names the
+one thing that unlocks it, so the grey promises no choice the
+profile could have by a setting.
 A screen with no row of its own (one plugged in after the save)
 follows its bar, so hiding loses nothing. The rows list the
 profile's screens, not the connected ones, since a profile names

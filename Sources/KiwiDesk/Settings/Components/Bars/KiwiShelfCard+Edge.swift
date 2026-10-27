@@ -41,40 +41,37 @@ extension KiwiShelfCard {
             // type cannot contain itself.
             VStack(alignment: .leading, spacing: 10) {
                 spaceBarEdgeRow
-                // Hidden, never greyed, on one screen (#1948).
-                if model.offersScreenEdges(\.spaceBarStyle) {
-                    ScreenEdgesDrawer(
-                        model: model,
-                        bar: \.spaceBarStyle,
-                        title: L(
-                            "kiwishelf.edge.per_screen.space_bar",
-                            "Per screen"
-                        ),
-                        barName: L("kiwishelf.edge.space_bar", "Space Bar"),
-                        options: edgeOptions
-                    )
-                    .searchAnchored(
-                        SettingsCatalog.bars.kiwishelfEdges.children
-                            .kiwishelfSpaceBarScreenEdges
-                    )
-                }
+                ScreenEdgesDrawer(
+                    model: model,
+                    bar: \.spaceBarStyle,
+                    title: L(
+                        "kiwishelf.edge.per_screen.space_bar",
+                        "Per screen"
+                    ),
+                    barName: L("kiwishelf.edge.space_bar", "Space Bar"),
+                    options: edgeOptions,
+                    offered: model.offersScreenEdges(\.spaceBarStyle)
+                )
+                .searchAnchored(
+                    SettingsCatalog.bars.kiwishelfEdges.children
+                        .kiwishelfSpaceBarScreenEdges
+                )
                 appBarEdgeRow
-                if model.offersScreenEdges(\.appBarStyle) {
-                    ScreenEdgesDrawer(
-                        model: model,
-                        bar: \.appBarStyle,
-                        title: L(
-                            "kiwishelf.edge.per_screen.app_bar",
-                            "Per screen"
-                        ),
-                        barName: L("kiwishelf.edge.app_bar", "App Bar"),
-                        options: edgeOptions
-                    )
-                    .searchAnchored(
-                        SettingsCatalog.bars.kiwishelfEdges.children
-                            .kiwishelfAppBarScreenEdges
-                    )
-                }
+                ScreenEdgesDrawer(
+                    model: model,
+                    bar: \.appBarStyle,
+                    title: L(
+                        "kiwishelf.edge.per_screen.app_bar",
+                        "Per screen"
+                    ),
+                    barName: L("kiwishelf.edge.app_bar", "App Bar"),
+                    options: edgeOptions,
+                    offered: model.offersScreenEdges(\.appBarStyle)
+                )
+                .searchAnchored(
+                    SettingsCatalog.bars.kiwishelfEdges.children
+                        .kiwishelfAppBarScreenEdges
+                )
             }
             .padding(.top, 8)
         }

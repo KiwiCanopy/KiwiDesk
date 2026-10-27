@@ -1005,6 +1005,7 @@
   "kiwishelf.edge.label.help": "Which screen edge the bars sit on. Put each on its own edge under “%1$@”.",
   "kiwishelf.edge.per_screen.app_bar": "Per screen",
   "kiwishelf.edge.per_screen.ax": "%1$@, %2$@",
+  "kiwishelf.edge.per_screen.one_screen": "Needs a profile with two or more screens.",
   "kiwishelf.edge.per_screen.space_bar": "Per screen",
   "kiwishelf.edge.screen.absent": "not connected",
   "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",
