@@ -75,9 +75,11 @@ struct GridHealTests {
     func forcedPassIgnoresTheFloor() throws {
         var ctx = context()
         ctx.sizeBounds[ids[4]] = EffectiveSizeBound(width: floor(900))
+        ctx.sizeBounds[ids[0]] = EffectiveSizeBound(height: floor(600))
         ctx.probesBeyondBounds = true
         let shape = try #require(GridLayout.shape(for: ids, in: ctx))
         #expect(shape.columns == 3)
+        #expect(shape.rows == 2)
     }
 
     @Test("the drawn cells follow the healed shape")
