@@ -176,6 +176,24 @@ struct OnboardingModifierNameTests {
         #expect(spoken.hasSuffix("← →"))
     }
 
+    /// The keycap is the surface that speaks the chord, so it
+    /// reads the spoken form rather than the drawn glyphs.
+    @Test("the keycap is labelled with the spoken glyphs")
+    func keycapSpeaksTheSpokenForm() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Onboarding/OnboardingKeycap.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: url, encoding: .utf8)
+        )
+        #expect(
+            source.contains(
+                ".accessibilityLabel(family.spokenGlyphs)"
+            )
+        )
+    }
+
     /// Naming a modifier the chord does not carry teaches a chord
     /// the user does not have.
     @Test("only the chord's own modifiers are drawn")
