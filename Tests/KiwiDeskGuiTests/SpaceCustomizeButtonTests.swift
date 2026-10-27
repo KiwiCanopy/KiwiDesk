@@ -72,18 +72,21 @@ struct SpaceCustomizeButtonTests {
 
     /// Named, so valued in the same change (gui.md ▸ the
     /// keyboard path): the label replaces nothing the badge said.
+    /// The chain is matched whole, up to the builder's closing
+    /// brace, so a trailing modifier that hides the button reds;
+    /// it costs reordering the chain, which edits this needle.
     @Test("the button is named and valued from its state")
     func buttonIsNamedAndValued() throws {
         let body = try stripped(customize)
         #expect(
             body.contains(
-                ".accessibilityLabel(L(\"spaces.customize.a11y\","
-            )
-        )
-        #expect(
-            body.contains(
-                ".accessibilityValue("
-                    + "OverrideCountBadge.spokenValue(state))"
+                ".buttonStyle(.borderless).iconHoverChip()"
+                    + ".help(L(\"spaces.overrides.customize\","
+                    + "\"Customize…\"))"
+                    + ".accessibilityLabel(L(\"spaces.customize.a11y\","
+                    + "\"CustomizeSpace%1$@\",space.raw))"
+                    + ".accessibilityValue("
+                    + "OverrideCountBadge.spokenValue(state))}"
             )
         )
         #expect(
