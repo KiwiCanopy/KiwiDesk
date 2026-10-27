@@ -1653,7 +1653,7 @@
   "pocket.color.a11y": "Pocket 标记颜色",
   "pocket.mark.ax": "Pocket 窗口",
   "pocket.refusal.float": "Pocket 窗口始终浮动",
-  "pocket.refusal.marked_elsewhere": "已有一个窗口被标记为 Pocket — 请先取消那个窗口的标记。",
+  "pocket.refusal.marked_elsewhere": "Pocket 已被占用",
   "pocket.refusal.sticky": "Pocket 窗口始终为 Sticky",
   "presets.apply": "套用",
   "presets.caption": "应用预设会将其保存为可供后续编辑的真实描述文件。",

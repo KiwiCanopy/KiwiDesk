@@ -1653,7 +1653,7 @@
   "pocket.color.a11y": "Couleur de la marque Pocket",
   "pocket.mark.ax": "Fenêtre Pocket",
   "pocket.refusal.float": "Les fenêtres Pocket flottent toujours",
-  "pocket.refusal.marked_elsewhere": "Une fenêtre est déjà marquée comme Pocket — retirez d'abord la marque sur cette fenêtre.",
+  "pocket.refusal.marked_elsewhere": "La Pocket est déjà prise",
   "pocket.refusal.sticky": "Les fenêtres Pocket sont toujours Sticky",
   "presets.apply": "Appliquer",
   "presets.caption": "L'appliquer l'enregistre comme un vrai profil que vous pouvez ensuite modifier.",
