@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "Layout-Anpassungen animieren",
   "behavior.animations.scrolling_xref": "Fokuswechsel im Scrolling-Layout haben unter %1$@ ihren eigenen Schalter und ihre eigene Dauer.",
   "behavior.animations.scrolling_xref_link": "Layout-Standards ▸ Scrolling",
+  "behavior.animations.state_change": "Schweben, Pocket & Maximieren animieren",
+  "behavior.animations.state_change.help": "Schwebt ein Fenster oder wird es wieder gekachelt, wird es maximiert oder kehrt es zurück, kommt es in die Pocket oder wieder heraus, bewegt es sich dorthin, statt zu springen. Die Fenster drumherum folgen „%1$@“.",
   "behavior.animations.title": "Animationen",
   "behavior.animations.window_duration": "Fenster-Dauer",
   "behavior.animations.window_duration.help": "Wie lange ein Fenster bei einer Bewegung, einer Größenänderung, einem Fenstertausch oder einer Layout-Anpassung braucht, um seinen neuen Platz zu erreichen. Eine längere Dauer ist langsamer.",

@@ -23,10 +23,12 @@ final class MotionGate {
         var pass: RetilePass
         var newlyCreatedWindow: WindowID?
         var sizing: BatchSizing
+        /// The window changing state this pass (#2676).
+        var stateChange: WindowID? = nil
 
         /// Two held passes as one: the stronger pass, a spring
         /// promise only when both made it (#593), the newest
-        /// window and animation choice.
+        /// window, state change and animation choice.
         func merged(with newer: Owed) -> Owed {
             Owed(
                 animated: newer.animated ?? animated,
@@ -34,7 +36,8 @@ final class MotionGate {
                     ? newer.pass : pass,
                 newlyCreatedWindow: newer.newlyCreatedWindow
                     ?? newlyCreatedWindow,
-                sizing: sizing == newer.sizing ? sizing : .mayInstantSize
+                sizing: sizing == newer.sizing ? sizing : .mayInstantSize,
+                stateChange: newer.stateChange ?? stateChange
             )
         }
 

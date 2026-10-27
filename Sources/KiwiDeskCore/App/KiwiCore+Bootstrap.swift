@@ -138,6 +138,13 @@ extension KiwiCore {
             // settle schedules a direct read-back.
             self?.scheduleSizeBoundProbe(id)
         }
+        // A state change's held ring waits for its spring to end,
+        // settled or cancelled (#2676).
+        let animationEnded = tiler.animation.onAnimationEnd
+        tiler.animation.onAnimationEnd = { [weak self] id in
+            animationEnded(id)
+            self?.borders.stateChangeSettled(id)
+        }
         // An instant layout write never settles (#2187).
         tiler.onInstantLayoutAsk = { [weak self] id in
             self?.scheduleSizeBoundProbe(id)

@@ -137,7 +137,7 @@ struct SplitFloorHealNeedleTests {
     func retileIssuesPlacedFrames() throws {
         let retile = try SourceScan.functionBody(
             of: "retile",
-            in: "TilingEngine.swift",
+            in: "TilingEngine+Retile.swift",
             under: "Tiling"
         )
         #expect(

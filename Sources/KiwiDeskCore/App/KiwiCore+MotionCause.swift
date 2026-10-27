@@ -95,7 +95,8 @@ extension KiwiCore {
                 animated: owed.animated,
                 pass: owed.pass,
                 newlyCreatedWindow: owed.newlyCreatedWindow,
-                sizing: owed.sizing
+                sizing: owed.sizing,
+                stateChange: owed.stateChange
             )
             // A restore that waited for this pass rides its settle,
             // or runs now when nothing animates.

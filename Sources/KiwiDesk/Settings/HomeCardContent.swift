@@ -215,9 +215,15 @@ enum HomeCardContent {
 }
 
 extension AnimationSettings {
+    /// The window toggles "Animate windows" stands for: its reading
+    /// and its write both take this one list.
+    static var masterToggles: [WritableKeyPath<AnimationSettings, Bool>] {
+        [\.onWindowResize, \.onWindowSwap, \.onRelayout, \.onStateChange]
+    }
+
     /// True when any window animation is enabled.
     var anyEnabled: Bool {
-        onWindowResize || onWindowSwap || onRelayout
+        Self.masterToggles.contains { self[keyPath: $0] }
     }
 }
 

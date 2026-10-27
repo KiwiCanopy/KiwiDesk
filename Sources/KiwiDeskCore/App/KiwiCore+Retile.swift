@@ -21,6 +21,10 @@ extension KiwiCore {
     /// site that may promise, and `BatchSizing` argues why
     /// guessing is the one mistake that reintroduces #45.
     ///
+    /// `stateChange` names the window changing state (#2676): it
+    /// alone follows `animations.on_state_change` and springs its
+    /// size, the rest of the pass keeping `animated` and `sizing`.
+    ///
     /// `pass` is the caller's classification of the pass (#1488):
     /// `.apply` for an explicit `set_*` apply (§5), `.reissue` for
     /// a switch that must re-issue frames the lagging echoes
@@ -30,7 +34,8 @@ extension KiwiCore {
         animated: Bool? = nil,
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
-        sizing: BatchSizing = .mayInstantSize
+        sizing: BatchSizing = .mayInstantSize,
+        stateChange: WindowID? = nil
     ) {
         // A held Space retires the moment it empties (#1507) —
         // every membership change retiles, so this is its one
@@ -59,7 +64,8 @@ extension KiwiCore {
             animated: animated,
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
-            sizing: sizing
+            sizing: sizing,
+            stateChange: stateChange
         )
         let paying = tiler.motionGate.owed != nil
         guard let run = tiler.motionGate.admit(asked) else {
@@ -74,6 +80,7 @@ extension KiwiCore {
         let pass = run.pass
         let newlyCreatedWindow = run.newlyCreatedWindow
         let sizing = run.sizing
+        let stateChange = run.stateChange
         // The whole main-actor cost of a pass that runs, bars and
         // rings included, filed under the caller's own pass (#1508).
         let finish = tiler.meter.beginRetile(asked.pass)
@@ -121,7 +128,8 @@ extension KiwiCore {
                 ?? tiler.settings.animations.onRelayout,
             pass: pass,
             newlyCreatedWindow: newlyCreatedWindow,
-            sizing: sizing
+            sizing: sizing,
+            stateChange: stateChange
         )
         // A retile-channel observation confirmed a bound
         // mid-pass (#677): the pass computed its frames BEFORE
@@ -142,10 +150,14 @@ extension KiwiCore {
                 animated: animated
                     ?? tiler.settings.animations.onRelayout,
                 pass: .event,
-                sizing: sizing
+                sizing: sizing,
+                stateChange: stateChange
             )
         }
         _ = tiler.takePendingBoundPlacement()
+        // The window changing state hides its ring until it lands,
+        // a held pass's included (#2676).
+        if let stateChange { holdRingForStateChange(stateChange) }
         narrateCorroborationProbes()
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op

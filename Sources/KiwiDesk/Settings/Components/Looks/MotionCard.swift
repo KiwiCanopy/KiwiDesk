@@ -139,9 +139,9 @@ struct MotionCard: View {
             set: { on in
                 let defaults = AnimationSettings()
                 var a = model.config.settings.animations
-                a.onWindowResize = on ? defaults.onWindowResize : false
-                a.onWindowSwap = on ? defaults.onWindowSwap : false
-                a.onRelayout = on ? defaults.onRelayout : false
+                for toggle in AnimationSettings.masterToggles {
+                    a[keyPath: toggle] = on ? defaults[keyPath: toggle] : false
+                }
                 model.config.settings.animations = a
             }
         )

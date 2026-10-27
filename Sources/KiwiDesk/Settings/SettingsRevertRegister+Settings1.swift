@@ -98,6 +98,8 @@ extension SettingsRevertRegister {
             .leaf(\.settings.animations.onWindowResize),
         .colours(.animationsOnWindowSwap):
             .leaf(\.settings.animations.onWindowSwap),
+        .colours(.animationsOnStateChange):
+            .leaf(\.settings.animations.onStateChange),
         .colours(.animationsOnRelayout):
             .leaf(\.settings.animations.onRelayout),
         .colours(.animationsDurationMS):

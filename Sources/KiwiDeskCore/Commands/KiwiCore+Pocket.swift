@@ -66,7 +66,7 @@ extension KiwiCore {
                 desktopFocusYield?()
             }
         }
-        retile(animated: true)
+        retile(stateChange: id)
     }
 
     /// Takes the pocketed window out onto the active Space's
@@ -93,7 +93,7 @@ extension KiwiCore {
         if let frame { tiler.seedStash(id, frame: frame) }
         onLog("pocket: w\(id.raw) out on space \(target)")
         refreshStickyReach()
-        retile(animated: true)
+        retile(stateChange: id)
         focusWindow(id, refocusRetile: false, warp: true)
         raiseLandingFloats(thenFocus: id)
         return true

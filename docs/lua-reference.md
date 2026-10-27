@@ -7503,6 +7503,12 @@ Shrinking splits by *what else is moving*, and only under
   **mouse resize**, where the window you dragged is already
   where you left it when the rest catches up.
 
+:::unreleased
+- A window changing state follows the animation whatever else
+  moves, unless a window opens in the same change
+  ([`animations.set_on_state_change`](#animationsset_on_state_change)).
+:::
+
 Under `"mid_slide"` a shrinking axis always takes the first
 frame. Either way the exact target lands on the settle frame.
 
@@ -7596,6 +7602,26 @@ changes.
 ```lua
 animations.set_on_relayout(true)
 ```
+
+:::unreleased
+### animations.set_on_state_change
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** enables or disables animation for a window changing
+state: floating and tiling back, maximizing and returning, and
+going into the Pocket and out. Floating and maximizing spring the
+window to its new frame, size included; pocketing slides it to
+its park corner and back. The windows around it, and a window
+float rules make floating, follow
+[`set_on_relayout`](#animationsset_on_relayout).
+
+**Example:**
+
+```lua
+animations.set_on_state_change(true)
+```
+:::
 
 ### Retired Monocle flip verbs
 

@@ -34,7 +34,10 @@ struct LayoutAskSeamTests {
         // caller anywhere adds a site.
         #expect(
             sites.map(\.file.lastPathComponent).sorted()
-                == ["TilingEngine+Issue.swift", "TilingEngine.swift"],
+                == [
+                    "TilingEngine+Issue.swift",
+                    "TilingEngine+Retile.swift",
+                ],
             "found \(sites.map(\.site))"
         )
     }

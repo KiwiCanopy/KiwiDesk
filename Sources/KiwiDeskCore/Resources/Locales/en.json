@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "Animate layout reflows",
   "behavior.animations.scrolling_xref": "Scrolling-layout focus shifts have their own toggle and duration in %1$@.",
   "behavior.animations.scrolling_xref_link": "Layout Defaults ▸ Scrolling",
+  "behavior.animations.state_change": "Animate float, Pocket & maximize",
+  "behavior.animations.state_change.help": "A window floating or tiling, maximizing or returning, or going into the Pocket and out moves there instead of jumping. The windows around it follow %1$@.",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_duration": "Window duration",
   "behavior.animations.window_duration.help": "How long a window takes to reach its new place when it moves, resizes, swaps or reflows. A longer duration is slower.",

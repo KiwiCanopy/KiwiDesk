@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "레이아웃 재배치 애니메이션",
   "behavior.animations.scrolling_xref": "%1$@에는 스크롤 레이아웃의 포커스 이동을 위한 별도의 스위치와 지속 시간이 있습니다.",
   "behavior.animations.scrolling_xref_link": "기본 레이아웃 ▸ 스크롤",
+  "behavior.animations.state_change": "플로팅, Pocket, 최대화 애니메이션",
+  "behavior.animations.state_change.help": "윈도우가 플로팅되거나 타일 배치로 돌아갈 때, 최대화되거나 원래대로 돌아갈 때, Pocket에 들어가거나 나올 때 순간적으로 건너뛰지 않고 그 위치로 이동합니다. 주변 윈도우는 ‘%1$@’을(를) 따릅니다.",
   "behavior.animations.title": "애니메이션",
   "behavior.animations.window_duration": "윈도우 지속 시간",
   "behavior.animations.window_duration.help": "윈도우를 이동하거나 크기를 조절하거나 교체하거나 레이아웃을 재배치할 때 윈도우가 새 위치에 도달하는 데 걸리는 시간입니다. 지속 시간이 길수록 느려집니다.",
