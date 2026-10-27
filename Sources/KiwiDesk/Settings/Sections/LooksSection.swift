@@ -16,7 +16,8 @@ struct LooksSection: View {
                 ColorsAndGlassSection(model: model)
                 MotionCard(model: model)
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 }

@@ -29,7 +29,8 @@ struct GeneralSection: View {
                 appliesImmediatelySection
                 advancedSection
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 

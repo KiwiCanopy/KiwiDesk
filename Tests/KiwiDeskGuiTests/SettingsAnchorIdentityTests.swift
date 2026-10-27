@@ -114,6 +114,10 @@ struct SettingsAnchorIdentityTests {
         // row into view (#1875). Not a Settings destination, so
         // nothing there is a reveal target.
         "JumpPanelView.swift": 1,
+        // Scroll identity: Add binding scrolls the Shortcuts page
+        // to its end, past the floating save pill (#2688). Not a
+        // reveal target — the mark is the page's padded edge.
+        "ShortcutsSection.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")
