@@ -64,43 +64,51 @@ struct LayoutCyclePopoverTests {
             list.range(of: "varbody:someView{")
         )
         let tail = list[body.upperBound...]
-        let ticked = try #require(
-            tail.range(
-                of: "ForEach(cycle,id:\\.self){modein"
-                    + "item(mode,in:true)}"
+        // One ForEach over every layout, so a tick keeps the row's
+        // identity and its checkbox's focus.
+        #expect(
+            tail.contains(
+                "ForEach(cycle+model.modeCycleAddable,id:\\.self)"
+                    + "{modeinitem(mode)}"
             )
         )
-        let rest = try #require(
-            tail.range(
-                of: "ForEach(model.modeCycleAddable,id:\\.self){modein"
-                    + "item(mode,in:false)}"
+        // No branch splits a row or its box by ticked state.
+        #expect(!list.contains("item(mode,in:"))
+        #expect(!list.contains("ifcycle{toggle"))
+        let divider = try #require(
+            list.range(
+                of: "ifmode==model.modeCycleAddable.first{Divider()"
             )
         )
-        #expect(ticked.lowerBound < rest.lowerBound)
-        // The reason, drawn between the two while the boxes grey.
+        // Every row takes the same chain; at two the ticked rows
+        // hold focus for the row menu's chord.
+        let row = try #require(
+            list.range(
+                of: "row(mode,in:ticked).focusable(held(mode))"
+                    + ".focused($focused,equals:mode)"
+                    + ".accessibilityElement(children:.combine)"
+                    + ".rowActions{actions(mode)}"
+            )
+        )
+        // The reason, under the last ticked row while the boxes
+        // grey, drawn outside their GreyOut.
         let reason = try #require(
-            tail.range(
-                of: "if!model.modeCycleCanRemove{"
+            list.range(
+                of: "ifheld(mode),mode==cycle.last{"
                     + "Text(LayoutCycleWords.minimum)"
             )
         )
-        #expect(ticked.upperBound <= reason.lowerBound)
-        #expect(reason.upperBound <= rest.lowerBound)
-        // Greyed with its reason, on the box alone; the row then
-        // holds focus for the row menu's chord.
+        #expect(divider.upperBound <= row.lowerBound)
+        #expect(row.upperBound <= reason.lowerBound)
         #expect(
             list.contains(
-                "ifcycle{toggle.modifier(GreyOut(active:"
-                    + "!model.modeCycleCanRemove,"
+                ".modifier(GreyOut(active:held(mode),"
                     + "help:LayoutCycleWords.minimum))"
             )
         )
         #expect(
             list.contains(
-                "row(mode,in:true).focusable(!model.modeCycleCanRemove)"
-                    + ".focused($focused,equals:mode)"
-                    + ".accessibilityElement(children:.combine)"
-                    + ".rowActions{actions(mode)}"
+                "!model.modeCycleCanRemove&&cycle.contains(mode)"
             )
         )
     }

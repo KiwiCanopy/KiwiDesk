@@ -6,9 +6,10 @@ import SwiftUI
 /// cycle's in order with a drag handle, the rest below in the
 /// Layout menu's order. A tick adds a layout at the end, an untick
 /// takes it out; at two the ticked boxes grey, the sentence under
-/// them saying why. Move Up / Move Down ride `rowActions` on each
-/// ticked row, which holds keyboard focus itself while its box is
-/// greyed; a click focuses it without a ring (#991).
+/// them saying why. Move Up / Move Down ride `rowActions` on every
+/// row, greyed on an unticked one; a ticked row holds keyboard
+/// focus itself while its box is greyed, and a click focuses it
+/// without a ring (#991).
 struct LayoutCycleList: View {
     @ObservedObject var model: SettingsModel
     @State private var dragOrder: [LayoutMode]?
@@ -19,23 +20,14 @@ struct LayoutCycleList: View {
 
     private static let listSpace = "layoutCycleList"
     static let rowHeight: CGFloat = 28
+    private static let handleWidth: CGFloat = 20
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(cycle, id: \.self) { mode in
-                item(mode, in: true)
-            }
-            if !model.modeCycleCanRemove {
-                // The greyed boxes' reason, drawn outside their GreyOut.
-                Text(LayoutCycleWords.minimum)
-                    .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink3)
-                    .fixedSize(horizontal: false, vertical: true)
-                    .padding(.leading, 26)
-            }
-            Divider().padding(.vertical, 4)
-            ForEach(model.modeCycleAddable, id: \.self) { mode in
-                item(mode, in: false)
+            // One ForEach, so a tick moves a row without rebuilding
+            // it and its checkbox keeps keyboard focus.
+            ForEach(cycle + model.modeCycleAddable, id: \.self) { mode in
+                item(mode)
             }
         }
         .padding(.horizontal, 12)
@@ -58,21 +50,36 @@ struct LayoutCycleList: View {
         dragOrder ?? model.config.modeCycle
     }
 
-    @ViewBuilder private func item(_ mode: LayoutMode, in cycle: Bool)
-        -> some View
-    {
-        if cycle {
+    /// Every row takes the same modifiers whether ticked or not,
+    /// so its identity survives a tick (#2673).
+    private func item(_ mode: LayoutMode) -> some View {
+        let ticked = cycle.contains(mode)
+        return VStack(alignment: .leading, spacing: 0) {
+            if mode == model.modeCycleAddable.first {
+                Divider().padding(.vertical, 4)
+            }
             // A greyed box takes no focus, so the row holds it then
             // for the row menu's chord.
-            row(mode, in: true)
-                .focusable(!model.modeCycleCanRemove)
+            row(mode, in: ticked)
+                .focusable(held(mode))
                 .focused($focused, equals: mode)
                 // One element, so VoiceOver finds the row menu on it.
                 .accessibilityElement(children: .combine)
                 .rowActions { actions(mode) }
-        } else {
-            row(mode, in: false)
+            if held(mode), mode == cycle.last {
+                // The greyed boxes' reason, drawn outside their GreyOut.
+                Text(LayoutCycleWords.minimum)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, Self.handleWidth + 6)
+            }
         }
+    }
+
+    /// A ticked layout the cycle cannot lose: its box greys.
+    private func held(_ mode: LayoutMode) -> Bool {
+        !model.modeCycleCanRemove && cycle.contains(mode)
     }
 
     private func row(_ mode: LayoutMode, in cycle: Bool) -> some View {
@@ -80,7 +87,7 @@ struct LayoutCycleList: View {
             if cycle {
                 handle(mode)
             } else {
-                Color.clear.frame(width: 20, height: 22)
+                Color.clear.frame(width: Self.handleWidth, height: 22)
             }
             box(mode, in: cycle)
             Spacer(minLength: 0)
@@ -99,10 +106,8 @@ struct LayoutCycleList: View {
         )
     }
 
-    @ViewBuilder private func box(_ mode: LayoutMode, in cycle: Bool)
-        -> some View
-    {
-        let toggle = Toggle(
+    private func box(_ mode: LayoutMode, in cycle: Bool) -> some View {
+        Toggle(
             isOn: Binding(
                 get: { cycle },
                 set: { on in tick(mode, on) }
@@ -118,17 +123,9 @@ struct LayoutCycleList: View {
         }
         .toggleStyle(.checkbox)
         .accessibilityLabel(label(mode))
-        if cycle {
-            toggle
-                .modifier(
-                    GreyOut(
-                        active: !model.modeCycleCanRemove,
-                        help: LayoutCycleWords.minimum
-                    )
-                )
-        } else {
-            toggle
-        }
+        .modifier(
+            GreyOut(active: held(mode), help: LayoutCycleWords.minimum)
+        )
     }
 
     /// The layout's name and, in the cycle, its place there.
@@ -155,15 +152,17 @@ struct LayoutCycleList: View {
     }
 
     @ViewBuilder private func actions(_ mode: LayoutMode) -> some View {
-        let index = model.config.modeCycle.firstIndex(of: mode)
+        // An unticked row has no place to move from: both grey.
+        let list = model.config.modeCycle
+        let index = list.firstIndex(of: mode)
         Button(LayoutCycleWords.moveUp) {
             model.stepCycleMode(mode, by: -1)
         }
-        .disabled(index == 0)
+        .disabled(index == nil || index == 0)
         Button(LayoutCycleWords.moveDown) {
             model.stepCycleMode(mode, by: 1)
         }
-        .disabled(index == model.config.modeCycle.count - 1)
+        .disabled(index == nil || index == list.count - 1)
     }
 
     // MARK: - Drag
@@ -174,7 +173,7 @@ struct LayoutCycleList: View {
     private func handle(_ mode: LayoutMode) -> some View {
         Image(systemName: "line.3.horizontal")
             .foregroundStyle(SettingsTheme.ink2)
-            .frame(width: 20, height: 22)
+            .frame(width: Self.handleWidth, height: 22)
             .contentShape(Rectangle())
             .help(LayoutCycleWords.dragHelp)
             .accessibilityHidden(true)
