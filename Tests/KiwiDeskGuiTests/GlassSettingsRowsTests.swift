@@ -94,7 +94,10 @@ struct GlassSettingsRowsTests {
             "Components/Common/ColorField+AutomaticMenu.swift"
         )
         #expect(
-            menu.contains("ifclearable{noColourItem(hex:hex,draft:draft)}")
+            menu.contains(
+                "ifclearable{noColourItem(automatic:automatic,"
+                    + "hex:hex,draft:draft)}"
+            )
         )
         #expect(menu.contains("KiwiShelf.cleared(hex.wrappedValue)"))
     }
