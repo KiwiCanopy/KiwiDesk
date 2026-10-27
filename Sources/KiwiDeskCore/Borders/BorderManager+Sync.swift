@@ -120,6 +120,7 @@ extension BorderManager {
         apply(id, windowFrame: frame)
         if source == .axEcho {
             noteArrivalReport(id, frame: windowFrame)
+            noteStateChangeReport(id, frame: windowFrame)
         }
     }
 

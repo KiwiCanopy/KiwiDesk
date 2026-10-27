@@ -49,6 +49,7 @@ enum ColorsRowOrder {
         .colours(.animationsOnWindowResize),
         .colours(.animationsOnWindowSwap),
         .colours(.animationsOnRelayout),
+        .colours(.animationsOnStateChange),
         .colours(.animationsDurationMS),
     ]
 

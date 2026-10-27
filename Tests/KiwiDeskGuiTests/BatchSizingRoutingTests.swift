@@ -112,9 +112,17 @@ struct BatchSizingRoutingTests {
         "KiwiDeskCore/Tiling/TilingEngine.swift":
             Site(names: 5, promises: 0),
         // One window's turn in the retile (#1944): threads the
-        // retile's promise into `applyFrame` unchanged.
+        // retile's promise into `applyFrame` unchanged, save for the
+        // pass's one window changing state (#2676), which promises
+        // its own spring: it moves alone between float and tile or
+        // fill and slot, and the engine names none with a newcomer.
         "KiwiDeskCore/Tiling/TilingEngine+Issue.swift":
-            Site(names: 3, promises: 0),
+            Site(names: 4, promises: 1),
+        // The float placement (#2676): a window changing state
+        // springs to the float size; it sits above the tiles and no
+        // newcomer shares the write.
+        "KiwiDeskCore/App/KiwiCore+FloatPlacement.swift":
+            Site(names: 2, promises: 1),
         // `applyFrame` (the animate-or-instant policy) moved
         // here when #677's additions hit the main file's line
         // ceiling; it still only threads the caller's promise.

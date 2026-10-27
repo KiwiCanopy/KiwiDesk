@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "为布局重排添加动画",
   "behavior.animations.scrolling_xref": "滚动布局的焦点切换在%1$@中有自己的开关和时长。",
   "behavior.animations.scrolling_xref_link": "默认布局 ▸ 滚动",
+  "behavior.animations.state_change": "为浮动、Pocket 和最大化添加动画",
+  "behavior.animations.state_change.help": "窗口在浮动或恢复平铺、最大化或还原、放入 Pocket 或取出时，会移动到新位置，而不是直接跳过去。周围的窗口跟随“%1$@”。",
   "behavior.animations.title": "动画",
   "behavior.animations.window_duration": "窗口时长",
   "behavior.animations.window_duration.help": "窗口在移动、调整大小、互换或布局重排时到达新位置所需的时间。时长越长，速度越慢。",

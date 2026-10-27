@@ -137,6 +137,8 @@ public final class TilingEngine {
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()
+    /// The last pass's state change (#2676), never with a newcomer.
+    var stateChangeWindow: WindowID?
     /// The input-quiescence gate `KiwiCore.retile` asks (#804).
     let motionGate = MotionGate()
 
@@ -299,7 +301,8 @@ public final class TilingEngine {
         animated: Bool = true,
         pass: RetilePass = .event,
         newlyCreatedWindow: WindowID? = nil,
-        sizing: BatchSizing = .mayInstantSize
+        sizing: BatchSizing = .mayInstantSize,
+        stateChange: WindowID? = nil
     ) {
         guard
             let screen = ScreenList.mainOrFirst
@@ -315,6 +318,7 @@ public final class TilingEngine {
             // IS an instant size, so no promise survives one.
             let promised: BatchSizing =
                 newlyCreatedWindow == nil ? sizing : .mayInstantSize
+            stateChangeWindow = newlyCreatedWindow == nil ? stateChange : nil
 
             for (id, target) in frames {
                 // A window in an active drag keeps its user-driven

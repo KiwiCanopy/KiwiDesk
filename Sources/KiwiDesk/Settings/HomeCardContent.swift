@@ -217,7 +217,7 @@ enum HomeCardContent {
 extension AnimationSettings {
     /// True when any window animation is enabled.
     var anyEnabled: Bool {
-        onWindowResize || onWindowSwap || onRelayout
+        onWindowResize || onWindowSwap || onRelayout || onStateChange
     }
 }
 

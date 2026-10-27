@@ -86,16 +86,20 @@ extension TilingEngine {
         meter.add(\.framesIssued)
         let issued = probe?.frame ?? target
         let from = sent ?? current
+        // The window changing state (#2676) follows its own switch
+        // and springs its size.
+        let changing = id == stateChangeWindow
         let instant = applyFrame(
             id,
             from: from,
             to: issued,
-            animated: animated
+            animated: (changing
+                ? settings.animations.onStateChange : animated)
                 && !Self.parkSnaps(from: from, to: issued) {
                     looksStashed($0)
                 },
             isNewWindow: isNew,
-            sizing: promised
+            sizing: changing ? .allSpringSized : promised
         )
         boundLearner.recordAsk(
             id,

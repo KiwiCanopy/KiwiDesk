@@ -185,6 +185,10 @@ struct MotionMoreControls: Sendable {
         "behavior.animations.relayout",
         "Animate layout reflows"
     )
+    let animateStateChanges = SettingsControl(
+        "behavior.animations.state_change",
+        "Animate float, Pocket & maximize"
+    )
     let animationDuration = SettingsControl(
         "behavior.animations.window_duration",
         "Window duration"

@@ -7571,6 +7571,25 @@ changes.
 animations.set_on_relayout(true)
 ```
 
+:::unreleased
+### animations.set_on_state_change
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** enables or disables animation for a window changing
+state: floating and tiling back, maximizing and returning, and
+going into the Pocket and out. Floating and maximizing spring the
+window to its new frame, size included; pocketing slides it to
+its park corner and back. The windows around it follow
+[`set_on_relayout`](#animationsset_on_relayout).
+
+**Example:**
+
+```lua
+animations.set_on_state_change(true)
+```
+:::
+
 ### Retired Monocle flip verbs
 
 `animations.set_on_monocle_focus` and

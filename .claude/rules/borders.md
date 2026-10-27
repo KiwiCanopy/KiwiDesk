@@ -325,6 +325,20 @@ these:
   read below says of every cue. Both `makeTestCore` twins pin the
   hold's clock, timer and that read.
 
+## A state change hides its window's ring until it settles (#2676)
+
+While our spring floats, tiles, maximizes or brings a window out
+of the pocket, a slow app's window trails the ring, which reads as
+lag. So that window's ring is held dormant through the one
+`KiwiCore.holdRingForStateChange`, called after the write and only
+for a window the spring now moves, and revealed by the
+`BorderManager+StateChange` hold once the animation has ended and
+the window reports near the frame we sent, or `arrivalCap` later.
+It is a second hold beside the switch's arrival hold, sharing the
+overlay's hold flag and reveal, never a second caller of
+`holdArrival`. A new state change takes that door; its neighbours'
+rings keep following (`StateChangeRingTests`).
+
 ## A ring stays on its window's Desktop; the mark spans them
 
 **A ring panel joins every Desktop only while its window is

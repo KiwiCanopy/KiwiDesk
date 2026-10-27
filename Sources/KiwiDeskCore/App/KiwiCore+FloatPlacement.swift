@@ -45,12 +45,16 @@ extension KiwiCore {
             return false
         }
         let base = currentFrame(of: id, fallback: window.frame)
+        // A state change (#2676): its own switch, and a full spring
+        // so the shrink to the float size slides instead of snapping.
         tiler.applyFrame(
             id,
             from: base,
             to: target,
-            animated: tiler.settings.animations.onRelayout
+            animated: tiler.settings.animations.onStateChange,
+            sizing: .allSpringSized
         )
+        holdRingForStateChange(id)
         // A size change outside the layout's asks (#677): its echo
         // must not read as the app refusing the last tiled ask, or
         // the next tiled space places the float's size as residue.

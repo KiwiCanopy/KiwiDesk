@@ -72,9 +72,10 @@ extension KiwiCore {
         {
             state.floatFrames[id] = floatFrame
         }
-        retile()
-        // Float direction only: `make_tiled` already animates a
-        // real move back into the layout.
+        retile(stateChange: floating ? nil : id)
+        if !floating { holdRingForStateChange(id) }
+        // Float direction only: the tile direction is the retile's,
+        // the window named as the state change (#2676).
         if floating, !wasFloating {
             placeFloating(id)
         }

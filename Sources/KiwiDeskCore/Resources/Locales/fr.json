@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "Animer les réagencements",
   "behavior.animations.scrolling_xref": "Les changements de focus de la disposition Scrolling ont leur propre interrupteur et leur propre durée dans %1$@.",
   "behavior.animations.scrolling_xref_link": "Dispositions par défaut ▸ Scrolling",
+  "behavior.animations.state_change": "Animer le flottement, la Pocket et la maximisation",
+  "behavior.animations.state_change.help": "Une fenêtre qui se met à flotter ou redevient tuilée, qui est maximisée ou reprend sa place, ou qui entre dans la Pocket puis en ressort s'y déplace au lieu de sauter. Les fenêtres autour suivent « %1$@ ».",
   "behavior.animations.title": "Animations",
   "behavior.animations.window_duration": "Durée des fenêtres",
   "behavior.animations.window_duration.help": "Le temps que met une fenêtre pour rejoindre sa nouvelle place lorsqu'elle se déplace, est redimensionnée, échangée ou réagencée. Une durée plus longue est plus lente.",

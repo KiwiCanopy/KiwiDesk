@@ -142,6 +142,7 @@ struct MotionCard: View {
                 a.onWindowResize = on ? defaults.onWindowResize : false
                 a.onWindowSwap = on ? defaults.onWindowSwap : false
                 a.onRelayout = on ? defaults.onRelayout : false
+                a.onStateChange = on ? defaults.onStateChange : false
                 model.config.settings.animations = a
             }
         )
