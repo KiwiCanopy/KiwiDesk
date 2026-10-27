@@ -61,7 +61,7 @@ private func noColourItem(
 ) -> some View {
     Button {
         hex.wrappedValue = KiwiShelf.cleared(hex.wrappedValue)
-        draft.wrappedValue = hex.wrappedValue
+        draft.wrappedValue = ""
     } label: {
         if !KiwiShelf.hasColour(hex.wrappedValue) {
             Label(

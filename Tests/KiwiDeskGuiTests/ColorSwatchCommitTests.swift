@@ -82,4 +82,41 @@ struct ColorSwatchCommitTests {
                 == nil
         )
     }
+
+    @Test("clearing a No Color field writes No Color once")
+    @MainActor
+    func clearableClears() {
+        #expect(
+            ColorSwatch.committed(
+                draft: " ",
+                over: "#2F7FD6CC",
+                automatic: false,
+                clearable: true
+            ) == "#2F7FD600"
+        )
+        #expect(
+            ColorSwatch.committed(
+                draft: "",
+                over: "#2F7FD600",
+                automatic: false,
+                clearable: true
+            ) == nil
+        )
+        #expect(
+            ColorSwatch.shown("#2F7FD600", clearable: true).isEmpty
+        )
+    }
+
+    @Test("an empty field on a well with both flags writes Automatic")
+    @MainActor
+    func bothFlagsClearToAutomatic() {
+        #expect(
+            ColorSwatch.committed(
+                draft: "",
+                over: "#8DB354",
+                automatic: true,
+                clearable: true
+            ) == ""
+        )
+    }
 }
