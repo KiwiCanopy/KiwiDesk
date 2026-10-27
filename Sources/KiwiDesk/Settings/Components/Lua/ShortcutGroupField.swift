@@ -100,9 +100,7 @@ struct ShortcutGroupField: View {
             : customTitle
     }
 
-    private var customTitle: String {
-        L("shortcuts.panel.custom", "Custom")
-    }
+    private var customTitle: String { naming.custom }
 
     private var builtInHeader: String {
         L("shortcuts.group.built_in", "Built-in shortcut groups")

@@ -61,6 +61,12 @@ struct ShortcutGroupFieldTests {
         #expect(naming.stored(" title of CUSTOM ") == "")
         #expect(naming.committed("Title of custom", over: "focus") == "")
         #expect(naming.committed(naming.shown(""), over: "") == "")
+        // An own group named like Custom reads as Custom, and a
+        // retype in another case files it into none.
+        #expect(
+            naming.committed("title of custom", over: "Title of custom")
+                == ""
+        )
     }
 
     /// An own group named like a built-in title — Lua files it by

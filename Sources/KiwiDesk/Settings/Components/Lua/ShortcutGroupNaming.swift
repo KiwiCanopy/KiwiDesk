@@ -5,7 +5,9 @@ import KiwiDeskCore
 /// stores what the user typed (#2544 ▸ Ruling): a built-in group
 /// reads as its title and is stored as its token; a group of the
 /// user's own is its name as written; no group reads as Custom,
-/// a value rather than a hint (#2688).
+/// a value rather than a hint, and so is a reserved name: typed in
+/// any case it files into no group, as KiwiHub lists no group under
+/// it (#2688).
 struct ShortcutGroupNaming {
     let titles: [ShortcutGroup: String]
     /// What no group reads as.

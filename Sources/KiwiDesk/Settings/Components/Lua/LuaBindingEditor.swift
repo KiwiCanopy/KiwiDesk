@@ -91,10 +91,17 @@ struct LuaBindingEditor: View {
     @ViewBuilder private var placeholderText: some View {
         if text.isEmpty {
             Text(placeholder)
-                .font(.system(size: 12, design: .monospaced))
+                .font(
+                    .system(
+                        size: LuaSourceEditor.fontSize,
+                        design: .monospaced
+                    )
+                )
                 .foregroundStyle(SettingsTheme.ink3)
-                // Past NSTextView's 5 pt line fragment padding.
-                .padding(.leading, Self.textInset.width + 5)
+                .padding(
+                    .leading,
+                    Self.textInset.width + LuaSourceEditor.linePadding
+                )
                 .padding(.top, Self.textInset.height)
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)

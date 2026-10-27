@@ -167,6 +167,12 @@ struct LuaSourceEditor: NSViewRepresentable {
     /// Room between the text and the editor's edge.
     var inset = NSSize.zero
 
+    /// The text's point size, which a drawn placeholder matches.
+    static let fontSize: CGFloat = 12
+    /// The text container's own leading room, stated rather than
+    /// AppKit's default so a placeholder can line up with it.
+    static let linePadding: CGFloat = 5
+
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text)
     }
@@ -178,8 +184,9 @@ struct LuaSourceEditor: NSViewRepresentable {
         textView.delegate = context.coordinator
         textView.isRichText = false
         textView.textContainerInset = inset
+        textView.textContainer?.lineFragmentPadding = Self.linePadding
         textView.font = .monospacedSystemFont(
-            ofSize: 12,
+            ofSize: Self.fontSize,
             weight: .regular
         )
         textView.isAutomaticQuoteSubstitutionEnabled = false

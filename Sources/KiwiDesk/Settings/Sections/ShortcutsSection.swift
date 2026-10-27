@@ -25,6 +25,7 @@ struct ShortcutsSection: View {
     @State var jumpTracker = ShortcutsJumpTracker()
     /// Bumped by Add binding, whose row lands at the page's end.
     @State var luaAdded = 0
+    @State private var endScroll: Task<Void, Never>?
     @StateObject private var coordinator =
         RecorderCoordinator(scrollsInPlace: true)
 
@@ -62,13 +63,7 @@ struct ShortcutsSection: View {
                 coordinator.scrollTarget = nil
             }
             .onChange(of: luaAdded) { _, _ in
-                // A yield, so the appended row is laid out first.
-                Task { @MainActor in
-                    await Task.yield()
-                    withAnimation(reduceMotion ? nil : .default) {
-                        proxy.scrollTo(Self.pageEnd, anchor: .bottom)
-                    }
-                }
+                scrollToEnd(proxy)
             }
         }
         .onAppear {
@@ -96,6 +91,28 @@ struct ShortcutsSection: View {
     /// The page's bottom edge, padding included.
     static let pageEnd = "shortcuts.page_end"
 
+    /// Scrolls to the page's end, then again un-animated once the
+    /// appended row is laid out — a yield does not promise layout
+    /// (`SettingsView.reveal`).
+    private func scrollToEnd(_ proxy: ScrollViewProxy) {
+        endScroll?.cancel()
+        endScroll = Task { @MainActor in
+            await Task.yield()
+            withAnimation(
+                reduceMotion
+                    ? nil
+                    : .easeInOut(duration: SettingsReveal.scroll)
+            ) { proxy.scrollTo(Self.pageEnd, anchor: .bottom) }
+            try? await Task.sleep(
+                nanoseconds: SettingsReveal.nanoseconds(
+                    SettingsReveal.scroll + SettingsReveal.settle
+                )
+            )
+            guard !Task.isCancelled else { return }
+            proxy.scrollTo(Self.pageEnd, anchor: .bottom)
+        }
+    }
+
     private var page: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -105,12 +122,7 @@ struct ShortcutsSection: View {
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
             // The page ends clear of a floating save pill (#2688).
-            .padding(
-                .bottom,
-                width.docksSavePill
-                    ? SettingsMetrics.paneInset
-                    : SettingsMetrics.savePillClearance
-            )
+            .padding(.bottom, SettingsMetrics.pageBottom(width))
             .overlay(alignment: .bottom) {
                 Color.clear.frame(height: 1).id(Self.pageEnd)
             }

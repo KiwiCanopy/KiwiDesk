@@ -2051,7 +2051,7 @@
   "shortcuts.lua.desc_ax": "%1$@の説明",
   "shortcuts.lua.desc_placeholder": "説明",
   "shortcuts.lua.edit_ax": "%1$@のLuaを編集",
-  "shortcuts.lua.editor_title": "Lua の割り当て",
+  "shortcuts.lua.editor_title": "Luaの割り当て",
   "shortcuts.lua.lines": "行数：%1$d",
   "shortcuts.lua.new_binding": "新しい割り当て",
   "shortcuts.lua.symbol_ax": "%1$@のシンボル",
