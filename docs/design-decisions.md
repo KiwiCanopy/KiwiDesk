@@ -14149,6 +14149,13 @@ one mark through the one `sticky.color`: a disc on the Space Bar
 badge, the glass's tint on the mark. With the finish off, or
 Reduce transparency on, the disc returns.
 
+The pocket mark takes the other branch on purpose (#2671): its
+colour is drawn opaque IN the glyph, filling the pocket, and its
+plate takes no tint, so the colour on screen is the hex itself and
+the outlines and stitch take `contrastingGlyph` of it, as the flat
+disc does. Moving it to `.labelColor` would draw a black or white
+outline on a pocket the label ink judged against nothing.
+
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
 The old reading — a float overlaps a tiled plane, so the window

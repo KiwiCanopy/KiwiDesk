@@ -41,11 +41,17 @@ extension KiwiCore {
             frontWindow: front?.window,
             strip: plan.segment(slot),
             style: placed,
-            stateMarkColors: StateMarkColors(
-                sticky: tiler.settings.stickyStyle.color,
-                floating: tiler.settings.floatingStyle.color,
-                pocket: tiler.settings.pocketStyle.color
-            )
+            stateMarkColors: stateMarkColors
+        )
+    }
+
+    /// The three marks' colours the Space Bar's badges take
+    /// (#429, #2671).
+    var stateMarkColors: StateMarkColors {
+        StateMarkColors(
+            sticky: tiler.settings.stickyStyle.color,
+            floating: tiler.settings.floatingStyle.color,
+            pocket: tiler.settings.pocketStyle.color
         )
     }
 

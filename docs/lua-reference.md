@@ -5865,16 +5865,16 @@ floating.set_color("#8E5DE0")
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
 empty string `""` for **Automatic** (default `""`).
 
-**Does:** colors the [pocket](#pocket) mark's pocket, filled
-opaque, and the Space Bar pocket badge's disc; the kiwis stay
-green. The mark's outlines and stitch take a legible
+**Does:** fills the pocket of the [pocket](#pocket) mark and of
+the Space Bar pocket badge, opaque, an alpha ignored; the kiwis
+stay green. The mark's outlines and stitch take a legible
 auto-contrast black or white, as
-[`sticky.set_color`](#stickyset_color)'s glyph does. `""` is
-Automatic: the mark's pocket and outlines take the label color,
-black in light mode and white in dark, and the badge keeps the
-count-badge fill. Any non-empty value must parse as a hex color.
-The mark's plate takes no tint from it, on Liquid Glass or off
-([#2671](https://github.com/KiwiCanopy/KiwiDesk/issues/2671)).
+[`sticky.set_color`](#stickyset_color)'s glyph does. Neither the
+mark's plate nor the badge's disc takes the color: the disc keeps
+the count-badge fill. `""` is Automatic: the mark's pocket and
+outlines take the label color, black in light mode and white in
+dark, and the badge's pocket the disc's auto-contrast ink. Any
+non-empty value must parse as a hex color.
 
 **Example:**
 

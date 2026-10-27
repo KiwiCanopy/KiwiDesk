@@ -1,10 +1,7 @@
 import Foundation
 
-/// `pocket.*` sub-API (#2671): the pocket mark's own colour, beside
-/// the bare `pocket` verb that pockets a window. `set_color` shares
-/// `setMarkColor` with the sticky and floating marks, so an empty
-/// string is "Automatic"; `layoutCommand`'s forced retile re-syncs
-/// the marks.
+/// `pocket.*` (#2671): the pocket mark's colour, through the
+/// marks' shared `setMarkColor` — empty is Automatic.
 extension KiwiCore {
     func pocketStyleCommand(
         _ command: String,

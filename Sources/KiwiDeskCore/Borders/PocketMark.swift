@@ -25,6 +25,19 @@ public enum PocketMark {
         blue: 0.816,
         alpha: 1
     )
+    /// The mark at `size` points in a mark colour `hex` (#2671):
+    /// the pocket filled in it, the outlines and stitch in its
+    /// contrasting glyph colour, as `StickyMarkPlate.paint` inks a
+    /// disc; empty is the bare label ink, light and dark.
+    public func image(size: CGFloat, hex: String) -> NSImage {
+        let ink = NSColor.mark(hex: hex, fallback: .labelColor)
+        return image(
+            size: size,
+            ink: ink,
+            outline: hex.isEmpty ? nil : ink.contrastingGlyph
+        )
+    }
+
     /// The mark at `size` points, its pocket filled opaque in
     /// `ink` and its outlines in `outline`, `ink` when nil. A
     /// dynamic colour resolves when drawn, so `.labelColor`

@@ -102,7 +102,7 @@ struct CoreLocalizationBoundaryTests {
         "Commands/PocketRefusal.swift": 1,
         // The three marks' VoiceOver names (#1799, #2446), with
         // the plate's glyph images since #2671.
-        "Borders/StickyMarkOverlay+Pocket.swift": 3,
+        "Borders/StickyMarkOverlay+Glyphs.swift": 3,
         // The overflow mark's VoiceOver name, one key per direction
         // (#2235); the mark is drawn by Core.
         "App/KiwiCore+OverflowMarks.swift": 4,

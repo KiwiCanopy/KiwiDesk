@@ -102,54 +102,6 @@ extension SpaceBarItemView {
         styleStateBadges()
     }
 
-    /// Styles sticky / floating corner state badges (#414).
-    private func styleStateBadges() {
-        for (index, app) in apps.enumerated() {
-            if index < stickyBadgeViews.count,
-                let badge = stickyBadgeViews[index]
-            {
-                applyStateBadge(
-                    badge,
-                    shown: style.stickyBadge && app.sticky,
-                    markHex: stateMarkColors.sticky,
-                    appFocused: app.focused
-                )
-            }
-            if index < floatingBadgeViews.count,
-                let badge = floatingBadgeViews[index]
-            {
-                // The pocket badge takes the float badge's slot and
-                // its own colour (#2446, #2671).
-                applyStateBadge(
-                    badge,
-                    shown: style.stickyBadge
-                        && (app.floating || app.pocket),
-                    markHex: app.pocket
-                        ? stateMarkColors.pocket : stateMarkColors.floating,
-                    appFocused: app.focused
-                )
-            }
-        }
-    }
-
-    /// State badge fill and contrast glyph (#429).
-    private func applyStateBadge(
-        _ badge: StateBadgeView,
-        shown: Bool,
-        markHex: String,
-        appFocused: Bool
-    ) {
-        badge.isHidden = !shown
-        let fill = NSColor.mark(
-            hex: markHex,
-            fallback: NSColor(kiwiHex: style.groupBadgeColor)
-        )
-        badge.layer?.backgroundColor = fill.cgColor
-        badge.symbol.contentTintColor = fill.contrastingGlyph
-        badge.ink = fill.contrastingGlyph
-        badge.alphaValue = untintedAppAlpha(focused: appFocused)
-    }
-
     /// Group badge styling with 3-tier alpha ladder
     /// (#470, #955, owner 2026-07-20); a `count` badge takes the
     /// ladder's count tier (#2650).
@@ -285,7 +237,7 @@ extension SpaceBarItemView {
     }
 
     /// Three-tier alpha ladder for untinted app glyphs (QA 2026-07-19).
-    private func untintedAppAlpha(
+    func untintedAppAlpha(
         focused: Bool,
         count: Bool = false
     ) -> CGFloat {

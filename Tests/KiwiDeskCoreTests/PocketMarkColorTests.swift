@@ -142,6 +142,7 @@ struct PocketMarkColorTests {
         // the plate's disc does: black on amber. (4, 15) is on the
         // pocket's left edge.
         let edge = try pocketPixel(image, at: (4, 15))
+        #expect(edge.alphaComponent == 1)
         let ink = NSColor(kiwiHex: amber).contrastingGlyph
         #expect(try hex(edge) == hex(ink))
     }
@@ -163,11 +164,21 @@ struct PocketMarkColorTests {
         #expect(dark.redComponent > 0.8)
     }
 
-    @Test("the Space Bar's pocket badge shows in the pocket colour")
+    @Test("the bar build hands the badges the pocket colour")
+    func barTakesThePocketColor() {
+        let core = makeCore()
+        core.tiler.settings.floatingStyle.color = "#112233"
+        core.tiler.settings.pocketStyle.color = amber
+        #expect(core.stateMarkColors.pocket == amber)
+        #expect(core.stateMarkColors.floating == "#112233")
+    }
+
+    @Test("the Space Bar's pocket badge fills its pocket in the colour")
     func badgeTakesTheColor() throws {
         let view = SpaceBarItemView(
             frame: CGRect(x: 0, y: 0, width: 120, height: 28)
         )
+        let style = SpaceBarLook()
         view.configure(
             identity: .space(SpaceID("1")),
             spaceGlyph: .text("1", tinted: true),
@@ -183,7 +194,7 @@ struct PocketMarkColorTests {
             ],
             active: true,
             horizontal: true,
-            style: SpaceBarLook(),
+            style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "",
                 floating: "#112233",
@@ -194,15 +205,22 @@ struct PocketMarkColorTests {
         let badge = try #require(view.floatingBadgeViews.first ?? nil)
         #expect(badge.symbolName == StateBadgeView.pocketName)
         #expect(!badge.isHidden)
+        // The pocket takes the colour; the disc stays the count
+        // badge's own, as the window mark's plate stays untinted.
+        #expect(try hex(badge.ink) == amber)
         let fill = try #require(
             badge.layer?.backgroundColor.flatMap(NSColor.init(cgColor:))
         )
-        #expect(try hex(fill) == amber)
+        #expect(
+            try hex(fill)
+                == hex(NSColor(kiwiHex: style.groupBadgeColor))
+        )
     }
 
     @Test("kiwi green separates from the lightest and darkest ink")
     func kiwiSeparatesFromTheInk() throws {
         let kiwi = try hex(PocketMark.kiwi)
+        var inks: Set<String> = []
         for name in [NSAppearance.Name.aqua, .darkAqua] {
             let look = try #require(NSAppearance(named: name))
             var resolved = NSColor.clear
@@ -210,6 +228,7 @@ struct PocketMarkColorTests {
                 resolved = PocketMark.opaque(.labelColor)
             }
             let ink = try hex(resolved)
+            inks.insert(ink)
             let separation = try #require(
                 ColorVision.separation(kiwi, ink)
             )
@@ -218,5 +237,7 @@ struct PocketMarkColorTests {
                 Comment(rawValue: "\(kiwi) vs \(ink): \(separation)")
             )
         }
+        // Light and dark resolved two inks, or one was measured twice.
+        #expect(inks.count == 2)
     }
 }

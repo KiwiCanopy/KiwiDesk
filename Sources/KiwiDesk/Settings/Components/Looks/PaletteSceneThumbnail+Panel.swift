@@ -210,7 +210,7 @@ extension PaletteSceneThumbnail {
             Image(
                 nsImage: PocketMark.mark.image(
                     size: 11 * scale,
-                    ink: NSColor(color("pocket.color"))
+                    hex: hex("pocket.color")
                 )
             )
             .padding(3 * scale)
