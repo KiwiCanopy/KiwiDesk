@@ -12,10 +12,7 @@ struct ShortcutSettingRowSeamTests {
 
     /// File basename → why it lays out a recorder footprint itself.
     private static let allowed: [String: String] = [
-        "ShortcutSettingRow.swift": "the one shape",
-        // #2673 rewrites this row; it adopts the shared shape on
-        // rebase, and this entry goes with it.
-        "LayoutCycleRow.swift": "#2673 adopts the shared row",
+        "ShortcutSettingRow.swift": "the one shape"
     ]
 
     @Test("only the shared row lays a setting over the footprint")
