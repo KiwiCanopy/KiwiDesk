@@ -1653,7 +1653,7 @@
   "pocket.color.a11y": "Цвет метки Pocket",
   "pocket.mark.ax": "Окно Pocket",
   "pocket.refusal.float": "Окна Pocket всегда плавающие",
-  "pocket.refusal.marked_elsewhere": "Одно окно уже отмечено как Pocket — сначала сними с него отметку.",
+  "pocket.refusal.marked_elsewhere": "Pocket уже занят",
   "pocket.refusal.sticky": "Окна Pocket всегда в режиме Sticky",
   "presets.apply": "Применить",
   "presets.caption": "Применение набора сохраняет его как настоящий профиль, который затем можно изменить.",

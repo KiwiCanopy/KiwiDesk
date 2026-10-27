@@ -58,7 +58,7 @@ extension KiwiCore {
             flashRefusalPill(
                 id,
                 text: PocketRefusal.markedElsewhereSentence,
-                symbol: AutoFloatReason.pocket.pillSymbol,
+                symbol: PocketMark.takenName,
                 announce: true
             )
         )

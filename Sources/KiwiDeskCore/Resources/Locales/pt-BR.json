@@ -1653,7 +1653,7 @@
   "pocket.color.a11y": "Cor da marca Pocket",
   "pocket.mark.ax": "Janela Pocket",
   "pocket.refusal.float": "Janelas Pocket sempre flutuam",
-  "pocket.refusal.marked_elsewhere": "Já há uma janela marcada como Pocket — remova a marca dela primeiro.",
+  "pocket.refusal.marked_elsewhere": "O Pocket já está ocupado",
   "pocket.refusal.sticky": "Janelas Pocket são sempre Sticky",
   "presets.apply": "Aplicar",
   "presets.caption": "Aplicar uma predefinição a salva como um perfil real que você pode editar depois.",

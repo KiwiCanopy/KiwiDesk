@@ -1653,7 +1653,7 @@
   "pocket.color.a11y": "Farbe der Pocket-Markierung",
   "pocket.mark.ax": "Pocket-Fenster",
   "pocket.refusal.float": "Pocket-Fenster schweben immer",
-  "pocket.refusal.marked_elsewhere": "Ein Fenster ist bereits als Pocket markiert — hebe dort zuerst die Markierung auf.",
+  "pocket.refusal.marked_elsewhere": "Die Pocket ist schon belegt",
   "pocket.refusal.sticky": "Pocket-Fenster sind immer Sticky",
   "presets.apply": "Anwenden",
   "presets.caption": "Beim Anwenden wird sie als eigenes Profil gespeichert, das du danach bearbeiten kannst.",

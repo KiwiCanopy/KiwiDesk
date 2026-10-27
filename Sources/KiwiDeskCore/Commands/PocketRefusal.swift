@@ -9,13 +9,10 @@ enum PocketRefusal {
         L("pocket.refusal.sticky", "Pocket windows are always sticky")
     }
 
-    /// `toggle_pocket_window` on a second window (#2675).
+    /// `toggle_pocket_window` on a second window (#2675), drawn
+    /// beside `PocketMark.takenName`.
     @MainActor
     static var markedElsewhereSentence: String {
-        L(
-            "pocket.refusal.marked_elsewhere",
-            "One window is already marked as Pocket — remove it "
-                + "there first."
-        )
+        L("pocket.refusal.marked_elsewhere", "Pocket is already taken")
     }
 }

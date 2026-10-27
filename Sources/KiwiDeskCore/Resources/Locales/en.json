@@ -1653,7 +1653,7 @@
   "pocket.color.a11y": "Pocket mark color",
   "pocket.mark.ax": "Pocket window",
   "pocket.refusal.float": "Pocket windows always float",
-  "pocket.refusal.marked_elsewhere": "One window is already marked as Pocket — remove it there first.",
+  "pocket.refusal.marked_elsewhere": "Pocket is already taken",
   "pocket.refusal.sticky": "Pocket windows are always sticky",
   "presets.apply": "Apply",
   "presets.caption": "Applying one saves it as a real profile you can then edit.",
