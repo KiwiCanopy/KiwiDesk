@@ -54,10 +54,26 @@ struct ShownUserSpaceTests {
         #expect(reads == 0)
     }
 
+    /// Shared Spaces key the one managed display by a synthetic
+    /// id; its lone entry answers every screen.
+    @Test("a lone shared-Spaces entry answers the screen")
+    func sharedEntryAnswers() {
+        var reads = 0
+        let filed = ["Main": false]
+        let answer = NativeSpaces.spaceIsUser(on: "REAL", filed: filed) {
+            _ in
+            reads += 1
+            return true
+        }
+        #expect(answer == false)
+        #expect(reads == 0)
+    }
+
     @Test("a screen no reading named reads live")
     func missReadsLive() {
         var asked: [String] = []
-        let answer = NativeSpaces.spaceIsUser(on: "NEW", filed: [:]) {
+        let filed = ["A": true, "B": true]
+        let answer = NativeSpaces.spaceIsUser(on: "NEW", filed: filed) {
             asked.append($0)
             return false
         }

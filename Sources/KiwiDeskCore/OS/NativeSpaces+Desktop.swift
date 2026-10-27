@@ -157,7 +157,11 @@ public struct DesktopSnapshot: Sendable {
 
     /// `currentSpaceIsUser` for every screen this reading names.
     var currentSpacesAreUser: [String: Bool] {
-        currentSpaces.mapValues { NativeSpaces.isUserSpace($0, in: spaces) }
+        Dictionary(
+            uniqueKeysWithValues: currentSpaces.keys.map {
+                ($0, currentSpaceIsUser(on: $0))
+            }
+        )
     }
 }
 

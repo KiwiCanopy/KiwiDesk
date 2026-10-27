@@ -21,7 +21,7 @@ struct ShownUserSpaceSeamTests {
         return found
     }
 
-    @Test("the switch handler files the verdict from its reading")
+    @Test("the switch handler files the verdict ahead of its bars")
     func switchFiles() throws {
         #expect(
             try sites(of: "desktopMemory.fileShown(snapshot)")
@@ -30,6 +30,47 @@ struct ShownUserSpaceSeamTests {
         #expect(
             try sites(of: "shownSpaces =") == ["DesktopMemory.swift": 1]
         )
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "Profiles/KiwiCore+Desktops.swift"
+            )
+        )
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "func handleDesktopChange()",
+                in: source
+            )
+        )
+        let filing = try #require(
+            body.range(of: "desktopMemory.fileShown(snapshot)")
+        )
+        for later in ["updateBars(", "retile("] {
+            let first = try #require(body.range(of: later), "\(later)")
+            #expect(filing.lowerBound < first.lowerBound, "\(later)")
+        }
+    }
+
+    @Test("a monitor change refiles the verdict from its reading")
+    func monitorChangeFiles() throws {
+        #expect(
+            try sites(of: "desktopMemory.fileShownUserSpaces(desktops)")
+                == ["KiwiCore+MonitorChange.swift": 1]
+        )
+    }
+
+    @Test("the live read is handed the filed verdict")
+    func readForwardsTheVerdict() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent("OS/NativeSpaces.swift")
+        )
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: "public static func currentSpaceIsUser(\n"
+                    + "        display: DisplayID,",
+                in: source
+            )
+        )
+        #expect(body.occurrences(of: "filed: filed") == 1)
     }
 
     @Test("the stand-down reads the filed verdict")

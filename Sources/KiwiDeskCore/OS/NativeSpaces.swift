@@ -186,7 +186,7 @@ public enum NativeSpaces {
     /// Whether space on display is a user desktop.
     public static func currentSpaceIsUser(
         display: DisplayID,
-        filed: [String: Bool] = [:]
+        filed: [String: Bool]
     ) -> Bool {
         #if DEBUG
             if let override = currentSpaceIsUserOverride {
@@ -208,7 +208,14 @@ public enum NativeSpaces {
         live: (String) -> Bool
     ) -> Bool {
         guard let uuid else { return true }
-        return filed[uuid] ?? live(uuid)
+        return shownEntry(filed, screen: uuid) ?? live(uuid)
+    }
+
+    /// The entry a Desktop reading filed for the screen `uuid`
+    /// names. Shared Spaces key the one managed display by a
+    /// synthetic id that names no screen, so a lone entry answers.
+    static func shownEntry<T>(_ map: [String: T], screen uuid: String) -> T? {
+        map[uuid] ?? (map.count == 1 ? map.first?.value : nil)
     }
 
     #if DEBUG
