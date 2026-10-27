@@ -65,10 +65,7 @@ extension KiwiCore {
         // Equal cells under the floor cascade the whole Space:
         // the grid draws no tracks to divide.
         guard
-            let shape = GridLayout.shape(
-                count: tiled.count,
-                in: context
-            )
+            let shape = GridLayout.shape(for: tiled, in: context)
         else {
             refuseNothingToDivide(window, otherAxisDivides: false)
             return .fail("the grid is a single pile")

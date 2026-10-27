@@ -4398,6 +4398,17 @@ too small for even one cell. The names stay: `set_dimensions`
 already meant "up to" for a dynamic grid, nothing stored changes
 value, and the Settings rows read "Column limit" and "Row limit".
 
+*The cap is the largest floor among the windows (#2687).* An
+app that will not shrink below its own minimum — learned from its
+refusals, as every layout learns it — lowers the grid's columns or
+rows, fixed or auto-sized, until it fits a cell; the grid grows
+back when that window leaves. A cap read from `min_window_size`
+alone laid cells no such window could take, so it overflowed its
+cell and covered its neighbours (owner, 2026-10-27, on a laptop
+screen). The floor is learned only from a refused ask, so the
+first layout after such a window arrives can be wrong for one
+pass, then heals.
+
 *The scrolling track is as deep as its widest member needs.*
 Across the scroll axis the last track takes the largest learned
 minimum of all its members, hidden ones included, as a Track
