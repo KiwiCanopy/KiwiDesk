@@ -79,11 +79,9 @@ enum HomeCardContent {
         case .layoutDefaults:
             return Self.layoutSubtitle(settings)
         case .screens:
-            return L(
-                "home.card.monitors.subtitle",
-                "%1$d connected · %2$d Spaces pinned",
-                model.displays.count,
-                model.config.spacePins.count
+            return Self.screensSubtitle(
+                displayCount: model.displays.count,
+                pinCount: model.config.spacePins.count
             )
         case .shortcuts:
             return L(
@@ -267,27 +265,4 @@ extension HomeCardContent {
                 dim
             )
     }
-
-    /// Layout Standards' line: the minimum window size every layout
-    /// shares, or that layouts differ (#2237).
-    static func layoutSubtitle(_ settings: TilingSettings) -> String {
-        let sizes = settings.minWindowSizes
-        guard let width = sizes.shared(.width),
-            let height = sizes.shared(.height)
-        else {
-            return L(
-                "home.card.layout.subtitle_mixed",
-                "Modes: %1$d · min window size per layout",
-                LayoutMode.allCases.count
-            )
-        }
-        return L(
-            "home.card.layout.subtitle_size",
-            "Modes: %1$d · min window %2$d × %3$d pt",
-            LayoutMode.allCases.count,
-            Int(width),
-            Int(height)
-        )
-    }
-
 }

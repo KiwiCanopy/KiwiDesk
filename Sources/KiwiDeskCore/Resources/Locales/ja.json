@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "必須項目はすべて完了",
   "home.card.mac_checklist.subtitle": "必須項目の完了: %2$d個中%1$d個",
   "home.card.monitors.subtitle": "%1$d台接続中 · %2$d個のスペースを固定",
+  "home.card.monitors.subtitle_single": "画面1台 · もう1台接続するとスペースを配置できます",
   "home.card.profiles.none": "プロファイルはまだありません — ここから開始",
   "home.card.profiles.subtitle": "%1$d個保存済み · デフォルトは%2$@",
   "home.card.profiles.subtitle_no_default": "%1$d個保存済み",

@@ -175,9 +175,8 @@ struct SettingsView: View {
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the grid's offer
             // filter and the onChange repair, which only fires on
-            // editing-flag transitions: links refuse what the
-            // stored-profile axis hides, never a card the screen
-            // count hides (#2654).
+            // editing-flag transitions: links refuse only what the
+            // stored-profile axis hides (#2690).
             guard
                 destination.isReachable(
                     editingStoredProfile:

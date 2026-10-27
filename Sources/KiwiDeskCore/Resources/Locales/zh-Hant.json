@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "必要設定已全部完成",
   "home.card.mac_checklist.subtitle": "必要設定已完成：%2$d 項中的 %1$d 項",
   "home.card.monitors.subtitle": "已連接 %1$d 部 · 已釘選 %2$d 個空間",
+  "home.card.monitors.subtitle_single": "1 部螢幕 · 連接另一部以放置空間",
   "home.card.profiles.none": "尚無描述檔 — 從這裡開始",
   "home.card.profiles.subtitle": "已儲存 %1$d 個 · %2$@ 為預設",
   "home.card.profiles.subtitle_no_default": "已儲存 %1$d 個",

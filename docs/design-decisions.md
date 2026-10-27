@@ -10162,15 +10162,14 @@ Customize… as a second door. A right-click menu as a row's only
 door is invisible at rest — the owner could not find it — while
 title matching is a choice inside a menu the user already sees.
 
-**Screens is a capability, not a depth.**
-`SettingsArea.isAvailable(displayCount:)` keeps its card off
-Home on a one-screen Mac, computed at read so a disconnect
-cannot strand a stored flag, and with no selection repair: an
-unplugged screen never pops the open page. Search and links
-still land there, because the page holds the pins and
-fingerprints of screens that are not connected, and an
-undocked laptop is exactly when a user goes looking — so the
-link guard consults the stored-profile axis only.
+**Screens shows on any screen count** (#2690, owner ruling
+2026-10-27, amending this entry). Hiding its Home card on a
+one-screen Mac as a capability was refused: on a laptop a user
+would never meet the page at all. The card is live, not greyed: the
+page holds the pins and fingerprints of screens that are not
+connected, search and links already landed there, and no Home
+card greys. On one screen with nothing pinned, its subtitle
+invites a second screen instead of counting zeros.
 
 The retired preference leaves its `settingsMode` key in the
 app's `UserDefaults` unread. That key is a display choice, not a
