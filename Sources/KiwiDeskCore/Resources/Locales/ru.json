@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Перейти в пространство",
   "shortcuts.group.ax": "Группа сочетаний клавиш для %1$@",
   "shortcuts.group.built_in": "Встроенные группы сочетаний клавиш",
+  "shortcuts.group.name_placeholder": "Название группы",
   "shortcuts.group.new": "Новая группа сочетаний клавиш…",
   "shortcuts.group.own": "Твои группы сочетаний клавиш",
   "shortcuts.held_space.note": "Сочетания клавиш перенесённого пространства исчезают, когда перенос заканчивается.",

@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Vai allo spazio",
   "shortcuts.group.ax": "Gruppo di scorciatoie per %1$@",
   "shortcuts.group.built_in": "Gruppi di scorciatoie integrati",
+  "shortcuts.group.name_placeholder": "Nome del gruppo",
   "shortcuts.group.new": "Nuovo gruppo di scorciatoie…",
   "shortcuts.group.own": "I tuoi gruppi di scorciatoie",
   "shortcuts.held_space.note": "Le scorciatoie di uno spazio conservato spariscono quando non è più conservato.",

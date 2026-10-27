@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Gehe zu Space",
   "shortcuts.group.ax": "Tastenkürzel-Gruppe für %1$@",
   "shortcuts.group.built_in": "Integrierte Tastenkürzel-Gruppen",
+  "shortcuts.group.name_placeholder": "Gruppenname",
   "shortcuts.group.new": "Neue Tastenkürzel-Gruppe…",
   "shortcuts.group.own": "Deine Tastenkürzel-Gruppen",
   "shortcuts.held_space.note": "Die Tastenkürzel eines übernommenen Space verschwinden, sobald er nicht mehr übernommen ist.",

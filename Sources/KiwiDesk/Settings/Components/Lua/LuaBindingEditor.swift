@@ -56,10 +56,20 @@ struct LuaBindingEditor: View {
                 text: typed,
                 spokenName: spokenName,
                 placeholder: placeholder,
-                takesFocus: true
+                takesFocus: true,
+                inset: Self.textInset
             )
             .frame(minHeight: 150)
             .overlay(alignment: .topLeading) { placeholderText }
+            // The container's edge, so the box reads as one (#2688).
+            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .strokeBorder(
+                        SettingsTheme.hairline,
+                        lineWidth: SettingsTheme.containerStroke
+                    )
+            )
             HStack {
                 actionsLink
                 Spacer()
@@ -75,13 +85,17 @@ struct LuaBindingEditor: View {
         .frame(width: 460)
     }
 
+    /// The text's room inside the bordered box (#2688).
+    static let textInset = NSSize(width: 6, height: 6)
+
     @ViewBuilder private var placeholderText: some View {
         if text.isEmpty {
             Text(placeholder)
                 .font(.system(size: 12, design: .monospaced))
                 .foregroundStyle(SettingsTheme.ink3)
-                // NSTextView's line fragment padding.
-                .padding(.leading, 5)
+                // Past NSTextView's 5 pt line fragment padding.
+                .padding(.leading, Self.textInset.width + 5)
+                .padding(.top, Self.textInset.height)
                 .allowsHitTesting(false)
                 .accessibilityHidden(true)
         }

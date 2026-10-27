@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "공간으로 이동",
   "shortcuts.group.ax": "%1$@의 단축키 그룹",
   "shortcuts.group.built_in": "내장 단축키 그룹",
+  "shortcuts.group.name_placeholder": "그룹 이름",
   "shortcuts.group.new": "새 단축키 그룹…",
   "shortcuts.group.own": "내 단축키 그룹",
   "shortcuts.held_space.note": "가져온 공간의 단축키는 가져온 상태가 끝나면 삭제됩니다.",

@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Ir para o espaço",
   "shortcuts.group.ax": "Grupo de atalhos para %1$@",
   "shortcuts.group.built_in": "Grupos de atalhos integrados",
+  "shortcuts.group.name_placeholder": "Nome do grupo",
   "shortcuts.group.new": "Novo grupo de atalhos…",
   "shortcuts.group.own": "Seus grupos de atalhos",
   "shortcuts.held_space.note": "Os atalhos de um espaço mantido somem quando ele deixa de ser mantido.",

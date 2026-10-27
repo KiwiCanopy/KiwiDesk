@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "スペースへ移動",
   "shortcuts.group.ax": "%1$@のショートカットグループ",
   "shortcuts.group.built_in": "内蔵のショートカットグループ",
+  "shortcuts.group.name_placeholder": "グループ名",
   "shortcuts.group.new": "新規ショートカットグループ…",
   "shortcuts.group.own": "自分のショートカットグループ",
   "shortcuts.held_space.note": "引き継いだスペースのショートカットは、引き継ぎが終わると削除されます。",

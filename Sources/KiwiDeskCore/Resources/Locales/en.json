@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Go to Space",
   "shortcuts.group.ax": "Shortcut group for %1$@",
   "shortcuts.group.built_in": "Built-in shortcut groups",
+  "shortcuts.group.name_placeholder": "Group name",
   "shortcuts.group.new": "New shortcut group…",
   "shortcuts.group.own": "Your shortcut groups",
   "shortcuts.held_space.note": "A held Space's shortcuts go when its hold ends.",

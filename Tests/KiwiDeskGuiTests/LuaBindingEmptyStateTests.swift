@@ -43,6 +43,12 @@ struct LuaBindingEmptyStateTests {
         #expect(editor.contains("iftext.isEmpty{Text(placeholder)"))
         #expect(editor.contains("placeholder:placeholder,takesFocus:true"))
         #expect(editor.contains("Button(action:ActionsListLink.open)"))
+        #expect(
+            editor.contains(
+                "{placeholderText}.clipShape(RoundedRectangle("
+            )
+        )
+        #expect(editor.contains(".strokeBorder(SettingsTheme.hairline,"))
         let row = try Self.source(
             "Components/Lua/AdvancedLuaGroup+Row.swift"
         )
@@ -57,6 +63,21 @@ struct LuaBindingEmptyStateTests {
         let text = try Self.source("Components/Lua/LuaEditorTab.swift")
         #expect(text.contains("setAccessibilityPlaceholderValue(placeholder)"))
         #expect(text.contains("iftakesFocus{"))
+        #expect(text.contains("textView.textContainerInset=inset"))
+        #expect(editor.contains("takesFocus:true,inset:Self.textInset"))
+    }
+
+    /// A group being named reads as a name to type, never as
+    /// Custom, which picks no group.
+    @Test("a new shortcut group's empty field does not read Custom")
+    func newGroupPlaceholder() throws {
+        let field = try Self.source(
+            "Components/Lua/ShortcutGroupField.swift"
+        )
+        #expect(field.contains("TextField(placeholder,text:$text)"))
+        #expect(
+            field.contains("startedNew?L(\"shortcuts.group.name_placeholder\"")
+        )
     }
 
     /// The page ends with the pill's room while it floats, and Add

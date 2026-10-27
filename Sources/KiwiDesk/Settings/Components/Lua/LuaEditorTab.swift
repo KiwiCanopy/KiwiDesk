@@ -164,6 +164,8 @@ struct LuaSourceEditor: NSViewRepresentable {
     var placeholder: String?
     /// Whether the text view takes the caret once it is in a window.
     var takesFocus = false
+    /// Room between the text and the editor's edge.
+    var inset = NSSize.zero
 
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text)
@@ -175,6 +177,7 @@ struct LuaSourceEditor: NSViewRepresentable {
         else { return scroll }
         textView.delegate = context.coordinator
         textView.isRichText = false
+        textView.textContainerInset = inset
         textView.font = .monospacedSystemFont(
             ofSize: 12,
             weight: .regular

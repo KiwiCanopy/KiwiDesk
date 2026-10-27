@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "前往空間",
   "shortcuts.group.ax": "%1$@的快速鍵群組",
   "shortcuts.group.built_in": "內建快速鍵群組",
+  "shortcuts.group.name_placeholder": "群組名稱",
   "shortcuts.group.new": "新增快速鍵群組…",
   "shortcuts.group.own": "你的快速鍵群組",
   "shortcuts.held_space.note": "保留的空間的快速鍵會在保留結束時移除。",

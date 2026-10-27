@@ -18,7 +18,8 @@ struct ShortcutGroupFieldTests {
             uniqueKeysWithValues: ShortcutGroup.allCases.map {
                 ($0, "Title of \($0.rawValue)")
             }
-        )
+        ),
+        custom: "Title of custom"
     )
 
     @Test("a built-in group shows its title")
@@ -27,10 +28,12 @@ struct ShortcutGroupFieldTests {
         #expect(naming.shown(" Layout ") == "Title of layout")
     }
 
-    @Test("a user's group shows as written, none shows empty")
+    /// No group reads as Custom in full ink, a value rather than
+    /// the field's grey hint (#2688).
+    @Test("a user's group shows as written, none shows Custom")
     func ownShowsAsWritten() {
         #expect(naming.shown("Move and follow") == "Move and follow")
-        #expect(naming.shown("  ") == "")
+        #expect(naming.shown("  ") == "Title of custom")
     }
 
     @Test("a typed title, any case, stores the token")
@@ -49,6 +52,15 @@ struct ShortcutGroupFieldTests {
     func otherNameIsOwn() {
         #expect(naming.stored(" Swap and follow ") == "Swap and follow")
         #expect(naming.stored("   ") == "")
+    }
+
+    /// Custom shown as text must not come back as a group named
+    /// Custom when typed or left in the field.
+    @Test("typed Custom, any case, stores none")
+    func typedCustomIsNone() {
+        #expect(naming.stored(" title of CUSTOM ") == "")
+        #expect(naming.committed("Title of custom", over: "focus") == "")
+        #expect(naming.committed(naming.shown(""), over: "") == "")
     }
 
     /// An own group named like a built-in title — Lua files it by

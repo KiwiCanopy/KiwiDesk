@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "前往空间",
   "shortcuts.group.ax": "%1$@的快捷键分组",
   "shortcuts.group.built_in": "内置快捷键分组",
+  "shortcuts.group.name_placeholder": "分组名称",
   "shortcuts.group.new": "新建快捷键分组…",
   "shortcuts.group.own": "你的快捷键分组",
   "shortcuts.held_space.note": "保留的空间的快捷键会在保留结束时移除。",

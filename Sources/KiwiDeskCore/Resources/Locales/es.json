@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Ir al espacio",
   "shortcuts.group.ax": "Grupo de atajos para %1$@",
   "shortcuts.group.built_in": "Grupos de atajos integrados",
+  "shortcuts.group.name_placeholder": "Nombre del grupo",
   "shortcuts.group.new": "Nuevo grupo de atajos…",
   "shortcuts.group.own": "Tus grupos de atajos",
   "shortcuts.held_space.note": "Los atajos de un espacio conservado desaparecen cuando deja de conservarse.",

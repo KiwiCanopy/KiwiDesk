@@ -1963,6 +1963,7 @@
   "shortcuts.go_to_space": "Aller à l'espace",
   "shortcuts.group.ax": "Groupe de raccourcis pour %1$@",
   "shortcuts.group.built_in": "Groupes de raccourcis intégrés",
+  "shortcuts.group.name_placeholder": "Nom du groupe",
   "shortcuts.group.new": "Nouveau groupe de raccourcis…",
   "shortcuts.group.own": "Vos groupes de raccourcis",
   "shortcuts.held_space.note": "Les raccourcis d'un espace repris disparaissent quand il cesse d'être repris.",
