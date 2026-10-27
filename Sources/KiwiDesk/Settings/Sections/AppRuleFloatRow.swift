@@ -9,10 +9,6 @@ struct AppRuleFloatRow: View {
     let app: String
     /// Whether the section draws the "Applies to" column (#1393).
     let showsReach: Bool
-    /// Whether the scope menu offers title matching, resolved ONCE
-    /// by the section: the predicate has one home, and so must its
-    /// input (`AppRuleTitleOfferWiringTests`).
-    let offersTitles: Bool
     /// The app whose pattern editor is open, owned by the section
     /// so the row survives having no stored rule while it composes
     /// its first pattern (#1022).
@@ -92,9 +88,7 @@ struct AppRuleFloatRow: View {
     private var floatMenu: some View {
         Menu {
             Button(allLabel) { setAll() }
-            if offersTitles {
-                Button(titledLabel) { openTitles() }
-            }
+            Button(titledLabel) { openTitles() }
         } label: {
             AppRuleMenuLabel(text: floatLabel)
         }

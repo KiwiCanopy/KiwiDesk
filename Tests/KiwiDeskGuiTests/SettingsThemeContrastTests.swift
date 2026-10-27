@@ -287,7 +287,7 @@ struct SettingsThemeContrastTests {
             on: SettingsTheme.card,
             washedWith: (
                 SettingsTheme.accent,
-                Double(SettingsTheme.searchNoticeFillOpacity)
+                Double(SettingsTheme.noticeFillOpacity)
             )
         ),
     ]

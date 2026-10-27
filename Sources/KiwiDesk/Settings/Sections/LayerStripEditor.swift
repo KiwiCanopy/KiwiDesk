@@ -18,8 +18,7 @@ struct LayerStripEditor: View {
                 .foregroundStyle(.secondary)
             LayerHeader(model: model, selected: $selected) {
                 selected = KeyLayer.defaultName
-                focusedChip =
-                    stripSurvivesDeletion ? KeyLayer.defaultName : nil
+                focusedChip = KeyLayer.defaultName
             }
         }
     }
@@ -126,14 +125,5 @@ struct LayerStripEditor: View {
         selected = name
         newLayer = ""
         addingLayer = false
-    }
-
-    /// Focus follows selection or clears if card disappears (#816,
-    /// code review 2026-08-12).
-    private var stripSurvivesDeletion: Bool {
-        LayersCard.isOffered(
-            config: model.config,
-            mode: model.settingsMode
-        )
     }
 }

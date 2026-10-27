@@ -28,19 +28,17 @@ extension SpacesSection {
     }
 
     /// Per-row override cell opening the full-pane editor (#678
-    /// 8b). Wording turns on the mode (owner ruling 2026-08-04):
+    /// 8b). Wording turns on the layout (owner ruling 2026-08-04):
     /// tiled counts read "N custom"; Floating reads a muted "N
     /// saved" that still opens the editor (grey, don't hide).
-    /// Withheld entirely while the offer is locked (#678 8c) —
-    /// `SpaceOverrideOffer` owns that predicate, gated HERE at the
-    /// one render site so the row never holds a second copy (the
-    /// hand-negated-copy drift `HomeCardOrder.isOffered` prevents
-    /// one level up).
+    /// Withheld until some Space carries an override (#678 8c,
+    /// #2654) — `SpaceOverrideOffer` owns that predicate, gated
+    /// HERE at the one render site; the row's actions menu always
+    /// offers the editor.
     @ViewBuilder func customizeButton(
         _ space: SpaceID
     ) -> some View {
         if SpaceOverrideOffer.isOffered(
-            mode: model.settingsMode,
             settings: model.config.settings,
             spaces: model.config.spaces
         ) {
@@ -203,6 +201,12 @@ extension SpacesSection {
     /// Context menu actions for space row reordering and role assignments.
     @ViewBuilder
     func contextActions(_ space: SpaceID) -> some View {
+        // The editor's door on every row, before any override
+        // exists as after (#2654).
+        Button(L("spaces.overrides.customize", "Customize…")) {
+            model.nav.spaceOverridesFocus = space
+        }
+        Divider()
         if model.config.fallbackSpace == space {
             Button(
                 L("spaces.context.clear_fallback", "Clear Fallback")

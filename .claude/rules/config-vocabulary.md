@@ -462,12 +462,9 @@ synonym:
   the drawn thing is called (`background_style`).
 - **layer** — a named alternate keybinding set; only the active
   one fires (`KeyLayer`, `config.layers`, `define_layer` /
-  `switch_layer`). Retired as a name for it: *mode*. That word
-  is spoken for twice over — a space's layout (`LayoutMode`,
-  `space_modes`) and the Settings window's Simple/Power-User depth —
-  so a third sense made "switch mode" ambiguous three ways.
-  Reserve *mode* for those two; the ruling is
-  `docs/design-decisions.md` ▸ Shortcuts.
+  `switch_layer`). Retired as a name for it: *mode*, which a
+  space's layout spends (`LayoutMode`, `space_modes`); the
+  ruling is `docs/design-decisions.md` ▸ Shortcuts.
 - **cascade level** — one step of the global ← profile
   resolution. Say this, not "layer", now that *layer* names the
   keybinding set (`docs/lua-reference.md`'s Config Cascade

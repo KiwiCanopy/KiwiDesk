@@ -6,7 +6,9 @@ import SwiftUI
 /// what the recorded key now does; the `?` teaches (gui.md, #94).
 @MainActor
 enum HyperKeyWords {
-    static var title: String { SettingsCatalog.shortcuts.hyperKey.text }
+    static var title: String {
+        SettingsCatalog.shortcuts.modifierKeys.children.hyperKey.text
+    }
 
     static var help: String {
         L(

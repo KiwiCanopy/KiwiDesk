@@ -33,6 +33,9 @@ struct LayerHeader: View {
                         )
                         .disabled(model.layerLockedHere(selected))
                     }
+                    .searchAnchored(
+                        SettingsCatalog.shortcuts.layersCard.children.reach
+                    )
                 }
                 actions(reading)
             }
@@ -45,9 +48,14 @@ struct LayerHeader: View {
 
     private func actions(_ reading: RuleReachReading?) -> some View {
         HStack(spacing: 10) {
-            Text(L("shortcuts.menu_bar_icon", "Menu bar icon"))
-                .foregroundStyle(.secondary)
-            IconPicker(icon: iconBinding, preview: .menuBar)
+            HStack(spacing: 10) {
+                Text(L("shortcuts.menu_bar_icon", "Menu bar icon"))
+                    .foregroundStyle(.secondary)
+                IconPicker(icon: iconBinding, preview: .menuBar)
+            }
+            .searchAnchored(
+                SettingsCatalog.shortcuts.layersCard.children.menuBarIcon
+            )
             Spacer()
             if model.layerLockedHere(selected) {
                 Text(LayerReachWords.storedPage)

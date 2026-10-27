@@ -77,7 +77,8 @@ extension KeyRecorderField {
             Button(L("key_recorder.go_to", "Go to")) {
                 conflictPopoverShown = false
                 coordinator.scrollTarget =
-                    SettingsCatalog.shortcuts.modifierSides.id
+                    SettingsCatalog.shortcuts.modifierKeys.children
+                    .modifierSides.id
             }
             .buttonStyle(.link)
             .font(.callout)

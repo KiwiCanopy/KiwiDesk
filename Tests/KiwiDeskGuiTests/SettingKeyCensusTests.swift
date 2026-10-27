@@ -119,10 +119,8 @@ struct SettingKeyCensusTests {
         #expect(gated > 0)
     }
 
-    /// No container is empty in either mode. A container's mode
-    /// is its area's (`SettingsArea.minimumMode` — mode depth
-    /// is per area, never per row), so the reduction is: every
-    /// declared container carries at least one surfaced row.
+    /// Every declared container carries at least one surfaced
+    /// row.
     /// A container case nothing places into would render as an
     /// empty card the day views generate from the census.
     @Test func noContainerIsEmpty() {

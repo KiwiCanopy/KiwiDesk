@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 import Testing
 
@@ -7,19 +8,12 @@ import Testing
 /// `ShortcutsCapabilityUnlockTests`, which pins the same rules for
 /// the shortcut override column.
 ///
-/// The defect this closes: `Customize…` rendered on every space
-/// row in BOTH modes, and the editor behind it exposes the
-/// per-layout parameters that the `.powerUser`-only Layout
-/// Defaults area withholds from Simple — so Simple reached the
-/// Advanced surface through a side door.
-///
-/// The trap, stated by the shortcuts suite and equally live here:
-/// the cheapest implementation is to gate on the MODE alone. That
-/// passes any test that only ever checks Simple-with-nothing and
-/// Power-User-with-nothing, and it silently strands a Simple user
-/// who already has overrides — they could neither see nor clear
-/// them. Every test below therefore names which of the three
-/// properties it is holding.
+/// The trap: the cheapest gate is per ROW (`count > 0` for the
+/// row's own Space), which strands every peer of the one Space
+/// that carries an override. Every test below names which
+/// property it holds. Until any override exists the editor opens
+/// from each row's actions menu (#2654), so the button's absence
+/// hides nothing.
 ///
 /// Two properties are deliberately NOT tested here, because a
 /// test of either would assert what the type system already says
@@ -54,26 +48,37 @@ struct SpaceOverrideUnlockTests {
         return settings
     }
 
-    // MARK: - The offer is withheld until it is earned
+    // MARK: - The button is withheld until it is earned
 
-    @Test("Simple with no override anywhere withholds the offer")
-    func simpleWithoutOverridesIsLocked() {
+    @Test("no override anywhere withholds the button")
+    func withoutOverridesIsLocked() {
         #expect(
             !SpaceOverrideOffer.isOffered(
-                mode: .simple,
                 settings: settings(overriding: nil),
                 spaces: spaces
             )
         )
     }
 
-    @Test("Power User always offers it, overrides or not")
-    func powerUserIsAlwaysOffered() {
+    /// The door that keeps the editor reachable meanwhile: the
+    /// row's actions menu, which every channel reads.
+    @Test("the row menu opens the editor before any override")
+    func rowMenuOpensTheEditor() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Sections/"
+                    + "SpacesSection+Customize.swift"
+            )
+        let raw = try String(contentsOf: url, encoding: .utf8)
+        let body = SourceScan.stripComments(raw)
+            .split(whereSeparator: \.isWhitespace).joined()
+        #expect(!body.isEmpty)
         #expect(
-            SpaceOverrideOffer.isOffered(
-                mode: .powerUser,
-                settings: settings(overriding: nil),
-                spaces: spaces
+            body.contains(
+                "funccontextActions(_space:SpaceID)->someView{"
+                    + "Button(L(\"spaces.overrides.customize\","
+                    + "\"Customize…\")){"
+                    + "model.nav.spaceOverridesFocus=space}"
             )
         )
     }
@@ -92,7 +97,6 @@ struct SpaceOverrideUnlockTests {
         let settings = settings(overriding: spaces[1])
         #expect(
             SpaceOverrideOffer.isOffered(
-                mode: .simple,
                 settings: settings,
                 spaces: spaces
             ),
@@ -101,10 +105,9 @@ struct SpaceOverrideUnlockTests {
         // And it is the LIST that is consulted, not the space:
         // asking with only an unoverridden space present is the
         // locked answer, so the true above came from the list
-        // rather than from the mode leaking through.
+        // rather than from some other input leaking through.
         #expect(
             !SpaceOverrideOffer.isOffered(
-                mode: .simple,
                 settings: settings,
                 spaces: [spaces[0]]
             ),
@@ -119,7 +122,6 @@ struct SpaceOverrideUnlockTests {
         var live = settings(overriding: spaces[1])
         #expect(
             SpaceOverrideOffer.isOffered(
-                mode: .simple,
                 settings: live,
                 spaces: spaces
             )
@@ -127,31 +129,10 @@ struct SpaceOverrideUnlockTests {
         live.bsp.override[spaces[1]] = nil
         #expect(
             !SpaceOverrideOffer.isOffered(
-                mode: .simple,
                 settings: live,
                 spaces: spaces
             ),
             "the offer must collapse with the last override"
         )
     }
-
-    // MARK: - The mode never changes what runs
-
-    /// A Simple user who already has overrides must still reach
-    /// them — this is the arm the mode-only gate strands, and the
-    /// reason the predicate consults saved state rather than the
-    /// mode alone.
-    @Test("saved overrides stay reachable in Simple")
-    func savedOverridesStayReachableInSimple() {
-        let settings = settings(overriding: spaces[0])
-        #expect(
-            SpaceOverrideOffer.isOffered(
-                mode: .simple,
-                settings: settings,
-                spaces: spaces
-            ),
-            "a Simple user with overrides must still reach them"
-        )
-    }
-
 }

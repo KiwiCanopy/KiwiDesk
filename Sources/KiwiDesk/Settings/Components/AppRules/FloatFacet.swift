@@ -5,9 +5,7 @@ import KiwiDeskCore
 /// The colon is the pattern marker, as the engine reads it: a
 /// bundle identifier cannot contain one, so `app` floats every
 /// window and `app:fragment` floats the windows whose title
-/// contains that fragment. `AppRuleTitleOffer` reads the same
-/// marker to decide whether the titled choice is offered, and
-/// `AppRuleTitleOfferTests` pins the two agreeing. A rule's app
+/// contains that fragment. A rule's app
 /// is keyed through `FloatRules.app(of:)`, the engine's own
 /// case-folded key (#2345).
 enum FloatFacet: Equatable {
@@ -18,9 +16,7 @@ enum FloatFacet: Equatable {
     /// Whether a float rule matches by title rather than floating
     /// every window, read through the engine's own
     /// `FloatRules.parse` (#2345). The one spelling of the marker
-    /// test, so `AppRuleTitleOffer` cannot read the colon
-    /// differently from `current(_:app:)` (architect review,
-    /// 2026-09-22).
+    /// test (architect review, 2026-09-22).
     static func isTitled(_ rule: String) -> Bool {
         FloatRules.title(of: rule) != nil
     }

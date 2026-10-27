@@ -67,8 +67,7 @@ struct HomeCard: View {
     /// empty-preview card does (#1610).
     private func textBand(plated: Bool) -> some View {
         VStack(alignment: .leading, spacing: 5) {
-            // Mode reveal wash restricted to title row (#760).
-            titleRow.modeRevealWash(modeGated)
+            titleRow
             if let preview = HomeCardPreview.preview(
                 for: destination,
                 model: model
@@ -105,17 +104,6 @@ struct HomeCard: View {
         HomeCardContent.conflictShout(
             for: destination,
             model: model
-        )
-    }
-
-    /// Whether destination is gated under Simple mode
-    /// (`HomeCardOrderTests`, #760).
-    private var modeGated: Bool {
-        !HomeCardOrder.isOffered(
-            destination,
-            mode: .simple,
-            displayCount: model.displays.count,
-            editingStoredProfile: model.editingStoredProfile
         )
     }
 
@@ -157,47 +145,27 @@ struct HomeCard: View {
             )
     }
 
-    /// The mode's channel, and only the mode's — a pointer
-    /// state on this edge erases the #760 marking of the card
-    /// it points at (#1173).
+    /// The card's edge; the pointer lifts the fill, never this
+    /// (#1173).
     private var cardStroke: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .strokeBorder(
-                modeGated
-                    ? SettingsTheme.accent.opacity(
-                        SettingsTheme.modeGatedStrokeOpacity
-                    )
-                    : SettingsTheme.hairline,
-                lineWidth: modeGated
-                    ? SettingsTheme.containerStrokeModeGated
-                    : SettingsTheme.containerStroke
+                SettingsTheme.hairline,
+                lineWidth: SettingsTheme.containerStroke
             )
             .allowsHitTesting(false)
     }
 
     /// One positional frame, never a hard-coded ", ": the joiner
     /// between two localized statements is the translator's (CJK
-    /// wants 、/，). VoiceOver hears the mode fact here or nowhere
-    /// (#760), off the segment's own label key.
+    /// wants 、/，).
     private var axValue: String {
-        let base =
-            if let shout {
-                L(
-                    "home.card.ax_value",
-                    "%1$@, %2$@",
-                    subtitle,
-                    shout
-                )
-            } else {
-                subtitle
-            }
-        // Power user mode narration (#760, ui-designer).
-        guard modeGated else { return base }
+        guard let shout else { return subtitle }
         return L(
             "home.card.ax_value",
             "%1$@, %2$@",
-            base,
-            L("mode.power_user", "Power User")
+            subtitle,
+            shout
         )
     }
 }

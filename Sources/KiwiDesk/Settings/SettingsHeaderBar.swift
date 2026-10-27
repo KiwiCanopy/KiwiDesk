@@ -6,8 +6,6 @@ struct SettingsHeaderBar: View {
     @ObservedObject var model: SettingsModel
     @State private var searchExpanded = false
     @Environment(\.settingsWidth) private var width
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
 
     private var destination: SettingsDestination? {
         model.destination
@@ -88,14 +86,12 @@ struct SettingsHeaderBar: View {
                 value: { [weak model] key in
                     model?.searchValue(for: key)
                 },
-                reveal: { model.nav.pendingReveal = $0 },
-                armModeNotice: { model.nav.pendingModeNotice = $0 }
+                reveal: { model.nav.pendingReveal = $0 }
             )
             .id(destination)
             if showsProfileContext {
                 profileChip
             }
-            modeSegment
         }
         .padding(.leading, SettingsHeaderBar.trafficLightInset)
         // The search panel's room ends at this row's trailing edge.
@@ -144,29 +140,4 @@ struct SettingsHeaderBar: View {
     private var profileChip: some View {
         ProfileEditTargetMenu(model: model)
     }
-
-    /// Mode segment picker triggering mode reveal wash (#760, #823).
-    private var modeSegment: some View {
-        SegmentedPicker(
-            selection: Binding(
-                get: { model.settingsMode },
-                set: {
-                    model.flipSettingsMode(
-                        $0,
-                        reduceMotion: reduceMotion
-                    )
-                }
-            ),
-            options: [
-                (L("mode.simple", "Simple"), SettingsMode.simple),
-                (
-                    L("mode.power_user", "Power User"),
-                    SettingsMode.powerUser
-                ),
-            ]
-        )
-        .fixedSize()
-        .accessibilityLabel(L("home.mode_ax", "Settings mode"))
-    }
-
 }

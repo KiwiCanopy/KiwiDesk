@@ -40,7 +40,7 @@ struct WhatsNewTrailBanner: View {
             RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
                 .fill(
                     SettingsTheme.accent.opacity(
-                        SettingsTheme.searchNoticeFillOpacity
+                        SettingsTheme.noticeFillOpacity
                     )
                 )
         )

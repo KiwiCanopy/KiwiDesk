@@ -233,7 +233,8 @@ struct SettingsCatalogArgumentTests {
         // #2103, 123 #2379, 125 #2417, 126 #2237, 129 #761, 130 Show & hide,
         // 131 #2389, 132 #2497, 134 #2524, 141 #2507, 144 #2601. 142 #2593.
         // 144 #2655: the macOS Desktops section and its drawer.
-        #expect(direct.values.reduce(0, +) == 144)
+        // 148 #2654: Hyper key, Shortcuts use and two layer rows.
+        #expect(direct.values.reduce(0, +) == 148)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

@@ -12,9 +12,6 @@ struct AppRulesGates {
     enum InertReason: Hashable, CaseIterable {
         /// The profile declares no Space (`.spaces(.spaceList)`).
         case noSpaces
-        /// No float rule matches by title
-        /// (`.titlePatternsExist`).
-        case noTitlePatterns
         /// Automatic floating is off, so nothing floats
         /// on a guess for a Tile rule to change (#2173).
         case automaticOff
@@ -26,9 +23,6 @@ struct AppRulesGates {
         switch key {
         case .appRules(.appRules):
             return config.spaces.isEmpty ? .noSpaces : nil
-        case .appRules(.floatRulesPattern):
-            return config.floatRules.contains(where: FloatFacet.isTitled)
-                ? nil : .noTitlePatterns
         case .appRules(.tileRules), .appRules(.appRulesAddTile):
             return config.floatAutomatically ? nil : .automaticOff
         default:
@@ -44,13 +38,6 @@ struct AppRulesGates {
         inertReason(for: .appRules(.appRules)) != .noSpaces
     }
 
-    /// Whether any float rule the reader can see matches by
-    /// title.
-    var titlePatternsExist: Bool {
-        inertReason(for: .appRules(.floatRulesPattern))
-            != .noTitlePatterns
-    }
-
     /// Whether detection floats windows on a guess, which the Tile
     /// list needs to change anything.
     var automaticFloats: Bool {
@@ -61,7 +48,6 @@ struct AppRulesGates {
     /// (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
         .appRules(.appRules),
-        .appRules(.floatRulesPattern),
         .appRules(.tileRules),
         .appRules(.appRulesAddTile),
     ]

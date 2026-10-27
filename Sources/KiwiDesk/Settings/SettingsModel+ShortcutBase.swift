@@ -14,8 +14,8 @@ extension SettingsModel {
     }
 
     /// Whether the draft holds anything on Hyper — a row or the
-    /// base — which keeps the Hyper card in Simple with no key set,
-    /// since config presence expands Simple (gui.md).
+    /// base — which holds the Modifier keys card open on arrival
+    /// with no key set (config presence, gui.md).
     var draftUsesHyper: Bool {
         config.shortcutBase == .hyper
             || config.layers.contains {

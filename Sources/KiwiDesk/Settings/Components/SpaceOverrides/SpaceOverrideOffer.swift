@@ -1,24 +1,17 @@
 import KiwiDeskCore
 
-/// Controls visibility of the per-space override affordance
+/// Whether the per-space Customize button sits on the rows at rest
 /// (#678 8c, `ShortcutsCapabilityUnlockTests`). One override
 /// anywhere unlocks EVERY space row (a list-wide predicate, never
-/// per-row `count > 0`), the unlock reaches this list and nothing
-/// else, and the mode never changes what runs — saved overrides
-/// keep resolving in Simple. HIDDEN rather than greyed when
-/// withheld (owner ruling 2026-08-04): mode-withheld surface is
-/// absent everywhere in this window, since the mode adds surface
-/// rather than expanding it.
+/// per-row `count > 0`), and the unlock reaches this list and
+/// nothing else. Each row's actions menu opens the editor either
+/// way (#2654), so the button is HIDDEN rather than greyed.
 enum SpaceOverrideOffer {
-    /// Offered in Power User mode or when any space has existing overrides
-    /// (#678 8c).
     static func isOffered(
-        mode: SettingsMode,
         settings: TilingSettings,
         spaces: [SpaceID]
     ) -> Bool {
-        if mode == .powerUser { return true }
-        return spaces.contains {
+        spaces.contains {
             settings.spaceOverrideCount(for: $0) > 0
         }
     }

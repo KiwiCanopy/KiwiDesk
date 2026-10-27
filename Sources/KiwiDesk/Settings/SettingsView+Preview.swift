@@ -88,7 +88,7 @@ extension SettingsView {
                 .overlay(
                     ChipMetrics.shape.fill(
                         SettingsTheme.accent.opacity(
-                            SettingsTheme.searchNoticeFillOpacity
+                            SettingsTheme.noticeFillOpacity
                         )
                     )
                 )

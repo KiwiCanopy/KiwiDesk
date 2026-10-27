@@ -23,9 +23,10 @@ extension SettingsButtonStyleConventionTests {
     var unstyledExempt: [String: Exemption] {
         [
             "SpacesSection+Customize.swift": (
-                9, "deleteConfirmActions",
-                "Returned to a confirmationDialog / contextMenu, "
-                    + "plus one icon affordance"
+                10, "deleteConfirmActions",
+                "Returned to a confirmationDialog / contextMenu "
+                    + "(Customize… among them, #2654), plus one "
+                    + "icon affordance"
             ),
             // The one discard gate's verbs, returned to its
             // confirmationDialog per kind (#515, #2049).

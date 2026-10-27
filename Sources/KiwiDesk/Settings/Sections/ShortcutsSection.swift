@@ -180,39 +180,16 @@ struct ShortcutsSection: View {
             spaces: expander.liveSpaces,
             layers: model.config.layers.map(\.name)
         )
-        advancedDrawer
+        luaDrawer
     }
 
-    /// Withheld in Simple (owner ruling 2026-08-04): importing
-    /// bindings out of init.lua is not a first-week concept.
-    /// `hasCustomLua` is the FIRST term for `layersExist`'s
-    /// reason: someone whose init.lua already carries bindings
-    /// must not have the one surface that explains them hidden by
-    /// a mode they did not know they were in.
-    private func offersAdvancedDrawer(
-        in mode: SettingsMode
-    ) -> Bool {
-        model.hasCustomLua || mode == .powerUser
-    }
-
-    var offersAdvancedDrawer: Bool {
-        offersAdvancedDrawer(in: model.settingsMode)
-    }
-
-    @ViewBuilder private var advancedDrawer: some View {
-        if offersAdvancedDrawer {
-            luaDrawer
-        }
-    }
-
+    /// Shut until a layer carries a Lua binding, then open on
+    /// arrival — never swapped for an open card (#1125, #2654).
     private var luaDrawer: some View {
         SettingsDisclosure(
             SettingsCatalog.shortcuts.luaBindings,
             chrome: .card,
-            isExpanded: $advancedExpanded,
-            // One predicate at `.simple` (#760): with custom Lua
-            // present the drawer is Simple content, unmarked.
-            modeGated: !offersAdvancedDrawer(in: .simple)
+            isExpanded: $advancedExpanded
         ) {
             VStack(alignment: .leading, spacing: 8) {
                 Text(advancedDrawerCaption)
@@ -228,6 +205,12 @@ struct ShortcutsSection: View {
         }
         // Its jump chip's anchor (#2544).
         .reportsSectionFrame(SettingsCatalog.shortcuts.luaBindings.control)
+        .onAppear {
+            let gates = ShortcutsGates(config: model.config)
+            if gates.luaBindingsExist(in: selected) {
+                advancedExpanded = true
+            }
+        }
     }
 
     private var advancedDrawerCaption: String {

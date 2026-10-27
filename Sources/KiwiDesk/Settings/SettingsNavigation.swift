@@ -7,10 +7,6 @@ struct SettingsNavigation {
     /// shows lingers and resolves when the visual editor returns —
     /// the detail pane is where a scroll target can exist.
     var pendingReveal: SettingsAnchor?
-    /// Notification target for mode switch during search reveal
-    /// (#678 4c) — consumed by the SAME apply that flips the mode,
-    /// so a refused or superseded reveal announces nothing.
-    var pendingModeNotice: SettingsDestination?
     /// Active highlight flash state (#277).
     private(set) var flash: SettingsFlash?
     private var flashToken = 0

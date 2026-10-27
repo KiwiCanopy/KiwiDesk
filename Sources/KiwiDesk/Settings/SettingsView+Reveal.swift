@@ -16,22 +16,11 @@ extension SettingsView {
     func apply(_ request: SettingsAnchor?) {
         guard let request else { return }
         model.nav.pendingReveal = nil
-        // Taken unconditionally, so a REFUSED request cannot
-        // leave a stale arm for the next reveal to announce.
-        let armedNotice = model.nav.pendingModeNotice
-        model.nav.pendingModeNotice = nil
         guard
             let resolved = request.resolved(
                 editingStoredProfile: model.editingStoredProfile
             )
         else { return }
-        let wasSimple = model.settingsMode == .simple
-        ensureModeAdmits(resolved.destination)
-        if armedNotice != nil, wasSimple,
-            model.settingsMode == .powerUser
-        {
-            model.noteSearchModeSwitch(resolved.destination)
-        }
         model.destination = resolved.destination
         // Every KiwiVision anchor but the strip's lives on the
         // Default page, and a landing names no lens (#2103).
