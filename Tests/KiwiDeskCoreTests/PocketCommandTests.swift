@@ -36,6 +36,21 @@ struct PocketCommandTests {
         return core
     }
 
+    /// A screen for the active Space, which the pocket files the
+    /// window's frame under.
+    private func giveSpaceAScreen(_ core: KiwiCore) throws {
+        let display = DisplayID(1)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: display,
+                name: "Main",
+                frame: CGRect(x: 0, y: 0, width: 1728, height: 1117)
+            )
+        )
+        let active = try #require(core.state.workspaces.activeSpace)
+        core.state.workspaces.assign(active, to: display)
+    }
+
     private func isFiled(_ core: KiwiCore, _ id: WindowID) -> Bool {
         core.state.workspaces.space(of: id) != nil
     }
@@ -225,26 +240,31 @@ struct PocketCommandTests {
         #expect(core.state.pocketPhase(of: one) == .out)
     }
 
-    @Test("a first take-out lands at the float size, not the tile's")
+    @Test("a window pocketed from a tile comes out at the float size")
     func firstTakeOutFloats() throws {
         let core = makeCore()
+        try giveSpaceAScreen(core)
         core.execute("pocket")
         core.execute("pocket")
         let space = try #require(core.state.workspaces.activeSpace)
         let region = try #require(core.floatGrowBounds(on: space))
         let landed = try #require(core.tiler.stashedFrames[one])
-        #expect(landed.size == FloatPlacement.centered(in: region).size)
+        // The float placement read when it was pocketed: the float
+        // width, centred; its height follows the strips of that pass.
+        let float = FloatPlacement.centered(in: region)
+        #expect(landed.width == float.width)
+        #expect(abs(landed.midX - region.midX) < 1)
         #expect(landed.size != CGSize(width: 600, height: 400))
     }
 
-    @Test("a first take-out forgets the tile's learned size bound")
-    func firstTakeOutForgetsTheBound() {
+    @Test("becoming the pocket window forgets the tile's size bound")
+    func pocketingForgetsTheBound() throws {
         let core = makeCore()
+        try giveSpaceAScreen(core)
         var ledger = SizeBoundLearner.Ledger()
         ledger.width = [300, 500].map {
             EffectiveSizeBound.Axis(asked: $0, answered: 900)
         }
-        core.execute("pocket")
         core.tiler.boundLearner.bounds[one] = ledger
         core.execute("pocket")
         // The float size is no answer to a tiled ask (#677).

@@ -24,7 +24,17 @@ struct NavRow: View {
             Color.clear
                 .frame(width: SettingsMetrics.shortcutIconSlot)
                 .overlay {
-                    if let glyph = ShortcutsReferenceBuilder.icon(
+                    if command.lua == KeybindingCatalog.pocket.lua {
+                        // The mark itself, as the panel draws it.
+                        Image(
+                            nsImage: PocketMark.mark.image(
+                                size: 16,
+                                ink: .labelColor
+                            )
+                        )
+                        .frame(width: 16, height: 16)
+                        .accessibilityHidden(true)
+                    } else if let glyph = ShortcutsReferenceBuilder.icon(
                         for: command
                     ) {
                         IconGlyphLabel(icon: glyph)

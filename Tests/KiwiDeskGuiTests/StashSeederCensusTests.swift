@@ -33,9 +33,7 @@ struct StashSeederCensusTests {
         // gather outranks it by overwriting where it trips. The
         // float verbs' placement of a window on a Space no screen
         // shows (#1518) takes the same gated door, after the
-        // verb's retile because only the activation delivers it,
-        // and so does the pocket's first take-out (#2672), ahead of
-        // the take-out's retile.
+        // verb's retile because only the activation delivers it.
         "App/KiwiCore+FloatPlacement.swift": 1,
         // The entry-into-floating gather (#1177).
         "App/KiwiCore+FloatGather.swift": 1,
@@ -46,11 +44,11 @@ struct StashSeederCensusTests {
         // corner (#1864).
         "App/KiwiCore+CrossSession.swift": 1,
         // The pocket's take-out (#2446): the frame it last had on
-        // that screen, or centred where no float placement seeds
-        // it (#2672) — no corner, since a pocketed window takes no
-        // capture; seeded after its filing, ahead of the retile
-        // whose restore delivers it.
-        "Commands/KiwiCore+Pocket.swift": 2,
+        // that screen — its float placement when it became the
+        // pocket window (#2672) — or centred; no corner, since a
+        // pocketed window takes no capture; seeded after its
+        // filing, ahead of the retile whose restore delivers it.
+        "Commands/KiwiCore+Pocket.swift": 1,
         // The replay of a parked record, and the late arrival's
         // owed frame (#1352, #1362); and a replayed float's record
         // beside its set, never a corner, so a park ahead of the
