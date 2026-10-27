@@ -742,6 +742,22 @@ editing here:
     `plainSnapshotCarriesNone`). The slot follows a native-tab
     re-key through `rekeyPocket` (`PocketCommandTests` ▸
     `rekeyFollows`).
+  - **The slot fills only through the mark (#2675).** A window
+    becomes the pocket window through
+    `StateCoordinator.markPocketWindow` alone, out and never
+    pocketed — no frames, no `cameFrom` — and `pocketWindow`
+    refuses any window that is not the out slot's; a new entry
+    path (a pick, #2678's list) marks first. Marking is the one
+    placement at the float size, and a window already floating
+    skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,
+    `fallbackKeepsAFloatsFrame`); a take-out restores the frame
+    filed at the put-back and never re-places it, the centring
+    being the fallback for a screen with no filed frame
+    (`PocketWindowTests` ▸ `takeOutKeepsTheSize`,
+    `fallbackPlacesBeforeThePark`). Releasing the window as a
+    plain float is `releasePocketWindow`, for a quit and an
+    unmark alike; the unmark's filing goes through
+    `fileMembership`.
 
   The argument is `docs/design-decisions.md` ▸ *The pocket is one
   slot beside the Spaces, not a Space*.

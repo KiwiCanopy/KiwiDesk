@@ -242,8 +242,8 @@ struct SettingsSearchIndexTests {
                 // 13 since #2103: Toggle KiwiVision, at rest.
                 // 14 #2460: Shortcuts use; 15 #2303; 17 #761's bar rows.
                 // 18 #2448: Maximize. 19 #2493: Wrap focus.
-                // 16 #2654: three rows anchor in collapsible cards.
-                .shortcuts: 16,
+                // 16 #2654: rows anchor in cards. 17 #2675's mark.
+                .shortcuts: 17,
                 // 4 since #1022: the one `app_rules.add_rule`
                 // action became two, one picker per rule, because
                 // a row can no longer be a no-op — a new census

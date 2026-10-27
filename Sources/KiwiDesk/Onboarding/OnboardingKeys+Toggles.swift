@@ -99,7 +99,7 @@ extension OnboardingKeys {
                 id: "pocket",
                 label: L(
                     "onboarding.keys.pocket",
-                    "Pocket the window, then bring it back"
+                    "Pocket a window, then take it out from anywhere"
                 ),
                 chord: $0
             )

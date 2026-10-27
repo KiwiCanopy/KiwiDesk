@@ -42,7 +42,8 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`toggle_sticky`](lua-reference.md#toggle_sticky) | Flips the focused window between globally sticky and off. |
 | [`toggle_display_sticky`](lua-reference.md#toggle_display_sticky) | Flips the focused window between screen-sticky and off. |
 | [`toggle_maximized`](lua-reference.md#toggle_maximized) | Fills the screen with the focused tiled window until pressed again or focus moves on. |
-| [`pocket`](lua-reference.md#pocket) | Pockets the focused window, or takes the pocket window out onto this screen, or puts it back. |
+| [`pocket`](lua-reference.md#pocket) | Pockets or takes out the pocket window; with none marked, marks and pockets the focused one. |
+| [`toggle_pocket_window`](lua-reference.md#toggle_pocket_window) | Marks the focused window as the pocket window, floating it, or unmarks it. |
 | [`override_sticky_reach`](lua-reference.md#override_sticky_reach) | Overrides Desktop reach for the focused sticky window; auto follows sticky.set_desktop_reach. |
 | [`resize`](lua-reference.md#resize) | Resizes the focused window along the x or y axis. |
 | [`move_to_track`](lua-reference.md#move_to_track) | Moves the focused window one track along; takes prev or next. |
