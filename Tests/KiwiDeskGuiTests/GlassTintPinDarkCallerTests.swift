@@ -26,7 +26,9 @@ struct GlassTintPinDarkCallerTests {
     /// the one copy.
     private static let pickFollowers: [String: String] = [
         "Animation/SpaceSlideOverlay+Plates.swift":
-            "the slide's plates: no Fill, KiwiHub's glass"
+            "the slide's plates: no Fill, KiwiHub's glass",
+        "Animation/BriefPocketViews.swift":
+            "the brief pocket's plate: the slide's, untinted",
     ]
 
     @Test("only the ruled surfaces call pinDark")

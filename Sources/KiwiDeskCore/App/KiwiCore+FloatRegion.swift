@@ -186,10 +186,17 @@ extension KiwiCore {
             on: state.workspaces.display(of: space)
                 .flatMap(screenFingerprint(of:))
         )
-        let painted =
-            spaceBarStrips(forSpace: space)
-            + appBars.strips(forSpace: space)
-        return painted.filter { reserved.contains($0.edge) }
+        return paintedStrips(forSpace: space).filter {
+            reserved.contains($0.edge)
+        }
+    }
+
+    /// Every bar strip painted over `space`, reserved or drawn over
+    /// the windows.
+    func paintedStrips(
+        forSpace space: SpaceID
+    ) -> [(strip: CGRect, edge: AppBarEdge)] {
+        spaceBarStrips(forSpace: space) + appBars.strips(forSpace: space)
     }
 
     /// The painted Space Bar strips covering `space`. The

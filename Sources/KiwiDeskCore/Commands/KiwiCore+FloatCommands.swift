@@ -46,7 +46,7 @@ extension KiwiCore {
         }
     }
 
-    private func setFloating(
+    func setFloating(
         _ id: WindowID,
         _ floating: Bool
     ) -> CommandResponse {

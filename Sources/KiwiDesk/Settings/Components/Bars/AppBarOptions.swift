@@ -8,11 +8,12 @@ import KiwiDeskCore
 enum AppBarOptions {
     @MainActor
     static var edge: [(AppBarEdge, String)] {
-        AppBarEdge.allCases.map { ($0, label($0)) }
+        AppBarEdge.allCases.map { ($0, edgeName($0)) }
     }
 
+    /// An edge's name, as every edge row says it.
     @MainActor
-    private static func label(_ edge: AppBarEdge) -> String {
+    static func edgeName(_ edge: AppBarEdge) -> String {
         switch edge {
         case .top: return L("app_bar.edge.top", "Top")
         case .bottom: return L("app_bar.edge.bottom", "Bottom")

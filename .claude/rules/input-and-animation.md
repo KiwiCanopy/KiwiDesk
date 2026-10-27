@@ -813,6 +813,18 @@ editing here:
   `bothTwinsPinTheReads`). The product ruling is
   `docs/design-decisions.md` ▸ *A Space switch slides, shows the
   Space, or neither*.
+- **Pocketing's motion is DRAWN too, and its window moves once
+  (#2680).** `BriefPocketOverlay` draws the pocket and the plate
+  over the windows; the window parks in the pass that pockets it,
+  and a take-out's one write waits in `FrameApplier`'s hold until
+  the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
+  `takeOutPlaysAndHolds`), and its ring waits with it through the
+  state-change hold. Never bring back a slide of the real window to
+  its park. Its Reduce Motion read is pinned on in both
+  `makeTestCore` twins (`SpaceSlideSeamTests` ▸
+  `bothTwinsPinTheReads`), so no other suite plays; a suite that
+  unpins it pins the panel and frame clock itself, as
+  `BriefPocketTests` does.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

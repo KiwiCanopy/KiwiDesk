@@ -21,7 +21,7 @@ struct ShortcutGroupField: View {
 
     var body: some View {
         HStack(spacing: 4) {
-            TextField(customTitle, text: $text)
+            TextField(placeholder, text: $text)
                 .textFieldStyle(.roundedBorder)
                 .commitsOnSave($editing, commit)
                 .onExitCommand(perform: revert)
@@ -92,9 +92,15 @@ struct ShortcutGroupField: View {
         }
     }
 
-    private var customTitle: String {
-        L("shortcuts.panel.custom", "Custom")
+    /// While a new group is named the empty field must not read as
+    /// Custom, which it does not mean (#2688).
+    private var placeholder: String {
+        startedNew
+            ? L("shortcuts.group.name_placeholder", "Group name")
+            : customTitle
     }
+
+    private var customTitle: String { naming.custom }
 
     private var builtInHeader: String {
         L("shortcuts.group.built_in", "Built-in shortcut groups")
@@ -110,10 +116,7 @@ struct ShortcutGroupField: View {
 
     /// The label replaced the menu's own announcement, so the
     /// current group is given back (gui.md, #812).
-    private var spokenGroup: String {
-        let shown = naming.shown(group)
-        return shown.isEmpty ? customTitle : shown
-    }
+    private var spokenGroup: String { naming.shown(group) }
 
     private var axLabel: String {
         L("shortcuts.group.ax", "Shortcut group for %1$@", rowName)
