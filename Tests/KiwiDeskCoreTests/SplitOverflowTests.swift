@@ -171,25 +171,23 @@ struct SplitOverflowTests {
         #expect(try #require(forced[w2]).width < 700)
     }
 
-    /// Seven windows in the default 3 × 2 cap pile the last two in
-    /// cell 6 (column 3): a 500-pt floor on the pile's first window lifts
-    /// nothing,
-    /// while the same floor on window 3, alone in column 3, does.
-    @Test("A pile window never lifts its column")
-    func pileLiftsNothing() throws {
+    /// Seven windows in the default 3 × 2 cap run the last two through
+    /// the last track: a 500-pt floor on a run member heals the cap to
+    /// two columns (#2687), the same as on window 3 in a cell, so no
+    /// cell is drawn under it.
+    @Test("A run member's floor heals the cap like any window's")
+    func runFloorHealsTheCap() throws {
         let ids = (1...7).map { WindowID(UInt32($0)) }
-        let piled = placed(
-            .grid,
-            ids,
-            context(bounds: [ids[5]: floor(500)])
-        )
-        #expect(try #require(piled[ids[2]]).width < 500)
-        let alone = placed(
-            .grid,
-            ids,
-            context(bounds: [ids[2]: floor(500)])
-        )
-        #expect(try #require(alone[ids[2]]).width >= 500)
+        let unfloored = placed(.grid, ids, context(bounds: [:]))
+        #expect(try #require(unfloored[ids[0]]).width < 500)
+        for carrier in [ids[5], ids[2]] {
+            let frames = placed(
+                .grid,
+                ids,
+                context(bounds: [carrier: floor(500)])
+            )
+            #expect(try #require(frames[ids[0]]).width >= 500)
+        }
     }
 
     @Test("The origin pulls back to the trailing edge, never past the lead")

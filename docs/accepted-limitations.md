@@ -166,6 +166,15 @@ the window split off beside it keeps `min_window_size`
 so a window in it is one the split-layout row's "deeper BSP
 split" leaves at its minimum on that axis only past that
 point.
+
+A Grid's column and row count, fixed or
+[auto-sized](lua-reference.md#gridset_auto_size), also falls to
+fit the largest learned minimum among the Space's windows, and
+grows back when that window leaves
+([#2687](https://github.com/KiwiCanopy/KiwiDesk/issues/2687)).
+So the Settings window row's three-column grid on a laptop
+screen drops a column rather than overlapping a neighbour, once
+the 720 pt floor is learned.
 :::
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
