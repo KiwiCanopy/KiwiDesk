@@ -35,6 +35,11 @@ extension APIReference {
             "Enables or disables animation on layout reflows.",
             .boolean("enabled")
         ),
+        "set_on_state_change": APIRecord(
+            "Enables or disables animation when a window floats, "
+                + "maximizes or goes into the Pocket and out.",
+            .boolean("enabled")
+        ),
         "set_on_expand": APIRecord(
             "Enables or disables the shelf's expand — a bar growing "
                 + "in or out and the shelf re-placing.",

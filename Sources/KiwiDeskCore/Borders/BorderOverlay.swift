@@ -193,6 +193,15 @@ final class BorderOverlay {
         }
     }
 
+    /// Fades a shown ring out and holds it there until `reveal`,
+    /// as an arrival hold does (#2676).
+    func holdDormant() {
+        isArrivalHeld = true
+        guard !isDormant else { return }
+        isDormant = true
+        backend.setDormant(true)
+    }
+
     /// Ends a hold without showing the ring: the next order shows
     /// it if its window is still wanted (#1959).
     func releaseArrival() {

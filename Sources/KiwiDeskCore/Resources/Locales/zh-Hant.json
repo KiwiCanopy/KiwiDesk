@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "為佈局重排加上動畫",
   "behavior.animations.scrolling_xref": "捲動佈局的焦點切換在%1$@中有自己的開關與時間長度。",
   "behavior.animations.scrolling_xref_link": "預設佈局 ▸ 捲動",
+  "behavior.animations.state_change": "為浮動、Pocket 與最大化加上動畫",
+  "behavior.animations.state_change.help": "視窗在浮動或回到並排、最大化或還原、放入 Pocket 或取出時，會移動到新位置，而不是直接跳過去。周圍的視窗跟隨「%1$@」。",
   "behavior.animations.title": "動畫",
   "behavior.animations.window_duration": "視窗時間長度",
   "behavior.animations.window_duration.help": "視窗在移動、變更尺寸、互換或佈局重排時抵達新位置所需的時間。時間長度越長，速度越慢。",

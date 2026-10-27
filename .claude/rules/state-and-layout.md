@@ -177,6 +177,18 @@ editing here:
   subsystem rule that owns it
   ([input-and-animation.md](input-and-animation.md)) only loads
   under `Animation/`.
+- **A window changing state — float, tile, maximize and its end,
+  pocket in and out — is named on its pass through
+  `retile(stateChange:)`, never by a pass-wide `animated:` (#2676).**
+  The named window alone follows `animations.on_state_change` and
+  springs its size where no newcomer shares the pass; its
+  neighbours keep the pass's toggle. A door whose own pass draws a
+  maximize's return passes the ended window (`retireEndedMaximize`
+  returns it, `retileEndingMaximize(_:)` requires it); a maximize
+  a rearranging write ends returns inside that write's pass. The
+  float verb's own placement, outside a pass, takes
+  `placeFloating(_:asStateChange: true)` while a detected float
+  keeps `on_relayout` (`StateChangeAnimationTests`).
 - The **create fold's spawn grant** — the focus a fresh window
   gets for existing, not one macOS reported — consults
   `ManagedWindow.isTransientOverlay`

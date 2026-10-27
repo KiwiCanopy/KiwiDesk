@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "Animar os rearranjos do layout",
   "behavior.animations.scrolling_xref": "As mudanças de foco do layout Scrolling têm interruptor e duração próprios em %1$@.",
   "behavior.animations.scrolling_xref_link": "Layout padrão ▸ Scrolling",
+  "behavior.animations.state_change": "Animar flutuação, Pocket e maximização",
+  "behavior.animations.state_change.help": "Uma janela que passa a flutuar ou volta a ficar lado a lado, que é maximizada ou volta ao lugar, ou que entra no Pocket e sai dele se move até lá em vez de pular. As janelas ao redor seguem “%1$@”.",
   "behavior.animations.title": "Animações",
   "behavior.animations.window_duration": "Duração das janelas",
   "behavior.animations.window_duration.help": "Quanto tempo uma janela leva para chegar ao novo lugar quando se move, é redimensionada, trocada ou rearranjada no layout. Uma duração maior é mais lenta.",

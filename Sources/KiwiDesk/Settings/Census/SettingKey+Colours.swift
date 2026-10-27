@@ -16,6 +16,7 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case animationsOnWindowResize = "settings.animations.onWindowResize"
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
     case animationsOnRelayout = "settings.animations.onRelayout"
+    case animationsOnStateChange = "settings.animations.onStateChange"
     case animationsDurationMS = "settings.animations.durationMS"
     case animationsOnScrolling = "settings.animations.onScrolling"
     case animationsScrollDurationMS =
@@ -91,7 +92,7 @@ extension ColoursKey {
             )
         case .animationsOnWindowResize,
             .animationsOnWindowSwap, .animationsOnRelayout,
-            .animationsDurationMS:
+            .animationsOnStateChange, .animationsDurationMS:
             return .row(
                 .coloursAndMotion,
                 .motion,
@@ -201,6 +202,11 @@ extension ColoursKey {
             return .text("behavior.animations.window_swap")
         case .animationsOnRelayout:
             return .text("behavior.animations.relayout")
+        case .animationsOnStateChange:
+            return .text(
+                "behavior.animations.state_change",
+                help: "behavior.animations.state_change.help"
+            )
         case .animationsDurationMS:
             return .text(
                 "behavior.animations.window_duration",

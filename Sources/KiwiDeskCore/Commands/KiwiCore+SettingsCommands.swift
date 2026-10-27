@@ -184,6 +184,10 @@ extension KiwiCore {
             return setBool(args) {
                 tiler.settings.animations.onRelayout = $0
             }
+        case "animations.set_on_state_change":
+            return setBool(args) {
+                tiler.settings.animations.onStateChange = $0
+            }
         default:
             return .fail("unknown command: \(command)")
         }

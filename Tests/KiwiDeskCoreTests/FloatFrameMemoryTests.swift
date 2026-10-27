@@ -184,13 +184,13 @@ struct FloatFrameMemoryTests {
         #expect(core.state.floatFrames[float] == nil)
     }
 
-    /// With relayout animation off the placement is an instant set
+    /// With state-change animation off the placement is an instant set
     /// whose echo has not reached state, so the commanded frame is
     /// the one the window really has — and the one remembered.
     @Test("the remembered frame is the commanded one, not the echo")
     func remembersTheCommandedFrame() throws {
         let core = setup { _, _ in }
-        core.tiler.settings.animations.onRelayout = false
+        core.tiler.settings.animations.onStateChange = false
         #expect(core.execute("make_floating").isSuccess)
         let commanded = try #require(core.tiler.recentInstantTarget(float))
         #expect(core.state.windows[float]?.frame != commanded)

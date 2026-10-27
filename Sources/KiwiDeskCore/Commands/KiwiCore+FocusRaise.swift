@@ -118,7 +118,8 @@ extension KiwiCore {
         }
         // A focus onto another tiled window ends a maximize; this
         // command's own pass draws the return (#2448).
-        let endedMaximize = !state.retireEndedMaximize().isEmpty
+        let ended = state.retireEndedMaximize().first
+        let endedMaximize = ended != nil
         if let previous = previousFocused, previous != id,
             let frame = state.windows[previous]?.frame
         {
@@ -172,11 +173,12 @@ extension KiwiCore {
             // subset of `isFocusDriven` — but if that drifts,
             // never lose the raise.
             if defersRaise { raiseWindow(id) }
-            if endedMaximize { retileEndingMaximize() }
+            if let ended { retileEndingMaximize(ended) }
             return true
         }
         retileWithScrollDuration(
-            sizing: endedMaximize ? .allSpringSized : .mayInstantSize
+            sizing: endedMaximize ? .allSpringSized : .mayInstantSize,
+            stateChange: ended
         )
         // Monocle overlaps every window at one full-screen frame and
         // has no other z-order backstop (stack/scrolling/track arm

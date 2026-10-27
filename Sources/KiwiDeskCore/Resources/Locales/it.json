@@ -225,6 +225,8 @@
   "behavior.animations.relayout": "Anima le ridisposizioni del layout",
   "behavior.animations.scrolling_xref": "I cambi di focus del layout Scrolling hanno il proprio interruttore e la propria durata in %1$@.",
   "behavior.animations.scrolling_xref_link": "Layout predefiniti ▸ Scrolling",
+  "behavior.animations.state_change": "Anima fluttuazione, Pocket e massimizzazione",
+  "behavior.animations.state_change.help": "Una finestra che inizia a fluttuare o torna affiancata, che viene massimizzata o torna al suo posto, o che entra nella Pocket e ne esce si sposta lì invece di saltare. Le finestre intorno seguono «%1$@».",
   "behavior.animations.title": "Animazioni",
   "behavior.animations.window_duration": "Durata delle finestre",
   "behavior.animations.window_duration.help": "Quanto impiega una finestra a raggiungere il suo nuovo posto quando si muove, viene ridimensionata, scambiata o ridisposta. Una durata maggiore è più lenta.",

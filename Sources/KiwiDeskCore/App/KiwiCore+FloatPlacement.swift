@@ -31,20 +31,32 @@ extension KiwiCore {
     /// Space no screen shows — a verb naming its window (#1518) —
     /// the frame is seeded as its pending capture, paid at the
     /// activation, as `placeEnteringFloat` does.
+    /// `asStateChange`: the float verb's own placement (#2676),
+    /// which follows `on_state_change` and springs its size; a
+    /// detected float keeps `on_relayout`.
     @discardableResult
-    func placeFloating(_ id: WindowID) -> Bool {
+    func placeFloating(
+        _ id: WindowID,
+        asStateChange: Bool = false
+    ) -> Bool {
         guard let window = state.windows[id] else { return false }
         if placementIsSeed(id) { return seedFloatPlacement(id) }
         guard let target = floatPlacementTarget(for: id) else {
             return false
         }
         let base = currentFrame(of: id, fallback: window.frame)
+        // A state change springs its size, so the shrink to the
+        // float size slides instead of snapping (#2676).
+        let animations = tiler.settings.animations
         tiler.applyFrame(
             id,
             from: base,
             to: target,
-            animated: tiler.settings.animations.onRelayout
+            animated: asStateChange
+                ? animations.onStateChange : animations.onRelayout,
+            sizing: asStateChange ? .allSpringSized : .mayInstantSize
         )
+        if asStateChange { holdRingForStateChange(id) }
         // A size change outside the layout's asks (#677): its echo
         // must not read as the app refusing the last tiled ask, or
         // the next tiled space places the float's size as residue.

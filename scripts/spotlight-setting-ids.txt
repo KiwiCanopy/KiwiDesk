@@ -116,6 +116,7 @@ settings.animations.durationMS
 settings.animations.expandDurationMS
 settings.animations.onRelayout
 settings.animations.onScrolling
+settings.animations.onStateChange
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
 settings.animations.revealDurationMS
