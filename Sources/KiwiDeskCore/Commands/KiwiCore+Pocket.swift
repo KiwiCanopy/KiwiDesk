@@ -70,9 +70,10 @@ extension KiwiCore {
     }
 
     /// Takes the pocketed window out onto the active Space's
-    /// screen, at the frame it last had there or centred, floating
-    /// and focused. False where it cannot be reached: not tracked
-    /// (its app hidden) or no Space to show it on.
+    /// screen, at the frame it last had there, else where a float
+    /// lands (#2672), floating and focused. False where it cannot
+    /// be reached: not tracked (its app hidden) or no Space to
+    /// show it on.
     @discardableResult
     func takePocketOut() -> Bool {
         guard let id = state.pocketedWindow,
@@ -82,13 +83,16 @@ extension KiwiCore {
         let cameFrom = state.workspaces.lastFocused
         let screen = state.workspaces.display(of: target)
             .flatMap { screenFingerprint(of: $0) }
+        let remembered = screen.flatMap { state.pocket?.frames[$0] }
+        state.markPocketOut(cameFrom: cameFrom)
+        fileMembership(id, into: target, from: nil)
+        // Placed once filed: the float target reads its Space.
         let frame =
-            screen.flatMap { state.pocket?.frames[$0] }
+            remembered
+            ?? floatPlacementTarget(for: id)
             ?? floatBounds(on: target).map {
                 FloatRecovery.centred(window.frame.size, in: $0)
             }
-        state.markPocketOut(cameFrom: cameFrom)
-        fileMembership(id, into: target, from: nil)
         // Its frame is the slot's; the restore delivers it.
         if let frame { tiler.seedStash(id, frame: frame) }
         onLog("pocket: w\(id.raw) out on space \(target)")

@@ -224,4 +224,16 @@ struct PocketCommandTests {
         core.handle(.windowFocused(one))
         #expect(core.state.pocketPhase(of: one) == .out)
     }
+
+    @Test("a first take-out lands at the float size, not the tile's")
+    func firstTakeOutFloats() throws {
+        let core = makeCore()
+        core.execute("pocket")
+        core.execute("pocket")
+        let space = try #require(core.state.workspaces.activeSpace)
+        let region = try #require(core.floatGrowBounds(on: space))
+        let landed = try #require(core.tiler.stashedFrames[one])
+        #expect(landed.size == FloatPlacement.centered(in: region).size)
+        #expect(landed.size != CGSize(width: 600, height: 400))
+    }
 }

@@ -148,7 +148,7 @@ extension KiwiCore {
     /// Where `id` floats on its placement space: its remembered
     /// frame, else centred at the derived size and cascaded off
     /// the other floats there (#1708); nil under `keep`.
-    private func floatPlacementTarget(for id: WindowID) -> CGRect? {
+    func floatPlacementTarget(for id: WindowID) -> CGRect? {
         guard tiler.settings.floatPlacement == .center,
             state.windows[id] != nil,
             let space = floatPlacementSpace(of: id),
