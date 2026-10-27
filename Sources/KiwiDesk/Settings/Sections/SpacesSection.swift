@@ -21,9 +21,6 @@ struct SpacesSection: View {
     /// The refusal caption each row's name field reports (#1623).
     @State var renameNotices: [SpaceID: SpaceNameNotice] = [:]
     @State var rowFrames: [SpaceID: CGRect] = [:]
-    /// Measured, never guessed, so every row's button locks to one
-    /// column width across locales and counts (#290).
-    @State var overridesButtonWidth: CGFloat = 0
     @Environment(\.controlActiveState) var activeState
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
@@ -81,9 +78,6 @@ struct SpacesSection: View {
             .coordinateSpace(name: Self.listSpace)
             .onPreferenceChange(SpaceRowFrames.self) {
                 rowFrames = $0
-            }
-            .onPreferenceChange(OverridesButtonWidth.self) {
-                overridesButtonWidth = $0
             }
         }
         .onChange(of: activeState) { _, now in

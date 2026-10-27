@@ -153,6 +153,13 @@ struct SettingsThemeContrastTests {
             SettingsTheme.ink2,
             on: SettingsTheme.sunken
         ),
+        // A Space row's override count, knocked out of its
+        // badge (#2674).
+        Pairing(
+            "sunken on ink2",
+            SettingsTheme.sunken,
+            on: SettingsTheme.ink2
+        ),
         Pairing(
             "ink3 on page",
             SettingsTheme.ink3,

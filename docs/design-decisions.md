@@ -8013,9 +8013,9 @@ destination is read BEFORE the mutation (afterwards the list names
 whichever row slid into the gap, right by accident and wrong at
 the end of a list), and it must be a control that is always DRAWN
 and non-destructive: binding the spaces list to a conditionally
-offered button (Customize…, drawn only once an override exists),
-which on a fresh install is not drawn at all, sends focus
-to the top by a second road.
+offered button (Customize…, as it once drew only after an
+override existed), which on a fresh install was not drawn at
+all, sends focus to the top by a second road.
 
 *A dim is not a sentence.* Greying keeps a control visible
 because the dimming means *switch that on and I act* — so a
@@ -10052,12 +10052,18 @@ config uses the capability are `.immediate`: the container
 opens on arrival for them and is never swapped (#1125). Layers
 and Modifier keys are collapsible cards; Lua bindings keeps its
 drawer. Where a drawer would hide one control, the offer takes
-the row's own menu instead: per-Space Customize… is always in
-each Space row's right-click menu, and joins the row itself once
-any Space has an override, and title matching
+the row's own menu instead: title matching
 is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs
 nothing at rest, and a drawer around it is chrome.
+
+Per-Space Customize… is the one offer that left the menu (#2674,
+owner ruling 2026-10-27, amending this entry): every Space row
+carries a small icon-only Customize button, its badge counting
+that Space's overrides, and the row's right-click menu keeps
+Customize… as a second door. A right-click menu as a row's only
+door is invisible at rest — the owner could not find it — while
+title matching is a choice inside a menu the user already sees.
 
 **Screens is a capability, not a depth.**
 `SettingsArea.isAvailable(displayCount:)` keeps its card off
