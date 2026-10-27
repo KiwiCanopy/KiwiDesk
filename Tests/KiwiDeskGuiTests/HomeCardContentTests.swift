@@ -1,8 +1,9 @@
+import CoreGraphics
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The Home cards' answers (#678 turn 9): the subtitles derive
 /// from the draft, not from constants — a card is an answer,
@@ -242,5 +243,38 @@ struct HomeCardContentTests {
             pinCount: 0
         )
         #expect(none != single)
+    }
+
+    /// The card itself routes through `screensSubtitle`: one live
+    /// screen and no pins shows the invitation (#2690).
+    @Test("the screens card reads the model's screens and pins")
+    func screensCardWiring() {
+        pinEnglish()
+        let model = model()
+        let core = model.core
+        for display in core.state.workspaces.allDisplays {
+            core.state.workspaces.removeDisplay(display.id)
+        }
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "Built-in",
+                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+            )
+        )
+        model.config.spacePins = [:]
+        let single = HomeCardContent.screensSubtitle(
+            displayCount: 1,
+            pinCount: 0
+        )
+        #expect(
+            HomeCardContent.subtitle(for: .screens, model: model)
+                == single
+        )
+        model.config.spacePins = ["2": "B:100x100"]
+        #expect(
+            HomeCardContent.subtitle(for: .screens, model: model)
+                != single
+        )
     }
 }
