@@ -43,4 +43,16 @@ struct ShortcutSettingRowSeamTests {
         #expect(row.contains("ShortcutsReferenceBuilder.icon("))
         #expect(!row.contains("command.icon"))
     }
+
+    @Test("a setting row wears the one setting glyph")
+    func settingRowWearsTheGlyph() throws {
+        let row = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "ShortcutSettingRow.swift"
+            )
+        )
+        #expect(row.contains("IconGlyphLabel(icon: Self.settingGlyph)"))
+        #expect(row.contains("{ \"slider.horizontal.3\" }"))
+    }
 }

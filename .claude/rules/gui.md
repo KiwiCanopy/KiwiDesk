@@ -2019,7 +2019,10 @@ in the reach column, text under it at
 `SettingsMetrics.shortcutTextIndent` — never a hand-built row
 beside it; a new one joins `ShortcutSettingRowSeamTests`' register
 only with its reason (`ShortcutSettingRowSeamTests` ▸
-`footprintHasOneHome`, `navRowReadsTheResolver`).
+`footprintHasOneHome`, `navRowReadsTheResolver`). **A setting row
+wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
+the key rows' ink, never a topic glyph of its own**
+(`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
 
 ## A sided chord is drawn once and spoken in words (#2601)
 

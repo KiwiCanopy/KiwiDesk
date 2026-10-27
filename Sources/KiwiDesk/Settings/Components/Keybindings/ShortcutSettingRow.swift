@@ -29,11 +29,16 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
         self.control = control()
     }
 
+    /// The glyph every setting row draws in its icon slot.
+    static var settingGlyph: String { "slider.horizontal.3" }
+
     var body: some View {
         HStack(alignment: .firstTextBaseline) {
-            // The icon slot every shortcut row reserves (#264).
-            Color.clear
-                .frame(width: SettingsMetrics.shortcutIconSlot, height: 1)
+            // A setting row wears the one setting glyph, never a
+            // topic's (owner, 2026-10-27).
+            IconGlyphLabel(icon: Self.settingGlyph)
+                .frame(width: SettingsMetrics.shortcutIconSlot)
+                .accessibilityHidden(true)
             Text(title)
                 .accessibilityHidden(true)
             HelpButton(explanation: help, subject: helpSubject)
