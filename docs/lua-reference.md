@@ -5910,9 +5910,10 @@ empty string `""` for **Automatic** (default `""`).
 
 **Does:** fills the pocket of the [pocket](#pocket) mark and of
 the Space Bar pocket badge, opaque, an alpha ignored; the kiwis
-stay green. The mark's outlines and stitch take a legible
-auto-contrast black or white, as
-[`sticky.set_color`](#stickyset_color)'s glyph does. Neither the
+stay green and lose their outline. The pocket's outline takes the
+color too, and the dashed stitch a legible auto-contrast black or
+white, as [`sticky.set_color`](#stickyset_color)'s glyph does.
+Each bundled palette sets its own pocket color. Neither the
 mark's plate nor the badge's disc takes the color: the disc keeps
 the count-badge fill. `""` is Automatic: the mark's pocket and
 outlines take the label color, black in light mode and white in

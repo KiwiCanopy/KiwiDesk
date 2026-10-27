@@ -6,8 +6,8 @@ import AppKit
 /// size; the kiwis keep their green whatever `ink` the pocket takes
 /// (#2671: the pocket is filled opaque in `ink`).
 public enum PocketMark {
-    /// The large mark: outlined slices and a dashed stitch in the
-    /// ink's contrasting glyph colour.
+    /// The large mark: slices outlined on Automatic and a dashed
+    /// stitch in the ink's contrasting glyph colour.
     case mark
     /// The badge: solid shapes, no stitch, the pocket filled with
     /// `ink`.
@@ -26,26 +26,24 @@ public enum PocketMark {
         alpha: 1
     )
     /// The mark at `size` points in a mark colour `hex` (#2671):
-    /// the pocket filled in it, the outlines and stitch in its
-    /// contrasting glyph colour, as `StickyMarkPlate.paint` inks a
-    /// disc; empty is the bare label ink, light and dark.
+    /// the pocket filled and outlined in it, the slices bare
+    /// (#2704); empty is the bare label ink, light and dark.
     public func image(size: CGFloat, hex: String) -> NSImage {
-        let ink = NSColor.mark(hex: hex, fallback: .labelColor)
-        return image(
+        image(
             size: size,
-            ink: ink,
-            outline: hex.isEmpty ? nil : ink.contrastingGlyph
+            ink: NSColor.mark(hex: hex, fallback: .labelColor),
+            outlinesKiwis: hex.isEmpty
         )
     }
 
-    /// The mark at `size` points, its pocket filled opaque in
-    /// `ink` and its outlines in `outline`, `ink` when nil. A
-    /// dynamic colour resolves when drawn, so `.labelColor`
-    /// follows light and dark.
+    /// The mark at `size` points, its pocket filled and outlined
+    /// opaque in `ink`, its slices outlined in `ink` when
+    /// `outlinesKiwis`. A dynamic colour resolves when drawn, so
+    /// `.labelColor` follows light and dark.
     public func image(
         size: CGFloat,
         ink: NSColor,
-        outline: NSColor? = nil
+        outlinesKiwis: Bool = true
     ) -> NSImage {
         NSImage(
             size: NSSize(width: size, height: size),
@@ -55,7 +53,7 @@ public enum PocketMark {
             let transform = AffineTransform(scale: scale)
             draw(
                 ink: ink,
-                outline: outline ?? ink,
+                outlinesKiwis: outlinesKiwis,
                 transform: transform
             )
             return true
@@ -64,7 +62,7 @@ public enum PocketMark {
 
     private func draw(
         ink: NSColor,
-        outline: NSColor,
+        outlinesKiwis: Bool,
         transform: AffineTransform
     ) {
         for (x, y) in [(8.5, 6.8), (15.5, 5.3)] {
@@ -72,8 +70,8 @@ public enum PocketMark {
             slice.transform(using: transform)
             Self.kiwi.setFill()
             slice.fill()
-            if self == .mark {
-                outline.setStroke()
+            if self == .mark, outlinesKiwis {
+                ink.setStroke()
                 slice.lineWidth = 1.6 * transform.m11
                 slice.stroke()
             }
@@ -88,7 +86,7 @@ public enum PocketMark {
         let cloth = Self.opaque(ink)
         cloth.setFill()
         pocket.fill()
-        Self.opaque(outline).setStroke()
+        cloth.setStroke()
         pocket.lineWidth = (self == .mark ? 2.2 : 1.6) * transform.m11
         pocket.lineJoinStyle = .round
         pocket.stroke()
