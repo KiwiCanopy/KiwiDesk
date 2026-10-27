@@ -4,37 +4,26 @@ import SwiftUI
 /// Layout ▸ Layouts to cycle (#2673): the label, and the list as a
 /// bordered button in the recorder column that opens
 /// `LayoutCycleList` in a popover. Its "Applies to" sits in the
-/// shortcut rows' reach column, as the Space history row's does.
+/// shortcut rows' reach column, in the shared setting row (#2670).
 struct LayoutCycleRow: View {
     @ObservedObject var model: SettingsModel
     @State private var request: LayoutCycleRequest?
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            // The icon slot every shortcut row reserves (#264).
-            Color.clear.frame(width: Self.iconSlot, height: 1)
-            // The button names itself; this is its drawn twin.
-            Text(LayoutCycleWords.title)
-                .foregroundStyle(SettingsTheme.ink)
-                .accessibilityHidden(true)
-            HelpButton(
-                explanation: LayoutCycleWords.help,
-                subject: LayoutCycleWords.title
-            )
-            Spacer(minLength: 0)
-            reach
-            // The recorder's own button width, inside its icon slots.
-            KeyRecorderField.footprint.overlay {
+        ShortcutSettingRow(
+            title: LayoutCycleWords.title,
+            help: LayoutCycleWords.help,
+            reach: { reach },
+            control: {
+                // The recorder's own button width, inside its slots.
                 summary.padding(
                     .horizontal,
                     KeyRecorderField.iconSlotWidth + 6
                 )
             }
-        }
+        )
         .searchAnchored(SettingsCatalog.shortcuts.modeCycle)
     }
-
-    static let iconSlot = SettingsMetrics.shortcutIconSlot
 
     private var summary: some View {
         let readout = LayoutCycleWords.readout(model.config.modeCycle)
@@ -92,7 +81,7 @@ struct LayoutCueRow: View {
         VStack(alignment: .leading, spacing: 4) {
             toggle
         }
-        .padding(.leading, LayoutCycleRow.iconSlot + 8)
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     @ViewBuilder private var toggle: some View {

@@ -1007,6 +1007,7 @@
   "kiwishelf.edge.label.help": "An welcher Bildschirmkante die Leisten sitzen. Setze unter „%1$@“ jede an ihre eigene Kante.",
   "kiwishelf.edge.per_screen.app_bar": "Pro Bildschirm",
   "kiwishelf.edge.per_screen.ax": "%1$@, %2$@",
+  "kiwishelf.edge.per_screen.one_screen": "Braucht ein Profil mit zwei oder mehr Bildschirmen.",
   "kiwishelf.edge.per_screen.space_bar": "Pro Bildschirm",
   "kiwishelf.edge.screen.absent": "nicht angeschlossen",
   "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",

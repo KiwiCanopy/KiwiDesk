@@ -1007,6 +1007,7 @@
   "kiwishelf.edge.label.help": "У какого края экрана стоят панели. Поставь каждую у своего края в блоке «%1$@».",
   "kiwishelf.edge.per_screen.app_bar": "По экранам",
   "kiwishelf.edge.per_screen.ax": "%1$@, %2$@",
+  "kiwishelf.edge.per_screen.one_screen": "Требуется профиль с двумя или более экранами.",
   "kiwishelf.edge.per_screen.space_bar": "По экранам",
   "kiwishelf.edge.screen.absent": "не подключён",
   "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",

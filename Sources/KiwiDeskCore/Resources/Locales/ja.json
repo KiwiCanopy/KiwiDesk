@@ -1007,6 +1007,7 @@
   "kiwishelf.edge.label.help": "バーを置く画面の端です。「%1$@」で、それぞれを別の端に置けます。",
   "kiwishelf.edge.per_screen.app_bar": "画面ごと",
   "kiwishelf.edge.per_screen.ax": "%1$@、%2$@",
+  "kiwishelf.edge.per_screen.one_screen": "画面が2つ以上あるプロファイルが必要です。",
   "kiwishelf.edge.per_screen.space_bar": "画面ごと",
   "kiwishelf.edge.screen.absent": "未接続",
   "kiwishelf.edge.screen.ax_absent": "%1$@、%2$@",

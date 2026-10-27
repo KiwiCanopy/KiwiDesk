@@ -40,13 +40,7 @@ extension KiwiCore {
         asStateChange: Bool = false
     ) -> Bool {
         guard let window = state.windows[id] else { return false }
-        if placementIsSeed(id) {
-            guard seedsPlacement(id),
-                let target = floatPlacementTarget(for: id)
-            else { return false }
-            seedPlacement(id, target)
-            return true
-        }
+        if placementIsSeed(id) { return seedFloatPlacement(id) }
         guard let target = floatPlacementTarget(for: id) else {
             return false
         }
@@ -139,6 +133,23 @@ extension KiwiCore {
         else { return false }
         seedPlacement(id, target)
         return true
+    }
+
+    /// Seeds `id`'s float placement as its pending capture: a float
+    /// on a Space no screen shows. False where nothing was seeded.
+    func seedFloatPlacement(_ id: WindowID) -> Bool {
+        guard seedsPlacement(id),
+            let target = floatPlacementTarget(for: id)
+        else { return false }
+        seedPlacement(id, target)
+        return true
+    }
+
+    /// Where `id` would float, read without seeding it — the frame
+    /// a window becoming the pocket window keeps (#2672). Nil where
+    /// it may not be placed now.
+    func floatPlacementFrame(for id: WindowID) -> CGRect? {
+        seedsPlacement(id) ? floatPlacementTarget(for: id) : nil
     }
 
     /// Whether `id` may take its placement as a pending capture —

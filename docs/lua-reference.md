@@ -5648,11 +5648,14 @@ window, and each call takes the next step:
 - **Empty:** pockets the focused window, a focused-window command
   like `make_floating`. It is parked off-screen — not minimized —
   belongs to no Space and is drawn on no bar, and focus moves on
-  within the Space. Fails on a window in native full screen and on
-  a transient panel or popup.
-- **Pocketed:** takes it out onto the active Space's screen at the
-  frame it last had on that screen, else centred, floating and
-  focused.
+  within the Space. It takes the frame
+  [`set_float_placement`](#set_float_placement)'s `"center"` gives
+  a window turned floating; under `"keep"` it keeps its size. Fails
+  on a window in native full screen and on a transient panel or
+  popup.
+- **Pocketed:** takes it out onto the active Space's screen,
+  floating and focused, at the frame it last had on that screen,
+  else centred at its own size.
 - **Out:** puts it back in the pocket, focused or not. If it had
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
