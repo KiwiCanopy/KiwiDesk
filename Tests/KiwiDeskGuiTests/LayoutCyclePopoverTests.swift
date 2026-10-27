@@ -72,7 +72,9 @@ struct LayoutCyclePopoverTests {
                     + "{modeinitem(mode)}"
             )
         )
-        // No branch splits a row or its box by ticked state.
+        // No branch splits a row or its box by ticked state: one
+        // row call, whatever the tick.
+        #expect(list.components(separatedBy: "row(mode,in:").count == 2)
         #expect(!list.contains("item(mode,in:"))
         #expect(!list.contains("ifcycle{toggle"))
         // The unticked rows read the drawn order, not the config.
