@@ -17,7 +17,8 @@ struct AISection: View {
                 prompts
                 AICapabilitiesCard()
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 

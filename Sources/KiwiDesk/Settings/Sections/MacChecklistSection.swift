@@ -22,7 +22,8 @@ struct MacChecklistSection: View {
                         SettingsCatalog.macChecklist.guideLink
                     )
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 

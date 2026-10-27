@@ -13,8 +13,6 @@ import SwiftUI
 struct ShortcutsSection: View {
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
-    @Environment(\.settingsWidth)
-    var width
     @ObservedObject var model: SettingsModel
     @State var advancedExpanded = false
     /// Lifted so the Mouse & trackpad chip opens the card (#1520);
@@ -121,8 +119,7 @@ struct ShortcutsSection: View {
                 tail
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
-            // The page ends clear of a floating save pill (#2688).
-            .padding(.bottom, SettingsMetrics.pageBottom(width))
+            .settingsPageBottom()
             .overlay(alignment: .bottom) {
                 Color.clear.frame(height: 1).id(Self.pageEnd)
             }

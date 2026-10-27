@@ -105,7 +105,7 @@ struct LuaBindingEmptyStateTests {
         let page = try Self.source("Sections/ShortcutsSection.swift")
         #expect(
             page.contains(
-                ".padding(.bottom,SettingsMetrics.pageBottom(width))"
+                ".settingsPageBottom().overlay(alignment:.bottom)"
             )
         )
         #expect(page.contains("Color.clear.frame(height:1).id(Self.pageEnd)"))
