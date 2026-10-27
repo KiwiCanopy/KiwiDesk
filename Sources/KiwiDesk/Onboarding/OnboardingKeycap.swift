@@ -23,7 +23,7 @@ struct OnboardingKeycap: View {
             }
         }
         .accessibilityElement(children: .ignore)
-        .accessibilityLabel(family.glyphs)
+        .accessibilityLabel(family.spokenGlyphs)
     }
 
     /// Single modifier chip with hidden accessibility label (#1016).

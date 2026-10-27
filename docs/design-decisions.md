@@ -6075,7 +6075,10 @@ focused window — sized as a mark sizes it — and pockets it, so the
 single key keeps working for someone who never learns the second. The verb acts on the focus, which a
 pocketed window never holds, so unmarking happens while the window
 is out. `⌃⌥⇧P` sits beside `⌃⌥P` as its related variant — the two
-keys act on one window (the `⇧` entry below, as amended).
+keys act on one window (the `⇧` entry below, as amended). Unmarking
+tiles the window on the Space shown (owner, #2680): leaving the
+pocket is a return to the layout, so it ends where a Tile ends it,
+and a window a float rule or detection floats stays a float.
 
 **A pocketed window waits on one screen, the active Space's**
 (`StateCoordinator.pocketHomeDisplay`), and the park and the Desktop
@@ -6171,10 +6174,26 @@ a tinted plate flashing over a jumping window: a glitch on float
 and maximize, not a style. A Genie stays refused because it means
 "minimized to the Dock" and needs a private API
 ([the overflow mark's peek](#layout-and-resize-behavior)).
-Pocketing slides the real window to its park corner at its own
-size, position only, so slow apps and minimum sizes are not in
-play; a plate shrinking into an on-screen pocket waits for that
-pocket to exist (#2680).
+Pocketing draws a brief pocket rather than moving the real window
+(#2680, replacing #2676's slide to the park corner): a pocket in
+KiwiShelf's look appears at its placement for the moment a window
+goes in or out, the Space switch's plate flies between it and the
+window — our own overlay, redrawn at each size, never a capture —
+and it nods and fades. The window parks at once and comes back with
+one write, held until the plate lands, so a slow app or a minimum
+size is never in play; no pocket stays on screen (that is #2678's,
+with the several-windows mode). The pocket's placement is an edge
+and a position along it, clear of a bar on that edge, in Shortcuts &
+Gestures ▸ Pocket beside its two keys, Edge as a menu since a
+Shortcuts setting row's control takes the recorder's footprint; the two rows grey while the
+toggle is off, since the pocket then never appears. The bar menus
+offer no Pocket or Take out yet (owner, 2026-10-27): a pocketed
+window has no bar item, so only one of the two could show. The plate's flight follows
+`animations.duration`, the window duration, at twice it within
+0.2–0.8 s, since a window's own trip is what it draws; the fades and
+the nod take no setting, since they shape how softly the pocket
+appears, not how fast anything travels (#1931's *own pace* ruling
+the other way round).
 :::
 
 ### Spaces, profiles & config ownership
@@ -9214,6 +9233,24 @@ narrower than the 25.4 pt chip above it, so the columns are
 chip-bound and no word here costs a pixel. There is nothing to buy
 by withholding one.
 
+:::unreleased
+**✦ takes Settings' name for it, through its catalog key.** On the
+Hyper shortcut base the chord's first chip is ✦, and its word is
+`shortcuts.hyper_key.name` — "Hyper", the name the Shortcuts page
+already gives that key. That makes it keyed rather than a fifth
+verbatim token, so the closed carve-out of four stays closed. It
+is a name, not an abbreviation, so it keeps its capital beside
+`ctrl` and `opt`, and it may overhang its chip: ✦ stands where ⌃⌥
+stand on the other base, so a Hyper row is held to be no wider
+than the ⌃⌥ row (`OnboardingModifierNameTests` ▸
+`namesStayInsideTheirChip`). The name of the key the user actually
+holds (Caps Lock, say) is rejected: it is not what Settings calls
+this key anywhere. VoiceOver reads the glyph as a star, so every
+spoken chord — the tour's keycaps and Settings' chord surfaces
+alike — names ✦ by the same word, through
+`SidedChordWords.label`.
+:::
+
 **And the rule outranks the rows.** The seeded keymap is a tier
 system — `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, `⌃⌥⌘`
 moves it and follows, and `⌥⌘` sizes it — so a list of unrelated
@@ -10140,15 +10177,14 @@ Customize… as a second door. A right-click menu as a row's only
 door is invisible at rest — the owner could not find it — while
 title matching is a choice inside a menu the user already sees.
 
-**Screens is a capability, not a depth.**
-`SettingsArea.isAvailable(displayCount:)` keeps its card off
-Home on a one-screen Mac, computed at read so a disconnect
-cannot strand a stored flag, and with no selection repair: an
-unplugged screen never pops the open page. Search and links
-still land there, because the page holds the pins and
-fingerprints of screens that are not connected, and an
-undocked laptop is exactly when a user goes looking — so the
-link guard consults the stored-profile axis only.
+**Screens shows on any screen count** (#2690, owner ruling
+2026-10-27, amending this entry). Hiding its Home card on a
+one-screen Mac as a capability was refused: on a laptop a user
+would never meet the page at all. The card is live, not greyed: the
+page holds the pins and fingerprints of screens that are not
+connected, search and links already landed there, and no Home
+card greys. On one screen with nothing pinned, its subtitle
+invites a second screen instead of counting zeros.
 
 The retired preference leaves its `settingsMode` key in the
 app's `UserDefaults` unread. That key is a display choice, not a

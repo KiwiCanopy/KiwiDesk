@@ -4,9 +4,14 @@ import KiwiDeskCore
 /// How Settings' shortcut group field shows a stored `group` and
 /// stores what the user typed (#2544 ▸ Ruling): a built-in group
 /// reads as its title and is stored as its token; a group of the
-/// user's own is its name as written.
+/// user's own is its name as written; no group reads as Custom,
+/// a value rather than a hint, and so is a reserved name: typed in
+/// any case it files into no group, as KiwiHub lists no group under
+/// it (#2688).
 struct ShortcutGroupNaming {
     let titles: [ShortcutGroup: String]
+    /// What no group reads as.
+    let custom: String
 
     @MainActor static var current: ShortcutGroupNaming {
         ShortcutGroupNaming(
@@ -14,14 +19,15 @@ struct ShortcutGroupNaming {
                 uniqueKeysWithValues: ShortcutGroup.allCases.map {
                     ($0, $0.title)
                 }
-            )
+            ),
+            custom: L("shortcuts.panel.custom", "Custom")
         )
     }
 
     /// The field's text for a stored value.
     func shown(_ stored: String) -> String {
         switch ShortcutGroup.filing(stored) {
-        case .none: return ""
+        case .none: return custom
         case .builtIn(let group): return titles[group] ?? group.rawValue
         case .own(let name): return name
         }
@@ -42,9 +48,15 @@ struct ShortcutGroupNaming {
     }
 
     /// The stored value for typed text: a built-in group's title or
-    /// token, case aside, files into that group.
+    /// token, case aside, files into that group; Custom files into
+    /// none.
     func stored(_ typed: String) -> String {
         let name = typed.trimmingCharacters(in: .whitespaces)
+        if custom.compare(name, options: .caseInsensitive)
+            == .orderedSame
+        {
+            return ""
+        }
         if let group = titles.first(where: {
             $0.value.compare(name, options: .caseInsensitive)
                 == .orderedSame

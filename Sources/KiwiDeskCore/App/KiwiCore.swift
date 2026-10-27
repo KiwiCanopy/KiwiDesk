@@ -29,9 +29,9 @@ public final class KiwiCore {
     public let stickyMarks = StickyMarkManager()
     /// The "+n" marks on a run's edge windows (#2235).
     public let overflowMarks = OverflowMarkManager()
-    /// KiwiVision's plates (#2103), driven with the rings.
-    public let vision = VisionManager()
+    public let vision = VisionManager()  // KiwiVision's plates, #2103
     let spaceSlide = SpaceSlideOverlay()  // #1956, #2524
+    let briefPocket = BriefPocketOverlay()  // #2680
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager

@@ -223,6 +223,8 @@ settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
 settings.mouseResize
 settings.pocketStyle.color
+settings.pocketStyle.edge
+settings.pocketStyle.position
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone

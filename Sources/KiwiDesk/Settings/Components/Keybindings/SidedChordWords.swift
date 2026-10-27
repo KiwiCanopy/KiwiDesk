@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// A sided chord as words (#2601 ▸ Ruling 1): `R⌘H` is drawn with a
@@ -40,9 +41,15 @@ enum SidedChordWords {
     }
 
     /// The words for `glyphs`, or the drawn glyphs where none keep a
-    /// side — what a label or value takes.
+    /// side — what a label or value takes. ✦ is always its key's
+    /// name, since VoiceOver reads the glyph as a star (#2700).
     static func label(_ glyphs: String) -> String {
-        spoken(glyphs) ?? glyphs
+        let hyper = ComboSymbols.hyperGlyph
+        let name = HyperKeyWords.keyName + " "
+        return (spoken(glyphs) ?? glyphs)
+            .replacingOccurrences(of: hyper + " ", with: name)
+            .replacingOccurrences(of: hyper, with: name)
+            .trimmingCharacters(in: .whitespaces)
     }
 
     /// The hover text a sided chord owes, empty for any other.

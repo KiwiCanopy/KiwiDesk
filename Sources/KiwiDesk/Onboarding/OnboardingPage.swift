@@ -34,7 +34,17 @@ struct OnboardingPage<Content: View, Action: View>: View {
                 }
             }
             content
-            Spacer(minLength: 0)
+            footer
+        }
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .multilineTextAlignment(.leading)
+    }
+
+    /// Pinned to the bottom by its own frame rather than a
+    /// `Spacer`, which would cost a second stack gap even when
+    /// collapsed (#2694).
+    private var footer: some View {
+        VStack(alignment: .leading, spacing: 16) {
             if let footnote, footnoteAtBottom {
                 footnoteText(footnote)
             }
@@ -56,8 +66,7 @@ struct OnboardingPage<Content: View, Action: View>: View {
                 action
             }
         }
-        .frame(maxWidth: .infinity, alignment: .leading)
-        .multilineTextAlignment(.leading)
+        .frame(maxHeight: .infinity, alignment: .bottom)
     }
 
     private func bodyText(_ text: String) -> some View {

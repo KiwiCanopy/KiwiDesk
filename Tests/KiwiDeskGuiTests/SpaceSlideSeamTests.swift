@@ -19,6 +19,8 @@ struct SpaceSlideSeamTests {
             "core.spaceSlide.reduceMotion = { true }",
             "core.spaceSlide.present = { _ in }",
             "core.spaceSlide.stackOrder = { [:] }",
+            // The brief pocket's own read (#2680).
+            "core.briefPocket.reduceMotion = { true }",
         ]
         for twin in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
             let source = try SourceScan.strippedSource(

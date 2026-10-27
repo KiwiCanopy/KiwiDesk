@@ -57,6 +57,7 @@ struct AnnouncedValueTests {
         "SpaceHistoryRow.swift": 1,
         // #2670: the Wrap focus menu, the same shape.
         "FocusWrapRow.swift": 1,
+        "PocketGroup.swift": 1,
         "KeybindingAppGroup+Action.swift": 1,
         // #1209: the export row's range menu, named by the range
         // key because the button beside it names the export.
