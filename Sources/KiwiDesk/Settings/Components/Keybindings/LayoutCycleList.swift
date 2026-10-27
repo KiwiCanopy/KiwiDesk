@@ -26,7 +26,7 @@ struct LayoutCycleList: View {
         VStack(alignment: .leading, spacing: 0) {
             // One ForEach, so a tick moves a row without rebuilding
             // it and its checkbox keeps keyboard focus.
-            ForEach(cycle + model.modeCycleAddable, id: \.self) { mode in
+            ForEach(cycle + addable, id: \.self) { mode in
                 item(mode)
             }
         }
@@ -50,12 +50,18 @@ struct LayoutCycleList: View {
         dragOrder ?? model.config.modeCycle
     }
 
+    /// The unticked layouts, read off `cycle` so a config change
+    /// mid-drag cannot draw one layout twice.
+    private var addable: [LayoutMode] {
+        SettingsModel.cycleAddable(besides: cycle)
+    }
+
     /// Every row takes the same modifiers whether ticked or not,
     /// so its identity survives a tick (#2673).
     private func item(_ mode: LayoutMode) -> some View {
         let ticked = cycle.contains(mode)
         return VStack(alignment: .leading, spacing: 0) {
-            if mode == model.modeCycleAddable.first {
+            if mode == addable.first {
                 Divider().padding(.vertical, 4)
             }
             // A greyed box takes no focus, so the row holds it then

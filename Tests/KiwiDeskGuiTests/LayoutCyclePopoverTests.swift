@@ -68,16 +68,25 @@ struct LayoutCyclePopoverTests {
         // identity and its checkbox's focus.
         #expect(
             tail.contains(
-                "ForEach(cycle+model.modeCycleAddable,id:\\.self)"
+                "ForEach(cycle+addable,id:\\.self)"
                     + "{modeinitem(mode)}"
             )
         )
         // No branch splits a row or its box by ticked state.
         #expect(!list.contains("item(mode,in:"))
         #expect(!list.contains("ifcycle{toggle"))
+        // The box sits unbranched in the row, its chain straight.
+        #expect(list.contains("}box(mode,in:cycle)Spacer("))
+        #expect(
+            list.contains(
+                ".toggleStyle(.checkbox)"
+                    + ".accessibilityLabel(label(mode))"
+                    + ".modifier(GreyOut("
+            )
+        )
         let divider = try #require(
             list.range(
-                of: "ifmode==model.modeCycleAddable.first{Divider()"
+                of: "ifmode==addable.first{Divider()"
             )
         )
         // Every row takes the same chain; at two the ticked rows
@@ -118,7 +127,8 @@ struct LayoutCyclePopoverTests {
     func everyLayoutOnce() {
         let model = makeTestModel(core: makeTestCore())
         model.config.modeCycle = [.scrolling, .bsp]
-        let drawn = model.config.modeCycle + model.modeCycleAddable
+        let cycle = model.config.modeCycle
+        let drawn = cycle + SettingsModel.cycleAddable(besides: cycle)
         #expect(drawn.count == LayoutMode.allCases.count)
         #expect(Set(drawn) == Set(LayoutMode.allCases))
         #expect(!model.modeCycleCanRemove)
