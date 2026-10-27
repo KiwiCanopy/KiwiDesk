@@ -1882,7 +1882,11 @@ editing here:
   ONE member takes `nothingToDivide` instead (#1258) — the count
   is the reason there, not the arrangement, and the sentence
   says which of the two it is because the caller states whether
-  the other axis divides.
+  the other axis divides. Grid's cell that already spans the
+  pressed axis is the exception (#2707): a grow takes
+  `ownMaximum(atBoundary: true)`, a shrink `gridNoOtherTrack`,
+  since a Grid row or column is named where a zone is not
+  (`GridSpanRefusalTests`).
   Two obligations on that judgement, both learned the same way.
   **Judge it on what the layout DREW, never on a member count**:
   a bsp region too small for one minimum-size window piles them

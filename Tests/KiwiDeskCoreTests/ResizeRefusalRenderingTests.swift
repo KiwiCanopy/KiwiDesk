@@ -158,6 +158,8 @@ struct ResizeRefusalRenderingTests {
             .noAxisHere(window, axis: "x"),
             .nothingToDivide(window, otherAxisDivides: false),
             .nothingToDivide(window, otherAxisDivides: true),
+            .gridNoOtherTrack(window, axis: "y"),
+            .gridNoOtherTrack(window, axis: "x"),
             .layoutHasNoResize(window),
             .windowIsFullscreen(window),
         ].map(\.pillText)
@@ -244,6 +246,14 @@ struct ResizeRefusalRenderingTests {
                 otherAxisDivides: true
             ).pillText
                 == "Nothing to divide here — try the other axis"
+        )
+        #expect(
+            ResizeRefusal.gridNoOtherTrack(window, axis: "y").pillText
+                == "No other row to take the height"
+        )
+        #expect(
+            ResizeRefusal.gridNoOtherTrack(window, axis: "x").pillText
+                == "No other column to take the width"
         )
         #expect(
             ResizeRefusal.layoutHasNoResize(window).pillText

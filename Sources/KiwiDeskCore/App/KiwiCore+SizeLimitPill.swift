@@ -177,6 +177,21 @@ extension KiwiCore {
         )
     }
 
+    /// A Grid cell already fills `axis` (#2707): a grow meets
+    /// the tiling area's edge, a shrink finds no other row or
+    /// column to hand the space to.
+    func refuseGridSpansAxis(
+        _ window: WindowID,
+        axis: String,
+        delta: Double
+    ) {
+        if delta > 0 {
+            refuseGrowAtBoundary(window, axis: axis)
+        } else {
+            cueResizeRefusal(.gridNoOtherTrack(window, axis: axis))
+        }
+    }
+
     /// The layout has no resizing at all (#1255): monocle and
     /// grid. A correct no-op — macOS's own full-screen exposes
     /// no resize either — but a perceivable one, and it is the
@@ -233,7 +248,9 @@ extension KiwiCore {
     }
 
     /// A float grow refused because BOTH edges are against the
-    /// region it may occupy — the screen less its bars (#1091).
+    /// region it may occupy — the screen less its bars (#1091) —
+    /// or a Grid cell grow where the cell already fills the axis
+    /// (#2707).
     ///
     /// Shares `.ownMaximum` rather than taking a case of its
     /// own, and that is a RULING: every consumer of the reason

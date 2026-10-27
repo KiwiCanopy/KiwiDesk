@@ -90,10 +90,11 @@ struct CoreLocalizationBoundaryTests {
         // configured floor and the app's, #1261), the two
         // own-maximum readings (learned bound and screen edge),
         // the two no-axis-here readings, the two
-        // nothing-to-divide readings, layout-has-no-resizing and
-        // window-is-fullscreen (#1298). Same caveat as
-        // `+StickyMarks` if the overlays ever move out of Core.
-        "Commands/ResizeRefusal+Rendering.swift": 12,
+        // nothing-to-divide readings, layout-has-no-resizing,
+        // window-is-fullscreen (#1298) and Grid's two no-other-
+        // track readings (#2707). Same caveat as `+StickyMarks` if
+        // the overlays ever move out of Core.
+        "Commands/ResizeRefusal+Rendering.swift": 14,
         // The Tile refusal's reasons (#1810), the pocket's among
         // them (#2446), drawn on the same pill and on the bar
         // menu's greyed row, both Core's.
