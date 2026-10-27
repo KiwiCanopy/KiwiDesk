@@ -44,9 +44,7 @@ extension InterpolatedLabelTests {
     /// worth having wherever it interpolates, not only where a
     /// conversion put it. Two shapes to know when adding one:
     /// `layout.schematic.grid.ax` picks between two labels for
-    /// ONE slot with a ternary (so 2), and `home.card.ax_value`
-    /// has two call sites of which only one interpolates a key
-    /// (the count is the larger).
+    /// ONE slot with a ternary (so 2).
     /// The eleven from `app_bar.alignment.label.help` on are the
     /// `i18n/terminology-round` batch, less
     /// `profiles.current_setup_note`, retired with its note
@@ -93,11 +91,9 @@ extension InterpolatedLabelTests {
         // records (re-review, 2026-08-16).
         "scroll_grid.auto_size.gates": 1,
         "track.auto_tracks.gates": 1,
-        "home.card.ax_value": 1,
         "keyboard.layout.value": 1,
         "panel.caption.with_hover_hint": 1,
         "layout.schematic.grid.ax": 2,
-        "search.result_mode_ax": 1,
         "track.new_window_position.help": 4,
         // Monocle's hide-style popover (#881): both option
         // names interpolated from their own keys, authored that
