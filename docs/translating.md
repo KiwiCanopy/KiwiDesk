@@ -369,22 +369,27 @@ each language so it surfaces as missing.
 
 ### Adding a whole new site language
 
-Routes are one file per locale, but a dozen places inside the
-components **hand-enumerate** the locale set, and a language
-added everywhere else still ships with those omitting it — a
+Routes are one file per locale. The head metadata — hreflang
+links, `og:locale` and its alternates, the sitemap, and every
+locale path — derives from the list in
+`site/src/lib/locales.ts`, which takes the new code and its
+`og:locale` value. `check-site-tokens.py` ▸ `check_locales` holds
+that list equal to the catalogs in `site/src/i18n/` and every
+built hreflang link to a page the build emits.
+
+Other places still **hand-enumerate** the locale set, and a
+language added everywhere else ships with those omitting it — a
 language switcher missing an option, a stored-locale redirect
-that cannot reach the new path, an `og:locale` naming the wrong
-one, a 404 that leaves the language out of its list. There is no
-single list to update, so find them mechanically:
+that cannot reach the new path, a 404 that leaves the language
+out of its list. Find them mechanically:
 
 ```bash
 grep -rn '"ja"\|/ja/\|ja_JP\|(de|ja)' site/src
 ```
 
-Every hit is a decision to extend. The shapes to expect: locale →
-path maps (`{ en: "/", de: "/de/", ja: "/ja/" }`), display-name
-and `og:locale` maps, `en|de|ja` predicates and route regexes,
-the `Lang` union in `site/src/i18n/legal.ts`, the
+Every hit is a decision to extend. The shapes to expect:
+display-name maps, `en|de|ja` predicates and route regexes in the
+inline scripts, per-locale banner and quotation-mark choices, the
 language-switcher markup in `Landing.astro` and `Guide.astro`,
 and the `alts` array in `site/src/pages/404.astro` — static
 hosting serves one 404 for every unmatched path, so that page

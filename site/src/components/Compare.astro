@@ -51,6 +51,7 @@
 // native-tab cell is the live example.
 import { Image } from "astro:assets";
 import PageShell, { type Lang } from "./PageShell.astro";
+import { localePath } from "../lib/locales";
 // The KiwiDesk app mark — the same file PageShell puts in the
 // nav brand. Not kiwi-mark.svg, which is the KiwiCanopy house
 // kiwi: this column names the product, so it wears the product's
@@ -62,6 +63,7 @@ import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
+import { publisher } from "../lib/publisher";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
 
@@ -88,11 +90,6 @@ const ogImage = new URL(
       : ogBannerEn).src,
   Astro.site,
 ).href;
-
-function localePath(l: Lang, sub = ""): string {
-  const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}` || "/";
-}
 
 // Source links. Named here rather than inline so a URL that moves
 // is fixed in one place, and so the prose below reads as prose.
@@ -211,11 +208,7 @@ const jsonLd = [
     url: canonical,
     inLanguage: lang,
     image: ogImage,
-    author: {
-      "@type": "Organization",
-      name: "KiwiCanopy",
-      url: "https://kiwicanopy.com",
-    },
+    author: publisher,
   },
   {
     "@context": "https://schema.org",

@@ -1,4 +1,12 @@
 import type { APIRoute } from "astro";
+import en from "../i18n/en.json";
+import de from "../i18n/de.json";
+import ja from "../i18n/ja.json";
+import {
+  locales as langs,
+  localePath,
+  type Lang,
+} from "../lib/locales";
 
 // Hand-rolled sitemap for the custom (non-Starlight) pages that
 // carry locale variants. @astrojs/sitemap covers the /docs/* tree
@@ -8,9 +16,6 @@ import type { APIRoute } from "astro";
 // full hreflang alternates so crawlers see the same graph the
 // <link rel="alternate"> tags declare. Legal pages (imprint,
 // privacy) are noindex and excluded from both.
-
-const langs = ["en", "de", "ja"] as const;
-type Lang = (typeof langs)[number];
 
 // Indexable routes — the path segment *after* the locale prefix.
 // "" is the landing page; "nerd" its dev-audience sibling (the
@@ -27,26 +32,23 @@ const paths = ["", "nerd", "guide", "changelog", "compare"];
 // both modes. A <video:video> entry per landing URL is what lets
 // Google show a video rich result for a file the site itself
 // serves (the JSON-LD VideoObject in Landing.astro is the other
-// half). Same data in both places, so they never contradict.
+// half). Title and description come from the same catalog keys the
+// VideoObject reads, per locale, so the two never contradict.
 const videoPaths = new Set(["", "nerd"]);
 const video = {
   file: "/kiwidesk-trailer.mp4",
   poster: "/kiwidesk-trailer-poster.jpg",
-  title: "KiwiDesk — a tiling window manager for macOS you can recommend to anyone",
-  description:
-    "Seventy seconds of KiwiDesk: five messy windows tiled in one step, " +
-    "the scrolling layout, a window dragged onto the Space Bar, a pinned " +
-    "window that follows you, and one profile per macOS Desktop.",
   seconds: 71,
   published: "2026-09-13T00:00:00+02:00",
 };
+const catalogs = { en, de, ja };
+
+function xmlText(s: string): string {
+  return s.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
 
 function urlFor(base: string, lang: Lang, path: string): string {
-  // English lives at root, other locales under /<lang>/
-  const segments = lang === "en"
-    ? (path ? `/${path}/` : "/")
-    : (path ? `/${lang}/${path}/` : `/${lang}/`);
-  return `${base}${segments}`;
+  return `${base}${localePath(lang, path ? `/${path}/` : "/")}`;
 }
 
 export const GET: APIRoute = ({ site }) => {
@@ -67,11 +69,11 @@ export const GET: APIRoute = ({ site }) => {
         `<xhtml:link rel="alternate" hreflang="x-default"` +
         ` href="${urlFor(base, "en", p)}"/>`,
       ].join("");
-      const videoEntry = videoPaths.has(p)
+      const videoEntry = (l: Lang) => videoPaths.has(p)
         ? `<video:video>` +
           `<video:thumbnail_loc>${base}${video.poster}</video:thumbnail_loc>` +
-          `<video:title>${video.title}</video:title>` +
-          `<video:description>${video.description}</video:description>` +
+          `<video:title>${xmlText(catalogs[l].demo_title)}</video:title>` +
+          `<video:description>${xmlText(catalogs[l].demo_body)}</video:description>` +
           `<video:content_loc>${base}${video.file}</video:content_loc>` +
           `<video:duration>${video.seconds}</video:duration>` +
           `<video:publication_date>${video.published}</video:publication_date>` +
@@ -82,7 +84,7 @@ export const GET: APIRoute = ({ site }) => {
         .map(
           (l) =>
             `<url><loc>${urlFor(base, l, p)}</loc>` +
-            `${alternates}${videoEntry}</url>`,
+            `${alternates}${videoEntry(l)}</url>`,
         )
         .join("");
     })

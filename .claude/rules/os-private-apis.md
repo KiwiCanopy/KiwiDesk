@@ -181,7 +181,15 @@ Every one of the following binds whoever touches them:
   moving such a read off the main actor does not take it off the
   main actor's path: a per-window layer reads `SLSGetWindowLevel`
   (`FloatDetection.windowLayer(of:)`, `layerReader`, the public
-  read their fallback), and a new whole-list read states its
+  read their fallback), as does the raise gate's on-screen flag
+  (`FloatDetection.isOnScreen`; why it takes two SLS reads is
+  `SkyLight+WindowVisibility.swift`'s docstring). **A per-window
+  read standing in for a public one whose consumer abstains on
+  nil answers nil wherever the public read has no entry, never
+  only its value**: the raise gate abstains on nil, and a SkyLight
+  `false` there turns that into a refusal
+  (`WindowVisibilityReadTests`, `RaiseGateOnScreenSeamTests`).
+  A new whole-list read states its
   cadence and why no per-window read answers it. Every public
   list read goes through `WindowListRead.copy` with a site name,
   which logs a read past 50 ms with its site and thread, so a

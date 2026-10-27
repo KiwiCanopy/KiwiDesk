@@ -7,6 +7,7 @@
 // without pulling in Starlight's chrome. German is legally binding; en/ja are
 // courtesy translations (see src/i18n/legal.ts).
 import PageShell, { type Lang } from "./PageShell.astro";
+import { localePath } from "../lib/locales";
 import { legal, type LegalDoc } from "../i18n/legal";
 
 interface Props {
@@ -15,15 +16,10 @@ interface Props {
 }
 const { lang, doc } = Astro.props;
 
-function localePath(l: Lang, sub = ""): string {
-  const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}` || "/";
-}
-
 const strings = legal[lang];
 const data: LegalDoc = strings[doc];
 const slug =
-  doc === "impressum" ? "/imprint" : doc === "datenschutz" ? "/privacy" : "/terms";
+  doc === "impressum" ? "/imprint/" : doc === "datenschutz" ? "/privacy/" : "/terms/";
 const showNote = lang !== "de" && !!strings.translationNote;
 
 const pageTitle = `${data.title} · KiwiDesk`;

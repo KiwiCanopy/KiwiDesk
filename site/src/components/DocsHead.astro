@@ -1,0 +1,15 @@
+---
+// Docs (Starlight) Head override: Starlight's own head, plus the
+// share image it never sets, though it declares a large Twitter
+// card. Docs are English-only, so they wear the English banner.
+import Default from "@astrojs/starlight/components/Head.astro";
+import ogBanner from "../assets/brand/og-banner.jpg";
+
+const image = new URL(ogBanner.src, Astro.site).href;
+---
+
+<Default {...Astro.props}><slot /></Default>
+<meta property="og:image" content={image} />
+<meta property="og:image:width" content={String(ogBanner.width)} />
+<meta property="og:image:height" content={String(ogBanner.height)} />
+<meta name="twitter:image" content={image} />
