@@ -5,14 +5,16 @@ import SwiftUI
 /// The layout cycle's popover (#2673): all seven layouts, the
 /// cycle's in order with a drag handle, the rest below in the
 /// Layout menu's order. A tick adds a layout at the end, an untick
-/// takes it out; at two the ticked boxes grey, each saying why.
-/// Move Up / Move Down ride `rowActions` on each ticked row, which
-/// holds keyboard focus itself while its box is greyed.
+/// takes it out; at two the ticked boxes grey, the sentence under
+/// them saying why. Move Up / Move Down ride `rowActions` on each
+/// ticked row, which holds keyboard focus itself while its box is
+/// greyed; a click focuses it without a ring (#991).
 struct LayoutCycleList: View {
     @ObservedObject var model: SettingsModel
     @State private var dragOrder: [LayoutMode]?
     @State private var dragged: LayoutMode?
     @State private var rowFrames: [LayoutMode: CGRect] = [:]
+    @FocusState private var focused: LayoutMode?
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private static let listSpace = "layoutCycleList"
@@ -23,6 +25,14 @@ struct LayoutCycleList: View {
             ForEach(cycle, id: \.self) { mode in
                 item(mode, in: true)
             }
+            if !model.modeCycleCanRemove {
+                // The greyed boxes' reason, drawn outside their GreyOut.
+                Text(LayoutCycleWords.minimum)
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .fixedSize(horizontal: false, vertical: true)
+                    .padding(.leading, 26)
+            }
             Divider().padding(.vertical, 4)
             ForEach(model.modeCycleAddable, id: \.self) { mode in
                 item(mode, in: false)
@@ -32,6 +42,13 @@ struct LayoutCycleList: View {
         .padding(.vertical, 8)
         .coordinateSpace(name: Self.listSpace)
         .onPreferenceChange(ItemFrames.self) { rowFrames = $0 }
+        .onChange(of: focused) { _, now in
+            // A click focuses a greyed row; it does not ring it.
+            guard now != nil else { return }
+            if ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
+                focused = nil
+            }
+        }
         .frame(width: SettingsMetrics.cycleListWidth, alignment: .leading)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(LayoutCycleWords.title)
@@ -49,6 +66,9 @@ struct LayoutCycleList: View {
             // for the row menu's chord.
             row(mode, in: true)
                 .focusable(!model.modeCycleCanRemove)
+                .focused($focused, equals: mode)
+                // One element, so VoiceOver finds the row menu on it.
+                .accessibilityElement(children: .combine)
                 .rowActions { actions(mode) }
         } else {
             row(mode, in: false)

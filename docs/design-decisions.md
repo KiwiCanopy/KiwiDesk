@@ -13970,8 +13970,8 @@ Floating", is a bordered button in the recorder column; its
 popover lists all seven layouts, the cycle's ticked and in
 order with a drag handle, the rest unticked below in the Layout
 menu's order. A tick appends a layout and an untick takes it
-out; at two, the ticked boxes grey, each with the reason on its
-tooltip.
+out; at two, the ticked boxes grey and a sentence under them
+says why.
 This reverses #453's inline list (2026-10-11), which unfolded a
 list with a ＋ menu and − buttons inside the Layout card and
 pushed every row below it down: the card is a column of

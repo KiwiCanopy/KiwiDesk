@@ -77,6 +77,15 @@ struct LayoutCyclePopoverTests {
             )
         )
         #expect(ticked.lowerBound < rest.lowerBound)
+        // The reason, drawn between the two while the boxes grey.
+        let reason = try #require(
+            tail.range(
+                of: "if!model.modeCycleCanRemove{"
+                    + "Text(LayoutCycleWords.minimum)"
+            )
+        )
+        #expect(ticked.upperBound <= reason.lowerBound)
+        #expect(reason.upperBound <= rest.lowerBound)
         // Greyed with its reason, on the box alone; the row then
         // holds focus for the row menu's chord.
         #expect(
@@ -89,6 +98,8 @@ struct LayoutCyclePopoverTests {
         #expect(
             list.contains(
                 "row(mode,in:true).focusable(!model.modeCycleCanRemove)"
+                    + ".focused($focused,equals:mode)"
+                    + ".accessibilityElement(children:.combine)"
                     + ".rowActions{actions(mode)}"
             )
         )

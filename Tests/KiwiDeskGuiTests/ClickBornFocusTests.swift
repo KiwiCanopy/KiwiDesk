@@ -144,6 +144,8 @@ struct ClickBornFocusTests {
             "SpaceAssignmentChip.swift": "false",
             "SettingsSlider.swift": "false",
             "SegmentedPicker.swift": "false",
+            // A greyed row of the layout cycle popover (#2673).
+            "LayoutCycleList.swift": "false",
         ]
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
