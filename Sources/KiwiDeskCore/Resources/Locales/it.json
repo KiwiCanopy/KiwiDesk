@@ -1657,7 +1657,7 @@
   "pocket.position": "Posizione lungo il bordo",
   "pocket.position.help": "Dove appare la Pocket lungo il suo bordo, dall'estremità sinistra o superiore a quella destra o inferiore.",
   "pocket.refusal.float": "Le finestre Pocket fluttuano sempre",
-  "pocket.refusal.marked_elsewhere": "Una finestra è già contrassegnata come Pocket — togli prima il contrassegno da quella finestra.",
+  "pocket.refusal.marked_elsewhere": "La Pocket è già occupata",
   "pocket.refusal.sticky": "Le finestre Pocket sono sempre Sticky",
   "presets.apply": "Applica",
   "presets.caption": "Applicandone uno lo salverai come un vero profilo che potrai poi modificare.",

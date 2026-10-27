@@ -40,13 +40,19 @@ final class SizeLimitPillPlate: NSVisualEffectView {
     }
 
     /// The leading glyph, chosen by the refusal's own case
-    /// (`ResizeRefusal.pillSymbol`); nil draws the text alone.
+    /// (`ResizeRefusal.pillSymbol`), or a pocket glyph its sentinel
+    /// names (`PocketMark.pillImage`); nil draws the text alone.
     func setSymbol(_ name: String?) {
-        icon.image = name.flatMap {
-            NSImage(systemSymbolName: $0, accessibilityDescription: nil)
-        }
+        icon.image = name.flatMap(Self.image(for:))
         icon.isHidden = name == nil
         needsLayout = true
+    }
+
+    /// The glyph `name` draws: a pocket sentinel's drawing first,
+    /// else the system symbol.
+    static func image(for name: String) -> NSImage? {
+        PocketMark.pillImage(named: name, size: 12)
+            ?? NSImage(systemSymbolName: name, accessibilityDescription: nil)
     }
 
     private var textInset: CGFloat { icon.isHidden ? 12 : 24 }

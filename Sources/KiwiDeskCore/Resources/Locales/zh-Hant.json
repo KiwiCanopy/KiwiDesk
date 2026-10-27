@@ -1657,7 +1657,7 @@
   "pocket.position": "沿邊緣的位置",
   "pocket.position.help": "Pocket 沿邊緣出現的位置，從左端或頂端到右端或底端。",
   "pocket.refusal.float": "Pocket 視窗一律浮動",
-  "pocket.refusal.marked_elsewhere": "已有一個視窗被標記為 Pocket — 請先取消那個視窗的標記。",
+  "pocket.refusal.marked_elsewhere": "Pocket 已被佔用",
   "pocket.refusal.sticky": "Pocket 視窗一律為 Sticky",
   "presets.apply": "套用",
   "presets.caption": "套用預置組合會將其儲存為可供後續編輯的真實描述檔。",

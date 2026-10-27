@@ -1657,7 +1657,7 @@
   "pocket.position": "端に沿った位置",
   "pocket.position.help": "端に沿って Pocket が現れる位置です。左端または上端から、右端または下端までです。",
   "pocket.refusal.float": "Pocket ウインドウは常にフローティング",
-  "pocket.refusal.marked_elsewhere": "すでに別のウインドウが Pocket としてマークされています。先にそちらのマークを解除してください。",
+  "pocket.refusal.marked_elsewhere": "Pocket はすでに使用中です",
   "pocket.refusal.sticky": "Pocket ウインドウは常に Sticky",
   "presets.apply": "適用",
   "presets.caption": "プリセットを適用すると実際のプロファイルとして保存され、後から編集できるようになります。",

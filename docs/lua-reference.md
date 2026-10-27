@@ -5735,8 +5735,8 @@ mark. Unmarking tiles it on the active Space, as
 detection floats stays floating.
 
 While one window is marked, a call on another window fails with a
-pill: "One window is already marked as Pocket — remove it there
-first." A pocketed window is never the focused one, so take it out
+pill: "Pocket is already taken". Unmark the marked window first; a
+pocketed window is never the focused one, so take it out
 with [`pocket`](#pocket) before unmarking it. Fails on a window in
 native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default

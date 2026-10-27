@@ -1657,7 +1657,7 @@
   "pocket.position": "Position entlang der Kante",
   "pocket.position.help": "Wo die Pocket entlang ihrer Kante erscheint, vom linken oder oberen bis zum rechten oder unteren Ende.",
   "pocket.refusal.float": "Pocket-Fenster schweben immer",
-  "pocket.refusal.marked_elsewhere": "Ein Fenster ist bereits als Pocket markiert — hebe dort zuerst die Markierung auf.",
+  "pocket.refusal.marked_elsewhere": "Die Pocket ist schon belegt",
   "pocket.refusal.sticky": "Pocket-Fenster sind immer Sticky",
   "presets.apply": "Anwenden",
   "presets.caption": "Beim Anwenden wird sie als eigenes Profil gespeichert, das du danach bearbeiten kannst.",
