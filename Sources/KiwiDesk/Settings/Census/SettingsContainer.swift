@@ -63,6 +63,9 @@ enum SettingsContainer: CaseIterable, Hashable {
     case optionalSettings
     case palettes
     case perSpaceOverrides
+    /// Shortcuts' Pocket card (#2680): its keys and where the
+    /// brief pocket appears.
+    case pocket
     case pinnedToDisconnectedScreens
     case presets
     case profilesPerMacOSSpace
@@ -112,7 +115,7 @@ enum SettingsContainer: CaseIterable, Hashable {
             .looks, .luaBindings,
             .screenFingerprints, .monocle, .gestures, .modifierKeys,
             .moveWindows, .macosDesktops, .openApplications,
-            .optionalSettings, .palettes, .perSpaceOverrides,
+            .optionalSettings, .palettes, .perSpaceOverrides, .pocket,
             .pinnedToDisconnectedScreens, .presets,
             .profilesPerMacOSSpace, .floatRules, .secondAccent,
             .spaceRules, .automaticFloating,

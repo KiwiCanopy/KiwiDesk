@@ -34,11 +34,7 @@ extension KiwiCore {
                 )
             }
         }
-        // The plate is the Space switch's, so it follows KiwiHub's
-        // leaf of the Liquid Glass switch as those plates do.
-        let glass = LiquidGlassGate.rendered(
-            glass: tiler.settings.shortcutPanelLiquidGlass
-        )
+        let glass = briefPocketPlateGlass()
         let flight = BriefPocketPlan.flight(
             durationMS: tiler.settings.animations.durationMS
         )
@@ -54,7 +50,7 @@ extension KiwiCore {
                     position: style.position
                 ),
                 iconPid: state.windows[id]?.pid,
-                shelf: LiquidGlassGate.rendered(tiler.settings.kiwishelf),
+                shelf: briefPocketShelf(),
                 markHex: style.color,
                 plateGlass: glass,
                 plateTint: tiler.settings.panelsWearFill(glassDrawn: glass)
@@ -64,5 +60,19 @@ extension KiwiCore {
         )
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return BriefPocketPlan.timeline(direction, flight: flight).flightEnd
+    }
+
+    /// The plate is the Space switch's, so it follows KiwiHub's
+    /// leaf of the Liquid Glass switch as those plates do.
+    func briefPocketPlateGlass() -> Bool {
+        LiquidGlassGate.rendered(
+            glass: tiler.settings.shortcutPanelLiquidGlass
+        )
+    }
+
+    /// The pocket wears KiwiShelf's look as drawn, as the overflow
+    /// mark does.
+    func briefPocketShelf() -> KiwiShelf {
+        LiquidGlassGate.rendered(tiler.settings.kiwishelf)
     }
 }

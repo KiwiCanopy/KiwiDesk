@@ -472,7 +472,8 @@ that way, stopping at the edge; neither takes other arguments
 
 :::unreleased
 `animations.set_on_state_change` animates a window floating,
-maximizing or going into the Pocket and out
+maximizing or going into the Pocket and out, the last as a brief
+pocket that `pocket.set_edge` and `pocket.set_position` place
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 :::
 

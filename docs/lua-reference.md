@@ -5919,6 +5919,41 @@ pocket.set_color("")          -- back to Automatic
 ```
 :::
 
+:::unreleased
+### pocket.set_edge
+
+**Expects:** `"top"`, `"bottom"`, `"left"` or `"right"` (default
+`"bottom"`).
+
+**Does:** sets the screen edge the brief pocket appears on while a
+window goes into the [pocket](#pocket) or comes out, under
+[`animations.set_on_state_change`](#animationsset_on_state_change).
+A bar on the same edge keeps it just inside the bar.
+
+**Example:**
+
+```lua
+pocket.set_edge("right")
+```
+:::
+
+:::unreleased
+### pocket.set_position
+
+**Expects:** a number from `0` to `100` (default `82`); outside
+that range it is clamped.
+
+**Does:** sets where along its edge the brief pocket appears, in
+percent: `0` is the left or top end, `100` the right or bottom
+end. The pocket stays whole on screen at either end.
+
+**Example:**
+
+```lua
+pocket.set_position(50)  -- the middle of its edge
+```
+:::
+
 ## Launching Apps
 
 ### focus_or_spawn
@@ -7646,8 +7681,13 @@ animations.set_on_relayout(true)
 **Does:** enables or disables animation for a window changing
 state: floating and tiling back, maximizing and returning, and
 going into the Pocket and out. Floating and maximizing spring the
-window to its new frame, size included; pocketing slides it to
-its park corner and back. The windows around it, and a window
+window to its new frame, size included. Going into the Pocket or
+out shows a brief pocket instead: it appears on the screen, a
+glass plate with the app's icon flies between it and the window,
+it nods and fades out, while the window itself leaves and comes
+back in one move. [`pocket.set_edge`](#pocketset_edge) and
+[`pocket.set_position`](#pocketset_position) place it. Under
+Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
 

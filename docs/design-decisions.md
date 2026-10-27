@@ -6159,10 +6159,20 @@ a tinted plate flashing over a jumping window: a glitch on float
 and maximize, not a style. A Genie stays refused because it means
 "minimized to the Dock" and needs a private API
 ([the overflow mark's peek](#layout-and-resize-behavior)).
-Pocketing slides the real window to its park corner at its own
-size, position only, so slow apps and minimum sizes are not in
-play; a plate shrinking into an on-screen pocket waits for that
-pocket to exist (#2680).
+Pocketing draws a brief pocket rather than moving the real window
+(#2680, replacing #2676's slide to the park corner): a pocket in
+KiwiShelf's look appears at its placement for the moment a window
+goes in or out, the Space switch's plate flies between it and the
+window — our own overlay, redrawn at each size, never a capture —
+and it nods and fades. The window parks at once and comes back with
+one write, held until the plate lands, so a slow app or a minimum
+size is never in play; no pocket stays on screen (that is #2678's,
+with the several-windows mode). The pocket's placement is an edge
+and a position along it, clear of a bar on that edge, in Settings ▸
+Shortcuts ▸ Pocket beside its two keys; the two rows grey while the
+toggle is off, since the pocket then never appears. The bar menus
+offer no Pocket or Take out yet (owner, 2026-10-27): a pocketed
+window has no bar item, so only one of the two could show.
 :::
 
 ### Spaces, profiles & config ownership

@@ -52,6 +52,17 @@ struct OverlayGlassGateTests {
             stored: "blur: look.blur"
         ),
         (
+            // The brief pocket's plate and pocket (#2680).
+            file: "App/KiwiCore+BriefPocket.swift",
+            function: "func briefPocketPlateGlass(",
+            stored: "glass: tiler.settings.shortcutPanelLiquidGlass"
+        ),
+        (
+            file: "App/KiwiCore+BriefPocket.swift",
+            function: "func briefPocketShelf(",
+            stored: "tiler.settings.kiwishelf"
+        ),
+        (
             file: "Commands/KiwiCore+SpaceSlide.swift",
             function: "func prepareSpaceSlide(",
             stored: "glass: tiler.settings.shortcutPanelLiquidGlass"
@@ -113,6 +124,7 @@ struct OverlayGlassGateTests {
         "Borders/StickyMarkPlate+Glass.swift": "OverlayGlassGateTests",
         "Borders/OverflowMarkView.swift": "OverlayGlassGateTests",
         "Animation/SpaceSlideOverlay+Plates.swift": "OverlayGlassGateTests",
+        "Animation/BriefPocketViews.swift": "OverlayGlassGateTests",
         "Bar/BarPeekPanel.swift": "BarPeekSeamTests",
         "Vision/VisionPlate.swift": "OverlayGlassGateTests",
         "Bar/ShelfHandleView.swift": "OverlayGlassGateTests",

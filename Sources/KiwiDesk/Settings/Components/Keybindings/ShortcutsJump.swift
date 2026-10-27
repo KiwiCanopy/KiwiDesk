@@ -13,6 +13,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case macosDesktops
     case layout
     case sizeFloat
+    case pocket
     case openApplications
     case luaBindings
 
@@ -30,6 +31,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
             return SettingsCatalog.shortcuts.desktopsSection
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
+        case .pocket: return SettingsCatalog.shortcuts.pocketKeys
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
         case .luaBindings:
@@ -47,6 +49,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .macosDesktops: return .macosDesktops
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
+        case .pocket: return .pocket
         case .openApplications: return .openApplications
         case .luaBindings: return .luaBindings
         }

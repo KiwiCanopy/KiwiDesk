@@ -97,6 +97,10 @@ struct LayoutBoundsRoutingTests {
         // region no bar occupies whenever an empty bar is
         // suppressed.
         "App/KiwiCore+FloatRegion.swift": 1,
+        // The brief pocket's placement (#2680): a containment box
+        // for a picture, clear of the strips the bars painted on
+        // its edge, as the float region is; it divides no span.
+        "App/KiwiCore+BriefPocket.swift": 1,
         // The traveler re-home (#1217), a float NET on the same
         // grounds: its destination is the display a floating
         // space renders on, a containment box for a window the
