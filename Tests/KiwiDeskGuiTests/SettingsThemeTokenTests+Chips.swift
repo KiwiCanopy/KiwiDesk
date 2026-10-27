@@ -37,15 +37,6 @@ extension SettingsThemeTokenTests {
             lightAlpha: 0.16,
             darkAlpha: 0.22
         ),
-        // A list's selected row (#453), a marking of its own.
-        Pin(
-            "rowSelected",
-            0x12_25_1A,
-            0xE6_EC_E6,
-            SettingsTheme.rowSelected,
-            lightAlpha: 0.16,
-            darkAlpha: 0.22
-        ),
         Pin(
             "chipEdge",
             0x12_25_1A,

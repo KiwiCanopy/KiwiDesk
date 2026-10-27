@@ -144,7 +144,7 @@ struct ClickBornFocusTests {
             "SpaceAssignmentChip.swift": "false",
             "SettingsSlider.swift": "false",
             "SegmentedPicker.swift": "false",
-            // An item of the layout cycle list (#453): a leaf.
+            // A greyed row of the layout cycle popover (#2673).
             "LayoutCycleList.swift": "false",
         ]
         let root = SourceScan.repoRoot(from: #filePath)

@@ -39,9 +39,9 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to the discard gate's confirmationDialog"
             ),
             "LayoutCycleList.swift": (
-                3, "rowActions",
+                2, "rowActions",
                 "Returned to the row-menu builder the rowActions "
-                    + "seam feeds (#845, #453)"
+                    + "seam feeds (#845, #2673)"
             ),
             "SpaceAssignmentChip.swift": (
                 3, "rowActions",
