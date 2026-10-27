@@ -15,6 +15,15 @@ struct DesktopCueRow: View {
     }
 
     var body: some View {
+        // Starts at the rows' text, as the layout cue does (#2670).
+        VStack(alignment: .leading, spacing: 4) { content }
+            .padding(
+                .leading,
+                ShortcutSettingRow<EmptyView, EmptyView>.captionIndent
+            )
+    }
+
+    @ViewBuilder private var content: some View {
         let luaOwned = reason == .appWideLuaOwned
         ToggleRow(
             label: SettingsCatalog.shortcuts.desktopCue.text,

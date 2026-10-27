@@ -14,20 +14,11 @@ struct ShortcutBaseRow: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            HStack(alignment: .firstTextBaseline) {
-                // The icon slot every shortcut row reserves (#264).
-                Color.clear.frame(width: Self.iconSlot, height: 1)
-                // The picker names itself; this is its drawn twin.
-                Text(ShortcutBaseWords.title)
-                    .accessibilityHidden(true)
-                HelpButton(
-                    explanation: ShortcutBaseWords.help,
-                    subject: ShortcutBaseWords.title
-                )
-                Spacer()
-                KeyRecorderField.footprint.overlay {
-                    picker.modifier(GreyOut(active: greyed, help: captionText))
-                }
+            ShortcutSettingRow(
+                title: ShortcutBaseWords.title,
+                help: ShortcutBaseWords.help
+            ) {
+                picker.modifier(GreyOut(active: greyed, help: captionText))
             }
             // Lua owning the config is the card's caption already.
             if reason != .appWideLuaOwned { caption(captionText) }
@@ -35,7 +26,8 @@ struct ShortcutBaseRow: View {
         }
     }
 
-    private static let iconSlot = SettingsMetrics.shortcutIconSlot
+    private static let captionIndent =
+        ShortcutSettingRow<EmptyView, EmptyView>.captionIndent
 
     private var keySet: Bool { model.appWide.hyperKey != nil }
 
@@ -91,7 +83,7 @@ struct ShortcutBaseRow: View {
         .font(.caption)
         .foregroundStyle(SettingsTheme.ink2)
         .fixedSize(horizontal: false, vertical: true)
-        .padding(.leading, Self.iconSlot + 8)
+        .padding(.leading, Self.captionIndent)
     }
 
     private func caption(_ text: String) -> some View {
@@ -99,6 +91,6 @@ struct ShortcutBaseRow: View {
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, Self.iconSlot + 8)
+            .padding(.leading, Self.captionIndent)
     }
 }

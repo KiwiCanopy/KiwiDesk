@@ -19,17 +19,16 @@ struct NavRow: View {
 
     var body: some View {
         HStack {
-            // Reserve the icon slot unconditionally (#264): only
-            // Go-to/Move-to-space rows carry a glyph, so a
-            // conditional icon shifted every icon-less row's
-            // label ~18 pt leftward. `Color.clear` holds the
-            // width; the glyph draws in an overlay when present.
+            // The icon slot is reserved unconditionally (#264); the
+            // glyph is the shortcuts panel's own for this action
+            // (#2670), drawn in an overlay so a row without one keeps
+            // its label in line.
             Color.clear
                 .frame(width: 18)
                 .overlay {
-                    if let glyph = command.icon,
-                        !glyph.isEmpty
-                    {
+                    if let glyph = ShortcutsReferenceBuilder.icon(
+                        for: command
+                    ) {
                         IconGlyphLabel(icon: glyph)
                     }
                 }
