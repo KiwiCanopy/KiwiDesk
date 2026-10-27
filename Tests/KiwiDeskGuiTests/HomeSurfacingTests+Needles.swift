@@ -22,9 +22,10 @@ extension HomeSurfacingTests {
             // A link refuses only what the stored-profile axis
             // hides, never a card the screen count hides: Screens
             // stays one link away on one screen (#2654).
-            "guarddestination.isReachable(editingStoredProfile:"
+            ".environment(\\.settingsNavigate){destinationin"
+                + "guarddestination.isReachable(editingStoredProfile:"
                 + "model.editingStoredProfile)else{return}"
-                + "selection=destination",
+                + "selection=destination}",
             // The measured band is published ONCE, from the
             // shell's own geometry: every responsive decision
             // below reads it from the environment rather than
@@ -167,7 +168,11 @@ extension HomeSurfacingTests {
             // A resolved hit lands whatever the screen count:
             // Screens' card hides on one screen, its search hits
             // do not (#2654).
-            "else{return}model.destination=resolved.destination"
+            "guardletrequestelse{return}"
+                + "model.nav.pendingReveal=nil"
+                + "guardletresolved=request.resolved("
+                + "editingStoredProfile:model.editingStoredProfile)"
+                + "else{return}model.destination=resolved.destination"
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home

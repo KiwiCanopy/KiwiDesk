@@ -59,8 +59,8 @@ struct ShortcutsGateTests {
     }
 
     /// The resolver on each side of the boundary. A non-nil reason
-    /// WITHHOLDS the Layers rows behind the offer; nil surfaces
-    /// them at rest. This is the half that reds a renderer pinned
+    /// keeps the Layers card shut on arrival; nil opens it. This
+    /// is the half that reds a renderer pinned
     /// to a constant, because `LayersCard` now asks this rather
     /// than re-deriving the condition inline.
     @Test("layer presence flips the resolver's reason")
@@ -77,18 +77,18 @@ struct ShortcutsGateTests {
         )
         #expect(
             reason([KeyLayer.defaultName, "resize"]) == nil,
-            "a configured layer must surface in both modes"
+            "a configured layer must surface"
         )
         // Presence, not a count: three still reads "exists", and
         // an off-by-one would pass the pair above.
         #expect(
             reason([KeyLayer.defaultName, "resize", "media"]) == nil
         )
-        // All three Layers rows carry the one gate, so they answer
-        // together — a resolver that only knew `switchToLayer`
-        // would leave the other two unaccounted below.
+        // The rows that exist once a layer does carry the one gate,
+        // so they answer together; the strip is the ungated offer
+        // (#2654).
         for key: SettingKey in [
-            .shortcuts(.layers), .shortcuts(.layersIcon),
+            .shortcuts(.layersIcon), .shortcuts(.layersReach),
             .shortcuts(.switchToLayer),
         ] {
             #expect(

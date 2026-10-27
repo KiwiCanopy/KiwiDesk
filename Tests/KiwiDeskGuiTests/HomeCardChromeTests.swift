@@ -211,8 +211,8 @@ struct HomeCardChromeTests {
             Comment(
                 rawValue:
                     "cardStroke reads the pointer again — the "
-                    + "border is the mode's channel alone, or a "
-                    + "hovered card stops stating its mode"
+                    + "border says what a card is, the fill "
+                    + "where the pointer is (#1173)"
             )
         )
     }

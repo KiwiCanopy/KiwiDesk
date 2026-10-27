@@ -45,7 +45,7 @@ extension SettingsTheme {
     static let containerStroke: CGFloat = 1
 
     /// Notice strip accent fill opacity (`WhatsNewTrailBanner`).
-    static let searchNoticeFillOpacity: CGFloat = 0.12
+    static let noticeFillOpacity: CGFloat = 0.12
 
     /// A marked chip's accent wash — the jump chip on `page`, the
     /// icon cell on `card` (`SettingsThemeContrastTests`, #1520).

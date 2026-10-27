@@ -33,8 +33,8 @@ extension SpacesSection {
     /// saved" that still opens the editor (grey, don't hide).
     /// Withheld until some Space carries an override (#678 8c,
     /// #2654) — `SpaceOverrideOffer` owns that predicate, gated
-    /// HERE at the one render site; the row's actions menu offers
-    /// the editor meanwhile.
+    /// HERE at the one render site; the row's actions menu always
+    /// offers the editor.
     @ViewBuilder func customizeButton(
         _ space: SpaceID
     ) -> some View {
@@ -201,7 +201,8 @@ extension SpacesSection {
     /// Context menu actions for space row reordering and role assignments.
     @ViewBuilder
     func contextActions(_ space: SpaceID) -> some View {
-        // The editor's door before any override exists (#2654).
+        // The editor's door on every row, before any override
+        // exists as after (#2654).
         Button(L("spaces.overrides.customize", "Customize…")) {
             model.nav.spaceOverridesFocus = space
         }

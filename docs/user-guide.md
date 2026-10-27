@@ -418,8 +418,8 @@ auto-size, Track's auto limit) says so and links Layout
 Defaults.
 
 :::unreleased
-Until any space has an override, **Customize…** is in each space
-row's actions menu instead of on the row.
+**Customize…** is always on a space row's right-click menu; once
+any space has an override, it is also a cell on every row.
 :::
 
 Changing a space's layout never deletes overrides; each layout
@@ -837,7 +837,7 @@ Apps with **macOS native tabs** (Finder, Terminal, Ghostty) are
 one tile per window that follows the active tab. Tabs cannot be
 split into separate tiles.
 
-### Ignore Rules (Power Users)
+### Ignore Rules (Lua only)
 
 An ignore rule makes KiwiDesk treat every window of an app as
 nonexistent — no space assignment, no window events — for HUDs,

@@ -21,8 +21,7 @@ private final class UnlockRegistrar: HotkeyRegistrar {
 }
 
 /// **A used capability unlocks its whole list, and the list is
-/// the scope** (#678 decision items 14/15). Two rules the
-/// redesign settles now and the mode-mechanics phase inherits:
+/// the scope** (#678 decision items 14/15, #2654):
 ///
 ///  - *the whole list.* The moment a profile carries a single
 ///    shortcut override, the override affordance is live on
@@ -31,17 +30,13 @@ private final class UnlockRegistrar: HotkeyRegistrar {
 ///    keys; making them re-discover the affordance per row is
 ///    the thing this forbids.
 ///  - *the list, not the app.* Overriding a shortcut must not
-///    turn a deeper surface on anywhere else — "the mode becomes
-///    something users lose by accident" is the failure. App
-///    rules are the nearest neighbour with the same
-///    override shape, so they are the probe.
+///    turn a deeper surface on anywhere else, or the unlock
+///    becomes something users trip by accident. App rules are
+///    the nearest neighbour with the same override shape, so
+///    they are the probe.
 ///
-/// Both already hold: the affordance keys off *editing a stored
-/// profile*, never off a mode or a per-row flag. That is exactly
-/// why this suite exists — nothing pinned it, and the cheapest
-/// way to implement mode mechanics later is to gate the column
-/// on a mode, which would violate both rules at once and break
-/// no test.
+/// Both hold because the affordance keys off *editing a stored
+/// profile*, never off a per-row flag or a window-wide depth.
 ///
 /// Item 15's third clause — the resolver takes no mode input —
 /// needs no test because it needs no code: `allowProfileSpecific

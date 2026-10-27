@@ -8012,8 +8012,9 @@ keyboard user re-walks the list after every deletion. The
 destination is read BEFORE the mutation (afterwards the list names
 whichever row slid into the gap, right by accident and wrong at
 the end of a list), and it must be a control that is always DRAWN
-and non-destructive: binding the spaces list to an offered
-button, which on a fresh install is not drawn at all, sends focus
+and non-destructive: binding the spaces list to a conditionally
+offered button (Customize…, drawn only once an override exists),
+which on a fresh install is not drawn at all, sends focus
 to the top by a second road.
 
 *A dim is not a sentence.* Greying keeps a control visible
@@ -8504,7 +8505,7 @@ search and the diff rows cannot name one row two ways),
 destination title, and a sparse English synonym table that is
 match-only and never displayed — which is why it needs no
 translation. Everything else a result row shows — the current
-value, the mode pill — is computed per *rendered* row after the
+value — is computed per *rendered* row after the
 list paints, from the draft in memory. Nothing on either path
 touches AX, the filesystem or the running session
 (`SettingsSearchIndexTests` scans the match-path files for the
@@ -8523,9 +8524,7 @@ construction and the writers.
 
 **Ranking is one stable destination order.** An exact match the
 user asked for never sinks for the page it lives on, and a list
-that reorders on some other state reads as random. (#2654
-retired the "Power User" tag and the mode flip a pick once
-made.)
+that reorders on some other state reads as random.
 
 ### A search hit lands on the control only where the section hides it (#277)
 
@@ -9961,8 +9960,8 @@ status board rather than a launcher. An area screen is a pushed
 view behind a "← Home" back chip (⌘[ and Escape pop it; Escape
 only when no inner view claimed the key). What this buys over a
 sidebar: the full window width for content, an entry screen that
-scales to the mode's card count instead of a fixed taxonomy
-column, and per-language label budgets that die with the fixed
+scales to however many cards are offered instead of a fixed
+taxonomy column, and per-language label budgets that die with the fixed
 column (a card flexes; an over-long label truncates visibly). What
 it costs, accepted: a second click to move between sibling
 areas. (The sidebar shell was an `HStack`, never a
@@ -10026,11 +10025,12 @@ rulings, both 2026-08-09:
   fallback rather than drawing dark-on-dark, guarded by
   `HomeCardChromeTests`.
 
+:::unreleased
 **Settings is one surface: depth grows in place, never by a
 mode.** (#2654, owner ruling 2026-10-26, superseding #678's
 Simple / Power User segment and #760's reveal wash and
 mode-gated frame.) The segment gated whole cards per area. By
-4.0.0 its whole effect was one card, Screens, on a Mac with one
+its retirement, its whole effect was one card, Screens, on a Mac with one
 screen, plus six "first one" offers that already showed in
 Simple once the config used them (*config presence*, below). A
 header-level choice that changes almost nothing is a decision
@@ -10048,12 +10048,13 @@ toggle keeps a visible decision with almost no effect.
 What replaces it is the offer shape this file already rules.
 Each offer sits behind its own container's disclosure
 (`SettingTier.showMore`), and the rows that exist once the
-config uses it are `.immediate`: the container opens on arrival
-for them, and is never swapped (#1125): Layers and
-Modifier keys are collapsible cards, Lua bindings keeps its
+config uses the capability are `.immediate`: the container
+opens on arrival for them and is never swapped (#1125). Layers
+and Modifier keys are collapsible cards; Lua bindings keeps its
 drawer. Where a drawer would hide one control, the offer takes
-the row's own menu instead: per-Space Customize is in each Space
-row's actions menu until an override exists, and title matching
+the row's own menu instead: per-Space Customize… is always in
+each Space row's right-click menu, and joins the row itself once
+any Space has an override, and title matching
 is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs
 nothing at rest, and a drawer around it is chrome.
@@ -10072,27 +10073,25 @@ The retired preference leaves its `settingsMode` key in the
 app's `UserDefaults` unread. That key is a display choice, not a
 config or profile value, so the stored-value guardrail owes it
 no `ConfigMigration`; a stray key in the app's own defaults
-domain is inert. **A new depth goes behind its container's
-disclosure or its row's menu, opened on arrival when the config
-uses it — never behind a window-wide switch.**
+domain is inert.
+:::
 
 **A persistent statement and a transient one never share a
-property.** (#1173.) Hover on the full-strength accent of that
-same edge, with the marking's own strength capped beneath it,
-shares the property, and that is the defect rather than the
-strengths: the two states then differ only in degree, so a marked
-card reads as permanently hovered — and pointing at a marked card
-OVERWRITES the one channel carrying its marking, which no ceiling
-can fix, because a statement a pointer can delete is not a
-statement. So the channels split by what they answer: the border
-says what a card is, the fill says where the pointer
-is (`cardHover`, `card` stepped one notch toward the ground in
-each appearance — opaque, so the inks above it are measured
-against what they actually sit on). The two facts compose, which
-is the whole prize: a marked card under the pointer keeps its
-frame AND lifts. It also returns the Home card to the idiom the
-rest of the tree already keeps — a neutral lift for the pointer,
-the accent reserved for what a thing IS.
+property.** (#1173.) Hover shipped on the full-strength accent of
+the Home card's border while #760's mode marking lived on that
+edge, with the marking's strength capped beneath it — and that
+shared property, not the strengths, was the defect: the two
+states differed only in degree, so a marked card read as
+permanently hovered, and pointing at one OVERWROTE the one
+channel carrying its marking, which no ceiling can fix, because
+a statement a pointer can delete is not a statement. So the
+channels split by what they answer: the border says what a card
+is, the fill says where the pointer is (`cardHover`, `card`
+stepped one notch toward the ground in each appearance — opaque,
+so the inks above it are measured against what they actually
+sit on). The split holds with the marking gone (#2654): the
+neutral lift is the idiom the rest of the tree keeps, and the
+border stays free for a future identity marking.
 
 **One draft, three views — and the save surface is the floating
 pill.** (#678 turn 9; Phase 4 shell.) Three views of one draft on
@@ -11326,18 +11325,17 @@ thing about them.
 **Config presence expands the surface.** A first-week Settings
 is not a smaller product, it is a smaller *offer*. Anything
 already in the user's config — a shortcut layer, an imported Lua
-binding, a per-profile override — shows at rest; what a
+binding, a per-profile override — is drawn on arrival; what a
 disclosure withholds is only the invitation to create the first
 one, and the disclosure opens on arrival the moment that
-invitation is accepted. (Written for #678's Simple mode, which
-#2654 retired; the rule outlived the mode it was written
-against.)
+invitation is accepted.
 
 The failure this prevents: a user creates a layer, then finds the
 Layers card folded away on the next visit. Hiding a control the
 user has never used is curation. Hiding something they *made* is
 losing their work as far as they can tell. Nothing a user has
-configured is ever folded away on arrival.
+*created* — a layer, a Lua binding, an override — is ever folded
+away on arrival.
 
 It follows that "how deep is this row" is the wrong question for
 such a row; the right one is "does the thing exist yet", which
@@ -11466,8 +11464,9 @@ resolver takes a base list and a sparse override and nothing else,
 and nothing in the Settings window is read-only because of how
 it is shown.
 
-What a disclosure may decide is only whether *creating* an
-override is offered at rest — and that offer retires itself. **A used capability
+What the surface may decide is only *where* creating a first
+override is offered — behind a disclosure or in a row's menu —
+never whether an existing one shows. **A used capability
 unlocks its whole list.** The moment a profile carries one
 shortcut override, the override column is live on every row of
 that list, because a user who has overridden one key is a user
@@ -14203,8 +14202,9 @@ override class to have a screen.*
 does not entitle every override class to a GUI.** Two
 boundaries rescope #68 §3.4 (they do not repeal it — wherever
 an override column renders, the dimmed-inheritance shape above
-still holds exactly). First: a disclosure withholds only the
-*offer* to create a first override; once any override exists,
+still holds exactly). First: the offer to create a first
+override may wait behind a disclosure or a row's menu; once any
+override exists,
 the column shows on every peer row at rest, because an
 existing thing that ran yesterday must never be invisible
 today.
@@ -19251,14 +19251,12 @@ complete rule and never a row with a defaulted facet
 the apps its own list holds, since an app may carry both rules
 (`AppRuleListsWiringTests` ▸ `pickersExcludeTheirOwnList`).
 
-**Matching windows by title is one choice in the Float menu,
-never a tier.** Placing an app in a Space is one of the most
-teachable things KiwiDesk does, so the area is shown whole, and
-*Windows titled…* sits in each Float row's menu beside *All
-windows* (#2654). It was an offer once, unlocked list-wide by the
-first pattern; with no mode left to withhold it, a menu item
-already behind a click costs nothing at rest, and hiding it would
-leave a saved pattern's own scope unexplained.
+:::unreleased
+**Matching windows by title is never withheld.** *Windows
+titled…* is a peer of *All windows* in the Float menu, not a
+deeper tier; [Settings is one surface](#navigation--saving)
+carries why an offer takes a row's menu rather than a drawer.
+:::
 
 **The word order of a sentence with controls in it is the
 translator's.** Such a sentence is one localized frame with

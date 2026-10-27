@@ -24,12 +24,20 @@ struct ShortcutsOfferDisclosureTests {
         return config
     }
 
-    @Test("Lua bindings hold open on a custom binding alone")
+    @Test("Lua bindings hold open on the selected layer's own")
     func luaBindingsHoldOpen() {
-        var config = config(layers: ["default"])
-        #expect(!ShortcutsGates(config: config).luaBindingsExist)
-        config.layers[0].bindings.append(KeyBinding(kind: .custom))
-        #expect(ShortcutsGates(config: config).luaBindingsExist)
+        var config = config(layers: ["default", "work"])
+        // A built-in row is not a Lua binding: the kind decides.
+        config.layers[0].bindings.append(KeyBinding(kind: .navigation))
+        config.layers[1].bindings.append(KeyBinding(kind: .application))
+        #expect(
+            !ShortcutsGates(config: config).luaBindingsExist(in: "work")
+        )
+        config.layers[1].bindings.append(KeyBinding(kind: .custom))
+        let gates = ShortcutsGates(config: config)
+        #expect(gates.luaBindingsExist(in: "work"))
+        // Per layer: the drawer lists the selected layer alone.
+        #expect(!gates.luaBindingsExist(in: "default"))
     }
 
     @Test("Modifier keys hold open on any of their three uses")
@@ -69,10 +77,10 @@ struct ShortcutsOfferDisclosureTests {
     /// nothing consults would pass the test above.
     @Test("each card opens on arrival from its own hold-open")
     func cardsOpenOnArrival() throws {
+        let layers = try squashed("Sections/LayersCard.swift")
+        #expect(layers.contains(".onAppear{iflayersExist{expanded=true}}"))
         #expect(
-            try squashed("Sections/LayersCard.swift").contains(
-                ".onAppear{iflayersExist{expanded=true}}"
-            )
+            layers.contains("ShortcutsGates(config:model.config).layersExist")
         )
         let modifier = try squashed(
             "Components/Keybindings/ModifierKeysCard.swift"
@@ -81,8 +89,9 @@ struct ShortcutsOfferDisclosureTests {
         #expect(modifier.contains("Self.inUse("))
         #expect(
             try squashed("Sections/ShortcutsSection.swift").contains(
-                ".onAppear{ifShortcutsGates(config:model.config)"
-                    + ".luaBindingsExist{advancedExpanded=true}}"
+                ".onAppear{letgates=ShortcutsGates(config:model.config)"
+                    + "ifgates.luaBindingsExist(in:selected)"
+                    + "{advancedExpanded=true}}"
             )
         )
     }
@@ -121,14 +130,42 @@ struct ShortcutsOfferDisclosureTests {
         }
     }
 
-    /// Asked of the declaration's type rather than its source:
-    /// a card the collapsible shape draws must be a drawer.
-    @Test("Layers and Modifier keys are declared as drawers")
-    func declaredAsDrawers() {
-        let layers: Any = SettingsCatalog.shortcuts.layersCard
-        let modifier: Any = SettingsCatalog.shortcuts.modifierKeys
-        #expect(layers is AnySettingsDrawer)
-        #expect(modifier is AnySettingsDrawer)
+    /// The search index anchors a hit from the catalog join alone,
+    /// so the view's own anchor is pinned at its call site — a
+    /// deleted `.searchAnchored` opens the card onto nothing.
+    @Test("each card row a hit lands on carries its anchor")
+    func rowsCarryTheirAnchors() throws {
+        let header = try squashed("Sections/LayerHeader.swift")
+        for row in ["reach", "menuBarIcon"] {
+            #expect(
+                header.contains(
+                    ".searchAnchored(SettingsCatalog.shortcuts"
+                        + ".layersCard.children.\(row))"
+                ),
+                Comment(rawValue: row)
+            )
+        }
+        let card = try squashed(
+            "Components/Keybindings/ModifierKeysCard.swift"
+        )
+        for row in ["hyperKey", "shortcutBase"] {
+            #expect(
+                card.contains(
+                    ".searchAnchored(SettingsCatalog.shortcuts"
+                        + ".modifierKeys.children.\(row))"
+                ),
+                Comment(rawValue: row)
+            )
+        }
+    }
+
+    /// Both cards declare the rows a search hit must open them for.
+    @Test("Layers and Modifier keys declare their children")
+    func declareChildren() {
+        #expect(!SettingsCatalog.shortcuts.layersCard.childIDs.isEmpty)
+        #expect(
+            !SettingsCatalog.shortcuts.modifierKeys.childIDs.isEmpty
+        )
     }
 
     private func squashed(_ path: String) throws -> String {

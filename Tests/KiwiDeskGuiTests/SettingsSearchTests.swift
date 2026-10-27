@@ -188,11 +188,12 @@ struct SettingsSearchTests {
         }
     }
 
-    /// Screens' Home card needs a second screen, but search
-    /// still finds it on one (#2654): it holds the pins for
-    /// screens that are not connected, so an undocked laptop is
-    /// exactly when a user goes looking.
-    @Test("Screens stays searchable on one screen")
+    /// Screens' Home card needs a second screen, but search still
+    /// finds it on one (#2654): it holds the pins for screens that
+    /// are not connected. The search context carries no screen
+    /// count at all, so this holds that Screens is indexed; a
+    /// screen-count filter read from elsewhere is review's.
+    @Test("search finds Screens with no screen count in reach")
     func screensSearchableOnOneScreen() {
         pinEnglish()
         defer { reset() }

@@ -57,8 +57,8 @@ extension AppRulesSection {
     }
 
     /// The Float card's `?`. `app_rules.float.help` is the one
-    /// copy of the float explanation; the title-pattern paragraph
-    /// joins only where the mode offers patterns at all.
+    /// copy of the float explanation, and the title-pattern
+    /// paragraph follows it.
     var floatHelp: String {
         var text = L(
             "app_rules.float.help",

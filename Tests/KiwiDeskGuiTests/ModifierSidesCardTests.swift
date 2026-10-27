@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDesk
 
 /// The Modifier keys card's sides switch (#2601): its live caption,
-/// the Simple offer, the side-collapse tier and the reads the
+/// the card's hold-open, the side-collapse tier and the reads the
 /// recorder and the card take from the model.
 @Suite("Modifier keys card: the sides switch (#2601)")
 @MainActor

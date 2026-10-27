@@ -49,7 +49,7 @@ struct SettingsThemeMetricTests {
         "containerStroke": "HomeCard.swift",
         "panelWidth": "SettingsDetailPanel.swift",
         "contentMaxWidth": "SettingsView+Detail.swift",
-        "searchNoticeFillOpacity": "WhatsNewTrailBanner.swift",
+        "noticeFillOpacity": "WhatsNewTrailBanner.swift",
         "chipMarkedOpacity": "ButtonChipStyle.swift",
         "highlightWashOpacity": "UpdateNotesGroups.swift",
     ]

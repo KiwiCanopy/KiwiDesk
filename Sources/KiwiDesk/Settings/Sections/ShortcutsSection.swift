@@ -206,7 +206,8 @@ struct ShortcutsSection: View {
         // Its jump chip's anchor (#2544).
         .reportsSectionFrame(SettingsCatalog.shortcuts.luaBindings.control)
         .onAppear {
-            if ShortcutsGates(config: model.config).luaBindingsExist {
+            let gates = ShortcutsGates(config: model.config)
+            if gates.luaBindingsExist(in: selected) {
                 advancedExpanded = true
             }
         }

@@ -879,7 +879,7 @@ off the main actor.
 
 **Config presence expands the surface.** Anything that already
 EXISTS in the user's config — a layer, an imported binding, an
-override — is displayed at rest; a disclosure withholds only the
+override — is drawn on arrival; a disclosure withholds only the
 OFFER to create, and opens on arrival once the first one exists.
 **Never add a window-wide depth switch** — new depth goes behind
 its container's disclosure or its row's menu (#2654,
@@ -1226,7 +1226,9 @@ must keep:
   compose instead of one erasing the other. An accent hover edge
   is legal only on a surface that carries no durable marking at
   all, as the gesture strip's pictures (#2537, `GestureStripTests`
-  ▸ `plateHoverCue`).
+  ▸ `plateHoverCue`). The Home card keeps the neutral fill lift
+  though #2654 removed its marking: its border stays reserved for
+  identity.
   `HomeCardChromeTests` holds the split, its negative half
   located by `cardStroke`'s brace-balanced body rather than by
   a spelling a retune may move. A searchable dropdown's
@@ -1499,7 +1501,7 @@ claim; the obligations a change here takes on:
   where the user is told which setting this all presumes.
 - **Every shape change states a focus destination**, and the
   destination must be a control that is always DRAWN. Binding a
-  return to an offered affordance sends focus to a value no
+  return to a conditionally offered affordance sends focus to a value no
   view claims, which lands at the top of the list — the exact
   behaviour the rule exists to prevent, and invisible to a
   source-needle guard, which is why the wirings in
