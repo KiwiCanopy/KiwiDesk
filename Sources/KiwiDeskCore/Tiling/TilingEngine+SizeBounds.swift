@@ -246,11 +246,18 @@ extension TilingEngine {
     }
 
     /// Drops everything learned about a window on a genuine
-    /// (non-echo) resize — the user or the app itself changed
-    /// the size, so the ledger is stale. The GONE paths take
-    /// `stashSizeBoundOnGone` instead.
+    /// (non-echo) resize the app made itself, so the ledger is
+    /// stale. The GONE paths take `stashSizeBoundOnGone`, a user's
+    /// resize gesture `sweepSizeBound`.
     public func forgetSizeBound(_ id: WindowID) {
         boundLearner.forget(id)
+    }
+
+    /// A user's resize gesture showed `size`: only the entries it
+    /// contradicts go, so a learned floor outlives the drag
+    /// (#2706, `SizeBoundLearner.gestureResized`).
+    func sweepSizeBound(_ id: WindowID, gestureSize size: CGSize) {
+        boundLearner.gestureResized(id, to: size)
     }
 
     /// The gone-window forget (#152/#158), parking the believed

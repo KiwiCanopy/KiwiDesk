@@ -42,11 +42,12 @@ extension SizeBoundLearner {
         probes[id]?[keyPath: slot].pending?.issues -= 1
     }
 
-    /// Drops everything learned about a window: it resized for
-    /// a reason that was not our ask (user, or the app
-    /// re-bounding itself), so the ledger describes a window
-    /// that no longer exists. Also the destroy path — WindowIDs
-    /// are reused (#152/#158).
+    /// Drops everything learned about a window: the app resized
+    /// it for a reason that was not our ask (it re-bounded
+    /// itself), so the ledger describes a window that no longer
+    /// exists. Also the destroy path — WindowIDs are reused
+    /// (#152/#158). A user's resize gesture takes
+    /// `gestureResized` instead (#2706).
     mutating func forget(_ id: WindowID) {
         lastAsks[id] = nil
         candidates[id] = nil
@@ -219,12 +220,7 @@ extension SizeBoundLearner {
         }
         guard var entries = bounds[id]?[keyPath: axis]
         else { return performedProbe }
-        let tolerance = EffectiveSizeBound.matchTolerance
-        entries.removeAll { entry in
-            entry.isFloor
-                ? asked < entry.answered - tolerance
-                : asked > entry.answered + tolerance
-        }
+        entries.removeAll { $0.isContradicted(by: asked) }
         writeBounds(id, entries: entries, axis: axis)
         return performedProbe
     }

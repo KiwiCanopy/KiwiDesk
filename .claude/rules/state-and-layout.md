@@ -1426,10 +1426,18 @@ editing here:
   `screenNeighbors` — `layoutInput` is the site, probes and
   previews rightly omit it (`SizeBoundPlumbingTests`). A path
   that changes a window's size outside the engine's asks **owes
-  the ledger an invalidation** — a genuine resize forgets
+  the ledger an invalidation** — an app's genuine resize forgets
   outright, rekey migrates — or a stale bound pins the window
   at a size the app no longer insists on
-  (`RetileBoundSkipTests`) — and the gate tells our echo from
+  (`RetileBoundSkipTests`). A user's resize gesture
+  (`isResizeGesture`, judged once before the ledger is touched)
+  owes the sweep instead: the open ask, the candidates and the
+  pending probe's issue retired, only the entries its size
+  contradicts dropped, through the one
+  `EffectiveSizeBound.Axis.isContradicted` the compliance sweep
+  reads — a forget there dropped Grid's cap mid-drag and the
+  press solved against a shape the render never drew (#2706,
+  `SizeBoundGestureResizeTests`). The gate tells our echo from
   that resize by the applier's recently-set stamp (and, past its
   grace, by `ledgerExplainsResize`), so the stamp is written at
   ENQUEUE ahead of the set and AGAIN after it, never only after
@@ -1754,7 +1762,9 @@ editing here:
   whose cap is their largest learned floor (#2687), while the pile
   check stays on `min_window_size` alone; the count door takes its
   floor as a required argument, so no reader re-derives the cap
-  from a count (`GridHealTests`). A store taking
+  from a count (`GridHealTests`); the cap's floor survives the
+  gesture that resizes the window setting it (#2706, the #677
+  bullet's gesture sweep). A store taking
   that answer states both halves, and a press on it solves
   against the same render.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
