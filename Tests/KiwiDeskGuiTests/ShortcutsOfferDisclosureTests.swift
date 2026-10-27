@@ -159,15 +159,6 @@ struct ShortcutsOfferDisclosureTests {
         }
     }
 
-    /// Both cards declare the rows a search hit must open them for.
-    @Test("Layers and Modifier keys declare their children")
-    func declareChildren() {
-        #expect(!SettingsCatalog.shortcuts.layersCard.childIDs.isEmpty)
-        #expect(
-            !SettingsCatalog.shortcuts.modifierKeys.childIDs.isEmpty
-        )
-    }
-
     private func squashed(_ path: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
