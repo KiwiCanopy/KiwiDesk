@@ -225,7 +225,7 @@
   "behavior.animations.relayout": "Анимировать перестроение раскладки",
   "behavior.animations.scrolling_xref": "У смены фокуса в раскладке Scrolling есть собственный переключатель и длительность в разделе %1$@.",
   "behavior.animations.scrolling_xref_link": "Раскладки по умолчанию ▸ Scrolling",
-  "behavior.animations.state_change": "Анимировать плавающий режим, Pocket и разворачивание",
+  "behavior.animations.state_change": "Анимировать плавающие окна, Pocket и разворачивание",
   "behavior.animations.state_change.help": "Окно, которое становится плавающим или возвращается в мозаику, разворачивается или возвращается на место, уходит в Pocket или выходит из него, перемещается туда, а не перескакивает. Окна вокруг него следуют флажку «%1$@».",
   "behavior.animations.title": "Анимации",
   "behavior.animations.window_duration": "Длительность окон",

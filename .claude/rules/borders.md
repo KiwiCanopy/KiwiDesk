@@ -10,6 +10,8 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
+  # The state change's ring hold is armed from App/ (#2676).
+  - "Sources/KiwiDeskCore/App/KiwiCore+StateChange.swift"
   # The one WindowServer stream every overlay hears through
   # (#2275), and its consumer order, live outside Borders/.
   - "Sources/KiwiDeskCore/OS/WindowServerWatch.swift"
@@ -325,19 +327,25 @@ these:
   read below says of every cue. Both `makeTestCore` twins pin the
   hold's clock, timer and that read.
 
-## A state change hides its window's ring until it settles (#2676)
+## A state change holds its window's ring until it lands (#2676)
 
-While our spring floats, tiles, maximizes or brings a window out
-of the pocket, a slow app's window trails the ring, which reads as
-lag. So that window's ring is held dormant through the one
-`KiwiCore.holdRingForStateChange`, called after the write and only
-for a window the spring now moves, and revealed by the
-`BorderManager+StateChange` hold once the animation has ended and
-the window reports near the frame we sent, or `arrivalCap` later.
-It is a second hold beside the switch's arrival hold, sharing the
-overlay's hold flag and reveal, never a second caller of
-`holdArrival`. A new state change takes that door; its neighbours'
-rings keep following (`StateChangeRingTests`).
+**Hold a state change's ring through the one
+`KiwiCore.holdRingForStateChange`**, called after the write and
+only for a window our spring now moves — `KiwiCore.retile` calls
+it for the pass's `stateChange`, a held pass included, and the
+float verb's placement for its own write
+(`StateChangeSeamTests` ▸ `oneDoor`). The
+`BorderManager+StateChange` hold reveals it once the spring has
+ended and the window reports near the target kept at the arm, or
+`arrivalCap` later, with `stateChangeBackstop` from the arm as
+the net for a spring end that never arrives
+(`StateChangeRingTests` ▸ `backstopReveals`); the end reaches it
+through the one chained `animation.onAnimationEnd`
+(`StateChangeSeamTests` ▸ `endChainIsWired`). It shares the
+overlay's hold flag and reveal with the switch's arrival hold and
+never calls `holdArrival` (`BorderOrderCensusTests` ▸
+`arrivalHoldHasOneDoor`). The why is `docs/design-decisions.md` ▸
+*A window changing state animates under its own switch*.
 
 ## A ring stays on its window's Desktop; the mark spans them
 

@@ -470,6 +470,12 @@ that way, stopping at the edge; neither takes other arguments
 ([`set_space_transition`](lua-reference.md#set_space_transition)).
 :::
 
+:::unreleased
+`animations.set_on_state_change` animates a window floating,
+maximizing or going into the Pocket and out
+([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
+:::
+
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 

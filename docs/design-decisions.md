@@ -6004,9 +6004,10 @@ rule of its own: a maximize ends where the new arrangement
 changes its Space's layout or files the window elsewhere, and
 stands where both stay. A sticky window is
 refused, since it draws on other Spaces' layouts too. It
-survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
-ordinary frame animation, governed by `animations.on_window_resize`
-with no setting of its own. Named "Maximize": "Zoom" and "Fill"
+survives KiwiDesk's own in-place restart and not a Quit. Its motion is
+the state-change animation ([a window changing
+state](#a-window-changing-state-animates-under-its-own-switch-2676)).
+Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 :::
@@ -6103,6 +6104,7 @@ be invisible.
 
 ### A window changing state animates under its own switch (#2676)
 
+:::unreleased
 **[Rationale]**
 
 **Floating and tiling back, maximizing and returning, and going
@@ -6111,23 +6113,27 @@ and only the window changing state follows it.** These moves are
 bigger than a drag or a resize step and change what the window
 is, so a user who wants reflows calm can still watch a window
 float; its neighbours keep following `on_relayout`, so turning
-reflows off never takes this with it. The moving window promises
-a full spring for itself (`BatchSizing.allSpringSized`): becoming
-floating shrinks both axes, and under `.mayInstantSize` the size
-landed on frame 1 while only the corner travelled, which read as
-no animation. Its ring is held dormant until the window settles,
-since a slow app's window trails our spring and a following ring
-runs ahead of it.
+reflows off never takes this with it. A float the detection
+places is no verb of the user's and keeps `on_relayout`. The
+window changing state promises a full spring for itself
+(`BatchSizing.allSpringSized`): becoming floating shrinks both
+axes, and a shrinking axis otherwise takes its target on frame 1,
+leaving only the corner to travel. A slow app's window trails our
+spring, so its ring is held dormant until the window has landed
+rather than running ahead of it.
 
-**One toggle, not a choice of styles.** Without Screen Recording
-nothing can capture another app's window, and without SIP off
-nothing can set its transparency, so a "fade" is a tinted plate
-flashing over a jumping window — a glitch on float and maximize,
-not a style. A Genie stays refused for the reason the peek entry
-gives. Pocketing slides the real window to its park corner at its
-own size, position only, so slow apps and minimum sizes are not in
-play; an overlay plate shrinking into an on-screen pocket waits
-for that pocket to exist (#2678).
+**One toggle, not a choice of styles.** No style can capture
+another app's window, and none can set its transparency
+([Blocked by macOS (SIP)](#blocked-by-macos-sip)), so a "fade" is
+a tinted plate flashing over a jumping window: a glitch on float
+and maximize, not a style. A Genie stays refused because it means
+"minimized to the Dock" and needs a private API
+([the overflow mark's peek](#layout-and-resize-behavior)).
+Pocketing slides the real window to its park corner at its own
+size, position only, so slow apps and minimum sizes are not in
+play; a plate shrinking into an on-screen pocket waits for that
+pocket to exist (#2680).
+:::
 
 ### Spaces, profiles & config ownership
 

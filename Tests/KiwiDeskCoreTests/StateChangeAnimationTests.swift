@@ -178,4 +178,117 @@ struct StateChangeAnimationTests {
             #expect(on ? moved >= 1 : moved == 0)
         }
     }
+
+    @Test("taking a window out of the pocket slides it in")
+    func pocketOutFollowsItsToggle() {
+        guard NSScreen.main != nil else { return }
+        for on in [true, false] {
+            let core = makeCore()
+            addWindow(core, 1)
+            addWindow(core, 2)
+            core.focusWindow(WindowID(1), warp: false)
+            #expect(core.execute("pocket").isSuccess)
+            core.tiler.settings.animations.onStateChange = on
+            let applies = countApplies(core)
+            #expect(core.execute("pocket").isSuccess)
+            #expect(core.state.pocketedWindow == nil)
+            let moved = applies()[WindowID(1)] ?? 0
+            #expect(on ? moved >= 1 : moved == 0)
+        }
+    }
+
+    @Test("a detected float keeps on_relayout")
+    func detectedFloatKeepsRelayout() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.tiler.settings.animations.onStateChange = false
+        core.tiler.settings.animations.onRelayout = true
+        let applies = countApplies(core)
+        core.state.apply(
+            .windowFloatChanged(WindowID(1), isFloating: true)
+        )
+        core.placeFloating(WindowID(1))
+        #expect((applies()[WindowID(1)] ?? 0) >= 1)
+    }
+
+    @Test("a focus that ends a maximize follows on_state_change")
+    func focusEndedMaximizeFollowsItsToggle() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        core.execute("set_mode", args: [.string("1"), .string("bsp")])
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.focusWindow(WindowID(1), warp: false)
+        #expect(core.execute("toggle_maximized").isSuccess)
+        core.tiler.settings.animations.onStateChange = false
+        core.tiler.settings.animations.onRelayout = true
+        core.tiler.settings.animations.onWindowResize = true
+        let applies = countApplies(core)
+        core.focusWindow(WindowID(2), warp: false)
+        #expect((applies()[WindowID(1)] ?? 0) == 0)
+    }
+
+    @Test("a newcomer's pass promises no state-change spring")
+    func newcomerKeepsTheInvariant() {
+        let core = makeCore()
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.tiler.retile(
+            state: core.state,
+            newlyCreatedWindow: WindowID(2),
+            stateChange: WindowID(1)
+        )
+        #expect(!core.tiler.stateChangeSprings)
+        #expect(core.tiler.stateChangeWindow == nil)
+        core.tiler.retile(state: core.state, stateChange: WindowID(1))
+        #expect(core.tiler.stateChangeSprings)
+    }
+
+    @Test("a held pass replays its state change")
+    func heldPassKeepsTheWindow() {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        core.execute("set_mode", args: [.string("1"), .string("bsp")])
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.focusWindow(WindowID(1), warp: false)
+        #expect(core.execute("make_floating").isSuccess)
+        core.state.setFloating(WindowID(1), false)
+        core.tiler.settings.animations.onRelayout = false
+        core.tiler.settings.animations.onStateChange = true
+        let applies = countApplies(core)
+        core.tiler.motionGate.release(
+            MotionGate.Owed(
+                animated: nil,
+                pass: .event,
+                sizing: .mayInstantSize,
+                stateChange: WindowID(1)
+            )
+        )
+        #expect((applies()[WindowID(1)] ?? 0) >= 1)
+        #expect((applies()[WindowID(2)] ?? 0) == 0)
+    }
+
+    @Test("a newcomer's spring promises nothing for the state change")
+    func newcomerSpringIsInstantSized() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        core.execute("set_mode", args: [.string("1"), .string("bsp")])
+        addWindow(core, 1)
+        addWindow(core, 2)
+        core.tiler.animation.isEnabled = true
+        defer { core.tiler.animation.cancelAll(snapToTargets: false) }
+        core.tiler.settings.animations.onStateChange = true
+        core.tiler.retile(
+            state: core.state,
+            newlyCreatedWindow: WindowID(2),
+            stateChange: WindowID(1)
+        )
+        let spring = try #require(
+            core.tiler.animation.removeAnimation(for: WindowID(1))
+        )
+        #expect(spring.sizing == .mayInstantSize)
+    }
 }

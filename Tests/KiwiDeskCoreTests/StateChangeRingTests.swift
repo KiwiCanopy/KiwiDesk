@@ -10,6 +10,7 @@ import Testing
 /// ended and the window reports near the frame we sent, or the cap
 /// passes. Driven on a real ring panel; the clock and the check
 /// scheduler are stepped by hand, as `BorderArrivalTests` does.
+/// Main-actor spend: one panel per test, no scan.
 @Suite("State change ring hold (#2676)")
 @MainActor
 struct StateChangeRingTests {
@@ -36,12 +37,20 @@ struct StateChangeRingTests {
         border.scheduleArrivalCheck = { delay, run in
             clock.due.append((clock.now + delay, run))
         }
-        border.commandedFrame = { [rest] _ in rest }
         return border
     }
 
     /// A shown ring, then held for a state change.
     private func heldRing(
+        _ border: BorderManager
+    ) throws -> AppKitBorderOverlay {
+        let panel = try heldRingSpec(border)
+        border.holdStateChange(of: WindowID(1), target: rest)
+        return panel
+    }
+
+    /// The ring shown at `rest`, not held.
+    private func heldRingSpec(
         _ border: BorderManager
     ) throws -> AppKitBorderOverlay {
         border.sync([
@@ -56,7 +65,6 @@ struct StateChangeRingTests {
         let ring = try #require(border.overlays[WindowID(1)])
         let panel = try #require(ring.backend as? AppKitBorderOverlay)
         #expect(panel.panelAlpha == 1)
-        border.holdStateChange(of: WindowID(1))
         return panel
     }
 
@@ -78,6 +86,9 @@ struct StateChangeRingTests {
         #expect(panel.panelAlpha == 0)
         report(border, rest)
         #expect(panel.panelAlpha == 0, "the spring has not ended")
+        border.stateChangeSettled(WindowID(1))
+        #expect(panel.panelAlpha == 0, "an early report is no arrival")
+        #expect(border.stateChange?.arrived == false)
     }
 
     @Test("after the settle a report near the target reveals it")
@@ -117,27 +128,61 @@ struct StateChangeRingTests {
         #expect(panel.panelAlpha == 0)
     }
 
-    /// The hold has one door: every state change reaches it
-    /// through `holdRingForStateChange`.
-    @Test("the hold is armed from the one door")
-    func oneDoor() throws {
-        let root = URL(fileURLWithPath: #filePath)
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .deletingLastPathComponent()
-            .appendingPathComponent("Sources/KiwiDeskCore")
-        var callers: [String] = []
-        let files = FileManager.default.enumerator(
-            at: root,
-            includingPropertiesForKeys: nil
+    @Test("a hold no spring end reaches lets go at the backstop")
+    func backstopReveals() throws {
+        let clock = Clock()
+        let border = manager(clock)
+        defer { border.clear() }
+        let panel = try heldRing(border)
+        clock.advance(to: 100 + BorderManager.arrivalCap)
+        #expect(panel.panelAlpha == 0, "the spring may still run")
+        clock.advance(to: 100 + BorderManager.stateChangeBackstop)
+        #expect(panel.panelAlpha == 1)
+    }
+
+    /// The real door: a window our spring moves is held, and the
+    /// engine's end of that spring starts the cap.
+    @Test("a spring the core starts holds and its end releases")
+    func coreDoorHoldsAndEndReleases() throws {
+        let clock = Clock()
+        let core = makeTestCore(
+            configDirectory:
+                testTemporaryDirectory
+                .appendingPathComponent(
+                    "kiwi-ring-\(UUID().uuidString)"
+                )
         )
-        while let url = files?.nextObject() as? URL {
-            guard url.pathExtension == "swift" else { continue }
-            let text = try String(contentsOf: url, encoding: .utf8)
-            if text.contains("borders.holdStateChange(") {
-                callers.append(url.lastPathComponent)
-            }
+        let border = core.borders
+        border.movePanel = { _, _ in false }
+        border.reduceMotion = { true }
+        border.arrivalClock = { clock.now }
+        border.scheduleArrivalCheck = { delay, run in
+            clock.due.append((clock.now + delay, run))
         }
-        #expect(callers == ["KiwiCore+StateChange.swift"])
+        defer { border.clear() }
+        border.sync([
+            BorderManager.Spec(
+                window: WindowID(1),
+                frame: rest,
+                colorHex: "#FF0000",
+                width: 4,
+                cornerStyle: .rounded
+            )
+        ])
+        let ring = try #require(border.overlays[WindowID(1)])
+        guard let screen = NSScreen.screens.first else { return }
+        core.tiler.animation.isEnabled = true
+        core.tiler.animation.animate(
+            window: WindowID(1),
+            on: screen,
+            from: rest,
+            to: away
+        )
+        core.holdRingForStateChange(WindowID(1))
+        #expect(ring.isDormant)
+        core.tiler.animation.cancel(window: WindowID(1))
+        #expect(border.stateChange?.settledAt != nil)
+        clock.advance(to: 100 + BorderManager.arrivalCap)
+        #expect(!ring.isDormant)
     }
 }

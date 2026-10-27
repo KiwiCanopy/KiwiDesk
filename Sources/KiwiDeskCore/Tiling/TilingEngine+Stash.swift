@@ -283,9 +283,11 @@ extension TilingEngine {
         }
         meter.add(\.parksIssued)
         // A window pocketed this pass slides there (#2676); its
-        // size is its own, so only the position moves.
+        // size is its own, so only the position moves. A refused
+        // slide keeps the one-call park below (#1508).
         if window.id == stateChangeWindow,
-            settings.animations.onStateChange
+            settings.animations.onStateChange,
+            !animation.reduceMotion()
         {
             applyFrame(
                 window.id,

@@ -150,10 +150,14 @@ extension KiwiCore {
                 animated: animated
                     ?? tiler.settings.animations.onRelayout,
                 pass: .event,
-                sizing: sizing
+                sizing: sizing,
+                stateChange: stateChange
             )
         }
         _ = tiler.takePendingBoundPlacement()
+        // The window changing state hides its ring until it lands,
+        // a held pass's included (#2676).
+        if let stateChange { holdRingForStateChange(stateChange) }
         narrateCorroborationProbes()
         // Scrolling reads back its own last rest (#66); other
         // modes never write `scrollRest`, so this is a no-op

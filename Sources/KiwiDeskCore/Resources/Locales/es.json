@@ -225,7 +225,7 @@
   "behavior.animations.relayout": "Animar los reajustes del diseño",
   "behavior.animations.scrolling_xref": "Los cambios de foco del diseño Scrolling tienen su propio interruptor y su propia duración en %1$@.",
   "behavior.animations.scrolling_xref_link": "Diseño por defecto ▸ Scrolling",
-  "behavior.animations.state_change": "Animar la flotación, el Pocket y la maximización",
+  "behavior.animations.state_change": "Animar flotación, Pocket y maximización",
   "behavior.animations.state_change.help": "Una ventana que pasa a flotar o vuelve al mosaico, que se maximiza o recupera su sitio, o que entra en el Pocket y sale de él se desplaza hasta allí en lugar de saltar. Las ventanas de alrededor siguen a «%1$@».",
   "behavior.animations.title": "Animaciones",
   "behavior.animations.window_duration": "Duración de las ventanas",

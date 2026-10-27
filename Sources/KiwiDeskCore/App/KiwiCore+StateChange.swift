@@ -5,6 +5,9 @@
 extension KiwiCore {
     func holdRingForStateChange(_ id: WindowID) {
         guard tiler.animation.isAnimating(window: id) else { return }
-        borders.holdStateChange(of: id)
+        borders.holdStateChange(
+            of: id,
+            target: tiler.animation.targetFrame(window: id)
+        )
     }
 }

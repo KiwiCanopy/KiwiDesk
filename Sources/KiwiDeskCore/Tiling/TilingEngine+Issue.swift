@@ -99,7 +99,8 @@ extension TilingEngine {
                     looksStashed($0)
                 },
             isNewWindow: isNew,
-            sizing: changing ? .allSpringSized : promised
+            sizing: changing && stateChangeSprings
+                ? .allSpringSized : promised
         )
         boundLearner.recordAsk(
             id,
