@@ -116,7 +116,8 @@ struct LuaBindingEmptyStateTests {
         // Animated, gated, then re-issued once laid out.
         #expect(
             page.contains(
-                ":.easeInOut(duration:SettingsReveal.scroll))"
+                "withAnimation(reduceMotion?nil"
+                    + ":.easeInOut(duration:SettingsReveal.scroll))"
                     + "{proxy.scrollTo(Self.pageEnd,anchor:.bottom)}"
             )
         )
