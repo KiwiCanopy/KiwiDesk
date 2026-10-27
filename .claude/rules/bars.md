@@ -399,7 +399,13 @@ twice, was a question the user answered twice. The argument is
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
   `presentationInFrontStandsShelfDown` holds both bars through
-  it. **A cue the shelf would sit beside — the Space, layout
+  it. **Its user-Space half reads the verdict the last Desktop
+  reading filed** (`DesktopMemory.shownUserSpaces`, through
+  `fileShown`), never two WindowServer round trips per pass; a
+  new place that takes a Desktop reading files it there, and a
+  screen no reading named reads live (#2667,
+  `ShownUserSpaceTests`, `ShownUserSpaceSeamTests`). **A cue the
+  shelf would sit beside — the Space, layout
   and Desktop cues — stands down through the same verdict**,
   never a part of it such as `showsPresentation`, which a
   new stand-down case would leave behind (#2348,

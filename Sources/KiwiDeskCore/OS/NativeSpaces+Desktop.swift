@@ -154,6 +154,11 @@ public struct DesktopSnapshot: Sendable {
         }
         return NativeSpaces.isUserSpace(id, in: spaces)
     }
+
+    /// `currentSpaceIsUser` for every screen this reading names.
+    var currentSpacesAreUser: [String: Bool] {
+        currentSpaces.mapValues { NativeSpaces.isUserSpace($0, in: spaces) }
+    }
 }
 
 /// Active-desktop authority and queries for Desktop bindings (#888).
