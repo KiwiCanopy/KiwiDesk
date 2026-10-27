@@ -22,7 +22,7 @@ enum PaletteSceneRoles {
         "drag.ghost.border_color",
     ]
 
-    /// The seventeen roles drawn by the detail panel (#231).
+    /// The eighteen roles drawn by the detail panel (#231).
     static let panel: Set<String> = [
         // The shelf: plate and its border — drawn while the
         // draft's border is on (#1679) — the accent
@@ -43,6 +43,7 @@ enum PaletteSceneRoles {
         // State marks.
         "sticky.color",
         "floating.color",
+        "pocket.color",
         // Drag visuals twinned (#231).
         "drag.ghost.fill_color",
         "drag.ghost.border_color",

@@ -1644,6 +1644,8 @@
   "placement.last": "Última",
   "placement.new_window": "Nova janela disposta lado a lado",
   "placement.new_window.help": "Onde uma nova janela é colocada em relação às outras: primeira ou última na ordem do layout, ou logo antes ou depois da janela que estiver em foco no momento em que ela abre.",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Cor da marca Pocket",
   "pocket.mark.ax": "Janela Pocket",
   "pocket.refusal.float": "Janelas Pocket sempre flutuam",
   "pocket.refusal.sticky": "Janelas Pocket são sempre Sticky",

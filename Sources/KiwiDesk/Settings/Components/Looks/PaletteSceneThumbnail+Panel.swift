@@ -22,6 +22,7 @@ extension PaletteSceneThumbnail {
                     mark: color("floating.color"),
                     symbol: FloatingStyle.symbolName
                 )
+                pocketTile
             }
             HStack(spacing: 7 * scale) {
                 dragTile(
@@ -194,6 +195,26 @@ extension PaletteSceneThumbnail {
             }
             .frame(maxWidth: .infinity)
             .frame(height: 30 * scale)
+    }
+
+    /// A window wearing the pocket mark in the palette's pocket
+    /// colour (#2671), drawn by `PocketMark` as the window's is.
+    private var pocketTile: some View {
+        windowTile(
+            ring: AnyShapeStyle(color("border.unfocused_color")),
+            ringWidth: 1.5 * scale,
+            mark: .clear,
+            symbol: nil
+        )
+        .overlay(alignment: .topLeading) {
+            Image(
+                nsImage: PocketMark.mark.image(
+                    size: 11 * scale,
+                    ink: NSColor(color("pocket.color"))
+                )
+            )
+            .padding(3 * scale)
+        }
     }
 
     /// Ghost and drop zone comparison tile (#231).

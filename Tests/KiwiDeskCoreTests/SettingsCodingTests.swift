@@ -34,7 +34,7 @@ struct SettingsCodingTests {
                 "min_window_size_override", "mouse",
                 "mouse_resize", "new_window_placement_override",
                 "shortcut_panel",
-                "floating", "resize", "space",
+                "floating", "pocket", "resize", "space",
                 "space_bar",
                 "sticky", "swap_skips_cascade",
             ]
@@ -94,6 +94,11 @@ struct SettingsCodingTests {
         #expect(Set(floating.keys) == ["mark", "color"])
         #expect(floating["mark"] as? Bool == true)
         #expect(floating["color"] as? String == "")
+        // `pocket.set_color` → `pocket.color` (#2671), the third
+        // mark's own colour, Automatic by default.
+        let pocket = try object(root["pocket"])
+        #expect(Set(pocket.keys) == ["color"])
+        #expect(pocket["color"] as? String == "")
         // The `quit` group left for gui.json with #1741
         // (`AppWideSettingsTests`); the key set above holds its
         // absence.

@@ -264,6 +264,7 @@ struct ColorsDrawerControls: Sendable {
     )
     let tintStickyMark = SettingsControl("sticky.color", "Sticky")
     let tintFloatingMark = SettingsControl("floating.color", "Floating")
+    let tintPocketMark = SettingsControl("pocket.color", "Pocket")
 }
 
 /// Gaps & Borders catalog controls (#678 Phase 3, #754).

@@ -43,7 +43,8 @@ extension KiwiCore {
             style: placed,
             stateMarkColors: StateMarkColors(
                 sticky: tiler.settings.stickyStyle.color,
-                floating: tiler.settings.floatingStyle.color
+                floating: tiler.settings.floatingStyle.color,
+                pocket: tiler.settings.pocketStyle.color
             )
         )
     }

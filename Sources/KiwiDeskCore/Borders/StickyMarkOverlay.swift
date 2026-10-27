@@ -101,7 +101,7 @@ final class StickyMarkOverlay {
         let changed = wanted != glyphs
         glyphs = wanted
         if changed, panel != nil { applyGlyphs() }
-        plate.setMarkColor(wanted[0].color)
+        plate.setMarkColor(wanted[0].plateHex)
     }
 
     /// Draws as many glyphs as `frame` fits (#1799).
@@ -125,20 +125,6 @@ final class StickyMarkOverlay {
         plate.setInner(
             inner.flatMap(Self.image),
             hex: inner?.color ?? ""
-        )
-    }
-
-    private static func image(
-        _ glyph: StickyMarkManager.Glyph
-    ) -> NSImage? {
-        if glyph.kind == .pocket { return pocketImage() }
-        let label =
-            glyph.kind == .sticky
-            ? L("sticky.mark.ax", "Sticky window")
-            : L("floating.mark.ax", "Floating window")
-        return NSImage(
-            systemSymbolName: glyph.symbolName,
-            accessibilityDescription: label
         )
     }
 

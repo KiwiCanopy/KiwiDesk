@@ -5677,7 +5677,8 @@ that screen.
 Out of the pocket it wears the pocket mark half over its top-right
 corner, whatever [`sticky.set_mark`](#stickyset_mark) and
 [`floating.set_mark`](#floatingset_mark) say, and no mark while it
-is maximized or presenting. Its Space Bar glyph wears the pocket
+is maximized or presenting; [`pocket.set_color`](#pocketset_color)
+colors it. Its Space Bar glyph wears the pocket
 badge where the floating badge goes and no sticky badge;
 [`space_bar.set_sticky_badge(false)`](#space_barset_sticky_badge)
 hides it with the others.
@@ -5857,6 +5858,31 @@ is Automatic; any non-empty value must parse as a hex color.
 ```lua
 floating.set_color("#8E5DE0")
 ```
+
+:::unreleased
+### pocket.set_color
+
+**Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
+empty string `""` for **Automatic** (default `""`).
+
+**Does:** colors the [pocket](#pocket) mark's pocket, filled
+opaque, and the Space Bar pocket badge's disc; the kiwis stay
+green. The mark's outlines and stitch take a legible
+auto-contrast black or white, as
+[`sticky.set_color`](#stickyset_color)'s glyph does. `""` is
+Automatic: the mark's pocket and outlines take the label color,
+black in light mode and white in dark, and the badge keeps the
+count-badge fill. Any non-empty value must parse as a hex color.
+The mark's plate takes no tint from it, on Liquid Glass or off
+([#2671](https://github.com/KiwiCanopy/KiwiDesk/issues/2671)).
+
+**Example:**
+
+```lua
+pocket.set_color("#E8A33D")  -- an amber pocket
+pocket.set_color("")          -- back to Automatic
+```
+:::
 
 ## Launching Apps
 

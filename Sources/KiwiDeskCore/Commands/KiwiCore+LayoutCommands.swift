@@ -67,6 +67,8 @@ extension KiwiCore {
             response = stickyCommand(command, args)
         } else if command.hasPrefix("floating.") {
             response = floatingCommand(command, args)
+        } else if command.hasPrefix("pocket.") {
+            response = pocketStyleCommand(command, args)
         } else if command.hasPrefix("mouse.") {
             response = mouseCommand(command, args)
         } else {
