@@ -13963,6 +13963,24 @@ does not replace the edge — it labels the row once, where the
 edge tells each chip from a passive capsule on every look, and
 without the edge a dark jump chip is `chipSurface()` again.
 
+:::unreleased
+**Layouts to cycle is a button that opens a popover (#2673,
+owner 2026-10-27).** The row's value, "BSP › Scrolling ›
+Floating", is a bordered button in the recorder column; its
+popover lists all seven layouts, the cycle's ticked and in
+order with a drag handle, the rest unticked below in the Layout
+menu's order. A tick appends a layout and an untick takes it
+out; at two, the ticked boxes grey and the row's `?` says why.
+This reverses #453's inline list (2026-10-11), which unfolded a
+list with a ＋ menu and − buttons inside the Layout card and
+pushed every row below it down: the card is a column of
+one-line settings, and a list growing out of one of them read
+as a section of its own. Seven boxes also make the choice
+visible at once, where ＋ hid the layouts not yet chosen behind
+a menu. Move Up / Move Down stay on each ticked box's row menu
+for the keyboard.
+:::
+
 ### Overrides & appearance
 
 **[Principle]**

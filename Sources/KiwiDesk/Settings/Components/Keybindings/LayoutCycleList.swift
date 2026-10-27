@@ -2,130 +2,116 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// The layout cycle's editable list (#453): the chosen layouts in
-/// cycle order, each with its symbol; a vertical handle drag and
-/// Move Up / Move Down / Remove through `rowActions` reorder and
-/// trim it, ＋ offers the layouts not in it and − (or Delete)
-/// removes the selected one. ＋ greys with all seven listed and −
-/// at two, the row's `?` saying why. Each item holds keyboard
-/// focus, which selects it, so − and the row menu's chord reach a
-/// keyboard user; a click selects without a focus ring (#991).
+/// The layout cycle's popover (#2673, reversing #453's inline
+/// list): all seven layouts, the cycle's in order with a drag
+/// handle, the rest below in the Layout menu's order. A tick adds
+/// a layout at the end, an untick takes it out; at two the ticked
+/// boxes grey, the row's `?` saying why. Move Up / Move Down ride
+/// `rowActions` on each ticked box, which holds keyboard focus.
 struct LayoutCycleList: View {
     @ObservedObject var model: SettingsModel
-    @State private var picked: LayoutMode?
-    @FocusState private var focused: LayoutMode?
     @State private var dragOrder: [LayoutMode]?
     @State private var dragged: LayoutMode?
     @State private var rowFrames: [LayoutMode: CGRect] = [:]
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
-    @Environment(\.controlActiveState) private var activeState
 
     private static let listSpace = "layoutCycleList"
+    static let rowHeight: CGFloat = 28
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(displayed, id: \.self) { mode in
-                item(mode)
+            ForEach(cycle, id: \.self) { mode in
+                item(mode, in: true)
             }
-            SettingsTheme.hairline.frame(height: 1)
-            bar
+            Divider().padding(.vertical, 4)
+            ForEach(model.modeCycleAddable, id: \.self) { mode in
+                item(mode, in: false)
+            }
         }
+        .padding(.horizontal, 12)
+        .padding(.vertical, 8)
         .coordinateSpace(name: Self.listSpace)
         .onPreferenceChange(ItemFrames.self) { rowFrames = $0 }
-        .onChange(of: focused) { _, now in
-            guard let now else { return }
-            picked = now
-            // A click selects; it does not ring the item.
-            if ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
-                focused = nil
-            }
-        }
-        .background(
-            RoundedRectangle(cornerRadius: 6)
-                .fill(SettingsTheme.sunken)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(SettingsTheme.hairline)
-        )
-        .frame(maxWidth: SettingsMetrics.cycleListWidth, alignment: .leading)
+        .frame(width: SettingsMetrics.cycleListWidth, alignment: .leading)
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(LayoutCycleWords.title)
     }
 
-    private var displayed: [LayoutMode] {
+    private var cycle: [LayoutMode] {
         dragOrder ?? model.config.modeCycle
     }
 
-    /// The selection, while it is still in the list — a Revert or a
-    /// reload can take it out from under the row.
-    private var selected: LayoutMode? {
-        picked.flatMap { model.config.modeCycle.contains($0) ? $0 : nil }
-    }
-
-    /// Whether the list holds keyboard focus in the key window — a
-    /// click selects without it, so the accent row is the
-    /// keyboard's alone, and focus outlives the window resigning.
-    private var listFocused: Bool {
-        focused != nil && activeState == .key
-    }
-
-    /// The selected row is the accent while the list holds focus
-    /// and the grey selection otherwise, as a macOS list draws it.
-    private func rowFill(_ mode: LayoutMode) -> Color {
-        guard selected == mode else { return .clear }
-        return listFocused ? SettingsTheme.accent : SettingsTheme.rowSelected
-    }
-
-    private func item(_ mode: LayoutMode) -> some View {
-        let onAccent = selected == mode && listFocused
-        return HStack(spacing: 8) {
-            handle(mode)
-            Image(systemName: mode.symbol)
-                .frame(width: 18)
-                .foregroundStyle(
-                    onAccent
-                        ? SettingsTheme.accentInkSecondary
-                        : SettingsTheme.ink2
-                )
-                .accessibilityHidden(true)
-            Text(mode.displayName)
-                .foregroundStyle(
-                    onAccent ? SettingsTheme.accentInk : SettingsTheme.ink
-                )
+    private func item(_ mode: LayoutMode, in cycle: Bool) -> some View {
+        HStack(spacing: 6) {
+            if cycle {
+                handle(mode)
+            } else {
+                Color.clear.frame(width: 20, height: 22)
+            }
+            box(mode, in: cycle)
             Spacer(minLength: 0)
         }
-        .padding(.horizontal, 6)
-        .padding(.vertical, 3)
-        // The pointer's lift, a fill apart from the selection's
-        // (#1173); the selected row, whose click changes nothing,
-        // stays flat.
-        .rowHoverHighlight(lifts: selected != mode, cornerRadius: 0)
-        .background(rowFill(mode))
+        .frame(height: Self.rowHeight)
         .contentShape(Rectangle())
-        // A click always lands grey: focus a click kept — the row
-        // already focused, or one the focus refusal missed — is
-        // cleared on a MOUSE tap alone, so VoiceOver's press keeps
-        // its focus (#991).
-        .onTapGesture {
-            picked = mode
-            if ClickBornFocus.isClickBorn(focusMayBeADescendant: false) {
-                focused = nil
-            }
-        }
-        .focusable()
-        .focused($focused, equals: mode)
-        .onDeleteCommand { remove(mode) }
         .background(
             GeometryReader { proxy in
                 Color.clear.preference(
                     key: ItemFrames.self,
-                    value: [mode: proxy.frame(in: .named(Self.listSpace))]
+                    value: cycle
+                        ? [mode: proxy.frame(in: .named(Self.listSpace))]
+                        : [:]
                 )
             }
         )
-        .accessibilityElement(children: .combine)
-        .accessibilityValue(position(of: mode))
-        .accessibilityAddTraits(selected == mode ? .isSelected : [])
-        .rowActions { actions(mode) }
+    }
+
+    @ViewBuilder private func box(_ mode: LayoutMode, in cycle: Bool)
+        -> some View
+    {
+        let toggle = Toggle(
+            isOn: Binding(
+                get: { cycle },
+                set: { on in tick(mode, on) }
+            )
+        ) {
+            HStack(spacing: 6) {
+                Image(systemName: mode.symbol)
+                    .frame(width: 18)
+                    .foregroundStyle(SettingsTheme.ink2)
+                    .accessibilityHidden(true)
+                Text(mode.displayName)
+                    .foregroundStyle(SettingsTheme.ink)
+            }
+        }
+        .toggleStyle(.checkbox)
+        .accessibilityLabel(label(mode))
+        if cycle {
+            toggle
+                .disabled(!model.modeCycleCanRemove)
+                .rowActions { actions(mode) }
+        } else {
+            toggle
+        }
+    }
+
+    /// The layout's name and, in the cycle, its place there.
+    private func label(_ mode: LayoutMode) -> String {
+        let list = model.config.modeCycle
+        guard let index = list.firstIndex(of: mode) else {
+            return mode.displayName
+        }
+        return mode.displayName + ", "
+            + LayoutCycleWords.position(index, of: list.count)
+    }
+
+    private func tick(_ mode: LayoutMode, _ on: Bool) {
+        withAnimation(reduceMotion ? nil : SpacesSection.reorderSpring) {
+            if on {
+                model.addCycleMode(mode)
+            } else {
+                model.removeCycleMode(mode)
+            }
+        }
     }
 
     @ViewBuilder private func actions(_ mode: LayoutMode) -> some View {
@@ -138,68 +124,6 @@ struct LayoutCycleList: View {
             model.stepCycleMode(mode, by: 1)
         }
         .disabled(index == model.config.modeCycle.count - 1)
-        Divider()
-        Button(LayoutCycleWords.remove) { remove(mode) }
-            .disabled(!model.modeCycleCanRemove)
-    }
-
-    private var bar: some View {
-        HStack(spacing: 0) {
-            addMenu
-            Divider().frame(height: 16)
-            Button {
-                if let selected { remove(selected) }
-            } label: {
-                Label(LayoutCycleWords.remove, systemImage: "minus")
-                    .labelStyle(.iconOnly)
-                    .frame(width: 24, height: 20)
-                    .contentShape(Rectangle())
-            }
-            .buttonStyle(.plain)
-            .foregroundStyle(SettingsTheme.ink2)
-            .iconHoverChip(padding: 0)
-            .disabled(selected == nil || !model.modeCycleCanRemove)
-            .help(LayoutCycleWords.remove)
-            Spacer(minLength: 0)
-        }
-        .padding(.horizontal, 4)
-        .padding(.vertical, 2)
-    }
-
-    private var addMenu: some View {
-        Menu {
-            ForEach(model.modeCycleAddable, id: \.self) { mode in
-                Button {
-                    model.addCycleMode(mode)
-                    picked = mode
-                } label: {
-                    Label(mode.displayName, systemImage: mode.symbol)
-                }
-            }
-        } label: {
-            // Named by its own label, so VoiceOver keeps the menu's
-            // derived announcement (#812).
-            Label(LayoutCycleWords.add, systemImage: "plus")
-                .labelStyle(.iconOnly)
-                .frame(width: 24, height: 20)
-        }
-        .menuStyle(.borderlessButton)
-        .neutralMenuLabel()
-        .menuIndicator(.hidden)
-        .fixedSize()
-        .iconHoverChip()
-        .disabled(model.modeCycleAddable.isEmpty)
-        .help(LayoutCycleWords.add)
-    }
-
-    private func remove(_ mode: LayoutMode) {
-        model.removeCycleMode(mode)
-    }
-
-    private func position(of mode: LayoutMode) -> String {
-        let list = model.config.modeCycle
-        guard let index = list.firstIndex(of: mode) else { return "" }
-        return LayoutCycleWords.position(index, of: list.count)
     }
 
     // MARK: - Drag
@@ -209,11 +133,7 @@ struct LayoutCycleList: View {
     /// changes use `set()`, never push/pop (gui.md).
     private func handle(_ mode: LayoutMode) -> some View {
         Image(systemName: "line.3.horizontal")
-            .foregroundStyle(
-                selected == mode && listFocused
-                    ? SettingsTheme.accentInkSecondary
-                    : SettingsTheme.ink2
-            )
+            .foregroundStyle(SettingsTheme.ink2)
             .frame(width: 20, height: 22)
             .contentShape(Rectangle())
             .help(LayoutCycleWords.dragHelp)

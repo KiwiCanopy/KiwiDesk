@@ -44,14 +44,6 @@ enum LayoutCycleWords {
         )
     }
 
-    static var add: String {
-        L("shortcuts.mode_cycle.add", "Add a layout")
-    }
-
-    static var remove: String {
-        L("shortcuts.mode_cycle.remove", "Remove")
-    }
-
     static var moveUp: String {
         L("shortcuts.mode_cycle.move_up", "Move Up")
     }

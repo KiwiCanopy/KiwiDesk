@@ -1,88 +1,54 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Layout ▸ Layouts to cycle (#453, owner ruling 2026-10-11): one
-/// line at rest — the label and the list as a readout, which wraps
-/// under the label where it does not fit — that unfolds the
-/// editable list in place on a click of either. Its "Applies to"
-/// sits in the shortcut rows' reach column, as the Space history
-/// row's does.
+/// Layout ▸ Layouts to cycle (#2673, owner ruling 2026-10-27,
+/// reversing #453's inline list): the label, and the list as a
+/// bordered button in the recorder column that opens
+/// `LayoutCycleList` in a popover. Its "Applies to" sits in the
+/// shortcut rows' reach column, as the Space history row's does.
 struct LayoutCycleRow: View {
     @ObservedObject var model: SettingsModel
-    @State private var expanded = false
+    @State private var request: LayoutCycleRequest?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HStack(alignment: .firstTextBaseline) {
-                // The icon slot every shortcut row reserves (#264).
-                Color.clear.frame(width: Self.iconSlot, height: 1)
-                SettingsDisclosureButton(
-                    isExpanded: $expanded,
-                    isHeading: false
-                ) {
-                    heading
-                }
-                .layoutPriority(1)
-                .accessibilityLabel(LayoutCycleWords.title)
-                .accessibilityValue(spokenValue)
-                HelpButton(
-                    explanation: LayoutCycleWords.help,
-                    subject: LayoutCycleWords.title
-                )
-                Spacer(minLength: 0)
-                reach
-                KeyRecorderField.footprint
-            }
-            if expanded {
-                LayoutCycleList(model: model)
-                    .padding(.leading, Self.iconSlot + 8)
-            }
+        HStack(alignment: .firstTextBaseline) {
+            // The icon slot every shortcut row reserves (#264).
+            Color.clear.frame(width: Self.iconSlot, height: 1)
+            // The button names itself; this is its drawn twin.
+            Text(LayoutCycleWords.title)
+                .foregroundStyle(SettingsTheme.ink)
+                .accessibilityHidden(true)
+            HelpButton(
+                explanation: LayoutCycleWords.help,
+                subject: LayoutCycleWords.title
+            )
+            Spacer(minLength: 0)
+            reach
+            KeyRecorderField.footprint.overlay { summary }
         }
         .searchAnchored(SettingsCatalog.shortcuts.modeCycle)
     }
 
     static let iconSlot = SettingsMetrics.shortcutIconSlot
 
-    /// The list without the drawn mark, then the button's own
-    /// expanded / collapsed state, which the label replaced.
-    private var spokenValue: String {
-        let state =
-            expanded
-            ? L("settings.disclosure.ax_expanded", "expanded")
-            : L("settings.disclosure.ax_collapsed", "collapsed")
-        return LayoutCycleWords.spoken(model.config.modeCycle)
-            + ", " + state
-    }
-
-    /// The label, then the readout while shut: beside it where it
-    /// fits, on a second line where it does not.
-    @ViewBuilder private var heading: some View {
-        if expanded {
-            label
-        } else {
-            ViewThatFits(in: .horizontal) {
-                HStack(alignment: .firstTextBaseline, spacing: 8) {
-                    label
-                    readout
-                }
-                VStack(alignment: .leading, spacing: 2) {
-                    label
-                    readout
-                }
-            }
+    private var summary: some View {
+        let readout = LayoutCycleWords.readout(model.config.modeCycle)
+        return Button {
+            request = LayoutCycleRequest()
+        } label: {
+            Text(readout)
+                .lineLimit(1)
+                .truncationMode(.tail)
+                .frame(maxWidth: .infinity)
         }
-    }
-
-    private var label: some View {
-        Text(LayoutCycleWords.title)
-            .foregroundStyle(SettingsTheme.ink)
-            .fixedSize()
-    }
-
-    private var readout: some View {
-        Text(LayoutCycleWords.readout(model.config.modeCycle))
-            .foregroundStyle(SettingsTheme.ink3)
-            .fixedSize(horizontal: false, vertical: true)
+        .settingsActionButton()
+        .help(readout)
+        .accessibilityLabel(LayoutCycleWords.title)
+        .accessibilityValue(LayoutCycleWords.spoken(model.config.modeCycle))
+        .popover(item: $request, arrowEdge: .bottom) { _ in
+            LayoutCycleList(model: model)
+                .settingsPopoverChrome()
+        }
     }
 
     @ViewBuilder private var reach: some View {
@@ -99,11 +65,16 @@ struct LayoutCycleRow: View {
     }
 }
 
+/// The popover's request — one row's (#843).
+struct LayoutCycleRequest: Identifiable {
+    let id = "modeCycle"
+}
+
 /// The plate's switch (#2144) under the cycle list: app-wide
 /// (#1741), written at once like the Desktop switch cue, and
 /// greyed with its sentence only where `init.lua` owns the config,
 /// as `ShortcutsGates` answers it. Indented to the cycle row's
-/// chevron, both rows taking the shortcut rows' icon slot.
+/// label, both rows taking the shortcut rows' icon slot.
 struct LayoutCueRow: View {
     @ObservedObject var model: SettingsModel
 

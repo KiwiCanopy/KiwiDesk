@@ -144,8 +144,6 @@ struct ClickBornFocusTests {
             "SpaceAssignmentChip.swift": "false",
             "SettingsSlider.swift": "false",
             "SegmentedPicker.swift": "false",
-            // An item of the layout cycle list (#453): a leaf.
-            "LayoutCycleList.swift": "false",
         ]
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
