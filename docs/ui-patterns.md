@@ -475,12 +475,13 @@ fill rather than a border in a new colour. Class is otherwise
 expressed through native style + control size:
 `.borderedProminent` regular for a surface commit on a
 mode-varying ground (a popover confirm, an editor's apply);
-`.bordered` large for row actions (Load, Apply, Customize, Set
-Gap Values), level with large dropdowns; `.bordered` regular
+`.bordered` large for row actions (Load, Apply, Set Gap
+Values), level with large dropdowns; `.bordered` regular
 for stateful input triggers (the shortcut recorder); and
 `.borderless` regular for icon-only row actions (trash,
-×-clear, rename). List-add actions stay `.bordered`; `.plain`
-+ underline is reserved for inline prose links. Small controls
+×-clear, rename, a Space's Customize). List-add actions stay
+`.bordered`; `.plain` + underline is reserved for inline prose
+links. Small controls
 are subordinate inline or popover utilities (Shortcuts import,
 override resets), never a normal row action. Native macOS
 shape differences between these classes are intentional —

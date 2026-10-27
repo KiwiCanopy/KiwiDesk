@@ -151,6 +151,13 @@ extension APIReference {
         ),
     ]
 
+    static let pocketRecords: [String: APIRecord] = [
+        "set_color": APIRecord(
+            "Sets the pocket mark's color; empty is automatic.",
+            .color("hex")
+        )
+    ]
+
     static let mouseRecords: [String: APIRecord] = [
         "set_follows_focus": APIRecord(
             "Warps the mouse pointer to the center of the "

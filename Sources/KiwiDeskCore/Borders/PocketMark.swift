@@ -3,9 +3,11 @@ import AppKit
 /// The pocket mark (#2446, design K5d): two kiwi slices in an open
 /// pocket. Drawn as vectors on a 24-unit grid, so one image serves
 /// the window mark, the Space Bar badge and KiwiHub's row at any
-/// size; the kiwis keep their green whatever `ink` the pocket takes.
+/// size; the kiwis keep their green whatever `ink` the pocket takes
+/// (#2671: the pocket is filled opaque in `ink`).
 public enum PocketMark {
-    /// The large mark: outlined slices and a dashed stitch.
+    /// The large mark: outlined slices and a dashed stitch in the
+    /// ink's contrasting glyph colour.
     case mark
     /// The badge: solid shapes, no stitch, the pocket filled with
     /// `ink`.
@@ -23,35 +25,55 @@ public enum PocketMark {
         blue: 0.816,
         alpha: 1
     )
-    static let cloth = NSColor(
-        srgbRed: 0.212,
-        green: 0.212,
-        blue: 0.235,
-        alpha: 1
-    )
+    /// The mark at `size` points in a mark colour `hex` (#2671):
+    /// the pocket filled in it, the outlines and stitch in its
+    /// contrasting glyph colour, as `StickyMarkPlate.paint` inks a
+    /// disc; empty is the bare label ink, light and dark.
+    public func image(size: CGFloat, hex: String) -> NSImage {
+        let ink = NSColor.mark(hex: hex, fallback: .labelColor)
+        return image(
+            size: size,
+            ink: ink,
+            outline: hex.isEmpty ? nil : ink.contrastingGlyph
+        )
+    }
 
-    /// The mark at `size` points, its outlines (or, as a badge, its
-    /// pocket) in `ink`.
-    public func image(size: CGFloat, ink: NSColor) -> NSImage {
+    /// The mark at `size` points, its pocket filled opaque in
+    /// `ink` and its outlines in `outline`, `ink` when nil. A
+    /// dynamic colour resolves when drawn, so `.labelColor`
+    /// follows light and dark.
+    public func image(
+        size: CGFloat,
+        ink: NSColor,
+        outline: NSColor? = nil
+    ) -> NSImage {
         NSImage(
             size: NSSize(width: size, height: size),
             flipped: true
         ) { rect in
             let scale = rect.width / 24
             let transform = AffineTransform(scale: scale)
-            draw(ink: ink, transform: transform)
+            draw(
+                ink: ink,
+                outline: outline ?? ink,
+                transform: transform
+            )
             return true
         }
     }
 
-    private func draw(ink: NSColor, transform: AffineTransform) {
+    private func draw(
+        ink: NSColor,
+        outline: NSColor,
+        transform: AffineTransform
+    ) {
         for (x, y) in [(8.5, 6.8), (15.5, 5.3)] {
             let slice = Self.circle(x, y, 3.9)
             slice.transform(using: transform)
             Self.kiwi.setFill()
             slice.fill()
             if self == .mark {
-                ink.setStroke()
+                outline.setStroke()
                 slice.lineWidth = 1.6 * transform.m11
                 slice.stroke()
             }
@@ -63,9 +85,10 @@ public enum PocketMark {
         let pocket = Self.pocket(inset: 0, top: 9, bottom: 22.8, radius: 5)
         pocket.close()
         pocket.transform(using: transform)
-        (self == .mark ? Self.cloth : ink).setFill()
+        let cloth = Self.opaque(ink)
+        cloth.setFill()
         pocket.fill()
-        (self == .mark ? ink : Self.cloth).setStroke()
+        Self.opaque(outline).setStroke()
         pocket.lineWidth = (self == .mark ? 2.2 : 1.6) * transform.m11
         pocket.lineJoinStyle = .round
         pocket.stroke()
@@ -77,12 +100,18 @@ public enum PocketMark {
             radius: 2.6
         )
         stitch.transform(using: transform)
-        ink.setStroke()
+        cloth.contrastingGlyph.setStroke()
         stitch.lineWidth = 1.2 * transform.m11
         stitch.lineCapStyle = .round
         let dash = 1.6 * transform.m11
         stitch.setLineDash([dash, dash], count: 2, phase: 0)
         stitch.stroke()
+    }
+
+    /// `ink` resolved in the drawing appearance at full alpha;
+    /// `.labelColor` carries a translucent alpha.
+    static func opaque(_ ink: NSColor) -> NSColor {
+        (ink.usingColorSpace(.sRGB) ?? ink).withAlphaComponent(1)
     }
 
     private static func circle(

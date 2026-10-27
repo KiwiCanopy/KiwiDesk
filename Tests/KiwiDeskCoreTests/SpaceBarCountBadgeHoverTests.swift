@@ -39,7 +39,11 @@ struct SpaceBarCountBadgeHoverTests {
             active: active,
             horizontal: true,
             style: SpaceBarLook(),
-            stateMarkColors: StateMarkColors(sticky: "", floating: ""),
+            stateMarkColors: StateMarkColors(
+                sticky: "",
+                floating: "",
+                pocket: ""
+            ),
             after: after
         )
         view.layout()

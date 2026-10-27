@@ -19,6 +19,7 @@ struct ColorsAndGlassPathsTests {
         "dragDropZone": "drag.drop_zone",
         "stickyStyle": "sticky",
         "floatingStyle": "floating",
+        "pocketStyle": "pocket",
     ]
 
     /// `settings.kiwishelf.activeItemColor` →

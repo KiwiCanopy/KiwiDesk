@@ -883,7 +883,11 @@ override — is drawn on arrival; a disclosure withholds only the
 OFFER to create, and opens on arrival once the first one exists.
 **Never add a window-wide depth switch** — new depth goes behind
 its container's disclosure or its row's menu (#2654,
-`docs/design-decisions.md` ▸ Settings is one surface). So a row
+`docs/design-decisions.md` ▸ Settings is one surface). **A row's
+menu is never the only door to an editor a row opens**: it is
+invisible at rest, so the row also draws a button, as every Space
+row's Customize does (#2674, `SpaceCustomizeButtonTests`); a
+choice inside a menu the user already sees may stay there. So a row
 whose gate says the thing is already there is
 `SettingTier.immediate`, never `.showMore`, and its gate is what
 gives the tier meaning — `immediateRowsAreGated` pins that every

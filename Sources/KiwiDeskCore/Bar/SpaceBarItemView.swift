@@ -126,7 +126,7 @@ final class SpaceBarItemView: NSView {
     var horizontal = true
     var style = SpaceBarLook()
     /// State mark colors (#429).
-    var stateMarkColors = StateMarkColors(sticky: "", floating: "")
+    var stateMarkColors = StateMarkColors(sticky: "", floating: "", pocket: "")
     var onSelect: (SpaceID) -> Void = { _ in }
 
     override var isFlipped: Bool { true }

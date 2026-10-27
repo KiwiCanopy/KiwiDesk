@@ -26,7 +26,11 @@ struct TemporarySpaceBarTests {
             active: false,
             horizontal: true,
             style: style,
-            stateMarkColors: StateMarkColors(sticky: "", floating: ""),
+            stateMarkColors: StateMarkColors(
+                sticky: "",
+                floating: "",
+                pocket: ""
+            ),
             marker: item.marker
         )
         return view

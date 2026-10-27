@@ -75,6 +75,7 @@ extension KiwiCore {
         // pins every overlay to the AX-fallback path.
         windowServer.onLog = log
         windowServer.configureFromEnvironment()
+        windowServer.atTurnEnd = MainRunLoopTurnEnd.schedule
         connectWindowServerConsumers()
         wireDrag()
         wireOwnKeyWindowRefresh()

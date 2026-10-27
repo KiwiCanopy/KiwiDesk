@@ -77,7 +77,8 @@ struct FrontAppFixedLengthTests {
             style: Self.look,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
     }
@@ -193,7 +194,8 @@ struct FrontAppFixedLengthTests {
                 style: look,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         }

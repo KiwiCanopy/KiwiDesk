@@ -131,7 +131,8 @@ struct SpaceBarChipEndsTests {
                 style: Self.look(),
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         ])

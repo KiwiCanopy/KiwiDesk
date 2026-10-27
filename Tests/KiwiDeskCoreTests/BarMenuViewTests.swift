@@ -63,7 +63,8 @@ struct BarMenuViewTests {
                 style: SpaceBarLook(),
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         ])
@@ -233,7 +234,8 @@ struct BarMenuViewTests {
                 style: style,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         ])
@@ -260,7 +262,8 @@ struct BarMenuViewTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         let spoken: [NSAccessibilityCustomAction]? =

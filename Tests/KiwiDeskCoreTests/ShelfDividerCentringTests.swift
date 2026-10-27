@@ -151,7 +151,8 @@ struct ShelfDividerCentringTests {
             style: spaceLook,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         let app = AppBarOverlay()
