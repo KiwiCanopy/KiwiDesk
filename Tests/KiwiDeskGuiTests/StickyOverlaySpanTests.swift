@@ -131,8 +131,7 @@ struct StickyOverlaySpanTests {
         #expect(
             handler.contains(
                 "let snapshot = stampedDesktopSnapshot()\n"
-                    + "        desktopMemory.shownSpaces = "
-                    + "snapshot.currentSpaces"
+                    + "        desktopMemory.fileShown(snapshot)"
             )
         )
         #expect(

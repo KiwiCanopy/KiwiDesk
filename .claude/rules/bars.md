@@ -399,7 +399,16 @@ twice, was a question the user answered twice. The argument is
   its `allowed` map the one copy of who is exempt;
   `FullscreenStandDownTests` ▸
   `presentationInFrontStandsShelfDown` holds both bars through
-  it. **A cue the shelf would sit beside — the Space, layout
+  it. **Read its user-Space half from the verdict a Desktop
+  reading filed** (`DesktopMemory.shownUserSpaces`), never two
+  WindowServer round trips per pass, and let a screen no reading
+  named read live. Every event that can change which Space a
+  screen shows files that verdict from its reading or drops it —
+  the switch handler at its head, boot, a display change and the
+  monitor change's reading — while a query taking a reading owes
+  nothing (#2667, `ShownUserSpaceTests`,
+  `ShownUserSpaceSeamTests`). **A cue the
+  shelf would sit beside — the Space, layout
   and Desktop cues — stands down through the same verdict**,
   never a part of it such as `showsPresentation`, which a
   new stand-down case would leave behind (#2348,
