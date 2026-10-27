@@ -2,10 +2,22 @@ import AppKit
 import KiwiDeskCore
 
 extension ColorSwatch {
-    /// What the field shows for `hex`: empty while a clearable well
-    /// holds no colour, so its placeholder reads "No Color" (#2569).
-    static func shown(_ hex: String, clearable: Bool) -> String {
-        clearable && !KiwiShelf.hasColour(hex) ? "" : hex
+    /// Whether a well holds no colour: only a `clearable` one can
+    /// (#2569).
+    static func isClear(_ hex: String, clearable: Bool) -> Bool {
+        clearable && !KiwiShelf.hasColour(hex)
+    }
+
+    /// What the field shows for `hex`: empty while the well holds no
+    /// colour, so its placeholder reads "No Color" (#2691). A well
+    /// that is also `automatic` keeps the hex, its empty field being
+    /// Automatic's.
+    static func shown(
+        _ hex: String,
+        automatic: Bool,
+        clearable: Bool
+    ) -> String {
+        !automatic && isClear(hex, clearable: clearable) ? "" : hex
     }
 
     /// What a commit of `draft` writes over `current`, or nil when
@@ -13,7 +25,7 @@ extension ColorSwatch {
     /// colour already stored — a blur is not an edit, and a well
     /// whose binding writes several rows (#1857) must not repaint
     /// them on one. An empty draft commits Automatic, else on a
-    /// `clearable` well No Color with the hue kept (#2569).
+    /// `clearable` well No Color with the hue kept (#2691).
     static func committed(
         draft: String,
         over current: String,

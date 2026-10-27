@@ -88,7 +88,11 @@ struct ColorSwatch: View {
         self.clearable = clearable
         self._hex = hex
         self._draft = State(
-            initialValue: Self.shown(hex.wrappedValue, clearable: clearable)
+            initialValue: Self.shown(
+                hex.wrappedValue,
+                automatic: automatic,
+                clearable: clearable
+            )
         )
     }
 
@@ -100,7 +104,7 @@ struct ColorSwatch: View {
 
     /// True while a clearable well holds no colour (#2569).
     private var isClear: Bool {
-        clearable && !KiwiShelf.hasColour(hex)
+        Self.isClear(hex, clearable: clearable)
     }
 
     var body: some View {
@@ -130,7 +134,13 @@ struct ColorSwatch: View {
         // but never mid-edit, or a background write would
         // discard the user's partial entry.
         .onChange(of: hex) { _, now in
-            if !focused { draft = Self.shown(now, clearable: clearable) }
+            if !focused {
+                draft = Self.shown(
+                    now,
+                    automatic: automatic,
+                    clearable: clearable
+                )
+            }
         }
         // Resign the shared panel when this swatch leaves the
         // hierarchy, so a lingering panel can't write into a
@@ -294,7 +304,11 @@ struct ColorSwatch: View {
         ) {
             hex = value
         }
-        draft = Self.shown(hex, clearable: clearable)
+        draft = Self.shown(
+            hex,
+            automatic: automatic,
+            clearable: clearable
+        )
     }
 
     private func present() {

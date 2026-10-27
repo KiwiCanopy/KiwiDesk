@@ -64,6 +64,9 @@ struct ColorSwatchCommitTests {
         let source = try SourceScan.strippedSource(at: url)
             .filter { !$0.isWhitespace }
         #expect(source.contains("ifletvalue=Self.committed("))
+        #expect(
+            source.contains("over:hex,automatic:automatic,clearable:clearable")
+        )
         #expect(source.components(separatedBy: "Self.committed(").count == 2)
     }
 
@@ -103,13 +106,34 @@ struct ColorSwatchCommitTests {
             ) == nil
         )
         #expect(
-            ColorSwatch.shown("#2F7FD600", clearable: true).isEmpty
+            ColorSwatch.shown(
+                "#2F7FD600",
+                automatic: false,
+                clearable: true
+            ).isEmpty
         )
     }
 
+    /// A No Color well with both flags shows its hex, so an emptied
+    /// field there is an edit to Automatic, never a blur.
     @Test("an empty field on a well with both flags writes Automatic")
     @MainActor
     func bothFlagsClearToAutomatic() {
+        #expect(
+            ColorSwatch.shown(
+                "#2F7FD600",
+                automatic: true,
+                clearable: true
+            ) == "#2F7FD600"
+        )
+        #expect(
+            ColorSwatch.committed(
+                draft: "",
+                over: "#2F7FD600",
+                automatic: true,
+                clearable: true
+            ) == ""
+        )
         #expect(
             ColorSwatch.committed(
                 draft: "",

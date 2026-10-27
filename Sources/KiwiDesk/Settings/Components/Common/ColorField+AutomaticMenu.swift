@@ -19,7 +19,13 @@ extension View {
         if automatic || clearable {
             rowActions {
                 if automatic { automaticItem(hex: hex, draft: draft) }
-                if clearable { noColourItem(hex: hex, draft: draft) }
+                if clearable {
+                    noColourItem(
+                        automatic: automatic,
+                        hex: hex,
+                        draft: draft
+                    )
+                }
             }
         } else {
             self
@@ -56,12 +62,17 @@ private func automaticItem(
 @ViewBuilder
 @MainActor
 private func noColourItem(
+    automatic: Bool,
     hex: Binding<String>,
     draft: Binding<String>
 ) -> some View {
     Button {
         hex.wrappedValue = KiwiShelf.cleared(hex.wrappedValue)
-        draft.wrappedValue = ""
+        draft.wrappedValue = ColorSwatch.shown(
+            hex.wrappedValue,
+            automatic: automatic,
+            clearable: true
+        )
     } label: {
         if !KiwiShelf.hasColour(hex.wrappedValue) {
             Label(
