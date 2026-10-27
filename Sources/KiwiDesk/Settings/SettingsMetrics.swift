@@ -9,6 +9,14 @@ enum SettingsMetrics {
     /// Gutter around destination pane scrolling content.
     static let paneInset: CGFloat = 16
 
+    /// The floating save pill's gap above the pane's bottom edge.
+    static let savePillLift: CGFloat = 22
+
+    /// Room a page ends with while the save pill floats, so its
+    /// last row can scroll clear of the pill (#2688): the lift, the
+    /// pill's drawn height and a row gap.
+    static let savePillClearance: CGFloat = savePillLift + 44 + paneInset
+
     /// Inset between the pane's content and its arrival focus
     /// ring (#996). The ring is the platform's and is drawn at
     /// the pane's bounds, so the pane holds it off its own edges
