@@ -757,7 +757,9 @@ editing here:
     `fallbackPlacesBeforeThePark`). Releasing the window as a
     plain float is `releasePocketWindow`, for a quit and an
     unmark alike; the unmark's filing goes through
-    `fileMembership`.
+    `fileMembership`, and it then tiles through the Tile's own
+    `setFloating` unless `tileRefusal` names a reason (#2680,
+    `PocketWindowTests` ▸ `unmarks`).
 
   The argument is `docs/design-decisions.md` ▸ *The pocket is one
   slot beside the Spaces, not a Space*.

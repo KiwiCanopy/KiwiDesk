@@ -6060,7 +6060,10 @@ focused window — sized as a mark sizes it — and pockets it, so the
 single key keeps working for someone who never learns the second. The verb acts on the focus, which a
 pocketed window never holds, so unmarking happens while the window
 is out. `⌃⌥⇧P` sits beside `⌃⌥P` as its related variant — the two
-keys act on one window (the `⇧` entry below, as amended).
+keys act on one window (the `⇧` entry below, as amended). Unmarking
+tiles the window on the Space shown (owner, #2680): leaving the
+pocket is a return to the layout, so it ends where a Tile ends it,
+and a window detection floats stays a float.
 
 **A pocketed window waits on one screen, the active Space's**
 (`StateCoordinator.pocketHomeDisplay`), and the park and the Desktop

@@ -5730,7 +5730,9 @@ Marking floats it at once at the frame
 [`set_float_placement`](#set_float_placement) gives a window turned
 floating (a window already floating keeps its frame), and leaves it
 out of the pocket: on every Space, wearing the pocket
-mark. Unmarking leaves it a plain float on the active Space.
+mark. Unmarking tiles it on the active Space, as
+[`make_tiled`](#make_tiled) does; a window a float rule or
+detection floats stays floating.
 
 While one window is marked, a call on another window fails with a
 pill: "One window is already marked as Pocket — remove it there
