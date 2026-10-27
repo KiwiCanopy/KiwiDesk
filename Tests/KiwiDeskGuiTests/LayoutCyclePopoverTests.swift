@@ -75,6 +75,8 @@ struct LayoutCyclePopoverTests {
         // No branch splits a row or its box by ticked state.
         #expect(!list.contains("item(mode,in:"))
         #expect(!list.contains("ifcycle{toggle"))
+        // The unticked rows read the drawn order, not the config.
+        #expect(list.contains("cycleAddable(besides:cycle)"))
         // The box sits unbranched in the row, its chain straight.
         #expect(list.contains("}box(mode,in:cycle)Spacer("))
         #expect(
