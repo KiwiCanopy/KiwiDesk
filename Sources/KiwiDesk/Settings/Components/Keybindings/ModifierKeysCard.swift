@@ -34,9 +34,19 @@ struct ModifierKeysCard: View {
         ).inertReason(for: .shortcuts(.shortcutBase))
     }
 
-    /// The card's hold-open (`ShortcutsGates.modifierKeysInUse`).
+    /// The card's hold-open (#2654): a key is set, the draft uses
+    /// Hyper, or sides are kept. Not a census gate — the rows sit
+    /// behind the disclosure either way.
+    static func inUse(
+        key: HyperSourceKey?,
+        usesHyper: Bool,
+        keepsSides: Bool
+    ) -> Bool {
+        key != nil || usesHyper || keepsSides
+    }
+
     private var inUse: Bool {
-        ShortcutsGates.modifierKeysInUse(
+        Self.inUse(
             key: model.appWide.hyperKey,
             usesHyper: model.draftUsesHyper,
             keepsSides: keepsSides

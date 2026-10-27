@@ -37,7 +37,8 @@ enum SettingTier: Hashable {
     case atRest
     /// Behind the container's "Show more" disclosure or context menu.
     case showMore
-    /// Surfaces without disclosure when its configuration exists.
+    /// Drawn on arrival once its gate holds: at rest, or in a
+    /// container that opens on arrival (#2654).
     case immediate
     /// Reachable from Lua without a dedicated GUI row.
     case luaOnly

@@ -30,12 +30,13 @@ struct ProfilesControls: Sendable {
 }
 
 struct ShortcutsControls: Sendable {
-    /// Layer definition and switching, a collapsible card (#2654).
-    /// Childless: its rows are `.dynamic` or `.immediate` on
-    /// `layersExist`, which opens the card on arrival.
+    /// Layer definition and switching, a collapsible card (#2654),
+    /// declared with its static-label rows so a hit on one opens
+    /// it after the user shut it.
     let layersCard = SettingsDrawer(
         "shortcuts.section.layers",
-        "Layers"
+        "Layers",
+        children: LayersControls()
     )
     /// The Show & hide card: KiwiHub, KiwiShelf and KiwiVision,
     /// each a sub-group titled by its product name below.
@@ -147,6 +148,16 @@ struct ShortcutsControls: Sendable {
         "shortcuts.gestures.title",
         "Mouse & trackpad",
         children: GesturesControls()
+    )
+}
+
+/// Shortcuts ▸ Layers rows drawn under a selected layer, keyed on
+/// their census label keys (#2654).
+struct LayersControls: Sendable {
+    let reach = SettingsControl("app_rules.reach", "Applies to")
+    let menuBarIcon = SettingsControl(
+        "shortcuts.menu_bar_icon",
+        "Menu bar icon"
     )
 }
 

@@ -10047,8 +10047,9 @@ toggle keeps a visible decision with almost no effect.
 
 What replaces it is the offer shape this file already rules.
 Each offer sits behind its own container's disclosure
-(`SettingTier.showMore`) and opens on arrival once the config
-uses it, the container never swapped (#1125): Layers and
+(`SettingTier.showMore`), and the rows that exist once the
+config uses it are `.immediate`: the container opens on arrival
+for them, and is never swapped (#1125): Layers and
 Modifier keys are collapsible cards, Lua bindings keeps its
 drawer. Where a drawer would hide one control, the offer takes
 the row's own menu instead: per-Space Customize is in each Space

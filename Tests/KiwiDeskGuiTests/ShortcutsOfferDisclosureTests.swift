@@ -35,28 +35,28 @@ struct ShortcutsOfferDisclosureTests {
     @Test("Modifier keys hold open on any of their three uses")
     func modifierKeysHoldOpen() {
         #expect(
-            !ShortcutsGates.modifierKeysInUse(
+            !ModifierKeysCard.inUse(
                 key: nil,
                 usesHyper: false,
                 keepsSides: false
             )
         )
         #expect(
-            ShortcutsGates.modifierKeysInUse(
+            ModifierKeysCard.inUse(
                 key: .capsLock,
                 usesHyper: false,
                 keepsSides: false
             )
         )
         #expect(
-            ShortcutsGates.modifierKeysInUse(
+            ModifierKeysCard.inUse(
                 key: nil,
                 usesHyper: true,
                 keepsSides: false
             )
         )
         #expect(
-            ShortcutsGates.modifierKeysInUse(
+            ModifierKeysCard.inUse(
                 key: nil,
                 usesHyper: false,
                 keepsSides: true
@@ -78,13 +78,47 @@ struct ShortcutsOfferDisclosureTests {
             "Components/Keybindings/ModifierKeysCard.swift"
         )
         #expect(modifier.contains(".onAppear{ifinUse{expanded=true}}"))
-        #expect(modifier.contains("ShortcutsGates.modifierKeysInUse("))
+        #expect(modifier.contains("Self.inUse("))
         #expect(
             try squashed("Sections/ShortcutsSection.swift").contains(
                 ".onAppear{ifShortcutsGates(config:model.config)"
                     + ".luaBindingsExist{advancedExpanded=true}}"
             )
         )
+    }
+
+    /// The drawer's rows and its hold-open read one predicate, so
+    /// an imported kind cannot be listed with the drawer shut.
+    @Test("Lua rows and the hold-open share one predicate")
+    func luaPredicateIsShared() throws {
+        #expect(
+            try squashed("Components/Lua/AdvancedLuaGroup.swift")
+                .contains("ifShortcutsGates.isLuaBinding(binding){")
+        )
+        #expect(
+            try squashed("Components/Keybindings/ShortcutsGates.swift")
+                .contains(".contains(where:Self.isLuaBinding)")
+        )
+    }
+
+    /// A hit on a layer's static-label row opens the Layers card
+    /// even after the user shut it (#1250's obligation, #2654).
+    @Test("a layer row's search hit opens the Layers card")
+    func layerRowHitsOpenTheCard() {
+        LocalizationManager.shared.select("en")
+        defer { LocalizationManager.shared.select(nil) }
+        let rows = SettingsSearchIndex.rows()
+        let card = SettingsCatalog.shortcuts.layersCard
+        for key in [
+            SettingKey.shortcuts(.layersIcon), .shortcuts(.layersReach),
+        ] {
+            let anchor = rows.first { $0.key == key }?.anchor.anchor
+            #expect(anchor != nil, Comment(rawValue: key.id))
+            #expect(
+                card.shouldExpand(revealing: anchor),
+                Comment(rawValue: key.id)
+            )
+        }
     }
 
     /// Asked of the declaration's type rather than its source:

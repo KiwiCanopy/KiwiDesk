@@ -465,10 +465,9 @@ synonym:
   `switch_layer`). Retired as a name for it: *mode*, which is
   spoken for by a space's layout (`LayoutMode`, `space_modes`).
   The Settings window's Simple/Power-User depth also spent the
-  word until #2654 retired it; a Settings depth switch is not to
-  return under that name or any other (`docs/design-decisions.md`
-  ▸ Settings is one surface). Reserve *mode* for the layout; the
-  ruling is `docs/design-decisions.md` ▸ Shortcuts.
+  word until #2654 retired it (gui.md owns the ruling against a
+  depth switch). Reserve *mode* for the layout; the ruling is
+  `docs/design-decisions.md` ▸ Shortcuts.
 - **cascade level** — one step of the global ← profile
   resolution. Say this, not "layer", now that *layer* names the
   keybinding set (`docs/lua-reference.md`'s Config Cascade

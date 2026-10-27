@@ -1,6 +1,6 @@
 /// Display order for Colours settings areas (#678, `ColorsCensusRenderTests`).
 enum ColorsRowOrder {
-    // MARK: - Colours & Animations (the Simple area)
+    // MARK: - Colours & Animations
 
     /// The Shared look card's one row (#1752).
     static let sharedLookAtRest: [SettingKey] = [

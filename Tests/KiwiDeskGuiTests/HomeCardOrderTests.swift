@@ -3,10 +3,10 @@ import Testing
 @testable import KiwiDesk
 
 /// Home's card offer (#678 turn 9): every destination has a
-/// card, the order is the frame's and stays stable across mode
-/// flips, and one predicate decides who is offered — Simple's
-/// eight, Power User's twelve, the Screens auto-promotion, and the
-/// #18 stored-profile rule, never a hand-negated copy.
+/// card, the order is the frame's and stays stable, and one
+/// predicate decides who is offered — the Screens capability
+/// (#2654) and the #18 stored-profile rule, never a hand-negated
+/// copy.
 @Suite("Home card order and offer")
 struct HomeCardOrderTests {
     @Test("every destination draws exactly one card")

@@ -31,9 +31,6 @@ struct SettingsCatalogDrawerTests {
         "desktops.title",
         // Raw Lua bindings: rows are the user's own bindings.
         "shortcuts.advanced.title",
-        // Layers (#2654): rows are `.dynamic` or `.immediate` on
-        // `layersExist`, which opens the card on arrival.
-        "shortcuts.section.layers",
     ]
 
     /// The declared set matches the register above — derived

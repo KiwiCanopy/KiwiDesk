@@ -96,7 +96,20 @@ struct SettingsSearchDrawerAnchorTests {
                 .shortcuts, "Shortcuts & Gestures", .modifierKeys,
                 [SettingsCatalog.shortcuts.modifierKeys]
             ),
+            (
+                .shortcuts, "Shortcuts & Gestures", .layers,
+                [SettingsCatalog.shortcuts.layersCard]
+            ),
         ]
+    }
+
+    /// Whether a row is hidden while its drawer is shut: a
+    /// `.showMore` row, or an `.immediate` one in a card that opens
+    /// on arrival once its gate holds (#2654's Layers card) — the
+    /// user can still shut it, so a hit must open it again.
+    private func hides(_ key: SettingKey) -> Bool {
+        key.placement.tier == .showMore
+            || key.placement.tier == .immediate
     }
 
     /// The indexed census rows placed in `container` — by
@@ -179,9 +192,7 @@ struct SettingsSearchDrawerAnchorTests {
             in filledDrawers
         {
             let held = indexedRows(in: destination, container)
-            let hidden = held.filter {
-                $0.placement.tier == .showMore
-            }
+            let hidden = held.filter(hides)
             // Non-vacuity only — each membership is its own
             // census-render suite's, never a count pinned here.
             #expect(!hidden.isEmpty, Comment(rawValue: "\(container)"))
@@ -191,7 +202,7 @@ struct SettingsSearchDrawerAnchorTests {
                 let opening = drawers.filter {
                     $0.shouldExpand(revealing: anchor)
                 }
-                if key.placement.tier == .showMore {
+                if hides(key) {
                     #expect(anchor != nil, Comment(rawValue: key.id))
                     #expect(
                         opening.count == 1,

@@ -17,20 +17,12 @@ extension SettingsThemeContrastTests {
             SettingsTheme.accentInk,
             on: SettingsTheme.accent
         ),
-        // A header result's breadcrumb, value and Power User tag,
-        // and a guessed app's window caption.
+        // A header result's breadcrumb and value, and a guessed
+        // app's window caption.
         Pairing(
             "accentInkSecondary on a dropdown's cursor row",
             SettingsTheme.accentInkSecondary,
             on: SettingsTheme.accent
-        ),
-        // The Power User tag's edge on the cursor row: a
-        // non-text boundary, so the 3:1 floor.
-        Pairing(
-            "accentInkSecondary tag edge on a dropdown's cursor row",
-            SettingsTheme.accentInkSecondary,
-            on: SettingsTheme.accent,
-            floor: 3.0
         ),
         // A result tile's edge there — Profiles' tile IS the
         // accent, so the edge is all that outlines it.

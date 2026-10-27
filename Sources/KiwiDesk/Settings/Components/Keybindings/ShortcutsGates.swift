@@ -81,18 +81,13 @@ struct ShortcutsGates {
     /// Whether any layer carries a Lua binding: the Lua bindings
     /// drawer's hold-open, not a census gate (#2654).
     var luaBindingsExist: Bool {
-        config.layers.flatMap(\.bindings).contains { $0.kind == .custom }
+        config.layers.flatMap(\.bindings).contains(where: Self.isLuaBinding)
     }
 
-    /// Modifier keys' hold-open (#2654): a key is set, the draft
-    /// uses Hyper, or sides are kept. Not a census gate — the
-    /// rows sit behind the card's disclosure either way.
-    static func modifierKeysInUse(
-        key: HyperSourceKey?,
-        usesHyper: Bool,
-        keepsSides: Bool
-    ) -> Bool {
-        key != nil || usesHyper || keepsSides
+    /// A row the Lua bindings drawer lists — the one spelling its
+    /// rows and its hold-open share.
+    static func isLuaBinding(_ binding: KeyBinding) -> Bool {
+        binding.kind == .custom
     }
 
     /// Whether the Track layout is in play (#1440): a Track

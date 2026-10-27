@@ -93,9 +93,13 @@ extension ShortcutsKey {
         switch self {
         case .kiwiHubNavigationKeys:
             return .luaOnly
-        case .layers, .layersIcon, .layersReach, .switchToLayer:
-            // Behind the Layers card's disclosure until a layer
-            // exists; the card then opens on arrival (#2654).
+        case .layers:
+            // The strip: the offer to make the first layer, behind
+            // the Layers card's disclosure (#2654).
+            return .row(.shortcuts, .layers, .showMore)
+        case .layersIcon, .layersReach, .switchToLayer:
+            // Exist once a layer does; the card then opens on
+            // arrival (#2654).
             return .row(
                 .shortcuts,
                 .layers,

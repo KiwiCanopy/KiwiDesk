@@ -20,7 +20,7 @@ struct AdvancedLuaGroup: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach($bindings) { $binding in
-                if binding.kind == .custom {
+                if ShortcutsGates.isLuaBinding(binding) {
                     row($binding)
                 }
             }
