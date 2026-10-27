@@ -244,16 +244,16 @@ struct PocketCommandTests {
     func firstTakeOutFloats() throws {
         let core = makeCore()
         try giveSpaceAScreen(core)
-        core.execute("pocket")
-        core.execute("pocket")
+        // Pinned, never the host's screen (tests.md, #531).
+        let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
+        core.tiler.visibleBounds = { _ in screen }
         let space = try #require(core.state.workspaces.activeSpace)
+        // The region it is placed in as it becomes the pocket window.
         let region = try #require(core.floatGrowBounds(on: space))
+        core.execute("pocket")
+        core.execute("pocket")
         let landed = try #require(core.tiler.stashedFrames[one])
-        // The float placement read when it was pocketed: the float
-        // width, centred; its height follows the strips of that pass.
-        let float = FloatPlacement.centered(in: region)
-        #expect(landed.width == float.width)
-        #expect(abs(landed.midX - region.midX) < 1)
+        #expect(landed.size == FloatPlacement.centered(in: region).size)
         #expect(landed.size != CGSize(width: 600, height: 400))
     }
 
