@@ -76,13 +76,26 @@ struct ShortcutRowSymbolTests {
         }
     }
 
-    /// KiwiHub's sides draw as the panel's segments, never as rows
-    /// there, so `drawable()` misses them; their Settings rows
-    /// still wear a glyph (#2670).
-    @Test("KiwiHub's side rows wear a symbol that resolves")
-    func kiwiHubSidesHaveSymbols() {
-        let rows = KeybindingCatalog.kiwiHubRows
-        #expect(rows.count == 3)
+    /// Every row Settings ▸ Shortcuts draws wears a glyph that
+    /// resolves (#2670) — KiwiHub's sides and Open Settings
+    /// included, which the panel draws as segments or its app
+    /// icon, so `drawable()` misses them.
+    @Test("every Settings shortcut row wears a symbol that resolves")
+    @MainActor
+    func settingsRowsHaveSymbols() {
+        let expander = ShortcutsFamilyRows(
+            spaces: ["1", "2", "mail"],
+            icons: [:],
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
+            resizeStep: 42,
+            layerNames: [KeyLayer.defaultName, "Mouse"],
+            currentLayer: KeyLayer.defaultName,
+            lenses: ["Writing"]
+        )
+        let rows = ShortcutsKey.allCases.flatMap {
+            expander.rows(for: .shortcuts($0)) ?? []
+        }
+        #expect(rows.count > 40, "expanded too few rows")
         for command in rows {
             guard let name = ShortcutsReferenceBuilder.icon(for: command)
             else {
