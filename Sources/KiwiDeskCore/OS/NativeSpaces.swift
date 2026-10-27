@@ -185,17 +185,43 @@ public enum NativeSpaces {
 
     /// Whether space on display is a user desktop.
     public static func currentSpaceIsUser(
-        display: DisplayID
+        display: DisplayID,
+        filed: [String: Bool]
     ) -> Bool {
         #if DEBUG
             if let override = currentSpaceIsUserOverride {
                 return override(display)
             }
         #endif
-        guard let uuid = displayUUID(for: display),
-            let id = currentSpace(displayUUID: uuid)
-        else { return true }
-        return isUserSpace(id, in: allSpaces())
+        return spaceIsUser(on: displayUUID(for: display), filed: filed) {
+            guard let id = currentSpace(displayUUID: $0) else { return true }
+            return isUserSpace(id, in: allSpaces())
+        }
+    }
+
+    /// A screen's filed verdict where the last Desktop reading
+    /// named it, else the `live` read; true for an unknown screen,
+    /// as `currentSpaceIsUser(on:)` answers (#2667).
+    static func spaceIsUser(
+        on uuid: String?,
+        filed: [String: Bool],
+        live: (String) -> Bool
+    ) -> Bool {
+        guard let uuid else { return true }
+        return shownEntry(filed, screen: uuid) ?? live(uuid)
+    }
+
+    /// The entry a Desktop reading filed for the screen `uuid`
+    /// names. Shared Spaces key the one managed display by a
+    /// synthetic id that names no screen, so a lone entry keyed by
+    /// no screen UUID answers; a lone screen's entry never answers
+    /// for another screen.
+    static func shownEntry<T>(_ map: [String: T], screen uuid: String) -> T? {
+        if let entry = map[uuid] { return entry }
+        guard map.count == 1, let lone = map.first,
+            UUID(uuidString: lone.key) == nil
+        else { return nil }
+        return lone.value
     }
 
     #if DEBUG

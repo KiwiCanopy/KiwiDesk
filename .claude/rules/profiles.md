@@ -559,7 +559,9 @@ the away ledger reads through — `readCensus` and
 `readWindowSpace` (#1146), [os-private-apis.md](os-private-apis.md)'s
 — which `makeTestCore` pins to "no compositor"
 (`DesktopCensusSeamTests` ▸ `testCorePinsBothDoors`); a suite
-wanting a verdict states it on the instance.
+wanting a verdict states it on the instance. It also files each
+screen's user-Space verdict for the shelf's stand-down, whose
+filing obligations are [bars.md](bars.md)'s (#2667).
 
 Two obligations fall out for a **switch handler**. Take ONE
 snapshot and answer every question from it — which Desktop is

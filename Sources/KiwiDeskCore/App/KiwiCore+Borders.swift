@@ -190,10 +190,12 @@ extension KiwiCore {
                 .kiwiDisplayID,
             let uuid = NativeSpaces.displayUUID(for: display)
         else { return nil }
-        let shown = desktopMemory.shownSpaces
-        // Shared Spaces key the one managed display by a synthetic
-        // id that names no screen (`cueDisplay` reads it alike).
-        return shown[uuid] ?? (shown.count == 1 ? shown.first?.value : nil)
+        // Shared Spaces answer through their synthetic key here;
+        // `cueDisplay` detects that mode from its own reading.
+        return NativeSpaces.shownEntry(
+            desktopMemory.shownSpaces,
+            screen: uuid
+        )
     }
 
     /// The rings to show for one space. Focused window always
