@@ -7,8 +7,9 @@ import Testing
 /// The tour draws one chip per modifier with the word printed on
 /// that key under it (#1016), which makes
 /// `OnboardingModifierNames` a hand-kept mirror of
-/// `ComboSymbols.modifierSymbols` — the same four modifiers, in
-/// the same canonical ⌃⌥⇧⌘ order, one level up.
+/// `ComboSymbols.modifierSymbols` — the same modifiers, ✦
+/// included (#2700), in the same canonical ✦⌃⌥⇧⌘ order, one
+/// level up.
 ///
 /// So it is guarded the way `.claude/rules/parity-tests.md` asks:
 /// the mirror is DERIVED against its original rather than
@@ -16,22 +17,20 @@ import Testing
 /// from the list all show up as the two disagreeing — none of
 /// which a needle for `"⌃"` would see.
 ///
-/// Nothing here is locale-pinned, and that is itself the point:
-/// since #1016's third cut the names are language-neutral tokens
-/// with no catalog keys at all, so a suite that had to `select()`
-/// a locale would be asserting something this component no longer
-/// does.
+/// Nothing here is locale-pinned: since #1016's third cut the four
+/// plain names are language-neutral tokens with no catalog keys,
+/// and ✦'s is Settings' "Hyper", which every catalog keeps as is.
 @Suite("Onboarding modifier names")
 @MainActor
 struct OnboardingModifierNameTests {
-    /// Every subset of the four, so the mirror is checked against
+    /// Every subset of the five, so the mirror is checked against
     /// the original for each shape a chord can have rather than
     /// for the one the seeded keymap happens to use.
     private var everySet: [HotkeyModifiers] {
         let all: [HotkeyModifiers] = [
-            .control, .option, .shift, .command,
+            .hyper, .control, .option, .shift, .command,
         ]
-        return (0..<16).map { mask in
+        return (0..<32).map { mask in
             var set = HotkeyModifiers()
             for (bit, modifier) in all.enumerated()
             where mask & (1 << bit) != 0 {
@@ -69,10 +68,10 @@ struct OnboardingModifierNameTests {
     @Test("every modifier carries a name")
     func everyModifierIsNamed() {
         let all: HotkeyModifiers = [
-            .control, .option, .shift, .command,
+            .hyper, .control, .option, .shift, .command,
         ]
         let named = OnboardingModifierNames.named(all)
-        #expect(named.count == 4)
+        #expect(named.count == 5)
         for modifier in named {
             #expect(!modifier.name.isEmpty)
             #expect(!modifier.glyph.isEmpty)
@@ -114,10 +113,9 @@ struct OnboardingModifierNameTests {
         )
         // The chip's own padding, from `OnboardingView.chip`.
         let horizontalPadding: CGFloat = 18
-        let all: HotkeyModifiers = [
-            .control, .option, .shift, .command,
-        ]
-        for modifier in OnboardingModifierNames.named(all) {
+        func column(_ modifier: OnboardingModifierName) -> (
+            chip: CGFloat, name: CGFloat
+        ) {
             let chip =
                 (modifier.glyph as NSString)
                 .size(withAttributes: [.font: glyphFont])
@@ -125,6 +123,13 @@ struct OnboardingModifierNameTests {
             let name =
                 (modifier.name as NSString)
                 .size(withAttributes: [.font: nameFont]).width
+            return (chip, name)
+        }
+        let plain: HotkeyModifiers = [
+            .control, .option, .shift, .command,
+        ]
+        for modifier in OnboardingModifierNames.named(plain) {
+            let (chip, name) = column(modifier)
             #expect(
                 name <= chip,
                 Comment(
@@ -135,6 +140,40 @@ struct OnboardingModifierNameTests {
                 )
             )
         }
+        // ✦'s word is Settings' name, not an abbreviation, and
+        // may overhang its chip (#2700). It stands where ⌃⌥ stand
+        // on the other base, so its column may not outgrow theirs.
+        let hyper = column(OnboardingModifierNames.named(.hyper)[0])
+        let pair = OnboardingModifierNames.named([.control, .option])
+            .map { max(column($0).chip, column($0).name) }
+            .reduce(0, +)
+        let hyperWidth = max(hyper.chip, hyper.name)
+        #expect(
+            hyperWidth <= pair,
+            Comment(
+                rawValue:
+                    "✦ is \(hyperWidth) pt wide where ⌃⌥ take "
+                    + "\(pair) pt — a Hyper row outgrows the "
+                    + "measured ⌃⌥ one"
+            )
+        )
+    }
+
+    /// VoiceOver reads ✦ as a star, so the keycap speaks the
+    /// name drawn under it instead (#2700).
+    @Test("the keycap speaks ✦ by its name")
+    func hyperIsSpokenByName() {
+        let family = OnboardingKeyFamily(
+            id: "focus",
+            label: "Move focus",
+            chord: .shared([.hyper, .shift], keys: "← →")
+        )
+        let spoken = family.spokenGlyphs
+        #expect(!spoken.contains(ComboSymbols.hyperGlyph))
+        #expect(
+            spoken.hasPrefix(OnboardingModifierNames.hyperName + " ")
+        )
+        #expect(spoken.hasSuffix("← →"))
     }
 
     /// Naming a modifier the chord does not carry teaches a chord

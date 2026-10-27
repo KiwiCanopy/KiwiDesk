@@ -21,6 +21,16 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
 
     /// The chord as a native glyph string for VoiceOver and mixed families.
     var glyphs: String { chord.glyphs }
+
+    /// The glyphs as VoiceOver reads them: ✦ by its name, since
+    /// the glyph alone reads as a star (#2700).
+    @MainActor var spokenGlyphs: String {
+        glyphs.replacingOccurrences(
+            of: ComboSymbols.hyperGlyph,
+            with: OnboardingModifierNames.hyperName + " "
+        )
+        .replacingOccurrences(of: "  ", with: " ")
+    }
 }
 
 /// Seeded modifier tiers for onboarding explanations (focus vs
