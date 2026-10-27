@@ -213,9 +213,15 @@ public enum NativeSpaces {
 
     /// The entry a Desktop reading filed for the screen `uuid`
     /// names. Shared Spaces key the one managed display by a
-    /// synthetic id that names no screen, so a lone entry answers.
+    /// synthetic id that names no screen, so a lone entry keyed by
+    /// no screen UUID answers; a lone screen's entry never answers
+    /// for another screen.
     static func shownEntry<T>(_ map: [String: T], screen uuid: String) -> T? {
-        map[uuid] ?? (map.count == 1 ? map.first?.value : nil)
+        if let entry = map[uuid] { return entry }
+        guard map.count == 1, let lone = map.first,
+            UUID(uuidString: lone.key) == nil
+        else { return nil }
+        return lone.value
     }
 
     #if DEBUG

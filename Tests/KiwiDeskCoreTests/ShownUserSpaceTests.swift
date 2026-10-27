@@ -69,6 +69,23 @@ struct ShownUserSpaceTests {
         #expect(reads == 0)
     }
 
+    /// Separate Spaces with one screen filed: another screen's
+    /// verdict never answers for the screen just connected.
+    @Test("a lone screen's entry never answers another screen")
+    func loneScreenEntryReadsLive() {
+        var reads = 0
+        let filed = ["37D8832A-2D66-02CA-B9F7-8F30A301B230": false]
+        let answer = NativeSpaces.spaceIsUser(
+            on: "0E9A8D21-1D1C-4D51-A7B5-3C0B1F0D9E11",
+            filed: filed
+        ) { _ in
+            reads += 1
+            return true
+        }
+        #expect(answer)
+        #expect(reads == 1)
+    }
+
     @Test("a screen no reading named reads live")
     func missReadsLive() {
         var asked: [String] = []

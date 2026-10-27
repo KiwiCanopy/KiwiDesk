@@ -56,6 +56,19 @@ struct ShownUserSpaceSeamTests {
             try sites(of: "desktopMemory.fileShownUserSpaces(desktops)")
                 == ["KiwiCore+MonitorChange.swift": 1]
         )
+        // Ahead of the bound-profile arm, whose load returns early.
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "Profiles/KiwiCore+MonitorChange.swift"
+            )
+        )
+        let filing = try #require(
+            source.range(of: "desktopMemory.fileShownUserSpaces(desktops)")
+        )
+        let binding = try #require(
+            source.range(of: "mainDesktopBinding(in: desktops)")
+        )
+        #expect(filing.lowerBound < binding.lowerBound)
     }
 
     @Test("the live read is handed the filed verdict")
