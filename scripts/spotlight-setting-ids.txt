@@ -101,6 +101,7 @@ keybinding.grow_width
 keybinding.maximize
 keybinding.open_settings
 keybinding.pocket
+keybinding.pocket_window
 keybinding.reset_sizes
 keybinding.show_shortcuts
 keybinding.shrink_height
@@ -116,6 +117,7 @@ settings.animations.durationMS
 settings.animations.expandDurationMS
 settings.animations.onRelayout
 settings.animations.onScrolling
+settings.animations.onStateChange
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
 settings.animations.revealDurationMS
@@ -220,6 +222,9 @@ settings.mouse.followsFocus
 settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
 settings.mouseResize
+settings.pocketStyle.color
+settings.pocketStyle.edge
+settings.pocketStyle.position
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone

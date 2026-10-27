@@ -7,13 +7,14 @@ struct OnboardingModifierName: Identifiable, Equatable {
     let name: String
 }
 
-/// Language-neutral short names under tour modifier glyphs.
+/// Language-neutral short names under tour modifier glyphs, save
+/// ✦, which takes Settings' own name for it (#2700).
 /// `OnboardingModifierNameTests.namesStayShort` is the one home for those
 /// numbers; do not restate them. An abbreviation of the app's own word is
 /// not a second word.
 @MainActor
 enum OnboardingModifierNames {
-    /// Modifiers in canonical ⌃⌥⇧⌘ order
+    /// Modifiers in canonical ✦⌃⌥⇧⌘ order
     /// (OnboardingModifierNameTests).
     static func named(
         _ modifiers: HotkeyModifiers
@@ -24,12 +25,19 @@ enum OnboardingModifierNames {
             (.shift, "shift"),
             (.command, "cmd"),
         ]
-        return names.compactMap { modifier, name in
+        let hyper = OnboardingModifierName(
+            glyph: ComboSymbols.hyperGlyph,
+            name: HyperKeyWords.keyName
+        )
+        let plain: [OnboardingModifierName] = names.compactMap {
+            modifier,
+            name in
             guard modifiers.contains(modifier) else { return nil }
             return OnboardingModifierName(
                 glyph: ComboSymbols.modifierSymbols(modifier),
                 name: name
             )
         }
+        return (modifiers.contains(.hyper) ? [hyper] : []) + plain
     }
 }

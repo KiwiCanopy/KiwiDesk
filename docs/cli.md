@@ -470,6 +470,14 @@ that way, stopping at the edge; neither takes other arguments
 ([`set_space_transition`](lua-reference.md#set_space_transition)).
 :::
 
+:::unreleased
+`animations.set_on_state_change` animates a window floating,
+maximizing or going into the Pocket and out, the last as a brief
+pocket that `pocket.set_edge top|bottom|left|right` (default
+`bottom`) and `pocket.set_position 0–100` (default `82`) place
+([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
+:::
+
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 
@@ -578,7 +586,8 @@ every lens with why it cannot turn on.
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
 | | `toggle_maximized` | — the focused tiled window fills its screen, bars hidden, until called again |
-| | `pocket` | — pockets the focused window, takes the pocket window out onto this screen, or puts it back ([`pocket`](lua-reference.md#pocket)) |
+| | `pocket` | — pockets the pocket window, takes it out onto this screen, or puts it back; with none marked, marks and pockets the focused window ([`pocket`](lua-reference.md#pocket)) |
+| | `toggle_pocket_window` | — marks the focused window as the pocket window, floating it, or unmarks it, tiling it ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window)) |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
@@ -626,6 +635,7 @@ every lens with why it cannot turn on.
 | | `animations.set_on_window_resize` | true\|false (default true) |
 | | `animations.set_on_window_swap` | true\|false (default true) |
 | | `animations.set_on_relayout` | true\|false (default true) |
+| | `animations.set_on_state_change` | true\|false (default true); floating, maximizing and pocketing |
 | | `animations.set_on_expand` | true\|false (default true); the KiwiShelf expand on a Space switch |
 | | `animations.set_expand_duration` | ms (0 or 500–2000, default 750; 0 snaps); the KiwiShelf expand's length |
 | | `animations.set_reveal_duration` | ms (0 or 150–800, default 300; 0 is instant); a hidden bar's reveal |

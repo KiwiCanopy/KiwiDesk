@@ -62,21 +62,6 @@ struct AppRulesGateTests {
         #expect(gates().hasSpaces)
     }
 
-    /// The draft's patterns count, and a bare float rule is not a
-    /// pattern.
-    @Test("a title pattern retires the offer gate")
-    func titlePatterns() {
-        #expect(!gates(floatRules: ["com.apple.mail"]).titlePatternsExist)
-        #expect(
-            gates(floatRules: ["com.apple.mail:Drafts"])
-                .titlePatternsExist
-        )
-        #expect(
-            gates().inertReason(for: .appRules(.floatRulesPattern))
-                == .noTitlePatterns
-        )
-    }
-
     // MARK: - The views ask the resolver
 
     private static func squashed(_ text: String) -> String {

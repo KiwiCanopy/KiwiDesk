@@ -26,10 +26,12 @@ struct ModifierSidesRow: View {
                 help: ModifierSidesWords.help,
                 disabled: reason == .appWideLuaOwned
             )
-            .searchAnchored(SettingsCatalog.shortcuts.modifierSides)
+            .searchAnchored(
+                SettingsCatalog.shortcuts.modifierKeys.children.modifierSides
+            )
             if let text = captionText { caption(text) }
         }
-        .padding(.leading, SettingsMetrics.shortcutIconSlot + 8)
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     private var captionText: String? {
@@ -65,7 +67,7 @@ struct ModifierSidesRow: View {
 @MainActor
 enum ModifierSidesWords {
     static var title: String {
-        SettingsCatalog.shortcuts.modifierSides.text
+        SettingsCatalog.shortcuts.modifierKeys.children.modifierSides.text
     }
 
     static var help: String {

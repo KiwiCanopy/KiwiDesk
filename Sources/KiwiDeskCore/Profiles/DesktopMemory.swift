@@ -138,10 +138,28 @@ final class DesktopMemory {
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).
     var shownSpaces: [String: SkyLight.SpaceID] = [:]
+    /// Whether each screen's shown Space is a user Space, filed
+    /// from every Desktop reading taken where the shown Space can
+    /// change and dropped at a display change; the shelf's
+    /// stand-down reads it rather than two WindowServer round
+    /// trips per pass (#2667).
+    var shownUserSpaces: [String: Bool] = [:]
+
+    /// Files the native Space each screen shows from `snapshot`.
+    func fileShown(_ snapshot: DesktopSnapshot) {
+        shownSpaces = snapshot.currentSpaces
+        fileShownUserSpaces(snapshot)
+    }
+
+    /// Files only the verdict, for a reading that must leave
+    /// `shownSpaces` to the switch handler (#1215).
+    func fileShownUserSpaces(_ snapshot: DesktopSnapshot) {
+        shownUserSpaces = snapshot.currentSpacesAreUser
+    }
 
     /// Seeds display space readings from desktop snapshot at boot.
     func seed(_ snapshot: DesktopSnapshot) {
         lastDisplaySpaces = snapshot.currentSpaces
-        shownSpaces = snapshot.currentSpaces
+        fileShown(snapshot)
     }
 }

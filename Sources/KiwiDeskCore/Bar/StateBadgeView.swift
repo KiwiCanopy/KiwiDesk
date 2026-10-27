@@ -15,16 +15,18 @@ enum StateBadgeMetrics {
     }
 }
 
-/// Resolved tints for sticky and floating state mark rendering
-/// (#429), carried as data from `KiwiCore` so the Bar subsystem
-/// never reaches into the sticky/floating namespaces itself.
+/// Resolved tints for sticky, floating and pocket state mark
+/// rendering (#429, #2671), carried as data from `KiwiCore` so the
+/// Bar subsystem never reaches into the mark namespaces itself.
 public struct StateMarkColors: Sendable, Equatable {
     public let sticky: String
     public let floating: String
+    public let pocket: String
 
-    public init(sticky: String, floating: String) {
+    public init(sticky: String, floating: String, pocket: String) {
         self.sticky = sticky
         self.floating = floating
+        self.pocket = pocket
     }
 }
 
@@ -36,7 +38,17 @@ final class StateBadgeView: NSView {
     var symbolName: String {
         didSet {
             guard symbolName != oldValue else { return }
-            symbol.image = Self.image(symbolName)
+            symbol.image = image()
+        }
+    }
+
+    /// The pocket badge's ink, which a template symbol takes from
+    /// `contentTintColor` instead (#2671).
+    var ink: NSColor = .labelColor {
+        didSet {
+            guard ink != oldValue, symbolName == Self.pocketName
+            else { return }
+            symbol.image = image()
         }
     }
 
@@ -45,7 +57,7 @@ final class StateBadgeView: NSView {
         super.init(frame: .zero)
         wantsLayer = true
         layer?.masksToBounds = true
-        symbol.image = Self.image(symbolName)
+        symbol.image = image()
         symbol.imageScaling = .scaleProportionallyUpOrDown
         symbol.setAccessibilityElement(false)
         addSubview(symbol)
@@ -59,11 +71,14 @@ final class StateBadgeView: NSView {
     /// than a symbol (#2446).
     static let pocketName = "kiwidesk.pocket"
 
-    private static func image(_ name: String) -> NSImage? {
-        if name == pocketName {
-            return PocketMark.badge.image(size: 12, ink: .labelColor)
+    private func image() -> NSImage? {
+        if symbolName == Self.pocketName {
+            return PocketMark.badge.image(size: 12, ink: ink)
         }
-        return NSImage(systemSymbolName: name, accessibilityDescription: nil)
+        return NSImage(
+            systemSymbolName: symbolName,
+            accessibilityDescription: nil
+        )
     }
 
     override var isFlipped: Bool { true }

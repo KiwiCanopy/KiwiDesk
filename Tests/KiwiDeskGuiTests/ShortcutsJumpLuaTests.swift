@@ -3,9 +3,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The jump bar's Lua bindings chip (#2544): last, drawn only while
-/// the drawer is offered — hidden, not greyed, with nowhere to jump —
-/// and a jump opens the drawer it lands on.
+/// The jump bar's Lua bindings chip (#2544): last, always drawn
+/// since the drawer always is (#2654), and a jump opens the drawer
+/// it lands on.
 @Suite("Shortcuts jump: Lua bindings chip")
 struct ShortcutsJumpLuaTests {
     private static func source(_ path: String) throws -> String {
@@ -22,24 +22,13 @@ struct ShortcutsJumpLuaTests {
         .joined()
     }
 
-    @Test("the chip is last, and only while the drawer is offered")
-    func chipFollowsTheOffer() {
+    @Test("the chip is last and always drawn")
+    func chipIsLast() {
         #expect(
-            ShortcutsJumpGroup.shown(
-                luaDrawerOffered: true,
-                desktopsDrawn: true
-            ) == ShortcutsJumpGroup.allCases
+            ShortcutsJumpGroup.shown(desktopsDrawn: true)
+                == ShortcutsJumpGroup.allCases
         )
         #expect(ShortcutsJumpGroup.allCases.last == .luaBindings)
-        #expect(
-            ShortcutsJumpGroup.shown(
-                luaDrawerOffered: false,
-                desktopsDrawn: true
-            )
-                == ShortcutsJumpGroup.allCases.filter {
-                    $0 != .luaBindings
-                }
-        )
     }
 
     /// The macOS Desktops chip follows its section (#2655): a
@@ -47,10 +36,7 @@ struct ShortcutsJumpLuaTests {
     @Test("the Desktops chip shows only while its section draws")
     func desktopsChipFollowsTheSection() {
         #expect(
-            ShortcutsJumpGroup.shown(
-                luaDrawerOffered: true,
-                desktopsDrawn: false
-            )
+            ShortcutsJumpGroup.shown(desktopsDrawn: false)
                 == ShortcutsJumpGroup.allCases.filter {
                     $0 != .macosDesktops
                 }
@@ -67,7 +53,6 @@ struct ShortcutsJumpLuaTests {
         #expect(
             jump.contains(
                 "groups:ShortcutsJumpGroup.shown("
-                    + "luaDrawerOffered:offersAdvancedDrawer,"
                     + "desktopsDrawn:MacOSDesktopsGroup"
                     + ".hasRows(expander))"
             )

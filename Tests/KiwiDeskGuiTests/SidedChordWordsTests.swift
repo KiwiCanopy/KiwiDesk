@@ -26,6 +26,16 @@ struct SidedChordWordsTests {
         #expect(SidedChordWords.help("⌘H").isEmpty)
     }
 
+    @Test("a label names ✦ by the Hyper key's name")
+    func hyperIsNamed() {
+        LocalizationManager.shared.select("en")
+        let name = HyperKeyWords.keyName
+        #expect(SidedChordWords.label("✦⌘K") == name + " ⌘K")
+        #expect(SidedChordWords.label("✦ ← →") == name + " ← →")
+        #expect(SidedChordWords.label("✦R⌘H") == name + " Right ⌘ H")
+        #expect(SidedChordWords.label("✦") == name)
+    }
+
     @Test("what ComboSymbols draws, the words read back, every side")
     func readsTheDrawnForm() {
         LocalizationManager.shared.select("en")
@@ -127,6 +137,16 @@ struct SidedChordWordsTests {
             try read("Jump/LayoutPickText.swift").contains(
                 "SidedChordWords.label(chord)"
             )
+        )
+        #expect(
+            try read("Onboarding/OnboardingKeyFamily.swift").contains(
+                "SidedChordWords.label(glyphs)"
+            )
+        )
+        #expect(
+            try read("Onboarding/OnboardingKeys+KiwiHub.swift")
+                .filter { !$0.isWhitespace }
+                .contains("rendered(combo:combo).map(SidedChordWords.label)")
         )
         #expect(
             try read(keys + "KeyboardPreviewPanel+Slot.swift").contains(

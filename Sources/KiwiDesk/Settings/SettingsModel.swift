@@ -70,13 +70,6 @@ final class SettingsModel: ObservableObject {
             onWindowTitle?(SettingsWindowTitle.of(destination))
         }
     }
-    /// Simple or Power User mode; stored in `SettingsModePreference` (#678).
-    @Published var settingsMode: SettingsMode = .simple
-    /// True during mode-reveal wash; set by explicit flip only (#760).
-    @Published var modeRevealActive = false
-    /// Running reveal timeline task superseded by newer flips
-    /// (`SettingsModeRevealTests`, #979).
-    var modeRevealTask: Task<Void, Never>?
     /// Distinct setting changes in draft, recomputed beside `isDirty`.
     @Published var draftChangeCount = 0
     /// The live Spaces the profile does not hold (#1790), pushed by
@@ -98,7 +91,7 @@ final class SettingsModel: ObservableObject {
     /// (`KiwiCore.mergeLiveSpaces`).
     var seedSpaces: [SpaceID] = []
 
-    // `recomputeDirty()` lives in `SettingsModel+Mode.swift` (§2.1).
+    // `recomputeDirty()` lives in `SettingsModel+Dirty.swift` (§2.1).
 
     /// `UserDefaults` seam for non-config preferences; tests inject a scratch
     /// domain.
@@ -145,11 +138,6 @@ final class SettingsModel: ObservableObject {
     @Published var userLooks: [ShelfLook] = []
     /// Screen counts where multiple profiles claim default flag.
     @Published var duplicateDefaultCounts: [Int] = []
-    /// Confirmation text after search flipped mode
-    /// (`SettingsModel+Search`, #678).
-    @Published var searchModeNotice: String?
-    /// Task cancelling previous notice clear on new search flips.
-    var searchNoticeTask: Task<Void, Never>?
 
     /// Profile resolution summary snapshot refreshed by `refreshProfiles`
     /// (#678).
@@ -248,7 +236,7 @@ final class SettingsModel: ObservableObject {
     /// Rows the user ticked because macOS would not answer — the
     /// published mirror of `UserDefaults.mac_checklist.ticks`,
     /// seeded at init and written beside the store
-    /// (`setMacChecklistTick`), the `settingsMode` shape.
+    /// (`setMacChecklistTick`), the `appearance` shape.
     @Published var macChecklistTicks: Set<MacSetting> = []
 
     /// Why window management is not running, if it is not; drives
@@ -334,9 +322,6 @@ final class SettingsModel: ObservableObject {
         // is process-constant — mirror it once (#1145).
         SettingsSearchIndex.canDriveDesktops =
             core.canDriveDesktops
-        self.settingsMode = SettingsModePreference.read(
-            from: preferences
-        )
         self.macChecklistTicks = Self.storedTicks(in: preferences)
         self.appearance = AppearancePreference.read(
             from: preferences

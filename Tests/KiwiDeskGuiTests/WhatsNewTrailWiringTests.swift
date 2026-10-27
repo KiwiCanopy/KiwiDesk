@@ -135,12 +135,6 @@ struct WhatsNewTrailWiringTests {
             in: "Settings/SettingsModel+WhatsNewTrail.swift"
         )
         #expect(Self.squashed(door).contains("nav.pendingReveal=anchor"))
-        // The notice is armed every time; the reveal judges the flip.
-        #expect(
-            Self.squashed(door).contains(
-                "nav.pendingModeNotice=anchor.destination"
-            )
-        )
     }
 
     /// The trail's in-place navigations record the input source
@@ -161,25 +155,5 @@ struct WhatsNewTrailWiringTests {
         )
         let bump = try #require(body.range(of: "nav.trailFocusRequest+=1"))
         #expect(record.upperBound <= bump.lowerBound)
-    }
-
-    /// The reveal announces a flip on the destination it RESOLVED.
-    @Test("the reveal announces the resolved destination")
-    func revealAnnouncesResolved() throws {
-        let source = Self.squashed(
-            SourceScan.stripComments(
-                try String(
-                    contentsOf: Self.gui.appendingPathComponent(
-                        "Settings/SettingsView+Reveal.swift"
-                    ),
-                    encoding: .utf8
-                )
-            )
-        )
-        #expect(
-            source.contains(
-                "model.noteSearchModeSwitch(resolved.destination)"
-            )
-        )
     }
 }

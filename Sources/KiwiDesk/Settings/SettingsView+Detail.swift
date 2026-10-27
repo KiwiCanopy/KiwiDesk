@@ -127,15 +127,6 @@ extension SettingsView {
                         // where both sides are clipped away
                         // (owner, 2026-09-01).
                         .padding(SettingsMetrics.focusRingInset)
-                        // Animated surface reflow on mode switch (#760).
-                        .animation(
-                            reduceMotion
-                                ? nil
-                                : .easeOut(
-                                    duration: SettingsReveal.scroll
-                                ),
-                            value: model.settingsMode
-                        )
                         .contentMargins(
                             .top,
                             SettingsMetrics.paneInset,

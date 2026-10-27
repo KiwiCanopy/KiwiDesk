@@ -46,7 +46,7 @@ extension KiwiCore {
         }
     }
 
-    private func setFloating(
+    func setFloating(
         _ id: WindowID,
         _ floating: Bool
     ) -> CommandResponse {
@@ -72,11 +72,11 @@ extension KiwiCore {
         {
             state.floatFrames[id] = floatFrame
         }
-        retile()
-        // Float direction only: `make_tiled` already animates a
-        // real move back into the layout.
+        retile(stateChange: floating ? nil : id)
+        // Float direction only: the tile direction is the retile's,
+        // the window named as the state change (#2676).
         if floating, !wasFloating {
-            placeFloating(id)
+            placeFloating(id, asStateChange: true)
         }
         return .ok()
     }

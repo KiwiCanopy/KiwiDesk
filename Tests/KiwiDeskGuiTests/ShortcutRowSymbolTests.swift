@@ -76,6 +76,40 @@ struct ShortcutRowSymbolTests {
         }
     }
 
+    /// Every row Settings ▸ Shortcuts draws wears a glyph that
+    /// resolves (#2670) — KiwiHub's sides and Open Settings
+    /// included, which the panel draws as segments or its app
+    /// icon, so `drawable()` misses them.
+    @Test("every Settings shortcut row wears a symbol that resolves")
+    @MainActor
+    func settingsRowsHaveSymbols() {
+        let expander = ShortcutsFamilyRows(
+            spaces: ["1", "2", "mail"],
+            icons: [:],
+            desktops: KeybindingCatalog.DesktopOffer(desktops: [1, 2]),
+            resizeStep: 42,
+            layerNames: [KeyLayer.defaultName, "Mouse"],
+            currentLayer: KeyLayer.defaultName,
+            lenses: ["Writing"]
+        )
+        let rows = ShortcutsKey.allCases.flatMap {
+            expander.rows(for: .shortcuts($0)) ?? []
+        }
+        #expect(rows.count > 40, "expanded too few rows")
+        for command in rows {
+            guard let name = ShortcutsReferenceBuilder.icon(for: command)
+            else {
+                Issue.record("\(command.lua) draws no symbol")
+                continue
+            }
+            let image = NSImage(
+                systemSymbolName: name,
+                accessibilityDescription: nil
+            )
+            #expect(image != nil, "\(name) does not resolve")
+        }
+    }
+
     @Test("every exemption names a command the panel draws")
     func exemptionsAreLive() {
         let drawn = Set(Self.drawable().map(\.lua))

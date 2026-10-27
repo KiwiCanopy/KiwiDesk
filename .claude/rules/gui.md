@@ -549,7 +549,7 @@ it, and every way out of the trail ends it (#2038).** Settings
 lands on the row's control through `SettingsModel.land(on:)` —
 the one writer of `pendingReveal` in the window controller and
 the model, so a bar menu's row, the tour and an adoption land
-the same way and a mode flip is announced alike — and carries a
+the same way — and carries a
 banner back; the trail has ONE owner, `WhatsNewCoordinator`,
 which ends it whenever What's new is fronted or answered, so the
 banner never outlives the window its Back returns to, and a
@@ -877,12 +877,18 @@ the grey and its sentence must not be two decisions that can
 disagree, and a reason CASE keeps the whole resolver assertable
 off the main actor.
 
-**Config presence expands the Simple surface.** Anything that
-already EXISTS in the user's config — a layer, an imported
-binding, an override — is displayed in BOTH Settings modes and
-enhances the simple one; Simple withholds only the OFFER to
-create, and that offer retires itself once the first one exists.
-So a row whose gate says the thing is already there is
+**Config presence expands the surface.** Anything that already
+EXISTS in the user's config — a layer, an imported binding, an
+override — is drawn on arrival; a disclosure withholds only the
+OFFER to create, and opens on arrival once the first one exists.
+**Never add a window-wide depth switch** — new depth goes behind
+its container's disclosure or its row's menu (#2654,
+`docs/design-decisions.md` ▸ Settings is one surface). **A row's
+menu is never the only door to an editor a row opens**: it is
+invisible at rest, so the row also draws a button, as every Space
+row's Customize does (#2674, `SpaceCustomizeButtonTests`); a
+choice inside a menu the user already sees may stay there. So a row
+whose gate says the thing is already there is
 `SettingTier.immediate`, never `.showMore`, and its gate is what
 gives the tier meaning — `immediateRowsAreGated` pins that every
 `.immediate` row carries one. Reading such a row as `.showMore`
@@ -1001,12 +1007,9 @@ with a gap between its segments is a defect a reviewer names.
 (#678). Once a profile carries a single shortcut override, the
 override affordance is live on every row of that list — never
 re-earned per row — and it turns nothing on elsewhere in the
-app. Do not gate such an affordance on a Settings mode: mode
-depth is per AREA (`SettingsArea.minimumMode`), never per row,
-and nothing is read-only because of the mode.
-`ShortcutsCapabilityUnlockTests` holds those three.
-The fourth clause has no guard because it needs no code —
-**never give an override resolver a mode parameter**;
+app. `ShortcutsCapabilityUnlockTests` holds those two.
+The third clause has no guard because it needs no code —
+**never give an override resolver a display parameter**;
 `KeyLayerOverride.resolved(onto:)` takes a base list and
 nothing else, and a flag deciding which shortcuts fire is a
 second config the user cannot see.
@@ -1080,31 +1083,24 @@ Home (a card grid; `model.destination == nil`) is the only
 navigator — there is no sidebar. The conventions a shell change
 must keep:
 
-- **One offer predicate.** Whether a destination is reachable —
-  the Simple/Power-User gate, the computed Screens promotion, the
-  #18 stored-profile axis — is answered by
-  `HomeCardOrder.isOffered`, consulted by the grid, the
-  selection repairs and the `settingsNavigate` guard alike;
-  a hand-negated copy at any of those sites is the drift #18's
-  one-predicate rule exists to prevent
-  (`HomeCardOrderTests`). The search panel shows NOTHING before
+- **One offer predicate.** Whether a destination is offered —
+  the #18 stored-profile axis — is answered by
+  `SettingsDestination.isReachable`, which the grid (through
+  `HomeCardOrder.offered`), the `settingsNavigate` guard, search
+  and the reveal all consult; a hand-negated copy is the drift
+  #18's one-predicate rule exists to prevent
+  (`HomeCardOrderTests`, `HomeSurfacingTests`). Gate no
+  destination on the screen count: Screens shows on one screen
+  too (#2690; `SettingsSearchTests` ▸
+  `screensSearchableOnOneScreen`). The
+  search panel shows NOTHING before
   a query (#1470): the field takes the window's arrival focus,
   so any row drawn before one pops over Home on every open
   (#1468), and `results("")` stays empty so a bare Return
   cannot navigate somewhere unnamed (`SettingsSearchTests` ▸
   `emptyQuery`; `HomeSurfacingTests` needles the query-only
   panel). A "recent destinations" list under the field is a
-  second navigator. The `displayCount` axis has NO
-  selection repair, deliberately — a display disconnect never
-  pops an open area; `HomeCardOrder.isOffered`'s docstring
-  carries the argument.
-- **Navigation into a mode-withheld area switches the mode,
-  never refuses** (`ensureModeAdmits` — search and
-  cross-references index both modes), and a flip back to
-  Simple pops a `.powerUser`-gated area to Home
-  (`SettingsModeNavigationTests`). User-facing labels are
-  "Simple" / "Power User", wire and label alike
-  (`docs/localization-naming.md` owns the pair's policy).
+  second navigator.
 - **A card is an answer**: subtitles derive from the draft
   (`HomeCardContentTests` holds the derivations), save AI's,
   which is fixed because KiwiDesk cannot read an AI app's state
@@ -1191,9 +1187,7 @@ must keep:
   shell joins `HomeSurfacingTests` in the same change**, keyed
   on its use site — the Monitors lesson, which this shell
   inherits whole.
-- The mode pick persists via `SettingsModePreference`
-  (`UserDefaults`, absent = Simple, never `gui.json`); the
-  save pill's unsaved count (the header carries none — the
+- The save pill's unsaved count (the header carries none — the
   pill is the draft's one narrator) is the ROW COUNT of the
   popover's own list, `SettingsDiffRowSource.rows(for:)`, and
   **every reason the pill appears owes a row in that list**: a
@@ -1221,28 +1215,10 @@ must keep:
   a visible list derives the N from that list's rows, never
   from the settings count — a per-instance family made the
   two disagree on sight (owner 2026-08-10).
-- **The mode flip's reveal has one entry point and two
-  channels** (#760): only the header segment's explicit flip
-  washes (`flipSettingsMode` — `ensureModeAdmits`' promotion
-  stays on `setSettingsMode`, silent), the wash rides title
-  bands alone, and mode-gated *presence* draws the
-  accent-tinted frame (`containerStrokeModeGated` at
-  `modeGatedStrokeOpacity` — the mode's own colour, never a
-  second hue, the weight step keeping a hue-free channel) from
-  the site's own offer predicate evaluated at `.simple`, never
-  a hand-negated copy. `ModeGatedChromeTests` pins the chrome
-  and the predicates — membership is DERIVED (any Settings
-  offer consulting `.powerUser` threads `modeGated` or argues
-  its exemption in that suite's `unmarked` map, the one copy
-  of who may stay plain) — `ModeGatedFrameSeparationTests`
-  derives the frame's CVD floors from the shipped tokens, and
-  `SettingsModeRevealTests` pins the timeline; a new
-  mode-gated container passes `modeGated:` to its container
-  shape.
 - **A durable marking and a transient pointer state never
   share a property** (#1173). Hover shipped on the Home card's
-  border, where the #760 marking already lived, so the two
-  differed only in strength — and pointing at a mode-gated card
+  border, where the #760 marking then lived, so the two
+  differed only in strength — and pointing at a marked card
   OVERWROTE the channel carrying its marking, which no
   strength ceiling can fix. Separate them by what they ANSWER,
   never by degree: the border says what a thing IS, a
@@ -1252,7 +1228,9 @@ must keep:
   compose instead of one erasing the other. An accent hover edge
   is legal only on a surface that carries no durable marking at
   all, as the gesture strip's pictures (#2537, `GestureStripTests`
-  ▸ `plateHoverCue`).
+  ▸ `plateHoverCue`). The Home card keeps the neutral fill lift
+  though #2654 removed its marking: its border stays reserved for
+  identity.
   `HomeCardChromeTests` holds the split, its negative half
   located by `cardStroke`'s brace-balanced body rather than by
   a spelling a retune may move. A searchable dropdown's
@@ -1525,7 +1503,7 @@ claim; the obligations a change here takes on:
   where the user is told which setting this all presumes.
 - **Every shape change states a focus destination**, and the
   destination must be a control that is always DRAWN. Binding a
-  return to a mode-gated affordance sends focus to a value no
+  return to a conditionally offered affordance sends focus to a value no
   view claims, which lands at the top of the list — the exact
   behaviour the rule exists to prevent, and invisible to a
   source-needle guard, which is why the wirings in
@@ -1925,7 +1903,7 @@ own `reduceMotion:` parameter was enough to make every ungated
 call inside it unprovable (guard-prover, #989). The three sites
 that used it were normalized. A model has no environment to
 read, so it takes `reduceMotion` as a parameter from its caller
-(`flipSettingsMode`, `setAutoStart`) and names it at the call.
+(`setAutoStart`) and names it at the call.
 
 **And `withAnimation { … }` — no parens — is the shape that
 hides.** Swift defaults the animation, so that spelling is an
@@ -2030,6 +2008,20 @@ with a stand-in the floor has** (`ShortcutSymbolFloorTests`, read
 from the OS's availability table, since a newer name resolves on
 every machine that runs the suite).
 
+**A Settings shortcut row draws the panel's glyph for its action
+through the one `ShortcutsReferenceBuilder.icon(for:)`**, never a
+glyph table of its own (#2670). **A Shortcuts row that holds a
+setting rather than a key lays out through `ShortcutSettingRow`**
+— its value control in the recorder's footprint, its "Applies to"
+in the reach column, text under it at
+`SettingsMetrics.shortcutTextIndent` — never a hand-built row
+beside it; a new one joins `ShortcutSettingRowSeamTests`' register
+only with its reason (`ShortcutSettingRowSeamTests` ▸
+`footprintHasOneHome`, `navRowReadsTheResolver`). **A setting row
+wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
+the key rows' ink, never a topic glyph of its own**
+(`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord that can keep a side names it for
@@ -2043,7 +2035,12 @@ which each recorder mount sets beside `\.hyperKeyIsOff`
 (`ModifierSideRecorderTests` ▸ `mountsWireTheSides`); a new mount
 joins that needle. **A menu key equivalent never carries a sided
 chord**, since it has no side to draw
-(`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
+(`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`). **A spoken
+chord names ✦ by `HyperKeyWords.keyName`, through
+`SidedChordWords.label`**, sided or not, since VoiceOver reads the
+glyph as a star (#2700, `SidedChordWordsTests` ▸ `hyperIsNamed`);
+a surface speaking a chord takes `label`, never a ✦ replacement of
+its own.
 
 ## SwiftUI traps
 

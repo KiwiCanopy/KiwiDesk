@@ -1,18 +1,8 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Per-row override cell, context menu, and delete confirmation dialogs (#205,
-/// #678).
-struct OverridesButtonWidth: PreferenceKey {
-    static let defaultValue: CGFloat = 0
-    static func reduce(
-        value: inout CGFloat,
-        nextValue: () -> CGFloat
-    ) {
-        value = max(value, nextValue())
-    }
-}
-
+/// Per-row Customize button, context menu, and delete confirmation
+/// dialogs (#205, #678, #2674).
 extension SpacesSection {
     /// Destructive row action in trailing danger slot.
     func deleteButton(_ space: SpaceID) -> some View {
@@ -27,30 +17,11 @@ extension SpacesSection {
         )
     }
 
-    /// Per-row override cell opening the full-pane editor (#678
-    /// 8b). Wording turns on the mode (owner ruling 2026-08-04):
-    /// tiled counts read "N custom"; Floating reads a muted "N
-    /// saved" that still opens the editor (grey, don't hide).
-    /// Withheld entirely while the offer is locked (#678 8c) —
-    /// `SpaceOverrideOffer` owns that predicate, gated HERE at the
-    /// one render site so the row never holds a second copy (the
-    /// hand-negated-copy drift `HomeCardOrder.isOffered` prevents
-    /// one level up).
-    @ViewBuilder func customizeButton(
-        _ space: SpaceID
-    ) -> some View {
-        if SpaceOverrideOffer.isOffered(
-            mode: model.settingsMode,
-            settings: model.config.settings,
-            spaces: model.config.spaces
-        ) {
-            offeredCustomizeButton(space)
-        }
-    }
-
-    private func offeredCustomizeButton(
-        _ space: SpaceID
-    ) -> some View {
+    /// Per-row Customize button opening the full-pane editor, on
+    /// every row (#2674). Its badge counts the Space's overrides;
+    /// a Floating Space whose overrides all wait for a tiling
+    /// layout dims it (`OverrideCellState`, #678 8a).
+    func customizeButton(_ space: SpaceID) -> some View {
         let count = model.config.settings.spaceOverrideCount(
             for: space
         )
@@ -66,64 +37,20 @@ extension SpacesSection {
         return Button {
             model.nav.spaceOverridesFocus = space
         } label: {
-            overrideCellLabel(state)
+            Image(systemName: "slider.horizontal.3")
+                .overlay(alignment: .topTrailing) {
+                    OverrideCountBadge(state: state)
+                        .offset(x: 5, y: -5)
+                }
+                .padding(.horizontal, 6)
         }
-        .settingsActionButton()
-        .controlSize(.large)
-        .fixedSize()
-        .background(
-            GeometryReader { proxy in
-                Color.clear.preference(
-                    key: OverridesButtonWidth.self,
-                    value: proxy.size.width
-                )
-            }
-        )
-        .frame(
-            width: overridesButtonWidth > 0
-                ? overridesButtonWidth : nil,
-            alignment: .center
-        )
-        .help(overrideCellHelp(state))
+        .buttonStyle(.borderless)
+        .iconHoverChip()
+        .help(L("spaces.overrides.customize", "Customize…"))
         .accessibilityLabel(
-            L(
-                "spaces.overrides.a11y_any",
-                "Overrides for %1$@, %2$d saved",
-                space.raw,
-                count
-            )
+            L("spaces.customize.a11y", "Customize Space %1$@", space.raw)
         )
-    }
-
-    @ViewBuilder
-    private func overrideCellLabel(
-        _ state: OverrideCellState
-    ) -> some View {
-        switch state {
-        case .saved(let count):
-            Text(L("spaces.overrides.saved", "%1$d saved", count))
-                .foregroundStyle(.secondary)
-        case .customize:
-            Text(L("spaces.overrides.customize", "Customize…"))
-        case .custom(let count):
-            Text(L("spaces.overrides.custom", "%1$d custom", count))
-        }
-    }
-
-    private func overrideCellHelp(_ state: OverrideCellState) -> String {
-        switch state {
-        case .saved:
-            return L(
-                "spaces.overrides.saved_any.help",
-                "Kept while this Space floats — they apply when it "
-                    + "tiles again."
-            )
-        case .customize, .custom:
-            return L(
-                "spaces.customize_any.help",
-                "Overrides for this Space"
-            )
-        }
+        .accessibilityValue(OverrideCountBadge.spokenValue(state))
     }
 
     /// Prompts confirmation if space carries overrides before removing.
@@ -203,6 +130,12 @@ extension SpacesSection {
     /// Context menu actions for space row reordering and role assignments.
     @ViewBuilder
     func contextActions(_ space: SpaceID) -> some View {
+        // The editor's second door, beside the row's Customize
+        // button (#2654, #2674).
+        Button(L("spaces.overrides.customize", "Customize…")) {
+            model.nav.spaceOverridesFocus = space
+        }
+        Divider()
         if model.config.fallbackSpace == space {
             Button(
                 L("spaces.context.clear_fallback", "Clear Fallback")

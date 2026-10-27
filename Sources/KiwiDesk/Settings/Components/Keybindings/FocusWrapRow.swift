@@ -1,44 +1,35 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Focus ▸ Wrap focus (#2493): one segmented row directly above the
-/// direction keys it governs, in the shortcut rows' shape, its
-/// "Applies to" control in their reach column. Never greyed on one
-/// screen: a profile outlives a docking, and This screen and All
-/// screens then simply act alike.
+/// Focus ▸ Wrap focus (#2493): one menu row directly above the
+/// direction keys it governs, in the shared setting row's shape
+/// (#2670). Never greyed on one screen: a profile outlives a
+/// docking, and This screen and All screens then simply act alike.
 struct FocusWrapRow: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        HStack(alignment: .firstTextBaseline) {
-            // The icon slot every shortcut row reserves (#264).
-            Color.clear.frame(width: Self.iconSlot, height: 1)
-            // The picker names itself; this is its drawn twin.
-            Text(FocusWrapWords.title)
-                .accessibilityHidden(true)
-            picker
-            HelpButton(
-                explanation: FocusWrapWords.help,
-                subject: FocusWrapWords.title
-            )
-            Spacer()
-            reach
-            KeyRecorderField.footprint
-        }
+        ShortcutSettingRow(
+            title: FocusWrapWords.title,
+            help: FocusWrapWords.help,
+            reach: { reach },
+            control: { menu }
+        )
     }
 
-    private static let iconSlot = SettingsMetrics.shortcutIconSlot
-
-    private var picker: some View {
-        SegmentedPicker(
-            spokenLabel: FocusWrapWords.title,
-            spokenValue: FocusWrapWords.value(model.config.focusWrap),
-            selection: $model.config.focusWrap,
-            options: FocusWrap.allCases.map {
-                (title: FocusWrapWords.value($0), value: $0)
+    private var menu: some View {
+        Picker(FocusWrapWords.title, selection: $model.config.focusWrap) {
+            ForEach(FocusWrap.allCases, id: \.self) {
+                Text(FocusWrapWords.value($0)).tag($0)
             }
-        )
+        }
+        .labelsHidden()
+        .pickerStyle(.menu)
+        .neutralMenuLabel()
+        .controlSize(.regular)
         .fixedSize()
+        .accessibilityLabel(FocusWrapWords.title)
+        .accessibilityValue(FocusWrapWords.value(model.config.focusWrap))
     }
 
     @ViewBuilder private var reach: some View {

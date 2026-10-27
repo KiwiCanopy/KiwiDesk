@@ -64,10 +64,10 @@ func makeTestCore(
         hotkeyRegistrar: hotkeyRegistrar
     )
     core.tiler.animation.reduceMotion = { false }
-    // The plate slide (#1956) pinned off — a playing slide holds
-    // the incoming writes past every switching suite's read — its
-    // panel and stack read inert; a slide suite states the read.
+    // The plate slide (#1956) and brief pocket (#2680) pinned off,
+    // their panels and reads inert; a suite of either states them.
     core.spaceSlide.reduceMotion = { true }
+    core.briefPocket.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
     // The focused ring's arrival hold (#1959) reads the render
@@ -78,8 +78,9 @@ func makeTestCore(
     core.borders.scheduleArrivalCheck = { _, _ in }
     core.borders.reduceMotion = { true }
     core.windowServer.trackingDisabled = false
-    // A frame event fed through the core reads no live bounds.
+    // An event reads no live bounds and restacks at once (#2659).
     core.windowServer.readWindowBounds = { _ in nil }
+    core.windowServer.atTurnEnd = { $0() }
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }

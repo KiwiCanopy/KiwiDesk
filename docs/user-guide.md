@@ -409,13 +409,19 @@ pile on quit**.
 
 ### Per-Space Overrides
 
-A space's override editor (from its **Customize…** cell in
-Spaces) edits the layout the space currently uses. Each row's
+A space's override editor (from its row in Spaces) edits the layout the space currently uses. Each row's
 **Override** checkbox, unchecked, inherits the Layout Defaults
 value; checked, the control appears seeded with the current
 value. A field greyed by a switch on another page (Grid's
 auto-size, Track's auto limit) says so and links Layout
 Defaults.
+
+:::unreleased
+Every space row carries a **Customize** button; its badge counts
+that space's overrides, dimmed while a Floating space keeps them
+for when it tiles again. **Customize…** is also on the row's
+right-click menu.
+:::
 
 Changing a space's layout never deletes overrides; each layout
 keeps its own, and a **Saved for _N_ other layouts** card at the
@@ -819,10 +825,6 @@ editable profile; presets cannot be deleted.
 
 ## App Rules
 
-**Windows titled…** is a Power User choice in the Float list's
-menu. Once any rule uses it, the choice stays listed in Simple as
-well.
-
 **The title match is case-sensitive**, and "Info" also catches
 "Information"; the live window list under the chips shows what
 the rule as written would float. Dialogs, sheets and
@@ -836,7 +838,7 @@ Apps with **macOS native tabs** (Finder, Terminal, Ghostty) are
 one tile per window that follows the active tab. Tabs cannot be
 split into separate tiles.
 
-### Ignore Rules (Power Users)
+### Ignore Rules (Lua only)
 
 An ignore rule makes KiwiDesk treat every window of an app as
 nonexistent — no space assignment, no window events — for HUDs,
@@ -1002,11 +1004,13 @@ under Shortcuts & Gestures ▸ Size & float.
 :::
 
 :::unreleased
-`⌃⌥P` is **Pocket this window**, under Shortcuts & Gestures ▸ Size
-& float ([`pocket`](lua-reference.md#pocket)). A pocketed window
-leaves the screen and every bar, and comes out on the screen you
-are on, floating on every Space. `⌘-Tab` to its app takes it out
-too, and KiwiHub's window switcher lists it under **Pocket**.
+`⌃⌥⇧P` is **Toggle Pocket**, and `⌃⌥P` is **Pocket or take out**,
+under Shortcuts & Gestures ▸ Pocket
+([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window),
+[`pocket`](lua-reference.md#pocket)). A pocketed window leaves
+the screen and every bar, and comes out on the screen you are on,
+floating on every Space. `⌘-Tab` to its app takes it out too, and
+KiwiHub's window switcher lists it under **Pocket**.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

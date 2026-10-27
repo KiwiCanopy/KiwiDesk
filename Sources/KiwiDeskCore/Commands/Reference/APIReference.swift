@@ -46,6 +46,7 @@ public enum APIReference {
             ("toggle_display_sticky", "toggle_display_sticky"),
             ("toggle_maximized", "toggle_maximized"),
             ("pocket", "pocket"),
+            ("toggle_pocket_window", "toggle_pocket_window"),
             ("override_sticky_reach", "override_sticky_reach"),
             ("resize", "resize"),
             ("move_to_track", "move_to_track"),
@@ -160,7 +161,7 @@ public enum APIReference {
             "set_duration", "set_scroll_duration",
             "set_on_scrolling",
             "set_on_window_resize", "set_on_window_swap",
-            "set_on_relayout",
+            "set_on_relayout", "set_on_state_change",
             "set_on_expand", "set_expand_duration", "set_on_peek",
             "set_reveal_duration",
             "set_size_policy", "set_size_rate",
@@ -292,6 +293,7 @@ public enum APIReference {
         "floating": [
             "set_mark", "set_color",
         ],
+        "pocket": ["set_color", "set_edge", "set_position"],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",
             "set_fade_curve", "set_appearance",

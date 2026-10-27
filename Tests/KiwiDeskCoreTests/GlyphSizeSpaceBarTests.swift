@@ -72,7 +72,8 @@ struct GlyphSizeSpaceBarTests {
             style: look(boxed: boxed, roundness: roundness),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
     }

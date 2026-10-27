@@ -14,7 +14,7 @@ import Testing
 ///
 /// Stated limit: these are existence pins, not behavior — the
 /// behavior halves live in `HomeCardOrderTests`,
-/// `HomeCardContentTests` and `SettingsModeNavigationTests`.
+/// and `HomeCardContentTests`.
 /// What only these can see is a branch or a wiring line being
 /// deleted whole with the suite green
 /// (`ZOrderSequenceWiringTests` is the precedent).

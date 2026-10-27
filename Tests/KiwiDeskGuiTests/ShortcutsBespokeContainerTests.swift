@@ -74,6 +74,16 @@ struct ShortcutsBespokeContainerTests {
                 "sizeAndFloatMore", .sizeAndFloat,
                 ShortcutsRowOrder.sizeAndFloatMore
             ),
+            // The Pocket card (#2680): its keys walked, its
+            // placement rows drawn by `PocketGroup` itself.
+            (
+                "pocketAtRest", .pocket,
+                ShortcutsRowOrder.pocketAtRest
+            ),
+            (
+                "pocketList", .pocket,
+                ShortcutsRowOrder.pocketList
+            ),
             (
                 "openApplicationsAtRest", .openApplications,
                 ShortcutsRowOrder.openApplicationsAtRest

@@ -79,7 +79,19 @@ extension DefaultKeybindings {
             combo: "control+option+p",
             lua: "KiwiDesk.pocket()",
             kind: .navigation,
-            label: "Pocket this window"
+            label: "Pocket or take out"
+        )
+    }
+
+    /// Toggle Pocket on `⌃⌥⇧P` (#2675), beside Pocket's
+    /// `⌃⌥P`. Free in the seed and `SystemShortcuts.map` (read
+    /// 2026-10-27).
+    public static func pocketWindowRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+shift+p",
+            lua: "KiwiDesk.toggle_pocket_window()",
+            kind: .navigation,
+            label: "Toggle Pocket"
         )
     }
 

@@ -124,10 +124,8 @@ struct HomeCardChromeTests {
     /// The card's border rides ABOVE the clip, after the plate:
     /// in the background it was painted over by the opaque
     /// plate for the top 92 pt of every plated card, silencing
-    /// the rest hairline, the hover accent and the #760
-    /// mode-gated frame at once (ui-designer blocker,
-    /// 2026-08-09) — with `ModeGatedChromeTests` green, since
-    /// it pins tokens and predicates, not paint order.
+    /// the rest hairline and the hover accent at once
+    /// (ui-designer blocker, 2026-08-09).
     @Test("the card stroke is painted above the plate")
     func strokeRidesAboveTheClip() throws {
         #expect(
@@ -213,8 +211,8 @@ struct HomeCardChromeTests {
             Comment(
                 rawValue:
                     "cardStroke reads the pointer again — the "
-                    + "border is the mode's channel alone, or a "
-                    + "hovered card stops stating its mode"
+                    + "border says what a card is, the fill "
+                    + "where the pointer is (#1173)"
             )
         )
     }

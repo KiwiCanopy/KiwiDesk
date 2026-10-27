@@ -148,8 +148,7 @@ struct SettingsCatalogTests {
         // 161 since #2417: KiwiVision's fade duration and curve.
         // 174 since #2237: the Per layout drawer and its twelve.
         // 177 since #761: Shortcuts' KiwiShelf group, the Show
-        // master's drawer and its Space Bar row.
-        // 178: the Show & hide card over Shortcuts' three groups.
+        // master's drawer and its Space Bar row. 178: Show & hide.
         // 198 since #2389: Colors & glass and its twenty-five
         // children, for the Liquid Glass card and the old page's
         // four group titles and its scene. 199 #2497: Reveal.
@@ -164,8 +163,9 @@ struct SettingsCatalogTests {
         // Colors drawer in, the Fill, Tint, Fill fade and Sheen
         // out — at rest, they take no anchor (#277). 209 with
         // #2655: the macOS Desktops section in for the Focus
-        // card's Desktop drawer, the switch cue moved, net zero.
-        #expect(allEntries.count == 209)
+        // card's Desktop drawer, net zero. 212 #2654; 213 #2671;
+        // 214 #2676; 217 #2680 (the Pocket card and its two rows).
+        #expect(allEntries.count == 217)
         // And the two-ground split behind that number.
         let modeTabs = allEntries.filter {
             $0.1.control.key == nil

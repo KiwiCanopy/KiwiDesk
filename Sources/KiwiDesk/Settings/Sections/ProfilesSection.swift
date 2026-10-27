@@ -39,7 +39,8 @@ struct ProfilesSection: View {
                 reduceMotion ? nil : .default,
                 value: model.profileSummaries.isEmpty
             )
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 

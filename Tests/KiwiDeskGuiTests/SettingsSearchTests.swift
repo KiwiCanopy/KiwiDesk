@@ -188,40 +188,18 @@ struct SettingsSearchTests {
         }
     }
 
-    /// The pill's predicate is the ONE offer predicate
-    /// (`HomeCardOrder.isOffered`), never a hand-negated copy:
-    /// a Power-User-only area flips in Simple mode, stays quiet
-    /// in Power User mode, and the Screens screen-count
-    /// promotion silences its pill exactly when it silences its
-    /// gate.
-    @Test("the mode pill derives from the offer predicate")
-    func modePillFollowsOfferPredicate() {
+    /// No screen count gates a destination (#2690): Screens holds
+    /// the pins of screens that are not connected. The search
+    /// context carries no screen count at all, so this holds that
+    /// Screens is indexed.
+    @Test("search finds Screens with no screen count in reach")
+    func screensSearchableOnOneScreen() {
         pinEnglish()
         defer { reset() }
-        let simple = SettingsSearchContext(mode: .simple)
-        let power = SettingsSearchContext(mode: .powerUser)
-        let screens = SettingsSearchResult.destination(.screens)
-        #expect(
-            SettingsSearch.switchesMode(screens, context: simple)
+        let hits = SettingsSearch.results(
+            query: SettingsDestination.screens.title,
+            context: SettingsSearchContext()
         )
-        #expect(
-            !SettingsSearch.switchesMode(screens, context: power)
-        )
-        #expect(
-            !SettingsSearch.switchesMode(
-                screens,
-                context: SettingsSearchContext(
-                    mode: .simple,
-                    displayCount: 2
-                )
-            )
-        )
-        let simpleArea = SettingsSearchResult.destination(.bars)
-        #expect(
-            !SettingsSearch.switchesMode(
-                simpleArea,
-                context: simple
-            )
-        )
+        #expect(hits.settings.contains(.destination(.screens)))
     }
 }

@@ -77,9 +77,9 @@ struct OverrideMinSizeRowTests {
         #expect(row.contains("Text(sentence)"))
     }
 
-    /// The cell's live count is what keeps a Floating Space's
-    /// editor reachable; the pure verdict cannot see the call.
-    @Test("the Customize cell hands the live count to its verdict")
+    /// The button's live count is what keeps a Floating Space's
+    /// badge honest; the pure verdict cannot see the call.
+    @Test("the Customize button hands the live count to its verdict")
     func cellPassesTheLiveCount() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let cell = try SourceScan.strippedSource(

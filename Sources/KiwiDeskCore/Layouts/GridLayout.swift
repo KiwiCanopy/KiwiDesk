@@ -3,8 +3,8 @@ import CoreGraphics
 /// Grid layout system supporting dynamic and rigid tiling.
 /// Both types share one ceiling: `columns`×`rows` (or the
 /// auto-size screen-computed dimensions, both capped at what fits
-/// `min_window_size`) is the most cells the grid splits into —
-/// rigid fills it, dynamic balances up to it, and the excess
+/// the largest window's floor, #2687) is the most cells the grid
+/// splits into — rigid fills it, dynamic balances up to it, and the excess
 /// scrolls through the last track (#2541, `GridLayout+Run`).
 public struct GridLayout: LayoutSystem {
     public init() {}
@@ -28,9 +28,48 @@ public struct GridLayout: LayoutSystem {
         public let scrolls: Bool
     }
 
+    /// The shape `windows` draw: the ceiling fits the largest
+    /// floor among them (#2687), so a window that cannot shrink
+    /// to a cell takes a track away until it leaves. Geometry and
+    /// the resize both ask here.
     public static func shape(
-        count: Int,
+        for windows: [WindowID],
         in context: LayoutContext
+    ) -> Shape? {
+        shape(
+            count: windows.count,
+            in: context,
+            capFloor: capFloor(of: windows, in: context)
+        )
+    }
+
+    /// The largest floor per axis among `windows`, never below
+    /// `min_window_size`; a probe beyond the bounds learns none.
+    static func capFloor(
+        of windows: [WindowID],
+        in context: LayoutContext
+    ) -> MinSize {
+        windows.reduce(context.minWindowSize) { floor, id in
+            MinSize(
+                width: max(
+                    floor.width,
+                    context.runFloor(of: id, horizontal: true)
+                ),
+                height: max(
+                    floor.height,
+                    context.runFloor(of: id, horizontal: false)
+                )
+            )
+        }
+    }
+
+    /// The shape for `count` windows whose ceiling fits
+    /// `capFloor`. Production reads `shape(for:in:)`; the floor is
+    /// required so no caller falls back to `min_window_size`.
+    static func shape(
+        count: Int,
+        in context: LayoutContext,
+        capFloor: MinSize
     ) -> Shape? {
         guard count > 0 else { return nil }
         let params = context.grid
@@ -41,7 +80,7 @@ public struct GridLayout: LayoutSystem {
             usable: context.usable,
             gapH: gapH,
             gapV: gapV,
-            minSize: context.minWindowSize
+            minSize: capFloor
         )
         let (columns, rows) = dimensions(
             count: count,
@@ -78,7 +117,7 @@ public struct GridLayout: LayoutSystem {
         in context: LayoutContext
     ) -> [WindowID: CGRect] {
         guard !windows.isEmpty else { return [:] }
-        guard let shape = Self.shape(count: windows.count, in: context)
+        guard let shape = Self.shape(for: windows, in: context)
         else {
             return OverlapStack.frames(
                 for: windows,
@@ -124,8 +163,9 @@ public struct GridLayout: LayoutSystem {
     }
 
     /// The cell ceiling: as many columns and rows as fit at
-    /// `min_window_size`, or the fixed ones capped at that — a
-    /// fixed grid's dimensions are a maximum (#2541).
+    /// `minSize` — the largest window floor (#2687) — or the fixed
+    /// ones capped at that, a fixed grid's dimensions being a
+    /// maximum (#2541).
     func capDimensions(
         params: GridParams,
         usable: CGRect,
@@ -154,7 +194,9 @@ public struct GridLayout: LayoutSystem {
     /// bounds the CEILING, not the growth, so a dynamic grid stays
     /// tight until it hits it. Public + static because the
     /// Settings preview needs the whole rule or it subdivides past
-    /// where the real grid stops (#712).
+    /// where the real grid stops (#712); it has no live windows,
+    /// so it caps at the configured minimum, never a learned
+    /// floor (#2687).
     public static func dimensions(
         count: Int,
         params: GridParams,

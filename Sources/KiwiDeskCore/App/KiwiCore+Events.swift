@@ -75,6 +75,8 @@ extension KiwiCore {
         case .displaysChanged:
             tiler.displaysChanged()
             borders.displaysChanged()
+            // A screen back may show another Space than filed.
+            desktopMemory.shownUserSpaces = [:]
             if monitorChangeSettles(priorCount: priorDisplayCount) {
                 if !monitorSettlePending {
                     state.settlingScreens = priorScreens

@@ -110,7 +110,7 @@ extension SettingsThemeContrastTests {
             SettingsTheme.card,
             wash: (
                 SettingsTheme.accent,
-                Double(SettingsTheme.searchNoticeFillOpacity)
+                Double(SettingsTheme.noticeFillOpacity)
             )
         ),
         icon("ink3", SettingsTheme.ink3, on: "panel", SettingsTheme.panel),

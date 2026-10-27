@@ -22,7 +22,8 @@ extension SettingsValueReadout {
             .maximize,
             .toggleFloating, .toggleKiwiVision, .toggleLens,
             .toggleSpaceBar, .toggleAppBar,
-            .toggleSticky, .pocket, .showShortcuts,
+            .toggleSticky, .pocket, .pocketWindow,
+            .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
             .advanced, .`import`, .restoreDefaults:
             return []
@@ -62,6 +63,28 @@ extension SettingsValueReadout {
                     label: FocusWrapWords.title,
                     old: FocusWrapWords.value(old.focusWrap),
                     new: FocusWrapWords.value(new.focusWrap)
+                )
+            ]
+        case .pocketEdge:
+            return [
+                .change(
+                    census,
+                    label: SettingsCatalog.shortcuts.pocketEdge.text,
+                    old: AppBarOptions.edgeName(
+                        old.settings.pocketStyle.edge
+                    ),
+                    new: AppBarOptions.edgeName(
+                        new.settings.pocketStyle.edge
+                    )
+                )
+            ]
+        case .pocketPosition:
+            return [
+                .change(
+                    census,
+                    label: SettingsCatalog.shortcuts.pocketPosition.text,
+                    old: pocketPercent(old),
+                    new: pocketPercent(new)
                 )
             ]
         case .modeCycle:
@@ -298,5 +321,9 @@ extension SettingsValueReadout {
             layers.map { ($0.name, $0) },
             uniquingKeysWith: { first, _ in first }
         )
+    }
+
+    private static func pocketPercent(_ config: GuiConfig) -> String {
+        percent(Double(config.settings.pocketStyle.position) / 100)
     }
 }

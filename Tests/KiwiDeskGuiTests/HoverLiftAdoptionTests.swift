@@ -59,56 +59,6 @@ struct HoverLiftAdoptionTests {
         #expect(strip.contains(".strokeBorder(selected?SettingsTheme."))
     }
 
-    /// The cycle list's selected row takes its focused look only
-    /// while the list holds keyboard focus in the key window, as a
-    /// macOS list draws it (owner, 2026-10-17): the fill and the
-    /// inks each read that one predicate. Which tokens is a tuning.
-    @Test("the cycle row's focused look reads the list's focus")
-    func cycleRowFollowsFocus() throws {
-        let list = try source(
-            "Settings/Components/Keybindings/LayoutCycleList.swift"
-        )
-        let focus = try body("private var listFocused:", in: list)
-        #expect(focus.contains("focused!=nil"))
-        #expect(focus.contains("activeState==.key"))
-        let fill = try body("private func rowFill(", in: list)
-        #expect(fill.contains("guardselected==modeelse{return.clear}"))
-        #expect(fill.contains("returnlistFocused?SettingsTheme."))
-        let item = try body("private func item(", in: list)
-        #expect(item.occurrences(of: ".background(rowFill(mode))") == 1)
-        #expect(item.contains("letonAccent=selected==mode&&listFocused"))
-        #expect(item.occurrences(of: "onAccent?SettingsTheme.") == 2)
-        // The − button and the + menu.
-        #expect(squash(list).occurrences(of: ".iconHoverChip(") == 2)
-    }
-
-    /// A click always lands on the grey selection — the tap clears
-    /// any focus the click kept, the row already focused included
-    /// (owner device report, 2026-10-17) — and every row but the
-    /// selected one lifts, on a layer apart from the selection's
-    /// fill (#1173).
-    @Test("a cycle row click lands grey, and the rows lift")
-    func cycleRowClickAndLift() throws {
-        let list = try source(
-            "Settings/Components/Keybindings/LayoutCycleList.swift"
-        )
-        let item = try body("private func item(", in: list)
-        // Cleared on a mouse tap alone, never on VoiceOver's press.
-        #expect(
-            item.contains(
-                ".onTapGesture{picked=mode"
-                    + "ifClickBornFocus.isClickBorn("
-                    + "focusMayBeADescendant:false){focused=nil}}"
-            )
-        )
-        let lift = try #require(
-            item.range(of: ".rowHoverHighlight(lifts:selected!=mode")
-        )
-        let fill = try #require(item.range(of: ".background(rowFill(mode))"))
-        #expect(lift.lowerBound < fill.lowerBound)
-        #expect(item.occurrences(of: ".rowHoverHighlight(") == 1)
-    }
-
     /// Revert and Save a copy wash like the count button beside
     /// them; the wash does not react while disabled, and the
     /// pointing hand stays a link's.

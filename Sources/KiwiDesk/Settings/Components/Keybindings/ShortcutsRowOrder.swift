@@ -9,6 +9,7 @@ enum ShortcutsRowOrder {
     static let bespokeContainers: Set<SettingsContainer> = [
         .openApplications,
         .layout,
+        .pocket,
         .layers,
         .luaBindings,
         .defaultShortcuts,
@@ -156,7 +157,18 @@ enum ShortcutsRowOrder {
         .shortcuts(.maximize),
         .shortcuts(.toggleFloating),
         .shortcuts(.toggleSticky),
+    ]
+
+    /// The Pocket card (#2680): its two keys, then the brief
+    /// pocket's placement, drawn by `PocketGroup`.
+    static let pocketAtRest: [SettingKey] = [
         .shortcuts(.pocket),
+        .shortcuts(.pocketWindow),
+    ]
+
+    static let pocketList: [SettingKey] = [
+        .shortcuts(.pocketEdge),
+        .shortcuts(.pocketPosition),
     ]
 
     /// Size & float's `.showMore` tier, empty since #1255 took

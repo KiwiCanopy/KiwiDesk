@@ -63,7 +63,7 @@ extension SettingsView {
             }
             .buttonStyle(.plain)
             .padding(.trailing, SettingsMetrics.paneInset)
-            .padding(.bottom, 22)
+            .padding(.bottom, SettingsMetrics.savePillLift)
         }
     }
 
@@ -88,7 +88,7 @@ extension SettingsView {
                 .overlay(
                     ChipMetrics.shape.fill(
                         SettingsTheme.accent.opacity(
-                            SettingsTheme.searchNoticeFillOpacity
+                            SettingsTheme.noticeFillOpacity
                         )
                     )
                 )

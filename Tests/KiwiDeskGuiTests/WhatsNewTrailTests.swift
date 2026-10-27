@@ -138,14 +138,10 @@ struct WhatsNewTrailTests {
 
     // MARK: - The one external-landing door
 
-    /// Armed on every landing: the reveal announces only a flip it
-    /// made, on the destination it resolved
-    /// (`WhatsNewTrailWiringTests` ▸ `revealAnnouncesResolved`).
-    @Test("a landing arms the reveal and the mode notice")
-    func landingArmsRevealAndNotice() {
+    @Test("a landing arms the reveal")
+    func landingArmsReveal() {
         let model = makeTestModel()
         model.land(on: SettingsAnchor(destination: .shortcuts))
-        #expect(model.nav.pendingModeNotice == .shortcuts)
         #expect(model.nav.pendingReveal?.destination == .shortcuts)
     }
 }

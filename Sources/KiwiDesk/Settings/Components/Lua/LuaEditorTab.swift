@@ -160,6 +160,18 @@ struct LuaSourceEditor: NSViewRepresentable {
     @Binding var text: String
     /// What VoiceOver calls the text.
     var spokenName = "init.lua"
+    /// VoiceOver's placeholder while the text is empty.
+    var placeholder: String?
+    /// Whether the text view takes the caret once it is in a window.
+    var takesFocus = false
+    /// Room between the text and the editor's edge.
+    var inset = NSSize.zero
+
+    /// The text's point size, which a drawn placeholder matches.
+    static let fontSize: CGFloat = 12
+    /// The text container's own leading room, stated rather than
+    /// AppKit's default so a placeholder can line up with it.
+    static let linePadding: CGFloat = 5
 
     func makeCoordinator() -> Coordinator {
         Coordinator(text: $text)
@@ -171,8 +183,10 @@ struct LuaSourceEditor: NSViewRepresentable {
         else { return scroll }
         textView.delegate = context.coordinator
         textView.isRichText = false
+        textView.textContainerInset = inset
+        textView.textContainer?.lineFragmentPadding = Self.linePadding
         textView.font = .monospacedSystemFont(
-            ofSize: 12,
+            ofSize: Self.fontSize,
             weight: .regular
         )
         textView.isAutomaticQuoteSubstitutionEnabled = false
@@ -183,6 +197,13 @@ struct LuaSourceEditor: NSViewRepresentable {
         // a translatable third name for the config file is
         // Family C drift (localization audit 2026-08-24).
         textView.setAccessibilityLabel(spokenName)
+        textView.setAccessibilityPlaceholderValue(placeholder)
+        if takesFocus {
+            // Not in a window until the popover has been shown.
+            DispatchQueue.main.async {
+                textView.window?.makeFirstResponder(textView)
+            }
+        }
         return scroll
     }
 

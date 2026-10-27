@@ -2,10 +2,9 @@ import Foundation
 import SwiftUI
 
 /// A group the Shortcuts & Gestures jump chips lead to (#1520), in
-/// page order. Layers takes no chip: it scopes the groups below
-/// rather than being a destination, and is absent in Simple. Lua
-/// bindings takes one only while its drawer is offered (#2544),
-/// macOS Desktops only while its section draws (#2655).
+/// page order. Layers and Modifier keys take no chip: they scope
+/// or precede the groups below rather than being destinations.
+/// macOS Desktops takes one only while its section draws (#2655).
 enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case gestures
     case showHide
@@ -14,6 +13,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     case macosDesktops
     case layout
     case sizeFloat
+    case pocket
     case openApplications
     case luaBindings
 
@@ -31,6 +31,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
             return SettingsCatalog.shortcuts.desktopsSection
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
+        case .pocket: return SettingsCatalog.shortcuts.pocketKeys
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
         case .luaBindings:
@@ -48,6 +49,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
         case .macosDesktops: return .macosDesktops
         case .layout: return .layout
         case .sizeFloat: return .sizeAndFloat
+        case .pocket: return .pocket
         case .openApplications: return .openApplications
         case .luaBindings: return .luaBindings
         }
@@ -60,17 +62,8 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
     /// The chips drawn: a drawer or section not drawn has nowhere
     /// to jump, so its chip is left out rather than greyed (#2544,
     /// #2655).
-    static func shown(
-        luaDrawerOffered: Bool,
-        desktopsDrawn: Bool
-    ) -> [ShortcutsJumpGroup] {
-        allCases.filter {
-            switch $0 {
-            case .luaBindings: return luaDrawerOffered
-            case .macosDesktops: return desktopsDrawn
-            default: return true
-            }
-        }
+    static func shown(desktopsDrawn: Bool) -> [ShortcutsJumpGroup] {
+        allCases.filter { $0 != .macosDesktops || desktopsDrawn }
     }
 }
 

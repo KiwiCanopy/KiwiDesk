@@ -98,7 +98,9 @@ synonym:
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One family;
-  the three on an app glyph take three different corners.
+  the three on an app glyph take three different corners. In
+  Settings, the override count on a Space row's Customize button
+  is a badge too (#2674): it counts, so it takes the word.
 - **Space marker** — a glyph drawn after a Space's identifier, in
   its ink and with no plate: a held Space's (#1507) or a temporary
   one's (#1790), one slot shared since a Space is never both.
@@ -145,6 +147,10 @@ synonym:
   other window managers' word; a *stash*, the park that hides a
   window at a corner (`TilingEngine` stash), which the pocket
   uses but is not; or a *drawer*, Settings' Lua bindings drawer.
+  Choosing the window is **Toggle Pocket** in copy (owner,
+  #2675) and `toggle_pocket_window` in Lua and CLI, neither
+  spending *mark*, which stays the on-window glyph's — the
+  pocket *mark*; docs prose may say a window is *marked*.
 - **pin** — two relations, and only ONE of them still spends the
   word (#1022). A **Screen pin** binds a Space to a screen and
   takes the word in its labels (`diff.label.space_pin`,
@@ -462,12 +468,9 @@ synonym:
   the drawn thing is called (`background_style`).
 - **layer** — a named alternate keybinding set; only the active
   one fires (`KeyLayer`, `config.layers`, `define_layer` /
-  `switch_layer`). Retired as a name for it: *mode*. That word
-  is spoken for twice over — a space's layout (`LayoutMode`,
-  `space_modes`) and the Settings window's Simple/Power-User depth —
-  so a third sense made "switch mode" ambiguous three ways.
-  Reserve *mode* for those two; the ruling is
-  `docs/design-decisions.md` ▸ Shortcuts.
+  `switch_layer`). Retired as a name for it: *mode*, which a
+  space's layout spends (`LayoutMode`, `space_modes`); the
+  ruling is `docs/design-decisions.md` ▸ Shortcuts.
 - **cascade level** — one step of the global ← profile
   resolution. Say this, not "layer", now that *layer* names the
   keybinding set (`docs/lua-reference.md`'s Config Cascade

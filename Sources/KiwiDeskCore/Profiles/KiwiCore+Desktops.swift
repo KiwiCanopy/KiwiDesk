@@ -106,7 +106,7 @@ extension KiwiCore {
         // stamped at the first switch that shows it, and every
         // question below is still answered from this ONE reading.
         let snapshot = stampedDesktopSnapshot()
-        desktopMemory.shownSpaces = snapshot.currentSpaces
+        desktopMemory.fileShown(snapshot)
         // The arriving Desktop, answered from the SAME snapshot
         // (#1147): its stamp where it carries one, its Mission
         // Control number where it does not.

@@ -23,9 +23,10 @@ extension SettingsButtonStyleConventionTests {
     var unstyledExempt: [String: Exemption] {
         [
             "SpacesSection+Customize.swift": (
-                9, "deleteConfirmActions",
-                "Returned to a confirmationDialog / contextMenu, "
-                    + "plus one icon affordance"
+                10, "deleteConfirmActions",
+                "Returned to a confirmationDialog / contextMenu "
+                    + "(Customize… among them, #2654), plus one "
+                    + "icon affordance"
             ),
             // The one discard gate's verbs, returned to its
             // confirmationDialog per kind (#515, #2049).
@@ -38,9 +39,9 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to the discard gate's confirmationDialog"
             ),
             "LayoutCycleList.swift": (
-                3, "rowActions",
+                2, "rowActions",
                 "Returned to the row-menu builder the rowActions "
-                    + "seam feeds (#845, #453)"
+                    + "seam feeds (#845, #2673)"
             ),
             "SpaceAssignmentChip.swift": (
                 3, "rowActions",

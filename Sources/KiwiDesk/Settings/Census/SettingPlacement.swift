@@ -1,11 +1,5 @@
 /// Placement vocabulary of the settings census (#678).
 
-/// Settings modes: "Simple" and "Power User".
-enum SettingsMode: String, CaseIterable, Hashable {
-    case simple
-    case powerUser
-}
-
 /// A Home-level area card in the Settings window.
 enum SettingsArea: CaseIterable, Hashable {
     case gapsAndBorders
@@ -21,29 +15,6 @@ enum SettingsArea: CaseIterable, Hashable {
     case ai
     case general
     case macChecklist
-
-    /// The mode an area first appears in.
-    var minimumMode: SettingsMode {
-        switch self {
-        case .screens:
-            return .powerUser
-        case .layoutDefaults, .gapsAndBorders, .shortcuts,
-            .coloursAndMotion, .bars, .spacesAndLayouts,
-            .profiles, .appRules, .kiwiVision, .ai, .general,
-            .macChecklist:
-            return .simple
-        }
-    }
-
-    /// Effective minimum mode, promoting Screens to Simple for multi-screen.
-    func effectiveMinimumMode(
-        displayCount: Int
-    ) -> SettingsMode {
-        if self == .screens, displayCount >= 2 {
-            return .simple
-        }
-        return minimumMode
-    }
 }
 
 /// How deep a setting sits within its container.
@@ -52,7 +23,8 @@ enum SettingTier: Hashable {
     case atRest
     /// Behind the container's "Show more" disclosure or context menu.
     case showMore
-    /// Surfaces without disclosure when its configuration exists.
+    /// Drawn on arrival once its gate holds: at rest, or in a
+    /// container that opens on arrival (#2654).
     case immediate
     /// Reachable from Lua without a dedicated GUI row.
     case luaOnly

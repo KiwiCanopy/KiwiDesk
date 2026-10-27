@@ -91,7 +91,8 @@ struct ContentRedrawCensusTests {
             style: Self.look,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
     }
@@ -110,7 +111,8 @@ struct ContentRedrawCensusTests {
             style: Self.look,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         #expect(Self.labels(shown) == Set(self.shown.keys))

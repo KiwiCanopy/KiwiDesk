@@ -51,7 +51,7 @@ struct GridRunTests {
     func lastRowShowsItsCells() throws {
         let ctx = context()
         let frames = GridLayout().calculateGeometry(for: ids, in: ctx)
-        let shape = try #require(GridLayout.shape(count: 9, in: ctx))
+        let shape = try #require(GridLayout.shape(for: ids, in: ctx))
         #expect(shape.scrolls)
         // w1…w3 fill the first row; the last row shows w4…w6 in
         // its three cells and parks w7…w9.
@@ -108,7 +108,7 @@ struct GridRunTests {
     @Test("Typed columns are a limit the screen lowers")
     func typedColumnsAreALimit() throws {
         let ctx = context(columns: 9, rows: 9)
-        let shape = try #require(GridLayout.shape(count: 9, in: ctx))
+        let shape = try #require(GridLayout.shape(for: ids, in: ctx))
         let fit = { (span: CGFloat) in
             Int((span / (300 + 10)).rounded(.down))
         }
@@ -173,7 +173,14 @@ struct GridRunTests {
             ),
             ids[4]: EffectiveSizeBound(width: floor(700)),
         ]
-        let shape = try #require(GridLayout.shape(count: 9, in: ctx))
+        // The 3 × 2 shape these floors would heal away (#2687).
+        let shape = try #require(
+            GridLayout.shape(
+                count: 9,
+                in: ctx,
+                capFloor: ctx.minWindowSize
+            )
+        )
         let floors = GridLayout.trackFloors(
             windows: ids,
             shape: shape,
@@ -204,7 +211,7 @@ struct GridRunTests {
     @Test("A resize finds a shown run member's cell, not a hidden one")
     func cellIndicesSkipHidden() throws {
         let ctx = context(focused: ids[8])
-        let shape = try #require(GridLayout.shape(count: 9, in: ctx))
+        let shape = try #require(GridLayout.shape(for: ids, in: ctx))
         let cells = GridLayout.cellIndices(of: ids, shape: shape, in: ctx)
         #expect(cells[ids[8]] == 5)
         #expect(cells[ids[6]] == 3)

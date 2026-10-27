@@ -185,6 +185,10 @@ struct MotionMoreControls: Sendable {
         "behavior.animations.relayout",
         "Animate layout reflows"
     )
+    let animateStateChanges = SettingsControl(
+        "behavior.animations.state_change",
+        "Animate float, Pocket & maximize"
+    )
     let animationDuration = SettingsControl(
         "behavior.animations.window_duration",
         "Window duration"
@@ -264,6 +268,7 @@ struct ColorsDrawerControls: Sendable {
     )
     let tintStickyMark = SettingsControl("sticky.color", "Sticky")
     let tintFloatingMark = SettingsControl("floating.color", "Floating")
+    let tintPocketMark = SettingsControl("pocket.color", "Pocket")
 }
 
 /// Gaps & Borders catalog controls (#678 Phase 3, #754).

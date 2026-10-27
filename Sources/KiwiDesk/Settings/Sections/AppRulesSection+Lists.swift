@@ -94,7 +94,6 @@ extension AppRulesSection {
                     model: model,
                     app: app,
                     showsReach: showsReach,
-                    offersTitles: offersTitles,
                     composingTitles: $composingTitles,
                     onDelete: { deleteFloat(app, $0) },
                     returningRow: $returningFloatRow

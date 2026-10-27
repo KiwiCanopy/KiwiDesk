@@ -46,6 +46,16 @@ extension ColorsAndGlassRow {
                 automatic: true,
                 hex: settings.floatingStyle.color
             )
+        case .pocketColor:
+            HexColorField(
+                label: L("pocket.color", "Pocket"),
+                a11yLabel: L(
+                    "pocket.color.a11y",
+                    "Pocket mark color"
+                ),
+                automatic: true,
+                hex: settings.pocketStyle.color
+            )
         case .dragGhostBorderColor:
             dragRow(ghost: true, fill: false)
         case .dragGhostFillColor:

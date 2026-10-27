@@ -76,6 +76,12 @@ extension SettingsValueReadout {
                 o.onRelayout,
                 n.onRelayout
             )
+        case .animationsOnStateChange:
+            return coloursOnOffRow(
+                census,
+                o.onStateChange,
+                n.onStateChange
+            )
         case .animationsDurationMS:
             return coloursRow(
                 census,

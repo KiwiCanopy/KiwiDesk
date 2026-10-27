@@ -86,7 +86,10 @@ extension KiwiCore {
     /// Space it shows holding a maximized window (#2448). Both
     /// bars ask this one answer.
     func shelfStandsDown(on display: DisplayID) -> Bool {
-        !NativeSpaces.currentSpaceIsUser(display: display)
+        !NativeSpaces.currentSpaceIsUser(
+            display: display,
+            filed: desktopMemory.shownUserSpaces
+        )
             || showsPresentation(on: display)
             || showsMaximized(on: display)
     }

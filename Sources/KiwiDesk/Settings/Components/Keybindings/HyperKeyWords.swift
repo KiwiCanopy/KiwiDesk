@@ -6,7 +6,9 @@ import SwiftUI
 /// what the recorded key now does; the `?` teaches (gui.md, #94).
 @MainActor
 enum HyperKeyWords {
-    static var title: String { SettingsCatalog.shortcuts.hyperKey.text }
+    static var title: String {
+        SettingsCatalog.shortcuts.modifierKeys.children.hyperKey.text
+    }
 
     static var help: String {
         L(
@@ -19,6 +21,12 @@ enum HyperKeyWords {
                 + "stays ⌘. While KiwiDesk manages your "
                 + "windows, the key you pick stops doing its own job."
         )
+    }
+
+    /// The Hyper key's own name, which ✦ is spoken and captioned
+    /// as wherever a chord carries it (#2700).
+    static var keyName: String {
+        L("shortcuts.hyper_key.name", "Hyper")
     }
 
     /// The key as the row names it: "Caps Lock", "Right ⌘", "F13".

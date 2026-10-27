@@ -9,6 +9,21 @@ enum SettingsMetrics {
     /// Gutter around destination pane scrolling content.
     static let paneInset: CGFloat = 16
 
+    /// The floating save pill's gap above the pane's bottom edge.
+    static let savePillLift: CGFloat = 22
+
+    /// Room a page ends with while the save pill floats, so its
+    /// last row can scroll clear of the pill (#2688): the lift, the
+    /// pill's height (content-sized; 44 pt is its height as drawn
+    /// on device, 2026-10-27) and a row gap.
+    static let savePillClearance: CGFloat = savePillLift + 44 + paneInset
+
+    /// A page's bottom inset: the pill's room while it floats over
+    /// the pane, the plain gutter while it docks below it.
+    static func pageBottom(_ width: SettingsWidthClass) -> CGFloat {
+        width.docksSavePill ? paneInset : savePillClearance
+    }
+
     /// Inset between the pane's content and its arrival focus
     /// ring (#996). The ring is the platform's and is drawn at
     /// the pane's bounds, so the pane holds it off its own edges
@@ -31,13 +46,16 @@ enum SettingsMetrics {
     /// Destination icon square tile (#678).
     static let sidebarTile: CGFloat = 22
 
-    /// The layout cycle list's well (#453): wide enough for the
-    /// longest layout name with its symbol and handle.
+    /// The layout cycle popover's width (#2673): wide enough for
+    /// the longest layout name with its handle, box and symbol.
     static let cycleListWidth: CGFloat = 320
 
     /// The icon slot a Shortcuts setting row reserves so its label
     /// starts where a shortcut row's does (#264, #1655, #453).
     static let shortcutIconSlot: CGFloat = 18
+    /// Where text under a Shortcuts row starts: under the row's
+    /// title, past the icon slot (#2670).
+    static let shortcutTextIndent: CGFloat = shortcutIconSlot + 8
 
     /// Trailing readout of a slider row (#406). Sized for proportional
     /// digits with `monospacedDigit()`.

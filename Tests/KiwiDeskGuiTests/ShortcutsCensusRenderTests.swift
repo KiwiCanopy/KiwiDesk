@@ -189,21 +189,23 @@ struct ShortcutsCensusRenderTests {
         #expect(apps.occurrences(of: "KiwiDeskKeyRows(") == 1)
     }
 
-    /// `.immediate`, not `.showMore`: a configured layer is the
-    /// user's own setup, so the card surfaces at rest the moment
-    /// one exists (config presence expands the simple surface).
-    /// Reading these as show-more hides a user's configuration
-    /// from them, which an earlier draft of this area did.
+    /// The strip is the offer, `.showMore`; the rows that exist
+    /// once a layer does are `.immediate`, so the card opens on
+    /// arrival the moment one exists (#2654). Reading those as
+    /// show-more hides a user's configuration from them, which an
+    /// earlier draft of this area did.
     /// Bespoke container — membership only (see the suite note).
-    @Test("Layers renders the census's immediate families")
+    @Test("Layers renders the census's two tiers")
     func layersTier() {
         pin(
-            ShortcutsRowOrder.layersMore,
+            ShortcutsRowOrder.layersMore.filter {
+                $0 != .shortcuts(.layers)
+            },
             .layers,
             .immediate,
             "layers"
         )
-        #expect(censusRows(.layers, .showMore).isEmpty)
+        pin([.shortcuts(.layers)], .layers, .showMore, "layer strip")
         #expect(censusRows(.layers, .atRest).isEmpty)
     }
 
@@ -281,12 +283,12 @@ struct ShortcutsCensusRenderTests {
     /// renderer to publish its mounted containers as data, which
     /// no area does yet — until one does, a deleted card is a
     /// reviewer's catch.
-    @Test("Shortcuts holds exactly the twelve rendered containers")
+    @Test("Shortcuts holds exactly the thirteen rendered containers")
     func shortcutsContainers() {
         #expect(
             Self.containers(of: .shortcuts) == [
                 .showHide, .focus, .moveWindows, .macosDesktops,
-                .layout, .sizeAndFloat,
+                .layout, .sizeAndFloat, .pocket,
                 .openApplications, .layers,
                 .luaBindings, .defaultShortcuts, .gestures, .modifierKeys,
             ]

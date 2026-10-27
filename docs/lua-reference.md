@@ -1991,9 +1991,10 @@ these, and a dynamic grid balances up to them.
 
 :::unreleased
 The columns and rows are a limit: where a cell would fall under
-the grid's [minimum window size](#set_min_window_size), the grid
-lays as many as fit, as [auto-size](#gridset_auto_size) does,
-and the windows past its cells scroll through its last track
+the grid's [minimum window size](#set_min_window_size), or under
+an app's own minimum, the grid lays as many as fit, as
+[auto-size](#gridset_auto_size) does, and the windows past its
+cells scroll through its last track
 ([When windows no longer fit](#when-windows-no-longer-fit)).
 :::
 
@@ -2020,6 +2021,13 @@ width and as many rows as fit at its minimum height
 `floor(usable width / (min width + horizontal inner gap))`
 columns and `floor(usable height / (min height + vertical inner
 gap))` rows, at least 1 each.
+
+:::unreleased
+Each of the min width and height is the larger of Grid's minimum
+and the largest minimum an app in the Space enforces (learned
+when it refuses a smaller size), so one such window lowers the
+count, and the grid grows back once that window leaves.
+:::
 
 **Example:**
 
@@ -5642,17 +5650,22 @@ end)
 
 **Expects:** nothing.
 
-**Does:** keeps one window one key away. The pocket holds one
-window, and each call takes the next step:
+**Does:** keeps one window, the pocket window, one key away. Mark
+it with [`toggle_pocket_window`](#toggle_pocket_window); each
+`pocket` call takes the next step:
 
-- **Empty:** pockets the focused window, a focused-window command
-  like `make_floating`. It is parked off-screen — not minimized —
-  belongs to no Space and is drawn on no bar, and focus moves on
-  within the Space. Fails on a window in native full screen and on
-  a transient panel or popup.
-- **Pocketed:** takes it out onto the active Space's screen at the
-  frame it last had on that screen, else centred, floating and
-  focused.
+- **Nothing marked:** marks the focused window and pockets it, a
+  focused-window command like `make_floating`. It is parked
+  off-screen — not minimized — belongs to no Space and is drawn on
+  no bar, and focus moves on within the Space. A tiled window takes
+  the frame [`set_float_placement`](#set_float_placement)'s
+  `"center"` gives a window turned floating; under `"keep"`, or
+  already floating, it keeps its size. Fails
+  on a window in native full screen and on a transient panel or
+  popup.
+- **Pocketed:** takes it out onto the active Space's screen,
+  floating and focused, at the frame it last had on that screen,
+  else centred at its own size. A take-out never resizes it.
 - **Out:** puts it back in the pocket, focused or not. If it had
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
@@ -5677,7 +5690,8 @@ that screen.
 Out of the pocket it wears the pocket mark half over its top-right
 corner, whatever [`sticky.set_mark`](#stickyset_mark) and
 [`floating.set_mark`](#floatingset_mark) say, and no mark while it
-is maximized or presenting. Its Space Bar glyph wears the pocket
+is maximized or presenting; [`pocket.set_color`](#pocketset_color)
+colors it. Its Space Bar glyph wears the pocket
 badge where the floating badge goes and no sticky badge;
 [`space_bar.set_sticky_badge(false)`](#space_barset_sticky_badge)
 hides it with the others.
@@ -5688,8 +5702,8 @@ click, a notification — takes it out as a call would, and so do
 Return or **⇧Return** under **Pocket** in KiwiHub's
 [window switcher](#kiwihubshow).
 
-Closing the window, minimizing it or quitting its app empties the
-pocket; hiding the app keeps it. While the window is in the pocket
+Closing the window, minimizing it, quitting its app or unmarking it
+empties the pocket; hiding the app keeps it. While the window is in the pocket
 or out of it, `make_tiled`, `toggle_floating`, every
 `make_*sticky` and `toggle_*sticky` verb and
 `override_sticky_reach` are refused, with a pill: "Pocket windows
@@ -5711,6 +5725,36 @@ by default
 ```lua
 KiwiDesk.bind("ctrl+alt+p", function()
     KiwiDesk.pocket()
+end)
+```
+
+### toggle_pocket_window
+
+**Expects:** nothing.
+
+**Does:** marks the focused window as the [pocket](#pocket) window,
+or unmarks it, a focused-window command like `make_floating`.
+Marking floats it at once at the frame
+[`set_float_placement`](#set_float_placement) gives a window turned
+floating (a window already floating keeps its frame), and leaves it
+out of the pocket: on every Space, wearing the pocket
+mark. Unmarking tiles it on the active Space, as
+[`make_tiled`](#make_tiled) does; a window a float rule or
+detection floats stays floating.
+
+While one window is marked, a call on another window fails with a
+pill: "Pocket is already taken". Unmark the marked window first; a
+pocketed window is never the focused one, so take it out
+with [`pocket`](#pocket) before unmarking it. Fails on a window in
+native full screen and on a transient panel or popup. Bound to
+`⌃⌥⇧P` by default
+([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+p", function()
+    KiwiDesk.toggle_pocket_window()
 end)
 ```
 :::
@@ -5857,6 +5901,66 @@ is Automatic; any non-empty value must parse as a hex color.
 ```lua
 floating.set_color("#8E5DE0")
 ```
+
+:::unreleased
+### pocket.set_color
+
+**Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
+empty string `""` for **Automatic** (default `""`).
+
+**Does:** fills the pocket of the [pocket](#pocket) mark and of
+the Space Bar pocket badge, opaque, an alpha ignored; the kiwis
+stay green. The mark's outlines and stitch take a legible
+auto-contrast black or white, as
+[`sticky.set_color`](#stickyset_color)'s glyph does. Neither the
+mark's plate nor the badge's disc takes the color: the disc keeps
+the count-badge fill. `""` is Automatic: the mark's pocket and
+outlines take the label color, black in light mode and white in
+dark, and the badge's pocket the disc's auto-contrast ink. Any
+non-empty value must parse as a hex color.
+
+**Example:**
+
+```lua
+pocket.set_color("#E8A33D")  -- an amber pocket
+pocket.set_color("")          -- back to Automatic
+```
+:::
+
+:::unreleased
+### pocket.set_edge
+
+**Expects:** `"top"`, `"bottom"`, `"left"` or `"right"` (default
+`"bottom"`).
+
+**Does:** sets the screen edge the brief pocket appears on while a
+window goes into the [pocket](#pocket) or comes out, under
+[`animations.set_on_state_change`](#animationsset_on_state_change).
+A bar on the same edge keeps it just inside the bar.
+
+**Example:**
+
+```lua
+pocket.set_edge("right")
+```
+:::
+
+:::unreleased
+### pocket.set_position
+
+**Expects:** a number from `0` to `100` (default `82`); outside
+that range it is clamped.
+
+**Does:** sets where along its edge the brief pocket appears, in
+percent: `0` is the left or top end, `100` the right or bottom
+end. The pocket stays whole on screen at either end.
+
+**Example:**
+
+```lua
+pocket.set_position(50)  -- the middle of its edge
+```
+:::
 
 ## Launching Apps
 
@@ -7424,6 +7528,13 @@ Space](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-wind
 **Does:** sets the general animation duration for window moves
 and layout reflowing ([Animation Cascade](#animation-cascade)).
 
+:::unreleased
+It also paces a window changing state — floating, maximizing — and
+the brief pocket's plate, which flies for twice this duration,
+between 0.2 and 0.8 seconds
+([`set_on_state_change`](#animationsset_on_state_change)).
+:::
+
 **Example:**
 
 ```lua
@@ -7476,6 +7587,12 @@ Shrinking splits by *what else is moving*, and only under
   covers window open and close, mode and space changes, and a
   **mouse resize**, where the window you dragged is already
   where you left it when the rest catches up.
+
+:::unreleased
+- A window changing state follows the animation whatever else
+  moves, unless a window opens in the same change
+  ([`animations.set_on_state_change`](#animationsset_on_state_change)).
+:::
 
 Under `"mid_slide"` a shrinking axis always takes the first
 frame. Either way the exact target lands on the settle frame.
@@ -7570,6 +7687,31 @@ changes.
 ```lua
 animations.set_on_relayout(true)
 ```
+
+:::unreleased
+### animations.set_on_state_change
+
+**Expects:** `true` or `false` (default `true`).
+
+**Does:** enables or disables animation for a window changing
+state: floating and tiling back, maximizing and returning, and
+going into the Pocket and out. Floating and maximizing spring the
+window to its new frame, size included. Going into the Pocket or
+out shows a brief pocket instead: it appears on the screen, a
+plate with the app's icon flies between it and the window,
+it nods and fades out, while the window itself leaves and comes
+back in one move. [`pocket.set_edge`](#pocketset_edge) and
+[`pocket.set_position`](#pocketset_position) place it. Under
+Reduce Motion nothing animates. The windows around it, and a window
+float rules make floating, follow
+[`set_on_relayout`](#animationsset_on_relayout).
+
+**Example:**
+
+```lua
+animations.set_on_state_change(true)
+```
+:::
 
 ### Retired Monocle flip verbs
 

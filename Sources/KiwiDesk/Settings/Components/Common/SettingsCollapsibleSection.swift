@@ -11,7 +11,6 @@ import SwiftUI
 struct SettingsCollapsibleSection<Content: View>: View {
     private let control: SettingsControl
     private let drawer: any AnySettingsDrawer
-    private let modeGated: Bool
     private let summary: String
     /// Drawn under the disclosure while shut only — the Mouse &
     /// trackpad card's pictures (owner ruling 2026-10-17).
@@ -27,7 +26,6 @@ struct SettingsCollapsibleSection<Content: View>: View {
         isExpanded: Binding<Bool>,
         summary: String,
         preview: AnyView? = nil,
-        modeGated: Bool = false,
         onToggle: ((Bool) -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
@@ -37,12 +35,11 @@ struct SettingsCollapsibleSection<Content: View>: View {
         self._isExpanded = isExpanded
         self.summary = summary
         self.preview = preview
-        self.modeGated = modeGated
         self.content = content
     }
 
     var body: some View {
-        SettingsSection(control, modeGated: modeGated) {
+        SettingsSection(control) {
             // Not a heading: the section's title above is, and one
             // card lists once in the rotor.
             SettingsDisclosureButton(

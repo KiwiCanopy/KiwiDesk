@@ -170,6 +170,7 @@ struct ShelfLookApplyTests {
         source.animations.onWindowResize = false
         source.animations.onWindowSwap = false
         source.animations.onRelayout = false
+        source.animations.onStateChange = false
         source.animations.durationMS = 250
         source.animations.scrollDurationMS = 260
         source.animations.onExpand = false

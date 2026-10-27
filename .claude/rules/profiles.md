@@ -68,21 +68,23 @@ because two real clients now remove drift — see
   EXISTING install only through Shortcuts ▸ Restore Defaults…
   (#1096), and prose naming a chrome chord says so.
 - **Never spend `⇧` on anything but "act on the window" — or,
-  off a positional key, on reversing its unshifted twin, as
-  `⇧Tab` does everywhere on macOS (#1655).** It qualifies a
-  positional row, so a lettered toggle never carries it: `⌃⌥⇧S`
-  did, and it was the one chord in the seed a user who had
-  learned the ladder read wrong (#1094,
+  off a positional key, on a RELATED variant of its unshifted
+  twin (#1655, #2675).** It qualifies a positional row; on a
+  letter it never changes the subject or the scope: `⌃⌥⇧S` did, a
+  broader sticky scope, and it was the one chord in the seed a
+  user who had learned the ladder read wrong (#1094,
   `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`).
-  A letter whose unshifted row STEPS may take the reversal — the
-  layout cycle's `⌃⌥⇧C` (#453) — and a further pair joins that
-  suite's `reversals` register as a ruling. On the ladder `⇧` acts on the
-  window on an arrow (swap) and on a digit (send it to a Space),
-  and `⌘` steps the Spaces on an arrow and sends-and-follows on a
-  digit, which is #1655's re-ruling of #1176; the tier an arrow
-  may ride, and the twin a `⇧` reversal needs, are derived per
+  A related variant reverses the twin, as `⇧Tab` does everywhere
+  on macOS — the layout cycle's `⌃⌥⇧C` (#453) — or is a closely
+  related act on the twin's own subject — `⌃⌥⇧P` marks the window
+  `⌃⌥P` pockets (owner, 2026-10-27). Each pair joins that suite's
+  `relatedVariants` register with its reason, as a ruling. On the
+  ladder `⇧` acts on the window on an arrow (swap) and on a digit
+  (send it to a Space), and `⌘` steps the Spaces on an arrow and
+  sends-and-follows on a digit, which is #1655's re-ruling of #1176; the tier an arrow
+  may ride, and the twin a `⇧` variant needs, are derived per
   row rather than restated (`DefaultKeybindingLadderTests` ▸
-  `arrowsRideTheirOwnTiers`, `shiftReversesItsTwin`). The
+  `arrowsRideTheirOwnTiers`, `shiftIsARelatedVariant`). The
   ergonomics rulings and the collision measure behind them are
   `docs/design-decisions.md`'s. Which letter each sticky scope
   takes, why the screen-scoped one is named for a mark rather
@@ -559,7 +561,9 @@ the away ledger reads through — `readCensus` and
 `readWindowSpace` (#1146), [os-private-apis.md](os-private-apis.md)'s
 — which `makeTestCore` pins to "no compositor"
 (`DesktopCensusSeamTests` ▸ `testCorePinsBothDoors`); a suite
-wanting a verdict states it on the instance.
+wanting a verdict states it on the instance. It also files each
+screen's user-Space verdict for the shelf's stand-down, whose
+filing obligations are [bars.md](bars.md)'s (#2667).
 
 Two obligations fall out for a **switch handler**. Take ONE
 snapshot and answer every question from it — which Desktop is
@@ -1091,7 +1095,7 @@ until the user picks a side.
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's
 new" record (`WhatsNewRecord`, #1542), the tour's progress, the
-Settings mode — describes the machine, not the setup, and a backup
+appearance choice — describes the machine, not the setup, and a backup
 restored on another Mac must neither replay nor swallow it. Such
 state never moves into the config folder "for consistency" and
 never joins `ConfigArtifact`.

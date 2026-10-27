@@ -68,7 +68,8 @@ struct BarTextBaselineSiteTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         let manager = SpaceBarManager()

@@ -110,6 +110,13 @@ struct GreyOutAnchorTests {
             "reasonCaption(for: key)",
             1
         ),
+        // The Per screen drawer on one screen (#2677): its rows
+        // grey, its `?` beside the live label.
+        (
+            "ScreenEdgesDrawer.swift",
+            "explanation: Self.oneScreenHelp",
+            1
+        ),
     ]
 
     @Test("every block gate keeps a live help anchor")

@@ -18,11 +18,6 @@ struct HeaderSearch: View {
     /// Hands a pick up to the shell, which owns the destination
     /// and the scroll choreography.
     let reveal: (SettingsAnchor) -> Void
-    /// Arms the shell's confirmation for a pick predicting a
-    /// mode flip; the reveal pipeline announces it only if the
-    /// promotion happens (`SettingsView.apply`), so a refused
-    /// reveal stays silent. Search's only mention of the mode.
-    let armModeNotice: (SettingsDestination) -> Void
 
     @State var query = ""
     /// The one cursor pointer and keys share (`DropdownCursor`).
@@ -126,12 +121,6 @@ struct HeaderSearch: View {
 
     /// Selects search result and reveals target anchor.
     func pick(_ result: SettingsSearchResult) {
-        if SettingsSearch.switchesMode(
-            result,
-            context: context
-        ) {
-            armModeNotice(result.destination)
-        }
         query = ""
         focused = false
         panelHovered = false

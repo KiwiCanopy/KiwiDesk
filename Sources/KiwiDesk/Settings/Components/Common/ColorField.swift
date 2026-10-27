@@ -87,7 +87,13 @@ struct ColorSwatch: View {
         self.follows = follows
         self.clearable = clearable
         self._hex = hex
-        self._draft = State(initialValue: hex.wrappedValue)
+        self._draft = State(
+            initialValue: Self.shown(
+                hex.wrappedValue,
+                automatic: automatic,
+                clearable: clearable
+            )
+        )
     }
 
     /// True while this well is showing its adaptive "Automatic"
@@ -98,7 +104,7 @@ struct ColorSwatch: View {
 
     /// True while a clearable well holds no colour (#2569).
     private var isClear: Bool {
-        clearable && !KiwiShelf.hasColour(hex)
+        Self.isClear(hex, clearable: clearable)
     }
 
     var body: some View {
@@ -128,7 +134,13 @@ struct ColorSwatch: View {
         // but never mid-edit, or a background write would
         // discard the user's partial entry.
         .onChange(of: hex) { _, now in
-            if !focused { draft = now }
+            if !focused {
+                draft = Self.shown(
+                    now,
+                    automatic: automatic,
+                    clearable: clearable
+                )
+            }
         }
         // Resign the shared panel when this swatch leaves the
         // hierarchy, so a lingering panel can't write into a
@@ -259,10 +271,12 @@ struct ColorSwatch: View {
 
     /// The hex field's placeholder: the word "Automatic" on an
     /// adaptive well with no color (so a blank box never reads as
-    /// "unset by accident"), else empty.
+    /// "unset by accident"), "No Color" on a clear one, else empty.
     private var placeholder: String {
-        isAutomatic
-            ? L("color_field.hex.automatic", "Automatic") : ""
+        if isAutomatic {
+            return L("color_field.hex.automatic", "Automatic")
+        }
+        return isClear ? L("color_field.no_color", "No Color") : ""
     }
 
     /// Falls back to `.clear` (an empty dot) when the stored
@@ -279,41 +293,22 @@ struct ColorSwatch: View {
         )
     }
 
-    /// Parse draft and normalize hex; empty field commits Automatic (#429).
+    /// Parse draft and normalize hex; an empty field commits
+    /// Automatic (#429), else No Color on a clearable well.
     private func commit() {
         if let value = Self.committed(
             draft: draft,
             over: hex,
-            automatic: automatic
+            automatic: automatic,
+            clearable: clearable
         ) {
             hex = value
         }
-        draft = hex
-    }
-
-    /// What a commit of `draft` writes over `current`, or nil when
-    /// it writes nothing: an unparseable draft, or one naming the
-    /// colour already stored — a blur is not an edit, and a well
-    /// whose binding writes several rows (#1857) must not repaint
-    /// them on one.
-    static func committed(
-        draft: String,
-        over current: String,
-        automatic: Bool
-    ) -> String? {
-        if automatic, draft.trimmingCharacters(in: .whitespaces).isEmpty {
-            return current.isEmpty ? nil : ""
-        }
-        guard let rgba = DragVisual.parseHex(draft),
-            rgba != DragVisual.parseHex(current)
-        else { return nil }
-        let ns = NSColor(
-            srgbRed: CGFloat(rgba.red),
-            green: CGFloat(rgba.green),
-            blue: CGFloat(rgba.blue),
-            alpha: CGFloat(rgba.alpha)
+        draft = Self.shown(
+            hex,
+            automatic: automatic,
+            clearable: clearable
         )
-        return HexColorField.hexString(from: ns)
     }
 
     private func present() {

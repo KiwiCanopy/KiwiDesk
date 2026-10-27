@@ -11,7 +11,7 @@ extension GridLayout {
         for windows: [WindowID],
         in context: LayoutContext
     ) -> [RunZone]? {
-        guard let shape = shape(count: windows.count, in: context)
+        guard let shape = shape(for: windows, in: context)
         else { return nil }
         guard shape.scrolls else { return [] }
         return [

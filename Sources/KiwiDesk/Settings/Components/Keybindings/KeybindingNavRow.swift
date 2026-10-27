@@ -19,17 +19,21 @@ struct NavRow: View {
 
     var body: some View {
         HStack {
-            // Reserve the icon slot unconditionally (#264): only
-            // Go-to/Move-to-space rows carry a glyph, so a
-            // conditional icon shifted every icon-less row's
-            // label ~18 pt leftward. `Color.clear` holds the
-            // width; the glyph draws in an overlay when present.
+            // Icon slot reserved unconditionally (#264); the
+            // panel's glyph (#2670).
             Color.clear
-                .frame(width: 18)
+                .frame(width: SettingsMetrics.shortcutIconSlot)
                 .overlay {
-                    if let glyph = command.icon,
-                        !glyph.isEmpty
-                    {
+                    if command.lua == KeybindingCatalog.pocket.lua {
+                        // The mark itself, as the panel draws it.
+                        Image(
+                            nsImage: PocketMark.mark.image(size: 16, hex: "")
+                        )
+                        .frame(width: 16, height: 16)
+                        .accessibilityHidden(true)
+                    } else if let glyph = ShortcutsReferenceBuilder.icon(
+                        for: command
+                    ) {
                         IconGlyphLabel(icon: glyph)
                     }
                 }

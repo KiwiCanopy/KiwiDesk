@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The per-row override cell's wording (#678 8a, owner ruling
+/// The Space row's override count state (#678 8a, #2674, owner ruling
 /// 2026-08-04). The decision is pure — this pins each corner so a
 /// regression to the design-literal "— always on Floating" (which
 /// would hide a Floating space's dormant overrides, #458 haunted

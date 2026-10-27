@@ -40,7 +40,7 @@ struct SymbolClassifierSeamTests {
             "builds the peek's focus check from a fixed name",
         "Sources/KiwiDeskCore/Bar/SpaceBarItemView+Marker.swift":
             "builds the Space marker's image from a fixed name",
-        "Sources/KiwiDeskCore/Borders/StickyMarkOverlay.swift":
+        "Sources/KiwiDeskCore/Borders/StickyMarkOverlay+Glyphs.swift":
             "builds the state mark images from fixed names",
         "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Pill.swift":
             "render-time net on a name `homeSpaceMark` classified",
@@ -49,7 +49,9 @@ struct SymbolClassifierSeamTests {
         "Tests/KiwiDeskCoreTests/FloatingMarkOverlayTests.swift":
             "builds the floating glyph from a fixed name",
         "Sources/KiwiDeskCore/Borders/SizeLimitPillPlate.swift":
-            "builds the refusal pill's image from `pillSymbol`",
+            "builds the pill's image from `pillSymbol` or a sentinel",
+        "Sources/KiwiDeskCore/Borders/PocketMark+Taken.swift":
+            "builds the taken glyph's nosign from a fixed name",
         "Tests/KiwiDeskCoreTests/ResizeRefusalSymbolTests.swift":
             "asserts every pill symbol RESOLVES; classifies nothing",
         "Tests/KiwiDeskGuiTests/ShortcutsSheetTests.swift":

@@ -78,6 +78,7 @@ extension BorderManager {
                 spansDesktops: spec.spansDesktops,
                 desktop: spec.desktop
             )
+            holdIfStateChanging(spec.window, overlay: overlay)
             let held = ordersDormant(spec.window, overlay: overlay)
             if Self.ordersOverlay(
                 reassert: reassertOrder,
@@ -120,6 +121,7 @@ extension BorderManager {
         apply(id, windowFrame: frame)
         if source == .axEcho {
             noteArrivalReport(id, frame: windowFrame)
+            noteStateChangeReport(id, frame: windowFrame)
         }
     }
 

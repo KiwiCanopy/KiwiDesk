@@ -98,12 +98,12 @@ struct CoreLocalizationBoundaryTests {
         // them (#2446), drawn on the same pill and on the bar
         // menu's greyed row, both Core's.
         "Commands/AutoFloatReason+Rendering.swift": 6,
-        // The pocket's sticky refusal, on the same pill (#2446).
-        "Commands/PocketRefusal.swift": 1,
-        // The two marks' VoiceOver names (#1799).
-        "Borders/StickyMarkOverlay.swift": 2,
-        // The pocket mark's VoiceOver name (#2446).
-        "Borders/StickyMarkOverlay+Pocket.swift": 1,
+        // The pocket's sticky refusal (#2446) and its second-window
+        // refusal (#2675), on the same pill.
+        "Commands/PocketRefusal.swift": 2,
+        // The three marks' VoiceOver names (#1799, #2446), with
+        // the plate's glyph images since #2671.
+        "Borders/StickyMarkOverlay+Glyphs.swift": 3,
         // The overflow mark's VoiceOver name, one key per direction
         // (#2235); the mark is drawn by Core.
         "App/KiwiCore+OverflowMarks.swift": 4,

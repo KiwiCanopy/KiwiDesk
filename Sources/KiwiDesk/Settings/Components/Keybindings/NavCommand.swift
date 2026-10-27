@@ -5,10 +5,10 @@ import KiwiDeskCore
 struct NavCommand: Identifiable, Hashable {
     let label: String
     let lua: String
-    /// An identity glyph — a Space's or a Desktop's — that Settings
-    /// draws before the label too (#68 §6.5). A verb's glyph is the
-    /// key panel's alone and lives in
-    /// `ShortcutsReferenceBuilder.verbIcon`, never here (#2530).
+    /// An identity glyph — a Space's or a Desktop's (#68 §6.5). A
+    /// verb's glyph lives in `ShortcutsReferenceBuilder.verbIcon`,
+    /// never here (#2530); both the key panel and Settings draw
+    /// through `ShortcutsReferenceBuilder.icon(for:)` (#2670).
     var icon: String? = nil
     /// Localized label closure (`KeyLayer.sameAction`).
     var displayLabel: @MainActor () -> String = { "" }

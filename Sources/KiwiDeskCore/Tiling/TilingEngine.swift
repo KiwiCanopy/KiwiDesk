@@ -137,6 +137,12 @@ public final class TilingEngine {
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()
+    /// The window changing state in the pass running now (#2676),
+    /// nil between passes and for a newcomer.
+    var stateChangeWindow: WindowID?
+    /// Whether it springs its size: no promise survives a
+    /// newcomer (#45), whose pass places it at its final size.
+    var stateChangeSprings = false
     /// The input-quiescence gate `KiwiCore.retile` asks (#804).
     let motionGate = MotionGate()
 
@@ -272,75 +278,6 @@ public final class TilingEngine {
         }
         animation.onAnimationEnd = { [applier] id in
             applier.endAnimating(id)
-        }
-    }
-
-    /// Recomputes and applies the active space's layout.
-    /// `animated: false` snaps windows to their targets in
-    /// one frame-set each (Space switches).
-    ///
-    /// `pass` (#1488): `.reissue` and `.apply` skip the "already
-    /// there" tolerance check and (re)issue every layout frame —
-    /// a Space switch needs that, since the check reads state
-    /// frames whose AX echoes lag during rapid switching and
-    /// strand windows mid-transition — and `.apply` alone probes
-    /// past corroborated bounds once (#1055). The parks they
-    /// force are only the ones `StashDepartures` owes (#1508).
-    ///
-    /// `sizing` is the caller's promise about how every window in
-    /// this pass gets its size (#593); promising them all
-    /// spring-sized lets a shrinking pane slide its shared edge
-    /// instead of snapping. It rides the layout loop only: the
-    /// stash park and the float restore below place windows that
-    /// sit *outside* the layout, and a promise about the layout
-    /// cannot extend to them.
-    public func retile(
-        state: StateCoordinator,
-        animated: Bool = true,
-        pass: RetilePass = .event,
-        newlyCreatedWindow: WindowID? = nil,
-        sizing: BatchSizing = .mayInstantSize
-    ) {
-        guard
-            let screen = ScreenList.mainOrFirst
-        else { return }
-        // An apply probes past bounds once; the one door (#1055).
-        withForcedPass(pass.probes) {
-            // The issued set, not the slots (#934), recording what
-            // each scrolled run draws (#2235).
-            runCovers = [:]
-            let frames = placedFrames(state: state, recordingCovers: true)
-            // The #45 invariant, enforced here because the routing
-            // guard counts occurrences, not combinations: a newcomer
-            // IS an instant size, so no promise survives one.
-            let promised: BatchSizing =
-                newlyCreatedWindow == nil ? sizing : .mayInstantSize
-
-            for (id, target) in frames {
-                // A window in an active drag keeps its user-driven
-                // frame: the pointer owns it. Reframing it here would
-                // yank it to its computed slot mid-drag — a Space Bar
-                // spring retiles the target's OTHER windows but must
-                // leave the dragged one under the cursor (#372). Its
-                // real placement happens at drop, once the exemption
-                // clears.
-                if id == dragExemptWindow { continue }
-                issueLayoutFrame(
-                    id,
-                    target: target,
-                    state: state,
-                    pass: pass,
-                    animated: animated,
-                    isNew: id == newlyCreatedWindow,
-                    sizing: promised
-                )
-            }
-            stashInactive(
-                state: state,
-                fallback: screen,
-                forcesDepartures: pass.reissues
-            )
-            restoreStashed(state: state, frames: frames)
         }
     }
 }

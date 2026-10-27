@@ -72,6 +72,12 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleSticky = "keybinding.toggle_sticky"
     /// `pocket` (#2446), in pin's place since pin went Lua-only.
     case pocket = "keybinding.pocket"
+    /// `toggle_pocket_window` (#2675).
+    case pocketWindow = "keybinding.pocket_window"
+    /// Where the brief pocket appears (#2680): its edge and its
+    /// position along it.
+    case pocketEdge = "settings.pocketStyle.edge"
+    case pocketPosition = "settings.pocketStyle.position"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
@@ -93,8 +99,13 @@ extension ShortcutsKey {
         switch self {
         case .kiwiHubNavigationKeys:
             return .luaOnly
-        case .layers, .layersIcon, .layersReach, .switchToLayer:
-            // Surfaces at rest when configured layers exist.
+        case .layers:
+            // The strip: the offer to make the first layer, behind
+            // the Layers card's disclosure (#2654).
+            return .row(.shortcuts, .layers, .showMore)
+        case .layersIcon, .layersReach, .switchToLayer:
+            // Exist once a layer does; the card then opens on
+            // arrival (#2654).
             return .row(
                 .shortcuts,
                 .layers,
@@ -151,19 +162,23 @@ extension ShortcutsKey {
             )
         case .hyperKey, .shortcutBase, .modifierSides:
             // Above the layer header: it belongs to no layer
-            // (#1870). The key and the sides switch (#2601) are
-            // written at once, the base into the draft (#2460); all
-            // grey where init.lua owns the config.
+            // (#1870). Behind the card's disclosure, which opens on
+            // arrival once in use (#2654). The key and the sides
+            // switch (#2601) are written at once, the base into the
+            // draft (#2460); all grey where init.lua owns the config.
             return .row(
                 .shortcuts,
                 .modifierKeys,
-                .atRest,
+                .showMore,
                 gate: .runtime(.luaOwnsConfig)
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
-            .resetSizes, .maximize, .toggleFloating, .toggleSticky,
-            .pocket:
+            .resetSizes, .maximize, .toggleFloating, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
+        // Its own card (#2680): the two keys moved from Size &
+        // float, then where the brief pocket appears.
+        case .pocket, .pocketWindow, .pocketEdge, .pocketPosition:
+            return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
         // KiwiDesk's own chord, under the group's "KiwiDesk"
@@ -248,6 +263,15 @@ extension ShortcutsKey {
                 "keybinding.pocket",
                 help: "keybinding.pocket.help"
             )
+        case .pocketWindow:
+            return .text(
+                "keybinding.pocket_window",
+                help: "keybinding.pocket_window.help"
+            )
+        case .pocketEdge:
+            return .text("pocket.edge", help: "pocket.edge.help")
+        case .pocketPosition:
+            return .text("pocket.position", help: "pocket.position.help")
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")
         case .openSettings:

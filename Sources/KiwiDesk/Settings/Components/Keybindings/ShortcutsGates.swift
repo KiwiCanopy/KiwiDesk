@@ -36,8 +36,8 @@ struct ShortcutsGates {
     func inertReason(for key: SettingKey) -> InertReason? {
         guard key.placement.gate != nil else { return nil }
         switch key {
-        case .shortcuts(.layers), .shortcuts(.layersIcon),
-            .shortcuts(.layersReach), .shortcuts(.switchToLayer):
+        case .shortcuts(.layersIcon), .shortcuts(.layersReach),
+            .shortcuts(.switchToLayer):
             // `default` always exists, so a SECOND entry is what
             // "the user configured a layer" means — presence, not
             // a count.
@@ -78,6 +78,20 @@ struct ShortcutsGates {
             .contains(where: KeybindingCatalog.recordsDesktopMove)
     }
 
+    /// Whether `layer` carries a Lua binding: the Lua bindings
+    /// drawer's hold-open, not a census gate (#2654). Per layer,
+    /// since the drawer lists the selected layer's rows alone.
+    func luaBindingsExist(in layer: String) -> Bool {
+        config.layers.first { $0.name == layer }?.bindings
+            .contains(where: Self.isLuaBinding) ?? false
+    }
+
+    /// A row the Lua bindings drawer lists — the one spelling its
+    /// rows and its hold-open share.
+    static func isLuaBinding(_ binding: KeyBinding) -> Bool {
+        binding.kind == .custom
+    }
+
     /// Whether the Track layout is in play (#1440): a Track
     /// space in the config this window edits, or a Track verb
     /// recorded in any layer.
@@ -95,7 +109,6 @@ struct ShortcutsGates {
     /// Gated keys resolved directly from `GuiConfig`
     /// (`everyGatedRowIsResolved`).
     static let resolved: Set<SettingKey> = [
-        .shortcuts(.layers),
         .shortcuts(.layersIcon),
         .shortcuts(.layersReach),
         .shortcuts(.switchToLayer),

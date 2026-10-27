@@ -4,16 +4,15 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A `CrossReferenceRow` renders the destination's name AT the
-/// position its prose puts it, which only works while the prose
-/// carries `CrossReferenceRow.linkSlot`. Without one the link
-/// falls to the end of the sentence — the row's old fixed-order
-/// `HStack` shape — and the key has to be authored dangling
-/// ("… — edit them in"), which is what forced `ja`, `ko`,
-/// `zh-Hans`, `zh-Hant` and `ru` to end their translations on a
-/// colon or a bare preposition. That fallback is deliberate (a
-/// missed call site still renders a followable pointer rather
-/// than losing navigation) and therefore silent.
+/// A `CrossReferenceRow` renders the destination's name AT the position
+/// its prose puts it, which only works while the prose carries
+/// `CrossReferenceRow.linkSlot`. Without one the link falls to the end of
+/// the sentence — the row's old fixed-order `HStack` shape — and the key
+/// has to be authored dangling ("… — edit them in"), which is what forced
+/// `ja`, `ko`, `zh-Hans`, `zh-Hant` and `ru` to end their translations on
+/// a colon or a bare preposition. That fallback is deliberate (a missed
+/// call site still renders a followable pointer rather than losing
+/// navigation) and therefore silent.
 ///
 /// **The prose is ASSERTED, not scanned for.** The first cut of
 /// this suite resolved each call site's `prose:` expression to
@@ -130,6 +129,7 @@ struct CrossReferenceRowSlotTests {
         "SpacesSection.swift:Self.shortcutsProse",
         "AILookPointer.swift:Self.prose",
         "KiwiShelfKeyRows.swift:Self.caption(key)",  // #761
+        "PocketGroup.swift:Self.inertProse",  // PocketGroupTests
         // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
     ]

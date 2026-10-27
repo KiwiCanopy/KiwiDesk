@@ -175,36 +175,15 @@ struct SettingsView: View {
         .environment(\.settingsNavigate) { destination in
             // Third #18 enforcement point beside the grid's offer
             // filter and the onChange repair, which only fires on
-            // editing-flag transitions: links must refuse what the
-            // grid hides.
+            // editing-flag transitions: links refuse only what the
+            // stored-profile axis hides (#2690).
             guard
                 destination.isReachable(
                     editingStoredProfile:
                         model.editingStoredProfile
                 )
             else { return }
-            ensureModeAdmits(destination)
             selection = destination
-        }
-    }
-
-    /// Switches Simple to Power User mode when navigation targets advanced
-    /// section (#678).
-    func ensureModeAdmits(
-        _ destination: SettingsDestination
-    ) {
-        if !HomeCardOrder.isOffered(
-            destination,
-            mode: model.settingsMode,
-            displayCount: model.displays.count,
-            editingStoredProfile: model.editingStoredProfile
-        ),
-            destination.isReachable(
-                editingStoredProfile:
-                    model.editingStoredProfile
-            )
-        {
-            model.setSettingsMode(.powerUser)
         }
     }
 

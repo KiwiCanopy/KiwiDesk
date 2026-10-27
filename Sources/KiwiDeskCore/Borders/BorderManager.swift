@@ -101,6 +101,10 @@ public final class BorderManager {
     var roomsHeld = false
     /// Rings that took a room since the last resync.
     var heldRooms: Set<WindowID> = []
+    /// The visibility settle pass's burst timing (#2659), read by
+    /// `KiwiCore+BorderSettle` alone; held here for `KiwiCore`'s
+    /// line cap, not as border state.
+    var dropSettleBurst = DropSettleBurst()
     #if DEBUG
         /// Test-only: the screen frame `room(for:screen:)` uses in
         /// place of the host's. Production must not read it.
@@ -114,6 +118,9 @@ public final class BorderManager {
     /// The ring a Space switch keeps dormant until its window
     /// arrives (#1959, `BorderManager+Arrival`).
     var arrival: ArrivalHold?
+    /// The ring a state change keeps dormant until its window
+    /// settles (#2676, `BorderManager+StateChange`).
+    var stateChange: StateChangeHold?
     /// The render-server clock the hold is timed on, the slide's.
     var arrivalClock: @MainActor () -> CFTimeInterval = {
         CACurrentMediaTime()
@@ -213,6 +220,7 @@ public final class BorderManager {
         specs = [:]
         cornerRadii = [:]
         arrival = nil
+        stateChange = nil
         roomsHeld = false
         heldRooms = []
         watch.request([], for: .ring)

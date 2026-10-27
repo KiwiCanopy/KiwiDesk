@@ -41,18 +41,11 @@ extension SettingsTheme {
     static let paletteCardStroke: CGFloat = 1
     static let paletteCardStrokeApplied: CGFloat = 2
 
-    /// Container border weights at rest and when presence is mode-gated
-    /// (`ModeGatedChromeTests`, `ModeGatedFrameSeparationTests`, #760).
+    /// Container border weight.
     static let containerStroke: CGFloat = 1
-    static let containerStrokeModeGated: CGFloat = 1.5
 
-    /// Mode-gated frame accent stroke opacity
-    /// (`ModeGatedFrameSeparationTests`).
-    static let modeGatedStrokeOpacity: CGFloat = 0.6
-
-    /// Search mode-switch notice accent fill opacity
-    /// (`SettingsSearchNotice`, #678).
-    static let searchNoticeFillOpacity: CGFloat = 0.12
+    /// Notice strip accent fill opacity (`WhatsNewTrailBanner`).
+    static let noticeFillOpacity: CGFloat = 0.12
 
     /// A marked chip's accent wash — the jump chip on `page`, the
     /// icon cell on `card` (`SettingsThemeContrastTests`, #1520).

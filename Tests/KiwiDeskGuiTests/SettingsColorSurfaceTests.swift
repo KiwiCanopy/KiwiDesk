@@ -164,8 +164,9 @@ struct SettingsColorSurfaceTests {
         }
         // 17 rows since #1517: the shelf's eight colours replaced
         // the two bars' seventeen; 18 since #1679, the border; 19
-        // since #1856, the front chip's indicator.
-        #expect(placed.count == 19)
+        // since #1856, the front chip's indicator; 20 since #2671,
+        // the pocket mark.
+        #expect(placed.count == 20)
         #expect(placed.count == ColorPaletteKeys.all.count)
     }
 
@@ -198,15 +199,16 @@ struct SettingsColorSurfaceTests {
         // catch a wrongly-flagged row. The excluded files are
         // the ones that DECLARE and plumb the parameter rather
         // than hand it to a swatch — every other occurrence in
-        // the tree is a call site. There are two of them since
-        // the §2.1 split moved the right-click clear path into
-        // `ColorField+AutomaticMenu.swift`, which takes the flag
-        // as a parameter and passes it along; the exclusion is
-        // by that role, so a THIRD file appearing here should be
-        // read as a call site until shown otherwise.
+        // the tree is a call site. The §2.1 splits moved the
+        // right-click clear path into `ColorField+AutomaticMenu`
+        // and the commit rule into `ColorField+Commit` (#2691),
+        // each taking the flag as a parameter; the exclusion is
+        // by that role, so a FOURTH file appearing here should
+        // be read as a call site until shown otherwise.
         let plumbing: Set<String> = [
             "ColorField.swift",
             "ColorField+AutomaticMenu.swift",
+            "ColorField+Commit.swift",
         ]
         var flags = 0
         var follows = 0
@@ -229,8 +231,8 @@ struct SettingsColorSurfaceTests {
             ColorPaletteKeys.allowsAutomatic
         )
         #expect(flags == automaticPaths.count)
-        // The two marks, and the front indicator following its
-        // text (#1856).
-        #expect(flags == 3)
+        // The three marks (#2671), and the front indicator
+        // following its text (#1856).
+        #expect(flags == 4)
     }
 }

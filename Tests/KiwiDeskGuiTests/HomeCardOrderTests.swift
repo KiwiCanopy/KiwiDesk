@@ -3,10 +3,10 @@ import Testing
 @testable import KiwiDesk
 
 /// Home's card offer (#678 turn 9): every destination has a
-/// card, the order is the frame's and stays stable across mode
-/// flips, and one predicate decides who is offered — Simple's
-/// eight, Power User's twelve, the Screens auto-promotion, and the
-/// #18 stored-profile rule, never a hand-negated copy.
+/// card, the order is the frame's and stays stable, and one
+/// predicate decides who is offered — the #18 stored-profile
+/// rule, never a hand-negated copy. No card hangs on the screen
+/// count (#2690).
 @Suite("Home card order and offer")
 struct HomeCardOrderTests {
     @Test("every destination draws exactly one card")
@@ -34,56 +34,14 @@ struct HomeCardOrderTests {
         )
     }
 
-    /// TWELVE in Power User since #1741 retired Behavior; TEN
-    /// since #1365's Mac Checklist, NINE since Layout Defaults
-    /// moved to `.simple` (owner
-    /// ruling 2026-08-04) — those parameters are how people learn
-    /// what a tiling manager does, so withholding them teaches
-    /// nothing. A literal over a derived value on purpose: this
-    /// is the conscious-edit tripwire on the size of the
-    /// first-week surface, and growing it should cost a
-    /// deliberate edit here.
-    @Test("Simple offers twelve cards, Power User thirteen")
-    func modeCounts() {
-        let simple = offered(mode: .simple, displays: 1)
-        let powerUser = offered(mode: .powerUser, displays: 1)
-        // 10 / 13 since #1365: the Mac Checklist, offered in
-        // Simple — the north-star's own card. 10 / 12 since
-        // #1741: Behavior, Power User only, retired. 11 / 13
-        // since #1685: AI, offered in Simple. 12 / 14 since
-        // #2103: KiwiVision, offered in Simple. 12 / 13 since
-        // #2389: Advanced Colors folded into Looks & Animations.
-        #expect(simple.count == 12)
-        #expect(powerUser.count == 13)
-    }
-
-    /// Power User INSERTS, never reorders: Simple's sequence is
-    /// Power User's with its extra cards removed, so no card
-    /// moves when the segment flips.
-    @Test("Simple is a subsequence of Power User")
-    func stablePositions() {
-        let simple = offered(mode: .simple, displays: 1)
-        let powerUser = offered(mode: .powerUser, displays: 1)
-        #expect(
-            powerUser.filter { simple.contains($0) } == simple
-        )
-    }
-
-    @Test("Screens auto-promotes into Simple at two screens")
-    func screensPromotes() {
-        #expect(
-            !offered(mode: .simple, displays: 1)
-                .contains(.screens)
-        )
-        let promoted = offered(mode: .simple, displays: 2)
-        #expect(promoted.contains(.screens))
-        #expect(promoted.count == 13)
-        // Computed at read: one display again and the card is
-        // gone — nothing stored the promotion.
-        #expect(
-            !offered(mode: .simple, displays: 1)
-                .contains(.screens)
-        )
+    /// A literal over a derived value on purpose: this is the
+    /// conscious-edit tripwire on the size of Home, and growing it
+    /// should cost a deliberate edit here.
+    @Test("Home offers thirteen cards")
+    func cardCounts() {
+        #expect(offered().count == 13)
+        // Screens shows on one screen too (#2690).
+        #expect(offered().contains(.screens))
     }
 
     /// The #18 axis rides the same predicate: editing a stored
@@ -94,8 +52,6 @@ struct HomeCardOrderTests {
     func storedProfileHidesGeneral() {
         let cards = HomeCardOrder.offered(
             HomeCardOrder.wholeApp,
-            mode: .powerUser,
-            displayCount: 1,
             editingStoredProfile: true
         )
         #expect(!cards.contains(.general))
@@ -105,20 +61,13 @@ struct HomeCardOrderTests {
         #expect(cards.count == 3)
     }
 
-    private func offered(
-        mode: SettingsMode,
-        displays: Int
-    ) -> [SettingsDestination] {
+    private func offered() -> [SettingsDestination] {
         HomeCardOrder.offered(
             HomeCardOrder.thisProfile,
-            mode: mode,
-            displayCount: displays,
             editingStoredProfile: false
         )
             + HomeCardOrder.offered(
                 HomeCardOrder.wholeApp,
-                mode: mode,
-                displayCount: displays,
                 editingStoredProfile: false
             )
     }

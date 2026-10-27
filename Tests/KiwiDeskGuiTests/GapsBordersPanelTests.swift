@@ -165,7 +165,7 @@ struct GapsBordersPanelTests {
         #expect(
             Set(automatic)
                 == [
-                    "sticky.color", "floating.color",
+                    "sticky.color", "floating.color", "pocket.color",
                     "space_bar.focused_highlight_color",
                 ],
             Comment(

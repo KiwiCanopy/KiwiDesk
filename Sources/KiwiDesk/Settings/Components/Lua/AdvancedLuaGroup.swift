@@ -9,6 +9,8 @@ import SwiftUI
 struct AdvancedLuaGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
+    /// Runs after Add binding appends its row, which is last.
+    let onAdd: () -> Void
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
@@ -20,12 +22,13 @@ struct AdvancedLuaGroup: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             ForEach($bindings) { $binding in
-                if binding.kind == .custom {
+                if ShortcutsGates.isLuaBinding(binding) {
                     row($binding)
                 }
             }
             Button {
                 bindings.append(KeyBinding(kind: .custom))
+                onAdd()
             } label: {
                 Label(
                     L("shortcuts.add_binding", "Add binding"),

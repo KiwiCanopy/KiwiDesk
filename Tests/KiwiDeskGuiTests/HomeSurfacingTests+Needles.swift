@@ -19,9 +19,12 @@ extension HomeSurfacingTests {
             ".environment(\\.openAbout){aboutRequest=AboutRequest()}",
             // Escape pops an area back to Home.
             ".onExitCommand{ifselection!=nil{selection=nil}}",
-            // A link into a Power-User-only area switches the mode
-            // before landing.
-            "ensureModeAdmits(destination)selection=destination",
+            // A link refuses only what the stored-profile axis
+            // hides; no screen count gates a destination (#2690).
+            ".environment(\\.settingsNavigate){destinationin"
+                + "guarddestination.isReachable(editingStoredProfile:"
+                + "model.editingStoredProfile)else{return}"
+                + "selection=destination}",
             // The measured band is published ONCE, from the
             // shell's own geometry: every responsive decision
             // below reads it from the environment rather than
@@ -46,11 +49,6 @@ extension HomeSurfacingTests {
                 + ")){_inmodel.refreshMacChecklist()}",
         ],
         "Settings/SettingsView+Chrome.swift": [
-            // The mode-reveal window reaches both panes (#760):
-            // the environment mounts above the Home/detail
-            // branch, from the model's one timeline.
-            ".environment(\\.settingsModeReveal,"
-                + "model.modeRevealActive)",
             // The save pill FLOATS over the content (#678
             // redesign spec; owner overturned the docked
             // footer 2026-08-09) —
@@ -82,12 +80,6 @@ extension HomeSurfacingTests {
                 + "SettingsFooter(model:model)",
             ".overlay(alignment:.topTrailing){"
                 + "detachedPreview(width)}",
-            // The search mode-switch notice DRAWS when set
-            // (#678 4c) — needle through the branch body: a
-            // consult that never mounts the strip would leave
-            // the flip unannounced with every test green.
-            "ifletnotice=model.searchModeNotice{"
-                + "SettingsSearchNotice(text:notice)",
         ],
         "Settings/SettingsView+Detail.swift": [
             // The two-column detail consults the ONE offer set
@@ -172,20 +164,13 @@ extension HomeSurfacingTests {
                 + "rows:SettingsDiffRowSource.rows(for:model)",
         ],
         "Settings/SettingsView+Reveal.swift": [
-            // A search hit into a Power-User-only area switches
-            // the mode BEFORE landing — one needle through the
-            // whole run (flip, announce, land), so the ORDER
-            // stays pinned, not just each statement's existence.
-            "ensureModeAdmits(resolved.destination)"
-                + "ifarmedNotice!=nil,wasSimple,"
-                + "model.settingsMode==.powerUser{"
-                + "model.noteSearchModeSwitch(resolved.destination)}"
-                + "model.destination=resolved.destination",
-            // The reveal CONSUMES the armed notice
-            // unconditionally (a refused request must not leave
-            // a stale arm)…
-            "letarmedNotice=model.nav.pendingModeNotice"
-                + "model.nav.pendingModeNotice=nil",
+            // A resolved hit lands whatever the screen count
+            // (#2654, #2690).
+            "guardletrequestelse{return}"
+                + "model.nav.pendingReveal=nil"
+                + "guardletresolved=request.resolved("
+                + "editingStoredProfile:model.editingStoredProfile)"
+                + "else{return}model.destination=resolved.destination"
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home
@@ -205,19 +190,14 @@ extension HomeSurfacingTests {
             // (architecture review, 2026-08-11).
             ".onChange(of:width){_,nowin"
                 + "if!now.collapsesChrome{searchExpanded=false}}",
-            // The segment is the one EXPLICIT flip — the entry
-            // point that washes what the flip inserts (#760).
-            // `ensureModeAdmits` stays on `setSettingsMode`.
-            "model.flipSettingsMode($0,reduceMotion:reduceMotion)",
             // The search wiring is one-line-wiring territory
             // (architect review 2026-08-10): swap any closure
-            // for a stub and Places, the value column or the
-            // notice dies with every suite green. Needles on
+            // for a stub and Places or the value column dies
+            // with every suite green. Needles on
             // the USE sites.
             "context:searchContext",
             "value:{[weakmodel]keyin"
                 + "model?.searchValue(for:key)}",
-            "armModeNotice:{model.nav.pendingModeNotice=$0}",
             // A navigation is a new search context: the field
             // remounts on the destination, clearing the query
             // and closing the panel — without this, restored
@@ -322,11 +302,9 @@ extension HomeSurfacingTests {
             "ForEach(verdicts,id:\\.setting){verdictin",
         ],
         "Settings/SettingsSearchRow.swift": [
-            // Enrichment and the mode tag are surfacing
-            // branches: consulting the closure is not drawing
-            // its answer.
-            "ifletshownValue{Text(shownValue)",
-            "ifswitchesMode{modeTag}",
+            // Enrichment is a surfacing branch: consulting the
+            // closure is not drawing its answer.
+            "ifletshownValue{Text(shownValue)"
         ],
         "Settings/SettingsModel+EditTarget.swift": [
             // A dirty draft reaching a clean transition

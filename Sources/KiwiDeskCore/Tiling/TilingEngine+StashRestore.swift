@@ -97,8 +97,10 @@ extension TilingEngine {
             {
                 continue
             }
-            animation.cancel(window: id)
             stashSent[id] = original
+            // One write, a take-out's held until the brief pocket's
+            // plate lands (#2680).
+            animation.cancel(window: id)
             setFrame(id, original)
         }
     }

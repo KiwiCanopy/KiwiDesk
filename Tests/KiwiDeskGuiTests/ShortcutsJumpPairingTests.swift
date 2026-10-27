@@ -64,6 +64,10 @@ struct ShortcutsJumpPairingTests {
                 ShortcutsRowOrder.sizeAndFloatAtRest
             ),
             (
+                "ShortcutsRowOrder.pocketAtRest",
+                ShortcutsRowOrder.pocketAtRest
+            ),
+            (
                 "KiwiDeskKeyRows(",
                 ShortcutsRowOrder.openApplicationsKiwiDesk
             ),

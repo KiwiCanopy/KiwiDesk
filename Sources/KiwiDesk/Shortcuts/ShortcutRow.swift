@@ -13,7 +13,7 @@ struct ShortcutRow: Identifiable {
     /// Draws KiwiDesk's own app icon — its Open Settings row
     /// (#2246).
     var ownApp = false
-    /// Draws the pocket mark — the Pocket row (#2446).
+    /// Draws the pocket mark — the Pocket rows (#2446, #2675).
     var pocketMark = false
     var monospaced: Bool = false
     /// Trailing accessory glyph for non-default actions (#334).

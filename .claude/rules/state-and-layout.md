@@ -177,6 +177,21 @@ editing here:
   subsystem rule that owns it
   ([input-and-animation.md](input-and-animation.md)) only loads
   under `Animation/`.
+- **A window changing state — float, tile, maximize and its end,
+  pocket in and out — is named on its pass through
+  `retile(stateChange:)`, never by a pass-wide `animated:` (#2676).**
+  The pocket's window parks and returns in one write, its motion
+  drawn by the brief pocket (input-and-animation.md ▸ Pocketing's
+  motion is DRAWN too).
+  The named window alone follows `animations.on_state_change` and
+  springs its size where no newcomer shares the pass; its
+  neighbours keep the pass's toggle. A door whose own pass draws a
+  maximize's return passes the ended window (`retireEndedMaximize`
+  returns it, `retileEndingMaximize(_:)` requires it); a maximize
+  a rearranging write ends returns inside that write's pass. The
+  float verb's own placement, outside a pass, takes
+  `placeFloating(_:asStateChange: true)` while a detected float
+  keeps `on_relayout` (`StateChangeAnimationTests`).
 - The **create fold's spawn grant** — the focus a fresh window
   gets for existing, not one macOS reported — consults
   `ManagedWindow.isTransientOverlay`
@@ -730,6 +745,23 @@ editing here:
     `plainSnapshotCarriesNone`). The slot follows a native-tab
     re-key through `rekeyPocket` (`PocketCommandTests` ▸
     `rekeyFollows`).
+  - **The slot fills only through the mark (#2675).** A window
+    becomes the pocket window through
+    `StateCoordinator.markPocketWindow` alone, out and never
+    pocketed — no frames, no `cameFrom` — and `pocketWindow`
+    refuses any window that is not the out slot's; a new entry
+    path (a pick, #2678's list) marks first. Marking is the one
+    placement at the float size, and a window already floating
+    skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,
+    `fallbackKeepsAFloatsFrame`); a take-out restores the frame
+    filed at the put-back and never re-places it, the centring
+    being the fallback for a screen with no filed frame
+    (`PocketWindowTests` ▸ `takeOutKeepsTheSize`,
+    `fallbackPlacesBeforeThePark`). Emptying the slot is
+    `releasePocketWindow`, for a quit and an unmark alike; the unmark's filing goes through
+    `fileMembership`, and it then tiles through the Tile's own
+    `setFloating` unless `tileRefusal` names a reason (#2680,
+    `PocketWindowTests` ▸ `unmarks`).
 
   The argument is `docs/design-decisions.md` ▸ *The pocket is one
   slot beside the Spaces, not a Space*.
@@ -1716,7 +1748,13 @@ editing here:
   is judged on EQUAL cells (`GridLayout.shape`) and whose floors
   are `GridLayout.trackFloors` drawn by `GridTracks.lengths`,
   standing down on a forced pass (`GridTracksTests`,
-  `SplitOverflowTests` ▸ `gridWidensTheColumn`). A store taking
+  `SplitOverflowTests` ▸ `gridWidensTheColumn`). Every reader of
+  Grid's shape — the render, the overflow run, the resize — asks
+  `GridLayout.shape(for:in:)` with the Space's tiled windows,
+  whose cap is their largest learned floor (#2687), while the pile
+  check stays on `min_window_size` alone; the count door takes its
+  floor as a required argument, so no reader re-derives the cap
+  from a count (`GridHealTests`). A store taking
   that answer states both halves, and a press on it solves
   against the same render.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`

@@ -58,6 +58,28 @@ extension MotionCard {
             .searchAnchored(
                 SettingsCatalog.colors.motionMore.children.animateLayoutReflows
             )
+        case .animationsOnStateChange:
+            ToggleRow(
+                label: L(
+                    "behavior.animations.state_change",
+                    "Animate float, Pocket & maximize"
+                ),
+                isOn: animations.onStateChange,
+                help: L(
+                    "behavior.animations.state_change.help",
+                    "A window floating or tiling, maximizing or "
+                        + "returning, or going into the Pocket and "
+                        + "out moves there instead of jumping. "
+                        + "The windows around it follow %1$@.",
+                    L(
+                        "behavior.animations.relayout",
+                        "Animate layout reflows"
+                    )
+                )
+            )
+            .searchAnchored(
+                SettingsCatalog.colors.motionMore.children.animateStateChanges
+            )
         case .animationsDurationMS:
             // Paces the window toggles above and the window moves
             // no toggle governs, so it greys only with the master
@@ -74,8 +96,10 @@ extension MotionCard {
                 help: L(
                     "behavior.animations.window_duration.help",
                     "How long a window takes to reach its new place "
-                        + "when it moves, resizes, swaps or reflows. A "
-                        + "longer duration is slower."
+                        + "when it moves, resizes, swaps, reflows or "
+                        + "changes state — floating, maximizing, or "
+                        + "going into the Pocket and out. A longer "
+                        + "duration is slower."
                 )
             )
             .searchAnchored(

@@ -75,10 +75,10 @@ func makeTestCore(
     // silently turn a KiwiCore test's animations into instant
     // snaps (same host-state-leak class as the hotkey registrar).
     core.tiler.animation.reduceMotion = { false }
-    // The plate slide (#1956) pinned off — a playing slide holds
-    // the incoming writes past every switching suite's read — its
-    // panel and stack read inert; a slide suite states the read.
+    // The plate slide (#1956) and brief pocket (#2680) pinned off,
+    // their panels and reads inert; a suite of either states them.
     core.spaceSlide.reduceMotion = { true }
+    core.briefPocket.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
     // The focused ring's arrival hold (#1959) reads the render
@@ -88,16 +88,16 @@ func makeTestCore(
     core.borders.arrivalClock = { 0 }
     core.borders.scheduleArrivalCheck = { _, _ in }
     core.borders.reduceMotion = { true }
-    // Same class again (#596): bootstrap reads the
-    // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process
-    // environment, so a developer who has it exported would get a
-    // different core in every test. Inert today — the private
-    // runtime never starts under test, so `isActive` is
-    // already false — but neutralized here so it stays that way
-    // if the lever ever gains a second effect.
+    // Same class again (#596): bootstrap reads the exported
+    // `KIWIDESK_NO_WS_TRACKING` QA lever from the real process, so
+    // a developer who has it set would get a different core in
+    // every test. Inert today — the private runtime never starts
+    // under test, so `isActive` is already false — but neutralized
+    // so it stays that way if the lever gains a second effect.
     core.windowServer.trackingDisabled = false
-    // A frame event fed through the core reads no live bounds.
+    // An event reads no live bounds and restacks at once (#2659).
     core.windowServer.readWindowBounds = { _ in nil }
+    core.windowServer.atTurnEnd = { $0() }
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }

@@ -106,6 +106,8 @@ struct ShortcutsFamilyRows {
             return [KeybindingCatalog.toggleSticky]
         case .pocket:
             return [KeybindingCatalog.pocket]
+        case .pocketWindow:
+            return [KeybindingCatalog.pocketWindow]
         case .showShortcuts:
             return [KeybindingCatalog.showShortcuts]
         case .openSettings:
@@ -121,7 +123,8 @@ struct ShortcutsFamilyRows {
             .scrollStepDistance, .scrollNaturalTrackpad,
             .scrollNaturalMouse, .scrollSpaceStep, .spaceHistory,
             .focusWrap, .modeCycle, .modeCue, .desktopCue, .hyperKey,
-            .shortcutBase, .kiwiHubNavigationKeys, .modifierSides:
+            .shortcutBase, .kiwiHubNavigationKeys, .modifierSides,
+            .pocketEdge, .pocketPosition:
             return nil
         }
     }
