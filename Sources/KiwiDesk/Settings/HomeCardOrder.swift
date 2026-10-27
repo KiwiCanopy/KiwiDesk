@@ -1,6 +1,7 @@
 /// Home dashboard card offer and display order
 /// (`HomeCardOrderTests`, #678 turn 9). The order is STABLE: a card
-/// the Mac cannot use yet is left out of its slot, never moved.
+/// withdrawn by the #18 stored-profile axis leaves its slot, never
+/// moves the others.
 enum HomeCardOrder {
     /// THIS PROFILE, full order.
     static let thisProfile: [SettingsDestination] = [
@@ -19,32 +20,24 @@ enum HomeCardOrder {
     ]
 
     /// Single offer predicate for home dashboard cards (#18) — no
-    /// hand-negated copies. The `displayCount` axis deliberately
-    /// has NO selection repair: unplugging a display must not yank
-    /// the screen mid-edit; the next Home visit re-derives.
+    /// hand-negated copies. Every card shows on any screen count:
+    /// Screens holds the pins of absent screens (#2690).
     static func isOffered(
         _ destination: SettingsDestination,
-        displayCount: Int,
         editingStoredProfile: Bool
     ) -> Bool {
         destination.isReachable(
             editingStoredProfile: editingStoredProfile
         )
-            && destination.area.isAvailable(displayCount: displayCount)
     }
 
     /// Filters destination group to currently offered cards.
     static func offered(
         _ group: [SettingsDestination],
-        displayCount: Int,
         editingStoredProfile: Bool
     ) -> [SettingsDestination] {
         group.filter {
-            isOffered(
-                $0,
-                displayCount: displayCount,
-                editingStoredProfile: editingStoredProfile
-            )
+            isOffered($0, editingStoredProfile: editingStoredProfile)
         }
     }
 }

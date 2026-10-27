@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "Tutti gli essenziali fatti",
   "home.card.mac_checklist.subtitle": "Essenziali fatti: %1$d di %2$d",
   "home.card.monitors.subtitle": "%1$d collegati · %2$d spazi fissati",
+  "home.card.monitors.subtitle_single": "Uno schermo · collegane un altro per posizionare gli spazi",
   "home.card.profiles.none": "Ancora nessun profilo — inizia qui",
   "home.card.profiles.subtitle": "%1$d salvati · %2$@ è predefinito",
   "home.card.profiles.subtitle_no_default": "%1$d salvati",

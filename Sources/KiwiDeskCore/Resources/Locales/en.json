@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "All essentials done",
   "home.card.mac_checklist.subtitle": "Essentials done: %1$d of %2$d",
   "home.card.monitors.subtitle": "%1$d connected · %2$d Spaces pinned",
+  "home.card.monitors.subtitle_single": "One screen · connect another to place Spaces",
   "home.card.profiles.none": "No profiles yet — start here",
   "home.card.profiles.subtitle": "%1$d saved · %2$@ is default",
   "home.card.profiles.subtitle_no_default": "%1$d saved",

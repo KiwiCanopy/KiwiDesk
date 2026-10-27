@@ -215,4 +215,26 @@ struct HomeCardContentTests {
         #expect(!none.contains("0"))
     }
 
+    /// One screen with nothing pinned says what the page is for;
+    /// pins or a second screen bring back the counts (#2690).
+    @Test("the screens answer invites a second screen")
+    func screensAnswer() {
+        pinEnglish()
+        let single = HomeCardContent.screensSubtitle(
+            displayCount: 1,
+            pinCount: 0
+        )
+        #expect(single.contains("One screen"))
+        let pinned = HomeCardContent.screensSubtitle(
+            displayCount: 1,
+            pinCount: 2
+        )
+        #expect(pinned.contains("1") && pinned.contains("2"))
+        #expect(pinned != single)
+        let two = HomeCardContent.screensSubtitle(
+            displayCount: 2,
+            pinCount: 0
+        )
+        #expect(two.contains("2") && two != single)
+    }
 }

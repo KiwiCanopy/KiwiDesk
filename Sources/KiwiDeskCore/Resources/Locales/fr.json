@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "Tous les essentiels faits",
   "home.card.mac_checklist.subtitle": "Essentiels faits : %1$d sur %2$d",
   "home.card.monitors.subtitle": "%1$d connectés · %2$d espaces épinglés",
+  "home.card.monitors.subtitle_single": "Un écran · connectez-en un autre pour placer des espaces",
   "home.card.profiles.none": "Aucun profil pour l'instant — commencez ici",
   "home.card.profiles.subtitle": "%1$d enregistrés · %2$@ par défaut",
   "home.card.profiles.subtitle_no_default": "%1$d enregistrés",

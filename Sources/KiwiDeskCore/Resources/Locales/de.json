@@ -785,6 +785,7 @@
   "home.card.mac_checklist.all": "Alles Wesentliche erledigt",
   "home.card.mac_checklist.subtitle": "Wesentliches erledigt: %1$d von %2$d",
   "home.card.monitors.subtitle": "%1$d angeschlossen · %2$d Spaces gepinnt",
+  "home.card.monitors.subtitle_single": "Ein Bildschirm · weiteren anschließen, um Spaces zu platzieren",
   "home.card.profiles.none": "Noch keine Profile — hier starten",
   "home.card.profiles.subtitle": "%1$d gespeichert · %2$@ ist Standard",
   "home.card.profiles.subtitle_no_default": "%1$d gespeichert",

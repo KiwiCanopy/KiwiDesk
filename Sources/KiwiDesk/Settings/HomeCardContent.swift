@@ -79,11 +79,9 @@ enum HomeCardContent {
         case .layoutDefaults:
             return Self.layoutSubtitle(settings)
         case .screens:
-            return L(
-                "home.card.monitors.subtitle",
-                "%1$d connected · %2$d Spaces pinned",
-                model.displays.count,
-                model.config.spacePins.count
+            return Self.screensSubtitle(
+                displayCount: model.displays.count,
+                pinCount: model.config.spacePins.count
             )
         case .shortcuts:
             return L(
@@ -290,4 +288,23 @@ extension HomeCardContent {
         )
     }
 
+    /// Screens' line: a lone screen with nothing pinned invites a
+    /// second one instead of reading "1 connected · 0" (#2690).
+    static func screensSubtitle(
+        displayCount: Int,
+        pinCount: Int
+    ) -> String {
+        guard displayCount > 1 || pinCount > 0 else {
+            return L(
+                "home.card.monitors.subtitle_single",
+                "One screen · connect another to place Spaces"
+            )
+        }
+        return L(
+            "home.card.monitors.subtitle",
+            "%1$d connected · %2$d Spaces pinned",
+            displayCount,
+            pinCount
+        )
+    }
 }

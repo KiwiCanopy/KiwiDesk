@@ -1084,25 +1084,22 @@ navigator — there is no sidebar. The conventions a shell change
 must keep:
 
 - **One offer predicate.** Whether a Home card is offered — the
-  computed Screens capability (`SettingsArea.isAvailable`), the
   #18 stored-profile axis — is answered by
   `HomeCardOrder.isOffered`, consulted by the grid; a
   hand-negated copy is the drift #18's one-predicate rule exists
-  to prevent (`HomeCardOrderTests`). The `settingsNavigate`
-  guard and the reveal consult the stored-profile axis ALONE:
-  Screens hides from Home on one screen, never from a link or a
-  search hit (`HomeSurfacingTests`, `SettingsSearchTests` ▸
-  `screensSearchableOnOneScreen`). The search panel shows NOTHING before
+  to prevent (`HomeCardOrderTests`). No card hangs on the screen
+  count: Screens shows on one screen too (#2690). The
+  `settingsNavigate` guard and the reveal consult the same
+  stored-profile axis (`HomeSurfacingTests`,
+  `SettingsSearchTests` ▸ `screensSearchableOnOneScreen`). The
+  search panel shows NOTHING before
   a query (#1470): the field takes the window's arrival focus,
   so any row drawn before one pops over Home on every open
   (#1468), and `results("")` stays empty so a bare Return
   cannot navigate somewhere unnamed (`SettingsSearchTests` ▸
   `emptyQuery`; `HomeSurfacingTests` needles the query-only
   panel). A "recent destinations" list under the field is a
-  second navigator. The `displayCount` axis has NO
-  selection repair, deliberately — a display disconnect never
-  pops an open area; `HomeCardOrder.isOffered`'s docstring
-  carries the argument.
+  second navigator.
 - **A card is an answer**: subtitles derive from the draft
   (`HomeCardContentTests` holds the derivations), save AI's,
   which is fixed because KiwiDesk cannot read an AI app's state
