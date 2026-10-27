@@ -128,7 +128,9 @@ final class HeldWrites: @unchecked Sendable {
 }
 
 extension FrameApplier {
-    /// Holds every write to `ids` until `deadline` (#1956).
+    /// Holds every write to `ids` until `deadline`: the plate
+    /// slide's incoming windows (#1956), a take-out's window until
+    /// the brief pocket's plate lands (#2680).
     func holdWrites(
         _ ids: some Sequence<WindowID>,
         until deadline: DispatchTime
@@ -137,7 +139,7 @@ extension FrameApplier {
     }
 
     /// Ends every hold — the plate slide's play was dropped — and
-    /// sends what they kept. The holds are the slide's alone.
+    /// sends what they kept, a take-out's early with them.
     func releaseAllHolds() {
         for id in held.releaseAll() { releaseHeld(id, at: .now()) }
     }

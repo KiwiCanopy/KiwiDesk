@@ -94,6 +94,8 @@ struct TileRefusalSeamTests {
                 "App/KiwiCore+AutoFloat.swift": 1,
                 // `explain_window`'s cause (#1685).
                 "Commands/KiwiCore+Explain.swift": 1,
+                // Unmarking tiles as a Tile does (#2680).
+                "Commands/KiwiCore+PocketWindow.swift": 1,
             ]
         )
     }

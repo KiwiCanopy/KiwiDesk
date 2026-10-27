@@ -2,7 +2,8 @@ import AppKit
 
 /// The ring of a window changing state (#2676) — floating and
 /// back, maximizing and back, out of the pocket — stays dormant
-/// while our spring moves the window and returns once it has
+/// while our spring moves the window, or a take-out's held write
+/// waits for the brief pocket (#2680), and returns once it has
 /// landed (`docs/design-decisions.md` ▸ a window changing state).
 /// A second hold beside the switch's arrival hold (#1959), on the
 /// same overlay flag and reveal.

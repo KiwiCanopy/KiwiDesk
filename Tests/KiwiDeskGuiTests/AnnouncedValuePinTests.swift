@@ -146,6 +146,8 @@ struct AnnouncedValuePinTests {
         "AppPickerButton.swift": 1,
         // The diff list's "Live, not saved" heading (#2262).
         "SettingsDiffRowsView+Live.swift": 1,
+        // The Lua binding editor's title (#2688).
+        "LuaBindingEditor.swift": 1,
     ]
 
     @Test("title components are rotor headings")

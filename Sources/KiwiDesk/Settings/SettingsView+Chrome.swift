@@ -61,7 +61,7 @@ extension SettingsView {
             .overlay(alignment: .bottom) {
                 if !width.docksSavePill {
                     SettingsFooter(model: model)
-                        .padding(.bottom, 22)
+                        .padding(.bottom, SettingsMetrics.savePillLift)
                         .offset(
                             x: panelDocked(width)
                                 ? -SettingsTheme.panelWidth / 2

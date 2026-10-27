@@ -68,6 +68,16 @@ extension AdvancedLuaGroup {
         return L("shortcuts.lua.new_binding", "New binding")
     }
 
+    /// The editor's title: its description, else what the row is.
+    /// Never the first Lua line, which the editor draws below it.
+    static func editorTitle(_ binding: KeyBinding) -> String {
+        if !binding.desc.trimmed.isEmpty { return binding.desc }
+        if binding.lua.isEmpty {
+            return L("shortcuts.lua.new_binding", "New binding")
+        }
+        return L("shortcuts.lua.editor_title", "Lua binding")
+    }
+
     private func descPlaceholder(_ binding: KeyBinding) -> String {
         binding.lua.isEmpty
             ? L("shortcuts.lua.desc_placeholder", "Description")
@@ -127,8 +137,9 @@ extension AdvancedLuaGroup {
         expandButton(id: id, name: name)
             .popover(item: editBinding(id)) { _ in
                 LuaBindingEditor(
-                    title: binding.wrappedValue.desc,
+                    title: Self.editorTitle(binding.wrappedValue),
                     spokenName: spoken,
+                    placeholder: luaPlaceholder,
                     text: luaBinding(id),
                     dismiss: { editing = nil }
                 )

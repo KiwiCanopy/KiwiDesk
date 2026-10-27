@@ -165,7 +165,7 @@ extension APIReference {
         ),
         "toggle_pocket_window": APIRecord(
             "Marks the focused window as the pocket window, floating "
-                + "it, or unmarks it."
+                + "it, or unmarks it, tiling it."
         ),
         "override_sticky_reach": APIRecord(
             "Overrides Desktop reach for the focused sticky "

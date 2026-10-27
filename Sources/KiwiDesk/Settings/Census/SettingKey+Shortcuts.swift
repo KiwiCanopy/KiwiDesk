@@ -74,6 +74,10 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocket = "keybinding.pocket"
     /// `toggle_pocket_window` (#2675).
     case pocketWindow = "keybinding.pocket_window"
+    /// Where the brief pocket appears (#2680): its edge and its
+    /// position along it.
+    case pocketEdge = "settings.pocketStyle.edge"
+    case pocketPosition = "settings.pocketStyle.position"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
@@ -169,9 +173,12 @@ extension ShortcutsKey {
                 gate: .runtime(.luaOwnsConfig)
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
-            .resetSizes, .maximize, .toggleFloating, .toggleSticky,
-            .pocket, .pocketWindow:
+            .resetSizes, .maximize, .toggleFloating, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
+        // Its own card (#2680): the two keys moved from Size &
+        // float, then where the brief pocket appears.
+        case .pocket, .pocketWindow, .pocketEdge, .pocketPosition:
+            return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
         // KiwiDesk's own chord, under the group's "KiwiDesk"
@@ -261,6 +268,10 @@ extension ShortcutsKey {
                 "keybinding.pocket_window",
                 help: "keybinding.pocket_window.help"
             )
+        case .pocketEdge:
+            return .text("pocket.edge", help: "pocket.edge.help")
+        case .pocketPosition:
+            return .text("pocket.position", help: "pocket.position.help")
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")
         case .openSettings:

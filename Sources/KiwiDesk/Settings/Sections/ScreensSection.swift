@@ -25,7 +25,8 @@ struct ScreensSection: View {
                 orphanCard(rows: rows, gates: gates)
                 fingerprintsDrawer(rows: rows)
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 

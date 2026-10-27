@@ -40,6 +40,10 @@ extension SettingsRevertRegister {
             \.scrollGesture.naturalMouse
         ),
         .shortcuts(.scrollSpaceStep): scroll(\.scrollGesture.spaceStep),
+        .shortcuts(.pocketEdge): .leaf(\.settings.pocketStyle.edge),
+        .shortcuts(.pocketPosition): .leaf(
+            \.settings.pocketStyle.position
+        ),
     ]
 
     /// One app's rules back to the baseline, with the reach the
