@@ -59,7 +59,7 @@ struct OnboardingBarsFitTests {
         ).fittingSize.height
     }
 
-    @Test("the bars and keys pages fit in every catalog")
+    @Test("the bars and keys pages fit in every catalog and base")
     func pagesFit() {
         defer { LocalizationManager.shared.select("en") }
         let locales = ["en"] + LocalizationManager.shared.available
