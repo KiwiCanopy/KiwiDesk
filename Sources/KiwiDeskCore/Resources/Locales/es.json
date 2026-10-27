@@ -229,7 +229,7 @@
   "behavior.animations.state_change.help": "Una ventana que pasa a flotar o vuelve al mosaico, que se maximiza o recupera su sitio, o que entra en el Pocket y sale de él se desplaza hasta allí en lugar de saltar. Las ventanas de alrededor siguen a «%1$@».",
   "behavior.animations.title": "Animaciones",
   "behavior.animations.window_duration": "Duración de las ventanas",
-  "behavior.animations.window_duration.help": "Cuánto tarda una ventana en llegar a su nuevo sitio cuando se mueve, cambia de tamaño, se intercambia o se reajusta el diseño. Una duración mayor es más lenta.",
+  "behavior.animations.window_duration.help": "Cuánto tarda una ventana en llegar a su nuevo sitio cuando se mueve, cambia de tamaño, se intercambia, se reajusta el diseño o cambia de estado: al pasar a flotar, al maximizarse o al entrar en el Pocket y salir de él. Una duración mayor es más lenta.",
   "behavior.animations.window_resize": "Animar los cambios de tamaño",
   "behavior.animations.window_swap": "Animar los intercambios de ventanas",
   "behavior.mouse.follows_focus": "Llevar el puntero a la ventana que queda enfocada",

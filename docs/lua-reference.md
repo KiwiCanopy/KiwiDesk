@@ -7520,6 +7520,13 @@ Space](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-wind
 **Does:** sets the general animation duration for window moves
 and layout reflowing ([Animation Cascade](#animation-cascade)).
 
+:::unreleased
+It also paces a window changing state — floating, maximizing — and
+the brief pocket's plate, which flies for twice this duration,
+between 0.2 and 0.8 seconds
+([`set_on_state_change`](#animationsset_on_state_change)).
+:::
+
 **Example:**
 
 ```lua

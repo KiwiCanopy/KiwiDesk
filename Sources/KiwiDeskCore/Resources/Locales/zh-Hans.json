@@ -229,7 +229,7 @@
   "behavior.animations.state_change.help": "窗口在浮动或恢复平铺、最大化或还原、放入 Pocket 或取出时，会移动到新位置，而不是直接跳过去。周围的窗口跟随“%1$@”。",
   "behavior.animations.title": "动画",
   "behavior.animations.window_duration": "窗口时长",
-  "behavior.animations.window_duration.help": "窗口在移动、调整大小、互换或布局重排时到达新位置所需的时间。时长越长，速度越慢。",
+  "behavior.animations.window_duration.help": "窗口在移动、调整大小、互换、布局重排或状态改变（浮动、最大化、放入 Pocket 或取出）时到达新位置所需的时间。时长越长，速度越慢。",
   "behavior.animations.window_resize": "为窗口大小调整添加动画",
   "behavior.animations.window_swap": "为窗口互换添加动画",
   "behavior.mouse.follows_focus": "将指针移到获得焦点的窗口",

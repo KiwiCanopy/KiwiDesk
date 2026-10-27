@@ -229,7 +229,7 @@
   "behavior.animations.state_change.help": "視窗在浮動或回到並排、最大化或還原、放入 Pocket 或取出時，會移動到新位置，而不是直接跳過去。周圍的視窗跟隨「%1$@」。",
   "behavior.animations.title": "動畫",
   "behavior.animations.window_duration": "視窗時間長度",
-  "behavior.animations.window_duration.help": "視窗在移動、變更尺寸、互換或佈局重排時抵達新位置所需的時間。時間長度越長，速度越慢。",
+  "behavior.animations.window_duration.help": "視窗在移動、變更尺寸、互換、佈局重排或狀態改變（浮動、最大化、放入 Pocket 或取出）時抵達新位置所需的時間。時間長度越長，速度越慢。",
   "behavior.animations.window_resize": "為視窗尺寸變更加上動畫",
   "behavior.animations.window_swap": "為視窗互換加上動畫",
   "behavior.mouse.follows_focus": "將指標移至取得焦點的視窗",

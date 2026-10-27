@@ -96,8 +96,10 @@ extension MotionCard {
                 help: L(
                     "behavior.animations.window_duration.help",
                     "How long a window takes to reach its new place "
-                        + "when it moves, resizes, swaps or reflows. A "
-                        + "longer duration is slower."
+                        + "when it moves, resizes, swaps, reflows or "
+                        + "changes state — floating, maximizing, or "
+                        + "going into the Pocket and out. A longer "
+                        + "duration is slower."
                 )
             )
             .searchAnchored(

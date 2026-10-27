@@ -229,7 +229,7 @@
   "behavior.animations.state_change.help": "ウインドウがフローティングになる・タイル表示に戻る、最大化する・元に戻る、Pocket に入る・Pocket から出るときに、瞬時に切り替わらずその位置まで移動します。周囲のウインドウは「%1$@」に従います。",
   "behavior.animations.title": "アニメーション",
   "behavior.animations.window_duration": "ウインドウの継続時間",
-  "behavior.animations.window_duration.help": "移動、サイズ変更、入れ替え、レイアウトの再配置のときに、ウインドウが新しい位置に収まるまでにかかる時間です。継続時間が長いほど遅くなります。",
+  "behavior.animations.window_duration.help": "移動、サイズ変更、入れ替え、レイアウトの再配置、または状態の変化（フローティング、最大化、Pocket に入る・Pocket から出る）のときに、ウインドウが新しい位置に収まるまでにかかる時間です。継続時間が長いほど遅くなります。",
   "behavior.animations.window_resize": "ウインドウのサイズ変更をアニメーション表示",
   "behavior.animations.window_swap": "ウインドウの入れ替えをアニメーション表示",
   "behavior.mouse.follows_focus": "フォーカスされたウインドウにポインタを移動",
