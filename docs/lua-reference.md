@@ -5642,17 +5642,20 @@ end)
 
 **Expects:** nothing.
 
-**Does:** keeps one window one key away. The pocket holds one
-window, and each call takes the next step:
+**Does:** keeps one window, the pocket window, one key away. Mark
+it with [`toggle_pocket_window`](#toggle_pocket_window); each call
+takes the next step:
 
-- **Empty:** pockets the focused window, a focused-window command
-  like `make_floating`. It is parked off-screen — not minimized —
-  belongs to no Space and is drawn on no bar, and focus moves on
-  within the Space. Fails on a window in native full screen and on
-  a transient panel or popup.
+- **Nothing marked:** marks the focused window, floating it as
+  `toggle_pocket_window` does, and pockets it, a focused-window
+  command like `make_floating`. It is parked
+  off-screen — not minimized — belongs to no Space and is drawn on
+  no bar, and focus moves on within the Space. Fails on a window
+  in native full screen and on a transient panel or popup.
 - **Pocketed:** takes it out onto the active Space's screen at the
   frame it last had on that screen, else centred, floating and
-  focused.
+  focused. A take-out never resizes it to the float size; only
+  marking does.
 - **Out:** puts it back in the pocket, focused or not. If it had
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
@@ -5688,8 +5691,8 @@ click, a notification — takes it out as a call would, and so do
 Return or **⇧Return** under **Pocket** in KiwiHub's
 [window switcher](#kiwihubshow).
 
-Closing the window, minimizing it or quitting its app empties the
-pocket; hiding the app keeps it. While the window is in the pocket
+Closing the window, minimizing it, quitting its app or unmarking it
+empties the pocket; hiding the app keeps it. While the window is in the pocket
 or out of it, `make_tiled`, `toggle_floating`, every
 `make_*sticky` and `toggle_*sticky` verb and
 `override_sticky_reach` are refused, with a pill: "Pocket windows
@@ -5711,6 +5714,32 @@ by default
 ```lua
 KiwiDesk.bind("ctrl+alt+p", function()
     KiwiDesk.pocket()
+end)
+```
+
+### toggle_pocket_window
+
+**Expects:** nothing.
+
+**Does:** marks the focused window as the [pocket](#pocket) window,
+or unmarks it. Marking floats it at once where it is, placed as
+[`toggle_floating`](#toggle_floating) places a tiled window, and
+leaves it out of the pocket: on every Space, wearing the pocket
+mark. Unmarking leaves it a plain float on the active Space.
+
+While one window is marked, a call on another window fails with a
+pill: "One window is already marked as Pocket — remove it there
+first." A pocketed window is never the focused one, so take it out
+with [`pocket`](#pocket) before unmarking it. Fails on a window in
+native full screen and on a transient panel or popup. Bound to
+`⌃⌥⇧P` by default
+([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+p", function()
+    KiwiDesk.toggle_pocket_window()
 end)
 ```
 :::

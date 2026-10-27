@@ -1,23 +1,16 @@
 import CoreGraphics
 import Foundation
 
-/// `pocket` (#2446): the one key that pockets the focused window,
-/// takes it out and puts it back. The slot is
+/// `pocket` (#2446): the key that pockets the pocket window, takes
+/// it out and puts it back (`toggle_pocket_window` marks it). The slot is
 /// `StateCoordinator.pocket`; this file moves windows in and out
 /// of it. A #292 focused command whose filled slot passes the
 /// preflight: taking the window out acts on no focus.
 extension KiwiCore {
     func pocketCommand() -> CommandResponse {
-        // An untracked window whose app is gone empties the slot,
-        // and the press ends there: a filled slot passed the #292
-        // preflight, so it never acts on the focus.
-        if let slot = state.pocket, state.windows[slot.window] == nil,
-            let pid = slot.pid, !eventLoop.processIdentity.runs(pid)
-        {
-            state.emptyPocket()
-            onLog("pocket: w\(slot.window.raw) gone with its app — emptied")
-            return .ok()
-        }
+        // The press ends at an emptied slot: a filled slot passed
+        // the #292 preflight, so it never acts on the focus.
+        if emptyPocketIfGone() { return .ok() }
         switch state.pocket?.phase {
         case .pocketed?:
             return takePocketOut() ? .ok() : .fail("pocket is unreachable")
@@ -33,9 +26,23 @@ extension KiwiCore {
             else { return .fail("no focused window") }
             guard !window.isFullscreen, !window.isTransientOverlay
             else { return .fail("this window cannot be pocketed") }
+            // Marked first (#2675): floated at the float size, so
+            // the frame filed at the park is the float's.
+            markPocketWindow(id)
             putInPocket(id)
             return .ok()
         }
+    }
+
+    /// Empties a slot whose untracked window's app is gone; true
+    /// where it did.
+    func emptyPocketIfGone() -> Bool {
+        guard let slot = state.pocket, state.windows[slot.window] == nil,
+            let pid = slot.pid, !eventLoop.processIdentity.runs(pid)
+        else { return false }
+        state.emptyPocket()
+        onLog("pocket: w\(slot.window.raw) gone with its app — emptied")
+        return true
     }
 
     /// Pockets `id`: out of its Space, parked by the next retile,

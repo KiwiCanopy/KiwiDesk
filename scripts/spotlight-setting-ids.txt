@@ -101,6 +101,7 @@ keybinding.grow_width
 keybinding.maximize
 keybinding.open_settings
 keybinding.pocket
+keybinding.pocket_window
 keybinding.reset_sizes
 keybinding.show_shortcuts
 keybinding.shrink_height

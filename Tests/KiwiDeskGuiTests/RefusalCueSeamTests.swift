@@ -300,6 +300,9 @@ struct RefusalCueSeamTests {
                 // A sticky verb on the pocket window (#2446),
                 // sounded through `soundIfDrawn`.
                 "KiwiCore+Pocket.swift": 1,
+                // A second pocket window refused (#2675), sounded
+                // through `soundIfDrawn`.
+                "KiwiCore+PocketWindow.swift": 1,
                 // A Hyper press with nothing to do (#2480): silent
                 // by ruling, on a window or else the shelf.
                 "KiwiCore+HyperBarePress.swift": 2,

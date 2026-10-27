@@ -25,6 +25,7 @@ public enum FocusedCommandPolicy {
         "toggle_display_sticky",
         "toggle_maximized",
         "pocket",
+        "toggle_pocket_window",
         "override_sticky_reach",
         "move_to_track",
         "track.swap",

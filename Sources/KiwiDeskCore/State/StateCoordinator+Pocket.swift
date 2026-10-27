@@ -40,6 +40,17 @@ extension StateCoordinator {
         )
     }
 
+    /// Marks `id` the pocket window where it is (#2675): out,
+    /// floating, on every Space, its membership kept. Nothing
+    /// while the slot holds a window.
+    mutating func markPocketWindow(_ id: WindowID) {
+        guard pocket == nil, windows[id] != nil else { return }
+        windows.setFloating(id, true)
+        windows.setSticky(id, .global)
+        userFloated.remove(id)
+        pocket = PocketSlot(window: id, pid: windows[id]?.pid, phase: .out)
+    }
+
     /// Marks the slot's window out: floating and on every Space.
     /// Its filing is the caller's, through `fileMembership`.
     mutating func markPocketOut(cameFrom: WindowID?) {

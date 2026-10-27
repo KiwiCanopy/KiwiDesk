@@ -83,6 +83,18 @@ extension DefaultKeybindings {
         )
     }
 
+    /// Mark as pocket window on `⌃⌥⇧P` (#2675), beside Pocket's
+    /// `⌃⌥P`. Free in the seed and `SystemShortcuts.map` (read
+    /// 2026-10-27).
+    public static func pocketWindowRow() -> KeyBinding {
+        KeyBinding(
+            combo: "control+option+shift+p",
+            lua: "KiwiDesk.toggle_pocket_window()",
+            kind: .navigation,
+            label: "Mark as pocket window"
+        )
+    }
+
     /// The bars' shortcuts (#761): the Space Bar on `⌃⌥G`, the App
     /// Bar on `⌃⌥H` — the home row beside KiwiHub's J K L, the keys
     /// that show something (owner, 2026-10-19). Free in the seed and

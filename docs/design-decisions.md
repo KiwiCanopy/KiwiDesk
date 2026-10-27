@@ -6016,8 +6016,8 @@ Screen" promises a new Desktop.
 
 **[Rationale]**
 
-**One window, one key, three states — empty, pocketed, out — and
-the window is never a member of a Space while it is pocketed.**
+**One window, three states — empty, pocketed, out — and the window
+is never a member of a Space while it is pocketed.**
 The slot (`StateCoordinator.pocket`) knows the window, and the
 window stays tracked, so its frame, its app and its focus reports
 keep flowing; but no Space lists it. That is the away ledger's
@@ -6033,6 +6033,30 @@ Desktop carry, the window switcher, `get_state` — reaches the window
 in both states, so each such walk rules on it, and forgetting it
 there draws a mark on a parked window or parks it on the wrong
 screen.
+
+**Choosing the window is its own key (#2675), amending #2446's
+"one window, one key". Becoming the pocket window is the one
+resize.** With one key, the first press on an empty
+pocket chose the window and every press after it only toggled that
+window, so nothing short of a quit let a user pick another. So
+`toggle_pocket_window` (`⌃⌥⇧P`) marks the focused window and
+unmarks it, and `pocket` (`⌃⌥P`) pockets and takes out the marked
+window alone. A second window is refused with a pill naming where
+to go, rather than silently moving the mark: the pocket window
+carries a frame per screen and is the one window a key always
+reaches, so taking that away is an act on the marked window, not a
+side effect of pressing a key somewhere else. Marking floats the
+window at once, placed as a Float places it, and leaves it out:
+a marked window is the pocket window, and an out pocket window is
+a global sticky float, so a mark that left it tiled would be a
+fourth state. That is the only time the pocket sizes the window: a
+take-out restores the frame filed when it was put back, so a size
+the user gave it holds. With nothing marked, `⌃⌥P` still marks the
+focused window — sized as a mark sizes it — and pockets it, so the
+single key keeps working for someone who never learns the second. The verb acts on the focus, which a
+pocketed window never holds, so unmarking happens while the window
+is out. `⌃⌥⇧P` sits beside `⌃⌥P` as its related variant — the two
+keys act on one window (the `⇧` entry below, as amended).
 
 **A pocketed window waits on one screen, the active Space's**
 (`StateCoordinator.pocketHomeDisplay`), and the park and the Desktop
@@ -12289,6 +12313,15 @@ where the file carries one (`gui.json`, a backup's config). A
 profile file carries no base, so there both `⌃⌥P` and `✦P` move:
 the trade is that a pin a user bound by hand to the other base's
 chord inside a profile moves with them.
+
+Amended again by #2675 (owner, 2026-10-27): on a letter, `⇧` is a
+related variant of the unshifted key, not a ban. It may reverse the
+key (`⌃⌥⇧C`, the layout cycle backwards) or add a closely related
+act on the same subject: `⌃⌥⇧P` marks the window `⌃⌥P` pockets. What
+#1094 retired stays retired — `⇧` turning a letter into something
+about a different subject or scope, as `⌃⌥⇧S` did — since that is
+the reading a user who learned the ladder gets wrong; a variant on
+the same subject reads the way the plain key taught.
 :::
 
 **`D`, the obvious letter, is refused** on three counts: *Desktop*

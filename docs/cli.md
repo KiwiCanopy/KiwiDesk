@@ -578,7 +578,8 @@ every lens with why it cannot turn on.
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
 | | `toggle_maximized` | — the focused tiled window fills its screen, bars hidden, until called again |
-| | `pocket` | — pockets the focused window, takes the pocket window out onto this screen, or puts it back ([`pocket`](lua-reference.md#pocket)) |
+| | `pocket` | — pockets the pocket window, takes it out onto this screen, or puts it back; with none marked, marks and pockets the focused window ([`pocket`](lua-reference.md#pocket)) |
+| | `toggle_pocket_window` | — marks the focused window as the pocket window, floating it, or unmarks it ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window)) |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |

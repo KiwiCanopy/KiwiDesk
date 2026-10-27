@@ -72,6 +72,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case toggleSticky = "keybinding.toggle_sticky"
     /// `pocket` (#2446), in pin's place since pin went Lua-only.
     case pocket = "keybinding.pocket"
+    /// `toggle_pocket_window` (#2675).
+    case pocketWindow = "keybinding.pocket_window"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
@@ -168,7 +170,7 @@ extension ShortcutsKey {
             )
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .resetSizes, .maximize, .toggleFloating, .toggleSticky,
-            .pocket:
+            .pocket, .pocketWindow:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -253,6 +255,11 @@ extension ShortcutsKey {
             return .text(
                 "keybinding.pocket",
                 help: "keybinding.pocket.help"
+            )
+        case .pocketWindow:
+            return .text(
+                "keybinding.pocket_window",
+                help: "keybinding.pocket_window.help"
             )
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")

@@ -8,24 +8,36 @@ import Testing
 /// (combos parse, rows are unique, digits map to positions).
 /// This suite owns the senses those combos carry, which is a
 /// different question and the one #1094 settled: `⇧` qualifies a
-/// positional row, or reverses its unshifted twin (#1655, #453),
-/// and each sticky scope takes the letter its own rationale
-/// gives it.
+/// positional row, or is a ruled related variant of its unshifted
+/// twin (#1655, #453, #2675), and each sticky scope takes the
+/// letter its own rationale gives it.
 @Suite("The seeded ladder's modifier senses (#1094)")
 struct DefaultKeybindingLadderTests {
     private func spaces(_ count: Int) -> [SpaceID] {
         (1...count).map { SpaceID($0) }
     }
 
-    /// The ruled reversals: an unshifted step → its `⇧` twin.
-    /// A new pair is a ruling (profiles.md ▸ seeded keymap).
-    private static let reversals: [String: String] = [
-        "KiwiDesk.focus_space_back()": "KiwiDesk.focus_space_forward()",
-        "KiwiDesk.cycle_mode()": "KiwiDesk.cycle_mode(\"prev\")",
-    ]
+    /// The ruled related variants: an unshifted row → its `⇧` twin,
+    /// which reverses it or acts on the same subject. A new pair is
+    /// a ruling (profiles.md ▸ seeded keymap), its reason beside it.
+    private static let relatedVariants:
+        [String: (shifted: String, why: String)] = [
+            "KiwiDesk.focus_space_back()": (
+                "KiwiDesk.focus_space_forward()",
+                "reverses the history step, as ⇧Tab (#1655)"
+            ),
+            "KiwiDesk.cycle_mode()": (
+                "KiwiDesk.cycle_mode(\"prev\")",
+                "reverses the layout cycle (#453)"
+            ),
+            "KiwiDesk.pocket()": (
+                "KiwiDesk.toggle_pocket_window()",
+                "marks the window the plain key pockets (#2675)"
+            ),
+        ]
 
-    /// Whether `row` is the ruled `⇧` reversal of its seeded twin.
-    private func reversesItsTwin(
+    /// Whether `row` is the ruled `⇧` variant of its seeded twin.
+    private func isRelatedVariant(
         _ combo: KeyCombo,
         _ row: KeyBinding,
         in combos: [(KeyCombo, KeyBinding)]
@@ -35,10 +47,11 @@ struct DefaultKeybindingLadderTests {
         let twin = combos.first {
             $0.0.keyCode == combo.keyCode && $0.0.modifiers == plain
         }?.1
-        return twin.flatMap { Self.reversals[$0.lua] } == row.lua
+        return twin.flatMap { Self.relatedVariants[$0.lua]?.shifted }
+            == row.lua
     }
 
-    @Test("⇧ on a letter only reverses its twin")
+    @Test("⇧ on a letter is only a ruled variant of its twin")
     func shiftNeverQualifiesALetter() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
@@ -49,8 +62,10 @@ struct DefaultKeybindingLadderTests {
         // ever qualifies a POSITIONAL row — an arrow or a digit.
         // A lettered row is a toggle or app chrome and escalates
         // nothing, so a ⇧ on one would be the second sense of ⇧
-        // that #1094 retired with `⌃⌥⇧S` — save the ruled reversal
-        // of a stepping twin (`⌃⌥⇧C`, #453). Derived from each
+        // that #1094 retired with `⌃⌥⇧S` — save a ruled related
+        // variant of its twin: the reversal of a stepping twin
+        // (`⌃⌥⇧C`, #453) or an act on the same subject (`⌃⌥⇧P`,
+        // #2675). Derived from each
         // row's own key rather than a hand-listed set, so a
         // toggle added later joins the invariant by existing.
         let combos = rows.compactMap { row in
@@ -67,7 +82,7 @@ struct DefaultKeybindingLadderTests {
                 key.count == 1 && key.allSatisfy(\.isLetter)
             let site = "\(row.combo) (\(row.label))"
             #expect(
-                !isLetter || reversesItsTwin(combo, row, in: combos),
+                !isLetter || isRelatedVariant(combo, row, in: combos),
                 "⇧ on a lettered row — \(site)"
             )
         }
@@ -127,12 +142,13 @@ struct DefaultKeybindingLadderTests {
         )
     }
 
-    /// `⇧` reverses its twin, as on Tab everywhere on macOS — the
-    /// one sense it carries off a positional key (#1655, widened
-    /// to the layout cycle's `C` by #453). So a `⇧` row on any key
-    /// that is neither an arrow nor a digit has its unshifted twin
-    /// seeded, running the opposite step.
-    @Test("off a positional key, ⇧ only reverses its twin")
+    /// Off a positional key `⇧` is a related variant of its twin —
+    /// its reversal, as on Tab everywhere on macOS (#1655, widened
+    /// to the layout cycle's `C` by #453), or an act on the same
+    /// subject (#2675). So a `⇧` row on any key that is neither an
+    /// arrow nor a digit has its unshifted twin seeded, and the
+    /// pair is ruled in `relatedVariants`.
+    @Test("off a positional key, ⇧ is a ruled variant of its twin")
     func shiftReversesItsTwin() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
@@ -156,12 +172,12 @@ struct DefaultKeybindingLadderTests {
         {
             reversed += 1
             #expect(
-                reversesItsTwin(combo, row, in: combos),
-                "⇧ on \(row.combo) is not a reversal of its twin"
+                isRelatedVariant(combo, row, in: combos),
+                "⇧ on \(row.combo) is no ruled variant of its twin"
             )
         }
         // Every ruled pair is seeded, or the register outgrew it.
-        #expect(reversed == Self.reversals.count)
+        #expect(reversed == Self.relatedVariants.count)
     }
 
     @Test("sticky seeds ⌃⌥S global; ⌃⌥P is Pocket, pin unseeded")

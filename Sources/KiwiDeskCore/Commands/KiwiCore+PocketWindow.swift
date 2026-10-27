@@ -1,0 +1,66 @@
+import Foundation
+
+/// `toggle_pocket_window` (#2675): marks the focused window the
+/// pocket window, or unmarks it. Marking floats it at the float
+/// size as a Float does and leaves it out; `pocket` then pockets
+/// and takes out that window alone, marking the focus first where
+/// none is marked.
+extension KiwiCore {
+    func togglePocketWindowCommand() -> CommandResponse {
+        _ = emptyPocketIfGone()
+        guard let id = focusedWindowID, let window = state.windows[id]
+        else { return .fail("no focused window") }
+        if state.pocketPhase(of: id) != nil {
+            unmarkPocketWindow(id)
+            return .ok()
+        }
+        if state.pocket != nil { return refuseSecondPocketWindow(id) }
+        guard !window.isFullscreen, !window.isTransientOverlay
+        else { return .fail("this window cannot be pocketed") }
+        markPocketWindow(id)
+        return .ok()
+    }
+
+    /// Makes `id` the pocket window, out where it is, placed as the
+    /// float verbs place a window that was no effective float — the
+    /// one resize a pocket window takes; a take-out keeps its frame.
+    func markPocketWindow(_ id: WindowID) {
+        let wasFloating = isEffectiveFloatForPlacement(id)
+        state.markPocketWindow(id)
+        onLog("pocket: w\(id.raw) marked")
+        refreshStickyReach()
+        retile()
+        if !wasFloating { placeFloating(id) }
+    }
+
+    /// Empties the slot, leaving `id` a plain float on the active
+    /// Space. Only an out window holds the focus the verb reads.
+    private func unmarkPocketWindow(_ id: WindowID) {
+        // Out, it drew on every Space; it stays on the one shown.
+        if let active = state.workspaces.activeSpace,
+            state.workspaces.space(of: id) != active
+        {
+            state.workspaces.add(id, to: active)
+        }
+        state.emptyPocket()
+        state.setFloating(id, true)
+        onLog("pocket: w\(id.raw) unmarked")
+        refreshStickyReach()
+        retile()
+    }
+
+    /// A second window asked to be the pocket window: refused on it.
+    private func refuseSecondPocketWindow(
+        _ id: WindowID
+    ) -> CommandResponse {
+        soundIfDrawn(
+            flashRefusalPill(
+                id,
+                text: PocketRefusal.markedElsewhereSentence,
+                symbol: AutoFloatReason.pocket.pillSymbol,
+                announce: true
+            )
+        )
+        return .fail("another window is the pocket window")
+    }
+}

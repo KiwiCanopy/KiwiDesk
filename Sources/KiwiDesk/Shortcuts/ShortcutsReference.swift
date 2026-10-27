@@ -91,7 +91,10 @@ enum ShortcutsReferenceBuilder {
                     )
                 )
                 row.ownApp = cmd.lua == KeybindingCatalog.openSettings.lua
-                row.pocketMark = cmd.lua == KeybindingCatalog.pocket.lua
+                row.pocketMark = [
+                    KeybindingCatalog.pocket.lua,
+                    KeybindingCatalog.pocketWindow.lua,
+                ].contains(cmd.lua)
                 guard regroups, cmd.unavailable == nil else { return row }
                 switch ShortcutGroup.filing(binding.group) {
                 case .none:

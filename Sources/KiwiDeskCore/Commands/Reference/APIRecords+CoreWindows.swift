@@ -160,8 +160,13 @@ extension APIReference {
                 + "pressed again or focus moves on."
         ),
         "pocket": APIRecord(
-            "Pockets the focused window, or takes the pocket window "
-                + "out onto this screen, or puts it back."
+            "Pockets the pocket window, or takes it out onto this "
+                + "screen; with none marked, marks and pockets the "
+                + "focused window."
+        ),
+        "toggle_pocket_window": APIRecord(
+            "Marks the focused window as the pocket window, floating "
+                + "it, or unmarks it."
         ),
         "override_sticky_reach": APIRecord(
             "Overrides Desktop reach for the focused sticky "

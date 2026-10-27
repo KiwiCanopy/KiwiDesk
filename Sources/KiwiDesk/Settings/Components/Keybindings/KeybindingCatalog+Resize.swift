@@ -11,6 +11,7 @@ extension KeybindingCatalog {
                 toggleFloating,
                 toggleSticky,
                 pocket,
+                pocketWindow,
             ]
     }
 
@@ -27,6 +28,7 @@ extension KeybindingCatalog {
         toggleSticky,
         toggleDisplaySticky,
         pocket,
+        pocketWindow,
         makeSticky,
         makeDisplaySticky,
         makeUnsticky,
@@ -146,8 +148,8 @@ extension KeybindingCatalog {
         }
     )
 
-    /// `pocket` (#2446): pockets the focused window, takes it out
-    /// and puts it back.
+    /// `pocket` (#2446): pockets the pocket window, takes it out
+    /// and puts it back; with none marked, marks the focused one.
     static let pocket = NavCommand(
         label: "Pocket this window",
         lua: "KiwiDesk.pocket()",
@@ -157,10 +159,28 @@ extension KeybindingCatalog {
         help: {
             L(
                 "keybinding.pocket.help",
-                "The first press pockets the focused window. After "
-                    + "that, the same key takes it out of your "
-                    + "pocket and puts it back. Close the window "
-                    + "to empty your pocket."
+                "Pockets your pocket window, or takes it out and "
+                    + "puts it back. With no window marked, the "
+                    + "first press marks the focused window and "
+                    + "pockets it."
+            )
+        }
+    )
+
+    /// `toggle_pocket_window` (#2675): marks or unmarks the focused
+    /// window as the pocket window.
+    static let pocketWindow = NavCommand(
+        label: "Mark as pocket window",
+        lua: "KiwiDesk.toggle_pocket_window()",
+        displayLabel: {
+            L("keybinding.pocket_window", "Mark as pocket window")
+        },
+        help: {
+            L(
+                "keybinding.pocket_window.help",
+                "Marks the focused window as your pocket window and "
+                    + "floats it, or unmarks it. One window can be "
+                    + "marked at a time."
             )
         }
     )
