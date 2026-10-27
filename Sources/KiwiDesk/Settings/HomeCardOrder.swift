@@ -19,25 +19,16 @@ enum HomeCardOrder {
         .general, .macChecklist,
     ]
 
-    /// Single offer predicate for home dashboard cards (#18) — no
-    /// hand-negated copies. Every card shows on any screen count:
-    /// Screens holds the pins of absent screens (#2690).
-    static func isOffered(
-        _ destination: SettingsDestination,
-        editingStoredProfile: Bool
-    ) -> Bool {
-        destination.isReachable(
-            editingStoredProfile: editingStoredProfile
-        )
-    }
-
-    /// Filters destination group to currently offered cards.
+    /// Filters a group to the cards offered: the #18
+    /// stored-profile axis alone, the one predicate links, search
+    /// and the reveal share. No card hangs on the screen count
+    /// (#2690).
     static func offered(
         _ group: [SettingsDestination],
         editingStoredProfile: Bool
     ) -> [SettingsDestination] {
         group.filter {
-            isOffered($0, editingStoredProfile: editingStoredProfile)
+            $0.isReachable(editingStoredProfile: editingStoredProfile)
         }
     }
 }

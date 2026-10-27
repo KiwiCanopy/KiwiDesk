@@ -236,5 +236,11 @@ struct HomeCardContentTests {
             pinCount: 0
         )
         #expect(two.contains("2") && two != single)
+        // No screen detected is not "One screen".
+        let none = HomeCardContent.screensSubtitle(
+            displayCount: 0,
+            pinCount: 0
+        )
+        #expect(none != single)
     }
 }

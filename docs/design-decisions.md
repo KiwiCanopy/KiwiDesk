@@ -10126,9 +10126,9 @@ door is invisible at rest — the owner could not find it — while
 title matching is a choice inside a menu the user already sees.
 
 **Screens shows on any screen count** (#2690, owner ruling
-2026-10-27, amending this entry). Its Home card first hid on a
-one-screen Mac as a capability; on a laptop that meant a user
-never met the page at all. The card is live, not greyed: the
+2026-10-27, amending this entry). Hiding its Home card on a
+one-screen Mac as a capability was refused: on a laptop a user
+would never meet the page at all. The card is live, not greyed: the
 page holds the pins and fingerprints of screens that are not
 connected, search and links already landed there, and no Home
 card greys. On one screen with nothing pinned, its subtitle

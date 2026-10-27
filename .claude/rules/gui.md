@@ -1083,15 +1083,16 @@ Home (a card grid; `model.destination == nil`) is the only
 navigator — there is no sidebar. The conventions a shell change
 must keep:
 
-- **One offer predicate.** Whether a Home card is offered — the
-  #18 stored-profile axis — is answered by
-  `HomeCardOrder.isOffered`, consulted by the grid; a
-  hand-negated copy is the drift #18's one-predicate rule exists
-  to prevent (`HomeCardOrderTests`). No card hangs on the screen
-  count: Screens shows on one screen too (#2690). The
-  `settingsNavigate` guard and the reveal consult the same
-  stored-profile axis (`HomeSurfacingTests`,
-  `SettingsSearchTests` ▸ `screensSearchableOnOneScreen`). The
+- **One offer predicate.** Whether a destination is offered —
+  the #18 stored-profile axis — is answered by
+  `SettingsDestination.isReachable`, which the grid (through
+  `HomeCardOrder.offered`), the `settingsNavigate` guard, search
+  and the reveal all consult; a hand-negated copy is the drift
+  #18's one-predicate rule exists to prevent
+  (`HomeCardOrderTests`, `HomeSurfacingTests`). Gate no
+  destination on the screen count: Screens shows on one screen
+  too (#2690; `SettingsSearchTests` ▸
+  `screensSearchableOnOneScreen`). The
   search panel shows NOTHING before
   a query (#1470): the field takes the window's arrival focus,
   so any row drawn before one pops over Home on every open

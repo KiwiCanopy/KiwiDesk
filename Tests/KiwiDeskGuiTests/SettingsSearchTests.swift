@@ -188,11 +188,10 @@ struct SettingsSearchTests {
         }
     }
 
-    /// Search finds Screens on one screen (#2654): it holds the
-    /// pins for screens that are not connected. The search context
-    /// carries no screen count at all, so this holds that Screens
-    /// is indexed; a screen-count filter read from elsewhere is
-    /// review's.
+    /// No screen count gates a destination (#2690): Screens holds
+    /// the pins of screens that are not connected. The search
+    /// context carries no screen count at all, so this holds that
+    /// Screens is indexed.
     @Test("search finds Screens with no screen count in reach")
     func screensSearchableOnOneScreen() {
         pinEnglish()
