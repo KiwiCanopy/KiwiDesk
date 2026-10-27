@@ -78,17 +78,16 @@ struct SpaceCustomizeButtonTests {
     @Test("the button is named and valued from its state")
     func buttonIsNamedAndValued() throws {
         let body = try stripped(customize)
-        #expect(
-            body.contains(
-                ".buttonStyle(.borderless).iconHoverChip()"
-                    + ".help(L(\"spaces.overrides.customize\","
-                    + "\"Customize…\"))"
-                    + ".accessibilityLabel(L(\"spaces.customize.a11y\","
-                    + "\"CustomizeSpace%1$@\",space.raw))"
-                    + ".accessibilityValue("
-                    + "OverrideCountBadge.spokenValue(state))}"
-            )
-        )
+        let chain: String = [
+            ".buttonStyle(.borderless).iconHoverChip()",
+            ".help(L(\"spaces.overrides.customize\",",
+            "\"Customize…\"))",
+            ".accessibilityLabel(L(\"spaces.customize.a11y\",",
+            "\"CustomizeSpace%1$@\",space.raw))",
+            ".accessibilityValue(",
+            "OverrideCountBadge.spokenValue(state))}",
+        ].joined()
+        #expect(body.contains(chain))
         #expect(
             body.contains("OverrideCountBadge(state:state)")
         )
