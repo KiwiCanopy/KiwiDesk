@@ -27,10 +27,7 @@ struct NavRow: View {
                     if command.lua == KeybindingCatalog.pocket.lua {
                         // The mark itself, as the panel draws it.
                         Image(
-                            nsImage: PocketMark.mark.image(
-                                size: 16,
-                                ink: .labelColor
-                            )
+                            nsImage: PocketMark.mark.image(size: 16, hex: "")
                         )
                         .frame(width: 16, height: 16)
                         .accessibilityHidden(true)
