@@ -62,7 +62,7 @@ struct PocketGroup: View {
                 selection: pocket.edge
             ) {
                 ForEach(AppBarEdge.allCases, id: \.self) {
-                    Text(Self.edgeName($0)).tag($0)
+                    Text(AppBarOptions.edgeName($0)).tag($0)
                 }
             }
             .labelsHidden()
@@ -71,7 +71,9 @@ struct PocketGroup: View {
             .controlSize(.regular)
             .fixedSize()
             .accessibilityLabel(SettingsCatalog.shortcuts.pocketEdge.text)
-            .accessibilityValue(Self.edgeName(pocket.wrappedValue.edge))
+            .accessibilityValue(
+                AppBarOptions.edgeName(pocket.wrappedValue.edge)
+            )
         }
         .searchAnchored(SettingsCatalog.shortcuts.pocketEdge)
     }
@@ -123,17 +125,12 @@ struct PocketGroup: View {
     static var inertProse: String {
         L(
             "shortcuts.pocket.inert_link",
-            "The Pocket appears only while %1$@ is on in %2$@.",
+            "The Pocket appears only while “%1$@” is on in %2$@.",
             L(
                 "behavior.animations.state_change",
                 "Animate float, Pocket & maximize"
             ),
             CrossReferenceRow.linkSlot
         )
-    }
-
-    /// An edge's name, as the bars' edge rows say it.
-    @MainActor static func edgeName(_ edge: AppBarEdge) -> String {
-        AppBarOptions.edge.first { $0.0 == edge }?.1 ?? ""
     }
 }

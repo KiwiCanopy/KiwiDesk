@@ -180,6 +180,9 @@ editing here:
 - **A window changing state — float, tile, maximize and its end,
   pocket in and out — is named on its pass through
   `retile(stateChange:)`, never by a pass-wide `animated:` (#2676).**
+  The pocket's window parks and returns in one write, its motion
+  drawn by the brief pocket (input-and-animation.md ▸ Pocketing's
+  motion is DRAWN too).
   The named window alone follows `animations.on_state_change` and
   springs its size where no newcomer shares the pass; its
   neighbours keep the pass's toggle. A door whose own pass draws a
@@ -754,9 +757,8 @@ editing here:
     filed at the put-back and never re-places it, the centring
     being the fallback for a screen with no filed frame
     (`PocketWindowTests` ▸ `takeOutKeepsTheSize`,
-    `fallbackPlacesBeforeThePark`). Releasing the window as a
-    plain float is `releasePocketWindow`, for a quit and an
-    unmark alike; the unmark's filing goes through
+    `fallbackPlacesBeforeThePark`). Emptying the slot is
+    `releasePocketWindow`, for a quit and an unmark alike; the unmark's filing goes through
     `fileMembership`, and it then tiles through the Tile's own
     `setFloating` unless `tileRefusal` names a reason (#2680,
     `PocketWindowTests` ▸ `unmarks`).

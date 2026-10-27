@@ -64,10 +64,10 @@ func makeTestCore(
         hotkeyRegistrar: hotkeyRegistrar
     )
     core.tiler.animation.reduceMotion = { false }
-    // The plate slide (#1956) pinned off — a playing slide holds
-    // the incoming writes past every switching suite's read — its
-    // panel and stack read inert; a slide suite states the read.
+    // The plate slide (#1956) and brief pocket (#2680) pinned off,
+    // their panels and reads inert; a suite of either states them.
     core.spaceSlide.reduceMotion = { true }
+    core.briefPocket.reduceMotion = { true }
     core.spaceSlide.present = { _ in }
     core.spaceSlide.stackOrder = { [:] }
     // The focused ring's arrival hold (#1959) reads the render

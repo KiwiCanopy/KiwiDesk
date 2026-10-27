@@ -25,9 +25,9 @@ struct BriefPocketTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 0, width: 1600, height: 1000)
         }
-        core.spaceSlide.reduceMotion = { !plays }
+        core.briefPocket.reduceMotion = { !plays }
         core.briefPocket.present = { _ in }
-        core.briefPocket.startFrames = { _, _ in }
+        core.briefPocket.makeFrames = { _, _ in nil }
         for raw: UInt32 in [1, 2] {
             core.state.apply(
                 .windowCreated(
@@ -70,6 +70,34 @@ struct BriefPocketTests {
         #expect(applies() == 0)
     }
 
+    /// The play takes the stored placement and the gated looks.
+    @Test("the play wears the stored placement and the gated looks")
+    func requestWiring() throws {
+        guard NSScreen.main != nil else { return }
+        let core = makeCore()
+        core.tiler.settings.pocketStyle.edge = .right
+        core.tiler.settings.pocketStyle.position = 30
+        #expect(core.execute("pocket").isSuccess)
+        let request = try #require(core.briefPocket.playing)
+        let region = core.tiler.visibleBounds(request.screen)
+        #expect(
+            request.pocket
+                == BriefPocketPlan.pocketFrame(
+                    in: region,
+                    edge: .right,
+                    position: 30
+                )
+        )
+        let settings = core.tiler.settings
+        #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
+        #expect(
+            request.plateGlass
+                == LiquidGlassGate.rendered(
+                    glass: settings.shortcutPanelLiquidGlass
+                )
+        )
+    }
+
     @Test("taking out plays the pocket and holds the one write")
     func takeOutPlaysAndHolds() {
         guard NSScreen.main != nil else { return }
@@ -81,6 +109,8 @@ struct BriefPocketTests {
         #expect(core.state.pocketedWindow == nil)
         #expect(core.briefPocket.isPlaying)
         #expect(core.tiler.applier.held.isHeld(one))
+        // The restore's one write is staged, not sent ahead of it.
+        #expect(core.tiler.applier.held.isStaged(one))
         #expect(applies() == 0)
     }
 

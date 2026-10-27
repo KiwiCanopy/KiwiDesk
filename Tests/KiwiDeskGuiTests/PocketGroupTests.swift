@@ -60,10 +60,10 @@ struct PocketGroupTests {
         #expect(source.contains("destination: .looks"))
     }
 
-    @Test("an edge reads as the bars' edge rows say it")
+    @Test("an edge reads as every edge row says it")
     func edgeNames() {
         LocalizationManager.shared.select("en")
-        #expect(PocketGroup.edgeName(.top) == "Top")
-        #expect(PocketGroup.edgeName(.right) == "Right")
+        #expect(AppBarOptions.edgeName(.top) == "Top")
+        #expect(AppBarOptions.edgeName(.right) == "Right")
     }
 }

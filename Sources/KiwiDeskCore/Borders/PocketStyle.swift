@@ -13,14 +13,16 @@ public struct PocketStyle: Sendable, Equatable {
 
     /// Where along `edge` the brief pocket's centre sits, in
     /// percent: 0 the left or top end, 100 the right or bottom.
-    public var position: CGFloat = 82 {
+    public var position: CGFloat = Self.defaultPosition {
         didSet { position = Self.clampPosition(position) }
     }
+
+    static let defaultPosition: CGFloat = 82
 
     public init() {}
 
     static func clampPosition(_ value: CGFloat) -> CGFloat {
-        value.isFinite ? max(0, min(value, 100)) : 82
+        value.isFinite ? max(0, min(value, 100)) : defaultPosition
     }
 }
 

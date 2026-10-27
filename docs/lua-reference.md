@@ -7683,7 +7683,7 @@ state: floating and tiling back, maximizing and returning, and
 going into the Pocket and out. Floating and maximizing spring the
 window to its new frame, size included. Going into the Pocket or
 out shows a brief pocket instead: it appears on the screen, a
-glass plate with the app's icon flies between it and the window,
+plate with the app's icon flies between it and the window,
 it nods and fades out, while the window itself leaves and comes
 back in one move. [`pocket.set_edge`](#pocketset_edge) and
 [`pocket.set_position`](#pocketset_position) place it. Under

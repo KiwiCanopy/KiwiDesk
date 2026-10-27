@@ -135,6 +135,12 @@ extension KiwiCore {
             )
         {
             tiler.applier.holdWrites([id], until: .now() + lands)
+            // Its ring waits for the write too, as a spring's does.
+            borders.holdStateChange(of: id, target: frame)
+            DispatchQueue.main.asyncAfter(deadline: .now() + lands) {
+                [weak self] in
+                self?.borders.stateChangeSettled(id)
+            }
         }
         refreshStickyReach()
         retile(stateChange: id)

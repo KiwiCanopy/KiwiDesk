@@ -6063,7 +6063,7 @@ is out. `⌃⌥⇧P` sits beside `⌃⌥P` as its related variant — the two
 keys act on one window (the `⇧` entry below, as amended). Unmarking
 tiles the window on the Space shown (owner, #2680): leaving the
 pocket is a return to the layout, so it ends where a Tile ends it,
-and a window detection floats stays a float.
+and a window a float rule or detection floats stays a float.
 
 **A pocketed window waits on one screen, the active Space's**
 (`StateCoordinator.pocketHomeDisplay`), and the park and the Desktop
@@ -6168,8 +6168,9 @@ and it nods and fades. The window parks at once and comes back with
 one write, held until the plate lands, so a slow app or a minimum
 size is never in play; no pocket stays on screen (that is #2678's,
 with the several-windows mode). The pocket's placement is an edge
-and a position along it, clear of a bar on that edge, in Settings ▸
-Shortcuts ▸ Pocket beside its two keys; the two rows grey while the
+and a position along it, clear of a bar on that edge, in Shortcuts &
+Gestures ▸ Pocket beside its two keys, Edge as a menu since a
+Shortcuts setting row's control takes the recorder's footprint; the two rows grey while the
 toggle is off, since the pocket then never appears. The bar menus
 offer no Pocket or Take out yet (owner, 2026-10-27): a pocketed
 window has no bar item, so only one of the two could show.

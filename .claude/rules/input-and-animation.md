@@ -818,12 +818,13 @@ editing here:
   over the windows; the window parks in the pass that pockets it,
   and a take-out's one write waits in `FrameApplier`'s hold until
   the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
-  `takeOutPlaysAndHolds`). Never bring back a slide of the real
-  window to its park. The play reads the slide's Reduce Motion,
-  which both `makeTestCore` twins pin on, so its panel and frame
-  clock are reached only by a suite that unpins it and pins them
-  itself; a further live read it adds is pinned the same way. Its
-  frame clock is one `DisplayLink` from the play's own screen.
+  `takeOutPlaysAndHolds`), and its ring waits with it through the
+  state-change hold. Never bring back a slide of the real window to
+  its park. The overlay's live reads are pinned inert in both
+  `makeTestCore` twins (`SpaceSlideSeamTests` ▸
+  `bothTwinsPinTheReads`); a suite that unpins its Reduce Motion
+  pins its panel and frame clock itself, as `BriefPocketTests`
+  does, and a live read the overlay adds joins that pin.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

@@ -16,13 +16,14 @@ final class BriefPocketOverlay {
     /// AppKit keeps a visible panel alive after its owner is gone
     /// (#1868).
     isolated deinit {
+        frames?.invalidate()
         for panel in panels.values { panel.orderOut(nil) }
     }
 
-    /// Puts a panel on screen, once. Reached only by a play, which
-    /// the slide's Reduce Motion read — pinned ON in both
-    /// `makeTestCore` twins — keeps from every suite but the brief
-    /// pocket's, which pins this and `startFrames` itself.
+    /// The Reduce Motion read — live by default; pinned ON in both
+    /// `makeTestCore` twins, so no suite plays unless it says so.
+    var reduceMotion: @MainActor () -> Bool = { BarMotion.isReduced }
+    /// Puts a panel on screen, once.
     var present: @MainActor (NSPanel) -> Void = {
         $0.orderFrontRegardless()
     }
@@ -32,12 +33,15 @@ final class BriefPocketOverlay {
     }
     /// The clock every time here is measured on.
     var clock: @MainActor () -> CFTimeInterval = { CACurrentMediaTime() }
-    /// Starts `screen`'s frame clock calling `tick` until it
-    /// answers false — one `DisplayLink` per screen.
-    var startFrames:
-        @MainActor (NSScreen, @escaping @MainActor () -> Bool) -> Void = {
-            BriefPocketTicker.start(on: $0, tick: $1)
-        }
+    /// Builds a play's frame clock on its screen — one
+    /// `DisplayLinkDriver` per play, which reports a starved clock
+    /// as every driver does (#1084).
+    var makeFrames:
+        @MainActor (NSScreen, @escaping DisplayLinkDriver.Tick)
+            -> DisplayLinkDriver? = {
+                DisplayLinkDriver(screen: $0, onTick: $1)
+            }
+    private var frames: DisplayLinkDriver?
 
     /// One play: the screen (its Cocoa frame) it shows on, which
     /// way the plate flies, the window's frame and the pocket's —
@@ -77,6 +81,8 @@ final class BriefPocketOverlay {
     private var generation = 0
 
     var isPlaying: Bool { play != nil }
+    /// The request playing now, nil between plays.
+    var playing: Request? { play?.request }
 
     /// Plays `request`, ending any play still running first.
     func play(_ request: Request) {
@@ -125,29 +131,36 @@ final class BriefPocketOverlay {
         play = current
         draw(current, at: 0)
         let mine = generation
-        startFrames(request.screen) { [weak self] in
-            self?.tick(mine) ?? false
+        frames = makeFrames(request.screen) { [weak self] _ in
+            self?.tick(mine)
+        }
+        frames?.start()
+        // A screen that leaves mid-play stops its clock; the play
+        // still ends on time.
+        let over = current.timeline.end + 0.1
+        DispatchQueue.main.asyncAfter(deadline: .now() + over) {
+            [weak self] in
+            guard self?.play?.generation == mine else { return }
+            self?.end()
         }
     }
 
     /// Drops the play at once and leaves the panel empty.
     func end() {
+        frames?.invalidate()
+        frames = nil
         guard let current = play else { return }
         current.panel.contentView = nil
         play = nil
     }
 
-    /// One frame of play `mine`; false once it is over or replaced.
-    private func tick(_ mine: Int) -> Bool {
+    /// One frame of play `mine`; ends the play once it is over.
+    private func tick(_ mine: Int) {
         guard let current = play, current.generation == mine
-        else { return false }
+        else { return }
         let t = clock() - current.begin
-        guard t < current.timeline.end else {
-            end()
-            return false
-        }
+        guard t < current.timeline.end else { return end() }
         draw(current, at: t)
-        return true
     }
 
     private func draw(_ current: Play, at t: TimeInterval) {
@@ -219,42 +232,5 @@ final class BriefPocketOverlay {
             .transient, .ignoresCycle, .canJoinAllSpaces, .stationary,
         ]
         return panel
-    }
-}
-
-/// A screen's frame clock for the brief pocket: a `CADisplayLink`
-/// from that screen, invalidated the tick its play says it is over.
-@MainActor
-final class BriefPocketTicker: NSObject {
-    private let tick: @MainActor () -> Bool
-    private var link: CADisplayLink?
-    /// Live tickers; each removes itself when it stops.
-    private static var running: Set<BriefPocketTicker> = []
-
-    private init(tick: @escaping @MainActor () -> Bool) {
-        self.tick = tick
-    }
-
-    static func start(
-        on screen: NSScreen,
-        tick: @escaping @MainActor () -> Bool
-    ) {
-        let ticker = BriefPocketTicker(tick: tick)
-        let link = screen.displayLink(
-            target: ticker,
-            selector: #selector(step(_:))
-        )
-        ticker.link = link
-        running.insert(ticker)
-        link.add(to: .main, forMode: .common)
-    }
-
-    @objc private func step(_ link: CADisplayLink) {
-        guard tick() else {
-            link.invalidate()
-            self.link = nil
-            Self.running.remove(self)
-            return
-        }
     }
 }

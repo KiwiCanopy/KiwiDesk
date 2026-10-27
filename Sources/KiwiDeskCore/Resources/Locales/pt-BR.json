@@ -1652,7 +1652,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Cor da marca Pocket",
   "pocket.edge": "Borda",
-  "pocket.edge.help": "Borda da tela em que o Pocket aparece enquanto uma janela entra ou sai. Uma barra na mesma borda o mantém logo para dentro.",
+  "pocket.edge.help": "Borda da tela em que o Pocket aparece enquanto uma janela entra ou sai. Se houver uma barra na mesma borda, ele aparece logo do lado de dentro dela.",
   "pocket.mark.ax": "Janela Pocket",
   "pocket.position": "Posição ao longo da borda",
   "pocket.position.help": "Onde o Pocket aparece ao longo da borda, da ponta esquerda ou superior à ponta direita ou inferior.",

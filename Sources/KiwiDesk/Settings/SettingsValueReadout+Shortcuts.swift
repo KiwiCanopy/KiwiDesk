@@ -70,10 +70,10 @@ extension SettingsValueReadout {
                 .change(
                     census,
                     label: SettingsCatalog.shortcuts.pocketEdge.text,
-                    old: PocketGroup.edgeName(
+                    old: AppBarOptions.edgeName(
                         old.settings.pocketStyle.edge
                     ),
-                    new: PocketGroup.edgeName(
+                    new: AppBarOptions.edgeName(
                         new.settings.pocketStyle.edge
                     )
                 )

@@ -16,8 +16,7 @@ extension KiwiCore {
         on display: DisplayID?
     ) -> TimeInterval? {
         guard tiler.settings.animations.onStateChange,
-            // The plate is the slide's, so is its Reduce Motion read.
-            !spaceSlide.reduceMotion(),
+            !briefPocket.reduceMotion(),
             let display,
             let screen = TilingEngine.screen(for: display)
         else { return nil }
