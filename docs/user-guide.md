@@ -1004,11 +1004,10 @@ under Shortcuts & Gestures ▸ Size & float.
 `⌃⌥⇧P` is **Mark as pocket window**, and `⌃⌥P` is **Pocket this
 window**, under Shortcuts & Gestures ▸ Size & float
 ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window),
-[`pocket`](lua-reference.md#pocket)). One window at a time is
-marked; with none marked, `⌃⌥P` marks the focused one. A pocketed
-window leaves the screen and every bar, and comes out on the
-screen you are on, floating on every Space. `⌘-Tab` to its app takes it out
-too, and KiwiHub's window switcher lists it under **Pocket**.
+[`pocket`](lua-reference.md#pocket)). A pocketed window leaves
+the screen and every bar, and comes out on the screen you are on,
+floating on every Space. `⌘-Tab` to its app takes it out too, and
+KiwiHub's window switcher lists it under **Pocket**.
 :::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each

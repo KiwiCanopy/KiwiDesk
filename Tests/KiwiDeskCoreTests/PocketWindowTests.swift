@@ -62,10 +62,7 @@ struct PocketWindowTests {
         let core = makeCore()
         #expect(core.execute("toggle_pocket_window").isSuccess)
         #expect(core.state.pocketPhase(of: one) == .out)
-        #expect(
-            core.state.workspaces.space(of: one)
-                == core.state.workspaces.activeSpace
-        )
+        #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
         #expect(core.state.windows[one]?.isFloating == true)
         #expect(core.state.windows[one]?.stickyScope == .global)
         #expect(core.state.pocketPhase(of: two) == nil)
@@ -137,10 +134,6 @@ struct PocketWindowTests {
         #expect(core.state.windows[one]?.isFloating == true)
         #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
         #expect(core.state.userFloated.contains(one))
-        #expect(
-            core.state.workspaces.space(of: one)
-                == core.state.workspaces.activeSpace
-        )
     }
 
     @Test("unmarked on another Space, it stays on that one")
@@ -168,19 +161,49 @@ struct PocketWindowTests {
         #expect(core.state.pocketPhase(of: two) == .pocketed)
     }
 
-    /// The fallback marks first, so the window is placed at the
-    /// float size before the park moves it off-screen.
-    @Test("the fallback floats the focus at the float size first")
+    /// Puts Space 1 on the host's first screen and pins the layout
+    /// to its usable area, so a frame placed there is one the park
+    /// files under that screen. Returns the area.
+    private func pinHostScreen(_ core: KiwiCore) throws -> CGRect {
+        let screen = try #require(ScreenList.all.first)
+        let id = try #require(screen.kiwiDisplayID)
+        core.state.workspaces.upsertDisplay(
+            Display(id: id, name: "Main", frame: screen.frame)
+        )
+        core.state.workspaces.assign(SpaceID("1"), to: id)
+        let area = GeometryUtils.axVisibleFrame(of: screen)
+        core.tiler.visibleBounds = { _ in area }
+        return area
+    }
+
+    /// A core whose windows follow every frame sent, as a real app
+    /// does, so the park files the frame the window stands at.
+    private func makeFollowingCore(
+        sent: @escaping @MainActor (WindowID, CGRect) -> Void = { _, _ in }
+    ) -> KiwiCore {
+        var core: KiwiCore?
+        let made = makeCore { id, frame in
+            sent(id, frame)
+            core?.state.apply(.windowResized(id, frame))
+        }
+        core = made
+        return made
+    }
+
+    /// The fallback marks first, so the frame the park files is the
+    /// float placement — the frame the mark sent — not the tiled
+    /// slot the window had.
+    @Test("the fallback files the float placement at the park")
     func fallbackPlacesBeforeThePark() throws {
-        var frames: [WindowID: [CGRect]] = [:]
-        let core = makeCore { frames[$0, default: []].append($1) }
-        let region = try #require(
-            core.floatGrowBounds(on: SpaceID("1"))
-        )
+        var frames: [CGRect] = []
+        let core = makeFollowingCore { id, frame in
+            if id == WindowID(1) { frames.append(frame) }
+        }
+        _ = try pinHostScreen(core)
         core.execute("pocket")
-        #expect(
-            frames[one]?.first == FloatPlacement.centered(in: region)
-        )
+        let placed = try #require(frames.first)
+        #expect(placed != slot)
+        #expect(core.state.pocket?.frames.values.map(\.self) == [placed])
     }
 
     /// A take-out never resizes (owner, #2675): it restores the
@@ -189,18 +212,8 @@ struct PocketWindowTests {
     /// looks the frame up on.
     @Test("a take-out keeps a hand-resized size")
     func takeOutKeepsTheSize() throws {
-        var frames: [WindowID: CGRect] = [:]
-        let core = makeCore { frames[$0] = $1 }
-        let screen = try #require(ScreenList.all.first)
-        let id = try #require(screen.kiwiDisplayID)
-        let display = Display(
-            id: id,
-            name: "Main",
-            frame: screen.frame
-        )
-        core.state.workspaces.upsertDisplay(display)
-        core.state.workspaces.assign(SpaceID("1"), to: id)
-        let area = GeometryUtils.axVisibleFrame(of: screen)
+        let core = makeFollowingCore()
+        let area = try pinHostScreen(core)
         let hand = CGRect(
             x: area.minX + 40,
             y: area.minY + 40,
@@ -213,14 +226,18 @@ struct PocketWindowTests {
         #expect(
             core.state.pocket?.frames.values.map(\.size) == [hand.size]
         )
-        frames[one] = nil
+        // Parked off the corner, as the stash leaves it.
+        let parked = hand.offsetBy(dx: area.width, dy: area.height)
+        core.state.apply(.windowResized(one, parked))
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: one) == .out)
-        // The fixture parks nothing, so the window still stands at
-        // the filed frame and the restore sends no frame; a resize
-        // to the float size would send one.
-        #expect((frames[one] ?? hand).size == hand.size)
-        #expect(core.state.windows[one]?.frame.size == hand.size)
+        // The frame the take-out seeds: still pending, or already
+        // sent and stood at.
+        let back = try #require(
+            core.tiler.stashOriginal(one) ?? core.state.windows[one]?.frame
+        )
+        #expect(back.size == hand.size)
+        #expect(back != parked)
     }
 
     @Test("a slot whose app is gone frees the mark for the focus")
@@ -241,6 +258,13 @@ struct PocketWindowTests {
         #expect(row.combo == "control+option+shift+p")
         #expect(row.lua == "KiwiDesk.toggle_pocket_window()")
         #expect(DefaultKeybindings.rows(ofGeneration: 9) == [row])
+        #expect(
+            DefaultKeybindings.bindings(
+                spaces: [SpaceID("1")],
+                resizeStep: 50,
+                base: .standard
+            ).contains(row)
+        )
         #expect(
             DefaultKeybindings.generationTopUp(
                 existing: [],

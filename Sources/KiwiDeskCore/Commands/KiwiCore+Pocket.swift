@@ -152,17 +152,15 @@ extension KiwiCore {
     /// lays it out and the next launch keeps it floating; an out
     /// one stays where it is, no longer sticky.
     func releasePocketForQuit() {
-        guard let slot = state.pocket else { return }
-        let id = slot.window
-        state.emptyPocket()
-        guard state.windows[id] != nil else { return }
+        guard let slot = state.pocket,
+            let id = state.releasePocketWindow()
+        else { return }
         if slot.phase == .pocketed,
             let target = state.workspaces.activeSpace
         {
             // A quit's filing, no user's: the gather lays it out.
             state.workspaces.add(id, to: target)
         }
-        state.setFloating(id, true)
     }
 }
 

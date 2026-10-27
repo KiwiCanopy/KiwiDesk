@@ -70,21 +70,22 @@ because two real clients now remove drift — see
 - **Never spend `⇧` on anything but "act on the window" — or,
   off a positional key, on a RELATED variant of its unshifted
   twin (#1655, #2675).** It qualifies a positional row; on a
-  letter it never changes the subject: `⌃⌥⇧S` did, a broader
-  sticky scope, and it was the one chord in the seed a user who
-  had learned the ladder read wrong (#1094,
+  letter it never changes the subject or the scope: `⌃⌥⇧S` did, a
+  broader sticky scope, and it was the one chord in the seed a
+  user who had learned the ladder read wrong (#1094,
   `DefaultKeybindingLadderTests` ▸ `shiftNeverQualifiesALetter`).
   A related variant reverses the twin, as `⇧Tab` does everywhere
   on macOS — the layout cycle's `⌃⌥⇧C` (#453) — or is a closely
   related act on the twin's own subject — `⌃⌥⇧P` marks the window
   `⌃⌥P` pockets (owner, 2026-10-27). Each pair joins that suite's
-  `relatedVariants` register with its reason, as a ruling. On the ladder `⇧` acts on the
+  `relatedVariants` register with its reason, as a ruling. On the
+  ladder `⇧` acts on the
   window on an arrow (swap) and on a digit (send it to a Space),
   and `⌘` steps the Spaces on an arrow and sends-and-follows on a
   digit, which is #1655's re-ruling of #1176; the tier an arrow
-  may ride, and the twin a `⇧` reversal needs, are derived per
+  may ride, and the twin a `⇧` variant needs, are derived per
   row rather than restated (`DefaultKeybindingLadderTests` ▸
-  `arrowsRideTheirOwnTiers`, `shiftReversesItsTwin`). The
+  `arrowsRideTheirOwnTiers`, `shiftIsARelatedVariant`). The
   ergonomics rulings and the collision measure behind them are
   `docs/design-decisions.md`'s. Which letter each sticky scope
   takes, why the screen-scoped one is named for a mark rather

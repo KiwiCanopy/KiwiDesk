@@ -105,7 +105,9 @@ struct PocketHomeTests {
             )
         )
         state.workspaces.add(one, to: "1")
+        state.markPocketWindow(one)
         state.pocketWindow(one)
+        #expect(state.pocketedWindow == one)
         #expect(state.pocketHomeDisplay == main)
 
         state.workspaces.activate(SpaceID("5"))

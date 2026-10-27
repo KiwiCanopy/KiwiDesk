@@ -906,7 +906,7 @@
   "keybinding.next_layout": "Passer à la disposition suivante",
   "keybinding.open_settings": "Ouvrir les Réglages",
   "keybinding.pocket": "Mettre cette fenêtre dans la Pocket",
-  "keybinding.pocket.help": "Met votre fenêtre Pocket dans la Pocket, ou l'en sort et la remet à sa place. Si aucune fenêtre n'est marquée, le premier appui marque la fenêtre ciblée et la met dans la Pocket.",
+  "keybinding.pocket.help": "Met votre fenêtre Pocket dans la Pocket, ou l'en ressort. Si aucune fenêtre n'est marquée, le premier appui marque la fenêtre ciblée et la met dans la Pocket.",
   "keybinding.pocket_window": "Marquer comme fenêtre Pocket",
   "keybinding.pocket_window.help": "Marque la fenêtre ciblée comme votre fenêtre Pocket et la fait flotter, ou retire la marque. Une seule fenêtre peut être marquée à la fois.",
   "keybinding.previous_layout": "Passer à la disposition précédente",

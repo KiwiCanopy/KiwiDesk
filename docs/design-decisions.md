@@ -6034,19 +6034,21 @@ in both states, so each such walk rules on it, and forgetting it
 there draws a mark on a parked window or parks it on the wrong
 screen.
 
-**Choosing the window is its own key (#2675), amending #2446's
-"one window, one key". Becoming the pocket window is the one
-resize.** With one key, the first press on an empty
-pocket chose the window and every press after it only toggled that
-window, so nothing short of a quit let a user pick another. So
+**Choosing the window is its own key (#2675), amending #2446,
+which chose the window with the one key that pockets it. Becoming
+the pocket window is the one resize.** With one key, the first
+press on an empty pocket chose the window and every press after it
+only toggled that window, so nothing short of closing the window or
+a quit let a user pick another. So
 `toggle_pocket_window` (`⌃⌥⇧P`) marks the focused window and
 unmarks it, and `pocket` (`⌃⌥P`) pockets and takes out the marked
-window alone. A second window is refused with a pill naming where
-to go, rather than silently moving the mark: the pocket window
+window alone. A second window is refused with a pill that sends the
+user to the marked window, rather than silently moving the mark: the pocket window
 carries a frame per screen and is the one window a key always
 reaches, so taking that away is an act on the marked window, not a
 side effect of pressing a key somewhere else. Marking floats the
-window at once, placed as a Float places it, and leaves it out:
+window at once, placed as the float placement places a floated
+tiled window, and leaves it out:
 a marked window is the pocket window, and an out pocket window is
 a global sticky float, so a mark that left it tiled would be a
 fourth state. That is the only time the pocket sizes the window: a

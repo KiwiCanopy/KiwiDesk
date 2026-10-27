@@ -906,7 +906,7 @@
   "keybinding.next_layout": "Alternar para o layout seguinte",
   "keybinding.open_settings": "Abrir Ajustes",
   "keybinding.pocket": "Guardar esta janela no Pocket",
-  "keybinding.pocket.help": "Guarda sua janela Pocket no Pocket, ou a tira e a devolve ao lugar. Sem nenhuma janela marcada, o primeiro toque marca a janela em foco e a guarda no Pocket.",
+  "keybinding.pocket.help": "Guarda sua janela Pocket no Pocket, ou a tira de novo. Sem nenhuma janela marcada, ao pressionar pela primeira vez você marca a janela em foco e a guarda no Pocket.",
   "keybinding.pocket_window": "Marcar como janela Pocket",
   "keybinding.pocket_window.help": "Marca a janela em foco como sua janela Pocket e a faz flutuar, ou remove a marca. Só uma janela pode estar marcada por vez.",
   "keybinding.previous_layout": "Alternar para o layout anterior",

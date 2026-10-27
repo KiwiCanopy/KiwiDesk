@@ -906,7 +906,7 @@
   "keybinding.next_layout": "切换到下一个布局",
   "keybinding.open_settings": "打开设置",
   "keybinding.pocket": "将此窗口放入 Pocket",
-  "keybinding.pocket.help": "将你的 Pocket 窗口放入 Pocket，或将其取出并放回原处。如果没有标记任何窗口，第一次按下会标记焦点窗口并将其放入 Pocket。",
+  "keybinding.pocket.help": "将你的 Pocket 窗口放入 Pocket，或再将其取出。如果没有标记任何窗口，第一次按下会标记焦点窗口并将其放入 Pocket。",
   "keybinding.pocket_window": "标记为 Pocket 窗口",
   "keybinding.pocket_window.help": "将焦点窗口标记为你的 Pocket 窗口并使其浮动，或取消标记。一次只能标记一个窗口。",
   "keybinding.previous_layout": "切换到上一个布局",

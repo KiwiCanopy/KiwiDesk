@@ -149,7 +149,7 @@ struct DefaultKeybindingLadderTests {
     /// arrow nor a digit has its unshifted twin seeded, and the
     /// pair is ruled in `relatedVariants`.
     @Test("off a positional key, ⇧ is a ruled variant of its twin")
-    func shiftReversesItsTwin() {
+    func shiftIsARelatedVariant() {
         let rows = DefaultKeybindings.bindings(
             spaces: spaces(9),
             resizeStep: 50,

@@ -23,32 +23,43 @@ extension StateCoordinator {
         pocket?.phase == .pocketed ? pocket?.window : nil
     }
 
-    /// Puts `id` in the pocket: floating, no sticky scope, filed in
-    /// no Space. A window already the slot's keeps its frames.
+    /// Puts the out pocket window `id` in the pocket: floating, no
+    /// sticky scope, filed in no Space. The slot fills only through
+    /// `markPocketWindow` (#2675), so any other window is refused.
     mutating func pocketWindow(_ id: WindowID) {
-        guard windows[id] != nil else { return }
-        let frames = pocket?.window == id ? pocket?.frames ?? [:] : [:]
+        guard pocketPhase(of: id) == .out, windows[id] != nil
+        else { return }
         windows.setFloating(id, true)
         windows.setSticky(id, .none)
         userFloated.remove(id)
         workspaces.remove(id)
-        pocket = PocketSlot(
-            window: id,
-            pid: windows[id]?.pid,
-            phase: .pocketed,
-            frames: frames
-        )
+        pocket?.phase = .pocketed
+        pocket?.cameFrom = nil
     }
 
-    /// Marks `id` the pocket window where it is (#2675): out,
-    /// floating, on every Space, its membership kept. Nothing
-    /// while the slot holds a window.
-    mutating func markPocketWindow(_ id: WindowID) {
-        guard pocket == nil, windows[id] != nil else { return }
-        windows.setFloating(id, true)
-        windows.setSticky(id, .global)
+    /// Marks `id` the pocket window where it is (#2675): out, its
+    /// membership kept, never pocketed yet. False while the slot
+    /// holds a window.
+    @discardableResult
+    mutating func markPocketWindow(_ id: WindowID) -> Bool {
+        guard pocket == nil, windows[id] != nil else { return false }
         userFloated.remove(id)
         pocket = PocketSlot(window: id, pid: windows[id]?.pid, phase: .out)
+        markPocketOut(cameFrom: nil)
+        return true
+    }
+
+    /// Empties the pocket, leaving its window the user's plain float
+    /// with no sticky scope; filing it is the caller's. The window,
+    /// where it is still tracked.
+    @discardableResult
+    mutating func releasePocketWindow() -> WindowID? {
+        guard let id = pocket?.window else { return nil }
+        emptyPocket()
+        guard windows[id] != nil else { return nil }
+        windows.setSticky(id, .none)
+        setFloating(id, true)
+        return id
     }
 
     /// Marks the slot's window out: floating and on every Space.

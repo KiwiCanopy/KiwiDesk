@@ -26,7 +26,7 @@ extension KiwiCore {
     /// one resize a pocket window takes; a take-out keeps its frame.
     func markPocketWindow(_ id: WindowID) {
         let wasFloating = isEffectiveFloatForPlacement(id)
-        state.markPocketWindow(id)
+        guard state.markPocketWindow(id) else { return }
         onLog("pocket: w\(id.raw) marked")
         refreshStickyReach()
         retile()
@@ -36,14 +36,12 @@ extension KiwiCore {
     /// Empties the slot, leaving `id` a plain float on the active
     /// Space. Only an out window holds the focus the verb reads.
     private func unmarkPocketWindow(_ id: WindowID) {
+        state.releasePocketWindow()
         // Out, it drew on every Space; it stays on the one shown.
-        if let active = state.workspaces.activeSpace,
-            state.workspaces.space(of: id) != active
-        {
-            state.workspaces.add(id, to: active)
+        let home = state.workspaces.space(of: id)
+        if let active = state.workspaces.activeSpace, home != active {
+            fileMembership(id, into: active, from: home)
         }
-        state.emptyPocket()
-        state.setFloating(id, true)
         onLog("pocket: w\(id.raw) unmarked")
         refreshStickyReach()
         retile()

@@ -159,10 +159,9 @@ extension KeybindingCatalog {
         help: {
             L(
                 "keybinding.pocket.help",
-                "Pockets your pocket window, or takes it out and "
-                    + "puts it back. With no window marked, the "
-                    + "first press marks the focused window and "
-                    + "pockets it."
+                "Pockets your pocket window, or takes it out "
+                    + "again. With no window marked, the first press "
+                    + "marks the focused window and pockets it."
             )
         }
     )
@@ -179,8 +178,8 @@ extension KeybindingCatalog {
             L(
                 "keybinding.pocket_window.help",
                 "Marks the focused window as your pocket window and "
-                    + "floats it, or unmarks it. One window can be "
-                    + "marked at a time."
+                    + "floats it, or unmarks it. Only one window can "
+                    + "be marked at a time."
             )
         }
     )

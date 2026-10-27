@@ -5643,8 +5643,8 @@ end)
 **Expects:** nothing.
 
 **Does:** keeps one window, the pocket window, one key away. Mark
-it with [`toggle_pocket_window`](#toggle_pocket_window); each call
-takes the next step:
+it with [`toggle_pocket_window`](#toggle_pocket_window); each
+`pocket` call takes the next step:
 
 - **Nothing marked:** marks the focused window, floating it as
   `toggle_pocket_window` does, and pockets it, a focused-window
@@ -5654,8 +5654,9 @@ takes the next step:
   in native full screen and on a transient panel or popup.
 - **Pocketed:** takes it out onto the active Space's screen at the
   frame it last had on that screen, else centred, floating and
-  focused. A take-out never resizes it to the float size; only
-  marking does.
+  focused. A take-out never resizes it; only marking a tiled window
+  places it at the float size
+  ([`set_float_placement`](#set_float_placement)).
 - **Out:** puts it back in the pocket, focused or not. If it had
   the focus, the focus goes back to the window it came out over
   where that is still on the Space, else to the Space's focused
@@ -5722,8 +5723,10 @@ end)
 **Expects:** nothing.
 
 **Does:** marks the focused window as the [pocket](#pocket) window,
-or unmarks it. Marking floats it at once where it is, placed as
-[`toggle_floating`](#toggle_floating) places a tiled window, and
+or unmarks it, a focused-window command like `make_floating`.
+Marking floats it at once, placed as
+[`set_float_placement`](#set_float_placement) places a tiled window
+that is floated (a window already floating keeps its frame), and
 leaves it out of the pocket: on every Space, wearing the pocket
 mark. Unmarking leaves it a plain float on the active Space.
 

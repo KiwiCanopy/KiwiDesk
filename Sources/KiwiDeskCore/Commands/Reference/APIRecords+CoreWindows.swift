@@ -160,9 +160,9 @@ extension APIReference {
                 + "pressed again or focus moves on."
         ),
         "pocket": APIRecord(
-            "Pockets the pocket window, or takes it out onto this "
-                + "screen; with none marked, marks and pockets the "
-                + "focused window."
+            "Pockets the pocket window, takes it out onto this "
+                + "screen or puts it back; with none marked, marks "
+                + "and pockets the focused window."
         ),
         "toggle_pocket_window": APIRecord(
             "Marks the focused window as the pocket window, floating "

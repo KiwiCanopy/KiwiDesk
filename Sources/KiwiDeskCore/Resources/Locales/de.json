@@ -906,7 +906,7 @@
   "keybinding.next_layout": "Zum nächsten Layout wechseln",
   "keybinding.open_settings": "Einstellungen öffnen",
   "keybinding.pocket": "Dieses Fenster in die Pocket stecken",
-  "keybinding.pocket.help": "Steckt dein Pocket-Fenster in die Pocket oder holt es heraus und bringt es an seinen Platz zurück. Ist kein Fenster markiert, markiert der erste Tastendruck das fokussierte Fenster und steckt es in die Pocket.",
+  "keybinding.pocket.help": "Steckt dein Pocket-Fenster in die Pocket oder holt es wieder heraus. Ist kein Fenster markiert, markiert der erste Tastendruck das fokussierte Fenster und steckt es in die Pocket.",
   "keybinding.pocket_window": "Als Pocket-Fenster markieren",
   "keybinding.pocket_window.help": "Markiert das fokussierte Fenster als dein Pocket-Fenster und lässt es schweben, oder hebt die Markierung auf. Es kann immer nur ein Fenster markiert sein.",
   "keybinding.previous_layout": "Zum vorherigen Layout wechseln",

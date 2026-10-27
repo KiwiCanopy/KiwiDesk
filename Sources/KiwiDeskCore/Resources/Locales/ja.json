@@ -906,7 +906,7 @@
   "keybinding.next_layout": "次のレイアウトに切り替える",
   "keybinding.open_settings": "設定を開く",
   "keybinding.pocket": "このウインドウを Pocket に入れる",
-  "keybinding.pocket.help": "Pocket ウインドウを Pocket に入れるか、取り出して元の場所に戻します。マークされたウインドウがないときは、最初に押すとフォーカス中のウインドウをマークして Pocket に入れます。",
+  "keybinding.pocket.help": "Pocket ウインドウを Pocket に入れるか、再び取り出します。マークされたウインドウがないときは、最初に押すとフォーカス中のウインドウをマークして Pocket に入れます。",
   "keybinding.pocket_window": "Pocket ウインドウとしてマークする",
   "keybinding.pocket_window.help": "フォーカス中のウインドウを Pocket ウインドウとしてマークしてフローティングにするか、マークを解除します。マークできるウインドウは一度に1つだけです。",
   "keybinding.previous_layout": "前のレイアウトに切り替える",
