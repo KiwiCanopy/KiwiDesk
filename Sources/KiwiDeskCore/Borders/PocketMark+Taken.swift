@@ -40,7 +40,25 @@ extension PocketMark {
                     )
                 )
             )
-            sign?.draw(in: corner)
+            if let sign {
+                // Aspect-fit: the symbol's own box is not square.
+                let fit = min(
+                    side / sign.size.width,
+                    side / sign.size.height
+                )
+                let size = NSSize(
+                    width: sign.size.width * fit,
+                    height: sign.size.height * fit
+                )
+                sign.draw(
+                    in: NSRect(
+                        x: corner.midX - size.width / 2,
+                        y: corner.midY - size.height / 2,
+                        width: size.width,
+                        height: size.height
+                    )
+                )
+            }
             return true
         }
     }

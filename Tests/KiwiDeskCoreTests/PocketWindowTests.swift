@@ -115,15 +115,15 @@ struct PocketWindowTests {
         #expect(core.state.windows[two]?.isFloating == false)
     }
 
-    /// The refusal names its own glyph, which the pill resolves
-    /// to the pocket drawing, never a missing system symbol.
-    @Test("the refusal's glyph is the pocket's")
-    func refusalGlyph() {
-        #expect(
-            PocketMark.pillImage(named: PocketMark.takenName, size: 12)
-                != nil
-        )
-        #expect(PocketMark.pillImage(named: "nosign", size: 12) == nil)
+    /// The pill resolves the refusal's sentinel to the pocket
+    /// drawing, which no system symbol of that name could supply.
+    @Test("the pill draws the pocket's taken glyph")
+    @MainActor
+    func pillDrawsTheTakenGlyph() {
+        let taken = SizeLimitPillPlate.image(for: PocketMark.takenName)
+        #expect(taken != nil)
+        #expect(taken?.isTemplate == false)
+        #expect(SizeLimitPillPlate.image(for: "nosign") != nil)
     }
 
     @Test("a second window is refused while the mark is pocketed")
