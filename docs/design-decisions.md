@@ -9227,10 +9227,11 @@ verbatim token, so the closed carve-out of four stays closed. It
 is a name, not an abbreviation, so it keeps its capital beside
 `ctrl` and `opt`, and it may overhang its chip: ✦ stands where ⌃⌥
 stand on the other base, so a Hyper row is held to be no wider
-than the ⌃⌥ row (`OnboardingModifierNameTests`). The name of
-the key the user actually holds (Caps Lock, say) is rejected: it is too wide for the chip, and it
-is not what Settings calls this key anywhere. VoiceOver reads the
-glyph as a star, so the keycap speaks the same word in its place.
+than the ⌃⌥ row (`OnboardingModifierNameTests` ▸
+`namesStayInsideTheirChip`). The name of the key the user actually
+holds (Caps Lock, say) is rejected: it is not what Settings calls
+this key anywhere. VoiceOver reads the glyph as a star, so the
+keycap speaks the same word in its place.
 :::
 
 **And the rule outranks the rows.** The seeded keymap is a tier

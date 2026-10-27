@@ -27,7 +27,7 @@ enum OnboardingModifierNames {
         ]
         let hyper = OnboardingModifierName(
             glyph: ComboSymbols.hyperGlyph,
-            name: hyperName
+            name: HyperKeyWords.keyName
         )
         let plain: [OnboardingModifierName] = names.compactMap {
             modifier,
@@ -39,10 +39,5 @@ enum OnboardingModifierNames {
             )
         }
         return (modifiers.contains(.hyper) ? [hyper] : []) + plain
-    }
-
-    /// The Hyper key's name, the word Settings gives it.
-    static var hyperName: String {
-        L("shortcuts.hyper_key.name", "Hyper")
     }
 }

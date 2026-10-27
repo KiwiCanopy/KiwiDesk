@@ -2037,7 +2037,12 @@ which each recorder mount sets beside `\.hyperKeyIsOff`
 (`ModifierSideRecorderTests` ▸ `mountsWireTheSides`); a new mount
 joins that needle. **A menu key equivalent never carries a sided
 chord**, since it has no side to draw
-(`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
+(`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`). **A spoken
+chord names ✦ by `HyperKeyWords.keyName`, through
+`SidedChordWords.label`**, sided or not, since VoiceOver reads the
+glyph as a star (#2700, `SidedChordWordsTests` ▸ `hyperIsNamed`);
+a surface speaking a chord takes `label`, never a ✦ replacement of
+its own.
 
 ## SwiftUI traps
 

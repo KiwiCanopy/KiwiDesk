@@ -118,7 +118,7 @@ enum ShortcutBaseWords {
         case .standard:
             L("shortcuts.base.spoken.standard", "Control-Option")
         case .hyper where keySet:
-            L("shortcuts.hyper_key.name", "Hyper")
+            HyperKeyWords.keyName
         case .hyper:
             L("shortcuts.base.spoken.no_key", "Hyper, no key set")
         }

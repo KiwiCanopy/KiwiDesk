@@ -104,8 +104,10 @@ struct OnboardingModifierNameTests {
     /// number-pin must derive the number). What actually matters
     /// is that a name is narrower than the chip above it, which
     /// is what keeps each column chip-bound and the words free.
-    @Test("a name is narrower than the chip above it")
-    func namesStayInsideTheirChip() {
+    /// ✦'s word is a name, held instead to the room ⌃⌥ take on the
+    /// other base (#2700).
+    @Test("a name fits the column it stands in")
+    func namesStayInsideTheirChip() throws {
         let nameFont = NSFont.systemFont(ofSize: 9.5)
         let glyphFont = NSFont.monospacedSystemFont(
             ofSize: 12,
@@ -142,38 +144,45 @@ struct OnboardingModifierNameTests {
         }
         // ✦'s word is Settings' name, not an abbreviation, and
         // may overhang its chip (#2700). It stands where ⌃⌥ stand
-        // on the other base, so its column may not outgrow theirs.
-        let hyper = column(OnboardingModifierNames.named(.hyper)[0])
+        // on the other base, so its column may not outgrow theirs
+        // in any catalog.
         let pair = OnboardingModifierNames.named([.control, .option])
             .map { max(column($0).chip, column($0).name) }
             .reduce(0, +)
-        let hyperWidth = max(hyper.chip, hyper.name)
-        #expect(
-            hyperWidth <= pair,
-            Comment(
-                rawValue:
-                    "✦ is \(hyperWidth) pt wide where ⌃⌥ take "
-                    + "\(pair) pt — a Hyper row outgrows the "
-                    + "measured ⌃⌥ one"
+        defer { LocalizationManager.shared.select("en") }
+        for locale in ["en"] + LocalizationManager.shared.available {
+            LocalizationManager.shared.select(locale)
+            let hyper = try #require(
+                OnboardingModifierNames.named(.hyper).first
             )
-        )
+            let width = max(column(hyper).chip, column(hyper).name)
+            #expect(
+                width <= pair,
+                Comment(
+                    rawValue:
+                        "✦ is \(width) pt wide in \(locale) where "
+                        + "⌃⌥ take \(pair) pt — a Hyper row "
+                        + "outgrows the measured ⌃⌥ one"
+                )
+            )
+        }
     }
 
     /// VoiceOver reads ✦ as a star, so the keycap speaks the
     /// name drawn under it instead (#2700).
     @Test("the keycap speaks ✦ by its name")
     func hyperIsSpokenByName() {
-        let family = OnboardingKeyFamily(
-            id: "focus",
-            label: "Move focus",
-            chord: .shared([.hyper, .shift], keys: "← →")
-        )
-        let spoken = family.spokenGlyphs
-        #expect(!spoken.contains(ComboSymbols.hyperGlyph))
+        LocalizationManager.shared.select("en")
+        func spoken(_ chord: OnboardingChord) -> String {
+            OnboardingKeyFamily(id: "focus", label: "", chord: chord)
+                .spokenGlyphs
+        }
+        let name = HyperKeyWords.keyName
+        #expect(spoken(.shared(.hyper, keys: "← →")) == name + " ← →")
         #expect(
-            spoken.hasPrefix(OnboardingModifierNames.hyperName + " ")
+            spoken(.shared([.hyper, .shift], keys: "← →"))
+                == name + " ⇧ ← →"
         )
-        #expect(spoken.hasSuffix("← →"))
     }
 
     /// The keycap is the surface that speaks the chord, so it

@@ -23,6 +23,12 @@ enum HyperKeyWords {
         )
     }
 
+    /// The Hyper key's own name, which ✦ is spoken and captioned
+    /// as wherever a chord carries it (#2700).
+    static var keyName: String {
+        L("shortcuts.hyper_key.name", "Hyper")
+    }
+
     /// The key as the row names it: "Caps Lock", "Right ⌘", "F13".
     /// One key per sided modifier: the side is an adjective that
     /// agrees with each key's own noun (localization.md).
