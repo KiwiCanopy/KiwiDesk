@@ -1003,7 +1003,7 @@ under Shortcuts & Gestures ▸ Size & float.
 
 :::unreleased
 `⌃⌥⇧P` is **Toggle Pocket**, and `⌃⌥P` is **Pocket or take out**,
-under Shortcuts & Gestures ▸ Size & float
+under Shortcuts & Gestures ▸ Pocket
 ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window),
 [`pocket`](lua-reference.md#pocket)). A pocketed window leaves
 the screen and every bar, and comes out on the screen you are on,

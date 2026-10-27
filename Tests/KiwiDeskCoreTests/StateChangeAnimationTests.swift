@@ -6,7 +6,7 @@ import Testing
 @testable import KiwiDeskCore
 
 /// #2676: a window changing state — floating and back, maximizing
-/// and back, pocketing and out — moves under `on_state_change`,
+/// and back — moves under `on_state_change`,
 /// apart from the toggles its neighbours follow. A counted
 /// `animation.apply` is the animated path; the instant `setFrame`
 /// path is uncounted (the #11 suites' probe).
@@ -157,41 +157,6 @@ struct StateChangeAnimationTests {
             core.tiler.settings.animations.onStateChange = on
             let applies = countApplies(core)
             #expect(core.execute("toggle_maximized").isSuccess)
-            let moved = applies()[WindowID(1)] ?? 0
-            #expect(on ? moved >= 1 : moved == 0)
-        }
-    }
-
-    @Test("pocketing slides only under on_state_change")
-    func pocketFollowsItsToggle() {
-        guard NSScreen.main != nil else { return }
-        for on in [true, false] {
-            let core = makeCore()
-            addWindow(core, 1)
-            addWindow(core, 2)
-            core.focusWindow(WindowID(1), warp: false)
-            core.tiler.settings.animations.onStateChange = on
-            let applies = countApplies(core)
-            #expect(core.execute("pocket").isSuccess)
-            #expect(core.state.pocketedWindow == WindowID(1))
-            let moved = applies()[WindowID(1)] ?? 0
-            #expect(on ? moved >= 1 : moved == 0)
-        }
-    }
-
-    @Test("taking a window out of the pocket slides it in")
-    func pocketOutFollowsItsToggle() {
-        guard NSScreen.main != nil else { return }
-        for on in [true, false] {
-            let core = makeCore()
-            addWindow(core, 1)
-            addWindow(core, 2)
-            core.focusWindow(WindowID(1), warp: false)
-            #expect(core.execute("pocket").isSuccess)
-            core.tiler.settings.animations.onStateChange = on
-            let applies = countApplies(core)
-            #expect(core.execute("pocket").isSuccess)
-            #expect(core.state.pocketedWindow == nil)
             let moved = applies()[WindowID(1)] ?? 0
             #expect(on ? moved >= 1 : moved == 0)
         }

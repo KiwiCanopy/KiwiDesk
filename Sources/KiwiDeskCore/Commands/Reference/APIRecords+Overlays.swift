@@ -155,7 +155,17 @@ extension APIReference {
         "set_color": APIRecord(
             "Sets the pocket mark's color; empty is automatic.",
             .color("hex")
-        )
+        ),
+        "set_edge": APIRecord(
+            "Sets the screen edge the pocket appears on while a "
+                + "window goes in or out.",
+            .choice("edge", AppBarEdge.self)
+        ),
+        "set_position": APIRecord(
+            "Sets where along its edge the pocket appears, 0–100 "
+                + "percent from the left or top.",
+            .number("percent")
+        ),
     ]
 
     static let mouseRecords: [String: APIRecord] = [

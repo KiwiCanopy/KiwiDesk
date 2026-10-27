@@ -129,7 +129,6 @@ struct HomeScreen: View {
     ) -> [SettingsDestination] {
         HomeCardOrder.offered(
             group,
-            displayCount: model.displays.count,
             editingStoredProfile: model.editingStoredProfile
         )
     }

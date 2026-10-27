@@ -282,21 +282,8 @@ extension TilingEngine {
             return
         }
         meter.add(\.parksIssued)
-        // A window pocketed this pass slides there (#2676); its
-        // size is its own, so only the position moves. A refused
-        // slide keeps the one-call park below (#1508).
-        if window.id == stateChangeWindow,
-            settings.animations.onStateChange,
-            !animation.reduceMotion()
-        {
-            applyFrame(
-                window.id,
-                from: commanded ?? window.frame,
-                to: target,
-                animated: true
-            )
-            return
-        }
+        // A pocketed window parks at once too: the brief pocket
+        // draws its going (#2680).
         animation.cancel(window: window.id)
         // Only the right corner's x is width-free; the left one
         // is measured from the state width, which the size write

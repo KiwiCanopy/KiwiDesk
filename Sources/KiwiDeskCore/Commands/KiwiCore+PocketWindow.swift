@@ -1,7 +1,7 @@
 import Foundation
 
 /// `toggle_pocket_window` (#2675): marks the focused window the
-/// pocket window, or unmarks it. Marking floats it at the float
+/// pocket window, or unmarks it, tiling it. Marking floats it at the float
 /// size as a Float does and leaves it out; `pocket` then pockets
 /// and takes out that window alone, marking the focus first where
 /// none is marked.
@@ -36,8 +36,9 @@ extension KiwiCore {
         if !wasFloating { placeFloating(id) }
     }
 
-    /// Empties the slot, leaving `id` a plain float on the active
-    /// Space. Only an out window holds the focus the verb reads.
+    /// Empties the slot and tiles `id` on the active Space, as a
+    /// Tile does (owner, #2680); a window detection floats stays a
+    /// float. Only an out window holds the focus the verb reads.
     private func unmarkPocketWindow(_ id: WindowID) {
         state.releasePocketWindow()
         // Out, it drew on every Space; it stays on the one shown.
@@ -47,7 +48,8 @@ extension KiwiCore {
         }
         onLog("pocket: w\(id.raw) unmarked")
         refreshStickyReach()
-        retile()
+        guard tileRefusal(of: id) == nil else { return retile() }
+        _ = setFloating(id, false)
     }
 
     /// A second window asked to be the pocket window: refused on it.

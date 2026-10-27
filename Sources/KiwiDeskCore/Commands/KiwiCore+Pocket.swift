@@ -60,6 +60,10 @@ extension KiwiCore {
         filing becoming: (frame: CGRect, screen: String)? = nil
     ) {
         rememberPocketFrame(of: id)
+        // Read while it still shows: the plate leaves from here.
+        let shown = state.windows[id].map {
+            tiler.commandedFrame(of: id) ?? $0.frame
+        }
         let cameFrom = state.pocket?.cameFrom
         let heldFocus = state.workspaces.lastFocused == id
         tiler.forgetStash(id)
@@ -85,6 +89,14 @@ extension KiwiCore {
             }
         }
         retile(stateChange: id)
+        if let shown {
+            playBriefPocket(
+                .into,
+                window: id,
+                frame: shown,
+                on: TilingEngine.screen(containing: shown)?.kiwiDisplayID
+            )
+        }
     }
 
     /// Takes the pocketed window out onto the active Space's
@@ -112,6 +124,19 @@ extension KiwiCore {
             }
         if let frame { tiler.seedStash(id, frame: frame) }
         onLog("pocket: w\(id.raw) out on space \(target)")
+        // Its one write lands as the plate does (#2680).
+        if let frame,
+            let lands = playBriefPocket(
+                .outOf,
+                window: id,
+                frame: frame,
+                on: TilingEngine.screen(for: target, in: state)?
+                    .kiwiDisplayID
+            )
+        {
+            tiler.applier.holdWrites([id], until: .now() + lands)
+            holdRingThroughLanding(id, target: frame, lands: lands)
+        }
         refreshStickyReach()
         retile(stateChange: id)
         focusWindow(id, refocusRetile: false, warp: true)
