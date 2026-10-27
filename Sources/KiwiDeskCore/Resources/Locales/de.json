@@ -1644,6 +1644,8 @@
   "placement.last": "Letztes",
   "placement.new_window": "Neues Fenster",
   "placement.new_window.help": "Wo ein neues Fenster relativ zu den anderen landet: Erster oder Letzter in der Layout-Reihenfolge oder direkt vor bzw. nach dem aktuell fokussierten Fenster beim Öffnen.",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Farbe der Pocket-Markierung",
   "pocket.mark.ax": "Pocket-Fenster",
   "pocket.refusal.float": "Pocket-Fenster schweben immer",
   "pocket.refusal.sticky": "Pocket-Fenster sind immer Sticky",

@@ -808,6 +808,18 @@ paths. The product
 ruling is `docs/design-decisions.md` ▸ One width and one corner
 style for every window stroke.
 
+## A mark's colour reaches its plate through `plateHex`
+
+**A plate's tint is read through `Glyph.plateHex`, never
+`Glyph.color`** (#2671): the pocket mark's colour fills the pocket
+itself, opaque, so its plate stays untinted, and the Space Bar's
+pocket badge keeps the count badge's disc the same way. Draw the
+on-window mark in a mark colour through the one
+`PocketMark.image(size:hex:)`, which inks its outlines with
+`contrastingGlyph` as `StickyMarkPlate.paint` inks a disc; the
+badge's pocket alone falls back to its disc's `contrastingGlyph`,
+in `applyStateBadge` (`PocketMarkColorTests`).
+
 ## Exercising the fallback path
 
 `KIWIDESK_NO_WS_TRACKING=<anything>` keeps `WindowServerWatch`'s

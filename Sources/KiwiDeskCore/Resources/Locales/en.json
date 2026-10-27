@@ -1644,6 +1644,8 @@
   "placement.last": "Last",
   "placement.new_window": "New window",
   "placement.new_window.help": "Where a new window lands relative to the others: First or Last in the layout's order, or right before or after whichever window is focused at the moment it opens.",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Pocket mark color",
   "pocket.mark.ax": "Pocket window",
   "pocket.refusal.float": "Pocket windows always float",
   "pocket.refusal.sticky": "Pocket windows are always sticky",

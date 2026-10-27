@@ -101,7 +101,7 @@ struct VisibleBoundsRoutingTests {
         "App/KiwiCore+ShelfRevealCue.swift": 1,
         // The pocket mark slides inward off the screen's edge
         // (#2446): an overlay, no layout reads it.
-        "Borders/StickyMarkOverlay+Pocket.swift": 1,
+        "Borders/StickyMarkOverlay+Glyphs.swift": 1,
         // DO NOT ROUTE. Re-anchor resolves the source AND the
         // destination screen and early-returns when they are
         // equal — under a one-rect hook they always are, so

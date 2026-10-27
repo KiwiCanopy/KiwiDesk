@@ -1644,6 +1644,8 @@
   "placement.last": "末尾",
   "placement.new_window": "新建平铺窗口",
   "placement.new_window.help": "新窗口相对于其他窗口的落位：在布局顺序中排最前或最后，或紧邻打开时处于焦点的那个窗口之前或之后。",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Pocket 标记颜色",
   "pocket.mark.ax": "Pocket 窗口",
   "pocket.refusal.float": "Pocket 窗口始终浮动",
   "pocket.refusal.sticky": "Pocket 窗口始终为 Sticky",

@@ -1644,6 +1644,8 @@
   "placement.last": "마지막",
   "placement.new_window": "새 타일 윈도우",
   "placement.new_window.help": "새로운 윈도우가 다른 윈도우를 기준으로 어디에 놓일지 정합니다. 레이아웃 순서상 처음이나 마지막에 놓거나, 열리는 시점에 포커스된 윈도우의 바로 앞이나 뒤에 놓습니다.",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Pocket 마크 색상",
   "pocket.mark.ax": "Pocket 윈도우",
   "pocket.refusal.float": "Pocket 윈도우는 항상 플로팅됨",
   "pocket.refusal.sticky": "Pocket 윈도우는 항상 Sticky임",

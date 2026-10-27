@@ -30,6 +30,7 @@ enum BordersKey: String, CaseIterable, Hashable {
     case dragDropZoneFill = "settings.dragDropZone.fill"
     case dragDropZoneFillColor = "settings.dragDropZone.fillColor"
     case floatingColor = "settings.floatingStyle.color"
+    case pocketColor = "settings.pocketStyle.color"
 }
 
 extension BordersKey {
@@ -83,8 +84,8 @@ extension BordersKey {
                     .borders(.borderUnfocusedEnabled),
                 ])
             )
-        case .stickyColor, .floatingColor:
-            // Both paint on the window, so neither takes the Space
+        case .stickyColor, .floatingColor, .pocketColor:
+            // Each paints on the window, so none takes the Space
             // Bar's gate (StickyMarkUngatedTests, #1799).
             return .row(.coloursAndMotion, .windowMarks, .showMore)
         case .borderGlowSize:

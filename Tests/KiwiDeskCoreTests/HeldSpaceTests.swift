@@ -282,7 +282,11 @@ struct HeldSpaceTests {
             active: false,
             horizontal: true,
             style: SpaceBarLook(),
-            stateMarkColors: StateMarkColors(sticky: "", floating: ""),
+            stateMarkColors: StateMarkColors(
+                sticky: "",
+                floating: "",
+                pocket: ""
+            ),
             marker: renumbered.marker
         )
         #expect(!view.markerView.isHidden)

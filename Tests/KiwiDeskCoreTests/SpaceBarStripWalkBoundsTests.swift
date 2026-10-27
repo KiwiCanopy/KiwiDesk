@@ -72,7 +72,8 @@ struct SpaceBarStripWalkBoundsTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             before: .init(windows: ids(0..<window.lowerBound)),
             after: .init(windows: ids(window.upperBound..<count)),

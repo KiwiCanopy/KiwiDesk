@@ -135,7 +135,7 @@ struct ColorsVerdictAnchorTests {
             $0.isColourRow
                 && SettingsDraftDiff.namesModelPath($0.id)
         }
-        #expect(keys.count == 19)
+        #expect(keys.count == 20)
         // Every such row is on a card the walk above reads, so a
         // row moved between groups cannot leave it (#2593).
         #expect(Set(keys).isSubset(of: cards.flatMap(\.keys)))

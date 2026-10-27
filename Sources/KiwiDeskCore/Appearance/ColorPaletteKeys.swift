@@ -36,6 +36,10 @@ public enum ColorPaletteKeys {
                 FloatingStyle.CodingKeys.allCases,
                 prefix: "floating"
             )
+            + colorPaths(
+                PocketStyle.CodingKeys.allCases,
+                prefix: "pocket"
+            )
     }
 
     /// Whether path permits the empty "Automatic" value: a mark's

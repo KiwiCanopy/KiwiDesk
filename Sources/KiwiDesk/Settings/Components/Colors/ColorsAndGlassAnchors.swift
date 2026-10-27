@@ -45,6 +45,7 @@ enum ColorsAndGlassAnchors {
         case .borderUnfocusedColor: return rows.tintUnfocusedBorder
         case .stickyColor: return rows.tintStickyMark
         case .floatingColor: return rows.tintFloatingMark
+        case .pocketColor: return rows.tintPocketMark
         default: return nil
         }
     }

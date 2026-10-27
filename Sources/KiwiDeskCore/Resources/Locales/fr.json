@@ -1644,6 +1644,8 @@
   "placement.last": "À la fin",
   "placement.new_window": "Nouvelle fenêtre tuilée",
   "placement.new_window.help": "Où s'insère une nouvelle fenêtre par rapport aux autres : Au début ou À la fin dans l'ordre de la disposition, ou juste avant ou après la fenêtre ayant le focus au moment où elle s'ouvre.",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Couleur de la marque Pocket",
   "pocket.mark.ax": "Fenêtre Pocket",
   "pocket.refusal.float": "Les fenêtres Pocket flottent toujours",
   "pocket.refusal.sticky": "Les fenêtres Pocket sont toujours Sticky",

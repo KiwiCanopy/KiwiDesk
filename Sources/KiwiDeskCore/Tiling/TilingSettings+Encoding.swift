@@ -40,6 +40,7 @@ extension TilingSettings {
         try container.encode(borderStyle, forKey: .border)
         try container.encode(stickyStyle, forKey: .sticky)
         try container.encode(floatingStyle, forKey: .floating)
+        try container.encode(pocketStyle, forKey: .pocket)
         try container.encode(animations, forKey: .animations)
         try container.encode(mouseResize, forKey: .mouseResize)
         try container.encode(mouse, forKey: .mouse)

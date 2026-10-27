@@ -62,6 +62,8 @@ public struct TilingSettings: Sendable, Equatable {
     public var stickyStyle = StickyStyle()
     /// Floating window badge appearance (`floating.*`, #429).
     public var floatingStyle = FloatingStyle()
+    /// Pocket mark appearance (`pocket.*`, #2671).
+    public var pocketStyle = PocketStyle()
     /// Drag ghost visual settings (`drag.ghost`).
     public var dragGhost = DragVisual.ghostDefault
     /// Drag drop zone visual settings (`drag.drop_zone`).

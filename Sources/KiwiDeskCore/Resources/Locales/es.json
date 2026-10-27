@@ -1644,6 +1644,8 @@
   "placement.last": "Al final",
   "placement.new_window": "Nueva ventana en mosaico",
   "placement.new_window.help": "Dónde se ubica una nueva ventana con respecto a las demás: Al principio o Al final en el orden del diseño, o justo antes o después de la ventana enfocada al momento de abrirse.",
+  "pocket.color": "Pocket",
+  "pocket.color.a11y": "Color de la marca Pocket",
   "pocket.mark.ax": "Ventana Pocket",
   "pocket.refusal.float": "Las ventanas Pocket siempre flotan",
   "pocket.refusal.sticky": "Las ventanas Pocket siempre son sticky",

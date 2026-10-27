@@ -57,6 +57,8 @@ extension BordersKey {
             return .text("colors.drop_zone_fill")
         case .floatingColor:
             return .text("floating.color")
+        case .pocketColor:
+            return .text("pocket.color")
         }
     }
 }
