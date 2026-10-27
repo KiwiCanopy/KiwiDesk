@@ -69,6 +69,9 @@ struct SettingsRawColorTests {
         "ColorField.swift":
             "same RGBA tuple accessors in the swatch's "
             + "conversion plumbing",
+        "ColorField+Commit.swift":
+            "same RGBA tuple accessors in the commit's hex "
+            + "normalisation",
     ]
 
     @Test("no fixed system hue is drawn in the Settings tree")

@@ -622,7 +622,9 @@ through `NSColor(kiwiFill:)` — never the generic hex parser,
 whose fallback is the accent colour, the trap the Automatic
 paragraph above names. It sits on the same row-menu routes as
 Automatic. A well may carry both flags, and their items then
-share the menu.
+share the menu. Emptying the hex field commits No Color too, and
+the field then shows "No Color" as its placeholder; on a well with
+both flags the empty field stays Automatic's.
 :::
 
 ## Row layout & alignment
