@@ -117,6 +117,15 @@ extension ShortcutsReferenceBuilder {
             return "tray.and.arrow.down.fill"
         case "KiwiDesk.reset_layout_sizing()":
             return "arrow.counterclockwise"
+        // KiwiHub's sides wear the symbol of the Settings page the
+        // side mirrors; the window switcher, the swap of two windows
+        // (owner, 2026-10-27).
+        case KiwiHubSide.windows.lua:
+            return "rectangle.2.swap"
+        case KiwiHubSide.shortcuts.lua:
+            return SettingsDestination.shortcuts.symbol
+        case KiwiHubSide.view.lua:
+            return SettingsDestination.layoutDefaults.symbol
         // Two screens: back to the one before (#2512).
         case KeybindingCatalog.screenLastRow.lua:
             return "display.2"
@@ -130,15 +139,17 @@ extension ShortcutsReferenceBuilder {
             return "menubar.arrow.up.rectangle"
         case KeybindingCatalog.toggleAppBar.lua:
             return "dock.rectangle"
-        // Track's own verbs: to the line before or after, a swap
-        // of two tracks (#2530).
+        // Track's own verbs: to the line before or after (#2530); a
+        // swap of two tracks wears the window swap's triangles
+        // (owner, 2026-10-27).
         case KeybindingCatalog.moveToTrackRows[0].lua:
             return "arrow.backward.to.line"
         case KeybindingCatalog.moveToTrackRows[1].lua:
             return "arrow.forward.to.line"
-        case KeybindingCatalog.trackSwapRows[0].lua,
-            KeybindingCatalog.trackSwapRows[1].lua:
-            return "rectangle.2.swap"
+        case KeybindingCatalog.trackSwapRows[0].lua:
+            return "arrowtriangle.left.fill"
+        case KeybindingCatalog.trackSwapRows[1].lua:
+            return "arrowtriangle.right.fill"
         default:
             break
         }
