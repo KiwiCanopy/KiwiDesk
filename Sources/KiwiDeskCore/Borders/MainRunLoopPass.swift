@@ -4,6 +4,7 @@ import CoreFoundation
 /// Animation's commit, which is when AppKit sends a window frame
 /// it was handed in that pass (#1956). A SkyLight move issued in
 /// the same pass reaches WindowServer first and is overwritten.
+/// `MainRunLoopTurnEnd` is its opposite: work BEFORE the commit.
 @MainActor
 enum MainRunLoopPass {
     private static var count: UInt64 = 0
