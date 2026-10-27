@@ -7,7 +7,7 @@ extension KiwiCore {
         guard tiler.animation.isAnimating(window: id) else { return }
         borders.holdStateChange(
             of: id,
-            target: tiler.animation.targetFrame(window: id)
+            target: tiler.commandedFrame(of: id)
         )
     }
 }

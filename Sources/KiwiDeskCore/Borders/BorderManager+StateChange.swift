@@ -9,9 +9,10 @@ import AppKit
 extension BorderManager {
     struct StateChangeHold: Equatable {
         let window: WindowID
-        /// The spring's target, kept from the arm: the commanded
-        /// frame an animated write leaves is nil.
-        let target: CGRect?
+        /// The frame we sent: from the arm, replaced by a later
+        /// write that moves the window, never by a retired (nil)
+        /// commanded frame — the arrival hold's rule.
+        var target: CGRect?
         /// When the hold began; the backstop counts from here.
         let start: CFTimeInterval
         /// When the spring ended; the cap counts from here.
@@ -69,6 +70,11 @@ extension BorderManager {
 
     /// A report of `window` at `frame` after its spring ended.
     func noteStateChangeReport(_ window: WindowID, frame: CGRect) {
+        if stateChange?.window == window,
+            let sent = commandedFrame(window)
+        {
+            stateChange?.target = sent
+        }
         guard var hold = stateChange, hold.window == window,
             hold.settledAt != nil, !hold.arrived,
             let sent = hold.target ?? specs[window]?.frame,

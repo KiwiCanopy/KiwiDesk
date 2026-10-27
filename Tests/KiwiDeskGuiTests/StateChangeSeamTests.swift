@@ -50,6 +50,11 @@ struct StateChangeSeamTests {
             try sites(of: "borders.stateChangeSettled(")
                 == ["KiwiCore+Bootstrap.swift": 1]
         )
+        // The wrap still runs the engine's own end handler.
+        #expect(
+            try sites(of: "animationEnded(id)")
+                == ["KiwiCore+Bootstrap.swift": 1]
+        )
     }
 
     /// Every state change arms the hold: the retile for its pass's

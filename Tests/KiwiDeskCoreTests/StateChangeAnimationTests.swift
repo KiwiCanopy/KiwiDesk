@@ -315,4 +315,29 @@ struct StateChangeAnimationTests {
         )
         #expect(spring.sizing == .mayInstantSize)
     }
+
+    /// The OS focus report path (a click, ⌘-Tab), beside the
+    /// commanded focus `focusEndedMaximizeFollowsItsToggle` drives.
+    @Test("a focus report that ends a maximize follows its toggle")
+    func reportEndedMaximizeFollowsItsToggle() {
+        guard NSScreen.main != nil else { return }
+        for on in [true, false] {
+            let core = makeCore()
+            core.execute(
+                "set_mode",
+                args: [.string("1"), .string("bsp")]
+            )
+            addWindow(core, 1)
+            addWindow(core, 2)
+            core.focusWindow(WindowID(1), warp: false)
+            #expect(core.execute("toggle_maximized").isSuccess)
+            core.tiler.settings.animations.onStateChange = on
+            core.tiler.settings.animations.onRelayout = !on
+            core.tiler.settings.animations.onWindowResize = !on
+            let applies = countApplies(core)
+            core.handle(.windowFocused(WindowID(2)))
+            let moved = applies()[WindowID(1)] ?? 0
+            #expect(on ? moved >= 1 : moved == 0)
+        }
+    }
 }

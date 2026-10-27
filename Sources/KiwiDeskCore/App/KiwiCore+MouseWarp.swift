@@ -112,7 +112,7 @@ extension KiwiCore {
         if let slot = tiler.calculatedFrames(state: state)[id] {
             return slot
         }
-        if let target = tiler.animation.targetFrame(window: id) {
+        if let target = tiler.commandedFrame(of: id) {
             return target
         }
         return eventLoop.element(for: id).map {
