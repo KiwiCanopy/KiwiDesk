@@ -4404,10 +4404,14 @@ refusals, as every layout learns it — lowers the grid's columns or
 rows, fixed or auto-sized, until it fits a cell; the grid grows
 back when that window leaves. A cap read from `min_window_size`
 alone laid cells no such window could take, so it overflowed its
-cell and covered its neighbours (owner, 2026-10-27, on a laptop
-screen). The floor is learned only from a refused ask, so the
-first layout after such a window arrives can be wrong for one
-pass, then heals.
+cell and covered its neighbours (owner, 2026-10-27). The floor is
+learned from refused asks, with the latency the split-layout row
+of [accepted limitations](accepted-limitations.md) states. Track
+differs on purpose: its fixed limit stays the user's number
+(#1355). The ruling covers Grid alone, whose columns and rows
+were already limits (#2541), and Grid takes one Space-wide floor
+per axis where Track's automatic count fits each track to its
+own members.
 
 *The scrolling track is as deep as its widest member needs.*
 Across the scroll axis the last track takes the largest learned

@@ -4,8 +4,7 @@ import CoreGraphics
 /// Both types share one ceiling: `columns`×`rows` (or the
 /// auto-size screen-computed dimensions, both capped at what fits
 /// the largest window's floor, #2687) is the most cells the grid
-/// splits into —
-/// rigid fills it, dynamic balances up to it, and the excess
+/// splits into — rigid fills it, dynamic balances up to it, and the excess
 /// scrolls through the last track (#2541, `GridLayout+Run`).
 public struct GridLayout: LayoutSystem {
     public init() {}
@@ -50,29 +49,27 @@ public struct GridLayout: LayoutSystem {
         of windows: [WindowID],
         in context: LayoutContext
     ) -> MinSize {
-        guard !context.probesBeyondBounds else {
-            return context.minWindowSize
-        }
-        return windows.reduce(context.minWindowSize) { floor, id in
+        windows.reduce(context.minWindowSize) { floor, id in
             MinSize(
                 width: max(
                     floor.width,
-                    context.learnedFloor(of: id, horizontal: true)
+                    context.runFloor(of: id, horizontal: true)
                 ),
                 height: max(
                     floor.height,
-                    context.learnedFloor(of: id, horizontal: false)
+                    context.runFloor(of: id, horizontal: false)
                 )
             )
         }
     }
 
     /// The shape for `count` windows whose ceiling fits
-    /// `capFloor`, `min_window_size` when nil.
-    public static func shape(
+    /// `capFloor`. Production reads `shape(for:in:)`; the floor is
+    /// required so no caller falls back to `min_window_size`.
+    static func shape(
         count: Int,
         in context: LayoutContext,
-        capFloor: MinSize? = nil
+        capFloor: MinSize
     ) -> Shape? {
         guard count > 0 else { return nil }
         let params = context.grid
@@ -83,7 +80,7 @@ public struct GridLayout: LayoutSystem {
             usable: context.usable,
             gapH: gapH,
             gapV: gapV,
-            minSize: capFloor ?? context.minWindowSize
+            minSize: capFloor
         )
         let (columns, rows) = dimensions(
             count: count,
@@ -197,7 +194,9 @@ public struct GridLayout: LayoutSystem {
     /// bounds the CEILING, not the growth, so a dynamic grid stays
     /// tight until it hits it. Public + static because the
     /// Settings preview needs the whole rule or it subdivides past
-    /// where the real grid stops (#712).
+    /// where the real grid stops (#712); it has no live windows,
+    /// so it caps at the configured minimum, never a learned
+    /// floor (#2687).
     public static func dimensions(
         count: Int,
         params: GridParams,

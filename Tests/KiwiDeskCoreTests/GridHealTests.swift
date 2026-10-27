@@ -62,6 +62,24 @@ struct GridHealTests {
         #expect(back.columns == 3)
     }
 
+    @Test("the overflow run scrolls what the healed cells drop")
+    func runFollows() throws {
+        var ctx = context()
+        #expect(GridLayout.zones(for: ids, in: ctx) == [])
+        ctx.sizeBounds[ids[4]] = EffectiveSizeBound(width: floor(900))
+        let zones = try #require(GridLayout.zones(for: ids, in: ctx))
+        #expect(zones.count == 1)
+    }
+
+    @Test("a forced pass probes past the floor at the full grid")
+    func forcedPassIgnoresTheFloor() throws {
+        var ctx = context()
+        ctx.sizeBounds[ids[4]] = EffectiveSizeBound(width: floor(900))
+        ctx.probesBeyondBounds = true
+        let shape = try #require(GridLayout.shape(for: ids, in: ctx))
+        #expect(shape.columns == 3)
+    }
+
     @Test("the drawn cells follow the healed shape")
     func geometryFollows() throws {
         var ctx = context()

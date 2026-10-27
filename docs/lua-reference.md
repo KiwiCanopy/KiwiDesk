@@ -1992,12 +1992,10 @@ these, and a dynamic grid balances up to them.
 :::unreleased
 The columns and rows are a limit: where a cell would fall under
 the grid's [minimum window size](#set_min_window_size), or under
-the minimum size of the largest window in the Space (an app's
-own, learned when it refuses a smaller size), the grid lays as
-many as fit, as [auto-size](#gridset_auto_size) does, and the
-windows past its cells scroll through its last track
-([When windows no longer fit](#when-windows-no-longer-fit)). The
-grid grows back once that window leaves.
+an app's own minimum, the grid lays as many as fit, as
+[auto-size](#gridset_auto_size) does, and the windows past its
+cells scroll through its last track
+([When windows no longer fit](#when-windows-no-longer-fit)).
 :::
 
 **Example:**
@@ -2025,10 +2023,10 @@ columns and `floor(usable height / (min height + vertical inner
 gap))` rows, at least 1 each.
 
 :::unreleased
-The min width and height are the largest among the Space's
-windows: Grid's minimum, or a window's own where its app refuses
-to be smaller, so one such window lowers the count until it
-leaves.
+Each of the min width and height is the larger of Grid's minimum
+and the largest minimum an app in the Space enforces (learned
+when it refuses a smaller size), so one such window lowers the
+count, and the grid grows back once that window leaves.
 :::
 
 **Example:**

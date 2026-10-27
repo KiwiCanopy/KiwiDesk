@@ -1744,7 +1744,13 @@ editing here:
   is judged on EQUAL cells (`GridLayout.shape`) and whose floors
   are `GridLayout.trackFloors` drawn by `GridTracks.lengths`,
   standing down on a forced pass (`GridTracksTests`,
-  `SplitOverflowTests` ▸ `gridWidensTheColumn`). A store taking
+  `SplitOverflowTests` ▸ `gridWidensTheColumn`). Every reader of
+  Grid's shape — the render, the overflow run, the resize — asks
+  `GridLayout.shape(for:in:)` with the Space's tiled windows,
+  whose cap is their largest learned floor (#2687), while the pile
+  check stays on `min_window_size` alone; the count door takes its
+  floor as a required argument, so no reader re-derives the cap
+  from a count (`GridHealTests`). A store taking
   that answer states both halves, and a press on it solves
   against the same render.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
