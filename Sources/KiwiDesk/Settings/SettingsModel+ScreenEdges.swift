@@ -34,8 +34,8 @@ extension SettingsModel {
         return [MonitorSet(monitors: displays.map(\.fingerprint))]
     }
 
-    /// Whether a bar's Per screen rows can show: the drawer greys
-    /// shut while the profile holds one screen (#2677, amending
+    /// Whether a bar's Per screen rows can show: its rows grey
+    /// while the profile holds one screen (#2677, amending
     /// #1948) — unless that bar's screens already differ, which
     /// the rows must then show.
     func offersScreenEdges<Bar: ScreenEdged>(

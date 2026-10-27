@@ -33,7 +33,9 @@ struct StashSeederCensusTests {
         // gather outranks it by overwriting where it trips. The
         // float verbs' placement of a window on a Space no screen
         // shows (#1518) takes the same gated door, after the
-        // verb's retile because only the activation delivers it.
+        // verb's retile because only the activation delivers it,
+        // and so does the pocket's first take-out (#2672), ahead of
+        // the take-out's retile.
         "App/KiwiCore+FloatPlacement.swift": 1,
         // The entry-into-floating gather (#1177).
         "App/KiwiCore+FloatGather.swift": 1,

@@ -34,13 +34,7 @@ extension KiwiCore {
     @discardableResult
     func placeFloating(_ id: WindowID) -> Bool {
         guard let window = state.windows[id] else { return false }
-        if placementIsSeed(id) {
-            guard seedsPlacement(id),
-                let target = floatPlacementTarget(for: id)
-            else { return false }
-            seedPlacement(id, target)
-            return true
-        }
+        if placementIsSeed(id) { return seedFloatPlacement(id) }
         guard let target = floatPlacementTarget(for: id) else {
             return false
         }
@@ -129,9 +123,9 @@ extension KiwiCore {
         return true
     }
 
-    /// Seeds `id`'s float placement as its pending capture — the
-    /// pocket's first take-out (#2672), which has no frame of its
-    /// own yet. False where nothing was seeded.
+    /// Seeds `id`'s float placement as its pending capture — a
+    /// float on an unshown Space, and the pocket's first take-out
+    /// (#2672). False where nothing was seeded.
     func seedFloatPlacement(_ id: WindowID) -> Bool {
         guard seedsPlacement(id),
             let target = floatPlacementTarget(for: id)

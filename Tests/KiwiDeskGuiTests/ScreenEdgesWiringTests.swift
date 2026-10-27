@@ -47,9 +47,22 @@ struct ScreenEdgesWiringTests {
         )
         let help = "if!offered{HelpButton(explanation:Self.oneScreenHelp"
         #expect(count(help, in: drawer) == 1)
-        // The rows grey, never the label (#527).
+        // The rows grey, never the label (#527): the `?` sits in the
+        // header's own stack, and the one grey closes the rows' block.
         #expect(count(".modifier(GreyOut(active:!offered))", in: drawer) == 1)
-        #expect(count("header.modifier(GreyOut", in: drawer) == 0)
+        #expect(
+            count(
+                "HStack(spacing:6){header.fixedSize()if!offered{HelpButton(",
+                in: drawer
+            ) == 1
+        )
+        #expect(
+            count(
+                "ForEach(model.screenEdgeRows(bar)){rowinscreenRow(row)}}"
+                    + ".modifier(GreyOut(active:!offered))",
+                in: drawer
+            ) == 1
+        )
     }
 
     @Test("each bar row explains an empty selection")
