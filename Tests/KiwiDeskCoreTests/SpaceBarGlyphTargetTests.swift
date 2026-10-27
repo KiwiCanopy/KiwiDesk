@@ -93,7 +93,8 @@ struct SpaceBarGlyphTargetTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             after: .init(windows: overflow.map(WindowID.init)),
             collapse: collapsed ? .init(windows: 3) : nil
@@ -221,7 +222,8 @@ struct SpaceBarGlyphTargetTests {
                 style: SpaceBarLook(),
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 ),
                 after: .init(windows: overflow.map(WindowID.init))
             )
@@ -263,7 +265,8 @@ struct SpaceBarGlyphTargetTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         #expect(item.glyphTargets.map(ObjectIdentifier.init) == before)
@@ -276,7 +279,8 @@ struct SpaceBarGlyphTargetTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         #expect(item.glyphTargets.map(\.members) == [[WindowID(4)]])
@@ -291,7 +295,8 @@ struct SpaceBarGlyphTargetTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         #expect(item.glyphTargets.map(\.members) == [[WindowID(6)]])

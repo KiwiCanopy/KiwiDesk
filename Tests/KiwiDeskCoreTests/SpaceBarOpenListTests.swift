@@ -52,7 +52,8 @@ struct SpaceBarOpenListTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             after: .init(windows: [WindowID(5), WindowID(6)]),
             collapse: nil

@@ -37,7 +37,8 @@ struct BarRenderEnvironmentTests {
                 style: look,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         }

@@ -142,7 +142,8 @@ struct ShelfOverflowPadTests {
             style: spaceLook(alignment),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         let first = try #require(overlay.itemViews.first)

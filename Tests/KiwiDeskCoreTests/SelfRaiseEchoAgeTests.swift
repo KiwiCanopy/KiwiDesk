@@ -307,7 +307,8 @@ struct BarStripAbsorptionTests {
                 style: SpaceBarLook(),
                 stateMarkColors: StateMarkColors(
                     sticky: "",
-                    floating: ""
+                    floating: "",
+                    pocket: ""
                 )
             )
         ])

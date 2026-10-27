@@ -23,7 +23,7 @@ public struct StateMarkColors: Sendable, Equatable {
     public let floating: String
     public let pocket: String
 
-    public init(sticky: String, floating: String, pocket: String = "") {
+    public init(sticky: String, floating: String, pocket: String) {
         self.sticky = sticky
         self.floating = floating
         self.pocket = pocket

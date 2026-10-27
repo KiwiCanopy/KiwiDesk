@@ -132,6 +132,25 @@ struct PocketMarkColorTests {
         #expect(glyphs?.first?.plateHex == "")
     }
 
+    @Test("the pocket's plate takes no tint, outer slot or inner")
+    func plateStaysUntinted() {
+        let overlay = StickyMarkOverlay(window: 1) { _, _ in false }
+        defer { overlay.hide() }
+        overlay.setGlass(false)
+        overlay.update(
+            frame: CGRect(x: -9_000, y: -9_000, width: 800, height: 500)
+        )
+        overlay.setGlyphs([.pocket(color: amber)])
+        #expect(overlay.plate.roundel.isHidden)
+        overlay.setGlyphs([.sticky(), .pocket(color: amber)])
+        #expect(overlay.plate.innerRoundel.isHidden)
+        // Control: a floating glyph's colour does tint its disc.
+        overlay.setGlyphs([.sticky(), .floating(color: amber)])
+        #expect(!overlay.plate.innerRoundel.isHidden)
+        overlay.setGlyphs([.floating(color: amber)])
+        #expect(!overlay.plate.roundel.isHidden)
+    }
+
     @Test("the window mark draws its pocket opaque in the colour")
     func markDrawsTheColor() throws {
         let image = StickyMarkOverlay.pocketImage(hex: amber)

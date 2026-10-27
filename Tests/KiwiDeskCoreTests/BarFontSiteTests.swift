@@ -46,7 +46,8 @@ struct BarFontSiteTests {
             ),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             after: .init(
                 windows: (0..<overflow).map { WindowID(UInt32(900 + $0)) }
@@ -183,7 +184,8 @@ struct BarFontSiteTests {
                 style: style,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         }

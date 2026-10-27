@@ -53,7 +53,8 @@ struct BarPeekWiringTests {
                     style: style,
                     stateMarkColors: StateMarkColors(
                         sticky: "#ffffff",
-                        floating: "#ffffff"
+                        floating: "#ffffff",
+                        pocket: "#ffffff"
                     )
                 )
             ])

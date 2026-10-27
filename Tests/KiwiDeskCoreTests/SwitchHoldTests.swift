@@ -104,7 +104,11 @@ struct SwitchHoldTests {
             active: false,
             horizontal: true,
             style: SpaceBarLook(),
-            stateMarkColors: StateMarkColors(sticky: "", floating: ""),
+            stateMarkColors: StateMarkColors(
+                sticky: "",
+                floating: "",
+                pocket: ""
+            ),
             marker: .held(
                 SpaceBarItemView.Held(
                     screenName: "DELL",
