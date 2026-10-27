@@ -145,10 +145,10 @@ synonym:
   other window managers' word; a *stash*, the park that hides a
   window at a corner (`TilingEngine` stash), which the pocket
   uses but is not; or a *drawer*, Settings' Lua bindings drawer.
-  Choosing the window is *marking* it in copy (**Mark as pocket
-  window**, #2675) and `toggle_pocket_window` in Lua and CLI, a
-  verb that does not spend *mark*; the on-window glyph stays the
-  pocket *mark*.
+  Choosing the window is **Toggle Pocket** in copy (owner,
+  #2675) and `toggle_pocket_window` in Lua and CLI, neither
+  spending *mark*, which stays the on-window glyph's — the
+  pocket *mark*; docs prose may say a window is *marked*.
 - **pin** — two relations, and only ONE of them still spends the
   word (#1022). A **Screen pin** binds a Space to a screen and
   takes the word in its labels (`diff.label.space_pin`,

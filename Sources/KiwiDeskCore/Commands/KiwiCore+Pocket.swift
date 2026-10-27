@@ -50,9 +50,7 @@ extension KiwiCore {
     /// the window it came out over where that is still here.
     func putInPocket(_ id: WindowID) {
         rememberPocketFrame(of: id)
-        let cameFrom =
-            state.pocket?.window == id
-            ? state.pocket?.cameFrom : nil
+        let cameFrom = state.pocket?.cameFrom
         let heldFocus = state.workspaces.lastFocused == id
         tiler.forgetStash(id)
         state.pocketWindow(id)

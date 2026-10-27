@@ -151,17 +151,18 @@ extension KeybindingCatalog {
     /// `pocket` (#2446): pockets the pocket window, takes it out
     /// and puts it back; with none marked, marks the focused one.
     static let pocket = NavCommand(
-        label: "Pocket this window",
+        label: "Pocket or take out",
         lua: "KiwiDesk.pocket()",
         displayLabel: {
-            L("keybinding.pocket", "Pocket this window")
+            L("keybinding.pocket", "Pocket or take out")
         },
         help: {
             L(
                 "keybinding.pocket.help",
-                "Pockets your pocket window, or takes it out "
-                    + "again. With no window marked, the first press "
-                    + "marks the focused window and pockets it."
+                "Pockets your Pocket window from wherever you are, or "
+                    + "takes it out as a float on the screen you're "
+                    + "working on. With no Pocket window yet, it makes "
+                    + "the focused window one and pockets it."
             )
         }
     )
@@ -169,17 +170,17 @@ extension KeybindingCatalog {
     /// `toggle_pocket_window` (#2675): marks or unmarks the focused
     /// window as the pocket window.
     static let pocketWindow = NavCommand(
-        label: "Mark as pocket window",
+        label: "Toggle Pocket",
         lua: "KiwiDesk.toggle_pocket_window()",
         displayLabel: {
-            L("keybinding.pocket_window", "Mark as pocket window")
+            L("keybinding.pocket_window", "Toggle Pocket")
         },
         help: {
             L(
                 "keybinding.pocket_window.help",
-                "Marks the focused window as your pocket window and "
-                    + "floats it, or unmarks it. Only one window can "
-                    + "be marked at a time."
+                "Makes the focused window your Pocket window, or "
+                    + "makes it an ordinary window again. Only one "
+                    + "window can be the Pocket window at a time."
             )
         }
     )

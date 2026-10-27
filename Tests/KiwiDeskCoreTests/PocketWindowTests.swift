@@ -145,9 +145,23 @@ struct PocketWindowTests {
         core.state.workspaces.add(two, to: SpaceID("2"))
         core.state.apply(.windowFocused(one))
         #expect(core.focusedWindowID == one)
+        var moved: [KiwiNotification] = []
+        core.bus.addSink { event, _ in moved.append(event) }
         core.execute("toggle_pocket_window")
         #expect(core.state.workspaces.space(of: one) == SpaceID("2"))
         #expect(core.state.pocket == nil)
+        // Filed as a user move files a window, so it is announced.
+        #expect(moved.contains(.windowMovedToSpace))
+    }
+
+    /// The slot fills only through the mark: the pocketing
+    /// transition refuses a window that is not the out slot's.
+    @Test("an unmarked window cannot be pocketed directly")
+    func pocketingNeedsTheMark() {
+        let core = makeCore()
+        core.state.pocketWindow(one)
+        #expect(core.state.pocket == nil)
+        #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
     }
 
     @Test("with nothing marked, pocket marks and pockets the focus")
@@ -181,7 +195,7 @@ struct PocketWindowTests {
     private func makeFollowingCore(
         sent: @escaping @MainActor (WindowID, CGRect) -> Void = { _, _ in }
     ) -> KiwiCore {
-        var core: KiwiCore?
+        weak var core: KiwiCore?
         let made = makeCore { id, frame in
             sent(id, frame)
             core?.state.apply(.windowResized(id, frame))
@@ -223,11 +237,19 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowResized(one, hand))
         core.execute("pocket")
-        #expect(
-            core.state.pocket?.frames.values.map(\.size) == [hand.size]
+        let filed = try #require(
+            core.state.pocket?.frames.values.first
         )
-        // Parked off the corner, as the stash leaves it.
-        let parked = hand.offsetBy(dx: area.width, dy: area.height)
+        #expect(filed.size == hand.size)
+        // Parked off the corner, at a size of its own, so a take-out
+        // centring the window's current size reads apart from one
+        // restoring the filed frame.
+        let parked = CGRect(
+            x: area.maxX - 1,
+            y: area.maxY - 1,
+            width: 320,
+            height: 200
+        )
         core.state.apply(.windowResized(one, parked))
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: one) == .out)
@@ -236,8 +258,9 @@ struct PocketWindowTests {
         let back = try #require(
             core.tiler.stashOriginal(one) ?? core.state.windows[one]?.frame
         )
-        #expect(back.size == hand.size)
-        #expect(back != parked)
+        // The size: a delivered frame may be nudged into the grow
+        // bounds, and a centring fallback keeps the parked size.
+        #expect(back.size == filed.size)
     }
 
     @Test("a slot whose app is gone frees the mark for the focus")

@@ -31,7 +31,7 @@ extension DefaultKeybindings {
         case 7: [maximizeRow()]
         // Pocket (#2446).
         case 8: [pocketRow()]
-        // Mark as pocket window (#2675).
+        // Toggle Pocket (#2675).
         case 9: [pocketWindowRow()]
         default: []
         }

@@ -79,10 +79,9 @@ because two real clients now remove drift — see
   related act on the twin's own subject — `⌃⌥⇧P` marks the window
   `⌃⌥P` pockets (owner, 2026-10-27). Each pair joins that suite's
   `relatedVariants` register with its reason, as a ruling. On the
-  ladder `⇧` acts on the
-  window on an arrow (swap) and on a digit (send it to a Space),
-  and `⌘` steps the Spaces on an arrow and sends-and-follows on a
-  digit, which is #1655's re-ruling of #1176; the tier an arrow
+  ladder `⇧` acts on the window on an arrow (swap) and on a digit
+  (send it to a Space), and `⌘` steps the Spaces on an arrow and
+  sends-and-follows on a digit, which is #1655's re-ruling of #1176; the tier an arrow
   may ride, and the twin a `⇧` variant needs, are derived per
   row rather than restated (`DefaultKeybindingLadderTests` ▸
   `arrowsRideTheirOwnTiers`, `shiftIsARelatedVariant`). The
