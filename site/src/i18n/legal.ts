@@ -13,7 +13,8 @@
 // distributed via GitHub and is out of scope here. Keep this file honest — a
 // Datenschutzerklärung must describe the *actual* processing.
 
-export type Lang = "en" | "de" | "ja";
+import type { Lang } from "../lib/locales";
+export type { Lang };
 
 export const OPERATOR = {
   name: "Maikel Hajiabadi",

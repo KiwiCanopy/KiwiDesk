@@ -72,6 +72,7 @@ of a silently skipped assertion.
 from __future__ import annotations
 
 import argparse
+import html.parser
 import importlib.machinery
 import importlib.util
 import io
@@ -685,6 +686,121 @@ def check_guide_routes(dist: pathlib.Path) -> None:
         f"{len(routes) + 1} linked page(s)"
     )
 
+
+def check_locales(dist: pathlib.Path) -> None:
+    """The locale list is one list, and every hreflang link lands.
+
+    `site/src/lib/locales.ts` is the list the head metadata and the
+    sitemap derive from. It must name exactly the catalogs in
+    `site/src/i18n/`: a catalog the list omits is a language no
+    page advertises, and a list entry with no catalog advertises
+    pages that do not exist. Then, on the BUILT pages: every page
+    the marketing sitemap lists, and every page carrying any
+    hreflang link, names every locale plus x-default and nothing
+    else, each link points at a page this build emits on the
+    published host, the page's canonical is one of them, and its
+    og:locale tags name every locale's value exactly once. The
+    sitemap's own clusters are held the same way.
+    """
+    lib = source_without_comments(REPO / "site/src/lib/locales.ts")
+    match = re.search(r"export const locales\s*=\s*\[([^\]]*)\]", lib)
+    og_match = re.search(r"ogLocales[^=]*=\s*\{([^}]*)\}", lib)
+    if match is None or og_match is None:
+        fail("could not read the locale list in site/src/lib/locales.ts")
+    locales = re.findall(r'"([^"]+)"', match.group(1))
+    og_values = dict(re.findall(r'(\w+):\s*"([^"]+)"', og_match.group(1)))
+    if sorted(og_values) != sorted(locales):
+        fail(f"locales.ts ogLocales names {sorted(og_values)}, not "
+             f"the list {locales}")
+    catalogs = sorted(
+        p.stem for p in (REPO / "site/src/i18n").glob("*.json")
+    )
+    if sorted(locales) != catalogs:
+        fail(f"locales.ts lists {locales} but site/src/i18n holds "
+             f"catalogs {catalogs}")
+    want = set(locales) | {"x-default"}
+    host = canonical_host()
+
+    def page_for(href: str, where: str) -> pathlib.Path:
+        url = urllib.parse.urlparse(href)
+        if url.netloc != host:
+            fail(f"{where}: link {href} is not on {host}")
+        if not url.path.endswith("/"):
+            fail(f"{where}: link {href} lacks its slash")
+        page = dist / url.path.lstrip("/") / "index.html"
+        if not page.is_file():
+            fail(f"{where}: link {href} names a page this build "
+                 "does not emit")
+        return page
+
+    ns = {
+        "s": "http://www.sitemaps.org/schemas/sitemap/0.9",
+        "x": "http://www.w3.org/1999/xhtml",
+    }
+    root = ET.parse(dist / "sitemap.xml").getroot()
+    required = set()
+    urls = root.findall("s:url", ns)
+    for entry in urls:
+        loc = entry.findtext("s:loc", namespaces=ns) or ""
+        where = f"sitemap.xml {loc}"
+        alternates = {
+            link.get("hreflang"): link.get("href")
+            for link in entry.findall("x:link", ns)
+            if link.get("rel") == "alternate"
+        }
+        if set(alternates) != want:
+            fail(f"{where}: hreflang names {sorted(alternates)}, "
+                 f"not {sorted(want)}")
+        required.add(page_for(loc, where))
+        for href in alternates.values():
+            page_for(href, where)
+    if not urls:
+        fail("sitemap.xml lists no URL, so no hreflang was checked")
+
+    class Head(html.parser.HTMLParser):
+        def __init__(self) -> None:
+            super().__init__()
+            self.alternates: dict[str, str] = {}
+            self.canonical: str | None = None
+            self.og: list[str] = []
+
+        def handle_starttag(self, tag, attrs):
+            a = {k.lower(): v or "" for k, v in attrs}
+            rel = a.get("rel", "").lower()
+            if tag == "link" and rel == "alternate" and "hreflang" in a:
+                self.alternates[a["hreflang"]] = a.get("href", "")
+            elif tag == "link" and rel == "canonical":
+                self.canonical = a.get("href")
+            elif tag == "meta" and a.get("property", "") in (
+                "og:locale", "og:locale:alternate"
+            ):
+                self.og.append(a.get("content", ""))
+
+    pages = 0
+    for page in sorted(dist.rglob("*.html")):
+        head = Head()
+        head.feed(page.read_text(encoding="utf-8"))
+        where = str(page.relative_to(dist))
+        if not head.alternates and page not in required:
+            continue
+        pages += 1
+        if set(head.alternates) != want:
+            fail(f"{where}: hreflang names {sorted(head.alternates)}, "
+                 f"not {sorted(want)}")
+        for href in head.alternates.values():
+            page_for(href, where)
+        if head.canonical not in head.alternates.values():
+            fail(f"{where}: canonical {head.canonical} is not among "
+                 "its own hreflang alternates")
+        if sorted(head.og) != sorted(og_values.values()):
+            fail(f"{where}: og:locale tags name {sorted(head.og)}, "
+                 f"not {sorted(og_values.values())}")
+    if pages < len(required):
+        fail("fewer pages carry hreflang than sitemap.xml lists")
+    print(
+        f"locales: {', '.join(locales)} match the catalogs; hreflang "
+        f"clusters land on {pages} page(s) and {len(urls)} sitemap URL(s)"
+    )
 
 def check_sitemaps_disjoint(dist: pathlib.Path) -> None:
     """The site ships two sitemaps, and they must not overlap.
@@ -1521,6 +1637,7 @@ def main() -> None:
     check_promoted_download(dist)
     check_guide_routes(dist)
     check_sitemaps_disjoint(dist)
+    check_locales(dist)
     check_var_references(dist)
     check_markdown_pipeline(dist)
     check_unreleased_markers(dist)
