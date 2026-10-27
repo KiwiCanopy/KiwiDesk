@@ -17,7 +17,8 @@ struct GapsAndBordersSection: View {
                 DragVisualsEditor(model: model)
                 StickyMarkEditor(model: model)
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 }

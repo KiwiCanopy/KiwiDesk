@@ -9,6 +9,21 @@ enum SettingsMetrics {
     /// Gutter around destination pane scrolling content.
     static let paneInset: CGFloat = 16
 
+    /// The floating save pill's gap above the pane's bottom edge.
+    static let savePillLift: CGFloat = 22
+
+    /// Room a page ends with while the save pill floats, so its
+    /// last row can scroll clear of the pill (#2688): the lift, the
+    /// pill's height (content-sized; 44 pt is its height as drawn
+    /// on device, 2026-10-27) and a row gap.
+    static let savePillClearance: CGFloat = savePillLift + 44 + paneInset
+
+    /// A page's bottom inset: the pill's room while it floats over
+    /// the pane, the plain gutter while it docks below it.
+    static func pageBottom(_ width: SettingsWidthClass) -> CGFloat {
+        width.docksSavePill ? paneInset : savePillClearance
+    }
+
     /// Inset between the pane's content and its arrival focus
     /// ring (#996). The ring is the platform's and is drawn at
     /// the pane's bounds, so the pane holds it off its own edges

@@ -20,7 +20,8 @@ extension SpacesSection {
                     overridesBody(space, mode: mode, gates: gates)
                 }
                 .frame(maxWidth: 900, alignment: .leading)
-                .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+                .padding(.horizontal, SettingsMetrics.paneInset)
+                .settingsPageBottom()
             }
         }
     }

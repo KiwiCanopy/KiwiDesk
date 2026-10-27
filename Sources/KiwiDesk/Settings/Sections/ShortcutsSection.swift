@@ -21,6 +21,9 @@ struct ShortcutsSection: View {
     /// `@State`, never an observed object: the body must not
     /// subscribe to the reading only the bar draws (#1520).
     @State var jumpTracker = ShortcutsJumpTracker()
+    /// Bumped by Add binding, whose row lands at the page's end.
+    @State var luaAdded = 0
+    @State private var endScroll: Task<Void, Never>?
     @StateObject private var coordinator =
         RecorderCoordinator(scrollsInPlace: true)
 
@@ -57,6 +60,9 @@ struct ShortcutsSection: View {
                 }
                 coordinator.scrollTarget = nil
             }
+            .onChange(of: luaAdded) { _, _ in
+                scrollToEnd(proxy)
+            }
         }
         .onAppear {
             ensureSelection()
@@ -80,6 +86,31 @@ struct ShortcutsSection: View {
         }
     }
 
+    /// The page's bottom edge, padding included.
+    static let pageEnd = "shortcuts.page_end"
+
+    /// Scrolls to the page's end, then again un-animated once the
+    /// appended row is laid out — a yield does not promise layout
+    /// (`SettingsView.reveal`).
+    private func scrollToEnd(_ proxy: ScrollViewProxy) {
+        endScroll?.cancel()
+        endScroll = Task { @MainActor in
+            await Task.yield()
+            withAnimation(
+                reduceMotion
+                    ? nil
+                    : .easeInOut(duration: SettingsReveal.scroll)
+            ) { proxy.scrollTo(Self.pageEnd, anchor: .bottom) }
+            try? await Task.sleep(
+                nanoseconds: SettingsReveal.nanoseconds(
+                    SettingsReveal.scroll + SettingsReveal.settle
+                )
+            )
+            guard !Task.isCancelled else { return }
+            proxy.scrollTo(Self.pageEnd, anchor: .bottom)
+        }
+    }
+
     private var page: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
@@ -87,10 +118,11 @@ struct ShortcutsSection: View {
                 actionGroups
                 tail
             }
-            .padding(
-                [.horizontal, .bottom],
-                SettingsMetrics.paneInset
-            )
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
+            .overlay(alignment: .bottom) {
+                Color.clear.frame(height: 1).id(Self.pageEnd)
+            }
             .shortcutsJumpSlot(.content)
             .environment(\.keybindingLayerName, selected)
             // One live read per section render (#1105), so
@@ -203,7 +235,8 @@ struct ShortcutsSection: View {
                 ActionsListLink()
                 AdvancedLuaGroup(
                     model: model,
-                    bindings: bindingsBinding
+                    bindings: bindingsBinding,
+                    onAdd: { luaAdded += 1 }
                 )
             }
             .padding(.top, 8)

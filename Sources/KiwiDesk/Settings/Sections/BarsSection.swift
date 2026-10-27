@@ -16,7 +16,8 @@ struct BarsSection: View {
                 SpaceBarCard(model: model)
                 AppBarCard(model: model)
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
     }
 }

@@ -23,7 +23,8 @@ struct LayoutDefaultsSection: View {
                     mode: selected.wrappedValue
                 )
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
         // Land on the most-used layout, then leave the selection
         // alone — latched by writing the model once, or `selected`

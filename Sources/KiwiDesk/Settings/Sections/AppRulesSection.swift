@@ -32,7 +32,8 @@ struct AppRulesSection: View {
                 floatList
                 automaticList
             }
-            .padding([.horizontal, .bottom], SettingsMetrics.paneInset)
+            .padding(.horizontal, SettingsMetrics.paneInset)
+            .settingsPageBottom()
         }
         // The composing row belongs to the draft it was opened in.
         // Every reload — an edit-target switch, a Revert — replaces
