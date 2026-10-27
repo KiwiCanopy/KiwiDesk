@@ -29,7 +29,9 @@ extension OnboardingKeys {
                             "onboarding.keys.kiwihub.side",
                             "%1$@ %2$@",
                             side.title,
-                            rendered(combo: combo) ?? combo
+                            rendered(combo: combo).map(
+                                SidedChordWords.label
+                            ) ?? combo
                         )
                     }
                 )

@@ -9218,6 +9218,24 @@ narrower than the 25.4 pt chip above it, so the columns are
 chip-bound and no word here costs a pixel. There is nothing to buy
 by withholding one.
 
+:::unreleased
+**✦ takes Settings' name for it, through its catalog key.** On the
+Hyper shortcut base the chord's first chip is ✦, and its word is
+`shortcuts.hyper_key.name` — "Hyper", the name the Shortcuts page
+already gives that key. That makes it keyed rather than a fifth
+verbatim token, so the closed carve-out of four stays closed. It
+is a name, not an abbreviation, so it keeps its capital beside
+`ctrl` and `opt`, and it may overhang its chip: ✦ stands where ⌃⌥
+stand on the other base, so a Hyper row is held to be no wider
+than the ⌃⌥ row (`OnboardingModifierNameTests` ▸
+`namesStayInsideTheirChip`). The name of the key the user actually
+holds (Caps Lock, say) is rejected: it is not what Settings calls
+this key anywhere. VoiceOver reads the glyph as a star, so every
+spoken chord — the tour's keycaps and Settings' chord surfaces
+alike — names ✦ by the same word, through
+`SidedChordWords.label`.
+:::
+
 **And the rule outranks the rows.** The seeded keymap is a tier
 system — `⌃⌥` moves the focus, `⌃⌥⇧` moves the window, `⌃⌥⌘`
 moves it and follows, and `⌥⌘` sizes it — so a list of unrelated

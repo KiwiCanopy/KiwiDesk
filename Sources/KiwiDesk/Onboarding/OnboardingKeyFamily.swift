@@ -21,6 +21,12 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
 
     /// The chord as a native glyph string for VoiceOver and mixed families.
     var glyphs: String { chord.glyphs }
+
+    /// The glyphs as VoiceOver reads them, through the one door
+    /// every chord surface speaks by (#2700).
+    @MainActor var spokenGlyphs: String {
+        SidedChordWords.label(glyphs)
+    }
 }
 
 /// Seeded modifier tiers for onboarding explanations (focus vs
