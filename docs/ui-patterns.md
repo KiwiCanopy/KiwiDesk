@@ -283,14 +283,12 @@ is a different noun (*actions*), and Screens has no lesser
 fingerprint anywhere.
 
 **The qualifier must also be unclaimed by the surface AROUND
-the drawer** (#678). A row tier and a mode depth are never
-spelled with one word: a page whose `SettingsArea.minimumMode` is
-`.powerUser` already means *which mode you are in* by
-"advanced", so no drawer may re-use the word to mean *which rows
-are hidden*. The colours' own section is **"Colors & glass"**
-(#2389), named for what it holds, after the Power User page it
-replaced was called Advanced Colors, and its one drawer is
-**Colors** (#2593).
+the drawer** (#678). A word a page already spends on its own
+section ("Advanced", General's) cannot also name *which rows a
+drawer hides*. The colours' own section is **"Colors & glass"**
+(#2389), named for what it holds, after the page it replaced was
+called Advanced Colors, and its one drawer is **Colors**
+(#2593).
 
 A connector (`Advanced: Lua bindings`) is not the fix: it
 restores the tier reading but re-splits the format. Dropping
@@ -1353,48 +1351,6 @@ card, `SettingsSurface.layoutMode`), then yield one layout pass
 before asking the scroll proxy for the id — a `scrollTo` in the
 same synchronous pass as the state change that mints the view
 will miss it.
-
-**The mode flip answers twice: motion says what just changed,
-the accent-tinted frame says what is mode-gated** (#760).
-Flipping the header segment to Power User washes the title band
-of every *container* the flip inserted — the same transient
-accent wash as a search reveal, same numbers — and the reflow
-animates as pure insertion in both places the user can be
-standing: Home's grid (Simple's card order is a subsequence of
-Power User's) and the open area's pane. The durable half is the
-frame: a container whose *presence* depends on the mode draws
-its border at `SettingsTheme.containerStrokeModeGated` (1.5 pt)
-in THE accent (the colour the active Power User segment wears,
-never a second hue) at `modeGatedStrokeOpacity`, against the
-1 pt hairline rest. Hue never carries alone: the weight step
-remains and the strength is measured —
-`ModeGatedFrameSeparationTests` derives the CVD floors against
-both neighbours on the same edge (the hairline, and hover's
-full accent) from the shipped tokens. The weight stays below
-the doubling the Screens (1.5→3 pt) and palette (1→2 pt) pairs
-spend on *selected/applied*, because a mode-gated card is
-present, not picked; hover keeps the full-strength accent as
-its own register. The argument is `docs/design-decisions.md` ▸
-*the flip to Power User answers with motion plus an
-accent-tinted weight*.
-
-Three boundaries. **Only the explicit segment flip washes** —
-the implicit promotion (search or a cross-reference landing in a
-Power-User-only area) already owns its arrival wash. **The flag
-is the site's own offer predicate evaluated at `.simple`** —
-never a hand-negated copy — so the weight states the same fact
-as presence: Screens is unmarked on a multi-screen machine,
-the Layers card is unmarked the moment a layer exists, and when
-config presence changes the flag at rest the weight steps with
-no wash. **The way back to Simple is a plain fade.** Reduce
-Motion keeps the wash flat for the same ≈1.2 s and drops only
-the reflow and the cross-fade. The vocabulary is
-container-granular: a per-row *control* offer the mode also
-unlocks (the Spaces "Customize…" cells) has no container border
-to weight and appears plainly, and which offers stay unmarked
-is data in `ModeGatedChromeTests`' `unmarked` map, not a
-skipped site. `ModeGatedChromeTests` pins the chrome,
-`SettingsModeRevealTests` the timeline.
 
 **An action that reloads must ask before it discards.** Any
 Settings action whose tail is `model.reload()` re-seeds from

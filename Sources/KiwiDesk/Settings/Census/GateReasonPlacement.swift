@@ -90,8 +90,7 @@ extension SettingRuntimeGate {
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent,
-            .trackInUse, .defaultsToRestore,
-            .titlePatternsExist:
+            .trackInUse, .defaultsToRestore:
             return false
         }
     }
@@ -122,8 +121,7 @@ extension SettingRuntimeGate {
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent,
-            .trackInUse, .defaultsToRestore,
-            .titlePatternsExist:
+            .trackInUse, .defaultsToRestore:
             return true
         }
     }

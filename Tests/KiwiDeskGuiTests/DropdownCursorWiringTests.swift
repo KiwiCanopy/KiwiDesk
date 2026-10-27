@@ -197,15 +197,8 @@ struct DropdownCursorWiringTests {
         #expect(
             search.contains(".foregroundStyle(DropdownRowStyle.ink(onCursor))")
         )
-        #expect(search.occurrences(of: ".foregroundStyle(secondaryInk)") == 3)
+        #expect(search.occurrences(of: ".foregroundStyle(secondaryInk)") == 2)
         #expect(search.occurrences(of: "SettingsTheme.ink3") == 0)
-        let edge = try Self.body(
-            "private var modeTagEdge",
-            in: Self.settings + "SettingsSearchRow.swift"
-        )
-        #expect(edge.contains("onCursor"))
-        #expect(edge.contains("DropdownRowStyle.secondaryInk(onCursor)"))
-        #expect(search.contains("Capsule().strokeBorder(modeTagEdge)"))
         #expect(search.contains("edged: onCursor"))
         let tile = try Self.body(
             "if edged",

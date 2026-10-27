@@ -42,11 +42,6 @@ extension SettingsView {
                 .padding(.horizontal, 12)
                 .padding(.top, 10)
             }
-            if let notice = model.searchModeNotice {
-                SettingsSearchNotice(text: notice)
-                    .padding(.horizontal, 12)
-                    .padding(.top, 10)
-            }
             // `ClickAwayResignsFocus` installs a window-scoped
             // mouse-down monitor (#93) committing an edited field
             // when a click lands outside it — a zero-size,
@@ -55,14 +50,6 @@ extension SettingsView {
                 ClickAwayResignsFocus()
                 content()
             }
-            // Above BOTH panes on purpose (#760): the segment is
-            // always in the header, so a flip can wash Home's
-            // inserted cards or an in-area surface alike — one
-            // mount, the model owns the timeline.
-            .environment(
-                \.settingsModeReveal,
-                model.modeRevealActive
-            )
             .overlay(alignment: .bottomTrailing) {
                 showPreviewOffer(width)
             }

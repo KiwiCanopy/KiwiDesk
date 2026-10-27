@@ -11,8 +11,6 @@ import Testing
 /// and a dedicated conflict red — so the suite was green while
 /// measuring a pair the app does not draw, and the ruling in
 /// `docs/design-decisions.md` rested on it.
-/// `ModeGatedFrameSeparationTests` parses for exactly this
-/// reason; this is the same walk.
 ///
 /// **Each ring is measured against the ONE fill it can sit on.**
 /// The AMBER reserved ring only ever rings a FREE key — a bound

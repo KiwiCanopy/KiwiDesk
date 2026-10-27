@@ -6,26 +6,15 @@ import SwiftUI
 /// shape: the Hyper key's recorder (#1870), app-wide and written at
 /// once like the layout cue (#1741), greyed with its sentence only
 /// where `init.lua` owns the config; "Shortcuts use" (#2460),
-/// drafted with the layers; and the sides switch (#2601). Offered
-/// in Power User, and in Simple once a key is set, the draft uses
-/// Hyper, the switch is on or a row keeps a side (config presence
-/// expands Simple).
+/// drafted with the layers; and the sides switch (#2601). A
+/// collapsible card (#2654), open on arrival once a key is set, the
+/// draft uses Hyper, the switch is on or a row keeps a side.
 struct ModifierKeysCard: View {
     @ObservedObject var model: SettingsModel
     /// The take-over's focus destination (#816): the button leaves
     /// once the remap is KiwiDesk's, and the recorder stays drawn.
     @FocusState private var recorderFocused: Bool
-
-    /// The one offer predicate, evaluated at `.simple` for the
-    /// mode-gated frame (#760).
-    static func isOffered(
-        in mode: SettingsMode,
-        key: HyperSourceKey?,
-        usesHyper: Bool = false,
-        keepsSides: Bool = false
-    ) -> Bool {
-        mode == .powerUser || key != nil || usesHyper || keepsSides
-    }
+    @State private var expanded = false
 
     /// The switch is on or a draft row keeps a side (#2601).
     private var keepsSides: Bool {
@@ -45,36 +34,54 @@ struct ModifierKeysCard: View {
         ).inertReason(for: .shortcuts(.shortcutBase))
     }
 
-    var body: some View {
-        if Self.isOffered(
-            in: model.settingsMode,
+    /// The card's hold-open (#2654): a key is set, the draft uses
+    /// Hyper, or sides are kept. Not a census gate — the rows sit
+    /// behind the disclosure either way.
+    static func inUse(
+        key: HyperSourceKey?,
+        usesHyper: Bool,
+        keepsSides: Bool
+    ) -> Bool {
+        key != nil || usesHyper || keepsSides
+    }
+
+    private var inUse: Bool {
+        Self.inUse(
             key: model.appWide.hyperKey,
             usesHyper: model.draftUsesHyper,
             keepsSides: keepsSides
-        ) {
-            card
-        }
+        )
     }
 
-    private var card: some View {
-        SettingsSection(
+    var body: some View {
+        SettingsCollapsibleSection(
             SettingsCatalog.shortcuts.modifierKeys,
-            modeGated: !Self.isOffered(
-                in: .simple,
-                key: model.appWide.hyperKey,
-                usesHyper: model.draftUsesHyper,
-                keepsSides: keepsSides
+            isExpanded: $expanded,
+            summary: L(
+                "shortcuts.modifier_keys.summary",
+                "Turn a key into Hyper, and choose the modifiers "
+                    + "your shortcuts use"
             )
         ) {
             VStack(alignment: .leading, spacing: 6) {
                 keyRow
+                    .searchAnchored(
+                        SettingsCatalog.shortcuts.modifierKeys.children
+                            .hyperKey
+                    )
                 captions
                 ShortcutBaseRow(model: model, reason: offerReason)
+                    .searchAnchored(
+                        SettingsCatalog.shortcuts.modifierKeys.children
+                            .shortcutBase
+                    )
                     .padding(.top, 6)
                 ModifierSidesRow(model: model)
                     .padding(.top, 6)
             }
         }
+        // Open on arrival once in use — never forced shut.
+        .onAppear { if inUse { expanded = true } }
     }
 
     /// The recorder in the recorder column, ✦ in the icon slot and

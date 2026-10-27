@@ -19,7 +19,7 @@ import Testing
 /// (#1069). `entryPoints` is the census of the spellings that
 /// start motion; a new one joins it.
 ///
-/// The house split (`SettingsModel+Mode`) is what "gated" means
+/// The house split is what "gated" means
 /// here: drop the MOTION, keep the affordance. So the shape
 /// required is ONE canonical form — a call whose animation
 /// argument can resolve to nil:
@@ -40,7 +40,7 @@ import Testing
 ///
 /// A model has no environment to read, so it takes
 /// `reduceMotion` as a parameter from its caller
-/// (`flipSettingsMode`, `setAutoStart`) and names it at the
+/// (`setAutoStart`) and names it at the
 /// call, or resolves it into a local the call names.
 @Suite("Reduce Motion gating (#989, #1069)")
 struct ReduceMotionGateTests {

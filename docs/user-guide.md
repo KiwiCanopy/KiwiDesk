@@ -417,6 +417,11 @@ value. A field greyed by a switch on another page (Grid's
 auto-size, Track's auto limit) says so and links Layout
 Defaults.
 
+:::unreleased
+**Customize…** is always on a space row's right-click menu; once
+any space has an override, it is also a cell on every row.
+:::
+
 Changing a space's layout never deletes overrides; each layout
 keeps its own, and a **Saved for _N_ other layouts** card at the
 foot lists them. **Reset All Layout Overrides** there clears
@@ -819,10 +824,6 @@ editable profile; presets cannot be deleted.
 
 ## App Rules
 
-**Windows titled…** is a Power User choice in the Float list's
-menu. Once any rule uses it, the choice stays listed in Simple as
-well.
-
 **The title match is case-sensitive**, and "Info" also catches
 "Information"; the live window list under the chips shows what
 the rule as written would float. Dialogs, sheets and
@@ -836,7 +837,7 @@ Apps with **macOS native tabs** (Finder, Terminal, Ghostty) are
 one tile per window that follows the active tab. Tabs cannot be
 split into separate tiles.
 
-### Ignore Rules (Power Users)
+### Ignore Rules (Lua only)
 
 An ignore rule makes KiwiDesk treat every window of an app as
 nonexistent — no space assignment, no window events — for HUDs,

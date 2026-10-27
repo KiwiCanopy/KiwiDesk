@@ -8,11 +8,8 @@ extension SettingsModel {
     /// through — a bar menu's row (#1518), a spotlight row
     /// (#2038), the tour (#326), an adoption's dropped chords —
     /// and the one writer of `pendingReveal` here
-    /// (`WhatsNewTrailWiringTests`). The mode notice is armed every
-    /// time: the reveal announces only a flip it made, judged on
-    /// the destination it resolved.
+    /// (`WhatsNewTrailWiringTests`).
     func land(on anchor: SettingsAnchor) {
-        nav.pendingModeNotice = anchor.destination
         nav.pendingReveal = anchor
     }
 

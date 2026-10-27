@@ -1093,7 +1093,7 @@ until the user picks a side.
 **State about THIS MAC that is no file stays out of the register,
 in the app's defaults.** What a Mac has run and read — the "What's
 new" record (`WhatsNewRecord`, #1542), the tour's progress, the
-Settings mode — describes the machine, not the setup, and a backup
+appearance choice — describes the machine, not the setup, and a backup
 restored on another Mac must neither replay nor swallow it. Such
 state never moves into the config folder "for consistency" and
 never joins `ConfigArtifact`.

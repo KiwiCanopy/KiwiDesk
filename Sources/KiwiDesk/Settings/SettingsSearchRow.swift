@@ -9,8 +9,6 @@ struct SettingsSearchRow: View {
     var onCursor = false
     /// Enrichment: current setting value evaluated from in-memory draft.
     let value: (SettingKey) -> String?
-    /// Whether committing flips active settings mode.
-    let switchesMode: Bool
     /// Badge indicator status.
     let badged: Bool
     /// Accessibility value for badge indicator.
@@ -46,7 +44,6 @@ struct SettingsSearchRow: View {
                     .foregroundStyle(secondaryInk)
                     .lineLimit(1)
             }
-            if switchesMode { modeTag }
         }
         .contentShape(Rectangle())
         .onTapGesture { reveal(result) }
@@ -59,26 +56,6 @@ struct SettingsSearchRow: View {
         // mouse-only for AX users.
         .accessibilityAddTraits(.isButton)
         .accessibilityAction { reveal(result) }
-    }
-
-    /// Mode tag capsule indicator (localization audit 2026-08-10).
-    private var modeTag: some View {
-        Text(L("mode.power_user", "Power User"))
-            .font(.caption2)
-            .foregroundStyle(secondaryInk)
-            .padding(.horizontal, 6)
-            .padding(.vertical, 2)
-            .background(Capsule().strokeBorder(modeTagEdge))
-    }
-
-    /// The tag's accent edge would vanish on the cursor's accent,
-    /// so there it takes the row's secondary ink.
-    private var modeTagEdge: Color {
-        onCursor
-            ? DropdownRowStyle.secondaryInk(onCursor)
-            : SettingsTheme.accent.opacity(
-                SettingsTheme.modeGatedStrokeOpacity
-            )
     }
 
     private var secondaryInk: Color {
@@ -159,14 +136,6 @@ struct SettingsSearchRow: View {
                 "%1$@, %2$@",
                 label,
                 shownValue
-            )
-        }
-        if switchesMode {
-            label = L(
-                "search.result_mode_ax",
-                "%1$@, %2$@ mode",
-                label,
-                L("mode.power_user", "Power User")
             )
         }
         return label

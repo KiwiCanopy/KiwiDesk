@@ -20,16 +20,6 @@ struct LensPageViewTests {
         #expect(nav.kiwiVisionLensSelection(in: lenses) == nil)
     }
 
-    @Test("Windows titled… shows in Power User, or once a member is titled")
-    func titlesOffer() {
-        var lens = VisionLens(name: "Writing")
-        lens.apps = ["test.kiwi.notes"]
-        #expect(!KiwiVisionLensAppsCard.offersTitles(lens, mode: .simple))
-        #expect(KiwiVisionLensAppsCard.offersTitles(lens, mode: .powerUser))
-        lens.titles = ["test.kiwi.notes": []]
-        #expect(KiwiVisionLensAppsCard.offersTitles(lens, mode: .simple))
-    }
-
     @Test("Clear after reads Off at 0, else seconds")
     func delayReadout() {
         LocalizationManager.shared.select("en")

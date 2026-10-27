@@ -1,13 +1,12 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Keybinding layer management card — a bespoke container
-/// (`ShortcutsRowOrder.bespokeContainers`). Config presence
-/// expands the simple surface: a configured layer is the user's
-/// own setup, so the card is AT REST the moment one exists, in
-/// both modes. Getting this backwards hides a user's own
-/// configuration — an earlier draft shipped exactly that by
-/// reading the tier as `.showMore`.
+/// Keybinding layer management — a bespoke container
+/// (`ShortcutsRowOrder.bespokeContainers`) drawn as a collapsible
+/// card (#2654). Config presence expands it: once a layer exists
+/// the card opens on arrival, and it is never swapped for another
+/// container, so a recorder inside survives its first combo
+/// (#1125).
 struct LayersCard: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -15,58 +14,46 @@ struct LayersCard: View {
     let expander: ShortcutsFamilyRows
     @State private var expanded = false
 
-    /// Whether configured layers exist (`ShortcutsGates`).
+    /// Whether configured layers exist (`ShortcutsGates`) — the
+    /// census gate of the rows and the card's hold-open alike.
     private var layersExist: Bool {
         ShortcutsGates(config: model.config).layersExist
     }
 
-    /// Whether the card is offered: an always-open card, or no
-    /// card at all (owner ruling 2026-08-04) — absent until earned
-    /// by having a layer or Power User (`SpaceOverrideOffer`,
-    /// #678 8c). Static so the STRIP inside asks the same
-    /// predicate rather than keeping a second copy (#816).
-    static func isOffered(
-        config: GuiConfig,
-        mode: SettingsMode
-    ) -> Bool {
-        ShortcutsGates(config: config).layersExist
-            || mode == .powerUser
-    }
-
-    private func offered(in mode: SettingsMode) -> Bool {
-        Self.isOffered(config: model.config, mode: mode)
-    }
-
-    private var offered: Bool {
-        offered(in: model.settingsMode)
-    }
-
-    /// Mode gating status for visual framing (#760, 2026-08-09).
-    private var modeGated: Bool {
-        !offered(in: .simple)
-    }
-
-    @ViewBuilder var body: some View {
-        if offered {
-            SettingsSection(
-                SettingsCatalog.shortcuts.layersCard,
-                modeGated: modeGated
-            ) {
-                VStack(alignment: .leading, spacing: 12) {
-                    LayerStripEditor(
+    var body: some View {
+        SettingsCollapsibleSection(
+            SettingsCatalog.shortcuts.layersCard,
+            isExpanded: $expanded,
+            summary: summary
+        ) {
+            VStack(alignment: .leading, spacing: 12) {
+                LayerStripEditor(
+                    model: model,
+                    selected: $selected
+                )
+                if layersExist {
+                    KeybindingFamilyRows(
                         model: model,
-                        selected: $selected
+                        bindings: $bindings,
+                        key: .shortcuts(.switchToLayer),
+                        expander: expander
                     )
-                    if layersExist {
-                        KeybindingFamilyRows(
-                            model: model,
-                            bindings: $bindings,
-                            key: .shortcuts(.switchToLayer),
-                            expander: expander
-                        )
-                    }
                 }
             }
         }
+        // Open on arrival once in use — never forced shut.
+        .onAppear { if layersExist { expanded = true } }
+    }
+
+    /// The layers by name once there is more than one, or what a
+    /// layer is.
+    private var summary: String {
+        guard layersExist else {
+            return L(
+                "shortcuts.layers.summary",
+                "Alternate shortcut sets, switched with a key"
+            )
+        }
+        return LocalizedList.join(model.config.layers.map(\.name))
     }
 }

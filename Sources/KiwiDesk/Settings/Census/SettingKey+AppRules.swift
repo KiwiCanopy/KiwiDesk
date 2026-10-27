@@ -36,15 +36,8 @@ extension AppRulesKey {
         case .floatRules, .appRulesAddFloat, .floatRuleDelete:
             return .row(.appRules, .floatRules, .atRest)
         case .floatRulesPattern:
-            // An OFFER until the user matches a title (#1022):
-            // withheld in Simple until some row carries a
-            // pattern, and at rest in BOTH modes once one does.
-            return .row(
-                .appRules,
-                .floatRules,
-                .immediate,
-                gate: .runtime(.titlePatternsExist)
-            )
+            // Inside each Float row's scope menu (#1022, #2654).
+            return .row(.appRules, .floatRules, .showMore)
         case .ignoreRules:
             return .luaOnly
         case .floatAutomatically, .tileRuleDelete:

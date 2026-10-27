@@ -30,21 +30,12 @@ struct KiwiVisionLensAppsCard: View {
         }
     }
 
-    /// Whether the scope menus show (ruling 51, #1022's offer):
-    /// Power User, or any member already titled — a choice in
-    /// effect is never hidden.
-    static func offersTitles(_ lens: VisionLens, mode: SettingsMode) -> Bool {
-        mode == .powerUser || !lens.titles.isEmpty
-    }
-
     @ViewBuilder private func row(_ app: String) -> some View {
         let titled = lens.titles[app] != nil
         HStack(spacing: 6) {
             AppPickerRowLabel(key: app)
             Spacer(minLength: 0)
-            if Self.offersTitles(lens, mode: model.settingsMode) {
-                scopeMenu(app, titled: titled)
-            }
+            scopeMenu(app, titled: titled)
             AppRuleDeleteButton(help: KiwiVisionLensWords.removeApp) { _ in
                 update {
                     $0.apps.removeAll { $0 == app }
