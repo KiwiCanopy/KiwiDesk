@@ -86,15 +86,19 @@ extension KiwiCore {
         let remembered = screen.flatMap { state.pocket?.frames[$0] }
         state.markPocketOut(cameFrom: cameFrom)
         fileMembership(id, into: target, from: nil)
-        // Placed once filed: the float target reads its Space.
-        let frame =
-            remembered
-            ?? floatPlacementTarget(for: id)
-            ?? floatBounds(on: target).map {
-                FloatRecovery.centred(window.frame.size, in: $0)
-            }
-        // Its frame is the slot's; the restore delivers it.
-        if let frame { tiler.seedStash(id, frame: frame) }
+        // Its frame is the slot's; the restore delivers it. With
+        // none remembered it is placed as a float (#2672), after
+        // `markPocketOut`, whose global scope names the Space.
+        if let remembered {
+            tiler.seedStash(id, frame: remembered)
+        } else if !seedFloatPlacement(id),
+            let bounds = floatBounds(on: target)
+        {
+            tiler.seedStash(
+                id,
+                frame: FloatRecovery.centred(window.frame.size, in: bounds)
+            )
+        }
         onLog("pocket: w\(id.raw) out on space \(target)")
         refreshStickyReach()
         retile(animated: true)

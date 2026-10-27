@@ -24,12 +24,11 @@ struct ScreenEdgesWiringTests {
         text.components(separatedBy: needle).count - 1
     }
 
-    @Test("each drawer greys on one screen and names what unlocks it")
+    @Test("each drawer greys its rows on one screen and says why")
     func drawersGreyOnOneScreen() throws {
         let card = try squashed(Self.bars + "Bars/KiwiShelfCard+Edge.swift")
         #expect(count("ScreenEdgesDrawer(", in: card) == 2)
         #expect(count("ifmodel.offersScreenEdges(", in: card) == 0)
-        // Each mount edits, and is offered by, its own bar.
         for bar in ["spaceBarStyle", "appBarStyle"] {
             #expect(
                 count(
@@ -37,17 +36,20 @@ struct ScreenEdgesWiringTests {
                     in: card
                 ) == 1
             )
-            #expect(
-                count(
-                    "offered:model.offersScreenEdges(\\.\(bar))",
-                    in: card
-                ) == 1
-            )
         }
         let drawer = try squashed(Self.bars + "Bars/ScreenEdgesDrawer.swift")
-        #expect(count(".modifier(GreyOut(active:!offered))", in: drawer) == 1)
+        // The drawer asks for its own bar, once.
+        #expect(
+            count(
+                "privatevaroffered:Bool{model.offersScreenEdges(bar)}",
+                in: drawer
+            ) == 1
+        )
         let help = "if!offered{HelpButton(explanation:Self.oneScreenHelp"
         #expect(count(help, in: drawer) == 1)
+        // The rows grey, never the label (#527).
+        #expect(count(".modifier(GreyOut(active:!offered))", in: drawer) == 1)
+        #expect(count("header.modifier(GreyOut", in: drawer) == 0)
     }
 
     @Test("each bar row explains an empty selection")
@@ -81,7 +83,7 @@ struct ScreenEdgesWiringTests {
                 in: drawer
             ) == 1
         )
-        #expect(count("ifoffered&&(expanded||locked){", in: drawer) == 1)
+        #expect(count("ifexpanded||locked{", in: drawer) == 1)
         let wrapper = try squashed(
             Self.bars + "Common/SettingsDisclosure.swift"
         )

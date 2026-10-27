@@ -26,9 +26,6 @@ struct ShortcutBaseRow: View {
         }
     }
 
-    private static let captionIndent =
-        ShortcutSettingRow<EmptyView, EmptyView>.captionIndent
-
     private var keySet: Bool { model.appWide.hyperKey != nil }
 
     /// No key and nothing on `✦` yet: the switch has nothing to do.
@@ -83,7 +80,7 @@ struct ShortcutBaseRow: View {
         .font(.caption)
         .foregroundStyle(SettingsTheme.ink2)
         .fixedSize(horizontal: false, vertical: true)
-        .padding(.leading, Self.captionIndent)
+        .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     private func caption(_ text: String) -> some View {
@@ -91,6 +88,6 @@ struct ShortcutBaseRow: View {
             .font(.caption)
             .foregroundStyle(SettingsTheme.ink2)
             .fixedSize(horizontal: false, vertical: true)
-            .padding(.leading, Self.captionIndent)
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 }

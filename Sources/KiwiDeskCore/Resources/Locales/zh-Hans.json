@@ -1005,6 +1005,7 @@
   "kiwishelf.edge.label.help": "栏所在的屏幕边缘。可在“%1$@”中让每个栏各占一条边缘。",
   "kiwishelf.edge.per_screen.app_bar": "按显示器",
   "kiwishelf.edge.per_screen.ax": "%1$@，%2$@",
+  "kiwishelf.edge.per_screen.one_screen": "需要包含两台或更多显示器的描述文件。",
   "kiwishelf.edge.per_screen.space_bar": "按显示器",
   "kiwishelf.edge.screen.absent": "未连接",
   "kiwishelf.edge.screen.ax_absent": "%1$@，%2$@",

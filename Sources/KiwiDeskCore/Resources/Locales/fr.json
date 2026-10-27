@@ -1005,6 +1005,7 @@
   "kiwishelf.edge.label.help": "Le bord de l'écran où se placent les barres. Placez chacune sur son propre bord sous « %1$@ ».",
   "kiwishelf.edge.per_screen.app_bar": "Par écran",
   "kiwishelf.edge.per_screen.ax": "%1$@, %2$@",
+  "kiwishelf.edge.per_screen.one_screen": "Nécessite un profil avec au moins deux écrans.",
   "kiwishelf.edge.per_screen.space_bar": "Par écran",
   "kiwishelf.edge.screen.absent": "non connecté",
   "kiwishelf.edge.screen.ax_absent": "%1$@, %2$@",

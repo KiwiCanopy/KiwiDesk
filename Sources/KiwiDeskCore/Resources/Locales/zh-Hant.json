@@ -1005,6 +1005,7 @@
   "kiwishelf.edge.label.help": "列所在的螢幕邊緣。可在「%1$@」中讓每個列各佔一個邊緣。",
   "kiwishelf.edge.per_screen.app_bar": "依螢幕",
   "kiwishelf.edge.per_screen.ax": "%1$@，%2$@",
+  "kiwishelf.edge.per_screen.one_screen": "需要包含兩部或更多螢幕的描述檔。",
   "kiwishelf.edge.per_screen.space_bar": "依螢幕",
   "kiwishelf.edge.screen.absent": "未連接",
   "kiwishelf.edge.screen.ax_absent": "%1$@，%2$@",

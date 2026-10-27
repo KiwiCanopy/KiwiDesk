@@ -17,10 +17,7 @@ struct DesktopCueRow: View {
     var body: some View {
         // Starts at the rows' text, as the layout cue does (#2670).
         VStack(alignment: .leading, spacing: 4) { content }
-            .padding(
-                .leading,
-                ShortcutSettingRow<EmptyView, EmptyView>.captionIndent
-            )
+            .padding(.leading, SettingsMetrics.shortcutTextIndent)
     }
 
     @ViewBuilder private var content: some View {

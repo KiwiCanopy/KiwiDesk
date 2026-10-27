@@ -129,6 +129,17 @@ extension KiwiCore {
         return true
     }
 
+    /// Seeds `id`'s float placement as its pending capture — the
+    /// pocket's first take-out (#2672), which has no frame of its
+    /// own yet. False where nothing was seeded.
+    func seedFloatPlacement(_ id: WindowID) -> Bool {
+        guard seedsPlacement(id),
+            let target = floatPlacementTarget(for: id)
+        else { return false }
+        seedPlacement(id, target)
+        return true
+    }
+
     /// Whether `id` may take its placement as a pending capture —
     /// asked before the target is read, which consumes the
     /// remembered frame. Never a window in its own macOS Space
@@ -148,7 +159,7 @@ extension KiwiCore {
     /// Where `id` floats on its placement space: its remembered
     /// frame, else centred at the derived size and cascaded off
     /// the other floats there (#1708); nil under `keep`.
-    func floatPlacementTarget(for id: WindowID) -> CGRect? {
+    private func floatPlacementTarget(for id: WindowID) -> CGRect? {
         guard tiler.settings.floatPlacement == .center,
             state.windows[id] != nil,
             let space = floatPlacementSpace(of: id),

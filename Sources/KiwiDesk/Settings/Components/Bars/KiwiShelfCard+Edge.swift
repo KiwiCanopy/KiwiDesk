@@ -49,8 +49,7 @@ extension KiwiShelfCard {
                         "Per screen"
                     ),
                     barName: L("kiwishelf.edge.space_bar", "Space Bar"),
-                    options: edgeOptions,
-                    offered: model.offersScreenEdges(\.spaceBarStyle)
+                    options: edgeOptions
                 )
                 .searchAnchored(
                     SettingsCatalog.bars.kiwishelfEdges.children
@@ -65,8 +64,7 @@ extension KiwiShelfCard {
                         "Per screen"
                     ),
                     barName: L("kiwishelf.edge.app_bar", "App Bar"),
-                    options: edgeOptions,
-                    offered: model.offersScreenEdges(\.appBarStyle)
+                    options: edgeOptions
                 )
                 .searchAnchored(
                     SettingsCatalog.bars.kiwishelfEdges.children

@@ -19,12 +19,10 @@ struct NavRow: View {
 
     var body: some View {
         HStack {
-            // The icon slot is reserved unconditionally (#264); the
-            // glyph is the shortcuts panel's own for this action
-            // (#2670), drawn in an overlay so a row without one keeps
-            // its label in line.
+            // Icon slot reserved unconditionally (#264); the
+            // panel's glyph (#2670).
             Color.clear
-                .frame(width: 18)
+                .frame(width: SettingsMetrics.shortcutIconSlot)
                 .overlay {
                     if let glyph = ShortcutsReferenceBuilder.icon(
                         for: command

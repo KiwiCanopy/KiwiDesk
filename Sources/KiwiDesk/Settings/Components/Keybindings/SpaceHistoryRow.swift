@@ -21,6 +21,7 @@ struct SpaceHistoryRow: View {
             ShortcutSettingRow(
                 title: SpaceHistoryWords.kept,
                 help: SpaceHistoryWords.help,
+                helpSubject: SpaceHistoryWords.title,
                 reach: { reach },
                 control: { menu }
             )
@@ -28,13 +29,10 @@ struct SpaceHistoryRow: View {
                 Text(reason)
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink3)
-                    .padding(.leading, Self.captionIndent)
+                    .padding(.leading, SettingsMetrics.shortcutTextIndent)
             }
         }
     }
-
-    private static let captionIndent =
-        ShortcutSettingRow<EmptyView, EmptyView>.captionIndent
 
     private var menu: some View {
         Picker(

@@ -236,4 +236,18 @@ struct PocketCommandTests {
         #expect(landed.size == FloatPlacement.centered(in: region).size)
         #expect(landed.size != CGSize(width: 600, height: 400))
     }
+
+    @Test("a first take-out forgets the tile's learned size bound")
+    func firstTakeOutForgetsTheBound() {
+        let core = makeCore()
+        var ledger = SizeBoundLearner.Ledger()
+        ledger.width = [300, 500].map {
+            EffectiveSizeBound.Axis(asked: $0, answered: 900)
+        }
+        core.execute("pocket")
+        core.tiler.boundLearner.bounds[one] = ledger
+        core.execute("pocket")
+        // The float size is no answer to a tiled ask (#677).
+        #expect(core.tiler.boundLearner.bounds[one] == nil)
+    }
 }
