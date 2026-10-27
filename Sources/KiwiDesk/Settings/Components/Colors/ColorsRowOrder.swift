@@ -89,5 +89,6 @@ enum ColorsRowOrder {
         .borders(.borderUnfocusedColor),
         .borders(.stickyColor),
         .borders(.floatingColor),
+        .borders(.pocketColor),
     ]
 }

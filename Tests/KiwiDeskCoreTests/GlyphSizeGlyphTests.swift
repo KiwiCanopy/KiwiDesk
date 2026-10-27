@@ -58,7 +58,8 @@ struct GlyphSizeGlyphTests {
                 style: Self.look(glyphSize: glyphSize),
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         ])

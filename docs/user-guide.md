@@ -409,8 +409,7 @@ pile on quit**.
 
 ### Per-Space Overrides
 
-A space's override editor (from its **Customize…** cell in
-Spaces) edits the layout the space currently uses. Each row's
+A space's override editor (from its row in Spaces) edits the layout the space currently uses. Each row's
 **Override** checkbox, unchecked, inherits the Layout Defaults
 value; checked, the control appears seeded with the current
 value. A field greyed by a switch on another page (Grid's
@@ -418,8 +417,10 @@ auto-size, Track's auto limit) says so and links Layout
 Defaults.
 
 :::unreleased
-**Customize…** is always on a space row's right-click menu; once
-any space has an override, it is also a cell on every row.
+Every space row carries a **Customize** button; its badge counts
+that space's overrides, dimmed while a Floating space keeps them
+for when it tiles again. **Customize…** is also on the row's
+right-click menu.
 :::
 
 Changing a space's layout never deletes overrides; each layout

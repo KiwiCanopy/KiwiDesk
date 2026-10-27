@@ -6,6 +6,7 @@ paths:
   # for the exact file where someone would re-merge the two keys.
   - "Sources/KiwiDeskCore/App/KiwiCore+Borders.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+BorderSettle.swift"
+  - "Sources/KiwiDeskCore/App/DropSettleBurst.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
@@ -150,7 +151,13 @@ second cancel the other:
   ring, exactly as the `updateBorders()` at the end of each
   `retile()` does, and that includes the residual named below: a
   window the user is dragging under a live WindowServer stream is
-  not guarded here either.
+  not guarded here either. **Time it through the one
+  `DropSettleBurst`**, measured from the pass's last RUN and never
+  its last ask, so the asks one gesture makes before the pass runs
+  (a drop's retile and its own defer) keep the early wait; a burst
+  waits its gap, and no ask waits past `maxWait` from the first
+  one no pass has answered — every per-step pass was a
+  no-op on device (#2659, `BorderDropSettleBurstTests`).
 - **Geometry, late** (`scheduleBorderResync`, `.borderResync`).
   Rides `AnimationEngine.onAllAnimationsEnded`, never a duration
   guess — a spring's visual settle is ~2× its response, so
@@ -196,7 +203,14 @@ these:
   overlays (#2284, `FloatRaiseRingRestackTests`,
   `FloatRaiseLandingWiringTests`); that landing pays one ring
   order per raise even where a front-order ring needed none,
-  accepted. A new caller is a new round
+  accepted. **An event's restack is owed to the run loop turn's
+  end** and paid once per window there, skipping a consumer whose
+  hide landed since, since one raise sends a reorder and an unhide
+  and each ordered the ring again (#2659,
+  `WindowServerTurnEndTests`, `WindowServerWatchSeamTests` ▸
+  `eventRestackIsOwed`); a new event arm owes through
+  `oweRestack`, never `restack` itself. A new caller of a ring's
+  order is a new round
   trip on the switch path and owes its ruling in
   `BorderOrderCensusTests`' `allowed` map; a front-order ring's
   level read is a second one (`levelOf`). The order is AppKit's
@@ -429,7 +443,8 @@ Obligations:
   (#2287), so while a plate shows, KiwiVision's consumer also hears
   the float tier and a float's own reorder event re-stacks the
   target's overlays through the one watch door, the plate landing
-  above the float at once rather than at the raise's end. Gate it
+  above the float in that event's turn rather than at the raise's
+  end. Gate it
   on a shown plate, since each call is a ring and mark order on the
   switch path (#1925) (`KiwiVisionFloatLandingTests`,
   `BorderOrderCensusTests` ▸ `watchRestackSitesAreCensused`).
@@ -792,6 +807,18 @@ store it drifts in is the defect. `WindowStrokeTests` ▸
 paths. The product
 ruling is `docs/design-decisions.md` ▸ One width and one corner
 style for every window stroke.
+
+## A mark's colour reaches its plate through `plateHex`
+
+**A plate's tint is read through `Glyph.plateHex`, never
+`Glyph.color`** (#2671): the pocket mark's colour fills the pocket
+itself, opaque, so its plate stays untinted, and the Space Bar's
+pocket badge keeps the count badge's disc the same way. Draw the
+on-window mark in a mark colour through the one
+`PocketMark.image(size:hex:)`, which inks its outlines with
+`contrastingGlyph` as `StickyMarkPlate.paint` inks a disc; the
+badge's pocket alone falls back to its disc's `contrastingGlyph`,
+in `applyStateBadge` (`PocketMarkColorTests`).
 
 ## Exercising the fallback path
 

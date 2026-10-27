@@ -102,7 +102,8 @@ struct SpaceBarCollapsedPeekTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             collapse: .init(windows: peek.count, peek: peek)
         )
@@ -164,7 +165,8 @@ struct SpaceBarCollapsedPeekTests {
                 style: SpaceBarLook(),
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         }

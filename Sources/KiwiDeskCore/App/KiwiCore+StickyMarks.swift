@@ -25,6 +25,7 @@ extension KiwiCore {
         let stickyMark = tiler.settings.stickyStyle.mark
         let stickyColor = tiler.settings.stickyStyle.color
         let floating = tiler.settings.floatingStyle
+        let pocketColor = tiler.settings.pocketStyle.color
         let shown = floating.mark ? floatingMarkWindows() : []
         let glass = LiquidGlassGate.rendered(
             glass: tiler.settings.stickyStyle.liquidGlass
@@ -42,7 +43,7 @@ extension KiwiCore {
             // Out of the pocket, its own mark stands in for the
             // sticky and floating glyphs (#2446).
             if state.pocketPhase(of: window.id) == .out {
-                glyphs = [.pocket]
+                glyphs = [.pocket(color: pocketColor)]
             } else if stickyMark, window.isSticky {
                 glyphs.append(
                     .sticky(

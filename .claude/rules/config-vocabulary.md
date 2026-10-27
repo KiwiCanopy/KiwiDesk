@@ -98,7 +98,9 @@ synonym:
 - **badge** — a small disc on a bar item's corner: the group
   count badge, and the Space Bar's sticky / floating state
   badges (`group_badge_*`, `space_bar.sticky_badge`). One family;
-  the three on an app glyph take three different corners.
+  the three on an app glyph take three different corners. In
+  Settings, the override count on a Space row's Customize button
+  is a badge too (#2674): it counts, so it takes the word.
 - **Space marker** — a glyph drawn after a Space's identifier, in
   its ink and with no plate: a held Space's (#1507) or a temporary
   one's (#1790), one slot shared since a Space is never both.

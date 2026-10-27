@@ -43,12 +43,14 @@ extension ColorPalette {
             applyBorder(parts[1], hex, to: &settings.borderStyle)
         case "drag" where parts.count == 3:
             applyDrag(parts[1], parts[2], hex, to: &settings)
-        // The two mark tints (#678 Colours phase). Each struct IS
-        // the mark, so its one color key is bare `color`.
+        // The mark tints (#678 Colours phase, #2671). Each struct
+        // IS the mark, so its one color key is bare `color`.
         case "sticky" where parts == ["sticky", "color"]:
             settings.stickyStyle.color = hex
         case "floating" where parts == ["floating", "color"]:
             settings.floatingStyle.color = hex
+        case "pocket" where parts == ["pocket", "color"]:
+            settings.pocketStyle.color = hex
         default:
             break
         }

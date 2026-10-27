@@ -65,7 +65,11 @@ struct BarHoverFillTests {
             active: active,
             horizontal: true,
             style: SpaceBarLook(shelf: shelf, bar: SpaceBarStyle(), sheen: 0),
-            stateMarkColors: StateMarkColors(sticky: "", floating: "")
+            stateMarkColors: StateMarkColors(
+                sticky: "",
+                floating: "",
+                pocket: ""
+            )
         )
         view.isHovered = hovered
         view.isDragHovered = dragHovered

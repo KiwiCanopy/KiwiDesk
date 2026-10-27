@@ -164,7 +164,8 @@ struct GlyphGapDrawingTests {
             style: look,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             after: .init(windows: [WindowID(901), WindowID(902)])
         )
@@ -245,7 +246,8 @@ struct GlyphGapRenderTests {
                 style: style,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         ])

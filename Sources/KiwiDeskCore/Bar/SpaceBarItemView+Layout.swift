@@ -201,7 +201,7 @@ extension SpaceBarItemView {
         let side = StateBadgeMetrics.side(cell: cell)
         let box = cellRect(at: offset, cell: cell)
         if index < stickyBadgeViews.count,
-            let badge = stickyBadgeViews[index], !badge.isHidden
+            let badge = stickyBadgeViews[index]
         {
             badge.frame = backingAlignedRect(
                 CGRect(
@@ -215,7 +215,7 @@ extension SpaceBarItemView {
             badge.needsLayout = true
         }
         if index < floatingBadgeViews.count,
-            let badge = floatingBadgeViews[index], !badge.isHidden
+            let badge = floatingBadgeViews[index]
         {
             badge.frame = backingAlignedRect(
                 CGRect(

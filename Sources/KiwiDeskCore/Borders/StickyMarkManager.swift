@@ -30,10 +30,14 @@ public final class StickyMarkManager {
         }
 
         /// The pocket mark, drawn by `PocketMark` rather than a
-        /// symbol (#2446).
-        public static var pocket: Glyph {
-            Glyph(kind: .pocket, symbolName: "", color: "")
+        /// symbol (#2446), its pocket in `color` (#2671).
+        public static func pocket(color: String = "") -> Glyph {
+            Glyph(kind: .pocket, symbolName: "", color: color)
         }
+
+        /// The plate's tint: the pocket's colour fills the pocket
+        /// itself, so its plate stays untinted (#2671).
+        var plateHex: String { kind == .pocket ? "" : color }
 
         public static func floating(color: String = "") -> Glyph {
             Glyph(

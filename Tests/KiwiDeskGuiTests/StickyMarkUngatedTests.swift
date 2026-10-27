@@ -85,7 +85,7 @@ struct StickyMarkUngatedTests {
         let mark = SettingKey.borders(.floatingMark).placement
         #expect(mark.gate == nil)
         #expect(mark.container == .stickyWindows)
-        for key in [BordersKey.stickyColor, .floatingColor] {
+        for key in [BordersKey.stickyColor, .floatingColor, .pocketColor] {
             let placement = SettingKey.borders(key).placement
             #expect(placement.gate == nil, "\(key)")
             #expect(placement.container == .windowMarks, "\(key)")

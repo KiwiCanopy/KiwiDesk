@@ -101,6 +101,10 @@ public final class BorderManager {
     var roomsHeld = false
     /// Rings that took a room since the last resync.
     var heldRooms: Set<WindowID> = []
+    /// The visibility settle pass's burst timing (#2659), read by
+    /// `KiwiCore+BorderSettle` alone; held here for `KiwiCore`'s
+    /// line cap, not as border state.
+    var dropSettleBurst = DropSettleBurst()
     #if DEBUG
         /// Test-only: the screen frame `room(for:screen:)` uses in
         /// place of the host's. Production must not read it.

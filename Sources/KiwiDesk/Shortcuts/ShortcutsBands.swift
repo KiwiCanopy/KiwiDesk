@@ -69,14 +69,10 @@ struct ShortcutRowView: View {
                 )
                 .frame(width: 16, height: 16)
         } else if row.pocketMark {
-            // Vectors, drawn at the row's own size (#2446).
-            Image(
-                nsImage: PocketMark.mark.image(
-                    size: 16,
-                    ink: .secondaryLabelColor
-                )
-            )
-            .frame(width: 16, height: 16)
+            // Vectors, drawn at the row's own size (#2446), in the
+            // mark's Automatic ink (#2671).
+            Image(nsImage: PocketMark.mark.image(size: 16, hex: ""))
+                .frame(width: 16, height: 16)
         } else if row.ownApp {
             Image(nsImage: NSApplication.shared.applicationIconImage)
                 .resizable()

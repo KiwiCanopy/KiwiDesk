@@ -138,6 +138,12 @@ extension SettingsValueReadout {
                 old.settings.floatingStyle.color,
                 new.settings.floatingStyle.color
             )
+        case .pocketColor:
+            return bordersAutoHexRow(
+                census,
+                old.settings.pocketStyle.color,
+                new.settings.pocketStyle.color
+            )
         }
     }
 }
