@@ -49,6 +49,7 @@ enum ColorsRowOrder {
         .colours(.animationsOnWindowResize),
         .colours(.animationsOnWindowSwap),
         .colours(.animationsOnRelayout),
+        .colours(.animationsOnStateChange),
         .colours(.animationsDurationMS),
     ]
 
@@ -89,5 +90,6 @@ enum ColorsRowOrder {
         .borders(.borderUnfocusedColor),
         .borders(.stickyColor),
         .borders(.floatingColor),
+        .borders(.pocketColor),
     ]
 }

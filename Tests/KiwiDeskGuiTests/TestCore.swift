@@ -78,8 +78,9 @@ func makeTestCore(
     core.borders.scheduleArrivalCheck = { _, _ in }
     core.borders.reduceMotion = { true }
     core.windowServer.trackingDisabled = false
-    // A frame event fed through the core reads no live bounds.
+    // An event reads no live bounds and restacks at once (#2659).
     core.windowServer.readWindowBounds = { _ in nil }
+    core.windowServer.atTurnEnd = { $0() }
     // A front-order ring reads its target's level from WindowServer
     // on every sync otherwise (#1868).
     core.borders.windowLevel = { _ in nil }

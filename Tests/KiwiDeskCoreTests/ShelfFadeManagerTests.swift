@@ -82,7 +82,8 @@ struct ShelfFadeManagerTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         overlay.hide()

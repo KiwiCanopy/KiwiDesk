@@ -275,8 +275,29 @@ extension TilingEngine {
         {
             stashedFrames[window.id] = window.frame
         }
-        animation.cancel(window: window.id)
+        // A slide already carrying it to this park is left to land.
+        if let inFlight = animation.targetFrame(window: window.id),
+            Self.parked(inFlight, at: target)
+        {
+            return
+        }
         meter.add(\.parksIssued)
+        // A window pocketed this pass slides there (#2676); its
+        // size is its own, so only the position moves. A refused
+        // slide keeps the one-call park below (#1508).
+        if window.id == stateChangeWindow,
+            settings.animations.onStateChange,
+            !animation.reduceMotion()
+        {
+            applyFrame(
+                window.id,
+                from: commanded ?? window.frame,
+                to: target,
+                animated: true
+            )
+            return
+        }
+        animation.cancel(window: window.id)
         // Only the right corner's x is width-free; the left one
         // is measured from the state width, which the size write
         // makes true (#1508).

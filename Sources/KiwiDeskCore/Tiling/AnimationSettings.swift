@@ -14,6 +14,11 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
     /// Animate layout reflow upon window open/close or mode changes.
     public var onRelayout = true
 
+    /// Animate a window changing state (#2676): floating and back,
+    /// maximizing and back, pocketing and out. Only that window
+    /// follows it; its neighbours keep `onRelayout`.
+    public var onStateChange = true
+
     /// Spring animation duration in milliseconds (50–1000 ms).
     public var durationMS = 150 {
         didSet { durationMS = Self.clampMS(durationMS) }
@@ -108,6 +113,7 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
         case onWindowResize = "on_window_resize"
         case onWindowSwap = "on_window_swap"
         case onRelayout = "on_relayout"
+        case onStateChange = "on_state_change"
         case durationMS = "duration"
         case scrollDurationMS = "scroll_duration"
         case onExpand = "on_expand"
@@ -141,6 +147,11 @@ public struct AnimationSettings: Sendable, Equatable, Codable {
             try container.decodeIfPresent(
                 Bool.self,
                 forKey: .onRelayout
+            ) ?? true
+        onStateChange =
+            try container.decodeIfPresent(
+                Bool.self,
+                forKey: .onStateChange
             ) ?? true
         // `didSet` observers don't fire during init, so clamp the
         // decoded values explicitly through the same helper.

@@ -146,11 +146,13 @@ extension KiwiCore {
         // it ends the maximize first — the writers measure the
         // drawn slot — and a refusal still draws the return
         // (#2448).
-        let endedMaximize = space.maximized != nil
+        let endedMaximize = space.maximized
         state.workspaces.withSpace(space.id) { $0.maximized = nil }
         var resized = false
         defer {
-            if endedMaximize, !resized { retileEndingMaximize() }
+            if let endedMaximize, !resized {
+                retileEndingMaximize(endedMaximize)
+            }
         }
         // Span resolves on the space's OWN display (#449) —
         // main-screen math resized against the wrong bounds on

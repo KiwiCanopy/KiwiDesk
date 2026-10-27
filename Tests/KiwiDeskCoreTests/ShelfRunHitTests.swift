@@ -89,7 +89,8 @@ struct ShelfRunHitTests {
             style: look,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         try #require(overlay.scrollOffset > 0, "the run did not scroll")

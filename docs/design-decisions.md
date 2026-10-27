@@ -6004,9 +6004,10 @@ rule of its own: a maximize ends where the new arrangement
 changes its Space's layout or files the window elsewhere, and
 stands where both stay. A sticky window is
 refused, since it draws on other Spaces' layouts too. It
-survives KiwiDesk's own in-place restart and not a Quit. Its motion is the engine's
-ordinary frame animation, governed by `animations.on_window_resize`
-with no setting of its own. Named "Maximize": "Zoom" and "Fill"
+survives KiwiDesk's own in-place restart and not a Quit. Its motion is
+the state-change animation ([a window changing
+state](#a-window-changing-state-animates-under-its-own-switch-2676)).
+Named "Maximize": "Zoom" and "Fill"
 already mean other things in KiwiDesk's catalogs, and "Full
 Screen" promises a new Desktop.
 :::
@@ -6099,6 +6100,39 @@ next launch with no pocket would otherwise hold a window off-screen
 that no key can bring back. An update's in-place relaunch carries
 the slot (`StateSnapshot.pocket`), since that restart is meant to
 be invisible.
+:::
+
+### A window changing state animates under its own switch (#2676)
+
+:::unreleased
+**[Rationale]**
+
+**Floating and tiling back, maximizing and returning, and going
+into the pocket and out move under `animations.on_state_change`,
+and only the window changing state follows it.** These moves are
+bigger than a drag or a resize step and change what the window
+is, so a user who wants reflows calm can still watch a window
+float; its neighbours keep following `on_relayout`, so turning
+reflows off never takes this with it. A float the detection
+places is no verb of the user's and keeps `on_relayout`. The
+window changing state promises a full spring for itself
+(`BatchSizing.allSpringSized`): becoming floating shrinks both
+axes, and a shrinking axis otherwise takes its target on frame 1,
+leaving only the corner to travel. A slow app's window trails our
+spring, so its ring is held dormant until the window has landed
+rather than running ahead of it.
+
+**One toggle, not a choice of styles.** No style can capture
+another app's window, and none can set its transparency
+([Blocked by macOS (SIP)](#blocked-by-macos-sip)), so a "fade" is
+a tinted plate flashing over a jumping window: a glitch on float
+and maximize, not a style. A Genie stays refused because it means
+"minimized to the Dock" and needs a private API
+([the overflow mark's peek](#layout-and-resize-behavior)).
+Pocketing slides the real window to its park corner at its own
+size, position only, so slow apps and minimum sizes are not in
+play; a plate shrinking into an on-screen pocket waits for that
+pocket to exist (#2680).
 :::
 
 ### Spaces, profiles & config ownership
@@ -8013,9 +8047,8 @@ destination is read BEFORE the mutation (afterwards the list names
 whichever row slid into the gap, right by accident and wrong at
 the end of a list), and it must be a control that is always DRAWN
 and non-destructive: binding the spaces list to a conditionally
-offered button (Customize…, drawn only once an override exists),
-which on a fresh install is not drawn at all, sends focus
-to the top by a second road.
+mode-gated button, which on a fresh install is not drawn at
+all, sends focus to the top by a second road.
 
 *A dim is not a sentence.* Greying keeps a control visible
 because the dimming means *switch that on and I act* — so a
@@ -10052,12 +10085,18 @@ config uses the capability are `.immediate`: the container
 opens on arrival for them and is never swapped (#1125). Layers
 and Modifier keys are collapsible cards; Lua bindings keeps its
 drawer. Where a drawer would hide one control, the offer takes
-the row's own menu instead: per-Space Customize… is always in
-each Space row's right-click menu, and joins the row itself once
-any Space has an override, and title matching
+the row's own menu instead: title matching
 is always a choice in the App Rules float menu and a KiwiVision
 lens's scope menu — a menu item already behind a click costs
 nothing at rest, and a drawer around it is chrome.
+
+Per-Space Customize… is the one offer that left the menu (#2674,
+owner ruling 2026-10-27, amending this entry): every Space row
+carries a small icon-only Customize button, its badge counting
+that Space's overrides, and the row's right-click menu keeps
+Customize… as a second door. A right-click menu as a row's only
+door is invisible at rest — the owner could not find it — while
+title matching is a choice inside a menu the user already sees.
 
 **Screens is a capability, not a depth.**
 `SettingsArea.isAvailable(displayCount:)` keeps its card off
@@ -14168,6 +14207,13 @@ one mark through the one `sticky.color`: a disc on the Space Bar
 badge, the glass's tint on the mark. With the finish off, or
 Reduce transparency on, the disc returns.
 
+The pocket mark takes the other branch on purpose (#2671): its
+colour is drawn opaque IN the glyph, filling the pocket, and its
+plate takes no tint, so the colour on screen is the hex itself and
+the outlines and stitch take `contrastingGlyph` of it, as the flat
+disc does. Moving it to `.labelColor` would draw a black or white
+outline on a pocket the label ink judged against nothing.
+
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
 The old reading — a float overlaps a tiled plane, so the window
@@ -14334,6 +14380,15 @@ A Floating space's cell never disables: its own minimum window
 size still applies there, so the cell offers **Customize…** with
 nothing saved, and counts as **N custom** once that value is set
 (#2422).
+
+:::unreleased
+Amended by #2674: the summary is now the badge on every Space
+row's Customize button, dimmed where this entry says muted and
+absent with no overrides; VoiceOver speaks it as "N custom",
+"N saved — they apply when it tiles again" or "None". The gaps
+row's place in that total, above, reads the same way. The rule
+it protects — never hidden, never disabled — is unchanged.
+:::
 
 **Gaps are uniform-first.** One Outer and one Inner slider
 for the everyday "more breathing room" action, per-edge

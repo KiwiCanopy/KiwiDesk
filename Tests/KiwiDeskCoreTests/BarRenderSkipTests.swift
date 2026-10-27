@@ -41,7 +41,8 @@ struct BarRenderSkipTests {
 
     private static let marks = StateMarkColors(
         sticky: "#ffffff",
-        floating: "#ffffff"
+        floating: "#ffffff",
+        pocket: "#ffffff"
     )
 
     @Test("The App Bar draws a changed show and skips a repeat")

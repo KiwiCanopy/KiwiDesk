@@ -116,6 +116,7 @@ settings.animations.durationMS
 settings.animations.expandDurationMS
 settings.animations.onRelayout
 settings.animations.onScrolling
+settings.animations.onStateChange
 settings.animations.onWindowResize
 settings.animations.onWindowSwap
 settings.animations.revealDurationMS
@@ -220,6 +221,7 @@ settings.mouse.followsFocus
 settings.mouse.hoverFocus
 settings.mouse.hoverFocusDelayMS
 settings.mouseResize
+settings.pocketStyle.color
 settings.scrolling.anchor
 settings.scrolling.appBar.visibility
 settings.scrolling.fillWhenAlone

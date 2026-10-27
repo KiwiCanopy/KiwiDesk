@@ -37,7 +37,8 @@ extension KiwiCore {
     /// (#593): a focus that ended a maximize promises spring
     /// sizing (#2448).
     func retileWithScrollDuration(
-        sizing: BatchSizing = .mayInstantSize
+        sizing: BatchSizing = .mayInstantSize,
+        stateChange: WindowID? = nil
     ) {
         if activeSpace?.mode == .scrolling,
             tiler.settings.animations.onScrolling
@@ -45,10 +46,14 @@ extension KiwiCore {
             let saved = tiler.animation.durationMS
             tiler.animation.durationMS =
                 tiler.animation.scrollDurationMS
-            retile(animated: true, sizing: sizing)
+            retile(animated: true, sizing: sizing, stateChange: stateChange)
             tiler.animation.durationMS = saved
         } else {
-            retile(animated: focusRetileAnimated, sizing: sizing)
+            retile(
+                animated: focusRetileAnimated,
+                sizing: sizing,
+                stateChange: stateChange
+            )
         }
     }
 }

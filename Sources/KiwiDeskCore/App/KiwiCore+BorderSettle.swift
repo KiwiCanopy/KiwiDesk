@@ -45,16 +45,27 @@ extension KiwiCore {
     /// geometry; `scheduleBorderResync` fixes GEOMETRY late and
     /// would be far too slow for a hidden ring. Separate deferred
     /// keys, so neither can cancel the other.
-    func scheduleBorderDropReconcile() {
+    ///
+    /// Inside a burst of steps it waits per `DropSettleBurst`: every
+    /// per-step pass was a no-op on device (160 of 160, #2659). A
+    /// drop asks `lone`, since its swap target is the case above.
+    func scheduleBorderDropReconcile(lone: Bool = false) {
         let animationMS =
             tiler.animation.activeCount > 0
             ? tiler.settings.animations.durationMS : 0
+        let wait = borders.dropSettleBurst.wait(
+            asking: wallClock(),
+            early: Double(animationMS + 50) / 1_000,
+            lone: lone
+        )
         deferred.schedule(
             .borderDropSettle,
-            after: .milliseconds(animationMS + 50)
+            after: .milliseconds(Int((wait * 1_000).rounded()))
         ) { [weak self] in
-            self?.updateBorders(reassertOrder: true)
-            self?.updateMarks(reassertOrder: true)
+            guard let self else { return }
+            borders.dropSettleBurst.ran(at: wallClock())
+            updateBorders(reassertOrder: true)
+            updateMarks(reassertOrder: true)
         }
     }
 
