@@ -34,6 +34,13 @@ import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
 import ogBannerEn from "../assets/brand/og-banner.jpg";
+import {
+  locales,
+  ogLocales,
+  ogLocaleAlternates,
+  localePath,
+  type Lang,
+} from "../lib/locales";
 import { publisher } from "../lib/publisher";
 import ogBannerDe from "../assets/brand/og-banner.de.jpg";
 import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
@@ -51,7 +58,7 @@ import "../styles/landing.css";
 
 interface Props {
   t: Record<string, string>;
-  lang: "en" | "de" | "ja";
+  lang: Lang;
   mode?: "simple" | "dev";
 }
 const { t: locale, lang, mode = "simple" } = Astro.props;
@@ -67,9 +74,8 @@ const ogImage = lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBann
 const t = { ...en, ...locale } as Record<string, string>;
 
 // Home path for the active locale; the language switcher pairs it
-// with its counterpart. English lives at /, German at /de/.
-const homeHref =
-  lang === "de" ? "/de/" : lang === "ja" ? "/ja/" : "/";
+// with its counterpart (`localePath`: English at /, others below).
+const homeHref = localePath(lang);
 
 // Same-locale path for each mode: the Simple page is the locale
 // home, the Nerd page its `nerd/` sibling. `pageHref` is THIS
@@ -84,10 +90,8 @@ const pageHref = isDev ? devHref : simpleHref;
 // The same-mode home path per locale — the language switcher and
 // the anti-redirect resolver both stay INSIDE the active mode's
 // cluster, so switching language never also switches audience.
-const langHref = (l: "en" | "de" | "ja"): string => {
-  const home = l === "de" ? "/de/" : l === "ja" ? "/ja/" : "/";
-  return isDev ? `${home}nerd/` : home;
-};
+const langHref = (l: Lang): string =>
+  localePath(l, isDev ? "/nerd/" : "/");
 
 // Locale-aware quotation marks: German opens low and closes high
 // („…“); English opens and closes high (“…”). Applied to every
@@ -202,17 +206,12 @@ const steps = [
 // that the Nerd page may say "tiling window manager" in the one
 // place a consumer page could not.
 const canonical = new URL(pageHref, Astro.site).href;
-const enURL = new URL(langHref("en"), Astro.site).href;
-const deURL = new URL(langHref("de"), Astro.site).href;
-const jaURL = new URL(langHref("ja"), Astro.site).href;
+const altURL = (l: Lang): string => new URL(langHref(l), Astro.site).href;
 const metaTitle = isDev ? t.meta_title_nerd : t.meta_title;
 const metaDesc = isDev ? t.meta_desc_nerd : t.meta_desc;
 const ogImageURL = new URL(ogImage.src, Astro.site).href;
-const ogLocale =
-  lang === "de" ? "de_DE" : lang === "ja" ? "ja_JP" : "en_US";
-const ogLocaleAlts = ["en_US", "de_DE", "ja_JP"].filter(
-  (l) => l !== ogLocale,
-);
+const ogLocale = ogLocales[lang];
+const ogLocaleAlts = ogLocaleAlternates(lang);
 
 // The hero trailer: served from this origin (media-src 'self'), with
 // the same cut on YouTube for sharing. A link is navigation, so the
@@ -314,10 +313,10 @@ const jsonLd = [
     <meta name="twitter:image" content={ogImageURL} />
     <ThemeHead />
     <FaviconLinks />
-    <link rel="alternate" hreflang="en" href={enURL} />
-    <link rel="alternate" hreflang="de" href={deURL} />
-    <link rel="alternate" hreflang="ja" href={jaURL} />
-    <link rel="alternate" hreflang="x-default" href={enURL} />
+    {locales.map((l) => (
+      <link rel="alternate" hreflang={l} href={altURL(l)} />
+    ))}
+    <link rel="alternate" hreflang="x-default" href={altURL("en")} />
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd)}
     ></script>
     {/* The mode script is GONE — data-mode is server-rendered on

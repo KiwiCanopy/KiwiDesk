@@ -2,6 +2,11 @@ import type { APIRoute } from "astro";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
+import {
+  locales as langs,
+  localePath,
+  type Lang,
+} from "../lib/locales";
 
 // Hand-rolled sitemap for the custom (non-Starlight) pages that
 // carry locale variants. @astrojs/sitemap covers the /docs/* tree
@@ -11,9 +16,6 @@ import ja from "../i18n/ja.json";
 // full hreflang alternates so crawlers see the same graph the
 // <link rel="alternate"> tags declare. Legal pages (imprint,
 // privacy) are noindex and excluded from both.
-
-const langs = ["en", "de", "ja"] as const;
-type Lang = (typeof langs)[number];
 
 // Indexable routes — the path segment *after* the locale prefix.
 // "" is the landing page; "nerd" its dev-audience sibling (the
@@ -46,11 +48,7 @@ function xmlText(s: string): string {
 }
 
 function urlFor(base: string, lang: Lang, path: string): string {
-  // English lives at root, other locales under /<lang>/
-  const segments = lang === "en"
-    ? (path ? `/${path}/` : "/")
-    : (path ? `/${lang}/${path}/` : `/${lang}/`);
-  return `${base}${segments}`;
+  return `${base}${localePath(lang, path ? `/${path}/` : "/")}`;
 }
 
 export const GET: APIRoute = ({ site }) => {

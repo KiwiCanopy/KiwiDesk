@@ -34,6 +34,7 @@ import {
   type Section,
 } from "../lib/changelog-view";
 import PageShell, { type Lang } from "./PageShell.astro";
+import { localePath } from "../lib/locales";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
@@ -47,12 +48,6 @@ interface Props {
   lang: Lang;
 }
 const { lang } = Astro.props;
-
-// English lives at /, German at /de, Japanese at /ja.
-function localePath(l: Lang, sub = "/"): string {
-  const prefix = l === "en" ? "" : `/${l}`;
-  return `${prefix}${sub}`;
-}
 
 // Per-key English fallback, exactly as Landing/Guide/Legal do it:
 // a key a locale has not translated renders its English source
