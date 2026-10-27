@@ -76,6 +76,27 @@ struct ShortcutRowSymbolTests {
         }
     }
 
+    /// KiwiHub's sides draw as the panel's segments, never as rows
+    /// there, so `drawable()` misses them; their Settings rows
+    /// still wear a glyph (#2670).
+    @Test("KiwiHub's side rows wear a symbol that resolves")
+    func kiwiHubSidesHaveSymbols() {
+        let rows = KeybindingCatalog.kiwiHubRows
+        #expect(rows.count == 3)
+        for command in rows {
+            guard let name = ShortcutsReferenceBuilder.icon(for: command)
+            else {
+                Issue.record("\(command.lua) draws no symbol")
+                continue
+            }
+            let image = NSImage(
+                systemSymbolName: name,
+                accessibilityDescription: nil
+            )
+            #expect(image != nil, "\(name) does not resolve")
+        }
+    }
+
     @Test("every exemption names a command the panel draws")
     func exemptionsAreLive() {
         let drawn = Set(Self.drawable().map(\.lua))
