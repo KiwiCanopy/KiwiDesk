@@ -48,7 +48,7 @@ struct PocketSurfaceTests {
         let core = makeCore()
         core.execute("pocket")
         core.execute("pocket")
-        #expect(spec(core)?.glyphs == [.pocket])
+        #expect(spec(core)?.glyphs == [.pocket()])
     }
 
     @Test("pocketed it wears no mark")

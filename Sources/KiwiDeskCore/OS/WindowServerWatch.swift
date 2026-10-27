@@ -3,8 +3,10 @@ import AppKit
 /// The one subscription to WindowServer's per-window events
 /// (#2275): each overlay family registers the windows it wants
 /// under its own `Consumer`, the watch requests their union, and
-/// an event fans out by phase — frames, then restacks, then hides
-/// — in `Consumer` declaration order (borders.md ▸ KiwiVision).
+/// an event's frames and hides fan out at once, in `Consumer`
+/// declaration order (borders.md ▸ KiwiVision). Its restack is
+/// owed to `atTurnEnd` and paid there once per window, in the same
+/// order, skipping a consumer whose hide landed since (#2659).
 @MainActor
 public final class WindowServerWatch {
     /// Declaration order IS the fan-out order in every phase: the
@@ -40,6 +42,11 @@ public final class WindowServerWatch {
         SkyLight.windowBounds($0.raw)
     }
     var onLog: @MainActor (String) -> Void = CoreLog.write
+    /// Where an event's owed restack is paid. Bootstrap wires the
+    /// run loop turn's end, so the reorder and unhide one raise
+    /// sends order a ring once (#2659); unwired, it pays at once.
+    var atTurnEnd: @MainActor (@escaping @MainActor () -> Void) -> Void =
+        { $0() }
     #if DEBUG
         /// Test-only: stands in for the WindowServer request.
         /// Production must not set it.
@@ -59,6 +66,11 @@ public final class WindowServerWatch {
     /// false, since a live stream would heal the drift it exposes.
     private(set) var triedSource = false
     private var reported: Bool?
+    /// Windows whose event owes a restack this turn, in arrival
+    /// order, and the consumers whose hide landed since.
+    private var owedRestacks: [WindowID] = []
+    private var hiddenSinceOwed: [WindowID: Set<Consumer>] = [:]
+    private var paymentScheduled = false
 
     public init() {}
 
@@ -114,6 +126,9 @@ public final class WindowServerWatch {
     func stop() {
         heard = [:]
         kept = [:]
+        owedRestacks = []
+        hiddenSinceOwed = [:]
+        paymentScheduled = false
         // A best-effort clear outside the verdict path: a quit
         // reports no tracking state.
         if started { _ = source?.watch([]) }
@@ -137,18 +152,44 @@ public final class WindowServerWatch {
             )
         }
         if action == .reorder || action == .followAndReorder {
-            restack(id)
+            oweRestack(id)
         }
         if action == .hide {
-            for consumer in heardBy { hooks[consumer]?.hide?(id) }
+            for consumer in heardBy {
+                guard let hide = hooks[consumer]?.hide else { continue }
+                if owedRestacks.contains(id) {
+                    hiddenSinceOwed[id, default: []].insert(consumer)
+                }
+                hide(id)
+            }
         }
     }
 
     /// Re-stacks `id`'s overlays in consumer order: a reorder event,
     /// and a raise that moved other windows in between `id` and its
     /// overlays and sent `id` no event of its own (#2284).
-    func restack(_ id: WindowID) {
-        for consumer in hearers(of: id) { hooks[consumer]?.restack?(id) }
+    func restack(_ id: WindowID, skipping skipped: Set<Consumer> = []) {
+        for consumer in hearers(of: id) where !skipped.contains(consumer) {
+            hooks[consumer]?.restack?(id)
+        }
+    }
+
+    /// A later reorder or unhide re-owes every consumer.
+    private func oweRestack(_ id: WindowID) {
+        hiddenSinceOwed[id] = nil
+        if !owedRestacks.contains(id) { owedRestacks.append(id) }
+        guard !paymentScheduled else { return }
+        paymentScheduled = true
+        atTurnEnd { [weak self] in self?.payOwedRestacks() }
+    }
+
+    private func payOwedRestacks() {
+        paymentScheduled = false
+        while let id = owedRestacks.first {
+            owedRestacks.removeFirst()
+            let skipped = hiddenSinceOwed.removeValue(forKey: id) ?? []
+            restack(id, skipping: skipped)
+        }
     }
 
     private func hearers(of id: WindowID) -> [Consumer] {

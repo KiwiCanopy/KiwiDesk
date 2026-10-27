@@ -43,7 +43,8 @@ struct SpaceBarStripViewTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             ),
             before: .init(
                 windows: (1..<drawn.lowerBound).map(WindowID.init)

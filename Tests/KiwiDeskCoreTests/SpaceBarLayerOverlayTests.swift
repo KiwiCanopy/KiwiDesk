@@ -59,7 +59,8 @@ struct SpaceBarLayerOverlayTests {
                 style: style,
                 stateMarkColors: StateMarkColors(
                     sticky: "#ffffff",
-                    floating: "#ffffff"
+                    floating: "#ffffff",
+                    pocket: "#ffffff"
                 )
             )
         ])
@@ -123,7 +124,8 @@ struct SpaceBarLayerOverlayTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         #expect(
@@ -162,7 +164,8 @@ struct SpaceBarLayerOverlayTests {
             style: SpaceBarLook(),
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         #expect(!view.isHovered)

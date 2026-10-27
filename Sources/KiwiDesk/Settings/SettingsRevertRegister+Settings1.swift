@@ -86,6 +86,7 @@ extension SettingsRevertRegister {
         .borders(.dragDropZoneFillColor):
             .leaf(\.settings.dragDropZone.fillColor),
         .borders(.floatingColor): .leaf(\.settings.floatingStyle.color),
+        .borders(.pocketColor): .leaf(\.settings.pocketStyle.color),
         .colours(.shortcutPanelLiquidGlass):
             .leaf(\.settings.shortcutPanelLiquidGlass),
         .colours(.dragLiquidGlass): .leaf(\.settings.dragLiquidGlass),

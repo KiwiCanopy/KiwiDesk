@@ -97,6 +97,41 @@ struct WindowServerWatchSeamTests {
         #expect(body.occurrences(of: "onLog(") == 0)
     }
 
+    /// An event's restack pays at the run loop turn's end (#2659):
+    /// the watch pays at once until bootstrap wires the turn end,
+    /// and both test twins pay at once, so no Core suite sees a
+    /// lost wiring or an event arm that orders directly.
+    @Test("an event's restack is owed to the turn's end")
+    func eventRestackIsOwed() throws {
+        #expect(
+            try sites(of: "MainRunLoopTurnEnd.schedule")
+                == ["KiwiCore+Bootstrap.swift": 1]
+        )
+        #expect(
+            try sites(of: "atTurnEnd =") == ["KiwiCore+Bootstrap.swift": 1]
+        )
+        let source = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent("OS/WindowServerWatch.swift")
+        )
+        let handle = try #require(
+            SourceScan.declarationBody(after: "func handle(", in: source)
+        )
+        #expect(handle.occurrences(of: "oweRestack(id)") == 1)
+        #expect(handle.occurrences(of: "restack(id") == 0)
+        #expect(handle.occurrences(of: ".restack?(") == 0)
+    }
+
+    /// The drop asks the visibility pass lone (#2659): its swap
+    /// target is the hide the pass exists to heal, and no fixture
+    /// drives a drag through its commit.
+    @Test("the drop's settle ask is lone")
+    func dropAsksLone() throws {
+        #expect(
+            try sites(of: "scheduleBorderDropReconcile(lone: true)")
+                == ["KiwiCore+Drag.swift": 1]
+        )
+    }
+
     @Test("the watch is built in one place")
     func oneConstructionSite() throws {
         // The core builds its watch; BorderManager's default is a
@@ -125,6 +160,7 @@ struct WindowServerWatchSeamTests {
             "windowServer.configureFromEnvironment()",
             "connectWindowServerConsumers()",
             "windowServer.isAnimating = animationDriven",
+            "windowServer.atTurnEnd = MainRunLoopTurnEnd.schedule",
         ] {
             #expect(bootstrap.occurrences(of: needle) == 1, "\(needle)")
         }

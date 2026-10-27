@@ -74,7 +74,8 @@ struct BoxStrokeAboveGlassTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         return overlay
@@ -191,7 +192,8 @@ struct BoxStrokeAboveGlassTests {
             style: style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         view.layout()

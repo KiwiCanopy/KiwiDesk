@@ -130,7 +130,7 @@ extension KiwiCore {
             crossedDisplays ? frontmostPIDProvider?() : nil
         dragOverlay.hideAll()
         spaceBars.endDragAutoScroll()
-        defer { scheduleBorderDropReconcile() }
+        defer { scheduleBorderDropReconcile(lone: true) }
         // Space Bar drop resolves first (#372). A fast drop onto a
         // different space's item relocates the window (stay put).
         // A drop after the space sprang needs no move here — the

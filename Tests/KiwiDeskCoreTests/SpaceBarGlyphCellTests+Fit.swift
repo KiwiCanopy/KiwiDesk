@@ -37,7 +37,8 @@ extension SpaceBarGlyphCellTests {
             style: Self.style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         view.layout()
@@ -101,7 +102,8 @@ extension SpaceBarGlyphCellTests {
             style: Self.style,
             stateMarkColors: StateMarkColors(
                 sticky: "#ffffff",
-                floating: "#ffffff"
+                floating: "#ffffff",
+                pocket: "#ffffff"
             )
         )
         view.layout()
