@@ -5649,9 +5649,10 @@ it with [`toggle_pocket_window`](#toggle_pocket_window); each
 - **Nothing marked:** marks the focused window and pockets it, a
   focused-window command like `make_floating`. It is parked
   off-screen — not minimized — belongs to no Space and is drawn on
-  no bar, and focus moves on within the Space. It takes the frame
-  [`set_float_placement`](#set_float_placement)'s `"center"` gives
-  a window turned floating; under `"keep"` it keeps its size. Fails
+  no bar, and focus moves on within the Space. A tiled window takes
+  the frame [`set_float_placement`](#set_float_placement)'s
+  `"center"` gives a window turned floating; under `"keep"`, or
+  already floating, it keeps its size. Fails
   on a window in native full screen and on a transient panel or
   popup.
 - **Pocketed:** takes it out onto the active Space's screen,
@@ -5727,8 +5728,8 @@ end)
 or unmarks it, a focused-window command like `make_floating`.
 Marking floats it at once at the frame
 [`set_float_placement`](#set_float_placement) gives a window turned
-floating, whether it floated before or not, and leaves it out of
-the pocket: on every Space, wearing the pocket
+floating (a window already floating keeps its frame), and leaves it
+out of the pocket: on every Space, wearing the pocket
 mark. Unmarking leaves it a plain float on the active Space.
 
 While one window is marked, a call on another window fails with a

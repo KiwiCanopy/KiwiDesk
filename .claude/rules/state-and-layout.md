@@ -748,7 +748,9 @@ editing here:
     pocketed — no frames, no `cameFrom` — and `pocketWindow`
     refuses any window that is not the out slot's; a new entry
     path (a pick, #2678's list) marks first. Marking is the one
-    placement at the float size; a take-out restores the frame
+    placement at the float size, and a window already floating
+    skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,
+    `fallbackKeepsAFloatsFrame`); a take-out restores the frame
     filed at the put-back and never re-places it, the centring
     being the fallback for a screen with no filed frame
     (`PocketWindowTests` ▸ `takeOutKeepsTheSize`,

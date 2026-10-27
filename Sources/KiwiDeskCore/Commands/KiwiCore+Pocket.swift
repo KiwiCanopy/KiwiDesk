@@ -27,8 +27,11 @@ extension KiwiCore {
             guard !window.isFullscreen, !window.isTransientOverlay
             else { return .fail("this window cannot be pocketed") }
             // Marked first (#2675), its float frame read while it is
-            // still in its Space and filed at the park.
-            let becoming = becomePocketWindow(id)
+            // still in its Space and filed at the park; a window
+            // already floating keeps its own.
+            let becoming =
+                isEffectiveFloatForPlacement(id)
+                ? nil : becomePocketWindow(id)
             guard state.markPocketWindow(id)
             else { return .fail("this window cannot be pocketed") }
             putInPocket(id, filing: becoming)

@@ -6048,8 +6048,9 @@ user to the marked window, rather than silently moving the mark: the pocket wind
 carries a frame per screen and is the one window a key always
 reaches, so taking that away is an act on the marked window, not a
 side effect of pressing a key somewhere else. Marking floats the
-window at once at the float placement, whether it floated before
-or not, and leaves it out:
+window at once at the float placement — a window already floating
+keeps its frame, since its size is one the user chose — and leaves
+it out:
 a marked window is the pocket window, and an out pocket window is
 a global sticky float, so a mark that left it tiled would be a
 fourth state. That is the only time the pocket sizes the window: a
