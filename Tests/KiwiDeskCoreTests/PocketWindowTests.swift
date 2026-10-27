@@ -115,6 +115,17 @@ struct PocketWindowTests {
         #expect(core.state.windows[two]?.isFloating == false)
     }
 
+    /// The pill resolves the refusal's sentinel to the pocket
+    /// drawing, which no system symbol of that name could supply.
+    @Test("the pill draws the pocket's taken glyph")
+    @MainActor
+    func pillDrawsTheTakenGlyph() {
+        let taken = SizeLimitPillPlate.image(for: PocketMark.takenName)
+        #expect(taken != nil)
+        #expect(taken?.isTemplate == false)
+        #expect(SizeLimitPillPlate.image(for: "nosign") != nil)
+    }
+
     @Test("a second window is refused while the mark is pocketed")
     func pocketedMarkRefusesAnother() {
         let core = makeCore()
