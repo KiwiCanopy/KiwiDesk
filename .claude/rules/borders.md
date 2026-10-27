@@ -799,9 +799,11 @@ style for every window stroke.
 `Glyph.color`** (#2671): the pocket mark's colour fills the pocket
 itself, opaque, so its plate stays untinted, and the Space Bar's
 pocket badge keeps the count badge's disc the same way. Draw the
-pocket in a mark colour through the one `PocketMark.image(size:hex:)`,
-which inks its outlines with `contrastingGlyph` as
-`StickyMarkPlate.paint` inks a disc (`PocketMarkColorTests`).
+on-window mark in a mark colour through the one
+`PocketMark.image(size:hex:)`, which inks its outlines with
+`contrastingGlyph` as `StickyMarkPlate.paint` inks a disc; the
+badge's pocket alone falls back to its disc's `contrastingGlyph`,
+in `applyStateBadge` (`PocketMarkColorTests`).
 
 ## Exercising the fallback path
 

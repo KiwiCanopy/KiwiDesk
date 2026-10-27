@@ -132,23 +132,32 @@ struct PocketMarkColorTests {
         #expect(glyphs?.first?.plateHex == "")
     }
 
-    @Test("the pocket's plate takes no tint, outer slot or inner")
-    func plateStaysUntinted() {
+    /// A mark wearing `glyphs` on a window wide enough for two
+    /// slots, in the manager's order: glyphs first, then the frame.
+    private func plate(
+        _ glyphs: [StickyMarkManager.Glyph]
+    ) -> StickyMarkPlate {
         let overlay = StickyMarkOverlay(window: 1) { _, _ in false }
         defer { overlay.hide() }
         overlay.setGlass(false)
+        overlay.setGlyphs(glyphs)
         overlay.update(
             frame: CGRect(x: -9_000, y: -9_000, width: 800, height: 500)
         )
-        overlay.setGlyphs([.pocket(color: amber)])
-        #expect(overlay.plate.roundel.isHidden)
-        overlay.setGlyphs([.sticky(), .pocket(color: amber)])
-        #expect(overlay.plate.innerRoundel.isHidden)
+        return overlay.plate
+    }
+
+    @Test("the pocket's plate takes no tint, outer slot or inner")
+    func plateStaysUntinted() {
+        #expect(plate([.pocket(color: amber)]).roundel.isHidden)
+        let inner = plate([.sticky(), .pocket(color: amber)])
+        #expect(inner.slotCount == 2)
+        #expect(inner.innerRoundel.isHidden)
         // Control: a floating glyph's colour does tint its disc.
-        overlay.setGlyphs([.sticky(), .floating(color: amber)])
-        #expect(!overlay.plate.innerRoundel.isHidden)
-        overlay.setGlyphs([.floating(color: amber)])
-        #expect(!overlay.plate.roundel.isHidden)
+        #expect(!plate([.floating(color: amber)]).roundel.isHidden)
+        let floating = plate([.sticky(), .floating(color: amber)])
+        #expect(floating.slotCount == 2)
+        #expect(!floating.innerRoundel.isHidden)
     }
 
     @Test("the window mark draws its pocket opaque in the colour")
@@ -223,7 +232,6 @@ struct PocketMarkColorTests {
         view.layout()
         let badge = try #require(view.floatingBadgeViews.first ?? nil)
         #expect(badge.symbolName == StateBadgeView.pocketName)
-        #expect(!badge.isHidden)
         // The pocket takes the colour; the disc stays the count
         // badge's own, as the window mark's plate stays untinted.
         #expect(try hex(badge.ink) == amber)

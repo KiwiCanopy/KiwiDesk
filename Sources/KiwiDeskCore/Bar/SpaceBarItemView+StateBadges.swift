@@ -42,7 +42,6 @@ extension SpaceBarItemView {
         pocketHex: String? = nil,
         appFocused: Bool
     ) {
-        badge.isHidden = false
         let fill = NSColor.mark(
             hex: pocketHex == nil ? markHex : "",
             fallback: NSColor(kiwiHex: style.groupBadgeColor)
