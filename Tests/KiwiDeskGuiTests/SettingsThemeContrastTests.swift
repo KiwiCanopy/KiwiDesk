@@ -148,17 +148,12 @@ struct SettingsThemeContrastTests {
             SettingsTheme.ink2,
             on: SettingsTheme.panel
         ),
+        // Also a Space row's override badge, sunken digits on an
+        // ink2 capsule (#2674): opaque, so the ratio is this one.
         Pairing(
             "ink2 on sunken",
             SettingsTheme.ink2,
             on: SettingsTheme.sunken
-        ),
-        // A Space row's override count, knocked out of its
-        // badge (#2674).
-        Pairing(
-            "sunken on ink2",
-            SettingsTheme.sunken,
-            on: SettingsTheme.ink2
         ),
         Pairing(
             "ink3 on page",

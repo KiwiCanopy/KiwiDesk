@@ -48,7 +48,13 @@ struct SpaceCustomizeButtonTests {
         let row = try stripped(
             "Sources/KiwiDesk/Settings/Sections/SpacesSection.swift"
         )
-        #expect(row.contains("modePicker(space)customizeButton(space)"))
+        // Ending at the divider bans a modifier on the call, which
+        // could hide the button; it costs a reorder of the row.
+        #expect(
+            row.contains(
+                "modePicker(space)customizeButton(space)Divider()"
+            )
+        )
     }
 
     @Test("the row menu also opens the editor")
