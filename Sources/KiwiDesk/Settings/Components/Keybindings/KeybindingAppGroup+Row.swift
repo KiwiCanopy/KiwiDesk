@@ -3,25 +3,14 @@ import SwiftUI
 
 /// Application shortcut row component (`KeybindingAppGroup`, `KeyBinding`).
 extension ApplicationsGroup {
+    /// The app is fixed once added, as on an App Rules row
+    /// (#2708): another app is a new row from the add picker.
     func row(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        VStack(alignment: .leading, spacing: 4) {
-            rowBody(binding)
-            // The refusal draws at the picker that raised it,
-            // keyed by this row's id — so it is one sentence at
-            // the place it is about, never gui.md's caption
-            // stamped under every child of the `ForEach`.
-            rowNotice(binding)
-        }
-    }
-
-    private func rowBody(
         _ binding: Binding<KeyBinding>
     ) -> some View {
         HStack {
             HStack(spacing: 6) {
-                appMenu(binding)
+                identity(binding.wrappedValue)
                 actionMenu(binding)
             }
             Spacer()
@@ -31,9 +20,7 @@ extension ApplicationsGroup {
                 binding: binding.wrappedValue
             )
             KeyRecorderField(
-                name: binding.wrappedValue.label.isEmpty
-                    ? L("shortcuts.choose_app", "Choose app…")
-                    : binding.wrappedValue.label,
+                name: recorderName(binding.wrappedValue),
                 combo: binding.wrappedValue.combo,
                 reading: ConflictText.reading(
                     for: binding.wrappedValue,
@@ -73,78 +60,29 @@ extension ApplicationsGroup {
         .id(binding.wrappedValue.id.uuidString)
     }
 
-    private func appMenu(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        AppPickerButton(
-            placeholder: L(
-                "shortcuts.choose_app",
-                "Choose app…"
-            ),
-            selection: binding.wrappedValue.label.isEmpty
-                ? nil
-                : binding.wrappedValue.label,
-            onPick: { assign(binding, app: $0) },
-            escapeLabel: L("shortcuts.other_ellipsis", "Other…"),
-            onEscape: {
-                if let app = AppBundlePanel.pick() {
-                    assign(binding, app: app)
-                }
-            },
-            exclude: fullyBoundBundleIDs(
-                excluding: binding.wrappedValue.id
-            )
+    /// The App Rules icon and name; a binding whose Lua names
+    /// no bundle keeps the icon slot, so its menu still lines up.
+    private func identity(_ binding: KeyBinding) -> some View {
+        let bundleID = KeybindingCatalog.appBundleID(
+            from: binding.lua
         )
-        .fixedSize()
+        return AppRuleIdentity(
+            app: bundleID ?? "",
+            name: bundleID == nil ? binding.label : nil
+        )
     }
 
-    /// This row's own refusal, if the last one was raised here.
-    @ViewBuilder func rowNotice(
-        _ binding: Binding<KeyBinding>
-    ) -> some View {
-        if let notice = allBoundNotice(
-            for: binding.wrappedValue.id
-        ) {
-            Text(notice)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
-        }
-    }
-
-    private func assign(
-        _ binding: Binding<KeyBinding>,
-        app: KeybindingCatalog.InstalledApp
-    ) {
-        let id = binding.wrappedValue.id
-        let taken = KeybindingCatalog.takenActions(
-            for: app.bundleID,
-            in: bindings,
-            excluding: id
-        )
-        // Says why instead of dropping the pick: this row's
-        // picker excludes fully-bound apps, but its "Other…"
-        // panel does not, so it could reach one and do nothing
-        // at all (#1235). One refusal channel, two pick routes.
-        guard taken.count < AppShortcutAction.allCases.count else {
-            refuse(app, at: id)
-            return
-        }
-        clearRefusal()
-        let current =
-            KeybindingCatalog.appShortcutAction(
-                from: binding.wrappedValue.lua
-            ) ?? .openOrFocus
-        let action = KeybindingCatalog.actionForAssignment(
-            to: app.bundleID,
-            preferred: current,
-            in: bindings,
-            excluding: id
-        )
-        binding.wrappedValue.label = app.name
-        binding.wrappedValue.lua = KeybindingCatalog.appCommand(
-            app.bundleID,
-            action: action
+    /// The recorder is the row's one control naming what it binds,
+    /// and an app may hold a row per action.
+    private func recorderName(_ binding: KeyBinding) -> String {
+        let action =
+            KeybindingCatalog.appShortcutAction(from: binding.lua)
+            ?? .openOrFocus
+        return L(
+            "shortcuts.apps.recorder_name",
+            "%1$@, %2$@",
+            binding.label,
+            actionLabel(action)
         )
     }
 

@@ -1884,6 +1884,7 @@
   "shortcuts.app_behavior.open_or_focus": "打开或聚焦",
   "shortcuts.apps.all_bound": "“%1$@”的每种操作都已有按键。请更改上方的某个快捷键，为它指定另一个。",
   "shortcuts.apps.empty": "还没有任何 App 拥有专属按键。添加一个后，它的按键会带你到该 App 的窗口，无论它在哪里；如果 App 未运行则启动它。",
+  "shortcuts.apps.recorder_name": "%1$@，%2$@",
   "shortcuts.base": "快捷键使用",
   "shortcuts.base.caption": "✦ 会将所有 ⌃⌥ 快捷键移到 Hyper，⇧ 和 ⌘ 保持不变。由于 ⇧⌘3–5 是 macOS 的截屏快捷键，%1$@ 改用 ✦⌥。调整大小的快捷键仍保留在 ⌥⌘ 上。保存后应用到所有描述文件。",
   "shortcuts.base.help": "选择 ✦ 即可将 KiwiDesk 的快捷键放到 Hyper 键上。你自己设在其他键上的快捷键会留在原处；对应的 ✦ 按键已被其他快捷键占用的，仍保留在 ⌃⌥ 上。",

@@ -151,44 +151,6 @@ struct AppShortcutActionTests {
         )
     }
 
-    @Test("re-pick keeps a free action, else takes the first free")
-    func assignmentAction() {
-        // The edited row lives in the array and is genuinely
-        // excluded (its old com.b binding must not count against
-        // the com.a target); another row holds com.a / Open New.
-        let edited = appBinding("com.b", .openOrFocus)
-        let bindings = [appBinding("com.a", .openNew), edited]
-        // Preferred (.openNew) is taken by the other row ⇒ fall to
-        // the first free (.openOrFocus): no collision.
-        #expect(
-            KeybindingCatalog.actionForAssignment(
-                to: "com.a",
-                preferred: .openNew,
-                in: bindings,
-                excluding: edited.id
-            ) == .openOrFocus
-        )
-        // Preferred is free ⇒ preserved.
-        #expect(
-            KeybindingCatalog.actionForAssignment(
-                to: "com.a",
-                preferred: .openOrFocus,
-                in: bindings,
-                excluding: edited.id
-            ) == .openOrFocus
-        )
-        // Fresh app ⇒ preferred preserved (the edited row's own
-        // old com.b binding is excluded, so it doesn't interfere).
-        #expect(
-            KeybindingCatalog.actionForAssignment(
-                to: "com.b",
-                preferred: .openNew,
-                in: bindings,
-                excluding: edited.id
-            ) == .openNew
-        )
-    }
-
     @Test("non-app Lua matches neither inverse")
     func nonAppLua() {
         for lua in [

@@ -12,16 +12,8 @@ struct ApplicationsGroup: View {
     @Environment(\.keybindingLayerName)
     var layerName
     /// The last pick that created nothing: WHICH app to ask
-    /// about, and WHERE it was picked. Never the sentence, which
-    /// `allBoundNotice` derives live (#1235).
-    ///
-    /// `row` is nil for the add row. It exists so the caption
-    /// draws at the picker that refused rather than at the
-    /// bottom of the group — a refusal raised from row 2 of
-    /// twenty would otherwise paint below row 20, which for any
-    /// scrolling list is silent for a sighted user (code review
-    /// 2026-09-06). Keyed, so it is still ONE sentence and not
-    /// gui.md's caption stamped under every child.
+    /// about. Never the sentence, which `allBoundNotice` derives
+    /// live (#1235).
     @State var refusal: AppPickRefusal?
 
     /// The pending announcement, cancelled by the next pick so a

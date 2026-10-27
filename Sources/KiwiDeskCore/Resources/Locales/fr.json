@@ -1884,6 +1884,7 @@
   "shortcuts.app_behavior.open_or_focus": "Ouvrir ou Activer",
   "shortcuts.apps.all_bound": "« %1$@ » a déjà une touche pour chaque action. Modifiez l'un de ses raccourcis ci-dessus pour lui en attribuer un autre.",
   "shortcuts.apps.empty": "Aucune app n'a encore de touche à elle. Ajoutez-en une : sa touche vous amènera à la fenêtre de cette app, où qu'elle soit, ou lancera l'app si elle n'est pas ouverte.",
+  "shortcuts.apps.recorder_name": "%1$@, %2$@",
   "shortcuts.base": "Raccourcis sur",
   "shortcuts.base.caption": "✦ déplace chaque raccourci ⌃⌥ vers Hyper, en conservant ⇧ et ⌘. %1$@ prend ✦⌥, car ⇧⌘3–5 sont les captures d'écran de macOS. Les raccourcis de taille restent sur ⌥⌘. S'applique à tous les profils à l'enregistrement.",
   "shortcuts.base.help": "Choisissez ✦ pour placer les raccourcis de KiwiDesk sur la touche Hyper. Un raccourci que vous avez placé vous-même sur une autre touche reste où vous l'avez mis, et celui dont la touche ✦ est déjà prise par un autre raccourci reste sur ⌃⌥.",

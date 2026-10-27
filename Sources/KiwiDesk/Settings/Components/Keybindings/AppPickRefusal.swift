@@ -1,14 +1,11 @@
 import Foundation
 import KiwiDeskCore
 
-/// A pick that created nothing, and where it was made (#1235).
+/// An add-row pick that created nothing (#1235).
 ///
 /// The app rather than a message: the sentence is derived from
 /// the live question each render, so freeing an action clears
-/// it with nothing having to notice. The row is what lets the
-/// caption appear at the picker that refused.
+/// it with nothing having to notice.
 struct AppPickRefusal: Equatable {
     let app: KeybindingCatalog.InstalledApp
-    /// The binding whose picker refused, or nil for the add row.
-    let row: UUID?
 }

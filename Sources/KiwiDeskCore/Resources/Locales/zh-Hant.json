@@ -1884,6 +1884,7 @@
   "shortcuts.app_behavior.open_or_focus": "打開或聚焦",
   "shortcuts.apps.all_bound": "「%1$@」的每種動作都已有按鍵。請更改上方的某個快速鍵，為它指定另一個。",
   "shortcuts.apps.empty": "還沒有任何 App 擁有專屬按鍵。加入一個後，它的按鍵會帶你到該 App 的視窗，無論它在哪裡；如果 App 未執行則啟動它。",
+  "shortcuts.apps.recorder_name": "%1$@，%2$@",
   "shortcuts.base": "快速鍵使用",
   "shortcuts.base.caption": "✦ 會將所有 ⌃⌥ 快速鍵移到 Hyper，⇧ 和 ⌘ 維持不變。由於 ⇧⌘3–5 是 macOS 的螢幕快照快速鍵，%1$@ 改用 ✦⌥。調整大小的快速鍵仍保留在 ⌥⌘ 上。儲存後套用到所有描述檔。",
   "shortcuts.base.help": "選擇 ✦ 即可將 KiwiDesk 的快速鍵放到 Hyper 鍵上。你自己設在其他按鍵上的快速鍵會留在原處；對應的 ✦ 按鍵已被其他快速鍵占用的，仍保留在 ⌃⌥ 上。",

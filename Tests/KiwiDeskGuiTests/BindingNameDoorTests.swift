@@ -26,9 +26,10 @@ struct BindingNameDoorTests {
     /// it is routed through the door or classified here.
     private let allowed: [String: (count: Int, reason: String)] = [
         "KeybindingAppGroup+Row.swift": (
-            4,
-            "an application row's label IS the picked app's name; "
-                + "empty picks the picker's placeholder"
+            2,
+            "an application row's label IS the added app's name: "
+                + "its recorder's spoken name, and the row's name "
+                + "where the Lua names no bundle (#2708)"
         ),
         "KeybindingAppGroup.swift": (
             2,
