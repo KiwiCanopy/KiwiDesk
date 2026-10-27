@@ -820,11 +820,11 @@ editing here:
   the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
   `takeOutPlaysAndHolds`), and its ring waits with it through the
   state-change hold. Never bring back a slide of the real window to
-  its park. The overlay's live reads are pinned inert in both
+  its park. Its Reduce Motion read is pinned on in both
   `makeTestCore` twins (`SpaceSlideSeamTests` ▸
-  `bothTwinsPinTheReads`); a suite that unpins its Reduce Motion
-  pins its panel and frame clock itself, as `BriefPocketTests`
-  does, and a live read the overlay adds joins that pin.
+  `bothTwinsPinTheReads`), so no other suite plays; a suite that
+  unpins it pins the panel and frame clock itself, as
+  `BriefPocketTests` does.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

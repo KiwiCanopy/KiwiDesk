@@ -348,7 +348,10 @@ these:
 only for a window our spring now moves — `KiwiCore.retile` calls
 it for the pass's `stateChange`, a held pass included, and the
 float verb's placement for its own write
-(`StateChangeSeamTests` ▸ `oneDoor`). The
+(`StateChangeSeamTests` ▸ `oneDoor`). A take-out, whose one write
+waits for the brief pocket, holds through the one
+`KiwiCore.holdRingThroughLanding` beside it, which settles the hold
+at the landing (#2680, `BriefPocketTests` ▸ `takeOutPlaysAndHolds`). The
 `BorderManager+StateChange` hold reveals it once the spring has
 ended and the window reports near the target kept at the arm, or
 `arrivalCap` later, with `stateChangeBackstop` from the arm as

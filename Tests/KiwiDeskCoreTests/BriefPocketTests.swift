@@ -28,6 +28,15 @@ struct BriefPocketTests {
         core.briefPocket.reduceMotion = { !plays }
         core.briefPocket.present = { _ in }
         core.briefPocket.makeFrames = { _, _ in nil }
+        // An element and an inert writer, so a held write stays
+        // staged rather than dropped for want of one.
+        let element = AXUIElementCreateApplication(1)
+        core.tiler.applier.elementProvider = { _ in element }
+        core.tiler.applier.writer = FrameWriter(
+            setFrame: { _, _ in },
+            setPosition: { _, _ in },
+            writeEUI: { _, _ in }
+        )
         for raw: UInt32 in [1, 2] {
             core.state.apply(
                 .windowCreated(
@@ -75,6 +84,13 @@ struct BriefPocketTests {
     func requestWiring() throws {
         guard NSScreen.main != nil else { return }
         let core = makeCore()
+        // Reduce transparency on, glass stored on: the gated looks
+        // differ from the stored ones.
+        let gate = LiquidGlassGate.override
+        LiquidGlassGate.override = { true }
+        defer { LiquidGlassGate.override = gate }
+        core.tiler.settings.kiwishelf.liquidGlass = true
+        core.tiler.settings.shortcutPanelLiquidGlass = true
         core.tiler.settings.pocketStyle.edge = .right
         core.tiler.settings.pocketStyle.position = 30
         #expect(core.execute("pocket").isSuccess)
@@ -89,13 +105,9 @@ struct BriefPocketTests {
                 )
         )
         let settings = core.tiler.settings
+        #expect(request.shelf != settings.kiwishelf)
         #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
-        #expect(
-            request.plateGlass
-                == LiquidGlassGate.rendered(
-                    glass: settings.shortcutPanelLiquidGlass
-                )
-        )
+        #expect(!request.plateGlass)
     }
 
     @Test("taking out plays the pocket and holds the one write")
@@ -111,6 +123,14 @@ struct BriefPocketTests {
         #expect(core.tiler.applier.held.isHeld(one))
         // The restore's one write is staged, not sent ahead of it.
         #expect(core.tiler.applier.held.isStaged(one))
+        // Its ring waits with it, and lets go at the landing.
+        #expect(core.borders.stateChange?.window == one)
+        core.borders.stateChangeSettled(one)
+        core.borders.noteStateChangeReport(
+            one,
+            frame: core.tiler.commandedFrame(of: one) ?? .zero
+        )
+        #expect(core.borders.stateChange == nil)
         #expect(applies() == 0)
     }
 
