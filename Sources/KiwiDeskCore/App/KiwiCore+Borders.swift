@@ -190,7 +190,8 @@ extension KiwiCore {
                 .kiwiDisplayID,
             let uuid = NativeSpaces.displayUUID(for: display)
         else { return nil }
-        // `cueDisplay` reads a shared-Spaces entry alike.
+        // Shared Spaces answer through their synthetic key here;
+        // `cueDisplay` detects that mode from its own reading.
         return NativeSpaces.shownEntry(
             desktopMemory.shownSpaces,
             screen: uuid
