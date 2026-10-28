@@ -18168,8 +18168,9 @@ for that reason, and the unfloored 1/8 for leaving a tile a band
 along its top. The label sits mid-height, where the fill keeps
 about 0.7, and the selected and hovered inks are measured at the
 far end on every bundled palette (`HighlightFadeContrastTests`).
-Under Increase Contrast the fills fade only as far as the panel,
-whose stricter floor holds their inks where 0.4 does not.
+Where 0.4 would sink a fill's own ink — under Increase Contrast,
+whose floor is stricter — the share rises to the point that holds
+it, over both ends of the panel (`highlightFadeShare`).
 The footer's buttons stay native macOS buttons; off the toggle,
 and in Settings, the fills stay flat.
 
@@ -18180,7 +18181,8 @@ the disc read as a grey smudge. The dim ladder now reaches the
 mark alone, and every badge shares one face (`BarBadgeFace`): an
 opaque disc with a 1 pt rim that parts it from the glass: white at
 0.35 on a dark shelf Fill, black at 0.25 on a light one, dimmed
-with the mark. A 0.5 pt
+with the mark; with no Fill the glass follows the Appearance pick,
+and so does the rim. A 0.5 pt
 rim picked by the disc's own brightness vanished on the device, a
 black rim on a light disc disappearing into dark glass
 (`ui-designer`).

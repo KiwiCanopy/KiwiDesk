@@ -51,7 +51,7 @@ extension SpaceBarItemView {
         BarBadgeFace.disc(
             badge,
             fill: fill,
-            shelfFill: style.shelf.fillColor,
+            shelf: style.shelf,
             tier: tier
         )
         badge.symbol.contentTintColor = fill.contrastingGlyph

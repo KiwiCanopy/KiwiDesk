@@ -126,6 +126,37 @@ struct SpaceBarCountBadgeHoverTests {
         for badge in [count, view.overflowBadge] {
             #expect(badge.inkAlpha < 1)
             #expect(badge.alphaValue == 1)
+            #expect(badge.layer?.borderWidth == BarBadgeFace.rimWidth)
         }
+    }
+
+    /// A state badge wears the same face: its disc opaque and
+    /// rimmed, its symbol on the ladder (#2722).
+    @Test("A dimmed state badge keeps its disc opaque")
+    func dimmedStateBadgeStaysOpaque() throws {
+        var floating = app("Notes", focused: false)
+        floating.floating = true
+        let view = SpaceBarItemView(
+            frame: NSRect(x: 0, y: 0, width: 120, height: 32)
+        )
+        view.configure(
+            identity: .space(SpaceID("1")),
+            spaceGlyph: .text("1", tinted: true),
+            apps: [floating],
+            active: false,
+            horizontal: true,
+            style: SpaceBarLook(),
+            stateMarkColors: StateMarkColors(
+                sticky: "",
+                floating: "",
+                pocket: ""
+            )
+        )
+        view.layout()
+        view.restyle()
+        let badge = try #require(view.floatingBadgeViews.first ?? nil)
+        #expect(badge.alphaValue == 1)
+        #expect(abs(badge.symbol.alphaValue - view.style.dimFactor) < 0.01)
+        #expect(badge.layer?.borderWidth == BarBadgeFace.rimWidth)
     }
 }

@@ -14,35 +14,42 @@ enum BarBadgeFace {
     static let lightRimAlpha: CGFloat = 0.35
     static let darkRimAlpha: CGFloat = 0.25
 
-    /// The rim of a disc of `fill` on a shelf of `shelfFill`, at
-    /// `tier` of its strength, the dim the badge's mark takes; a
-    /// shelf with no Fill takes the disc's own polarity.
+    /// The rim on `shelf`'s glass at `tier` of its strength, the
+    /// dim the badge's mark takes. A shelf with no Fill draws glass
+    /// that follows the Appearance pick, so `dark` — the badge's
+    /// effective appearance — decides there. The threshold is
+    /// `wantsLightInk`'s, `GlassTint.pin`'s, without its glass gate:
+    /// a solid plate still paints the Fill.
     static func rim(
-        on fill: NSColor,
-        shelfFill: String,
+        on shelf: KiwiShelf,
+        dark: Bool,
         tier: CGFloat = 1
     ) -> NSColor {
-        let ground =
-            KiwiShelf.hasColour(shelfFill) ? NSColor(kiwiHex: shelfFill) : fill
-        return ground.wantsLightInk
+        let darkGround =
+            KiwiShelf.hasColour(shelf.fillColor)
+            ? NSColor(kiwiHex: shelf.fillColor).wantsLightInk : dark
+        return darkGround
             ? NSColor.white.withAlphaComponent(lightRimAlpha * tier)
             : NSColor.black.withAlphaComponent(darkRimAlpha * tier)
     }
 
-    /// Paints `badge`'s opaque disc in `fill` on a shelf of
-    /// `shelfFill`, its rim dimmed with its mark to `tier`.
+    /// Paints `badge`'s opaque disc in `fill` on `shelf`, its rim
+    /// dimmed with its mark to `tier`.
     @MainActor
     static func disc(
         _ badge: NSView,
         fill: NSColor,
-        shelfFill: String,
-        tier: CGFloat = 1
+        shelf: KiwiShelf,
+        tier: CGFloat
     ) {
+        let dark =
+            badge.effectiveAppearance.bestMatch(from: [.aqua, .darkAqua])
+            == .darkAqua
         badge.alphaValue = 1
         badge.layer?.backgroundColor = fill.cgColor
         badge.layer?.borderWidth = rimWidth
         badge.layer?.borderColor =
-            rim(on: fill, shelfFill: shelfFill, tier: tier).cgColor
+            rim(on: shelf, dark: dark, tier: tier).cgColor
     }
 
     /// Paints a count badge in `fill` with its number in `ink` at
@@ -53,12 +60,12 @@ enum BarBadgeFace {
         fill: String,
         ink: String,
         inkAlpha: CGFloat,
-        shelfFill: String
+        shelf: KiwiShelf
     ) {
         disc(
             badge,
             fill: NSColor(kiwiHex: fill),
-            shelfFill: shelfFill,
+            shelf: shelf,
             tier: inkAlpha
         )
         let color = NSColor(kiwiHex: ink)

@@ -25,7 +25,9 @@ struct PanelGlassTests {
     private static func paint(_ glass: PanelGlass) -> KiwiHubPaint {
         KiwiHubPaint.of(
             glass,
-            ink: glass.shelf?.panelInk(increaseContrast: false)
+            ink: glass.shelf?.panelInk(increaseContrast: false),
+            tint: nil,
+            increaseContrast: false
         )
     }
 

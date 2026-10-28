@@ -99,19 +99,52 @@ extension KiwiShelf {
     /// The far end a KiwiHub selection or hover fill keeps at the
     /// strongest fade, as a share of its top (#2721, ui-designer):
     /// the panel's floor guards the panel's inks, and a fill
-    /// carries its own, held by `HighlightFadeContrastTests`.
-    public static let highlightFloorShare: CGFloat = 0.4
+    /// carries its own.
+    static let highlightFloorShare: CGFloat = 0.4
 
     /// The far end of KiwiHub's selection and hover fills: Fill
-    /// fade's own share, never below `highlightFloorShare`; under
-    /// Increase Contrast, the panel's own far end, whose floor holds
-    /// the fills' inks at the stricter floor where 0.4 does not.
+    /// fade's own share, never below `highlightFloorShare`, and
+    /// raised to the share at which each fill's ink holds the
+    /// reading floor (`idleInkFloor` under Increase Contrast) over
+    /// the panel's both ends (`HighlightFadeContrastTests`).
     public func highlightFadeShare(increaseContrast: Bool) -> CGFloat {
-        let fade = GlassTint.farShare(fade: fillFade)
-        guard increaseContrast else {
-            return max(fade, Self.highlightFloorShare)
+        let floor =
+            increaseContrast ? Self.idleInkFloor : Self.readingInkFloor
+        let base = max(
+            GlassTint.farShare(fade: fillFade),
+            Self.highlightFloorShare
+        )
+        guard let rgba = DragVisual.parseHex(fillColor) else { return base }
+        let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
+        let panel = panelGlassFill(increaseContrast: increaseContrast)
+        let far = max(GlassTint.farShare(fade: panel.fade), panel.minShare)
+        let grounds = [fill(cappedAt: anchor), fill(cappedAt: anchor * far)]
+        let paint = panelHighlight
+        let pairs = [
+            (paint.selectionInk, paint.selection),
+            (paint.hoverInk, paint.hover),
+        ]
+        func holds(_ share: CGFloat) -> Bool {
+            grounds.allSatisfy { ground in
+                pairs.allSatisfy { ink, layer in
+                    let ratio = worstContrast(
+                        ink,
+                        nil,
+                        on: ground,
+                        beneath: Self.hex(layer, atShare: share)
+                    )
+                    return (ratio ?? 0) >= floor
+                }
+            }
         }
-        let panel = panelGlassFill(increaseContrast: true)
-        return max(fade, panel.minShare)
+        guard !holds(base) else { return base }
+        guard holds(1) else { return 1 }
+        var low = base
+        var high: CGFloat = 1
+        for _ in 0..<20 {
+            let mid = (low + high) / 2
+            if holds(mid) { high = mid } else { low = mid }
+        }
+        return high
     }
 }

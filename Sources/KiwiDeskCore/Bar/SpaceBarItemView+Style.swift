@@ -117,7 +117,7 @@ extension SpaceBarItemView {
             ink: style.groupBadgeTextColor,
             inkAlpha: lit
                 ? 1 : untintedAppAlpha(focused: appFocused, count: count),
-            shelfFill: style.shelf.fillColor
+            shelf: style.shelf
         )
     }
 

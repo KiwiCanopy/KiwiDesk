@@ -1598,7 +1598,9 @@ Obligations:
   the compiler holds the mint; a GUI surface reading `fillColor`
   and building its own gradient beside it is not covered, since
   `GlassTintSeamTests` scans Core alone — that half is review's
-  until someone widens the roots. Which SwiftUI surfaces wear the
+  until someone widens the roots. KiwiHub's selection fills read a
+  `GlassPaint` for its axis alone and draw no Fill colour
+  ([gui.md](gui.md) ▸ `KiwiHubPaint.fill`). Which SwiftUI surfaces wear the
   Fill, and through what, is [gui.md](gui.md)'s — ▸ This tree
   draws glass through one modifier.
 - **Reduce transparency stands the glass down at the one
@@ -1676,7 +1678,8 @@ sites clipped alike.
 Every badge a bar item carries — the group count, the Space
 Bar's `+n` and its sticky, floating and pocket badges — wears one
 look: an opaque disc with a rim whose colour follows the shelf's
-Fill, the dim ladder reaching its mark alone. A disc faded whole
+Fill (the Appearance pick where it has none), the dim ladder
+reaching its mark alone. A disc faded whole
 read as a grey smudge on a faded plate, and a rim picked by the
 disc vanished into the glass (#2722, owner, device 2026-10-28;
 `docs/design-decisions.md` ▸ A bar badge keeps its disc opaque).
@@ -1685,7 +1688,7 @@ disc vanished into the glass (#2722, owner, device 2026-10-28;
   and dim its number or symbol, never the badge view's
   `alphaValue`.** A new badge joins the face rather than drawing
   a disc of its own (`AppBarBadgeDimTests`,
-  `SpaceBarCountBadgeHoverTests`). The rim is the face's second
+  `SpaceBarCountBadgeHoverTests`, `BarBadgeFaceTests`). The rim is the face's second
   layer border in `Bar/`, held by `ShelfBorderSeamTests`.
 
 ## An indicator's weight comes from the shelf, never a literal

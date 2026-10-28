@@ -55,21 +55,24 @@ struct HighlightFadeContrastTests {
         return worst
     }
 
-    /// The panel's far end, and the share KiwiHub's fills fade to
-    /// (`highlightFadeShare`), deeper than the panel's.
+    /// The panel's two ends — the anchor at the cap, the far end
+    /// at the panel's own share, mirroring `GlassTint.rendered` —
+    /// and the share KiwiHub's fills fade to; a fill fades over its
+    /// own row, so it may sit on either.
     private func ends(
         _ shelf: KiwiShelf,
         increaseContrast: Bool
-    ) throws -> (ground: String, share: CGFloat) {
+    ) throws -> (grounds: [String], share: CGFloat) {
         let fill = shelf.panelGlassFill(increaseContrast: increaseContrast)
         let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
         let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
         let far = max(GlassTint.farShare(fade: fill.fade), fill.minShare)
-        let floored = try #require(
-            scaled(shelf.fillColor, by: anchor * far / CGFloat(rgba.alpha))
-        )
+        let alpha = CGFloat(rgba.alpha)
+        let grounds = try [anchor, anchor * far].map {
+            try #require(scaled(shelf.fillColor, by: $0 / alpha))
+        }
         return (
-            floored,
+            grounds,
             shelf.highlightFadeShare(increaseContrast: increaseContrast)
         )
     }
@@ -86,27 +89,45 @@ struct HighlightFadeContrastTests {
         for palette in PaletteCatalog.bundled() {
             let shelf = painted(palette)
             let paint = shelf.panelHighlight
-            let (ground, share) = try ends(
+            let (grounds, share) = try ends(
                 shelf,
                 increaseContrast: increaseContrast
             )
-            for (ink, layer) in [
-                (paint.selectionInk, paint.selection),
-                (paint.hoverInk, paint.hover),
-            ] {
-                let value = try worst(
-                    ink,
-                    on: layer,
-                    at: share,
-                    ground: ground
-                )
-                measured += 1
-                #expect(
-                    value >= floor - 0.01,
-                    "\(palette.name) \(ink) on \(layer): \(value)"
-                )
+            for ground in grounds {
+                for (ink, layer) in [
+                    (paint.selectionInk, paint.selection),
+                    (paint.hoverInk, paint.hover),
+                ] {
+                    let value = try worst(
+                        ink,
+                        on: layer,
+                        at: share,
+                        ground: ground
+                    )
+                    measured += 1
+                    #expect(
+                        value >= floor - 0.01,
+                        "\(palette.name) \(ink) on \(layer): \(value)"
+                    )
+                }
             }
         }
-        #expect(measured >= 2)
+        #expect(measured == PaletteCatalog.bundled().count * 4)
+    }
+
+    /// The floor is a floor and not a pin: under Increase Contrast,
+    /// 0.4 sinks some bundled palette's ink below the stricter
+    /// floor, and the share rises past it to hold.
+    @Test("Increase Contrast lifts some palette's share")
+    func increasedContrastLifts() throws {
+        var lifted = 0
+        for palette in PaletteCatalog.bundled() {
+            let shelf = painted(palette)
+            let normal = shelf.highlightFadeShare(increaseContrast: false)
+            let raised = shelf.highlightFadeShare(increaseContrast: true)
+            #expect(raised >= normal, "\(palette.name)")
+            if raised > normal { lifted += 1 }
+        }
+        #expect(lifted > 0)
     }
 }
