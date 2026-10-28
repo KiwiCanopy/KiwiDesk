@@ -95,13 +95,19 @@ final class PocketPlateOverlay {
         panel?.orderOut(nil)
     }
 
-    /// What the plate draws: its frame (AppKit), the gated shelf,
-    /// the mark's colour, the count and VoiceOver's name.
+    /// What the plate draws: its screen, its windows, its frame (AppKit), the
+    /// gated shelf, the mark's colour, the count — the mark's
+    /// square trailing it where `markTrailing` — and VoiceOver's
+    /// name.
     struct Spec: Equatable {
+        let display: DisplayID
+        /// The windows it lists.
+        let windows: [WindowID]
         let frame: CGRect
         let shelf: KiwiShelf
         let markHex: String
         let count: String
+        let markTrailing: Bool
         let name: String
     }
 
@@ -113,6 +119,9 @@ final class PocketPlateOverlay {
     }
     private(set) var panel: PocketPlatePanel?
     private(set) var shown: Spec?
+    /// The screens the last bar pass stood down on, which the plate
+    /// stands down on too.
+    var standingDown: Set<DisplayID> = []
 
     #if DEBUG
         /// Whether the plate orders its panel in; off in both
@@ -132,7 +141,8 @@ final class PocketPlateOverlay {
             view.pocket.wear(
                 spec.shelf,
                 markHex: spec.markHex,
-                count: spec.count
+                count: spec.count,
+                markTrailing: spec.markTrailing
             )
             view.setAccessibilityLabel(spec.name)
             if panel.frame != spec.frame {
@@ -145,6 +155,13 @@ final class PocketPlateOverlay {
             guard ordersPanel else { return }
         #endif
         if !panel.isVisible { panel.orderFrontRegardless() }
+    }
+
+    /// The shelf the plate wears in `window`, its panel — the peek
+    /// growing out of it wears it too.
+    func shelf(drawnIn window: NSWindow) -> KiwiShelf? {
+        guard let panel, panel === window else { return nil }
+        return shown?.shelf
     }
 
     private func made() -> PocketPlatePanel {

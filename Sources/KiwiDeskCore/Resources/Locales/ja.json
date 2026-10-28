@@ -1653,7 +1653,7 @@
   "placement.new_window": "新規タイルウインドウ",
   "placement.new_window.help": "新しいウインドウがほかのウインドウに対してどこに配置されるかです。レイアウトの順序で最初か最後に置くか、開いた時点でフォーカスされているウインドウの直前または直後に置きます。",
   "pocket.capacity": "収納数",
-  "pocket.capacity.help": "%1$@：Pocket にはウインドウが1つだけ入ります。%2$@：さらにウインドウにマークを付けると、端のプレートにまとめて入ります。Pocket のショートカットは最後に入れたウインドウを取り出します。",
+  "pocket.capacity.help": "%1$@：Pocket にはウインドウが1つだけ入ります。%2$@：さらにウインドウにマークを付けると、端のプレートにまとめて入ります。Pocket のショートカットは使っていたウインドウを Pocket に入れ、すべて入っているときは最後に入れたウインドウを取り出します。",
   "pocket.capacity.one": "1つのウインドウ",
   "pocket.capacity.several": "複数のウインドウ",
   "pocket.color": "Pocket",

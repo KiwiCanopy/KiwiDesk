@@ -1653,7 +1653,7 @@
   "placement.new_window": "Nueva ventana en mosaico",
   "placement.new_window.help": "Dónde se ubica una nueva ventana con respecto a las demás: Al principio o Al final en el orden del diseño, o justo antes o después de la ventana enfocada al momento de abrirse.",
   "pocket.capacity": "Capacidad",
-  "pocket.capacity.help": "%1$@: el Pocket guarda una sola ventana. %2$@: marca más y una placa en el borde las guarda; el atajo de Pocket saca la última que metiste.",
+  "pocket.capacity.help": "%1$@: el Pocket guarda una sola ventana. %2$@: marca más y una placa en el borde las guarda; el atajo de Pocket mete en el Pocket la que usaste o, si están todas dentro, saca la última que metiste.",
   "pocket.capacity.one": "Una ventana",
   "pocket.capacity.several": "Varias ventanas",
   "pocket.color": "Pocket",

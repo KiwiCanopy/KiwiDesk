@@ -56,6 +56,9 @@ final class BriefPocketOverlay {
         /// KiwiShelf as drawn, glass gated.
         let shelf: KiwiShelf
         let markHex: String
+        /// False while the pocket plate stands at the pocket (#2678):
+        /// the plate flies to it, and no second pocket is drawn.
+        var drawsPocket = true
         /// Whether the plate draws Liquid Glass, and the Fill it
         /// wears there, nil for the untinted glass.
         let plateGlass: Bool
@@ -166,10 +169,9 @@ final class BriefPocketOverlay {
     private func draw(_ current: Play, at t: TimeInterval) {
         let request = current.request
         let timeline = current.timeline
-        current.pocketHost.alphaValue = BriefPocketPlan.pocketOpacity(
-            at: t,
-            timeline: timeline
-        )
+        current.pocketHost.alphaValue =
+            request.drawsPocket
+            ? BriefPocketPlan.pocketOpacity(at: t, timeline: timeline) : 0
         current.pocket.frame = local(
             BriefPocketPlan.pocketFrame(
                 request.pocket,

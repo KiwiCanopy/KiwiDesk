@@ -5592,12 +5592,10 @@ refused.
 
 :::unreleased
 Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
-pocket holds every marked window, in the order each went in, and a
+pocket holds every marked window, in the order each last went in, and a
 call puts away before it takes out: while a marked window is out,
 it puts back the focused one, else the one focused last. Only with
 every marked window in does it take one out, the one put in last.
-[`focus_window`](#focus_window) takes out the pocketed window it
-names.
 :::
 
 Out of the pocket the window floats on every Space, as a
@@ -5834,16 +5832,18 @@ floating.set_color("#8E5DE0")
 
 **Expects:** `"one"` or `"several"` (default `"one"`).
 
-**Does:** sets how many windows the [pocket](#pocket) holds. Under
-`"one"`, [`toggle_pocket_window`](#toggle_pocket_window) marks a
-second window only once the first is unmarked. Under `"several"` it
-marks any number, and while two or more windows are inside, the
-pocket plate stays on the active Space's screen at
+**Does:** sets how many windows the [pocket](#pocket) holds:
+`"one"` refuses a mark while any window is marked
+([`toggle_pocket_window`](#toggle_pocket_window)), and `"several"`
+marks any number. While two or more windows are inside, the pocket
+plate stays on the active Space's screen at
 [`pocket.set_edge`](#pocketset_edge) and
 [`pocket.set_position`](#pocketset_position), showing how many are
-inside. A click on the plate lists the windows inside by app; a
-row takes its window out. Switching back to `"one"` keeps the
-windows already marked.
+inside, except while KiwiShelf stands down there for a native
+full-screen window or a presentation. A click on the plate lists
+the windows inside by app; a row takes its window out. Switching
+back to `"one"` keeps the windows already marked, and the plate
+with them.
 
 **Example:**
 
@@ -5912,6 +5912,11 @@ end. The pocket stays whole on screen at either end.
 ```lua
 pocket.set_position(50)  -- the middle of its edge
 ```
+
+:::unreleased
+The pocket plate of [`pocket.set_capacity("several")`](#pocketset_capacity)
+sits there too.
+:::
 
 ## Launching Apps
 

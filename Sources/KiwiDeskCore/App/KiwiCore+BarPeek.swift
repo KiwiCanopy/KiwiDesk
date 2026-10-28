@@ -12,8 +12,10 @@ extension KiwiCore {
         spaceBars.glyphActions.peek = peek
         appBars.itemActions.peek = peek
         // An overflow mark's panel wears the shelf it draws in.
+        // So does the pocket plate's (#2678).
         shelves.shelfBeyondBars = { [weak self] window in
             self?.overflowMarks.shelf(drawnIn: window)
+                ?? self?.pocketPlate.shelf(drawnIn: window)
         }
         peek.content = { [weak self] source, space in
             self?.barPeekContent(source, on: space)

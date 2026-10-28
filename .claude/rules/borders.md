@@ -10,6 +10,7 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+PocketPlate.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
   # The state change's ring hold is armed from App/ (#2676).
   - "Sources/KiwiDeskCore/App/KiwiCore+StateChange.swift"
@@ -419,6 +420,21 @@ while that window is carried — the off-transition's re-home is
 `StickyOverlaySpanTests`' needle, its on-screen effect review's —
 and its panels order in nowhere in a `makeTestCore` twin
 (`ordersPanels`).
+
+## The pocket plate rides the bar pass (#2678)
+
+**Sync the pocket plate only through `updatePocketPlate()`, at the
+tail of `updateBars()` and on the stand-down that pass took**,
+stored on the overlay as the overflow marks' is; a path that
+changes what it shows without a bar pass calls it, as an emptied
+pocket does. **What it counts, shows for and lists is the one
+`pocketPlateWindows`**, never `pocketedWindows` beside it, and its
+screen is `pocketHomeDisplay`. **The brief pocket and the plate
+read the one `pocketRegion(on:screen:)`, the plate's mark keeping
+the brief pocket's square**, so a play flies into a standing plate
+and draws no second pocket (`drawsPocket`). Its list is the bars'
+click-held peek, its panel answering `shelfBeyondBars`
+(`PocketPlateTests`).
 
 ## The ring draws on the `.transient` panel, never a raw window
 

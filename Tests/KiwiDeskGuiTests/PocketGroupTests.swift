@@ -51,11 +51,23 @@ struct PocketGroupTests {
                     + "PocketGroup.swift"
             )
         )
-        #expect(source.contains("capacityRow"))
+        // The body draws Holds above Edge and Position, as
+        // `pocketList` records; a defined row never drawn reds.
+        let body = try #require(source.range(of: "var body: some View"))
+        let drawn = String(source[body.upperBound...])
+        let rows = ["capacityRow", "edgeRow", "positionRow"].map {
+            drawn.range(of: "\n            \($0)\n")?.lowerBound
+        }
+        #expect(rows.allSatisfy { $0 != nil })
+        #expect(rows.compactMap { $0 } == rows.compactMap { $0 }.sorted())
         #expect(source.contains("selection: pocket.capacity"))
-        #expect(!source.contains("GreyOut"))
-        #expect(!source.contains("CrossReferenceRow"))
-        #expect(!source.contains("onStateChange"))
+        // Every way a row could grey: none applies.
+        for grey in [
+            "GreyOut", "CrossReferenceRow", "onStateChange", ".disabled(",
+            ".opacity(",
+        ] {
+            #expect(!source.contains(grey), "\(grey)")
+        }
     }
 
     @Test("an edge reads as every edge row says it")

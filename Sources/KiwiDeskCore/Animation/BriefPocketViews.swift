@@ -15,6 +15,8 @@ final class BriefPocketView: NSView {
     private let rim = ShelfBorder.make()
     private var glass: NSView?
     private var shelf = KiwiShelf()
+    /// The mark's square at the trailing end, the count before it.
+    private var markTrailing = false
 
     override var isFlipped: Bool { true }
 
@@ -42,13 +44,16 @@ final class BriefPocketView: NSView {
     required init?(coder: NSCoder) { nil }
 
     /// Wears the gated `shelf` and the mark in `hex`, the pocket
-    /// mark's colour, with `text` beside the mark where non-nil.
+    /// mark's colour, with `text` beside the mark where non-nil —
+    /// before it where `markTrailing`.
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
-        count text: String? = nil
+        count text: String? = nil,
+        markTrailing: Bool = false
     ) {
         self.shelf = shelf
+        self.markTrailing = markTrailing
         mark.image = PocketMark.mark.image(
             size: BriefPocketPlan.markSide,
             hex: hex
@@ -79,12 +84,13 @@ final class BriefPocketView: NSView {
         super.layout()
         let radius = min(bounds.width, bounds.height) * 0.3
         content.frame = bounds
-        // The mark keeps a square at the leading end; the count
-        // takes the rest.
+        // The mark keeps a square at one end, where the brief pocket
+        // lands; the count takes the rest.
         let square = count.isHidden ? bounds.width : bounds.height
         let side = square * BriefPocketPlan.markSide / BriefPocketPlan.side
+        let squareX = markTrailing ? bounds.width - square : 0
         mark.frame = CGRect(
-            x: (square - side) / 2,
+            x: squareX + (square - side) / 2,
             y: (bounds.height - side) / 2,
             width: side,
             height: side
@@ -93,7 +99,9 @@ final class BriefPocketView: NSView {
             count.sizeToFit()
             let height = count.frame.height
             count.frame = CGRect(
-                x: square - BriefPocketPlan.margin / 2,
+                x: markTrailing
+                    ? BriefPocketPlan.margin / 2
+                    : square - BriefPocketPlan.margin / 2,
                 y: BarTextGlyph.originY(
                     centredOn: bounds.midY,
                     for: count,

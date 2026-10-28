@@ -6180,12 +6180,12 @@ goes in or out, the Space switch's plate flies between it and the
 window — our own overlay, redrawn at each size, never a capture —
 and it nods and fades. The window parks at once and comes back with
 one write, held until the plate lands, so a slow app or a minimum
-size is never in play; no pocket stays on screen (that is #2678's,
-with the several-windows mode). The pocket's placement is an edge
+size is never in play; no pocket stays on screen under One window
+(Several windows keeps a plate, #2678). The pocket's placement is an edge
 and a position along it, clear of a bar on that edge, in Shortcuts &
 Gestures ▸ Pocket beside its two keys, Edge as a menu since a
-Shortcuts setting row's control takes the recorder's footprint; the two rows grey while the
-toggle is off, since the pocket then never appears. The bar menus
+Shortcuts setting row's control takes the recorder's footprint; they
+do not grey on the toggle, since the pocket plate reads them too. The bar menus
 offer no Pocket or Take out yet (owner, 2026-10-27): a pocketed
 window has no bar item, so only one of the two could show. The plate's flight follows
 `animations.duration`, the window duration, at twice it within

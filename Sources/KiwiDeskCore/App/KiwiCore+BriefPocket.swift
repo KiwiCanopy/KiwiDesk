@@ -26,7 +26,7 @@ extension KiwiCore {
         let flight = BriefPocketPlan.flight(
             durationMS: tiler.settings.animations.durationMS
         )
-        briefPocket.play(
+        var request =
             BriefPocketOverlay.Request(
                 display: display,
                 screen: screen,
@@ -45,7 +45,9 @@ extension KiwiCore {
                     ? tiler.settings.kiwishelf.glassFill : nil,
                 flight: flight
             )
-        )
+        // A pocket plate on this screen is the pocket (#2678).
+        request.drawsPocket = pocketPlate.shown?.display != display
+        briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return BriefPocketPlan.timeline(direction, flight: flight)
     }

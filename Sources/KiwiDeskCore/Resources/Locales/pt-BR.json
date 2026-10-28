@@ -1653,7 +1653,7 @@
   "placement.new_window": "Nova janela disposta lado a lado",
   "placement.new_window.help": "Onde uma nova janela é colocada em relação às outras: primeira ou última na ordem do layout, ou logo antes ou depois da janela que estiver em foco no momento em que ela abre.",
   "pocket.capacity": "Capacidade",
-  "pocket.capacity.help": "%1$@: o Pocket guarda uma única janela. %2$@: marque mais, e uma placa na borda as guarda; o atalho do Pocket tira a última guardada.",
+  "pocket.capacity.help": "%1$@: o Pocket guarda uma única janela. %2$@: marque mais, e uma placa na borda as guarda; o atalho do Pocket guarda a que você usou ou, com todas dentro, tira a última guardada.",
   "pocket.capacity.one": "Uma janela",
   "pocket.capacity.several": "Várias janelas",
   "pocket.color": "Pocket",

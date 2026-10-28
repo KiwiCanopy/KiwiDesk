@@ -923,7 +923,9 @@ Obligations:
   its presses to the same `pressed`, sparing the mark's own LEFT
   press, whose click opens its list (`OverflowMarkPanelSeamTests`,
   `OverflowMarkWiringTests` ▸
-  `leftPressOnAMarkSpares`); a view's
+  `leftPressOnAMarkSpares`), and the pocket plate's panel is a
+  second twin (#2678), `PocketPlatePanel.sendEvent` sparing the
+  plate's own LEFT press; a view's
   own press handler never re-spells the dismissal, so one that
   takes its own press cannot leave a peek standing
   (`BarPeekSeamTests` ▸ `onePressDismissal`,
@@ -1039,7 +1041,9 @@ Obligations:
   draws it rather than on its home Space (`BarPeekSeamTests` ▸
   `oneBarRowPick`, `BarPeekClickTests` ▸
   `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
-  `travelerRowActsAsItsItem`). A left click on a click-held list
+  `travelerRowActsAsItsItem`). A pocketed window's row — the
+  pocket plate's list (#2678) — takes `focus_window`, which takes
+  it out, ahead of both arms (`PocketPlateTests` ▸ `rowTakesOut`). A left click on a click-held list
   opens it at once — a fading one included, no dwell and no
   cool-down — pops no menu and moves no focus, a row being the
   pick (#2571, retiring #2063's click cycle); `BarPeek.show`

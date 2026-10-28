@@ -1,31 +1,38 @@
 import AppKit
 
-/// Drives the pocket plate (#2678): under Several windows it stays on
-/// the active Space's screen while two windows are inside, at the
+/// Drives the pocket plate (#2678): it stays on the screen pocketed
+/// windows wait on while two windows are inside, at the
 /// pocket's edge and position, and a click lists them. It wears
 /// KiwiShelf's look, so it is synced at the tail of every
-/// `updateBars()` and stands down on that pass's verdict.
+/// `updateBars()` and stands down on that pass's verdict, which the
+/// overlay keeps.
 extension KiwiCore {
-    /// Shows or hides the plate; `standingDown` is the bar pass's.
-    func updatePocketPlate(standingDown: Set<DisplayID>) {
-        let spec = pocketPlateSpec(standingDown: standingDown)
-        if spec == nil, shelves.peek.shown?.view === pocketPlate.view {
+    /// Shows or hides the plate. A list open on it closes when the
+    /// plate changes — what it lists, or where it stands.
+    func updatePocketPlate() {
+        let spec = pocketPlateSpec()
+        if shelves.peek.shown?.view === pocketPlate.view,
+            spec != pocketPlate.shown
+        {
             shelves.peek.dismiss()
         }
         pocketPlate.sync(spec)
     }
 
+    /// The windows the plate counts, shows for and lists: those
+    /// inside that are tracked, so a hidden app's window, which no
+    /// row can name, counts for nothing.
+    var pocketPlateWindows: [WindowID] {
+        state.pocketedWindows.filter { state.windows[$0] != nil }
+    }
+
     /// What the plate draws, nil while it is not on screen.
-    func pocketPlateSpec(
-        standingDown: Set<DisplayID>
-    ) -> PocketPlateOverlay.Spec? {
+    func pocketPlateSpec() -> PocketPlateOverlay.Spec? {
         let style = tiler.settings.pocketStyle
-        let inside = state.pocketedWindows
-        guard
-            Self.pocketPlateShows(capacity: style.capacity, inside: inside),
-            let space = state.workspaces.activeSpace,
-            let display = state.workspaces.display(of: space),
-            !standingDown.contains(display),
+        let inside = pocketPlateWindows
+        guard Self.pocketPlateShows(inside: inside),
+            let display = state.pocketHomeDisplay,
+            !pocketPlate.standingDown.contains(display),
             let screen = TilingEngine.screen(for: display)
         else { return nil }
         let shelf = briefPocketShelf()
@@ -41,6 +48,8 @@ extension KiwiCore {
             edge: style.edge
         )
         return PocketPlateOverlay.Spec(
+            display: display,
+            windows: inside,
             frame: GeometryUtils.flip(
                 frame,
                 primaryHeight: GeometryUtils.primaryHeight
@@ -48,6 +57,7 @@ extension KiwiCore {
             shelf: shelf,
             markHex: style.color,
             count: count,
+            markTrailing: style.edge == .right,
             name: L(
                 "pocket.plate.ax",
                 "Pocket, windows inside: %1$d",
@@ -56,17 +66,16 @@ extension KiwiCore {
         )
     }
 
-    /// Whether the plate stays on screen: Several windows, and two
-    /// windows inside.
-    static func pocketPlateShows(
-        capacity: PocketCapacity,
-        inside: [WindowID]
-    ) -> Bool {
-        capacity == .several && inside.count >= 2
+    /// Whether the plate stays on screen: two windows inside, which
+    /// only Several windows lets in — and a switch back to One keeps,
+    /// so each stays reachable.
+    static func pocketPlateShows(inside: [WindowID]) -> Bool {
+        inside.count >= 2
     }
 
-    /// The plate's frame (AX): the pocket's `square` widened by
-    /// `extra` for the count, away from a side edge it sits on.
+    /// The plate's frame (AX): the pocket's `square`, where the
+    /// brief pocket lands, widened by `extra` for the count — inward
+    /// on the right edge, rightward on every other.
     static func pocketPlateFrame(
         square: CGRect,
         extra: CGFloat,
@@ -74,11 +83,7 @@ extension KiwiCore {
     ) -> CGRect {
         var frame = square
         frame.size.width += extra
-        switch edge {
-        case .right: frame.origin.x -= extra
-        case .left: break
-        case .top, .bottom: frame.origin.x -= extra / 2
-        }
+        if edge == .right { frame.origin.x -= extra }
         return frame
     }
 
@@ -96,7 +101,7 @@ extension KiwiCore {
     func openPocketList() {
         shelves.peek.show(
             pocketPlate.view,
-            source: .pocket(state.pocketedWindows),
+            source: .pocket(pocketPlateWindows),
             space: nil,
             edge: tiler.settings.pocketStyle.edge
         )

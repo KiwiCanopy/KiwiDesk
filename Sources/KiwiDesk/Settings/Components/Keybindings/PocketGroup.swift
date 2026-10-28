@@ -60,6 +60,7 @@ struct PocketGroup: View {
             "pocket.capacity.help",
             "%1$@: the Pocket keeps a single window. %2$@: mark more, "
                 + "and a plate at the edge holds them; the Pocket key "
+                + "puts away the one you used, or with all inside "
                 + "takes out the one put in last.",
             capacityName(.one),
             capacityName(.several)

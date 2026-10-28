@@ -1,13 +1,12 @@
-import CoreGraphics
+import AppKit
 import Foundation
 import Testing
 
 @testable import KiwiDeskCore
 
-/// The pocket plate (#2678): on screen under Several windows while
-/// two windows are inside, widened for its count away from a side
-/// edge, and a click lists the windows inside, each row taking its
-/// window out.
+/// The pocket plate (#2678): on screen while two windows are inside,
+/// widened for its count with its mark kept on the pocket, and a
+/// click lists the windows inside, each row taking its window out.
 @Suite("Pocket plate", .serialized)
 @MainActor
 struct PocketPlateTests {
@@ -47,16 +46,89 @@ struct PocketPlateTests {
         }
     }
 
-    @Test("the plate shows under Several windows from two inside")
-    func showsFromTwo() {
-        typealias Core = KiwiCore
-        #expect(!Core.pocketPlateShows(capacity: .several, inside: [one]))
-        #expect(Core.pocketPlateShows(capacity: .several, inside: [one, two]))
-        #expect(!Core.pocketPlateShows(capacity: .one, inside: [one, two]))
-        #expect(!Core.pocketPlateShows(capacity: .several, inside: []))
+    /// Shows the plate's panel, which a peek opens only on, with
+    /// the peek's room pinned; `close` puts both away.
+    private func showPanels(_ core: KiwiCore) {
+        core.pocketPlate.ordersPanel = true
+        core.shelves.peek.visibleArea = { _ in
+            CGRect(x: 0, y: 0, width: 1440, height: 900)
+        }
     }
 
-    @Test("the count widens the plate away from a side edge")
+    private func close(_ core: KiwiCore) {
+        core.shelves.peek.dismiss()
+        core.shelves.peek.panel.panel?.orderOut(nil)
+        core.pocketPlate.sync(nil)
+    }
+
+    @Test("the plate shows from two windows inside")
+    func showsFromTwo() {
+        #expect(!KiwiCore.pocketPlateShows(inside: []))
+        #expect(!KiwiCore.pocketPlateShows(inside: [one]))
+        #expect(KiwiCore.pocketPlateShows(inside: [one, two]))
+    }
+
+    /// The active Space on the host's main screen, which the plate's
+    /// frame is read on; nil on a host with none.
+    private func giveSpaceTheMainScreen(_ core: KiwiCore) -> DisplayID? {
+        guard let screen = NSScreen.main, let id = screen.kiwiDisplayID,
+            let space = core.state.workspaces.activeSpace
+        else { return nil }
+        core.state.workspaces.upsertDisplay(
+            Display(id: id, name: "Main", frame: screen.frame)
+        )
+        core.state.workspaces.assign(space, to: id)
+        // Pinned (tests.md, #531).
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 25, width: 1440, height: 800)
+        }
+        return id
+    }
+
+    @Test(
+        "the bar pass shows the plate, and its stand-down hides it",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func barPassDrivesThePlate() throws {
+        let core = makeCore()
+        let display = try #require(giveSpaceTheMainScreen(core))
+        pocketTwo(core)
+        core.updateBars()
+        let shown = try #require(core.pocketPlate.shown)
+        #expect(shown.count == "2")
+        #expect(shown.windows == [one, two])
+        #expect(shown.display == display)
+        // A switch back to One keeps both reachable.
+        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.updateBars()
+        #expect(core.pocketPlate.shown != nil)
+        core.pocketPlate.standingDown = [display]
+        core.updatePocketPlate()
+        #expect(core.pocketPlate.shown == nil)
+    }
+
+    @Test(
+        "a list open on the plate closes when the plate changes",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func changeClosesTheList() throws {
+        let core = makeCore()
+        _ = try #require(giveSpaceTheMainScreen(core))
+        showPanels(core)
+        defer { close(core) }
+        pocketTwo(core)
+        core.handle(.windowFocused(three))
+        core.execute("toggle_pocket_window")
+        core.execute("pocket")
+        core.updateBars()
+        core.openPocketList()
+        #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
+        core.execute("pocket")
+        core.updateBars()
+        #expect(core.shelves.peek.shown == nil)
+    }
+
+    @Test("the count widens the plate, its mark kept on the pocket")
     func widensAwayFromTheEdge() {
         let square = CGRect(x: 100, y: 200, width: 40, height: 40)
         let right = KiwiCore.pocketPlateFrame(
@@ -77,8 +149,34 @@ struct PocketPlateTests {
             extra: 20,
             edge: .bottom
         )
-        #expect(bottom.midX == square.midX)
+        #expect(bottom.minX == square.minX)
         #expect(bottom.height == square.height)
+        let top = KiwiCore.pocketPlateFrame(
+            square: square,
+            extra: 20,
+            edge: .top
+        )
+        #expect(top == bottom)
+    }
+
+    @Test("capacity decodes as stored, absent as one, and refuses a bad value")
+    func capacityStored() throws {
+        let set = try JSONDecoder().decode(
+            PocketStyle.self,
+            from: Data(#"{"capacity":"several"}"#.utf8)
+        )
+        #expect(set.capacity == .several)
+        let absent = try JSONDecoder().decode(
+            PocketStyle.self,
+            from: Data("{}".utf8)
+        )
+        #expect(absent.capacity == .one)
+        let core = makeCore()
+        #expect(
+            !core.execute("pocket.set_capacity", args: [.string("many")])
+                .isSuccess
+        )
+        #expect(core.tiler.settings.pocketStyle.capacity == .one)
     }
 
     @Test("the plate's list is a click-held list of the windows inside")
@@ -100,13 +198,35 @@ struct PocketPlateTests {
         #expect(core.state.pocketPhase(of: two) == .pocketed)
     }
 
-    @Test("One window shows no plate, however many are inside")
-    func oneWindowHides() {
+    @Test("a click grows the list out of the plate, wearing its shelf")
+    func clickOpensTheList() {
+        let core = makeCore()
+        showPanels(core)
+        defer { close(core) }
+        pocketTwo(core)
+        core.pocketPlate.sync(
+            PocketPlateOverlay.Spec(
+                display: DisplayID(1),
+                windows: [one, two],
+                frame: CGRect(x: 100, y: 100, width: 60, height: 40),
+                shelf: KiwiShelf(),
+                markHex: "",
+                count: "2",
+                markTrailing: false,
+                name: "Pocket"
+            )
+        )
+        let window = try? #require(core.pocketPlate.panel)
+        #expect(window.flatMap { core.shelves.shelfBeyondBars($0) } != nil)
+        core.openPocketList()
+        #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
+    }
+
+    @Test("a hidden app's window counts for nothing on the plate")
+    func untrackedCountsForNothing() {
         let core = makeCore()
         pocketTwo(core)
-        core.execute("pocket.set_capacity", args: [.string("one")])
-        #expect(core.pocketPlateSpec(standingDown: []) == nil)
-        core.updateBars()
-        #expect(core.pocketPlate.shown == nil)
+        core.state.apply(.windowHidden(one))
+        #expect(core.pocketPlateWindows == [two])
     }
 }

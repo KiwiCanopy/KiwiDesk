@@ -10,7 +10,10 @@ extension KiwiCore {
     func pocketCommand() -> CommandResponse {
         // A press that emptied the pocket ends there: a filled one
         // passed the #292 preflight, so it never acts on the focus.
-        if emptyPocketIfGone(), state.pocket.isEmpty { return .ok() }
+        if emptyPocketIfGone() {
+            updatePocketPlate()
+            if state.pocket.isEmpty { return .ok() }
+        }
         // Away first: the out window used last (#2678).
         if let id = state.pocketPutBackNext(focused: focusedWindowID) {
             putInPocket(id)

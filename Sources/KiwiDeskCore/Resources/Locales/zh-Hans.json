@@ -1653,7 +1653,7 @@
   "placement.new_window": "新建平铺窗口",
   "placement.new_window.help": "新窗口相对于其他窗口的落位：在布局顺序中排最前或最后，或紧邻打开时处于焦点的那个窗口之前或之后。",
   "pocket.capacity": "容量",
-  "pocket.capacity.help": "%1$@：Pocket 只放一个窗口。%2$@：标记更多窗口，边缘的底板会容纳它们；Pocket 快捷键取出最后放入的那个。",
+  "pocket.capacity.help": "%1$@：Pocket 只放一个窗口。%2$@：标记更多窗口，边缘的底板会容纳它们；Pocket 快捷键会将你用过的那个放入 Pocket，如果全部都已放入，则取出最后放入的那个。",
   "pocket.capacity.one": "一个窗口",
   "pocket.capacity.several": "多个窗口",
   "pocket.color": "Pocket",
