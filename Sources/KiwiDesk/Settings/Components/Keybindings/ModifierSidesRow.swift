@@ -90,13 +90,15 @@ enum ModifierSidesWords {
         )
     }
 
-    /// A sided ⌘ as every surface draws it (`ComboSymbols`), `R⌘`;
-    /// the example's key stays the frame's own H, whatever the
-    /// keyboard layout draws for it.
+    /// A sided ⌘ before its key as every surface draws it
+    /// (`ChordGlyphs`), `Right ⌘ `; the example's key stays the
+    /// frame's own H, whatever the keyboard layout draws for it.
     static func drawn(_ side: ModifierSide) -> String {
-        ChordGlyphs.modifiers(
-            HotkeyModifiers.command.union(.side(side, of: .command))
+        let modifiers = HotkeyModifiers.command.union(
+            .side(side, of: .command)
         )
+        return ChordGlyphs.modifiers(modifiers)
+            + ChordGlyphs.separator(modifiers)
     }
 
     /// Off, with shortcuts that keep a side: they fire either-side.

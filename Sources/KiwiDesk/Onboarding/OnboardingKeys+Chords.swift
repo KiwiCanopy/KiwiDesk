@@ -125,9 +125,9 @@ extension OnboardingKeys {
         guard let parsed = KeyCombo.parse(combo),
             let full = rendered(combo: combo)
         else { return nil }
-        let modifiers = ChordGlyphs.modifiers(
-            parsed.modifiers
-        )
+        let modifiers =
+            ChordGlyphs.modifiers(parsed.modifiers)
+            + ChordGlyphs.separator(parsed.modifiers)
         guard full.hasPrefix(modifiers) else { return full }
         return String(full.dropFirst(modifiers.count))
     }

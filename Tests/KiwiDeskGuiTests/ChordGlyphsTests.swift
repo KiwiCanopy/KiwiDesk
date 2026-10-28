@@ -33,15 +33,23 @@ struct ChordGlyphsTests {
     @Test("an either-side modifier stays a bare glyph beside a run")
     func mixedKeepsTheBareGlyph() throws {
         LocalizationManager.shared.select("en")
-        #expect(ChordGlyphs.words("⌃R⌥H") == "⌃ Right ⌥ H")
-        #expect(ChordGlyphs.words("✦R⌘K") == "✦ Right ⌘ K")
+        #expect(
+            ChordGlyphs.modifiers(
+                [.control, .option, .side(.right, of: .option)]
+            ) == "⌃ Right ⌥"
+        )
+        #expect(
+            ChordGlyphs.modifiers(
+                [.hyper, .command, .side(.right, of: .command)]
+            ) == "✦ Right ⌘"
+        )
     }
 
     @Test("an either-side chord is drawn as Core draws it")
     func eitherSideUnchanged() throws {
         #expect(try drawn("ctrl+alt+j") == "⌃⌥J")
         #expect(try drawn("hyper+cmd+k") == "✦⌘K")
-        #expect(ChordGlyphs.words("⌘L") == "⌘L")
+        #expect(ChordGlyphs.separator(.command).isEmpty)
     }
 
     @Test("the words come from the catalog, never a fixed language")

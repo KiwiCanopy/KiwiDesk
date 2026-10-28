@@ -8,10 +8,10 @@ import Testing
 @Suite("Chord glyphs have one door (#2601)")
 struct ChordGlyphsSeamTests {
     private static let allowed: [String: (count: Int, why: String)] = [
-        "ChordGlyphs.swift": (2, "the door itself"),
+        "ChordGlyphs.swift": (3, "the door itself"),
         "KeyboardCensus.swift": (
             1,
-            "a layer's identity, compared and never drawn"
+            "the lettered label the census tests read off the main actor"
         ),
     ]
 
@@ -26,12 +26,14 @@ struct ChordGlyphsSeamTests {
             let text = SourceScan.stripComments(
                 try String(contentsOf: file, encoding: .utf8)
             )
-            let calls =
-                text.components(separatedBy: "ComboSymbols.render(")
-                .count - 1
-                + text.components(
-                    separatedBy: "ComboSymbols.modifierSymbols("
-                ).count - 1
+            // The member names without a call's paren: a function
+            // reference or a line break before `(` still counts.
+            let calls = ["render", "modifierSymbols", "sideLetter"]
+                .map {
+                    text.components(separatedBy: "ComboSymbols.\($0)")
+                        .count - 1
+                }
+                .reduce(0, +)
             if calls > 0 { counts[file.lastPathComponent] = calls }
         }
         #expect(counts == Self.allowed.mapValues(\.count))

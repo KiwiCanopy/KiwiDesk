@@ -20,9 +20,31 @@ enum ChordGlyphs {
         words(ComboSymbols.modifierSymbols(modifiers))
     }
 
+    /// What stands between drawn modifiers and their key: a space
+    /// where a side is named, so the word stays with its run.
+    static func separator(_ modifiers: HotkeyModifiers) -> String {
+        modifiers.isSided ? " " : ""
+    }
+
+    /// A side's word around a run of glyphs, as the catalog frames
+    /// it.
+    static func word(_ side: ModifierSide, _ run: String) -> String {
+        switch side {
+        case .left: L("chord.side.left", "Left %1$@", run)
+        case .right: L("chord.side.right", "Right %1$@", run)
+        }
+    }
+
+    /// The modifier glyphs Core draws, for readers of a drawn chord.
+    static let kinds: [Character: ModifierKind] = Dictionary(
+        uniqueKeysWithValues: ModifierKind.allCases.map {
+            (Character(ComboSymbols.glyph(of: $0)), $0)
+        }
+    )
+
     /// Core's lettered glyphs (`R⌘H`) with each same-side run
     /// named once; unchanged where no modifier keeps a side.
-    static func words(_ glyphs: String) -> String {
+    private static func words(_ glyphs: String) -> String {
         let chars = Array(glyphs)
         var pieces: [String] = []
         var run = ""
@@ -41,13 +63,13 @@ enum ChordGlyphs {
                 pieces.append(String(char))
                 runSide = nil
                 index += 1
-            } else if kinds.contains(char) {
+            } else if kinds[char] != nil {
                 if runSide != nil { closeRun() }
                 runSide = nil
                 run.append(char)
                 index += 1
             } else if let side = sides[char], index + 1 < chars.count,
-                kinds.contains(chars[index + 1])
+                kinds[chars[index + 1]] != nil
             {
                 if runSide != side { closeRun() }
                 runSide = side
@@ -65,21 +87,9 @@ enum ChordGlyphs {
             .joined(separator: " ")
     }
 
-    private static func word(_ side: ModifierSide, _ run: String) -> String {
-        switch side {
-        case .left: L("chord.side.left", "Left %1$@", run)
-        case .right: L("chord.side.right", "Right %1$@", run)
+    private static let sides: [Character: ModifierSide] = Dictionary(
+        uniqueKeysWithValues: ModifierSide.allCases.map {
+            (Character(ComboSymbols.sideLetter($0)), $0)
         }
-    }
-
-    private static let kinds = Set(
-        ModifierKind.allCases.map { Character(ComboSymbols.glyph(of: $0)) }
     )
-
-    private static let sides: [Character: ModifierSide] =
-        Dictionary(
-            uniqueKeysWithValues: ModifierSide.allCases.map {
-                (Character(ComboSymbols.sideLetter($0)), $0)
-            }
-        )
 }

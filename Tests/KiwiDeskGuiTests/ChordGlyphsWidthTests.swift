@@ -5,13 +5,13 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// A one-hand sided chord fits the recorder's least width in every
+/// A one-hand sided chord of up to three modifiers and a
+/// one-character key fits the recorder's least width in every
 /// catalog (#2601): the side word is translated, so its length is
-/// each translator's, and the widest one-hand chord — three
-/// modifiers, on either side — is measured in the label's own font
-/// against the width the field draws (`labelMinWidth`). A
-/// cross-hand chord carries two words and widens its chip past
-/// that width, as any long chord does; it is not held here.
+/// each translator's, measured in the label's own font against the
+/// width the field draws (`labelMinWidth`). A longer chord — all
+/// four modifiers, an F-key, a cross-hand pair of words — widens
+/// its chip, as any long chord does; it is not held here.
 @Suite("Sided chords fit the recorder in every locale (#2601)", .serialized)
 @MainActor
 struct ChordGlyphsWidthTests {

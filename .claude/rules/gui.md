@@ -2034,10 +2034,15 @@ never reaches a screen (owner ruling 2026-10-28, amending #2601's
 Ruling 1; `ChordGlyphsSeamTests`, whose `allowed` map is the one
 copy of who may read the lettered form). A translated side word
 fits the recorder's `labelMinWidth` in every catalog on a one-hand
-chord of three modifiers, while a cross-hand chord widens its chip
-(`ChordGlyphsWidthTests`). A
-surface naming a chord for VoiceOver and on hover goes through
-`SidedChordWords`, which names ✦ by `HyperKeyWords.keyName`, since
+chord of up to three modifiers and a one-character key, while a
+longer chord widens its chip (`ChordGlyphsWidthTests`). The run's
+word is a second spelling of a side beside `HyperKeyWords`' key
+names, by ruling: it names a GROUP of modifiers, so it agrees with
+no key noun and stands before its run, whatever order the key
+names take. A surface naming a chord for VoiceOver and on hover
+goes through `SidedChordWords`, which reads each drawn run back
+through the catalog's own frame as the full key names, so a short
+word (`Izq.`) is spoken whole, and names ✦ by `HyperKeyWords.keyName`, since
 VoiceOver reads the glyph as a star (#2700, `SidedChordWordsTests`
 ▸ `hyperIsNamed`); a surface speaking a chord takes `label`, never
 a ✦ replacement of its own. A new chord surface joins
