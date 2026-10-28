@@ -62,7 +62,6 @@ struct NextOnMyListTests {
         for json in [
             #"{"format":1,"items":[]}"#,
             #"{"format":1,"as_of":"2026-09-30","items":[]}"#,
-            #"{"format":1}"#,
         ] {
             #expect(NextOnMyList.read(Self.data(json)) == .emptied, "\(json)")
         }
@@ -70,6 +69,7 @@ struct NextOnMyListTests {
             #"{"format":2,"as_of":"2026-09-30","items":["One"]}"#,
             #"{"format":1,"as_of":"soon","items":["One"]}"#,
             #"{"format":1,"items":["One"]}"#,
+            #"{"format":1}"#,
             "not json",
         ] {
             #expect(

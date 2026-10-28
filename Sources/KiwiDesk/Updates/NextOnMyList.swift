@@ -55,9 +55,8 @@ struct NextOnMyList: Codable, Equatable {
             ),
             knownFormats.contains(document.format)
         else { return .unreadable }
-        guard let items = document.items, !items.isEmpty else {
-            return .emptied
-        }
+        guard let items = document.items else { return .unreadable }
+        guard !items.isEmpty else { return .emptied }
         guard let day = document.asOf, let asOf = Self.day(day) else {
             return .unreadable
         }

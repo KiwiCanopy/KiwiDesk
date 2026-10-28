@@ -106,4 +106,17 @@ struct WhatsNewBrowseNextTests {
         await coordinator.browseFetch?.value
         #expect(try #require(log.shown.first).next == nil)
     }
+
+    @Test("Owed notes file the list they read for Home's window")
+    func owedReadFillsTheCache() async throws {
+        let list = Self.list("A bigger pocket")
+        let (coordinator, record, _) = try WhatsNewFixture.coordinator(
+            current: "9999.3.0",
+            lastRun: "9999.2.0",
+            feed: WhatsNewFixture.items(["9999.3.0", "9999.2.0"])
+        )
+        coordinator.fetchNext = { _ in list }
+        await coordinator.launched(opensWindow: false, existingUser: true)
+        #expect(record.cachedNext == list)
+    }
 }

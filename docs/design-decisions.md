@@ -779,10 +779,9 @@ the notes say they are online. Home's window ends on "Next on my
 list" too, from the list last read, kept the same way: a read
 that fails keeps it, a section the owner emptied clears it, and
 the list's own sixty days retire one nobody refreshed — so a
-correction reaches Home's window on its next online open, while
-an offline open never shows a list older than that limit.
-Home's What's new answers nothing
-— owed notes keep their own window and their Done, and an offer
+correction reaches Home's window on the open after its next
+online read, while an offline open never shows a list older than
+that limit. Home's What's new answers nothing — owed notes keep their own window and their Done, and an offer
 on screen comes forward instead, since it carries the notes worth
 reading.
 
