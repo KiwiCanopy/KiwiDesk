@@ -1,0 +1,286 @@
+---
+// One look's picture on the gallery (#1740): its screenshot,
+// downloaded at build time and served from the site through
+// astro:assets, or — without one — a CSS sketch of the desk drawn
+// from the look file's own colors and shapes, labelled "Preview".
+// The sketch's colors arrive as inline custom properties
+// (`sketchStyle` in `src/lib/looks.ts`): look data, not brand
+// colors, so no hex of them is written under `site/src`.
+// An image astro:assets cannot process drops to the sketch too, so
+// a bad screenshot never fails the deploy (`src/lib/looks.ts`).
+import { getImage } from "astro:assets";
+import { sketchStyle, type Look } from "../lib/looks";
+
+interface Props {
+  look: Look;
+  size: "card" | "detail";
+  badgeScreenshot: string;
+  badgePreview: string;
+  /** Alt text for a screenshot and for any other picture. */
+  altScreenshot: string;
+  altPreview: string;
+}
+const { look, size, badgeScreenshot, badgePreview, altScreenshot, altPreview } =
+  Astro.props;
+
+const s = look.sketch;
+const edges = s?.edges ?? ["top"];
+const shared = edges.length === 1;
+const sizes =
+  size === "card"
+    ? "(max-width: 720px) 100vw, 360px"
+    : "(max-width: 760px) 100vw, 680px";
+const widths = size === "card" ? [360, 720] : [680, 1360];
+let picture: Awaited<ReturnType<typeof getImage>> | null = null;
+if (look.image) {
+  const fit = widths.filter((w) => w <= look.image!.width);
+  try {
+    picture = await getImage({
+      src: look.image.src,
+      width: look.image.width,
+      height: look.image.height,
+      widths: fit.length > 0 ? fit : [look.image.width],
+      sizes,
+    });
+  } catch (error) {
+    console.warn(`[looks] image of ${look.id} not processed: ${error}`);
+  }
+}
+const kind = picture ? look.image!.kind : null;
+const classes = [
+  "plate",
+  s?.glass && "plate--glass",
+  s?.square && "plate--square",
+  s?.glow && "plate--glow",
+  s?.boxed && s?.hug && "plate--hug",
+  s && !s.centered && "plate--start",
+]
+  .filter(Boolean)
+  .join(" ");
+---
+
+<div class:list={["pic", `pic--${size}`]}>
+  <span class="pic__badge">
+    {kind === "screenshot" ? badgeScreenshot : badgePreview}
+  </span>
+  {
+    picture ? (
+      <img
+        class="pic__img"
+        src={picture.src}
+        srcset={picture.srcSet.attribute || undefined}
+        sizes={sizes}
+        width={look.image!.width}
+        height={look.image!.height}
+        alt={kind === "screenshot" ? altScreenshot : altPreview}
+        loading="lazy"
+        decoding="async"
+      />
+    ) : (
+      <div class={classes} style={sketchStyle(s)} aria-hidden="true">
+        {edges.map((edge, index) => (
+          <div class={`plate__bar plate__bar--${edge}`}>
+            {(shared || index === 0) && (
+              <span class="plate__group">
+                <i class="sq on" />
+                <i class="sq" />
+                <i class="sq" />
+                <i class="sq" />
+              </span>
+            )}
+            {(shared || index === 1) && (
+              <span class="plate__group">
+                <i class="dot on" />
+                <i class="dot" />
+                <i class="dot" />
+              </span>
+            )}
+          </div>
+        ))}
+        <div class="plate__well">
+          <span class="plate__ghost plate__ghost--l" />
+          <span class="plate__ghost" />
+          <span class="plate__win" />
+        </div>
+      </div>
+    )
+  }
+</div>
+
+<style>
+  .pic {
+    position: relative;
+  }
+  .pic__badge {
+    position: absolute;
+    right: 8px;
+    top: 8px;
+    z-index: 3;
+    font-size: 0.68rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    padding: 0.12rem 0.5rem;
+    border-radius: 6px;
+    color: rgb(255 255 255);
+    background: rgba(0, 0, 0, 0.55);
+  }
+  .pic--detail .pic__badge {
+    right: 12px;
+    top: 12px;
+  }
+  .pic__img {
+    width: 100%;
+    aspect-ratio: 16 / 10;
+    object-fit: cover;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .pic--detail .pic__img,
+  .pic--detail .plate {
+    border-radius: 14px;
+  }
+
+  /* The sketch: a desk in the look's own colors. Every length is in
+     container units, so the card and the detail draw one picture
+     at two sizes. */
+  .plate {
+    container-type: inline-size;
+    position: relative;
+    aspect-ratio: 16 / 10;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    display: grid;
+    grid-template:
+      "top top top" auto
+      "left well right" 1fr
+      "bottom bottom bottom" auto / auto 1fr auto;
+    gap: 2cqi;
+    padding: 2cqi;
+    background: linear-gradient(
+      135deg,
+      color-mix(in srgb, var(--lk-ring, var(--accent)) 38%, rgb(24 26 32)),
+      color-mix(in srgb, var(--lk-active, var(--accent)) 22%, rgb(86 90 102))
+    );
+  }
+  .plate__bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 2.6cqi;
+    background: var(--lk-fill, rgba(20, 24, 22, 0.8));
+    border-radius: calc(var(--lk-round, 0.5) * 3.5cqi);
+    padding: 1.6cqi 2.4cqi;
+  }
+  .plate__bar--top {
+    grid-area: top;
+  }
+  .plate__bar--bottom {
+    grid-area: bottom;
+  }
+  .plate__bar--left,
+  .plate__bar--right {
+    flex-direction: column;
+    padding: 2.4cqi 1.6cqi;
+  }
+  .plate__bar--left {
+    grid-area: left;
+  }
+  .plate__bar--right {
+    grid-area: right;
+  }
+  .plate--hug .plate__bar {
+    justify-self: center;
+    align-self: center;
+  }
+  .plate--start .plate__bar {
+    justify-content: flex-start;
+  }
+  .plate--hug.plate--start .plate__bar {
+    justify-self: start;
+    align-self: start;
+  }
+  .plate--glass .plate__bar {
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+  .plate__group {
+    display: flex;
+    flex-direction: inherit;
+    align-items: center;
+    gap: 1.2cqi;
+  }
+  .plate i {
+    display: block;
+    width: 3.4cqi;
+    height: 3.4cqi;
+    background: var(--lk-item, rgba(255, 255, 255, 0.8));
+    opacity: 0.55;
+  }
+  .plate i.sq {
+    border-radius: calc(var(--lk-round, 0.5) * 1.2cqi);
+  }
+  .plate i.dot {
+    border-radius: 50%;
+  }
+  .plate i.on {
+    opacity: 1;
+    background: var(--lk-active, var(--accent));
+  }
+  .plate__well {
+    grid-area: well;
+    position: relative;
+    min-height: 0;
+  }
+  .plate__win,
+  .plate__ghost {
+    position: absolute;
+    border-radius: 2cqi;
+  }
+  .plate--square .plate__win,
+  .plate--square .plate__ghost {
+    border-radius: 0;
+  }
+  .plate__win {
+    inset: 8% 20%;
+    background: rgba(245, 246, 250, 0.9);
+    border: var(--lk-ring-w, 0.75cqi) solid var(--lk-ring, var(--accent));
+    box-shadow: 0 1.5cqi 4cqi rgba(0, 0, 0, 0.3);
+  }
+  .plate--glow .plate__win {
+    box-shadow:
+      0 0 3.5cqi var(--lk-ring, var(--accent)),
+      0 1.5cqi 4cqi rgba(0, 0, 0, 0.3);
+  }
+  /* Two lines of content, so the window reads as a window. */
+  .plate__win::before,
+  .plate__win::after {
+    content: "";
+    position: absolute;
+    left: 8%;
+    height: 7%;
+    border-radius: 1cqi;
+    background: rgba(20, 24, 30, 0.14);
+  }
+  .plate__win::before {
+    top: 14%;
+    right: 8%;
+  }
+  .plate__win::after {
+    top: 32%;
+    width: 55%;
+    box-shadow:
+      0 3cqi 0 rgba(20, 24, 30, 0.14),
+      0 6cqi 0 rgba(20, 24, 30, 0.14);
+  }
+  .plate__ghost {
+    inset: 14% 2% 14% 82%;
+    background: rgba(245, 246, 250, 0.42);
+  }
+  .plate__ghost--l {
+    inset: 14% 82% 14% 2%;
+  }
+</style>

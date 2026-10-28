@@ -1,0 +1,924 @@
+---
+// KiwiDesk — the looks gallery at /looks/ (#1740), rendered by
+// src/pages/looks/index.astro and its /de/ and /ja/ twins. The
+// data is the KiwiDesk-Looks repo's index, read at build time by
+// src/lib/looks.ts; the binding rulings (sorting, tags, counts,
+// fonts, versions, page details) are in the issue body.
+//
+// Works without JavaScript: the grid ships in Discover order and
+// each look's detail is a `:target` section below it. The script
+// adds search, the tag filter and the other two orders on top.
+import PageShell, { type Lang } from "./PageShell.astro";
+import LookPicture from "./LookPicture.astro";
+import en from "../i18n/en.json";
+import de from "../i18n/de.json";
+import ja from "../i18n/ja.json";
+import ghMarkRaw from "../assets/brand/mark-github-mono.svg?raw";
+import ogBannerEn from "../assets/brand/og-banner.jpg";
+import ogBannerDe from "../assets/brand/og-banner.de.jpg";
+import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
+import {
+  looks,
+  discoverOrder,
+  recentOrder,
+  popularOrder,
+  wasUpdated,
+  mainAction,
+  needsNewerApp,
+  shortCount,
+  fullCount,
+  formatDate,
+  SYSTEM_FONTS,
+  LOOKS_REPO_URL,
+  SUBMIT_URL,
+  REPORT_URL,
+  CC_BY_URL,
+  type Look,
+} from "../lib/looks";
+
+interface Props {
+  lang: Lang;
+}
+const { lang } = Astro.props;
+
+const dict = { ...en, ...{ en, de, ja }[lang] } as Record<string, string>;
+const t = (k: string): string =>
+  dict[k] ?? (en as Record<string, string>)[k] ?? k;
+/** `key` with `{name}` placeholders filled as plain text. */
+const f = (k: string, vars: Record<string, string | number>): string =>
+  t(k).replace(/\{(\w+)\}/g, (m, name) =>
+    name in vars ? String(vars[name]) : m,
+  );
+
+const esc = (s: string): string =>
+  s
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+const link = (href: string, label: string): string =>
+  `<a href="${esc(href)}" target="_blank" rel="noopener">${label}</a>`;
+/** `key` as HTML: its text escaped, `{name}` filled with the given
+ * (already safe) HTML, `{cc}…{/cc}` made the CC BY 4.0 link. */
+const h = (k: string, vars: Record<string, string> = {}): string =>
+  esc(t(k))
+    .replace(/\{cc\}(.*?)\{\/cc\}/g, (_, label) => link(CC_BY_URL, label))
+    .replace(/\{(\w+)\}/g, (m, name) => vars[name] ?? m);
+
+const plural = (base: string, n: number): string =>
+  f(n === 1 ? `${base}_one` : `${base}_other`, { n: fullCount(n, lang) });
+
+const slug = "/looks/";
+const ogBanner =
+  lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBannerEn;
+const ogImage = new URL(ogBanner.src, Astro.site).href;
+
+const byId = new Map(looks.map((l) => [l.id, l]));
+const discover = discoverOrder(looks);
+const rank = (list: Look[]) => new Map(list.map((l, i) => [l.id, i]));
+const recentRank = rank(recentOrder(looks));
+const popularRank = rank(popularOrder(looks));
+
+// The filter chips: every tag a look carries, the most used first.
+const tagCounts = new Map<string, number>();
+for (const l of looks) {
+  for (const tag of l.tags) tagCounts.set(tag, (tagCounts.get(tag) ?? 0) + 1);
+}
+const tagList = [...tagCounts]
+  .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+  .map(([tag]) => tag);
+
+const norm = (s: string): string =>
+  s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
+const fontOf = (l: Look): string | null => {
+  const font = l.sketch?.font;
+  if (!font) return null;
+  return Object.hasOwn(SYSTEM_FONTS, font) ? t(SYSTEM_FONTS[font]) : font;
+};
+/** What the search box matches: name, author, description,
+ * keywords, font and "Inspired by" (#1740 ▸ Keywords). */
+const haystack = (l: Look): string =>
+  norm(
+    [
+      l.name,
+      l.author,
+      l.description,
+      ...l.keywords,
+      l.sketch?.font ?? "",
+      ...l.needsFonts,
+      l.inspiredBy ?? "",
+    ].join(" "),
+  );
+
+/** The HTML ids of a look's detail section, its title and its card:
+ * prefixed so no look id collides with the page's own, and suffixed
+ * after `_`, which a look id cannot hold, so none collides with
+ * another look's. */
+const anchor = (id: string): string => `look-${id}`;
+const titleId = (id: string): string => `look-${id}_title`;
+const cardId = (id: string): string => `look-${id}_card`;
+
+const creditHtml = (l: Look): string | null => {
+  const c = l.credit;
+  if (!c) return null;
+  if (c.removed) return esc(t("looks_based_on_removed"));
+  const name =
+    c.id && byId.has(c.id)
+      ? `<a href="#${anchor(c.id)}">${esc(c.name)}</a>`
+      : esc(c.name);
+  return h("looks_based_on", { name, author: esc(c.author) });
+};
+const needsFontHtml = (l: Look, font: string): string => {
+  const line = esc(f("looks_needs_font", { font }));
+  return l.fontUrl
+    ? `${line} · ${link(l.fontUrl, esc(t("looks_get_font")))}`
+    : line;
+};
+const likeAria = (l: Look): string =>
+  l.likes > 0
+    ? f("looks_like_aria", { name: l.name, likes: plural("looks_likes", l.likes) })
+    : f("looks_like_aria_zero", { name: l.name });
+const dateLine = (l: Look): string =>
+  wasUpdated(l)
+    ? f("looks_updated_on", { date: formatDate(l.updated, lang), n: l.revision })
+    : f("looks_added_on", { date: formatDate(l.added, lang) });
+
+const ghMark = ghMarkRaw
+  .replace(/fill="[^"]*"/, 'fill="currentColor"')
+  .replace(/\swidth="\d+"\sheight="\d+"/, "")
+  .replace("<svg", '<svg class="gh" aria-hidden="true" focusable="false"');
+const MAX_CARD_TAGS = 4;
+---
+
+{/* Not linked from the nav or the footer and kept out of the
+    sitemap until the owner calls the gallery live (#1740), so the
+    page carries noindex until then. Going live: drop `noindex`
+    here, add "looks" to `paths` in src/pages/sitemap.xml.ts, and
+    link it from PageShell's footer. */}
+<PageShell
+  lang={lang}
+  slug={slug}
+  title={t("looks_meta_title")}
+  desc={t("looks_meta_desc")}
+  ogImage={ogImage}
+  noindex={true}
+  mainClass="looks"
+>
+  <div class="wrap" data-looks>
+    <header class="looks-hero">
+      <p class="eyebrow">{t("looks_eyebrow")}</p>
+      <h1>{t("looks_title")}</h1>
+      <p class="looks-hero__lead">{t("looks_lead")}</p>
+      <div class="looks-hero__actions">
+        <a class="btn btn--ghost btn--sm" href={SUBMIT_URL}
+          target="_blank" rel="noopener">
+          {t("looks_share")}<span aria-hidden="true"> ↗</span>
+        </a>
+        <span class="small">{t("looks_share_note")}</span>
+      </div>
+    </header>
+
+    {looks.length > 0 && (
+      <div class="toolbar" role="search" aria-label={t("looks_find_aria")}
+        data-looks-toolbar hidden>
+        <div class="toolbar__row">
+          <label class="search">
+            <span class="visually-hidden">{t("looks_search_label")}</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"
+              stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+              <circle cx="7" cy="7" r="5" />
+              <path d="M11 11l3.5 3.5" stroke-linecap="round" />
+            </svg>
+            <input type="search" autocomplete="off" data-looks-search
+              placeholder={t("looks_search_placeholder")} />
+          </label>
+          <div class="sort" role="group" aria-label={t("looks_sort_aria")}>
+            {(["discover", "recent", "popular"] as const).map((key) => (
+              <button type="button" data-sort={key}
+                aria-pressed={key === "discover" ? "true" : "false"}>
+                {t(`looks_sort_${key}`)}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div class="chips" role="group" aria-label={t("looks_tags_aria")}>
+          <button type="button" class="chip" data-tag="" aria-pressed="true">
+            {t("looks_tag_all")}
+          </button>
+          {tagList.map((tag) => (
+            <button type="button" class="chip" data-tag={tag}
+              aria-pressed="false">{tag}</button>
+          ))}
+        </div>
+      </div>
+    )}
+
+    <p class="result-count small" aria-live="polite" data-looks-count
+      data-one={t("looks_count_one")} data-other={t("looks_count_other")}>
+      {looks.length > 0
+        ? plural("looks_count", looks.length)
+        : t("looks_empty")}
+    </p>
+
+    <ul class="grid" id="looks-grid" aria-label={t("looks_eyebrow")}
+      data-sort="discover">
+      {discover.map((look, index) => {
+        const credit = creditHtml(look);
+        const action = mainAction(look);
+        const extra = look.tags.length - MAX_CARD_TAGS;
+        return (
+          <li class="card look-card" id={cardId(look.id)} data-look={look.id}
+            data-tags={look.tags.join(" ")} data-search={haystack(look)}
+            data-discover={index} data-recent={recentRank.get(look.id)}
+            data-popular={popularRank.get(look.id)}>
+            <LookPicture look={look} size="card"
+              badgeScreenshot={t("looks_badge_screenshot")}
+              badgePreview={t("looks_badge_preview")}
+              altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })}
+              altPreview={f("looks_picture_alt_preview", { name: look.name })} />
+            <div class="card__body">
+              <h2 class="card__title">
+                <a href={`#${anchor(look.id)}`}>{look.name}</a>
+                <span class="recent-label">
+                  {t(wasUpdated(look) ? "looks_label_updated" : "looks_label_new")}
+                </span>
+              </h2>
+              <p class="byline">{f("looks_by", { author: look.author })}</p>
+              {credit && <p class="based" set:html={credit} />}
+              {needsNewerApp(look) && (
+                <p class="needs">{t("looks_needs_newer")}</p>
+              )}
+              {look.needsFonts.map((font) => (
+                <p class="needs" set:html={needsFontHtml(look, font)} />
+              ))}
+              {look.tags.length > 0 && (
+                <ul class="tags">
+                  {look.tags.slice(0, MAX_CARD_TAGS).map((tag) => (
+                    <li class="tag">{tag}</li>
+                  ))}
+                  {extra > 0 && (
+                    <li class="tag tag--more">
+                      <span aria-hidden="true">+{extra}</span>
+                      <span class="visually-hidden">
+                        {f("looks_tags_more", { n: extra })}
+                      </span>
+                    </li>
+                  )}
+                </ul>
+              )}
+              <div class="card__foot">
+                <div class="stats">
+                  {look.likes > 0 && (
+                    <span class="stat">
+                      <svg width="14" height="14" viewBox="0 0 16 16"
+                        fill="none" stroke="currentColor" stroke-width="1.6"
+                        aria-hidden="true">
+                        <path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.5 1.3C13.5 10.2 8 13.5 8 13.5z"
+                          stroke-linejoin="round" />
+                      </svg>
+                      <span aria-hidden="true">{shortCount(look.likes, lang)}</span>
+                      <span class="visually-hidden">
+                        {plural("looks_likes", look.likes)}
+                      </span>
+                    </span>
+                  )}
+                  {look.downloads > 0 && (
+                    <span class="stat">
+                      <span aria-hidden="true">↓</span>
+                      <span aria-hidden="true">{shortCount(look.downloads, lang)}</span>
+                      <span class="visually-hidden">
+                        {plural("looks_downloads", look.downloads)}
+                      </span>
+                    </span>
+                  )}
+                </div>
+                <a class="btn btn--primary btn--sm look-get" href={action.href}
+                  aria-label={f(action.ariaKey, { name: look.name })}>
+                  {t(action.labelKey)}
+                </a>
+                <span class="touch-note">{t("looks_touch_card")}</span>
+              </div>
+            </div>
+          </li>
+        );
+      })}
+    </ul>
+    <p class="result-none" data-looks-none hidden>{t("looks_none_match")}</p>
+
+    {discover.map((look) => {
+      const credit = creditHtml(look);
+      const action = mainAction(look);
+      const font = fontOf(look);
+      const derived = look.builtOn
+        .map((id) => byId.get(id))
+        .filter((l): l is Look => !!l);
+      return (
+        <article class="detail" id={anchor(look.id)}
+          aria-labelledby={titleId(look.id)}>
+          <a class="detail__back small" href={`#${cardId(look.id)}`}>
+            <span aria-hidden="true">← </span>{t("looks_back")}
+          </a>
+          <LookPicture look={look} size="detail"
+            badgeScreenshot={t("looks_badge_screenshot")}
+            badgePreview={t("looks_badge_preview")}
+            altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })}
+            altPreview={f("looks_picture_alt_preview", { name: look.name })} />
+          <h2 id={titleId(look.id)}>{look.name}</h2>
+          <p class="byline">{f("looks_by", { author: look.author })}</p>
+          {credit && <p class="based" set:html={credit} />}
+          {look.description && <p class="desc">{look.description}</p>}
+
+          <div class="detail__actions">
+            <a class="btn btn--primary btn--sm look-get" href={action.href}
+              aria-label={f(action.ariaKey, { name: look.name })}>
+              {t(action.labelKey)}
+            </a>
+            <a class="seg" href={look.likeUrl} target="_blank"
+              rel="noopener" aria-label={likeAria(look)}>
+              <span class="seg__main">
+                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"
+                  stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.5 1.3C13.5 10.2 8 13.5 8 13.5z"
+                    stroke-linejoin="round" />
+                </svg>
+                {t("looks_like")}
+                <span class="seg__out" aria-hidden="true">↗</span>
+              </span>
+              {look.likes > 0 && (
+                <span class="seg__count">
+                  {f("looks_like_count", { n: fullCount(look.likes, lang) })}
+                  <Fragment set:html={ghMark} />
+                </span>
+              )}
+            </a>
+            {look.downloads > 0 && (
+              <span class="small">
+                <span aria-hidden="true">↓ </span>
+                {plural("looks_downloads", look.downloads)}
+              </span>
+            )}
+          </div>
+          <p class="small look-get look-file">
+            <a href={look.downloadUrl}>{t("looks_download_file")}</a>
+          </p>
+          <p class="touch-note">{t("looks_touch_detail")}</p>
+
+          <hr class="rule" />
+          {needsNewerApp(look) && (
+            <p class="needs">{t("looks_needs_newer")}</p>
+          )}
+          <ul class="facts">
+            {look.version && (
+              <li>{f("looks_made_with", { version: look.version })}</li>
+            )}
+            <li>{dateLine(look)}</li>
+            {font && <li>{f("looks_font", { font })}</li>}
+          </ul>
+          {look.needsFonts.map((name) => (
+            <p class="needs" set:html={needsFontHtml(look, name)} />
+          ))}
+          {look.tags.length > 0 && (
+            <ul class="tags">
+              {look.tags.map((tag) => <li class="tag">{tag}</li>)}
+            </ul>
+          )}
+          {look.inspiredBy && (
+            <p class="facts-line">
+              {f("looks_inspired_by", { palette: look.inspiredBy })}
+            </p>
+          )}
+          {look.keywords.length > 0 && (
+            <p class="keywords">
+              {f("looks_keywords", { list: look.keywords.join(", ") })}
+            </p>
+          )}
+
+          {derived.length > 0 && (
+            <>
+              <hr class="rule" />
+              <h3>{t("looks_built_on")}</h3>
+              <ul class="built">
+                {derived.map((d) => (
+                  <li>
+                    <a href={`#${anchor(d.id)}`}>{d.name}</a>
+                    <span class="who">{f("looks_by", { author: d.author })}</span>
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+
+          <hr class="rule" />
+          <p class="caption">
+            <Fragment set:html={h("looks_license")} />
+            {" · "}
+            <a class="quiet" href={REPORT_URL} target="_blank"
+              rel="noopener">{t("looks_report")}</a>
+          </p>
+        </article>
+      );
+    })}
+
+    <p class="looks-foot" set:html={h("looks_footer", {
+      repo: link(LOOKS_REPO_URL, "KiwiCanopy/KiwiDesk-Looks"),
+    })} />
+  </div>
+</PageShell>
+
+<style>
+  .looks-hero {
+    padding-block: clamp(2rem, 7vw, 4.5rem) clamp(1.5rem, 4vw, 2.5rem);
+    max-width: 44rem;
+  }
+  .looks-hero h1 {
+    font-size: clamp(2rem, 6vw, 3.25rem);
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    margin: 0 0 0.9rem;
+  }
+  .looks-hero__lead {
+    font-size: clamp(1.05rem, 2.4vw, 1.25rem);
+    color: var(--text-dim);
+    margin: 0 0 1.5rem;
+  }
+  .looks-hero__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem 1.25rem;
+    align-items: center;
+  }
+  .small {
+    font-size: 0.85rem;
+    color: var(--text-faint);
+  }
+  .btn--sm {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
+  /* ---- Toolbar ---- */
+  .toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 0.85rem;
+    padding-block: 0.5rem 0.75rem;
+  }
+  .toolbar[hidden] {
+    display: none;
+  }
+  .toolbar__row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    align-items: center;
+  }
+  .search {
+    position: relative;
+    flex: 1 1 18rem;
+    max-width: 26rem;
+  }
+  .search svg {
+    position: absolute;
+    left: 0.8rem;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-faint);
+  }
+  .search input {
+    width: 100%;
+    font: inherit;
+    font-size: 0.95rem;
+    color: var(--text);
+    background: var(--bg-3);
+    border: 1px solid var(--border-strong);
+    border-radius: 12px;
+    padding: 0.6rem 0.9rem 0.6rem 2.3rem;
+  }
+  .search input::placeholder {
+    color: var(--text-faint);
+  }
+  .sort {
+    display: inline-flex;
+    padding: 3px;
+    gap: 2px;
+    border-radius: 11px;
+    background: var(--ghost-bg);
+    border: 1px solid var(--border);
+  }
+  .sort button,
+  .chip {
+    font: inherit;
+    cursor: pointer;
+    color: var(--text-dim);
+    background: none;
+    border: 1px solid transparent;
+  }
+  .sort button {
+    font-size: 0.86rem;
+    font-weight: 550;
+    padding: 0.32rem 0.85rem;
+    border-radius: 8px;
+  }
+  .sort button[aria-pressed="true"] {
+    background: var(--bg-3);
+    color: var(--text);
+    box-shadow: var(--shadow-sm);
+  }
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.45rem;
+  }
+  .chip {
+    font-size: 0.84rem;
+    font-weight: 550;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    background: var(--ghost-bg);
+    border-color: var(--border);
+  }
+  .chip[aria-pressed="true"] {
+    color: var(--text);
+    background: var(--nav-hover-bg);
+    border-color: var(--accent);
+  }
+  .result-count {
+    margin: 0.5rem 0 1rem;
+  }
+
+  /* ---- Grid & card ---- */
+  .grid {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+  }
+  .card {
+    display: flex;
+    flex-direction: column;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+    padding: 10px 10px 0;
+  }
+  .card[hidden] {
+    display: none;
+  }
+  .card__body {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    padding: 0.9rem 0.4rem 0.9rem;
+    flex: 1;
+  }
+  .card__title {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 680;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    display: flex;
+    align-items: baseline;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .card__title a {
+    color: var(--text);
+  }
+  .card__title a:hover {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .recent-label {
+    display: none;
+    font-size: 0.7rem;
+    font-weight: 650;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+  .grid[data-sort="recent"] .recent-label {
+    display: inline;
+  }
+  .byline,
+  .based,
+  .desc {
+    margin: 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .based {
+    font-size: 0.84rem;
+    color: var(--text-faint);
+  }
+  .needs {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--text);
+    display: flex;
+    gap: 0.4rem;
+    align-items: baseline;
+    flex-wrap: wrap;
+  }
+  .needs::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--kiwi-shell);
+    flex: none;
+    transform: translateY(-1px);
+  }
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+    margin: 0.1rem 0 0;
+    padding: 0;
+    list-style: none;
+  }
+  .tag {
+    font-size: 0.75rem;
+    padding: 0.1rem 0.55rem;
+    border-radius: 999px;
+    color: var(--text-dim);
+    border: 1px solid var(--border);
+  }
+  .tag--more {
+    border-style: dashed;
+  }
+  .card__foot {
+    margin-top: auto;
+    padding-top: 0.7rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+    border-top: 1px solid var(--border);
+    min-height: 3rem;
+  }
+  .stats {
+    display: flex;
+    gap: 0.9rem;
+    font-size: 0.84rem;
+    color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+  }
+  .result-none {
+    margin: 1rem 0;
+    color: var(--text-dim);
+  }
+
+  /* ---- Detail: one centered column, shown when targeted ---- */
+  .detail {
+    display: none;
+    max-width: 720px;
+    margin: 3.5rem auto 2rem;
+    scroll-margin-top: 5.5rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--accent);
+    background: var(--card-bg);
+    box-shadow: 0 0 0 3px var(--nav-hover-bg), var(--shadow-sm);
+    padding: clamp(16px, 3vw, 1.75rem);
+  }
+  .detail:target {
+    display: block;
+  }
+  .detail__back {
+    display: inline-block;
+    margin-bottom: 0.9rem;
+    color: var(--text-dim);
+  }
+  .detail h2 {
+    font-size: clamp(1.6rem, 3.6vw, 2.1rem);
+    line-height: 1.15;
+    margin: 1.25rem 0 0.25rem;
+    letter-spacing: -0.015em;
+  }
+  .detail .desc {
+    margin-top: 0.6rem;
+    color: var(--text);
+  }
+  .detail__actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.7rem 1rem;
+    margin: 1.1rem 0 0.4rem;
+  }
+  .look-file {
+    margin: 0.1rem 0 0;
+  }
+  .look-file a {
+    color: var(--text-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .seg {
+    display: inline-flex;
+    align-items: stretch;
+    border-radius: 10px;
+    border: 1px solid var(--border-strong);
+    background: var(--ghost-bg);
+    color: var(--text);
+    font-size: 0.88rem;
+    font-weight: 600;
+    overflow: hidden;
+  }
+  .seg:hover {
+    border-color: var(--ghost-hover-border);
+  }
+  .seg__main {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.42rem 0.8rem;
+  }
+  .seg__out {
+    font-size: 0.8em;
+    opacity: 0.7;
+  }
+  .seg__count {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3rem;
+    padding: 0.42rem 0.7rem;
+    border-left: 1px solid var(--border-strong);
+    font-variant-numeric: tabular-nums;
+    color: var(--text-dim);
+  }
+  .seg__count :global(.gh) {
+    width: 1.05em;
+    height: 1.05em;
+  }
+  .rule {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 1.25rem 0;
+  }
+  .facts {
+    list-style: none;
+    margin: 0 0 0.8rem;
+    padding: 0;
+    display: grid;
+    gap: 0.2rem;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .detail .needs {
+    margin-bottom: 0.8rem;
+  }
+  .facts-line {
+    margin: 0.7rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+  }
+  .keywords {
+    margin: 0.6rem 0 0;
+    font-size: 0.82rem;
+    color: var(--text-faint);
+  }
+  .detail h3 {
+    font-size: 0.95rem;
+    margin: 0 0 0.55rem;
+  }
+  .built {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-radius: 12px;
+    border: 1px solid var(--border);
+    overflow: hidden;
+  }
+  .built li {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.6rem 0.85rem;
+    font-size: 0.9rem;
+    flex-wrap: wrap;
+  }
+  .built li + li {
+    border-top: 1px solid var(--border);
+  }
+  .built .who {
+    color: var(--text-faint);
+  }
+  .caption {
+    margin: 0;
+    font-size: 0.84rem;
+    color: var(--text-faint);
+  }
+  .caption :global(a) {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+  .caption .quiet {
+    white-space: nowrap;
+    color: var(--text-faint);
+  }
+  .looks-foot {
+    padding-block: 2rem 1rem;
+    margin: 2rem 0 0;
+    color: var(--text-faint);
+    font-size: 0.85rem;
+    border-top: 1px solid var(--border);
+  }
+
+  /* Touch screens, decided by input device and never by width
+     (#1740 ▸ Page details): the add and download give way to a
+     note. */
+  .touch-note {
+    display: none;
+    font-size: 0.84rem;
+    color: var(--text-faint);
+  }
+  p.touch-note {
+    margin: 0.4rem 0 0;
+  }
+  @media (hover: none) and (pointer: coarse) {
+    .look-get {
+      display: none;
+    }
+    .touch-note {
+      display: inline;
+    }
+    p.touch-note {
+      display: block;
+    }
+  }
+</style>
+
+<script>
+  // Search, tag filter and sort over the cards the build already
+  // ordered for Discover. Each card carries its rank in every order
+  // and its search text, so nothing here fetches anything.
+  const root = document.querySelector<HTMLElement>("[data-looks]");
+  const grid = root?.querySelector<HTMLElement>("#looks-grid");
+  const toolbar = root?.querySelector<HTMLElement>("[data-looks-toolbar]");
+  if (root && grid && toolbar) {
+    const cards = Array.from(grid.children) as HTMLElement[];
+    const input = toolbar.querySelector<HTMLInputElement>("[data-looks-search]");
+    const count = root.querySelector<HTMLElement>("[data-looks-count]");
+    const none = root.querySelector<HTMLElement>("[data-looks-none]");
+    const number = new Intl.NumberFormat(document.documentElement.lang);
+    const norm = (s: string) =>
+      s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
+    let sort = "discover";
+    let tag = "";
+
+    const apply = () => {
+      const words = norm(input?.value ?? "").split(/\s+/).filter(Boolean);
+      const rank = (c: HTMLElement) => Number(c.dataset[sort] ?? 0);
+      let shown = 0;
+      for (const card of [...cards].sort((a, b) => rank(a) - rank(b))) {
+        const tags = (card.dataset.tags ?? "").split(" ");
+        const text = card.dataset.search ?? "";
+        const match =
+          (!tag || tags.includes(tag)) && words.every((w) => text.includes(w));
+        card.hidden = !match;
+        if (match) shown++;
+        grid.append(card);
+      }
+      grid.dataset.sort = sort;
+      if (count) {
+        const template = shown === 1 ? count.dataset.one : count.dataset.other;
+        count.textContent = (template ?? "").replace("{n}", number.format(shown));
+      }
+      if (none) none.hidden = shown > 0;
+    };
+
+    const press = (group: string, chosen: HTMLElement) => {
+      toolbar.querySelectorAll<HTMLElement>(group).forEach((b) =>
+        b.setAttribute("aria-pressed", String(b === chosen)),
+      );
+    };
+    toolbar.querySelectorAll<HTMLElement>("[data-sort]").forEach((b) =>
+      b.addEventListener("click", () => {
+        sort = b.dataset.sort ?? "discover";
+        press("[data-sort]", b);
+        apply();
+      }),
+    );
+    toolbar.querySelectorAll<HTMLElement>("[data-tag]").forEach((b) =>
+      b.addEventListener("click", () => {
+        tag = b.dataset.tag ?? "";
+        press("[data-tag]", b);
+        apply();
+      }),
+    );
+    input?.addEventListener("input", apply);
+    toolbar.hidden = false;
+  }
+</script>
