@@ -67,7 +67,7 @@ extension KiwiCore {
         guard
             let shape = GridLayout.shape(for: tiled, in: context)
         else {
-            refuseNothingToDivide(window, otherAxisDivides: false)
+            refuseGridSpansAxis(window, axis: axis, delta: delta)
             return .fail("the grid is a single pile")
         }
         let cells = GridLayout.cellIndices(
@@ -97,9 +97,7 @@ extension KiwiCore {
         }
         let cell = GridLayout.cell(index, of: shape)
         let span = horizontal ? cell.columns : cell.rows
-        let across = horizontal ? cell.rows : cell.columns
         let count = horizontal ? shape.columns : shape.rows
-        let otherCount = horizontal ? shape.rows : shape.columns
         guard
             let (grown, neighbor) = Self.gridEdgePair(
                 span: span,
@@ -109,11 +107,7 @@ extension KiwiCore {
         else {
             // The cell reaches both outer edges on this axis —
             // one track, or the short last row spanning it.
-            refuseNothingToDivide(
-                window,
-                otherAxisDivides: across.first > 0
-                    || across.last < otherCount - 1
-            )
+            refuseGridSpansAxis(window, axis: axis, delta: delta)
             return .fail("the cell spans the grid on this axis")
         }
         let floors = GridLayout.trackFloors(

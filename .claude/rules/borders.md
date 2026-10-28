@@ -840,8 +840,10 @@ style for every window stroke.
 itself, opaque, so its plate stays untinted, and the Space Bar's
 pocket badge keeps the count badge's disc the same way. Draw the
 on-window mark in a mark colour through the one
-`PocketMark.image(size:hex:)`, which inks its outlines with
-`contrastingGlyph` as `StickyMarkPlate.paint` inks a disc; the
+`PocketMark.image(size:hex:)`, which outlines the pocket in the
+colour itself, draws the slices with no outline and inks only the
+stitch with `contrastingGlyph`, as `StickyMarkPlate.paint` inks a
+disc (#2704); the
 badge's pocket alone falls back to its disc's `contrastingGlyph`,
 in `applyStateBadge` (`PocketMarkColorTests`).
 

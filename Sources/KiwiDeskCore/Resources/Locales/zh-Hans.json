@@ -1793,6 +1793,8 @@
   "resize.app_min_reached": "此 App 尺寸无法再减小",
   "resize.boundary_reached": "已无增大尺寸的余地",
   "resize.divide_other_axis": "此处没有可划分的内容，请试试另一个轴",
+  "resize.grid_no_other_column": "没有其他列可以接收宽度",
+  "resize.grid_no_other_row": "没有其他行可以接收高度",
   "resize.layout_has_none": "此布局不支持调整大小",
   "resize.min_size_reached": "已达到窗口最小尺寸",
   "resize.neighbor_app_min": "相邻 App 尺寸无法再减小",

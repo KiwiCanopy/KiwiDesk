@@ -18,7 +18,8 @@
       "drag.ghost.border_color": "#D9A521",
       "drag.ghost.fill_color": "#D9A52140",
       "drag.drop_zone.border_color": "#9CE8C8",
-      "drag.drop_zone.fill_color": "#9CE8C840"
+      "drag.drop_zone.fill_color": "#9CE8C840",
+      "pocket.color": "#9CE8C8"
     }
   },
   {
@@ -40,7 +41,8 @@
       "drag.ghost.border_color": "#0A84FF",
       "drag.ghost.fill_color": "#0A84FF40",
       "drag.drop_zone.border_color": "#FF9F0A",
-      "drag.drop_zone.fill_color": "#FF9F0A26"
+      "drag.drop_zone.fill_color": "#FF9F0A26",
+      "pocket.color": "#0A84FF"
     }
   },
   {
@@ -62,7 +64,8 @@
       "drag.ghost.border_color": "#5E9EFF",
       "drag.ghost.fill_color": "#5E9EFF40",
       "drag.drop_zone.border_color": "#FFB340",
-      "drag.drop_zone.fill_color": "#FFB34026"
+      "drag.drop_zone.fill_color": "#FFB34026",
+      "pocket.color": "#5E9EFF"
     }
   },
   {
@@ -84,7 +87,8 @@
       "drag.ghost.border_color": "#64D2FF",
       "drag.ghost.fill_color": "#64D2FF40",
       "drag.drop_zone.border_color": "#FF9F0A",
-      "drag.drop_zone.fill_color": "#FF9F0A26"
+      "drag.drop_zone.fill_color": "#FF9F0A26",
+      "pocket.color": "#64D2FF"
     }
   },
   {
@@ -106,7 +110,8 @@
       "drag.ghost.border_color": "#FFFFFF",
       "drag.ghost.fill_color": "#FFFFFF40",
       "drag.drop_zone.border_color": "#AEAEB2",
-      "drag.drop_zone.fill_color": "#AEAEB226"
+      "drag.drop_zone.fill_color": "#AEAEB226",
+      "pocket.color": "#FFD60A"
     }
   },
   {
@@ -128,7 +133,8 @@
       "drag.ghost.border_color": "#FF8099",
       "drag.ghost.fill_color": "#FF809940",
       "drag.drop_zone.border_color": "#9E2F6E",
-      "drag.drop_zone.fill_color": "#9E2F6E26"
+      "drag.drop_zone.fill_color": "#9E2F6E26",
+      "pocket.color": "#FF8099"
     }
   },
   {
@@ -150,7 +156,8 @@
       "drag.ghost.border_color": "#5E5CE6",
       "drag.ghost.fill_color": "#5E5CE640",
       "drag.drop_zone.border_color": "#64D2FF",
-      "drag.drop_zone.fill_color": "#64D2FF26"
+      "drag.drop_zone.fill_color": "#64D2FF26",
+      "pocket.color": "#5E5CE6"
     }
   },
   {
@@ -172,7 +179,8 @@
       "drag.ghost.border_color": "#4A9816",
       "drag.ghost.fill_color": "#4A981640",
       "drag.drop_zone.border_color": "#2BE0FF",
-      "drag.drop_zone.fill_color": "#2BE0FF26"
+      "drag.drop_zone.fill_color": "#2BE0FF26",
+      "pocket.color": "#2BE0FF"
     }
   },
   {
@@ -194,7 +202,8 @@
       "drag.ghost.border_color": "#7AA2F7",
       "drag.ghost.fill_color": "#7AA2F740",
       "drag.drop_zone.border_color": "#FF9E64",
-      "drag.drop_zone.fill_color": "#FF9E6426"
+      "drag.drop_zone.fill_color": "#FF9E6426",
+      "pocket.color": "#7AA2F7"
     }
   }
 ]

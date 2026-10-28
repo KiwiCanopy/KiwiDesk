@@ -28,8 +28,11 @@ extension OnboardingView {
 
     /// Vertical list of space rows, each playing its layout's
     /// story once, staggered down the first screenful (#1750).
+    /// It takes the height the page has free, ahead of the
+    /// footer's own, and fades its edge while rows overflow
+    /// (#2705).
     private var spaceStrip: some View {
-        ScrollView(.vertical, showsIndicators: false) {
+        ScrollView(.vertical) {
             // Lazy, so a row below the fold plays when it
             // scrolls into view rather than unseen on arrival.
             LazyVStack(spacing: 8) {
@@ -47,7 +50,9 @@ extension OnboardingView {
             }
             .padding(.bottom, 2)
         }
-        .frame(maxHeight: 232)
+        .moreBelowFade()
+        .frame(maxHeight: .infinity, alignment: .top)
+        .layoutPriority(1)
         .accessibilityElement(children: .contain)
         .accessibilityLabel(spacesTitle)
     }

@@ -57,11 +57,13 @@ struct ResizeRefusalCensusTests {
             "layoutHasNoResize — monocle (#1255); the floating "
             + "layout left the set with #1184 and grid with #763",
         "the grid is a single pile":
-            "nothingToDivide — equal cells under the floor "
-            + "cascade the Space, so no track divides (#763)",
+            "ownMaximum on a grow, gridNoOtherTrack on a shrink — "
+            + "equal cells under the floor cascade the Space, so "
+            + "no track divides (#763, #2707)",
         "the cell spans the grid on this axis":
-            "nothingToDivide — the cell reaches both outer edges "
-            + "on the axis (#763)",
+            "ownMaximum on a grow, gridNoOtherTrack on a shrink — "
+            + "the cell reaches both outer edges on the axis "
+            + "(#763, #2707)",
         "no \\(axis) parameter for this arrangement":
             "noAxisHere — the other axis divides (#1255)",
         "focused window is alone in its column":

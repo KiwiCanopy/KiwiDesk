@@ -43,7 +43,7 @@ extension ResizeRefusal {
         case .ownMaximum:
             "arrow.up.left.and.arrow.down.right"
         case .noAxisHere, .layoutHasNoResize, .nothingToDivide,
-            .windowIsFullscreen:
+            .gridNoOtherTrack, .windowIsFullscreen:
             "nosign"
         }
     }
@@ -106,6 +106,16 @@ extension ResizeRefusal {
                 : L(
                     "resize.nothing_to_divide",
                     "This zone has nothing to divide"
+                )
+        case .gridNoOtherTrack(_, let axis):
+            axis == "y"
+                ? L(
+                    "resize.grid_no_other_row",
+                    "No other row to take the height"
+                )
+                : L(
+                    "resize.grid_no_other_column",
+                    "No other column to take the width"
                 )
         case .layoutHasNoResize:
             L(

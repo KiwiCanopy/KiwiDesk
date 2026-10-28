@@ -14297,9 +14297,16 @@ Reduce transparency on, the disc returns.
 The pocket mark takes the other branch on purpose (#2671): its
 colour is drawn opaque IN the glyph, filling the pocket, and its
 plate takes no tint, so the colour on screen is the hex itself and
-the outlines and stitch take `contrastingGlyph` of it, as the flat
-disc does. Moving it to `.labelColor` would draw a black or white
-outline on a pocket the label ink judged against nothing.
+the dashed stitch takes `contrastingGlyph` of it, as the flat disc
+does. Moving the stitch to `.labelColor` would draw a black or
+white line on a pocket the label ink judged against nothing. The
+pocket's outline is the colour itself and the kiwi slices draw no
+outline (owner, #2704): a contrasting outline read as a black
+border around the mark, so the stitch alone carries the inner
+contrast. Automatic keeps its outlines, which are the fill's ink
+and draw no border. No gap is cut out of the pocket around the
+slices: the owner judged it unnecessary for a pocket colour near
+the kiwi green.
 
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
@@ -14534,11 +14541,18 @@ paths and nowhere else — without that the surface would be
 one-directional (paint a mark, never hand it back), and the
 derived default palette, which extracts the shipped defaults,
 would carry two values apply dropped. The authored palettes in
-`Resources/Palettes` leave both keys out and should keep leaving
-them out: a mark tint is the one colour whose default is
-*adaptive*, so a palette that pins it takes a light/dark-following
-mark away without saying so. The derived default palette is the
-deliberate exception — it carries both, empty, which is what makes
+`Resources/Palettes` leave the sticky and floating keys out and
+should keep leaving them out: a mark tint is the one colour whose
+default is *adaptive*, so a palette that pins it takes a
+light/dark-following mark away without saying so. The pocket is
+the exception (owner, #2704): each authored palette paints it one
+of its own accents, since the pocket is filled opaque and keeps
+its contrasting stitch, so a fixed colour stays legible over any
+window, and it sits under the kiwi green, which every bundled
+pocket colour must clear by the colour-vision floor
+(`PocketMarkColorTests`). The cost, a pocket that no longer
+follows light and dark under a bundled palette, is accepted. The derived default palette is the
+deliberate exception — it carries all three mark keys, empty, which is what makes
 a reset reach them. This does not soften the colors-only rule
 below — two more COLOURS joined; no palette gained a flag, a width
 or an effect.

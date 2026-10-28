@@ -13,7 +13,7 @@ import Testing
 @Suite("Grid resize (#763)", .serialized)
 @MainActor
 struct GridResizeTests {
-    private func makeCore() -> KiwiCore {
+    func makeCore() -> KiwiCore {
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -40,7 +40,7 @@ struct GridResizeTests {
     /// `count` windows in a `type` grid capped at `columns` × 1,
     /// window `focus` focused.
     @discardableResult
-    private func grid(
+    func grid(
         _ core: KiwiCore,
         count: UInt32,
         columns: Int = 3,
@@ -73,7 +73,7 @@ struct GridResizeTests {
         return space
     }
 
-    private func refusals(
+    func refusals(
         _ core: KiwiCore,
         _ body: () -> Void
     ) -> [ResizeRefusal] {
@@ -195,18 +195,6 @@ struct GridResizeTests {
             seen == [
                 .ownMinimum(WindowID(4), axis: "x", appBound: false)
             ]
-        )
-    }
-
-    @Test("A single row has no edge to move on y")
-    func singleRowDividesNothing() {
-        let core = makeCore()
-        grid(core, count: 3)
-        let seen = refusals(core) {
-            core.execute("resize", args: [.string("y"), .number(40)])
-        }
-        #expect(
-            seen == [.nothingToDivide(WindowID(1), otherAxisDivides: true)]
         )
     }
 
