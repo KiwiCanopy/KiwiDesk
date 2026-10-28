@@ -97,10 +97,15 @@ struct SimpleSectionsTests {
         #expect(!SimpleCoverage.draws(row(.spaces(.fallbackSpace)), in: model))
         #expect(!SimpleCoverage.draws(row(.gaps(.outerTop)), in: model))
         // A pin is Simple's only where it draws the Screen menu.
-        #expect(
-            SimpleCoverage.draws(row(.screens(.spacePins)), in: model)
-                == model.offersScreenMenu
-        )
+        for screenMenu in [true, false] {
+            #expect(
+                SimpleCoverage.draws(
+                    row(.screens(.spacePins)),
+                    screenMenu: screenMenu,
+                    binding: { _ in false }
+                ) == screenMenu
+            )
+        }
         // A binding row: KiwiHub's keys and app rows, default
         // layer alone.
         let hub = KeybindingCatalog.jumpToWindow.lua
@@ -141,6 +146,17 @@ struct SimpleSectionsTests {
         #expect(SimpleCoverage.draws(added, in: model))
         model.jump(to: added)
         #expect(model.nav.pendingReveal == nil)
+        // A key removed on Simple: its row reads the saved config.
+        model.cleanConfig = model.config
+        model.config.layers[index].bindings.removeAll {
+            $0.kind == .application
+        }
+        let removed = SettingsDiffRowSource.rows(for: model).first {
+            if case .binding = $0.revert { return true }
+            return false
+        }
+        let removedRow = try #require(removed)
+        #expect(SimpleCoverage.draws(removedRow, in: model))
     }
 
     /// Simple owns layout only: a tile, a recorder or a layout

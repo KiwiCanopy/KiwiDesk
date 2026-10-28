@@ -11,13 +11,25 @@ import KiwiDeskCore
         _ row: SettingsDiffRow,
         in model: SettingsModel
     ) -> Bool {
+        draws(row, screenMenu: model.offersScreenMenu) {
+            drawsBinding($0, in: model)
+        }
+    }
+
+    /// The answer over its two model reads, so both screen counts
+    /// are assertable.
+    static func draws(
+        _ row: SettingsDiffRow,
+        screenMenu: Bool,
+        binding: (SettingsRowRevert) -> Bool
+    ) -> Bool {
         switch row.key {
         case .spaces(.spacesName), .spaces(.spaceModes):
             return true
         case .screens(.spacePins), .screens(.mainSpaces):
-            return model.offersScreenMenu
+            return screenMenu
         case .shortcuts(.layers):
-            return drawsBinding(row.revert, in: model)
+            return binding(row.revert)
         default:
             return false
         }

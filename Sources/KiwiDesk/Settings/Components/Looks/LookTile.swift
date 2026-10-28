@@ -57,9 +57,8 @@ struct LookTile: View {
         Self.painted(look, over: model.config.settings)
     }
 
-    /// `settings` with `look` painted on, its colors included — the
-    /// tile's picture, and what a preview of the look shows.
-    static func painted(
+    /// `settings` with `look` painted on, its colors included.
+    private static func painted(
         _ look: ShelfLook,
         over settings: TilingSettings
     ) -> TilingSettings {

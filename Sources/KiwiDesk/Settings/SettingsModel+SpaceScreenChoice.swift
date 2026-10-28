@@ -1,9 +1,11 @@
 import KiwiDeskCore
 
 /// Where a Space is placed, as the Screen menus offer it. Every
-/// Settings writer of a Space's placement — Screens' chips, drops
-/// and orphan clear, Simple's Screen menu — goes through `place`
-/// (#758, #2737; `SimpleSectionsTests` ▸ `placementHasOneDoor`).
+/// per-Space placement write in Settings — Screens' chips, drops and
+/// orphan clear, the Screen menu — goes through `place` (#758,
+/// #2737; `SimpleSectionsTests` ▸ `placementHasOneDoor`). Writers
+/// of the whole map (a kept layout, a screen setup's adopt, the
+/// revert register) are outside that guard.
 enum SpaceScreenChoice: Hashable, Sendable {
     case auto
     case followsMain

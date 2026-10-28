@@ -214,7 +214,8 @@ struct SpaceAssignmentChip: View {
                     L(
                         "monitor_chip.move_to",
                         "Move to %1$@",
-                        display.name
+                        SpaceScreenChoice.screen(display.fingerprint)
+                            .title(in: model)
                     )
                 ) {
                     model.place(space, .screen(display.fingerprint))
