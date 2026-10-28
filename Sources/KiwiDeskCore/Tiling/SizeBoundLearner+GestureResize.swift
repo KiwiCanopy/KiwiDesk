@@ -7,8 +7,9 @@ import CoreGraphics
 extension SizeBoundLearner {
     /// The window now holds `size` by the user's hand. The open ask
     /// and a pending probe's issue are retired as a park retires
-    /// them, the candidates go (no ask of ours produced this size),
-    /// and a believed entry stays unless `size` falsifies it — so a
+    /// them and the probe's baseline is distrusted, the candidates
+    /// go (no ask of ours produced this size), and a believed
+    /// entry stays unless `size` falsifies it — so a
     /// floor capping Grid survives the drag that grows its window.
     /// Returns whether a believed entry was dropped.
     @discardableResult
@@ -18,8 +19,7 @@ extension SizeBoundLearner {
     ) -> Bool {
         parkRetiresAsk(id)
         candidates[id] = nil
-        probes[id]?.width.pending?.baselineTrusted = false
-        probes[id]?.height.pending?.baselineTrusted = false
+        distrustProbeBaselines(id)
         guard let ledger = bounds[id] else { return false }
         writeBounds(
             id,

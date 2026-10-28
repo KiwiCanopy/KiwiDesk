@@ -41,6 +41,11 @@ struct SizeBoundGestureResizeTests {
         #expect(learner.bound(for: w)?.minWidth == 500)
         #expect(learner.bound(for: w)?.maxHeight == 600)
         learner.recordAsk(w, size: CGSize(width: 300, height: 600))
+        var candidate = SizeBoundLearner.Ledger()
+        candidate.width = [
+            EffectiveSizeBound.Axis(asked: 300, answered: 500)
+        ]
+        learner.candidates[w] = candidate
         let dropped = learner.gestureResized(
             w,
             to: CGSize(width: 700, height: 700)
@@ -62,6 +67,34 @@ struct SizeBoundGestureResizeTests {
         #expect(!dropped)
         #expect(learner.bound(for: w)?.minWidth == 500)
         #expect(learner.bound(for: w)?.maxHeight == 600)
+    }
+
+    @Test("A size inside the match tolerance keeps the floor")
+    func toleranceKeepsTheFloor() {
+        var learner = learned()
+        let width = 500 - EffectiveSizeBound.matchTolerance / 2
+        learner.gestureResized(w, to: CGSize(width: width, height: 600))
+        #expect(learner.bound(for: w)?.minWidth == 500)
+    }
+
+    @Test("A pending probe goes back unissued and untrusted")
+    func probeIsRetired() {
+        var learner = learned()
+        let anchor = EffectiveSizeBound.Axis(asked: 400, answered: 500)
+        var ledger = SizeBoundLearner.ProbeLedger()
+        ledger.width.pending = SizeBoundLearner.CorroborationProbe(
+            anchor: anchor,
+            asked: 387,
+            issues: 1,
+            baselineTrusted: true
+        )
+        learner.probes[w] = ledger
+        learner.recordAsk(w, size: CGSize(width: 387, height: 800))
+        learner.probes[w]?.width.pending?.baselineTrusted = true
+        learner.gestureResized(w, to: CGSize(width: 700, height: 600))
+        let pending = learner.probes[w]?.width.pending
+        #expect(pending?.issues == 0)
+        #expect(pending?.baselineTrusted == false)
     }
 
     @Test("A size under the floor drops it")

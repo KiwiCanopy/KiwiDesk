@@ -20,8 +20,9 @@ extension SizeBoundLearner {
     /// if that ask was a pending corroboration probe's own
     /// (#1439), its issue goes back unanswered: no parked echo
     /// can answer it, and an issued probe with no answer is never
-    /// re-issued, so the return sends it again. Park-only: the
-    /// loop's own probe re-issue must keep counting.
+    /// re-issued, so the return sends it again. A park and a user's
+    /// resize gesture (#2706) only: the loop's own probe re-issue
+    /// must keep counting.
     mutating func parkRetiresAsk(_ id: WindowID) {
         if let asked = lastAsks[id]?.size {
             unissueProbe(id, asked: asked.width, slot: \.width)
