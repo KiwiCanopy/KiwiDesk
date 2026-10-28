@@ -56,6 +56,7 @@ public final class EventLoop {
     /// the tiling mark's lookup (#678 item 18), bridged through
     /// `NSApp.windows`. A seam because the mark is otherwise
     /// unobservable from a test (`SelfWindowExclusionTests`).
+    /// Never nil: a window with no identifier answers nil itself.
     var ownWindowIdentifier: (WindowID) -> String? = { id in
         EventLoop.ownWindow(number: Int(id.raw))?
             .identifier?.rawValue

@@ -23,9 +23,31 @@ struct LockedRemovalSeamTests {
             Issue.record("the lock read is not wired")
             return
         }
-        let body = source[wire.upperBound...].prefix(80)
+        // The whole closure body, so an added condition reds too.
+        let rest = source[wire.upperBound...]
+        let body = rest.prefix { $0 != "}" }
         #expect(
-            body.contains("SessionPresence.live().screenLocked == true")
+            body.trimmingCharacters(in: .whitespacesAndNewlines)
+                == "SessionPresence.live().screenLocked == true"
         )
+    }
+
+    @Test("both makeTestCore twins pin the read unlocked")
+    func twinsPinTheRead() throws {
+        // The twins are held identical to each other, so a pin
+        // deleted from both reds nowhere else.
+        let root = SourceScan.repoRoot(from: #filePath)
+        for target in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
+            let file = root.appendingPathComponent(
+                "Tests/\(target)/TestCore.swift"
+            )
+            let source = try SourceScan.strippedSource(at: file)
+            #expect(
+                source.contains(
+                    "core.eventLoop.lockedRemovals.isLocked = { false }"
+                ),
+                "\(target) does not pin the lock read"
+            )
+        }
     }
 }

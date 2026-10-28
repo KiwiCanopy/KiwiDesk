@@ -10,7 +10,8 @@ import Foundation
 /// does not (observed 2026-08-13, macOS 26.6.1). The lock key is
 /// present ONLY while locked, so absence decodes to `nil`, never
 /// `false` — a diagnostic that guesses is worse than one that
-/// says it does not know.
+/// says it does not know. The removal pause (#2538) reads only
+/// `true` as locked, so an unreadable flag keeps removals going.
 public struct SessionPresence: Sendable, Equatable {
     /// Whether this session owns the console, or `nil` if unreadable.
     public let onConsole: Bool?

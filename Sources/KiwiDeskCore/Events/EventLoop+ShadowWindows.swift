@@ -218,7 +218,9 @@ extension EventLoop {
     /// since — is handed back as a HIDE, never a close: no
     /// close-return raise and no closed-return mark for a window
     /// nobody closed. False when a queued boot step's budget ran
-    /// out first, so the caller defers the app (#803).
+    /// out first, so the caller defers the app (#803). Safe under
+    /// a locked session (#2538): only LISTED windows are asked,
+    /// and a locked list names none (#1285).
     func retireShadows(
         pid: pid_t,
         listed: [(element: AXUIElement, id: WindowID)],

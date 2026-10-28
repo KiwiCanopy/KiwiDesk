@@ -23,7 +23,7 @@ extension EventLoop {
         guard lockedRemovals.isLocked() else { return false }
         if lockedRemovals.refused.insert(pid).inserted {
             onLog(
-                "close distrust: \(app.bundleID ?? app.name) missing "
+                "locked removal: \(app.bundleID ?? app.name) missing "
                     + "from the AX list while the session is "
                     + "locked — removals refused (#2538)"
             )
@@ -34,6 +34,7 @@ extension EventLoop {
     /// Reconciles every app a lock refused, once the lock is gone.
     /// Called on the return leg and on every heal tick, since the
     /// unlock can be announced while the flag still reads locked.
+    /// No tab coalescing: a recovery pass, #1157's safe direction.
     func reconcileLockRefused() {
         guard !lockedRemovals.refused.isEmpty,
             !lockedRemovals.isLocked()
@@ -41,7 +42,11 @@ extension EventLoop {
         let pids = lockedRemovals.refused
         lockedRemovals.refused = []
         for pid in pids.sorted() where observers[pid] != nil {
-            reconcileOffMain(pid: pid, app: appRef(of: pid))
+            reconcileOffMain(
+                pid: pid,
+                app: appRef(of: pid),
+                coalesceTabs: false
+            )
         }
     }
 }

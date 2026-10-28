@@ -129,6 +129,8 @@ struct LockedRemovalTests {
         let (loop, box) = makeLoop()
         loop.reconcile(pid: pid, app: ref)
         loop.sessionDidReturn()
+        // Nothing asked: a read now would only re-learn the lock.
+        #expect(box.reads.isEmpty)
         box.drain()
         #expect(loop.lockedRemovals.refused == [pid])
         #expect(box.destroyed.isEmpty)
@@ -184,9 +186,20 @@ struct LockedRemovalTests {
             pid: own,
             app: AppRef(bundleID: nil, name: "Own")
         )
+        // Nothing eager; the refusal is the off-main sweep's.
+        #expect(box.destroyed.isEmpty)
+        box.drain()
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[id] != nil)
         #expect(loop.lockedRemovals.refused.contains(own))
+    }
+
+    @Test("a stop forgets every debt")
+    func stopForgets() {
+        let (loop, _) = makeLoop()
+        loop.reconcile(pid: pid, app: ref)
+        loop.stop()
+        #expect(loop.lockedRemovals.refused.isEmpty)
     }
 
     @Test("a detach forgets the app's debt")
