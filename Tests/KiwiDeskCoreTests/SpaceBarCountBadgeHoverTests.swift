@@ -3,6 +3,12 @@ import Testing
 
 @testable import KiwiDeskCore
 
+/// A badge's dim tier: its number's alpha, since its disc stays
+/// opaque (`BarBadgeFace`).
+extension NSTextField {
+    fileprivate var inkAlpha: CGFloat { textColor?.alphaComponent ?? 0 }
+}
+
 /// The focused app's count badge in the current Space rests at the
 /// chip's glyph dim and comes to full under the pointer (#2650): it
 /// stands for the app's other windows, unfocused behind the one in
@@ -58,7 +64,7 @@ struct SpaceBarCountBadgeHoverTests {
         try #require(dim < 1)
         let badge = try #require(view.badgeViews.first)
         #expect(!badge.isHidden)
-        #expect(abs(badge.alphaValue - dim) < 0.01)
+        #expect(abs(badge.inkAlpha - dim) < 0.01)
         #expect(view.appViews[0].alphaValue == 1)
     }
 
@@ -68,7 +74,7 @@ struct SpaceBarCountBadgeHoverTests {
         let target = try #require(view.glyphTargets.first)
         view.hoveredTarget = target
         view.restyle()
-        #expect(view.badgeViews.first?.alphaValue == 1)
+        #expect(view.badgeViews.first?.inkAlpha == 1)
     }
 
     @Test("An unfocused app and another Space keep their ladder")
@@ -76,11 +82,11 @@ struct SpaceBarCountBadgeHoverTests {
         let active = item(active: true)
         let unfocused = try #require(active.badgeViews.last)
         #expect(
-            abs(unfocused.alphaValue - active.style.activeDimFactor) < 0.01
+            abs(unfocused.inkAlpha - active.style.activeDimFactor) < 0.01
         )
         let other = item(active: false)
         let away = try #require(other.badgeViews.first)
-        #expect(abs(away.alphaValue - other.style.dimFactor) < 0.01)
+        #expect(abs(away.inkAlpha - other.style.dimFactor) < 0.01)
     }
 
     /// A drag over the chip lifts the badge with the rest of the
@@ -90,11 +96,11 @@ struct SpaceBarCountBadgeHoverTests {
         let view = item(active: true)
         view.isDragHovered = true
         view.restyle()
-        #expect(view.badgeViews.first?.alphaValue == 1)
+        #expect(view.badgeViews.first?.inkAlpha == 1)
         // A drag over another glyph lifts it too.
         view.hoveredTarget = view.glyphTargets.last
         view.restyle()
-        #expect(view.badgeViews.first?.alphaValue == 1)
+        #expect(view.badgeViews.first?.inkAlpha == 1)
     }
 
     /// A `+n` disc holding the focus keeps full strength: only a
@@ -106,6 +112,20 @@ struct SpaceBarCountBadgeHoverTests {
         disc.holdsFocus = true
         let view = item(active: true, after: disc)
         #expect(!view.overflowBadge.isHidden)
-        #expect(view.overflowBadge.alphaValue == 1)
+        #expect(view.overflowBadge.inkAlpha == 1)
+    }
+
+    /// The disc never fades with the ladder; only its number does,
+    /// `+n` and a glyph's count alike.
+    @Test("A dimmed badge keeps its disc opaque")
+    func dimmedDiscStaysOpaque() throws {
+        var disc = SpaceBarStrip.Disc()
+        disc.windows = [WindowID(7)]
+        let view = item(active: false, after: disc)
+        let count = try #require(view.badgeViews.first)
+        for badge in [count, view.overflowBadge] {
+            #expect(badge.inkAlpha < 1)
+            #expect(badge.alphaValue == 1)
+        }
     }
 }

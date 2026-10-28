@@ -6,15 +6,20 @@ extension AppBarItemView {
     /// background layers. The dim means "not fully on screen"
     /// (#2234) and stays binary: the full 0.4, NOT the Space Bar's
     /// 0.6 middle tier, having no lower tier to collide with
-    /// (`BarAccent.activeUnfocusedAlpha`). The group-count badge
-    /// dims with the icon, whatever the item draws — a glyph or
-    /// title is tinted.
+    /// (`BarAccent.activeUnfocusedAlpha`). The group-count badge's
+    /// number dims with the icon, whatever the item draws — a glyph
+    /// or title is tinted.
     func applyColors() {
         label.textColor = NSColor(kiwiHex: textColorHex)
         glyphLabel.textColor = NSColor(kiwiHex: textColorHex)
         let alpha: CGFloat = isLit ? 1 : style.dimFactor
         iconView.alphaValue = alpha
-        badge.alphaValue = alpha
+        BarBadgeFace.paint(
+            badge,
+            fill: style.groupBadgeColor,
+            ink: style.groupBadgeTextColor,
+            inkAlpha: alpha
+        )
         halfMoon.show(visibility, ink: NSColor(kiwiHex: textColorHex))
         let glassHover = BarHoverFill.paint(
             hoverFill,

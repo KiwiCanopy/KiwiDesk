@@ -18161,6 +18161,21 @@ them there, so the fills take no floor of their own. The footer's
 buttons stay native macOS buttons. Off the toggle, and in Settings, the fills stay flat.
 :::
 
+:::unreleased
+**A bar badge keeps its disc opaque** (#2722, owner, 2026-10-28,
+on the device). The group count, the Space Bar's `+n` and its sticky,
+floating and pocket badges dimmed as a whole, so on a faded plate
+the disc read as a grey smudge. The dim ladder now reaches the
+mark alone, and every badge shares one face (`BarBadgeFace`): an
+opaque disc with a hairline rim, white on a dark disc and black on
+a light one, since a white rim vanished on a light badge colour.
+The `+n` disc is 0.7 of its cell, smaller than the 0.8 it had,
+which read too heavy beside the icons. Glass and a fade were
+weighed and refused: `ui-designer` pointed to Apple's solid badges
+on glass, and at a 14 pt disc a fade reads as a smudge, not a
+fade.
+:::
+
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two
 "unmeasured" clear-end sentences above. With the Fill on top and

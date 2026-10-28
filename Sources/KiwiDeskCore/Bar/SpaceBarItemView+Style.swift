@@ -102,7 +102,7 @@ extension SpaceBarItemView {
         styleStateBadges()
     }
 
-    /// Group badge styling with 3-tier alpha ladder
+    /// Group badge styling, its number on the 3-tier alpha ladder
     /// (#470, #955, owner 2026-07-20); a `count` badge takes the
     /// ladder's count tier (#2650).
     private func applyBadge(
@@ -111,12 +111,13 @@ extension SpaceBarItemView {
         lit: Bool,
         count: Bool
     ) {
-        badge.layer?.backgroundColor =
-            NSColor(kiwiHex: style.groupBadgeColor).cgColor
-        badge.textColor =
-            NSColor(kiwiHex: style.groupBadgeTextColor)
-        badge.alphaValue =
-            lit ? 1 : untintedAppAlpha(focused: appFocused, count: count)
+        BarBadgeFace.paint(
+            badge,
+            fill: style.groupBadgeColor,
+            ink: style.groupBadgeTextColor,
+            inkAlpha: lit
+                ? 1 : untintedAppAlpha(focused: appFocused, count: count)
+        )
     }
 
     var cornerRadius: CGFloat {

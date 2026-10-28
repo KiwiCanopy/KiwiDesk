@@ -134,8 +134,9 @@ struct ShelfBorderSeamTests {
         #expect(!source.contains("hasBox"))
     }
 
-    /// The active indicator's outline, the one other layer border
-    /// `Bar/` strokes: file and write count per channel, so a new
+    /// The active indicator's outline and a badge's rim
+    /// (`BarBadgeFace`), the other layer borders `Bar/` strokes:
+    /// file and write count per channel, so a new
     /// write — even one spelled like the accent's — reds until it
     /// is ruled. The width is counted on its own: CALayer's default
     /// border colour is opaque black, so a width alone draws a rim.
@@ -143,11 +144,13 @@ struct ShelfBorderSeamTests {
     /// reset to 0, which draws nothing; so does the front chip's
     /// indicator (#1856), the Space item's accent laid on the chip.
     private static let allowedColor: [String: Int] = [
+        "BarBadgeFace.swift": 1,
         "AppBarItemView+Paint.swift": 1,
         "SpaceBarItemView+Style.swift": 1,
         "SpaceBarOverlay+FrontAccent.swift": 1,
     ]
     private static let allowedWidth: [String: Int] = [
+        "BarBadgeFace.swift": 1,
         "AppBarItemView+Paint.swift": 3,
         "SpaceBarItemView+Style.swift": 2,
         "SpaceBarOverlay+FrontAccent.swift": 2,
@@ -174,10 +177,10 @@ struct ShelfBorderSeamTests {
         return writes
     }
 
-    /// A layer border in `Bar/` is the active indicator's or the
-    /// painter's; any other one is a second rim.
+    /// A layer border in `Bar/` is the painter's, the active
+    /// indicator's or a badge's; any other one is a second rim.
     @Test(
-        "Bar/ strokes a layer border only in the painter or accent",
+        "Bar/ strokes a layer border only in the painter, accent or badge",
         arguments: ["borderColor", "borderWidth"]
     )
     func noSecondRim(property: String) throws {
