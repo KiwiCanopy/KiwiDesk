@@ -8,7 +8,9 @@ import Testing
 /// (`KiwiHubPaint.fill`): at the fade's far end the selected item's
 /// ink on the faded highlight, and the hovered item's on the faded
 /// hover, hold the reading floor over the panel's own far end, on
-/// every bundled palette, Fill fade at 100. Measured as
+/// every bundled palette, Fill fade at 100. Residue: no bundled
+/// palette's share is decided at the panel's anchor end, so the
+/// solver's anchor ground is unexercised (guard-prover). Measured as
 /// `PeekInkContrastTests` measures: each layer composited over each
 /// wallpaper extreme, the ink over the layer.
 @Suite("KiwiHub highlight fade contrast")

@@ -107,7 +107,10 @@ extension SettingsThemeContrastTests {
         // measured tokens.
         #expect(source.occurrences(of: ".fill(paint.fill(") == 2)
         // Each faded fill spells `.fill(` twice; no third fill hides.
-        #expect(source.occurrences(of: ".fill(") == 4)
+        #expect(
+            source.occurrences(of: ".fill(")
+                == 2 * source.occurrences(of: ".fill(paint.fill(")
+        )
         #expect(source.occurrences(of: ".fill(paint.selection)") == 1)
         #expect(source.occurrences(of: ".fill(paint.rowHover)") == 1)
         let paint = try Self.hubPaint()

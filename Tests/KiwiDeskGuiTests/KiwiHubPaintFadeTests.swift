@@ -20,9 +20,27 @@ struct KiwiHubPaintFadeTests {
         return shelf
     }
 
+    /// A bundled palette whose share rises under Increase Contrast,
+    /// so a paint ignoring the flag reads a different share.
+    private func discriminating() throws -> KiwiShelf {
+        let shelves = PaletteCatalog.bundled().map { palette in
+            var settings = TilingSettings()
+            palette.apply(to: &settings)
+            var shelf = settings.kiwishelf
+            shelf.fillFade = 100
+            return shelf
+        }
+        return try #require(
+            shelves.first {
+                $0.highlightFadeShare(increaseContrast: true)
+                    != $0.highlightFadeShare(increaseContrast: false)
+            }
+        )
+    }
+
     @Test("The paint fades to the shelf's share", arguments: [false, true])
     func paintTakesTheShelfShare(increaseContrast: Bool) throws {
-        let shelf = shelf()
+        let shelf = try discriminating()
         let paint = KiwiHubPaint(
             shelf,
             divider: "#FFFFFF33",
