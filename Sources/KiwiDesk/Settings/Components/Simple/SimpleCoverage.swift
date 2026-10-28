@@ -3,9 +3,9 @@ import KiwiDeskCore
 /// Which save-pill rows Simple draws a control for (#2737 ruling
 /// 12): the one answer `SettingsModel.jump(to:)` reads to keep a row
 /// on Simple or land it on Advanced. Read off the row, not its key
-/// alone: a shortcut row is Simple's only on the default layer and
-/// only for the families its cards list, and a pin only where
-/// Simple draws the Screen menu.
+/// alone: a shortcut row is Simple's only for an Open applications
+/// key on the default layer, and a pin only where Simple draws the
+/// Screen menu.
 @MainActor enum SimpleCoverage {
     static func draws(
         _ row: SettingsDiffRow,
@@ -30,14 +30,18 @@ import KiwiDeskCore
             return screenMenu
         case .shortcuts(.layers):
             return binding(row.revert)
+        // The areas a look paints (`LookKeys`): the Look line wrote
+        // them, so their rows stay with it (ruling 12). Read by
+        // area, so a row of these areas made in Advanced stays too.
+        case .kiwishelf, .spaceBar, .appBar, .borders, .gaps, .colours:
+            return true
         default:
             return false
         }
     }
 
-    /// A default-layer binding of a family Simple's cards draw:
-    /// KiwiHub's keys (`ShortcutsRowOrder.kiwiHubAtRest`) or an
-    /// Open applications row.
+    /// A default-layer Open applications row; KiwiHub's keys are
+    /// shown on Simple, not edited, so their rows land on Advanced.
     private static func drawsBinding(
         _ revert: SettingsRowRevert,
         in model: SettingsModel
@@ -45,10 +49,6 @@ import KiwiDeskCore
         guard case .binding(let layer, let lua) = revert,
             layer == KeyLayer.defaultName
         else { return false }
-        let expander = ShortcutsFamilyRows.ofDraft(model, layer: layer)
-        let kiwiHub = ShortcutsRowOrder.kiwiHubAtRest
-            .compactMap(expander.rows(for:)).joined()
-        if kiwiHub.contains(where: { $0.runs(lua) }) { return true }
         return [model.config, model.cleanConfig]
             .compactMap { $0.layers.first(where: \.isDefault) }
             .flatMap(\.bindings)

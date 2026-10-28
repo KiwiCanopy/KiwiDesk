@@ -12,15 +12,10 @@ struct SpacesSection: View {
     /// Held here, not on the popover, so the dialog outlives the
     /// popover closing (#290).
     @State var pendingResetAll: SpaceID?
-    @State var dragged: SpaceID?
-    /// Live display order during a drag, written back once on
-    /// drop — a per-crossing profile write re-evaluated the whole
-    /// config (#299). nil when idle.
-    @State var dragOrder: [SpaceID]?
-    @State var hoveredHandle: SpaceID?
+    /// The list's drag-to-reorder, shared with Simple's rows.
+    @StateObject var reorder = SpaceReorder(listSpace: "spacesList")
     /// The refusal caption each row's name field reports (#1623).
     @State var renameNotices: [SpaceID: SpaceNameNotice] = [:]
-    @State var rowFrames: [SpaceID: CGRect] = [:]
     @Environment(\.controlActiveState) var activeState
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
@@ -76,23 +71,15 @@ struct SpacesSection: View {
             }
             .padding(.horizontal, SettingsMetrics.paneInset)
             .settingsPageBottom()
-            .coordinateSpace(name: Self.listSpace)
-            .onPreferenceChange(SpaceRowFrames.self) {
-                rowFrames = $0
-            }
+            .spaceReorderList(reorder)
         }
         .onChange(of: activeState) { _, now in
             // Deactivating mid-drag abandons the gesture with no
             // onEnded — commit so the list cannot keep showing an
             // unsaved reorder (#299).
-            if now != .key, dragged != nil {
-                commitDragOrder()
-                dragged = nil
-            }
+            if now != .key { reorder.abandon(to: model) }
         }
     }
-
-    static let listSpace = "spacesList"
 
     private var spacesSection: some View {
         SettingsSection(SettingsCatalog.spaces.spacesCard) {
@@ -129,7 +116,7 @@ struct SpacesSection: View {
             HStack {
                 dragHandle(space)
                 IconPicker(
-                    icon: iconBinding(space),
+                    icon: model.spaceIconBinding(space),
                     preview: .chip
                 )
                 SpaceNameField(
@@ -195,46 +182,6 @@ struct SpacesSection: View {
         // the ONLY site for Move Up/Down/Make Fallback, so a bare
         // channel here was pointer-only for those verbs.
         .rowActions { contextActions(space) }
-        .scaleEffect(dragged == space ? 1.02 : 1)
-        .shadow(
-            color: .black.opacity(dragged == space ? 0.2 : 0),
-            radius: 6,
-            y: 2
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 6)
-                .strokeBorder(
-                    dragged == space
-                        ? SettingsTheme.planeRing : .clear,
-                    lineWidth: 1
-                )
-        )
-        .zIndex(dragged == space ? 1 : 0)
-        .background(
-            GeometryReader { proxy in
-                Color.clear.preference(
-                    key: SpaceRowFrames.self,
-                    value: [
-                        space: proxy.frame(
-                            in: .named(Self.listSpace)
-                        )
-                    ]
-                )
-            }
-        )
-    }
-
-    private func iconBinding(
-        _ space: SpaceID
-    ) -> Binding<String> {
-        Binding(
-            get: {
-                model.config.settings.spaceIcons[space] ?? ""
-            },
-            set: {
-                model.config.settings.spaceIcons[space] =
-                    $0.isEmpty ? nil : $0
-            }
-        )
+        .spaceDragLift(space, in: reorder)
     }
 }

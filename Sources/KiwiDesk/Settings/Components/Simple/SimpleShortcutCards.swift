@@ -1,10 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Simple's two shortcut cards (#2737 rulings 6, 7, 16): KiwiHub's
-/// three keys and Open applications, drawn by the rows the
-/// Shortcuts page draws, on the default layer, with the recorder
-/// environment that page gives them — no Simple-only recorder.
+/// Simple's Open applications card (#2737 rulings 7, 16): the rows
+/// the Shortcuts page draws, on the default layer, with the
+/// recorder environment that page gives them — no Simple-only
+/// recorder.
 struct SimpleShortcutCards: View {
     @ObservedObject var model: SettingsModel
     /// Not in place: Simple cannot scroll to a row it does not
@@ -23,37 +23,16 @@ struct SimpleShortcutCards: View {
     }
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
-            SimpleCard(
-                title: SettingsCatalog.shortcuts.kiwiHubKeys.text,
-                caption: L(
-                    "simple.kiwihub.caption",
-                    "Its %1$@ side lists every other shortcut.",
-                    JumpScope.shortcuts.title
-                )
-            ) {
-                KiwiHubKeyRows(
-                    model: model,
-                    bindings: bindings,
-                    expander: expander,
-                    drawsHeading: false
-                )
-                .environment(
-                    \.recorderConflictAnchor,
-                    SettingsCatalog.shortcuts.kiwiHubKeys.id
-                )
-            }
-            ApplicationsGroup(
-                model: model,
-                bindings: bindings,
-                expander: expander,
-                drawsKiwiDeskKeys: false
-            )
-            .environment(
-                \.recorderConflictAnchor,
-                SettingsCatalog.shortcuts.openApplications.id
-            )
-        }
+        ApplicationsGroup(
+            model: model,
+            bindings: bindings,
+            expander: expander,
+            drawsKiwiDeskKeys: false
+        )
+        .environment(
+            \.recorderConflictAnchor,
+            SettingsCatalog.shortcuts.openApplications.id
+        )
         .environment(\.keybindingLayerName, layer)
         // One live read per render (#1105), as the Shortcuts page.
         .environment(

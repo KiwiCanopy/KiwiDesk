@@ -6,15 +6,7 @@ import SwiftUI
 extension SpacesSection {
     /// Destructive row action in trailing danger slot.
     func deleteButton(_ space: SpaceID) -> some View {
-        Button {
-            requestRemove(space)
-        } label: {
-            Image(systemName: "trash")
-        }
-        .buttonStyle(.borderless)
-        .iconButtonAffordance(
-            L("spaces.delete.help", "Delete Space")
-        )
+        SpaceDeleteButton { requestRemove(space) }
     }
 
     /// Per-row Customize button opening the full-pane editor, on
@@ -41,9 +33,7 @@ extension SpacesSection {
         )
     }
 
-    var deleteConfirmTitle: String {
-        L("spaces.delete_confirm.title", "Delete this Space?")
-    }
+    var deleteConfirmTitle: String { SpaceDeleteWording.title }
 
     /// Confirmation message with interpolated role names (#818).
     var deleteConfirmMessage: String {

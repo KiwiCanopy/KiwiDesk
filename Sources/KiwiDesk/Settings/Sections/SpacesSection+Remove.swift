@@ -6,10 +6,7 @@ extension SpacesSection {
     func removeSpace(_ space: SpaceID) {
         // Compute focus neighbor before mutation (#678 Phase 4 pass 10).
         let neighbour = neighbourAfterDeleting(space)
-        model.config.removeSpace(space)
-        if model.nav.spaceOverridesFocus == space {
-            model.nav.spaceOverridesFocus = nil
-        }
+        model.removeSpace(space)
         returningRow = neighbour
     }
 

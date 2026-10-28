@@ -16,6 +16,9 @@ struct SimpleScreen: View {
         GeometryReader { geo in
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    // First: it teaches the keys the tour taught,
+                    // before any control (ui-designer, #2737).
+                    SimpleKiwiHubKeys(model: model)
                     SimpleLookCard(model: model)
                     SimpleSpacesCard(model: model)
                     SimpleShortcutCards(model: model)

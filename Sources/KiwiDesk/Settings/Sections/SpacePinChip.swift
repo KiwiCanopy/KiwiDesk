@@ -35,14 +35,31 @@ struct SpacePinChip: View {
             BadgeChip(
                 label: L("spaces.pin_offline_badge", "Pin offline")
             )
-            .help(
-                L(
-                    "spaces.pin_offline_badge.help",
-                    "Pinned to a screen that isn't attached, so "
-                        + "this Space opens on the main screen "
-                        + "for now."
-                )
+            .help(offlineHelp)
+            .accessibilityHint(offlineHelp)
+        }
+    }
+
+    /// Names both screens where it can: the one the pin waits for,
+    /// by the name its fingerprint keeps, and the main screen the
+    /// Space opens on meanwhile (#2737).
+    private var offlineHelp: String {
+        guard let pin = model.config.spacePins[space],
+            let main = model.mainDisplay
+        else {
+            return L(
+                "spaces.pin_offline_badge.help",
+                "Pinned to a screen that isn't attached, so "
+                    + "this Space opens on the main screen "
+                    + "for now."
             )
         }
+        return L(
+            "spaces.pin_offline_badge.help_named",
+            "Pinned to %1$@, which isn't connected.\nOpens on %2$@, "
+                + "the main screen, until it's back.",
+            Display.fingerprintParts(pin).name,
+            main.name
+        )
     }
 }

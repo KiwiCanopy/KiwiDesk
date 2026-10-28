@@ -10232,10 +10232,13 @@ left, a live preview of the desk on the right.
 construction rather than by promise:
 
 - **A doubled surface.** Simple owns layout and nothing else. It
-  composes Advanced's own parts — the look tiles, the Space
-  name field, layout menu, Customize button and pin chip, the
-  KiwiHub and Open applications rows, the support strip — so a
-  change to a control reaches both surfaces. Where Advanced draws
+  composes Advanced's own parts — the look tiles; the Space
+  row's grip, icon chip, name field, layout menu, Customize
+  button, pin chip, trash and add row; the Open applications
+  rows; the support strip — so a change to a control reaches
+  both surfaces. KiwiHub's keys are shown, not edited: KiwiHub
+  is the way to every other shortcut, so Simple teaches its keys
+  and leaves changing them to Advanced. Where Advanced draws
   a choice another way, as Screens' chip menu, Simple's Screen
   menu shares its choices and its one write. A Simple-only editor
   is the defect this entry exists to forbid.
