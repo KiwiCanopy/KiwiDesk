@@ -153,11 +153,10 @@ struct BriefPocketTests {
         }
     }
 
-    /// #2703: a focus change mid-flight activates an app on the
-    /// thread the plate's frames tick on, so the raise waits for
-    /// the landing. Read off the raise's own stamp: state focus
-    /// moves with the filing, before any raise.
-    @Test("pocketing raises the next window as the plate lands")
+    /// #2703: a raise mid-play activates an app on the thread the
+    /// plate's frames tick on, so it waits for the play to end.
+    /// Read off the raise's own stamp: state focus moves at once.
+    @Test("pocketing raises the next window once the play ends")
     func putInRaiseWaits() async {
         guard NSScreen.main != nil else { return }
         let core = raisingCore()
@@ -171,7 +170,7 @@ struct BriefPocketTests {
         #expect(next.map { raised(core, $0) } == true)
     }
 
-    @Test("taking out raises the window as the plate lands")
+    @Test("taking out raises the window once the play ends")
     func takeOutRaiseWaits() async {
         guard NSScreen.main != nil else { return }
         let core = raisingCore()
@@ -185,7 +184,7 @@ struct BriefPocketTests {
         #expect(raised(core, one))
     }
 
-    @Test("a press before the landing takes the waiting hand-off over")
+    @Test("a press before the play ends takes the waiting hand-off over")
     func secondPressReplaces() async {
         guard NSScreen.main != nil else { return }
         let core = raisingCore()
@@ -199,11 +198,34 @@ struct BriefPocketTests {
         #expect(core.state.pocketPhase(of: one) == .out)
         #expect(raised(core, one))
         #expect(next.map { !raised(core, $0) } == true)
-        // Out over its own put-in, it came out over nothing.
-        #expect(core.state.pocket?.cameFrom == nil)
+        // State focus moved at the put-in, so it came out over it.
+        #expect(next != nil && core.state.pocket?.cameFrom == next)
     }
 
-    @Test("a focus moved before the landing keeps its window")
+    /// The window it came out over is not the Space's successor:
+    /// state focus goes there at the press, so the pass pans to it.
+    @Test("pocketing moves state focus to where it came out at once")
+    func stateFocusLeadsTheRaise() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        core.focusWindow(three, warp: false)
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        #expect(core.state.pocket?.cameFrom == three)
+        core.selfRaiseStamps = [:]
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.focusedWindowID == three)
+        #expect(!raised(core, three))
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(raised(core, three))
+    }
+
+    @Test("a focus moved before the play ends keeps its window")
     func movedFocusDrops() async {
         guard NSScreen.main != nil else { return }
         let core = raisingCore()
@@ -218,7 +240,7 @@ struct BriefPocketTests {
         }
         #expect(core.execute("pocket").isSuccess)
         let landing = core.deferred.task(for: .pocketFocus)
-        // The user moves on while the plate still flies.
+        // The user moves on while the pocket still plays.
         core.focusWindow(three, warp: false)
         core.selfRaiseStamps[one] = nil
         flight.landed = true

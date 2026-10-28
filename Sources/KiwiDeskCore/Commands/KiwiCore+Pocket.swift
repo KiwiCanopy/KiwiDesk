@@ -73,8 +73,18 @@ extension KiwiCore {
         }
         moveLatch.stamp(id, at: wallClock())
         onLog("pocket: w\(id.raw) pocketed")
+        let next =
+            heldFocus
+            ? cameFrom.flatMap { focusableOnActiveSpace($0) }
+                ?? activeSpace?.focused
+            : nil
+        // State focus moves now, so the pass pans to it; the raise
+        // waits for the play to end (#2703).
+        if let next, let space = state.workspaces.space(of: next) {
+            state.workspaces.focus(next, in: space)
+        }
         retile(stateChange: id)
-        let lands = shown.flatMap {
+        let play = shown.flatMap {
             playBriefPocket(
                 .into,
                 window: id,
@@ -82,18 +92,21 @@ extension KiwiCore {
                 on: TilingEngine.screen(containing: $0)?.kiwiDisplayID
             )
         }
-        guard heldFocus else { return deferred.cancel(.pocketFocus) }
-        let next =
-            cameFrom.flatMap { focusableOnActiveSpace($0) }
-            ?? activeSpace?.focused
-        handPocketFocus(after: lands) { [weak self] in
+        guard heldFocus else { return handPocketFocus(after: nil, nil) }
+        handPocketFocus(after: play?.end) { [weak self] in
             guard let self else { return }
             guard let next else {
                 self.desktopFocusYield?()
                 return
             }
+            // The latch swallows the echo of this hand-off, not
+            // only of the park.
+            self.moveLatch.stamp(id, at: self.wallClock())
             let priorFrontmost = self.frontmostPIDProvider?()
             self.focusWindow(next, refocusRetile: false, warp: true)
+            // The state focus above leaves the focus unchanged here,
+            // so the commanded float raise is owed by hand (#2284).
+            self.raiseFloatsAbove(afterFocusing: next)
             self.scheduleMoveSettle(
                 origin: self.state.workspaces.activeSpace,
                 priorFrontmost: priorFrontmost
@@ -112,10 +125,7 @@ extension KiwiCore {
             let window = state.windows[id],
             let target = state.workspaces.activeSpace
         else { return false }
-        // Itself while a put-in's hand-off still waits (#2703).
-        let cameFrom = state.workspaces.lastFocused.flatMap {
-            $0 == id ? nil : $0
-        }
+        let cameFrom = state.workspaces.lastFocused
         let screen = state.workspaces.display(of: target)
             .flatMap { screenFingerprint(of: $0) }
         let remembered = screen.flatMap { state.pocket?.frames[$0] }
@@ -130,7 +140,7 @@ extension KiwiCore {
         if let frame { tiler.seedStash(id, frame: frame) }
         onLog("pocket: w\(id.raw) out on space \(target)")
         // Its one write lands as the plate does (#2680).
-        let lands = frame.flatMap {
+        let play = frame.flatMap {
             playBriefPocket(
                 .outOf,
                 window: id,
@@ -139,13 +149,13 @@ extension KiwiCore {
                     .kiwiDisplayID
             )
         }
-        if let frame, let lands {
+        if let frame, let lands = play?.flightEnd {
             tiler.applier.holdWrites([id], until: .now() + lands)
             holdRingThroughLanding(id, target: frame, lands: lands)
         }
         refreshStickyReach()
         retile(stateChange: id)
-        handPocketFocus(after: lands) { [weak self] in
+        handPocketFocus(after: play?.end) { [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
             else { return }
             self.focusWindow(id, refocusRetile: false, warp: true)

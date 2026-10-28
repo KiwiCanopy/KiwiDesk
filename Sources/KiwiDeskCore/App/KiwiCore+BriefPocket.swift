@@ -7,14 +7,14 @@ import AppKit
 extension KiwiCore {
     /// Plays the brief pocket for `id` flying `direction`, between
     /// `frame` (AX) and the pocket on the screen `display` names.
-    /// The seconds until the plate lands, nil where nothing plays.
+    /// The play's timeline from now, nil where nothing plays.
     @discardableResult
     func playBriefPocket(
         _ direction: BriefPocketPlan.Direction,
         window id: WindowID,
         frame: CGRect,
         on display: DisplayID?
-    ) -> TimeInterval? {
+    ) -> BriefPocketPlan.Timeline? {
         guard tiler.settings.animations.onStateChange,
             !briefPocket.reduceMotion(),
             let display,
@@ -58,29 +58,31 @@ extension KiwiCore {
             )
         )
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
-        return BriefPocketPlan.timeline(direction, flight: flight).flightEnd
+        return BriefPocketPlan.timeline(direction, flight: flight)
     }
 
-    /// Pays a pocket press's focus hand-off `hand` once the plate
-    /// lands, `lands` seconds on — at once where nothing plays
-    /// (#2703). A focus change activates an app on the main thread
-    /// the plate's frames tick on, and stalls it 100–350 ms where
-    /// that app is KiwiDesk, whose Settings window redraws whole.
-    /// Dropped where the focus or the Space moved meanwhile.
+    /// Pays a pocket press's focus hand-off `hand` once the play
+    /// `ends` seconds on is over, so no app activates while the
+    /// plate draws (#2703); at once where nothing plays. A later
+    /// press replaces it, a nil `hand` only cancels, and it is
+    /// dropped where the state focus or the Space moved meanwhile.
     func handPocketFocus(
-        after lands: TimeInterval?,
-        _ hand: @escaping @MainActor () -> Void
+        after ends: TimeInterval?,
+        _ hand: (@MainActor () -> Void)?
     ) {
         deferred.cancel(.pocketFocus)
-        guard let lands else { return hand() }
-        let held = focusedWindowID
+        guard let hand else { return }
+        guard let ends else { return hand() }
+        let held = state.workspaces.lastFocused
         let space = state.workspaces.activeSpace
-        deferred.schedule(.pocketFocus, after: .seconds(lands)) {
+        deferred.schedule(.pocketFocus, after: .seconds(ends)) {
             [weak self] in
             guard let self else { return }
-            guard self.focusedWindowID == held,
-                self.state.workspaces.activeSpace == space
-            else {
+            guard self.state.workspaces.activeSpace == space else {
+                self.onLog("pocket: landing focus dropped — Space moved")
+                return
+            }
+            guard self.state.workspaces.lastFocused == held else {
                 self.onLog("pocket: landing focus dropped — focus moved")
                 return
             }
