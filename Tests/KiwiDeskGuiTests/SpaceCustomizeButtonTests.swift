@@ -32,8 +32,8 @@ struct SpaceCustomizeButtonTests {
         + "SpaceCustomizeButton.swift"
 
     /// The row mounts the button unconditionally beside the layout
-    /// menu, and the builder returns its `Button` straight after
-    /// the count reads, with no builder attribute to branch in.
+    /// menu, and the shared view's body draws its `Button` straight
+    /// after the state reads, with no branch between.
     @Test("every row draws the button")
     func everyRowDrawsTheButton() throws {
         let cell = try stripped(customize)
@@ -47,7 +47,10 @@ struct SpaceCustomizeButtonTests {
         let view = try stripped(button)
         #expect(
             view.contains(
-                "Button(action:open){"
+                // The state, then straight to the Button: no branch
+                // can sit between them and withhold it.
+                "letstate=Self.state(of:space,in:model)"
+                    + "Button(action:open){"
                     + "Image(systemName:\"slider.horizontal.3\")"
             )
         )

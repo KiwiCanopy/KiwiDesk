@@ -27,6 +27,7 @@ struct KeyRecorderField: View {
     @EnvironmentObject var coordinator: RecorderCoordinator
     @Environment(\.hyperKeyIsOff) private var hyperKeyIsOff
     @Environment(\.recorderSides) private var recorderSides
+    @Environment(\.recorderConflictAnchor) var conflictAnchor
     @State private var fieldID = UUID()
     @State private var recorder = ChordRecorder()
     @State private var preview = ""

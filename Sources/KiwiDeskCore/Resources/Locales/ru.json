@@ -2147,7 +2147,7 @@
   "simple.header.lua_one": "1 сочетание клавиш на Lua",
   "simple.header.screens": "Экранов: %1$d",
   "simple.header.screens_one": "1 экран",
-  "simple.kiwihub.caption": "В разделе «%1$@» KiwiHub показывает все остальные сочетания клавиш.",
+  "simple.kiwihub.caption": "«%1$@» показывает все остальные сочетания клавиш.",
   "simple.look.hint": "Хочешь свои цвета или сохранить облик? %1$@ — в разделе «%2$@».",
   "simple.look.title": "Облик",
   "simple.space.screen.help": "Экран для этого пространства",

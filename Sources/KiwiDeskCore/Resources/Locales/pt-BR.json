@@ -2147,7 +2147,7 @@
   "simple.header.lua_one": "1 atalho Lua",
   "simple.header.screens": "%1$d telas",
   "simple.header.screens_one": "1 tela",
-  "simple.kiwihub.caption": "Em “%1$@”, o KiwiHub mostra todos os outros atalhos.",
+  "simple.kiwihub.caption": "Em “%1$@” aparecem todos os outros atalhos.",
   "simple.look.hint": "Quer cores próprias ou salvar um look? %1$@ em “%2$@”.",
   "simple.look.title": "Look",
   "simple.space.screen.help": "Tela deste espaço",

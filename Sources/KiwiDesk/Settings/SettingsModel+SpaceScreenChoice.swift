@@ -1,8 +1,9 @@
 import KiwiDeskCore
 
-/// Where a Space is placed, as the Screen menus offer it: Screens'
-/// chip and Simple's Space row write through the one door
-/// (#758, #2737).
+/// Where a Space is placed, as the Screen menus offer it. Every
+/// Settings writer of a Space's placement — Screens' chips, drops
+/// and orphan clear, Simple's Screen menu — goes through `place`
+/// (#758, #2737; `SimpleSectionsTests` ▸ `placementHasOneDoor`).
 enum SpaceScreenChoice: Hashable, Sendable {
     case auto
     case followsMain
@@ -33,5 +34,34 @@ extension SettingsModel {
             config.spacePins[space] = fingerprint
             config.mainSpaces.remove(space)
         }
+    }
+}
+
+/// The Screen menus' one vocabulary (#2737 ruling 4): what each
+/// choice is called, and which a Space is offered.
+extension SpaceScreenChoice {
+    @MainActor func title(in model: SettingsModel) -> String {
+        switch self {
+        case .auto:
+            L("monitor_chip.automatic", "Automatic")
+        case .followsMain:
+            L("monitor_card.follows_main", "Follows main screen")
+        case .screen(let fingerprint):
+            model.screenName(fingerprint)
+        }
+    }
+
+    /// Automatic, Follows main screen, each connected screen, and
+    /// the Space's own pin where its screen is not connected.
+    @MainActor static func offered(
+        for space: SpaceID,
+        in model: SettingsModel
+    ) -> [SpaceScreenChoice] {
+        var choices: [SpaceScreenChoice] =
+            [.auto, .followsMain]
+            + model.displays.map { .screen($0.fingerprint) }
+        let current = model.screenChoice(of: space)
+        if !choices.contains(current) { choices.append(current) }
+        return choices
     }
 }

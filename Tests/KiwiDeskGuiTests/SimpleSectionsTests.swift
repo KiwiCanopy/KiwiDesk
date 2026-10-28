@@ -36,6 +36,33 @@ struct SimpleSectionsTests {
         #expect(model.screenChoice(of: space) == .auto)
     }
 
+    /// Screens' chips, drops and orphan clear and Simple's menu
+    /// share one meaning of a placement, so no Settings file but the
+    /// door writes a pin or the main-screen set.
+    @Test("a Space's placement has one writer")
+    func placementHasOneDoor() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+        let files = try SourceScan.swiftSources(under: root)
+        #expect(!files.isEmpty)
+        let door = "SettingsModel+SpaceScreenChoice.swift"
+        // An assignment, not a comparison: `]=` not followed by `=`.
+        let write = try NSRegularExpression(
+            pattern: #"spacePins\[[^\]]*\]=(?!=)|"#
+                + #"mainSpaces\.(insert|remove)\("#
+        )
+        var writers: [String] = []
+        for file in files where file.lastPathComponent != door {
+            let text = try SourceScan.strippedSource(at: file)
+                .filter { !$0.isWhitespace }
+            let range = NSRange(text.startIndex..., in: text)
+            if write.firstMatch(in: text, range: range) != nil {
+                writers.append(file.lastPathComponent)
+            }
+        }
+        #expect(writers.isEmpty, "\(writers)")
+    }
+
     private func row(_ key: SettingKey) -> SettingsDiffRow {
         SettingsDiffRow(id: "row", key: key, label: "Row")
     }
@@ -63,14 +90,57 @@ struct SimpleSectionsTests {
         }
     }
 
-    @Test("Simple's coverage names only what it draws")
+    @Test("Simple's coverage reads the row, not its key alone")
     func coverage() {
-        #expect(SimpleCoverage.draws(.spaces(.spaceModes)))
-        #expect(SimpleCoverage.draws(.screens(.spacePins)))
-        #expect(SimpleCoverage.draws(.shortcuts(.openApplications)))
-        #expect(!SimpleCoverage.draws(.spaces(.fallbackSpace)))
-        #expect(!SimpleCoverage.draws(.shortcuts(.layers)))
-        #expect(!SimpleCoverage.draws(.gaps(.outerTop)))
+        let model = onSimple()
+        #expect(SimpleCoverage.draws(row(.spaces(.spaceModes)), in: model))
+        #expect(!SimpleCoverage.draws(row(.spaces(.fallbackSpace)), in: model))
+        #expect(!SimpleCoverage.draws(row(.gaps(.outerTop)), in: model))
+        // A pin is Simple's only where it draws the Screen menu.
+        #expect(
+            SimpleCoverage.draws(row(.screens(.spacePins)), in: model)
+                == model.offersScreenMenu
+        )
+        // A binding row: KiwiHub's keys and app rows, default
+        // layer alone.
+        let hub = KeybindingCatalog.jumpToWindow.lua
+        var binding = row(.shortcuts(.layers))
+        binding.revert = .binding(layer: KeyLayer.defaultName, lua: hub)
+        #expect(SimpleCoverage.draws(binding, in: model))
+        binding.revert = .binding(layer: "Gaming", lua: hub)
+        #expect(!SimpleCoverage.draws(binding, in: model))
+        binding.revert = .binding(
+            layer: KeyLayer.defaultName,
+            lua: KeybindingCatalog.toggleSpaceBar.lua
+        )
+        #expect(!SimpleCoverage.draws(binding, in: model))
+    }
+
+    /// An app key recorded on Simple yields a row that stays.
+    @Test("an app key's pill row stays on Simple")
+    func appRowStays() throws {
+        let model = onSimple()
+        let found = model.config.layers.firstIndex { $0.isDefault }
+        let index = try #require(found)
+        model.config.layers[index].bindings.append(
+            KeyBinding(
+                combo: "ctrl+alt+s",
+                lua: KeybindingCatalog.appCommand(
+                    "com.apple.Safari",
+                    action: .openOrFocus
+                ),
+                kind: .application
+            )
+        )
+        let rows = SettingsDiffRowSource.rows(for: model)
+        let binding = rows.first {
+            if case .binding = $0.revert { return true }
+            return false
+        }
+        let added = try #require(binding)
+        #expect(SimpleCoverage.draws(added, in: model))
+        model.jump(to: added)
+        #expect(model.nav.pendingReveal == nil)
     }
 
     /// Simple owns layout only: a tile, a recorder or a layout
@@ -87,7 +157,8 @@ struct SimpleSectionsTests {
         let parts = [
             "PaletteTile(", "LookPlate(", "KeyRecorderField(",
             "LayoutMode.allCases", "OverrideCountBadge(",
-            "SpacePinBadge.resolve(",
+            "SpacePinBadge.resolve(", "monitor_chip.automatic",
+            "monitor_card.follows_main", "model.displays.map",
         ]
         for file in files {
             let text = try SourceScan.strippedSource(at: file)

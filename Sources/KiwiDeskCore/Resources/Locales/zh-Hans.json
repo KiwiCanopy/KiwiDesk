@@ -2147,7 +2147,7 @@
   "simple.header.lua_one": "1 个 Lua 快捷键",
   "simple.header.screens": "%1$d 台显示器",
   "simple.header.screens_one": "1 台显示器",
-  "simple.kiwihub.caption": "KiwiHub 的“%1$@”列出了其他所有快捷键。",
+  "simple.kiwihub.caption": "“%1$@”列出了其他所有快捷键。",
   "simple.look.hint": "想用自己的颜色或保存造型？前往“%2$@”中的%1$@。",
   "simple.look.title": "造型",
   "simple.space.screen.help": "此空间的显示器",

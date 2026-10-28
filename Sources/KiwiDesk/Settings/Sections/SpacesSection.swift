@@ -122,12 +122,7 @@ struct SpacesSection: View {
         }
     }
 
-    /// Every name a new or renamed draft Space may not take: the
-    /// draft's, and the live Spaces it does not hold (#1790), so a
-    /// "+" never draws a second row for a temporary Space.
-    var takenSpaces: [SpaceID] {
-        model.config.spaces + model.liveOnlySpaces.map(\.id)
-    }
+    var takenSpaces: [SpaceID] { model.takenSpaceNames }
 
     private func spaceRow(_ space: SpaceID) -> some View {
         VStack(alignment: .leading, spacing: 6) {

@@ -46,8 +46,8 @@ struct AnnouncedValueTests {
         // #1393: the trash that asks where a shared rule goes.
         "AppRuleIdentity.swift": 1,
         "SpaceModeMenu.swift": 1,
-        // #2737: Simple's Screen menu, named for its row.
-        "SimpleScreenMenu.swift": 1,
+        // #2737: a Space's Screen menu, named for its row.
+        "SpaceScreenMenu.swift": 1,
         // #1790: a temporary or held Space's greyed mode readout.
         "LiveOnlySpaceRow.swift": 1,
         "DesktopsGroup+Row.swift": 1,

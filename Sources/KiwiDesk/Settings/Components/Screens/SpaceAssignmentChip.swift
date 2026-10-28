@@ -196,16 +196,11 @@ struct SpaceAssignmentChip: View {
     }
 
     @ViewBuilder private var menu: some View {
-        Button(L("monitor_chip.automatic", "Automatic")) {
+        Button(SpaceScreenChoice.auto.title(in: model)) {
             clear()
         }
         .disabled(kind == .auto)
-        Button(
-            L(
-                "monitor_card.follows_main",
-                "Follows main screen"
-            )
-        ) {
+        Button(SpaceScreenChoice.followsMain.title(in: model)) {
             model.place(space, .followsMain)
         }
         .disabled(kind == .main)

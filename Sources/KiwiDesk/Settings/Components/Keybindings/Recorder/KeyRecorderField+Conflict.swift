@@ -100,7 +100,7 @@ extension KeyRecorderField {
                 )
             ) {
                 conflictPopoverShown = false
-                fix()
+                fix(conflictAnchor)
             }
             .buttonStyle(.link)
             .font(.callout)

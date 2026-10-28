@@ -2147,7 +2147,7 @@
   "simple.header.lua_one": "1 raccourci Lua",
   "simple.header.screens": "%1$d écrans",
   "simple.header.screens_one": "1 écran",
-  "simple.kiwihub.caption": "Sous « %1$@ », KiwiHub affiche tous les autres raccourcis.",
+  "simple.kiwihub.caption": "Sous « %1$@ » figurent tous les autres raccourcis.",
   "simple.look.hint": "Envie de vos propres couleurs ou d'enregistrer un look ? %1$@ dans « %2$@ ».",
   "simple.look.title": "Look",
   "simple.space.screen.help": "Écran de cet espace",

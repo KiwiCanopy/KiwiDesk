@@ -39,10 +39,6 @@ struct SimpleSpacesCard: View {
         )
     }
 
-    /// The Screen menu is Simple's own scope call: hidden, not
-    /// greyed, on one screen (#2737 ruling 17).
-    private var offersScreens: Bool { model.displays.count >= 2 }
-
     private func row(_ space: SpaceID, number: Int) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             HStack(spacing: 10) {
@@ -56,7 +52,7 @@ struct SimpleSpacesCard: View {
                     .accessibilityHidden(true)
                 SpaceNameField(
                     space: space,
-                    isAvailable: { !taken.contains($0) },
+                    isAvailable: { !model.takenSpaceNames.contains($0) },
                     onRename: {
                         model.config.renameSpace(from: space, to: $0)
                     },
@@ -65,17 +61,14 @@ struct SimpleSpacesCard: View {
                 if hasOverrides(space) {
                     SpaceCustomizeButton(model: model, space: space) {
                         model.openAdvanced(
-                            SettingsAnchor(
-                                destination: .spaces,
-                                surface: .space(space)
-                            )
+                            SettingsAnchor(landing: .space(space))
                         )
                     }
                 }
                 SpacePinChip(model: model, space: space, offlineOnly: true)
                 Spacer(minLength: 8)
-                if offersScreens {
-                    SimpleScreenMenu(model: model, space: space)
+                if model.offersScreenMenu {
+                    SpaceScreenMenu(model: model, space: space)
                 }
                 SpaceModeMenu(model: model, space: space)
             }
@@ -85,10 +78,6 @@ struct SimpleSpacesCard: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
-    }
-
-    private var taken: [SpaceID] {
-        model.config.spaces + model.liveOnlySpaces.map(\.id)
     }
 
     private func hasOverrides(_ space: SpaceID) -> Bool {

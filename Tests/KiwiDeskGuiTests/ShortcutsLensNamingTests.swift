@@ -145,6 +145,16 @@ struct ShortcutsLensNamingTests {
                     + "bindings:bindings)"
             )
         )
+        // …over every layer's rows, never the selected one's.
+        #expect(
+            try flat(
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "ShortcutsFamilyRows+Draft.swift"
+            )
+            .contains(
+                "letbindings=model.config.layers.flatMap(\\.bindings)"
+            )
+        )
         #expect(
             try flat(
                 "Sources/KiwiDesk/Jump/JumpPanelController+Shortcuts.swift"

@@ -26,13 +26,15 @@ struct SimpleLookCard: View {
     }
 
     private func tile(_ look: ShelfLook) -> some View {
-        let description = LookDescriptions.caption(for: look.name)
-        return LookTile(model: model, look: look, caption: nil) {
+        LookTile(
+            model: model,
+            look: look,
+            caption: nil,
+            help: LookDescriptions.caption(for: look.name)
+        ) {
             model.applyLook(look)
         }
         .frame(width: Self.tileWidth)
-        .help(description ?? "")
-        .accessibilityHint(description ?? "")
     }
 
     /// The way to the rest of the looks, its link at the slot.

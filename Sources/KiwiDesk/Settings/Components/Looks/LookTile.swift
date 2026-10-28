@@ -11,6 +11,8 @@ struct LookTile: View {
     let look: ShelfLook
     /// Drawn under the name; nil draws the name alone.
     let caption: String?
+    /// Hover help and VoiceOver hint where the caption is not drawn.
+    var help: String?
     let apply: () -> Void
 
     var body: some View {
@@ -32,7 +34,8 @@ struct LookTile: View {
         }
         .buttonStyle(.plain)
         .accessibilityAddTraits(applied ? [.isSelected] : [])
-        .help(other ? restoreColorsHelp : "")
+        .accessibilityHint(help ?? "")
+        .help(other ? restoreColorsHelp : (help ?? ""))
     }
 
     private var otherColorsNote: String {
@@ -50,11 +53,19 @@ struct LookTile: View {
         )
     }
 
-    /// The draft with `look` painted on, its colors included.
     private var preview: TilingSettings {
-        var settings = model.config.settings
-        look.apply(to: &settings)
-        return settings
+        Self.painted(look, over: model.config.settings)
+    }
+
+    /// `settings` with `look` painted on, its colors included — the
+    /// tile's picture, and what a preview of the look shows.
+    static func painted(
+        _ look: ShelfLook,
+        over settings: TilingSettings
+    ) -> TilingSettings {
+        var painted = settings
+        look.apply(to: &painted)
+        return painted
     }
 
     private var spaceLabels: [SpaceGlyph] {

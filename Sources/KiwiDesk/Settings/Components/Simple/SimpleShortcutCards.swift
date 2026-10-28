@@ -8,8 +8,19 @@ import SwiftUI
 struct SimpleShortcutCards: View {
     @ObservedObject var model: SettingsModel
     /// Not in place: Simple cannot scroll to a row it does not
-    /// draw, so a collision's way out is Advanced.
-    @StateObject private var coordinator = RecorderCoordinator()
+    /// draw, so a collision's way out is the row's card in Advanced.
+    @StateObject private var coordinator: RecorderCoordinator
+
+    init(model: SettingsModel) {
+        self.model = model
+        _coordinator = StateObject(
+            wrappedValue: RecorderCoordinator { [model] anchor in
+                model.openAdvanced(
+                    SettingsAnchor(destination: .shortcuts, anchor: anchor)
+                )
+            }
+        )
+    }
 
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
@@ -27,12 +38,20 @@ struct SimpleShortcutCards: View {
                     expander: expander,
                     drawsHeading: false
                 )
+                .environment(
+                    \.recorderConflictAnchor,
+                    SettingsCatalog.shortcuts.kiwiHubKeys.id
+                )
             }
             ApplicationsGroup(
                 model: model,
                 bindings: bindings,
                 expander: expander,
                 drawsKiwiDeskKeys: false
+            )
+            .environment(
+                \.recorderConflictAnchor,
+                SettingsCatalog.shortcuts.openApplications.id
             )
         }
         .environment(\.keybindingLayerName, layer)
@@ -47,9 +66,6 @@ struct SimpleShortcutCards: View {
             // Suspend hotkeys while capturing (#213).
             coordinator.onArmedChange = { [model] armed in
                 model.setRecorderArmed(armed)
-            }
-            coordinator.fixElsewhere = { [model] in
-                model.openAdvanced(SettingsAnchor(destination: .shortcuts))
             }
         }
         .onChange(of: model.target) { _, _ in

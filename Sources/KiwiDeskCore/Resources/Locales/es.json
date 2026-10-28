@@ -2147,7 +2147,7 @@
   "simple.header.lua_one": "1 atajo Lua",
   "simple.header.screens": "%1$d pantallas",
   "simple.header.screens_one": "1 pantalla",
-  "simple.kiwihub.caption": "En «%1$@», KiwiHub muestra todos los demás atajos.",
+  "simple.kiwihub.caption": "En «%1$@» aparecen todos los demás atajos.",
   "simple.look.hint": "¿Quieres colores propios o guardar un look? %1$@ en «%2$@».",
   "simple.look.title": "Look",
   "simple.space.screen.help": "Pantalla de este espacio",

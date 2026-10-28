@@ -2147,7 +2147,7 @@
   "simple.header.lua_one": "1 個 Lua 綁定",
   "simple.header.screens": "%1$d 部螢幕",
   "simple.header.screens_one": "1 部螢幕",
-  "simple.kiwihub.caption": "KiwiHub 的「%1$@」列出了其他所有快速鍵。",
+  "simple.kiwihub.caption": "「%1$@」列出了其他所有快速鍵。",
   "simple.look.hint": "想用自己的顏色或儲存造型？前往「%2$@」中的%1$@。",
   "simple.look.title": "造型",
   "simple.space.screen.help": "此空間的螢幕",
