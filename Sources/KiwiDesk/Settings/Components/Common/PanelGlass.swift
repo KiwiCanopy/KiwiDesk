@@ -96,20 +96,23 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
     func body(content: Content) -> some View {
         // The one place Increase Contrast becomes the panel's inks.
         let ink = drawn.shelf?.panelInk(increaseContrast: increased)
+        // One mint: the glass and KiwiHub's fills fade alike.
+        let tint = drawn.shelf.flatMap {
+            GlassTint.paint(
+                $0.panelGlassFill(increaseContrast: increased),
+                edge: .top
+            )
+        }
         inked(content, ink)
-            .environment(\.kiwiHubPaint, KiwiHubPaint.of(drawn, ink: ink))
+            .environment(
+                \.kiwiHubPaint,
+                KiwiHubPaint.of(drawn, ink: ink, tint: tint)
+            )
             .glassChrome(
                 in: shape,
                 enabled: drawn.enabled,
                 variant: drawn.variant,
-                tint: drawn.shelf.flatMap {
-                    GlassTint.paint(
-                        $0.panelGlassFill(
-                            increaseContrast: contrast == .increased
-                        ),
-                        edge: .top
-                    )
-                },
+                tint: tint,
                 fallback: fallback
             )
     }

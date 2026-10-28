@@ -19,10 +19,17 @@ struct KiwiHubPaint {
     /// A divider's hairline under the toggle (#2596); nil keeps the
     /// system separator.
     var divider: Color?
+    /// The panel Fill as its glass paints it, whose fade a
+    /// selection or hover fill follows (#2721); nil draws it flat.
+    var fade: GlassPaint?
 
     init() {}
 
-    init(_ shelf: PanelHighlight, divider: String) {
+    init(
+        _ shelf: PanelHighlight,
+        divider: String,
+        fade: GlassPaint? = nil
+    ) {
         tinted = true
         selection = Color(kiwiHex: shelf.selection)
         selectionInk = Color(kiwiHex: shelf.selectionInk)
@@ -31,13 +38,32 @@ struct KiwiHubPaint {
         chipHover = rowHover
         hoverInk = Color(kiwiHex: shelf.hoverInk)
         self.divider = Color(kiwiHex: divider)
+        self.fade = fade
     }
 
     /// The paint KiwiHub wears on `glass` as drawn, its divider from
-    /// `ink`, the inks the panel chrome resolved for that glass.
-    static func of(_ glass: PanelGlass, ink: PanelInk?) -> KiwiHubPaint {
+    /// `ink`, the inks the panel chrome resolved for that glass;
+    /// its fills fade as `tint`, the glass's own paint, does; the
+    /// inks on them hold at its far end (`HighlightFadeContrastTests`).
+    static func of(
+        _ glass: PanelGlass,
+        ink: PanelInk?,
+        tint: GlassPaint? = nil
+    ) -> KiwiHubPaint {
         guard let shelf = glass.shelf, let ink else { return KiwiHubPaint() }
-        return KiwiHubPaint(shelf.panelHighlight, divider: ink.divider)
+        return KiwiHubPaint(
+            shelf.panelHighlight,
+            divider: ink.divider,
+            fade: tint
+        )
+    }
+
+    /// The far end of a faded fill as a share of its top, the
+    /// glass's own; nil draws it flat.
+    var fadeShare: CGFloat? {
+        guard let fade, fade.anchorAlpha > 0 else { return nil }
+        let share = fade.farAlpha / fade.anchorAlpha
+        return share < 1 ? share : nil
     }
 }
 
@@ -56,6 +82,19 @@ struct PanelDivider: View {
 }
 
 extension KiwiHubPaint {
+    /// `color` as a selection, hover or track fill: faded like
+    /// the panel's Fill, to `fadeShare`; flat off the toggle.
+    func fill(_ color: Color) -> AnyShapeStyle {
+        guard let fade, let fadeShare else { return AnyShapeStyle(color) }
+        return AnyShapeStyle(
+            LinearGradient(
+                colors: [color, color.opacity(fadeShare)],
+                startPoint: UnitPoint(x: fade.start.x, y: fade.start.y),
+                endPoint: UnitPoint(x: fade.end.x, y: fade.end.y)
+            )
+        )
+    }
+
     /// The ink a selected or hovered item's every level takes under
     /// the toggle; nil leaves the panel's own (#2569).
     func rowInk(selected: Bool, lifted: Bool) -> Color? {

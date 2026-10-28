@@ -132,10 +132,10 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
         .background { slidingPill }
         .padding(3)
-        .background(Capsule().fill(SettingsTheme.trackFill))
+        .background(Capsule().fill(paint.fill(SettingsTheme.trackFill)))
         .overlay(
             Capsule().strokeBorder(
-                SettingsTheme.trackFill,
+                paint.fill(SettingsTheme.trackFill),
                 lineWidth: 0.5
             )
         )
@@ -254,7 +254,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         .background(
             Capsule().fill(
                 isEnabled && !selected && hoveredIndex == index
-                    ? paint.rowHover : .clear
+                    ? paint.fill(paint.rowHover) : AnyShapeStyle(.clear)
             )
         )
         .animation(
@@ -322,7 +322,7 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     private var pill: some View {
         Capsule()
-            .fill(paint.selection)
+            .fill(paint.fill(paint.selection))
     }
 
     /// An unselected label's ink: the theme's, or on KiwiHub's Fill

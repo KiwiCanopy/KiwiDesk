@@ -105,7 +105,7 @@ extension SettingsThemeContrastTests {
         // The selection's fill, and the hover lift (#2365), both
         // through KiwiHub's paint (#2569), whose defaults are the
         // measured tokens.
-        #expect(source.occurrences(of: ".fill(") == 2)
+        #expect(source.occurrences(of: ".fill(paint.fill(") == 2)
         #expect(source.occurrences(of: ".fill(paint.selection)") == 1)
         #expect(source.occurrences(of: ".fill(paint.rowHover)") == 1)
         let paint = try Self.hubPaint()
