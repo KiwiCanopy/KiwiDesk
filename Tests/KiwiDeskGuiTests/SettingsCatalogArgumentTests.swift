@@ -236,7 +236,8 @@ struct SettingsCatalogArgumentTests {
         // 148 #2654: Hyper key, Shortcuts use and two layer rows.
         // 149 #2676: Animate float, Pocket & maximize.
         // 152 #2680: the Pocket card, its Edge and Position rows.
-        #expect(direct.values.reduce(0, +) == 152)
+        // 153 #2678: the Pocket card's Holds row.
+        #expect(direct.values.reduce(0, +) == 153)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

@@ -74,8 +74,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocket = "keybinding.pocket"
     /// `toggle_pocket_window` (#2675).
     case pocketWindow = "keybinding.pocket_window"
-    /// Where the brief pocket appears (#2680): its edge and its
-    /// position along it.
+    /// What the pocket holds (#2678), then where its plate sits
+    /// (#2680): its edge and its position along it.
+    case pocketCapacity = "settings.pocketStyle.capacity"
     case pocketEdge = "settings.pocketStyle.edge"
     case pocketPosition = "settings.pocketStyle.position"
     case showShortcuts = "keybinding.show_shortcuts"
@@ -176,8 +177,9 @@ extension ShortcutsKey {
             .resetSizes, .maximize, .toggleFloating, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         // Its own card (#2680): the two keys moved from Size &
-        // float, then where the brief pocket appears.
-        case .pocket, .pocketWindow, .pocketEdge, .pocketPosition:
+        // float, then what it holds and where its plate sits.
+        case .pocket, .pocketWindow, .pocketCapacity, .pocketEdge,
+            .pocketPosition:
             return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -268,6 +270,8 @@ extension ShortcutsKey {
                 "keybinding.pocket_window",
                 help: "keybinding.pocket_window.help"
             )
+        case .pocketCapacity:
+            return .text("pocket.capacity", help: "pocket.capacity.help")
         case .pocketEdge:
             return .text("pocket.edge", help: "pocket.edge.help")
         case .pocketPosition:

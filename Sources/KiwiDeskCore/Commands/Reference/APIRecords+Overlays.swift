@@ -156,13 +156,16 @@ extension APIReference {
             "Sets the pocket mark's color; empty is automatic.",
             .color("hex")
         ),
+        "set_capacity": APIRecord(
+            "Sets whether the pocket holds one window or several.",
+            .choice("capacity", PocketCapacity.self)
+        ),
         "set_edge": APIRecord(
-            "Sets the screen edge the pocket appears on while a "
-                + "window goes in or out.",
+            "Sets the screen edge the pocket plate sits on.",
             .choice("edge", AppBarEdge.self)
         ),
         "set_position": APIRecord(
-            "Sets where along its edge the pocket appears, 0–100 "
+            "Sets where along its edge the pocket plate sits, 0–100 "
                 + "percent from the left or top.",
             .number("percent")
         ),

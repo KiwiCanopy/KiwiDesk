@@ -6039,6 +6039,18 @@ switcher's own focus recency (#1840), not a second record of it.
 One window stays the default, so a second mark is refused until
 the Several windows setting opens the list.
 
+**Several windows shows the pocket (#2678).** One window keeps the
+pocket out of sight, since its one window is a key away. Under
+Several windows a plate stays at the pocket's edge and position
+while two windows are inside, the second being the one no key can
+name, and its count is every window inside. A click grows the list
+of them out of the plate, by app, each row taking its window out —
+the bars' own click-held list, so it closes and keys as theirs do.
+The plate shows on every window drag in both modes, so Edge and
+Position act whatever the animation switch says: they do not grey.
+No "show the pocket" choice sits beside the capacity, since the
+capacity already decides when the plate stays.
+
 **Choosing the window is its own key (#2675), amending #2446,
 which chose the window with the one key that pockets it. Becoming
 the pocket window is the one resize.** With one key, the first

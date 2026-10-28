@@ -64,7 +64,7 @@ extension BarPeekSource {
     /// or the mixed rows of `+n` and a collapsed Space.
     var menuKind: SpaceBarGlyphPick.Kind {
         switch self {
-        case .overflow, .space, .run: .overflow
+        case .overflow, .space, .run, .pocket: .overflow
         case .glyph, .appItem: .glyph
         }
     }

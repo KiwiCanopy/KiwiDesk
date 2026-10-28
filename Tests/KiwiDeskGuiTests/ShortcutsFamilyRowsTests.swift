@@ -78,6 +78,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.hyperKey),
             .shortcuts(.shortcutBase),
             .shortcuts(.modifierSides),
+            .shortcuts(.pocketCapacity),
             .shortcuts(.pocketEdge),
             .shortcuts(.pocketPosition),
         ]

@@ -5590,6 +5590,16 @@ app that quit while hidden empties the pocket at the next call. A
 `move_to_space` or `swap` naming the pocketed window's id is
 refused.
 
+:::unreleased
+Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
+pocket holds every marked window, in the order each went in, and a
+call puts away before it takes out: while a marked window is out,
+it puts back the focused one, else the one focused last. Only with
+every marked window in does it take one out, the one put in last.
+[`focus_window`](#focus_window) takes out the pocketed window it
+names.
+:::
+
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another
 Space is refused with the same pill. It comes along when you switch
@@ -5662,6 +5672,11 @@ with [`pocket`](#pocket) before unmarking it. Fails on a window in
 native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
+
+:::unreleased
+Under [`pocket.set_capacity("several")`](#pocketset_capacity) a
+call on another window marks it too, beside the others.
+:::
 
 **Example:**
 
@@ -5814,6 +5829,29 @@ is Automatic; any non-empty value must parse as a hex color.
 floating.set_color("#8E5DE0")
 ```
 
+:::unreleased
+### pocket.set_capacity
+
+**Expects:** `"one"` or `"several"` (default `"one"`).
+
+**Does:** sets how many windows the [pocket](#pocket) holds. Under
+`"one"`, [`toggle_pocket_window`](#toggle_pocket_window) marks a
+second window only once the first is unmarked. Under `"several"` it
+marks any number, and while two or more windows are inside, the
+pocket plate stays on the active Space's screen at
+[`pocket.set_edge`](#pocketset_edge) and
+[`pocket.set_position`](#pocketset_position), showing how many are
+inside. A click on the plate lists the windows inside by app; a
+row takes its window out. Switching back to `"one"` keeps the
+windows already marked.
+
+**Example:**
+
+```lua
+pocket.set_capacity("several")
+```
+:::
+
 ### pocket.set_color
 
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
@@ -5847,6 +5885,12 @@ pocket.set_color("")          -- back to Automatic
 window goes into the [pocket](#pocket) or comes out, under
 [`animations.set_on_state_change`](#animationsset_on_state_change).
 A bar on the same edge keeps it just inside the bar.
+
+:::unreleased
+The pocket plate of
+[`pocket.set_capacity("several")`](#pocketset_capacity) sits at the
+same place, whatever `animations.set_on_state_change` says.
+:::
 
 **Example:**
 

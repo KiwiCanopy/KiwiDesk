@@ -159,14 +159,15 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleSticky),
     ]
 
-    /// The Pocket card (#2680): its two keys, then the brief
-    /// pocket's placement, drawn by `PocketGroup`.
+    /// The Pocket card (#2680): its two keys, then what it holds
+    /// (#2678) and where its plate sits, drawn by `PocketGroup`.
     static let pocketAtRest: [SettingKey] = [
         .shortcuts(.pocket),
         .shortcuts(.pocketWindow),
     ]
 
     static let pocketList: [SettingKey] = [
+        .shortcuts(.pocketCapacity),
         .shortcuts(.pocketEdge),
         .shortcuts(.pocketPosition),
     ]

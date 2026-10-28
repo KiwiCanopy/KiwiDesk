@@ -293,7 +293,9 @@ public enum APIReference {
         "floating": [
             "set_mark", "set_color",
         ],
-        "pocket": ["set_color", "set_edge", "set_position"],
+        "pocket": [
+            "set_capacity", "set_color", "set_edge", "set_position",
+        ],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",
             "set_fade_curve", "set_appearance",

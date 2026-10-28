@@ -108,6 +108,8 @@ struct CoreLocalizationBoundaryTests {
         // The overflow mark's VoiceOver name, one key per direction
         // (#2235); the mark is drawn by Core.
         "App/KiwiCore+OverflowMarks.swift": 4,
+        // The pocket plate's VoiceOver name (#2678); Core draws it.
+        "App/KiwiCore+PocketPlate.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901, a float's two #1826), drawn
         // by Core; one Space

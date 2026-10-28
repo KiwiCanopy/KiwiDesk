@@ -65,6 +65,19 @@ extension SettingsValueReadout {
                     new: FocusWrapWords.value(new.focusWrap)
                 )
             ]
+        case .pocketCapacity:
+            return [
+                .change(
+                    census,
+                    label: SettingsCatalog.shortcuts.pocketCapacity.text,
+                    old: PocketGroup.capacityName(
+                        old.settings.pocketStyle.capacity
+                    ),
+                    new: PocketGroup.capacityName(
+                        new.settings.pocketStyle.capacity
+                    )
+                )
+            ]
         case .pocketEdge:
             return [
                 .change(

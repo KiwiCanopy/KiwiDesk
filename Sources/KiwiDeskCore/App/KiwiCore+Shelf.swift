@@ -61,6 +61,7 @@ extension KiwiCore {
             retireDepartedBars(live: Set(fallback.map(\.display)))
             overflowMarks.standingDown = []
             updateOverflowMarks()
+            updatePocketPlate(standingDown: [])
             return
         }
         var appBarsShown: [AppBarManager.Bar] = []
@@ -171,6 +172,8 @@ extension KiwiCore {
         // with every shelf repaint, on this pass's verdict (#2235).
         overflowMarks.standingDown = standingDown
         updateOverflowMarks()
+        // The pocket plate wears the shelf's look too (#2678).
+        updatePocketPlate(standingDown: standingDown)
     }
 
     /// Drops the bar overlays of displays outside `live` — after the

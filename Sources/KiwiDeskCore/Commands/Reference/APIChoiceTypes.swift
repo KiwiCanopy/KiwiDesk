@@ -46,6 +46,7 @@ extension AppBarStyle.BackgroundStyle: APIChoiceType {}
 extension AppBarStyle.BackgroundFit: APIChoiceType {}
 extension AppBarStyle.ActiveIndicator: APIChoiceType {}
 extension BarAppIconSource: APIChoiceType {}
+extension PocketCapacity: APIChoiceType {}
 extension SpaceBarStyle.InactiveContent: APIChoiceType {}
 extension SpaceBarStyle.ItemLabel: APIChoiceType {}
 extension ShelfVisibility: APIChoiceType {}

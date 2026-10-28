@@ -1,17 +1,22 @@
 import CoreGraphics
 import Foundation
 
-/// The pocket's style: the mark's colour (#2671), and where the
-/// brief pocket appears while a window goes in or out (#2680).
+/// The pocket's settings: the mark's colour (#2671), where the
+/// pocket plate sits (#2680), and how many windows it holds
+/// (#2678).
 public struct PocketStyle: Sendable, Equatable {
     /// Pocket fill hex string; empty = automatic, the plate's
     /// mark ink (`.labelColor`), so it follows light and dark.
     public var color = ""
 
-    /// The screen edge the brief pocket sits on.
+    /// One window, as 4.0.0 shipped, or several: the plate then
+    /// stays on screen while it holds two (#2678).
+    public var capacity = PocketCapacity.one
+
+    /// The screen edge the pocket plate sits on.
     public var edge = AppBarEdge.bottom
 
-    /// Where along `edge` the brief pocket's centre sits, in
+    /// Where along `edge` the pocket plate's centre sits, in
     /// percent: 0 the left or top end, 100 the right or bottom.
     public var position: CGFloat = Self.defaultPosition {
         didSet { position = Self.clampPosition(position) }
@@ -29,6 +34,7 @@ public struct PocketStyle: Sendable, Equatable {
 extension PocketStyle: Codable {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case color
+        case capacity
         case edge
         case position
     }
@@ -43,6 +49,11 @@ extension PocketStyle: Codable {
                 String.self,
                 forKey: .color
             ) ?? d.color
+        capacity =
+            try container.decodeIfPresent(
+                PocketCapacity.self,
+                forKey: .capacity
+            ) ?? d.capacity
         edge =
             try container.decodeIfPresent(
                 AppBarEdge.self,
@@ -56,4 +67,9 @@ extension PocketStyle: Codable {
             ) ?? d.position
         )
     }
+}
+
+/// How many windows the pocket holds (#2678).
+public enum PocketCapacity: String, Sendable, Codable, CaseIterable {
+    case one, several
 }

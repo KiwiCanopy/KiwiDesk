@@ -2,12 +2,14 @@ import AppKit
 
 /// The brief pocket itself (#2680): a rounded plate in KiwiShelf's
 /// look — its Fill as tinted glass or solid, and its rim, as the
-/// overflow mark wears it — holding the pocket mark. Redrawn at
-/// each size the nod gives it, never scaled.
+/// overflow mark wears it — holding the pocket mark, and on the
+/// pocket plate the count beside it (#2678). Redrawn at each size
+/// the nod gives it, never scaled.
 @MainActor
 final class BriefPocketView: NSView {
     private let content = NSView()
     private let mark = NSImageView()
+    private let count = NSTextField(labelWithString: "")
     private let solid = NSView()
     private let tint = GlassBackdrop()
     private let rim = ShelfBorder.make()
@@ -24,6 +26,12 @@ final class BriefPocketView: NSView {
         content.wantsLayer = true
         mark.imageScaling = .scaleProportionallyUpOrDown
         content.addSubview(mark)
+        count.isBezeled = false
+        count.drawsBackground = false
+        count.alignment = .center
+        count.isHidden = true
+        count.setAccessibilityElement(false)
+        content.addSubview(count)
         addSubview(solid)
         addSubview(content)
         addSubview(rim)
@@ -34,29 +42,68 @@ final class BriefPocketView: NSView {
     required init?(coder: NSCoder) { nil }
 
     /// Wears the gated `shelf` and the mark in `hex`, the pocket
-    /// mark's colour.
-    func wear(_ shelf: KiwiShelf, markHex hex: String) {
+    /// mark's colour, with `text` beside the mark where non-nil.
+    func wear(
+        _ shelf: KiwiShelf,
+        markHex hex: String,
+        count text: String? = nil
+    ) {
         self.shelf = shelf
         mark.image = PocketMark.mark.image(
             size: BriefPocketPlan.markSide,
             hex: hex
         )
+        count.isHidden = text == nil
+        count.stringValue = text ?? ""
+        count.font = Self.countFont(shelf)
+        count.textColor = NSColor(kiwiHex: shelf.itemColor)
         needsLayout = true
+    }
+
+    /// The count's face, the overflow mark's.
+    static func countFont(_ shelf: KiwiShelf) -> NSFont {
+        shelf.badgeFont(
+            ofSize: OverflowMarkView.textSize,
+            emphasis: .semibold
+        )
+    }
+
+    /// The width `text` adds to the square beside the mark.
+    static func countWidth(_ text: String, shelf: KiwiShelf) -> CGFloat {
+        let font = countFont(shelf)
+        let width = (text as NSString).size(withAttributes: [.font: font])
+        return ceil(width.width) + BriefPocketPlan.margin
     }
 
     override func layout() {
         super.layout()
         let radius = min(bounds.width, bounds.height) * 0.3
         content.frame = bounds
-        let side =
-            bounds.width * BriefPocketPlan.markSide
-            / BriefPocketPlan.side
+        // The mark keeps a square at the leading end; the count
+        // takes the rest.
+        let square = count.isHidden ? bounds.width : bounds.height
+        let side = square * BriefPocketPlan.markSide / BriefPocketPlan.side
         mark.frame = CGRect(
-            x: (bounds.width - side) / 2,
+            x: (square - side) / 2,
             y: (bounds.height - side) / 2,
             width: side,
             height: side
         )
+        if !count.isHidden {
+            count.sizeToFit()
+            let height = count.frame.height
+            count.frame = CGRect(
+                x: square - BriefPocketPlan.margin / 2,
+                y: BarTextGlyph.originY(
+                    centredOn: bounds.midY,
+                    for: count,
+                    band: .figures,
+                    height: height
+                ),
+                width: bounds.width - square,
+                height: height
+            )
+        }
         paintPlate(radius: radius)
         rim.frame = bounds
         ShelfBorder.paint(
