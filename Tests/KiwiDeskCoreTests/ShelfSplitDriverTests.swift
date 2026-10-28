@@ -46,6 +46,9 @@ struct ShelfSplitDriverTests {
         settings.scrolling.appBar.visibility = .always
         settings.spaceBarStyle.edge = space
         settings.appBarStyle.edge = app
+        // Glass repairs its width only after the glide, past the
+        // test's end, so it would draw cut on screen meanwhile.
+        settings.kiwishelf.liquidGlass = false
         core.tiler.settings = settings
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.updateBars()
