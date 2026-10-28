@@ -52,6 +52,12 @@ count in this sentence for the next author to falsify.
 8. Every built page declares a raster favicon. Google Search takes
    no SVG favicon, so a head carrying only `/favicon.svg` shows a
    generic icon in results on a green build.
+9. The /looks gallery draws at least one look in every locale
+   (#1740), the watcher for `src/lib/looks.ts`'s silent fallback.
+   The looks' own colors reach the built pages only, as inline
+   custom properties, so rule 1's scan of `site/src` never meets
+   them and needs no exemption; a look color written into source
+   would be a brand-layer question like any other hex.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -1619,6 +1625,58 @@ def check_voices_rendered(dist: pathlib.Path) -> None:
     print(f"voices: {drawn} drawn across {len(pages)} landing page(s)")
 
 
+LOOKS_PAGE = "looks/index.html"
+
+
+def check_looks_rendered(dist: pathlib.Path) -> None:
+    """Every locale's /looks page draws the gallery (#1740).
+
+    `src/lib/looks.ts` reads the KiwiDesk-Looks index at build time
+    and, on any failure, draws NO look so a Pages deploy never
+    breaks on it. That leniency is silent by construction, so this
+    is the watcher: a renamed field, a format bump or a moved repo
+    reds the site gate instead of quietly emptying the gallery.
+    Each card owes a detail section under its own id, so a card's
+    title link lands, and while a page carries noindex no sitemap
+    may list it — the gallery goes live by dropping both together.
+    """
+    card = re.compile(
+        r"<li\b[^>]*\bclass=\"[^\"]*\blook-card\b[^>]*\bdata-look=\"([^\"]+)\""
+    )
+    detail = re.compile(r"<article\b[^>]*\bclass=\"[^\"]*\bdetail\b"
+                        r"[^>]*\bid=\"([^\"]+)\"")
+    noindex = re.compile(
+        r"<meta\b[^>]*name=\"robots\"[^>]*content=\"[^\"]*noindex"
+    )
+    listed = set()
+    for name in ("sitemap.xml", "sitemap-0.xml"):
+        page = dist / name
+        if page.is_file():
+            listed |= set(re.findall(r"<loc>(.*?)</loc>", page.read_text()))
+    drawn = 0
+    pages = [dist / locale / LOOKS_PAGE for locale in ("", "de", "ja")]
+    for page in pages:
+        where = page.relative_to(dist)
+        if not page.exists():
+            fail(f"looks page {where} was not built")
+        html = page.read_text()
+        cards = card.findall(html)
+        if not cards:
+            fail(
+                f"{where} draws no look card. The build's read of the "
+                "KiwiDesk-Looks index failed or returned nothing; its "
+                "`[looks]` warning in the build log says why."
+            )
+        missing = set(cards) - set(detail.findall(html))
+        if missing:
+            fail(f"{where}: no detail section for {sorted(missing)}")
+        path = "/" + str(where.parent) + "/"
+        if noindex.search(html) and any(u.endswith(path) for u in listed):
+            fail(f"{where} is noindex but a sitemap lists {path}")
+        drawn += len(cards)
+    print(f"looks: {drawn} card(s) drawn across {len(pages)} page(s)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1646,6 +1704,7 @@ def main() -> None:
     check_raster_favicon(dist)
     check_no_sanity_in_dist(dist)
     check_voices_rendered(dist)
+    check_looks_rendered(dist)
 
 
 if __name__ == "__main__":

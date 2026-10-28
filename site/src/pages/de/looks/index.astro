@@ -1,0 +1,10 @@
+---
+// KiwiDesk — German looks gallery at /de/looks/ (#1740).
+//
+// The page lives entirely in the shared <Looks> component; this
+// route only supplies the locale. The looks come from the
+// KiwiDesk-Looks repo at build time (src/lib/looks.ts).
+import Looks from "../../../components/Looks.astro";
+---
+
+<Looks lang="de" />
