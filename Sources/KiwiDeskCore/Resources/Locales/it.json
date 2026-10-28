@@ -1793,6 +1793,8 @@
   "resize.app_min_reached": "Questa app non si riduce oltre",
   "resize.boundary_reached": "Non c'è più posto per aumentare la dimensione",
   "resize.divide_other_axis": "Qui non c'è nulla da dividere — prova l'altro asse",
+  "resize.grid_no_other_column": "Nessun’altra colonna può prendere la larghezza",
+  "resize.grid_no_other_row": "Nessun’altra riga può prendere l’altezza",
   "resize.layout_has_none": "Questo layout non prevede il ridimensionamento",
   "resize.min_size_reached": "Dimensione minima della finestra raggiunta",
   "resize.neighbor_app_min": "L'app adiacente non si riduce oltre",

@@ -1437,10 +1437,20 @@ editing here:
   `screenNeighbors` — `layoutInput` is the site, probes and
   previews rightly omit it (`SizeBoundPlumbingTests`). A path
   that changes a window's size outside the engine's asks **owes
-  the ledger an invalidation** — a genuine resize forgets
-  outright, rekey migrates — or a stale bound pins the window
+  the ledger an invalidation** — a genuine resize that is no
+  user gesture forgets outright, rekey migrates — or a stale bound pins the window
   at a size the app no longer insists on
-  (`RetileBoundSkipTests`) — and the gate tells our echo from
+  (`RetileBoundSkipTests`). A user's resize gesture
+  (`isResizeGesture`) owes the sweep instead: the open ask, the
+  candidates and the pending probe's issue and baseline retired,
+  and only the entries its size contradicts dropped — a forget
+  there dropped Grid's cap mid-drag and the press solved against
+  a shape the render never drew (#2706,
+  `SizeBoundGestureResizeTests`). An unlearning sweep asks
+  `EffectiveSizeBound.Axis.isContradicted`, never a floor/ceiling
+  comparison of its own. A new per-window learner store answers
+  the gesture sweep too (`SizeBoundLearnerLifecycleParityTests`).
+  The gate tells our echo from
   that resize by the applier's recently-set stamp (and, past its
   grace, by `ledgerExplainsResize`), so the stamp is written at
   ENQUEUE ahead of the set and AGAIN after it, never only after
@@ -1765,7 +1775,9 @@ editing here:
   whose cap is their largest learned floor (#2687), while the pile
   check stays on `min_window_size` alone; the count door takes its
   floor as a required argument, so no reader re-derives the cap
-  from a count (`GridHealTests`). A store taking
+  from a count (`GridHealTests`); the cap's floor survives the
+  gesture that resizes the window setting it (#2706, the #677
+  bullet's gesture sweep). A store taking
   that answer states both halves, and a press on it solves
   against the same render.
   `TrackWeightHealTests` pins the wiring, `WeightHealTests`
@@ -1893,7 +1905,11 @@ editing here:
   ONE member takes `nothingToDivide` instead (#1258) — the count
   is the reason there, not the arrangement, and the sentence
   says which of the two it is because the caller states whether
-  the other axis divides.
+  the other axis divides. Grid's cell that already spans the
+  pressed axis is the exception (#2707): a grow takes
+  `ownMaximum(atBoundary: true)`, a shrink `gridNoOtherTrack`,
+  since a Grid row or column is named where a zone is not
+  (`GridSpanRefusalTests`).
   Two obligations on that judgement, both learned the same way.
   **Judge it on what the layout DREW, never on a member count**:
   a bsp region too small for one minimum-size window piles them

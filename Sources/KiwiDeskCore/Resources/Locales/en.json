@@ -1793,6 +1793,8 @@
   "resize.app_min_reached": "This app won't go smaller",
   "resize.boundary_reached": "No room left to grow",
   "resize.divide_other_axis": "Nothing to divide here — try the other axis",
+  "resize.grid_no_other_column": "No other column to take the width",
+  "resize.grid_no_other_row": "No other row to take the height",
   "resize.layout_has_none": "This layout has no resizing",
   "resize.min_size_reached": "Minimum window size reached",
   "resize.neighbor_app_min": "Neighboring app won't go smaller",

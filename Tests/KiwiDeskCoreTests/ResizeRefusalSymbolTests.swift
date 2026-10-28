@@ -34,6 +34,8 @@ struct ResizeRefusalSymbolTests {
             // reds (guard-prover, 2026-09-05).
             .nothingToDivide(window, otherAxisDivides: false),
             .nothingToDivide(window, otherAxisDivides: true),
+            .gridNoOtherTrack(window, axis: "y"),
+            .gridNoOtherTrack(window, axis: "x"),
             // #1298: full screen is a fact about the window, and
             // there is no resize here either — the non-arrow arm.
             .windowIsFullscreen(window),
