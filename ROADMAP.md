@@ -8,11 +8,10 @@ the full picture, and the
 [Discord](https://discord.gg/bYeTrJyZyS) is the place to talk about
 any of it.
 
-KiwiDesk now keeps your desk the way you left it, takes its setup
-from your own AI assistant, and has focus that follows the mouse and
-a hyper key. Further out, KiwiDesk is growing from a window tiler into a
-way of shaping how you work with your whole desk, and something new
-is taking shape there.
+I'm building KiwiDesk to be the best window manager for macOS I can
+imagine. It has come this far because people tried it and told me
+what broke and what they missed. If you have an idea, I'd like to
+hear it.
 
 <!--
 KiwiDesk's "What's new" window shows the section below (#1813), so
@@ -27,9 +26,7 @@ that section is free.
 
 ## Next on my list
 
-_As of 2026-10-21_
+_As of 2026-10-28_
 
-- A Stack or Track that runs out of room scrolls instead of piling windows up
-- Keep a window one key away, floating over whatever you're on
-- One key gives the focused window the whole screen, and again puts it back
+- A bigger pocket: more windows, each with its own key, and a pocket the mouse can use like the bars
 
