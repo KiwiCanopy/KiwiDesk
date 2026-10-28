@@ -763,7 +763,7 @@ area's gate-wiring suite pins that its VIEWS consult the resolver
 rather than re-deriving the predicate inline — the dead-resolver
 trap General shipped, where the resolver was built only in tests
 (`BarsGateWiringTests`, `GapsAndBordersGateWiringTests`,
-`ShortcutsGateTests.layersCardConsultsTheResolver`), gate-granular
+`ShortcutsOfferDisclosureTests` ▸ `cardsOpenOnArrival`), gate-granular
 so a file resolving two gates reds if EITHER goes hand-rolled.
 A gate joins `ShortcutsGates.resolvedElsewhere` only when it is
 a live-editor-state predicate no resolver input can answer, never
@@ -1743,8 +1743,10 @@ silently exempt from a fail-open guard. **A new directory under
 `Sources/KiwiDesk` that draws chrome joins `ChromeScanRoots` in
 the same change that creates it**, and one that renders a
 **schematic** joins `LayoutSchematicPlacementScanTests`' roots
-as well. Each guard carries a root-coverage check, so a moved or
-renamed directory reds rather than going quiet.
+as well. A moved or renamed directory reds rather than going
+quiet: `ChromeScanRootsTests` checks the shared list once for
+every guard reading it, and a guard declaring its own roots
+carries its own root-coverage check.
 
 `ChromeScanRoots` is the ONE list of which trees draw the app's
 own chrome, and a guard that scans chrome reads it rather than

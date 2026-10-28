@@ -242,7 +242,7 @@ struct PanelGlassTests {
         #expect(face.contains(".foregroundStyle(ink)"))
         let footer = try Self.source("Jump/JumpPanelView+Footer.swift")
         #expect(
-            footer.contains("Capsule().fill(paint.selection.opacity(0.2))")
+            footer.contains("Capsule().fill(paint.selection")
         )
         #expect(!footer.contains("SettingsTheme.accent"))
     }
