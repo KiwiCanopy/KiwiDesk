@@ -48,6 +48,9 @@ paths:
   # the gate.
   - "Sources/KiwiDeskCore/Borders/OverflowMark*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+  # The pocket plate wears the shelf and feeds the peek (#2678).
+  - "Sources/KiwiDeskCore/Borders/PocketPlate.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+PocketPlate.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
   # The Space slide's plates (#1956, #2524): KiwiHub's glass on
   # KiwiHub's leaf, wearing the Fill under the toggle (#2569).

@@ -130,33 +130,56 @@ struct PocketPlateTests {
 
     @Test("the count widens the plate, its mark kept on the pocket")
     func widensAwayFromTheEdge() {
-        let square = CGRect(x: 100, y: 200, width: 40, height: 40)
-        let right = KiwiCore.pocketPlateFrame(
-            square: square,
+        let region = CGRect(x: 0, y: 0, width: 1000, height: 800)
+        let inside = CGRect(x: 100, y: 200, width: 40, height: 40)
+        let free = KiwiCore.pocketPlateFrame(
+            square: inside,
             extra: 20,
-            edge: .right
+            region: region
         )
-        #expect(right.maxX == square.maxX)
-        #expect(right.width == 60)
-        let left = KiwiCore.pocketPlateFrame(
-            square: square,
+        #expect(free.frame.minX == inside.minX)
+        #expect(free.frame.width == 60)
+        #expect(free.frame.height == inside.height)
+        #expect(!free.markTrailing)
+        // At the right end — the right edge, or a position near 100
+        // on the top or bottom — it widens leftward, mark trailing.
+        let end = CGRect(x: 952, y: 200, width: 40, height: 40)
+        let held = KiwiCore.pocketPlateFrame(
+            square: end,
             extra: 20,
-            edge: .left
+            region: region
         )
-        #expect(left.minX == square.minX)
-        let bottom = KiwiCore.pocketPlateFrame(
-            square: square,
-            extra: 20,
-            edge: .bottom
+        #expect(held.frame.maxX == end.maxX)
+        #expect(held.frame.width == 60)
+        #expect(held.markTrailing)
+    }
+
+    @Test(
+        "a play draws its own pocket only where no plate stands after it",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func playDrawsWhereNoPlate() throws {
+        let core = makeCore()
+        let display = try #require(giveSpaceTheMainScreen(core))
+        pocketTwo(core)
+        core.updateBars()
+        #expect(!core.briefPocketDrawsPocket(on: display))
+        // A take-out plays before its retile: the plate it leaves
+        // behind is gone, so the play draws the pocket.
+        core.state.markPocketOut(one, cameFrom: nil)
+        #expect(core.briefPocketDrawsPocket(on: display))
+    }
+
+    @Test("the bar pass hands the plate its own stand-down")
+    func barPassHandsTheStandDown() {
+        let core = makeCore()
+        // A stale verdict the pass must overwrite.
+        core.pocketPlate.standingDown = [DisplayID(99)]
+        core.updateBars()
+        #expect(
+            core.pocketPlate.standingDown
+                == core.overflowMarks.standingDown
         )
-        #expect(bottom.minX == square.minX)
-        #expect(bottom.height == square.height)
-        let top = KiwiCore.pocketPlateFrame(
-            square: square,
-            extra: 20,
-            edge: .top
-        )
-        #expect(top == bottom)
     }
 
     @Test("capacity decodes as stored, absent as one, and refuses a bad value")
@@ -199,7 +222,7 @@ struct PocketPlateTests {
     }
 
     @Test("a click grows the list out of the plate, wearing its shelf")
-    func clickOpensTheList() {
+    func clickOpensTheList() throws {
         let core = makeCore()
         showPanels(core)
         defer { close(core) }
@@ -216,8 +239,8 @@ struct PocketPlateTests {
                 name: "Pocket"
             )
         )
-        let window = try? #require(core.pocketPlate.panel)
-        #expect(window.flatMap { core.shelves.shelfBeyondBars($0) } != nil)
+        let window = try #require(core.pocketPlate.panel)
+        #expect(core.shelves.shelfBeyondBars(window) != nil)
         core.openPocketList()
         #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
     }

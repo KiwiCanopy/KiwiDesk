@@ -37,27 +37,28 @@ extension KiwiCore {
         else { return nil }
         let shelf = briefPocketShelf()
         let count = "\(inside.count)"
+        let region = pocketRegion(on: display, screen: screen)
         let square = BriefPocketPlan.pocketFrame(
-            in: pocketRegion(on: display, screen: screen),
+            in: region,
             edge: style.edge,
             position: style.position
         )
-        let frame = Self.pocketPlateFrame(
+        let placed = Self.pocketPlateFrame(
             square: square,
             extra: BriefPocketView.countWidth(count, shelf: shelf),
-            edge: style.edge
+            region: region
         )
         return PocketPlateOverlay.Spec(
             display: display,
             windows: inside,
             frame: GeometryUtils.flip(
-                frame,
+                placed.frame,
                 primaryHeight: GeometryUtils.primaryHeight
             ),
             shelf: shelf,
             markHex: style.color,
             count: count,
-            markTrailing: style.edge == .right,
+            markTrailing: placed.markTrailing,
             name: L(
                 "pocket.plate.ax",
                 "Pocket, windows inside: %1$d",
@@ -74,17 +75,27 @@ extension KiwiCore {
     }
 
     /// The plate's frame (AX): the pocket's `square`, where the
-    /// brief pocket lands, widened by `extra` for the count — inward
-    /// on the right edge, rightward on every other.
+    /// brief pocket lands, widened by `extra` for the count —
+    /// rightward, or leftward where that would leave `region`'s
+    /// margin, the mark's square then trailing.
     static func pocketPlateFrame(
         square: CGRect,
         extra: CGFloat,
-        edge: AppBarEdge
-    ) -> CGRect {
+        region: CGRect
+    ) -> (frame: CGRect, markTrailing: Bool) {
         var frame = square
         frame.size.width += extra
-        if edge == .right { frame.origin.x -= extra }
-        return frame
+        let trailing =
+            square.maxX + extra > region.maxX - BriefPocketPlan.margin
+        if trailing { frame.origin.x -= extra }
+        return (frame, trailing)
+    }
+
+    /// Whether a play on `display` draws its own pocket: not where
+    /// the plate stands, read from the state the play shows, since a
+    /// take-out plays before its retile syncs the plate.
+    func briefPocketDrawsPocket(on display: DisplayID) -> Bool {
+        pocketPlateSpec()?.display != display
     }
 
     /// The plate's click and VoiceOver press, wired once at boot.

@@ -46,7 +46,7 @@ extension KiwiCore {
                 flight: flight
             )
         // A pocket plate on this screen is the pocket (#2678).
-        request.drawsPocket = pocketPlate.shown?.display != display
+        request.drawsPocket = briefPocketDrawsPocket(on: display)
         briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return BriefPocketPlan.timeline(direction, flight: flight)
