@@ -81,7 +81,10 @@ function freshOn<T extends Dated>(list: T[], day: number): T[] {
   );
 }
 
-/** Discover on one UTC day (a day number). */
+/** Discover on one UTC day (a day number). Replays from the epoch
+ * with today's list: an added look never disturbs a cycle, but a
+ * removed one drops out of past decks too, so a removal may reshuffle
+ * the current cycle once (accepted, #1740). */
 export function discoverDay<T extends Dated>(
   list: T[],
   today: number,
