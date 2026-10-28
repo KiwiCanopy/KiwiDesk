@@ -68,6 +68,14 @@ final class SettingsModel: ObservableObject {
         didSet {
             nav.navigationMovesFocus = SettingsInputSource.movesFocus
             onWindowTitle?(SettingsWindowTitle.of(destination))
+            // Every page is Advanced's (#2737).
+            if destination != nil { settingsRoot = .advanced }
+        }
+    }
+    /// The root Settings shows, stored as it changes (#2737).
+    @Published var settingsRoot: SettingsRoot = .simple {
+        didSet {
+            SettingsRootPreference.write(settingsRoot, to: preferences)
         }
     }
     /// Distinct setting changes in draft, recomputed beside `isDirty`.
@@ -326,6 +334,7 @@ final class SettingsModel: ObservableObject {
         self.appearance = AppearancePreference.read(
             from: preferences
         )
+        self.settingsRoot = SettingsRootPreference.read(from: preferences)
         reload()
     }
 

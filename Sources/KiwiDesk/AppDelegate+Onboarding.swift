@@ -124,7 +124,7 @@ extension AppDelegate {
     /// closing page's exit (#1365) and the shortcuts panel's
     /// Edit door, which is why the close is conditional.
     func openSettingsFromTour(at destination: SettingsDestination) {
-        dashboard.show(navigatingTo: destination)
+        dashboard.show(landingFromTour: destination)
         if onboardingWindow != nil {
             closeOnboarding()
         }

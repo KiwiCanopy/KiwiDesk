@@ -133,7 +133,7 @@ Advanced ▸ Saved window arrangement ▸ Discard** clears it.
 
 ## Moving to Another Mac: Backups
 
-**General ▸ Advanced ▸ KiwiDesk backup ▸ Export…** writes one
+**General ▸ Files & Reset ▸ KiwiDesk backup ▸ Export…** writes one
 file with your settings, every profile, your saved palettes and
 your Desktop bindings; **Restore from backup ▸ Restore…** puts it
 back. Not included: the remembered window arrangement. For
@@ -1236,7 +1236,7 @@ never starts a second one: the second launch brings the running
 instance forward and exits with `already running`.
 
 **Windows come back in the wrong spaces after a restart or wake?**  
-**General ▸ Advanced ▸ Saved window arrangement ▸ Discard**
+**General ▸ Files & Reset ▸ Saved window arrangement ▸ Discard**
 clears the remembered arrangement without changing settings.
 **All settings ▸ Reset…** below it is the last resort: it deletes every
 profile, your spaces, layouts and keybindings and reseeds the
@@ -1244,7 +1244,7 @@ defaults, keeping `init.lua`, your palettes, the display language,
 the login item and onboarding; the old files go to the Trash.
 
 **Reporting a bug?**  
-**General ▸ Advanced ▸ Log**: pick a time range and press
+**General ▸ Files & Reset ▸ Log**: pick a time range and press
 **Export…** to save KiwiDesk's log for it to a file. Make the
 problem happen again first: the range counts back from now, and
 "since KiwiDesk started" means this run. The file names the apps

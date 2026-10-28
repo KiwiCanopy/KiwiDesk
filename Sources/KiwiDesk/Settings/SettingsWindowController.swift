@@ -246,6 +246,16 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
         show()
     }
 
+    /// The tour's landing: its page while Advanced is the stored
+    /// surface, Simple's root otherwise (#2737 ruling 15).
+    func show(landingFromTour destination: SettingsDestination) {
+        if model.settingsRoot == .advanced {
+            show(navigatingTo: destination)
+        } else {
+            show()
+        }
+    }
+
     /// Shows the dashboard window: a fresh open on Home, an open
     /// one where it is (`SettingsModel.prepareToShow`, #1970).
     func show() {

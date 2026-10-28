@@ -10296,10 +10296,15 @@ Inside a control Simple does draw, the rule binds as before: an
 `init.lua`-owned Look line greys, it does not vanish.
 
 Simple is a root beside Home, not a navigator, so *Home is the
-only navigator* still holds inside Advanced. A fresh install
-opens on Simple. The preference is a new key; the retired
-`settingsMode` is never read, because its values meant the old
-modes.
+only navigator* still holds inside Advanced. Every install opens
+on Simple until the user picks a root, an updated one too: the
+header names what Simple hides, so an existing config reads as
+kept rather than lost, and guessing a root from the config would
+be a second predicate to keep true. The choice is a new key; the
+retired `settingsMode` is never read, because its values meant
+the old modes. "Advanced" names the root alone: General's drawer
+that held the config file, backup and resets is *Files & Reset*,
+for what it holds.
 :::
 
 **A persistent statement and a transient one never share a
@@ -20021,7 +20026,7 @@ switch macOS accepted but never announced.
 **[Principle]**
 
 **A reset clears app-generated state, never authored content or
-app-level preferences** (#634). The two General ▸ Advanced
+app-level preferences** (#634). The two General ▸ Files & Reset
 hatches delete what KiwiDesk wrote for itself — `gui.json`,
 profiles, the arrangement snapshots — and always keep what the
 user made or chose: `init.lua`, the palette library, the display
@@ -20148,7 +20153,7 @@ carries an *Update Available…* row only while there is one to
 install — a menu row that is usually a no-op is noise beside
 Quit. Language,
 appearance and start-at-login are General's, and the reset
-ladder, log export and backup stay under General ▸ Advanced,
+ladder, log export and backup stay under General ▸ Files & Reset,
 the recovery shelf.
 
 **A "checking" state is only ever our own check.** A scheduled

@@ -76,6 +76,10 @@ struct SettingsSearchCatalogSynonymTests {
                 "macos-desktops",
                 "likewise, the moves behind its drawer"
             ),
+            SettingsCatalog.general.generalAdvanced.control.id: (
+                "files-and-reset",
+                "the drawer's retired title, now a root's (#2737)"
+            ),
         ]
     }
 
