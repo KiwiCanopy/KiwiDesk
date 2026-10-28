@@ -8,11 +8,7 @@ import Testing
 @Suite("Chord glyphs have one door (#2601)")
 struct ChordGlyphsSeamTests {
     private static let allowed: [String: (count: Int, why: String)] = [
-        "ChordGlyphs.swift": (3, "the door itself"),
-        "KeyboardCensus.swift": (
-            1,
-            "test-only: the census tests read it off the main actor"
-        ),
+        "ChordGlyphs.swift": (4, "the door itself")
     ]
 
     @Test("ComboSymbols is drawn only through ChordGlyphs")

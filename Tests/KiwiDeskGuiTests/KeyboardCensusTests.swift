@@ -44,12 +44,12 @@ struct KeyboardCensusTests {
             in: [layer(["alt+j", "alt+k"])]
         )
         #expect(only.count == 1)
-        #expect(only.first?.label == "⌥")
+        #expect(only.first?.glyphs == "⌥")
 
         let two = KeyboardCensus.layers(
             in: [layer(["alt+j", "ctrl+alt+k"])]
         )
-        #expect(two.map(\.label) == ["⌥", "⌃⌥"])
+        #expect(two.map(\.glyphs) == ["⌥", "⌃⌥"])
     }
 
     /// A bare key binding gets a chip like any other. An earlier
@@ -63,7 +63,7 @@ struct KeyboardCensusTests {
         let only = KeyboardCensus.layers(in: [layer(["j"])])
         #expect(only.count == 1)
         #expect(only.first?.modifiers.isEmpty == true)
-        #expect(only.first?.label == "")
+        #expect(only.first?.glyphs == "")
 
         let mixed = KeyboardCensus.layers(
             in: [layer(["j", "ctrl+alt+k"])]
@@ -97,7 +97,7 @@ struct KeyboardCensusTests {
         let sorted = KeyboardCensus.layers(
             in: [layer(["shift+cmd+j", "ctrl+k"])]
         )
-        #expect(sorted.map(\.label) == ["⌃", "⇧⌘"])
+        #expect(sorted.map(\.glyphs) == ["⌃", "⇧⌘"])
     }
 
     /// The tiebreak, which the test above cannot reach: two
@@ -111,7 +111,7 @@ struct KeyboardCensusTests {
         let sorted = KeyboardCensus.layers(
             in: [layer(["ctrl+alt+j", "shift+cmd+k"])]
         )
-        #expect(sorted.map(\.label) == ["⇧⌘", "⌃⌥"])
+        #expect(sorted.map(\.glyphs) == ["⇧⌘", "⌃⌥"])
     }
 
     @Test("Only the selected layers claim a key")
@@ -138,7 +138,7 @@ struct KeyboardCensusTests {
             selected: selected
         )
         #expect(claims[38]?.count == 2)
-        #expect(claims[38]?.map(\.label) == ["⌥", "⌃⌥"])
+        #expect(claims[38]?.map(\.glyphs) == ["⌥", "⌃⌥"])
     }
 
     /// `bindings(on:)` and `claims` are two folds over one
@@ -171,8 +171,8 @@ struct KeyboardCensusTests {
                 named == Set(claims[code] ?? []),
                 Comment(
                     rawValue: "key \(code): the words name "
-                        + "\(named.map(\.label)) and the fills "
-                        + "claim \(claims[code]?.map(\.label) ?? [])"
+                        + "\(named.map(\.glyphs)) and the fills "
+                        + "claim \(claims[code]?.map(\.glyphs) ?? [])"
                 )
             )
         }
@@ -297,4 +297,10 @@ struct KeyboardCensusTests {
             ) == .free
         )
     }
+}
+
+/// A layer's modifiers as Core draws them, the lettered form the
+/// census tests compare off the main actor.
+extension KeyboardCensus.ModifierLayer {
+    var glyphs: String { ComboSymbols.modifierSymbols(modifiers) }
 }

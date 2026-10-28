@@ -101,7 +101,9 @@ enum ModifierSidesWords {
     /// What stands between a sided ⌘ and its key; the example's key
     /// stays the frame's own H, whatever the keyboard layout draws.
     private static var space: String {
-        ChordGlyphs.separator(.side(.right, of: .command))
+        ChordGlyphs.separator(
+            HotkeyModifiers.command.union(.side(.right, of: .command))
+        )
     }
 
     /// Off, with shortcuts that keep a side: they fire either-side.

@@ -7,13 +7,6 @@ enum KeyboardCensus {
     struct ModifierLayer: Hashable, Comparable {
         let modifiers: HotkeyModifiers
 
-        /// Modifier glyphs, a side as Core's letter, or empty for
-        /// bare keys — read by the census tests off the main actor,
-        /// never drawn (`drawnLabel` is).
-        var label: String {
-            ComboSymbols.modifierSymbols(modifiers)
-        }
-
         /// `label` as drawn and spoken, each side a word.
         @MainActor var drawnLabel: String {
             ChordGlyphs.modifiers(modifiers)

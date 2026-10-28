@@ -61,4 +61,24 @@ struct ChordGlyphsTests {
         #expect(japanese != (try drawn("rcmd+h")))
         #expect(!japanese.contains("Right"))
     }
+
+    /// The fold and the tour drop `modifiers + separator` off a
+    /// drawn chord, so the three must agree for every side of every
+    /// modifier, or a key loses its first character.
+    @Test("a chord starts with its drawn modifiers and separator")
+    func partsAgreeWithTheChord() throws {
+        LocalizationManager.shared.select("en")
+        for kind in ModifierKind.allCases {
+            for side in [nil] + ModifierSide.allCases.map(Optional.some) {
+                var modifiers = kind.plain
+                if let side { modifiers.formUnion(.side(side, of: kind)) }
+                let combo = KeyCombo(keyCode: 38, modifiers: modifiers)
+                let drawn = ChordGlyphs.render(combo, layoutChar: { _ in "J" })
+                let head =
+                    ChordGlyphs.modifiers(modifiers)
+                    + ChordGlyphs.separator(modifiers)
+                #expect(drawn == head + "J", "\(drawn)")
+            }
+        }
+    }
 }

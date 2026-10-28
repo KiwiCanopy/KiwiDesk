@@ -21,9 +21,11 @@ enum ChordGlyphs {
     }
 
     /// What stands between drawn modifiers and their key: a space
-    /// where a side is named, so the word stays with its run.
+    /// where a side is drawn as a word, so the word stays with its
+    /// run — read off the drawing itself, so the two never differ.
     static func separator(_ modifiers: HotkeyModifiers) -> String {
-        modifiers.isSided ? " " : ""
+        let glyphs = ComboSymbols.modifierSymbols(modifiers)
+        return words(glyphs) == glyphs ? "" : " "
     }
 
     /// A side's word around a run of glyphs, as the catalog frames
