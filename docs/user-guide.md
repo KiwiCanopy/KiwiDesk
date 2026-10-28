@@ -153,14 +153,12 @@ one carrying settings when this Mac's settings come from
 `init.lua` (profiles and palettes alone restore there). A
 restore that skips a profile or a palette says so.
 
-:::unreleased
 `init.lua` travels only when asked, off by default: tick
 **Include init.lua** when you export, and pick **Restore with
 init.lua** when you restore, which runs it at once and is the one
 restore of settings a Mac whose settings come from `init.lua`
 accepts. The same backup is one command away with `kiwidesk
 export_setup` and `kiwidesk restore_setup` ([CLI](cli.md#commands)).
-:::
 
 Saved looks travel in a backup beside the palettes, and restore
 wherever they do; **All settings ▸ Reset…** keeps them too. The
@@ -271,11 +269,9 @@ folder together.
   inside `function() ... end`), **`kind`** ("navigation",
   "application", or "custom") and **`label`**.
 
-:::unreleased
 A row may also carry **`desc`**, **`group`** and **`symbol`**,
 written only when set ([Describing a
 Shortcut](lua-reference.md#describing-a-shortcut)).
-:::
 
 **`refusal`** holds `sound`, the alert sound when an action is
 blocked, and **`quit`** holds `grid_target_depth`, the
@@ -416,12 +412,10 @@ value. A field greyed by a switch on another page (Grid's
 auto-size, Track's auto limit) says so and links Layout
 Defaults.
 
-:::unreleased
 Every space row carries a **Customize** button; its badge counts
 that space's overrides, dimmed while a Floating space keeps them
 for when it tiles again. **Customize…** is also on the row's
 right-click menu.
-:::
 
 Changing a space's layout never deletes overrides; each layout
 keeps its own, and a **Saved for _N_ other layouts** card at the
@@ -452,9 +446,7 @@ does not move focus.
 Opening an app whose [app rule](#app-rules) names a space on
 another screen moves the focus there with its window.
 
-:::unreleased
 A new window of a running app follows its app rule the same way.
-:::
 
 ## Gaps & Borders
 
@@ -538,12 +530,10 @@ A **sticky** window stays visible on every space. Two scopes
 
 **Toggle sticky everywhere** is a shortcut under Size & float.
 
-:::unreleased
 **Toggle sticky on this screen** has no default key and no row
 there; bind
 [`toggle_display_sticky`](lua-reference.md#toggle_display_sticky)
 in the Lua bindings drawer.
-:::
 
 Moving a ∞ window anywhere, or a 📌 window to another space on
 the same screen, is refused with a brief pill. On a single
@@ -592,9 +582,7 @@ Scrolling** switches are its visibility.
 
 Drag an item to reorder the windows.
 
-:::unreleased
 Click a grouped item to list its windows; a row picks one.
-:::
 
 Styling it differently per layout is
 Lua-only: an `app_bar.*` field has a `monocle.set_app_bar_*` /
@@ -619,10 +607,8 @@ flat look instead.
 
 It covers the floating mark too.
 
-:::unreleased
 It covers the plates a Space switch slides too, and the Space,
 Desktop and layout plates.
-:::
 
 On by default, on every surface. While macOS's **Reduce
 transparency** (System Settings ▸ Accessibility ▸ Display) is on,
@@ -637,7 +623,6 @@ order. Click a Space to switch to it.
 
 Click an app glyph to switch to its Space and focus that window.
 
-:::unreleased
 Resting the pointer on a one-window glyph, or on an App Bar item
 that cuts its title, shows that window's name beside the bar.
 
@@ -653,7 +638,6 @@ Return picks one.
 
 A Space shown as its window count lists its windows when you rest
 the pointer on it, since clicking it switches to that Space.
-:::
 
 A list too long for the screen ends in **More windows**, which
 opens a menu of every window. With VoiceOver, pressing the glyph
@@ -705,13 +689,11 @@ layout wears no floating mark. Glyphs wearing the floating badge
 come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 
-:::unreleased
 A window out of the [pocket](lua-reference.md#pocket) wears the
 **pocket mark** half over its top-right corner, in place of its
 sticky and floating marks, and its glyph wears the **pocket badge**
 on the bottom-left, in place of the floating badge; that glyph
 comes last in its row too.
-:::
 
 **Drag a window onto a Space** to move it there:
 
@@ -996,14 +978,11 @@ listed under Shortcuts & Gestures ▸ Size & float.
 [`app_bar.toggle_reveal`](lua-reference.md#app_bartoggle_reveal)),
 listed under Shortcuts & Gestures ▸ Show & hide ▸ KiwiShelf.
 
-:::unreleased
 `⌃⌥M` makes the focused window fill its screen and hides the bars
 there, until you press it again or move focus to another window
 ([`toggle_maximized`](lua-reference.md#toggle_maximized)), listed
 under Shortcuts & Gestures ▸ Size & float.
-:::
 
-:::unreleased
 `⌃⌥⇧P` is **Toggle Pocket**, and `⌃⌥P` is **Pocket or take out**,
 under Shortcuts & Gestures ▸ Pocket
 ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window),
@@ -1011,7 +990,6 @@ under Shortcuts & Gestures ▸ Pocket
 the screen and every bar, and comes out on the screen you are on,
 floating on every Space. `⌘-Tab` to its app takes it out too, and
 KiwiHub's window switcher lists it under **Pocket**.
-:::
 
 `⌃⌥⇧⌘1` … `⌃⌥⇧⌘9`, `⌃⌥⇧⌘0` go to that macOS Desktop. Each
 Desktop gets its key the first time KiwiDesk sees it, so a key you

@@ -5,7 +5,6 @@ description: The actions KiwiDesk can run from a key.
 
 # Actions
 
-:::unreleased
 Each action below can be bound to a key with `bind`. The link opens its arguments in the [Lua reference](lua-reference.md). Settings and queries are listed by `kiwidesk list_commands --kind setting` and `--kind query` ([CLI & IPC](cli.md#discovering-commands)).
 
 ## KiwiDesk
@@ -100,4 +99,3 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 |---|---|
 | [`track.swap`](lua-reference.md#trackswap) | Swaps the focused window's track with the next one along; takes prev or next. |
 
-:::

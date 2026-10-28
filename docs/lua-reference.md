@@ -79,9 +79,7 @@ the GUI** instead. Settings are:
 
 A [`kiwishelf.*`](#kiwishelf) setter counts as a setting too.
 
-:::unreleased
 A [`kiwihub.set_key`](#kiwihubset_key) call counts as a setting too.
-:::
 
 ```lua
 -- Any one of these makes init.lua the config owner:
@@ -113,7 +111,6 @@ Cross-axis directions keep the geometric search. The track
 layout steps in window order along its axis, within the
 focused track, and across it to the neighboring track.
 
-:::unreleased
 Across tracks, focus lands on the window nearest by centre. Where
 the focused window faces several windows on its screen alike —
 it spans more than one of them, or two lie equally near — focus
@@ -121,12 +118,9 @@ returns to the window it came from when that is one of them,
 and otherwise takes the first of them in window order. A hop
 onto another screen keeps only the return; floating windows keep
 the nearest by position.
-:::
 
-:::unreleased
 What happens past the last window that way is
 [`set_focus_wrap`](#set_focus_wrap)'s.
-:::
 
 The search is two-tier: **tiled windows always win**, and only
 when no tiled window lies in the pressed direction are the
@@ -139,13 +133,11 @@ or cycle to it instead
 ([Accepted limitations](accepted-limitations.md)). `swap` is
 tiled-only.
 
-:::unreleased
 A float past the last window that way is reached before focus
 wraps or leaves the screen, except under `"this_screen"` in
 Scrolling, Monocle and Track, where the wrap wins: there a float
 past that edge is reachable on the cross axis only, except with a
 single tiled window, when it is reachable on both axes.
-:::
 
 While a KiwiVision lens is on with
 [`keep_focus`](#kiwivisiondefine_lens), `focus` and `swap` skip
@@ -187,10 +179,8 @@ between their tracks and the track boundaries stay put. `swap`
 never wraps at the ends, whatever
 [`set_focus_wrap`](#set_focus_wrap) says.
 
-:::unreleased
 Where several windows tie, `swap` takes the first of them in
 window order and never the window focus came from.
-:::
 
 **Example:**
 
@@ -246,7 +236,6 @@ an **empty** space hands focus to Finder. If macOS drops the
 activation, the post-switch settle (~300 ms) detects the
 unchanged frontmost app and re-raises once.
 
-:::unreleased
 When the target Space is on another screen, the pointer moves
 there too, whether or not
 [*mouse follows focus*](#mouseset_follows_focus) is on: onto the
@@ -254,7 +243,6 @@ focused window, or to the centre of that screen's usable area
 when the Space is empty. It stays put when it is already on that
 screen or a mouse button is held. A move-and-follow onto another screen's Space
 does the same.
-:::
 
 **Example:**
 
@@ -273,14 +261,12 @@ Space included where the bar hides it. It never creates a Space.
 The ⌃⌥⌘ + scroll gesture takes the same step on the screen under
 the pointer.
 
-:::unreleased
 Past the last Space it wraps to the first, and past the first to
 the last, on the same screen — never onto another one. With
 [Wrap focus](#set_focus_wrap) `off` it stops there instead: the
 focused window's ring bumps toward the step, as at the end of a
 row, and nothing switches. A screen with one Space stops there
 too. A wrap slides in the key's direction.
-:::
 
 Seeded on `⌃⌥⌘←` and `⌃⌥⌘→` for a new setup; an existing one
 gets them through **Restore Defaults…**.
@@ -320,7 +306,6 @@ an existing one gets them through **Restore Defaults…**.
 KiwiDesk.focus_space_back()
 ```
 
-:::unreleased
 ### focus_display_last / focus_display
 
 **Expects:** nothing for `focus_display_last`; a direction
@@ -361,7 +346,6 @@ Lua and CLI only.
 KiwiDesk.focus_display_last()
 KiwiDesk.focus_display("right")
 ```
-:::
 
 ### move_to_space
 
@@ -521,11 +505,9 @@ switches you there with it.
 Keyboard focus ends on the window you sent. The pointer moves
 only with *mouse follows focus* on.
 
-:::unreleased
 A follow onto a Desktop on another screen moves the pointer there
 too, whether or not *mouse follows focus* is on
 ([`focus_space`](#focus_space)).
-:::
 
 If the target Desktop is **hidden**, focus lands a beat after
 the switch, when the window reappears there
@@ -1063,7 +1045,6 @@ profile's own value still wins.
 KiwiDesk.set_space_history("all_screens")
 ```
 
-:::unreleased
 ### set_focus_wrap
 
 **Expects:** `"off"`, `"this_screen"` or `"all_screens"`
@@ -1116,7 +1097,6 @@ one is reported in Config Issues naming this verb.
 ```lua
 KiwiDesk.set_focus_wrap("this_screen")
 ```
-:::
 
 ### set_desktop_cue
 
@@ -1185,7 +1165,6 @@ KiwiDesk.set_hyper_key("caps_lock")
 KiwiDesk.bind("hyper+h", function() KiwiDesk.focus("left") end)
 ```
 
-:::unreleased
 ### set_modifier_sides
 
 **Expects:** `true` or `false` (default `false`).
@@ -1226,9 +1205,7 @@ KiwiDesk.bind("ralt+space", function()
     KiwiDesk.focus_or_spawn("com.apple.Safari")
 end)
 ```
-:::
 
-:::unreleased
 ### set_space_transition
 
 **Expects:** `"slide"`, `"show"` or `"none"` (default `"slide"`).
@@ -1282,9 +1259,7 @@ macOS Desktop switches are never animated in either direction (see
 ```lua
 KiwiDesk.set_space_transition("show")
 ```
-:::
 
-:::unreleased
 ### set_space_slide_duration
 
 **Expects:** a number (milliseconds, clamped 150–1000; default
@@ -1312,7 +1287,6 @@ refused, naming it.
 ```lua
 KiwiDesk.set_space_slide_duration(450)
 ```
-:::
 
 ### set_mode_cue
 
@@ -1351,13 +1325,11 @@ macOS&nbsp;26, the panel draws `.regularMaterial`. The panel's
 glass is untinted: it draws `.regular` where the bars draw
 `.clear`, and no Fill reaches it (#1295).
 
-:::unreleased
 That holds while
 [`kiwishelf.set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 is off. On, its default, KiwiHub draws `.clear` glass wearing the
 shelf's fill (#2569). The Space, Desktop and layout plates read
 this leaf too, and draw `.regularMaterial` while it is off.
-:::
 
 The shortcuts panel is a side of [KiwiHub](#kiwihubshow), so this
 leaf sets the material of all of KiwiHub — the window switcher,
@@ -1369,14 +1341,12 @@ profile switch can change the panel's material.
 The slow-boot notice reads this leaf too: it draws its capsule
 in the same material (#1715).
 
-:::unreleased
 The plates a Space switch slides
 ([`set_space_transition`](#set_space_transition)) read this leaf
 too, and keep it untinted while
 [`kiwishelf.set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 is off; `set_space_switch_liquid_glass` is
 refused, since they have no leaf of their own.
-:::
 
 Also stood down while macOS's Reduce transparency is on, the
 stored value untouched
@@ -1410,11 +1380,9 @@ corner of their screen — [Parking is not a Desktop
 move](spaces-and-desktops.md#parking-is-not-a-desktop-move)
 owns the model.
 
-:::unreleased
 How the switch shows itself — the plate slide, at once with a
 plate naming the Space, or at once — is
 [`set_space_transition`](#set_space_transition).
-:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked
@@ -1989,14 +1957,12 @@ grid.set_split_direction("horizontal")
 **Does:** sets the grid's columns and rows: a rigid grid lays
 these, and a dynamic grid balances up to them.
 
-:::unreleased
 The columns and rows are a limit: where a cell would fall under
 the grid's [minimum window size](#set_min_window_size), or under
 an app's own minimum, the grid lays as many as fit, as
 [auto-size](#gridset_auto_size) does, and the windows past its
 cells scroll through its last track
 ([When windows no longer fit](#when-windows-no-longer-fit)).
-:::
 
 **Example:**
 
@@ -2022,12 +1988,10 @@ width and as many rows as fit at its minimum height
 columns and `floor(usable height / (min height + vertical inner
 gap))` rows, at least 1 each.
 
-:::unreleased
 Each of the min width and height is the larger of Grid's minimum
 and the largest minimum an app in the Space enforces (learned
 when it refuses a smaller size), so one such window lowers the
 count, and the grid grows back once that window leaves.
-:::
 
 **Example:**
 
@@ -2703,7 +2667,6 @@ bright tint normally holds at light. A fully transparent
 where the Settings toggle is hidden; the stored value still
 round-trips so a profile stays portable.
 
-:::unreleased
 The colored layer is drawn on the glass, beneath the items,
 rather than behind it, and the bars, the overflow marks, their
 list and the hover peek draw glass with the bright edge of a
@@ -2714,7 +2677,6 @@ never so far that their text stops reading.
 
 A fill with no color is covered under
 [KiwiShelf colours](#kiwishelf-colours).
-:::
 
 Stood down, live, while macOS's Reduce transparency is on: the
 bars draw their Boxed or Plain shape with the `fill_color` at
@@ -2723,15 +2685,11 @@ and the sticky mark their flat look. The stored values are
 untouched, so the glass and the alpha return the moment the
 setting goes off (#1374).
 
-:::unreleased
 The Space switch's plates draw their material then too.
-:::
 
-:::unreleased
 A hidden bar's Space dots and line wear the glass too, tinted by
 the same fill, and draw that fill flat when the glass is off or
 stood down.
-:::
 
 Settings has no KiwiShelf row for this (#1307): one **Liquid
 Glass** switch on Looks &amp; Animations writes this leaf, the
@@ -2744,9 +2702,7 @@ and shows on only when all of them are on.
 
 The slow-boot notice follows the shortcuts panel's.
 
-:::unreleased
 So do the plates a Space switch slides.
-:::
 
 This verb sets the
 bars alone; setting them apart is a Lua-only state, and the
@@ -2758,7 +2714,6 @@ Settings switch then reads off and says so in its `?`.
 kiwishelf.set_liquid_glass(true)
 ```
 
-:::unreleased
 ### kiwishelf.set_fill_fade
 
 **Expects:** a number 0–100 (percentage; default `100`);
@@ -2792,9 +2747,7 @@ while the fill has no color.
 ```lua
 kiwishelf.set_fill_fade(40)
 ```
-:::
 
-:::unreleased
 ### kiwishelf.set_tint_hub_and_plates
 
 **Expects:** `true` or `false` (default `true`).
@@ -2830,7 +2783,6 @@ fill has no color.
 ```lua
 kiwishelf.set_tint_hub_and_plates(false)
 ```
-:::
 
 ### kiwishelf.set_background_fit
 
@@ -3073,9 +3025,7 @@ A bar shown beside an `"always"` bar joins it instead, whichever
 style. Each plays with Reduce Motion on too. On a `"boxed"` shelf
 `"unfold"` springs each box out of the mark to its place.
 
-:::unreleased
 On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
-:::
 
 **Example:**
 
@@ -3125,7 +3075,6 @@ which follows the focused window's colour until you set it.
   overflow badges (defaults `#636366` and `#FFFFFF`); on a Space
   you are not on they take [`dim_factor`](#kiwishelfset_dim_factor).
 
-:::unreleased
 A `fill_color` with no color — 0% opacity, an empty string or a
 value that does not parse — draws no plate on the solid path,
 so the items sit on the wallpaper even under Reduce
@@ -3135,7 +3084,6 @@ color, and leaves KiwiHub and the plates
 [`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates)
 tints untinted. Settings' **No Color**, on the Fill well's menu,
 sets the fill's opacity to 0 and keeps its hue.
-:::
 
 An App Bar window not fully on screen draws its title and glyph in
 the same idle ink as an identifier on a Space you are not on:
@@ -3315,10 +3263,8 @@ app_bar.set_reserve(false)
 for the App Bar of the active Space's layout. Fails where that
 layout carries no App Bar, or where its App Bar is `"always"`.
 
-:::unreleased
 It fails with a pill too where the Space holds no window, so the
 App Bar has nothing to show.
-:::
 
 **Example:**
 
@@ -3354,7 +3300,6 @@ longer titles are cut at the end and marked with an ellipsis. A
 title is also cut where it does not fit its slot; only the
 title shrinks, never the icon.
 
-:::unreleased
 Every slot is as long as this many characters of the bar's font
 beside the icon, whatever the titles read — at least the icon
 square and at most a quarter of the whole KiwiShelf edge — so a
@@ -3363,7 +3308,6 @@ icon with the two centred in the slot, and a change of title
 never moves the App Bar or the shelf beside it. The cap is the
 App Bar's one size control; items that do not fit scroll instead
 of shrinking.
-:::
 
 **Example:**
 
@@ -3379,11 +3323,9 @@ app_bar.set_title_cap(25)
 item with a count badge; same-app windows that are not adjacent
 stay separate.
 
-:::unreleased
 Clicking a grouped item lists its windows. Picking one focuses it
 and expands the group into its members; focus leaving the group
 collapses it again.
-:::
 
 **Example:**
 
@@ -3426,12 +3368,10 @@ are retired: `false` is `"hidden"`. An `auto` App Bar hides to a
 short line, which grows when the pointer comes near and opens as
 the Space dots do.
 
-:::unreleased
 Grown, the line shows how many windows the App Bar lists for the
 Space on that screen, beside a window symbol. On a side edge the
 number stands above the symbol; past 99 a stacked-windows symbol
 shows there alone. VoiceOver reads the count at rest too.
-:::
 
 ## Space Bar
 
@@ -3490,10 +3430,8 @@ space_bar.set_reserve(false)
 `"always"`). Replaces the retired `space_bar.set_enabled`:
 `false` is `"hidden"`.
 
-:::unreleased
 The starter setup seeds `"auto"` for the Space Bar and for the
 App Bar in monocle and scrolling.
-:::
 
 **Does:**
 
@@ -3538,10 +3476,8 @@ handles. The pointer opens one bar at a time: while a bar is shown,
 the other's handle and band go away. A second bar's shortcut shows
 it beside the first. A look never carries the value.
 
-:::unreleased
 The Space dots and the App Bar's line wear the bars'
 [Liquid Glass](#kiwishelfset_liquid_glass).
-:::
 
 **Example:**
 
@@ -3721,11 +3657,9 @@ Lua-only, clamped. Independent of the shelf's `dim_factor`: no
 ordering is enforced, so a value below the outer tier inverts
 the ladder.
 
-:::unreleased
 The focused app's count badge on the active Space rests at this
 opacity too while its icon stays full, and comes to full while
 the pointer is on its glyph.
-:::
 
 **Example:**
 
@@ -3766,10 +3700,8 @@ The segment is always as long as this many characters of the
 bar's font: a longer title ends in "…", so a change of focus or
 title never moves the Space Bar or the shelf beside it.
 
-:::unreleased
 A shorter title draws right after the icon, the two centred in
 the segment.
-:::
 
 **Example:**
 
@@ -3820,10 +3752,8 @@ stays the group count). A grouped glyph aggregates its
 windows' states — the badge means "at least one". Lua-only; the
 Settings app offers no toggle for these badges.
 
-:::unreleased
 A window out of the [pocket](#pocket) wears the pocket badge on the
 bottom-left instead, and no sticky badge.
-:::
 
 **Example:**
 
@@ -4708,11 +4638,9 @@ on a window in an inactive space (cmd+tab into a stashed window),
 the warp waits until KiwiDesk follows focus and pulls that space
 forward. Clicking an app-bar item warps too.
 
-:::unreleased
 A Space switch onto another screen moves the pointer even with
 the setting off ([`focus_space`](#focus_space)); the setting
 governs focus changes within a screen.
-:::
 
 Also togglable in the Settings app under **Shortcuts & Gestures ▸
 Mouse & trackpad**.
@@ -4789,11 +4717,9 @@ does not move, even with `mouse.follows_focus` on.
   in the Space's window order, floating windows included,
   wrapping at the ends.
 
-:::unreleased
 The gesture never leaves its screen: under
 [`set_focus_wrap("all_screens")`](#set_focus_wrap) it wraps there
 as `"this_screen"` does.
-:::
 
 A swipe on a trackpad or Magic Mouse moves one window, and a
 notch of a mouse wheel moves one — a fast roll or a
@@ -4818,12 +4744,10 @@ mouse wheel; a fast roll or a free-spinning wheel steps one for the
 whole burst, and each notch counts again once the wheel pauses
 between notches. The pointer does not move.
 
-:::unreleased
 Past the first or last Space it wraps or stops as
 [`focus_space_next`](#focus_space_previous--focus_space_next)
 does; where it stops, the focused window's border, if the shown
 Space has one, bumps toward the step.
-:::
 
 The direction follows
 [Natural scrolling](#scroll_gestureset_natural_scrolling), as
@@ -4950,7 +4874,6 @@ offset 40 pt downward per window, so every title bar stays
 visible and clickable. There is no horizontal (side-reveal)
 stacking.
 
-:::unreleased
 A Stack zone — master or stack — and each Track track scroll
 instead of cascading. A zone shows as many windows as fit at
 their minimum size, which is `min_window_size`, or an app's own
@@ -5014,7 +4937,6 @@ either [strategy](#bspset_strategy), the mark at that end sits
 across the gap between them and covers a few points of that
 window. BSP cascades whole only when not even one window fits at
 `min_window_size`.
-:::
 
 For a cascade to read correctly, upper windows must sit *behind*
 lower ones. KiwiDesk restores this z-order whenever a window
@@ -5057,14 +4979,12 @@ automatically too, and a window of an app with no Dock icon that
 carries its own title-bar buttons on a raised layer (a system
 "Join Network" sheet, for one) is floated rather than ignored.
 
-:::unreleased
 A standard window whose close button is disabled and that offers a
 Cancel button instead — Archive Utility's progress window while it
 unzips — floats automatically too, and counts as a window that
 can't be resized for [`tile_rules`](#tile_rules),
 [`set_float_automatically`](#set_float_automatically) and
 `explain_window`'s `fixed_size` reason.
-:::
 
 This table is the global base. A profile may add rules or remove
 inherited ones with its sparse `float_rules` object (`true` adds,
@@ -5226,12 +5146,10 @@ windows macOS reopens at login or KiwiDesk finds when it starts,
 and the windows a Desktop switch shows you, stay in their space
 ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599)).
 
-:::unreleased
 A new window of a running app takes you there too — ⌘N, File ▸
 New, or one the app opens on its own — with the exceptions in
 [accepted limitations](accepted-limitations.md)
 ([#2478](https://github.com/KiwiCanopy/KiwiDesk/issues/2478)).
-:::
 
 A popup menu the app opens — a window above the normal window
 layer — is not filed by the rule: it opens in the space you are
@@ -5598,7 +5516,6 @@ end)
 (its current screen only) and off. Toggling screen sticky on a
 global-sticky window switches it to screen sticky.
 
-:::unreleased
 It has no default shortcut and no row in Settings ▸ Shortcuts &
 Gestures; bind it in `init.lua` or the Lua bindings drawer, where
 a shortcut you gave it is listed. A stored `⌃⌥P` running it —
@@ -5607,7 +5524,6 @@ profile's own shortcuts — is moved to [`pocket`](#pocket) once,
 the first time this version reads the file: `gui.json`, each
 profile and a backup's copies. A shortcut you give it after that
 stays.
-:::
 
 **Example:**
 
@@ -5617,7 +5533,6 @@ KiwiDesk.bind("cmd+alt+d", function()
 end)
 ```
 
-:::unreleased
 ### toggle_maximized
 
 **Expects:** nothing.
@@ -5643,9 +5558,7 @@ KiwiDesk.bind("ctrl+alt+m", function()
     KiwiDesk.toggle_maximized()
 end)
 ```
-:::
 
-:::unreleased
 ### pocket
 
 **Expects:** nothing.
@@ -5757,7 +5670,6 @@ KiwiDesk.bind("ctrl+alt+shift+p", function()
     KiwiDesk.toggle_pocket_window()
 end)
 ```
-:::
 
 ### override_sticky_reach
 
@@ -5902,7 +5814,6 @@ is Automatic; any non-empty value must parse as a hex color.
 floating.set_color("#8E5DE0")
 ```
 
-:::unreleased
 ### pocket.set_color
 
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
@@ -5926,9 +5837,7 @@ non-empty value must parse as a hex color.
 pocket.set_color("#E8A33D")  -- an amber pocket
 pocket.set_color("")          -- back to Automatic
 ```
-:::
 
-:::unreleased
 ### pocket.set_edge
 
 **Expects:** `"top"`, `"bottom"`, `"left"` or `"right"` (default
@@ -5944,9 +5853,7 @@ A bar on the same edge keeps it just inside the bar.
 ```lua
 pocket.set_edge("right")
 ```
-:::
 
-:::unreleased
 ### pocket.set_position
 
 **Expects:** a number from `0` to `100` (default `82`); outside
@@ -5961,7 +5868,6 @@ end. The pocket stays whole on screen at either end.
 ```lua
 pocket.set_position(50)  -- the middle of its edge
 ```
-:::
 
 ## Launching Apps
 
@@ -6139,10 +6045,8 @@ app. Typing narrows the list by app name, then by title. While a
 lens's apps come first and every other app's follow under **Other
 apps**, while you type too. Moving the mouse over a row selects it.
 
-:::unreleased
 A window in the [pocket](#pocket) is listed after the hidden apps,
 under **Pocket**.
-:::
 
 - **Return** goes to the selected window, switching Space or
   Desktop as needed; on a minimized window it brings it back, on a
@@ -6216,7 +6120,6 @@ KiwiDesk.bind("alt+space", function()
 end)
 ```
 
-:::unreleased
 ### kiwihub.set_key
 
 **Expects:** a built-in KiwiHub key — `"up"`, `"down"`,
@@ -6250,7 +6153,6 @@ kiwihub.set_key("up", "ctrl+p")
 kiwihub.set_key("page_down", "ctrl+d")
 kiwihub.set_key("page_up", "ctrl+u")
 ```
-:::
 
 ### Retired panel verbs
 
@@ -6307,14 +6209,12 @@ any of the others (`"hyper+cmd+ctrl+x"`). Held, a Hyper combo is
 its chord without `hyper`, so an enabled macOS shortcut on that
 chord (`hyper+cmd+space` is Spotlight's) still wins.
 
-:::unreleased
 A side is `l` or `r` before a short name: `lcmd` / `rcmd`,
 `lopt` / `ropt`, `lalt` / `ralt`, `lshift` / `rshift`, `lctrl` /
 `rctrl` (`"rcmd+h"`). It counts only while
 [`set_modifier_sides`](#set_modifier_sides) is on. Two spellings
 of one modifier (`"lcmd+rcmd+h"`, `"cmd+rcmd+h"`) and a side with
 `hyper` are unrecognized.
-:::
 
 **Keys:** letters, digits, `left`, `right`, `up`, `down`,
 `home`, `end`, `pageup`, `pagedown`, `space`,
@@ -6507,11 +6407,9 @@ different verb, fires once per press, and `focus`/`swap` never
 glide. A body that rebuilds its own bindings (`bind` inside the
 body) arms nothing.
 
-:::unreleased
 While [`set_modifier_sides`](#set_modifier_sides) is on, a
 shortcut whose keys a sided shortcut also uses — sided or not —
 fires once per press.
-:::
 
 A refusal that cues (#933/#1055) ends the run, so a held shrink
 parked on a minimum flashes its pill once; scrolling's wordless
@@ -6650,7 +6548,6 @@ KiwiDesk.define_layer("service", { --[[ bindings ]] },
     { icon = "⚙️" })
 ```
 
-:::unreleased
 #### Describing a Shortcut
 
 **Expects:** an optional third table on `KiwiDesk.bind`, or a
@@ -6695,7 +6592,6 @@ KiwiDesk.define_layer("resize", {
   ["h"] = { fn = shrink, desc = "Narrower", group = "size_float" },
 })
 ```
-:::
 
 ### Config Cascade (Per-Profile Keybindings)
 
@@ -6756,13 +6652,11 @@ effect.
 its `name`, whether it is the `default`, and its `shortcuts` —
 each `chord` and the `lua` it runs.
 
-:::unreleased
 A shortcut that describes itself carries its `desc`, `group` and
 `symbol` too ([Describing a Shortcut](#describing-a-shortcut)). It
 reads the saved files, where
 [`shortcut.list_groups`](#shortcutlist_groups) reads the shortcuts
 in effect.
-:::
 
 #### shortcut.set
 
@@ -6790,7 +6684,6 @@ shortcut.set("ctrl+alt+h", "focus", "left")
 shortcut.remove("ctrl+alt+h")
 ```
 
-:::unreleased
 #### shortcut.list_groups
 
 **Expects:** nothing.
@@ -6800,7 +6693,6 @@ groups, and `custom`, every shortcut group the installed shortcuts
 make of their own, each once. It reads the
 shortcuts in effect, so it answers with `init.lua` owning the
 config too.
-:::
 
 ## Events
 
@@ -7529,12 +7421,10 @@ Space](spaces-and-desktops.md#every-desktop-keeps-its-own-space-and-its-own-wind
 **Does:** sets the general animation duration for window moves
 and layout reflowing ([Animation Cascade](#animation-cascade)).
 
-:::unreleased
 It also paces a window changing state — floating, maximizing — and
 the brief pocket's plate, which flies for twice this duration,
 between 0.2 and 0.8 seconds
 ([`set_on_state_change`](#animationsset_on_state_change)).
-:::
 
 **Example:**
 
@@ -7589,11 +7479,9 @@ Shrinking splits by *what else is moving*, and only under
   **mouse resize**, where the window you dragged is already
   where you left it when the rest catches up.
 
-:::unreleased
 - A window changing state follows the animation whatever else
   moves, unless a window opens in the same change
   ([`animations.set_on_state_change`](#animationsset_on_state_change)).
-:::
 
 Under `"mid_slide"` a shrinking axis always takes the first
 frame. Either way the exact target lands on the settle frame.
@@ -7689,7 +7577,6 @@ changes.
 animations.set_on_relayout(true)
 ```
 
-:::unreleased
 ### animations.set_on_state_change
 
 **Expects:** `true` or `false` (default `true`).
@@ -7712,7 +7599,6 @@ float rules make floating, follow
 ```lua
 animations.set_on_state_change(true)
 ```
-:::
 
 ### Retired Monocle flip verbs
 
@@ -7769,7 +7655,6 @@ too.
 animations.set_reveal_duration(400)
 ```
 
-:::unreleased
 ### animations.set_on_peek
 
 **Expects:** `true` or `false` (default `true`).
@@ -7788,7 +7673,6 @@ turns it off.
 ```lua
 animations.set_on_peek(false)
 ```
-:::
 
 ### enable_wake_restore, set_wake_restore_delay
 
@@ -8047,10 +7931,8 @@ carry `track_breaks` (ids of the windows that start a track,
 Each window object has: `id`, `app`, `bundle_id`, `title`,
 `floating` (boolean).
 
-:::unreleased
 Each window object also has `pocket`: `"pocketed"` or `"out"` for
 the [pocket](#pocket)'s window, `nil` for every other.
-:::
 
 **Example:**
 
@@ -8088,12 +7970,10 @@ where the window has none. No window title is returned. Any other
 id is refused, an away window's included; ask `explain_app`
 instead.
 
-:::unreleased
 `detection.reason` can also read `raised_layer`: a standard
 window that floats because it opened above the normal window
 level, such as a picture-in-picture video. Like `panel`, it has
 no escapes.
-:::
 
 ### explain_app
 
@@ -8130,14 +8010,12 @@ sync folder's status. Each issue carries its `source` file, a
   that replaces it, or `nil` where nothing does.
 - `missing_font_family`, with its `name`.
 
-:::unreleased
 A shortcut whose `symbol` is no SF Symbol is
 `unknown_shortcut_symbol`, with its `layer`, `chord` and `symbol`.
 A saved shortcut KiwiDesk could not install, so its key does
 nothing, is `dead_shortcut`, with its `layer`, `chord` and a
 `reason`: `lua_error` with the interpreter's `message`, or
 `invalid_chord`.
-:::
 
 `sync` carries the followed `folder` (`nil` when none) and a
 `status`: `off`, `up_to_date`, `folder_unavailable`,
@@ -8169,7 +8047,6 @@ full-screen window has no `visibility`.
 coordinates, and `layout_frame`, the area its shown Space lays
 windows out in.
 
-:::unreleased
 Each entry also carries `app`, `pid`, `index` (the window's
 place in its Space's row, from 1; `null` for a window no Space
 holds) and `z`: its stacking rank among the windows KiwiDesk
@@ -8186,7 +8063,6 @@ macOS shows now: a tile an app raised over its pile by itself
 reads `hidden` with `z` `0`. To work out how much of a window is
 in view as macOS draws it, compare its `frame` with those of the
 windows of lower `z` on its screen.
-:::
 
 **Example:**
 
