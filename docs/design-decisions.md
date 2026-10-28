@@ -18171,7 +18171,10 @@ far end on every bundled palette (`HighlightFadeContrastTests`).
 Where 0.4 would sink a fill's own ink — under Increase Contrast,
 whose floor is stricter — the share rises to the point that holds
 it, over both ends of the panel (`highlightFadeShare`).
-The footer's buttons stay native macOS buttons; off the toggle,
+The footer's buttons (Edit in Settings…, Keep) fade too (#2725,
+owner, 2026-10-28): KiwiDesk already draws them as button chips
+(#2377), and a flat chip read as the one patch on faded glass.
+Their rest and hover fills take the same share; off the toggle,
 and in Settings, the fills stay flat.
 
 **A bar badge keeps its disc opaque** (#2722, owner, 2026-10-28,
