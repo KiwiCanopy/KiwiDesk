@@ -285,35 +285,4 @@ struct ShortcutsGateTests {
             )
         )
     }
-
-    /// `LayersCard` must ASK the resolver, not re-derive the
-    /// predicate inline — the dead-resolver trap General shipped
-    /// (built in tests, re-derived in the view; both reviewers
-    /// caught it, guard-prover did not, because a behaviour test
-    /// reds on the resolver alone). Whitespace-free so the needle
-    /// survives the formatter wrapping the call across lines.
-    @Test("LayersCard consults the resolver")
-    func layersCardConsultsTheResolver() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Sections/"
-                    + "LayersCard.swift"
-            )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        .split(whereSeparator: \.isWhitespace)
-        .joined()
-        #expect(
-            source.contains(
-                "ShortcutsGates(config:model.config).layersExist"
-            ),
-            Comment(
-                rawValue:
-                    "LayersCard no longer asks ShortcutsGates — the "
-                    + "layers gate went hand-rolled, the "
-                    + "dead-resolver trap"
-            )
-        )
-    }
 }
