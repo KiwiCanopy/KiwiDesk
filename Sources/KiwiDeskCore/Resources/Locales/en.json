@@ -1359,6 +1359,7 @@
   "looks.export": "Export…",
   "looks.import": "Import…",
   "looks.import_failed": "That file isn't a KiwiDesk look.",
+  "looks.import_newer": "This look was made with a newer KiwiDesk. Update KiwiDesk to add it.",
   "looks.keep_previous_colors": "Keep previous colors",
   "looks.keep_previous_colors.caption": "These colors aren't saved as a palette.",
   "looks.mine": "My looks",

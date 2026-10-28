@@ -9,6 +9,8 @@ public final class LookStore {
         case notFound(String)
         case duplicateName(String)
         case invalidFile
+        /// A look file a newer build wrote (#1740), its format.
+        case newerLookFile(Int)
         /// Unreadable or newer-format library.
         case unreadableLibrary
     }
@@ -127,15 +129,38 @@ public final class LookStore {
         try Self.encoder.encode(file).write(to: url)
     }
 
-    /// Imports a look file, admitted (`ShelfLook.admitted`).
+    /// Imports a look file, admitted (`ShelfLook.admitted`), with
+    /// its credit. A file below the current format crosses in memory
+    /// through the look-path steps, since a markerless sidecar has no
+    /// stamp to end on (profiles.md); a newer one is refused.
     public func importLook(from url: URL) throws -> ShelfLook {
-        guard let data = try? Data(contentsOf: url),
+        guard let data = try? Data(contentsOf: url) else {
+            throw StoreError.invalidFile
+        }
+        return try Self.importLook(data: data)
+    }
+
+    /// `importLook(from:)` over bytes already in hand — a file, or a
+    /// gallery download (#1740).
+    public static func importLook(data: Data) throws -> ShelfLook {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { throw StoreError.invalidFile }
+        let format = root["format"] as? Int ?? 0
+        guard format <= LookDocument.currentFormat else {
+            throw StoreError.newerLookFile(format)
+        }
+        let crossed =
+            format < LookDocument.currentFormat
+            ? ConfigMigration.crossingLookExport(data) : data
+        guard
             let file = try? JSONDecoder().decode(
                 LookExport.self,
-                from: data
+                from: crossed
             )
         else { throw StoreError.invalidFile }
-        return file.look.admitted
+        return file.credited.admitted
     }
 
     private static var encoder: JSONEncoder { LookDocument.encoder }
