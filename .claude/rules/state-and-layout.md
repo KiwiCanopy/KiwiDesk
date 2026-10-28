@@ -694,8 +694,7 @@ editing here:
   came back too. A reviewer reading a half-revert as harmless is
   the failure mode; the pair is the guard, not either half.
 - **A pocketed window is KNOWN in its slot, tracked, and never a
-  member (#2446).** `StateCoordinator.pocket`, a list since #2678,
-  names it and
+  member (#2446).** `StateCoordinator.pocket` names it and
   `windows` keeps it, but no Space lists it — the away ledger's
   shape above, for the same reason. So a new reader of
   `space.windows` owes it no exclusion, and the pocket never
@@ -762,7 +761,15 @@ editing here:
     `StateCoordinator.markPocketWindow` alone, out and never
     pocketed — no frames, no `cameFrom` — and `pocketWindow`
     refuses any window that is not the out slot's; a new entry
-    path (a pick, #2678's list) marks first. Marking is the one
+    path (a pick, #2678's list) marks first, and asks
+    `StateCoordinator.pocketAcceptsMark` before it does, the one
+    home of the One window cap that #2678's setting widens
+    (`PocketListTests` ▸ `secondMarkRefused`). A reader of "the
+    pocket holds something" states whether it means any slot or
+    the windows `pocket` works, since a per-app key's slot (#2612)
+    is the one but not the other. "Focused last" among out
+    windows is `focusRecencyRank`, never a pocket record of its
+    own. Marking is the one
     placement at the float size, and a window already floating
     skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,
     `fallbackKeepsAFloatsFrame`); a take-out restores the frame
@@ -2243,7 +2250,10 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys, the pocket's `PocketSlot` keys and
   `Phase` raw values (#2446, `PocketEdgeTests` ▸
-  `storedKeysArePinned`), and the snapshot's own
+  `storedKeysArePinned`) and the snapshot's `pockets` list, whose
+  decode keeps reading a 4.0.0 file's single `pocket` slot while a
+  4.0.0 capture can reach it and drops an unreadable slot alone
+  (#2678, `PocketSnapshotCrossingTests`), and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
   profiles.md), each window record's `app` and `title` — the
   stable key a cross-session match reads (#1385) — and its

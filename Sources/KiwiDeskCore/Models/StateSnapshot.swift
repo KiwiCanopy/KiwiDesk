@@ -252,12 +252,22 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         frozenForLogout =
             (try? c.decodeIfPresent(Bool.self, forKey: .frozenForLogout))
             ?? false
-        // On its own: an unreadable one empties the pocket.
+        // Slot by slot: an unreadable one costs only itself.
         let single = try? decoder.container(keyedBy: SingleSlotKey.self)
             .decodeIfPresent(PocketSlot.self, forKey: .pocket)
         pocket =
-            (try? c.decodeIfPresent([PocketSlot].self, forKey: .pocket))
+            (try? c.decodeIfPresent([ReadableSlot].self, forKey: .pocket))
+            .map { $0.compactMap(\.slot) }
             ?? single.map { [$0] } ?? []
+    }
+
+    /// One pocket slot, nil where it cannot be read.
+    private struct ReadableSlot: Decodable {
+        let slot: PocketSlot?
+
+        init(from decoder: Decoder) throws {
+            slot = try? PocketSlot(from: decoder)
+        }
     }
 }
 

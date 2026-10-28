@@ -14,8 +14,9 @@ extension KiwiCore {
             unmarkPocketWindow(id)
             return .ok()
         }
-        // One window (#2678's default): a second is refused.
-        if !state.pocket.isEmpty { return refuseSecondPocketWindow(id) }
+        guard state.pocketAcceptsMark else {
+            return refuseSecondPocketWindow(id)
+        }
         guard !window.isFullscreen, !window.isTransientOverlay
         else { return .fail("this window cannot be pocketed") }
         markPocketWindow(id)

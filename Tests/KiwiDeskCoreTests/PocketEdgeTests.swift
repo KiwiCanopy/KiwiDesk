@@ -78,8 +78,7 @@ struct PocketEdgeTests {
             pid: 7,
             phase: .out,
             frames: ["A": .zero],
-            cameFrom: two,
-            focusedAt: 3
+            cameFrom: two
         )
         let object = try #require(
             JSONSerialization.jsonObject(
@@ -88,10 +87,7 @@ struct PocketEdgeTests {
         )
         #expect(
             Set(object.keys)
-                == [
-                    "window", "pid", "phase", "frames", "came_from",
-                    "focused_at",
-                ]
+                == ["window", "pid", "phase", "frames", "came_from"]
         )
         #expect(object["phase"] as? String == "out")
     }

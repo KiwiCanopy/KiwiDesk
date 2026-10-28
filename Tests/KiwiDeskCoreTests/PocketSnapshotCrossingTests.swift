@@ -21,7 +21,7 @@ struct PocketSnapshotCrossingTests {
         )
         snapshot.pocket = [
             PocketSlot(window: one, phase: .pocketed),
-            PocketSlot(window: two, phase: .out, focusedAt: 2),
+            PocketSlot(window: two, phase: .out),
         ]
         return snapshot
     }
@@ -51,18 +51,35 @@ struct PocketSnapshotCrossingTests {
     @Test("a 4.0.0 file's one slot is read as a list of one")
     func singleSlotFolds() throws {
         var legacy = try object(snapshot())
-        let slots = try #require(legacy["pockets"] as? [[String: Any]])
-        var slot = try #require(slots.first)
-        // 4.0.0 wrote no focus order.
-        slot["focused_at"] = nil
+        let slots = try #require(legacy["pockets"] as? [Any])
         legacy["pockets"] = nil
-        legacy["pocket"] = slot
-        let read = try JSONDecoder().decode(
-            StateSnapshot.self,
-            from: JSONSerialization.data(withJSONObject: legacy)
-        )
+        legacy["pocket"] = slots.first
+        let read = try decode(legacy)
         #expect(read.pocket.map(\.window) == [one])
         #expect(read.pocket.first?.phase == .pocketed)
-        #expect(read.pocket.first?.focusedAt == 0)
+    }
+
+    @Test("an unreadable slot costs only itself")
+    func badSlotCostsItself() throws {
+        var written = try object(snapshot())
+        var slots = try #require(written["pockets"] as? [[String: Any]])
+        slots[0]["phase"] = "lost"
+        written["pockets"] = slots
+        #expect(try decode(written).pocket.map(\.window) == [two])
+    }
+
+    @Test("a list outranks a single slot beside it")
+    func listOutranksSingle() throws {
+        var written = try object(snapshot())
+        let slots = try #require(written["pockets"] as? [Any])
+        written["pocket"] = slots.last
+        #expect(try decode(written).pocket.map(\.window) == [one, two])
+    }
+
+    private func decode(_ object: [String: Any]) throws -> StateSnapshot {
+        try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: JSONSerialization.data(withJSONObject: object)
+        )
     }
 }

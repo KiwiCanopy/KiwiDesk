@@ -40,17 +40,23 @@ extension StateCoordinator {
     }
 
     /// The out window `pocket` puts back next (#2678): `focused`
-    /// where it is one, else the one focused last. Only a tracked
-    /// window qualifies; a hidden app's comes back by its unhide.
+    /// where it is one, else the one focused last by the focus
+    /// recency. Only a tracked window qualifies; a hidden app's
+    /// comes back by its unhide.
     func pocketPutBackNext(focused: WindowID?) -> WindowID? {
         let out = pocket.filter {
             $0.phase == .out && windows[$0.window] != nil
+        }.map(\.window)
+        if let focused, out.contains(focused) { return focused }
+        return out.max {
+            focusRecencyRank(of: $0) < focusRecencyRank(of: $1)
         }
-        if let focused, out.contains(where: { $0.window == focused }) {
-            return focused
-        }
-        return out.max { $0.focusedAt < $1.focusedAt }?.window
     }
+
+    /// Whether a window may be marked now: One window (#2678's
+    /// default) takes a mark only while the pocket is empty. Every
+    /// path that marks asks this.
+    var pocketAcceptsMark: Bool { pocket.isEmpty }
 
     /// Puts the out window `id` in the pocket: floating, no sticky
     /// scope, filed in no Space, last in put-in order. A slot fills
@@ -71,9 +77,9 @@ extension StateCoordinator {
     }
 
     /// Marks `id` a pocket window where it is (#2675): out, its
-    /// membership kept, never pocketed yet, and focused now. False
-    /// for an untracked or already marked window; whether the
-    /// pocket takes another is the caller's.
+    /// membership kept, never pocketed yet. False for an untracked
+    /// or already marked window; the caller asks
+    /// `pocketAcceptsMark` first.
     @discardableResult
     mutating func markPocketWindow(_ id: WindowID) -> Bool {
         guard pocketIndex(of: id) == nil, windows[id] != nil
@@ -99,7 +105,8 @@ extension StateCoordinator {
         return id
     }
 
-    /// Marks `id`'s slot out: floating, on every Space, focused now.
+    /// Marks `id`'s slot out: floating and on every Space, and
+    /// stamped as focused, since a take-out focuses it (#2678).
     /// Its filing is the caller's, through `fileMembership`.
     mutating func markPocketOut(_ id: WindowID, cameFrom: WindowID?) {
         guard let index = pocketIndex(of: id), windows[id] != nil
@@ -108,18 +115,7 @@ extension StateCoordinator {
         windows.setSticky(id, .global)
         pocket[index].phase = .out
         pocket[index].cameFrom = cameFrom == id ? nil : cameFrom
-        stampPocketFocus(id)
-    }
-
-    /// Records that the out window `id` was focused (#2678).
-    mutating func stampPocketFocus(_ id: WindowID) {
-        guard let index = pocketIndex(of: id),
-            pocket[index].phase == .out
-        else { return }
-        let latest = pocket.map(\.focusedAt).max() ?? 0
-        guard pocket[index].focusedAt != latest || latest == 0
-        else { return }
-        pocket[index].focusedAt = latest + 1
+        stampFocusRecency(id)
     }
 
     /// Remembers where `id` sits out of the pocket, on the screen

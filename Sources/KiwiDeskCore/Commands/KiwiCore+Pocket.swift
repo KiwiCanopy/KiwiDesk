@@ -8,9 +8,9 @@ import Foundation
 /// the preflight: its arms act on the slots, never the focus.
 extension KiwiCore {
     func pocketCommand() -> CommandResponse {
-        // A press on emptied slots ends there: a filled pocket
+        // A press that emptied the pocket ends there: a filled one
         // passed the #292 preflight, so it never acts on the focus.
-        if emptyPocketIfGone() { return .ok() }
+        if emptyPocketIfGone(), state.pocket.isEmpty { return .ok() }
         // Away first: the out window used last (#2678).
         if let id = state.pocketPutBackNext(focused: focusedWindowID) {
             putInPocket(id)
@@ -20,7 +20,8 @@ extension KiwiCore {
             return takePocketOut(id)
                 ? .ok() : .fail("pocket is unreachable")
         }
-        // Out with its app hidden: the unhide brings it back.
+        // Out with its app hidden: the unhide brings it back. Only
+        // an empty pocket marks the focus here.
         guard state.pocket.isEmpty else {
             return .fail("pocket is unreachable")
         }
@@ -263,22 +264,14 @@ extension KiwiCore {
 extension KiwiCore {
     /// macOS handing the focus to a pocketed window — ⌘-Tab, the
     /// Dock, a notification — takes it out; the echo of our own
-    /// pocketing does not. A report for an out one stamps its
-    /// focus (#2678) and passes. True where the report is spent here.
+    /// pocketing does not. True where the report is spent here.
     func consumePocketedFocus(_ id: WindowID) -> Bool {
-        switch state.pocketPhase(of: id) {
-        case .pocketed?:
-            if !moveLatch.isLatched(id, at: wallClock()) {
-                onLog("focus: w\(id.raw) pocketed — taking it out")
-                takePocketOut(id)
-            }
-            return true
-        case .out?:
-            state.stampPocketFocus(id)
-            return false
-        case nil:
-            return false
+        guard state.isPocketed(id) else { return false }
+        if !moveLatch.isLatched(id, at: wallClock()) {
+            onLog("focus: w\(id.raw) pocketed — taking it out")
+            takePocketOut(id)
         }
+        return true
     }
 }
 

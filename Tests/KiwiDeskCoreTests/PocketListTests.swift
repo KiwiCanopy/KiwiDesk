@@ -60,7 +60,7 @@ struct PocketListTests {
     func focusReportRanks() {
         let core = makeCore()
         markTwo(core)
-        #expect(!core.consumePocketedFocus(one))
+        core.handle(.windowFocused(one))
         core.state.apply(.windowFocused(three))
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: one) == .pocketed)
@@ -89,8 +89,22 @@ struct PocketListTests {
         #expect(core.state.pocketPhase(of: two) == .pocketed)
     }
 
-    @Test("a take-out counts as a focus, and a put-back as newest")
-    func takeOutRanksAndPutBackReorders() {
+    @Test("a take-out counts as a focus")
+    func takeOutRanks() {
+        let core = makeCore()
+        // `two` marked first, so `one`'s mark is the later focus.
+        core.state.markPocketWindow(two)
+        core.state.markPocketWindow(one)
+        core.state.pocketWindow(two)
+        #expect(core.takePocketOut(two))
+        core.state.apply(.windowFocused(three))
+        core.execute("pocket")
+        #expect(core.state.pocketPhase(of: two) == .pocketed)
+        #expect(core.state.pocketPhase(of: one) == .out)
+    }
+
+    @Test("a window put back becomes the one put in last")
+    func putBackReorders() {
         let core = makeCore()
         markTwo(core)
         core.execute("pocket")
