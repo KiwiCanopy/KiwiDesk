@@ -106,7 +106,12 @@ private struct PanelGlassChrome<S: Shape>: ViewModifier {
         inked(content, ink)
             .environment(
                 \.kiwiHubPaint,
-                KiwiHubPaint.of(drawn, ink: ink, tint: tint)
+                KiwiHubPaint.of(
+                    drawn,
+                    ink: ink,
+                    tint: tint,
+                    increaseContrast: increased
+                )
             )
             .glassChrome(
                 in: shape,

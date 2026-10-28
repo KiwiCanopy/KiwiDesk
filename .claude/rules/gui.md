@@ -1848,8 +1848,9 @@ Obligations:
   ink `PanelHighlightTests` measures, and hover pair, held to the reading
   floor by `GlassPaintTests` ▸ `hubInksHoldTheFloor` (`PanelGlassTests` ▸
   `rowsReadThePaint`). **A selection or hover fill there draws through
-  `KiwiHubPaint.fill`** (#2721), fading by the panel's own paint; its ink is
-  measured at that fade's far end (`HighlightFadeContrastTests`); the scope
+  `KiwiHubPaint.fill`** (#2721), along the panel's paint to
+  `KiwiShelf.highlightFadeShare`; its ink is measured at that far end
+  (`HighlightFadeContrastTests`); the scope
   switch, rows, chips and tiles take it, and the footer's buttons stay
   native. A divider in KiwiHub or a cue plate is a
   `PanelDivider`, which draws the paint's hairline tinted and the system

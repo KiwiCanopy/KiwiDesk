@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// KiwiHub's selection and hover fade by the panel Fill's own share
+/// KiwiHub's selection and hover fade to `highlightFadeShare`
 /// (`KiwiHubPaint.fill`): at the fade's far end the selected item's
 /// ink on the faded highlight, and the hovered item's on the faded
 /// hover, hold the reading floor over the panel's own far end, on
@@ -55,7 +55,8 @@ struct HighlightFadeContrastTests {
         return worst
     }
 
-    /// The panel's far end, and the share KiwiHub's fills fade to.
+    /// The panel's far end, and the share KiwiHub's fills fade to
+    /// (`highlightFadeShare`), deeper than the panel's.
     private func ends(
         _ shelf: KiwiShelf,
         increaseContrast: Bool
@@ -67,7 +68,10 @@ struct HighlightFadeContrastTests {
         let floored = try #require(
             scaled(shelf.fillColor, by: anchor * far / CGFloat(rgba.alpha))
         )
-        return (floored, far)
+        return (
+            floored,
+            shelf.highlightFadeShare(increaseContrast: increaseContrast)
+        )
     }
 
     @Test(

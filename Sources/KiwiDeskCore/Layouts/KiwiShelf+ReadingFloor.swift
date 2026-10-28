@@ -94,3 +94,24 @@ extension KiwiShelf {
         return high
     }
 }
+
+extension KiwiShelf {
+    /// The far end a KiwiHub selection or hover fill keeps at the
+    /// strongest fade, as a share of its top (#2721, ui-designer):
+    /// the panel's floor guards the panel's inks, and a fill
+    /// carries its own, held by `HighlightFadeContrastTests`.
+    public static let highlightFloorShare: CGFloat = 0.4
+
+    /// The far end of KiwiHub's selection and hover fills: Fill
+    /// fade's own share, never below `highlightFloorShare`; under
+    /// Increase Contrast, the panel's own far end, whose floor holds
+    /// the fills' inks at the stricter floor where 0.4 does not.
+    public func highlightFadeShare(increaseContrast: Bool) -> CGFloat {
+        let fade = GlassTint.farShare(fade: fillFade)
+        guard increaseContrast else {
+            return max(fade, Self.highlightFloorShare)
+        }
+        let panel = panelGlassFill(increaseContrast: true)
+        return max(fade, panel.minShare)
+    }
+}

@@ -125,8 +125,8 @@ struct PanelGlassTests {
         #expect(
             chrome.contains(
                 "inked(content,ink).environment(\\.kiwiHubPaint,"
-                    + "KiwiHubPaint.of(drawn,ink:ink,tint:tint))"
-                    + ".glassChrome("
+                    + "KiwiHubPaint.of(drawn,ink:ink,tint:tint,"
+                    + "increaseContrast:increased)).glassChrome("
             )
         )
         // One read of Increase Contrast resolves the inks for both.
@@ -282,7 +282,7 @@ struct PanelGlassTests {
         #expect(
             chrome.contains(
                 ".environment(\\.kiwiHubPaint,KiwiHubPaint.of(drawn,"
-                    + "ink:ink,tint:tint))"
+                    + "ink:ink,tint:tint,increaseContrast:increased))"
             )
         )
     }

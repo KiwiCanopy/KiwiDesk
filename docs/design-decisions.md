@@ -18146,19 +18146,28 @@ transparency returns the flat hover with the rest of the glass.
 Each layer takes the cap, not the stack: under Boxed the hover
 draws over the box's own faded tint, as the flat hover did, and
 that layered look is the one the owner compared and chose.
+
 :::unreleased
-**KiwiHub's selection fades with its Fill** (#2721, owner, 2026-10-28,
-after comparing solid and faded fills on a live prototype). Under
-*Tint KiwiHub and plates*, every selection and hover fill — the
-scope switch's pill, hover and track, the Windows rows, the View
-side's chips and layout tiles — fades top to bottom with the
-panel's own Fill, by the panel's own share. A solid pill read as
-a flat patch on faded glass, the #2645 case one surface over. The
-panel's floor is measured for the panel's inks, not the selected
-label, so the selected and hovered inks are measured at the far end
-too, on every bundled palette; the panel's share already holds
-them there, so the fills take no floor of their own. The footer's
-buttons stay native macOS buttons. Off the toggle, and in Settings, the fills stay flat.
+**KiwiHub's selection fades with its Fill** (#2721, owner,
+2026-10-28, after comparing solid and faded fills on a live
+prototype and the device). Under *Tint KiwiHub and plates*, every
+selection and hover fill — the scope switch's pill, hover and
+track, the Windows rows, the View side's chips and layout tiles —
+fades top to bottom along the panel's Fill. A solid pill read as a
+flat patch on faded glass, the #2645 case one surface over. The
+fills fade deeper than the panel, to 0.4 of their top at Fill fade
+100 (`KiwiShelf.highlightFloorShare`, `ui-designer`'s pick): the
+panel's floor keeps the panel's inks legible, while a fill carries
+its own ink, and at the panel's 0.46–0.73 the fade was barely
+visible on the device. Matching the panel was weighed and refused
+for that reason, and the unfloored 1/8 for leaving a tile a band
+along its top. The label sits mid-height, where the fill keeps
+about 0.7, and the selected and hovered inks are measured at the
+far end on every bundled palette (`HighlightFadeContrastTests`).
+Under Increase Contrast the fills fade only as far as the panel,
+whose stricter floor holds their inks where 0.4 does not.
+The footer's buttons stay native macOS buttons; off the toggle,
+and in Settings, the fills stay flat.
 :::
 
 :::unreleased

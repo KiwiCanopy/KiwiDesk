@@ -19,16 +19,20 @@ struct KiwiHubPaint {
     /// A divider's hairline under the toggle (#2596); nil keeps the
     /// system separator.
     var divider: Color?
-    /// The panel Fill as its glass paints it, whose fade a
+    /// The panel Fill as its glass paints it, whose direction a
     /// selection or hover fill follows (#2721); nil draws it flat.
     var fade: GlassPaint?
+    /// The far end of a faded fill as a share of its top
+    /// (`KiwiShelf.highlightFadeShare(increaseContrast:)`).
+    var share: CGFloat = 1
 
     init() {}
 
     init(
         _ shelf: PanelHighlight,
         divider: String,
-        fade: GlassPaint? = nil
+        fade: GlassPaint? = nil,
+        share: CGFloat = 1
     ) {
         tinted = true
         selection = Color(kiwiHex: shelf.selection)
@@ -39,31 +43,35 @@ struct KiwiHubPaint {
         hoverInk = Color(kiwiHex: shelf.hoverInk)
         self.divider = Color(kiwiHex: divider)
         self.fade = fade
+        self.share = share
     }
 
     /// The paint KiwiHub wears on `glass` as drawn, its divider from
     /// `ink`, the inks the panel chrome resolved for that glass;
-    /// its fills fade as `tint`, the glass's own paint, does; the
-    /// inks on them hold at its far end (`HighlightFadeContrastTests`).
+    /// its fills fade along `tint`, the glass's own paint, to the
+    /// shelf's highlight share under `increaseContrast`.
     static func of(
         _ glass: PanelGlass,
         ink: PanelInk?,
-        tint: GlassPaint? = nil
+        tint: GlassPaint? = nil,
+        increaseContrast: Bool = false
     ) -> KiwiHubPaint {
         guard let shelf = glass.shelf, let ink else { return KiwiHubPaint() }
         return KiwiHubPaint(
             shelf.panelHighlight,
             divider: ink.divider,
-            fade: tint
+            fade: tint,
+            share: shelf.highlightFadeShare(
+                increaseContrast: increaseContrast
+            )
         )
     }
 
-    /// The far end of a faded fill as a share of its top, the
-    /// glass's own; nil draws it flat.
+    /// The far end of a faded fill as a share of its top; nil
+    /// draws it flat, off the toggle or with no fade.
     var fadeShare: CGFloat? {
-        guard let fade, fade.anchorAlpha > 0 else { return nil }
-        let share = fade.farAlpha / fade.anchorAlpha
-        return share < 1 ? share : nil
+        guard fade != nil, share < 1 else { return nil }
+        return share
     }
 }
 
@@ -82,8 +90,8 @@ struct PanelDivider: View {
 }
 
 extension KiwiHubPaint {
-    /// `color` as a selection, hover or track fill: faded like
-    /// the panel's Fill, to `fadeShare`; flat off the toggle.
+    /// `color` as a selection, hover or track fill: faded along
+    /// the panel's Fill to `fadeShare`; flat off the toggle.
     func fill(_ color: Color) -> AnyShapeStyle {
         guard let fade, let fadeShare else { return AnyShapeStyle(color) }
         return AnyShapeStyle(
