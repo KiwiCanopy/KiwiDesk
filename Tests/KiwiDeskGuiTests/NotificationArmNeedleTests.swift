@@ -172,7 +172,7 @@ struct NotificationArmNeedleTests {
             body.range(of: "raiseCrossesDesktops(id)")
         )
         let predicate = try #require(
-            body.range(of: "if activeSpace?.focused != id {")
+            body.range(of: "if (leaving ?? activeSpace?.focused) != id {")
         )
         let stamp = try #require(
             body.range(of: "eventLoop.lastCommandedFocus = .now")
