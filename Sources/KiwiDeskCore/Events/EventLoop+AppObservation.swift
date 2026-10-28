@@ -281,6 +281,7 @@ extension EventLoop {
         transientRetried[pid] = nil
         pendingRetrack.remove(pid)
         pendingRemovalRecheck.remove(pid)
+        lockedRemovals.refused.remove(pid)
         switchReads.forget(pid)
         offMain.departures.forget(pid: pid)
         for id in Array(elements[pid, default: [:]].keys) {

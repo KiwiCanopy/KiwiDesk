@@ -111,6 +111,14 @@ extension EventLoop {
             )
         }
         endRemovalEpisodes(relisted: live)
+        // Under a locked session no reading is a close (#2538);
+        // a hide is a total answer about the app (#913).
+        if !hidden,
+            vanishedIDs.contains(where: { !consumed.contains($0) }),
+            refusesLockedRemovals(pid: pid, app: app)
+        {
+            return
+        }
         // Genuine closes: emit the destroy the eager path deferred.
         // A candidate is checked against ONE census per sweep; a
         // window the compositor still shows was not closed
