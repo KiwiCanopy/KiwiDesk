@@ -71,7 +71,6 @@ extension KiwiCore {
         if let becoming {
             state.rememberPocketFrame(becoming.frame, on: becoming.screen)
         }
-        moveLatch.stamp(id, at: wallClock())
         onLog("pocket: w\(id.raw) pocketed")
         let next =
             heldFocus
@@ -79,7 +78,8 @@ extension KiwiCore {
                 ?? activeSpace?.focused
             : nil
         // State focus moves now, so the pass pans to it; the raise
-        // waits for the play to end (#2703).
+        // waits for the play to end (#2703), told what it leaves.
+        let leaving = focusedWindowID
         if let next, let space = state.workspaces.space(of: next) {
             state.workspaces.focus(next, in: space)
         }
@@ -92,6 +92,9 @@ extension KiwiCore {
                 on: TilingEngine.screen(containing: $0)?.kiwiDisplayID
             )
         }
+        // Held through the play, whose end the hand-off waits for.
+        let past = max(0, (play?.end ?? 0) - MoveIntentLatch.window)
+        moveLatch.stamp(id, at: wallClock().addingTimeInterval(past))
         guard heldFocus else { return handPocketFocus(after: nil, nil) }
         handPocketFocus(after: play?.end) { [weak self] in
             guard let self else { return }
@@ -99,14 +102,15 @@ extension KiwiCore {
                 self.desktopFocusYield?()
                 return
             }
-            // The latch swallows the echo of this hand-off, not
-            // only of the park.
+            // And through the echo of the hand-off itself.
             self.moveLatch.stamp(id, at: self.wallClock())
             let priorFrontmost = self.frontmostPIDProvider?()
-            self.focusWindow(next, refocusRetile: false, warp: true)
-            // The state focus above leaves the focus unchanged here,
-            // so the commanded float raise is owed by hand (#2284).
-            self.raiseFloatsAbove(afterFocusing: next)
+            self.focusWindow(
+                next,
+                refocusRetile: false,
+                warp: true,
+                leaving: leaving
+            )
             self.scheduleMoveSettle(
                 origin: self.state.workspaces.activeSpace,
                 priorFrontmost: priorFrontmost

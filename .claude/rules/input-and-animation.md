@@ -824,11 +824,11 @@ editing here:
   through the one `handPocketFocus` (#2703): a raise mid-play
   activates an app on the thread the plate's frames tick on, and
   KiwiDesk's own Settings window redraws whole on it
-  (`BriefPocketTests` ▸ `putInRaiseWaits`, `takeOutRaiseWaits`). Its Reduce Motion read is pinned on in both
-  `makeTestCore` twins (`SpaceSlideSeamTests` ▸
-  `bothTwinsPinTheReads`), so no other suite plays; a suite that
-  unpins it pins the panel and frame clock itself, as
-  `BriefPocketTests` does.
+  (`BriefPocketTests` ▸ `putInRaiseWaits`, `takeOutRaiseWaits`).
+  Its Reduce Motion read is pinned on in both `makeTestCore` twins
+  (`SpaceSlideSeamTests` ▸ `bothTwinsPinTheReads`), so no other
+  suite plays; a suite that unpins it pins the panel and frame
+  clock itself, as `BriefPocketTests` does.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

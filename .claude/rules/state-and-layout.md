@@ -734,12 +734,16 @@ editing here:
     the move latch, stamped by `putInPocket` at the press and again
     at its hand-off, swallows the pocketing's own echo
     (`PocketCommandTests` ▸ `activationTakesOut`).
-  - **A pocket press moves state focus at once and raises when its
-    brief pocket ends (#2703)**, so for one play the key window is
-    not the state's: the one `handPocketFocus` pays the raise, and a
-    new focus path that must pre-empt it changes the state focus,
-    which its guard compares, or goes through that door
-    (`BriefPocketTests` ▸ `movedFocusDrops`).
+  - **A pocket press moves state focus at once where a window can
+    take it, and raises when its brief pocket ends (#2703)**, so for
+    one play the key window is not the state's — and where none can
+    take it, `lastFocused` names the pocketed window, in no Space.
+    The one `handPocketFocus` pays the raise, through `focusWindow`
+    told what it `leaving`s, so every arm reads the focus it moved
+    off; a new focus path that must pre-empt it changes the state
+    focus, which its guard compares, or goes through that door
+    (`BriefPocketTests` ▸ `stateFocusLeadsTheRaise`,
+    `movedFocusDrops`).
   - **The slot crosses an in-place restart in
     `StateSnapshot.pocket`, written by that capture alone**, and a
     slow app's window adopted after the replay comes back to it

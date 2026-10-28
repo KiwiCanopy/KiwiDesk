@@ -202,27 +202,30 @@ struct BriefPocketTests {
         #expect(next != nil && core.state.pocket?.cameFrom == next)
     }
 
-    /// The window it came out over is not the Space's successor:
+    /// The window it came out over is not the Space's successor,
+    /// the last window of the row once the pocket window joined it:
     /// state focus goes there at the press, so the pass pans to it.
     @Test("pocketing moves state focus to where it came out at once")
     func stateFocusLeadsTheRaise() async {
         guard NSScreen.main != nil else { return }
         let core = raisingCore()
+        let two = WindowID(2)
         core.deferred.sleep = { _ in }
         #expect(core.execute("pocket").isSuccess)
         await core.deferred.task(for: .pocketFocus)?.value
         core.briefPocket.end()
-        core.focusWindow(three, warp: false)
+        core.focusWindow(two, warp: false)
         #expect(core.execute("pocket").isSuccess)
         await core.deferred.task(for: .pocketFocus)?.value
         core.briefPocket.end()
-        #expect(core.state.pocket?.cameFrom == three)
+        #expect(core.state.pocket?.cameFrom == two)
+        #expect(core.activeSpace?.windows.last == one)
         core.selfRaiseStamps = [:]
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.focusedWindowID == three)
-        #expect(!raised(core, three))
+        #expect(core.focusedWindowID == two)
+        #expect(!raised(core, two))
         await core.deferred.task(for: .pocketFocus)?.value
-        #expect(raised(core, three))
+        #expect(raised(core, two))
     }
 
     @Test("a focus moved before the play ends keeps its window")
