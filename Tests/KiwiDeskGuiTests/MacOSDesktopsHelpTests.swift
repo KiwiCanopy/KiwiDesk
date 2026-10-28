@@ -30,9 +30,6 @@ struct MacOSDesktopsHelpTests {
         "Sources/KiwiDesk/Settings/Components/Keybindings/"
         + "MacOSDesktopsGroup.swift"
 
-    private static let sectionFile =
-        "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
-
     private func squashed(_ repoRelative: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(repoRelative)

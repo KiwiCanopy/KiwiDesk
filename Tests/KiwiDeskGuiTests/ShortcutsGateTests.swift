@@ -20,9 +20,9 @@ import Testing
 /// So it holds the halves that were missing: that an `.immediate`
 /// row carries the gate its tier's meaning depends on, that the
 /// resolver answers on each side of the boundary, that every
-/// declared gate is accounted for, and that `LayersCard` actually
-/// CONSULTS the resolver rather than re-deriving it — the
-/// dead-resolver trap the General lane shipped.
+/// declared gate is accounted for. That `LayersCard` CONSULTS the
+/// resolver is `ShortcutsOfferDisclosureTests` ▸
+/// `cardsOpenOnArrival`'s.
 @Suite("Shortcuts gates")
 struct ShortcutsGateTests {
     private func config(layers: [String]) -> GuiConfig {
