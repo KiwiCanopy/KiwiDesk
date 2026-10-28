@@ -163,9 +163,9 @@ extension SpaceBarItemView {
         guard !badge.isHidden else { return }
         let base =
             centered
-            ? cell * 0.8 : StateBadgeMetrics.side(cell: cell)
+            ? cell * 0.7 : StateBadgeMetrics.side(cell: cell)
         badge.font = style.shelf.badgeFont(
-            ofSize: base * (centered ? 0.5 : 0.72),
+            ofSize: base * (centered ? 0.55 : 0.72),
             emphasis: .bold
         )
         let textWidth = ceil(badge.cell?.cellSize.width ?? 0)

@@ -18152,6 +18152,46 @@ Each layer takes the cap, not the stack: under Boxed the hover
 draws over the box's own faded tint, as the flat hover did, and
 that layered look is the one the owner compared and chose.
 
+**KiwiHub's selection fades with its Fill** (#2721, owner,
+2026-10-28, after comparing solid and faded fills on a live
+prototype and the device). Under *Tint KiwiHub and plates*, every
+selection and hover fill — the scope switch's pill, hover and
+track, the Windows rows, the View side's chips and layout tiles —
+fades top to bottom along the panel's Fill. A solid pill read as a
+flat patch on faded glass, the #2645 case one surface over. The
+fills fade deeper than the panel, to 0.4 of their top at Fill fade
+100 (`KiwiShelf.highlightFloorShare`, `ui-designer`'s pick): the
+panel's floor keeps the panel's inks legible, while a fill carries
+its own ink, and at the panel's 0.46–0.73 the fade was barely
+visible on the device. Matching the panel was weighed and refused
+for that reason, and the unfloored 1/8 for leaving a tile a band
+along its top. The label sits mid-height, where the fill keeps
+about 0.7, and the selected and hovered inks are measured at the
+far end on every bundled palette (`HighlightFadeContrastTests`).
+Where 0.4 would sink a fill's own ink — under Increase Contrast,
+whose floor is stricter — the share rises to the point that holds
+it, over both ends of the panel (`highlightFadeShare`).
+The footer's buttons stay native macOS buttons; off the toggle,
+and in Settings, the fills stay flat.
+
+**A bar badge keeps its disc opaque** (#2722, owner, 2026-10-28,
+on the device). The group count, the Space Bar's `+n` and its sticky,
+floating and pocket badges dimmed as a whole, so on a faded plate
+the disc read as a grey smudge. The dim ladder now reaches the
+mark alone, and every badge shares one face (`BarBadgeFace`): an
+opaque disc with a 1 pt rim that parts it from the glass: white at
+0.35 on a dark shelf Fill, black at 0.25 on a light one, dimmed
+with the mark; with no Fill the glass follows the Appearance pick,
+and so does the rim. A 0.5 pt
+rim picked by the disc's own brightness vanished on the device, a
+black rim on a light disc disappearing into dark glass
+(`ui-designer`).
+The `+n` disc is 0.7 of its cell, smaller than the 0.8 it had,
+which read too heavy beside the icons. Glass and a fade were
+weighed and refused: `ui-designer` pointed to Apple's solid badges
+on glass, and at a 14 pt disc a fade reads as a smudge, not a
+fade.
+
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two
 "unmeasured" clear-end sentences above. With the Fill on top and

@@ -33,7 +33,12 @@ struct KiwiHubDividerTests {
         // The chrome's own resolution: no inks for an untinted glass.
         for increased in [false, true] {
             let ink = glass.shelf?.panelInk(increaseContrast: increased)
-            let paint = KiwiHubPaint.of(glass, ink: ink)
+            let paint = KiwiHubPaint.of(
+                glass,
+                ink: ink,
+                tint: nil,
+                increaseContrast: false
+            )
             guard tinted else {
                 #expect(ink == nil)
                 #expect(paint.divider == nil)
