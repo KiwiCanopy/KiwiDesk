@@ -142,7 +142,9 @@ struct SettingsView: View {
         _ width: SettingsWidthClass
     ) -> some View {
         chrome(width) {
-            if selection == nil {
+            if model.showsSimple {
+                SimpleScreen(model: model)
+            } else if selection == nil {
                 HomeScreen(model: model)
             } else {
                 detailPane(width)
