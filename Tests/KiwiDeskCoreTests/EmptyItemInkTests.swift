@@ -114,4 +114,20 @@ struct EmptyItemInkTests {
         #expect(!anyShareFits(shelf))
         #expect(shelf.emptyItemColor == shelf.idleItemColor)
     }
+
+    /// The share is memoised per colour pair: a change to either
+    /// colour alone, after a read, answers from the new pair.
+    @Test("A colour change is never answered from the memo")
+    func memoKeysBothColours() {
+        var shelf = KiwiShelf()
+        #expect(shelf.emptyItemAlpha != nil)
+        shelf.itemColor = "#808080"
+        #expect((shelf.emptyItemAlpha != nil) == anyShareFits(shelf))
+        shelf.fillColor = "#606060"
+        #expect(shelf.emptyItemAlpha == nil)
+        shelf.itemColor = KiwiShelf().itemColor
+        #expect((shelf.emptyItemAlpha != nil) == anyShareFits(shelf))
+        shelf.fillColor = KiwiShelf().fillColor
+        #expect(shelf.emptyItemAlpha != nil)
+    }
 }

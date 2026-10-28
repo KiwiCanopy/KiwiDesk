@@ -1,5 +1,6 @@
 import CoreGraphics
 import Foundation
+import os
 
 /// The identifier ink of an empty Space the screen does not show
 /// (#1683): derived from the palette, never
@@ -26,7 +27,34 @@ extension KiwiShelf {
     /// the plate: the cue drops rather than the floor. The
     /// candidate is the least dimming that makes the step, since
     /// dimming further only loses contrast on the plate.
+    /// Memoised per (item, fill) colour pair: every bar pass reads
+    /// it, and the search costs ~5 ms on a real desk.
     public var emptyItemAlpha: CGFloat? {
+        let key = EmptyInkKey(item: itemColor, fill: fillColor)
+        if let hit = Self.emptyInkMemo.withLock({ $0[key] }) {
+            return hit
+        }
+        let share = searchEmptyItemAlpha()
+        Self.emptyInkMemo.withLock {
+            if $0.count >= Self.emptyInkMemoCap { $0.removeAll() }
+            $0.updateValue(share, forKey: key)
+        }
+        return share
+    }
+
+    private struct EmptyInkKey: Hashable, Sendable {
+        let item: String
+        let fill: String
+    }
+
+    /// Distinct palettes stay few; a colour drag mints one key per
+    /// step, so the memo clears itself past this many.
+    private static let emptyInkMemoCap = 64
+
+    private static let emptyInkMemo =
+        OSAllocatedUnfairLock<[EmptyInkKey: CGFloat?]>(initialState: [:])
+
+    private func searchEmptyItemAlpha() -> CGFloat? {
         let occupied = idleItemColor
         let top = Int((Self.idleItemAlpha * 100).rounded()) - 1
         guard top >= 0 else { return nil }
