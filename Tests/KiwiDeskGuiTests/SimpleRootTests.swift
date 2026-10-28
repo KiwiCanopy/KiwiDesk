@@ -31,6 +31,13 @@ struct SimpleRootTests {
         #expect(SettingsRootPreference.read(from: defaults) == first)
     }
 
+    /// Advanced until Simple has its sections; PR 2 of #2737
+    /// flips it to the ruled `.simple` and this pin with it.
+    @Test("the first-open root is Advanced until Simple is filled")
+    func firstOpenIsPinned() {
+        #expect(SettingsRootPreference.firstOpen == .advanced)
+    }
+
     /// The retired key's values meant the old modes, so none of
     /// them moves the first-open root.
     @Test("the retired settingsMode key is never read")
@@ -74,9 +81,18 @@ struct SimpleRootTests {
     @Test("a landing and a named door are not the user's pick")
     func landingIsNotAPick() {
         let (defaults, model) = onSimple()
+        // A link waits for its page: no Advanced Home in between.
         model.openAdvanced(SettingsAnchor(destination: .looks))
-        #expect(model.settingsRoot == .advanced)
+        #expect(model.settingsRoot == .simple)
         #expect(model.nav.pendingReveal?.destination == .looks)
+        model.destination = .looks
+        #expect(model.settingsRoot == .advanced)
+        // The bare door shows Advanced's Home.
+        model.destination = nil
+        model.pickRoot(.simple)
+        model.openAdvanced()
+        #expect(!model.showsSimple)
+        model.prepareToShow(windowShown: false)
         #expect(SettingsRootPreference.read(from: defaults) == .simple)
     }
 
@@ -117,6 +133,39 @@ struct SimpleRootTests {
         #expect(!model.editingStoredProfile)
     }
 
+    /// Unsaved edits to the stored profile ask first; nothing
+    /// moves until the user confirms.
+    @Test("a dirty stored target asks before Simple")
+    func dirtyStoredTargetAsks() throws {
+        let model = try withStoredProfile()
+        model.destination = .spaces
+        model.selectEditTarget("p")
+        model.config.settings.mouse.hoverFocusDelayMS = 1234
+        #expect(model.isDirty)
+        model.pickRoot(.simple)
+        #expect(model.pendingDiscard != nil)
+        #expect(model.settingsRoot == .advanced)
+        #expect(model.editingStoredProfile)
+        #expect(
+            SettingsRootPreference.read(from: model.preferences)
+                == .simple
+        )
+        model.pickRoot(.advanced)
+        model.pickRoot(.simple)
+        #expect(
+            SettingsRootPreference.read(from: model.preferences)
+                == .advanced
+        )
+        let pending = try #require(model.pendingDiscard)
+        model.confirmPendingDiscard(pending)
+        #expect(!model.editingStoredProfile)
+        #expect(model.showsSimple)
+        #expect(
+            SettingsRootPreference.read(from: model.preferences)
+                == .simple
+        )
+    }
+
     @Test("picking Advanced on screen still stores it")
     func pickOnScreenStores() {
         let (defaults, model) = onSimple()
@@ -147,6 +196,11 @@ struct SimpleRootTests {
     @Test("the tour's landing follows the stored root")
     func tourFollowsStoredRoot() {
         let (_, model) = onSimple()
+        model.landFromTour(.macChecklist)
+        #expect(model.nav.pendingReveal == nil)
+        // A page shows Advanced; the stored root still decides.
+        model.destination = .spaces
+        model.destination = nil
         model.landFromTour(.macChecklist)
         #expect(model.nav.pendingReveal == nil)
         model.pickRoot(.advanced)

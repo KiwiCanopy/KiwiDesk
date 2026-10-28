@@ -67,6 +67,17 @@ struct OnboardingCloseSeamTests {
                 + "}else{dashboard.show(navigatingTo:destination)}"
                 + "ifonboardingWindow!=nil{closeOnboarding()}}",
         ],
+        "Settings/SettingsWindowController.swift": [
+            // …the controller asks the model whether the tour
+            // lands, and the switch stores through `pickRoot`
+            // (#2737).
+            "funcshow(landingFromTourdestination:"
+                + "SettingsDestination){"
+                + "model.landFromTour(destination)show()}"
+        ],
+        "Settings/SettingsRootSwitch.swift": [
+            "set:{model.pickRoot($0)}"
+        ],
         "Onboarding/OnboardingView+Closing.swift": [
             // …and the button calls THAT exit, with the login
             // commit on it: pinned at the view because a second

@@ -49,11 +49,12 @@ extension SettingsModel {
     }
 
     /// Leaves Simple through a named door — a "… in Advanced ›"
-    /// link, a save-pill row Simple does not draw — for this
-    /// window only; the stored choice stays the user's pick.
+    /// link — for this window only; the stored choice stays the
+    /// user's pick. With an anchor the landing's own destination
+    /// flips the root, so no Advanced Home shows in between.
     func openAdvanced(_ anchor: SettingsAnchor? = nil) {
-        settingsRoot = .advanced
-        if let anchor { land(on: anchor) }
+        guard let anchor else { return settingsRoot = .advanced }
+        land(on: anchor)
     }
 
     /// The tour's landing (#2737 ruling 15): its page while the
