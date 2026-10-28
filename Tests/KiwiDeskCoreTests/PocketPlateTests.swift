@@ -123,9 +123,35 @@ struct PocketPlateTests {
         core.updateBars()
         core.openPocketList()
         #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
-        core.execute("pocket")
-        core.updateBars()
+        #expect(
+            core.shelves.peek.shown?.source
+                == .pocket(core.pocketPlateWindows)
+        )
+        // Negative control: an unchanged plate keeps its list.
+        core.updatePocketPlate()
+        #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
+        // The plate alone, no bar pass: a window leaves the list.
+        core.state.markPocketOut(three, cameFrom: nil)
+        core.updatePocketPlate()
         #expect(core.shelves.peek.shown == nil)
+    }
+
+    @Test(
+        "the bar pass counts only the tracked windows inside",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func barPassCountsTracked() throws {
+        let core = makeCore()
+        _ = try #require(giveSpaceTheMainScreen(core))
+        pocketTwo(core)
+        core.handle(.windowFocused(three))
+        core.execute("toggle_pocket_window")
+        core.execute("pocket")
+        core.state.apply(.windowHidden(one))
+        core.updateBars()
+        let shown = try #require(core.pocketPlate.shown)
+        #expect(shown.count == "2")
+        #expect(shown.windows == [two, three])
     }
 
     @Test("the count widens the plate, its mark kept on the pocket")
@@ -168,6 +194,27 @@ struct PocketPlateTests {
         // behind is gone, so the play draws the pocket.
         core.state.markPocketOut(one, cameFrom: nil)
         #expect(core.briefPocketDrawsPocket(on: display))
+    }
+
+    @Test(
+        "a take-out of two draws the pocket, a put-in to two flies in",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func playsReadThePlateTheyLeave() throws {
+        let core = makeCore()
+        _ = try #require(giveSpaceTheMainScreen(core))
+        pocketTwo(core)
+        core.updateBars()
+        // Plays, panel and frame clock inert, as `BriefPocketTests`.
+        core.briefPocket.reduceMotion = { false }
+        core.briefPocket.present = { _ in }
+        core.briefPocket.makeFrames = { _, _ in nil }
+        core.execute("pocket")
+        #expect(try #require(core.briefPocket.playing).drawsPocket)
+        core.briefPocket.end()
+        core.execute("pocket")
+        #expect(try !#require(core.briefPocket.playing).drawsPocket)
+        core.briefPocket.end()
     }
 
     @Test("the bar pass hands the plate its own stand-down")
