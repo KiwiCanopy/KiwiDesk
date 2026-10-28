@@ -255,8 +255,13 @@ extension TilingEngine {
 
     /// A user's resize gesture showed `size`: only the entries it
     /// contradicts go, so a learned floor outlives the drag
-    /// (#2706, `SizeBoundLearner.gestureResized`).
-    func sweepSizeBound(_ id: WindowID, gestureSize size: CGSize) {
+    /// (#2706, `SizeBoundLearner.gestureResized`). Returns whether
+    /// a believed entry was dropped.
+    @discardableResult
+    func sweepSizeBound(
+        _ id: WindowID,
+        gestureSize size: CGSize
+    ) -> Bool {
         boundLearner.gestureResized(id, to: size)
     }
 

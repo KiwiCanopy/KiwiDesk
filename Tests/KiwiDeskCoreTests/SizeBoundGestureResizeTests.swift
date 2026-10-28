@@ -41,11 +41,27 @@ struct SizeBoundGestureResizeTests {
         #expect(learner.bound(for: w)?.minWidth == 500)
         #expect(learner.bound(for: w)?.maxHeight == 600)
         learner.recordAsk(w, size: CGSize(width: 300, height: 600))
-        learner.gestureResized(w, to: CGSize(width: 700, height: 700))
+        let dropped = learner.gestureResized(
+            w,
+            to: CGSize(width: 700, height: 700)
+        )
+        #expect(dropped)
         #expect(learner.bound(for: w)?.minWidth == 500)
         #expect(learner.bound(for: w)?.maxHeight == nil)
         #expect(learner.lastAsks[w] == nil)
         #expect(learner.candidates[w] == nil)
+    }
+
+    @Test("A size inside every entry drops nothing")
+    func insideDropsNothing() {
+        var learner = learned()
+        let dropped = learner.gestureResized(
+            w,
+            to: CGSize(width: 600, height: 500)
+        )
+        #expect(!dropped)
+        #expect(learner.bound(for: w)?.minWidth == 500)
+        #expect(learner.bound(for: w)?.maxHeight == 600)
     }
 
     @Test("A size under the floor drops it")

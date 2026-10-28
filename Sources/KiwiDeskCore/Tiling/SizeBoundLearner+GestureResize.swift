@@ -10,12 +10,17 @@ extension SizeBoundLearner {
     /// them, the candidates go (no ask of ours produced this size),
     /// and a believed entry stays unless `size` falsifies it — so a
     /// floor capping Grid survives the drag that grows its window.
-    mutating func gestureResized(_ id: WindowID, to size: CGSize) {
+    /// Returns whether a believed entry was dropped.
+    @discardableResult
+    mutating func gestureResized(
+        _ id: WindowID,
+        to size: CGSize
+    ) -> Bool {
         parkRetiresAsk(id)
         candidates[id] = nil
         probes[id]?.width.pending?.baselineTrusted = false
         probes[id]?.height.pending?.baselineTrusted = false
-        guard let ledger = bounds[id] else { return }
+        guard let ledger = bounds[id] else { return false }
         writeBounds(
             id,
             entries: ledger.width.filter {
@@ -30,5 +35,9 @@ extension SizeBoundLearner {
             },
             axis: \.height
         )
+        let kept =
+            (bounds[id]?.width.count ?? 0)
+            + (bounds[id]?.height.count ?? 0)
+        return kept < ledger.width.count + ledger.height.count
     }
 }

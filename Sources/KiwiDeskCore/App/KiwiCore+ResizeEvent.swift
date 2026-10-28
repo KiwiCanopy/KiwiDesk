@@ -62,13 +62,12 @@ extension KiwiCore {
                 // A user's drag changes the size, not the app's
                 // constraints: a forget here dropped Grid's cap
                 // for the rest of the gesture (#2706).
-                if tiler.sizeBound(for: id) != nil {
+                if tiler.sweepSizeBound(id, gestureSize: frame.size) {
                     onLog(
-                        "size bound swept by a resize gesture "
+                        "size bound narrowed by a resize gesture "
                             + "of window \(id.raw)"
                     )
                 }
-                tiler.sweepSizeBound(id, gestureSize: frame.size)
             } else {
                 // The app re-bounded itself — System Settings
                 // switching panes moves its fixed width — so the
