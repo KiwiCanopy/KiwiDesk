@@ -10300,9 +10300,13 @@ only navigator* still holds inside Advanced. Every install opens
 on Simple until the user picks a root, an updated one too: the
 header names what Simple hides, so an existing config reads as
 kept rather than lost, and guessing a root from the config would
-be a second predicate to keep true. The choice is a new key; the
-retired `settingsMode` is never read, because its values meant
-the old modes. "Advanced" names the root alone: General's drawer
+be a second predicate to keep true. Only the switch stores the
+choice: a link, a bar menu's Edit in Settings… or a What's new
+step shows Advanced for that window and leaves the stored root
+alone, since a landing the user followed is not the pick ruling
+15 waits for. The choice is a new key; the retired
+`settingsMode` is never read, because its values meant the old
+modes. "Advanced" names the root alone: General's drawer
 that held the config file, backup and resets is *Files & Reset*,
 for what it holds.
 :::

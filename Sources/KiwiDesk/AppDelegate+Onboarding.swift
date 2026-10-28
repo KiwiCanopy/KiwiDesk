@@ -48,7 +48,10 @@ extension AppDelegate {
             PermissionMonitor.openSystemSettings()
         }
         onboardingModel.onFinish = { [weak self] in
-            self?.openSettingsFromTour(at: .macChecklist)
+            self?.openSettingsFromTour(
+                at: .macChecklist,
+                followsRoot: true
+            )
         }
         // Registers login item via SMAppService (#342).
         onboardingModel.onSetLoginItem = { enabled in
@@ -123,8 +126,17 @@ extension AppDelegate {
     /// mark fire (`OnboardingCloseSeamTests`). Two callers: the
     /// closing page's exit (#1365) and the shortcuts panel's
     /// Edit door, which is why the close is conditional.
-    func openSettingsFromTour(at destination: SettingsDestination) {
-        dashboard.show(landingFromTour: destination)
+    /// `followsRoot`: the tour's closing landing yields to Simple
+    /// (#2737 ruling 15); KiwiHub's Edit door always lands.
+    func openSettingsFromTour(
+        at destination: SettingsDestination,
+        followsRoot: Bool = false
+    ) {
+        if followsRoot {
+            dashboard.show(landingFromTour: destination)
+        } else {
+            dashboard.show(navigatingTo: destination)
+        }
         if onboardingWindow != nil {
             closeOnboarding()
         }

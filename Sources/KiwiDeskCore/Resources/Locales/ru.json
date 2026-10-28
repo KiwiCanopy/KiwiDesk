@@ -1863,7 +1863,7 @@
   "settings.readout.auto_value": "Автоматически, %1$@",
   "settings.root.advanced": "Расширенные",
   "settings.root.ax": "Показываемые настройки",
-  "settings.root.simple": "Простые",
+  "settings.root.simple": "Упрощённые",
   "settings.save_blocked_newer_format": "Более новая версия KiwiDesk сохранила файл %1$@, поэтому эта версия не станет его перезаписывать. Обнови KiwiDesk, чтобы синхронизация продолжалась.",
   "settings.tiling_idle": "KiwiDesk ещё не запустил мозаику — твои окна остаются на своих местах.",
   "settings.write_refused_newer_format": "Более новая версия KiwiDesk сохранила файл %1$@, поэтому эта версия оставила его без изменений. Обнови KiwiDesk, чтобы синхронизация продолжалась.",

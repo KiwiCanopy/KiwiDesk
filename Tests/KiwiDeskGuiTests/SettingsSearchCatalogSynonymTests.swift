@@ -166,4 +166,17 @@ struct SettingsSearchCatalogSynonymTests {
             )
         )
     }
+
+    /// The drawer's retired title still finds it (#2737).
+    @Test("advanced finds Files & Reset")
+    func advancedFindsFilesAndReset() {
+        pinEnglish()
+        defer { reset() }
+        let anchor = SettingsCatalog.general.generalAdvanced.control.id
+        let hits = SettingsSearch.results(
+            query: "advanced",
+            context: SettingsSearchContext()
+        ).settings
+        #expect(hits.contains { $0.anchor.anchor == anchor })
+    }
 }

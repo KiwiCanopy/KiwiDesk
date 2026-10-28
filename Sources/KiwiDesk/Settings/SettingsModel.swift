@@ -68,14 +68,15 @@ final class SettingsModel: ObservableObject {
         didSet {
             nav.navigationMovesFocus = SettingsInputSource.movesFocus
             onWindowTitle?(SettingsWindowTitle.of(destination))
-            // Every page is Advanced's (#2737).
+            // Every page is Advanced's (#2737); shown, not stored.
             if destination != nil { settingsRoot = .advanced }
         }
     }
-    /// The root Settings shows, stored as it changes (#2737).
-    @Published var settingsRoot: SettingsRoot = .simple {
+    /// The root this window shows (#2737). Only the switch stores
+    /// it (`pickRoot`); a fresh open re-reads the stored choice.
+    @Published var settingsRoot: SettingsRoot = .advanced {
         didSet {
-            SettingsRootPreference.write(settingsRoot, to: preferences)
+            if settingsRoot == .simple { destination = nil }
         }
     }
     /// Distinct setting changes in draft, recomputed beside `isDirty`.

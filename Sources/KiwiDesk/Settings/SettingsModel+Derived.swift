@@ -9,6 +9,12 @@ extension SettingsModel {
     var configURL: URL { core.configURL }
     var displays: [Display] { core.state.workspaces.allDisplays }
 
+    /// App Rules in the draft — pins and floats — counted once for
+    /// Home's card and Simple's header (#2737).
+    var appRuleCount: Int {
+        config.appRules.count + config.floatRules.count
+    }
+
     /// The count stepper's ▲ bound (#1382): Core's count of the
     /// scrolling slots the DRAFT fits on `space`'s screen — the
     /// widest connected one with no space, the Layout Defaults

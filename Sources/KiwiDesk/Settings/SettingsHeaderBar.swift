@@ -100,8 +100,9 @@ struct SettingsHeaderBar: View {
             if showsProfileContext {
                 profileChip
             }
-            // The roots carry the switch; a page's way out is Home.
-            if destination == nil {
+            // The roots carry the switch; a page's way out is Home,
+            // and the Lua editor is neither root.
+            if destination == nil, !model.editingLua {
                 SettingsRootSwitch(model: model)
             }
         }

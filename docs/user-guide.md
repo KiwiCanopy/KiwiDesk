@@ -36,6 +36,11 @@ takes no focus, as anywhere on macOS. Shift-Tab reaches the
 **← Home** chip; **⌘[** or Escape goes back. **⌘K** puts the
 cursor in the search field from anywhere in the window.
 
+:::unreleased
+The search field and **⌘K** belong to **Advanced**; the Simple
+page has neither.
+:::
+
 With keyboard navigation off, a control that cannot hold focus
 hands it to the search field instead. VoiceOver is unaffected,
 and every card and panel title is a heading for its rotor.
@@ -129,7 +134,7 @@ rest (on by default, after a 1500 ms delay) and puts focus back
 on the window you were in. A wake restore is skipped when the
 screen setup changed during sleep; the screen-change profile
 switch takes over. If a restore leaves things wrong, **General ▸
-Advanced ▸ Saved window arrangement ▸ Discard** clears it.
+Files & Reset ▸ Saved window arrangement ▸ Discard** clears it.
 
 ## Moving to Another Mac: Backups
 

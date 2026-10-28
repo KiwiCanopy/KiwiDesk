@@ -1863,7 +1863,7 @@
   "settings.readout.auto_value": "Automatico, %1$@",
   "settings.root.advanced": "Avanzate",
   "settings.root.ax": "Impostazioni da mostrare",
-  "settings.root.simple": "Semplici",
+  "settings.root.simple": "Semplificate",
   "settings.save_blocked_newer_format": "Un KiwiDesk più recente ha salvato %1$@, quindi questa versione non lo sovrascriverà. Aggiorna KiwiDesk per continuare a sincronizzare.",
   "settings.tiling_idle": "KiwiDesk non ha ancora avviato l'affiancamento — le tue finestre restano dove sono.",
   "settings.write_refused_newer_format": "Un KiwiDesk più recente ha salvato %1$@, quindi questa versione l'ha lasciato invariato. Aggiorna KiwiDesk per continuare a sincronizzare.",

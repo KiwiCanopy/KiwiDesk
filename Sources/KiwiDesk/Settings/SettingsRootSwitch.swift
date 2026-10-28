@@ -9,16 +9,17 @@ struct SettingsRootSwitch: View {
 
     var body: some View {
         SegmentedPicker(
-            selection: $model.settingsRoot,
+            spokenLabel: L("settings.root.ax", "Settings to show"),
+            selection: Binding(
+                get: { model.settingsRoot },
+                set: { model.pickRoot($0) }
+            ),
             options: [
                 (Self.simpleTitle, SettingsRoot.simple),
                 (Self.advancedTitle, SettingsRoot.advanced),
             ]
         )
         .fixedSize()
-        .accessibilityLabel(
-            L("settings.root.ax", "Settings to show")
-        )
     }
 
     @MainActor static var simpleTitle: String {

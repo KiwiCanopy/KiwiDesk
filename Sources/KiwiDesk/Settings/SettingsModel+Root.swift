@@ -4,25 +4,62 @@ import KiwiDeskCore
 /// header draws.
 extension SettingsModel {
     /// Whether the window draws Simple's page: its root, outside
-    /// every Advanced page and the Lua editor.
+    /// the Lua editor. No page is open on it — a destination flips
+    /// the root to Advanced, and Simple clears the destination.
     var showsSimple: Bool {
-        settingsRoot == .simple && destination == nil && !editingLua
+        settingsRoot == .simple && !editingLua
     }
 
-    /// Leaves Simple for an Advanced page — a "… in Advanced ›"
-    /// link, a save-pill row Simple does not draw. Setting
-    /// `destination` flips the surface itself; this names the act.
-    func openAdvanced(_ destination: SettingsDestination? = nil) {
+    /// The switch's pick, the one write of the stored root. Simple
+    /// edits the loaded profile only, so leaving a stored target
+    /// for it goes through the profile switch's discard question.
+    func pickRoot(_ root: SettingsRoot) {
+        guard root != settingsRoot else { return }
+        let apply = { [self] in
+            settingsRoot = root
+            SettingsRootPreference.write(root, to: preferences)
+        }
+        guard root == .simple, editingStoredProfile else {
+            return apply()
+        }
+        discardingEdits(
+            message: L(
+                "discard.switch_profile.message",
+                "Switching profiles drops the edits you "
+                    + "haven't saved."
+            ),
+            confirmLabel: L(
+                "discard.switch_profile.confirm",
+                "Discard & switch"
+            )
+        ) { [self] in
+            selectEditTarget(nil)
+            apply()
+        }
+    }
+
+    /// Leaves Simple through a named door — a "… in Advanced ›"
+    /// link, a save-pill row Simple does not draw — for this
+    /// window only; the stored choice stays the user's pick.
+    func openAdvanced(_ anchor: SettingsAnchor? = nil) {
         settingsRoot = .advanced
-        if let destination { self.destination = destination }
+        if let anchor { land(on: anchor) }
+    }
+
+    /// The tour's landing (#2737 ruling 15): its page while the
+    /// stored root is Advanced; Simple's root otherwise.
+    func landFromTour(_ destination: SettingsDestination) {
+        guard
+            SettingsRootPreference.read(from: preferences) == .advanced
+        else { return }
+        land(on: SettingsAnchor(destination: destination))
     }
 
     /// What Simple hides that the draft holds: App Rules, every
     /// layer but the default, and Lua bindings across all layers.
     var simpleHiddenCounts: SimpleHiddenCounts {
         SimpleHiddenCounts(
-            appRules: config.appRules.count
-                + config.floatRules.count,
+            appRules: appRuleCount,
             layers: config.layers.filter { !$0.isDefault }.count,
             luaBindings: config.layers.flatMap(\.bindings)
                 .filter(ShortcutsGates.isLuaBinding).count

@@ -58,10 +58,13 @@ struct OnboardingCloseSeamTests {
             // `windowWillClose` above; an exit that skipped it
             // would dodge every needle here.
             "onboardingModel.onFinish={[weakself]in"
-                + "self?.openSettingsFromTour(at:.macChecklist)}",
-            "funcopenSettingsFromTour(at"
-                + "destination:SettingsDestination){"
-                + "dashboard.show(navigatingTo:destination)"
+                + "self?.openSettingsFromTour(at:.macChecklist,"
+                + "followsRoot:true)}",
+            "funcopenSettingsFromTour(atdestination:"
+                + "SettingsDestination,followsRoot:Bool=false){"
+                + "iffollowsRoot{"
+                + "dashboard.show(landingFromTour:destination)"
+                + "}else{dashboard.show(navigatingTo:destination)}"
                 + "ifonboardingWindow!=nil{closeOnboarding()}}",
         ],
         "Onboarding/OnboardingView+Closing.swift": [

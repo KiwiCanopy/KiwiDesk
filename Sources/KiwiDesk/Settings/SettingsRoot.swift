@@ -10,17 +10,22 @@ enum SettingsRoot: String, CaseIterable, Sendable {
 
 /// The root choice's storage (#2737): `UserDefaults`, never
 /// `gui.json` — a display choice, not profile data, so it owes no
-/// `ConfigMigration`. Absent or unrecognised reads `.simple`, which
-/// is how every install, fresh or updated, first opens. The retired
-/// `settingsMode` key is never read: its values meant the old modes.
+/// `ConfigMigration`. Absent or unrecognised reads `firstOpen`. The
+/// retired `settingsMode` key is never read: its values meant the
+/// old modes.
 enum SettingsRootPreference {
     static let key = "settingsRoot"
+
+    /// The root an install opens on until the user picks. Advanced
+    /// while Simple's page is empty; the ruled `.simple` lands with
+    /// Simple's sections (#2737 ruling 15).
+    static let firstOpen = SettingsRoot.advanced
 
     static func read(
         from defaults: UserDefaults
     ) -> SettingsRoot {
         defaults.string(forKey: key)
-            .flatMap(SettingsRoot.init(rawValue:)) ?? .simple
+            .flatMap(SettingsRoot.init(rawValue:)) ?? firstOpen
     }
 
     static func write(

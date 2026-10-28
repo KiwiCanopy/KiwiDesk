@@ -14,39 +14,50 @@ struct SimpleRootTests {
         LocalizationManager.shared.select("en")
     }
 
-    @Test("an absent or unknown choice opens Simple")
-    func defaultIsSimple() {
+    /// A model whose stored root is Simple, and its defaults.
+    private func onSimple() -> (UserDefaults, SettingsModel) {
         let defaults = makeScratchDefaults().defaults
-        #expect(SettingsRootPreference.read(from: defaults) == .simple)
-        defaults.set("bogus", forKey: SettingsRootPreference.key)
-        #expect(SettingsRootPreference.read(from: defaults) == .simple)
+        SettingsRootPreference.write(.simple, to: defaults)
+        return (defaults, makeTestModel(defaults: defaults))
     }
 
-    /// The retired key's values meant the old modes; a user who
-    /// had picked Power User still opens Simple.
+    @Test("an absent or unknown choice opens the first-open root")
+    func defaultIsFirstOpen() {
+        let defaults = makeScratchDefaults().defaults
+        let first = SettingsRootPreference.firstOpen
+        #expect(SettingsRootPreference.read(from: defaults) == first)
+        #expect(makeTestModel(defaults: defaults).settingsRoot == first)
+        defaults.set("bogus", forKey: SettingsRootPreference.key)
+        #expect(SettingsRootPreference.read(from: defaults) == first)
+    }
+
+    /// The retired key's values meant the old modes, so none of
+    /// them moves the first-open root.
     @Test("the retired settingsMode key is never read")
     func retiredKeyIgnored() {
-        let defaults = makeScratchDefaults().defaults
-        defaults.set("powerUser", forKey: "settingsMode")
-        defaults.set("advanced", forKey: "settingsMode")
-        #expect(SettingsRootPreference.read(from: defaults) == .simple)
-        #expect(makeTestModel(defaults: defaults).settingsRoot == .simple)
+        let first = SettingsRootPreference.firstOpen
+        for old in ["simple", "powerUser", "advanced"] {
+            let defaults = makeScratchDefaults().defaults
+            defaults.set(old, forKey: "settingsMode")
+            #expect(SettingsRootPreference.read(from: defaults) == first)
+            #expect(makeTestModel(defaults: defaults).settingsRoot == first)
+        }
     }
 
-    @Test("the choice survives a new model")
+    @Test("the switch's pick survives a new model")
     func choicePersists() {
         let defaults = makeScratchDefaults().defaults
         let model = makeTestModel(defaults: defaults)
-        model.settingsRoot = .advanced
-        #expect(makeTestModel(defaults: defaults).settingsRoot == .advanced)
-        model.settingsRoot = .simple
+        model.pickRoot(.simple)
+        #expect(model.settingsRoot == .simple)
         #expect(makeTestModel(defaults: defaults).settingsRoot == .simple)
+        model.pickRoot(.advanced)
+        #expect(makeTestModel(defaults: defaults).settingsRoot == .advanced)
     }
 
-    @Test("a page is always Advanced's")
+    @Test("a page is always Advanced's, and shows it without storing")
     func pageFlipsRoot() {
-        let defaults = makeScratchDefaults().defaults
-        let model = makeTestModel(defaults: defaults)
+        let (defaults, model) = onSimple()
         #expect(model.showsSimple)
         model.destination = .spaces
         #expect(model.settingsRoot == .advanced)
@@ -54,19 +65,48 @@ struct SimpleRootTests {
         // Back from the page lands on Advanced's Home.
         model.destination = nil
         #expect(!model.showsSimple)
-        #expect(makeTestModel(defaults: defaults).settingsRoot == .advanced)
+        #expect(SettingsRootPreference.read(from: defaults) == .simple)
+        // A fresh open shows the stored root again.
+        model.prepareToShow(windowShown: false)
+        #expect(model.showsSimple)
     }
 
-    @Test("openAdvanced leaves Simple, with or without a page")
-    func openAdvanced() {
-        let model = makeTestModel()
-        model.openAdvanced()
+    @Test("a landing and a named door are not the user's pick")
+    func landingIsNotAPick() {
+        let (defaults, model) = onSimple()
+        model.openAdvanced(SettingsAnchor(destination: .looks))
         #expect(model.settingsRoot == .advanced)
+        #expect(model.nav.pendingReveal?.destination == .looks)
+        #expect(SettingsRootPreference.read(from: defaults) == .simple)
+    }
+
+    @Test("picking Simple closes an open page")
+    func simpleClosesPage() {
+        let model = makeTestModel()
+        model.destination = .spaces
+        model.pickRoot(.simple)
         #expect(model.destination == nil)
-        model.settingsRoot = .simple
-        model.openAdvanced(.looks)
-        #expect(model.destination == .looks)
+        #expect(model.showsSimple)
+    }
+
+    @Test("the Lua editor is never Simple")
+    func luaEditorIsNotSimple() {
+        let (_, model) = onSimple()
+        #expect(model.showsSimple)
+        model.showLuaEditor = true
         #expect(!model.showsSimple)
+    }
+
+    /// Ruling 15: the tour lands on its page only while the
+    /// stored root is Advanced.
+    @Test("the tour's landing follows the stored root")
+    func tourFollowsStoredRoot() {
+        let (_, model) = onSimple()
+        model.landFromTour(.macChecklist)
+        #expect(model.nav.pendingReveal == nil)
+        model.pickRoot(.advanced)
+        model.landFromTour(.macChecklist)
+        #expect(model.nav.pendingReveal?.destination == .macChecklist)
     }
 
     @Test("the hidden counts read the draft")
@@ -75,18 +115,26 @@ struct SimpleRootTests {
         #expect(model.simpleHiddenCounts.isEmpty)
         model.config.appRules = ["mail": SpaceID("1")]
         model.config.floatRules = ["calculator"]
+        // The Lua row sits off the default layer, beside a row of
+        // another kind, so the count reads every layer and the
+        // kind filter.
         model.config.layers = [
+            KeyLayer(name: KeyLayer.defaultName),
             KeyLayer(
-                name: KeyLayer.defaultName,
+                name: "Gaming",
                 bindings: [
                     KeyBinding(
                         combo: "ctrl+alt+r",
                         lua: "kiwidesk.reload()",
                         kind: .custom
-                    )
+                    ),
+                    KeyBinding(
+                        combo: "ctrl+alt+g",
+                        lua: "kiwidesk.launch(\"Safari\")",
+                        kind: .application
+                    ),
                 ]
             ),
-            KeyLayer(name: "Gaming"),
         ]
         #expect(
             model.simpleHiddenCounts

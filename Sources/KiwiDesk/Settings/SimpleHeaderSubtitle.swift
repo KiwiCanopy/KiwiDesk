@@ -1,7 +1,7 @@
 import KiwiDeskCore
 
 /// Simple's header subtitle (#2737 ruling 2), from plain values so
-/// `SimpleSurfaceTests` drives it without a model: the screen
+/// `SimpleRootTests` drives it without a model: the screen
 /// count, then what Simple hides that the user made. Each clause
 /// is absent at zero.
 @MainActor enum SimpleHeaderSubtitle {
