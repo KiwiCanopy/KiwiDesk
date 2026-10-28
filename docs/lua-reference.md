@@ -5839,7 +5839,9 @@ floating.set_color("#8E5DE0")
 
 **Expects:** `"one"` or `"several"` (default `"one"`).
 
-**Does:** sets how many windows the [pocket](#pocket) holds:
+**Does:** sets how many windows the [pocket](#pocket) holds, on
+every profile alike — the running value, which Settings ▸ Shortcuts
+▸ Pocket stores:
 `"one"` refuses a mark while any window is marked
 ([`toggle_pocket_window`](#toggle_pocket_window)), and `"several"`
 marks any number. While two or more windows are inside, the pocket

@@ -30,19 +30,34 @@ struct PocketGroup: View {
         $model.config.settings.pocketStyle
     }
 
-    /// Two named behaviours, neither an "off", so a pick-one.
+    /// A menu like Edge's: the recorder's footprint has no room for
+    /// two spelled-out segments.
     private var capacityRow: some View {
         let label = SettingsCatalog.shortcuts.pocketCapacity.text
         return ShortcutSettingRow(title: label, help: Self.capacityHelp) {
-            SegmentedPicker(
-                spokenLabel: label,
-                spokenValue: Self.capacityName(pocket.wrappedValue.capacity),
-                selection: pocket.capacity,
-                options: PocketCapacity.allCases.map {
-                    (title: Self.capacityName($0), value: $0)
+            // App-wide, written at once (#1741).
+            Picker(
+                label,
+                selection: Binding(
+                    get: { model.appWide.pocketCapacity },
+                    set: { new in
+                        model.setAppWide { $0.pocketCapacity = new }
+                    }
+                )
+            ) {
+                ForEach(PocketCapacity.allCases, id: \.self) {
+                    Text(Self.capacityName($0)).tag($0)
                 }
-            )
+            }
+            .labelsHidden()
+            .pickerStyle(.menu)
+            .neutralMenuLabel()
+            .controlSize(.regular)
             .fixedSize()
+            .accessibilityLabel(label)
+            .accessibilityValue(
+                Self.capacityName(model.appWide.pocketCapacity)
+            )
         }
         .searchAnchored(SettingsCatalog.shortcuts.pocketCapacity)
     }
@@ -61,7 +76,8 @@ struct PocketGroup: View {
             "%1$@: the Pocket keeps a single window. %2$@: mark more, "
                 + "and a plate at the edge holds them; the Pocket key "
                 + "puts away the one you used, or with all inside "
-                + "takes out the one put in last.",
+                + "takes out the one put in last. Applies at once, in "
+                + "every profile.",
             capacityName(.one),
             capacityName(.several)
         )

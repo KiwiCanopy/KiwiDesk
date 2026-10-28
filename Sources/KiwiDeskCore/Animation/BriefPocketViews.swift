@@ -10,9 +10,22 @@ final class BriefPocketView: NSView {
     private let content = NSView()
     private let mark = NSImageView()
     private let count = NSTextField(labelWithString: "")
-    /// The shelf's hover fill, lit while a dragged window over the
-    /// pocket plate would drop in (#2678).
-    private let dropFill = NSView()
+    /// The shelf's hover fill, lit while the pointer or a window a
+    /// drop would take is over the pocket plate (#2678): flat on a
+    /// solid shelf, through `BarHoverFill` on glass.
+    private let litFill = NSView()
+    private let litGlass = GlassBackdrop()
+    /// How the pocket plate stands, as an inactive Space chip does;
+    /// the brief pocket is always `.active`.
+    enum Look: Equatable {
+        /// Ink dimmed down the shelf's ladder, no fill.
+        case rest
+        /// The chip's hover: its fill, hover ink, full.
+        case lit
+        /// Full item ink, no fill: a window just went in.
+        case active
+    }
+    private(set) var look = Look.active
     private let solid = NSView()
     private let tint = GlassBackdrop()
     private let rim = ShelfBorder.make()
@@ -30,10 +43,12 @@ final class BriefPocketView: NSView {
         solid.layer?.masksToBounds = true
         content.wantsLayer = true
         mark.imageScaling = .scaleProportionallyUpOrDown
-        dropFill.wantsLayer = true
-        dropFill.isHidden = true
-        dropFill.setAccessibilityElement(false)
-        content.addSubview(dropFill)
+        litFill.wantsLayer = true
+        litFill.isHidden = true
+        litFill.setAccessibilityElement(false)
+        litGlass.isHidden = true
+        content.addSubview(litGlass)
+        content.addSubview(litFill)
         content.addSubview(mark)
         count.isBezeled = false
         count.drawsBackground = false
@@ -68,16 +83,46 @@ final class BriefPocketView: NSView {
         count.isHidden = text == nil
         count.stringValue = text ?? ""
         count.font = Self.countFont(shelf)
-        count.textColor = NSColor(kiwiHex: shelf.itemColor)
         needsLayout = true
     }
 
-    /// Lights the pocket as a drop target, as a bar item's hover
-    /// lights it.
-    func setDropHovered(_ on: Bool) {
-        dropFill.isHidden = !on
-        dropFill.layer?.backgroundColor =
+    func setLook(_ look: Look) {
+        self.look = look
+        paintLook()
+    }
+
+    /// The chip's three readings: fill, ink, and the dim that
+    /// reaches the mark and count alone — never the plate or glass.
+    private func paintLook() {
+        let lit = look == .lit
+        let radius = min(bounds.width, bounds.height) * 0.3
+        litGlass.frame = bounds
+        litFill.layer?.cornerRadius = radius
+        let glassShown = BarHoverFill.paint(
+            litGlass,
+            showsHover: lit,
+            hex: shelf.hoverFillColor,
+            shelf: shelf,
+            edge: .top,
+            cornerRadius: radius,
+            corners: [
+                .layerMinXMinYCorner, .layerMaxXMinYCorner,
+                .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
+            ]
+        )
+        litFill.isHidden = !lit || glassShown
+        litFill.layer?.backgroundColor =
             NSColor(kiwiHex: shelf.hoverFillColor).cgColor
+        let ink =
+            switch look {
+            case .rest: shelf.idleItemColor
+            case .lit: shelf.hoverItemColor
+            case .active: shelf.itemColor
+            }
+        count.textColor = NSColor(kiwiHex: ink)
+        let alpha = look == .rest ? shelf.dimFactor : 1
+        count.alphaValue = alpha
+        mark.alphaValue = alpha
     }
 
     /// The count's face, the overflow mark's.
@@ -99,8 +144,8 @@ final class BriefPocketView: NSView {
         super.layout()
         let radius = min(bounds.width, bounds.height) * 0.3
         content.frame = bounds
-        dropFill.frame = bounds
-        dropFill.layer?.cornerRadius = radius
+        litFill.frame = bounds
+        litFill.layer?.cornerRadius = radius
         // The mark keeps a square at one end, where the brief pocket
         // lands; the count takes the rest.
         let square = count.isHidden ? bounds.width : bounds.height
@@ -130,6 +175,7 @@ final class BriefPocketView: NSView {
             )
         }
         paintPlate(radius: radius)
+        paintLook()
         rim.frame = bounds
         ShelfBorder.paint(
             rim,

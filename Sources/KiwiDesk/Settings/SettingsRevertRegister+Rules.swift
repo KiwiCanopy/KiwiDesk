@@ -40,9 +40,6 @@ extension SettingsRevertRegister {
             \.scrollGesture.naturalMouse
         ),
         .shortcuts(.scrollSpaceStep): scroll(\.scrollGesture.spaceStep),
-        .shortcuts(.pocketCapacity): .leaf(
-            \.settings.pocketStyle.capacity
-        ),
         .shortcuts(.pocketEdge): .leaf(\.settings.pocketStyle.edge),
         .shortcuts(.pocketPosition): .leaf(
             \.settings.pocketStyle.position

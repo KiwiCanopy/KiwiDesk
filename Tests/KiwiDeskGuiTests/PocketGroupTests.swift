@@ -60,7 +60,7 @@ struct PocketGroupTests {
         }
         #expect(rows.allSatisfy { $0 != nil })
         #expect(rows.compactMap { $0 } == rows.compactMap { $0 }.sorted())
-        #expect(source.contains("selection: pocket.capacity"))
+        #expect(source.contains("$0.pocketCapacity = new"))
         // Every way a row could grey: none applies.
         for grey in [
             "GreyOut", "CrossReferenceRow", "onStateChange", ".disabled(",

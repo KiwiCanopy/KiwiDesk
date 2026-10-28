@@ -42,6 +42,10 @@ public enum LookKeys {
             "border.glow",
             "border.glow_size",
             "gap.global",
+            // Where the pocket plate sits (#2678): placed beside the
+            // bars a look places, so the look carries it too.
+            "pocket.edge",
+            "pocket.position",
         ]
 
     /// The shelf's styling fields by wire key.

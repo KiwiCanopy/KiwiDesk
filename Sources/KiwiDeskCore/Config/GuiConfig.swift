@@ -135,6 +135,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
         case hyper
         case kiwihub
         case modifier
+        case pocket
         case look
         case shortcutOffer = "shortcut_offer"
     }
@@ -262,6 +263,10 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             modifier: try container.decodeIfPresent(
                 AppWideSettings.Modifier.self,
                 forKey: .modifier
+            ),
+            pocket: try container.decodeIfPresent(
+                AppWideSettings.Pocket.self,
+                forKey: .pocket
             )
         )
         // Additive since #1752: absence is "no shared look adopted
@@ -319,6 +324,7 @@ public struct GuiConfig: Codable, Equatable, Sendable {
             try container.encode(appWide.hyper, forKey: .hyper)
             try container.encode(appWide.kiwihub, forKey: .kiwihub)
             try container.encode(appWide.modifier, forKey: .modifier)
+            try container.encode(appWide.pocket, forKey: .pocket)
         }
         try container.encodeIfPresent(look, forKey: .look)
         try container.encodeIfPresent(

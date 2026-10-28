@@ -169,7 +169,8 @@ extension KiwiCore {
         }
         refreshStickyReach()
         retile(stateChange: id)
-        handPocketFocus(after: play?.end) { [weak self] in
+        handPocketFocus(after: play?.end, leaving: cameFrom) {
+            [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
             else { return }
             self.focusWindow(id, refocusRetile: false, warp: true)

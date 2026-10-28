@@ -29,7 +29,7 @@ extension SettingsValueReadout {
             return []
         // App-wide, written at once, never in the draft (#1741).
         case .modeCue, .desktopCue, .hyperKey,
-            .kiwiHubNavigationKeys, .modifierSides:
+            .kiwiHubNavigationKeys, .modifierSides, .pocketCapacity:
             return []
         // A layer's profiles are no config field: the checklist's own
         // rows carry them (`layerDiffRows`, #2022).
@@ -63,19 +63,6 @@ extension SettingsValueReadout {
                     label: FocusWrapWords.title,
                     old: FocusWrapWords.value(old.focusWrap),
                     new: FocusWrapWords.value(new.focusWrap)
-                )
-            ]
-        case .pocketCapacity:
-            return [
-                .change(
-                    census,
-                    label: SettingsCatalog.shortcuts.pocketCapacity.text,
-                    old: PocketGroup.capacityName(
-                        old.settings.pocketStyle.capacity
-                    ),
-                    new: PocketGroup.capacityName(
-                        new.settings.pocketStyle.capacity
-                    )
                 )
             ]
         case .pocketEdge:

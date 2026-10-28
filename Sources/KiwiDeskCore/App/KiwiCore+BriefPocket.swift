@@ -56,9 +56,12 @@ extension KiwiCore {
     /// `ends` seconds on is over, so no app activates while the
     /// plate draws (#2703); at once where nothing plays. A later
     /// press replaces it, a nil `hand` only cancels, and it is
-    /// dropped where the state focus or the Space moved meanwhile.
+    /// dropped where the state focus or the Space moved meanwhile —
+    /// save a move back onto `left`, the window a take-out left,
+    /// which macOS re-reports while its raise waits (#2678).
     func handPocketFocus(
         after ends: TimeInterval?,
+        leaving left: WindowID? = nil,
         _ hand: (@MainActor () -> Void)?
     ) {
         deferred.cancel(.pocketFocus)
@@ -73,7 +76,8 @@ extension KiwiCore {
                 self.onLog("pocket: landing focus dropped — Space moved")
                 return
             }
-            guard self.state.workspaces.lastFocused == held else {
+            let now = self.state.workspaces.lastFocused
+            guard now == held || (left != nil && now == left) else {
                 self.onLog("pocket: landing focus dropped — focus moved")
                 return
             }

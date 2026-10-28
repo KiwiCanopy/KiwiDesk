@@ -1654,7 +1654,7 @@
   "placement.new_window": "새 타일 윈도우",
   "placement.new_window.help": "새로운 윈도우가 다른 윈도우를 기준으로 어디에 놓일지 정합니다. 레이아웃 순서상 처음이나 마지막에 놓거나, 열리는 시점에 포커스된 윈도우의 바로 앞이나 뒤에 놓습니다.",
   "pocket.capacity": "보관 수",
-  "pocket.capacity.help": "%1$@: Pocket에 윈도우를 하나만 넣습니다. %2$@: 더 많은 윈도우에 마크를 붙이면 가장자리의 판에 담깁니다. Pocket 단축키는 사용하던 윈도우를 Pocket에 넣고, 모두 들어 있으면 마지막으로 넣은 윈도우를 꺼냅니다.",
+  "pocket.capacity.help": "%1$@: Pocket에 윈도우를 하나만 넣습니다. %2$@: 더 많은 윈도우에 마크를 붙이면 가장자리의 판에 담깁니다. Pocket 단축키는 사용하던 윈도우를 Pocket에 넣고, 모두 들어 있으면 마지막으로 넣은 윈도우를 꺼냅니다. 즉시, 모든 프로필에 적용됩니다.",
   "pocket.capacity.one": "윈도우 하나",
   "pocket.capacity.several": "여러 윈도우",
   "pocket.color": "Pocket",

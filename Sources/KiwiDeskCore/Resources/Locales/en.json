@@ -1654,7 +1654,7 @@
   "placement.new_window": "New window",
   "placement.new_window.help": "Where a new window lands relative to the others: First or Last in the layout's order, or right before or after whichever window is focused at the moment it opens.",
   "pocket.capacity": "Holds",
-  "pocket.capacity.help": "%1$@: the Pocket keeps a single window. %2$@: mark more, and a plate at the edge holds them; the Pocket key puts away the one you used, or with all inside takes out the one put in last.",
+  "pocket.capacity.help": "%1$@: the Pocket keeps a single window. %2$@: mark more, and a plate at the edge holds them; the Pocket key puts away the one you used, or with all inside takes out the one put in last. Applies at once, in every profile.",
   "pocket.capacity.one": "One window",
   "pocket.capacity.several": "Several windows",
   "pocket.color": "Pocket",

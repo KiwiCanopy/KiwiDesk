@@ -19,7 +19,7 @@ extension KiwiCore {
             !window.isTransientOverlay
         else { return .cannot }
         guard state.pocketPhase(of: id) == nil else { return nil }
-        let capacity = tiler.settings.pocketStyle.capacity
+        let capacity = appWide.pocketCapacity
         return state.pocketAcceptsMark(capacity) ? nil : .taken
     }
 

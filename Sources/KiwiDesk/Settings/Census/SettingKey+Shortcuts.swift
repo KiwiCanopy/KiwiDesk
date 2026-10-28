@@ -76,7 +76,7 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocketWindow = "keybinding.pocket_window"
     /// What the pocket holds (#2678), then where its plate sits
     /// (#2680): its edge and its position along it.
-    case pocketCapacity = "settings.pocketStyle.capacity"
+    case pocketCapacity = "appWide.pocketCapacity"
     case pocketEdge = "settings.pocketStyle.edge"
     case pocketPosition = "settings.pocketStyle.position"
     case showShortcuts = "keybinding.show_shortcuts"

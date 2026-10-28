@@ -36,6 +36,13 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     let pocket = BriefPocketView(frame: .zero)
     /// A left press landed on the plate; its release decides.
     private var armed = false
+    private var tracking: NSTrackingArea?
+    /// The pointer on the plate, and a dragged window over it that a
+    /// drop would take: either lights it, as a bar item's hover does.
+    private var hovered = false
+    var dropHovered = false {
+        didSet { paintLit() }
+    }
 
     override var isFlipped: Bool { true }
 
@@ -57,6 +64,41 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     override func layout() {
         super.layout()
         pocket.frame = bounds
+    }
+
+    override func updateTrackingAreas() {
+        super.updateTrackingAreas()
+        if let tracking { removeTrackingArea(tracking) }
+        let area = NSTrackingArea(
+            rect: bounds,
+            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            owner: self
+        )
+        addTrackingArea(area)
+        tracking = area
+    }
+
+    override func mouseEntered(with event: NSEvent) { setHovered(true) }
+
+    override func mouseExited(with event: NSEvent) { setHovered(false) }
+
+    func setHovered(_ on: Bool) {
+        guard on != hovered else { return }
+        hovered = on
+        paintLit()
+    }
+
+    /// A window just went in: full ink a moment, then rest.
+    var justFilled = false {
+        didSet { paintLit() }
+    }
+
+    /// Re-applies the look after the pocket re-wore its shelf.
+    func paintLit() {
+        pocket.setLook(
+            hovered || dropHovered
+                ? .lit : justFilled ? .active : .rest
+        )
     }
 
     /// The whole plate is one target.
@@ -158,6 +200,9 @@ final class PocketPlateOverlay {
             return
         }
         let panel = self.panel ?? made()
+        if let shown, spec.windows.count > shown.windows.count {
+            flashFilled()
+        }
         if spec != shown {
             view.pocket.wear(
                 spec.shelf,
@@ -165,7 +210,8 @@ final class PocketPlateOverlay {
                 count: spec.count.isEmpty ? nil : spec.count,
                 markTrailing: spec.markTrailing
             )
-            view.pocket.setDropHovered(spec.dropHovered)
+            view.dropHovered = spec.dropHovered
+            view.paintLit()
             // The panel fades, never the glass (bars.md ▸ glass alpha).
             panel.alphaValue = spec.faded ? Self.fadedAlpha : 1
             view.setAccessibilityLabel(spec.name)
@@ -179,6 +225,24 @@ final class PocketPlateOverlay {
             guard ordersPanel else { return }
         #endif
         if !panel.isVisible { panel.orderFrontRegardless() }
+    }
+
+    /// How long a put-in holds the plate at full ink.
+    static let filledHold: TimeInterval = 1.2
+    private var filledGeneration = 0
+
+    /// Holds the plate at full ink after a window went in, then
+    /// lets it rest — a timer, the plate's own, since the light is
+    /// no motion.
+    private func flashFilled() {
+        filledGeneration += 1
+        let mine = filledGeneration
+        view.justFilled = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + Self.filledHold) {
+            [weak self] in
+            guard let self, self.filledGeneration == mine else { return }
+            self.view.justFilled = false
+        }
     }
 
     /// The shelf the plate wears in `window`, its panel — the peek

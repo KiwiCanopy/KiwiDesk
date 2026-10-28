@@ -1654,7 +1654,7 @@
   "placement.new_window": "新視窗",
   "placement.new_window.help": "新視窗相對於其他視窗的落點：在佈局順序中的最前或最後，或緊接在它開啟那一刻持有焦點的視窗之前或之後。",
   "pocket.capacity": "容量",
-  "pocket.capacity.help": "%1$@：Pocket 只放一個視窗。%2$@：標記更多視窗，邊緣的底板會容納它們；Pocket 快速鍵會將你用過的那個放入 Pocket，如果全部都已放入，則取出最後放入的那個。",
+  "pocket.capacity.help": "%1$@：Pocket 只放一個視窗。%2$@：標記更多視窗，邊緣的底板會容納它們；Pocket 快速鍵會將你用過的那個放入 Pocket，如果全部都已放入，則取出最後放入的那個。立即生效，套用至所有描述檔。",
   "pocket.capacity.one": "一個視窗",
   "pocket.capacity.several": "多個視窗",
   "pocket.color": "Pocket",

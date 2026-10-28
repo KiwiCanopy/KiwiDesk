@@ -1,17 +1,13 @@
 import CoreGraphics
 import Foundation
 
-/// The pocket's settings: the mark's colour (#2671), where the
-/// pocket plate sits (#2680), and how many windows it holds
-/// (#2678).
+/// The pocket's style: the mark's colour (#2671) and where the
+/// pocket plate sits (#2680). How many windows it holds is app-wide
+/// (`AppWideSettings.pocketCapacity`, #2678).
 public struct PocketStyle: Sendable, Equatable {
     /// Pocket fill hex string; empty = automatic, the plate's
     /// mark ink (`.labelColor`), so it follows light and dark.
     public var color = ""
-
-    /// One window, as 4.0.0 shipped, or several: the plate then
-    /// stays on screen while it holds two (#2678).
-    public var capacity = PocketCapacity.one
 
     /// The screen edge the pocket plate sits on.
     public var edge = AppBarEdge.bottom
@@ -34,7 +30,6 @@ public struct PocketStyle: Sendable, Equatable {
 extension PocketStyle: Codable {
     enum CodingKeys: String, CodingKey, CaseIterable {
         case color
-        case capacity
         case edge
         case position
     }
@@ -49,11 +44,6 @@ extension PocketStyle: Codable {
                 String.self,
                 forKey: .color
             ) ?? d.color
-        capacity =
-            try container.decodeIfPresent(
-                PocketCapacity.self,
-                forKey: .capacity
-            ) ?? d.capacity
         edge =
             try container.decodeIfPresent(
                 AppBarEdge.self,

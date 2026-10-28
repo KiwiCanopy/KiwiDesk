@@ -261,24 +261,29 @@ struct PocketPlateTests {
         )
     }
 
-    @Test("capacity decodes as stored, absent as one, and refuses a bad value")
+    @Test("capacity is app-wide, decodes as stored, refuses a bad value")
     func capacityStored() throws {
-        let set = try JSONDecoder().decode(
-            PocketStyle.self,
+        // App-wide (#2678): gui.json's `pocket` group.
+        let group = try JSONDecoder().decode(
+            AppWideSettings.Pocket.self,
             from: Data(#"{"capacity":"several"}"#.utf8)
         )
-        #expect(set.capacity == .several)
-        let absent = try JSONDecoder().decode(
-            PocketStyle.self,
-            from: Data("{}".utf8)
+        let stored = AppWideSettings(
+            refusal: AppWideSettings.Refusal(),
+            quit: nil,
+            pocket: group
         )
-        #expect(absent.capacity == .one)
+        #expect(stored?.pocketCapacity == .several)
+        #expect(stored?.pocket.capacity == .several)
+        #expect(AppWideSettings().pocketCapacity == .one)
         let core = makeCore()
         #expect(
             !core.execute("pocket.set_capacity", args: [.string("many")])
                 .isSuccess
         )
-        #expect(core.tiler.settings.pocketStyle.capacity == .one)
+        #expect(core.appWide.pocketCapacity == .one)
+        core.execute("pocket.set_capacity", args: [.string("several")])
+        #expect(core.appWide.pocketCapacity == .several)
     }
 
     @Test("the plate's list is a click-held list of the windows inside")

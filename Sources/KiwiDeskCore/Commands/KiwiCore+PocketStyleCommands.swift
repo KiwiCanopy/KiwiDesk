@@ -14,9 +14,10 @@ extension KiwiCore {
                 tiler.settings.pocketStyle.color = $0
             }
         case "pocket.set_capacity":
+            // App-wide, the running value, as every app-wide verb.
             switch BarSettingChoice.value(args, PocketCapacity.self) {
             case .success(let capacity):
-                tiler.settings.pocketStyle.capacity = capacity
+                setAppWide(persisting: false) { $0.pocketCapacity = capacity }
                 return .ok()
             case .failure(let error):
                 return .fail(error.message)

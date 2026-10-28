@@ -1654,7 +1654,7 @@
   "placement.new_window": "Nouvelle fenêtre tuilée",
   "placement.new_window.help": "Où s'insère une nouvelle fenêtre par rapport aux autres : Au début ou À la fin dans l'ordre de la disposition, ou juste avant ou après la fenêtre ayant le focus au moment où elle s'ouvre.",
   "pocket.capacity": "Capacité",
-  "pocket.capacity.help": "%1$@ : la Pocket garde une seule fenêtre. %2$@ : marquez-en d'autres, et une plaque au bord les accueille ; le raccourci Pocket remet dans la Pocket celle que vous avez utilisée ou, si toutes y sont, sort la dernière mise dedans.",
+  "pocket.capacity.help": "%1$@ : la Pocket garde une seule fenêtre. %2$@ : marquez-en d'autres, et une plaque au bord les accueille ; le raccourci Pocket remet dans la Pocket celle que vous avez utilisée ou, si toutes y sont, sort la dernière mise dedans. S'applique immédiatement, dans tous les profils.",
   "pocket.capacity.one": "Une fenêtre",
   "pocket.capacity.several": "Plusieurs fenêtres",
   "pocket.color": "Pocket",

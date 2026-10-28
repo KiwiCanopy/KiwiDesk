@@ -97,12 +97,9 @@ struct SettingsCodingTests {
         // `pocket.set_color` → `pocket.color` (#2671), the third
         // mark's own colour, Automatic by default; `set_edge` /
         // `set_position` place the plate (#2680); `set_capacity`
-        // holds one window by default (#2678).
+        // is app-wide (#2678), in gui.json's own `pocket` group.
         let pocket = try object(root["pocket"])
-        #expect(
-            Set(pocket.keys) == ["capacity", "color", "edge", "position"]
-        )
-        #expect(pocket["capacity"] as? String == "one")
+        #expect(Set(pocket.keys) == ["color", "edge", "position"])
         #expect(pocket["color"] as? String == "")
         #expect(pocket["edge"] as? String == "bottom")
         #expect(pocket["position"] as? Double == 82)

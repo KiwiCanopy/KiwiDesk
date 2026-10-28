@@ -14,7 +14,7 @@ extension KiwiCore {
             unmarkPocketWindow(id)
             return .ok()
         }
-        let capacity = tiler.settings.pocketStyle.capacity
+        let capacity = appWide.pocketCapacity
         guard state.pocketAcceptsMark(capacity) else {
             return refuseSecondPocketWindow(id)
         }
