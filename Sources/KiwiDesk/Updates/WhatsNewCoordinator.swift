@@ -190,7 +190,7 @@ final class WhatsNewCoordinator {
             items: record.cachedFeed,
             current: current
         )
-        if let cached { openBrowser(cached) }
+        if let cached { openBrowser(cached, next: record.cachedNext) }
         browseFetch?.cancel()
         browseFetch = Task { [weak self] in
             await self?.refreshForBrowse(opens: cached == nil)
@@ -202,21 +202,30 @@ final class WhatsNewCoordinator {
     /// window or an offer took the screen during the read.
     private func refreshForBrowse(opens: Bool) async {
         var items: [WhatsNewFeed.Item]?
-        if let url = feedURL() { items = await fetch(url) }
+        var fresh: NextOnMyList?
+        if let url = feedURL() {
+            items = await fetch(url)
+            fresh = await fetchNext(url)
+        }
         if let items { record.cacheFeed(items) }
+        if let fresh { record.cacheNext(fresh) }
         guard opens, !Task.isCancelled, window == nil, waiting == nil,
             !updateOfferOpen()
         else { return }
         openBrowser(
-            items.flatMap { WhatsNewReleases(items: $0, current: current) }
+            items.flatMap { WhatsNewReleases(items: $0, current: current) },
+            next: fresh ?? record.cachedNext
         )
     }
 
-    private func openBrowser(_ releases: WhatsNewReleases?) {
+    private func openBrowser(
+        _ releases: WhatsNewReleases?,
+        next: NextOnMyList?
+    ) {
         let controller = WhatsNewWindowController(
             offer: UpdateOffer.unread(build: current, host: host),
             narration: nil,
-            next: nil,
+            next: next?.current(at: now()),
             menu: WhatsNewMenu(releases, owed: false),
             showMe: { [weak self] in self?.showMe($0) }
         ) { [weak self] in
