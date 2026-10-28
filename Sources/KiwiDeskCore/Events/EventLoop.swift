@@ -53,15 +53,9 @@ public final class EventLoop {
     public var ignoreRules = IgnoreRules()
 
     /// Reads one of KiwiDesk's OWN windows' AppKit identifier —
-    /// the tiling mark's lookup (#678 item 18). The production
-    /// default bridges AX identity to AppKit identity through
-    /// `NSApp.windows`; it is a seam because the mark is
-    /// otherwise unobservable from a test, so a call site that
-    /// stops consulting it — or compares the wrong constant —
-    /// would silently restore the old float-everything-own
-    /// behaviour with every suite green. Injected in tests
-    /// (`SelfWindowExclusionTests`); never nil, since a window
-    /// with no identifier answers nil on its own.
+    /// the tiling mark's lookup (#678 item 18), bridged through
+    /// `NSApp.windows`. A seam because the mark is otherwise
+    /// unobservable from a test (`SelfWindowExclusionTests`).
     var ownWindowIdentifier: (WindowID) -> String? = { id in
         EventLoop.ownWindow(number: Int(id.raw))?
             .identifier?.rawValue
@@ -181,6 +175,8 @@ public final class EventLoop {
     var pendingRetrack: Set<pid_t> = []
     /// Pids owed a #1157 follow-up, on its own queue and slot.
     var pendingRemovalRecheck: Set<pid_t> = []
+    /// The removal pause under a locked session (#2538).
+    var lockedRemovals = LockedRemovals()
     var workspaceTokens: [NSObjectProtocol] = []
     let displayWatch = DisplayWatch()
     var lastActivePid: pid_t?

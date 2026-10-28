@@ -372,7 +372,16 @@ editing AX code:
   gate (`HealReopenOnReturnTests`); a new such ledger joins that
   function. The heal's next tick then asks again, so a desk
   booted under a lock fills within one heal interval of the
-  unlock.
+  unlock. **No reading under the lock is a close (#2538):** a
+  display waking behind it drops every window from the census
+  for a moment, so the sweep and the eager destroy arm refuse
+  every non-hidden removal while `lockedRemovals.isLocked`
+  reads locked, and the apps refused are reconciled through
+  `reconcileLockRefused` on the return leg and on every heal
+  tick, since the unlock can announce itself before the flag
+  clears (`LockedRemovalTests`; the wiring,
+  `LockedRemovalSeamTests`). A new removal path joins the
+  pause, or argues on its doc why a locked reading may close.
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
   destroy also notes the departure an in-flight reading must not

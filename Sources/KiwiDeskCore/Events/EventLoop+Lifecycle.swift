@@ -50,6 +50,7 @@ extension EventLoop {
         tabCarriers = []
         removalDistrusted = [:]
         pendingRemovalRecheck = []
+        lockedRemovals.refused = []
         healQuiet = [:]
         transientRetried = [:]
         pendingRetrack = []

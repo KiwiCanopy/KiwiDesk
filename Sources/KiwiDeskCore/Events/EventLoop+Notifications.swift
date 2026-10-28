@@ -74,11 +74,13 @@ extension EventLoop {
                 // handler that carries it (#1215) — and a
                 // fullscreen transition orders the window out
                 // (#1272): same deferral, and the sweep's
-                // expected-absence arms rule it.
+                // expected-absence arms rule it, as it does a
+                // destroy under a locked session (#2538).
                 if note == kAXUIElementDestroyedNotification,
                     tabCarriers.contains(id)
                         || appHasTabCarrier(pid: pid)
                         || expectedAbsence(of: id) != nil
+                        || lockedRemovals.isLocked()
                 {
                     deferred = true
                 } else {
