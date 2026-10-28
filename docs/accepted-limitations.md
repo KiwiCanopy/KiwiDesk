@@ -109,6 +109,20 @@ class — see
 | Two connected screens of the **same model at the same resolution** are one identity to KiwiDesk: a space pinned to one may open on the other, both draw the same chips in Settings ▸ Screens, and only one of them can carry the "main" badge. | A screen is recognised by `name:WxH` because the identity has to be stable across sessions and macOS's `CGDirectDisplayID` is reassigned across reconnects and reboots, EDID serial numbers are unreliable in exactly the population that needs them (zeros for virtual, AirPlay and projector screens, missing on real panels), and every stored pin is keyed by that string, so changing the identity is a config-shape change. | `Display.fingerprint` (`Sources/KiwiDeskCore/Models/DisplayModel.swift`) is `name:WxH`; the Screens picture, the pin map and the main badge all key off it, and `ScreensFamilyRows.hasAmbiguousDisplays` is what detects the collision. | The picture **says so** rather than letting it read as a bug — a note appears under the arrangement whenever two connected screens share a fingerprint. Real fix planned in [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734): a screen identity that survives reconnects without colliding. Changing it re-keys every stored pin, so the change owes a one-shot `ConfigMigration` step (AGENTS.md §5), and the changelog says so. The open question is which field is both stable and distinct, which needs a device test with two identical panels. |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
+:::unreleased
+The stale-bound row and the probe-pass row above say a genuine
+resize forgets what was learned about a window. That holds for a
+resize the app makes itself, such as System Settings switching
+panes. A resize you make by hand now keeps every learned limit
+its new size does not contradict: dragging a window larger keeps
+its learned minimum, and only a drag below a minimum or above a
+maximum clears that limit
+([#2706](https://github.com/KiwiCanopy/KiwiDesk/issues/2706)).
+So the stale-bound row's hand-resize remedy clears a stale
+limit only when the drag goes past it; re-applying the layout
+still clears it either way.
+:::
+
 A snapshot written in **another login session** is discarded at launch too, so after a logout and login without a restart KiwiDesk starts as it does after a restart of the Mac, rather than replaying window ids the new session may reuse ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)). That covers the Spaces as well as the windows: the active Space, a Space's layout changed from a shortcut or the CLI without saving, and held and temporary Spaces all come back as after a restart, while your saved profiles and settings are untouched.
 
 The first launch after updating onto this version **other than through KiwiDesk's own updater** — replacing the app by hand, for one — starts fresh once in the same way: the older version's quit wrote an arrangement without the login-session mark, which is discarded by design. An update installed by KiwiDesk's own updater keeps the arrangement.

@@ -4,9 +4,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The learner's per-window stores are hand-mirrored across four
-/// lifecycle hooks — `forget`, `rekey`, `stashOnGone`, `revive` —
-/// and the #1439 probe ledger made it four stores. Past
+/// The learner's per-window stores are hand-mirrored across five
+/// lifecycle hooks — `forget`, `rekey`, `stashOnGone`, `revive`,
+/// and the gesture sweep `gestureResized` (#2706) — and the #1439
+/// probe ledger made it four stores. Past
 /// parity-tests.md's threshold, so this discovers the stores by
 /// reflection: every `[WindowID: …]` map and `Set<WindowID>` on
 /// the struct, whatever is added next, must forget and rekey.
@@ -72,6 +73,27 @@ struct SizeBoundLearnerLifecycleParityTests {
             #expect(
                 !store.ids.contains(w),
                 "\(store.name) still holds the forgotten id"
+            )
+        }
+    }
+
+    /// What a user's gesture keeps: the believed entries and the
+    /// probes it narrows rather than drops, and the gone path's
+    /// tombstone. Every in-flight store goes (#2706).
+    private let gestureKeeps: Set<String> =
+        ["bounds", "probes", "tombstones"]
+
+    @Test("A resize gesture clears every in-flight store")
+    func gestureClearsInFlightStores() {
+        var learner = populated()
+        #expect(learner.lastAsks[w] != nil)
+        #expect(learner.candidates[w] != nil)
+        learner.gestureResized(w, to: CGSize(width: 720, height: 800))
+        for store in stores(of: learner)
+        where !gestureKeeps.contains(store.name) {
+            #expect(
+                !store.ids.contains(w),
+                "\(store.name) survived a resize gesture"
             )
         }
     }

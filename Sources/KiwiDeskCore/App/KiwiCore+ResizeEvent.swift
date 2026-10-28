@@ -37,6 +37,9 @@ extension KiwiCore {
         // confirmed. The confirmation edge fires once per
         // learned entry, so this retile cannot loop on its
         // own echoes.
+        // Judged once, before the ledger is touched: a trailing
+        // event's verdict reads the slot the ledger shapes (#2706).
+        let gesture = isResizeGesture(id)
         var unsolicited = false
         if tiler.askEchoLikely(id) {
             observeSizeAnswer(
@@ -50,23 +53,33 @@ extension KiwiCore {
             size: frame.size
         ) {
             unsolicited = true
-            // A genuine resize stales the learned bound:
-            // the user or the app itself changed the size —
-            // System Settings switching panes moves its
-            // fixed width — so the next retile must probe
-            // fresh rather than skip on a dead answer. A
-            // size the ledger already predicted is exempt:
-            // that is a LATE echo of our own ask (#618's
-            // read queue can outlast the applier's grace),
-            // and wiping on it erased the learning over and
-            // over (device QA, 2026-08-18).
-            if tiler.sizeBound(for: id) != nil {
-                onLog(
-                    "size bound staled by a genuine "
-                        + "resize of window \(id.raw)"
-                )
+            // A size the ledger already predicted is exempt:
+            // that is a LATE echo of our own ask (#618's read
+            // queue can outlast the applier's grace), and
+            // wiping on it erased the learning over and over
+            // (device QA, 2026-08-18).
+            if gesture {
+                // A user's drag changes the size, not the app's
+                // constraints: a forget here dropped Grid's cap
+                // for the rest of the gesture (#2706).
+                if tiler.sweepSizeBound(id, gestureSize: frame.size) {
+                    onLog(
+                        "size bound narrowed by a resize gesture "
+                            + "of window \(id.raw)"
+                    )
+                }
+            } else {
+                // The app re-bounded itself — System Settings
+                // switching panes moves its fixed width — so the
+                // next retile must probe fresh.
+                if tiler.sizeBound(for: id) != nil {
+                    onLog(
+                        "size bound staled by a genuine "
+                            + "resize of window \(id.raw)"
+                    )
+                }
+                tiler.forgetSizeBound(id)
             }
-            tiler.forgetSizeBound(id)
         }
         // Resize gestures share the drag pipeline (same
         // settle debounce). Only mouse-driven resizes
@@ -76,7 +89,7 @@ extension KiwiCore {
         // resize (classified via the recent press near a
         // slot edge) start the gesture even after the
         // release.
-        if isResizeGesture(id) {
+        if gesture {
             drag.windowMoved(
                 id,
                 frame: frame,
