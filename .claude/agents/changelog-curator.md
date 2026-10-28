@@ -86,7 +86,20 @@ reaches people who did not ask to read anything.
    with no setting. A Lua-only change never gets a row, and a
    fixes-only release gets none: it stays prose. Each row's
    change stays a bullet in its section. Pick a symbol that
-   depicts the object, never a state or an action. Prose opens
+   depicts the object, never a state or an action.
+   **A spotlight title invites; it does not specify** (owner,
+   2026-10-28). Write it short, warm and a little playful, so a
+   reader is curious to try it — "Put it in your pocket", "Bye
+   bye overflows", "Maximize for a moment" — never a spec line
+   ("A window one key away", "Windows that always fit") or a
+   qualifier that answers a question nobody asked ("without full
+   screen"). Where the release has a real story, tell it in the
+   first person: a returning feature reads "I listened to the
+   community and brought it back, even better". Keep the
+   accuracy in the line under the title, and when the spotlight
+   runs long, cut the nerdiest row first. A migration note — a
+   chord that moved, a renamed verb — belongs in its section's
+   bullet, never in the Highlights. Prose opens
    with a summary sentence that stands alone; a PATCH's prose
    stays within `changelog-sync`'s `PATCH_PROSE_MAX_SENTENCES`
    and `PATCH_PROSE_MAX_CHARS`, since What's new may show it
