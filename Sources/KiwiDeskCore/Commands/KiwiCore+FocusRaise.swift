@@ -78,11 +78,14 @@ extension KiwiCore {
     /// (the AX echo of the instant switch has not landed yet),
     /// which is the "fly out of the corner" bug (issue #11).
     /// False where the #1345 gate refused it, which changed nothing.
+    /// `leaving` names the focus it moves off for a caller that
+    /// already moved state focus (#2703); nil reads the anchor.
     @discardableResult
     public func focusWindow(
         _ id: WindowID,
         refocusRetile: Bool = true,
-        warp: Bool
+        warp: Bool,
+        leaving: WindowID? = nil
     ) -> Bool {
         // Refused WHOLE, ahead of the state write, the warp and
         // the pan (#1345): moving state focus onto a window the
@@ -99,19 +102,21 @@ extension KiwiCore {
         // still be in its read's flight (#1088). A same-target
         // command — the z-order closing re-asserts — supersedes
         // nothing, so a click landing inside that flight stands.
-        if activeSpace?.focused != id {
+        if (leaving ?? activeSpace?.focused) != id {
             eventLoop.lastCommandedFocus = .now
         }
         // The anchor, not `activeSpace?.focused`: stepping off a
         // tiled-sticky traveler must classify the scroll pan
         // direction from the traveler's slot, not from the stale
         // local focus (#431). Identical for any local focus.
-        let previousFocused = activeSpace.flatMap { sp in
-            state.focusAnchor(
-                of: sp,
-                tiled: state.effectiveTiledMembers(of: sp)
-            )
-        }
+        let previousFocused =
+            leaving
+            ?? activeSpace.flatMap { sp in
+                state.focusAnchor(
+                    of: sp,
+                    tiled: state.effectiveTiledMembers(of: sp)
+                )
+            }
         let space = state.workspaces.space(of: id)
         if let space {
             state.workspaces.focus(id, in: space)

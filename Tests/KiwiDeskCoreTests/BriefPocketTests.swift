@@ -13,6 +13,7 @@ import Testing
 @MainActor
 struct BriefPocketTests {
     private let one = WindowID(1)
+    private let three = WindowID(3)
 
     private func makeCore(plays: Bool = true) -> KiwiCore {
         let core = makeTestCore(
@@ -37,7 +38,7 @@ struct BriefPocketTests {
             setPosition: { _, _ in },
             writeEUI: { _, _ in }
         )
-        for raw: UInt32 in [1, 2] {
+        for raw: UInt32 in [1, 2, 3] {
             core.state.apply(
                 .windowCreated(
                     ManagedWindow(
@@ -138,14 +139,160 @@ struct BriefPocketTests {
     func gated() {
         guard NSScreen.main != nil else { return }
         for (toggle, plays) in [(false, true), (true, false)] {
-            let core = makeCore(plays: plays)
+            let core = raisingCore(plays: plays)
             core.tiler.settings.animations.onStateChange = toggle
             #expect(core.execute("pocket").isSuccess)
             #expect(!core.briefPocket.isPlaying)
+            // Nothing plays, so nothing waits: the raise is now.
+            let next = core.state.workspaces.lastFocused
+            #expect(next != nil && next != one)
+            #expect(next.map { raised(core, $0) } == true)
             #expect(core.execute("pocket").isSuccess)
             #expect(!core.briefPocket.isPlaying)
             #expect(!core.tiler.applier.held.isHeld(one))
+            #expect(raised(core, one))
         }
+    }
+
+    /// #2703: a raise mid-play activates an app on the thread the
+    /// plate's frames tick on, so it waits for the play to end.
+    /// Read off the raise's own stamp: state focus moves at once.
+    @Test("pocketing raises the next window once the play ends")
+    func putInRaiseWaits() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.briefPocket.isPlaying)
+        let next = core.activeSpace?.focused
+        #expect(next != nil && next != one)
+        #expect(next.map { !raised(core, $0) } == true)
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(next.map { raised(core, $0) } == true)
+    }
+
+    @Test("taking out raises the window once the play ends")
+    func takeOutRaiseWaits() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        #expect(core.execute("pocket").isSuccess)
+        #expect(!raised(core, one))
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(raised(core, one))
+    }
+
+    @Test("a press before the play ends takes the waiting hand-off over")
+    func secondPressReplaces() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        let next = core.activeSpace?.focused
+        let first = core.deferred.task(for: .pocketFocus)
+        #expect(core.execute("pocket").isSuccess)
+        await first?.value
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(core.state.pocketPhase(of: one) == .out)
+        #expect(raised(core, one))
+        #expect(next.map { !raised(core, $0) } == true)
+        // State focus moved at the put-in, so it came out over it.
+        #expect(next != nil && core.state.pocket?.cameFrom == next)
+    }
+
+    /// The window it came out over is not the Space's successor,
+    /// the last window of the row once the pocket window joined it:
+    /// state focus goes there at the press, so the pass pans to it.
+    @Test("pocketing moves state focus to where it came out at once")
+    func stateFocusLeadsTheRaise() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        let two = WindowID(2)
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        core.focusWindow(two, warp: false)
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        #expect(core.state.pocket?.cameFrom == two)
+        #expect(core.activeSpace?.windows.last == one)
+        core.selfRaiseStamps = [:]
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.focusedWindowID == two)
+        #expect(!raised(core, two))
+        core.eventLoop.lastCommandedFocus = nil
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(raised(core, two))
+        // Told what it leaves, the raise counts as a commanded focus
+        // change (#1088), as the immediate hand-off did.
+        #expect(core.eventLoop.lastCommandedFocus != nil)
+    }
+
+    @Test("a focus moved before the play ends keeps its window")
+    func movedFocusDrops() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        // Every slot the focus below schedules waits on it too.
+        let flight = Flight()
+        core.deferred.sleep = { _ in
+            while !flight.landed { await Task.yield() }
+        }
+        #expect(core.execute("pocket").isSuccess)
+        let landing = core.deferred.task(for: .pocketFocus)
+        // The user moves on while the pocket still plays.
+        core.focusWindow(three, warp: false)
+        core.selfRaiseStamps[one] = nil
+        flight.landed = true
+        await landing?.value
+        #expect(core.focusedWindowID == three)
+        #expect(!raised(core, one))
+    }
+
+    @Test("a Space switch before the play ends drops the raise")
+    func movedSpaceDrops() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        let flight = Flight()
+        core.deferred.sleep = { _ in
+            while !flight.landed { await Task.yield() }
+        }
+        #expect(core.execute("pocket").isSuccess)
+        let next = core.activeSpace?.focused
+        let landing = core.deferred.task(for: .pocketFocus)
+        #expect(
+            core.execute("focus_space", args: [.string("9")]).isSuccess
+        )
+        core.selfRaiseStamps = [:]
+        flight.landed = true
+        await landing?.value
+        #expect(next.map { !raised(core, $0) } == true)
+    }
+
+    /// A core whose windows have elements, so a raise is stamped.
+    private func raisingCore(plays: Bool = true) -> KiwiCore {
+        let core = makeCore(plays: plays)
+        let element = AXUIElementCreateSystemWide()
+        core.eventLoop.elements[900_001] = [
+            one: element, WindowID(2): element, three: element,
+        ]
+        return core
+    }
+
+    private func raised(_ core: KiwiCore, _ id: WindowID) -> Bool {
+        core.selfRaiseStamps[id] != nil
+    }
+
+    private final class Flight: @unchecked Sendable {
+        var landed = false
     }
 
     @Test("edge and position decode absent as bottom, 82")
