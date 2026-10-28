@@ -134,9 +134,12 @@ struct AppRuleMenuLabel: View {
         HStack(spacing: 4) {
             Text(text)
                 .lineLimit(1)
+            // Drawn, not spoken: VoiceOver read the symbol's name,
+            // "up and down chevrons", after the value.
             Image(systemName: "chevron.up.chevron.down")
                 .font(.caption2)
                 .foregroundStyle(.secondary)
+                .accessibilityHidden(true)
         }
     }
 }

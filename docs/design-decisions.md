@@ -7906,71 +7906,58 @@ which is the half that stays bound. (Owner ruling 2026-08-02, in
 chat.)
 
 :::unreleased
-### The look is KiwiDesk's, its menus included; the behaviour stays the platform's (#2724)
+### A value menu stays the platform's; KiwiDesk draws the controls around it (#2724, #2726)
 
 **[Principle]**
 
-**KiwiDesk may draw a menu, a dialog or a button itself, but only
-its look changes: the keyboard, the VoiceOver role, the placement
-and the timing stay the platform's.** This restates the entry
-above for controls. "Apple-native" binds what a control does,
-and the look is KiwiDesk's own, however small the control. A
-KiwiDesk-drawn value menu still opens on Space and Return, moves
-on the arrows, selects by typing, closes on Escape, flips at a
-screen edge, keeps the submenu's safe triangle and announces
-itself as a menu. A drawn control that loses one of these has
-broken the half that stays bound, whatever it looks like.
+**KiwiDesk's controls may look like KiwiDesk, but a menu or a
+dialog macOS opens stays macOS's, highlight included.** "Apple-
+native" binds what a control does, and the look is KiwiDesk's
+own (▸ the entry above). The menu is where the two halves meet,
+and there the platform's half wins: a value menu, a right-click
+menu and a confirmation keep AppKit's rows, its system-accent
+highlight and its check.
 
-The reason is what a native menu costs inside a KiwiDesk window.
-Every other surface there is green, glass and `SettingsTheme`
-ink, and a native menu opens in the system accent on AppKit's
-grey material. Beside a kiwi selection one row away it reads as
-another app's control. The native menu was kept because
-re-tinting it fights the platform, and that holds: KiwiDesk does
-not re-tint AppKit's menu, it draws its own and rebuilds the
-behaviour in full.
+A pilot tried the other side (#2726, owner on the device,
+2026-10-28). App Rules' value menus kept AppKit's menu — keys,
+placement, VoiceOver, glass — and drew each row with the kiwi
+`accent` and `accentInk`. It failed on what a row looks like,
+not on what it does:
 
-**So the accent line moves.** It was the window: green marks what
-KiwiDesk draws, the user's accent marks what macOS draws (▸ *The
-layout picker is a side of the ⌃⌥J panel, not a menu*). It is now
-the drawing: whatever KiwiDesk draws is green, its menus
-included, and the user's accent stays on what macOS still draws.
-A drawn menu's highlight is the `accent` fill with `accentInk`,
-and its current value is a ✓ drawn in ink, so the choice is never
-told apart by colour alone.
+- **The highlight changes the text's weight.** `accentInk` on
+  kiwi renders visibly thinner than the light ink on the
+  menu's dark material, so the title slims as the pointer
+  reaches it. A native row goes white on the accent and keeps
+  its weight. Only a light ink on the highlight would match,
+  and white on kiwi is ruled out for contrast (▸ *The Settings
+  window paints its own colours*).
+- **AppKit's check cannot be borrowed.** Drawn from a view, the
+  menu's own state image comes out larger and thinner than in a
+  native row, and a symbol sized by eye is a guess per release.
+- **AppKit hands a drawn row no click and no Return**, so every
+  key and the pick itself are hand-built, beside a native menu
+  that has them for free.
 
-**#1502's neutral labels still hold.** A menu's *trigger* is a
-control at rest, and a label coloured by the tint reads as
-selected or as a link. The trigger keeps its neutral label
-whether the menu it opens is native or drawn; only the open menu
-takes green.
+So the green line stays at the window (▸ *The layout picker is a
+side of the ⌃⌥J panel, not a menu*): green marks what KiwiDesk
+draws, the user's accent marks what macOS draws, and a menu is
+macOS's. Re-opening this needs a way past all three, not a
+retune of the pilot's numbers.
 
-Not every native surface is replaced, and each keeps its own
-reason:
+What stays KiwiDesk's around the menu:
 
+- **The trigger.** A pop-up trigger takes the pop-up seal and
+  the neutral label #1502 requires, laid out as a native pop-up:
+  the value leading, the chevron at the capsule's end (#268).
+- **Buttons** (#2377). What is left there is the chip edge under
+  Increase Contrast, a gap of its own.
 - **A dialog stays native** where the platform gives it what it
-  needs. Restore keeps an `NSAlert`, whose accessory view holds
-  the "Include init.lua" checkbox (#2730). A drawn dialog would
-  rebuild sheet placement, the default button and the Escape
-  route for nothing the alert lacks.
-- **The bars' right-click menus stay native** until a drawn menu
-  has been checked on the device in Settings (#2729). A menu on a
-  bar opens over other apps' windows, where a drawn menu's
-  placement and dismissal carry more risk than inside the
-  Settings window.
-- **Buttons are KiwiDesk's already** (#2377). What is left there
-  is the chip edge under Increase Contrast, a gap of its own.
+  needs: Restore keeps an `NSAlert`, whose accessory view holds
+  the "Include init.lua" checkbox (#2730).
 
-The pilot is App Rules' value menus (#2726). A further control
-follows only after the pilot has been checked on the device with
-the keyboard, VoiceOver, Increase Contrast and Reduce
-Transparency (#2391). What breaks if this is ignored: a drawn
-menu that copies the look and drops one key is a regression no
-screenshot shows. A reviewer who reads "native" as "AppKit's
-pixels" would block every drawn control. A reviewer who reads
-"ours" as licence would pass one with home-made keys. Owner
-ruling 2026-10-28, on a `ui-designer` critique and a static
-preview.
+Owner rulings 2026-10-28: the design round on a `ui-designer`
+critique and a static preview, then the pilot's outcome on the
+device.
 :::
 
 ### Wide controls share the label axis; compact ones trail (#2439)
@@ -13212,12 +13199,6 @@ window (#1293 tints every one), and a native menu keeps the system
 accent because re-tinting a menu fights the platform. So green
 marks what KiwiDesk draws and the user's accent marks what macOS
 draws, and the line between them is the window, not the feature.
-
-:::unreleased
-The line moves from the window to the drawing: a menu KiwiDesk
-draws is green too (▸ *The look is KiwiDesk's, its menus
-included*).
-:::
 
 Under *Tint KiwiHub and plates* the selection takes KiwiShelf's
 highlight instead (#2569). The line holds: the look's colours are
