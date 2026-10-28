@@ -87,19 +87,22 @@ reaches people who did not ask to read anything.
    fixes-only release gets none: it stays prose. Each row's
    change stays a bullet in its section. Pick a symbol that
    depicts the object, never a state or an action.
-   **A spotlight title invites; it does not specify** (owner,
-   2026-10-28). Write it short, warm and a little playful, so a
-   reader is curious to try it — "Put it in your pocket", "Bye
-   bye overflows", "Maximize for a moment" — never a spec line
-   ("A window one key away", "Windows that always fit") or a
-   qualifier that answers a question nobody asked ("without full
-   screen"). Where the release has a real story, tell it in the
-   first person: a returning feature reads "I listened to the
-   community and brought it back, even better". Keep the
-   accuracy in the line under the title, and when the spotlight
-   runs long, cut the nerdiest row first. A migration note — a
-   chord that moved, a renamed verb — belongs in its section's
-   bullet, never in the Highlights. Prose opens
+   **A spotlight title leans inviting, and stays clear** (owner,
+   2026-10-28). Find the middle ground between a spec line and a
+   slogan: short and warm, a little playful where the feature
+   allows it, so a reader is curious to try it — "Put it in your
+   pocket", "Maximize for a moment" — while a plain title that
+   already reads well stays plain ("Focus crosses screens").
+   Lean away from titles that only list what a feature does ("A
+   window one key away") and from qualifiers that answer a
+   question nobody asked ("without full screen"). Where the
+   release has a real story, tell it in the first person: a
+   returning feature can read "I listened to the community and
+   brought it back". Keep the accuracy in the line under the
+   title, and when the spotlight runs long, cut the nerdiest row
+   first. A migration note — a chord that moved, a renamed verb
+   — usually reads better in its section's bullet than in the
+   Highlights. Prose opens
    with a summary sentence that stands alone; a PATCH's prose
    stays within `changelog-sync`'s `PATCH_PROSE_MAX_SENTENCES`
    and `PATCH_PROSE_MAX_CHARS`, since What's new may show it
