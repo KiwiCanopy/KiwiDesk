@@ -47,6 +47,13 @@ enum ShortcutFold {
         /// The rendered modifiers and key, e.g. "⌃⌥" and "3".
         let modifiers: String
         let key: String
+        /// What `ChordGlyphs` puts between the modifiers and the key.
+        var separator = ""
+
+        /// The modifiers before `keys`, spaced as a drawn chord.
+        func chord(_ keys: String) -> String {
+            modifiers + separator + keys
+        }
         /// Whether a ladder row sits on its own number's digit key,
         /// judged by key code so every keyboard layout folds alike.
         let ownDigit: Bool
@@ -67,7 +74,8 @@ enum ShortcutFold {
         rendered: String
     ) -> Tag? {
         guard let place, let combo else { return nil }
-        let modifiers = ComboSymbols.modifierSymbols(combo.modifiers)
+        let modifiers = ChordGlyphs.modifiers(combo.modifiers)
+        let separator = ChordGlyphs.separator(combo.modifiers)
         let digit = KeypadKeys.digits.first {
             $0.legend == String(place.position)
         }
@@ -75,7 +83,8 @@ enum ShortcutFold {
         return Tag(
             place: place,
             modifiers: modifiers,
-            key: String(rendered.dropFirst(modifiers.count)),
+            key: String(rendered.dropFirst(modifiers.count + separator.count)),
+            separator: separator,
             ownDigit: digit?.row == combo.keyCode,
             plain: !named && command.unavailable == nil
         )
@@ -163,7 +172,7 @@ enum ShortcutFold {
                 )
             )
             let keys = group.compactMap(\.fold?.key)
-            combo = tag.modifiers + keys[0] + "–" + keys[keys.count - 1]
+            combo = tag.chord(keys[0] + "–" + keys[keys.count - 1])
         } else {
             label = setLabel(tag.family)
             spoken = nil
@@ -186,15 +195,15 @@ enum ShortcutFold {
     /// keys would read as one ("12", "-=").
     private static func setCombo(_ tags: [Tag]) -> String {
         let shared = Set(tags.map(\.modifiers)).count == 1
-        guard shared, let modifiers = tags.first?.modifiers else {
-            return tags.map { $0.modifiers + $0.key }
+        guard shared, let first = tags.first else {
+            return tags.map { $0.chord($0.key) }
                 .joined(separator: " ")
         }
         let keys = tags.map(\.key)
         let arrows = keys.allSatisfy {
             ["←", "→", "↑", "↓"].contains($0)
         }
-        return modifiers + keys.joined(separator: arrows ? "" : " ")
+        return first.chord(keys.joined(separator: arrows ? "" : " "))
     }
 }
 

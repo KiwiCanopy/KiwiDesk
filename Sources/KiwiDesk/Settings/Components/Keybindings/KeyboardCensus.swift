@@ -7,9 +7,14 @@ enum KeyboardCensus {
     struct ModifierLayer: Hashable, Comparable {
         let modifiers: HotkeyModifiers
 
-        /// Modifier glyphs, or empty for bare keys (`KeyboardKeyLabel`).
-        var label: String {
-            ComboSymbols.modifierSymbols(modifiers)
+        /// `label` as drawn and spoken, each side a word.
+        @MainActor var drawnLabel: String {
+            ChordGlyphs.modifiers(modifiers)
+        }
+
+        /// `drawnLabel` spaced to take its key, as a drawn chord is.
+        @MainActor var drawnChord: String {
+            drawnLabel + ChordGlyphs.separator(modifiers)
         }
 
         /// Ordered by modifier count then raw value for stable reading order.
@@ -253,9 +258,9 @@ enum KeyboardCensus {
 
     /// The chord the shown scope names, empty under `.all` —
     /// where there is no single combination to name.
-    static func chordLabel(of scope: Scope) -> String {
+    @MainActor static func chordLabel(of scope: Scope) -> String {
         guard case .one(let layer) = scope else { return "" }
-        return layer.label
+        return layer.drawnChord
     }
 
     /// What macOS uses a key for under the SHOWN scope, or nil

@@ -34,7 +34,7 @@ enum OnboardingModifierNames {
             name in
             guard modifiers.contains(modifier) else { return nil }
             return OnboardingModifierName(
-                glyph: ComboSymbols.modifierSymbols(modifier),
+                glyph: ChordGlyphs.modifiers(modifier),
                 name: name
             )
         }

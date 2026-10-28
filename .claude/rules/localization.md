@@ -416,6 +416,13 @@ why they are here rather than beside the views:
   build the guard. The same string wants no terminal period: it
   is a label, and after a digit a period reads as a number
   separator (de, es, it and pt-BR group thousands with it).
+- **`chord.side.left` / `.right` name a GROUP of modifiers, not
+  one key**: their run of glyphs agrees with no noun, so a locale
+  takes a form that stands before any run — an adverb (ru
+  "Слева"), a usual abbreviation (es "Izq.") — and never reuses the
+  single-key word `shortcuts.hyper_key.*` agrees in; VoiceOver
+  speaks the run as those key names, so the short form costs no
+  meaning (gui.md ▸ A sided chord, `ChordGlyphsWidthTests`).
 - **A `▸` breadcrumb names on-screen labels, so every segment
   must equal what that segment's own key renders to in YOUR
   locale** — the destination label for the head, your own

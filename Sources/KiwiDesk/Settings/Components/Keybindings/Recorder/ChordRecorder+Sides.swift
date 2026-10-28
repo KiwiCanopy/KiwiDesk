@@ -64,7 +64,7 @@ extension ChordRecorder {
         sides: RecorderSides?
     ) -> String {
         if let sides, !hyper {
-            return ComboSymbols.modifierSymbols(sides.modifiers(flags))
+            return ChordGlyphs.modifiers(sides.modifiers(flags))
         }
         return (hyper ? ComboSymbols.hyperGlyph : "")
             + modifierSymbols(flags)

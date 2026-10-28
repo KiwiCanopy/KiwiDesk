@@ -56,6 +56,22 @@ struct ShortcutFoldTests {
         )
     }
 
+    /// A sided ladder folds with its side named once, the range
+    /// spaced off the run as `ChordGlyphs` draws a chord (#2601);
+    /// a ladder on two sides folds into neither.
+    @Test("a sided ladder folds with its side, and sides never mix")
+    func sidedLadderFolds() throws {
+        LocalizationManager.shared.select("en")
+        let left = (1...3).map { goTo($0, "lctrl+lalt+\($0)") }
+        let row = try #require(rows(build(left)).first)
+        #expect(row.combo == "Left ⌃⌥ 1–3")
+        let mixed = [
+            goTo(1, "lctrl+lalt+1"), goTo(2, "rctrl+ralt+2"),
+            goTo(3, "lctrl+lalt+3"),
+        ]
+        #expect(rows(build(mixed)).allSatisfy { $0.members.isEmpty })
+    }
+
     @Test("a rebound key or a named Space stands alone")
     func changedRowsStandAlone() {
         LocalizationManager.shared.select("en")

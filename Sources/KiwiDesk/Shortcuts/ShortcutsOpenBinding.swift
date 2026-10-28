@@ -20,7 +20,7 @@ enum ShortcutsOpenBinding {
         guard let parsed = combo(core: core, lua: verb) else {
             return nil
         }
-        return ComboSymbols.render(
+        return ChordGlyphs.render(
             parsed,
             layoutChar: LayoutKeyGlyph.char
         )
@@ -46,7 +46,7 @@ enum ShortcutsOpenBinding {
             return nil
         }
         return lensCombo(in: bindings, lens: name).map {
-            ComboSymbols.render($0, layoutChar: LayoutKeyGlyph.char)
+            ChordGlyphs.render($0, layoutChar: LayoutKeyGlyph.char)
         }
     }
 

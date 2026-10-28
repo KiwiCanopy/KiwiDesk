@@ -21,7 +21,8 @@ public enum ComboSymbols {
     /// Formats modifiers in canonical macOS `⌃⌥⇧⌘` order
     /// (`ChordRecorder`).
     /// A sided modifier takes a capital L or R just before its
-    /// glyph, `R⌘` (#2601 ▸ Ruling): a key never precedes a
+    /// glyph, `R⌘` — Core's internal form, which the GUI draws in
+    /// words (#2601 ▸ Ruling, amended): a key never precedes a
     /// modifier, so the letter can only be that modifier's side.
     public static func modifierSymbols(
         _ modifiers: HotkeyModifiers
@@ -40,7 +41,7 @@ public enum ComboSymbols {
     }
 
     /// A modifier's glyph, the one table every reader of a drawn
-    /// chord shares (the GUI speaks `R⌘` back from it, #2601).
+    /// chord shares (the GUI names a side in words from it, #2601).
     public static func glyph(of kind: ModifierKind) -> String {
         switch kind {
         case .control: "⌃"

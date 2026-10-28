@@ -78,12 +78,13 @@ struct ModifierSideRecorderTests {
 
     @Test("the preview draws the side a press would keep")
     func previewShowsTheSide() {
+        LocalizationManager.shared.select("en")
         #expect(
             ChordRecorder.preview(
                 rightCommand,
                 hyper: false,
                 sides: RecorderSides()
-            ) == "R⌘"
+            ) == "Right ⌘"
         )
         #expect(
             ChordRecorder.preview(rightCommand, hyper: false, sides: nil)
