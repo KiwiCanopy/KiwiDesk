@@ -7,30 +7,6 @@ import Foundation
 /// and out of it. A #292 focused command whose filled pocket passes
 /// the preflight: its arms act on the slots, never the focus.
 extension KiwiCore {
-    /// `pocket` with a window named (#2678) puts that window in —
-    /// marking it first under the capacity — never the next step.
-    func pocketCommand(_ args: [JSONValue]) -> CommandResponse {
-        guard let named = args.first, named != .null else {
-            return pocketCommand()
-        }
-        _ = emptyPocketIfGone()
-        switch commandTarget("pocket", args) {
-        case .refused(let response):
-            return response
-        case .window(let id):
-            if state.isPocketed(id) { return .ok() }
-            if state.pocketPhase(of: id) == .out {
-                putInPocket(id)
-                return .ok()
-            }
-            let capacity = tiler.settings.pocketStyle.capacity
-            guard state.pocketAcceptsMark(capacity) else {
-                return refuseSecondPocketWindow(id)
-            }
-            return markAndPocket(id)
-        }
-    }
-
     func pocketCommand() -> CommandResponse {
         // A press that emptied the pocket ends there: a filled one
         // passed the #292 preflight, so it never acts on the focus.
@@ -56,26 +32,6 @@ extension KiwiCore {
             return .fail("no focused window")
         }
         return markAndPocket(id)
-    }
-
-    /// Marks `id` and pockets it — the empty pocket's press, and a
-    /// named one (#2678).
-    private func markAndPocket(_ id: WindowID) -> CommandResponse {
-        guard let window = state.windows[id] else {
-            return .fail("no focused window")
-        }
-        guard !window.isFullscreen, !window.isTransientOverlay
-        else { return .fail("this window cannot be pocketed") }
-        // Marked first (#2675), its float frame read while it is
-        // still in its Space and filed at the park; a window
-        // already floating keeps its own.
-        let becoming =
-            isEffectiveFloatForPlacement(id)
-            ? nil : becomePocketWindow(id)
-        guard state.markPocketWindow(id)
-        else { return .fail("this window cannot be pocketed") }
-        putInPocket(id, filing: becoming)
-        return .ok()
     }
 
     /// Empties every slot whose untracked window's app is gone;
@@ -224,7 +180,7 @@ extension KiwiCore {
     /// on its Space's screen, filed as the frame it comes out at
     /// there, so a take-out only restores. Nil where it may not be
     /// placed now.
-    private func becomePocketWindow(
+    func becomePocketWindow(
         _ id: WindowID
     ) -> (frame: CGRect, screen: String)? {
         guard

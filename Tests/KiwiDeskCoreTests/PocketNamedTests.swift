@@ -65,7 +65,12 @@ struct PocketNamedTests {
     func capacityGates() {
         let core = makeCore()
         #expect(pocket(core, one))
-        #expect(!pocket(core, two))
+        // The mark's own refusal, pill and sentence, not a bare fail.
+        let refused = core.execute(
+            "pocket",
+            args: [.number(Double(two.raw))]
+        )
+        #expect(refused.error == "another window is the pocket window")
         #expect(core.state.pocketPhase(of: two) == nil)
         core.execute("pocket.set_capacity", args: [.string("several")])
         #expect(pocket(core, two))
@@ -75,7 +80,8 @@ struct PocketNamedTests {
     @Test("an id no tracked window carries is refused")
     func unknownRefused() {
         let core = makeCore()
-        #expect(!pocket(core, WindowID(77)))
+        let refused = core.execute("pocket", args: [.number(77)])
+        #expect(refused.error == "unknown window: 77")
         #expect(core.state.pocket.isEmpty)
     }
 
@@ -94,6 +100,10 @@ struct PocketNamedTests {
         }
         perform()
         #expect(core.state.pocketPhase(of: one) == .pocketed)
+        // Out again, the pocket window's own row stays live.
+        core.execute("pocket")
+        let out = core.windowRows([one], movable: false)
+        #expect(out.first { $0.title == "Pocket Window" }?.enabled == true)
         // Taken under One window: the next window's row greys.
         let next = core.windowRows([two], movable: false)
         #expect(next.first { $0.title == "Pocket Window" }?.enabled == false)

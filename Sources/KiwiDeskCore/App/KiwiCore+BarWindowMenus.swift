@@ -153,14 +153,8 @@ extension KiwiCore {
     /// under One window, or a window no pocket takes.
     private func pocketRow(_ windows: [WindowID]) -> BarMenuRow {
         let title = L("bar.menu.pocket_window", "Pocket Window")
-        let takes = { (id: WindowID) -> Bool in
-            guard let window = self.state.windows[id],
-                !window.isFullscreen, !window.isTransientOverlay
-            else { return false }
-            return self.state.pocketPhase(of: id) != nil
-                || self.state.pocketAcceptsMark(
-                    self.tiler.settings.pocketStyle.capacity
-                )
+        let takes = { (id: WindowID) in
+            self.pocketNamedRefusal(id) == nil
         }
         let pocket = { [weak self] (id: WindowID) in
             _ = self?.execute("pocket", args: [.number(Double(id.raw))])
