@@ -197,9 +197,10 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     /// Written by a logout's freeze (#1385): the one file a later
     /// boot may match by stable key, once.
     public var frozenForLogout = false
-    /// The pocket (#2446), written by the in-place stop's capture
-    /// alone: an update relaunch keeps a pocketed window pocketed.
-    public var pocket: PocketSlot?
+    /// The pocket (#2446, #2678), written by the in-place stop's
+    /// capture alone: an update relaunch keeps a pocketed window
+    /// pocketed.
+    public var pocket: [PocketSlot] = []
 
     public init(
         windows: [WindowRecord],
@@ -218,8 +219,11 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
     private enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
         case arrangementRecords, loginSession, frozenForLogout
-        case pocket
+        case pocket = "pockets"
     }
+
+    /// 4.0.0's one slot (#2446), read where no list was written.
+    private enum SingleSlotKey: String, CodingKey { case pocket }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -249,7 +253,11 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
             (try? c.decodeIfPresent(Bool.self, forKey: .frozenForLogout))
             ?? false
         // On its own: an unreadable one empties the pocket.
-        pocket = try? c.decodeIfPresent(PocketSlot.self, forKey: .pocket)
+        let single = try? decoder.container(keyedBy: SingleSlotKey.self)
+            .decodeIfPresent(PocketSlot.self, forKey: .pocket)
+        pocket =
+            (try? c.decodeIfPresent([PocketSlot].self, forKey: .pocket))
+            ?? single.map { [$0] } ?? []
     }
 }
 

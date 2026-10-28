@@ -24,7 +24,7 @@ extension StateCoordinator {
             closedDepartures.remove(id)
             rememberMinimized(id)
             // A minimize puts it in the Dock, not the pocket (#2446).
-            if pocketPhase(of: id) != nil { emptyPocket() }
+            emptyPocket(id)
         } else if let space = workspaces.space(of: id) {
             rememberedSpaces[id] = .departed(space)
             rememberDepartedSlot(of: id, in: space)

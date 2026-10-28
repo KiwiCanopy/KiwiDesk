@@ -32,8 +32,10 @@ extension KiwiCore {
                 return true
             }
             // Out of the pocket and here is the pocket's own way.
-            if case .window(let id) = target, state.pocketedWindow == id {
-                return takePocketOut()
+            if case .window(let id) = target,
+                state.isPocketed(id)
+            {
+                return takePocketOut(id)
             }
             guard case .window(let id) = target else {
                 if case .hiddenApp(let pid) = target {
@@ -61,8 +63,8 @@ extension KiwiCore {
 
     private func jumpToWindow(_ id: WindowID) {
         // A pick takes the pocket out (#2446).
-        if state.pocketedWindow == id {
-            takePocketOut()
+        if state.isPocketed(id) {
+            takePocketOut(id)
             return
         }
         if let window = state.windows[id] {

@@ -170,10 +170,10 @@ extension StateCoordinator {
     /// boot scan already filed leaves its Space again; a slow app's
     /// window not yet tracked is re-adopted unfiled by the create
     /// fold, and a press finds an exited app's slot and empties it.
-    mutating func adoptPocket(_ slot: PocketSlot?) {
-        guard let slot else { return }
-        pocket = slot
-        if readoptPocketWindow(slot.window) {
+    mutating func adoptPocket(_ slots: [PocketSlot]) {
+        guard !slots.isEmpty else { return }
+        pocket = slots
+        for slot in slots where readoptPocketWindow(slot.window) {
             workspaces.remove(slot.window)
         }
     }

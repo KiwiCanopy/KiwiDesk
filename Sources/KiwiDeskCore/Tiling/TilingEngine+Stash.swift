@@ -176,12 +176,11 @@ extension TilingEngine {
                 )
             }
         }
-        // The pocketed window is in no Space, so none shows it
+        // A pocketed window is in no Space, so none shows it
         // (#2446). Its frame out of the pocket is the slot's, never
         // a capture.
-        if let id = state.pocketedWindow, id != dragExemptWindow,
-            let window = state.windows[id]
-        {
+        for id in state.pocketedWindows where id != dragExemptWindow {
+            guard let window = state.windows[id] else { continue }
             let (bounds, corner) = parkTarget(
                 of: window,
                 on: state.pocketHomeDisplay.flatMap(Self.screen(for:)),

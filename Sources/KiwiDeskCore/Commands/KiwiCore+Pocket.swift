@@ -1,53 +1,59 @@
 import CoreGraphics
 import Foundation
 
-/// `pocket` (#2446): the key that pockets the pocket window, takes
-/// it out and puts it back (`toggle_pocket_window` marks it). The
-/// slot is `StateCoordinator.pocket`; this file moves windows in
-/// and out of it. A #292 focused command whose filled slot passes the
-/// preflight: taking the window out acts on no focus.
+/// `pocket` (#2446, #2678): the key that puts pocket windows away
+/// and takes them out (`toggle_pocket_window` marks them). The
+/// slots are `StateCoordinator.pocket`; this file moves windows in
+/// and out of it. A #292 focused command whose filled pocket passes
+/// the preflight: its arms act on the slots, never the focus.
 extension KiwiCore {
     func pocketCommand() -> CommandResponse {
-        // The press ends at an emptied slot: a filled slot passed
-        // the #292 preflight, so it never acts on the focus.
+        // A press on emptied slots ends there: a filled pocket
+        // passed the #292 preflight, so it never acts on the focus.
         if emptyPocketIfGone() { return .ok() }
-        switch state.pocket?.phase {
-        case .pocketed?:
-            return takePocketOut() ? .ok() : .fail("pocket is unreachable")
-        case .out?:
-            // Its app hidden: the unhide brings it back to the slot.
-            guard let id = state.pocket?.window, state.windows[id] != nil
-            else { return .fail("pocket is unreachable") }
+        // Away first: the out window used last (#2678).
+        if let id = state.pocketPutBackNext(focused: focusedWindowID) {
             putInPocket(id)
             return .ok()
-        case nil:
-            guard let id = focusedWindowID,
-                let window = state.windows[id]
-            else { return .fail("no focused window") }
-            guard !window.isFullscreen, !window.isTransientOverlay
-            else { return .fail("this window cannot be pocketed") }
-            // Marked first (#2675), its float frame read while it is
-            // still in its Space and filed at the park; a window
-            // already floating keeps its own.
-            let becoming =
-                isEffectiveFloatForPlacement(id)
-                ? nil : becomePocketWindow(id)
-            guard state.markPocketWindow(id)
-            else { return .fail("this window cannot be pocketed") }
-            putInPocket(id, filing: becoming)
-            return .ok()
         }
+        if let id = state.pocketTakeOutNext {
+            return takePocketOut(id)
+                ? .ok() : .fail("pocket is unreachable")
+        }
+        // Out with its app hidden: the unhide brings it back.
+        guard state.pocket.isEmpty else {
+            return .fail("pocket is unreachable")
+        }
+        guard let id = focusedWindowID,
+            let window = state.windows[id]
+        else { return .fail("no focused window") }
+        guard !window.isFullscreen, !window.isTransientOverlay
+        else { return .fail("this window cannot be pocketed") }
+        // Marked first (#2675), its float frame read while it is
+        // still in its Space and filed at the park; a window
+        // already floating keeps its own.
+        let becoming =
+            isEffectiveFloatForPlacement(id)
+            ? nil : becomePocketWindow(id)
+        guard state.markPocketWindow(id)
+        else { return .fail("this window cannot be pocketed") }
+        putInPocket(id, filing: becoming)
+        return .ok()
     }
 
-    /// Empties a slot whose untracked window's app is gone; true
-    /// where it did.
+    /// Empties every slot whose untracked window's app is gone;
+    /// true where one was.
     func emptyPocketIfGone() -> Bool {
-        guard let slot = state.pocket, state.windows[slot.window] == nil,
-            let pid = slot.pid, !eventLoop.processIdentity.runs(pid)
-        else { return false }
-        state.emptyPocket()
-        onLog("pocket: w\(slot.window.raw) gone with its app — emptied")
-        return true
+        let gone = state.pocket.filter {
+            state.windows[$0.window] == nil
+                && $0.pid.map { !eventLoop.processIdentity.runs($0) }
+                    ?? false
+        }
+        for slot in gone {
+            state.emptyPocket(slot.window)
+            onLog("pocket: w\(slot.window.raw) gone with its app — emptied")
+        }
+        return !gone.isEmpty
     }
 
     /// Pockets `id`: out of its Space, parked by the next retile,
@@ -64,12 +70,16 @@ extension KiwiCore {
         let shown = state.windows[id].map {
             tiler.commandedFrame(of: id) ?? $0.frame
         }
-        let cameFrom = state.pocket?.cameFrom
+        let cameFrom = state.pocketSlot(of: id)?.cameFrom
         let heldFocus = state.workspaces.lastFocused == id
         tiler.forgetStash(id)
         state.pocketWindow(id)
         if let becoming {
-            state.rememberPocketFrame(becoming.frame, on: becoming.screen)
+            state.rememberPocketFrame(
+                becoming.frame,
+                of: id,
+                on: becoming.screen
+            )
         }
         onLog("pocket: w\(id.raw) pocketed")
         let next =
@@ -121,22 +131,23 @@ extension KiwiCore {
         }
     }
 
-    /// Takes the pocketed window out onto the active Space's
+    /// Takes the pocketed window `id` out onto the active Space's
     /// screen, at the frame it last had there or centred, floating
-    /// and focused. False where it cannot
-    /// be reached: not tracked (its app hidden) or no Space to
-    /// show it on.
+    /// and focused. False where it cannot be reached: not pocketed,
+    /// not tracked (its app hidden) or no Space to show it on.
     @discardableResult
-    func takePocketOut() -> Bool {
-        guard let id = state.pocketedWindow,
+    func takePocketOut(_ id: WindowID) -> Bool {
+        guard state.pocketPhase(of: id) == .pocketed,
             let window = state.windows[id],
             let target = state.workspaces.activeSpace
         else { return false }
         let cameFrom = state.workspaces.lastFocused
         let screen = state.workspaces.display(of: target)
             .flatMap { screenFingerprint(of: $0) }
-        let remembered = screen.flatMap { state.pocket?.frames[$0] }
-        state.markPocketOut(cameFrom: cameFrom)
+        let remembered = screen.flatMap {
+            state.pocketSlot(of: id)?.frames[$0]
+        }
+        state.markPocketOut(id, cameFrom: cameFrom)
         fileMembership(id, into: target, from: nil)
         // Its frame is the slot's; the restore delivers it.
         let frame =
@@ -202,7 +213,7 @@ extension KiwiCore {
                 .kiwiDisplayID,
             let screen = screenFingerprint(of: display)
         else { return }
-        state.rememberPocketFrame(frame, on: screen)
+        state.rememberPocketFrame(frame, of: id, on: screen)
     }
 
     /// `id` where it still draws on the active Space.
@@ -231,42 +242,54 @@ extension KiwiCore {
 }
 
 extension KiwiCore {
-    /// Empties the pocket for a quit: a pocketed window is filed
+    /// Empties the pocket for a quit: each pocketed window is filed
     /// into the active Space as the user's float, so the gather
     /// lays it out and the next launch keeps it floating; an out
     /// one stays where it is, no longer sticky.
     func releasePocketForQuit() {
-        guard let slot = state.pocket,
-            let id = state.releasePocketWindow()
-        else { return }
-        if slot.phase == .pocketed,
-            let target = state.workspaces.activeSpace
-        {
-            // A quit's filing, no user's: the gather lays it out.
-            state.workspaces.add(id, to: target)
+        for slot in state.pocket {
+            guard let id = state.releasePocketWindow(slot.window)
+            else { continue }
+            if slot.phase == .pocketed,
+                let target = state.workspaces.activeSpace
+            {
+                // A quit's filing, no user's: the gather lays it out.
+                state.workspaces.add(id, to: target)
+            }
         }
     }
 }
 
 extension KiwiCore {
-    /// macOS handing the focus to the pocketed window — ⌘-Tab, the
+    /// macOS handing the focus to a pocketed window — ⌘-Tab, the
     /// Dock, a notification — takes it out; the echo of our own
-    /// pocketing does not. True where the report is spent here.
+    /// pocketing does not. A report for an out one stamps its
+    /// focus (#2678) and passes. True where the report is spent here.
     func consumePocketedFocus(_ id: WindowID) -> Bool {
-        guard state.pocketedWindow == id else { return false }
-        if !moveLatch.isLatched(id, at: wallClock()) {
-            onLog("focus: w\(id.raw) pocketed — taking it out")
-            takePocketOut()
+        switch state.pocketPhase(of: id) {
+        case .pocketed?:
+            if !moveLatch.isLatched(id, at: wallClock()) {
+                onLog("focus: w\(id.raw) pocketed — taking it out")
+                takePocketOut(id)
+            }
+            return true
+        case .out?:
+            state.stampPocketFocus(id)
+            return false
+        case nil:
+            return false
         }
-        return true
     }
 }
 
 extension KiwiCore {
-    /// The windows KiwiVision keeps clear for the pocket while it is
-    /// out (#2446): the pocket window and the one it came out over.
+    /// The windows KiwiVision keeps clear for the pocket (#2446):
+    /// each out pocket window and the one it came out over.
     func visionPocketPair() -> Set<WindowID> {
-        guard let slot = state.pocket, slot.phase == .out else { return [] }
-        return Set([slot.window] + (slot.cameFrom.map { [$0] } ?? []))
+        Set(
+            state.pocket.filter { $0.phase == .out }.flatMap {
+                [$0.window] + ($0.cameFrom.map { [$0] } ?? [])
+            }
+        )
     }
 }

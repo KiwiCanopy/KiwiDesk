@@ -205,7 +205,7 @@ extension KiwiCore {
         let uuids = Set(spaces.map(\.displayUUID))
         if uuids.count <= 1 { return uuids.first }
         let display =
-            state.pocketedWindow == window.id
+            state.isPocketed(window.id)
             ? state.pocketHomeDisplay
             : state.stickyRenderSpace(of: window)
                 .flatMap { state.workspaces.display(of: $0) }
