@@ -109,7 +109,6 @@ class — see
 | Two connected screens of the **same model at the same resolution** are one identity to KiwiDesk: a space pinned to one may open on the other, both draw the same chips in Settings ▸ Screens, and only one of them can carry the "main" badge. | A screen is recognised by `name:WxH` because the identity has to be stable across sessions and macOS's `CGDirectDisplayID` is reassigned across reconnects and reboots, EDID serial numbers are unreliable in exactly the population that needs them (zeros for virtual, AirPlay and projector screens, missing on real panels), and every stored pin is keyed by that string, so changing the identity is a config-shape change. | `Display.fingerprint` (`Sources/KiwiDeskCore/Models/DisplayModel.swift`) is `name:WxH`; the Screens picture, the pin map and the main badge all key off it, and `ScreensFamilyRows.hasAmbiguousDisplays` is what detects the collision. | The picture **says so** rather than letting it read as a bug — a note appears under the arrangement whenever two connected screens share a fingerprint. Real fix planned in [#734](https://github.com/KiwiCanopy/KiwiDesk/issues/734): a screen identity that survives reconnects without colliding. Changing it re-keys every stored pin, so the change owes a one-shot `ConfigMigration` step (AGENTS.md §5), and the changelog says so. The open question is which field is both stable and distinct, which needs a device test with two identical panels. |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
-:::unreleased
 The stale-bound row and the probe-pass row above say a genuine
 resize forgets what was learned about a window. That holds for a
 resize the app makes itself, such as System Settings switching
@@ -121,9 +120,7 @@ maximum clears that limit
 So the stale-bound row's hand-resize remedy clears a stale
 limit only when the drag goes past it; re-applying the layout
 still clears it either way.
-:::
 
-:::unreleased
 A window an app closes by itself **while the screen is locked**
 keeps its tile until you unlock, then drops within one heal
 tick. Under the lock neither the Accessibility list nor the
@@ -135,7 +132,6 @@ list while the session is locked, and the apps refused are
 reconciled at the unlock and on the heal ticks after it
 ([#2538](https://github.com/KiwiCanopy/KiwiDesk/issues/2538)).
 Nobody sees the desk while it is locked, so nothing is needed.
-:::
 
 A snapshot written in **another login session** is discarded at launch too, so after a logout and login without a restart KiwiDesk starts as it does after a restart of the Mac, rather than replaying window ids the new session may reuse ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)). That covers the Spaces as well as the windows: the active Space, a Space's layout changed from a shortcut or the CLI without saving, and held and temporary Spaces all come back as after a restart, while your saved profiles and settings are untouched.
 
@@ -183,7 +179,6 @@ cell that spans several tracks — the last cell of a short row
 under `fill_empty_cells` — and KiwiDesk's own Settings window
 widens its grid column like any other app.
 
-:::unreleased
 A Grid's scrolling last track instead takes, across its scroll
 axis, the largest learned minimum of every member, hidden ones
 included, and its members lift no column or row along it
@@ -203,7 +198,6 @@ grows back when that window leaves
 So the Settings window row's three-column grid on a laptop
 screen drops a column rather than overlapping a neighbour, once
 the 720 pt floor is learned.
-:::
 
 Opening an app whose [app rule](lua-reference.md#app_rules) sends its window to another space takes you there only when the app came forward **within about a second of a click or key press** with no window of its own showing — a launch, a reopen, an un-minimize — or through `focus_or_spawn` ([#1599](https://github.com/KiwiCanopy/KiwiDesk/issues/1599); the ruling is in [design decisions](design-decisions.md#opening-an-app-follows-its-window-into-its-rules-space-1599)). macOS reports that an app became active, never why, so the timing of your last press and whether the app showed a window stand in for the cause. What remains: an app a script opens other than through `focus_or_spawn` (`open -a`, say) leaves you where you are, and so does a first window that appears more than about ten seconds after the app comes forward. An app with no window showing that brings itself forward within a second of a press you made elsewhere takes you along as if you had opened it. Use `focus_space` to reach the window when you are left behind.
 
@@ -215,7 +209,6 @@ Reopening an app whose last window you closed while the app kept running can tak
 
 [`new_window`](lua-reference.md#new_window) takes you there too, whatever the app already shows. It finds the app's **File ▸ New Window** by its ⌘N or ⇧⌘N shortcut and a word for "window" in any language macOS ships, because apps expose no other name for that menu item ([#1518](https://github.com/KiwiCanopy/KiwiDesk/issues/1518)). What remains: an app whose New Window has no such shortcut (Claude's "New Session in New Window") is refused with a pill even though it has the item.
 
-:::unreleased
 A new window of a running app takes you there too when its app
 rule sends it to a Space no screen is showing — ⌘N, File ▸ New,
 or one the app opens on its own
@@ -231,7 +224,6 @@ KiwiDesk tells a new window from one it is only now adopting by
 WindowServer's create notification; where that route is
 unavailable, only opening the app takes you along. Use
 `focus_space` to reach the window when you are left behind.
-:::
 
 Open or Focus asks a running app with **no window at all** for a new one, the way a Dock click does, and it judges "no window" from what it can see ([#1840](https://github.com/KiwiCanopy/KiwiDesk/issues/1840)). A window on another Desktop counts only once KiwiDesk has seen it: on a Mac where the per-Desktop window list cannot be read none does, and anywhere else a window the app opened on a Desktop nobody has shown since does not, so the shortcut sends that reopen anyway. Whether the app then opens a second window beside the one on the other Desktop is the app's own reopen handling. Not observed; reasoned from the mechanism. Switch to the Desktop that holds the window to reach it instead.
 
@@ -269,7 +261,6 @@ A window with **no title-bar buttons and no accessibility content** that is the 
 
 A window that fills its whole screen — a slide show, a borderless-fullscreen game — is left where its app put it and hides both bars while it is in front ([#1787](https://github.com/KiwiCanopy/KiwiDesk/issues/1787)). KiwiDesk tells it from a window you maximise by its missing title bar, so a titled window whose app reports itself as untitled still reads as one when it fills its screen ([#1788](https://github.com/KiwiCanopy/KiwiDesk/issues/1788)). The bars come back at the next focus change, so a window of an app KiwiDesk ignores stepping in front of a show leaves them hidden until then, and a screen-filling window KiwiDesk does not manage keeps them drawn over it.
 
-:::unreleased
 With Space switches on Slide, a window of an app that is slow
 to move — System Settings is the usual one — can land a moment
 after the plates have faded, and under a heavily loaded GPU a
@@ -278,9 +269,7 @@ window can stay visible for an instant after the slide
 KiwiDesk sends each window its move at the press and holds the
 arriving ones until the plates land, but when the app performs
 the move is the app's.
-:::
 
-:::unreleased
 A Stack zone, a Track track — the overflow track included —, a
 Grid's last track (#2541) or BSP's scrolling line
 ([#2542](https://github.com/KiwiCanopy/KiwiDesk/issues/2542)),
@@ -307,7 +296,6 @@ either strategy, and the overflow mark at that end sits
 across the gap, covering a few points of that window: the mark
 rides the line's edge window, and the gap is narrower than the
 mark.
-:::
 
 The focus ring disappears with the desktop when Mission Control
 opens and comes back when it closes, in either draw order and
@@ -321,11 +309,8 @@ With KiwiVision on, the window you move the focus away from stays clear for a sp
 
 When `init.lua` owns the shortcuts, the shortcuts panel (`⌃⌥K`) lists every chord it registered, but names each one only as well as its source spells it ([#2482](https://github.com/KiwiCanopy/KiwiDesk/issues/2482)). An inline action KiwiDesk knows is listed by name, any other inline body as its raw Lua, and a binding to a named handler or a C function as **Lua function**. A body that reads a variable shows its value only where that value is a string, number or true/false the panel can spell exactly and the file never assigns the name; otherwise the row shows its raw Lua, since the value could not be shown as fact. The panel reads the bindings back once per load, right after `init.lua` runs, so a `bind` or `define_layer` that runs later, from an event hook, is not listed, and while a layer defined that way is active the panel shows the first layer it knows. The chords KiwiHub and the menus print beside an action read the same list, so they now show an `init.lua` chord too. Spelling the action inline — `function() KiwiDesk.focus("left") end` — names the row; Settings ▸ Shortcuts ▸ **Import from init.lua…** moves the shortcuts into the visual editor.
 
-:::unreleased
 A `desc` names such a row too ([Describing a Shortcut](lua-reference.md#describing-a-shortcut)).
-:::
 
-:::unreleased
 A window that an app lifts above the normal window level *after*
 KiwiDesk tiled it stays tiled — a player's "float on top" toggle,
 or an app that sets a window's level a moment after opening it —
@@ -342,9 +327,7 @@ window at that level, the window also covers any part of the Space
 Bar or App Bar that overlaps it — a revealed shelf, a peek — since
 the bars sit at the floating window level, below it; they show
 again as soon as the prompt closes or Brave loses focus.
-:::
 
-:::unreleased
 A window in the [pocket](lua-reference.md#pocket) cannot be taken
 out, or put back, while its app is hidden: the `pocket` command
 answers `pocket is unreachable`
@@ -353,9 +336,7 @@ hidden app's windows leave KiwiDesk's tracking, and a window
 KiwiDesk does not track cannot be moved. Show the app again —
 `⌘-Tab`, a Dock click, its row in KiwiHub's window switcher — and
 the pocket answers as before.
-:::
 
-:::unreleased
 Where macOS does not expose the window-management bridge, the
 pocket window is not carried across macOS Desktops: a window left
 in the pocket on another Desktop can be taken out only from that
@@ -363,9 +344,7 @@ Desktop ([#2446](https://github.com/KiwiCanopy/KiwiDesk/issues/2446)).
 Moving a window between Desktops needs that bridge, the same one
 sticky windows' Desktop reach needs; on a Mac that has it, the
 pocket window comes along with every switch.
-:::
 
-:::unreleased
 Switching to the app of a window you pocketed — `⌘-Tab`, a Dock
 click — within a second of pocketing it leaves the focus on the
 parked window instead of taking it out
@@ -373,4 +352,3 @@ parked window instead of taking it out
 For that second KiwiDesk reads a focus report for the pocketed
 window as the echo of pocketing it, which an app can still send,
 and swallows it. Press `⌃⌥P` to take the window out.
-:::

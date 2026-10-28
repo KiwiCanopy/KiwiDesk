@@ -610,7 +610,6 @@ tooltip names the followed row by that row's own label, and the
 picker opens on that colour — the split shape would promise
 light/dark following it does not do.
 
-:::unreleased
 **A well whose value may hold no colour offers "No Color" on its
 row menu** (#2569, the KiwiShelf Fill). A `HexColorField` opts in
 with `clearable`. The item writes the hex at zero opacity with its
@@ -627,7 +626,6 @@ Automatic. A well may carry both flags, and their items then
 share the menu. Emptying the hex field commits No Color too, and
 the field then shows "No Color" as its placeholder; on a well with
 both flags the empty field stays Automatic's.
-:::
 
 ## Row layout & alignment
 
@@ -931,11 +929,9 @@ in Scrolling/Monocle is **not** drawn into their schematics
 state in the `CrossReferenceRow` that points at the App Bar
 destination (#229).
 
-:::unreleased
 Stack's and Track's overflow are drawn the way the engine places
 them (`ZoneRun`): the windows that do not fit sit behind the
 edge tile.
-:::
 
 ## Labels & wire names
 
@@ -1102,7 +1098,6 @@ names it. While Reduce Motion is on, the card also says so in a
 warning box at its top, with a button to System Settings ▸
 Accessibility.
 
-:::unreleased
 The Space switch is on that card: **Space switches** at its top
 picks Slide, Show the Space or None, and **Slide duration**
 beneath it paces the slide (#1956, #2524). The **Animate windows**
@@ -1113,7 +1108,6 @@ fade. The duration also greys while the pick is not Slide. The
 pair closes with "Applies at once, in every profile." and a
 divider above **Animate windows**, and the card's Reduce Motion
 warning names window animations alone.
-:::
 
 Three bar motions keep playing under Reduce Motion, by the owner's
 ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its
@@ -1230,10 +1224,8 @@ keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
 
-:::unreleased
 On KiwiHub's tinted Fill a button chip's fills fade with the
 panel's other fills (#2725).
-:::
 
 A Layouts strip tile lifts like a palette tile, with the
 selection drawn as its stroke alone. A borderless value-menu or

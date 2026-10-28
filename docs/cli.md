@@ -141,7 +141,6 @@ Each command object also carries `destructive`: `true` for a
 command that cannot be undone
 ([Using KiwiDesk from AI Apps](#using-kiwidesk-from-ai-apps)).
 
-:::unreleased
 Each command object carries `kind`: `action` for a command that
 does something, `setting` for one that changes a value, `query`
 for one that only answers. `--kind action`, `--kind setting` or
@@ -153,7 +152,6 @@ kiwidesk list_commands --kind action
 
 `--kind` lists; with a command name it is an error. The
 [Actions](commands.md) page lists every action a key can run.
-:::
 
 The Swift type an enum's values were read from is **not** a JSON
 field; it appears in the terminal rendering only. `values` is
@@ -248,10 +246,8 @@ before the command runs. A shortcut verb saves at once, so `run`
 tells the AI app to show you the mapping and ask first. `subscribe` and the Lua-only verbs are
 not offered.
 
-:::unreleased
 The `list_commands` tool also takes `kind` (`action`, `setting` or
 `query`), and each row it returns carries its `kind`.
-:::
 
 An AI app reads Config Issues and the sync folder's status by
 sending `get_config_status` through `run`. When `keep` cannot write
@@ -429,13 +425,11 @@ verdict, and a `probes` array of `name`, `kind` (`symbol` or
 `bridge_class`), `home`, `verdict` and `detail`. CLI only — Lua
 cannot call it.
 
-:::unreleased
 `kind` may also be `objc_method`: a private AppKit method
 KiwiDesk answers on its own panels — `_hasActiveAppearance`,
 which gives KiwiDesk's glass the bright edge of a focused window
 (#2569). Its row reads `answered` while macOS still asks it and
 `absent` once it stops, when that glass draws its plain look.
-:::
 
 The exit code is 2 when any path `failed`, and 0 otherwise —
 `absent`, `resolved` and `inconclusive` are findings, not
@@ -457,35 +451,27 @@ Spaces by their order and by the ones you visited
 `set_desktop_cue` turns off the plate a Desktop switch shows
 ([`set_desktop_cue`](lua-reference.md#set_desktop_cue)).
 
-:::unreleased
 `focus_display_last` goes to the screen you were on before, and
 `focus_display` takes `left|right|up|down` to the nearest screen
 that way, stopping at the edge; neither takes other arguments
 ([`focus_display_last`](lua-reference.md#focus_display_last--focus_display)).
-:::
 
-:::unreleased
 `set_space_transition` picks how a Space switch shows itself, and
 `set_space_slide_duration` paces the slide
 ([`set_space_transition`](lua-reference.md#set_space_transition)).
-:::
 
-:::unreleased
 `animations.set_on_state_change` animates a window floating,
 maximizing or going into the Pocket and out, the last as a brief
 pocket that `pocket.set_edge top|bottom|left|right` (default
 `bottom`) and `pocket.set_position 0–100` (default `82`) place
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
-:::
 
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
 
-:::unreleased
 `set_modifier_sides` takes `true|false` (default `false`) and
 makes a shortcut written with a side, such as `rcmd+h`, keep it
 ([`set_modifier_sides`](lua-reference.md#set_modifier_sides)).
-:::
 
 `take_over_hyper_remap` takes over a Hyper remap another tool
 left in place when it is exactly the one KiwiDesk would write for
@@ -493,7 +479,6 @@ the chosen key ([`set_hyper_key`](lua-reference.md#set_hyper_key)).
 KiwiDesk then removes it when it quits, and an app still listening
 for F18 keeps hearing the key. CLI only — Lua cannot call it.
 
-:::unreleased
 `export_setup <path>` writes the same backup file as **Export…** in
 Settings, replacing a file already at that path, and `restore_setup
 <path>` does what **Restore…** does: the same refusals, the replaced
@@ -506,7 +491,6 @@ backup carries one; the reply's `init_lua` says what happened. The
 `kiwidesk` CLI resolves a relative path against your current
 directory; any other caller passes an absolute one. CLI only — Lua
 cannot call them.
-:::
 
 `get_config_status` returns the Config Issues and the sync
 folder's status
@@ -521,11 +505,9 @@ without writing it.
 `shortcut.remove <chord>` read and write the saved shortcuts; a
 write saves at once ([Shortcut verbs](lua-reference.md#shortcut-verbs)).
 
-:::unreleased
 `shortcut.list_groups` lists the shortcut groups a binding's `group`
 can name: the built-in tokens and the groups your shortcuts make
 ([`shortcut.list_groups`](lua-reference.md#shortcutlist_groups)).
-:::
 
 `app_rule.list`, `app_rule.set_space <app> <space>`,
 `app_rule.remove_space <app>`, `app_rule.set_float <app> [title]`
@@ -689,13 +671,10 @@ every lens with why it cannot turn on.
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
 for every other.
-:::
 
-:::unreleased
 `set_focus_wrap` takes `off`, `this_screen` or `all_screens`
 (default `all_screens`): what `focus <direction>` does at the
 last window that way in every layout — stop, wrap within the
@@ -705,7 +684,6 @@ screen, or continue onto the next screen
 `track.set_wrap_focus`, which now fail naming it. It also decides
 whether `focus_space_previous` / `focus_space_next` wrap
 ([Lua reference](lua-reference.md#focus_space_previous--focus_space_next)).
-:::
 
 `set_min_window_size`'s layout is `stack`, `grid`, `track`,
 `bsp`, `scrolling` or `floating`, and without one it sets every
@@ -721,21 +699,17 @@ track number (from 1) and a positive weight, `1` being an equal
 share; each has a `_override` sibling taking a space id first
 ([Lua reference](lua-reference.md#gridset_column_weight)).
 
-:::unreleased
 `set_space_cue`, `animations.set_on_space_change` and
 `animations.set_space_change` are refused, naming
 `set_space_transition`; `animations.set_space_change_duration` is
 refused, naming `set_space_slide_duration`; and
 `set_space_switch_liquid_glass` is refused, since the Space
 slide's plates follow KiwiHub's glass.
-:::
 
-:::unreleased
 `stack.set_overflow_style`, `track.set_overflow_style` and their
 `_override` siblings are refused, since a Stack zone or Track
 track scrolls the windows that do not fit
 ([When windows no longer fit](lua-reference.md#when-windows-no-longer-fit)).
-:::
 
 `animations.set_on_monocle_focus` and
 `animations.set_monocle_flip_duration` are refused, since a
@@ -759,12 +733,10 @@ KiwiHub on that side, so a launcher reaches it without a shortcut;
 any other side is refused, naming the three. See
 [kiwihub.show](lua-reference.md#kiwihubshow).
 
-:::unreleased
 `kiwihub.set_key` takes a built-in KiwiHub key (`up`, `down`,
 `page_up`, `page_down`, `left`, `right`) and a combo, and makes the
 combo a second key for it while KiwiHub is open; no combo clears it.
 See [kiwihub.set_key](lua-reference.md#kiwihubset_key).
-:::
 
 `gather` (Launch) takes an app bundle id and moves every window of
 that app into the Space you are on, from other macOS Desktops too
@@ -802,11 +774,9 @@ the KiwiShelf expand on a Space switch, and
 `animations.set_on_shelf` and `animations.set_shelf_duration` are
 retired and fail naming their replacements.
 
-:::unreleased
 `animations.set_on_peek` (true|false, default true) turns the bars'
 peeks instant; see
 [animations.set_on_peek](lua-reference.md#animationsset_on_peek).
-:::
 
 `make_auto` is retired: it fails with `make_auto was retired —
 use make_tiled`, and `make_tiled` does its job. `make_tiled`, and

@@ -92,7 +92,6 @@ fingerprints**) — so the qualifier and the destination name one
 concept, Family C's one concept, one word; a *display* or
 *monitor* word beside them would read as a second one.
 
-:::unreleased
 **Pocket** (#2446) is the second single-word member, admitted the
 way Sticky was, by product decision: the owner ruled at the design
 preview (2026-10-20) that it stays English in every catalog, and
@@ -102,7 +101,6 @@ descriptive-occurrence check in *Adding a name*: every "pocket" in
 the word. A sentence keeps "Pocket" and translates the verb around
 it — "Dieses Fenster in die Pocket stecken", "このウインドウを
 Pocket に入れる".
-:::
 
 **`zh-Hans` is the measured exception.** It splits the English
 "screen" by countability — 屏幕 where the sense is mass, 显示器
