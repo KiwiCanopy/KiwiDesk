@@ -820,7 +820,11 @@ editing here:
   the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
   `takeOutPlaysAndHolds`), and its ring waits with it through the
   state-change hold. Never bring back a slide of the real window to
-  its park. Its Reduce Motion read is pinned on in both
+  its park. A pocket press's focus hand-off waits for the landing
+  too, through the one `handPocketFocus` (#2703): a raise mid-flight
+  activates an app on the thread the plate's frames tick on, and
+  KiwiDesk's own Settings window redraws whole on it
+  (`BriefPocketTests` ▸ `putInRaiseWaits`, `takeOutRaiseWaits`). Its Reduce Motion read is pinned on in both
   `makeTestCore` twins (`SpaceSlideSeamTests` ▸
   `bothTwinsPinTheReads`), so no other suite plays; a suite that
   unpins it pins the panel and frame clock itself, as

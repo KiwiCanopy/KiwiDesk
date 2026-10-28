@@ -13,6 +13,7 @@ import Testing
 @MainActor
 struct BriefPocketTests {
     private let one = WindowID(1)
+    private let three = WindowID(3)
 
     private func makeCore(plays: Bool = true) -> KiwiCore {
         let core = makeTestCore(
@@ -37,7 +38,7 @@ struct BriefPocketTests {
             setPosition: { _, _ in },
             writeEUI: { _, _ in }
         )
-        for raw: UInt32 in [1, 2] {
+        for raw: UInt32 in [1, 2, 3] {
             core.state.apply(
                 .windowCreated(
                     ManagedWindow(
@@ -142,10 +143,106 @@ struct BriefPocketTests {
             core.tiler.settings.animations.onStateChange = toggle
             #expect(core.execute("pocket").isSuccess)
             #expect(!core.briefPocket.isPlaying)
+            // Nothing plays, so nothing waits: the focus moves now.
+            let next = core.state.workspaces.lastFocused
+            #expect(next != nil && next != one)
             #expect(core.execute("pocket").isSuccess)
             #expect(!core.briefPocket.isPlaying)
             #expect(!core.tiler.applier.held.isHeld(one))
+            #expect(core.state.workspaces.lastFocused == one)
         }
+    }
+
+    /// #2703: a focus change mid-flight activates an app on the
+    /// thread the plate's frames tick on, so the raise waits for
+    /// the landing. Read off the raise's own stamp: state focus
+    /// moves with the filing, before any raise.
+    @Test("pocketing raises the next window as the plate lands")
+    func putInRaiseWaits() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.briefPocket.isPlaying)
+        let next = core.activeSpace?.focused
+        #expect(next != nil && next != one)
+        #expect(next.map { !raised(core, $0) } == true)
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(next.map { raised(core, $0) } == true)
+    }
+
+    @Test("taking out raises the window as the plate lands")
+    func takeOutRaiseWaits() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        #expect(core.execute("pocket").isSuccess)
+        #expect(!raised(core, one))
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(raised(core, one))
+    }
+
+    @Test("a press before the landing takes the waiting hand-off over")
+    func secondPressReplaces() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        let next = core.activeSpace?.focused
+        let first = core.deferred.task(for: .pocketFocus)
+        #expect(core.execute("pocket").isSuccess)
+        await first?.value
+        await core.deferred.task(for: .pocketFocus)?.value
+        #expect(core.state.pocketPhase(of: one) == .out)
+        #expect(raised(core, one))
+        #expect(next.map { !raised(core, $0) } == true)
+        // Out over its own put-in, it came out over nothing.
+        #expect(core.state.pocket?.cameFrom == nil)
+    }
+
+    @Test("a focus moved before the landing keeps its window")
+    func movedFocusDrops() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        // Every slot the focus below schedules waits on it too.
+        let flight = Flight()
+        core.deferred.sleep = { _ in
+            while !flight.landed { await Task.yield() }
+        }
+        #expect(core.execute("pocket").isSuccess)
+        let landing = core.deferred.task(for: .pocketFocus)
+        // The user moves on while the plate still flies.
+        core.focusWindow(three, warp: false)
+        core.selfRaiseStamps[one] = nil
+        flight.landed = true
+        await landing?.value
+        #expect(core.focusedWindowID == three)
+        #expect(!raised(core, one))
+    }
+
+    /// A core whose windows have elements, so a raise is stamped.
+    private func raisingCore() -> KiwiCore {
+        let core = makeCore()
+        let element = AXUIElementCreateSystemWide()
+        core.eventLoop.elements[900_001] = [
+            one: element, WindowID(2): element, three: element,
+        ]
+        return core
+    }
+
+    private func raised(_ core: KiwiCore, _ id: WindowID) -> Bool {
+        core.selfRaiseStamps[id] != nil
+    }
+
+    private final class Flight: @unchecked Sendable {
+        var landed = false
     }
 
     @Test("edge and position decode absent as bottom, 82")

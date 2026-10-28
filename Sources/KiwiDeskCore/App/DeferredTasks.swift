@@ -101,6 +101,9 @@ final class DeferredTasks {
         /// Ends a lens's delayed clear at its deadline (#2103
         /// ruling 12).
         case visionHold
+        /// A pocket press's focus hand-off, paid as its plate
+        /// lands (#2703).
+        case pocketFocus
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -111,7 +114,7 @@ final class DeferredTasks {
             case .focusFollow, .spaceSettle, .moveSettle,
                 .desktopSettle, .desktopMoveReap, .desktopFollowReap,
                 .desktopSwitchVerify, .borderDropSettle, .floatRaise,
-                .awayReachReap, .gatherReap:
+                .awayReachReap, .gatherReap, .pocketFocus:
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,

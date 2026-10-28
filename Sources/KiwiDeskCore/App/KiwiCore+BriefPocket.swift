@@ -61,6 +61,33 @@ extension KiwiCore {
         return BriefPocketPlan.timeline(direction, flight: flight).flightEnd
     }
 
+    /// Pays a pocket press's focus hand-off `hand` once the plate
+    /// lands, `lands` seconds on — at once where nothing plays
+    /// (#2703). A focus change activates an app on the main thread
+    /// the plate's frames tick on, and stalls it 100–350 ms where
+    /// that app is KiwiDesk, whose Settings window redraws whole.
+    /// Dropped where the focus or the Space moved meanwhile.
+    func handPocketFocus(
+        after lands: TimeInterval?,
+        _ hand: @escaping @MainActor () -> Void
+    ) {
+        deferred.cancel(.pocketFocus)
+        guard let lands else { return hand() }
+        let held = focusedWindowID
+        let space = state.workspaces.activeSpace
+        deferred.schedule(.pocketFocus, after: .seconds(lands)) {
+            [weak self] in
+            guard let self else { return }
+            guard self.focusedWindowID == held,
+                self.state.workspaces.activeSpace == space
+            else {
+                self.onLog("pocket: landing focus dropped — focus moved")
+                return
+            }
+            hand()
+        }
+    }
+
     /// The plate is the Space switch's, so it follows KiwiHub's
     /// leaf of the Liquid Glass switch as those plates do.
     func briefPocketPlateGlass() -> Bool {
