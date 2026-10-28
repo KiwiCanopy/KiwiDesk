@@ -1849,7 +1849,13 @@ Obligations:
   `SettingsThemeContrastTests` measures; tinted, the shelf's highlight, whose
   ink `PanelHighlightTests` measures, and hover pair, held to the reading
   floor by `GlassPaintTests` ▸ `hubInksHoldTheFloor` (`PanelGlassTests` ▸
-  `rowsReadThePaint`). A divider in KiwiHub or a cue plate is a
+  `rowsReadThePaint`). **A selection or hover fill there draws through
+  `KiwiHubPaint.fill`** (#2721), along the panel's axis to the share
+  `KiwiShelf.highlightFadeShare` solves for its own ink, which the paint
+  reads from the shelf (`HighlightFadeContrastTests`,
+  `KiwiHubPaintFadeTests`); the scope
+  switch, rows, chips and tiles take it, and the footer's buttons stay
+  native. A divider in KiwiHub or a cue plate is a
   `PanelDivider`, which draws the paint's hairline tinted and the system
   separator untinted, never a bare `Divider()` (#2596,
   `KiwiHubDividerTests`, which scans `Jump/` and `CuePlate/`;

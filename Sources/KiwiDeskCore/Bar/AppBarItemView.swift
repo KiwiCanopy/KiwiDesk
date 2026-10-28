@@ -247,10 +247,6 @@ final class AppBarItemView: NSView {
         iconView.isHidden = showsGlyph || icon == nil
         badge.isHidden = count < 2
         badge.stringValue = "\(count)"
-        badge.textColor =
-            NSColor(kiwiHex: style.groupBadgeTextColor)
-        badge.layer?.backgroundColor =
-            NSColor(kiwiHex: style.groupBadgeColor).cgColor
         applyColors()
         applyAccent()
         updateAccessibilityLabel()
