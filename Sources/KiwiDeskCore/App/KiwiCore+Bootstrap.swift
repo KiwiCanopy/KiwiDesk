@@ -293,6 +293,9 @@ extension KiwiCore {
         eventLoop.reachAwaitsCarry = { [weak self] id in
             self?.stickyReachAwaitsCarry(id) ?? false
         }
+        eventLoop.lockedRemovals.isLocked = {
+            SessionPresence.live().screenLocked == true
+        }
         sleepWake.captureState = { [weak self] in
             self?.sessionSnapshot()
         }

@@ -91,11 +91,11 @@ struct SegmentedPickerCoverageTests {
         .split(whereSeparator: \.isWhitespace)
         .joined()
         for needle in [
-            ".background(Capsule().fill(SettingsTheme.trackFill))",
-            "Capsule().strokeBorder(SettingsTheme.trackFill,",
+            ".background(Capsule().fill(paint.fill(SettingsTheme.trackFill)))",
+            "Capsule().strokeBorder(paint.fill(SettingsTheme.trackFill),",
             // KiwiHub's paint, whose default is `chipRest`
             // (`PanelGlassTests` ▸ `scopeSwitchReadsThePaint`).
-            "?paint.rowHover:.clear",
+            "?paint.fill(paint.rowHover):AnyShapeStyle(.clear)",
         ] {
             #expect(source.contains(needle), Comment(rawValue: needle))
         }

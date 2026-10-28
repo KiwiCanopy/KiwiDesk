@@ -1598,7 +1598,9 @@ Obligations:
   the compiler holds the mint; a GUI surface reading `fillColor`
   and building its own gradient beside it is not covered, since
   `GlassTintSeamTests` scans Core alone — that half is review's
-  until someone widens the roots. Which SwiftUI surfaces wear the
+  until someone widens the roots. KiwiHub's selection fills read a
+  `GlassPaint` for its axis alone and draw no Fill colour
+  ([gui.md](gui.md) ▸ `KiwiHubPaint.fill`). Which SwiftUI surfaces wear the
   Fill, and through what, is [gui.md](gui.md)'s — ▸ This tree
   draws glass through one modifier.
 - **Reduce transparency stands the glass down at the one
@@ -1671,6 +1673,24 @@ sites clipped alike.
   anchored the ink correctly would stay green there, so the
   routing is review's.
 
+## A bar badge paints through `BarBadgeFace`
+
+Every badge a bar item carries — the group count, the Space
+Bar's `+n` and its sticky, floating and pocket badges — wears one
+look: an opaque disc with a rim whose colour follows the shelf's
+Fill (the Appearance pick where it has none), the dim ladder
+reaching its mark alone. A disc faded whole
+read as a grey smudge on a faded plate, and a rim picked by the
+disc vanished into the glass (#2722, owner, device 2026-10-28;
+`docs/design-decisions.md` ▸ A bar badge keeps its disc opaque).
+
+- **Paint a badge's disc through `BarBadgeFace.disc` or `paint`,
+  and dim its number or symbol, never the badge view's
+  `alphaValue`.** A new badge joins the face rather than drawing
+  a disc of its own (`AppBarBadgeDimTests`,
+  `SpaceBarCountBadgeHoverTests`, `BarBadgeFaceTests`). The rim is the face's second
+  layer border in `Bar/`, held by `ShelfBorderSeamTests`.
+
 ## An indicator's weight comes from the shelf, never a literal
 
 `kiwishelf.highlight_width` (#1680) is the weight of both bars'
@@ -1729,8 +1749,9 @@ Boxed.
   and `ShelfBorderSeamTests` ▸ `rimmedBoxIsWhereTheOutlineHugs`).
   `ShelfBorderSeamTests` holds the one home: only the painter
   reads the drawn width in Core, and in `Bar/` the only
-  layer-border colour written beside it is
-  the active indicator's. `ShelfBorderPlateTests` builds the
+  layer-border colours written beside it are the active
+  indicator's and a badge's rim (`BarBadgeFace`).
+  `ShelfBorderPlateTests` builds the
   plate (solid, glass, under Reduce transparency) and
   `ShelfBorderDrawingTests` both bars' boxes and the chip; they
   hold the stroke, its place in the order, and its absence while
