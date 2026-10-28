@@ -186,8 +186,10 @@ struct LockedRemovalTests {
             pid: own,
             app: AppRef(bundleID: nil, name: "Own")
         )
-        // Nothing eager; the refusal is the off-main sweep's.
+        // Nothing eager; the refusal is the off-main sweep's
+        // (#1888): one list read queued, none run on main.
         #expect(box.destroyed.isEmpty)
+        #expect(box.reads.count == 1)
         box.drain()
         #expect(box.destroyed.isEmpty)
         #expect(loop.elements[own]?[id] != nil)
