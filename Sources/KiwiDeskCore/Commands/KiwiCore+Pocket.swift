@@ -93,8 +93,11 @@ extension KiwiCore {
             )
         }
         // Held through the play, whose end the hand-off waits for.
-        let past = max(0, (play?.end ?? 0) - MoveIntentLatch.window)
-        moveLatch.stamp(id, at: wallClock().addingTimeInterval(past))
+        moveLatch.stamp(
+            id,
+            at: wallClock(),
+            holdingFor: (play?.end ?? 0) - MoveIntentLatch.window
+        )
         guard heldFocus else { return handPocketFocus(after: nil, nil) }
         handPocketFocus(after: play?.end) { [weak self] in
             guard let self else { return }
