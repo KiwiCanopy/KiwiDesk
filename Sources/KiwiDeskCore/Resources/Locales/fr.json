@@ -279,6 +279,8 @@
   "border.unfocused_enabled": "Afficher la bordure sur les fenêtres inactives",
   "border.width": "Épaisseur",
   "brand.menu_bar_icon.a11y": "KiwiDesk",
+  "chord.side.left": "Gauche %1$@",
+  "chord.side.right": "Droite %1$@",
   "color_field.automatic": "Automatique",
   "color_field.hex.a11y": "Valeur hexadécimale de %1$@",
   "color_field.hex.automatic": "Automatique",

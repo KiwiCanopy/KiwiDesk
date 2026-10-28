@@ -30,7 +30,9 @@ struct ShortcutRowView: View {
             Text(row.combo)
                 .font(.callout)
                 .foregroundStyle(.secondary)
-                // `R⌘H` reads as a bare letter (#2601).
+                // A sided chord grows; the name truncates first,
+                // never the chord (#2601).
+                .fixedSize()
                 .accessibilityLabel(SidedChordWords.label(row.combo))
                 .help(SidedChordWords.help(row.combo))
         }

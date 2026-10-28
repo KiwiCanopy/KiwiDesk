@@ -107,7 +107,7 @@ enum ShortcutBaseWords {
 
     /// The segment titles, drawn as glyphs.
     static func glyphs(_ base: ShortcutBase) -> String {
-        ComboSymbols.modifierSymbols(
+        ChordGlyphs.modifiers(
             base == .hyper ? .hyper : [.control, .option]
         )
     }
@@ -135,6 +135,6 @@ enum ShortcutBaseWords {
     /// `combo` as the board draws it.
     static func chord(_ combo: String) -> String {
         guard let parsed = KeyCombo.parse(combo) else { return combo }
-        return ComboSymbols.render(parsed, layoutChar: LayoutKeyGlyph.char)
+        return ChordGlyphs.render(parsed, layoutChar: LayoutKeyGlyph.char)
     }
 }

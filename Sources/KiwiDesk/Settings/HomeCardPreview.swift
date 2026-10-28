@@ -198,7 +198,7 @@ enum HomeCardPreview {
         guard let parsed = KeyCombo.parse(combo) else {
             return combo
         }
-        return ComboSymbols.render(
+        return ChordGlyphs.render(
             parsed,
             layoutChar: LayoutKeyGlyph.char
         )

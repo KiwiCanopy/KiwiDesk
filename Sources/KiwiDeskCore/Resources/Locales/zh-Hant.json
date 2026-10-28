@@ -279,6 +279,8 @@
   "border.unfocused_enabled": "為非焦點視窗顯示邊框",
   "border.width": "寬度",
   "brand.menu_bar_icon.a11y": "KiwiDesk",
+  "chord.side.left": "左%1$@",
+  "chord.side.right": "右%1$@",
   "color_field.automatic": "自動",
   "color_field.hex.a11y": "%1$@ 的十六進位值",
   "color_field.hex.automatic": "自動",

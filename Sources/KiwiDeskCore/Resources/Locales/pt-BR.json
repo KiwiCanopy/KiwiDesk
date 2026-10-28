@@ -279,6 +279,8 @@
   "border.unfocused_enabled": "Mostrar o contorno nas janelas fora de foco",
   "border.width": "Espessura",
   "brand.menu_bar_icon.a11y": "KiwiDesk",
+  "chord.side.left": "Esq. %1$@",
+  "chord.side.right": "Dir. %1$@",
   "color_field.automatic": "Automático",
   "color_field.hex.a11y": "Valor hexadecimal de %1$@",
   "color_field.hex.automatic": "Automático",

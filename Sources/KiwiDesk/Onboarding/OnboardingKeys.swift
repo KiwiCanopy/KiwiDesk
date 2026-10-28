@@ -118,8 +118,8 @@ enum OnboardingKeys {
         return L(
             "onboarding.keys.tier",
             "%1$@ moves your focus. Add %2$@ to move the window.",
-            ComboSymbols.modifierSymbols(base),
-            ComboSymbols.modifierSymbols(.shift)
+            ChordGlyphs.modifiers(base),
+            ChordGlyphs.modifiers(.shift)
         )
     }
 

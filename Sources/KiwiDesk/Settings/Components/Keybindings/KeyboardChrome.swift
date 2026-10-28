@@ -59,7 +59,7 @@ enum KeyboardKeyLabel {
     ) -> String {
         layer.modifiers.isEmpty
             ? L("keyboard.modifier.bare", "No modifier")
-            : layer.label
+            : layer.drawnLabel
     }
 
     /// Functional key symbols for macOS keyboard hardware.

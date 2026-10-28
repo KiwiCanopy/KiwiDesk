@@ -94,7 +94,7 @@ enum ModifierSidesWords {
     /// the example's key stays the frame's own H, whatever the
     /// keyboard layout draws for it.
     static func drawn(_ side: ModifierSide) -> String {
-        ComboSymbols.modifierSymbols(
+        ChordGlyphs.modifiers(
             HotkeyModifiers.command.union(.side(side, of: .command))
         )
     }

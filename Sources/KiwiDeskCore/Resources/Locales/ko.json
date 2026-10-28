@@ -279,6 +279,8 @@
   "border.unfocused_enabled": "포커스되지 않은 윈도우에도 테두리 보기",
   "border.width": "두께",
   "brand.menu_bar_icon.a11y": "KiwiDesk",
+  "chord.side.left": "왼쪽 %1$@",
+  "chord.side.right": "오른쪽 %1$@",
   "color_field.automatic": "자동",
   "color_field.hex.a11y": "%1$@의 16진수 값",
   "color_field.hex.automatic": "자동",

@@ -2026,23 +2026,28 @@ the key rows' ink, never a topic glyph of its own**
 
 ## A sided chord is drawn once and spoken in words (#2601)
 
-**A surface drawing a chord that can keep a side names it for
-VoiceOver and on hover through `SidedChordWords`**, which reads
-the `R⌘H` `ComboSymbols` draws back as "Right ⌘ H" with
-`HyperKeyWords`' key names — never a second spelling of the sides beside
-it. A new chord surface joins `SidedChordWordsTests` ▸
-`surfacesSpeakTheSide` in the change that adds it. **The recorder
-takes a side only from the `\.recorderSides` environment value**,
-which each recorder mount sets beside `\.hyperKeyIsOff`
-(`ModifierSideRecorderTests` ▸ `mountsWireTheSides`); a new mount
-joins that needle. **A menu key equivalent never carries a sided
-chord**, since it has no side to draw
-(`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`). **A spoken
-chord names ✦ by `HyperKeyWords.keyName`, through
-`SidedChordWords.label`**, sided or not, since VoiceOver reads the
-glyph as a star (#2700, `SidedChordWordsTests` ▸ `hyperIsNamed`);
-a surface speaking a chord takes `label`, never a ✦ replacement of
-its own.
+**A surface drawing a chord takes it from `ChordGlyphs`**, which
+names a side as the catalog's word, once per run of same-side
+modifiers — `Left ⌃⌥ J`, `Right ⌘ H` — and leaves an either-side
+chord as Core's plain glyphs; Core names a side by its letter and
+never reaches a screen (owner ruling 2026-10-28, amending #2601's
+Ruling 1; `ChordGlyphsSeamTests`, whose `allowed` map is the one
+copy of who may read the lettered form). A translated side word
+fits the recorder's `labelMinWidth` in every catalog on a one-hand
+chord of three modifiers, while a cross-hand chord widens its chip
+(`ChordGlyphsWidthTests`). A
+surface naming a chord for VoiceOver and on hover goes through
+`SidedChordWords`, which names ✦ by `HyperKeyWords.keyName`, since
+VoiceOver reads the glyph as a star (#2700, `SidedChordWordsTests`
+▸ `hyperIsNamed`); a surface speaking a chord takes `label`, never
+a ✦ replacement of its own. A new chord surface joins
+`SidedChordWordsTests` ▸ `surfacesSpeakTheSide` in the change that
+adds it. **The recorder takes a side only from the
+`\.recorderSides` environment value**, which each recorder mount
+sets beside `\.hyperKeyIsOff` (`ModifierSideRecorderTests` ▸
+`mountsWireTheSides`); a new mount joins that needle. **A menu key
+equivalent never carries a sided chord**, since it has no side to
+draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
 
 ## SwiftUI traps
 
