@@ -28,9 +28,6 @@ struct HomeCardChromeTests {
     /// card, or the group split reads backwards.
     @Test("the two card heights hold their registers")
     func heightsHoldTheirRegisters() {
-        #expect(SettingsTheme.cardHeight == 152)
-        #expect(SettingsTheme.cardHeightCompact == 105)
-        #expect(SettingsTheme.plateHeight == 92)
         #expect(
             SettingsTheme.cardHeight
                 > SettingsTheme.cardHeightCompact

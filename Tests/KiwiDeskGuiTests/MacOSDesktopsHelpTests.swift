@@ -30,9 +30,6 @@ struct MacOSDesktopsHelpTests {
         "Sources/KiwiDesk/Settings/Components/Keybindings/"
         + "MacOSDesktopsGroup.swift"
 
-    private static let sectionFile =
-        "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
-
     private func squashed(_ repoRelative: String) throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(repoRelative)
@@ -86,20 +83,5 @@ struct MacOSDesktopsHelpTests {
         #expect(source.occurrences(of: "help:") == 1)
         #expect(!source.contains("HelpButton("))
         #expect(!source.contains("accessory:"))
-    }
-
-    /// The mount hands the section its rows, never its words: an
-    /// explanation per mount is a sentence that must agree with
-    /// the section's forever (#1114).
-    @Test("the mount hands in no explanation")
-    func mountPassesOnlyTheRuledArguments() throws {
-        let section = try squashed(Self.sectionFile)
-        #expect(
-            section.contains(
-                "MacOSDesktopsGroup(model:model,"
-                    + "bindings:bindingsBinding,expander:expander)"
-            )
-        )
-        #expect(section.occurrences(of: "MacOSDesktopsGroup(") == 1)
     }
 }

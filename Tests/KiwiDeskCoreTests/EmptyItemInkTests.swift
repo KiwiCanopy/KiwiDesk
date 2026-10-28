@@ -114,4 +114,60 @@ struct EmptyItemInkTests {
         #expect(!anyShareFits(shelf))
         #expect(shelf.emptyItemColor == shelf.idleItemColor)
     }
+
+    /// The share the search should find, measured on ColorVision:
+    /// the least dimming that makes the step, nil where it then
+    /// misses the floor or no share makes it.
+    private func expectedShare(_ shelf: KiwiShelf) -> CGFloat? {
+        let occupied = shelf.idleItemColor
+        let top = Int((KiwiShelf.idleItemAlpha * 100).rounded()) - 1
+        for hundredths in stride(from: top, through: 0, by: -1) {
+            let share = CGFloat(hundredths) / 100
+            let ink = shelf.itemColor(atShare: share)
+            guard let step = worst(occupied, ink, fill: shelf.fillColor),
+                step >= KiwiShelf.emptyInkStep
+            else { continue }
+            guard let floor = worst(ink, nil, fill: shelf.fillColor),
+                floor >= KiwiShelf.idleInkFloor
+            else { return nil }
+            return share
+        }
+        return nil
+    }
+
+    /// The share is memoised process-wide per colour pair: every
+    /// item ink crossed with every fill, read in turn, answers
+    /// for its own pair — a key missing either colour returns a
+    /// neighbour's share.
+    @Test("Every colour pair answers for itself through the memo")
+    func memoKeysBothColours() throws {
+        let palettes = PaletteCatalog.bundled()
+        let items = Set(
+            palettes.compactMap {
+                $0.colors["kiwishelf.item_color"]
+            }
+        )
+        let fills = Set(
+            palettes.compactMap {
+                $0.colors["kiwishelf.fill_color"]
+            }
+        )
+        try #require(items.count > 1 && fills.count > 1)
+        var shares = Set<CGFloat?>()
+        for item in items.sorted() {
+            for fill in fills.sorted() {
+                var shelf = KiwiShelf()
+                shelf.itemColor = item
+                shelf.fillColor = fill
+                let expected = expectedShare(shelf)
+                shares.insert(expected)
+                #expect(
+                    shelf.emptyItemAlpha == expected,
+                    Comment(rawValue: "\(item) on \(fill)")
+                )
+            }
+        }
+        // Not vacuous: the pairs disagree, so a collision shows.
+        #expect(shares.count > 2)
+    }
 }
