@@ -31,4 +31,17 @@ struct BarBadgeFaceTests {
         let navy = NSColor(kiwiHex: "#1A1A2E")
         #expect(white(BarBadgeFace.rim(on: navy, shelfFill: "")))
     }
+
+    /// A dimmed badge dims its rim with its mark.
+    @Test("The rim dims with the badge's tier")
+    func rimDimsWithTheTier() {
+        let lavender = NSColor(kiwiHex: "#B38ED9")
+        let full = BarBadgeFace.rim(on: lavender, shelfFill: "#1A1A2EA5")
+        let dim = BarBadgeFace.rim(
+            on: lavender,
+            shelfFill: "#1A1A2EA5",
+            tier: 0.4
+        )
+        #expect(abs(dim.alphaComponent - full.alphaComponent * 0.4) < 0.001)
+    }
 }

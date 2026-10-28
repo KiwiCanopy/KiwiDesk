@@ -18179,7 +18179,8 @@ floating and pocket badges dimmed as a whole, so on a faded plate
 the disc read as a grey smudge. The dim ladder now reaches the
 mark alone, and every badge shares one face (`BarBadgeFace`): an
 opaque disc with a 1 pt rim that parts it from the glass: white at
-0.35 on a dark shelf Fill, black at 0.25 on a light one. A 0.5 pt
+0.35 on a dark shelf Fill, black at 0.25 on a light one, dimmed
+with the mark. A 0.5 pt
 rim picked by the disc's own brightness vanished on the device, a
 black rim on a light disc disappearing into dark glass
 (`ui-designer`).

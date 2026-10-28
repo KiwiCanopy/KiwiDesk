@@ -14,25 +14,35 @@ enum BarBadgeFace {
     static let lightRimAlpha: CGFloat = 0.35
     static let darkRimAlpha: CGFloat = 0.25
 
-    /// The rim of a disc of `fill` on a shelf of `shelfFill`; a
+    /// The rim of a disc of `fill` on a shelf of `shelfFill`, at
+    /// `tier` of its strength, the dim the badge's mark takes; a
     /// shelf with no Fill takes the disc's own polarity.
-    static func rim(on fill: NSColor, shelfFill: String) -> NSColor {
+    static func rim(
+        on fill: NSColor,
+        shelfFill: String,
+        tier: CGFloat = 1
+    ) -> NSColor {
         let ground =
             KiwiShelf.hasColour(shelfFill) ? NSColor(kiwiHex: shelfFill) : fill
         return ground.wantsLightInk
-            ? NSColor.white.withAlphaComponent(lightRimAlpha)
-            : NSColor.black.withAlphaComponent(darkRimAlpha)
+            ? NSColor.white.withAlphaComponent(lightRimAlpha * tier)
+            : NSColor.black.withAlphaComponent(darkRimAlpha * tier)
     }
 
-    /// Paints `badge`'s opaque, rimmed disc in `fill` on a shelf of
-    /// `shelfFill`.
+    /// Paints `badge`'s opaque disc in `fill` on a shelf of
+    /// `shelfFill`, its rim dimmed with its mark to `tier`.
     @MainActor
-    static func disc(_ badge: NSView, fill: NSColor, shelfFill: String) {
+    static func disc(
+        _ badge: NSView,
+        fill: NSColor,
+        shelfFill: String,
+        tier: CGFloat = 1
+    ) {
         badge.alphaValue = 1
         badge.layer?.backgroundColor = fill.cgColor
         badge.layer?.borderWidth = rimWidth
         badge.layer?.borderColor =
-            rim(on: fill, shelfFill: shelfFill).cgColor
+            rim(on: fill, shelfFill: shelfFill, tier: tier).cgColor
     }
 
     /// Paints a count badge in `fill` with its number in `ink` at
@@ -45,7 +55,12 @@ enum BarBadgeFace {
         inkAlpha: CGFloat,
         shelfFill: String
     ) {
-        disc(badge, fill: NSColor(kiwiHex: fill), shelfFill: shelfFill)
+        disc(
+            badge,
+            fill: NSColor(kiwiHex: fill),
+            shelfFill: shelfFill,
+            tier: inkAlpha
+        )
         let color = NSColor(kiwiHex: ink)
         badge.textColor = color.withAlphaComponent(
             color.alphaComponent * inkAlpha

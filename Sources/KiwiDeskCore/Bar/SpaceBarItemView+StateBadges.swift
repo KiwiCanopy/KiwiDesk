@@ -47,16 +47,18 @@ extension SpaceBarItemView {
             hex: pocketHex == nil ? markHex : "",
             fallback: NSColor(kiwiHex: style.groupBadgeColor)
         )
+        let tier = untintedAppAlpha(focused: appFocused)
         BarBadgeFace.disc(
             badge,
             fill: fill,
-            shelfFill: style.shelf.fillColor
+            shelfFill: style.shelf.fillColor,
+            tier: tier
         )
         badge.symbol.contentTintColor = fill.contrastingGlyph
         badge.ink = NSColor.mark(
             hex: pocketHex ?? "",
             fallback: fill.contrastingGlyph
         )
-        badge.symbol.alphaValue = untintedAppAlpha(focused: appFocused)
+        badge.symbol.alphaValue = tier
     }
 }
