@@ -180,6 +180,72 @@ struct PocketDropTests {
         #expect(filed.map { Array($0) } == [before])
     }
 
+    @Test("a first frame with no delta, or a shrink, shows no plate")
+    func undecidedOrShrinkShowsNothing() throws {
+        let core = try makeCore()
+        point(core, onPlate: false)
+        core.handleDragMove(one, start: start, frame: start)
+        #expect(core.pocketPlate.shown == nil)
+        var shrunk = start.offsetBy(dx: 30, dy: 30)
+        shrunk.size.width -= 50
+        core.handleDragMove(one, start: start, frame: shrunk)
+        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.resizing == one)
+    }
+
+    @Test("an unlit plate takes no drop, even with the pointer on it")
+    func unlitTakesNothing() throws {
+        let core = try makeCore()
+        point(core, onPlate: false)
+        move(core, one)
+        // On the plate at the release, but lit by no move.
+        point(core, onPlate: true)
+        end(core, one)
+        #expect(core.state.pocket.isEmpty)
+    }
+
+    @Test("a drop clears the light and the drag's screen")
+    func dropClearsDragState() throws {
+        let core = try makeCore()
+        point(core, onPlate: false)
+        move(core, one)
+        point(core, onPlate: true)
+        move(core, one)
+        end(core, one)
+        #expect(!core.pocketPlate.dropHovered)
+        #expect(core.pocketPlate.dragDisplay == nil)
+    }
+
+    @Test("with one window inside the drag's plate is not faded")
+    func oneInsideIsNotFaded() throws {
+        let core = try makeCore()
+        core.execute("pocket", args: [.number(Double(one.raw))])
+        point(core, onPlate: false)
+        move(core, two)
+        #expect(core.pocketPlate.shown?.faded == false)
+    }
+
+    @Test("the plate keeps its screen while the Space moves under it")
+    func dragHoldsItsScreen() throws {
+        let core = try makeCore()
+        point(core, onPlate: false)
+        move(core, one)
+        let held = try #require(core.pocketPlate.shown?.display)
+        // The active Space moves to a screen no NSScreen backs.
+        let other = DisplayID(424_242)
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: other,
+                name: "Other",
+                frame: CGRect(x: 5000, y: 0, width: 800, height: 600)
+            )
+        )
+        let space = try #require(core.state.workspaces.activeSpace)
+        core.state.workspaces.assign(space, to: other)
+        core.updatePocketPlate()
+        #expect(core.pocketPlate.shown?.display == held)
+    }
+
     @Test("a cancelled drag hides the plate it showed")
     func cancelHides() throws {
         let core = try makeCore()
