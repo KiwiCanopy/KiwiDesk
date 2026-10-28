@@ -18152,7 +18152,6 @@ Each layer takes the cap, not the stack: under Boxed the hover
 draws over the box's own faded tint, as the flat hover did, and
 that layered look is the one the owner compared and chose.
 
-:::unreleased
 **KiwiHub's selection fades with its Fill** (#2721, owner,
 2026-10-28, after comparing solid and faded fills on a live
 prototype and the device). Under *Tint KiwiHub and plates*, every
@@ -18173,9 +18172,7 @@ Under Increase Contrast the fills fade only as far as the panel,
 whose stricter floor holds their inks where 0.4 does not.
 The footer's buttons stay native macOS buttons; off the toggle,
 and in Settings, the fills stay flat.
-:::
 
-:::unreleased
 **A bar badge keeps its disc opaque** (#2722, owner, 2026-10-28,
 on the device). The group count, the Space Bar's `+n` and its sticky,
 floating and pocket badges dimmed as a whole, so on a faded plate
@@ -18191,7 +18188,6 @@ which read too heavy beside the icons. Glass and a fade were
 weighed and refused: `ui-designer` pointed to Apple's solid badges
 on glass, and at a 14 pt disc a fade reads as a smudge, not a
 fade.
-:::
 
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two
