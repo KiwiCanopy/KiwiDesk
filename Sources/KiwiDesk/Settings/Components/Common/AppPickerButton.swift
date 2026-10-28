@@ -38,16 +38,20 @@ struct AppPickerButton: View {
         Button {
             showing = true
         } label: {
-            // Hugs the name, as a native pop-up does: no spacer in
-            // the label, the chevron right after the name.
+            // The chevron trails at the capsule's end, as a native
+            // pop-up's does, whatever the 110 pt floor leaves (#268).
             HStack(spacing: 4) {
                 Text(selection ?? placeholder)
                     .lineLimit(1)
+                Spacer(minLength: 0)
                 Image(systemName: "chevron.up.chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
             }
             .frame(minWidth: minWidth, alignment: .leading)
+            // The spacer fills the floor and no further: never greedy
+            // where a call site does not hug (#2396).
+            .fixedSize(horizontal: true, vertical: false)
         }
         .settingsPopUpTrigger()
         .controlSize(.large)
