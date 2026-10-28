@@ -124,7 +124,7 @@ struct AnnouncedValuePinTests {
         // What's new's "Next on my list" label (#1813).
         "NextOnMyListPanel.swift": 1,
         // The in-card group heading — Mouse & trackpad (#1726),
-        // General ▸ Advanced (#2439).
+        // General ▸ Files & Reset (#2439).
         "SettingsGroupHeading.swift": 1,
         // The tour looks step's two row headers (#1720).
         "OnboardingLooksRows.swift": 1,
@@ -148,6 +148,8 @@ struct AnnouncedValuePinTests {
         "SettingsDiffRowsView+Live.swift": 1,
         // The Lua binding editor's title (#2688).
         "LuaBindingEditor.swift": 1,
+        // Simple's title, the edited profile's name (#2737).
+        "SettingsHeaderBar+Simple.swift": 1,
     ]
 
     @Test("title components are rotor headings")

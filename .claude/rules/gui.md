@@ -881,9 +881,18 @@ off the main actor.
 EXISTS in the user's config — a layer, an imported binding, an
 override — is drawn on arrival; a disclosure withholds only the
 OFFER to create, and opens on arrival once the first one exists.
-**Never add a window-wide depth switch** — new depth goes behind
-its container's disclosure or its row's menu (#2654,
-`docs/design-decisions.md` ▸ Settings is one surface). **A row's
+**Add no window-wide switch beside `Simple | Advanced`, and no
+depth switch inside either root** — new depth goes behind its
+container's disclosure or its row's menu (#2654,
+`docs/design-decisions.md` ▸ Settings is one surface; #2737, ▸
+Simple is a second root). Draw a control Simple needs with the
+component Advanced draws it with, never a Simple look-alike —
+review's to hold. Keep every page Advanced's and store the root
+only on the switch's pick (`SimpleRootTests` ▸ `pageFlipsRoot`,
+`landingIsNotAPick`). Simple edits the loaded profile alone: a
+new writer of `settingsRoot = .simple` beside `pickRoot` and a
+fresh open settles the edit target as they do
+(`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a

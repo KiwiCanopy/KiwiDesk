@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Reset and recovery actions in General ▸ Advanced (#606,
+/// Reset and recovery actions in General ▸ Files & Reset (#606,
 /// #634). Restore sits AFTER Reset All: Reset All earns its name
 /// by leaving `init.lua` and the palettes standing, and Restore
 /// replaces the palettes too — the widest action comes last, or

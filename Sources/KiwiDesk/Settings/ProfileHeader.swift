@@ -24,7 +24,7 @@ struct ProfileEditTargetMenu: View {
 
     private var menu: some View {
         Menu {
-            Button(checked(liveTitle, nil)) { requestSelect(nil) }
+            Button(checked(model.liveTargetTitle, nil)) { requestSelect(nil) }
             if !others.isEmpty { Divider() }
             if groups.count > 1 {
                 ForEach(groups, id: \.count) { group in
@@ -147,27 +147,7 @@ struct ProfileEditTargetMenu: View {
         ) { model.selectEditTarget(name) }
     }
 
-    /// What is running: the loaded profile, else the layout that
-    /// stands in for one.
-    private var liveTitle: String {
-        if let profile = model.activeProfile { return profile }
-        if let standard = model.activeStandard {
-            return L(
-                "profile_header.title.standard",
-                "Standard: %1$@",
-                standardDisplayName(
-                    standard,
-                    title: model.activeStandardTitle
-                )
-            )
-        }
-        return L(
-            "profile_header.title.transient",
-            "Transient layout"
-        )
-    }
-
-    private var title: String { model.editingProfile ?? liveTitle }
+    private var title: String { model.editTargetTitle }
 
     /// The closed menu's value; the dot beside it is hidden, so the
     /// loaded state is spoken here.
@@ -179,7 +159,9 @@ struct ProfileEditTargetMenu: View {
                 editing
             )
         }
-        guard let profile = model.activeProfile else { return liveTitle }
+        guard let profile = model.activeProfile else {
+            return model.liveTargetTitle
+        }
         return L("profile_header.menu.value.loaded", "%1$@, loaded", profile)
     }
 }
