@@ -27,8 +27,8 @@ extension KiwiShelf {
     /// the plate: the cue drops rather than the floor. The
     /// candidate is the least dimming that makes the step, since
     /// dimming further only loses contrast on the plate.
-    /// Memoised per (item, fill) colour pair: every bar pass reads
-    /// it, and the search costs ~5 ms on a real desk.
+    /// Memoised per (item, fill) colour pair, since every bar
+    /// pass reads it.
     public var emptyItemAlpha: CGFloat? {
         let key = EmptyInkKey(item: itemColor, fill: fillColor)
         if let hit = Self.emptyInkMemo.withLock({ $0[key] }) {
