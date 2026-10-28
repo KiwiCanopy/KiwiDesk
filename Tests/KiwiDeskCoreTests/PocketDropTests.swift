@@ -168,6 +168,8 @@ struct PocketDropTests {
             start: before,
             frame: before.offsetBy(dx: 300, dy: 300)
         )
+        // The echoes fold the dragged frame in, as on the device.
+        core.state.apply(.windowMoved(one, before.offsetBy(dx: 300, dy: 300)))
         core.handleDragEnd(
             one,
             start: before,

@@ -34,23 +34,20 @@ extension KiwiCore {
     }
 
     /// Whether the gesture of `id` is a move the plate takes part in,
-    /// latched once it reads as a resize: the origin moved and the
-    /// size held past `MouseResize`'s threshold — save the shrink
-    /// macOS clamps on a crossing, which stays a move (#504).
+    /// latched off at the first size change, so an edge pull never
+    /// shows it — save the shrink macOS clamps on a crossing, which
+    /// stays a move (#504). A clamp ahead of the crossing latches it
+    /// off too, the trade for never flashing on a pull.
     private func pocketMoveVerdict(
         _ id: WindowID,
         start: CGRect,
         frame: CGRect
     ) -> Bool {
         guard pocketPlate.resizing != id else { return false }
-        let grew =
-            frame.width > start.width + 0.5
-            || frame.height > start.height + 0.5
         let resized =
-            grew
-            || (MouseResize.isResize(from: start, to: frame)
-                && !dragCrossing.hasCrossed(id))
-        if resized {
+            abs(frame.width - start.width) > 0.5
+            || abs(frame.height - start.height) > 0.5
+        if resized, !dragCrossing.hasCrossed(id) {
             pocketPlate.resizing = id
             endPocketDrag()
             return false
@@ -87,8 +84,8 @@ extension KiwiCore {
             "pocket",
             args: [.number(Double(id.raw))]
         )
-        if !response.isSuccess { retile() }
-        return true
+        // Refused at the drop after all: the ordinary drop takes it.
+        return response.isSuccess
     }
 
     /// Drops the plate's drag state; a cancelled drag ends here.
