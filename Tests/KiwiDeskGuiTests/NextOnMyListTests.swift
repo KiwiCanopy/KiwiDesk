@@ -55,6 +55,30 @@ struct NextOnMyListTests {
         }
     }
 
+    /// Home's cache clears only on a section the owner emptied, so
+    /// an emptied one must read apart from one that never arrived.
+    @Test("an emptied section reads apart from an unreadable one")
+    func emptiedReadsApart() {
+        for json in [
+            #"{"format":1,"items":[]}"#,
+            #"{"format":1,"as_of":"2026-09-30","items":[]}"#,
+        ] {
+            #expect(NextOnMyList.read(Self.data(json)) == .emptied, "\(json)")
+        }
+        for json in [
+            #"{"format":2,"as_of":"2026-09-30","items":["One"]}"#,
+            #"{"format":1,"as_of":"soon","items":["One"]}"#,
+            #"{"format":1,"items":["One"]}"#,
+            #"{"format":1}"#,
+            "not json",
+        ] {
+            #expect(
+                NextOnMyList.read(Self.data(json)) == .unreadable,
+                "\(json)"
+            )
+        }
+    }
+
     @Test("hidden once more than sixty days old, or dated ahead")
     func ageBoundsTheList() throws {
         let next = NextOnMyList(asOf: try Self.day("2026-09-30"), items: ["A"])
