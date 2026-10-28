@@ -132,6 +132,14 @@ final class PocketPlateOverlay {
     var dragging: WindowID?
     /// Whether that window is over the plate and a drop takes it.
     var dropHovered = false
+    /// The dropped window, its frame before the drag — which an out
+    /// window files as where it comes out next — and where it was
+    /// let go, which the brief pocket flies from.
+    var dropStart: (window: WindowID, frame: CGRect, released: CGRect)?
+    /// The screen the plate holds for the drag in flight.
+    var dragDisplay: DisplayID?
+    /// The gesture read as a resize, which shows no plate.
+    var resizing: WindowID?
 
     /// The empty pocket's opacity while a drag shows it.
     static let fadedAlpha: CGFloat = 0.55

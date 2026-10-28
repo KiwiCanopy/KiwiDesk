@@ -11,6 +11,7 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+PocketPlate.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+PocketDrop.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
   # The state change's ring hold is armed from App/ (#2676).
   - "Sources/KiwiDeskCore/App/KiwiCore+StateChange.swift"
@@ -437,8 +438,12 @@ click-held peek, its panel answering `shelfBeyondBars`
 (`PocketPlateTests`). **As a drop target it acts through `pocket`
 naming the window and lights on the one `pocketNamedRefusal`**, the
 bar menus' Pocket Window door, so the light and the drop never
-disagree; it shows for a move alone, never a resize
-(`PocketDropTests`).
+disagree, and it takes a drop only where it is lit — a refused
+window drops as it would anywhere else, told why. It shows for a
+move alone, latched off once the gesture reads as a resize, ranks
+after the Space Bar at move and drop alike, holds one screen for the
+gesture, and every way a gesture ends — a drop, a bar relocate, a
+cancel — goes through `finishPocketGesture` (`PocketDropTests`).
 
 ## The ring draws on the `.transient` panel, never a raw window
 

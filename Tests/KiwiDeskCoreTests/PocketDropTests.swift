@@ -131,6 +131,51 @@ struct PocketDropTests {
         end(core, two)
         #expect(core.state.pocketPhase(of: two) == nil)
         #expect(core.state.pocketedWindows == [one])
+        // Refused, the ordinary drop took it: the plate is done.
+        #expect(core.pocketPlate.dragging == nil)
+    }
+
+    @Test("a resize latches off the plate it began as a move")
+    func resizeLatches() throws {
+        let core = try makeCore()
+        point(core, onPlate: true)
+        move(core, one)
+        #expect(core.pocketPlate.shown != nil)
+        move(core, one, resize: true)
+        #expect(core.pocketPlate.shown == nil)
+        move(core, one)
+        #expect(core.pocketPlate.shown == nil)
+        end(core, one)
+        #expect(core.state.pocket.isEmpty)
+        #expect(core.pocketPlate.resizing == nil)
+    }
+
+    @Test("an out window dropped in files its pre-drag frame")
+    func outWindowKeepsItsFrame() throws {
+        let core = try makeCore()
+        core.handle(.windowFocused(one))
+        core.execute("toggle_pocket_window")
+        let before = try #require(core.state.windows[one]?.frame)
+        point(core, onPlate: false)
+        core.handleDragMove(
+            one,
+            start: before,
+            frame: before.offsetBy(dx: 30, dy: 30)
+        )
+        point(core, onPlate: true)
+        core.handleDragMove(
+            one,
+            start: before,
+            frame: before.offsetBy(dx: 300, dy: 300)
+        )
+        core.handleDragEnd(
+            one,
+            start: before,
+            frame: before.offsetBy(dx: 300, dy: 300)
+        )
+        #expect(core.state.pocketPhase(of: one) == .pocketed)
+        let filed = core.state.pocketSlot(of: one)?.frames.values
+        #expect(filed.map { Array($0) } == [before])
     }
 
     @Test("a cancelled drag hides the plate it showed")

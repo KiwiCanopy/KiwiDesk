@@ -33,7 +33,7 @@ extension KiwiCore {
         let inside = pocketPlateWindows
         let dragging = pocketPlate.dragging != nil
         guard Self.pocketPlateShows(inside: inside, dragging: dragging),
-            let display = state.pocketHomeDisplay,
+            let display = pocketPlate.dragDisplay ?? state.pocketHomeDisplay,
             !pocketPlate.standingDown.contains(display),
             let screen = TilingEngine.screen(for: display)
         else { return nil }

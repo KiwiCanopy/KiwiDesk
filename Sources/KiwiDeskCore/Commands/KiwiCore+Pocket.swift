@@ -60,8 +60,11 @@ extension KiwiCore {
     ) {
         rememberPocketFrame(of: id)
         // Read while it still shows: the plate leaves from here.
+        let released = pocketPlate.dropStart.flatMap {
+            $0.window == id ? $0.released : nil
+        }
         let shown = state.windows[id].map {
-            tiler.commandedFrame(of: id) ?? $0.frame
+            released ?? tiler.commandedFrame(of: id) ?? $0.frame
         }
         let cameFrom = state.pocketSlot(of: id)?.cameFrom
         let heldFocus = state.workspaces.lastFocused == id
@@ -200,7 +203,10 @@ extension KiwiCore {
         guard state.pocketPhase(of: id) == .out,
             let window = state.windows[id]
         else { return }
-        let frame = tiler.commandedFrame(of: id) ?? window.frame
+        let dropped = pocketPlate.dropStart.flatMap {
+            $0.window == id ? $0.frame : nil
+        }
+        let frame = dropped ?? tiler.commandedFrame(of: id) ?? window.frame
         guard
             let display = TilingEngine.screen(containing: frame)?
                 .kiwiDisplayID,
