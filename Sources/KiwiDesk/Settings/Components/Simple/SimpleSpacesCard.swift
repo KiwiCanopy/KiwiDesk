@@ -109,8 +109,32 @@ struct SimpleSpacesCard: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
-        .background(SettingsTheme.card)
+        .background(
+            RoundedRectangle(cornerRadius: 6).fill(SettingsTheme.card)
+        )
+        .rowActions { actions(space) }
         .spaceDragLift(space, in: reorder)
+    }
+
+    /// The row menu: the grip's reorder for the keyboard, and the
+    /// trash's delete.
+    @ViewBuilder
+    private func actions(_ space: SpaceID) -> some View {
+        Button(L("spaces.context.move_up", "Move Up")) {
+            model.moveSpace(space, by: -1)
+        }
+        .disabled(!model.canMoveSpace(space, by: -1))
+        Button(L("spaces.context.move_down", "Move Down")) {
+            model.moveSpace(space, by: 1)
+        }
+        .disabled(!model.canMoveSpace(space, by: 1))
+        Divider()
+        Button(
+            L("spaces.context.delete", "Delete"),
+            role: .destructive
+        ) {
+            requestRemove(space)
+        }
     }
 
     private func requestRemove(_ space: SpaceID) {

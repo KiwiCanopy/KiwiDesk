@@ -54,7 +54,7 @@ final class SpaceReorder: ObservableObject {
         _ space: SpaceID,
         at y: CGFloat,
         in spaces: [SpaceID],
-        animation: Animation?
+        reduceMotion: Bool
     ) {
         var order = dragOrder ?? spaces
         guard
@@ -70,7 +70,7 @@ final class SpaceReorder: ObservableObject {
                 ? y >= candidate.value.midY
                 : y <= candidate.value.midY
         else { return }
-        withAnimation(animation) {
+        withAnimation(reduceMotion ? nil : Self.spring) {
             order.move(
                 fromOffsets: IndexSet(integer: from),
                 toOffset: to > from ? to + 1 : to
@@ -84,14 +84,6 @@ final class SpaceReorder: ObservableObject {
         response: 0.25,
         dampingFraction: 0.86
     )
-
-    /// The spring, or nothing under Reduce Motion — ONE decision
-    /// for both the per-swap shuffle and the drop settle: a
-    /// reorder that springs at one and snaps at the other reads as
-    /// a stutter. Rows still move; they arrive rather than travel.
-    static func animation(reduceMotion: Bool) -> Animation? {
-        reduceMotion ? nil : spring
-    }
 
     /// List coordinate frames preference key.
     struct RowFrames: PreferenceKey {
@@ -158,10 +150,6 @@ struct SpaceDragHandle: View {
             .gesture(gesture)
     }
 
-    private var animation: Animation? {
-        SpaceReorder.animation(reduceMotion: reduceMotion)
-    }
-
     private var gesture: some Gesture {
         DragGesture(coordinateSpace: .named(reorder.listSpace))
             .onChanged { value in
@@ -174,7 +162,7 @@ struct SpaceDragHandle: View {
                     space,
                     at: value.location.y,
                     in: model.config.spaces,
-                    animation: animation
+                    reduceMotion: reduceMotion
                 )
             }
             .onEnded { _ in
@@ -182,7 +170,9 @@ struct SpaceDragHandle: View {
                     ? NSCursor.openHand : .arrow)
                     .set()
                 reorder.commit(to: model)
-                withAnimation(animation) {
+                // One gate for the shuffle and the settle: a spring
+                // at one and a snap at the other reads as a stutter.
+                withAnimation(reduceMotion ? nil : SpaceReorder.spring) {
                     reorder.dragged = nil
                 }
             }

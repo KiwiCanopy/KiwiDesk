@@ -113,16 +113,13 @@ extension SpacesSection {
         }
         Divider()
         Button(L("spaces.context.move_up", "Move Up")) {
-            nudge(space, by: -1)
+            model.moveSpace(space, by: -1)
         }
-        .disabled(index(of: space) == 0)
+        .disabled(!model.canMoveSpace(space, by: -1))
         Button(L("spaces.context.move_down", "Move Down")) {
-            nudge(space, by: 1)
+            model.moveSpace(space, by: 1)
         }
-        .disabled(
-            index(of: space)
-                == model.config.spaces.count - 1
-        )
+        .disabled(!model.canMoveSpace(space, by: 1))
         Divider()
         Button(
             L("spaces.context.delete", "Delete"),
@@ -130,18 +127,5 @@ extension SpacesSection {
         ) {
             requestRemove(space)
         }
-    }
-
-    private func index(of space: SpaceID) -> Int {
-        model.config.spaces.firstIndex(of: space) ?? 0
-    }
-
-    private func nudge(_ space: SpaceID, by delta: Int) {
-        let from = index(of: space)
-        let to = from + delta
-        guard model.config.spaces.indices.contains(to) else {
-            return
-        }
-        model.config.spaces.swapAt(from, to)
     }
 }

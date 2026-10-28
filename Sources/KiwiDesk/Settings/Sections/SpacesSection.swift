@@ -17,8 +17,6 @@ struct SpacesSection: View {
     /// The refusal caption each row's name field reports (#1623).
     @State var renameNotices: [SpaceID: SpaceNameNotice] = [:]
     @Environment(\.controlActiveState) var activeState
-    @Environment(\.accessibilityReduceMotion)
-    var reduceMotion
     /// The pushed editor's back crumb and the row to return to on
     /// pop (#678 Phase 4 pass 10); wired in `+Overrides` and
     /// `+Customize`, which carry the argument.

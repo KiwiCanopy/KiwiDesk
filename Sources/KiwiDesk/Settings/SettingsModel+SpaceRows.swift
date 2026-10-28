@@ -12,6 +12,24 @@ extension SettingsModel {
         }
     }
 
+    /// Whether `space` can move `delta` places in the list.
+    func canMoveSpace(_ space: SpaceID, by delta: Int) -> Bool {
+        guard let from = config.spaces.firstIndex(of: space) else {
+            return false
+        }
+        return config.spaces.indices.contains(from + delta)
+    }
+
+    /// Moves `space` `delta` places: the row menu's Move Up and
+    /// Move Down, the keyboard's way to the grip's reorder.
+    func moveSpace(_ space: SpaceID, by delta: Int) {
+        guard
+            canMoveSpace(space, by: delta),
+            let from = config.spaces.firstIndex(of: space)
+        else { return }
+        config.spaces.swapAt(from, from + delta)
+    }
+
     /// A Space's icon in the draft, the empty string for none.
     func spaceIconBinding(_ space: SpaceID) -> Binding<String> {
         Binding(

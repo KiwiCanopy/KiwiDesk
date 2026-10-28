@@ -1,3 +1,4 @@
+import Combine
 import Foundation
 import Testing
 
@@ -49,17 +50,23 @@ struct SimpleSectionsTests {
         let door = "SettingsModel+SpaceScreenChoice.swift"
         // Whole-map writers, outside the per-Space door by design:
         // a kept layout's and a screen setup's adopt replace every
-        // pin at once; the census names the store in a string.
+        // pin at once; the census names the store in a string; the
+        // ↺ register restores a whole store through its key path.
         let bulk: Set<String> = [
             "SettingsModel+KeptLayout.swift",
             "SettingsModel+ScreenSetups.swift",
             "SettingKey+Screens.swift",
+            "SettingsRevertRegister.swift",
         ]
-        // An assignment, not a comparison: `]=` not followed by `=`.
+        // An assignment, not a comparison: `]=` not followed by `=`;
+        // a key path to either store is a writer's handle.
         let write = try NSRegularExpression(
             pattern: #"(spacePins|mainSpaces)(\[[^\]]*\])?=(?!=)|"#
                 + #"(spacePins|mainSpaces)\.(insert|remove|removeValue|"#
-                + #"updateValue|merge|formUnion|subtract|removeAll)\("#
+                + #"updateValue|update|merge|formUnion|subtract|"#
+                + #"formIntersection|formSymmetricDifference|"#
+                + #"removeFirst|popFirst|removeAll)\(|"#
+                + #"\\(GuiConfig)?\.(spacePins|mainSpaces)\b"#
         )
         var writers: [String] = []
         for file in files
@@ -112,8 +119,20 @@ struct SimpleSectionsTests {
         #expect(SimpleCoverage.draws(row(.spaces(.spaceModes)), in: model))
         #expect(SimpleCoverage.draws(row(.spaces(.spacesName)), in: model))
         #expect(!SimpleCoverage.draws(row(.spaces(.fallbackSpace)), in: model))
-        // A look's rows stay with the Look line.
+        #expect(SimpleCoverage.draws(row(.spaces(.spaceIcon)), in: model))
+        #expect(SimpleCoverage.draws(row(.spaces(.spaceList)), in: model))
+        // A look's rows stay with the Look line; a bar's on/off,
+        // which no look paints, leaves.
         #expect(SimpleCoverage.draws(row(.gaps(.outerTop)), in: model))
+        #expect(
+            SimpleCoverage.draws(row(.kiwishelf(.highlightColor)), in: model)
+        )
+        #expect(
+            !SimpleCoverage.draws(
+                row(.spaceBar(.spaceBarVisibility)),
+                in: model
+            )
+        )
         #expect(!SimpleCoverage.draws(row(.appRules(.appRules)), in: model))
         // A pin is Simple's only where it draws the Screen menu.
         for screenMenu in [true, false] {
@@ -135,6 +154,50 @@ struct SimpleSectionsTests {
             lua: KeybindingCatalog.toggleSpaceBar.lua
         )
         #expect(!SimpleCoverage.draws(binding, in: model))
+        // An app key on another layer is Advanced's: Simple draws
+        // the default layer's alone.
+        binding.revert = .binding(
+            layer: "Other",
+            lua: KeybindingCatalog.appCommand(
+                "com.apple.Safari",
+                action: .openOrFocus
+            )
+        )
+        #expect(!SimpleCoverage.draws(binding, in: model))
+    }
+
+    /// The census id and the look's wire path name one setting.
+    @Test("a census id reads as the look's wire path")
+    func wirePaths() {
+        #expect(
+            SimpleCoverage.wirePath(
+                ofCensusID: "settings.borderStyle.cornerStyle"
+            ) == "border.corner_style"
+        )
+        #expect(
+            SimpleCoverage.wirePath(
+                ofCensusID: "settings.gapsGlobal.outer.top (x)"
+            ) == "gap.global.outer.top"
+        )
+        #expect(SimpleCoverage.wirePath(ofCensusID: "layers") == nil)
+    }
+
+    /// Every path a look paints reaches a census row, so no look
+    /// write leaves its pill row unmatched.
+    @Test("every look path has a row Simple keeps")
+    func lookPathsAreMatched() {
+        let paths = Set(
+            SettingKey.allCases.compactMap {
+                SimpleCoverage.wirePath(ofCensusID: $0.id)
+            }
+        )
+        let unmatched = (LookKeys.all + ColorPaletteKeys.all).filter {
+            look in
+            !paths.contains {
+                $0 == look || $0.hasPrefix(look + ".")
+            }
+        }
+        #expect(unmatched.isEmpty, "\(unmatched)")
     }
 
     /// An app key recorded on Simple yields a row that stays.
@@ -173,6 +236,12 @@ struct SimpleSectionsTests {
         }
         let removedRow = try #require(removed)
         #expect(SimpleCoverage.draws(removedRow, in: model))
+        // The same key named on another layer is Advanced's.
+        var elsewhere = removedRow
+        if case .binding(_, let lua) = removedRow.revert {
+            elsewhere.revert = .binding(layer: "Other", lua: lua)
+        }
+        #expect(!SimpleCoverage.draws(elsewhere, in: model))
     }
 
     @Test("removing a Space closes its overrides editor")
@@ -191,8 +260,19 @@ struct SimpleSectionsTests {
     func identifierText() {
         let model = onSimple()
         #expect(model.spaceIdentifierText(SpaceID("3")) == "3")
-        let named = model.spaceIdentifierText(SpaceID("Code"))
-        #expect(named != nil && named != "Code")
+        #expect(model.spaceIdentifierText(SpaceID("Code")) == "CO")
+    }
+
+    @Test("Move Up and Move Down stop at the ends")
+    func moveStopsAtEnds() {
+        let model = onSimple()
+        model.config.spaces = ["a", "b"].map { SpaceID($0) }
+        #expect(!model.canMoveSpace(SpaceID("a"), by: -1))
+        model.moveSpace(SpaceID("a"), by: -1)
+        #expect(model.config.spaces.map(\.raw) == ["a", "b"])
+        model.moveSpace(SpaceID("a"), by: 1)
+        #expect(model.config.spaces.map(\.raw) == ["b", "a"])
+        #expect(!model.canMoveSpace(SpaceID("a"), by: 1))
     }
 
     @Test("a reorder writes once, and only a change")
@@ -201,13 +281,23 @@ struct SimpleSectionsTests {
         model.config.spaces = ["a", "b", "c"].map { SpaceID($0) }
         let reorder = SpaceReorder(listSpace: "test")
         reorder.dragOrder = model.config.spaces
+        var writes = 0
+        let watch = model.objectWillChange.sink { writes += 1 }
         reorder.commit(to: model)
+        watch.cancel()
+        #expect(writes == 0)
         #expect(reorder.dragOrder == nil)
         #expect(model.config.spaces.map(\.raw) == ["a", "b", "c"])
         reorder.dragOrder = ["c", "a", "b"].map { SpaceID($0) }
         #expect(reorder.displayed(model.config.spaces).first?.raw == "c")
         reorder.commit(to: model)
         #expect(model.config.spaces.map(\.raw) == ["c", "a", "b"])
+        // A drag the window abandons still lands its order.
+        reorder.dragged = SpaceID("a")
+        reorder.dragOrder = ["a", "c", "b"].map { SpaceID($0) }
+        reorder.abandon(to: model)
+        #expect(reorder.dragged == nil)
+        #expect(model.config.spaces.map(\.raw) == ["a", "c", "b"])
     }
 
     /// Simple owns layout only: a tile, a recorder or a layout
@@ -226,7 +316,7 @@ struct SimpleSectionsTests {
             "LayoutMode.allCases", "OverrideCountBadge(",
             "SpacePinBadge.resolve(", "monitor_chip.automatic",
             "monitor_card.follows_main", "model.displays",
-            "KiwiHubKeyRows(", "Image(systemName: \"trash\")",
+            "KiwiHubKeyRows(", "\"trash",
             "\"line.3.horizontal\"", "DragGesture(",
         ]
         for file in files {

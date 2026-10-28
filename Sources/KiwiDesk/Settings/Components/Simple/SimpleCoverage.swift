@@ -24,19 +24,15 @@ import KiwiDeskCore
         binding: (SettingsRowRevert) -> Bool
     ) -> Bool {
         switch row.key {
-        case .spaces(.spacesName), .spaces(.spaceModes):
+        case .spaces(.spacesName), .spaces(.spaceModes),
+            .spaces(.spaceIcon), .spaces(.spaceList):
             return true
         case .screens(.spacePins), .screens(.mainSpaces):
             return screenMenu
         case .shortcuts(.layers):
             return binding(row.revert)
-        // The areas a look paints (`LookKeys`): the Look line wrote
-        // them, so their rows stay with it (ruling 12). Read by
-        // area, so a row of these areas made in Advanced stays too.
-        case .kiwishelf, .spaceBar, .appBar, .borders, .gaps, .colours:
-            return true
         default:
-            return false
+            return isLookPainted(row.key)
         }
     }
 
