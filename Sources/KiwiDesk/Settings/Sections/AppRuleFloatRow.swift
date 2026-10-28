@@ -90,7 +90,7 @@ struct AppRuleFloatRow: View {
             Button(allLabel) { setAll() }
             Button(titledLabel) { openTitles() }
         } label: {
-            AppRuleMenuLabel(text: floatLabel)
+            AppRuleMenuLabel(text: floatLabel, chevron: false)
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()

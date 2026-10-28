@@ -129,14 +129,23 @@ struct AppRuleDeleteButton: View {
 /// (`ProfileEditTargetMenu`), shared by both lists' value menus.
 struct AppRuleMenuLabel: View {
     let text: String
+    /// Off inside a native `Menu`: AppKit draws its own indicator
+    /// there and moves a label's image to the front, so the value
+    /// read "⇕ All windows ⌄".
+    var chevron = true
 
     var body: some View {
         HStack(spacing: 4) {
             Text(text)
                 .lineLimit(1)
-            Image(systemName: "chevron.up.chevron.down")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
+            if chevron {
+                // Drawn, not spoken: VoiceOver read the symbol's
+                // name, "up and down chevrons", after the value.
+                Image(systemName: "chevron.up.chevron.down")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                    .accessibilityHidden(true)
+            }
         }
     }
 }

@@ -73,7 +73,7 @@ struct AppRuleSpaceRow: View {
             }
             temporarySpaces
         } label: {
-            AppRuleMenuLabel(text: spaceFacetLabel)
+            AppRuleMenuLabel(text: spaceFacetLabel, chevron: false)
         }
         .menuStyle(.borderlessButton)
         .neutralMenuLabel()
