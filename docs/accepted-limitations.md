@@ -123,6 +123,20 @@ limit only when the drag goes past it; re-applying the layout
 still clears it either way.
 :::
 
+:::unreleased
+A window an app closes by itself **while the screen is locked**
+keeps its tile until you unlock, then drops within one heal
+tick. Under the lock neither the Accessibility list nor the
+on-screen census can be trusted: a display waking behind the
+lock drops every window from the census for a moment, and
+trusting that would close every window and bring each back as
+new at the unlock. So no close is taken from an app's window
+list while the session is locked, and the apps refused are
+reconciled at the unlock and on the heal ticks after it
+([#2538](https://github.com/KiwiCanopy/KiwiDesk/issues/2538)).
+Nobody sees the desk while it is locked, so nothing is needed.
+:::
+
 A snapshot written in **another login session** is discarded at launch too, so after a logout and login without a restart KiwiDesk starts as it does after a restart of the Mac, rather than replaying window ids the new session may reuse ([#1385](https://github.com/KiwiCanopy/KiwiDesk/issues/1385)). That covers the Spaces as well as the windows: the active Space, a Space's layout changed from a shortcut or the CLI without saving, and held and temporary Spaces all come back as after a restart, while your saved profiles and settings are untouched.
 
 The first launch after updating onto this version **other than through KiwiDesk's own updater** — replacing the app by hand, for one — starts fresh once in the same way: the older version's quit wrote an arrangement without the login-session mark, which is discarded by design. An update installed by KiwiDesk's own updater keeps the arrangement.

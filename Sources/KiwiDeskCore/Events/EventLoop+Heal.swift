@@ -69,6 +69,7 @@ extension EventLoop {
     /// One sweep over `census`, a snapshot taken by the caller.
     func healSweep(census: [pid_t: Set<WindowID>]) {
         guard isRunning else { return }
+        reconcileLockRefused()
         var quiet: [pid_t: Set<WindowID>] = [:]
         var unwatched: [pid_t: RunningApp]?
         forgetExitedUnlisted()
@@ -149,6 +150,7 @@ extension EventLoop {
     func sessionDidReturn() {
         forgetHealQuiet()
         for observer in observers.values { observer.forgetRepairStall() }
+        reconcileLockRefused()
     }
 
     /// Re-opens the gate for every quieted id; the next heal

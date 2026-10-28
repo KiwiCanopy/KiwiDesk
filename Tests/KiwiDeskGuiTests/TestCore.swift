@@ -166,11 +166,11 @@ func makeTestCore(
     core.jump.knownWindows = { nil }
     core.tiler.allScreenFrames = { [] }
     // Same class, fifth time (#933): the own-key-window seam
-    // defaults to a live `NSApplication.shared` read, so a
-    // runner that happens to hold a key window would suppress
-    // the focused ring in every border suite. Pin "no own key
-    // window"; the stand-down suites inject their own reading.
+    // reads `NSApplication.shared` live; a runner holding a key
+    // window would suppress the focused ring in every suite.
     core.eventLoop.ownKeyWindow = { nil }
+    // A runner whose screen is locked keeps every close (#2538).
+    core.eventLoop.lockedRemovals.isLocked = { false }
     // A refusal pill's VoiceOver announcement (#2480) defaults to a
     // live post; a suite wanting it states its own sink.
     core.borders.announceRefusal = { _ in }
