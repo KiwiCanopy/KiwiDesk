@@ -1230,6 +1230,11 @@ keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
 
+:::unreleased
+On KiwiHub's tinted Fill a button chip's fills fade with the
+panel's other fills (#2725).
+:::
+
 A Layouts strip tile lifts like a palette tile, with the
 selection drawn as its stroke alone. A borderless value-menu or
 popover trigger whose label is text takes the glyph chip's lift
