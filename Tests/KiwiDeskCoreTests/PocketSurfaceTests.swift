@@ -93,7 +93,7 @@ struct PocketSurfaceTests {
         let snapshot = core.state.inPlaceSnapshot(monocleShown: [:])
         let data = try JSONEncoder().encode(snapshot)
         let read = try JSONDecoder().decode(StateSnapshot.self, from: data)
-        #expect(read.pocket?.window == one)
+        #expect(read.pocket.first?.window == one)
         let next = makeCore()
         #expect(next.state.workspaces.space(of: one) != nil)
         next.state.adopt(read)
@@ -105,6 +105,6 @@ struct PocketSurfaceTests {
     func plainSnapshotCarriesNone() {
         let core = makeCore()
         core.execute("pocket")
-        #expect(core.state.snapshot().pocket == nil)
+        #expect(core.state.snapshot().pocket.isEmpty)
     }
 }

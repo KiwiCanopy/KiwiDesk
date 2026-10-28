@@ -104,7 +104,7 @@ struct CrossSessionRekeyParityTests {
         snapshot.arrangementRecords = .init([.profile("P"): ["3": [w]]])
         snapshot.loginSession = 4
         snapshot.frozenForLogout = true
-        snapshot.pocket = PocketSlot(window: w, phase: .pocketed)
+        snapshot.pocket = [PocketSlot(window: w, phase: .pocketed)]
         return snapshot
     }
 

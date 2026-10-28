@@ -16,7 +16,7 @@ extension KiwiCore {
         switch commandTarget(command, args) {
         case .refused(let response): return response
         case .window(let window):
-            guard state.pocketedWindow != window else {
+            guard !state.isPocketed(window) else {
                 return .fail("window \(window.raw) is in the pocket")
             }
             moveWindow(window, to: SpaceID(raw), follow: follow)
@@ -48,8 +48,8 @@ extension KiwiCore {
     ) {
         let from = state.workspaces.space(of: window)
         // A pocketed window is filed by its own key alone (#2446).
-        guard state.pocketedWindow != window,
-            partner.map({ state.pocketedWindow != $0 }) ?? true
+        guard !state.isPocketed(window),
+            partner.map({ !state.isPocketed($0) }) ?? true
         else {
             onLog("move: w\(window.raw) refused — in the pocket")
             return

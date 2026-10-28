@@ -110,7 +110,7 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket?.window == one)
+        #expect(core.state.pocket.first?.window == one)
         #expect(core.state.pocketPhase(of: one) == .out)
         #expect(core.state.windows[two]?.isFloating == false)
     }
@@ -133,7 +133,7 @@ struct PocketWindowTests {
         core.execute("pocket")
         #expect(core.focusedWindowID == two)
         #expect(!core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket?.window == one)
+        #expect(core.state.pocket.first?.window == one)
         #expect(core.state.pocketPhase(of: one) == .pocketed)
     }
 
@@ -143,7 +143,7 @@ struct PocketWindowTests {
         let core = makeCore()
         core.execute("toggle_pocket_window")
         #expect(core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         #expect(core.state.windows[one]?.isFloating == false)
         #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
         #expect(!core.state.userFloated.contains(one))
@@ -163,7 +163,7 @@ struct PocketWindowTests {
         core.bus.addSink { event, _ in moved.append(event) }
         core.execute("toggle_pocket_window")
         #expect(core.state.workspaces.space(of: one) == SpaceID("2"))
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         // Filed as a user move files a window, so it is announced.
         #expect(moved.contains(.windowMovedToSpace))
     }
@@ -174,7 +174,7 @@ struct PocketWindowTests {
     func pocketingNeedsTheMark() {
         let core = makeCore()
         core.state.pocketWindow(one)
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         #expect(core.state.workspaces.space(of: one) == SpaceID("1"))
     }
 
@@ -185,7 +185,7 @@ struct PocketWindowTests {
         core.execute("toggle_pocket_window")
         core.state.apply(.windowFocused(two))
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocket?.window == two)
+        #expect(core.state.pocket.first?.window == two)
         #expect(core.state.pocketPhase(of: two) == .pocketed)
     }
 
@@ -227,7 +227,7 @@ struct PocketWindowTests {
         let placed = try #require(core.floatPlacementFrame(for: one))
         #expect(placed != slot)
         core.execute("pocket")
-        #expect(core.state.pocket?.frames.values.map(\.self) == [placed])
+        #expect(core.state.pocket.first?.frames.values.map(\.self) == [placed])
     }
 
     /// The fallback on a window already floating files the frame
@@ -246,7 +246,7 @@ struct PocketWindowTests {
         core.state.apply(.windowResized(one, own))
         core.execute("pocket")
         #expect(
-            core.state.pocket?.frames.values.map(\.size) == [own.size]
+            core.state.pocket.first?.frames.values.map(\.size) == [own.size]
         )
     }
 
@@ -268,7 +268,7 @@ struct PocketWindowTests {
         core.state.apply(.windowResized(one, hand))
         core.execute("pocket")
         let filed = try #require(
-            core.state.pocket?.frames.values.first
+            core.state.pocket.first?.frames.values.first
         )
         #expect(filed.size == hand.size)
         // Parked off the corner, at a size of its own, so a take-out
@@ -301,7 +301,7 @@ struct PocketWindowTests {
         core.eventLoop.processIdentity.runs = { _ in false }
         core.state.apply(.windowFocused(two))
         #expect(core.execute("toggle_pocket_window").isSuccess)
-        #expect(core.state.pocket?.window == two)
+        #expect(core.state.pocket.first?.window == two)
         #expect(core.state.pocketPhase(of: two) == .out)
     }
 

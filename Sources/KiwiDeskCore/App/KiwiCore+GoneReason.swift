@@ -61,8 +61,8 @@ extension KiwiCore {
             // or a hide comes back under the same id and keeps it.
             state.floatFrames[id] = nil
             state.focusRecency[id] = nil
-            // Closing the window empties the pocket (#2446).
-            if state.pocketPhase(of: id) != nil { state.emptyPocket() }
+            // Closing the window empties its slot (#2446).
+            state.emptyPocket(id)
         }
         if reason == .vanished,
             case .hosted(let space, _) = presence

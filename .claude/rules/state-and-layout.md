@@ -693,7 +693,7 @@ editing here:
   left all three cases green until the away-resolving lookup
   came back too. A reviewer reading a half-revert as harmless is
   the failure mode; the pair is the guard, not either half.
-- **A pocketed window is KNOWN in the slot, tracked, and never a
+- **A pocketed window is KNOWN in its slot, tracked, and never a
   member (#2446).** `StateCoordinator.pocket` names it and
   `windows` keeps it, but no Space lists it — the away ledger's
   shape above, for the same reason. So a new reader of
@@ -711,7 +711,7 @@ editing here:
     fold does through `readoptPocketWindow` (an unhide, a boot
     scan, a replay), and on a re-file, as the profile
     partitioning restore (`restorePartitioning`) skips
-    `pocketedWindow` — or it files the pocketed window and draws
+    `isPocketed` — or it files the pocketed window and draws
     it (`PocketCommandTests` ▸ `hideKeeps`,
     `outReadoptKeepsFlags`). A new per-window flag memory that a
     close writes and an arrival restores skips the pocket window,
@@ -721,7 +721,7 @@ editing here:
     records the window.
   - **Ask whether a window is the pocket's through
     `StateCoordinator.pocketPhase(of:)`**, which answers the phase
-    too, or `pocketedWindow`; a new consumer that draws, refuses
+    too, or `isPocketed`; a new consumer that draws, refuses
     or skips for it states which phase it means. **The screen a
     pocketed window waits on is `pocketHomeDisplay`**, the active
     Space's, which the stash park and the Desktop carry both read;
@@ -761,7 +761,16 @@ editing here:
     `StateCoordinator.markPocketWindow` alone, out and never
     pocketed — no frames, no `cameFrom` — and `pocketWindow`
     refuses any window that is not the out slot's; a new entry
-    path (a pick, #2678's list) marks first. Marking is the one
+    path (a pick, #2678's list) marks first, and a path that adds
+    a window beside a marked one asks
+    `StateCoordinator.pocketAcceptsMark`, the one home of the One
+    window cap that #2678's setting widens (`PocketListTests` ▸
+    `secondMarkRefused`). A reader of "the
+    pocket holds something" states whether it means any slot or
+    the windows `pocket` works, since a per-app key's slot (#2612)
+    is the one but not the other. "Focused last" among out
+    windows is `focusRecencyRank`, stamped at an honored focus
+    alone, never a pocket record of its own. Marking is the one
     placement at the float size, and a window already floating
     skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,
     `fallbackKeepsAFloatsFrame`); a take-out restores the frame
@@ -2242,7 +2251,10 @@ editing here:
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys, the pocket's `PocketSlot` keys and
   `Phase` raw values (#2446, `PocketEdgeTests` ▸
-  `storedKeysArePinned`), and the snapshot's own
+  `storedKeysArePinned`) and the snapshot's `pockets` list, whose
+  decode keeps reading a 4.0.0 file's single `pocket` slot while a
+  4.0.0 capture can reach it and drops an unreadable slot alone
+  (#2678, `PocketSnapshotCrossingTests`), and the snapshot's own
   `arrangement`, which every snapshot carries (#1646,
   profiles.md), each window record's `app` and `title` — the
   stable key a cross-session match reads (#1385) — and its

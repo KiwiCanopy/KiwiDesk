@@ -1,12 +1,12 @@
 import CoreGraphics
 import Foundation
 
-/// The pocket (#2446): one window kept one key away. Pocketed, it
-/// is tracked but filed in no Space, parked off-screen and drawn
-/// on no bar; out, it is a float that renders on every Space like
-/// a global sticky. A window just marked (#2675) is out with no
-/// frames and no `cameFrom`. The one record of which window that
-/// is — every reader asks `StateCoordinator.pocketPhase(of:)`.
+/// One window of the pocket (#2446, #2678): kept one key away.
+/// Pocketed, it is tracked but filed in no Space, parked off-screen
+/// and drawn on no bar; out, it is a float that renders on every
+/// Space like a global sticky. A window just marked (#2675) is out
+/// with no frames and no `cameFrom`. `StateCoordinator.pocket`
+/// holds the slots; every reader asks `pocketPhase(of:)`.
 public struct PocketSlot: Sendable, Equatable, Codable {
     public enum Phase: String, Sendable, Equatable, Codable {
         case pocketed

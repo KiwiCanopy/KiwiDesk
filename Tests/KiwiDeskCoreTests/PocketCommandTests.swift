@@ -100,7 +100,7 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         core.state.apply(.appTerminated(pid: 900_001))
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
     }
 
     @Test("a hide keeps the pocket, and the unhide files nothing")
@@ -108,7 +108,7 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         core.state.apply(.windowHidden(one))
-        #expect(core.state.pocket?.window == one)
+        #expect(core.state.pocket.first?.window == one)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: one, pid: 900_001, appName: "App1")
@@ -158,7 +158,7 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         core.state.apply(.windowRekeyed(one, WindowID(9)))
-        #expect(core.state.pocket?.window == WindowID(9))
+        #expect(core.state.pocket.first?.window == WindowID(9))
     }
 
     @Test("a closed pocket window leaves no memory of its flags")
@@ -167,7 +167,7 @@ struct PocketCommandTests {
         core.execute("pocket")
         core.execute("pocket")
         core.state.apply(.windowDestroyed(one, wasMinimized: false))
-        core.state.pocket = nil
+        core.state.pocket = []
         core.state.apply(
             .windowCreated(
                 ManagedWindow(
@@ -211,7 +211,7 @@ struct PocketCommandTests {
         let core = makeCore()
         core.execute("pocket")
         core.releasePocketForQuit()
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         #expect(isFiled(core, one))
         #expect(core.state.windows[one]?.isFloating == true)
         #expect(core.state.userFloated.contains(one))
@@ -223,7 +223,7 @@ struct PocketCommandTests {
         core.execute("pocket")
         core.execute("pocket")
         core.releasePocketForQuit()
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         #expect(core.state.windows[one]?.stickyScope == StickyScope.none)
         #expect(core.state.windows[one]?.isFloating == true)
     }

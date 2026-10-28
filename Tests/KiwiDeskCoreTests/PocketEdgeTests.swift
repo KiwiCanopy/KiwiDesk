@@ -42,7 +42,7 @@ struct PocketEdgeTests {
         core.execute("pocket")
         core.execute("pocket")
         core.state.apply(.windowDestroyed(one, wasMinimized: true))
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
     }
 
     @Test("out, with its app hidden, the key refuses and keeps it")
@@ -52,7 +52,7 @@ struct PocketEdgeTests {
         core.execute("pocket")
         core.state.apply(.windowHidden(one))
         #expect(!core.execute("pocket").isSuccess)
-        #expect(core.state.pocket?.window == one)
+        #expect(core.state.pocket.first?.window == one)
     }
 
     @Test("an exited app's slot empties, and that press ends there")
@@ -66,9 +66,9 @@ struct PocketEdgeTests {
         // the purge must not go on to pocket the focus.
         core.frontmostPIDProvider = { 1 }
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         #expect(!core.execute("pocket").isSuccess)
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
     }
 
     @Test("the in-place slot's stored keys are pinned")
@@ -121,7 +121,7 @@ struct PocketEdgeTests {
         let core = makeCore()
         core.frontmostPIDProvider = { 1 }
         #expect(!core.execute("pocket").isSuccess)
-        #expect(core.state.pocket == nil)
+        #expect(core.state.pocket.isEmpty)
         core.frontmostPIDProvider = nil
         core.execute("pocket")
         core.frontmostPIDProvider = { 1 }
@@ -134,9 +134,9 @@ struct PocketEdgeTests {
         let core = makeCore()
         let late = WindowID(7)
         var snapshot = core.state.snapshot()
-        snapshot.pocket = PocketSlot(window: late, phase: .pocketed)
+        snapshot.pocket = [PocketSlot(window: late, phase: .pocketed)]
         core.state.adopt(snapshot)
-        #expect(core.state.pocket?.window == late)
+        #expect(core.state.pocket.first?.window == late)
         core.state.apply(
             .windowCreated(
                 ManagedWindow(id: late, pid: 900_007, appName: "Late")

@@ -75,7 +75,7 @@ struct BriefPocketTests {
         let core = makeCore()
         let applies = countApplies(core)
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketedWindow == one)
+        #expect(core.state.pocketedWindows == [one])
         #expect(core.briefPocket.isPlaying)
         #expect(applies() == 0)
     }
@@ -119,7 +119,7 @@ struct BriefPocketTests {
         core.briefPocket.end()
         let applies = countApplies(core)
         #expect(core.execute("pocket").isSuccess)
-        #expect(core.state.pocketedWindow == nil)
+        #expect(core.state.pocketedWindows.isEmpty)
         #expect(core.briefPocket.isPlaying)
         #expect(core.tiler.applier.held.isHeld(one))
         // The restore's one write is staged, not sent ahead of it.
@@ -200,7 +200,7 @@ struct BriefPocketTests {
         #expect(raised(core, one))
         #expect(next.map { !raised(core, $0) } == true)
         // State focus moved at the put-in, so it came out over it.
-        #expect(next != nil && core.state.pocket?.cameFrom == next)
+        #expect(next != nil && core.state.pocket.first?.cameFrom == next)
     }
 
     /// The window it came out over is not the Space's successor,
@@ -219,7 +219,7 @@ struct BriefPocketTests {
         #expect(core.execute("pocket").isSuccess)
         await core.deferred.task(for: .pocketFocus)?.value
         core.briefPocket.end()
-        #expect(core.state.pocket?.cameFrom == two)
+        #expect(core.state.pocket.first?.cameFrom == two)
         #expect(core.activeSpace?.windows.last == one)
         core.selfRaiseStamps = [:]
         #expect(core.execute("pocket").isSuccess)

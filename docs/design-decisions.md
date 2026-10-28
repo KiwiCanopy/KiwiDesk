@@ -6024,6 +6024,21 @@ in both states, so each such walk rules on it, and forgetting it
 there draws a mark on a parked window or parks it on the wrong
 screen.
 
+**The slot is an ordered list (#2678), amending "one window".**
+The pocket holds one slot per marked window, in the order each
+last went in, and a slot keeps its place while its window is out;
+of the keys, only `toggle_pocket_window` removes one (a close, a
+minimize or the app's exit ends it too). `pocket` puts away before
+it takes out: while any marked window is out it puts back the
+focused one, else the one focused last, a take-out counting as a
+focus; only with every window in does it take one out, the one put
+in last. The deciding fact is whether a pocket window is on
+screen, which the user sees rather than remembers, and with one
+window the key is #2675's toggle. "Focused last" is the window
+switcher's own focus recency (#1840), not a second record of it.
+One window stays the default, so a second mark is refused until
+the Several windows setting opens the list.
+
 **Choosing the window is its own key (#2675), amending #2446,
 which chose the window with the one key that pockets it. Becoming
 the pocket window is the one resize.** With one key, the first

@@ -88,7 +88,7 @@ extension KiwiCore {
                     title: window.title,
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
-                    status: state.pocketedWindow == window.id
+                    status: state.isPocketed(window.id)
                         ? .pocketed
                         : window.isFullscreen ? .fullscreen : .shown,
                     movesHere: jumpMovesHere(window, from: space),

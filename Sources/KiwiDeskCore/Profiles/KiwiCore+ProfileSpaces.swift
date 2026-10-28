@@ -235,7 +235,7 @@ extension KiwiCore {
                 }
                 let from = state.workspaces.space(of: window)
                 // The pocketed window stays in the slot (#2446).
-                guard from != space, state.pocketedWindow != window
+                guard from != space, !state.isPocketed(window)
                 else { continue }
                 state.workspaces.add(window, to: space)
                 // A float crossing displays must re-anchor

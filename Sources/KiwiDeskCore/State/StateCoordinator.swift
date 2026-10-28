@@ -155,8 +155,9 @@ public struct StateCoordinator: Sendable {
     /// Sticky intent remembered across window close/reopen (#414, #445).
     var rememberedSticky: [WindowIdentity: StickyScope] = [:]
 
-    /// The pocket (#2446): `StateCoordinator+Pocket`.
-    public internal(set) var pocket: PocketSlot?
+    /// The pocket (#2446, #2678), in put-in order:
+    /// `StateCoordinator+Pocket`.
+    public internal(set) var pocket: [PocketSlot] = []
 
     /// The id a first launch seeds before any config declares one.
     public static let placeholderID = SpaceID(1)
@@ -245,8 +246,8 @@ public struct StateCoordinator: Sendable {
                 rememberFloatOverride(of: window)
                 rememberStickyIntent(of: window)
             }
-            if let id = pocket?.window, windows[id]?.pid == pid {
-                emptyPocket()
+            for slot in pocket where windows[slot.window]?.pid == pid {
+                emptyPocket(slot.window)
             }
             for id in windows.removeAll(pid: pid) {
                 workspaces.remove(id)

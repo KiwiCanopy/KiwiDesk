@@ -14,7 +14,9 @@ extension KiwiCore {
             unmarkPocketWindow(id)
             return .ok()
         }
-        if state.pocket != nil { return refuseSecondPocketWindow(id) }
+        guard state.pocketAcceptsMark else {
+            return refuseSecondPocketWindow(id)
+        }
         guard !window.isFullscreen, !window.isTransientOverlay
         else { return .fail("this window cannot be pocketed") }
         markPocketWindow(id)
@@ -36,11 +38,11 @@ extension KiwiCore {
         if !wasFloating { placeFloating(id) }
     }
 
-    /// Empties the slot and tiles `id` on the active Space, as a
+    /// Empties `id`'s slot and tiles it on the active Space, as a
     /// Tile does (owner, #2680); a window detection floats stays a
     /// float. Only an out window holds the focus the verb reads.
     private func unmarkPocketWindow(_ id: WindowID) {
-        state.releasePocketWindow()
+        state.releasePocketWindow(id)
         // Out, it drew on every Space; it stays on the one shown.
         let home = state.workspaces.space(of: id)
         if let active = state.workspaces.activeSpace, home != active {
