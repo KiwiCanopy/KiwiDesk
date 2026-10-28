@@ -13,15 +13,16 @@ extension SettingsModel {
     /// The switch's pick, the one write of the stored root. Simple
     /// edits the loaded profile only, so leaving a stored target
     /// for it goes through the profile switch's discard question.
+    /// Picking the root already on screen still stores it: after a
+    /// landing the screen shows Advanced while Simple is stored.
     func pickRoot(_ root: SettingsRoot) {
-        guard root != settingsRoot else { return }
         let apply = { [self] in
             settingsRoot = root
             SettingsRootPreference.write(root, to: preferences)
         }
-        guard root == .simple, editingStoredProfile else {
-            return apply()
-        }
+        guard root == .simple, settingsRoot != .simple,
+            editingStoredProfile
+        else { return apply() }
         discardingEdits(
             message: L(
                 "discard.switch_profile.message",
@@ -35,6 +36,15 @@ extension SettingsModel {
         ) { [self] in
             selectEditTarget(nil)
             apply()
+        }
+    }
+
+    /// A fresh open on Simple edits the loaded profile: a stored
+    /// target an Advanced page picked does not outlive the close,
+    /// which already reverted its draft.
+    func settleSimpleTarget() {
+        if settingsRoot == .simple, editingStoredProfile {
+            selectEditTarget(nil)
         }
     }
 

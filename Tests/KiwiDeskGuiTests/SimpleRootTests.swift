@@ -80,6 +80,51 @@ struct SimpleRootTests {
         #expect(SettingsRootPreference.read(from: defaults) == .simple)
     }
 
+    /// A model on Simple with a stored profile "p" to target.
+    private func withStoredProfile() throws -> SettingsModel {
+        let core = makeTestCore()
+        try core.guiConfigStore.save(GuiConfig())
+        let defaults = makeScratchDefaults().defaults
+        SettingsRootPreference.write(.simple, to: defaults)
+        let model = makeTestModel(core: core, defaults: defaults)
+        _ = try core.profiles.write(
+            Profile(
+                name: "p",
+                monitorSets: [MonitorSet(monitors: ["Away:100x100"])],
+                spaces: [SpaceID("1")],
+                spaceModes: [SpaceID("1"): .bsp],
+                settings: TilingSettings()
+            )
+        )
+        model.reload()
+        return model
+    }
+
+    @Test("Simple edits the loaded profile, whichever way it opens")
+    func simpleLeavesAStoredTarget() throws {
+        let model = try withStoredProfile()
+        model.destination = .spaces
+        model.selectEditTarget("p")
+        #expect(model.editingStoredProfile)
+        model.pickRoot(.simple)
+        #expect(!model.editingStoredProfile)
+        #expect(model.showsSimple)
+        // A page's target does not survive a fresh open on Simple.
+        model.destination = .spaces
+        model.selectEditTarget("p")
+        model.prepareToShow(windowShown: false)
+        #expect(model.showsSimple)
+        #expect(!model.editingStoredProfile)
+    }
+
+    @Test("picking Advanced on screen still stores it")
+    func pickOnScreenStores() {
+        let (defaults, model) = onSimple()
+        model.destination = .spaces
+        model.pickRoot(.advanced)
+        #expect(SettingsRootPreference.read(from: defaults) == .advanced)
+    }
+
     @Test("picking Simple closes an open page")
     func simpleClosesPage() {
         let model = makeTestModel()
