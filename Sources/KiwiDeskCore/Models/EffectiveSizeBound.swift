@@ -63,6 +63,16 @@ public struct EffectiveSizeBound: Sendable, Equatable {
         /// reading (an equal answer is a compliance and is never
         /// stored).
         public var isFloor: Bool { answered > asked }
+
+        /// Whether the window holding `span` falsifies the entry:
+        /// a floor above it, a ceiling below it. The compliance
+        /// sweep and the gesture sweep both ask here (#2706).
+        public func isContradicted(by span: CGFloat) -> Bool {
+            let tolerance = EffectiveSizeBound.matchTolerance
+            return isFloor
+                ? span < answered - tolerance
+                : span > answered + tolerance
+        }
     }
 
     public var width: [Axis]
