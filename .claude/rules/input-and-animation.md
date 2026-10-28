@@ -820,11 +820,15 @@ editing here:
   the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
   `takeOutPlaysAndHolds`), and its ring waits with it through the
   state-change hold. Never bring back a slide of the real window to
-  its park. Its Reduce Motion read is pinned on in both
-  `makeTestCore` twins (`SpaceSlideSeamTests` ▸
-  `bothTwinsPinTheReads`), so no other suite plays; a suite that
-  unpins it pins the panel and frame clock itself, as
-  `BriefPocketTests` does.
+  its park. A pocket press's raise waits for the play to end,
+  through the one `handPocketFocus` (#2703): a raise mid-play
+  activates an app on the thread the plate's frames tick on, and
+  KiwiDesk's own Settings window redraws whole on it
+  (`BriefPocketTests` ▸ `putInRaiseWaits`, `takeOutRaiseWaits`).
+  Its Reduce Motion read is pinned on in both `makeTestCore` twins
+  (`SpaceSlideSeamTests` ▸ `bothTwinsPinTheReads`), so no other
+  suite plays; a suite that unpins it pins the panel and frame
+  clock itself, as `BriefPocketTests` does.
 - Env levers for device QA of this subsystem are **listed and
   explained in [tests.md](tests.md)**, which owns that table.
   Named here only because that file is scoped to `Tests/**` and

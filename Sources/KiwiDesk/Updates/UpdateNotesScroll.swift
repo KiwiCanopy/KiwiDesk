@@ -16,9 +16,7 @@ struct UpdateNotesScroll: View {
     /// height is the tallest tab's and a switch does not jump it.
     let measuring: Bool
 
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
     @State private var selection: UpdateNotesTab
-    @State private var moreBelow = false
 
     init(
         offer: UpdateOffer,
@@ -58,8 +56,7 @@ struct UpdateNotesScroll: View {
                 ScrollView { padded }
                     // A switch opens the new tab at its top.
                     .id(selection)
-                    .modifier(UpdateNotesScrollCues(moreBelow: $moreBelow))
-                    .mask { fade }
+                    .moreBelowFade()
             }
         }
     }
@@ -139,48 +136,6 @@ struct UpdateNotesScroll: View {
                 title: L("update.window.all_releases", "All releases"),
                 url: SupportLinks.changelog
             )
-        }
-    }
-
-    /// Soft edge while more is below (#1542 ruling): the notes
-    /// themselves fade, since a painted band would show on glass
-    /// (#1849).
-    private var fade: some View {
-        // A mask reads alpha alone; `.primary` is any opaque ink.
-        VStack(spacing: 0) {
-            Rectangle().fill(.primary)
-            LinearGradient(
-                colors: [.primary, .primary.opacity(moreBelow ? 0 : 1)],
-                startPoint: .top,
-                endPoint: .bottom
-            )
-            .frame(height: 34)
-        }
-        .animation(
-            reduceMotion ? nil : .easeOut(duration: 0.2),
-            value: moreBelow
-        )
-    }
-}
-
-/// The scroller flashes on open and the fade tracks what is below
-/// — both macOS 15 APIs; macOS 14 keeps the plain scroller.
-private struct UpdateNotesScrollCues: ViewModifier {
-    @Binding var moreBelow: Bool
-
-    func body(content: Content) -> some View {
-        if #available(macOS 15, *) {
-            content
-                .scrollIndicatorsFlash(onAppear: true)
-                .onScrollGeometryChange(for: Bool.self) { geometry in
-                    geometry.contentSize.height
-                        - geometry.contentOffset.y
-                        - geometry.containerSize.height > 4
-                } action: { _, below in
-                    moreBelow = below
-                }
-        } else {
-            content
         }
     }
 }

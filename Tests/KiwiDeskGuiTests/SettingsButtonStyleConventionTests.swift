@@ -17,40 +17,10 @@ import Testing
 /// spellings.
 @Suite("Settings button style convention")
 struct SettingsButtonStyleConventionTests {
-    /// The trees this guard covers — `ChromeScanRoots`, which
-    /// is the ONE list of "which GUI trees draw chrome". It was
-    /// hand-copied into five suites when the Onboarding tree
-    /// joined (#828), which is five registers a sixth tree has
-    /// to be added to and four places for it to be forgotten.
-    private var scanRoots: [URL] {
-        ChromeScanRoots.urls(from: #filePath)
-    }
-
+    /// The trees this guard covers — `ChromeScanRoots`, whose
+    /// own suite proves every root is read.
     private func scannedSources() throws -> [URL] {
         try ChromeScanRoots.sources(from: #filePath)
-    }
-
-    @Test("every scan root is actually read")
-    func everyScanRootIsRead() throws {
-        for root in scanRoots {
-            #expect(
-                !(try SourceScan.swiftSources(under: root))
-                    .isEmpty,
-                Comment(
-                    rawValue: "\(root.lastPathComponent) yielded "
-                        + "no Swift files — this guard no longer "
-                        + "covers that tree"
-                )
-            )
-        }
-        // Derived from what the scan READ, never from the
-        // literal list: deleting a root leaves the loop above
-        // green, having faithfully checked whatever remains.
-        #expect(
-            try scannedSources().contains {
-                $0.path.contains("/Onboarding/")
-            }
-        )
     }
 
     @Test("every action button names its style")

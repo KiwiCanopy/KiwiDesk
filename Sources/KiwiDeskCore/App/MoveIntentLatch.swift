@@ -20,12 +20,18 @@ final class MoveIntentLatch {
 
     private var stamps: [WindowID: Date] = [:]
 
-    /// Records no-follow move timestamp for window, pruning expired entries.
-    func stamp(_ id: WindowID, at now: Date = Date()) {
+    /// Records no-follow move timestamp for window, pruning expired
+    /// entries. `holdingFor` seconds past `window` keep it latched
+    /// for a move whose echo trails a longer motion (#2703).
+    func stamp(
+        _ id: WindowID,
+        at now: Date = Date(),
+        holdingFor extra: TimeInterval = 0
+    ) {
         stamps = stamps.filter {
             now.timeIntervalSince($0.value) < Self.window
         }
-        stamps[id] = now
+        stamps[id] = now.addingTimeInterval(max(0, extra))
     }
 
     /// Tests if window's focus report is currently latched against follow.

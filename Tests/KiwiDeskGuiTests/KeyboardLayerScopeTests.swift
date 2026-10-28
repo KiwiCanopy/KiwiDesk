@@ -242,7 +242,7 @@ struct KeyboardLayerWiringTests {
     /// The jump bar's readout names the same layer under the same
     /// condition, so it asks the same resolver. It moved off the
     /// header with #1520; nothing else scans it —
-    /// `ShortcutsGateTests` is keyed on `LayersCard` and the
+    /// `ShortcutsOfferDisclosureTests` is keyed on `LayersCard` and the
     /// clause above on the panel (re-review 2026-09-04).
     @Test("the jump bar asks the gate whether to name the layer")
     func readoutAsksTheResolver() throws {

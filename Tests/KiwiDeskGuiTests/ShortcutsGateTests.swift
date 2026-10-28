@@ -20,9 +20,9 @@ import Testing
 /// So it holds the halves that were missing: that an `.immediate`
 /// row carries the gate its tier's meaning depends on, that the
 /// resolver answers on each side of the boundary, that every
-/// declared gate is accounted for, and that `LayersCard` actually
-/// CONSULTS the resolver rather than re-deriving it — the
-/// dead-resolver trap the General lane shipped.
+/// declared gate is accounted for. That `LayersCard` CONSULTS the
+/// resolver is `ShortcutsOfferDisclosureTests` ▸
+/// `cardsOpenOnArrival`'s.
 @Suite("Shortcuts gates")
 struct ShortcutsGateTests {
     private func config(layers: [String]) -> GuiConfig {
@@ -282,37 +282,6 @@ struct ShortcutsGateTests {
         #expect(
             source.contains(
                 "ifluaOwned{Text(GeneralGateHelp.sentence(for:.luaOwned))"
-            )
-        )
-    }
-
-    /// `LayersCard` must ASK the resolver, not re-derive the
-    /// predicate inline — the dead-resolver trap General shipped
-    /// (built in tests, re-derived in the view; both reviewers
-    /// caught it, guard-prover did not, because a behaviour test
-    /// reds on the resolver alone). Whitespace-free so the needle
-    /// survives the formatter wrapping the call across lines.
-    @Test("LayersCard consults the resolver")
-    func layersCardConsultsTheResolver() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Sections/"
-                    + "LayersCard.swift"
-            )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        )
-        .split(whereSeparator: \.isWhitespace)
-        .joined()
-        #expect(
-            source.contains(
-                "ShortcutsGates(config:model.config).layersExist"
-            ),
-            Comment(
-                rawValue:
-                    "LayersCard no longer asks ShortcutsGates — the "
-                    + "layers gate went hand-rolled, the "
-                    + "dead-resolver trap"
             )
         )
     }

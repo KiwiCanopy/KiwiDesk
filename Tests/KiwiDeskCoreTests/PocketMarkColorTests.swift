@@ -166,13 +166,31 @@ struct PocketMarkColorTests {
         let pixel = try pocketPixel(image)
         #expect(pixel.alphaComponent == 1)
         #expect(try hex(pixel) == amber)
-        // The outline takes the colour's contrasting glyph ink, as
-        // the plate's disc does: black on amber. (4, 15) is on the
+        // The outline takes the colour itself, never its
+        // contrasting glyph ink (#2704). (4, 15) is on the
         // pocket's left edge.
         let edge = try pocketPixel(image, at: (4, 15))
         #expect(edge.alphaComponent == 1)
-        let ink = NSColor(kiwiHex: amber).contrastingGlyph
-        #expect(try hex(edge) == hex(ink))
+        #expect(try hex(edge) == amber)
+    }
+
+    /// The slices lose their outline with a colour set (#2704):
+    /// (4, 7) sits in the left slice's stroke, outside its green
+    /// and above the pocket.
+    @Test("a coloured mark draws its kiwis bare")
+    func colouredKiwisAreBare() throws {
+        let rim = (x: 4, y: 7)
+        let coloured = try pocketPixel(
+            StickyMarkOverlay.pocketImage(hex: amber),
+            at: rim
+        )
+        #expect(coloured.alphaComponent < 0.5)
+        // Control: Automatic keeps the outline there.
+        let automatic = try pocketPixel(
+            StickyMarkOverlay.pocketImage(hex: ""),
+            at: rim
+        )
+        #expect(automatic.alphaComponent > 0.5)
     }
 
     @Test("automatic fills the pocket opaque in the mark ink")
@@ -242,6 +260,32 @@ struct PocketMarkColorTests {
             try hex(fill)
                 == hex(NSColor(kiwiHex: style.groupBadgeColor))
         )
+    }
+
+    /// Each authored palette paints the pocket (#2704); its colour
+    /// meets the unoutlined slices, so it clears the colour-vision
+    /// floor against the kiwi green; the derived default keeps
+    /// Automatic.
+    @Test("every bundled palette's pocket separates from the kiwis")
+    func bundledPocketsSeparateFromTheKiwis() throws {
+        let kiwi = try hex(PocketMark.kiwi)
+        let palettes = PaletteCatalog.authored()
+        #expect(!palettes.isEmpty)
+        for palette in palettes {
+            let pocket = try #require(
+                palette.colors["pocket.color"],
+                Comment(rawValue: "\(palette.name) paints no pocket")
+            )
+            let separation = try #require(
+                ColorVision.separation(kiwi, pocket)
+            )
+            #expect(
+                separation >= ColorVision.separationFloor,
+                Comment(
+                    rawValue: "\(palette.name) \(pocket): \(separation)"
+                )
+            )
+        }
     }
 
     @Test("kiwi green separates from the lightest and darkest ink")

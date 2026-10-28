@@ -65,7 +65,7 @@ struct SymbolNameAnnouncementTests {
     /// The App Rules trash menu names itself through its label.
     @Test func trashMenuNamesItself() throws {
         let url = Self.settings
-            .appendingPathComponent("Sections/AppRuleIdentity.swift")
+            .appendingPathComponent("Components/Common/AppRuleIdentity.swift")
         let source = try SourceScan.strippedSource(at: url)
         let start = try #require(source.range(of: "func menu("))
         let tail = source[start.upperBound...]

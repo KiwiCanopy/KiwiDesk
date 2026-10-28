@@ -34,8 +34,9 @@ enum ResizeRefusal: Equatable {
     /// A grow stopped at the resized window's own learned
     /// app-enforced maximum (#1055) — the app refuses to get
     /// bigger, so growing the slot further only overshoots — or
-    /// against the region a float may occupy (#1091), which the
-    /// wording tells apart and no consumer acts on.
+    /// against the region a float may occupy (#1091) or a Grid
+    /// cell already filling the axis (#2707), which the wording
+    /// tells apart and no consumer acts on.
     case ownMaximum(WindowID, axis: String, atBoundary: Bool)
     /// The zone the focused window sits in has no parameter on
     /// the asked axis at all (#1255) — a horizontal master zone
@@ -57,6 +58,9 @@ enum ResizeRefusal: Equatable {
     /// divides nothing shipped twice. Here a test reads the
     /// verdict.
     case nothingToDivide(WindowID, otherAxisDivides: Bool)
+    /// A Grid shrink where the cell already fills `axis` (#2707):
+    /// no other row or column takes the space it would free.
+    case gridNoOtherTrack(WindowID, axis: String)
     /// The space's layout has no resizing at all (#1255) —
     /// monocle and grid, the floating layout having left the
     /// set with #1184. The most reachable refusal there is, and
@@ -78,7 +82,8 @@ extension ResizeRefusal {
         switch self {
         case .ownMinimum(let id, _, _), .ownMaximum(let id, _, _),
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
-            .layoutHasNoResize(let id), .windowIsFullscreen(let id):
+            .gridNoOtherTrack(let id, _), .layoutHasNoResize(let id),
+            .windowIsFullscreen(let id):
             id
         case .neighborMinimum(_, let focused, _, _):
             focused
@@ -92,7 +97,7 @@ extension ResizeRefusal {
     var axis: String? {
         switch self {
         case .ownMinimum(_, let axis, _), .ownMaximum(_, let axis, _),
-            .noAxisHere(_, let axis):
+            .noAxisHere(_, let axis), .gridNoOtherTrack(_, let axis):
             axis
         case .neighborMinimum(_, _, let axis, _):
             axis
@@ -119,8 +124,8 @@ extension ResizeRefusal {
             axis == "y" ? .down : .right
         case .neighborMinimum(_, _, let axis, _):
             axis == "y" ? .down : .right
-        case .noAxisHere, .nothingToDivide, .layoutHasNoResize,
-            .windowIsFullscreen:
+        case .noAxisHere, .nothingToDivide, .gridNoOtherTrack,
+            .layoutHasNoResize, .windowIsFullscreen:
             nil
         }
     }
