@@ -761,15 +761,16 @@ editing here:
     `StateCoordinator.markPocketWindow` alone, out and never
     pocketed — no frames, no `cameFrom` — and `pocketWindow`
     refuses any window that is not the out slot's; a new entry
-    path (a pick, #2678's list) marks first, and asks
-    `StateCoordinator.pocketAcceptsMark` before it does, the one
-    home of the One window cap that #2678's setting widens
-    (`PocketListTests` ▸ `secondMarkRefused`). A reader of "the
+    path (a pick, #2678's list) marks first, and a path that adds
+    a window beside a marked one asks
+    `StateCoordinator.pocketAcceptsMark`, the one home of the One
+    window cap that #2678's setting widens (`PocketListTests` ▸
+    `secondMarkRefused`). A reader of "the
     pocket holds something" states whether it means any slot or
     the windows `pocket` works, since a per-app key's slot (#2612)
     is the one but not the other. "Focused last" among out
-    windows is `focusRecencyRank`, never a pocket record of its
-    own. Marking is the one
+    windows is `focusRecencyRank`, stamped at an honored focus
+    alone, never a pocket record of its own. Marking is the one
     placement at the float size, and a window already floating
     skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,
     `fallbackKeepsAFloatsFrame`); a take-out restores the frame

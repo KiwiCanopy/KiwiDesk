@@ -38,10 +38,13 @@ struct PocketListTests {
     }
 
     /// `one` and `two` marked, out, `two` focused last; the focus on
-    /// `three`, a plain tiled window.
+    /// `three`, a plain tiled window. A mark is of the focused
+    /// window, so each is focused first.
     private func markTwo(_ core: KiwiCore) {
-        core.state.markPocketWindow(one)
-        core.state.markPocketWindow(two)
+        for id in [one, two] {
+            core.handle(.windowFocused(id))
+            core.state.markPocketWindow(id)
+        }
         core.state.apply(.windowFocused(three))
     }
 
@@ -89,26 +92,13 @@ struct PocketListTests {
         #expect(core.state.pocketPhase(of: two) == .pocketed)
     }
 
-    @Test("a take-out counts as a focus")
-    func takeOutRanks() {
-        let core = makeCore()
-        // `two` marked first, so `one`'s mark is the later focus.
-        core.state.markPocketWindow(two)
-        core.state.markPocketWindow(one)
-        core.state.pocketWindow(two)
-        #expect(core.takePocketOut(two))
-        core.state.apply(.windowFocused(three))
-        core.execute("pocket")
-        #expect(core.state.pocketPhase(of: two) == .pocketed)
-        #expect(core.state.pocketPhase(of: one) == .out)
-    }
-
     @Test("a window put back becomes the one put in last")
     func putBackReorders() {
         let core = makeCore()
         markTwo(core)
         core.execute("pocket")
         core.execute("pocket")
+        #expect(core.state.pocketedWindows == [two, one])
         // Out by another door: `two`, put in first.
         #expect(core.takePocketOut(two))
         core.state.apply(.windowFocused(three))
@@ -117,6 +107,19 @@ struct PocketListTests {
         core.execute("pocket")
         #expect(core.state.pocketPhase(of: two) == .out)
         #expect(core.state.pocketPhase(of: one) == .pocketed)
+    }
+
+    @Test("a press that clears a gone app's slot still acts")
+    func goneSlotPressActs() {
+        let core = makeCore()
+        markTwo(core)
+        core.execute("pocket")
+        core.execute("pocket")
+        core.state.apply(.windowHidden(one))
+        core.eventLoop.processIdentity.runs = { _ in false }
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.state.pocket.map(\.window) == [two])
+        #expect(core.state.pocketPhase(of: two) == .out)
     }
 
     @Test("a second mark is still refused in One window")

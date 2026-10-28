@@ -216,14 +216,11 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         self.arrangement = arrangement
     }
 
-    private enum CodingKeys: String, CodingKey {
+    enum CodingKeys: String, CodingKey {
         case windows, spaces, activeSpace, capturedAt, arrangement
         case arrangementRecords, loginSession, frozenForLogout
         case pocket = "pockets"
     }
-
-    /// 4.0.0's one slot (#2446), read where no list was written.
-    private enum SingleSlotKey: String, CodingKey { case pocket }
 
     public init(from decoder: Decoder) throws {
         let c = try decoder.container(keyedBy: CodingKeys.self)
@@ -252,22 +249,7 @@ public struct StateSnapshot: Codable, Sendable, Equatable {
         frozenForLogout =
             (try? c.decodeIfPresent(Bool.self, forKey: .frozenForLogout))
             ?? false
-        // Slot by slot: an unreadable one costs only itself.
-        let single = try? decoder.container(keyedBy: SingleSlotKey.self)
-            .decodeIfPresent(PocketSlot.self, forKey: .pocket)
-        pocket =
-            (try? c.decodeIfPresent([ReadableSlot].self, forKey: .pocket))
-            .map { $0.compactMap(\.slot) }
-            ?? single.map { [$0] } ?? []
-    }
-
-    /// One pocket slot, nil where it cannot be read.
-    private struct ReadableSlot: Decodable {
-        let slot: PocketSlot?
-
-        init(from decoder: Decoder) throws {
-            slot = try? PocketSlot(from: decoder)
-        }
+        pocket = Self.decodePocket(c, from: decoder)
     }
 }
 
