@@ -1675,10 +1675,10 @@ sites clipped alike.
 
 Every badge a bar item carries — the group count, the Space
 Bar's `+n` and its sticky, floating and pocket badges — wears one
-look: an opaque disc with a hairline rim whose colour follows the
-disc's brightness, the dim ladder reaching its mark alone. A disc
-faded whole read as a grey smudge on a faded plate, and a white
-rim vanished on a light disc (#2722, owner, device 2026-10-28;
+look: an opaque disc with a rim whose colour follows the shelf's
+Fill, the dim ladder reaching its mark alone. A disc faded whole
+read as a grey smudge on a faded plate, and a rim picked by the
+disc vanished into the glass (#2722, owner, device 2026-10-28;
 `docs/design-decisions.md` ▸ A bar badge keeps its disc opaque).
 
 - **Paint a badge's disc through `BarBadgeFace.disc` or `paint`,

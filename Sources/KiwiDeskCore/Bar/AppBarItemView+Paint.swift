@@ -18,7 +18,8 @@ extension AppBarItemView {
             badge,
             fill: style.groupBadgeColor,
             ink: style.groupBadgeTextColor,
-            inkAlpha: alpha
+            inkAlpha: alpha,
+            shelfFill: style.shelf.fillColor
         )
         halfMoon.show(visibility, ink: NSColor(kiwiHex: textColorHex))
         let glassHover = BarHoverFill.paint(

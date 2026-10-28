@@ -47,7 +47,11 @@ extension SpaceBarItemView {
             hex: pocketHex == nil ? markHex : "",
             fallback: NSColor(kiwiHex: style.groupBadgeColor)
         )
-        BarBadgeFace.disc(badge, fill: fill)
+        BarBadgeFace.disc(
+            badge,
+            fill: fill,
+            shelfFill: style.shelf.fillColor
+        )
         badge.symbol.contentTintColor = fill.contrastingGlyph
         badge.ink = NSColor.mark(
             hex: pocketHex ?? "",
