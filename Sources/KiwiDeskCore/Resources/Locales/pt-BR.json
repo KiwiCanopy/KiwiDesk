@@ -1659,6 +1659,8 @@
   "pocket.mark.ax": "Janela Pocket",
   "pocket.position": "Posição ao longo da borda",
   "pocket.position.help": "Onde o Pocket aparece ao longo da borda, da ponta esquerda ou superior à ponta direita ou inferior.",
+  "pocket.position.spoken.horizontal": "%1$@ a partir da esquerda",
+  "pocket.position.spoken.vertical": "%1$@ a partir do topo",
   "pocket.refusal.float": "Janelas Pocket sempre flutuam",
   "pocket.refusal.marked_elsewhere": "O Pocket já está ocupado",
   "pocket.refusal.sticky": "Janelas Pocket são sempre Sticky",

@@ -19,6 +19,14 @@ struct SettingsSlider: View {
     /// ends, a ramp on the track, and the origin notch showing
     /// above and below the knob while the value rests on it.
     var lightness = false
+    /// SF Symbols drawn at the track's two ends, naming where the
+    /// scale runs (a position along an edge); decorative, the
+    /// spoken value says which way. `lightness` draws its own.
+    var ends: (leading: String, trailing: String)? = nil
+
+    private var endSymbols: (leading: String, trailing: String)? {
+        lightness ? ("moon.fill", "sun.max.fill") : ends
+    }
 
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion)
@@ -42,11 +50,11 @@ struct SettingsSlider: View {
 
     var body: some View {
         HStack(spacing: Self.endSpacing) {
-            if lightness { endGlyph("moon.fill") }
+            if let endSymbols { endGlyph(endSymbols.leading) }
             GeometryReader { geo in
                 track(width: geo.size.width)
             }
-            if lightness { endGlyph("sun.max.fill") }
+            if let endSymbols { endGlyph(endSymbols.trailing) }
         }
         .frame(height: Self.height)
         .opacity(isEnabled ? 1 : 0.4)

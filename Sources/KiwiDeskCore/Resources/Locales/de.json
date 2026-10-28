@@ -1659,6 +1659,8 @@
   "pocket.mark.ax": "Pocket-Fenster",
   "pocket.position": "Position entlang der Kante",
   "pocket.position.help": "Wo die Pocket entlang ihrer Kante erscheint, vom linken oder oberen bis zum rechten oder unteren Ende.",
+  "pocket.position.spoken.horizontal": "%1$@ von links",
+  "pocket.position.spoken.vertical": "%1$@ von oben",
   "pocket.refusal.float": "Pocket-Fenster schweben immer",
   "pocket.refusal.marked_elsewhere": "Die Pocket ist schon belegt",
   "pocket.refusal.sticky": "Pocket-Fenster sind immer Sticky",

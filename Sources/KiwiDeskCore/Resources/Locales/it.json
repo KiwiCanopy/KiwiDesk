@@ -1659,6 +1659,8 @@
   "pocket.mark.ax": "Finestra Pocket",
   "pocket.position": "Posizione lungo il bordo",
   "pocket.position.help": "Dove appare la Pocket lungo il suo bordo, dall'estremità sinistra o superiore a quella destra o inferiore.",
+  "pocket.position.spoken.horizontal": "%1$@ da sinistra",
+  "pocket.position.spoken.vertical": "%1$@ dall'alto",
   "pocket.refusal.float": "Le finestre Pocket fluttuano sempre",
   "pocket.refusal.marked_elsewhere": "La Pocket è già occupata",
   "pocket.refusal.sticky": "Le finestre Pocket sono sempre Sticky",

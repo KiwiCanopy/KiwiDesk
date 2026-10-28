@@ -1659,6 +1659,8 @@
   "pocket.mark.ax": "Pocket ウインドウ",
   "pocket.position": "端に沿った位置",
   "pocket.position.help": "端に沿って Pocket が現れる位置です。左端または上端から、右端または下端までです。",
+  "pocket.position.spoken.horizontal": "左端から %1$@",
+  "pocket.position.spoken.vertical": "上端から %1$@",
   "pocket.refusal.float": "Pocket ウインドウは常にフローティング",
   "pocket.refusal.marked_elsewhere": "Pocket はすでに使用中です",
   "pocket.refusal.sticky": "Pocket ウインドウは常に Sticky",

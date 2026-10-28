@@ -1659,6 +1659,8 @@
   "pocket.mark.ax": "Окно Pocket",
   "pocket.position": "Положение вдоль края",
   "pocket.position.help": "Где вдоль своего края появляется Pocket — от левого или верхнего конца до правого или нижнего.",
+  "pocket.position.spoken.horizontal": "%1$@ от левого конца",
+  "pocket.position.spoken.vertical": "%1$@ от верхнего конца",
   "pocket.refusal.float": "Окна Pocket всегда плавающие",
   "pocket.refusal.marked_elsewhere": "Pocket уже занят",
   "pocket.refusal.sticky": "Окна Pocket всегда в режиме Sticky",

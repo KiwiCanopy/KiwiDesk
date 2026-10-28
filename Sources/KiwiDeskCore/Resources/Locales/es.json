@@ -1659,6 +1659,8 @@
   "pocket.mark.ax": "Ventana Pocket",
   "pocket.position": "Posición a lo largo del borde",
   "pocket.position.help": "Dónde aparece el Pocket a lo largo de su borde, desde el extremo izquierdo o superior hasta el derecho o inferior.",
+  "pocket.position.spoken.horizontal": "%1$@ desde la izquierda",
+  "pocket.position.spoken.vertical": "%1$@ desde arriba",
   "pocket.refusal.float": "Las ventanas Pocket siempre flotan",
   "pocket.refusal.marked_elsewhere": "El Pocket ya está ocupado",
   "pocket.refusal.sticky": "Las ventanas Pocket siempre son sticky",
