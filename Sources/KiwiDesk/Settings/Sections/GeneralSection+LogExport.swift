@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// General ▸ Advanced: the log export (#1209) — rung zero of the
+/// General ▸ Files & Reset: the log export (#1209) — rung zero of the
 /// recovery ladder, the first thing a user in trouble should do,
 /// because it changes nothing. The action-row shape (#2439): the
 /// range menu, then the button it feeds, trailing.

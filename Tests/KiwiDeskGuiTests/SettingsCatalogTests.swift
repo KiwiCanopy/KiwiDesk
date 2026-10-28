@@ -78,7 +78,7 @@ struct SettingsCatalogTests {
         // those families have, their own labels being dynamic.
         // 71 since #1307: the Liquid Glass card, one switch
         // over both bars and the shortcuts panel.
-        // 79 since #1250: General ▸ Advanced's eight rows, the
+        // 79 since #1250: General ▸ Files & Reset's eight rows, the
         // drawer's children, so a search hit opens the drawer.
         // 80 since #1440: the Track drawer in Move windows, the
         // Track families' one search-reachable name.

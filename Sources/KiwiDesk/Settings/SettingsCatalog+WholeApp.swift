@@ -265,12 +265,12 @@ struct GeneralControls: Sendable {
     /// them opens the drawer it lands in (#1250).
     let generalAdvanced = SettingsDrawer(
         "general.advanced.title",
-        "Advanced",
+        "Files & Reset",
         children: GeneralAdvancedControls()
     )
 }
 
-/// General ▸ Advanced rows, keyed on their census label keys so
+/// General ▸ Files & Reset rows, keyed on their census label keys so
 /// the census hit resolves to the row (#1250).
 struct GeneralAdvancedControls: Sendable {
     let configFile = SettingsControl(

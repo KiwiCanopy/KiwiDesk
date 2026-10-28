@@ -64,7 +64,15 @@ struct SettingsHeaderBar: View {
         }
     }
 
-    private var titleRow: some View {
+    @ViewBuilder private var titleRow: some View {
+        if model.showsSimple {
+            simpleTitleRow
+        } else {
+            advancedTitleRow
+        }
+    }
+
+    private var advancedTitleRow: some View {
         HStack(spacing: 12) {
             if let destination {
                 backChip
@@ -91,6 +99,11 @@ struct SettingsHeaderBar: View {
             .id(destination)
             if showsProfileContext {
                 profileChip
+            }
+            // The roots carry the switch; a page's way out is Home,
+            // and the Lua editor is neither root.
+            if destination == nil, !model.editingLua {
+                SettingsRootSwitch(model: model)
             }
         }
         .padding(.leading, SettingsHeaderBar.trafficLightInset)

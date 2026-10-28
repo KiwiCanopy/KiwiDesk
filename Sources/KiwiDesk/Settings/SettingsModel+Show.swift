@@ -14,6 +14,8 @@ extension SettingsModel {
         }
         guard !windowShown else { return }
         destination = nil
+        settingsRoot = SettingsRootPreference.read(from: preferences)
+        settleSimpleTarget()
         nav.resetSurfaces()
     }
 }

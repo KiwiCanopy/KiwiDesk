@@ -3,7 +3,7 @@ import KiwiDeskCore
 import UniformTypeIdentifiers
 
 /// Export the log from Settings (#1209) — rung zero of General ▸
-/// Advanced's recovery ladder, because it changes nothing. Read-only
+/// Files & Reset's recovery ladder, because it changes nothing. Read-only
 /// over the unified log; the query is `LogExport`'s.
 extension SettingsModel {
     /// The ranges the control offers — presets only, never a
