@@ -11,7 +11,7 @@ struct ChordGlyphsSeamTests {
         "ChordGlyphs.swift": (3, "the door itself"),
         "KeyboardCensus.swift": (
             1,
-            "the lettered label the census tests read off the main actor"
+            "test-only: the census tests read it off the main actor"
         ),
     ]
 

@@ -111,7 +111,7 @@ extension KeyboardHoverReading {
         )
         .map { entry in
             Claim(
-                chord: entry.layer.drawnLabel,
+                chord: entry.layer.drawnChord,
                 action: KeybindingCatalog.localizedName(
                     of: entry.binding,
                     config: config

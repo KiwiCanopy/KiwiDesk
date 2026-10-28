@@ -84,21 +84,24 @@ enum ModifierSidesWords {
                 + "shortcut keeps a side, and it acts only on the "
                 + "shortcuts on those keys.",
             HyperKeyWords.name(.rightCommand),
-            drawn(.right) + "H",
-            drawn(.left) + "H",
+            drawn(.right) + space + "H",
+            drawn(.left) + space + "H",
             "cmd+h"
         )
     }
 
-    /// A sided ⌘ before its key as every surface draws it
-    /// (`ChordGlyphs`), `Right ⌘ `; the example's key stays the
-    /// frame's own H, whatever the keyboard layout draws for it.
+    /// A sided ⌘ as every surface draws it (`ChordGlyphs`),
+    /// `Right ⌘`.
     static func drawn(_ side: ModifierSide) -> String {
-        let modifiers = HotkeyModifiers.command.union(
-            .side(side, of: .command)
+        ChordGlyphs.modifiers(
+            HotkeyModifiers.command.union(.side(side, of: .command))
         )
-        return ChordGlyphs.modifiers(modifiers)
-            + ChordGlyphs.separator(modifiers)
+    }
+
+    /// What stands between a sided ⌘ and its key; the example's key
+    /// stays the frame's own H, whatever the keyboard layout draws.
+    private static var space: String {
+        ChordGlyphs.separator(.side(.right, of: .command))
     }
 
     /// Off, with shortcuts that keep a side: they fire either-side.
