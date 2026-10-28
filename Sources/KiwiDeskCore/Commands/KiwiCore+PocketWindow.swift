@@ -56,7 +56,7 @@ extension KiwiCore {
     }
 
     /// A second window asked to be the pocket window: refused on it.
-    private func refuseSecondPocketWindow(
+    func refuseSecondPocketWindow(
         _ id: WindowID
     ) -> CommandResponse {
         soundIfDrawn(

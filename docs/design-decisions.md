@@ -6186,8 +6186,9 @@ and a position along it, clear of a bar on that edge, in Shortcuts &
 Gestures ▸ Pocket beside its two keys, Edge as a menu since a
 Shortcuts setting row's control takes the recorder's footprint; they
 do not grey on the toggle, since the pocket plate reads them too. The bar menus
-offer no Pocket or Take out yet (owner, 2026-10-27): a pocketed
-window has no bar item, so only one of the two could show. The plate's flight follows
+offer Pocket Window and no Take out (owner, 2026-10-27; #2678): a
+pocketed window has no bar item, so only Pocket could show, and the
+plate's list is where one comes out. The plate's flight follows
 `animations.duration`, the window duration, at twice it within
 0.2–0.8 s, since a window's own trip is what it draws; the fades and
 the nod take no setting, since they shape how softly the pocket

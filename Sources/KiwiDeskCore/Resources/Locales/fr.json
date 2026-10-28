@@ -194,6 +194,7 @@
   "bar.menu.new_space": "Nouvel espace",
   "bar.menu.new_space.temporary": "temporaire",
   "bar.menu.new_window": "Nouvelle fenêtre",
+  "bar.menu.pocket_window": "Mettre la fenêtre dans la Pocket",
   "bar.menu.quit_app": "Quitter %1$@",
   "bar.menu.reset_minimum": "Réinitialiser le minimum de la Space Bar",
   "bar.menu.shelf_settings": "Réglages de KiwiShelf…",

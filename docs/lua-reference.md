@@ -5591,6 +5591,13 @@ app that quit while hidden empties the pocket at the next call. A
 refused.
 
 :::unreleased
+`pocket` also takes a window id, as the bar menus' Pocket Window
+does: that window goes in, marked first, as
+[`toggle_pocket_window`](#toggle_pocket_window) would mark it, and
+refused the same way while the pocket is taken.
+:::
+
+:::unreleased
 Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
 pocket holds every marked window, in the order each last went in, and a
 call puts away before it takes out: while a marked window is out,

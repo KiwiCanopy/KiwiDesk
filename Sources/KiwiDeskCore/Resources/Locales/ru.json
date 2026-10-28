@@ -194,6 +194,7 @@
   "bar.menu.new_space": "Новое пространство",
   "bar.menu.new_space.temporary": "временное",
   "bar.menu.new_window": "Новое окно",
+  "bar.menu.pocket_window": "Убрать окно в Pocket",
   "bar.menu.quit_app": "Завершить %1$@",
   "bar.menu.reset_minimum": "Сбросить минимум Space Bar",
   "bar.menu.shelf_settings": "Настройки KiwiShelf…",

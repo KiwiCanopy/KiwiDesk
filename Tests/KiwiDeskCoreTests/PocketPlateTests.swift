@@ -120,13 +120,12 @@ struct PocketPlateTests {
         core.handle(.windowFocused(three))
         core.execute("toggle_pocket_window")
         core.execute("pocket")
+        // A hidden app's window is no row: the list names the rest.
+        core.state.apply(.windowHidden(one))
         core.updateBars()
         core.openPocketList()
         #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
-        #expect(
-            core.shelves.peek.shown?.source
-                == .pocket(core.pocketPlateWindows)
-        )
+        #expect(core.shelves.peek.shown?.source == .pocket([two, three]))
         // Negative control: an unchanged plate keeps its list.
         core.updatePocketPlate()
         #expect(core.shelves.peek.shown?.view === core.pocketPlate.view)
@@ -178,6 +177,18 @@ struct PocketPlateTests {
         #expect(held.frame.maxX == end.maxX)
         #expect(held.frame.width == 60)
         #expect(held.markTrailing)
+        // The margin band decides, from both sides of its edge.
+        let margin = BriefPocketPlan.margin
+        let edge = region.maxX - margin - 20 - 40
+        for (x, trails) in [(edge + 1, true), (edge - 1, false)] {
+            let square = CGRect(x: x, y: 200, width: 40, height: 40)
+            let placed = KiwiCore.pocketPlateFrame(
+                square: square,
+                extra: 20,
+                region: region
+            )
+            #expect(placed.markTrailing == trails, "x \(x)")
+        }
     }
 
     @Test(
@@ -215,6 +226,23 @@ struct PocketPlateTests {
         core.execute("pocket")
         #expect(try !#require(core.briefPocket.playing).drawsPocket)
         core.briefPocket.end()
+    }
+
+    @Test(
+        "a bar pass with screens hands the plate its stand-down",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func screenPassHandsTheStandDown() throws {
+        let core = makeCore()
+        _ = try #require(giveSpaceTheMainScreen(core))
+        // A stale verdict the pass must overwrite.
+        core.pocketPlate.standingDown = [DisplayID(99)]
+        core.updateBars()
+        #expect(!core.pocketPlate.standingDown.contains(DisplayID(99)))
+        #expect(
+            core.pocketPlate.standingDown
+                == core.overflowMarks.standingDown
+        )
     }
 
     @Test("the bar pass hands the plate its own stand-down")

@@ -194,6 +194,7 @@
   "bar.menu.new_space": "New Space",
   "bar.menu.new_space.temporary": "temporary",
   "bar.menu.new_window": "New Window",
+  "bar.menu.pocket_window": "Pocket Window",
   "bar.menu.quit_app": "Quit %1$@",
   "bar.menu.reset_minimum": "Reset Space Bar Minimum",
   "bar.menu.shelf_settings": "KiwiShelf Settings…",

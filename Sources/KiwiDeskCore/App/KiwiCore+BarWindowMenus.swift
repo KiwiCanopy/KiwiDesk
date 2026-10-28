@@ -20,6 +20,7 @@ extension KiwiCore {
         var rows: [BarMenuRow] = [.header(app.appName), newWindowRow(app)]
         if movable { rows.append(moveRow(live)) }
         rows.append(floatRow(live))
+        rows.append(pocketRow(live))
         rows.append(appRulesRow(app))
         rows += [.separator, closeRow(live), quitRow(app)]
         return rows
@@ -145,6 +146,35 @@ extension KiwiCore {
             enabled: rows.contains { $0.enabled },
             rows
         )
+    }
+
+    /// Puts the window in the pocket through `pocket` naming it
+    /// (#2678), greyed where the pocket would refuse it — taken
+    /// under One window, or a window no pocket takes.
+    private func pocketRow(_ windows: [WindowID]) -> BarMenuRow {
+        let title = L("bar.menu.pocket_window", "Pocket Window")
+        let takes = { (id: WindowID) -> Bool in
+            guard let window = self.state.windows[id],
+                !window.isFullscreen, !window.isTransientOverlay
+            else { return false }
+            return self.state.pocketPhase(of: id) != nil
+                || self.state.pocketAcceptsMark(
+                    self.tiler.settings.pocketStyle.capacity
+                )
+        }
+        let pocket = { [weak self] (id: WindowID) in
+            _ = self?.execute("pocket", args: [.number(Double(id.raw))])
+        }
+        guard windows.count > 1 else {
+            let id = windows[0]
+            return .action(title, enabled: takes(id)) { pocket(id) }
+        }
+        let rows = windows.map { id in
+            BarMenuRow.action(windowRowName(id), enabled: takes(id)) {
+                pocket(id)
+            }
+        }
+        return .submenu(title, enabled: rows.contains { $0.enabled }, rows)
     }
 
     /// Greyed for an app with no bundle id, which no rule can

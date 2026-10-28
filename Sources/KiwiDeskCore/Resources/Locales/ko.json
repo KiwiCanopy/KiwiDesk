@@ -194,6 +194,7 @@
   "bar.menu.new_space": "새로운 공간",
   "bar.menu.new_space.temporary": "임시",
   "bar.menu.new_window": "새로운 윈도우",
+  "bar.menu.pocket_window": "윈도우 Pocket에 넣기",
   "bar.menu.quit_app": "%1$@ 종료",
   "bar.menu.reset_minimum": "Space Bar 최소 길이 재설정",
   "bar.menu.shelf_settings": "KiwiShelf 설정…",

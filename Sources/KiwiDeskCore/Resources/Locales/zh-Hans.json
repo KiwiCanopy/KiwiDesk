@@ -194,6 +194,7 @@
   "bar.menu.new_space": "新建空间",
   "bar.menu.new_space.temporary": "临时",
   "bar.menu.new_window": "新建窗口",
+  "bar.menu.pocket_window": "将窗口放入 Pocket",
   "bar.menu.quit_app": "退出 %1$@",
   "bar.menu.reset_minimum": "重置 Space Bar 最小长度",
   "bar.menu.shelf_settings": "KiwiShelf 设置…",
