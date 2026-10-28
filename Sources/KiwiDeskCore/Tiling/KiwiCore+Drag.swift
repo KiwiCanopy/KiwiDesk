@@ -131,6 +131,11 @@ extension KiwiCore {
         dragOverlay.hideAll()
         spaceBars.endDragAutoScroll()
         defer { scheduleBorderDropReconcile(lone: true) }
+        // A drop on the pocket plate is the pocket's (#2678).
+        if pocketDragEnded(id, live: !drag.isLateGesture(id)) {
+            spaceBarDrop.reset()
+            return
+        }
         // Space Bar drop resolves first (#372). A fast drop onto a
         // different space's item relocates the window (stay put).
         // A drop after the space sprang needs no move here — the

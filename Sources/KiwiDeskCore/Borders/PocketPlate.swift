@@ -106,8 +106,13 @@ final class PocketPlateOverlay {
         let frame: CGRect
         let shelf: KiwiShelf
         let markHex: String
+        /// Empty from two down: no count is drawn.
         let count: String
         let markTrailing: Bool
+        /// The empty pocket, shown only as a drag's target.
+        let faded: Bool
+        /// A dragged window over it that a drop would take.
+        let dropHovered: Bool
         let name: String
     }
 
@@ -122,6 +127,14 @@ final class PocketPlateOverlay {
     /// The screens the last bar pass stood down on, which the plate
     /// stands down on too.
     var standingDown: Set<DisplayID> = []
+    /// The window a drag moves, while one does: the plate is its
+    /// drop target (#2678).
+    var dragging: WindowID?
+    /// Whether that window is over the plate and a drop takes it.
+    var dropHovered = false
+
+    /// The empty pocket's opacity while a drag shows it.
+    static let fadedAlpha: CGFloat = 0.55
 
     #if DEBUG
         /// Whether the plate orders its panel in; off in both
@@ -141,9 +154,12 @@ final class PocketPlateOverlay {
             view.pocket.wear(
                 spec.shelf,
                 markHex: spec.markHex,
-                count: spec.count,
+                count: spec.count.isEmpty ? nil : spec.count,
                 markTrailing: spec.markTrailing
             )
+            view.pocket.setDropHovered(spec.dropHovered)
+            // The panel fades, never the glass (bars.md ▸ glass alpha).
+            panel.alphaValue = spec.faded ? Self.fadedAlpha : 1
             view.setAccessibilityLabel(spec.name)
             if panel.frame != spec.frame {
                 panel.setFrame(spec.frame, display: false)

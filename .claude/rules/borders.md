@@ -434,7 +434,11 @@ read the one `pocketRegion(on:screen:)`, the plate's mark keeping
 the brief pocket's square**, so a play flies into a standing plate
 and draws no second pocket (`drawsPocket`). Its list is the bars'
 click-held peek, its panel answering `shelfBeyondBars`
-(`PocketPlateTests`).
+(`PocketPlateTests`). **As a drop target it acts through `pocket`
+naming the window and lights on the one `pocketNamedRefusal`**, the
+bar menus' Pocket Window door, so the light and the drop never
+disagree; it shows for a move alone, never a resize
+(`PocketDropTests`).
 
 ## The ring draws on the `.transient` panel, never a raw window
 

@@ -63,9 +63,13 @@ struct PocketPlateTests {
 
     @Test("the plate shows from two windows inside")
     func showsFromTwo() {
-        #expect(!KiwiCore.pocketPlateShows(inside: []))
-        #expect(!KiwiCore.pocketPlateShows(inside: [one]))
-        #expect(KiwiCore.pocketPlateShows(inside: [one, two]))
+        #expect(!KiwiCore.pocketPlateShows(inside: [], dragging: false))
+        #expect(!KiwiCore.pocketPlateShows(inside: [one], dragging: false))
+        #expect(
+            KiwiCore.pocketPlateShows(inside: [one, two], dragging: false)
+        )
+        // A window drag shows it, empty or not.
+        #expect(KiwiCore.pocketPlateShows(inside: [], dragging: true))
     }
 
     /// The active Space on the host's main screen, which the plate's
@@ -311,6 +315,8 @@ struct PocketPlateTests {
                 markHex: "",
                 count: "2",
                 markTrailing: false,
+                faded: false,
+                dropHovered: false,
                 name: "Pocket"
             )
         )

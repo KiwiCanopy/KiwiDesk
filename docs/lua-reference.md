@@ -5848,7 +5848,11 @@ plate stays on the active Space's screen at
 [`pocket.set_position`](#pocketset_position), showing how many are
 inside, except while KiwiShelf stands down there for a native
 full-screen window or a presentation. A click on the plate lists
-the windows inside by app; a row takes its window out. Switching
+the windows inside by app; a row takes its window out. While you
+drag a window, under either capacity, the plate shows there too —
+faded while empty — and a drop on it pockets that window as
+[`pocket`](#pocket) naming it would; where the pocket would refuse
+it, the plate does not light and the window goes back. Switching
 back to `"one"` keeps the windows already marked, and the plate
 with them.
 

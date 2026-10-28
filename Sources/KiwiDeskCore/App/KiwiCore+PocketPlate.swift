@@ -1,8 +1,9 @@
 import AppKit
 
 /// Drives the pocket plate (#2678): it stays on the screen pocketed
-/// windows wait on while two windows are inside, at the
-/// pocket's edge and position, and a click lists them. It wears
+/// windows wait on while two windows are inside, and shows on every
+/// window drag as a drop target, at the pocket's edge and position;
+/// a click lists the windows inside. It wears
 /// KiwiShelf's look, so it is synced at the tail of every
 /// `updateBars()` and stands down on that pass's verdict, which the
 /// overlay keeps.
@@ -30,13 +31,15 @@ extension KiwiCore {
     func pocketPlateSpec() -> PocketPlateOverlay.Spec? {
         let style = tiler.settings.pocketStyle
         let inside = pocketPlateWindows
-        guard Self.pocketPlateShows(inside: inside),
+        let dragging = pocketPlate.dragging != nil
+        guard Self.pocketPlateShows(inside: inside, dragging: dragging),
             let display = state.pocketHomeDisplay,
             !pocketPlate.standingDown.contains(display),
             let screen = TilingEngine.screen(for: display)
         else { return nil }
         let shelf = briefPocketShelf()
-        let count = "\(inside.count)"
+        // The count shows from two up.
+        let count = inside.count >= 2 ? "\(inside.count)" : ""
         let region = pocketRegion(on: display, screen: screen)
         let square = BriefPocketPlan.pocketFrame(
             in: region,
@@ -45,7 +48,8 @@ extension KiwiCore {
         )
         let placed = Self.pocketPlateFrame(
             square: square,
-            extra: BriefPocketView.countWidth(count, shelf: shelf),
+            extra: count.isEmpty
+                ? 0 : BriefPocketView.countWidth(count, shelf: shelf),
             region: region
         )
         return PocketPlateOverlay.Spec(
@@ -59,6 +63,8 @@ extension KiwiCore {
             markHex: style.color,
             count: count,
             markTrailing: placed.markTrailing,
+            faded: inside.isEmpty,
+            dropHovered: pocketPlate.dropHovered,
             name: L(
                 "pocket.plate.ax",
                 "Pocket, windows inside: %1$d",
@@ -67,11 +73,15 @@ extension KiwiCore {
         )
     }
 
-    /// Whether the plate stays on screen: two windows inside, which
-    /// only Several windows lets in — and a switch back to One keeps,
-    /// so each stays reachable.
-    static func pocketPlateShows(inside: [WindowID]) -> Bool {
-        inside.count >= 2
+    /// Whether the plate is on screen: during a window drag, as its
+    /// drop target, and otherwise while two windows are inside —
+    /// which only Several windows lets in, and a switch back to One
+    /// keeps, so each stays reachable.
+    static func pocketPlateShows(
+        inside: [WindowID],
+        dragging: Bool
+    ) -> Bool {
+        dragging || inside.count >= 2
     }
 
     /// The plate's frame (AX): the pocket's `square`, where the

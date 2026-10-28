@@ -10,6 +10,9 @@ final class BriefPocketView: NSView {
     private let content = NSView()
     private let mark = NSImageView()
     private let count = NSTextField(labelWithString: "")
+    /// The shelf's hover fill, lit while a dragged window over the
+    /// pocket plate would drop in (#2678).
+    private let dropFill = NSView()
     private let solid = NSView()
     private let tint = GlassBackdrop()
     private let rim = ShelfBorder.make()
@@ -27,6 +30,10 @@ final class BriefPocketView: NSView {
         solid.layer?.masksToBounds = true
         content.wantsLayer = true
         mark.imageScaling = .scaleProportionallyUpOrDown
+        dropFill.wantsLayer = true
+        dropFill.isHidden = true
+        dropFill.setAccessibilityElement(false)
+        content.addSubview(dropFill)
         content.addSubview(mark)
         count.isBezeled = false
         count.drawsBackground = false
@@ -65,6 +72,14 @@ final class BriefPocketView: NSView {
         needsLayout = true
     }
 
+    /// Lights the pocket as a drop target, as a bar item's hover
+    /// lights it.
+    func setDropHovered(_ on: Bool) {
+        dropFill.isHidden = !on
+        dropFill.layer?.backgroundColor =
+            NSColor(kiwiHex: shelf.hoverFillColor).cgColor
+    }
+
     /// The count's face, the overflow mark's.
     static func countFont(_ shelf: KiwiShelf) -> NSFont {
         shelf.badgeFont(
@@ -84,6 +99,8 @@ final class BriefPocketView: NSView {
         super.layout()
         let radius = min(bounds.width, bounds.height) * 0.3
         content.frame = bounds
+        dropFill.frame = bounds
+        dropFill.layer?.cornerRadius = radius
         // The mark keeps a square at one end, where the brief pocket
         // lands; the count takes the rest.
         let square = count.isHidden ? bounds.width : bounds.height
