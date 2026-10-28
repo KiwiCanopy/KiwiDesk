@@ -164,9 +164,12 @@ struct SpacesSection: View {
                         )
                     )
                 }
-                pinBadge(space)
+                SpacePinChip(model: model, space: space)
                 Spacer()
-                modePicker(space)
+                SpaceModeMenu(model: model, space: space)
+                    // Focused row target for navigation returns
+                    // (#678 Phase 4, #812).
+                    .focused($returningRow, equals: space)
                 customizeButton(space)
                 // Danger zone: set the destructive delete apart
                 // so the trash can't be hit reaching for the

@@ -18,39 +18,11 @@ extension SpacesSection {
     }
 
     /// Per-row Customize button opening the full-pane editor, on
-    /// every row (#2674). Its badge counts the Space's overrides;
-    /// a Floating Space whose overrides all wait for a tiling
-    /// layout dims it (`OverrideCellState`, #678 8a).
+    /// every row (#2674).
     func customizeButton(_ space: SpaceID) -> some View {
-        let count = model.config.settings.spaceOverrideCount(
-            for: space
-        )
-        let isFloating =
-            (model.config.spaceModes[space] ?? .bsp) == .floating
-        let state = OverrideCellState.resolve(
-            count: count,
-            live: model.config.settings.floatingLiveOverrideCount(
-                for: space
-            ),
-            isFloating: isFloating
-        )
-        return Button {
+        SpaceCustomizeButton(model: model, space: space) {
             model.nav.spaceOverridesFocus = space
-        } label: {
-            Image(systemName: "slider.horizontal.3")
-                .overlay(alignment: .topTrailing) {
-                    OverrideCountBadge(state: state)
-                        .offset(x: 5, y: -5)
-                }
-                .padding(.horizontal, 6)
         }
-        .buttonStyle(.borderless)
-        .iconHoverChip()
-        .help(L("spaces.overrides.customize", "Customize…"))
-        .accessibilityLabel(
-            L("spaces.customize.a11y", "Customize Space %1$@", space.raw)
-        )
-        .accessibilityValue(OverrideCountBadge.spokenValue(state))
     }
 
     /// Prompts confirmation if space carries overrides before removing.

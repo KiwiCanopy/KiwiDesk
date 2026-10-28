@@ -1,10 +1,16 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Space row display-pin badge view for SpacesSection (#678 Phase 3).
-extension SpacesSection {
-    @ViewBuilder
-    func pinBadge(_ space: SpaceID) -> some View {
+/// A Space row's Screen pin chip (`SpacePinBadge`, #678 Phase 3):
+/// the pinned screen's name, or "Pin offline" for a pin to a
+/// screen that is not attached. `offlineOnly` draws the second
+/// alone, for a row whose Screen menu already names the screen.
+struct SpacePinChip: View {
+    @ObservedObject var model: SettingsModel
+    let space: SpaceID
+    var offlineOnly = false
+
+    var body: some View {
         switch SpacePinBadge.resolve(
             pin: model.config.spacePins[space],
             connectedFingerprints: Set(
@@ -15,14 +21,16 @@ extension SpacesSection {
         case .none:
             EmptyView()
         case .pinned(let displayName):
-            BadgeChip(label: displayName)
-                .help(
-                    L(
-                        "spaces.pin_badge.help",
-                        "Pinned to %1$@ for this profile.",
-                        displayName
+            if !offlineOnly {
+                BadgeChip(label: displayName)
+                    .help(
+                        L(
+                            "spaces.pin_badge.help",
+                            "Pinned to %1$@ for this profile.",
+                            displayName
+                        )
                     )
-                )
+            }
         case .offline:
             BadgeChip(
                 label: L("spaces.pin_offline_badge", "Pin offline")

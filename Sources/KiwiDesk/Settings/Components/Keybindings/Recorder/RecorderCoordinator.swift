@@ -28,6 +28,12 @@ final class RecorderCoordinator: ObservableObject {
     /// registration.
     var onArmedChange: (Bool) -> Void = { _ in }
 
+    /// Where a conflict is fixed when its page is elsewhere: Simple
+    /// draws the row but not what it collides with, so its conflict
+    /// popover offers "Fix in Advanced" (#2737 ruling 7). Nil on
+    /// the Shortcuts page.
+    var fixElsewhere: (() -> Void)?
+
     /// Teardown closure for active event monitor.
     private var stopActive: (() -> Void)?
 

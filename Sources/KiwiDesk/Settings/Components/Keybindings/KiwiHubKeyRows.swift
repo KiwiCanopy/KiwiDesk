@@ -7,13 +7,17 @@ struct KiwiHubKeyRows: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
+    /// Simple's KiwiHub card titles the rows itself (#2737).
+    var drawsHeading = true
 
     var body: some View {
         // The in-card heading idiom, heading trait included.
-        SettingsGroupHeading(
-            title: SettingsCatalog.shortcuts.kiwiHubKeys.text
-        )
-        .searchAnchored(SettingsCatalog.shortcuts.kiwiHubKeys)
+        if drawsHeading {
+            SettingsGroupHeading(
+                title: SettingsCatalog.shortcuts.kiwiHubKeys.text
+            )
+            .searchAnchored(SettingsCatalog.shortcuts.kiwiHubKeys)
+        }
         ForEach(ShortcutsRowOrder.kiwiHubAtRest, id: \.id) { key in
             anchored(key) {
                 KeybindingFamilyRows(

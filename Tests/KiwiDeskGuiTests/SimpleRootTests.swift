@@ -31,11 +31,10 @@ struct SimpleRootTests {
         #expect(SettingsRootPreference.read(from: defaults) == first)
     }
 
-    /// Advanced until Simple has its sections; PR 2 of #2737
-    /// flips it to the ruled `.simple` and this pin with it.
-    @Test("the first-open root is Advanced until Simple is filled")
+    /// Ruling 15: every install opens on Simple until it picks.
+    @Test("the first-open root is Simple")
     func firstOpenIsPinned() {
-        #expect(SettingsRootPreference.firstOpen == .advanced)
+        #expect(SettingsRootPreference.firstOpen == .simple)
     }
 
     /// The retired key's values meant the old modes, so none of

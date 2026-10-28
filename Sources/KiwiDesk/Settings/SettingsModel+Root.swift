@@ -57,6 +57,17 @@ extension SettingsModel {
         land(on: anchor)
     }
 
+    /// A save pill row's jump (#2737 ruling 12): on Simple, a row
+    /// whose control Simple draws stays there; any other row lands
+    /// on its Advanced page.
+    func jump(to row: SettingsDiffRow) {
+        if showsSimple, SimpleCoverage.draws(row.key) { return }
+        guard let anchor = SettingsDiffJump.anchor(for: row) else {
+            return
+        }
+        land(on: anchor)
+    }
+
     /// The tour's landing (#2737 ruling 15): its page while the
     /// stored root is Advanced; Simple's root otherwise.
     func landFromTour(_ destination: SettingsDestination) {

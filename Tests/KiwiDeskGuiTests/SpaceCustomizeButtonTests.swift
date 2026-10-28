@@ -26,6 +26,11 @@ struct SpaceCustomizeButtonTests {
         "Sources/KiwiDesk/Settings/Sections/"
         + "SpacesSection+Customize.swift"
 
+    /// The button itself, shared with Simple's rows (#2737).
+    private let button =
+        "Sources/KiwiDesk/Settings/Sections/"
+        + "SpaceCustomizeButton.swift"
+
     /// The row mounts the button unconditionally beside the layout
     /// menu, and the builder returns its `Button` straight after
     /// the count reads, with no builder attribute to branch in.
@@ -35,16 +40,17 @@ struct SpaceCustomizeButtonTests {
         #expect(
             cell.contains(
                 "funccustomizeButton(_space:SpaceID)->someView{"
+                    + "SpaceCustomizeButton(model:model,space:space){"
+                    + "model.nav.spaceOverridesFocus=space}}"
             )
         )
+        let view = try stripped(button)
         #expect(
-            cell.contains(
-                "isFloating:isFloating)returnButton{"
-                    + "model.nav.spaceOverridesFocus=space}label:{"
+            view.contains(
+                "Button(action:open){"
                     + "Image(systemName:\"slider.horizontal.3\")"
             )
         )
-        #expect(!cell.contains("@ViewBuilderfunccustomizeButton"))
         let row = try stripped(
             "Sources/KiwiDesk/Settings/Sections/SpacesSection.swift"
         )
@@ -52,7 +58,9 @@ struct SpaceCustomizeButtonTests {
         // could hide the button; it costs a reorder of the row.
         #expect(
             row.contains(
-                "modePicker(space)customizeButton(space)Divider()"
+                "SpaceModeMenu(model:model,space:space)"
+                    + ".focused($returningRow,equals:space)"
+                    + "customizeButton(space)Divider()"
             )
         )
     }
@@ -77,7 +85,7 @@ struct SpaceCustomizeButtonTests {
     /// it costs reordering the chain, which edits this needle.
     @Test("the button is named and valued from its state")
     func buttonIsNamedAndValued() throws {
-        let body = try stripped(customize)
+        let body = try stripped(button)
         let chain: String = [
             ".buttonStyle(.borderless).iconHoverChip()",
             ".help(L(\"spaces.overrides.customize\",",

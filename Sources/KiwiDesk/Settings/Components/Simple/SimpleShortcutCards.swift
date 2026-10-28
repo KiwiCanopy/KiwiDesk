@@ -1,0 +1,83 @@
+import KiwiDeskCore
+import SwiftUI
+
+/// Simple's two shortcut cards (#2737 rulings 6, 7, 16): KiwiHub's
+/// three keys and Open applications, drawn by the rows the
+/// Shortcuts page draws, on the default layer, with the recorder
+/// environment that page gives them — no Simple-only recorder.
+struct SimpleShortcutCards: View {
+    @ObservedObject var model: SettingsModel
+    /// Not in place: Simple cannot scroll to a row it does not
+    /// draw, so a collision's way out is Advanced.
+    @StateObject private var coordinator = RecorderCoordinator()
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            SimpleCard(
+                title: SettingsCatalog.shortcuts.kiwiHubKeys.text,
+                caption: L(
+                    "simple.kiwihub.caption",
+                    "Its %1$@ side lists every other shortcut.",
+                    JumpScope.shortcuts.title
+                )
+            ) {
+                KiwiHubKeyRows(
+                    model: model,
+                    bindings: bindings,
+                    expander: expander,
+                    drawsHeading: false
+                )
+            }
+            ApplicationsGroup(
+                model: model,
+                bindings: bindings,
+                expander: expander,
+                drawsKiwiDeskKeys: false
+            )
+        }
+        .environment(\.keybindingLayerName, layer)
+        // One live read per render (#1105), as the Shortcuts page.
+        .environment(
+            \.disabledSystemShortcuts,
+            model.disabledSystemShortcuts()
+        )
+        .recorderKeys(model)
+        .environmentObject(coordinator)
+        .onAppear {
+            // Suspend hotkeys while capturing (#213).
+            coordinator.onArmedChange = { [model] armed in
+                model.setRecorderArmed(armed)
+            }
+            coordinator.fixElsewhere = { [model] in
+                model.openAdvanced(SettingsAnchor(destination: .shortcuts))
+            }
+        }
+        .onChange(of: model.target) { _, _ in
+            coordinator.invalidate()
+        }
+    }
+
+    /// Simple edits the default layer alone.
+    private var layer: String { KeyLayer.defaultName }
+
+    private var layerIndex: Int? {
+        model.config.layers.firstIndex { $0.name == layer }
+    }
+
+    private var bindings: Binding<[KeyBinding]> {
+        Binding(
+            get: {
+                layerIndex.map { model.config.layers[$0].bindings }
+                    ?? []
+            },
+            set: { rows in
+                guard let index = layerIndex else { return }
+                model.config.layers[index].bindings = rows
+            }
+        )
+    }
+
+    private var expander: ShortcutsFamilyRows {
+        ShortcutsFamilyRows.ofDraft(model, layer: layer)
+    }
+}
