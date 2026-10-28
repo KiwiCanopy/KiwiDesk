@@ -184,6 +184,9 @@ const rows = [
   "updates",
   "mouse",
   "layouts",
+  // Each tool's own docs checked 2026-10-27; "Not documented"
+  // means exactly that, and the table note links KiwiDesk's answer.
+  "overflow",
   "onscreen",
   "licence",
   "permissions",
@@ -332,7 +335,10 @@ const jsonLd = [
   <p class="cmp__note">
     <Fragment set:html={t("compare_table_note")
       .replace("{guide}", `<a href="${localePath(lang, "/guide/")}">`)
-      .replace("{/guide}", "</a>")} />
+      .replace("{/guide}", "</a>")
+      .replace("{overflow}",
+        `<a href="${src.luaRef}#when-windows-no-longer-fit">`)
+      .replace("{/overflow}", "</a>")} />
   </p>
 
   <section class="cmp__anchors" aria-labelledby="different">
