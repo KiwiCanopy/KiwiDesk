@@ -43,12 +43,15 @@ struct ChipFace: View {
     }
 
     /// Untinted, the chip ladder; on KiwiHub's Fill a lifted chip
-    /// takes the shelf's hover fill, a resting one the neutral rest.
-    private var fill: Color {
-        if paint.tinted, lifted { return paint.rowHover }
-        return ButtonChipStyle.fill(
-            pressed: isEnabled && configuration.isPressed,
-            hovered: isEnabled && hovered
+    /// takes the shelf's hover fill, a resting one the neutral rest,
+    /// both fading along the Fill like its other fills (#2725).
+    private var fill: AnyShapeStyle {
+        if paint.tinted, lifted { return paint.fill(paint.rowHover) }
+        return paint.fill(
+            ButtonChipStyle.fill(
+                pressed: isEnabled && configuration.isPressed,
+                hovered: isEnabled && hovered
+            )
         )
     }
 

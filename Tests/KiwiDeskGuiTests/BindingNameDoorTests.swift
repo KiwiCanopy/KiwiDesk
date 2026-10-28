@@ -59,14 +59,6 @@ struct BindingNameDoorTests {
             1,
             "a NavCommand's label stored on the binding it creates"
         ),
-        "KeyboardHoverReading.swift": (
-            1,
-            "a KeyLayer's chord label, not a binding's"
-        ),
-        "KeyboardCensus.swift": (
-            1,
-            "a KeyLayer's chord label, not a binding's"
-        ),
         "JumpPanelController+Shortcuts.swift": (
             1,
             "a built ShortcutRow's display label"

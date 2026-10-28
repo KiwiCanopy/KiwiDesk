@@ -32,7 +32,8 @@ extension SpaceBarItemView {
         }
     }
 
-    /// State badge fill and contrast glyph (#429). A pocket badge
+    /// State badge fill and contrast glyph (#429), its symbol on
+    /// the dim ladder (`BarBadgeFace`). A pocket badge
     /// keeps the count badge's own disc and fills its pocket in
     /// `pocketHex`, the window mark's split (#2671); empty takes
     /// the disc's contrasting ink.
@@ -46,12 +47,18 @@ extension SpaceBarItemView {
             hex: pocketHex == nil ? markHex : "",
             fallback: NSColor(kiwiHex: style.groupBadgeColor)
         )
-        badge.layer?.backgroundColor = fill.cgColor
+        let tier = untintedAppAlpha(focused: appFocused)
+        BarBadgeFace.disc(
+            badge,
+            fill: fill,
+            shelf: style.shelf,
+            tier: tier
+        )
         badge.symbol.contentTintColor = fill.contrastingGlyph
         badge.ink = NSColor.mark(
             hex: pocketHex ?? "",
             fallback: fill.contrastingGlyph
         )
-        badge.alphaValue = untintedAppAlpha(focused: appFocused)
+        badge.symbol.alphaValue = tier
     }
 }

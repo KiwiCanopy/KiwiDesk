@@ -67,6 +67,10 @@ struct KeyRecorderField: View {
 
     /// Fixed width for trailing action icon slots (#264).
     static let iconSlotWidth: CGFloat = 20
+    /// The chord label's least width, so recorders line up; a
+    /// sided chord fits it in every catalog
+    /// (`ChordGlyphsWidthTests`).
+    static let labelMinWidth: CGFloat = 110
 
     /// Fixed-width slot reserving space across icon states (#264).
     func iconSlot<Content: View>(
@@ -98,7 +102,7 @@ struct KeyRecorderField: View {
     private var recordButton: some View {
         Button(action: toggle) {
             Text(label)
-                .frame(minWidth: 110)
+                .frame(minWidth: Self.labelMinWidth)
                 .monospaced()
         }
         .buttonStyle(.bordered)
@@ -244,7 +248,7 @@ struct KeyRecorderField: View {
         guard let parsed = KeyCombo.parse(combo) else {
             return combo
         }
-        return ComboSymbols.render(
+        return ChordGlyphs.render(
             parsed,
             layoutChar: LayoutKeyGlyph.char
         )

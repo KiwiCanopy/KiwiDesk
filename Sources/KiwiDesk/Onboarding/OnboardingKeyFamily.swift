@@ -20,7 +20,7 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
     var spoken: String?
 
     /// The chord as a native glyph string for VoiceOver and mixed families.
-    var glyphs: String { chord.glyphs }
+    @MainActor var glyphs: String { chord.glyphs }
 
     /// The glyphs as VoiceOver reads them, through the one door
     /// every chord surface speaks by (#2700).
@@ -46,10 +46,10 @@ enum OnboardingChord: Equatable {
     /// written in full, and no modifier to name in words.
     case mixed(String)
 
-    var glyphs: String {
+    @MainActor var glyphs: String {
         switch self {
         case .shared(let modifiers, let keys):
-            let symbols = ComboSymbols.modifierSymbols(modifiers)
+            let symbols = ChordGlyphs.modifiers(modifiers)
             guard !symbols.isEmpty else { return keys }
             guard !keys.isEmpty else { return symbols }
             // Space separator between modifier symbols and keys.

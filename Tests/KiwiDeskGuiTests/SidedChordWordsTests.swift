@@ -1,29 +1,43 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A sided chord is spoken and explained in words (#2601 ▸ Ruling
 /// 1), and the keyboard board marks the caps a chip holds.
 @Suite("Sided chords in words and on the board (#2601)")
 @MainActor
 struct SidedChordWordsTests {
-    @Test("each side is named with the Hyper card's key names")
-    func spokenNamesTheSide() {
+    /// What `ChordGlyphs` draws for `combo`, the input every
+    /// consumer hands the words.
+    private func drawn(_ combo: String) throws -> String {
+        ChordGlyphs.render(
+            try #require(KeyCombo.parse(combo)),
+            layoutChar: { _ in nil }
+        )
+    }
+
+    @Test("a drawn run is named key by key with the Hyper card's names")
+    func spokenNamesTheSide() throws {
         LocalizationManager.shared.select("en")
-        #expect(SidedChordWords.spoken("R⌘H") == "Right ⌘ H")
-        #expect(SidedChordWords.spoken("⌃R⌥H") == "⌃ Right ⌥ H")
-        #expect(SidedChordWords.spoken("L⇧⌘K") == "Left ⇧ ⌘ K")
-        #expect(SidedChordWords.spoken("R⌘") == "Right ⌘")
+        #expect(SidedChordWords.spoken(try drawn("rcmd+h")) == "Right ⌘ H")
+        #expect(
+            SidedChordWords.spoken(try drawn("lshift+lcmd+k"))
+                == "Left ⇧ Left ⌘ K"
+        )
+        #expect(
+            SidedChordWords.spoken(try drawn("lctrl+ralt+j"))
+                == "Left ⌃ Right ⌥ J"
+        )
     }
 
     @Test("a chord keeping no side reads as drawn")
-    func unsidedIsNil() {
-        #expect(SidedChordWords.spoken("⌘L") == nil)
-        #expect(SidedChordWords.spoken("✦⌘K") == nil)
+    func unsidedIsNil() throws {
+        LocalizationManager.shared.select("en")
+        #expect(SidedChordWords.spoken(try drawn("cmd+l")) == nil)
         #expect(SidedChordWords.label("⌃⌥R") == "⌃⌥R")
-        #expect(SidedChordWords.help("⌘H").isEmpty)
+        #expect(SidedChordWords.help(try drawn("cmd+h")).isEmpty)
     }
 
     @Test("a label names ✦ by the Hyper key's name")
@@ -32,20 +46,37 @@ struct SidedChordWordsTests {
         let name = HyperKeyWords.keyName
         #expect(SidedChordWords.label("✦⌘K") == name + " ⌘K")
         #expect(SidedChordWords.label("✦ ← →") == name + " ← →")
-        #expect(SidedChordWords.label("✦R⌘H") == name + " Right ⌘ H")
+        #expect(
+            SidedChordWords.label("✦ Right ⌘ K") == name + " Right ⌘ K"
+        )
         #expect(SidedChordWords.label("✦") == name)
     }
 
-    @Test("what ComboSymbols draws, the words read back, every side")
-    func readsTheDrawnForm() {
-        LocalizationManager.shared.select("en")
-        for kind in ModifierKind.allCases {
+    /// The point of reading the drawn words back: a short catalog
+    /// word is spoken as the full key name, in every locale.
+    @Test("every catalog's drawn side reads back as its key names")
+    func readsTheDrawnFormEverywhere() throws {
+        defer { LocalizationManager.shared.select("en") }
+        let locales = LocaleCatalog.availableLocales() + ["en"]
+        #expect(locales.count > 1)
+        for locale in locales {
+            LocalizationManager.shared.select(locale)
             for side in ModifierSide.allCases {
-                let drawn = ComboSymbols.modifierSymbols(
-                    kind.plain.union(.side(side, of: kind))
+                let modifiers = HotkeyModifiers.control
+                    .union(.option)
+                    .union(.side(side, of: .control))
+                    .union(.side(side, of: .option))
+                let glyphs =
+                    ChordGlyphs.modifiers(modifiers)
+                    + ChordGlyphs.separator(modifiers) + "J"
+                let names = [ModifierKind.control, .option].map {
+                    HyperKeyWords.name(.key(side, of: $0))
+                }
+                #expect(
+                    SidedChordWords.spoken(glyphs)
+                        == (names + ["J"]).joined(separator: " "),
+                    "\(locale): \(glyphs)"
                 )
-                let name = HyperKeyWords.name(.key(side, of: kind))
-                #expect(SidedChordWords.spoken(drawn + "X") == name + " X")
             }
         }
     }

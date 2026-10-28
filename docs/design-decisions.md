@@ -775,8 +775,13 @@ one decision is Install or Later. Offline the window opens from
 the feed last read, kept in the app's defaults beside the "What's
 new" record and replaced by each read rather than added to, so it
 grows only with the feed's structured notes; with nothing kept,
-the notes say they are online. Home's What's new answers nothing
-— owed notes keep their own window and their Done, and an offer
+the notes say they are online. Home's window ends on "Next on my
+list" too, from the list last read, kept the same way: a read
+that fails keeps it, a section the owner emptied clears it, and
+the list's own sixty days retire one nobody refreshed — so a
+correction reaches Home's window on the open after its next
+online read, while an offline open never shows a list older than
+that limit. Home's What's new answers nothing — owed notes keep their own window and their Done, and an offer
 on screen comes forward instead, since it carries the notes worth
 reading.
 
@@ -18146,6 +18151,53 @@ transparency returns the flat hover with the rest of the glass.
 Each layer takes the cap, not the stack: under Boxed the hover
 draws over the box's own faded tint, as the flat hover did, and
 that layered look is the one the owner compared and chose.
+
+**KiwiHub's selection fades with its Fill** (#2721, owner,
+2026-10-28, after comparing solid and faded fills on a live
+prototype and the device). Under *Tint KiwiHub and plates*, every
+selection and hover fill — the scope switch's pill, hover and
+track, the Windows rows, the View side's chips and layout tiles —
+fades top to bottom along the panel's Fill. A solid pill read as a
+flat patch on faded glass, the #2645 case one surface over. The
+fills fade deeper than the panel, to 0.4 of their top at Fill fade
+100 (`KiwiShelf.highlightFloorShare`, `ui-designer`'s pick): the
+panel's floor keeps the panel's inks legible, while a fill carries
+its own ink, and at the panel's 0.46–0.73 the fade was barely
+visible on the device. Matching the panel was weighed and refused
+for that reason, and the unfloored 1/8 for leaving a tile a band
+along its top. The label sits mid-height, where the fill keeps
+about 0.7, and the selected and hovered inks are measured at the
+far end on every bundled palette (`HighlightFadeContrastTests`).
+Where 0.4 would sink a fill's own ink — under Increase Contrast,
+whose floor is stricter — the share rises to the point that holds
+it, over both ends of the panel (`highlightFadeShare`).
+The footer's buttons (Edit in Settings…, Keep) fade too (#2725,
+owner, 2026-10-28): KiwiDesk already draws them as button chips
+(#2377), and a flat chip read as the one patch on faded glass.
+Their rest and hover fills take the same share, while the chip's
+1 pt edge stays flat: it is the button's outline, and faded it
+would leave the chip open along its bottom. Off the toggle,
+and in Settings, the fills stay flat. Residue: the resting chip's
+label on its faint neutral wash is measured at neither end; the
+fade moves it toward the bare Fill, whose inks are measured.
+
+**A bar badge keeps its disc opaque** (#2722, owner, 2026-10-28,
+on the device). The group count, the Space Bar's `+n` and its sticky,
+floating and pocket badges dimmed as a whole, so on a faded plate
+the disc read as a grey smudge. The dim ladder now reaches the
+mark alone, and every badge shares one face (`BarBadgeFace`): an
+opaque disc with a 1 pt rim that parts it from the glass: white at
+0.35 on a dark shelf Fill, black at 0.25 on a light one, dimmed
+with the mark; with no Fill the glass follows the Appearance pick,
+and so does the rim. A 0.5 pt
+rim picked by the disc's own brightness vanished on the device, a
+black rim on a light disc disappearing into dark glass
+(`ui-designer`).
+The `+n` disc is 0.7 of its cell, smaller than the 0.8 it had,
+which read too heavy beside the icons. Glass and a fade were
+weighed and refused: `ui-designer` pointed to Apple's solid badges
+on glass, and at a 14 pt disc a fade reads as a smudge, not a
+fade.
 
 **Reading surfaces fade above a floor, and the clear end no
 longer rests on the #1308 pin.** This replaces the two

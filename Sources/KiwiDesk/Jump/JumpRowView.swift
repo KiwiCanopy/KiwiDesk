@@ -140,13 +140,13 @@ struct JumpRowView: View {
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(paint.selection)
+            .fill(paint.fill(paint.selection))
         } else if isLifted {
             RoundedRectangle(
                 cornerRadius: KeyPanelStyle.selectionRadius,
                 style: .continuous
             )
-            .fill(paint.rowHover)
+            .fill(paint.fill(paint.rowHover))
         }
     }
 }

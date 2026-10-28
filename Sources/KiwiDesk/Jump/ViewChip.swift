@@ -120,10 +120,13 @@ struct ViewChip: View {
 
     @ViewBuilder private var ground: some View {
         if isSelected {
-            Capsule().fill(paint.selection)
+            Capsule().fill(paint.fill(paint.selection))
         } else {
             Capsule()
-                .fill(isLifted ? paint.chipHover : .clear)
+                .fill(
+                    isLifted
+                        ? paint.fill(paint.chipHover) : AnyShapeStyle(.clear)
+                )
                 .overlay(Capsule().strokeBorder(.separator))
         }
     }

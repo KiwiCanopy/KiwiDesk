@@ -464,8 +464,10 @@ a notch marks the origin. A signed value that means darker or
 lighter (the sheen) also carries a moon and a sun at the track's
 ends and a faint dark-to-light ramp on the track, and at Off the
 notch shows just above and below the knob, which covers it
-otherwise. The glyphs are decorative; the spoken value says which
-way.
+otherwise. A position along a screen edge (the Pocket's) carries
+arrows to its ends, left and right on a top or bottom edge, up and
+down on a side, and speaks the end it counts from. The glyphs are
+decorative; the spoken value says which way.
 
 **Buttons take a native style, and semantic role chooses the
 class.** No gradients or shadows on buttons — the crisp shadow
@@ -1227,6 +1229,11 @@ Every such control also needs an explicit accessibility label
 keyboard-focus state, and a recognizable rest treatment or list
 context — `.help()` and hover alone do not make a control
 discoverable.
+
+:::unreleased
+On KiwiHub's tinted Fill a button chip's fills fade with the
+panel's other fills (#2725).
+:::
 
 A Layouts strip tile lifts like a palette tile, with the
 selection drawn as its stroke alone. A borderless value-menu or

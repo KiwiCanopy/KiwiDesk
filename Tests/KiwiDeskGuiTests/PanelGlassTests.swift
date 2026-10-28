@@ -25,7 +25,9 @@ struct PanelGlassTests {
     private static func paint(_ glass: PanelGlass) -> KiwiHubPaint {
         KiwiHubPaint.of(
             glass,
-            ink: glass.shelf?.panelInk(increaseContrast: false)
+            ink: glass.shelf?.panelInk(increaseContrast: false),
+            tint: nil,
+            increaseContrast: false
         )
     }
 
@@ -125,7 +127,8 @@ struct PanelGlassTests {
         #expect(
             chrome.contains(
                 "inked(content,ink).environment(\\.kiwiHubPaint,"
-                    + "KiwiHubPaint.of(drawn,ink:ink)).glassChrome("
+                    + "KiwiHubPaint.of(drawn,ink:ink,tint:tint,"
+                    + "increaseContrast:increased)).glassChrome("
             )
         )
         // One read of Increase Contrast resolves the inks for both.
@@ -154,15 +157,17 @@ struct PanelGlassTests {
                     + "variant:drawn.variant,tint:"
             )
         )
-        // The paint lands as the chrome's tint, untouched.
+        // One paint, minted once, lands as the chrome's tint and
+        // KiwiHub's fade alike.
         #expect(
             chrome.contains(
-                "tint:drawn.shelf.flatMap{GlassTint.paint("
-                    + "$0.panelGlassFill(increaseContrast:"
-                    + "contrast==.increased),edge:.top)},"
-                    + "fallback:fallback)"
+                "lettint=drawn.shelf.flatMap{GlassTint.paint("
+                    + "$0.panelGlassFill(increaseContrast:increased),"
+                    + "edge:.top)}"
             )
         )
+        #expect(chrome.contains("tint:tint,fallback:fallback)"))
+        #expect(chrome.occurrences(of: "GlassTint.paint(") == 1)
     }
 
     @Test("The cue panel wears the rim the glass asks for")
@@ -213,7 +218,11 @@ struct PanelGlassTests {
         #expect(picker.contains(".fill(paint.selection)"))
         #expect(picker.contains("paint.selectionInk"))
         #expect(picker.contains("paint.selectionInkSecondary"))
-        #expect(picker.contains("? paint.rowHover : .clear"))
+        #expect(
+            picker.contains(
+                "? paint.fill(paint.rowHover) : AnyShapeStyle(.clear)"
+            )
+        )
         for token in [
             "SettingsTheme.accent)", "SettingsTheme.accentInk",
             "SettingsTheme.chipRest",
@@ -230,14 +239,22 @@ struct PanelGlassTests {
     }
 
     /// KiwiHub's footer buttons rest on the neutral chip, lift in
-    /// the shelf's hover, and read the panel's inks; the layer pill
+    /// the shelf's hover, both faded along the Fill (#2725), and
+    /// read the panel's inks; the layer pill
     /// takes the highlight (#2569 ▸ owner).
     @Test("KiwiHub's footer chips and layer pill read the paint")
     func footerReadsThePaint() throws {
         let face = try Self.source("Settings/ChipFace.swift")
             .filter { !$0.isWhitespace }
         #expect(face.contains("@Environment(\\.kiwiHubPaint)"))
-        #expect(face.contains("ifpaint.tinted,lifted{returnpaint.rowHover}"))
+        // Both the lift and the rest fade along the Fill (#2725).
+        #expect(
+            face.contains(
+                "ifpaint.tinted,lifted{returnpaint.fill(paint.rowHover)}"
+            )
+        )
+        #expect(face.contains("returnpaint.fill(ButtonChipStyle.fill("))
+        #expect(face.contains(".background{shape.fill(fill)}"))
         #expect(face.contains("guardpaint.tintedelse{"))
         #expect(face.contains(".foregroundStyle(ink)"))
         let footer = try Self.source("Jump/JumpPanelView+Footer.swift")
@@ -274,7 +291,8 @@ struct PanelGlassTests {
         ).filter { !$0.isWhitespace }
         #expect(
             chrome.contains(
-                ".environment(\\.kiwiHubPaint,KiwiHubPaint.of(drawn,ink:ink))"
+                ".environment(\\.kiwiHubPaint,KiwiHubPaint.of(drawn,"
+                    + "ink:ink,tint:tint,increaseContrast:increased))"
             )
         )
     }

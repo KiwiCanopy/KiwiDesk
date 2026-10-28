@@ -10,7 +10,9 @@ extension KeyRecorderField {
             Color.clear.frame(width: iconSlotWidth)
             Button {
             } label: {
-                Text(verbatim: " ").frame(minWidth: 110).monospaced()
+                Text(verbatim: " ")
+                    .frame(minWidth: labelMinWidth)
+                    .monospaced()
             }
             .settingsActionButton()
             .controlSize(.regular)

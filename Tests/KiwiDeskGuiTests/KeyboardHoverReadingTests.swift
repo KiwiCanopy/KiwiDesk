@@ -139,7 +139,7 @@ struct KeyboardHoverReadingTests {
         #expect(r.lines[1] == "⌃⌥J — Focus left")
         // …and that IS the strip's own order, not a coincidence.
         #expect(
-            KeyboardCensus.layers(in: l).map(\.label)
+            KeyboardCensus.layers(in: l).map(\.glyphs)
                 == ["⌘", "⌃⌥"]
         )
     }

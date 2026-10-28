@@ -81,7 +81,9 @@ struct JumpClickWiringTests {
         }
         let chip = try Self.squashed("ViewChip.swift")
         #expect(
-            chip.occurrences(of: ".fill(isLifted?paint.chipHover:")
+            chip.occurrences(
+                of: ".fill(isLifted?paint.fill(paint.chipHover):"
+            )
                 == 1
         )
     }

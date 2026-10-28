@@ -93,7 +93,11 @@ struct PocketGroup: View {
                     range: 0...100,
                     step: 1,
                     label: label,
-                    spokenValue: readout
+                    spokenValue: Self.spokenPosition(
+                        readout,
+                        edge: pocket.wrappedValue.edge
+                    ),
+                    ends: Self.ends(pocket.wrappedValue.edge)
                 )
                 Text(readout)
                     .monospacedDigit()
@@ -101,6 +105,34 @@ struct PocketGroup: View {
             }
         }
         .searchAnchored(SettingsCatalog.shortcuts.pocketPosition)
+    }
+
+    /// The track's ends name where the position runs: left to
+    /// right on a top or bottom edge, top to bottom on a side.
+    static func ends(_ edge: AppBarEdge) -> (
+        leading: String, trailing: String
+    ) {
+        edge.isHorizontal
+            ? ("arrow.left.to.line", "arrow.right.to.line")
+            : ("arrow.up.to.line", "arrow.down.to.line")
+    }
+
+    /// The position with the end it counts from, one sentence per
+    /// orientation so a translator keeps the agreement.
+    static func spokenPosition(_ readout: String, edge: AppBarEdge)
+        -> String
+    {
+        edge.isHorizontal
+            ? L(
+                "pocket.position.spoken.horizontal",
+                "%1$@ from the left",
+                readout
+            )
+            : L(
+                "pocket.position.spoken.vertical",
+                "%1$@ from the top",
+                readout
+            )
     }
 
     static var edgeHelp: String {

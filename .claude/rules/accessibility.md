@@ -372,7 +372,18 @@ editing AX code:
   gate (`HealReopenOnReturnTests`); a new such ledger joins that
   function. The heal's next tick then asks again, so a desk
   booted under a lock fills within one heal interval of the
-  unlock.
+  unlock. **No reading under the lock is a close (#2538):** a
+  display waking behind it dropped every window from the census
+  for a moment (field log, 2026-10-28), so the sweep and the
+  eager destroy arm — which then reads off main, no order being
+  owed for a refused removal — refuse every non-hidden removal
+  while `lockedRemovals.isLocked` reads locked, and the apps refused are reconciled through
+  `reconcileLockRefused` on the return leg and on every heal
+  tick, since the unlock can announce itself before the flag
+  clears (`LockedRemovalTests`; the wiring,
+  `LockedRemovalSeamTests`). A new removal path joins the
+  pause, or argues on its doc why a locked reading may close —
+  review's, since nothing scans for one.
 - **A WindowServer window create or destroy only WAKES the AX
   path (#1877); it never tracks, files or removes a window.** A
   destroy also notes the departure an in-flight reading must not
@@ -600,7 +611,9 @@ editing AX code:
   window list — the #913 defect's mirror image — and the sweep
   took that absence as a close: a never-closed window lost its
   slot, close-return raise and all, until the ~20 s adoption
-  heal re-tracked it (log-proven, 2026-08-31). So a non-hidden,
+  heal re-tracked it (log-proven, 2026-08-31); under a locked
+  session a pause ahead of this gate refuses every non-hidden
+  removal (the #1285 bullet's #2538 clause). So a non-hidden,
   non-minimized close candidate is checked against ONE
   on-screen census before its destroy is emitted, and a listed
   window is refused. The asymmetry is the rule: **the census
