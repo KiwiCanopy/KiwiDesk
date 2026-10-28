@@ -24,6 +24,12 @@ struct WhatsNewRecord {
     /// feed's structured notes.
     static let feedCacheKey = "updates.feedCache"
 
+    /// The last "Next on my list" read, so Home's window carries it
+    /// when it opens from the cache (#1813). A failed read keeps
+    /// it, an emptied section clears it, and its own age limit
+    /// retires a list nobody refreshed.
+    static let nextCacheKey = "updates.nextCache"
+
     /// What the relaunch reads: the version installed, the one it
     /// replaced, the feed items the window merged, and the "Next on
     /// my list" fetched while the offer was open (#1813).
@@ -84,6 +90,26 @@ struct WhatsNewRecord {
                 [WhatsNewFeed.Item].self,
                 from: data
             )) ?? []
+    }
+
+    /// Files a read of "Next on my list" over the cached one.
+    func cacheNext(_ read: NextOnMyList.Read) {
+        switch read {
+        case .list(let next):
+            defaults.set(
+                try? JSONEncoder().encode(next),
+                forKey: Self.nextCacheKey
+            )
+        case .emptied: defaults.removeObject(forKey: Self.nextCacheKey)
+        case .unreadable: break
+        }
+    }
+
+    /// The cached "Next on my list"; nil before the first read.
+    var cachedNext: NextOnMyList? {
+        guard let data = defaults.data(forKey: Self.nextCacheKey)
+        else { return nil }
+        return try? JSONDecoder().decode(NextOnMyList.self, from: data)
     }
 
     /// The owed range is answered: this version's notes are done.
