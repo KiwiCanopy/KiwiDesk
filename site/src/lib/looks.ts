@@ -14,15 +14,26 @@
  * hiccup never fails the deploy; the site gate reds instead when
  * the built /looks page draws no card (`check-site-tokens.py` ▸
  * `check_looks_rendered`). A failed look file only drops that
- * look's sketch colors, and an unreachable screenshot falls back
- * to the sketch.
+ * look's sketch and font, and a screenshot that is unreachable,
+ * not a PNG or too large falls back to the sketch.
  */
+import sharp from "sharp";
+
 const REPO = "KiwiCanopy/KiwiDesk-Looks";
 const RAW = `https://raw.githubusercontent.com/${REPO}/main/`;
 const INDEX_FORMAT = 1;
 const TIMEOUT_MS = 5000;
+/** The look format KiwiDesk 4.0.0 reads (`LookDocument.currentFormat`);
+ * moves with the release that bumps that format. */
+export const RELEASED_LOOK_FORMAT = 2;
+/** The largest screenshot the build downloads, in bytes. */
+const MAX_IMAGE_BYTES = 8_000_000;
+/** The longest screenshot edge the build accepts, in pixels. */
+const MAX_IMAGE_EDGE = 8000;
 
 export const LOOKS_REPO_URL = `https://github.com/${REPO}`;
+/** Every like and download link a look carries starts here. */
+const REPO_PREFIX = `${LOOKS_REPO_URL}/`;
 export const SUBMIT_URL =
   `${LOOKS_REPO_URL}/issues/new?template=submit-look.yml`;
 export const REPORT_URL =
@@ -72,8 +83,16 @@ export interface Look {
   version: string | null;
   needsFonts: string[];
   fontUrl: string | null;
-  /** Remote image URL the build downloads, and how it was made. */
-  image: { src: string; kind: "screenshot" | "preview" } | null;
+  /** Remote image the build downloads, how it was made, and its
+   * pixel size (read from the PNG the build fetched). */
+  image: {
+    src: string;
+    kind: "screenshot" | "preview";
+    width: number;
+    height: number;
+  } | null;
+  /** The look file's `look_format`; 0 when the index omits it. */
+  lookFormat: number;
   added: string;
   updated: string;
   revision: number;
@@ -85,15 +104,20 @@ export interface Look {
 }
 
 /**
- * The main button: one place for its label key and target, so the
- * switch to "Add to KiwiDesk" and a `kiwidesk://` link is one edit
- * here once the app handles the scheme (owner, 2026-10-28).
+ * The main button: one place for its label key and target. It hands
+ * the look to the app over `kiwidesk://look/<id>` (owner,
+ * 2026-10-28); the detail view adds a plain file download under it.
  */
 export const mainAction = (look: Look) => ({
-  href: look.downloadUrl,
-  labelKey: "looks_download",
-  ariaKey: "looks_download_aria",
+  href: `kiwidesk://look/${look.id}`,
+  labelKey: "looks_add",
+  ariaKey: "looks_add_aria",
 });
+
+/** Whether the look needs a KiwiDesk newer than the latest release
+ * (#1740 ▸ Versions). */
+export const needsNewerApp = (look: Look): boolean =>
+  look.lookFormat > RELEASED_LOOK_FORMAT;
 
 /** Families KiwiDesk itself draws with; never a "Needs font". */
 export const SYSTEM_FONTS: Record<string, string> = {
@@ -104,6 +128,7 @@ export const SYSTEM_FONTS: Record<string, string> = {
 const HEX = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
 const ID = /^[a-z0-9][a-z0-9-]*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
+const IMAGE_PATH = /^looks\/[a-z0-9-]+\/screenshot\.png$/;
 
 const text = (v: unknown): string | null =>
   typeof v === "string" && v.trim() !== "" ? v.trim() : null;
@@ -114,6 +139,11 @@ const strings = (v: unknown): string[] =>
 const https = (v: unknown): string | null => {
   const s = text(v);
   return s?.startsWith("https://") ? s : null;
+};
+/** A link into the looks repo, or `null` for any other target. */
+const repoLink = (v: unknown): string | null => {
+  const s = text(v);
+  return s?.startsWith(REPO_PREFIX) && !s.includes("..") ? s : null;
 };
 const color = (v: unknown): string | null => {
   const s = text(v);
@@ -138,8 +168,8 @@ function toLook(row: any): { look: Look; file: string } | null {
   const name = text(row?.name);
   const author = text(row?.author);
   const file = text(row?.file);
-  const likeUrl = https(row?.like_url);
-  const downloadUrl = https(row?.download_url);
+  const likeUrl = repoLink(row?.like_url);
+  const downloadUrl = repoLink(row?.download_url);
   const added = text(row?.added);
   if (
     !id || !ID.test(id) || !name || !author || !file ||
@@ -166,12 +196,15 @@ function toLook(row: any): { look: Look; file: string } | null {
     needsFonts: fonts,
     fontUrl: https(row?.font_url),
     image:
-      path && !path.includes("..")
+      path && IMAGE_PATH.test(path)
         ? {
-            src: RAW + path.replace(/^\/+/, ""),
+            src: RAW + path,
             kind: row?.image?.kind === "screenshot" ? "screenshot" : "preview",
+            width: 0,
+            height: 0,
           }
         : null,
+    lookFormat: count(row?.look_format),
     added,
     updated: updated && DATE.test(updated) ? updated : added,
     revision: Math.max(1, count(row?.version)),
@@ -224,20 +257,50 @@ async function readSketch(look: Look, file: string): Promise<Sketch | null> {
   }
 }
 
-/** `look` with its image dropped unless GitHub serves it now. */
-async function withReachableImage(look: Look): Promise<Look> {
+/** The pixel size of a PNG, or why `bytes` is not one we accept.
+ * Decodes it whole, so a truncated file is refused here rather
+ * than failing the image pipeline later in the build. */
+async function pngSize(
+  bytes: Uint8Array,
+): Promise<{ width: number; height: number }> {
+  if (bytes.length > MAX_IMAGE_BYTES) {
+    throw new Error(`${bytes.length} bytes, over ${MAX_IMAGE_BYTES}`);
+  }
+  const image = sharp(bytes, {
+    limitInputPixels: MAX_IMAGE_EDGE * MAX_IMAGE_EDGE,
+  });
+  const { format, width, height } = await image.metadata();
+  if (format !== "png") throw new Error(`${format ?? "unknown"}, not PNG`);
+  if (!width || !height || width > MAX_IMAGE_EDGE || height > MAX_IMAGE_EDGE) {
+    throw new Error(`${width}×${height} px`);
+  }
+  await image.stats();
+  return { width, height };
+}
+
+/** `look` with its image dropped unless GitHub serves it now as a
+ * PNG within the size limits; the kept image carries its size. */
+async function withServedImage(look: Look): Promise<Look> {
   if (!look.image) return look;
   try {
     const res = await fetch(look.image.src, {
-      method: "HEAD",
       signal: AbortSignal.timeout(TIMEOUT_MS),
     });
-    if (res.ok) return look;
-    console.warn(`[looks] image of ${look.id}: HTTP ${res.status}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const type = res.headers.get("content-type") ?? "";
+    if (!/^image\/png\b/i.test(type) && !/^application\/octet-stream/i.test(type)) {
+      throw new Error(`content-type ${type || "missing"}`);
+    }
+    const declared = Number(res.headers.get("content-length"));
+    if (declared > MAX_IMAGE_BYTES) {
+      throw new Error(`${declared} bytes, over ${MAX_IMAGE_BYTES}`);
+    }
+    const size = await pngSize(new Uint8Array(await res.arrayBuffer()));
+    return { ...look, image: { ...look.image, ...size } };
   } catch (error) {
-    console.warn(`[looks] image of ${look.id}: ${error}`);
+    console.warn(`[looks] image of ${look.id} dropped: ${error}`);
+    return { ...look, image: null };
   }
-  return { ...look, image: null };
 }
 
 const none = (why: string): Look[] => {
@@ -265,8 +328,10 @@ async function read(): Promise<Look[]> {
     if (valid.length === 0) return none("the index lists no look");
     return await Promise.all(
       valid.map(async ({ look, file }) => {
-        const shown = await withReachableImage(look);
-        const sketch = shown.image ? null : await readSketch(shown, file);
+        const [shown, sketch] = await Promise.all([
+          withServedImage(look),
+          readSketch(look, file),
+        ]);
         return { ...shown, sketch };
       }),
     );
@@ -279,64 +344,8 @@ export const looks: Look[] = await read();
 
 // ---- Orders (#1740 ▸ Sorting) ----------------------------------
 
-const DAY_MS = 86_400_000;
-const dayNumber = (iso: string): number =>
-  Math.floor(Date.parse(`${iso}T00:00:00Z`) / DAY_MS);
-
-/** Seeded PRNG (mulberry32): the same cycle shuffles the same way
- * on every build of that cycle. */
-function mulberry32(seed: number): () => number {
-  let a = seed >>> 0;
-  return () => {
-    a = (a + 0x6d2b79f5) >>> 0;
-    let t = a;
-    t = Math.imul(t ^ (t >>> 15), t | 1);
-    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
-    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
-  };
-}
-
-function shuffled<T>(items: T[], seed: number): T[] {
-  const out = [...items];
-  const random = mulberry32(seed);
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-/** Top block: 6 looks, 12 from about 150. */
-const topBlock = (n: number): number => (n >= 150 ? 12 : 6);
-/** Places in the top block kept for looks added in the window. */
-const NEW_PLACES = 2;
-const NEW_WINDOW_DAYS = 14;
-
-/**
- * Discover, the default: a fair daily rotation from the UTC date,
- * computed at build time. Up to two looks added in the last 14
- * days (by add date, newest first) lead; every other look rotates
- * through the remaining top places, shuffled once per cycle with
- * the cycle number as seed and shifted each day by those places.
- * A cycle lasts until every look has had its turn. Likes and
- * downloads never touch it.
- */
-export function discoverOrder(list: Look[], now = new Date()): Look[] {
-  const today = Math.floor(now.getTime() / DAY_MS);
-  const fresh = list
-    .filter((l) => today - dayNumber(l.added) <= NEW_WINDOW_DAYS)
-    .sort((a, b) => b.added.localeCompare(a.added) || a.id.localeCompare(b.id))
-    .slice(0, NEW_PLACES);
-  const free = Math.max(1, topBlock(list.length) - NEW_PLACES);
-  const cycleDays = Math.max(1, Math.ceil(list.length / free));
-  const cycle = Math.floor(today / cycleDays);
-  const base = [...list].sort((a, b) => a.id.localeCompare(b.id));
-  const deck = shuffled(base, cycle);
-  const shift = deck.length ? ((today % cycleDays) * free) % deck.length : 0;
-  const rotated = [...deck.slice(shift), ...deck.slice(0, shift)];
-  const lead = new Set(fresh.map((l) => l.id));
-  return [...fresh, ...rotated.filter((l) => !lead.has(l.id))];
-}
+/** Discover: `src/lib/looks-order.ts`, kept pure so a test drives it. */
+export { discoverOrder } from "./looks-order.ts";
 
 /** Recent: by the later of added and updated, newest first. */
 export const recentOrder = (list: Look[]): Look[] =>
@@ -362,12 +371,14 @@ export const wasUpdated = (look: Look): boolean =>
 
 // ---- Formatting ------------------------------------------------
 
-/** A count as a card shows it: 1.2k from 1,000. */
+/** A count as a card shows it: 1.2k from 1,000, 1M from 1,000,000.
+ * Rounded down, so 999,999 reads 999.9k and never 1,000k. */
 export function shortCount(n: number, lang: string): string {
   if (n < 1000) return new Intl.NumberFormat(lang).format(n);
-  const k = new Intl.NumberFormat(lang, { maximumFractionDigits: 1 })
-    .format(Math.floor(n / 100) / 10);
-  return `${k}k`;
+  const [unit, suffix] = n < 1_000_000 ? [1000, "k"] : [1_000_000, "M"];
+  const short = new Intl.NumberFormat(lang, { maximumFractionDigits: 1 })
+    .format(Math.floor(n / (unit / 10)) / 10);
+  return `${short}${suffix}`;
 }
 
 export const fullCount = (n: number, lang: string): string =>

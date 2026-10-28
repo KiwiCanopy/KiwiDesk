@@ -24,6 +24,7 @@ import {
   popularOrder,
   wasUpdated,
   mainAction,
+  needsNewerApp,
   shortCount,
   fullCount,
   formatDate,
@@ -109,13 +110,21 @@ const haystack = (l: Look): string =>
     ].join(" "),
   );
 
+/** The HTML ids of a look's detail section, its title and its card:
+ * prefixed so no look id collides with the page's own, and suffixed
+ * after `_`, which a look id cannot hold, so none collides with
+ * another look's. */
+const anchor = (id: string): string => `look-${id}`;
+const titleId = (id: string): string => `look-${id}_title`;
+const cardId = (id: string): string => `look-${id}_card`;
+
 const creditHtml = (l: Look): string | null => {
   const c = l.credit;
   if (!c) return null;
   if (c.removed) return esc(t("looks_based_on_removed"));
   const name =
     c.id && byId.has(c.id)
-      ? `<a href="#${c.id}">${esc(c.name)}</a>`
+      ? `<a href="#${anchor(c.id)}">${esc(c.name)}</a>`
       : esc(c.name);
   return h("looks_based_on", { name, author: esc(c.author) });
 };
@@ -218,23 +227,27 @@ const MAX_CARD_TAGS = 4;
         const action = mainAction(look);
         const extra = look.tags.length - MAX_CARD_TAGS;
         return (
-          <li class="card look-card" data-look={look.id}
+          <li class="card look-card" id={cardId(look.id)} data-look={look.id}
             data-tags={look.tags.join(" ")} data-search={haystack(look)}
             data-discover={index} data-recent={recentRank.get(look.id)}
             data-popular={popularRank.get(look.id)}>
             <LookPicture look={look} size="card"
               badgeScreenshot={t("looks_badge_screenshot")}
               badgePreview={t("looks_badge_preview")}
-              alt={f("looks_picture_alt", { name: look.name })} />
+              altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })}
+              altPreview={f("looks_picture_alt_preview", { name: look.name })} />
             <div class="card__body">
               <h2 class="card__title">
-                <a href={`#${look.id}`}>{look.name}</a>
+                <a href={`#${anchor(look.id)}`}>{look.name}</a>
                 <span class="recent-label">
                   {t(wasUpdated(look) ? "looks_label_updated" : "looks_label_new")}
                 </span>
               </h2>
               <p class="byline">{f("looks_by", { author: look.author })}</p>
               {credit && <p class="based" set:html={credit} />}
+              {needsNewerApp(look) && (
+                <p class="needs">{t("looks_needs_newer")}</p>
+              )}
               {look.needsFonts.map((font) => (
                 <p class="needs" set:html={needsFontHtml(look, font)} />
               ))}
@@ -300,16 +313,17 @@ const MAX_CARD_TAGS = 4;
         .map((id) => byId.get(id))
         .filter((l): l is Look => !!l);
       return (
-        <article class="detail" id={look.id}
-          aria-labelledby={`${look.id}-title`}>
-          <a class="detail__back small" href="#looks-grid">
+        <article class="detail" id={anchor(look.id)}
+          aria-labelledby={titleId(look.id)}>
+          <a class="detail__back small" href={`#${cardId(look.id)}`}>
             <span aria-hidden="true">← </span>{t("looks_back")}
           </a>
           <LookPicture look={look} size="detail"
             badgeScreenshot={t("looks_badge_screenshot")}
             badgePreview={t("looks_badge_preview")}
-            alt={f("looks_picture_alt", { name: look.name })} />
-          <h2 id={`${look.id}-title`}>{look.name}</h2>
+            altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })}
+            altPreview={f("looks_picture_alt_preview", { name: look.name })} />
+          <h2 id={titleId(look.id)}>{look.name}</h2>
           <p class="byline">{f("looks_by", { author: look.author })}</p>
           {credit && <p class="based" set:html={credit} />}
           {look.description && <p class="desc">{look.description}</p>}
@@ -344,10 +358,15 @@ const MAX_CARD_TAGS = 4;
               </span>
             )}
           </div>
-          <p class="small look-get look-hint">{t("looks_import_hint")}</p>
+          <p class="small look-get look-file">
+            <a href={look.downloadUrl}>{t("looks_download_file")}</a>
+          </p>
           <p class="touch-note">{t("looks_touch_detail")}</p>
 
           <hr class="rule" />
+          {needsNewerApp(look) && (
+            <p class="needs">{t("looks_needs_newer")}</p>
+          )}
           <ul class="facts">
             {look.version && (
               <li>{f("looks_made_with", { version: look.version })}</li>
@@ -381,7 +400,7 @@ const MAX_CARD_TAGS = 4;
               <ul class="built">
                 {derived.map((d) => (
                   <li>
-                    <a href={`#${d.id}`}>{d.name}</a>
+                    <a href={`#${anchor(d.id)}`}>{d.name}</a>
                     <span class="who">{f("looks_by", { author: d.author })}</span>
                   </li>
                 ))}
@@ -698,8 +717,13 @@ const MAX_CARD_TAGS = 4;
     gap: 0.7rem 1rem;
     margin: 1.1rem 0 0.4rem;
   }
-  .look-hint {
-    margin: 0.2rem 0 0;
+  .look-file {
+    margin: 0.1rem 0 0;
+  }
+  .look-file a {
+    color: var(--text-dim);
+    text-decoration: underline;
+    text-underline-offset: 3px;
   }
   .seg {
     display: inline-flex;
@@ -813,7 +837,8 @@ const MAX_CARD_TAGS = 4;
   }
 
   /* Touch screens, decided by input device and never by width
-     (#1740 ▸ Page details): the download gives way to a note. */
+     (#1740 ▸ Page details): the add and download give way to a
+     note. */
   .touch-note {
     display: none;
     font-size: 0.84rem;

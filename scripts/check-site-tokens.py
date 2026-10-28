@@ -1636,23 +1636,32 @@ def check_looks_rendered(dist: pathlib.Path) -> None:
     breaks on it. That leniency is silent by construction, so this
     is the watcher: a renamed field, a format bump or a moved repo
     reds the site gate instead of quietly emptying the gallery.
-    Each card owes a detail section under its own id, so a card's
-    title link lands, and while a page carries noindex no sitemap
-    may list it — the gallery goes live by dropping both together.
+    The trade is the voices check's: an emptied gallery or a GitHub
+    outage during the build reds every site PR until it clears.
+    Each card owes a detail section at `look-<id>`, so its title
+    link lands, and a page is noindex exactly when no sitemap lists
+    it — the gallery goes live by dropping noindex and adding the
+    sitemap entry together, and either alone reds.
     """
-    card = re.compile(
-        r"<li\b[^>]*\bclass=\"[^\"]*\blook-card\b[^>]*\bdata-look=\"([^\"]+)\""
-    )
-    detail = re.compile(r"<article\b[^>]*\bclass=\"[^\"]*\bdetail\b"
-                        r"[^>]*\bid=\"([^\"]+)\"")
-    noindex = re.compile(
-        r"<meta\b[^>]*name=\"robots\"[^>]*content=\"[^\"]*noindex"
-    )
+    tag = re.compile(r"<(li|article|meta)\b([^>]*)>")
+    attr = re.compile(r'([\w:-]+)\s*=\s*"([^"]*)"')
+
+    def elements(html: str, name: str) -> list[dict[str, str]]:
+        return [
+            dict(attr.findall(attrs))
+            for kind, attrs in tag.findall(html)
+            if kind == name
+        ]
+
+    def classes(el: dict[str, str]) -> list[str]:
+        return el.get("class", "").split()
+
     listed = set()
     for name in ("sitemap.xml", "sitemap-0.xml"):
         page = dist / name
         if page.is_file():
-            listed |= set(re.findall(r"<loc>(.*?)</loc>", page.read_text()))
+            for loc in re.findall(r"<loc>(.*?)</loc>", page.read_text()):
+                listed.add(urllib.parse.urlparse(loc).path)
     drawn = 0
     pages = [dist / locale / LOOKS_PAGE for locale in ("", "de", "ja")]
     for page in pages:
@@ -1660,19 +1669,36 @@ def check_looks_rendered(dist: pathlib.Path) -> None:
         if not page.exists():
             fail(f"looks page {where} was not built")
         html = page.read_text()
-        cards = card.findall(html)
+        cards = [
+            el["data-look"]
+            for el in elements(html, "li")
+            if "look-card" in classes(el) and "data-look" in el
+        ]
         if not cards:
             fail(
                 f"{where} draws no look card. The build's read of the "
                 "KiwiDesk-Looks index failed or returned nothing; its "
                 "`[looks]` warning in the build log says why."
             )
-        missing = set(cards) - set(detail.findall(html))
+        details = {
+            el.get("id", "")
+            for el in elements(html, "article")
+            if "detail" in classes(el)
+        }
+        missing = {c for c in cards if f"look-{c}" not in details}
         if missing:
-            fail(f"{where}: no detail section for {sorted(missing)}")
+            fail(f"{where}: no detail section at look-<id> for "
+                 f"{sorted(missing)}")
+        noindex = any(
+            el.get("name") == "robots"
+            and "noindex" in el.get("content", "")
+            for el in elements(html, "meta")
+        )
         path = "/" + str(where.parent) + "/"
-        if noindex.search(html) and any(u.endswith(path) for u in listed):
+        if noindex and path in listed:
             fail(f"{where} is noindex but a sitemap lists {path}")
+        if not noindex and path not in listed:
+            fail(f"{where} is indexable but no sitemap lists {path}")
         drawn += len(cards)
     print(f"looks: {drawn} card(s) drawn across {len(pages)} page(s)")
 

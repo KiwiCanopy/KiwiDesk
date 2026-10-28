@@ -6,7 +6,9 @@
 // The sketch's colors arrive as inline custom properties
 // (`sketchStyle` in `src/lib/looks.ts`): look data, not brand
 // colors, so no hex of them is written under `site/src`.
-import { Image } from "astro:assets";
+// An image astro:assets cannot process drops to the sketch too, so
+// a bad screenshot never fails the deploy (`src/lib/looks.ts`).
+import { getImage } from "astro:assets";
 import { sketchStyle, type Look } from "../lib/looks";
 
 interface Props {
@@ -14,9 +16,12 @@ interface Props {
   size: "card" | "detail";
   badgeScreenshot: string;
   badgePreview: string;
-  alt: string;
+  /** Alt text for a screenshot and for any other picture. */
+  altScreenshot: string;
+  altPreview: string;
 }
-const { look, size, badgeScreenshot, badgePreview, alt } = Astro.props;
+const { look, size, badgeScreenshot, badgePreview, altScreenshot, altPreview } =
+  Astro.props;
 
 const s = look.sketch;
 const edges = s?.edges ?? ["top"];
@@ -25,6 +30,23 @@ const sizes =
   size === "card"
     ? "(max-width: 720px) 100vw, 360px"
     : "(max-width: 760px) 100vw, 680px";
+const widths = size === "card" ? [360, 720] : [680, 1360];
+let picture: Awaited<ReturnType<typeof getImage>> | null = null;
+if (look.image) {
+  const fit = widths.filter((w) => w <= look.image!.width);
+  try {
+    picture = await getImage({
+      src: look.image.src,
+      width: look.image.width,
+      height: look.image.height,
+      widths: fit.length > 0 ? fit : [look.image.width],
+      sizes,
+    });
+  } catch (error) {
+    console.warn(`[looks] image of ${look.id} not processed: ${error}`);
+  }
+}
+const kind = picture ? look.image!.kind : null;
 const classes = [
   "plate",
   s?.glass && "plate--glass",
@@ -39,18 +61,20 @@ const classes = [
 
 <div class:list={["pic", `pic--${size}`]}>
   <span class="pic__badge">
-    {look.image?.kind === "screenshot" ? badgeScreenshot : badgePreview}
+    {kind === "screenshot" ? badgeScreenshot : badgePreview}
   </span>
   {
-    look.image ? (
-      <Image
+    picture ? (
+      <img
         class="pic__img"
-        src={look.image.src}
-        inferSize
-        alt={alt}
-        widths={size === "card" ? [360, 720] : [680, 1360]}
+        src={picture.src}
+        srcset={picture.srcSet.attribute || undefined}
         sizes={sizes}
+        width={look.image!.width}
+        height={look.image!.height}
+        alt={kind === "screenshot" ? altScreenshot : altPreview}
         loading="lazy"
+        decoding="async"
       />
     ) : (
       <div class={classes} style={sketchStyle(s)} aria-hidden="true">

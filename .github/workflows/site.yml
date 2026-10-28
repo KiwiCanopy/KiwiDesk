@@ -103,6 +103,12 @@ jobs:
       - name: Check the roadmap section
         run: node test-roadmap.mjs
 
+      # The looks gallery's Discover rotation (#1740), over
+      # synthetic galleries: the live index is too young to have
+      # run a cycle.
+      - name: Check the looks rotation
+        run: node test-looks-order.mjs
+
       # The unreleased-marker plugin's own subject (#1232). The
       # artifact clauses in the check above go vacuous whenever
       # the corpus carries no marker, which is most of the time —
