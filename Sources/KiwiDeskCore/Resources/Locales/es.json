@@ -1884,6 +1884,7 @@
   "shortcuts.app_behavior.open_or_focus": "Abrir o Enfocar",
   "shortcuts.apps.all_bound": "«%1$@» ya tiene una tecla para cada acción. Cambia uno de sus atajos de arriba para darle otro.",
   "shortcuts.apps.empty": "Todavía ninguna app tiene una tecla propia. Añade una y su tecla te llevará a la ventana de esa app, esté donde esté, o iniciará la app si no está en ejecución.",
+  "shortcuts.apps.recorder_name": "%1$@, %2$@",
   "shortcuts.base": "Atajos en",
   "shortcuts.base.caption": "✦ pasa todos los atajos de ⌃⌥ a Hyper, manteniendo ⇧ y ⌘. %1$@ usa ✦⌥, porque ⇧⌘3–5 son las capturas de pantalla de macOS. Los atajos de tamaño se quedan en ⌥⌘. Se aplica a todos los perfiles cuando guardes.",
   "shortcuts.base.help": "Elige ✦ para poner los atajos de KiwiDesk en la tecla Hyper. Un atajo que pusiste tú en otra tecla se queda donde lo pusiste, y uno cuya tecla ✦ ya ocupa otro atajo se queda en ⌃⌥.",

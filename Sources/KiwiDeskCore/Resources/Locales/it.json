@@ -1884,6 +1884,7 @@
   "shortcuts.app_behavior.open_or_focus": "Apri o porta in primo piano",
   "shortcuts.apps.all_bound": "«%1$@» ha già un tasto per ogni azione. Cambia una delle sue scorciatoie qui sopra per dargliene un'altra.",
   "shortcuts.apps.empty": "Nessuna app ha ancora un tasto tutto suo. Aggiungine una: il suo tasto ti porterà alla finestra di quell'app, ovunque si trovi, oppure avvierà l'app se non è in esecuzione.",
+  "shortcuts.apps.recorder_name": "%1$@, %2$@",
   "shortcuts.base": "Scorciatoie su",
   "shortcuts.base.caption": "✦ sposta ogni scorciatoia ⌃⌥ su Hyper, mantenendo ⇧ e ⌘. %1$@ usa ✦⌥, perché ⇧⌘3–5 sono le istantanee dello schermo di macOS. Le scorciatoie di dimensione restano su ⌥⌘. Vale per tutti i profili quando salvi.",
   "shortcuts.base.help": "Scegli ✦ per mettere le scorciatoie di KiwiDesk sul tasto Hyper. Una scorciatoia che hai messo tu su un altro tasto resta dove l'hai messa, e una il cui tasto ✦ è già occupato da un'altra scorciatoia resta su ⌃⌥.",

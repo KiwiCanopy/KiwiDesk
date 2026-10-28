@@ -27,10 +27,9 @@ extension ApplicationsGroup {
                 },
                 exclude: fullyBoundBundleIDs()
             )
-            // Hug the content, like the per-row picker. Alone in
-            // the row it would otherwise stretch to the section
-            // width, read as a field rather than a control, and
-            // stop lining up with the row pickers above it.
+            // Hug the content: alone in the row it would otherwise
+            // stretch to the section width and read as a field
+            // rather than a control.
             .fixedSize()
             // The picker is the add affordance now that the
             // button is gone, so it carries the census's name —
@@ -44,7 +43,7 @@ extension ApplicationsGroup {
             .accessibilityValue(
                 L("shortcuts.choose_app", "Choose app…")
             )
-            if let notice = allBoundNotice(for: nil) {
+            if let notice = allBoundNotice {
                 Text(notice)
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -56,16 +55,15 @@ extension ApplicationsGroup {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    /// Why a pick at `row` created nothing, or nil.
+    /// Why the last pick created nothing, or nil.
     ///
     /// DERIVED, never a stored message: it re-asks the live
     /// question, so freeing a action by deleting one of that
     /// app's rows clears the sentence without anything having to
-    /// notice. `refusal` only says which app to ask about and
-    /// where the pick was made.
-    func allBoundNotice(for row: UUID?) -> String? {
-        guard let refusal, refusal.row == row else { return nil }
-        return allBoundNotice(about: refusal.app)
+    /// notice. `refusal` only says which app to ask about.
+    var allBoundNotice: String? {
+        guard let refusal else { return nil }
+        return allBoundNotice(about: refusal)
     }
 
     /// The sentence for one app, asked of live state.
@@ -101,7 +99,7 @@ extension ApplicationsGroup {
         guard
             let action = firstAvailableAction(for: app.bundleID)
         else {
-            refuse(app, at: nil)
+            refuse(app)
             return
         }
         var binding = KeyBinding(kind: .application)
@@ -122,11 +120,8 @@ extension ApplicationsGroup {
     /// `SettingsFooter`'s measured one, taken FROM it rather than
     /// restated: a post landing in the same instant as a
     /// control's own announcement was dropped on device (#812).
-    func refuse(
-        _ app: KeybindingCatalog.InstalledApp,
-        at row: UUID?
-    ) {
-        refusal = AppPickRefusal(app: app, row: row)
+    func refuse(_ app: KeybindingCatalog.InstalledApp) {
+        refusal = app
         refusalAnnouncement?.cancel()
         guard let sentence = allBoundNotice(about: app) else {
             return
@@ -145,14 +140,9 @@ extension ApplicationsGroup {
     }
 
     /// Bundle IDs that already carry every action (#334).
-    /// A per-row re-pick excludes its own row, so an app fully
-    /// bound only BECAUSE of that row stays pickable.
-    func fullyBoundBundleIDs(
-        excluding id: UUID? = nil
-    ) -> Set<String> {
+    func fullyBoundBundleIDs() -> Set<String> {
         var seen: [String: Set<AppShortcutAction>] = [:]
-        for binding in bindings
-        where binding.kind == .application && binding.id != id {
+        for binding in bindings where binding.kind == .application {
             guard
                 let bundleID = KeybindingCatalog.appBundleID(
                     from: binding.lua

@@ -1884,6 +1884,7 @@
   "shortcuts.app_behavior.open_or_focus": "Open or Focus",
   "shortcuts.apps.all_bound": "“%1$@” already has a key for each action. Change one of its shortcuts above to give it another.",
   "shortcuts.apps.empty": "No app has a key of its own yet. Add one and its key takes you to that app's window, wherever it is, or launches the app if it isn't running.",
+  "shortcuts.apps.recorder_name": "%1$@, %2$@",
   "shortcuts.base": "Shortcuts use",
   "shortcuts.base.caption": "✦ moves every ⌃⌥ shortcut to Hyper, keeping ⇧ and ⌘. %1$@ takes ✦⌥, since ⇧⌘3–5 are macOS's screenshots. Resize shortcuts stay on ⌥⌘. Applies to all profiles when you save.",
   "shortcuts.base.help": "Pick ✦ to put KiwiDesk's shortcuts on the Hyper key. A shortcut you set on another key stays where you put it, and one whose ✦ key another shortcut holds stays on ⌃⌥.",

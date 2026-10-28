@@ -3,14 +3,24 @@ import SwiftUI
 
 /// The app half of an App Rules row — its icon and name — shared
 /// by the Space list and the Float list (#1608).
+/// Open applications rows wear it too (#2708).
 struct AppRuleIdentity: View {
     let app: String
+    /// The name to show, where the caller knows it better than
+    /// the bundle lookup does. An empty `app` holds a blank icon
+    /// slot and needs `name`.
+    var name: String?
     @Environment(\.settingsWidth) private var width
 
     var body: some View {
+        let shown =
+            name
+            ?? KeybindingCatalog.displayName(
+                forBundleID: app
+            )
         HStack(spacing: 6) {
             icon
-            Text(KeybindingCatalog.displayName(forBundleID: app))
+            Text(shown)
                 .fontWeight(.medium)
                 .lineLimit(1)
                 // A column wide, so both lists' values line up;
@@ -20,16 +30,27 @@ struct AppRuleIdentity: View {
                         ? nil : SettingsMetrics.appRuleNameColumn,
                     alignment: .leading
                 )
+                // The column truncates a long name.
+                .help(shown)
         }
     }
 
-    private var icon: some View {
-        Image(nsImage: AppIconCache.shared.icon(forBundleID: app))
-            .resizable()
-            .frame(
+    /// Decorative: the name beside it is what VoiceOver reads.
+    @ViewBuilder private var icon: some View {
+        if app.isEmpty {
+            Color.clear.frame(
                 width: SettingsMetrics.appRuleIconColumn,
                 height: SettingsMetrics.appRuleIconColumn
             )
+        } else {
+            Image(nsImage: AppIconCache.shared.icon(forBundleID: app))
+                .resizable()
+                .frame(
+                    width: SettingsMetrics.appRuleIconColumn,
+                    height: SettingsMetrics.appRuleIconColumn
+                )
+                .accessibilityHidden(true)
+        }
     }
 }
 
