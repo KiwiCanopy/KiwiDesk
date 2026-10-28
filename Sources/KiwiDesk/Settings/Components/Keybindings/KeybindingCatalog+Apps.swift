@@ -71,25 +71,6 @@ extension KeybindingCatalog {
         }
     }
 
-    /// Resolves preferred or available action when reassigning application
-    /// row (#334).
-    static func actionForAssignment(
-        to bundleID: String,
-        preferred: AppShortcutAction,
-        in bindings: [KeyBinding],
-        excluding id: UUID
-    ) -> AppShortcutAction {
-        let taken = takenActions(
-            for: bundleID,
-            in: bindings,
-            excluding: id
-        )
-        if !taken.contains(preferred) { return preferred }
-        return AppShortcutAction.allCases.first {
-            !taken.contains($0)
-        } ?? preferred
-    }
-
     /// nil unless `lua` is exactly an app-launch call; an embedded
     /// quote means escaped content the app menu never authors.
     private static func parseAppCommand(

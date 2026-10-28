@@ -191,12 +191,7 @@ struct AppShortcutAddOnSelectTests {
             (
                 "KeybindingAppGroup+AddRow.swift", "funcadd(",
                 "firstAvailableAction(for:app.bundleID)"
-            ),
-            (
-                "KeybindingAppGroup+Row.swift",
-                "privatefuncassign(",
-                "AppShortcutAction.allCases.count"
-            ),
+            )
         ] {
             let body = try declarationBody(
                 function,
@@ -244,9 +239,8 @@ struct AppShortcutAddOnSelectTests {
                         + "nothing and say nothing"
                 )
             )
-            // Both routes RETIRE it too, or the channel this
-            // change calls one channel is retired from one of
-            // them and a caption narrates a pick two actions old.
+            // The success path RETIRES it too, or a caption
+            // narrates a pick two actions old.
             #expect(
                 body.contains("clearRefusal()"),
                 Comment(
@@ -278,39 +272,32 @@ struct AppShortcutAddOnSelectTests {
         )
     }
 
-    /// The caption belongs to the picker that refused.
-    ///
-    /// Drawn only at the add row, a refusal raised from row 2 of
-    /// twenty painted below row 20 — silent for a sighted user on
-    /// any list long enough to scroll (code review 2026-09-06).
-    /// Keyed rather than per-row-unconditional, so it stays ONE
-    /// sentence instead of gui.md's caption under every child.
-    @Test("the refusal draws at the picker that raised it")
-    func refusalDrawsAtItsOwnPicker() throws {
+    /// An added row shows its app the App Rules way and never
+    /// switches it in place (#2708): another app is a new row.
+    @Test("an added row shows its app, with no picker")
+    func rowShowsItsApp() throws {
         let row = squashed(try source("KeybindingAppGroup+Row.swift"))
-        // Scoped to `rowNotice`, which is what DRAWS: read
-        // file-wide, the needled spelling survived in a
-        // non-drawing site while `rowNotice` regressed to the
-        // add row's key, so every row painted the add row's
-        // refusal (`guard-prover`, 2026-09-06).
         #expect(
-            try declarationBody("funcrowNotice(", in: row)
-                .contains(
-                    "allBoundNotice(for:binding.wrappedValue.id)"
-                ),
+            !row.contains("AppPickerButton("),
             Comment(
                 rawValue:
-                    "a row no longer asks for ITS refusal — the "
-                    + "sentence would print at the bottom of the "
-                    + "group, away from the pick that raised it"
+                    "an Open applications row carries an app "
+                    + "picker again, so its app switches in place "
+                    + "unlike an App Rules row"
             )
         )
+        let body = try declarationBody("funcrow(", in: row)
         #expect(
-            try declarationBody("funcrow(", in: row)
-                .contains("rowNotice(binding)"),
+            body.contains("identity(binding.wrappedValue)"),
+            Comment(rawValue: "the row no longer draws its app")
+        )
+        #expect(
+            try declarationBody("privatefuncidentity(", in: row)
+                .contains("AppRuleIdentity("),
             Comment(
                 rawValue:
-                    "the row no longer draws its notice at all"
+                    "the row's app no longer wears App Rules' "
+                    + "icon and name"
             )
         )
     }

@@ -95,7 +95,7 @@ struct IconHoverChipTests {
         let help = try source("Components/Common/HelpButton.swift")
         #expect(help.occurrences(of: ".iconHoverChip(") == 1)
         #expect(!help.contains(".hoverHighlight("))
-        let trash = try source("Sections/AppRuleIdentity.swift")
+        let trash = try source("Components/Common/AppRuleIdentity.swift")
         #expect(trash.occurrences(of: ".iconHoverChip()") == 1)
         // The menu's own neutral label ink sits closer to the glyph.
         #expect(trash.contains(".foregroundStyle(SettingsTheme."))
@@ -155,7 +155,7 @@ struct IconHoverChipTests {
             )
         )
         for path in [
-            "Sections/AppRuleIdentity.swift",
+            "Components/Common/AppRuleIdentity.swift",
             "Components/Keybindings/KeybindingNavRow.swift",
         ] {
             #expect(
