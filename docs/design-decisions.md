@@ -10216,6 +10216,88 @@ config or profile value, so the stored-value guardrail owes it
 no `ConfigMigration`; a stray key in the app's own defaults
 domain is inert.
 
+:::unreleased
+**Simple is a second root, built from Advanced's own parts.**
+(#2737, owner ruling 2026-10-28, superseding *Settings is one
+surface* above as far as it refuses a stripped Simple; the rest
+of that entry — the offer shapes, the Customize button, Screens
+on any screen count — stands for Advanced.) A `Simple | Advanced`
+segment at the header's trailing edge switches between two
+roots. Advanced is the Settings described everywhere else in
+this file, unchanged. Simple is one page: the Look line, the
+Space rows, KiwiHub's three keys and Open applications on the
+left, a live preview of the desk on the right.
+
+#2654 refused this on two grounds, and both are answered by
+construction rather than by promise:
+
+- **A doubled surface.** Simple owns layout and nothing else. It
+  composes the components Advanced already draws — the look
+  tiles, the Space row with its layout menu and the Screen pin
+  menu, the Open applications rows, the support strip — so a
+  change to a control reaches both surfaces, and a Simple-only
+  editor is the defect this entry exists to forbid.
+- **Config presence.** Simple hides what a user made, so it
+  names it instead: the header's subtitle counts the App Rules,
+  shortcut layers and Lua bindings it does not draw ("kept in
+  Advanced ›"), a Space with overrides keeps its Customize
+  badge, and a pin to a missing screen keeps "Pin offline".
+  Hiding a thing the user made without saying so is still
+  losing their work; hiding it while naming it is curation.
+
+What changed since #2654 is the premise. That segment's whole
+effect was one card, a decision with no result. This one
+removes some ten areas from a first-run user's path, and
+"which surface" is a decision with a large result.
+
+Three things stay one, or the two roots drift apart:
+
+- **One draft, one save pill.** Switching keeps the open draft
+  untouched; a pill row whose control Simple does not draw
+  switches to Advanced when clicked. A Simple that wrote at once
+  would be a second save model.
+- **No silent doors.** Simple has no search field; every way
+  into Advanced is a visible, named link. The search tag and
+  silent flip #2654 deleted stay deleted.
+- **No hue marks the mode.** The segment's label says which root
+  is showing; the accent stays selection's and identity's
+  (#1173).
+
+The preview is the reason Simple is two columns. It is drawn
+from the draft on the neutral plate, never on a wallpaper — a
+look carries none, and painting one teaches what the app does
+not do (#702). Hover previews a look or a Space; a click keeps a
+Space, so the keyboard and VoiceOver reach what the pointer
+does. It docks at the panel breakpoint and leaves its column
+below it, as every preview does; the support strip and footer
+end the controls at every width, so the right column is the
+preview and nothing else.
+
+**Simple has its own visibility rule.** *Grey, don't hide*
+governs the controls within a surface; what Simple draws at all
+is a scope decision, made once for the whole root. So on one
+screen Simple hides the Screen menu and the screen map rather
+than greying them: a disabled control there teaches a choice the
+user cannot make, and Advanced ▸ Screens still holds the pins.
+Inside a control Simple does draw, the rule binds as before: an
+`init.lua`-owned Look line greys, it does not vanish.
+
+Simple is a root beside Home, not a navigator, so *Home is the
+only navigator* still holds inside Advanced. Every install opens
+on Simple until the user picks a root, an updated one too: the
+header names what Simple hides, so an existing config reads as
+kept rather than lost, and guessing a root from the config would
+be a second predicate to keep true. Only the switch stores the
+choice: a link, a bar menu's Edit in Settings… or a What's new
+step shows Advanced for that window and leaves the stored root
+alone, since a landing the user followed is not the pick ruling
+15 waits for. The choice is a new key; the retired
+`settingsMode` is never read, because its values meant the old
+modes. "Advanced" names the root alone: General's drawer
+that held the config file, backup and resets is *Files & Reset*,
+for what it holds.
+:::
+
 **A persistent statement and a transient one never share a
 property.** (#1173.) Hover shipped on the full-strength accent of
 the Home card's border while #760's mode marking lived on that
@@ -19929,7 +20011,7 @@ switch macOS accepted but never announced.
 **[Principle]**
 
 **A reset clears app-generated state, never authored content or
-app-level preferences** (#634). The two General ▸ Advanced
+app-level preferences** (#634). The two General ▸ Files & Reset
 hatches delete what KiwiDesk wrote for itself — `gui.json`,
 profiles, the arrangement snapshots — and always keep what the
 user made or chose: `init.lua`, the palette library, the display
@@ -20056,7 +20138,7 @@ carries an *Update Available…* row only while there is one to
 install — a menu row that is usually a no-op is noise beside
 Quit. Language,
 appearance and start-at-login are General's, and the reset
-ladder, log export and backup stay under General ▸ Advanced,
+ladder, log export and backup stay under General ▸ Files & Reset,
 the recovery shelf.
 
 **A "checking" state is only ever our own check.** A scheduled

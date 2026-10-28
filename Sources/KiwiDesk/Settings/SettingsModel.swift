@@ -68,6 +68,15 @@ final class SettingsModel: ObservableObject {
         didSet {
             nav.navigationMovesFocus = SettingsInputSource.movesFocus
             onWindowTitle?(SettingsWindowTitle.of(destination))
+            // Every page is Advanced's (#2737); shown, not stored.
+            if destination != nil { settingsRoot = .advanced }
+        }
+    }
+    /// The root this window shows (#2737). Only the switch stores
+    /// it (`pickRoot`); a fresh open re-reads the stored choice.
+    @Published var settingsRoot: SettingsRoot = .advanced {
+        didSet {
+            if settingsRoot == .simple { destination = nil }
         }
     }
     /// Distinct setting changes in draft, recomputed beside `isDirty`.
@@ -326,6 +335,7 @@ final class SettingsModel: ObservableObject {
         self.appearance = AppearancePreference.read(
             from: preferences
         )
+        self.settingsRoot = SettingsRootPreference.read(from: preferences)
         reload()
     }
 
