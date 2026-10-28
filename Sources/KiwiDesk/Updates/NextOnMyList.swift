@@ -36,21 +36,39 @@ struct NextOnMyList: Codable, Equatable {
         }
     }
 
-    /// Nil for an unknown format, a document that does not decode,
-    /// or a section with no date or no items. Unknown keys are
-    /// ignored, so the document can grow without a format bump.
-    static func decode(_ data: Data) -> NextOnMyList? {
+    /// One read of the file: a list, a section the owner emptied
+    /// (heading only), or nothing this build can read — the last
+    /// is also a read that never arrived.
+    enum Read: Equatable {
+        case list(NextOnMyList)
+        case emptied
+        case unreadable
+    }
+
+    /// Unknown keys are ignored, so the document can grow without
+    /// a format bump.
+    static func read(_ data: Data) -> Read {
         guard
             let document = try? JSONDecoder().decode(
                 Document.self,
                 from: data
             ),
-            knownFormats.contains(document.format),
-            let day = document.asOf,
-            let asOf = Self.day(day),
-            let items = document.items, !items.isEmpty
-        else { return nil }
-        return NextOnMyList(asOf: asOf, items: items)
+            knownFormats.contains(document.format)
+        else { return .unreadable }
+        guard let items = document.items, !items.isEmpty else {
+            return .emptied
+        }
+        guard let day = document.asOf, let asOf = Self.day(day) else {
+            return .unreadable
+        }
+        return .list(NextOnMyList(asOf: asOf, items: items))
+    }
+
+    /// Nil for an unknown format, a document that does not decode,
+    /// or a section with no date or no items.
+    static func decode(_ data: Data) -> NextOnMyList? {
+        guard case .list(let next) = read(data) else { return nil }
+        return next
     }
 
     private static func day(_ text: String) -> Date? {
@@ -80,6 +98,15 @@ struct NextOnMyList: Codable, Equatable {
     @concurrent static func fetch(
         besideFeed feed: URL
     ) async -> NextOnMyList? {
+        guard case .list(let next) = await fetchRead(besideFeed: feed)
+        else { return nil }
+        return next
+    }
+
+    /// `fetch`, telling an emptied section from a failed read.
+    @concurrent static func fetchRead(
+        besideFeed feed: URL
+    ) async -> Read {
         var request = URLRequest(url: url(besideFeed: feed))
         request.cachePolicy = .reloadIgnoringLocalCacheData
         // What's new waits on this before it opens.
@@ -89,7 +116,7 @@ struct NextOnMyList: Codable, Equatable {
                 for: request
             ),
             (response as? HTTPURLResponse)?.statusCode == 200
-        else { return nil }
-        return decode(data)
+        else { return .unreadable }
+        return read(data)
     }
 }

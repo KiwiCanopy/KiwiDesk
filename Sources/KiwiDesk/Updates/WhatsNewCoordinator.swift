@@ -21,6 +21,12 @@ final class WhatsNewCoordinator {
     var fetchNext: (URL) async -> NextOnMyList? = {
         await NextOnMyList.fetch(besideFeed: $0)
     }
+    /// Reads it for Home's window, which caches the answer and so
+    /// must tell an emptied section from a failed read; a test
+    /// hands one in.
+    var readNext: (URL) async -> NextOnMyList.Read = {
+        await NextOnMyList.fetchRead(besideFeed: $0)
+    }
     /// The clock the list's age is judged on; a test pins it.
     var now: () -> Date = Date.init
     /// Puts the window on screen; a test records it instead.
@@ -94,6 +100,7 @@ final class WhatsNewCoordinator {
         record.cacheFeed(relaunch.items)
         self.narration = narration
         next = relaunch.next
+        if let next { record.cacheNext(.list(next)) }
         releases = WhatsNewReleases(
             items: relaunch.items,
             current: current,
@@ -146,6 +153,7 @@ final class WhatsNewCoordinator {
             return
         }
         next = await fetchNext(url)
+        if let next { record.cacheNext(.list(next)) }
         releases = due.since.flatMap {
             WhatsNewReleases(items: items, current: current, since: $0)
         }
@@ -202,19 +210,20 @@ final class WhatsNewCoordinator {
     /// window or an offer took the screen during the read.
     private func refreshForBrowse(opens: Bool) async {
         var items: [WhatsNewFeed.Item]?
-        var fresh: NextOnMyList?
         if let url = feedURL() {
+            // Both reads in flight at once: an open waits on both.
+            let readNext = readNext
+            let list = Task { await readNext(url) }
             items = await fetch(url)
-            fresh = await fetchNext(url)
+            record.cacheNext(await list.value)
         }
         if let items { record.cacheFeed(items) }
-        if let fresh { record.cacheNext(fresh) }
         guard opens, !Task.isCancelled, window == nil, waiting == nil,
             !updateOfferOpen()
         else { return }
         openBrowser(
             items.flatMap { WhatsNewReleases(items: $0, current: current) },
-            next: fresh ?? record.cachedNext
+            next: record.cachedNext
         )
     }
 

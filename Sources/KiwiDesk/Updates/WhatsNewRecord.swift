@@ -25,9 +25,9 @@ struct WhatsNewRecord {
     static let feedCacheKey = "updates.feedCache"
 
     /// The last "Next on my list" read, so Home's window carries it
-    /// when it opens from the cache (#1813). Only a read list
-    /// replaces it, so offline keeps the last one; its own age
-    /// limit retires a list nobody refreshed.
+    /// when it opens from the cache (#1813). A failed read keeps
+    /// it, an emptied section clears it, and its own age limit
+    /// retires a list nobody refreshed.
     static let nextCacheKey = "updates.nextCache"
 
     /// What the relaunch reads: the version installed, the one it
@@ -92,12 +92,17 @@ struct WhatsNewRecord {
             )) ?? []
     }
 
-    /// Replaces the cached "Next on my list".
-    func cacheNext(_ next: NextOnMyList) {
-        defaults.set(
-            try? JSONEncoder().encode(next),
-            forKey: Self.nextCacheKey
-        )
+    /// Files a read of "Next on my list" over the cached one.
+    func cacheNext(_ read: NextOnMyList.Read) {
+        switch read {
+        case .list(let next):
+            defaults.set(
+                try? JSONEncoder().encode(next),
+                forKey: Self.nextCacheKey
+            )
+        case .emptied: defaults.removeObject(forKey: Self.nextCacheKey)
+        case .unreadable: break
+        }
     }
 
     /// The cached "Next on my list"; nil before the first read.

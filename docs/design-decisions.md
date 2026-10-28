@@ -775,7 +775,13 @@ one decision is Install or Later. Offline the window opens from
 the feed last read, kept in the app's defaults beside the "What's
 new" record and replaced by each read rather than added to, so it
 grows only with the feed's structured notes; with nothing kept,
-the notes say they are online. Home's What's new answers nothing
+the notes say they are online. Home's window ends on "Next on my
+list" too, from the list last read, kept the same way: a read
+that fails keeps it, a section the owner emptied clears it, and
+the list's own sixty days retire one nobody refreshed — so a
+correction reaches Home's window on its next online open, while
+an offline open never shows a list older than that limit.
+Home's What's new answers nothing
 — owed notes keep their own window and their Done, and an offer
 on screen comes forward instead, since it carries the notes worth
 reading.
