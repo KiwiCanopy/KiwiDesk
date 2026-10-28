@@ -18174,7 +18174,9 @@ it, over both ends of the panel (`highlightFadeShare`).
 The footer's buttons (Edit in Settings…, Keep) fade too (#2725,
 owner, 2026-10-28): KiwiDesk already draws them as button chips
 (#2377), and a flat chip read as the one patch on faded glass.
-Their rest and hover fills take the same share; off the toggle,
+Their rest and hover fills take the same share, while the chip's
+1 pt edge stays flat: it is the button's outline, and faded it
+would leave the chip open along its bottom. Off the toggle,
 and in Settings, the fills stay flat. Residue: the resting chip's
 label on its faint neutral wash is measured at neither end; the
 fade moves it toward the bare Fill, whose inks are measured.
