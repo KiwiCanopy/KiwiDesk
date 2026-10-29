@@ -31,7 +31,8 @@ struct SimpleSpaceCard: View {
                     onRename: {
                         model.config.renameSpace(from: space, to: $0)
                     },
-                    onNotice: onNotice
+                    onNotice: onNotice,
+                    width: nil
                 )
                 if hasOverrides {
                     SpaceCustomizeButton(model: model, space: space) {
@@ -40,20 +41,28 @@ struct SimpleSpaceCard: View {
                         )
                     }
                 }
+                SpaceDeleteButton(action: onDelete)
             }
             if let notice {
                 SpaceNameNoticeCaption(notice: notice)
             }
             SpaceModePictureMenu(model: model, space: space) { face }
-            HStack(spacing: 6) {
-                SpacePinChip(model: model, space: space, offlineOnly: true)
-                if model.offersScreenMenu {
-                    SpaceScreenMenu(model: model, space: space)
+                .frame(maxWidth: .infinity)
+            if model.offersScreenMenu || pinnedOffline {
+                HStack(spacing: 6) {
+                    SpacePinChip(
+                        model: model,
+                        space: space,
+                        offlineOnly: true
+                    )
+                    if model.offersScreenMenu {
+                        SpaceScreenMenu(model: model, space: space)
+                    }
+                    Spacer(minLength: 0)
                 }
-                Spacer(minLength: 0)
-                SpaceDeleteButton(action: onDelete)
             }
         }
+        .frame(maxWidth: .infinity, alignment: .topLeading)
         .padding(10)
         .background(
             RoundedRectangle(cornerRadius: SettingsTheme.sectionRadius)
@@ -77,6 +86,7 @@ struct SimpleSpaceCard: View {
         let mode = model.config.modes(for: [space])[space] ?? .bsp
         return VStack(alignment: .leading, spacing: 6) {
             SimpleSpacePicture(model: model, space: space)
+                .frame(maxWidth: .infinity)
             HStack(spacing: 5) {
                 Image(systemName: mode.symbol)
                 Text(mode.displayName)
@@ -87,6 +97,7 @@ struct SimpleSpaceCard: View {
             .foregroundStyle(SettingsTheme.ink2)
         }
         .padding(4)
+        .frame(maxWidth: .infinity, alignment: .leading)
         .background(
             RoundedRectangle(cornerRadius: 10)
                 .fill(faceHovered ? SettingsTheme.chipRest : .clear)
@@ -108,6 +119,10 @@ struct SimpleSpaceCard: View {
             model.spaceIdentifierText(space) ?? space.raw,
             mode.displayName
         )
+    }
+
+    private var pinnedOffline: Bool {
+        model.spacePinBadge(space) == .offline
     }
 
     private var hasOverrides: Bool {

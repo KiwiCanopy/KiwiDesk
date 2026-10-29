@@ -16,7 +16,7 @@ struct SimpleSpacesCard: View {
     @Environment(\.controlActiveState) private var activeState
 
     /// The narrowest card, so a line holds as many as fit.
-    static let cardMinimum: CGFloat = 200
+    static let cardMinimum: CGFloat = 240
 
     var body: some View {
         SimpleCard(title: SettingsDestination.spaces.title, plated: false) {
