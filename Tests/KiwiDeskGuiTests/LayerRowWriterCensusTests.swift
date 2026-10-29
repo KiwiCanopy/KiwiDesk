@@ -71,6 +71,12 @@ struct LayerRowWriterCensusTests {
             ),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":
             (1, "layer editor: writes back the rows it was handed"),
+        "KiwiDesk/Settings/Components/Simple/SimpleShortcutCards.swift":
+            (
+                1,
+                "Simple's default-layer rows (#2737): written back"
+                    + " whole, as the layer editor's"
+            ),
         "KiwiDesk/Settings/SettingsRevertRegister+Rules.swift":
             (
                 1,
@@ -151,6 +157,8 @@ struct LayerRowWriterCensusTests {
             (1, "the import merge; its caller takes the dedupe"),
         "KiwiDesk/Settings/Sections/ShortcutsSection.swift":
             (1, "the layer's rows handed down, written back whole"),
+        "KiwiDesk/Settings/Components/Simple/SimpleShortcutCards.swift":
+            (1, "Simple's default layer, handed down to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/KeybindingGroups.swift":
             (6, "catalog groups: hand the holder to their rows"),
         "KiwiDesk/Settings/Components/Keybindings/ShowHideGroup.swift":

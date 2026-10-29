@@ -8,6 +8,14 @@ import SwiftUI
 extension SettingsHeaderBar {
     var simpleTitleRow: some View {
         HStack(alignment: .top, spacing: 12) {
+            // Home's identity mark, so both roots start alike.
+            if let mark = BrandAssets.appMark {
+                Image(nsImage: mark)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 26, height: 26)
+                    .accessibilityHidden(true)
+            }
             VStack(alignment: .leading, spacing: 4) {
                 Text(model.editTargetTitle)
                     .font(.title2.weight(.bold))

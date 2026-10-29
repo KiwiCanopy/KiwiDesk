@@ -234,8 +234,7 @@ struct ScreenCard: View {
             guard model.config.spaces.contains(space) else {
                 continue
             }
-            model.config.spacePins[space] = display.fingerprint
-            model.config.mainSpaces.remove(space)
+            model.place(space, .screen(display.fingerprint))
             assigned = true
         }
         return assigned

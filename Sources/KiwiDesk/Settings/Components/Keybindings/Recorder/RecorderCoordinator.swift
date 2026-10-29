@@ -16,9 +16,19 @@ final class RecorderCoordinator: ObservableObject {
     /// Whether the page consumes `scrollTarget`; only the Shortcuts
     /// section does, so a Go to elsewhere would do nothing.
     let scrollsInPlace: Bool
+    /// Where a collision is fixed when its page is elsewhere: Simple
+    /// draws the row but not what it collides with, so its conflict
+    /// popover offers the way there, handed the anchor of the card
+    /// the row sits in (`\.recorderConflictAnchor`, #2737 ruling 7).
+    /// A page that draws the colliding rows passes none.
+    let fixElsewhere: ((String?) -> Void)?
 
-    init(scrollsInPlace: Bool = false) {
+    init(
+        scrollsInPlace: Bool = false,
+        fixElsewhere: ((String?) -> Void)? = nil
+    ) {
         self.scrollsInPlace = scrollsInPlace
+        self.fixElsewhere = fixElsewhere
     }
 
     /// Suspends/restores live hotkeys while any recorder is armed
@@ -117,5 +127,18 @@ enum RecorderPreflight {
                 commit(combo)
             }
         )
+    }
+}
+
+private struct RecorderConflictAnchorKey: EnvironmentKey {
+    static let defaultValue: String? = nil
+}
+
+extension EnvironmentValues {
+    /// The anchor of the card a recorder sits in, where its
+    /// `RecorderCoordinator.fixElsewhere` lands (#2737).
+    var recorderConflictAnchor: String? {
+        get { self[RecorderConflictAnchorKey.self] }
+        set { self[RecorderConflictAnchorKey.self] = newValue }
     }
 }

@@ -975,8 +975,27 @@ the same three answers or argues a different one — and since
 the same answers.** A breaking `ShelfLook` or `LookDocument`
 change bumps `LookDocument.currentFormat` for `looks.json` AND
 `SetupBundle.currentFormat`, which carries `[ShelfLook]` inline,
-and rules the markerless `LookExport` sidecar deliberately, as
-the palette sidecar above was. **And a look stores setting PATHS
+and rules the `LookExport` sidecar deliberately, as the palette
+sidecar above was. Since #1740 that file states its `format`
+(`LookDocument.currentFormat` when written) and carries its credit
+beside the body: `LookStore.importLook(data:)` is its one reader,
+refusing a newer file and crossing an older one in memory through
+`ConfigMigration.lookExportSteps`, since the file is never
+rewritten — so a `LookDocument.currentFormat` bump owes an entry
+there lifting to the new format (`LookExportStepsCensusTests`). An
+older build that saves the library drops each look's `author` and
+`based_on`, which its decoder does not know: accepted, since a
+bump would make that build read the whole library as unreadable.
+A look has a fourth home since #1740: the origin a pick records,
+a whole `ShelfLook` in the settings (`TilingSettings.lookOrigin`,
+`look_origin`) and in the shared look (`LookBody.origin`), so a
+breaking `ShelfLook` change reaches profiles and `gui.json` too,
+and an older build's save drops it, the same accepted trade. A
+user's pick goes through `ShelfLook.pick`, never `apply` beside
+it, or the credit Share and Save read goes stale
+(`LookOriginTests`, `LookOriginSaveTests`); a new pick door is
+review's, since nothing scans for one.
+**And a look stores setting PATHS
 and their wire spellings as data** (`LookKeys`): renaming a key
 or value a look carries — any path in `LookKeys.all`, since
 #1752 any colour path in `ColorPaletteKeys.all`, and a field
@@ -996,13 +1015,25 @@ change too, and a shared look missing it owes
 and its Revert carry `LookKeys.styling` alone**, never motion
 (`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
 
-Nothing can guard the format bumps above, and they are the
-obligation the format integers rest on: `<=` is decoder tolerance rather than a
-compatibility shim, so an older config or backup is accepted — which is
-right, and which silently becomes a lie the first time a
-`GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
-actively encourages that rename, so the bump is the reader's
-responsibility here.
+The format bumps above are the obligation the format integers
+rest on: `<=` is decoder tolerance rather than a compatibility
+shim, so an older config or backup is accepted — which is right,
+and which silently becomes a lie the first time a `GuiConfig`,
+`Profile` or `ColorPalette` field is renamed. §5 actively
+encourages that rename, so the bump is the reader's
+responsibility here. **Every shape a step reaches owes one test
+through `ConfigMigration.migrated` from the format the last
+release shipped, floor or no floor, never a direct call alone**:
+a direct call runs the step whatever the stamp says, and proves
+nothing about the bump (`ScrollDurationMigrationTests` ▸
+`bundleProfilesMigrate`). `ConfigMigrationFloorCensusTests` is
+the backstop for one spelling of a dropped bump — a floor past
+its shape's `currentFormat` — and is blind to a floor equal to
+an un-bumped one. It reads a floor's shape from its name, so a
+`static let` floor in a `ConfigMigration+` file ends in
+`BundleFormat`, `GuiFormat`, `PaletteFormat` or `ProfileFormat`
+and is an integer literal; a floor kept in a table owes that
+census a reader of the table, as `MachineConfig.moves` has.
 
 **A long-lived release branch keeps every `currentFormat` above
 `main`'s (#2265).** `needsMigration` stops at the stamp, and a

@@ -51,7 +51,7 @@ extension ScreensSection {
             )
             Spacer()
             Button(backToAutomatic) {
-                model.config.spacePins[orphan.space] = nil
+                model.place(orphan.space, .auto)
             }
             .settingsActionButton()
         }

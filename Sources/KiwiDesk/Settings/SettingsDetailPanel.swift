@@ -179,9 +179,7 @@ struct SettingsDetailPanel: View {
     /// Jumps to setting control associated with diff row
     /// (`SettingsView.apply`).
     private func jump(to row: SettingsDiffRow) {
-        guard let anchor = SettingsDiffJump.anchor(for: row)
-        else { return }
-        model.nav.pendingReveal = anchor
+        model.jump(to: row)
     }
 
 }
@@ -252,7 +250,7 @@ enum SettingsDiffRowSource {
         // count of the list it opens.
         rows += driftRows(for: model)
         rows += liveRows(for: model, leaving: diff.changedSettings)
-        return rows
+        return lookFolded(rows, for: model)
     }
 
     /// Filters draft diff rows relevant to specific destination area

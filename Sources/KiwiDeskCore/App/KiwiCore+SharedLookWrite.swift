@@ -84,7 +84,7 @@ extension KiwiCore {
     private func restampFollowers() {
         guard let base = sharedLook else { return }
         for var stored in followingProfiles()
-        where !base.isWorn(by: stored.settings) {
+        where !base.isStamped(on: stored.settings) {
             let name = stored.name
             stored.settings = wearingSharedLook(stored.settings)
             do {

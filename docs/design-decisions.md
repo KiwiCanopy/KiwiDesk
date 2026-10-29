@@ -10232,11 +10232,16 @@ left, a live preview of the desk on the right.
 construction rather than by promise:
 
 - **A doubled surface.** Simple owns layout and nothing else. It
-  composes the components Advanced already draws — the look
-  tiles, the Space row with its layout menu and the Screen pin
-  menu, the Open applications rows, the support strip — so a
-  change to a control reaches both surfaces, and a Simple-only
-  editor is the defect this entry exists to forbid.
+  composes Advanced's own parts — the look tiles; the Space
+  row's grip, icon chip, name field, layout menu, Customize
+  button, pin chip, trash and add row; the Open applications
+  rows; the support strip — so a change to a control reaches
+  both surfaces. KiwiHub's keys are shown, not edited: KiwiHub
+  is the way to every other shortcut, so Simple teaches its keys
+  and leaves changing them to Advanced. Where Advanced draws
+  a choice another way, as Screens' chip menu, Simple's Screen
+  menu shares its choices and its one write. A Simple-only editor
+  is the defect this entry exists to forbid.
 - **Config presence.** Simple hides what a user made, so it
   names it instead: the header's subtitle counts the App Rules,
   shortcut layers and Lua bindings it does not draw ("kept in
@@ -10255,7 +10260,12 @@ Three things stay one, or the two roots drift apart:
 - **One draft, one save pill.** Switching keeps the open draft
   untouched; a pill row whose control Simple does not draw
   switches to Advanced when clicked. A Simple that wrote at once
-  would be a second save model.
+  would be a second save model. On Simple the pill folds every
+  row a look paints into one row, "Changes to the look", whose ↺
+  takes them back together and which does not expand (#2745): a
+  Simple user picks a look as one choice and never weighs its
+  settings one by one. Advanced keeps a row per setting, since it
+  is where a single setting is kept or taken back.
 - **No silent doors.** Simple has no search field; every way
   into Advanced is a visible, named link. The search tag and
   silent flip #2654 deleted stay deleted.
@@ -10273,14 +10283,29 @@ below it, as every preview does; the support strip and footer
 end the controls at every width, so the right column is the
 preview and nothing else.
 
+**The motion says where the user came from.** The switch
+converges: Simple fades and Home's cards gather out of the
+window's centre into their slots, so Advanced reads as the same
+settings opened out rather than another window; back, Home
+recedes under Simple fading in. A card expands into its page and
+Back folds it into the card again, so the page is visibly that
+card's. A landing with no card behind it — a
+search hit, a "… in Advanced" link — zooms through, since a
+morph from a card the user never touched would lie about where
+they came from. Each change of the root or the page records its
+cause where the change happens, so the shell picks the motion
+from one field rather than guessing from the states, and a new
+way in cannot leave the last change's motion standing. Under Reduce Motion each swap is instant, with
+no fade put in its place.
+
 **Simple has its own visibility rule.** *Grey, don't hide*
 governs the controls within a surface; what Simple draws at all
 is a scope decision, made once for the whole root. So on one
 screen Simple hides the Screen menu and the screen map rather
 than greying them: a disabled control there teaches a choice the
 user cannot make, and Advanced ▸ Screens still holds the pins.
-Inside a control Simple does draw, the rule binds as before: an
-`init.lua`-owned Look line greys, it does not vanish.
+Inside a control Simple does draw, the rule binds as before: a
+control Advanced greys, Simple greys too.
 
 Simple is a root beside Home, not a navigator, so *Home is the
 only navigator* still holds inside Advanced. Every install opens

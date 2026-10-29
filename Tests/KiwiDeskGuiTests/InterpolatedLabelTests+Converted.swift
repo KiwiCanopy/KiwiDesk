@@ -64,6 +64,11 @@ extension InterpolatedLabelTests {
     /// translation that pronominalises it. `gui.md` ▸ Strings
     /// now bans it outright.
     static let converted: [String: Int] = [
+        // Simple's Spaces pointer names Layout Defaults by its
+        // key (#2737); the root's name arrives through
+        // `SettingsRootSwitch.advancedTitle`, which the scan does
+        // not read as a label.
+        "simple.spaces.hint": 1,
         // The state-change toggle names the reflow toggle its
         // neighbours follow (#2676).
         "behavior.animations.state_change.help": 1,

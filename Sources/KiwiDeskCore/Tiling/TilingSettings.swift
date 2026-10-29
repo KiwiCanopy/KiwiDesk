@@ -80,6 +80,11 @@ public struct TilingSettings: Sendable, Equatable {
     public var mouse = MouseSettings()
     /// Optional display icon per space (`space.icon[space_id]`, #68).
     public var spaceIcons: [SpaceID: String] = [:]
+    /// The authored look these settings were last painted from
+    /// (#1740), which Share credits while half of it is kept; nil
+    /// after a pick of the user's own or a bundled look. Written by
+    /// a pick (`ShelfLook.pick`) alone.
+    public var lookOrigin: ShelfLook?
 
     public init() {}
 }

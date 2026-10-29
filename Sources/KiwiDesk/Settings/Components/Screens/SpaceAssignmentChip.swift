@@ -19,7 +19,7 @@ struct SpaceAssignment: Identifiable, Hashable {
 ///
 /// Supports drag, context menu, VoiceOver actions, and keyboard menu chord
 /// via `.rowActions` (#678, #845).
-/// Explicit chips clear to automatic via corner badge.
+/// Explicit chips clear to auto via corner badge.
 struct SpaceAssignmentChip: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -196,18 +196,12 @@ struct SpaceAssignmentChip: View {
     }
 
     @ViewBuilder private var menu: some View {
-        Button(L("monitor_chip.automatic", "Automatic")) {
+        Button(SpaceScreenChoice.auto.title(in: model)) {
             clear()
         }
         .disabled(kind == .auto)
-        Button(
-            L(
-                "monitor_card.follows_main",
-                "Follows main screen"
-            )
-        ) {
-            model.config.mainSpaces.insert(space)
-            model.config.spacePins[space] = nil
+        Button(SpaceScreenChoice.followsMain.title(in: model)) {
+            model.place(space, .followsMain)
         }
         .disabled(kind == .main)
         let elsewhere = displays.filter {
@@ -220,12 +214,11 @@ struct SpaceAssignmentChip: View {
                     L(
                         "monitor_chip.move_to",
                         "Move to %1$@",
-                        display.name
+                        SpaceScreenChoice.screen(display.fingerprint)
+                            .title(in: model)
                     )
                 ) {
-                    model.config.spacePins[space] =
-                        display.fingerprint
-                    model.config.mainSpaces.remove(space)
+                    model.place(space, .screen(display.fingerprint))
                 }
             }
         }
@@ -236,7 +229,6 @@ struct SpaceAssignmentChip: View {
     }
 
     private func clear() {
-        model.config.spacePins[space] = nil
-        model.config.mainSpaces.remove(space)
+        model.place(space, .auto)
     }
 }

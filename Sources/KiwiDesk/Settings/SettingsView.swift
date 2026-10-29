@@ -19,11 +19,19 @@ struct SettingsView: View {
     @FocusState var contentFocused: Bool
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
+    /// Where a Home card and its page share a box (#2737).
+    @Namespace var shellSpace
 
     /// Whether current destination supports detail panel.
     var panelOffered: Bool {
-        SettingsDetailPanelOffer.offers(model.destination)
+        (model.showsSimple
+            || SettingsDetailPanelOffer.offers(model.destination))
             && !model.editingLua
+    }
+
+    /// Which branch the content shows.
+    var shellBranch: ShellMotion.Branch {
+        model.showsSimple ? .simple : (selection == nil ? .home : .page)
     }
 
     private var selection: SettingsDestination? {
@@ -114,6 +122,10 @@ struct SettingsView: View {
         .onChange(of: model.destination) { _, _ in
             previewShown = false
         }
+        // The card is per mount, and a root switch is a navigation.
+        .onChange(of: model.showsSimple) { _, _ in
+            previewShown = false
+        }
         // The Mac Checklist's one read (#1365), at the shell so
         // the Home card and the section count the same snapshot:
         // on appear, and whenever the window comes back forward
@@ -142,14 +154,26 @@ struct SettingsView: View {
         _ width: SettingsWidthClass
     ) -> some View {
         chrome(width) {
-            if model.showsSimple {
-                SimpleScreen(model: model)
-            } else if selection == nil {
-                HomeScreen(model: model)
-            } else {
-                detailPane(width)
+            Group {
+                if model.showsSimple {
+                    simplePane(width)
+                        .transition(simpleTransition)
+                } else if selection == nil {
+                    HomeScreen(model: model)
+                        .transition(homeTransition)
+                } else {
+                    detailPane(width)
+                        .transition(pageTransition)
+                }
             }
+            // One gated spring on the branch swap alone, so what a
+            // landing writes beside it lands unanimated (#2737).
+            .animation(
+                reduceMotion ? nil : ShellMotion.spring,
+                value: shellBranch
+            )
         }
+        .environment(\.shellSpace, reduceMotion ? nil : shellSpace)
         .frame(maxWidth: .infinity)
         .ignoresSafeArea(.container, edges: .top)
         .onExitCommand {

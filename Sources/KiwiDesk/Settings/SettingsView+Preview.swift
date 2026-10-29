@@ -17,6 +17,15 @@ extension SettingsView {
         previewForm(width) == .docked
     }
 
+    /// The docked column's width, nil when nothing docks — the one
+    /// answer the save pill centres against, Simple's or a page's.
+    func dockedPanelWidth(_ width: SettingsWidthClass) -> CGFloat? {
+        guard panelDocked(width) else { return nil }
+        return model.showsSimple
+            ? SimpleColumns.preview
+            : SettingsTheme.panelWidth
+    }
+
     /// Whether floating preview overlay is visible.
     func detachedPreviewShown(
         _ width: SettingsWidthClass
@@ -29,7 +38,17 @@ extension SettingsView {
     @ViewBuilder func detachedPreview(
         _ width: SettingsWidthClass
     ) -> some View {
-        if detachedPreviewShown(width),
+        if detachedPreviewShown(width), model.showsSimple {
+            GeometryReader { geo in
+                MovableCard(
+                    bounds: geo.size,
+                    close: { previewShown = false }
+                ) {
+                    ScrollView { SimplePreview(model: model) }
+                        .scrollIndicators(.hidden)
+                }
+            }
+        } else if detachedPreviewShown(width),
             let destination = model.destination
         {
             GeometryReader { geo in

@@ -151,8 +151,7 @@ struct FollowsMainTray: View {
             guard model.config.spaces.contains(space) else {
                 continue
             }
-            model.config.mainSpaces.insert(space)
-            model.config.spacePins[space] = nil
+            model.place(space, .followsMain)
             assigned = true
         }
         return assigned

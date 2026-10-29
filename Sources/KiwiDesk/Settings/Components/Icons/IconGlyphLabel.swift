@@ -7,10 +7,14 @@ import SwiftUI
 struct IconGlyphLabel: View {
     let icon: String
     var placeholder: String?
+    var emptyText: String?
 
     var body: some View {
         if icon.isEmpty {
-            if let placeholder {
+            if let emptyText {
+                Text(verbatim: emptyText)
+                    .font(.callout.weight(.semibold).monospacedDigit())
+            } else if let placeholder {
                 Image(systemName: placeholder)
             } else {
                 // No "Choose…" text: the label stays

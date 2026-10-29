@@ -1292,7 +1292,12 @@ editing here:
   unreserved visible frame the stash parks against and
   `looksStashed` judges, never the shelf-reserved `bounds`, or a
   park reads as no park (`RunParkSnapTests` ▸
-  `parkBoundsAreTheScreens`); a window already at its park is
+  `parkBoundsAreTheScreens`). A park frame, from a layout or the
+  stash, is `TilingEngine.stashFrame`'s, never a corner x
+  spelled beside it: every parked judge rebuilds its target
+  through that function, so a hand-spelled x reads as parked
+  while it drops the left corner's whole-x rounding
+  (`StashLeftPeekTests`, #2753); a window already at its park is
   skipped on a re-issuing pass too (▸ `liftedParkIsKept`). A
   z-order restore or gate that judges frames computed now leaves
   out what `parkedByRun` names, and a classifier of the last

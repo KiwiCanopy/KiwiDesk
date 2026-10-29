@@ -70,13 +70,15 @@ final class SettingsModel: ObservableObject {
             onWindowTitle?(SettingsWindowTitle.of(destination))
             // Every page is Advanced's (#2737); shown, not stored.
             if destination != nil { settingsRoot = .advanced }
+            recordShellMotion(from: oldValue, to: destination)
         }
     }
     /// The root this window shows (#2737). Only the switch stores
     /// it (`pickRoot`); a fresh open re-reads the stored choice.
-    @Published var settingsRoot: SettingsRoot = .advanced {
+    @Published var settingsRoot = SettingsRootPreference.firstOpen {
         didSet {
             if settingsRoot == .simple { destination = nil }
+            recordShellMotion(from: oldValue)
         }
     }
     /// Distinct setting changes in draft, recomputed beside `isDirty`.

@@ -9,6 +9,14 @@ extension SettingsModel {
     var configURL: URL { core.configURL }
     var displays: [Display] { core.state.workspaces.allDisplays }
 
+    /// Every name a new or renamed draft Space may not take: the
+    /// draft's, and the live Spaces it does not hold (#1790), so a
+    /// "+" never draws a second row for a temporary Space. Read by
+    /// both Space row lists (#2737).
+    var takenSpaceNames: [SpaceID] {
+        config.spaces + liveOnlySpaces.map(\.id)
+    }
+
     /// App Rules in the draft — pins and floats — counted once for
     /// Home's card and Simple's header (#2737).
     var appRuleCount: Int {

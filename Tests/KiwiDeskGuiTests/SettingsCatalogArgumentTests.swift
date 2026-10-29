@@ -83,6 +83,8 @@ struct SettingsCatalogArgumentTests {
             + "SettingsCatalog.kiwiVision.appearanceCard.text",
         "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",
         "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
+        // Simple's cards, UNANCHORED: it has no search (#2737).
+        "SimpleCard.swift: title",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —

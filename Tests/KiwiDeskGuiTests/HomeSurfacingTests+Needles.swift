@@ -59,7 +59,7 @@ extension HomeSurfacingTests {
             // sibling instead (17a): both halves are needled,
             // because either one alone leaves a width band
             // with no save affordance at all.
-            "x:panelDocked(width)?-SettingsTheme.panelWidth/2:0",
+            "x:-(dockedPanelWidth(width)??0)/2",
             "ifwidth.docksSavePill{"
                 + "SettingsFooter(model:model,docked:true)}",
             // The detached preview and its offer are drawn
@@ -88,7 +88,12 @@ extension HomeSurfacingTests {
             // Monitors lesson.
             "ifpanelDocked(width),letdestination=model.destination"
                 + "{SettingsTheme.hairline.frame(width:1)"
-                + "SettingsDetailPanel("
+                + "SettingsDetailPanel(",
+            // Simple's preview docks through the same answer
+            // the pill centres against (#2737).
+            "ifletpreview=dockedPanelWidth(width){"
+                + "SettingsTheme.hairline.frame(width:1)"
+                + "ScrollView{SimplePreview(model:model)}",
         ],
         "Settings/SettingsFloatingPanel.swift": [
             // The gesture is declared in the view that takes
@@ -106,7 +111,7 @@ extension HomeSurfacingTests {
             // `SettingsFloatingPanel`, which is the violation
             // (guard-prover, 2026-08-11: the mutation this
             // comment describes stayed green).
-            "privatestructMovableCard<Content:View>:View{"
+            "structMovableCard<Content:View>:View{"
                 + "letbounds:CGSizeletclose:()->Void"
                 + "@Stateprivatevarmoved:CGSize=.zero"
                 + "@GestureStateprivatevardragging:CGSize=.zero"
@@ -118,6 +123,9 @@ extension HomeSurfacingTests {
             // preference (`DetailPanelTests` owns that half).
             "ifdetachedPreviewShown(width),"
                 + "letdestination=model.destination",
+            // Simple's card rides the same chrome and band.
+            "ifdetachedPreviewShown(width),model.showsSimple{"
+                + "GeometryReader{geoinMovableCard(",
             "close:{previewShown=false}",
             // A new area gets a new card: without the key the
             // structural position is identical across a

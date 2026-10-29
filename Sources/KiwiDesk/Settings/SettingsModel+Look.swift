@@ -12,9 +12,9 @@ extension SettingsModel {
 
     /// Paints `look` onto the draft — its styling and its colors
     /// — one-shot, like a palette (#375): nothing the look does
-    /// not name moves.
+    /// not name moves. A pick, so it records the look's origin.
     func applyLook(_ look: ShelfLook) {
-        look.apply(to: &config.settings)
+        look.pick(into: &config.settings)
     }
 
     /// Paints `colors` onto the draft — the "Keep previous colors"

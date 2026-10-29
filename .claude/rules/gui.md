@@ -886,13 +886,40 @@ depth switch inside either root** — new depth goes behind its
 container's disclosure or its row's menu (#2654,
 `docs/design-decisions.md` ▸ Settings is one surface; #2737, ▸
 Simple is a second root). Draw a control Simple needs with the
-component Advanced draws it with, never a Simple look-alike —
-review's to hold. Keep every page Advanced's and store the root
+component Advanced draws it with, never a Simple look-alike; a
+control Advanced draws another way — the Screen menu over a
+chip's menu — shares its choices and its one write
+(`SpaceScreenChoice`, `SimpleSectionsTests` ▸
+`placementHasOneDoor`). `SimpleSectionsTests` ▸ `noLookAlikes`
+holds Simple's directory to no look tile, recorder, layout menu or
+Screen vocabulary of its own; the rest is review's. Keep every
+page Advanced's and store the root
 only on the switch's pick (`SimpleRootTests` ▸ `pageFlipsRoot`,
 `landingIsNotAPick`). Simple edits the loaded profile alone: a
 new writer of `settingsRoot = .simple` beside `pickRoot` and a
 fresh open settles the edit target as they do
-(`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). **A row's
+(`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). A control
+Simple starts or stops drawing changes `SimpleCoverage` in the
+same change, since the save pill reads it to keep a row on Simple
+(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). On Simple
+the pill's rows a look pick reaches fold into its one look row
+(`SettingsDiffRowSource.lookFolded`): its members are the keys
+Core's one `ShelfLook.unpicked` would put back, and its ↺ is that
+call; Advanced never folds (`SimpleLookRowTests`). Simple's
+preview is its rows' sibling column, so what it shows is asked
+of the one `simplePreviewSpace` over the selection `nav` holds,
+and a row marks itself kept only through `simpleKeptSpace`
+(`SimplePreviewTests` ▸ `shownSpace`, `rowsReadTheKeptSpace`). A
+docked column's width, Simple's or a page's, is answered by the
+one `SettingsView.dockedPanelWidth`, which the save pill centres
+against (`HomeSurfacingTests`). **A change of the shown root or page records its
+motion through the one owner** — `SettingsModel`'s `destination`
+and `settingsRoot` `didSet`s — and a door that means another
+motion names it as `nav.pendingShellMotion` before the change, as
+`openFromCard` does, never by writing `nav.shellMotion` itself
+(`ShellMotionTests` ▸ `causeHasOneOwner`); a leaving branch's
+transition reads no cause, since it plays what it carried at its
+last render. **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a
@@ -1290,9 +1317,11 @@ agree, folded where rows are narrated and never in the diff**
 (#2450). A group is a master over its members, by axis, in the
 one table, `SettingKey.summaryAxes`; a surface that counts or asks per
 census key — the pill's rows, the live rows, the sync sheet — folds
-through `SettingKey.summarized`, never a fold of its own, and hands
-it the members a list beside it already narrates as `apart`,
-stated at every call.
+through `SettingKey.summarized`, never a fold of its own, and
+hands it the members a list beside it already narrates as
+`apart`, stated at every call. The one other fold is Simple's look
+row (#2745), which folds the pill's draft rows last and never
+reaches the live rows or the sync sheet.
 `SettingsDraftDiff` stays per member, since the live rows and the
 sync adopt compare key sets taken from different diffs. A key added
 under a master's path joins its group (`SettingsSummaryGroupTests`
