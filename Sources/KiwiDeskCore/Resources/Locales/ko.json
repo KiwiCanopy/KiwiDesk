@@ -457,6 +457,7 @@
   "diff.live.kept": "‘%1$@’에 유지했습니다.",
   "diff.live.kept_shared": "공유 디자인에 유지했습니다.",
   "diff.live.more": "더 보기: %1$d",
+  "diff.look_changes": "디자인 변경 사항",
   "diff.note.added": "추가됨",
   "diff.note.edited": "편집됨",
   "diff.note.removed": "제거됨",

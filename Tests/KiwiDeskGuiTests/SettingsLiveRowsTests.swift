@@ -21,7 +21,7 @@ struct SettingsLiveRowsTests {
     /// A clean live draft over Core's reading: saved border width
     /// 5 while live draws 9.
     private func liveModel() -> SettingsModel {
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.cleanConfig.settings.borderStyle.width = 9
         model.config = model.cleanConfig
         var saved = model.cleanConfig.settings

@@ -457,6 +457,7 @@
   "diff.live.kept": "「%1$@」に保持しました。",
   "diff.live.kept_shared": "共有デザインに保持しました。",
   "diff.live.more": "その他: %1$d",
+  "diff.look_changes": "デザインの変更",
   "diff.note.added": "追加",
   "diff.note.edited": "編集",
   "diff.note.removed": "削除",

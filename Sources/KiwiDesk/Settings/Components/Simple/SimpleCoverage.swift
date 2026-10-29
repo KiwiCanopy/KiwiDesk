@@ -23,6 +23,7 @@ import KiwiDeskCore
         screenMenu: Bool,
         binding: (SettingsRowRevert) -> Bool
     ) -> Bool {
+        if row.revert == .lookChanges { return true }
         switch row.key {
         case .spaces(.spacesName), .spaces(.spaceModes),
             .spaces(.spaceIcon), .spaces(.spaceList):

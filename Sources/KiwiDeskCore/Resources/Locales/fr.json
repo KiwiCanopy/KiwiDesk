@@ -457,6 +457,7 @@
   "diff.live.kept": "Conservé dans « %1$@ ».",
   "diff.live.kept_shared": "Conservé dans le look partagé.",
   "diff.live.more": "Autres : %1$d",
+  "diff.look_changes": "Modifications du look",
   "diff.note.added": "Ajout",
   "diff.note.edited": "Modification",
   "diff.note.removed": "Suppression",

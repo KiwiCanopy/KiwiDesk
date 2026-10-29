@@ -457,6 +457,7 @@
   "diff.live.kept": "已保留在“%1$@”中。",
   "diff.live.kept_shared": "已保留在共享造型中。",
   "diff.live.more": "更多：%1$d",
+  "diff.look_changes": "造型更改",
   "diff.note.added": "已添加",
   "diff.note.edited": "已修改",
   "diff.note.removed": "已移除",

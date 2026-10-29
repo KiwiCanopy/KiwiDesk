@@ -250,7 +250,7 @@ enum SettingsDiffRowSource {
         // count of the list it opens.
         rows += driftRows(for: model)
         rows += liveRows(for: model, leaving: diff.changedSettings)
-        return rows
+        return lookFolded(rows, for: model)
     }
 
     /// Filters draft diff rows relevant to specific destination area
