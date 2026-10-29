@@ -1460,13 +1460,14 @@ editing here:
   too (`plannedMinSize`). That reading plans and never emits:
   keep it out of `consumedWidth/Height`, `explains` and
   `centered`, and out of a shape decision (Grid's cap, a BSP
-  chain's thickness), which keeps `runFloor`'s corroborated
+  chain's thickness), which keeps `shapeFloor`'s corroborated
   reading. The trade: a run never asks that member below the
   answer, so only what drops the entry lowers it — a forced
   pass, an eviction, the gesture sweep, a forget — and a
   refusal learned under another layout plans this run too; a
   shown member asked above its floor and refused again still
-  lands inward, by at most the spread of its answers. And only
+  lands inward, by at most the spread of its answers, and a
+  member outside any run keeps #934's inward residue. And only
   a SETTLED read — the retile-time gate, the
   settle probe — may clear learning on a compliance (#1049): a
   raw echo's compliance can be the transient half of an app's

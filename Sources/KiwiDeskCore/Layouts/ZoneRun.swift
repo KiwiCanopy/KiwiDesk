@@ -145,18 +145,18 @@ extension LayoutContext {
     /// floor, or the configured minimum alone on a forced pass,
     /// which probes past learned bounds (#1055) like
     /// `TrackLayout.geometricCap`.
-    func runFloor(of id: WindowID, horizontal: Bool) -> CGFloat {
+    func shapeFloor(of id: WindowID, horizontal: Bool) -> CGFloat {
         probesBeyondBounds
             ? minWindowSize.along(horizontal: horizontal)
             : learnedFloor(of: id, horizontal: horizontal)
     }
 
     /// The floor a run plans a member at along its own axis:
-    /// `runFloor` raised to the member's least refusal there
+    /// `shapeFloor` raised to the member's least refusal there
     /// (`EffectiveSizeBound.refusedFloor`, #2774), stood down on a
     /// forced pass.
     func plannedFloor(of id: WindowID, horizontal: Bool) -> CGFloat {
-        let floor = runFloor(of: id, horizontal: horizontal)
+        let floor = shapeFloor(of: id, horizontal: horizontal)
         guard !probesBeyondBounds else { return floor }
         return max(
             floor,

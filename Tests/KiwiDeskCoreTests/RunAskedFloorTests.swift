@@ -161,4 +161,30 @@ struct RunAskedFloorTests {
         let height = try #require(plain[ids[3]]).height
         #expect(abs(shown.height - height) < 0.5)
     }
+
+    /// A refusal plans a run and never the shape (#2687's cap
+    /// stays corroborated): an auto-sized Grid keeps its columns
+    /// and rows beside one.
+    @Test("A refusal leaves an auto Grid's shape alone")
+    func refusalKeepsTheGridShape() throws {
+        let grid = CGRect(x: 0, y: 0, width: 1920, height: 1080)
+        var ctx = LayoutContext(bounds: grid, gaps: .uniform(10))
+        ctx.minWindowSize = .square(300)
+        ctx.grid.autoSize = true
+        let members = Array(ids[0...3])
+        let plain = try #require(
+            GridLayout.shape(for: members, in: ctx)
+        )
+        ctx.sizeBounds = [
+            ids[0]: EffectiveSizeBound(
+                width: [.init(asked: 300, answered: 1200)],
+                height: [.init(asked: 300, answered: 900)]
+            )
+        ]
+        let refused = try #require(
+            GridLayout.shape(for: members, in: ctx)
+        )
+        #expect(refused.columns == plain.columns)
+        #expect(refused.rows == plain.rows)
+    }
 }

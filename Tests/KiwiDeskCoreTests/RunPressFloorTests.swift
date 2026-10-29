@@ -32,8 +32,12 @@ struct RunPressFloorTests {
         return core
     }
 
-    /// Master w1, a stack zone of w2 and w3, focus on w2.
-    private func makeSpace(_ core: KiwiCore) -> SpaceID {
+    /// Master w1, a stack zone of w2 and w3, focus on w2 — or, for
+    /// `track`, two tracks.
+    private func makeSpace(
+        _ core: KiwiCore,
+        mode: String = "stack"
+    ) -> SpaceID {
         for id in 1...3 {
             core.state.apply(
                 .windowCreated(
@@ -48,9 +52,12 @@ struct RunPressFloorTests {
         let space = core.state.workspaces.space(of: WindowID(1))!
         _ = core.execute(
             "set_mode",
-            args: [.string(space.raw), .string("stack")]
+            args: [.string(space.raw), .string(mode)]
         )
-        _ = core.execute("set_min_window_size", args: [.number(300)])
+        if mode == "track" {
+            _ = core.execute("track.set_limit", args: [.number(2)])
+        }
+        _ = core.execute("set_min_window_size", args: [.number(200)])
         core.state.workspaces.focus(WindowID(2), in: space)
         core.retile(animated: false)
         return space
@@ -66,10 +73,11 @@ struct RunPressFloorTests {
 
     private func refuse(
         _ core: KiwiCore,
+        window: WindowID = WindowID(3),
         at answer: CGFloat
     ) {
-        core.tiler.boundLearner.bounds[WindowID(3)] = .init(height: [
-            .init(asked: 200, answered: answer)
+        core.tiler.boundLearner.bounds[window] = .init(height: [
+            .init(asked: 50, answered: answer)
         ])
         core.retile(animated: false)
     }
@@ -91,7 +99,7 @@ struct RunPressFloorTests {
         ).context
         let tiled = core.state.effectiveTiledMembers(of: space)
         let zone = try #require(
-            RunZone.zones(mode: .stack, tiled: tiled, in: context)?
+            RunZone.zones(mode: space.mode, tiled: tiled, in: context)?
                 .first { $0.members.contains(member) }
         )
         return (zone, context)
@@ -102,8 +110,8 @@ struct RunPressFloorTests {
         let core = makeCore()
         let id = makeSpace(core)
         let span = try zoneSpan(core)
-        // Floors fit (300 + answer), the shares do not.
-        refuse(core, at: span - 300 - 10)
+        // Floors fit (200 + answer), the shares do not.
+        refuse(core, at: span - 200 - 10)
         #expect(
             core.tiler.runCovers[id]?.runs.contains {
                 $0.shown.contains(WindowID(2))
@@ -159,5 +167,44 @@ struct RunPressFloorTests {
         core.retile(animated: false)
         let after = try zone(of: WindowID(3), in: core, space: id)
         #expect(after.zone.run(in: after.context) == nil)
+    }
+
+    /// Track's along-axis press shares the run's clamp (#2774):
+    /// two tracks, w1 and w2 sharing the first.
+    @Test("A Track shrink in a fitting zone stops at the refusal")
+    func trackShrinkStopsAtTheRefusal() throws {
+        let core = makeCore()
+        let id = makeSpace(core, mode: "track")
+        let before = try zone(of: WindowID(2), in: core, space: id)
+        try #require(before.zone.members == [WindowID(1), WindowID(2)])
+        #expect(before.zone.vertical)
+        let frames = core.tiler.calculatedFrames(state: core.state)
+        let share = try #require(frames[WindowID(2)]).height
+        refuse(core, window: WindowID(2), at: share - 30)
+        let fitting = try zone(of: WindowID(2), in: core, space: id)
+        #expect(fitting.zone.run(in: fitting.context) == nil)
+        let space = try #require(core.state.workspaces[id])
+        core.state.workspaces.focus(WindowID(2), in: id)
+        _ = core.resizeTrackMember(
+            WindowID(2),
+            axis: "y",
+            delta: -120,
+            span: core.layoutSpan(of: space, horizontal: false),
+            space: space
+        )
+        core.retile(animated: false)
+        let after = try zone(of: WindowID(2), in: core, space: id)
+        #expect(after.zone.run(in: after.context) == nil)
+    }
+
+    /// A press that stops at a refusal names the app's floor, never
+    /// the setting's (#1261).
+    @Test("A refusal reads as the app's minimum")
+    func refusalIsAppBound() {
+        let core = makeCore()
+        _ = makeSpace(core)
+        #expect(!core.minimumIsAppBound(of: WindowID(3), axis: "y"))
+        refuse(core, at: 500)
+        #expect(core.minimumIsAppBound(of: WindowID(3), axis: "y"))
     }
 }

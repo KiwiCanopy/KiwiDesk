@@ -34,8 +34,8 @@ extension KiwiCore {
     }
 
     /// The run `focused` sits in where its zone is laid by floor
-    /// and weight but hides nothing, which no cover records — a
-    /// refusal makes such a zone (#2774).
+    /// and weight but hides nothing, which no cover records — any
+    /// such zone, a refusal's (#2774) or a corroborated floor's.
     private func unhidingRun(
         of focused: WindowID,
         in space: Space

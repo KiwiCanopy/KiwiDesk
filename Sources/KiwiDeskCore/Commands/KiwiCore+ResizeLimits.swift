@@ -53,13 +53,14 @@ extension KiwiCore {
     /// minimum resolves to (#1261). `raisedBy` is a floor the
     /// clamp adds beside the setting — the scrolling slot's
     /// `ScrollSize.minPoints` — so a learned floor under it is
-    /// not what bound.
+    /// not what bound. A refusal counts as the app's (#2774), the
+    /// floor the run clamps stop at.
     func minimumIsAppBound(
         of id: WindowID,
         axis: String,
         raisedBy floor: Double = 0
     ) -> Bool {
-        effectiveMinSize(of: id, axis: axis)
+        plannedMinSize(of: id, axis: axis)
             > max(
                 Double(minWindowSize(of: id).on(axis: axis)),
                 floor
