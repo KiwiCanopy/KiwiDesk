@@ -986,6 +986,15 @@ there lifting to the new format (`LookExportStepsCensusTests`). An
 older build that saves the library drops each look's `author` and
 `based_on`, which its decoder does not know: accepted, since a
 bump would make that build read the whole library as unreadable.
+A look has a fourth home since #1740: the origin a pick records,
+a whole `ShelfLook` in the settings (`TilingSettings.lookOrigin`,
+`look_origin`) and in the shared look (`LookBody.origin`), so a
+breaking `ShelfLook` change reaches profiles and `gui.json` too,
+and an older build's save drops it, the same accepted trade. A
+user's pick goes through `ShelfLook.pick`, never `apply` beside
+it, or the credit Share and Save read goes stale
+(`LookOriginTests`, `LookOriginSaveTests`); a new pick door is
+review's, since nothing scans for one.
 **And a look stores setting PATHS
 and their wire spellings as data** (`LookKeys`): renaming a key
 or value a look carries — any path in `LookKeys.all`, since

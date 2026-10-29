@@ -32,6 +32,16 @@ extension SettingsValueReadout {
                 old.settings.stickyStyle.liquidGlass,
                 new.settings.stickyStyle.liquidGlass
             )
+        case .lookOrigin:
+            // Surfaceless, so the census carries no label to read.
+            return [
+                .change(
+                    census,
+                    label: lookOriginLabel,
+                    old: lookCredit(old.settings.lookOrigin),
+                    new: lookCredit(new.settings.lookOrigin)
+                )
+            ]
         case .borderSheen:
             return coloursRow(
                 census,
@@ -150,5 +160,19 @@ extension SettingsValueReadout {
         _ new: Bool
     ) -> [SettingsDiffRow] {
         coloursRow(census, onOff(old), onOff(new))
+    }
+}
+
+extension SettingsValueReadout {
+    /// The origin's diff row label.
+    static var lookOriginLabel: String {
+        L("looks.origin", "Look credit")
+    }
+
+    /// The look an origin credits, as a diff row reads it.
+    static func lookCredit(_ origin: ShelfLook?) -> String {
+        guard let origin else { return L("looks.origin.none", "None") }
+        guard let author = origin.author else { return origin.name }
+        return L("looks.origin.by", "%1$@ by %2$@", origin.name, author)
     }
 }

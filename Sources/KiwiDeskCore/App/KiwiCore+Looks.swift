@@ -32,7 +32,8 @@ extension KiwiCore {
         try paletteLibrary.rename(from: old, to: new)
     }
 
-    /// Saves `settings`' styling and colours as look `name`.
+    /// Saves `settings`' styling and colours as look `name`, with
+    /// the credit its origin still earns (#1740).
     @discardableResult
     public func saveLook(
         named name: String,
@@ -41,7 +42,8 @@ extension KiwiCore {
         let look = ShelfLook(
             name: name,
             style: LookKeys.extract(from: settings),
-            colors: ColorPaletteKeys.extract(from: settings)
+            colors: ColorPaletteKeys.extract(from: settings),
+            basedOn: settings.lookCredit
         )
         try lookLibrary.save(look)
         return look
