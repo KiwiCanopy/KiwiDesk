@@ -133,6 +133,8 @@ struct SimplePreviewTests {
         // Names the screen it waits for and the one the map lights.
         #expect(sentence.contains("Dell"))
         #expect(sentence.contains("Built-in"))
+        // Its one screen is the main one, and the sentence says so.
+        #expect(sentence.contains("the main screen"))
         #expect(model.simpleLanding(of: space)?.name == "Built-in")
         #expect(preview.caption(space) == sentence)
         model.hoverSimple(.space(space), inside: true)
@@ -171,39 +173,36 @@ struct SimplePreviewTests {
     @Test("the kept ring separates from the kept fill")
     func ringSeparates() throws {
         for dark in [false, true] {
-            let ring = try hex(
-                ThemeContrast.resolved(
-                    SimpleSpacesCard.keptRing,
-                    dark: dark
-                )
-            )
             let card = try ThemeContrast.resolved(
                 SettingsTheme.card,
                 dark: dark
             )
-            let fill = try ThemeContrast.resolved(
-                SimpleSpacesCard.keptFill,
-                dark: dark
-            )
-            let alpha = try ThemeContrast.resolvedAlpha(
-                SimpleSpacesCard.keptFill,
-                dark: dark
-            )
-            let ground = hex(
-                (
-                    fill.r * alpha + card.r * (1 - alpha),
-                    fill.g * alpha + card.g * (1 - alpha),
-                    fill.b * alpha + card.b * (1 - alpha)
-                )
-            )
+            let ground = try over(SimpleSpacesCard.keptFill, card, dark)
+            // The ring draws at its own alpha over that same ground.
+            let ring = try over(SimpleSpacesCard.keptRing, ground, dark)
             let separation = try #require(
-                ColorVision.separation(ring, ground)
+                ColorVision.separation(hex(ring), hex(ground))
             )
             #expect(
                 separation >= ColorVision.separationFloor,
                 "\(dark ? "dark" : "light"): \(separation)"
             )
         }
+    }
+
+    /// `color` composited at its resolved alpha over `ground`.
+    private func over(
+        _ color: Color,
+        _ ground: (r: Double, g: Double, b: Double),
+        _ dark: Bool
+    ) throws -> (r: Double, g: Double, b: Double) {
+        let top = try ThemeContrast.resolved(color, dark: dark)
+        let a = try ThemeContrast.resolvedAlpha(color, dark: dark)
+        return (
+            top.r * a + ground.r * (1 - a),
+            top.g * a + ground.g * (1 - a),
+            top.b * a + ground.b * (1 - a)
+        )
     }
 
     private func hex(_ rgb: (r: Double, g: Double, b: Double)) -> String {
