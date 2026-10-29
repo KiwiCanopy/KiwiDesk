@@ -260,7 +260,8 @@ its windows: it moves them into a bottom corner of their own
 screen, leaving a hair of each at the edge, and moves them back
 when their Space is shown again. The same park holds the windows
 a Stack, Track, Grid or BSP layout cannot fit, which wait off
-screen until they scroll in, and the windows Monocle is not
+screen until they scroll in, and, under
+`monocle.set_hide_style("park")`, the windows Monocle is not
 showing.
 
 **A parked window has not gone anywhere.** It is still on the
@@ -284,20 +285,24 @@ it switches to that Desktop and gives the window the focus.
 
 ### With more than one screen
 
-KiwiDesk parks in the bottom corner on the side of the screen
-that has no other screen next to it, and in the bottom-right
-corner when both sides have one. A parked window's top sits about
-48 pt above the screen's bottom edge, a strip 1 pt wide shows,
-and the rest hangs down and out past that side. So give each screen
-one bottom corner with no screen beside it or below it on that
-side; otherwise its parked windows show on the neighbour.
+KiwiDesk parks in the bottom-right corner of the window's own
+screen, and in the bottom-left corner when a screen sits to the
+right and none to the left. A screen counts as beside it when
+any part of it lies level with this screen. A parked window's top
+sits about 48 pt above the bottom of the screen's usable area
+(above a bottom Dock), a strip 1 pt wide shows, and the rest hangs
+down and out past that corner. Keep the corner KiwiDesk picks
+clear, with no screen beside it or below it; otherwise its parked
+windows show on that screen.
 
-A screen between two taller screens has no free corner: both side
-screens reach below its bottom edge. Raising one side screen in
-System Settings ▸ Displays until its bottom is above that edge frees
-the corner on its side. KiwiDesk never parks on another screen's
-free corner, because macOS then moves the window onto that
-screen's Desktop. AeroSpace's [proper monitor arrangement
+A screen between two taller screens parks bottom-right, where the
+right-hand screen reaches below it. Raising the right-hand screen
+in System Settings ▸ Displays until its bottom sits more than
+about 48 pt above that corner clears it; raising the left-hand
+one changes nothing while both sides still have a screen. Parking
+on another screen's free corner is not an option
+([Accepted limitations](accepted-limitations.md)). AeroSpace's
+[proper monitor arrangement
 guide](https://nikitabobko.github.io/AeroSpace/guide#proper-monitor-arrangement)
 shows the same rule with pictures.
 

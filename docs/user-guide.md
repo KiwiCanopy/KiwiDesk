@@ -443,9 +443,9 @@ space pinned to one may open on either. A space pinned to an
 absent screen gets its own card below the picture with **Back
 to automatic placement**.
 
-With more than one screen, give each one a free bottom corner, or
-the windows KiwiDesk hides show on its neighbour ([With more than
-one screen](spaces-and-desktops.md#with-more-than-one-screen)).
+With more than one screen, keep clear the bottom corner each one
+parks its hidden windows in, or they show on its neighbour ([With
+more than one screen](spaces-and-desktops.md#with-more-than-one-screen)).
 
 The **focused screen** is the one you last clicked — a window or
 the bare wallpaper. A new window, and a global sticky window,
