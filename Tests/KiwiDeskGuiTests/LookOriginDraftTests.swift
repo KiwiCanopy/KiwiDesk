@@ -37,3 +37,17 @@ struct LookOriginDraftTests {
         #expect(model.config.settings.lookOrigin == nil)
     }
 }
+
+extension LookOriginDraftTests {
+    @Test("the row names the credit a saved look kept, not its name")
+    func rowNamesTheKeptCredit() {
+        let model = makeTestModel()
+        var saved = LookBody(of: model.config.settings).named("Mine")
+        saved.basedOn = LookCredit(name: "Dawn", author: "Ben")
+        model.applyLook(saved)
+        let row = SettingsDiffRowSource.rows(for: model).first {
+            $0.key == .colours(.lookOrigin)
+        }
+        #expect(row?.newValue == "Dawn by Ben")
+    }
+}
