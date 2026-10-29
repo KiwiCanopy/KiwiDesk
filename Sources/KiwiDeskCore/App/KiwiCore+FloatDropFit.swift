@@ -69,7 +69,7 @@ extension KiwiCore {
         return Self.bottomFit(
             frame,
             limit: region.maxY,
-            floor: CGFloat(effectiveMinSize(of: id, axis: "y"))
+            floor: CGFloat(plannedMinSize(of: id, axis: "y"))
         )
     }
 }

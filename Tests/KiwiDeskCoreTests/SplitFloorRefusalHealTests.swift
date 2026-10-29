@@ -11,7 +11,11 @@ import Testing
 /// zone draws it, where the corroborated reading left it
 /// overlapping the master. Display and `min_window_size` pinned
 /// (#531, #660).
-@Suite("Split floor heal counts a refusal (#2774)", .serialized)
+@Suite(
+    "Split floor heal counts a refusal (#2774)",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct SplitFloorRefusalHealTests {
     /// Master w1 and stack w2 in a Stack Space on a pinned
@@ -57,7 +61,6 @@ struct SplitFloorRefusalHealTests {
 
     @Test("One refusal moves the master ratio")
     func refusalHealsTheMasterRatio() throws {
-        guard NSScreen.main != nil else { return }
         let (core, space) = makeCore()
         core.retile()
         let before = ratio(core, space)
@@ -74,7 +77,6 @@ struct SplitFloorRefusalHealTests {
 
     @Test("A snap's few points move nothing")
     func snapNoiseKeepsTheRatio() throws {
-        guard NSScreen.main != nil else { return }
         let (core, space) = makeCore()
         core.retile()
         let before = ratio(core, space)
@@ -82,9 +84,37 @@ struct SplitFloorRefusalHealTests {
         let width = try #require(frames[WindowID(2)]).width
         let margin = EffectiveSizeBound.refusalMargin
         core.tiler.boundLearner.bounds[WindowID(2)] = .init(width: [
-            .init(asked: width + 1 - margin, answered: width + 1)
+            .init(asked: width, answered: width + margin)
         ])
         core.retile()
         #expect(ratio(core, space) == before)
+    }
+
+    /// A master grow press stops where the stack zone would fall
+    /// under its refusal, the floor the heal drew it at.
+    @Test("A master press stops at the stack's refusal")
+    func pressStopsAtTheRefusal() throws {
+        let (core, space) = makeCore()
+        core.tiler.boundLearner.bounds[WindowID(2)] = .init(width: [
+            .init(asked: 400, answered: 700)
+        ])
+        core.retile()
+        let live = try #require(core.state.workspaces[space])
+        core.writeCappedMasterRatio(
+            proposed: 0.9,
+            span: core.layoutSpan(of: live, horizontal: true),
+            axis: "x",
+            space: live,
+            focused: WindowID(1),
+            deltaSign: 1
+        )
+        // Unhealed by any retile, the store still holds the zone
+        // near its refusal: the writer caps against the raw region
+        // span, a gap's worth wider than the drawn one, so it lands
+        // within that slack of 700 — never at the 300 setting.
+        let frame = try #require(
+            core.tiler.calculatedFrames(state: core.state)[WindowID(2)]
+        )
+        #expect(frame.width >= 650)
     }
 }

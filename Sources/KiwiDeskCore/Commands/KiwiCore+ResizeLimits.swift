@@ -29,14 +29,22 @@ extension KiwiCore {
         )
     }
 
-    /// The floor a run plans a member at along `axis` — the
-    /// effective minimum raised to the window's least refusal
-    /// there (#2774), so a weight press clamps where the run
-    /// would scroll. `LayoutContext.plannedFloor`'s clamp twin.
+    /// The floor a clamp stops at on `axis`: the effective minimum
+    /// raised to the window's least refusal there (#2774), the
+    /// clamp twin of `LayoutContext.plannedFloor`.
     func plannedMinSize(of id: WindowID, axis: String) -> Double {
-        let refused = tiler.sizeBound(for: id)?
-            .refusedFloor(horizontal: axis == "x")
-        return max(effectiveMinSize(of: id, axis: axis), refused ?? 0)
+        max(
+            effectiveMinSize(of: id, axis: axis),
+            refusedMinSize(of: id, axis: axis)
+        )
+    }
+
+    /// The window's least refusal on `axis`, 0 where none.
+    private func refusedMinSize(of id: WindowID, axis: String) -> Double {
+        Double(
+            tiler.sizeBound(for: id)?
+                .refusedFloor(horizontal: axis == "x") ?? 0
+        )
     }
 
     /// One window's learned app-enforced minimum on `axis` (#677),
@@ -110,19 +118,16 @@ extension KiwiCore {
 
     /// `effectiveMinSize` over a group, each member's learned
     /// floor raised to its least refusal on `axis` (#2774) — what
-    /// a split heal and its press writers stop at, so one refusal
-    /// moves the split that would otherwise overlap it.
+    /// every sizing clamp and heal stops at.
     func plannedMinSize(
         of members: some Collection<WindowID>,
         axis: String,
         in space: Space
     ) -> (size: Double, carrier: WindowID?) {
         groupMinSize(of: members, axis: axis, in: space) {
-            let refused = tiler.sizeBound(for: $0)?
-                .refusedFloor(horizontal: axis == "x")
-            return max(
+            max(
                 learnedMinSize(of: $0, axis: axis),
-                Double(refused ?? 0)
+                refusedMinSize(of: $0, axis: axis)
             )
         }
     }
