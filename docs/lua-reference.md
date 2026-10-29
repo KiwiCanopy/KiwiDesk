@@ -3313,6 +3313,11 @@ layout carries no App Bar, or where its App Bar is `"always"`.
 It fails with a pill too where the Space holds no window, so the
 App Bar has nothing to show.
 
+:::unreleased
+It fails with a pill first while a window fills the screen, as
+the Space Bar's call does.
+:::
+
 **Example:**
 
 ```lua
@@ -3543,6 +3548,12 @@ stays until the next call, or for
 seconds where that is above 0. Fails, with a pill beside the bar,
 where the Space Bar is `"always"`. VoiceOver's press on the Space
 dots runs it too.
+
+:::unreleased
+It fails with a pill first while a window fills the screen, whether
+maximized, full screen or a presentation, since the bars stay
+hidden there.
+:::
 
 **Example:**
 

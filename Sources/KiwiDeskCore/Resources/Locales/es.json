@@ -1899,6 +1899,7 @@
   "shelf.reveal_refused.space_beside": "La Space Bar sigue visible junto a la App Bar",
   "shelf.reveal_refused.space_empty": "No hay espacios para la Space Bar aquí",
   "shelf.reveal_refused.space_set": "La Space Bar está en «%1$@»",
+  "shelf.reveal_refused.stands_down": "Las barras siguen ocultas mientras una ventana llena la pantalla",
   "shortcuts.add": "Añadir",
   "shortcuts.add_application": "Añadir aplicación",
   "shortcuts.add_binding": "Añadir atajo",

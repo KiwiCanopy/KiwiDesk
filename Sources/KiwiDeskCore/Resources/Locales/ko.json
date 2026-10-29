@@ -1899,6 +1899,7 @@
   "shelf.reveal_refused.space_beside": "Space Bar가 App Bar 옆에서 계속 표시됨",
   "shelf.reveal_refused.space_empty": "여기에는 Space Bar에 표시할 공간이 없음",
   "shelf.reveal_refused.space_set": "Space Bar가 ‘%1$@’(으)로 설정되어 있음",
+  "shelf.reveal_refused.stands_down": "윈도우가 화면을 채우는 동안 바는 가려져 있음",
   "shortcuts.add": "추가",
   "shortcuts.add_application": "앱 추가",
   "shortcuts.add_binding": "단축키 추가",

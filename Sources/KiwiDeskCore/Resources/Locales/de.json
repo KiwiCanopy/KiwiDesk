@@ -1899,6 +1899,7 @@
   "shelf.reveal_refused.space_beside": "Space Bar bleibt neben der App Bar sichtbar",
   "shelf.reveal_refused.space_empty": "Hier keine Spaces für die Space Bar",
   "shelf.reveal_refused.space_set": "Space Bar steht auf „%1$@“",
+  "shelf.reveal_refused.stands_down": "Leisten bleiben ausgeblendet, solange ein Fenster den Bildschirm füllt",
   "shortcuts.add": "Hinzufügen",
   "shortcuts.add_application": "App hinzufügen",
   "shortcuts.add_binding": "Tastenkürzel hinzufügen",

@@ -51,7 +51,7 @@ struct ShelfRefusalPlaceTests {
 
     /// The empty pill asks the bar's own content and stands down with
     /// its shelf: empty and shown → the pill; a window → none; the
-    /// shelf stood down for what is in front → none.
+    /// shelf stood down for what is in front → the stand-down's.
     @Test(
         "The empty refusal asks the bar's content and the stand-down",
         .enabled(if: NSScreen.main != nil)
@@ -72,9 +72,12 @@ struct ShelfRefusalPlaceTests {
         #expect(
             core.emptyRefusal(.app, on: display.id) == .nothingToShow(.app)
         )
-        // Stood down (not a user Space): no pill, whatever the content.
+        // Stood down (not a user Space): the stand-down's own pill,
+        // whatever the content (#2775).
         NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        #expect(core.emptyRefusal(.app, on: display.id) == nil)
+        #expect(
+            core.emptyRefusal(.app, on: display.id) == .standsDown(.app)
+        )
         NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.state.apply(
             .windowCreated(
@@ -87,5 +90,35 @@ struct ShelfRefusalPlaceTests {
             )
         )
         #expect(core.emptyRefusal(.app, on: display.id) == nil)
+    }
+
+    /// A shelf stood down for what is in front is why nothing shows,
+    /// whatever the bar's setting says (#2775): the command answers
+    /// the stand-down before the Space Bar's `always`.
+    @Test(
+        "A stood-down shelf refuses before the bar's setting",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func standDownRefusesFirst() throws {
+        let screen = try #require(NSScreen.screens.first)
+        let display = try #require(screen.kiwiDisplay)
+        let core = makeTestCore()
+        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
+        core.tiler.visibleBounds = { _ in screen.frame }
+        core.state.apply(.displaysChanged([display]))
+        core.resolveSpaceDisplays(mainID: display.id)
+        var settings = core.tiler.settings
+        settings.spaceBarStyle.visibility = .always
+        core.tiler.settings = settings
+        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
+        #expect(
+            core.shelfRevealCommand(.space).error
+                == "the Space Bar is set to always"
+        )
+        NativeSpaces.currentSpaceIsUserOverride = { _ in false }
+        #expect(
+            core.shelfRevealCommand(.space).error
+                == "the Space Bar stands down for what is in front"
+        )
     }
 }

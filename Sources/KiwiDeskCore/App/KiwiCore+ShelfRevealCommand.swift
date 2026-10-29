@@ -6,8 +6,9 @@ import AppKit
 extension KiwiCore {
     /// `space_bar.toggle_reveal` / `app_bar.toggle_reveal` (#761):
     /// shows or hides the bar on the screen the active Space lays
-    /// out on, over the windows, and only that bar. A bar set to
-    /// `always` is refused with a pill on the bar, since it is
+    /// out on, over the windows, and only that bar. A shelf stood
+    /// down for what is in front is refused first (#2775); a bar set
+    /// to `always` is refused with a pill on the bar, since it is
     /// already shown; the App Bar is refused where the active
     /// Space's layout carries none.
     func shelfRevealCommand(_ bar: ShelfBar) -> CommandResponse {
@@ -16,6 +17,12 @@ extension KiwiCore {
         guard let space = workspaces.activeSpace,
             let display = workspaces.display(of: space)
         else { return .fail("the \(name) draws on no screen here") }
+        // Asked before the layout and the setting: a window filling
+        // the screen is why nothing shows, whatever those say (#2775).
+        if shelfStandsDown(on: display) {
+            cueRevealRefusal(.standsDown(bar), display: display)
+            return .fail("the \(name) stands down for what is in front")
+        }
         let mode = workspaces[space]?.mode ?? .bsp
         let settings = tiler.settings
         guard bar == .space || settings.appBarVisibility(in: mode) != nil
@@ -37,12 +44,6 @@ extension KiwiCore {
             cueRevealRefusal(.shownBesideAlways(bar), display: display)
             return .fail("the \(name) is shown beside an always bar")
         }
-        // A shelf stood down for what is in front (full screen, a
-        // presentation, a maximized window) has no target either,
-        // and is no empty bar: it refuses without a pill.
-        if shelfStandsDown(on: display) {
-            return .fail("the \(name) stands down for what is in front")
-        }
         guard
             let key = shelves.reveal.targets.keys.first(where: {
                 $0.shelf.display == display && $0.bar == bar
@@ -60,14 +61,16 @@ extension KiwiCore {
     }
 
     /// The pill a show/hide with no reveal target owes: nothing to
-    /// show where the bar's own content is empty, and none where the
-    /// shelf stands down for what is in front, which is no empty bar
-    /// (#2567).
+    /// show where the bar's own content is empty (#2567), and the
+    /// stand-down's where the shelf stands down for what is in
+    /// front, which is no empty bar (#2775).
     func emptyRefusal(
         _ bar: ShelfBar,
         on display: DisplayID
     ) -> RevealRefusal? {
-        guard !shelfStandsDown(on: display) else { return nil }
+        guard !shelfStandsDown(on: display) else {
+            return .standsDown(bar)
+        }
         let settings = tiler.settings
         let empty =
             bar == .app
