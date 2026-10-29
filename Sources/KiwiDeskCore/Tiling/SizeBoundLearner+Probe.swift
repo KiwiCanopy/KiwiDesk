@@ -32,9 +32,34 @@ extension SizeBoundLearner {
         /// state-and-layout.md ▸ #1439 states. Consumed by the
         /// first issue.
         var baselineTrusted: Bool
+        /// The layout frame the latest issue stood in for, nil
+        /// where the engine named none (#2758).
+        var slot: CGRect?
+        /// Issues a settled read has answered (#2758).
+        var answeredIssues = 0
+        /// Whether a layout frame was held for the issue in
+        /// flight, which its answer then owes a placement.
+        var held = false
 
         var expected: CGFloat { anchor.answered }
         var isFloor: Bool { anchor.isFloor }
+
+        /// Whether a layout span is one the anchor already
+        /// answers — its ask or its answer — the one span a probe
+        /// may replace and a held frame may re-ask.
+        func standsIn(for span: CGFloat) -> Bool {
+            EffectiveSizeBound.matches(span, anchor.asked)
+                || EffectiveSizeBound.matches(span, anchor.answered)
+        }
+
+        /// Whether an issue is out with no settled answer yet and
+        /// is still the last ask on its axis.
+        func isInFlight(lastAsked: CGFloat?) -> Bool {
+            guard answeredIssues < issues, let lastAsked else {
+                return false
+            }
+            return EffectiveSizeBound.matches(asked, lastAsked)
+        }
     }
 
     struct AxisProbes: Equatable {
@@ -172,11 +197,13 @@ extension SizeBoundLearner {
     mutating func takeCorroborationProbe(
         _ id: WindowID,
         current: CGSize,
-        target: CGSize
+        target: CGSize,
+        slot frame: CGRect? = nil
     ) -> ProbeIssue? {
         guard var ledger = probes[id] else { return nil }
         var size = target
         var trusted = false
+        let last = lastAsks[id]?.size
         if let asked = takeProbeAxis(
             &ledger,
             slot: \.width,
@@ -184,6 +211,8 @@ extension SizeBoundLearner {
             candidates: candidates[id]?.width ?? [],
             current: current.width,
             target: target.width,
+            lastAsked: last?.width,
+            frame: frame,
             trusted: &trusted
         ) {
             size.width = asked
@@ -195,6 +224,8 @@ extension SizeBoundLearner {
             candidates: candidates[id]?.height ?? [],
             current: current.height,
             target: target.height,
+            lastAsked: last?.height,
+            frame: frame,
             trusted: &trusted
         ) {
             size.height = asked
@@ -214,6 +245,8 @@ extension SizeBoundLearner {
         candidates: [EffectiveSizeBound.Axis],
         current: CGFloat,
         target: CGFloat,
+        lastAsked: CGFloat?,
+        frame: CGRect?,
         trusted: inout Bool
     ) -> CGFloat? {
         guard var probe = ledger[keyPath: slot].pending
@@ -228,19 +261,18 @@ extension SizeBoundLearner {
         let answered = candidates.contains {
             EffectiveSizeBound.matches($0.asked, probe.asked)
         }
+        // The last issue stays pending until it is answered
+        // (#2758), so its answer still reaches the ladder.
         guard anchorStands,
             !Self.corroborates(entries, floor: probe.isFloor),
             probe.issues < Self.maxProbeIssues
+                || probe.isInFlight(lastAsked: lastAsked)
         else {
             Self.retire(&ledger[keyPath: slot])
             return nil
         }
-        guard
-            EffectiveSizeBound.matches(target, probe.anchor.asked)
-                || EffectiveSizeBound.matches(
-                    target,
-                    probe.anchor.answered
-                ),
+        guard probe.issues < Self.maxProbeIssues,
+            probe.standsIn(for: target),
             probe.issues == 0 || answered
         else { return nil }
         // A trusted baseline needs the frame to still be the
@@ -253,6 +285,8 @@ extension SizeBoundLearner {
         }
         probe.baselineTrusted = false
         probe.issues += 1
+        probe.slot = frame
+        probe.held = false
         ledger[keyPath: slot].pending = probe
         return probe.asked
     }

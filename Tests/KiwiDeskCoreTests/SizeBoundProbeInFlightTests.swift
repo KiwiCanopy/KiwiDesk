@@ -11,8 +11,13 @@ import Testing
 /// and superseding the probe there left the bound uncorroborated
 /// for good. The probe's ladder is
 /// `SizeBoundCorroborationProbeEngineTests`; this suite is the
-/// hold.
-@Suite("Size-bound probe in flight (#2758)", .serialized)
+/// hold through the engine, `SizeBoundProbeHoldTests` its
+/// bookkeeping. Needs a screen: a headless host SKIPS it.
+@Suite(
+    "Size-bound probe in flight (#2758)",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct SizeBoundProbeInFlightTests {
     private let w = WindowID(1)
@@ -82,7 +87,6 @@ struct SizeBoundProbeInFlightTests {
 
     @Test("The placement pass keeps the probe's ask")
     func placementPassKeepsTheProbe() throws {
-        guard NSScreen.main != nil else { return }
         let captured = Captured()
         let core = makeCore(captured: captured)
         let (target, _) = try confirmWithEchoPending(
@@ -101,7 +105,6 @@ struct SizeBoundProbeInFlightTests {
 
     @Test("The probe's settled refusal corroborates the bound")
     func settledRefusalPairs() throws {
-        guard NSScreen.main != nil else { return }
         let captured = Captured()
         let core = makeCore(captured: captured)
         let (target, refused) = try confirmWithEchoPending(
@@ -119,40 +122,35 @@ struct SizeBoundProbeInFlightTests {
         #expect(abs(residue.midX - target.midX) < 0.01)
     }
 
-    @Test("The hold is the probe's spans alone, and ends answered")
-    func holdIsTheProbesSpansAlone() throws {
-        // The device's axis: a height floor, Telegram's 550 pt
-        // answering a 324 pt slot (#2758).
-        var learner = SizeBoundLearner()
-        let held = CGSize(width: 380, height: 550)
-        let slot = CGSize(width: 380, height: 324)
-        learner.recordAsk(w, size: slot, settledFrom: held)
-        learner.observe(w, currentSize: held, settledRead: true)
-        let taken = learner.takeCorroborationProbe(
-            w,
-            current: held,
-            target: slot
+    @Test("A re-issuing pass keeps its own ask")
+    func reissuingPassKeepsItsAsk() throws {
+        let captured = Captured()
+        let core = makeCore(captured: captured)
+        _ = try confirmWithEchoPending(core, captured: captured)
+        core.tiler.echoGraceOverride = { _ in true }
+        // Control: an ordinary pass holds the residue back.
+        captured.frames = [:]
+        core.retile()
+        #expect(captured.frames[w] == nil)
+        // A Space activation re-issues it, probe or not.
+        core.retile(pass: .reissue)
+        let reissued = try #require(captured.frames[w])
+        #expect(reissued.width == 715)
+    }
+
+    @Test("A forced pass keeps its own ask")
+    func forcedPassKeepsItsAsk() throws {
+        let captured = Captured()
+        let core = makeCore(captured: captured)
+        let (target, _) = try confirmWithEchoPending(
+            core,
+            captured: captured
         )
-        let issue = try #require(taken)
-        // Before the issue is recorded nothing is in flight.
-        #expect(!learner.probeInFlight(w, target: held))
-        learner.recordAsk(
-            w,
-            size: issue.size,
-            settledFrom: issue.baseline
-        )
-        // The anchor's answer and its ask are what it stands in
-        // for; a third height, or a changed width, are not.
-        #expect(learner.probeInFlight(w, target: held))
-        #expect(learner.probeInFlight(w, target: slot))
-        let taller = CGSize(width: 380, height: 700)
-        #expect(!learner.probeInFlight(w, target: taller))
-        let wider = CGSize(width: 500, height: 550)
-        #expect(!learner.probeInFlight(w, target: wider))
-        // The settled refusal pairs the floor and retires the
-        // probe, so the hold ends.
-        learner.observe(w, currentSize: held, settledRead: true)
-        #expect(learner.bound(for: w)?.minHeight == 550)
-        #expect(!learner.probeInFlight(w, target: held))
+        core.tiler.echoGraceOverride = { _ in true }
+        captured.frames = [:]
+        core.retile(pass: .apply)
+        let forced = try #require(captured.frames[w])
+        let probed = target.width + SizeBoundLearner.probeDistance
+        #expect(abs(forced.width - probed) > 1)
     }
 }

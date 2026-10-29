@@ -1418,11 +1418,17 @@ editing here:
   bounded to two, since an echo-quiet pass can confirm the
   answer it issued, and its flag clear afterwards — are
   `SizeBoundCorroborationProbeEngineTests`'; the drain after
-  that loop is belt, unguarded. An issued probe is answered
-  before the loop supersedes it: a frame re-asking only the
-  anchor's spans, in the slot the probe went to, is skipped
-  until the probe's answer lands, on an ordinary pass only
-  (#2758, `SizeBoundProbeInFlightTests`). The cap
+  that loop is belt, unguarded. An issue in flight is answered
+  before the loop supersedes it (#2758): an ordinary pass holds
+  a frame that re-asks only spans the anchor answers, in the
+  slot the issue stood in for, until a SETTLED read answers
+  that issue, and the held answer owes the placement. The
+  substitution door and the hold read one predicate
+  (`CorroborationProbe.standsIn`, `isInFlight`), so a change to
+  which span a probe may replace changes both; a new ender of
+  an issue answers it through `noteProbeAnswered`
+  (`SizeBoundProbeHoldTests`, `SizeBoundProbeInFlightTests`).
+  The cap
   consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself
