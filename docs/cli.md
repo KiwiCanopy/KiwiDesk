@@ -312,6 +312,21 @@ tunnel-client run --profile kiwidesk
 
 Then add a connector in ChatGPT whose connection is that tunnel.
 
+## Drawing a Look's Preview
+
+:::unreleased
+`kiwidesk preview <look.json> <out.png>` draws an exported look
+file as a 768 × 480 PNG: its tile in Looks & Animations, painted
+over the default settings on four Spaces in dark mode. It reads
+the file as Import… does and needs no running app. A font family
+the Mac lacks draws as `"System"`, as on the bars
+([`kiwishelf.set_font_family`](lua-reference.md#kiwishelfset_font_family)).
+
+```sh
+kiwidesk preview ~/Desktop/Dusk.json ~/Desktop/Dusk.png
+```
+:::
+
 ## Service Control
 
 ```sh
@@ -394,21 +409,6 @@ live while reproducing:
 `kiwidesk debug_log [message]` writes a marker line into this
 same log — one before and one after a repro brackets it; it
 exports nothing.
-
-## Drawing a Look's Preview
-
-:::unreleased
-`preview` draws an exported look file as a 768 × 480 PNG: the
-picture its tile shows in Looks & Animations, on four Spaces in
-dark mode. It reads the file the way Import… does and needs no
-running app; a font the Mac lacks draws in the system font.
-
-```sh
-kiwidesk preview ~/Desktop/Dusk.json ~/Desktop/Dusk.png
-```
-
-The looks gallery draws each look's preview with it (#1740).
-:::
 
 ## Checking the Private Fast Paths
 

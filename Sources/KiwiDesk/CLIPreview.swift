@@ -3,31 +3,39 @@ import KiwiDeskCore
 import SwiftUI
 
 /// `kiwidesk preview <look.json> <out.png>`: a look file's gallery
-/// preview (#1740 ▸ Preview) — the shelf card's `LookPlate`, painted
-/// over default settings on a fixed four-Space desk in dark mode,
-/// at a fixed size and scale so every machine writes the same
-/// pixels. Reads the file like Import… does; needs no running app.
+/// preview (#1740 ▸ Preview) — the shelf card's `LookPlate` at its
+/// own size, painted over default settings on a fixed four-Space
+/// desk in dark mode, scaled to a fixed pixel size. Reads the file
+/// like Import… does; needs no running app. The verb, `usage` and
+/// `pixels` are the KiwiDesk-Looks CI's contract
+/// (`CLIPreviewContractTests`).
 enum CLIPreview {
     static let verb = "preview"
 
     static let usage = "usage: kiwidesk preview <look.json> <out.png>"
 
-    /// The plate in points, the site card's 16:10; the PNG is
-    /// `scale` times as large, 768 × 480, to fill the card's 720 px.
-    static let size = CGSize(width: 192, height: 120)
-    static let scale: CGFloat = 4
+    /// The PNG's size, the site card's 16:10 at its 720 px slot.
+    static let pixels = CGSize(width: 768, height: 480)
+
+    /// The card's plate, 16:10 at its own height.
+    @MainActor static let points = CGSize(
+        width: PaletteSceneThumbnail.baseHeight * 1.6,
+        height: PaletteSceneThumbnail.baseHeight
+    )
 
     static func run(_ arguments: [String]) -> Int32 {
-        guard arguments.count == 4 else {
-            return fail(usage)
-        }
+        guard arguments.count == 4 else { return fail(usage) }
         let input = URL(fileURLWithPath: arguments[2])
         let output = URL(fileURLWithPath: arguments[3])
+        let data: Data
+        do {
+            data = try Data(contentsOf: input)
+        } catch {
+            return fail("error: \(input.path): \(error)")
+        }
         let look: ShelfLook
         do {
-            look = try LookStore.importLook(
-                data: Data(contentsOf: input)
-            )
+            look = try LookStore.importLook(data: data)
         } catch {
             return fail("error: \(input.path) is not a look file: \(error)")
         }
@@ -45,35 +53,32 @@ enum CLIPreview {
 
     /// The PNG bytes of `look`'s plate on the fixed desk.
     @MainActor static func render(_ look: ShelfLook) -> Data? {
-        let settings = look.painted(over: TilingSettings())
+        let config = desk(look)
         let plate = LookPlate(
-            settings: settings,
-            spaceLabels: spaceLabels(settings),
-            height: size.height
+            settings: config.settings,
+            spaceLabels: BarsPanelPreview.spaceLabels(of: config)
         )
-        .frame(width: size.width)
+        .frame(width: points.width)
         .environment(\.colorScheme, .dark)
         let renderer = ImageRenderer(content: plate)
-        renderer.scale = scale
-        guard let image = renderer.cgImage else { return nil }
+        renderer.scale = pixels.height / points.height
+        var image: CGImage?
+        // The theme's tokens resolve through the drawing appearance,
+        // which a headless process takes from the host.
+        NSAppearance(named: .darkAqua)?.performAsCurrentDrawingAppearance {
+            image = renderer.cgImage
+        }
+        guard let image else { return nil }
         return NSBitmapImageRep(cgImage: image)
             .representation(using: .png, properties: [:])
     }
 
-    /// Spaces 1–4 in tiling mode, labelled as the look labels them.
-    @MainActor static func spaceLabels(
-        _ settings: TilingSettings
-    ) -> [SpaceGlyph] {
-        (1...4).map { id in
-            KiwiCore.spaceBarLabel(
-                identifier: KiwiCore.spaceIdentifier(
-                    id: SpaceID(id),
-                    icon: nil
-                ),
-                mode: .bsp,
-                label: settings.spaceBarStyle.itemLabel
-            )
-        }
+    /// Spaces 1–4 in BSP, wearing `look` over default settings.
+    static func desk(_ look: ShelfLook) -> GuiConfig {
+        var config = GuiConfig()
+        config.settings = look.painted(over: TilingSettings())
+        config.spaces = (1...4).map { SpaceID($0) }
+        return config
     }
 
     private static func fail(_ message: String) -> Int32 {

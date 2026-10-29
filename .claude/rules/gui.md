@@ -2177,6 +2177,13 @@ route and shell completion reads it, so a local verb is never an
 command has, save the ruled `help` (`CLIRouteTests`,
 `CLIHelpSeamTests`).
 
+**`preview` renders the shelf card's `LookPlate` headless**
+(#1740): keep that view and what it draws free of `NSApp`, an
+environment object and a live model, or the gallery's previews
+stop (`CLIPreviewTests`). Its verb, usage line and PNG size are
+read by the KiwiDesk-Looks CI, so a change there moves that repo
+in step (`CLIPreviewContractTests`).
+
 ## Strings
 
 - **A shortcut row's title is a verb phrase saying what pressing

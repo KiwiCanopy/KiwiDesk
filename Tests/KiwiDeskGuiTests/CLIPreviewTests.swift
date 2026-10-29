@@ -1,12 +1,14 @@
 import AppKit
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
 
-/// `kiwidesk preview` (#1740 ▸ Preview): the gallery's CI draws each
-/// look's picture with it, so the file it writes must carry the
-/// look, at one size, with the same bytes on every run.
+/// `kiwidesk preview` (#1740 ▸ Preview): the KiwiDesk-Looks CI draws
+/// each look's picture with it, so the file it writes must carry the
+/// look on a dark desk, at one size, with the same bytes on every
+/// run on one machine.
 @Suite("CLI preview")
 @MainActor
 struct CLIPreviewTests {
@@ -17,6 +19,38 @@ struct CLIPreviewTests {
         #expect(Self.pixels(near: (0x56, 0x4A, 0xB6), in: violet) > 500)
         let amber = try drawn(focused: "#D79921")
         #expect(Self.pixels(near: (0x56, 0x4A, 0xB6), in: amber) == 0)
+    }
+
+    /// `SettingsTheme.sunken`'s two values: the plate draws the dark
+    /// one whatever the host's appearance.
+    @Test("the desk is dark")
+    func drawsDark() throws {
+        let image = try drawn(focused: "#564AB6")
+        #expect(Self.pixels(near: (0x23, 0x2B, 0x26), in: image) > 500)
+        #expect(Self.pixels(near: (0xF4, 0xF7, 0xF1), in: image) == 0)
+    }
+
+    /// The card's own plate, scaled up: a taller plate is another
+    /// layout, its bars a smaller share of the desk.
+    @Test("the plate is the shelf card's, on four Spaces")
+    func cardPlateOnFourSpaces() throws {
+        #expect(
+            CLIPreview.points.height == PaletteSceneThumbnail.baseHeight
+        )
+        let file = try Self.lookFile(focused: "#564AB6", in: Self.scratch())
+        let look = try LookStore.importLook(data: Data(contentsOf: file))
+        #expect(CLIPreview.desk(look).spaces.count == 4)
+    }
+
+    /// `runCLI` sends the verb here, not to the socket, which would
+    /// write no file.
+    @Test("runCLI dispatches preview")
+    func dispatches() throws {
+        let dir = try Self.scratch()
+        let look = try Self.lookFile(focused: "#564AB6", in: dir)
+        let out = dir.appendingPathComponent("out.png")
+        #expect(runCLI(["kiwidesk", "preview", look.path, out.path]) == 0)
+        #expect(FileManager.default.fileExists(atPath: out.path))
     }
 
     @Test("the same file draws the same bytes")
@@ -108,5 +142,20 @@ struct CLIPreviewTests {
             near(bytes[$0], rgb.0) && near(bytes[$0 + 1], rgb.1)
                 && near(bytes[$0 + 2], rgb.2)
         }.count
+    }
+}
+
+/// The KiwiDesk-Looks repository's CI (`scripts/previews.py`) calls
+/// the verb by name, probes for the usage line to tell a KiwiDesk
+/// that has it, and the site sizes the card for the PNG. Like
+/// `MCPInvocationContractTests`, a change that reds here breaks a
+/// reader outside this repository and moves that reader with it.
+@Suite("CLI preview contract")
+struct CLIPreviewContractTests {
+    @Test("the verb, its usage line and the PNG size are fixed")
+    func contract() {
+        #expect(CLIRoute.of("preview") == .preview)
+        #expect(CLIPreview.usage.hasPrefix("usage: kiwidesk preview"))
+        #expect(CLIPreview.pixels == CGSize(width: 768, height: 480))
     }
 }

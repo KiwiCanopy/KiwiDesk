@@ -12,8 +12,6 @@ struct LookPlate: View {
     /// The draft with the look painted on.
     let settings: TilingSettings
     let spaceLabels: [SpaceGlyph]
-    /// The plate's height; the shelf card's unless told otherwise.
-    var height: CGFloat = PaletteSceneThumbnail.baseHeight
 
     var body: some View {
         ZStack {
@@ -33,7 +31,7 @@ struct LookPlate: View {
                 HomeCardPlate.palette(settings)
             )
         }
-        .frame(height: height)
+        .frame(height: PaletteSceneThumbnail.baseHeight)
         .frame(maxWidth: .infinity)
         // Hidden from VoiceOver, never from the pointer: the plate is
         // most of a card's Button label, so a click on it is the click.
