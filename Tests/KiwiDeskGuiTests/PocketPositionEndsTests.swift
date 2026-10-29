@@ -49,6 +49,10 @@ struct PocketPositionEndsTests {
         .split(whereSeparator: \.isWhitespace)
         .joined()
         #expect(source.contains("spokenValue:Self.spokenPosition("))
-        #expect(source.contains("ends:Self.ends(pocket.wrappedValue.edge)"))
+        #expect(
+            source.contains(
+                "ends:Self.ends(shelf.wrappedValue.pocketEdge)"
+            )
+        )
     }
 }

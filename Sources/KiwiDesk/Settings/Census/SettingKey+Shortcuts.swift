@@ -77,8 +77,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// What the pocket holds (#2678), then where its plate sits
     /// (#2680): its edge and its position along it.
     case pocketCapacity = "appWide.pocketCapacity"
-    case pocketEdge = "settings.pocketStyle.edge"
-    case pocketPosition = "settings.pocketStyle.position"
+    case pocketEdge = "settings.kiwishelf.pocketEdge"
+    case pocketPosition = "settings.kiwishelf.pocketPosition"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"

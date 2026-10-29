@@ -71,10 +71,10 @@ extension SettingsValueReadout {
                     census,
                     label: SettingsCatalog.shortcuts.pocketEdge.text,
                     old: AppBarOptions.edgeName(
-                        old.settings.pocketStyle.edge
+                        old.settings.kiwishelf.pocketEdge
                     ),
                     new: AppBarOptions.edgeName(
-                        new.settings.pocketStyle.edge
+                        new.settings.kiwishelf.pocketEdge
                     )
                 )
             ]
@@ -324,6 +324,6 @@ extension SettingsValueReadout {
     }
 
     private static func pocketPercent(_ config: GuiConfig) -> String {
-        percent(Double(config.settings.pocketStyle.position) / 100)
+        percent(Double(config.settings.kiwishelf.pocketPosition) / 100)
     }
 }

@@ -34,8 +34,8 @@ extension KiwiCore {
                 window: frame,
                 pocket: BriefPocketPlan.pocketFrame(
                     in: region,
-                    edge: style.edge,
-                    position: style.position
+                    edge: tiler.settings.kiwishelf.pocketEdge,
+                    position: tiler.settings.kiwishelf.pocketPosition
                 ),
                 iconPid: state.windows[id]?.pid,
                 shelf: briefPocketShelf(),
@@ -90,7 +90,7 @@ extension KiwiCore {
     /// keeps it just inside. The brief pocket and the plate (#2678)
     /// read this one region.
     func pocketRegion(on display: DisplayID, screen: NSScreen) -> CGRect {
-        let edge = tiler.settings.pocketStyle.edge
+        let edge = tiler.settings.kiwishelf.pocketEdge
         var region = tiler.visibleBounds(screen)
         if let space = state.workspaces.currentSpace(on: display) {
             for (strip, side) in paintedStrips(forSpace: space)

@@ -95,14 +95,14 @@ struct SettingsCodingTests {
         #expect(floating["mark"] as? Bool == true)
         #expect(floating["color"] as? String == "")
         // `pocket.set_color` → `pocket.color` (#2671), the third
-        // mark's own colour, Automatic by default; `set_edge` /
-        // `set_position` place the plate (#2680); `set_capacity`
-        // is app-wide (#2678), in gui.json's own `pocket` group.
+        // mark's own colour, Automatic by default; where it sits is
+        // KiwiShelf's (#2678); `set_capacity` is app-wide, in
+        // gui.json's own `pocket` group.
         let pocket = try object(root["pocket"])
-        #expect(Set(pocket.keys) == ["color", "edge", "position"])
+        #expect(Set(pocket.keys) == ["color"])
         #expect(pocket["color"] as? String == "")
-        #expect(pocket["edge"] as? String == "bottom")
-        #expect(pocket["position"] as? Double == 82)
+        #expect(shelf["pocket_edge"] as? String == "bottom")
+        #expect(shelf["pocket_position"] as? Double == 82)
         // The `quit` group left for gui.json with #1741
         // (`AppWideSettingsTests`); the key set above holds its
         // absence.

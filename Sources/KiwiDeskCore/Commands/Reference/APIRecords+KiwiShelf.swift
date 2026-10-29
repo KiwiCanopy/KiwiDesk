@@ -161,6 +161,16 @@ extension APIReference {
                 + "0–100; 0 is one even color.",
             .number("percent")
         ),
+        "set_pocket_edge": APIRecord(
+            "Sets the screen edge the pocket sits on.",
+            .choice("edge", AppBarEdge.self)
+        ),
+        "set_pocket_position": APIRecord(
+            "Sets where along its edge the pocket sits, 0–100 "
+                + "percent from the left or top; on a bar's edge it "
+                + "takes the nearer end.",
+            .number("percent")
+        ),
         "set_reveal_timeout": APIRecord(
             "Sets how long the show/hide action keeps a shelf shown; "
                 + "0 waits for the next press.",

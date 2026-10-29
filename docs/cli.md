@@ -462,8 +462,9 @@ that way, stopping at the edge; neither takes other arguments
 
 `animations.set_on_state_change` animates a window floating,
 maximizing or going into the Pocket and out, the last as a brief
-pocket that `pocket.set_edge top|bottom|left|right` (default
-`bottom`) and `pocket.set_position 0–100` (default `82`) place
+pocket that `kiwishelf.set_pocket_edge top|bottom|left|right`
+(default `bottom`) and `kiwishelf.set_pocket_position 0–100`
+(default `82`) place
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 
 :::unreleased

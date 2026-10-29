@@ -160,15 +160,6 @@ extension APIReference {
             "Sets whether the pocket holds one window or several.",
             .choice("capacity", PocketCapacity.self)
         ),
-        "set_edge": APIRecord(
-            "Sets the screen edge the pocket plate sits on.",
-            .choice("edge", AppBarEdge.self)
-        ),
-        "set_position": APIRecord(
-            "Sets where along its edge the pocket plate sits, 0–100 "
-                + "percent from the left or top.",
-            .number("percent")
-        ),
     ]
 
     static let mouseRecords: [String: APIRecord] = [

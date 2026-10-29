@@ -90,6 +90,9 @@ extension APIReference {
         ] {
             map[verb] = "kiwihub.show"
         }
+        // The pocket is KiwiShelf's section or handle (#2678).
+        map["pocket.set_edge"] = "kiwishelf.set_pocket_edge"
+        map["pocket.set_position"] = "kiwishelf.set_pocket_position"
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()

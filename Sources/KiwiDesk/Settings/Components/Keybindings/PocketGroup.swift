@@ -26,8 +26,8 @@ struct PocketGroup: View {
         }
     }
 
-    private var pocket: Binding<PocketStyle> {
-        $model.config.settings.pocketStyle
+    private var shelf: Binding<KiwiShelf> {
+        $model.config.settings.kiwishelf
     }
 
     /// A menu like Edge's: the recorder's footprint has no room for
@@ -92,7 +92,7 @@ struct PocketGroup: View {
         ) {
             Picker(
                 SettingsCatalog.shortcuts.pocketEdge.text,
-                selection: pocket.edge
+                selection: shelf.pocketEdge
             ) {
                 ForEach(AppBarEdge.allCases, id: \.self) {
                     Text(AppBarOptions.edgeName($0)).tag($0)
@@ -105,7 +105,7 @@ struct PocketGroup: View {
             .fixedSize()
             .accessibilityLabel(SettingsCatalog.shortcuts.pocketEdge.text)
             .accessibilityValue(
-                AppBarOptions.edgeName(pocket.wrappedValue.edge)
+                AppBarOptions.edgeName(shelf.wrappedValue.pocketEdge)
             )
         }
         .searchAnchored(SettingsCatalog.shortcuts.pocketEdge)
@@ -114,23 +114,26 @@ struct PocketGroup: View {
     private var positionRow: some View {
         let label = SettingsCatalog.shortcuts.pocketPosition.text
         let readout = SettingsValueReadout.percent(
-            Double(pocket.wrappedValue.position) / 100
+            Double(shelf.wrappedValue.pocketPosition) / 100
         )
         return ShortcutSettingRow(title: label, help: Self.positionHelp) {
             HStack(spacing: 6) {
                 SettingsSlider(
                     value: Binding(
-                        get: { Double(pocket.wrappedValue.position) },
-                        set: { pocket.wrappedValue.position = CGFloat($0) }
+                        get: { Double(shelf.wrappedValue.pocketPosition) },
+                        set: {
+                            shelf.wrappedValue.pocketPosition =
+                                KiwiShelf.clampPocketPosition(CGFloat($0))
+                        }
                     ),
                     range: 0...100,
                     step: 1,
                     label: label,
                     spokenValue: Self.spokenPosition(
                         readout,
-                        edge: pocket.wrappedValue.edge
+                        edge: shelf.wrappedValue.pocketEdge
                     ),
-                    ends: Self.ends(pocket.wrappedValue.edge)
+                    ends: Self.ends(shelf.wrappedValue.pocketEdge)
                 )
                 Text(readout)
                     .monospacedDigit()

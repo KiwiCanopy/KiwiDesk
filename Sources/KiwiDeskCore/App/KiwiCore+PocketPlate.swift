@@ -43,8 +43,8 @@ extension KiwiCore {
         let region = pocketRegion(on: display, screen: screen)
         let square = BriefPocketPlan.pocketFrame(
             in: region,
-            edge: style.edge,
-            position: style.position
+            edge: tiler.settings.kiwishelf.pocketEdge,
+            position: tiler.settings.kiwishelf.pocketPosition
         )
         let placed = Self.pocketPlateFrame(
             square: square,
@@ -124,7 +124,7 @@ extension KiwiCore {
             pocketPlate.view,
             source: .pocket(pocketPlateWindows),
             space: nil,
-            edge: tiler.settings.pocketStyle.edge
+            edge: tiler.settings.kiwishelf.pocketEdge
         )
     }
 }

@@ -79,7 +79,8 @@ struct KiwiShelfCommandParityTests {
             .fontSize(15), .fontFamily("Menlo"), .fontWeight(540),
             .iconSource(.appFont), .dimFactor(0.3),
             .revealTimeout(5), .revealStyle(.grow), .fillFade(40),
-            .tintHubAndPlates(false),
+            .tintHubAndPlates(false), .pocketEdge(.left),
+            .pocketPosition(30),
         ]
     }
 
@@ -149,6 +150,8 @@ struct KiwiShelfCommandParityTests {
         case .revealStyle: return [.string("grow")]
         case .fillFade: return [.number(40)]
         case .tintHubAndPlates: return [.bool(false)]
+        case .pocketEdge: return [.string("left")]
+        case .pocketPosition: return [.number(30)]
         case .minimum, .thickness, .outerMargin, .innerMargin,
             .cornerRoundness, .borderWidth, .highlightWidth, .itemGap,
             .glyphSize,
