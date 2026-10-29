@@ -18,7 +18,7 @@ extension KiwiShelfCard {
             )
         ) {
             Picker(label, selection: shelf.pocketEdge) {
-                ForEach(AppBarEdge.allCases, id: \.self) {
+                ForEach(AppBarOptions.edgeOrder, id: \.self) {
                     Text(AppBarOptions.edgeName($0)).tag($0)
                 }
             }
