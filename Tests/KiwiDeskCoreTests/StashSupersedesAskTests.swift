@@ -199,14 +199,10 @@ struct StashSupersedesAskTests {
         #expect(engine.boundLearner.bound(for: window.id) == learned)
     }
 
-    /// A park inside a corroboration probe's grace (#1439) hands
-    /// its issue back, so the return re-sends the probe instead
-    /// of waiting forever on an answer no parked echo can give.
-    @Test(
-        "A park hands an in-flight probe's issue back",
-        arguments: [true, false]
-    )
-    func parkUnissuesProbe(parks: Bool) throws {
+    /// A probe whose issue a park retired unanswered is re-sent
+    /// on the return (#1439, #2758): no parked echo can answer it.
+    @Test("A parked probe is re-sent on the return")
+    func parkedProbeIsResent() throws {
         let w = WindowID(7)
         let held = CGSize(width: 720, height: 800)
         let ask = CGSize(width: 500, height: 800)
@@ -220,29 +216,23 @@ struct StashSupersedesAskTests {
         )
         let first = try #require(taken)
         learner.recordAsk(w, size: first.size)
-        if parks {
-            learner.parkRetiresAsk(w)
-        } else {
-            learner.supersedeAsk(w)
-        }
+        learner.supersedeAsk(w)
         // The Space returns: the loop asks the anchor's size.
         let again = learner.takeCorroborationProbe(
             w,
             current: held,
             target: ask
         )
-        // Re-sent either way: parked, its issue was handed back; a
-        // plain retire leaves it unanswered and superseded, which
-        // re-sends it in place (#2758). The park counts it again.
-        #expect(again != nil)
+        #expect(again?.size == first.size)
+        // The same issue, re-sent: no budget spent.
         let issues = learner.probes[w]?.width.pending?.issues
         #expect(issues == 1)
     }
 
-    /// The engine wiring of the probe hand-back: `stash` must take
-    /// the probe-aware door, not the plain retire.
+    /// Through the engine: `stash` retires the probe's ask, so
+    /// the return re-sends it.
     @Test("A park through the engine re-sends the in-flight probe")
-    func stashUnissuesProbe() throws {
+    func stashResendsProbe() throws {
         let engine = TilingEngine()
         let w = WindowID(7)
         let held = CGSize(width: 720, height: 800)

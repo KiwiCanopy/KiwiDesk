@@ -11,36 +11,11 @@ extension SizeBoundLearner {
     /// was learned (#1694): a park holds the window at the stash
     /// frame, so no reading until the next layout ask answers it —
     /// a cancelled ask left standing reads every parked echo as a
-    /// refusal and confirms a false bound.
+    /// refusal and confirms a false bound. A corroboration probe
+    /// whose issue it retires unanswered is re-sent when the
+    /// layout next asks its span (#1439, #2758).
     mutating func supersedeAsk(_ id: WindowID) {
         lastAsks[id] = nil
-    }
-
-    /// A park retires the open ask like any engine frame, and
-    /// if that ask was a pending corroboration probe's own
-    /// (#1439), its issue goes back unanswered: no parked echo
-    /// can answer it, and an issued probe with no answer is never
-    /// re-issued, so the return sends it again. A park and a user's
-    /// resize gesture (#2706) only: the loop's own probe re-issue
-    /// must keep counting.
-    mutating func parkRetiresAsk(_ id: WindowID) {
-        if let asked = lastAsks[id]?.size {
-            unissueProbe(id, asked: asked.width, slot: \.width)
-            unissueProbe(id, asked: asked.height, slot: \.height)
-        }
-        supersedeAsk(id)
-    }
-
-    private mutating func unissueProbe(
-        _ id: WindowID,
-        asked: CGFloat,
-        slot: WritableKeyPath<ProbeLedger, AxisProbes>
-    ) {
-        guard let probe = probes[id]?[keyPath: slot].pending,
-            probe.issues > 0,
-            EffectiveSizeBound.matches(probe.asked, asked)
-        else { return }
-        probes[id]?[keyPath: slot].pending?.issues -= 1
     }
 
     /// Drops everything learned about a window: the app resized

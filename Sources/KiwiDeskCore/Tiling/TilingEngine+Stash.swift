@@ -258,7 +258,7 @@ extension TilingEngine {
         // retire the ask themselves; this covers the early return
         // below, where the window is already parked and no frame
         // is set.
-        boundLearner.parkRetiresAsk(window.id)
+        boundLearner.supersedeAsk(window.id)
         // Parked only if the last frame we sent agrees: a state
         // frame at the corner may be the echo of an earlier park
         // that a later ask, still unanswered, has moved on from.
