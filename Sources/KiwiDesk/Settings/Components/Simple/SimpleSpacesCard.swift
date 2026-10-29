@@ -109,11 +109,39 @@ struct SimpleSpacesCard: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
-        .background(
-            RoundedRectangle(cornerRadius: 6).fill(SettingsTheme.card)
+        .background(rowFill(space))
+        .overlay(
+            // Closed on all four sides (#2737 ruling 5): the ring
+            // marks the kept Space, the fill under it the pointer.
+            RoundedRectangle(cornerRadius: 6).strokeBorder(
+                isKept(space) ? SettingsTheme.accent : .clear,
+                lineWidth: 1
+            )
         )
+        .contentShape(RoundedRectangle(cornerRadius: 6))
+        .onHover { model.hoverSimple(.space(space), inside: $0) }
+        .onTapGesture { model.nav.simpleKept = space }
+        .accessibilityAddTraits(isKept(space) ? [.isSelected] : [])
         .rowActions { actions(space) }
         .spaceDragLift(space, in: reorder)
+    }
+
+    private func isKept(_ space: SpaceID) -> Bool {
+        model.simpleKeptSpace == space
+    }
+
+    /// Source-list fills: neutral under the pointer, deeper when
+    /// kept — never the accent, which the ring alone carries.
+    private func rowFill(_ space: SpaceID) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 6)
+        return ZStack {
+            shape.fill(SettingsTheme.card)
+            if isKept(space) {
+                shape.fill(SettingsTheme.chipHover)
+            } else if model.nav.simpleHover == .space(space) {
+                shape.fill(SettingsTheme.chipRest)
+            }
+        }
     }
 
     /// The row menu: the grip's reorder for the keyboard, and the

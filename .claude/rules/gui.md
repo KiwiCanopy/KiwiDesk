@@ -901,7 +901,13 @@ fresh open settles the edit target as they do
 (`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). A control
 Simple starts or stops drawing changes `SimpleCoverage` in the
 same change, since the save pill reads it to keep a row on Simple
-(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). **A row's
+(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). Simple's
+preview is its rows' sibling column, so what it shows is asked
+of the one `simplePreviewSpace` over the selection `nav` holds,
+and the rows mark kept through `simpleKeptSpace`
+(`SimplePreviewTests` ▸ `shownSpace`); its docked width is
+`SimpleColumns.dockedPreview`, which the save pill centres
+against (`SimplePreviewTests` ▸ `columns`). **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a

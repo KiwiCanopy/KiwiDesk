@@ -7,6 +7,8 @@ import SwiftUI
 /// (`ScreenArrangement`, #758).
 struct HomeCardScreensTile: View {
     @ObservedObject var model: SettingsModel
+    /// The screen drawn lit; nil lights the main screen.
+    var lit: DisplayID?
     @Environment(\.schematicPalette) private var palette
 
     private static let standBand: CGFloat = 8
@@ -25,7 +27,7 @@ struct HomeCardScreensTile: View {
             ForEach(layout.displays) { drawn in
                 display(
                     drawn,
-                    main: drawn.display.id == mainID
+                    main: drawn.display.id == (lit ?? mainID)
                 )
                 .offset(x: shift.width, y: shift.height)
             }

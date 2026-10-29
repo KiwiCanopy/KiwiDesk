@@ -22,7 +22,8 @@ struct SettingsView: View {
 
     /// Whether current destination supports detail panel.
     var panelOffered: Bool {
-        SettingsDetailPanelOffer.offers(model.destination)
+        (model.showsSimple
+            || SettingsDetailPanelOffer.offers(model.destination))
             && !model.editingLua
     }
 
@@ -143,7 +144,7 @@ struct SettingsView: View {
     ) -> some View {
         chrome(width) {
             if model.showsSimple {
-                SimpleScreen(model: model)
+                simplePane(width)
             } else if selection == nil {
                 HomeScreen(model: model)
             } else {

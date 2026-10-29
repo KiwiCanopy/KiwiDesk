@@ -24,6 +24,7 @@ struct SimpleScreen: View {
                     SimpleShortcutCards(model: model)
                     HomeSupportStrip(model: model)
                 }
+                .frame(maxWidth: SimpleColumns.contentCap)
                 // The strip's footer reaches the window's bottom
                 // inset, as on Home.
                 .frame(

@@ -56,8 +56,9 @@ struct SettingsFloatingPanel: View {
 /// re-ran the whole draft diff per frame — the card stuttered
 /// under the pointer (owner, on device). Never move the
 /// `@GestureState` back up into a view that builds the preview,
-/// and never build the preview inline.
-private struct MovableCard<Content: View>: View {
+/// and never build the preview inline. Simple's preview card rides
+/// it too (#2737).
+struct MovableCard<Content: View>: View {
     let bounds: CGSize
     let close: () -> Void
     /// Per-mount drag offset (code review, 2026-08-11).

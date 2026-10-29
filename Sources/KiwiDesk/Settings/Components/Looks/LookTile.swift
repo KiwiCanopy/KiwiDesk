@@ -13,6 +13,9 @@ struct LookTile: View {
     let caption: String?
     /// Hover help and VoiceOver hint where the caption is not drawn.
     var help: String?
+    /// Told when the pointer enters and leaves, for a surface that
+    /// previews the look under it (Simple, #2737 ruling 9).
+    var hover: ((Bool) -> Void)?
     let apply: () -> Void
 
     var body: some View {
@@ -33,6 +36,7 @@ struct LookTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
+        .onHover { hover?($0) }
         .accessibilityAddTraits(applied ? [.isSelected] : [])
         .accessibilityHint(help ?? "")
         .help(other ? restoreColorsHelp : (help ?? ""))
@@ -58,7 +62,7 @@ struct LookTile: View {
     }
 
     /// `settings` with `look` painted on, its colors included.
-    private static func painted(
+    static func painted(
         _ look: ShelfLook,
         over settings: TilingSettings
     ) -> TilingSettings {
