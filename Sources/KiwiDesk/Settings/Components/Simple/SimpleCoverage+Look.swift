@@ -42,8 +42,12 @@ extension SimpleCoverage {
         return ([group] + parts.map(snake)).joined(separator: ".")
     }
 
+    /// A Swift name's wire spelling. A millisecond store drops
+    /// its `MS` on the wire (`durationMS` reads `duration`), which
+    /// `SimpleSectionsTests` ▸ `lookPathsAreMatched` holds.
     private static func snake(_ camel: String) -> String {
-        camel.reduce(into: "") { out, char in
+        let bare = camel.hasSuffix("MS") ? String(camel.dropLast(2)) : camel
+        return bare.reduce(into: "") { out, char in
             if char.isUppercase, !out.isEmpty { out += "_" }
             out += char.lowercased()
         }
