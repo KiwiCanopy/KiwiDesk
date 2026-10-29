@@ -32,69 +32,39 @@ struct ShellMotionTests {
         #expect(model.nav.shellMotion == .converge)
     }
 
-    @Test("a card's page expands, and Back folds into the card")
-    func cardExpands() {
+    /// Inside Advanced a page swaps at once: no door records a
+    /// motion, so the shell's spring, keyed on the root, stays still.
+    @Test("a card's page and a landing record no motion")
+    func pagesSwapAtOnce() {
         let model = model(.advanced)
+        // Home paid the opening converge.
+        model.nav.convergePending = false
+        let opened = model.nav.shellMotion
         model.openFromCard(.bars)
-        #expect(model.nav.shellMotion == .expand(.bars))
-        #expect(model.nav.pendingShellMotion == nil)
+        #expect(model.nav.shellMotion == opened)
+        #expect(model.nav.homeReturnFocus == .bars)
+        model.destination = .looks
         model.destination = nil
-        #expect(model.nav.shellMotion == .expand(.bars))
-    }
-
-    /// Only Home arriving owes the flight, and a landing breaks the
-    /// line back to a card.
-    @Test("a debt is owed only where it is paid")
-    func debtsArePaidWhereOwed() {
-        let model = model(.advanced)
-        model.pickRoot(.simple)
+        #expect(model.nav.shellMotion == opened)
         #expect(!model.nav.convergePending)
-        model.openAdvanced(SettingsAnchor(destination: .looks))
-        model.destination = .looks
-        model.destination = nil
-        #expect(!model.nav.convergePending)
-        #expect(model.nav.shellMotion == .zoomThrough)
-        // A card's page owes its late fade; a landing pays it off.
-        model.openFromCard(.bars)
-        #expect(model.nav.contentLagPending)
-        model.destination = .looks
-        #expect(!model.nav.contentLagPending)
-        #expect(model.nav.homeReturnFocus == nil)
-        model.destination = .bars
-        model.destination = nil
-        #expect(model.nav.shellMotion == .zoomThrough)
-    }
-
-    /// A landing — a search hit, a link, a page-to-page jump —
-    /// has no card behind it, so it never morphs from one.
-    @Test("a landing with no card zooms through")
-    func landingZooms() {
-        let model = model(.advanced)
-        model.destination = .spaces
-        #expect(model.nav.shellMotion == .zoomThrough)
-        model.openFromCard(.bars)
-        model.destination = .looks
-        #expect(model.nav.shellMotion == .zoomThrough)
-        // Back from a page no card opened.
-        model.destination = nil
-        #expect(model.nav.shellMotion == .zoomThrough)
         // A link from Simple lands on its page, not a converge.
         let simple = self.model()
         simple.destination = .looks
         #expect(simple.showsSimple == false)
-        #expect(simple.nav.shellMotion == .zoomThrough)
+        #expect(simple.nav.shellMotion == .none)
+        #expect(!simple.nav.convergePending)
     }
 
     /// The cause has one owner, so a new door cannot leave the last
     /// change's motion standing.
-    @Test("only the root and destination write the cause")
+    @Test("only the root writes the cause")
     func causeHasOneOwner() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk/Settings")
         let files = try SourceScan.swiftSources(under: root)
         #expect(!files.isEmpty)
         let allowed: [String: Int] = [
-            "SettingsModel+ShellMotion.swift": 4,
+            "SettingsModel+ShellMotion.swift": 1,
             "SettingsNavigation.swift": 1,
         ]
         var found: [String: Int] = [:]
@@ -118,7 +88,7 @@ struct ShellMotionTests {
     }
 
     /// The branches carry their transitions, and the one spring
-    /// they ride is gated in its argument.
+    /// they ride is gated in its argument and keyed on the root.
     @Test("the shell mounts each branch's transition, gated")
     func shellMountsTheMotion() throws {
         let shell = try source("SettingsView.swift")
@@ -128,7 +98,9 @@ struct ShellMotionTests {
             "detailPane(width).transition(pageTransition)",
             ".animation(reduceMotion?nil:ShellMotion.spring,"
                 + "value:shellBranch)",
-            ".environment(\\.shellSpace,reduceMotion?nil:shellSpace)",
+            // Home to a page is not a branch change, so it swaps
+            // unanimated.
+            "model.showsSimple?.simple:.advanced",
         ] {
             #expect(shell.contains(needle), "\(needle)")
         }
@@ -144,37 +116,5 @@ struct ShellMotionTests {
                 ".onAppear{arrived=truemodel.nav.convergePending=false}"
             )
         )
-    }
-
-    /// A page's box joins its card's only while that card opened it.
-    @Test("only the opening card's page shares its box")
-    func boxMatchesItsCard() throws {
-        let detail = try source("SettingsView+Detail.swift")
-        #expect(
-            detail.contains(
-                "ifletdestination=model.destination,"
-                    + "model.nav.shellMotion==.expand(destination){"
-            )
-        )
-        #expect(detail.contains(".background(pageBox)"))
-        // The box stays opaque; only the content on it lags, once
-        // per card open, the debt paid where it plays.
-        #expect(
-            detail.contains(
-                "contentColumn.modifier(PageContentLag("
-                    + "lags:pageExpands&&model.nav.contentLagPending,"
-                    + "played:{model.nav.contentLagPending=false}"
-            )
-        )
-        let card = try source("HomeCard.swift")
-        for id in ["boxID", "titleID"] {
-            #expect(
-                card.contains(
-                    ".shellMatched(ShellMotion.\(id)(destination),"
-                        + "in:shellSpace)"
-                ),
-                "\(id)"
-            )
-        }
     }
 }

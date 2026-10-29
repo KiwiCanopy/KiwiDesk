@@ -70,7 +70,6 @@ final class SettingsModel: ObservableObject {
             onWindowTitle?(SettingsWindowTitle.of(destination))
             // Every page is Advanced's (#2737); shown, not stored.
             if destination != nil { settingsRoot = .advanced }
-            recordShellMotion(from: oldValue, to: destination)
         }
     }
     /// The root this window shows (#2737). Only the switch stores

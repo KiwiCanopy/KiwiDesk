@@ -19,8 +19,6 @@ struct SettingsView: View {
     @FocusState var contentFocused: Bool
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
-    /// Where a Home card and its page share a box (#2737).
-    @Namespace var shellSpace
 
     /// Whether current destination supports detail panel.
     var panelOffered: Bool {
@@ -31,7 +29,7 @@ struct SettingsView: View {
 
     /// Which branch the content shows.
     var shellBranch: ShellMotion.Branch {
-        model.showsSimple ? .simple : (selection == nil ? .home : .page)
+        model.showsSimple ? .simple : .advanced
     }
 
     private var selection: SettingsDestination? {
@@ -166,14 +164,13 @@ struct SettingsView: View {
                         .transition(pageTransition)
                 }
             }
-            // One gated spring on the branch swap alone, so what a
-            // landing writes beside it lands unanimated (#2737).
+            // One gated spring on the root swap alone: Home to a page
+            // and a landing swap unanimated (#2737).
             .animation(
                 reduceMotion ? nil : ShellMotion.spring,
                 value: shellBranch
             )
         }
-        .environment(\.shellSpace, reduceMotion ? nil : shellSpace)
         .frame(maxWidth: .infinity)
         .ignoresSafeArea(.container, edges: .top)
         .onExitCommand {
