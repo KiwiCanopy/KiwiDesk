@@ -42,9 +42,9 @@ struct SimpleLookRowTests {
         gapped.gapsGlobal.outer.bottom += 7
         gapped.gapsGlobal.outer.left += 7
         gapped.gapsGlobal.outer.right += 7
-        look.style["gap.global"] = try #require(
-            LookKeys.extract(from: gapped, paths: ["gap.global"])["gap.global"]
-        )
+        let gaps = LookKeys.extract(from: gapped, paths: ["gap.global"])
+        let gap: JSONValue = try #require(gaps["gap.global"])
+        look.style["gap.global"] = gap
         model.applyLook(look)
         model.config.settings.spaceBarStyle.visibility =
             saved.spaceBarStyle.visibility == .hidden ? .always : .hidden
