@@ -30,7 +30,7 @@ extension TilingEngine {
         // an ask the anchor already answers and is meant
         // to be issued, so neither skip below applies. A
         // forced pass keeps its own ask (#1055).
-        let probe =
+        var probe =
             pass.probes
             ? nil
             : takeCorroborationProbe(
@@ -38,15 +38,17 @@ extension TilingEngine {
                 current: current,
                 target: target
             )
-        // #2758: an issued probe is answered before a frame that
-        // only re-asks what it stands in for, or the pair never
-        // forms. A re-issuing pass, a forced one included, keeps
-        // its own ask.
-        if probe == nil, !pass.reissues,
-            boundLearner.holdForProbe(id, target: target)
-        {
-            meter.add(\.framesSkipped)
-            return
+        // #2758: an issued probe is answered before the loop
+        // supersedes it, or the pair never forms: a frame that
+        // only re-asks what it stands in for is held, any other
+        // carries its ask. A re-issuing pass, a forced one
+        // included, keeps its own ask.
+        if probe == nil, !pass.reissues {
+            if boundLearner.holdForProbe(id, target: target) {
+                meter.add(\.framesSkipped)
+                return
+            }
+            probe = carryCorroborationProbe(id, target: target)
         }
         // Tolerance: apps clamp what we set (character
         // grids, minimum sizes), so the reported frame is

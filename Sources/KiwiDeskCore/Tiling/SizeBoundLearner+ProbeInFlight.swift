@@ -56,6 +56,50 @@ extension SizeBoundLearner {
         return true
     }
 
+    /// `target` with each axis whose issue is in flight and still
+    /// stood in for carried at the probe's ask, nil where none is
+    /// (#2758): a target that changed on another axis or moved
+    /// slot re-asks the question still out rather than dropping
+    /// it. The carried frame becomes the issue's slot, and its
+    /// answer owes the placement.
+    mutating func carryProbe(_ id: WindowID, target: CGRect) -> CGRect? {
+        guard let asked = lastAsks[id]?.size, var ledger = probes[id]
+        else { return nil }
+        var size = target.size
+        let width = Self.carry(
+            &ledger.width,
+            asked: asked.width,
+            target: target.width,
+            into: &size.width
+        )
+        let height = Self.carry(
+            &ledger.height,
+            asked: asked.height,
+            target: target.height,
+            into: &size.height
+        )
+        guard width || height else { return nil }
+        ledger.width.pending?.slot = target
+        ledger.height.pending?.slot = target
+        probes[id] = ledger
+        return CGRect(origin: target.origin, size: size)
+    }
+
+    private static func carry(
+        _ axis: inout AxisProbes,
+        asked: CGFloat,
+        target: CGFloat,
+        into span: inout CGFloat
+    ) -> Bool {
+        guard let probe = axis.pending,
+            probe.isInFlight(lastAsked: asked),
+            probe.standsIn(for: target)
+        else { return false }
+        span = probe.asked
+        axis.pending?.held = true
+        return true
+    }
+
     /// A settled read of `asked`: every issue in flight on it is
     /// answered. Returns whether one of them had a frame held.
     mutating func noteProbeAnswered(

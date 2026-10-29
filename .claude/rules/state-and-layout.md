@@ -1422,7 +1422,9 @@ editing here:
   before the loop supersedes it (#2758): an ordinary pass holds
   a frame that re-asks only spans the anchor answers, in the
   slot the issue stood in for, until a SETTLED read answers
-  that issue, and the held answer owes the placement. The
+  that issue, and any other ordinary frame carries the
+  issue's ask on each axis it still stands in for rather than
+  dropping it; the held answer owes the placement. The
   substitution door and the hold read one predicate
   (`CorroborationProbe.standsIn`, `isInFlight`), so a change to
   which span a probe may replace changes both; a new ender of

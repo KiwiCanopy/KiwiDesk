@@ -36,6 +36,18 @@ extension TilingEngine {
         )
     }
 
+    /// The issue in flight for `id` carried into a `target` the
+    /// hold does not cover (#2758), nil when none is; its ask is
+    /// re-sent untrusted, the pre-ask frame having moved since.
+    func carryCorroborationProbe(
+        _ id: WindowID,
+        target: CGRect
+    ) -> CorroborationProbeIssue? {
+        boundLearner.carryProbe(id, target: target).map {
+            CorroborationProbeIssue(frame: $0, baseline: nil)
+        }
+    }
+
     /// Drains the pass's issued probes — `takePendingBoundPlacement`'s
     /// shape, read by `KiwiCore.retile` after the pass.
     func takeIssuedCorroborationProbes() -> [(WindowID, CGSize)] {

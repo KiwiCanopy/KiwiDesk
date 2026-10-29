@@ -159,4 +159,109 @@ struct SizeBoundProbeHoldTests {
         learner.observe(w, currentSize: held, settledRead: true)
         #expect(learner.bound(for: w)?.minHeight == 550)
     }
+
+    @Test("A probe an ordinary ask superseded holds nothing")
+    func supersededProbeHoldsNothing() throws {
+        var learner = try probeInFlight()
+        learner.recordAsk(w, size: CGSize(width: 380, height: 400))
+        let holds = learner.holdForProbe(w, target: slot)
+        #expect(!holds)
+        let carried = learner.carryProbe(w, target: slot)
+        #expect(carried == nil)
+    }
+
+    @Test("A held answer that confirms nothing still owes the frame")
+    func unconfirmedHeldAnswerOwes() throws {
+        var learner = try probeInFlight()
+        let holds = learner.holdForProbe(w, target: slot)
+        #expect(holds)
+        // A grid app answering the probe off the anchor's answer:
+        // no confirmation, only the held frame owed.
+        let answer = learner.observeAnswer(
+            w,
+            currentSize: CGSize(width: 380, height: 560),
+            settledRead: true
+        )
+        #expect(answer.answeredHeldProbe)
+        #expect(!answer.confirmed)
+        #expect(!answer.performedProbe)
+        #expect(answer.owesPlacement)
+    }
+
+    @Test("A width ceiling's held answer is owed too")
+    func widthCeilingHeldAnswer() throws {
+        var learner = SizeBoundLearner()
+        let asked = CGSize(width: 1000, height: 800)
+        let answered = CGSize(width: 715, height: 800)
+        let frame = CGRect(origin: .zero, size: asked)
+        learner.recordAsk(w, size: asked, settledFrom: answered)
+        learner.observe(w, currentSize: answered, settledRead: true)
+        let taken = learner.takeCorroborationProbe(
+            w,
+            current: answered,
+            target: asked,
+            slot: frame
+        )
+        let issue = try #require(taken)
+        learner.recordAsk(
+            w,
+            size: issue.size,
+            settledFrom: issue.baseline
+        )
+        let holds = learner.holdForProbe(w, target: frame)
+        #expect(holds)
+        let answer = learner.observeAnswer(
+            w,
+            currentSize: answered,
+            settledRead: true
+        )
+        #expect(answer.answeredHeldProbe)
+        #expect(learner.bound(for: w)?.maxWidth == 715)
+    }
+
+    @Test("A target changed on another axis carries the probe")
+    func changedAxisCarriesTheProbe() throws {
+        // The device's second door: a neighbour's width floor
+        // widens the column while the height probe is out.
+        var learner = try probeInFlight()
+        let probed = try #require(learner.lastAsks[w]?.size.height)
+        let widened = frame(size: CGSize(width: 400, height: 550))
+        let holds = learner.holdForProbe(w, target: widened)
+        #expect(!holds)
+        let carry = learner.carryProbe(w, target: widened)
+        let carried = try #require(carry)
+        #expect(carried.width == 400)
+        #expect(carried.height == probed)
+        // Sent as the engine sends it, untrusted: the carried
+        // frame is now the slot, so the next pass holds.
+        learner.recordAsk(w, size: carried.size)
+        let next = learner.holdForProbe(w, target: widened)
+        #expect(next)
+        // A target that no longer stands in carries nothing.
+        let taller = frame(size: CGSize(width: 400, height: 700))
+        let none = learner.carryProbe(w, target: taller)
+        #expect(none == nil)
+        // The settled refusal is the issue's answer and owes the
+        // held frame; the re-issue then pairs the floor.
+        let answer = learner.observeAnswer(
+            w,
+            currentSize: CGSize(width: 400, height: 550),
+            settledRead: true
+        )
+        #expect(answer.answeredHeldProbe)
+        let again = learner.takeCorroborationProbe(
+            w,
+            current: CGSize(width: 400, height: 550),
+            target: widened.size,
+            slot: widened
+        )
+        let reissue = try #require(again)
+        learner.recordAsk(w, size: reissue.size)
+        learner.observe(
+            w,
+            currentSize: CGSize(width: 400, height: 550),
+            settledRead: true
+        )
+        #expect(learner.bound(for: w)?.minHeight == 550)
+    }
 }
