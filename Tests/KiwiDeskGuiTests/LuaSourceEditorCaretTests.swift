@@ -64,20 +64,31 @@ struct LuaSourceEditorCaretTests {
         let (textView, coordinator) = Self.editor("abcdef")
         textView.setSelectedRange(NSRange(location: 3, length: 0))
         Self.type("x", in: textView, coordinator)
-        coordinator.apply("abcdef", to: textView)
-        #expect(textView.string == "abcxdef")
         coordinator.apply("reverted", to: textView)
         #expect(textView.string == "reverted")
         #expect(textView.selectedRange() == NSRange(location: 4, length: 0))
     }
 
-    @Test("a shorter body clamps the selection to its end")
+    /// The order the device shows: a keystroke, the render that
+    /// matches it, then a Revert to the opened body.
+    @Test("a revert to the opened body lands once a render matched")
+    func revertAfterMatchLands() {
+        let opened = "abcdef"
+        let (textView, coordinator) = Self.editor(opened)
+        textView.setSelectedRange(NSRange(location: 3, length: 0))
+        Self.type("x", in: textView, coordinator)
+        coordinator.apply(textView.string, to: textView)
+        coordinator.apply(opened, to: textView)
+        #expect(textView.string == opened)
+    }
+
+    @Test("a shorter body clamps the selection into it")
     func shorterBodyClamps() {
         let textView = NSTextView()
         textView.string = "abcdef"
-        textView.setSelectedRange(NSRange(location: 4, length: 2))
-        LuaSourceEditor.replace(textView, with: "ab")
-        #expect(textView.selectedRange() == NSRange(location: 2, length: 0))
+        textView.setSelectedRange(NSRange(location: 1, length: 4))
+        LuaSourceEditor.replace(textView, with: "abc")
+        #expect(textView.selectedRange() == NSRange(location: 1, length: 2))
     }
 
     /// The representable routes every SwiftUI value through the
@@ -103,6 +114,7 @@ struct LuaSourceEditorCaretTests {
         )
         let update = source[start.upperBound..<end.lowerBound]
         #expect(update.contains("context.coordinator.apply(text,to:textView)"))
+        #expect(update.contains("context.coordinator.text=$text"))
         #expect(!update.contains(".string="))
     }
 }

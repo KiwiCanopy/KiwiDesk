@@ -240,18 +240,21 @@ struct LuaSourceEditor: NSViewRepresentable {
     @MainActor
     final class Coordinator: NSObject, NSTextViewDelegate {
         var text: Binding<String>
-        /// Bodies the view produced since the binding last matched
-        /// it. An update carrying one is a render behind the view's
-        /// own typing, never a write from outside (#2768).
+        /// Bodies typed since an update last matched the view. An
+        /// update equal to one is taken as a render behind the
+        /// typing; an outside write landing before that match is
+        /// lost (#2768).
         private var echoes: Set<String>
+        /// Past this many, the set is a burst no render matched.
+        private static let echoLimit = 32
 
         init(text: Binding<String>) {
             self.text = text
             echoes = [text.wrappedValue]
         }
 
-        /// Takes a value from SwiftUI: a Save, a Revert, a reload
-        /// lands; a late echo of the view's own edit is dropped.
+        /// Writes SwiftUI's value into the view unless it is a late
+        /// echo of the view's own typing.
         func apply(_ value: String, to textView: NSTextView) {
             if textView.string == value || !echoes.contains(value) {
                 echoes = [value]
@@ -264,6 +267,7 @@ struct LuaSourceEditor: NSViewRepresentable {
                 let textView = notification.object
                     as? NSTextView
             else { return }
+            if echoes.count >= Self.echoLimit { echoes.removeAll() }
             echoes.insert(textView.string)
             text.wrappedValue = textView.string
         }

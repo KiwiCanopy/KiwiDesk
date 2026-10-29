@@ -2117,6 +2117,15 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   ⌘S lives on the Settings root, mounted
   and enabled whatever the draft, since a typed value can be the
   one edit (`CommitsOnSaveCensusTests`, `SaveCommitsFocusedFieldTests`).
+- **An `NSViewRepresentable` hosting editable AppKit text writes
+  SwiftUI's value into the view only through a check that drops
+  the view's own late echoes, and keeps the selection when it
+  writes** (#2768). An update can carry a body some keystrokes
+  behind the view's own typing (measured in the Lua binding
+  editor popover, 2026-10-29); a bare `string =` then moves the
+  caret and scrambles fast input. The representable also hands
+  its coordinator the current binding on every update
+  (`LuaSourceEditorCaretTests`).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
   removed under the pointer (a link that deletes itself, a row
   rebuilt by rename) never delivers the balancing
