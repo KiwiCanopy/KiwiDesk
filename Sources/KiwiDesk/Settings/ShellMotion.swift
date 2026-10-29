@@ -32,10 +32,11 @@ enum ShellMotion: Equatable {
         "title." + destination.rawValue
     }
 
-    /// What the shell is showing, the one value its animation keys on.
-    struct Key: Equatable {
-        let simple: Bool
-        let destination: SettingsDestination?
+    /// Which branch the shell shows, the one value its animation
+    /// keys on — a page-to-page jump keeps the branch and springs
+    /// nothing.
+    enum Branch: Equatable {
+        case simple, home, page
     }
 }
 
@@ -113,4 +114,30 @@ struct HomeConverge: ViewModifier {
 
     /// The viewport the cards fly from the centre of.
     static let space = "homeViewport"
+}
+
+/// A page's content arriving after its box has grown out of the
+/// card (#2737 ruling 13): the box stays opaque, only what is on it
+/// fades in late.
+struct PageContentLag: ViewModifier {
+    let lags: Bool
+    @State private var shown: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    init(lags: Bool) {
+        self.lags = lags
+        _shown = State(initialValue: !lags)
+    }
+
+    func body(content: Content) -> some View {
+        content
+            .opacity(shown || reduceMotion ? 1 : 0)
+            .animation(
+                reduceMotion
+                    ? nil
+                    : .easeOut(duration: 0.2).delay(ShellMotion.contentLag),
+                value: shown
+            )
+            .onAppear { shown = true }
+    }
 }

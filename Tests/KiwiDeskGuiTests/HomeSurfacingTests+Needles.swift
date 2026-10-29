@@ -178,8 +178,7 @@ extension HomeSurfacingTests {
                 + "model.nav.pendingReveal=nil"
                 + "guardletresolved=request.resolved("
                 + "editingStoredProfile:model.editingStoredProfile)"
-                + "else{return}model.nav.shellMotion=.zoomThrough"
-                + "model.destination=resolved.destination"
+                + "else{return}model.destination=resolved.destination"
         ],
         "Settings/SettingsHeaderBar.swift": [
             // The pushed form draws the back chip, the Home

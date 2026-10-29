@@ -29,6 +29,11 @@ struct SettingsView: View {
             && !model.editingLua
     }
 
+    /// Which branch the content shows.
+    var shellBranch: ShellMotion.Branch {
+        model.showsSimple ? .simple : (selection == nil ? .home : .page)
+    }
+
     private var selection: SettingsDestination? {
         get { model.destination }
         nonmutating set { model.destination = newValue }
@@ -149,27 +154,26 @@ struct SettingsView: View {
         _ width: SettingsWidthClass
     ) -> some View {
         chrome(width) {
-            if model.showsSimple {
-                simplePane(width)
-                    .transition(simpleTransition)
-            } else if selection == nil {
-                HomeScreen(model: model)
-                    .transition(homeTransition)
-            } else {
-                detailPane(width)
-                    .transition(pageTransition)
+            Group {
+                if model.showsSimple {
+                    simplePane(width)
+                        .transition(simpleTransition)
+                } else if selection == nil {
+                    HomeScreen(model: model)
+                        .transition(homeTransition)
+                } else {
+                    detailPane(width)
+                        .transition(pageTransition)
+                }
             }
+            // One gated spring on the branch swap alone, so what a
+            // landing writes beside it lands unanimated (#2737).
+            .animation(
+                reduceMotion ? nil : ShellMotion.spring,
+                value: shellBranch
+            )
         }
         .environment(\.shellSpace, reduceMotion ? nil : shellSpace)
-        // One key, one gated spring: the change's own motion is the
-        // branches' transitions above (#2737 ruling 13).
-        .animation(
-            reduceMotion ? nil : ShellMotion.spring,
-            value: ShellMotion.Key(
-                simple: model.showsSimple,
-                destination: model.destination
-            )
-        )
         .frame(maxWidth: .infinity)
         .ignoresSafeArea(.container, edges: .top)
         .onExitCommand {

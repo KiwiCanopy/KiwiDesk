@@ -7,6 +7,7 @@ struct SettingsHeaderBar: View {
     @State private var searchExpanded = false
     @Environment(\.settingsWidth) private var width
     @Environment(\.shellSpace) private var shellSpace
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var destination: SettingsDestination? {
         model.destination
@@ -93,6 +94,11 @@ struct SettingsHeaderBar: View {
                         .shellMatched(
                             ShellMotion.titleID(destination),
                             in: expanding(destination)
+                        )
+                        // The header sits outside the shell's spring.
+                        .animation(
+                            reduceMotion ? nil : ShellMotion.spring,
+                            value: destination
                         )
                         .accessibilityAddTraits(.isHeader)
                 }

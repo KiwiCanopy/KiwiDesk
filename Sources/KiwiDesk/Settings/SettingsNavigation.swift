@@ -71,8 +71,17 @@ struct SettingsNavigation {
     /// What the pointer previews on Simple, nil at rest.
     var simpleHover: SimplePreviewHover?
 
-    /// Why the shell last changed, so it plays that motion.
+    /// Why the shell last changed, so it plays that motion. Written
+    /// only by `SettingsModel`'s root and destination `didSet`s.
     var shellMotion: ShellMotion = .none
+
+    /// A motion a door names for the change it is about to make,
+    /// consumed by that change (`openFromCard`).
+    var pendingShellMotion: ShellMotion?
+
+    /// Whether Home's cards still owe the switch's converge; Home
+    /// plays it once and clears this, so a remount does not replay it.
+    var convergePending = false
 
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
@@ -105,6 +114,8 @@ struct SettingsNavigation {
         simpleKept = nil
         simpleHover = nil
         shellMotion = .none
+        pendingShellMotion = nil
+        convergePending = false
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states
         // no destination rather than one the last visit earned.

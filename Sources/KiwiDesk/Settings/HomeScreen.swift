@@ -17,7 +17,7 @@ struct HomeScreen: View {
 
     init(model: SettingsModel) {
         self.model = model
-        _arrived = State(initialValue: model.nav.shellMotion != .converge)
+        _arrived = State(initialValue: !model.nav.convergePending)
     }
 
     /// Adaptive grid column count, capped at four with the cards
@@ -59,7 +59,10 @@ struct HomeScreen: View {
             grid(width: geo.size.width, height: geo.size.height)
         }
         .coordinateSpace(name: HomeConverge.space)
-        .onAppear { arrived = true }
+        .onAppear {
+            arrived = true
+            model.nav.convergePending = false
+        }
     }
 
     private func grid(
@@ -187,9 +190,7 @@ struct HomeScreen: View {
     }
 
     private func push(_ destination: SettingsDestination) {
-        model.nav.shellMotion = .expand(destination)
-        model.nav.homeReturnFocus = destination
-        model.destination = destination
+        model.openFromCard(destination)
     }
 }
 

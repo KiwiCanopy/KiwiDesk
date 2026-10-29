@@ -44,6 +44,7 @@ extension SettingsView {
     ) -> some View {
         HStack(spacing: 0) {
             contentColumn
+                .modifier(PageContentLag(lags: pageExpands))
             // `panelDocked` FIRST — the same predicate the pill's
             // centring offset reads: a conjunct added there must
             // move the pill and the mount together (review
@@ -64,6 +65,17 @@ extension SettingsView {
 
     /// The page's box, matched to its card's while a card opened it.
     @ViewBuilder private var pageBox: some View {
+        PageBox(model: model)
+    }
+}
+
+/// A page's box, in the shell's namespace — gated once, where the
+/// shell sets it.
+private struct PageBox: View {
+    @ObservedObject var model: SettingsModel
+    @Environment(\.shellSpace) private var shellSpace
+
+    var body: some View {
         if let destination = model.destination,
             model.nav.shellMotion == .expand(destination)
         {
@@ -71,12 +83,14 @@ extension SettingsView {
                 .fill(SettingsTheme.page)
                 .shellMatched(
                     ShellMotion.boxID(destination),
-                    in: reduceMotion ? nil : shellSpace
+                    in: shellSpace
                 )
         }
     }
+}
 
-    @ViewBuilder private var contentColumn: some View {
+extension SettingsView {
+    @ViewBuilder fileprivate var contentColumn: some View {
         VStack(spacing: 0) {
             if model.hasCustomLua {
                 CustomLuaBanner(savingAdopts: !model.sidecarExists)

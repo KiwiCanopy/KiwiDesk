@@ -30,15 +30,6 @@ struct HomeCard: View {
                     : SettingsTheme.cardHeightCompact
             )
             .background(cardFill)
-            // The box its page grows out of (#2737 ruling 13).
-            .background(
-                RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
-                    .fill(SettingsTheme.card)
-                    .shellMatched(
-                        ShellMotion.boxID(destination),
-                        in: shellSpace
-                    )
-            )
             .clipShape(
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
@@ -54,6 +45,16 @@ struct HomeCard: View {
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
                 )
+            )
+            // The box its page grows out of, outside the card's clip
+            // so the morph is not cut to the card (#2737 ruling 13).
+            .background(
+                RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
+                    .fill(SettingsTheme.card)
+                    .shellMatched(
+                        ShellMotion.boxID(destination),
+                        in: shellSpace
+                    )
             )
             // `HoverChip`'s own duration, so the two hover
             // idioms in the tree move at one speed.

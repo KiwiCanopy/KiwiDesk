@@ -47,6 +47,8 @@ struct SettingsNavigationResetTests {
         nav.simpleKept = SpaceID("code")
         nav.simpleHover = .look("Kiwi")
         nav.shellMotion = .zoomThrough
+        nav.pendingShellMotion = .converge
+        nav.convergePending = true
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true
         nav.trailFocusRequest = 3

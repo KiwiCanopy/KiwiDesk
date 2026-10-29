@@ -10281,14 +10281,16 @@ preview and nothing else.
 **The motion says where the user came from.** The switch
 converges: Simple fades and Home's cards gather out of the
 window's centre into their slots, so Advanced reads as the same
-settings opened out rather than another window. A card expands
-into its page and Back folds it into the card again, so the page
-is visibly that card's. A landing with no card behind it — a
+settings opened out rather than another window; back, Home
+recedes under Simple fading in. A card expands into its page and
+Back folds it into the card again, so the page is visibly that
+card's. A landing with no card behind it — a
 search hit, a "… in Advanced" link — zooms through, since a
 morph from a card the user never touched would lie about where
-they came from. Each change records its cause beside itself, so
-the shell picks the motion from one field rather than guessing
-from the states. Under Reduce Motion each swap is instant, with
+they came from. Each change of the root or the page records its
+cause where the change happens, so the shell picks the motion
+from one field rather than guessing from the states, and a new
+way in cannot leave the last change's motion standing. Under Reduce Motion each swap is instant, with
 no fade put in its place.
 
 **Simple has its own visibility rule.** *Grey, don't hide*
