@@ -76,7 +76,10 @@ struct LooksShelf: View {
             HStack {
                 groupHeader(L("looks.mine", "My looks"))
                 Spacer()
-                if LookGallery.isLive { shareButton }
+                if LookGallery.isLive {
+                    browseButton
+                    shareButton
+                }
                 Button {
                     importLook()
                 } label: {

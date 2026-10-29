@@ -1346,6 +1346,7 @@
   "layout_picker.layout_defaults": "%1$@…",
   "looks.ai.pointer": "你的 AI 可以为你创建新造型，甚至可以根据墙纸截屏来匹配。请从%1$@页面开始。",
   "looks.applied_other_colors": "已应用，颜色不同",
+  "looks.browse": "浏览造型…",
   "looks.bundled": "内置造型",
   "looks.byline": "作者：%1$@",
   "looks.caption": "应用内置或已保存的造型：包括其颜色、栏的位置、KiwiShelf 的形状、字体和指示器、焦点边框的形状和光泽，以及窗口间距。这是一次性上色，之后不会持续联动；栏中显示的内容从不属于造型。造型的间距会在你保存后移动窗口。你保存的造型也会带上它的动画；内置造型不会改变你的动画。",

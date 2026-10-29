@@ -560,16 +560,18 @@ reader to it.
 locales with `hreflang` alternates, so a single-locale route
 advertises two URLs that 404.
 
-**The app links `/guide/`, so those routes are not the site's
-alone to move (#1019).** `SupportLinks.guideRoutes` names the
-locales KiwiDesk sends a reader to in their own language, and an
+**The app links `/guide/` and `/looks/`, so those routes are not
+the site's alone to move (#1019, #1740).** `SupportLinks.guideRoutes`
+and `SupportLinks.looksRoutes` name the locales KiwiDesk sends a
+reader to in their own language, one set per page, and an
 installed copy links whatever it was built with — so dropping or
-renaming `/de/guide/` strands that link instead of breaking a
-build. Narrow the Swift list in the same change set, never the
-route alone. `scripts/check-site-tokens.py` ▸
-`check_guide_routes` holds it against the BUILT pages, on this
-gate for the reason the feed check below is, and reads that Swift
-list rather than restating it; `site.yml` takes
+renaming `/de/guide/` or `/de/looks/` strands that link instead of
+breaking a build. Narrow the Swift list in the same change set,
+never the route alone; a page the app starts linking gains its own
+set and joins the check's list. `scripts/check-site-tokens.py` ▸
+`check_guide_routes` holds them against the BUILT pages, on this
+gate for the reason the feed check below is, and reads those Swift
+lists rather than restating them; `site.yml` takes
 `SupportLinks.swift` as a path input so the check fires when
 either side moves. It holds the HOST beside the routes, against
 the `site` value `astro.config.mjs` publishes — a domain change
