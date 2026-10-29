@@ -6,8 +6,8 @@ import CoreGraphics
 /// re-bounding itself still takes `forget`.
 extension SizeBoundLearner {
     /// The window now holds `size` by the user's hand. The open ask
-    /// and a pending probe's issue are retired as a park retires
-    /// them and the probe's baseline is distrusted, the candidates
+    /// is retired as a park retires it, so a probe in flight is
+    /// re-sent later (#2758), its baseline distrusted; the candidates
     /// go (no ask of ours produced this size), and a believed
     /// entry stays unless `size` falsifies it — so a
     /// floor capping Grid survives the drag that grows its window.
@@ -17,7 +17,7 @@ extension SizeBoundLearner {
         _ id: WindowID,
         to size: CGSize
     ) -> Bool {
-        parkRetiresAsk(id)
+        supersedeAsk(id)
         candidates[id] = nil
         distrustProbeBaselines(id)
         guard let ledger = bounds[id] else { return false }

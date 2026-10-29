@@ -77,7 +77,7 @@ struct SizeBoundGestureResizeTests {
         #expect(learner.bound(for: w)?.minWidth == 500)
     }
 
-    @Test("A pending probe goes back unissued and untrusted")
+    @Test("A pending probe is re-sent later, untrusted")
     func probeIsRetired() {
         var learner = learned()
         let anchor = EffectiveSizeBound.Axis(asked: 400, answered: 500)
@@ -93,8 +93,12 @@ struct SizeBoundGestureResizeTests {
         learner.probes[w]?.width.pending?.baselineTrusted = true
         learner.gestureResized(w, to: CGSize(width: 700, height: 600))
         let pending = learner.probes[w]?.width.pending
-        #expect(pending?.issues == 0)
         #expect(pending?.baselineTrusted == false)
+        // Out and unanswered, but no longer the last ask: the
+        // take door re-sends it at its span's next ask (#2758).
+        #expect(learner.lastAsks[w] == nil)
+        #expect(pending?.issues == 1)
+        #expect(pending?.answeredIssues == 0)
     }
 
     @Test("A size under the floor drops it")

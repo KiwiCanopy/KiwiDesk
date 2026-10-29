@@ -131,7 +131,12 @@ struct SizeBoundLearner {
     struct Answer: Equatable {
         var confirmed = false
         var performedProbe = false
-        var owesPlacement: Bool { confirmed || performedProbe }
+        /// A settled read answered a probe a layout frame was
+        /// held for (#2758): the held frame is owed.
+        var answeredHeldProbe = false
+        var owesPlacement: Bool {
+            confirmed || performedProbe || answeredHeldProbe
+        }
     }
 
     /// The size `retile` just issued for a window. Only the
@@ -206,6 +211,8 @@ struct SizeBoundLearner {
         // collapse the slot.
         guard currentSize.width > 0, currentSize.height > 0
         else { return Answer() }
+        let heldAnswered =
+            settledRead && noteProbeAnswered(id, asked: asked)
         let width = observeAxis(
             id,
             asked: asked.width,
@@ -227,7 +234,8 @@ struct SizeBoundLearner {
         return Answer(
             confirmed: width.confirmed || height.confirmed,
             performedProbe: width.performedProbe
-                || height.performedProbe
+                || height.performedProbe,
+            answeredHeldProbe: heldAnswered
         )
     }
 
