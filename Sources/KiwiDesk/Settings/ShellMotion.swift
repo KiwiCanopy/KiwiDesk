@@ -113,7 +113,7 @@ struct HomeConverge: ViewModifier {
     }
 
     /// The viewport the cards fly from the centre of.
-    static let space = "homeViewport"
+    nonisolated static let space = "homeViewport"
 }
 
 /// A page's content arriving after its box has grown out of the
