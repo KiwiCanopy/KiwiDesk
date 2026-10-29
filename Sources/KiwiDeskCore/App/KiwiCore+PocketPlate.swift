@@ -85,8 +85,6 @@ extension KiwiCore {
         let dragging = pocketPlate.dragging != nil
         guard pocketStands else { return [] }
         let shelf = briefPocketShelf()
-        // The count shows from two up.
-        let count = inside.count >= 2 ? "\(inside.count)" : ""
         let name = L(
             "pocket.plate.ax",
             "Pocket, windows inside: %1$d",
@@ -119,17 +117,15 @@ extension KiwiCore {
                 ),
                 shelf: shelf,
                 markHex: tiler.settings.pocketStyle.color,
-                count: count,
-                badgeLeading: edge == .right
-                    || (edge.isHorizontal && shelf.pocketLeansEnd),
-                // The risen pocket is the bare mark.
-                platePiece: slot != nil && !shelf.plateSpans,
+                platePiece: Self.pocketWearsPlate(slot: slot, shelf: shelf),
                 faded: inside.isEmpty,
                 dropHovered: pocketPlate.dropHovered,
                 name: name,
                 handle: slot == nil ? edge : nil,
                 risen: risen,
-                risenSide: rise
+                risenSide: rise,
+                outer: shelf.outerMargin,
+                aboveDrag: dragging
             )
         }
     }
@@ -144,6 +140,13 @@ extension KiwiCore {
         playing: Bool
     ) -> Bool {
         several || dragging || playing
+    }
+
+    /// Whether the pocket draws its own plate: a section on a bar's
+    /// edge where the shelf's plate does not run beneath it; risen
+    /// out of a handle it is the bare mark (#2776).
+    static func pocketWearsPlate(slot: CGRect?, shelf: KiwiShelf) -> Bool {
+        slot != nil && !shelf.plateSpans
     }
 
     /// Whether a play on `display` draws its own pocket: not where

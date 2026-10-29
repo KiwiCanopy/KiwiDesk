@@ -6,12 +6,15 @@ import AppKit
 /// size; the kiwis keep their green whatever `ink` the pocket takes
 /// (#2671: the pocket is filled opaque in `ink`).
 public enum PocketMark {
-    /// The large mark: slices outlined on Automatic and a dashed
-    /// stitch in the ink's contrasting glyph colour.
+    /// The large mark: a dashed stitch in the ink's contrasting
+    /// glyph colour.
     case mark
     /// The badge: solid shapes, no stitch, the pocket filled with
     /// `ink`.
     case badge
+    /// The two slices alone, as the pocket's handle shows them
+    /// looking out from behind its tab (#2678).
+    case kiwis
 
     static let kiwi = NSColor(
         srgbRed: 0.553,
@@ -26,60 +29,40 @@ public enum PocketMark {
         alpha: 1
     )
     /// The mark at `size` points in a mark colour `hex` (#2671):
-    /// the pocket filled and outlined in it, the slices bare
-    /// (#2704); empty is the bare label ink, light and dark.
+    /// the pocket filled and outlined in it; empty is the bare label
+    /// ink, light and dark.
     public func image(size: CGFloat, hex: String) -> NSImage {
-        image(
-            size: size,
-            ink: NSColor.mark(hex: hex, fallback: .labelColor),
-            outlinesKiwis: hex.isEmpty
-        )
+        image(size: size, ink: NSColor.mark(hex: hex, fallback: .labelColor))
     }
 
     /// The mark at `size` points, its pocket filled and outlined
-    /// opaque in `ink`, its slices outlined in `ink` when
-    /// `outlinesKiwis`. A dynamic colour resolves when drawn, so
+    /// opaque in `ink`, its slices bare in every ink (#2704, owner
+    /// 2026-10-29). A dynamic colour resolves when drawn, so
     /// `.labelColor` follows light and dark.
-    public func image(
-        size: CGFloat,
-        ink: NSColor,
-        outlinesKiwis: Bool = true
-    ) -> NSImage {
+    public func image(size: CGFloat, ink: NSColor) -> NSImage {
         NSImage(
             size: NSSize(width: size, height: size),
             flipped: true
         ) { rect in
             let scale = rect.width / 24
             let transform = AffineTransform(scale: scale)
-            draw(
-                ink: ink,
-                outlinesKiwis: outlinesKiwis,
-                transform: transform
-            )
+            draw(ink: ink, transform: transform)
             return true
         }
     }
 
-    private func draw(
-        ink: NSColor,
-        outlinesKiwis: Bool,
-        transform: AffineTransform
-    ) {
+    private func draw(ink: NSColor, transform: AffineTransform) {
         for (x, y) in [(8.5, 6.8), (15.5, 5.3)] {
             let slice = Self.circle(x, y, 3.9)
             slice.transform(using: transform)
             Self.kiwi.setFill()
             slice.fill()
-            if self == .mark, outlinesKiwis {
-                ink.setStroke()
-                slice.lineWidth = 1.6 * transform.m11
-                slice.stroke()
-            }
-            let core = Self.circle(x, y, self == .mark ? 1.48 : 1.56)
+            let core = Self.circle(x, y, self == .badge ? 1.56 : 1.48)
             core.transform(using: transform)
             Self.flesh.setFill()
             core.fill()
         }
+        guard self != .kiwis else { return }
         let pocket = Self.pocket(inset: 0, top: 9, bottom: 22.8, radius: 5)
         pocket.close()
         pocket.transform(using: transform)

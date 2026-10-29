@@ -78,6 +78,7 @@ struct PocketHandleTests {
     @Test("an edge no bar shows takes the handle at rest")
     func handleAtRest() throws {
         let core = try makeCore()
+        core.tiler.settings.kiwishelf.outerMargin = 8
         let shown = try #require(spec(core))
         #expect(shown.handle == core.tiler.settings.kiwishelf.pocketEdge)
         #expect(!shown.risen)
@@ -85,7 +86,9 @@ struct PocketHandleTests {
         let depth =
             shown.handle?.isHorizontal == false
             ? shown.frame.width : shown.frame.height
-        #expect(depth == PocketHandleView.restDepth)
+        // It reaches the edge across the outer margin and draws
+        // past it, as the bars' handles sit.
+        #expect(depth == PocketHandleView.restDepth + 8)
     }
 
     @Test("a hover raises the pocket out of its handle, and leaving sinks it")
@@ -106,6 +109,15 @@ struct PocketHandleTests {
         core.pocketPlate.dragging = WindowID(7)
         let shown = try #require(spec(core))
         #expect(shown.risen)
+        // Above the drag's ghost, which shares the bars' level.
+        #expect(shown.aboveDrag)
+        let panel = try #require(
+            core.pocketPlate.handlePanel(on: shown.display)
+        )
+        #expect(panel.level == BarPanel.aboveLevel)
+        core.pocketPlate.dragging = nil
+        _ = spec(core)
+        #expect(panel.level == BarPanel.level)
     }
 
     @Test("a bar edge's slot keeps the section, never the handle")

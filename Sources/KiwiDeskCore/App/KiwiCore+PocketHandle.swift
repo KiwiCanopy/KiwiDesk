@@ -18,13 +18,17 @@ extension KiwiCore {
             return nil
         }
         let shelf = tiler.settings.kiwishelf
+        // Reaching the edge across the outer margin, as the bars'
+        // hover bands do; the handle draws past it (#2678).
         let depth =
-            risen
-            ? PocketHandleView.tabDepth + PocketPlateView.lift
-                + Self.pocketRiseSide(thickness: shelf.thickness)
-            : PocketHandleView.restDepth
+            shelf.outerMargin
+            + (risen
+                ? PocketHandleView.tabDepth + PocketPlateView.lift
+                    + Self.pocketRiseSide(thickness: shelf.thickness)
+                : PocketHandleView.restDepth)
         let visible = GeometryUtils.axVisibleFrame(of: screen)
-        // In an Auto edge's row of marks, else at Position (#2678).
+        // Where the shown pocket stands on an Auto edge, else at
+        // Position (#2678).
         if let band = pocketPlate.markBands[display] {
             return Self.pocketHandleFrame(
                 visible: visible,
@@ -119,13 +123,16 @@ extension KiwiCore {
         guard let room = pocketHandleFrame(on: display, risen: true) else {
             return nil
         }
-        let rise = Self.pocketRiseSide(
-            thickness: tiler.settings.kiwishelf.thickness
-        )
+        let shelf = tiler.settings.kiwishelf
+        let rise = Self.pocketRiseSide(thickness: shelf.thickness)
         // AX coordinates run down, as the view's flipped bounds do.
         return PocketPlateView.risenFrame(
-            in: room,
-            edge: tiler.settings.kiwishelf.pocketEdge,
+            in: PocketPlateView.room(
+                in: room,
+                edge: shelf.pocketEdge,
+                outer: shelf.outerMargin
+            ),
+            edge: shelf.pocketEdge,
             side: rise
         )
     }

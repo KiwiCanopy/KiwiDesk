@@ -13,9 +13,12 @@ final class ShelfPocketPiece {
     struct Mount: Equatable {
         let view: NSView
         let slot: CGRect
+        /// A window drag runs: the pocket stands above its ghost,
+        /// which shares the bars' level (#2776).
+        var raised = false
 
         static func == (a: Self, b: Self) -> Bool {
-            a.view === b.view && a.slot == b.slot
+            a.view === b.view && a.slot == b.slot && a.raised == b.raised
         }
     }
 
@@ -114,7 +117,9 @@ final class ShelfPocketPiece {
 
     /// Orders the panel in above `shelf`, the shelf's own panel.
     func orderIn(above shelf: NSWindow) {
-        guard let panel, mount != nil else { return }
+        guard let panel, let mount else { return }
+        let level = mount.raised ? BarPanel.aboveLevel : BarPanel.level
+        if panel.level != level { panel.level = level }
         #if DEBUG
             guard ordersPanel else { return }
         #endif

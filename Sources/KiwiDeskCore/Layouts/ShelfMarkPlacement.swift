@@ -15,18 +15,54 @@ public enum ShelfMarkPlacement {
     /// from the edge's start.
     public struct Row: Equatable, Sendable {
         public var bars: [ShelfBar: ClosedRange<CGFloat>]
-        /// The pocket handle's band, at the row's leaning end; nil
-        /// where no pocket stands on the edge (#2678).
+        /// The pocket handle's band; nil where no pocket stands on
+        /// the edge (#2678).
         public var pocket: ClosedRange<CGFloat>?
     }
 
     /// The band of each of `bars` along an edge `length` long, as
     /// offsets from its start (left, or top on a vertical edge):
-    /// adjacent, in `shelf`'s order, as one row at its alignment —
-    /// the pocket's handle one band more at the row's end where
-    /// `pocketLeansEnd`, at its start where false, none where nil.
-    /// A row longer than the edge starts at its start.
+    /// adjacent, in `shelf`'s order, as one row at its alignment.
+    /// The pocket's handle stands on `pocket`, the slot the pocket
+    /// takes on the shown shelf, so it is where the pocket shows
+    /// (owner, device 2026-10-29); where that band would meet the
+    /// row, it joins the row at the slot's end instead. A row longer
+    /// than the edge starts at its start.
     public static func row(
+        for bars: Set<ShelfBar>,
+        pocket slot: ClosedRange<CGFloat>?,
+        length: CGFloat,
+        shelf: KiwiShelf
+    ) -> Row {
+        let alone = row(
+            for: bars,
+            pocketLeansEnd: nil,
+            length: length,
+            shelf: shelf
+        )
+        guard let slot else { return alone }
+        let middle = (slot.lowerBound + slot.upperBound) / 2
+        let start = min(
+            max(middle - bandLength / 2, 0),
+            max(length - bandLength, 0)
+        )
+        let band = start...(start + bandLength)
+        guard alone.bars.values.contains(where: { $0.overlaps(band) })
+        else {
+            return Row(bars: alone.bars, pocket: band)
+        }
+        return row(
+            for: bars,
+            pocketLeansEnd: middle >= length / 2,
+            length: length,
+            shelf: shelf
+        )
+    }
+
+    /// The row with the pocket's handle one band more at its end
+    /// where `pocketLeansEnd`, at its start where false, none where
+    /// nil.
+    static func row(
         for bars: Set<ShelfBar>,
         pocketLeansEnd: Bool?,
         length: CGFloat,

@@ -86,11 +86,10 @@ struct PocketPlateTests {
         several(core)
         let shown = try #require(spec(core))
         #expect(shown.faded)
-        #expect(shown.count == "")
     }
 
-    @Test("one window inside lifts the fade and draws no badge")
-    func oneInsideNoBadge() throws {
+    @Test("one window inside lifts the fade")
+    func oneInsideLifts() throws {
         let core = makeCore()
         several(core)
         core.handle(.windowFocused(one))
@@ -98,18 +97,18 @@ struct PocketPlateTests {
         core.execute("pocket")
         let shown = try #require(spec(core))
         #expect(!shown.faded)
-        #expect(shown.count == "")
         #expect(shown.windows == [one])
     }
 
-    @Test("the badge counts from two inside")
-    func badgeFromTwo() throws {
+    @Test("two inside: listed, and counted for VoiceOver alone")
+    func twoInsideCounted() throws {
         let core = makeCore()
         pocketTwo(core)
         let shown = try #require(spec(core))
         #expect(!shown.faded)
-        #expect(shown.count == "2")
         #expect(shown.windows == [one, two])
+        // The pocket draws no count; its name carries it.
+        #expect(shown.name.contains("2"))
     }
 
     @Test("a pocket stands on every display not standing down")
@@ -160,21 +159,6 @@ struct PocketPlateTests {
         core.execute("kiwishelf.set_background_fit", args: [.string("hug")])
         core.updatePocketPlate(slots: [display: slot])
         #expect(core.pocketPlate.specs[display]?.platePiece == true)
-    }
-
-    @Test("the badge faces into the screen at the right")
-    func badgeFacesIn() throws {
-        let core = makeCore()
-        several(core)
-        core.execute("kiwishelf.set_pocket_edge", args: [.string("bottom")])
-        core.execute("kiwishelf.set_pocket_position", args: [.number(20)])
-        #expect(try #require(spec(core)).badgeLeading == false)
-        core.execute("kiwishelf.set_pocket_position", args: [.number(80)])
-        #expect(try #require(spec(core)).badgeLeading)
-        core.execute("kiwishelf.set_pocket_edge", args: [.string("right")])
-        #expect(try #require(spec(core)).badgeLeading)
-        core.execute("kiwishelf.set_pocket_edge", args: [.string("left")])
-        #expect(try #require(spec(core)).badgeLeading == false)
     }
 
     @Test("capacity is app-wide, decodes as stored, refuses a bad value")

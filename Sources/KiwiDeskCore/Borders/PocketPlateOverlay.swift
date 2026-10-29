@@ -19,10 +19,6 @@ final class PocketPlateOverlay {
         let frame: CGRect
         let shelf: KiwiShelf
         let markHex: String
-        /// Empty from two down: no badge is drawn.
-        let count: String
-        /// The badge takes the corner facing into the screen.
-        let badgeLeading: Bool
         /// Its own piece of plate: Hug and Boxed; under Full the
         /// shelf's plate runs beneath it.
         let platePiece: Bool
@@ -36,6 +32,11 @@ final class PocketPlateOverlay {
         /// Out of its handle (hover, drag), at this side.
         var risen = false
         var risenSide: CGFloat = 0
+        /// The shelf's outer margin, between the edge and the handle.
+        var outer: CGFloat = 0
+        /// A window drag runs: the pocket stands above its ghost,
+        /// which shares the bars' level (owner, device 2026-10-29).
+        var aboveDrag = false
     }
 
     /// One display's pocket: a handle's panel, or a section's
@@ -117,6 +118,13 @@ final class PocketPlateOverlay {
             ? sectionViews[spec.display] : shownViews[spec.display]
     }
 
+    #if DEBUG
+        /// Test-only: the handle panel standing on `display`.
+        func handlePanel(on display: DisplayID) -> NSPanel? {
+            shownViews[display]?.panel
+        }
+    #endif
+
     /// Every shown pocket's frame, AppKit coordinates.
     var shownFrames: [CGRect] { specs.values.map(\.frame) }
 
@@ -152,8 +160,6 @@ final class PocketPlateOverlay {
             shown.view.pocket.wear(
                 spec.shelf,
                 markHex: spec.markHex,
-                badge: spec.count.isEmpty ? nil : spec.count,
-                badgeLeading: spec.badgeLeading,
                 platePiece: spec.platePiece
             )
             shown.view.handle.wear(
@@ -161,11 +167,6 @@ final class PocketPlateOverlay {
                 markHex: spec.markHex,
                 edge: spec.handle ?? .bottom,
                 kiwisOut: spec.risen
-            )
-            shown.view.stand(
-                handle: spec.handle,
-                risen: spec.risen,
-                side: spec.risenSide
             )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
@@ -185,7 +186,23 @@ final class PocketPlateOverlay {
                 )
             }
         }
+        orderIn(shown, spec: spec, changed: changed)
+        // Sized and ordered in first: a pocket that rises out of a
+        // handle made this pass has no layer to rise on before.
+        if changed {
+            shown.view.stand(
+                handle: spec.handle,
+                risen: spec.risen,
+                side: spec.risenSide,
+                outer: spec.outer
+            )
+        }
+    }
+
+    private func orderIn(_ shown: Shown, spec: Spec, changed: Bool) {
         guard let panel = shown.panel else { return }
+        let level = spec.aboveDrag ? BarPanel.aboveLevel : BarPanel.level
+        if panel.level != level { panel.level = level }
         #if DEBUG
             guard ordersPanel else { return }
         #endif

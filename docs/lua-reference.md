@@ -3068,10 +3068,11 @@ percent: `0` is the left or top end, `100` the right or bottom
 end. On an edge where a bar shows, the pocket takes the shelf's
 nearer end instead — its start below `50`, its end from `50` —
 outside the bars' items, so it stays put while they scroll. On an
-edge where an `"auto"` bar rests hidden, its handle joins the bars'
-row of marks, one band more at the end the position leans to. On
-any other edge no bar shows, its handle stands at the position,
-whole on screen at either end. A look carries it.
+edge where an `"auto"` bar rests hidden, its handle stands where
+the pocket shows once the bar comes in, joining the bars' handles
+in one row where it would meet them. On any other edge no bar
+shows, its handle stands at the position, whole on screen at either
+end. A look carries it.
 
 **Example:**
 

@@ -59,6 +59,9 @@ final class BriefPocketOverlay {
         /// False while the pocket plate stands at the pocket (#2678):
         /// the plate flies to it, and no second pocket is drawn.
         var drawsPocket = true
+        /// The pocket it draws wears a plate: on a bar's edge, as
+        /// the section does; risen out of a handle, the bare mark.
+        var platePiece = true
         /// Whether the plate draws Liquid Glass, and the Fill it
         /// wears there, nil for the untinted glass.
         let plateGlass: Bool
@@ -101,7 +104,11 @@ final class BriefPocketOverlay {
         root.addSubview(pocketHost)
         root.addSubview(plateHost)
         let pocket = BriefPocketView(frame: .zero)
-        pocket.wear(request.shelf, markHex: request.markHex)
+        pocket.wear(
+            request.shelf,
+            markHex: request.markHex,
+            platePiece: request.platePiece
+        )
         pocketHost.addSubview(pocket)
         let plate = BriefPocketPlateView(
             glass: request.plateGlass,

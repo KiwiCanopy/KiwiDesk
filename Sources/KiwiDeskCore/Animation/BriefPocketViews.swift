@@ -2,14 +2,12 @@ import AppKit
 
 /// The brief pocket itself (#2680): a rounded plate in KiwiShelf's
 /// look — its Fill as tinted glass or solid, and its rim, as the
-/// overflow mark wears it — holding the pocket mark, and on the
-/// pocket plate the count beside it (#2678). Redrawn at each size
-/// the nod gives it, never scaled.
+/// overflow mark wears it — holding the pocket mark. Redrawn at
+/// each size the nod gives it, never scaled.
 @MainActor
 final class BriefPocketView: NSView {
     private let content = NSView()
     private let mark = NSImageView()
-    private let count = NSTextField(labelWithString: "")
     /// The shelf's hover fill, lit while the pointer or a window a
     /// drop would take is over the pocket plate (#2678): flat on a
     /// solid shelf, through `BarHoverFill` on glass.
@@ -31,9 +29,6 @@ final class BriefPocketView: NSView {
     private let rim = ShelfBorder.make()
     private var glass: NSView?
     private var shelf = KiwiShelf()
-    /// The count badge takes the mark's upper-left corner rather
-    /// than its upper-right, facing into the screen (#2678).
-    private var badgeLeading = false
     /// Draws its own plate (the brief pocket, and the pocket under
     /// Hug and Boxed); under Full the shelf's plate runs beneath.
     private var platePiece = true
@@ -55,13 +50,6 @@ final class BriefPocketView: NSView {
         content.addSubview(litGlass)
         content.addSubview(litFill)
         content.addSubview(mark)
-        count.isBezeled = false
-        count.drawsBackground = false
-        count.alignment = .center
-        count.wantsLayer = true
-        count.isHidden = true
-        count.setAccessibilityElement(false)
-        content.addSubview(count)
         addSubview(solid)
         addSubview(content)
         addSubview(rim)
@@ -72,22 +60,15 @@ final class BriefPocketView: NSView {
     required init?(coder: NSCoder) { nil }
 
     /// Wears the gated `shelf` and the mark in `hex`, the pocket
-    /// mark's colour, with `badge` on the mark's corner where
-    /// non-nil (#2678).
+    /// mark's colour.
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
-        badge text: String? = nil,
-        badgeLeading: Bool = false,
         platePiece: Bool = true
     ) {
         self.shelf = shelf
         self.hex = hex
-        self.badgeLeading = badgeLeading
         self.platePiece = platePiece
-        count.isHidden = text == nil
-        count.stringValue = text ?? ""
-        count.font = Self.countFont(shelf)
         needsLayout = true
     }
 
@@ -103,32 +84,16 @@ final class BriefPocketView: NSView {
     /// stitch blurs on a thin bar (#2678).
     static let solidBelow: CGFloat = 14
 
-    /// Hides the count badge while the pocket rises and returns the
-    /// rise's token; only the latest rise's landing shows it again,
-    /// so an interrupted rise never shows it mid-flight (#2678
-    /// review 19).
-    func holdBadge() -> Int {
-        badgeRise += 1
-        count.alphaValue = 0
-        return badgeRise
-    }
-
-    /// Shows the badge once `rise`, the latest, has landed.
-    func releaseBadge(rise: Int) {
-        guard rise == badgeRise else { return }
-        count.alphaValue = 1
-    }
-    private(set) var badgeRise = 0
-
     func setLook(_ look: Look) {
         self.look = look
         paintLook()
     }
 
     /// The chip's readings: the fill, and the dim that reaches the
-    /// mark alone — never the plate, glass or count badge.
+    /// mark alone — never the plate or glass.
     private func paintLook() {
-        let lit = look == .lit
+        // A bare mark lights by its ink alone: no box (#2776).
+        let lit = look == .lit && platePiece
         let radius = plateRadius
         litGlass.frame = bounds
         litFill.layer?.cornerRadius = radius
@@ -147,19 +112,44 @@ final class BriefPocketView: NSView {
         litFill.isHidden = !lit || glassShown
         litFill.layer?.backgroundColor =
             NSColor(kiwiHex: shelf.hoverFillColor).cgColor
-        count.textColor = NSColor(kiwiHex: shelf.groupBadgeTextColor)
-        count.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.groupBadgeColor).cgColor
         mark.alphaValue = look == .rest ? shelf.dimFactor : 1
     }
 
-    /// The count's face, the overflow mark's.
-    static func countFont(_ shelf: KiwiShelf) -> NSFont {
-        shelf.badgeFont(
-            ofSize: OverflowMarkView.textSize,
-            emphasis: .semibold
-        )
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        // Automatic ink, and with it the edge, follows the appearance.
+        needsLayout = true
     }
+
+    /// A bare mark's soft edge in its stitch's ink, which holds the
+    /// bag's shape on a window of its own ink (owner, #2776 ▸ D).
+    private func paintEdge(side: CGFloat) {
+        mark.wantsLayer = true
+        guard let layer = mark.layer else { return }
+        guard !platePiece else {
+            layer.shadowOpacity = 0
+            return
+        }
+        let ink = NSColor.mark(hex: hex, fallback: .labelColor)
+        var edge = NSColor.black
+        effectiveAppearance.performAsCurrentDrawingAppearance {
+            edge = PocketMark.opaque(ink).contrastingGlyph
+        }
+        layer.shadowColor = edge.cgColor
+        layer.shadowOpacity = 1
+        layer.shadowOffset = .zero
+        layer.shadowRadius = side * Self.edgeBlur
+    }
+
+    /// The bare mark's edge blur, as a share of the mark's side.
+    static let edgeBlur: CGFloat = 0.07
+
+    #if DEBUG
+        /// Test-only: whether a hover box draws, flat or on glass.
+        var drawsLitBox: Bool { !litFill.isHidden || !litGlass.isHidden }
+        /// Test-only: the bare mark's edge, 0 where none draws.
+        var edgeOpacity: Float { mark.layer?.shadowOpacity ?? 0 }
+    #endif
 
     override func layout() {
         super.layout()
@@ -177,24 +167,9 @@ final class BriefPocketView: NSView {
             width: side,
             height: side
         )
-        if !count.isHidden {
-            count.sizeToFit()
-            let height = count.frame.height
-            let width = max(height, count.frame.width + height / 2)
-            // On the pocket's upper corner facing into the screen,
-            // below the kiwis (#2678).
-            count.frame = CGRect(
-                x: badgeLeading
-                    ? mark.frame.minX - width / 3
-                    : mark.frame.maxX - width * 2 / 3,
-                y: mark.frame.minY + side * 0.35 - height / 2,
-                width: width,
-                height: height
-            )
-            count.layer?.cornerRadius = height / 2
-        }
         paintPlate(radius: radius)
         paintLook()
+        paintEdge(side: side)
         rim.frame = bounds
         ShelfBorder.paint(
             rim,

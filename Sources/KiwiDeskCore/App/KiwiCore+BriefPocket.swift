@@ -51,6 +51,10 @@ extension KiwiCore {
             )
         // A pocket on this screen is the pocket (#2678).
         request.drawsPocket = briefPocketDrawsPocket(on: display)
+        request.platePiece = Self.pocketWearsPlate(
+            slot: pocketPlate.slots[display],
+            shelf: request.shelf
+        )
         briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return timeline

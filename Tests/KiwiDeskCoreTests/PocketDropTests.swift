@@ -76,14 +76,13 @@ struct PocketDropTests {
         )
     }
 
-    @Test("a window move shows the empty plate, faded and uncounted")
+    @Test("a window move shows the empty plate, faded")
     func moveShowsThePlate() throws {
         let core = try makeCore()
         point(core, onPlate: false)
         move(core, one)
         let shown = try #require(core.pocketPlate.specs.values.first)
         #expect(shown.faded)
-        #expect(shown.count == "")
         #expect(!shown.dropHovered)
         end(core, one)
         #expect(core.pocketPlate.specs.values.first == nil)

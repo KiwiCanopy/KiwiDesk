@@ -154,8 +154,6 @@ struct PocketShelfWiringTests {
             frame: frame,
             shelf: KiwiShelf(),
             markHex: "",
-            count: "",
-            badgeLeading: false,
             platePiece: false,
             faded: windows.isEmpty,
             dropHovered: false,

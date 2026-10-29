@@ -6157,7 +6157,9 @@ loses 4.0.0's values silently. The old `pocket.set_edge` and
 display.** One window keeps the pocket out of sight, since its one
 window is a key away. Under Several windows the drop target and the
 list are what the pocket is for, so it stays where the user left it
-— faded while empty, a count badge from two inside — and on every
+— faded while empty, and drawing no count: the list names what is
+inside and VoiceOver hears how many (owner, device 2026-10-29) — and
+on every
 display, so it is reachable wherever the pointer is without
 focusing that screen first. A click grows the list of the windows
 inside out of it, by app, each row taking its window out — the
@@ -6190,22 +6192,41 @@ A separate overlay following the shelf would copy every reveal
 style by hand (architect review, 2026-10-29). Full keeps one plate;
 Hug gives the pocket its own piece; Boxed gives it its own box.
 
-**On an Auto edge the handle joins the row of marks.** A hidden
-Auto bar leaves its mark at the edge; the pocket's handle takes one
-band more in that row, at the end it leans to, so the pointer
-reaches the bar and the pocket one band apart and never opens one
-for the other. On a Hidden or empty edge it stands alone at
-Position.
+**On an Auto edge the handle stands where the pocket shows.** A
+hidden Auto bar leaves its handle at the edge, and the pocket's
+handle stands where the pocket appears once that bar comes in, so
+the hand reaches for one place either way (owner, device
+2026-10-29, reversing the handle at the row's end). Where that
+place would meet the bars' handles it joins their row at its end,
+so a point never opens one for the other. On a Hidden or empty edge
+it stands alone at Position.
 
 **A fixed handle; the risen pocket at the bar's size, within 20 to
 32 pt.** On an edge no bar shows, the handle is an edge mark like
-the Space dots and the App Bar line, so its kiwis do not scale with
-the shelf. Risen — on hover, a drag or a put-in or take-out — the
+the Space dots and the App Bar line: the kiwis alone, looking out
+from behind a tab, the pocket out of sight, one outer margin in
+from the edge as the bars' handles sit (owner, device 2026-10-29).
+Its kiwis do not scale with the shelf. Risen — on hover, a drag or a put-in or take-out — the
 pocket takes the size it has on that edge's bar, so a Hidden bar's
 shortcut reveal and a hover show one object at one size. The floor
 is the handle's 20 pt kiwis, which a rise must never shrink; the
 ceiling, 1.6x, is as far as a growth still reads as the pocket
 coming out rather than a jump.
+
+**Off a bar the pocket is the bare mark, edged softly in its
+stitch's ink** (owner, device 2026-10-29, #2776). Risen out of its
+handle it draws no plate, so it lights as a Space chip's ink does,
+dimmed at rest and full on hover or under a drop, and never as a
+box. A bare mark sits straight on whatever window is behind it,
+and its ink follows the system appearance, not that window: black
+ink measured 1.26:1 on a dark window and white ink 1.00:1 on a
+white one, and every bundled pocket colour falls below 3:1 on one
+of the two (`ColorVision`). So it wears a soft edge in the
+stitch's ink, which contrasts with whichever ground the bag loses
+to. A hover ring in the highlight colour was weighed and set
+aside for this, since it reads like the focused-window ring and
+leaves the bag lost at rest and in a drag; a coloured glow is the
+focused ring's alone.
 :::
 
 ### A window changing state animates under its own switch (#2676)
@@ -14483,8 +14504,10 @@ white line on a pocket the label ink judged against nothing. The
 pocket's outline is the colour itself and the kiwi slices draw no
 outline (owner, #2704): a contrasting outline read as a black
 border around the mark, so the stitch alone carries the inner
-contrast. Automatic keeps its outlines, which are the fill's ink
-and draw no border. No gap is cut out of the pocket around the
+contrast. Automatic draws them bare too (owner, 2026-10-29, #2776):
+its outline, in the fill's ink, read as a dark ring above the
+pocket wherever the kiwis show alone, as on the pocket's handle.
+No gap is cut out of the pocket around the
 slices: the owner judged it unnecessary for a pocket colour near
 the kiwi green.
 

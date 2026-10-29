@@ -4,8 +4,8 @@ import QuartzCore
 /// The pocket rising out of its handle (#2678, 2026-10-29 ruling):
 /// lift, grow from the handle's kiwis and, on another edge, the turn
 /// upright, all one transform on one damped spring pivoting on the
-/// pocket's base behind the tab; the count badge waits for the
-/// landing. Under Reduce Motion it stands out at once.
+/// pocket's base behind the tab. Under Reduce Motion it stands out
+/// at once.
 extension BarMotion {
     /// How far below its risen place the pocket starts, past the
     /// tab, so the kiwis are what first shows.
@@ -14,8 +14,7 @@ extension BarMotion {
             + PocketHandleView.markSide - PocketHandleView.lookOut
     }
 
-    /// Plays the rise on `pocket`, `side` points risen on `edge`,
-    /// its badge held until the spring lands.
+    /// Plays the rise on `pocket`, `side` points risen on `edge`.
     @MainActor
     static func playPocketRise(
         _ pocket: BriefPocketView,
@@ -30,15 +29,7 @@ extension BarMotion {
             ),
             let layer = pocket.layer
         else { return }
-        let token = pocket.holdBadge()
-        CATransaction.begin()
-        CATransaction.setCompletionBlock { [weak pocket] in
-            MainActor.assumeIsolated {
-                pocket?.releaseBadge(rise: token)
-            }
-        }
         layer.add(rise, forKey: "pocketRise")
-        CATransaction.commit()
     }
 
     /// The rise's spring, nil under `reduceMotion` or with no side.
