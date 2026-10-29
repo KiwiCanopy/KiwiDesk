@@ -18,6 +18,8 @@ enum SettingsRowRevert: Hashable {
     case lua
     /// One profile's look switch (#1752).
     case look(profile: String)
+    /// Every draft change a look paints, Simple's one row (#2745).
+    case lookChanges
     /// One app's rule and the reach it was given (#1393).
     case ruleReach(app: String)
     /// A live change put back to its stored value through Core

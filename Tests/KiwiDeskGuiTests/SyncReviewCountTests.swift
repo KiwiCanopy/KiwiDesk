@@ -24,7 +24,7 @@ struct SyncReviewCountTests {
         core.onLog = { _ in }
         try core.guiConfigStore.save(GuiConfig())
         core.loadConfig()
-        let model = makeTestModel(core: core)
+        let model = makeTestModel(core: core, root: .advanced)
         model.reload()
         return (core, model)
     }
@@ -210,7 +210,7 @@ struct SyncReviewCountTests {
     /// own row narrates.
     @Test("a live group with a draft-edited edge lists apart")
     func liveFoldStandsApart() {
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         var saved = model.cleanConfig.settings
         saved.gapsGlobal.outer = .init(top: 2, bottom: 2, left: 2, right: 2)
         var live = saved
@@ -238,7 +238,7 @@ struct SyncReviewCountTests {
     /// live rows list.
     @Test("a draft group with live edges lists apart")
     func draftFoldStandsApartFromLive() {
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         var saved = model.cleanConfig.settings
         saved.gapsGlobal.outer = .init(top: 2, bottom: 2, left: 2, right: 2)
         var live = saved

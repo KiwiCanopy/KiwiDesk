@@ -901,7 +901,11 @@ fresh open settles the edit target as they do
 (`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). A control
 Simple starts or stops drawing changes `SimpleCoverage` in the
 same change, since the save pill reads it to keep a row on Simple
-(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). Simple's
+(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). On Simple
+the pill's rows a look pick reaches fold into its one look row
+(`SettingsDiffRowSource.lookFolded`): its members are the keys
+Core's one `ShelfLook.unpicked` would put back, and its ↺ is that
+call; Advanced never folds (`SimpleLookRowTests`). Simple's
 preview is its rows' sibling column, so what it shows is asked
 of the one `simplePreviewSpace` over the selection `nav` holds,
 and a row marks itself kept only through `simpleKeptSpace`
@@ -1313,9 +1317,11 @@ agree, folded where rows are narrated and never in the diff**
 (#2450). A group is a master over its members, by axis, in the
 one table, `SettingKey.summaryAxes`; a surface that counts or asks per
 census key — the pill's rows, the live rows, the sync sheet — folds
-through `SettingKey.summarized`, never a fold of its own, and hands
-it the members a list beside it already narrates as `apart`,
-stated at every call.
+through `SettingKey.summarized`, never a fold of its own, and
+hands it the members a list beside it already narrates as
+`apart`, stated at every call. The one other fold is Simple's look
+row (#2745), which folds the pill's draft rows last and never
+reaches the live rows or the sync sheet.
 `SettingsDraftDiff` stays per member, since the live rows and the
 sync adopt compare key sets taken from different diffs. A key added
 under a master's path joins its group (`SettingsSummaryGroupTests`

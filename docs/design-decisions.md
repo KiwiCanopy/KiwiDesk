@@ -10260,7 +10260,12 @@ Three things stay one, or the two roots drift apart:
 - **One draft, one save pill.** Switching keeps the open draft
   untouched; a pill row whose control Simple does not draw
   switches to Advanced when clicked. A Simple that wrote at once
-  would be a second save model.
+  would be a second save model. On Simple the pill folds every
+  row a look paints into one row, "Changes to the look", whose ↺
+  takes them back together and which does not expand (#2745): a
+  Simple user picks a look as one choice and never weighs its
+  settings one by one. Advanced keeps a row per setting, since it
+  is where a single setting is kept or taken back.
 - **No silent doors.** Simple has no search field; every way
   into Advanced is a visible, named link. The search tag and
   silent flip #2654 deleted stay deleted.
