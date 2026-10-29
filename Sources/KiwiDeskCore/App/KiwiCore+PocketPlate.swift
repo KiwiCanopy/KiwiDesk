@@ -146,11 +146,11 @@ extension KiwiCore {
         several || dragging || playing
     }
 
-    /// Whether the pocket draws its own plate: a section on a bar's
-    /// edge where the shelf's plate does not run beneath it; risen
-    /// out of a handle it is the bare mark (#2776).
+    /// Whether the pocket draws its own plate: its box, as a section
+    /// on a Boxed shelf's edge; under Plain, Hug and Full alike, and
+    /// risen out of a handle, it is the bare mark (#2776).
     static func pocketWearsPlate(slot: CGRect?, shelf: KiwiShelf) -> Bool {
-        slot != nil && !shelf.plateSpans
+        slot != nil && !shelf.drawsPlate
     }
 
     /// Whether a play on `display` draws its own pocket: not where

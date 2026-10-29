@@ -6189,8 +6189,11 @@ panel of its own, beside the first, and plays every reveal, fade and
 glide on both from the same call, so the pocket comes and goes with
 the bars and never cuts, while the gap between them stays clear.
 A separate overlay following the shelf would copy every reveal
-style by hand (architect review, 2026-10-29). Full keeps one plate;
-Hug gives the pocket its own piece; Boxed gives it its own box.
+style by hand (architect review, 2026-10-29). Under Boxed the pocket
+takes its own box like every item; under Plain it draws no plate of
+its own — at a hugging shelf's corner it sits on the screen like a
+bag, and under Full on the shelf's plate (owner, device 2026-10-29,
+#2776, reversing its own piece under Hug).
 
 **On an Auto edge the handle stands where the pocket shows.** A
 hidden Auto bar leaves its handle at the edge, and the pocket's
@@ -6213,17 +6216,21 @@ is the handle's 20 pt kiwis, which a rise must never shrink; the
 ceiling, 1.6x, is as far as a growth still reads as the pocket
 coming out rather than a jump.
 
-**Off a bar the pocket is the bare mark, edged softly in its
-stitch's ink** (owner, device 2026-10-29, #2776). Risen out of its
-handle it draws no plate, so it lights as a Space chip's ink does,
-dimmed at rest and full on hover or under a drop, and never as a
-box. A bare mark sits straight on whatever window is behind it,
+**A bare pocket is the mark alone, edged softly in its stitch's
+ink while lit or taking a window** (owner, device 2026-10-29,
+#2776). Risen out of its
+handle, or a Plain shelf's section, it draws no plate, so it lights
+as a Space chip's ink does, dimmed at rest and full on hover or
+under a drop, never as a box, and an empty one drops its fade while
+lit. A bare mark sits straight on whatever window is behind it,
 and its ink follows the system appearance, not that window: black
 ink measured 1.26:1 on a dark window and white ink 1.00:1 on a
 white one, and every bundled pocket colour falls below 3:1 on one
-of the two (`ColorVision`). So it wears a soft edge in the
+of the two (`ColorVision`). So, lit or as a window goes in, it
+wears a soft edge in the
 stitch's ink, which contrasts with whichever ground the bag loses
-to. A hover ring in the highlight colour was weighed and set
+to; at rest it draws none, since an edge standing on the screen
+read as a border. A hover ring in the highlight colour was weighed and set
 aside for this, since it reads like the focused-window ring and
 leaves the bag lost at rest and in a drag; a coloured glow is the
 focused ring's alone.

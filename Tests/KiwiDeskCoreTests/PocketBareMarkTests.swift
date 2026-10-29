@@ -27,7 +27,9 @@ struct PocketBareMarkTests {
         let bare = pocket(platePiece: false)
         #expect(!bare.drawsLitBox)
         #expect(bare.edgeOpacity == 1)
-        // At rest the edge goes (owner, #2776).
+        // A window just in keeps it; at rest it goes (owner, #2776).
+        bare.setLook(.active)
+        #expect(bare.edgeOpacity == 1)
         bare.setLook(.rest)
         #expect(bare.edgeOpacity == 0)
         // Control: a plated section keeps its hover box, no edge.
@@ -36,16 +38,19 @@ struct PocketBareMarkTests {
         #expect(plated.edgeOpacity == 0)
     }
 
-    @Test("the pocket wears a plate only as a section on a bar's edge")
+    @Test("the pocket wears a box only as a Boxed shelf's section")
     func plateOnlyOnABar() {
         var shelf = KiwiShelf()
-        shelf.backgroundFit = .hug
+        shelf.backgroundStyle = .boxed
         let slot = CGRect(x: 0, y: 0, width: 40, height: 40)
         #expect(KiwiCore.pocketWearsPlate(slot: slot, shelf: shelf))
         #expect(!KiwiCore.pocketWearsPlate(slot: nil, shelf: shelf))
-        // Under Full the shelf's plate runs beneath the section.
-        shelf.backgroundFit = .full
-        #expect(!KiwiCore.pocketWearsPlate(slot: slot, shelf: shelf))
+        // Plain: bare at a hugging shelf's corner and on a full plate.
+        shelf.backgroundStyle = .plain
+        for fit in [KiwiShelf.BackgroundFit.hug, .full] {
+            shelf.backgroundFit = fit
+            #expect(!KiwiCore.pocketWearsPlate(slot: slot, shelf: shelf))
+        }
     }
 
     /// The pixel at grid point `at` of `image` drawn at 2x.

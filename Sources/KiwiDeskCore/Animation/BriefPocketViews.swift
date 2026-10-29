@@ -128,14 +128,14 @@ final class BriefPocketView: NSView {
         needsLayout = true
     }
 
-    /// A lit bare mark's soft edge in its stitch's ink, which holds
-    /// the bag's shape on a window of its own ink; at rest it draws
-    /// none (owner, #2776 ▸ D).
+    /// A bare mark's soft edge in its stitch's ink, which holds the
+    /// bag's shape on a window of its own ink: lit or a window just
+    /// in, never at rest (owner, #2776 ▸ D).
     private func paintEdge() {
         mark.wantsLayer = true
         halo.wantsLayer = true
         guard let inner = mark.layer, let outer = halo.layer else { return }
-        let drawn = !platePiece && look == .lit
+        let drawn = !platePiece && look != .rest
         halo.isHidden = !drawn
         guard drawn else {
             inner.shadowOpacity = 0
