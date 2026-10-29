@@ -147,6 +147,8 @@ final class SettingsModel: ObservableObject {
     /// The user looks, the one in-memory copy of `looks.json`
     /// (#1684) — `refreshLooks` is its one writer.
     @Published var userLooks: [ShelfLook] = []
+    /// The look a gallery link added, leading Simple's Look line (#1740).
+    @Published var linkedLook: String?
     /// Screen counts where multiple profiles claim default flag.
     @Published var duplicateDefaultCounts: [Int] = []
 

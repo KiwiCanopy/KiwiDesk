@@ -77,11 +77,13 @@ public struct LookExport: Codable, Sendable, Equatable {
         self.look = look.uncredited
     }
 
-    /// The look with its credit put back on it.
+    /// The look with its credit put back on it. A gallery id inside
+    /// the body is dropped: only a link's install sets one (#1740).
     public var credited: ShelfLook {
         var out = look
         out.author = author
         out.basedOn = basedOn
+        out.galleryID = nil
         return out
     }
 

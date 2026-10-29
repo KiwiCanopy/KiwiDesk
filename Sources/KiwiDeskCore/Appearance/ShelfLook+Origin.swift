@@ -33,10 +33,11 @@ extension ShelfLook {
     }
 
     /// The credit a look started from this one carries: its author's
-    /// own, else the credit it kept.
+    /// own, with the gallery id it was installed under, else the
+    /// credit it kept.
     public var credit: LookCredit? {
         guard let author else { return basedOn }
-        return LookCredit(name: name, author: author)
+        return LookCredit(name: name, author: author, id: galleryID)
     }
 }
 

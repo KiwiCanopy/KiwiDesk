@@ -415,6 +415,19 @@ cat > "$PLIST" <<PLISTEOF
     <string>APPL</string>
     <key>CFBundleShortVersionString</key>
     <string>$VERSION</string>
+    <!-- The gallery's "Add to KiwiDesk" links, kiwidesk://look/<id>
+         (#1740); LookLink.scheme names the same scheme. -->
+    <key>CFBundleURLTypes</key>
+    <array>
+        <dict>
+            <key>CFBundleURLName</key>
+            <string>com.kiwicanopy.kiwidesk.look</string>
+            <key>CFBundleURLSchemes</key>
+            <array>
+                <string>kiwidesk</string>
+            </array>
+        </dict>
+    </array>
     <key>CFBundleVersion</key>
     <string>$VERSION</string>
     <key>LSMinimumSystemVersion</key>
