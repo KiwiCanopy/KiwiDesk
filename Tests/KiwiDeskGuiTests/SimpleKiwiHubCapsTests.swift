@@ -30,8 +30,7 @@ struct SimpleKiwiHubCapsTests {
     func spacelessFrame() {
         LocalizationManager.shared.select("ja")
         defer { LocalizationManager.shared.select("en") }
-        let side = ChordGlyphs.word(.left, "")
-            .trimmingCharacters(in: .whitespaces)
+        let side = ChordGlyphs.sideWord(.left)
         #expect(!side.isEmpty)
         #expect(
             caps("lctrl+lalt+j") == ["\(side) ⌃", "\(side) ⌥", "J"]

@@ -26,6 +26,30 @@ struct LayoutMenuItemsTests {
         #expect(sites == ["SpaceModeMenu.swift": 1])
     }
 
+    /// A list of every layout drawn anywhere else is a second item
+    /// list: one drawing `mode.symbol` beside the name copies the
+    /// menu without its pictures. Each other site states its reason.
+    /// Trades: a list built by `.map` over `allCases` is unseen.
+    @Test("no second list of every layout")
+    func noSecondLayoutList() throws {
+        let allowed = [
+            "SpaceModeMenu.swift": 1,
+            // A frozen readout of a Space no profile declares; it
+            // chooses nothing (#1790).
+            "LiveOnlySpaceRow.swift": 1,
+        ]
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var sites: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let count = try SourceScan.strippedSource(at: file)
+                .filter { !$0.isWhitespace }
+                .occurrences(of: "ForEach(LayoutMode.allCases")
+            if count > 0 { sites[file.lastPathComponent] = count }
+        }
+        #expect(sites == allowed)
+    }
+
     /// Floating's single window reads as an empty screen at menu
     /// size, so its picture draws the whole scatter.
     @Test("Floating's picture draws its scatter")

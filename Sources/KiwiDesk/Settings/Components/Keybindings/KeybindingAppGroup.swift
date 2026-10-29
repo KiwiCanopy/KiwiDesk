@@ -13,9 +13,10 @@ struct ApplicationsGroup: View {
     /// Under the title, where no page around the card says what it
     /// is for (Simple, #2737).
     var caption: String?
-    /// Whether a row draws which profiles its key reaches even when
-    /// it reaches them all; Simple names only a narrower reach, since
-    /// a key made there reaches every profile (#2777).
+    /// Whether a row draws which profiles its key reaches; Simple
+    /// says nothing of profiles and draws no profiles menu, and a key
+    /// made there reaches all of them, as one made in Advanced does
+    /// by default (#2777 ruling 12).
     var drawsReach = true
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts

@@ -37,6 +37,12 @@ enum ChordGlyphs {
         }
     }
 
+    /// A side's word alone, for a surface that draws the word apart
+    /// from its run: the catalog's frame around no run, trimmed.
+    static func sideWord(_ side: ModifierSide) -> String {
+        word(side, "").trimmingCharacters(in: .whitespaces)
+    }
+
     /// The modifier glyphs Core draws, for readers of a drawn chord.
     static let kinds: [Character: ModifierKind] = Dictionary(
         uniqueKeysWithValues: ModifierKind.allCases.map {

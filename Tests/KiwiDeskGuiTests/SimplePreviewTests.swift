@@ -237,7 +237,7 @@ struct SimplePreviewTests {
         for file in try SourceScan.swiftSources(under: root) {
             let count = try SourceScan.strippedSource(at: file)
                 .filter { !$0.isWhitespace }
-                .occurrences(of: ".environment(\\.schematicFillsWell,true)")
+                .occurrences(of: ".environment(\\.schematicFillsWell,")
             if count > 0 { sites[file.lastPathComponent] = count }
         }
         #expect(sites == ["SimpleSpacePicture.swift": 1])

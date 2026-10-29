@@ -119,14 +119,8 @@ struct SimpleKiwiHubKeys: View {
         }
         let chord = ChordGlyphs.runs(parsed, layoutChar: LayoutKeyGlyph.char)
         let modifiers = chord.runs.flatMap { run in
-            run.glyphs.map { (String($0), run.side.map(sideWord)) }
+            run.glyphs.map { (String($0), run.side.map(ChordGlyphs.sideWord)) }
         }
         return modifiers + (chord.key.isEmpty ? [] : [(chord.key, nil)])
-    }
-
-    /// A side's word alone, from the catalog's run frame with no run.
-    @MainActor private static func sideWord(_ side: ModifierSide) -> String {
-        ChordGlyphs.word(side, "")
-            .trimmingCharacters(in: .whitespaces)
     }
 }
