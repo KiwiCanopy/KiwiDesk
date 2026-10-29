@@ -215,16 +215,48 @@ struct LuaSourceEditor: NSViewRepresentable {
             let textView = scroll.documentView as? NSTextView
         else { return }
         textView.setAccessibilityLabel(spokenName)
+        context.coordinator.text = $text
+        context.coordinator.apply(text, to: textView)
+    }
+
+    /// Writes `text` into the view keeping the caret where it was,
+    /// clamped to the new length; a bare `string` write moves the
+    /// caret to the end (#2768).
+    static func replace(_ textView: NSTextView, with text: String) {
         guard textView.string != text else { return }
+        let ranges = textView.selectedRanges
         textView.string = text
+        let length = (text as NSString).length
+        textView.selectedRanges = ranges.map {
+            let range = $0.rangeValue
+            let start = min(range.location, length)
+            let end = min(range.location + range.length, length)
+            return NSValue(
+                range: NSRange(location: start, length: end - start)
+            )
+        }
     }
 
     @MainActor
     final class Coordinator: NSObject, NSTextViewDelegate {
-        private let text: Binding<String>
+        var text: Binding<String>
+        /// Bodies the view produced since the binding last matched
+        /// it. An update carrying one is a render behind the view's
+        /// own typing, never a write from outside (#2768).
+        private var echoes: Set<String>
 
         init(text: Binding<String>) {
             self.text = text
+            echoes = [text.wrappedValue]
+        }
+
+        /// Takes a value from SwiftUI: a Save, a Revert, a reload
+        /// lands; a late echo of the view's own edit is dropped.
+        func apply(_ value: String, to textView: NSTextView) {
+            if textView.string == value || !echoes.contains(value) {
+                echoes = [value]
+                LuaSourceEditor.replace(textView, with: value)
+            }
         }
 
         func textDidChange(_ notification: Notification) {
@@ -232,6 +264,7 @@ struct LuaSourceEditor: NSViewRepresentable {
                 let textView = notification.object
                     as? NSTextView
             else { return }
+            echoes.insert(textView.string)
             text.wrappedValue = textView.string
         }
     }
