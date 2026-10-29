@@ -32,17 +32,14 @@ extension KiwiCore {
         try paletteLibrary.rename(from: old, to: new)
     }
 
-    /// Saves `settings`' styling and colours as look `name`.
+    /// Saves `settings`' styling and colours as look `name`, with
+    /// the credit its origin still earns (#1740).
     @discardableResult
     public func saveLook(
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
-        let look = ShelfLook(
-            name: name,
-            style: LookKeys.extract(from: settings),
-            colors: ColorPaletteKeys.extract(from: settings)
-        )
+        let look = ShelfLook.current(named: name, in: settings)
         try lookLibrary.save(look)
         return look
     }

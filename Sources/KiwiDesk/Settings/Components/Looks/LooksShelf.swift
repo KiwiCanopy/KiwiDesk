@@ -7,6 +7,7 @@ struct LooksShelf: View {
     @ObservedObject var model: SettingsModel
     @State var saveRequest: NameEditRequest?
     @State var renameRequest: NameEditRequest?
+    @State var shareRequest: NameEditRequest?
     /// The colours a look click replaced — per mount, never a
     /// stored preference, so the row offers only what this visit
     /// did (`KeepColorsOffer`).
@@ -75,6 +76,7 @@ struct LooksShelf: View {
             HStack {
                 groupHeader(L("looks.mine", "My looks"))
                 Spacer()
+                if LookGallery.isLive { shareButton }
                 Button {
                     importLook()
                 } label: {

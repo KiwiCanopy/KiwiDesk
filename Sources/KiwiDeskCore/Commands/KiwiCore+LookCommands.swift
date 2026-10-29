@@ -100,7 +100,7 @@ extension KiwiCore {
     /// Picks `look` over the live settings and nothing else: no
     /// file is written, so the change stays unkept (Ruling 4).
     func wearLook(_ look: ShelfLook) {
-        look.admitted.apply(to: &tiler.settings)
+        look.pick(into: &tiler.settings)
         // An explicit apply (§5): a look can move the shelf's edge.
         retile(pass: .apply)
     }

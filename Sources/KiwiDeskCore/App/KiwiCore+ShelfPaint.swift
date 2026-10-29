@@ -42,8 +42,12 @@ extension KiwiCore {
         palette: ColorPalette?
     ) -> TilingSettings {
         var painted = settings
-        // A paint reaches styling and colours, never motion (#2176).
-        look?.stylingOnly.apply(to: &painted)
+        // A paint reaches styling and colours, never motion (#2176),
+        // and is a pick, so it records or clears the origin (#1740).
+        if let look {
+            look.stylingOnly.apply(to: &painted)
+            painted.lookOrigin = look.recordsOrigin ? look.admitted : nil
+        }
         palette?.apply(to: &painted)
         return painted
     }
@@ -75,7 +79,8 @@ extension KiwiCore {
     /// `before` and nothing else: the look's styling — never its
     /// motion, which a paint does not reach (#2176) — and colours,
     /// then the writes `ShelfLook.apply` makes beyond its keys —
-    /// every glass leaf, the per-layout indicators — put back too
+    /// every glass leaf, the per-layout indicators, the origin — put
+    /// back too
     /// (`ShelfPaintRoundTripTests`).
     static func unpainted(
         _ current: TilingSettings,
@@ -99,6 +104,7 @@ extension KiwiCore {
         for leaf in TilingSettings.layoutIndicatorLeaves {
             settings[keyPath: leaf] = before[keyPath: leaf]
         }
+        settings.lookOrigin = before.lookOrigin
         return settings
     }
 
