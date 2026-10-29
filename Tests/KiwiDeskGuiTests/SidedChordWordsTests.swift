@@ -168,7 +168,9 @@ struct SidedChordWordsTests {
         #expect(
             try read(
                 "Settings/Components/Simple/SimpleKiwiHubKeys.swift"
-            ).contains(".map(SidedChordWords.label)")
+            )
+            .filter { !$0.isWhitespace }
+            .contains(".accessibilityValue(chord.map(SidedChordWords.label)")
         )
         #expect(
             try read("Jump/LayoutPickText.swift").contains(

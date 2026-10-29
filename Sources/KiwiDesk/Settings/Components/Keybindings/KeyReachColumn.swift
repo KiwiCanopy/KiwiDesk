@@ -15,7 +15,7 @@ struct KeyReachColumn: View {
     var body: some View {
         if model.offersReachColumn, !binding.lua.isEmpty,
             let reading = model.keyReach(key),
-            !(onlyWhenNarrow && reading.shared && reading.leftOut.isEmpty)
+            !(onlyWhenNarrow && reading.reachesEveryProfile)
         {
             RuleReachControl(
                 model: model,

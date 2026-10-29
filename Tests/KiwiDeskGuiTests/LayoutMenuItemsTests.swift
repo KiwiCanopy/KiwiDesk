@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -29,6 +30,9 @@ struct LayoutMenuItemsTests {
     /// size, so its picture draws the whole scatter.
     @Test("Floating's picture draws its scatter")
     func floatingDrawsItsScatter() {
+        // From a count below the scatter, so the floor is what
+        // answers, not the default count.
+        #expect(LayoutMenuPictures.windows(for: .floating, base: 1) >= 3)
         #expect(LayoutMenuPictures.windows(for: .floating) >= 3)
         #expect(
             LayoutMenuPictures.windows(for: .bsp)

@@ -22,36 +22,37 @@ struct SpaceModeMenu<Face: View>: View {
 
     var body: some View {
         let hint = L("spaces.mode.help", "Layout mode for this Space")
-        Group {
-            if let face {
-                Menu {
-                    Picker("", selection: binding) { items }
-                        .pickerStyle(.inline)
-                        .labelsHidden()
-                } label: {
-                    face()
-                }
-                // The button style draws the face whole, as the
-                // profile chip's menu does; the face lifts itself.
-                .menuStyle(.button)
-                .buttonStyle(.plain)
-                .neutralMenuLabel()
-                .menuIndicator(.hidden)
-            } else {
+        let value = binding.wrappedValue.displayName
+        if let face {
+            Menu {
                 Picker("", selection: binding) { items }
+                    .pickerStyle(.inline)
                     .labelsHidden()
-                    // Explicit: the automatic style IS the pop-up on
-                    // macOS and takes the tint the same way,
-                    // uncounted (#1502).
-                    .pickerStyle(.menu)
-                    .neutralMenuLabel()
-                    .controlSize(.large)
-                    .frame(width: 150)
+            } label: {
+                face()
             }
+            // The button style draws the face whole, as the profile
+            // chip's menu does; the face lifts itself.
+            .menuStyle(.button)
+            .buttonStyle(.plain)
+            .neutralMenuLabel()
+            .menuIndicator(.hidden)
+            .help(hint)
+            .accessibilityLabel(hint)
+            .accessibilityValue(value)
+        } else {
+            Picker("", selection: binding) { items }
+                .labelsHidden()
+                // Explicit: the automatic style IS the pop-up on macOS
+                // and takes the tint the same way, uncounted (#1502).
+                .pickerStyle(.menu)
+                .neutralMenuLabel()
+                .controlSize(.large)
+                .frame(width: 150)
+                .help(hint)
+                .accessibilityLabel(hint)
+                .accessibilityValue(value)
         }
-        .help(hint)
-        .accessibilityLabel(hint)
-        .accessibilityValue(binding.wrappedValue.displayName)
     }
 
     /// Every layout, each with its picture beside its name.

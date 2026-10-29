@@ -30,9 +30,12 @@ struct SimpleKiwiHubCapsTests {
     func spacelessFrame() {
         LocalizationManager.shared.select("ja")
         defer { LocalizationManager.shared.select("en") }
-        let drawn = caps("lctrl+lalt+j")
-        #expect(drawn.count == 3)
-        #expect(drawn.last == "J")
+        let side = ChordGlyphs.word(.left, "")
+            .trimmingCharacters(in: .whitespaces)
+        #expect(!side.isEmpty)
+        #expect(
+            caps("lctrl+lalt+j") == ["\(side) ⌃", "\(side) ⌥", "J"]
+        )
     }
 
     @Test("a hyper chord keeps its hyper cap")

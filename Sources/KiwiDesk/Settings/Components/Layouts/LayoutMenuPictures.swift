@@ -16,11 +16,11 @@ enum LayoutMenuPictures {
 
     /// How many windows a picture draws: the schematic's default,
     /// and Floating's whole scatter.
-    static func windows(for mode: LayoutMode) -> Int {
-        let count = LayoutSchematic.windowCount(
-            LayoutSchematic.defaultWindowCount,
-            for: mode
-        )
+    nonisolated static func windows(
+        for mode: LayoutMode,
+        base: Int = LayoutSchematic.defaultWindowCount
+    ) -> Int {
+        let count = LayoutSchematic.windowCount(base, for: mode)
         return mode == .floating ? max(count, 3) : count
     }
 

@@ -120,7 +120,7 @@ struct SimplePreviewTests {
         #expect(text.contains("HomeCardBarsTile(settings:settings,"))
         #expect(
             text.contains(
-                "activeSpace:model.config.spaces.firstIndex(of:space)"
+                "activeSpace:model.config.spaces.firstIndex(of:space)??0,"
             )
         )
         #expect(!text.contains("config.settings"))
@@ -188,10 +188,11 @@ struct SimplePreviewTests {
             spaces[2]: CGRect(x: 0, y: 90, width: 100, height: 80),
             spaces[3]: CGRect(x: 110, y: 90, width: 100, height: 80),
         ]
-        // `a` along its line past `b`'s middle.
+        // `a` along its line past `b`'s middle, above its vertical
+        // middle, so only the sideways reading crosses.
         reorder.retarget(
             spaces[0],
-            at: CGPoint(x: 170, y: 40),
+            at: CGPoint(x: 170, y: 20),
             in: spaces,
             reduceMotion: true
         )

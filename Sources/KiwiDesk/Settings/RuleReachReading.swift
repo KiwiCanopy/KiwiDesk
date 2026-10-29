@@ -36,6 +36,13 @@ struct RuleReachReading: Equatable {
     /// profiles greys where it is not (#2022).
     var layerShared = true
 
+    /// Whether the row is the shared rule every readable profile
+    /// resolves, none leaving it out or holding a value of its own —
+    /// the one reach Simple leaves unnamed (#2777).
+    var reachesEveryProfile: Bool {
+        shared && leftOut.isEmpty && own.isEmpty && unreadable.isEmpty
+    }
+
     /// Whether `profile`'s box is the edited profile's, locked.
     func isLocked(_ profile: String) -> Bool { profile == editing }
 
