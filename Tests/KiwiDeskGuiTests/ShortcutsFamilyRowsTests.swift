@@ -79,8 +79,6 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.shortcutBase),
             .shortcuts(.modifierSides),
             .shortcuts(.pocketCapacity),
-            .shortcuts(.pocketEdge),
-            .shortcuts(.pocketPosition),
         ]
         let expander = fixture()
         let placed = SettingKey.allCases.filter {

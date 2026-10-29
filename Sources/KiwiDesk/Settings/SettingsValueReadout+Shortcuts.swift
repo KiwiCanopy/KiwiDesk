@@ -65,28 +65,6 @@ extension SettingsValueReadout {
                     new: FocusWrapWords.value(new.focusWrap)
                 )
             ]
-        case .pocketEdge:
-            return [
-                .change(
-                    census,
-                    label: SettingsCatalog.shortcuts.pocketEdge.text,
-                    old: AppBarOptions.edgeName(
-                        old.settings.kiwishelf.pocketEdge
-                    ),
-                    new: AppBarOptions.edgeName(
-                        new.settings.kiwishelf.pocketEdge
-                    )
-                )
-            ]
-        case .pocketPosition:
-            return [
-                .change(
-                    census,
-                    label: SettingsCatalog.shortcuts.pocketPosition.text,
-                    old: pocketPercent(old),
-                    new: pocketPercent(new)
-                )
-            ]
         case .modeCycle:
             return [
                 .change(
@@ -321,9 +299,5 @@ extension SettingsValueReadout {
             layers.map { ($0.name, $0) },
             uniquingKeysWith: { first, _ in first }
         )
-    }
-
-    private static func pocketPercent(_ config: GuiConfig) -> String {
-        percent(Double(config.settings.kiwishelf.pocketPosition) / 100)
     }
 }

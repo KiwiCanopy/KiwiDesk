@@ -40,9 +40,8 @@ struct PocketGroupTests {
         #expect(PocketGroup.capacityName(.several) == "Several windows")
     }
 
-    /// The plate shows on every window drag in both modes (#2678),
-    /// so Edge and Position always act: no grey, no pointer at the
-    /// animation switch.
+    /// The Pocket card draws Holds first, and no row of it greys
+    /// (#2678).
     @Test("no Pocket row greys, and the Holds row is drawn")
     func nothingGreys() throws {
         let source = try SourceScan.strippedSource(
@@ -51,15 +50,18 @@ struct PocketGroupTests {
                     + "PocketGroup.swift"
             )
         )
-        // The body draws Holds above Edge and Position, as
-        // `pocketList` records; a defined row never drawn reds.
+        // The body draws Holds ahead of the keys (owner, #2678);
+        // where the pocket sits is KiwiShelf's card.
         let body = try #require(source.range(of: "var body: some View"))
         let drawn = String(source[body.upperBound...])
-        let rows = ["capacityRow", "edgeRow", "positionRow"].map {
-            drawn.range(of: "\n            \($0)\n")?.lowerBound
-        }
-        #expect(rows.allSatisfy { $0 != nil })
-        #expect(rows.compactMap { $0 } == rows.compactMap { $0 }.sorted())
+        let holds = try #require(
+            drawn.range(of: "\n            capacityRow\n")
+        )
+        let keys = try #require(
+            drawn.range(of: "ShortcutsRowOrder.pocketAtRest")
+        )
+        #expect(holds.lowerBound < keys.lowerBound)
+        #expect(!drawn.contains("edgeRow"))
         #expect(source.contains("$0.pocketCapacity = new"))
         // Every way a row could grey: none applies.
         for grey in [

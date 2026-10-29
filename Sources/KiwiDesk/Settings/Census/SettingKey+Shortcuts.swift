@@ -77,8 +77,6 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// What the pocket holds (#2678), then where its plate sits
     /// (#2680): its edge and its position along it.
     case pocketCapacity = "appWide.pocketCapacity"
-    case pocketEdge = "settings.kiwishelf.pocketEdge"
-    case pocketPosition = "settings.kiwishelf.pocketPosition"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
@@ -176,10 +174,9 @@ extension ShortcutsKey {
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .resetSizes, .maximize, .toggleFloating, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
-        // Its own card (#2680): the two keys moved from Size &
-        // float, then what it holds and where its plate sits.
-        case .pocket, .pocketWindow, .pocketCapacity, .pocketEdge,
-            .pocketPosition:
+        // Its own card (#2680): what it holds, then its two keys;
+        // where it sits is KiwiShelf's (#2678).
+        case .pocket, .pocketWindow, .pocketCapacity:
             return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -272,10 +269,6 @@ extension ShortcutsKey {
             )
         case .pocketCapacity:
             return .text("pocket.capacity", help: "pocket.capacity.help")
-        case .pocketEdge:
-            return .text("pocket.edge", help: "pocket.edge.help")
-        case .pocketPosition:
-            return .text("pocket.position", help: "pocket.position.help")
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")
         case .openSettings:

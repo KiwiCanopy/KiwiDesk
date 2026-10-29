@@ -40,8 +40,8 @@ extension SettingsRevertRegister {
             \.scrollGesture.naturalMouse
         ),
         .shortcuts(.scrollSpaceStep): scroll(\.scrollGesture.spaceStep),
-        .shortcuts(.pocketEdge): .leaf(\.settings.kiwishelf.pocketEdge),
-        .shortcuts(.pocketPosition): .leaf(
+        .kiwishelf(.pocketEdge): .leaf(\.settings.kiwishelf.pocketEdge),
+        .kiwishelf(.pocketPosition): .leaf(
             \.settings.kiwishelf.pocketPosition
         ),
     ]

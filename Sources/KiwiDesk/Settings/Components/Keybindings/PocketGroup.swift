@@ -11,6 +11,8 @@ struct PocketGroup: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.pocketKeys) {
+            // What it holds leads its keys (owner, #2678).
+            capacityRow
             ForEach(ShortcutsRowOrder.pocketAtRest, id: \.id) { key in
                 KeybindingFamilyRows(
                     model: model,
@@ -19,15 +21,7 @@ struct PocketGroup: View {
                     expander: expander
                 )
             }
-            // `ShortcutsRowOrder.pocketList`, drawn here.
-            capacityRow
-            edgeRow
-            positionRow
         }
-    }
-
-    private var shelf: Binding<KiwiShelf> {
-        $model.config.settings.kiwishelf
     }
 
     /// A menu like Edge's: the recorder's footprint has no room for
@@ -74,73 +68,13 @@ struct PocketGroup: View {
         L(
             "pocket.capacity.help",
             "%1$@: the Pocket keeps a single window. %2$@: mark more, "
-                + "and a plate at the edge holds them; the Pocket key "
-                + "puts away the one you used, or with all inside "
-                + "takes out the one put in last. Applies at once, in "
-                + "every profile.",
+                + "and the Pocket stays on screen on every display; the "
+                + "Pocket key puts away the one you used, or with all "
+                + "inside takes out the one put in last. Applies at "
+                + "once, in every profile.",
             capacityName(.one),
             capacityName(.several)
         )
-    }
-
-    /// In the shared setting row's shape (#2670), as a menu: the
-    /// recorder's footprint has no room for four segments.
-    private var edgeRow: some View {
-        ShortcutSettingRow(
-            title: SettingsCatalog.shortcuts.pocketEdge.text,
-            help: Self.edgeHelp
-        ) {
-            Picker(
-                SettingsCatalog.shortcuts.pocketEdge.text,
-                selection: shelf.pocketEdge
-            ) {
-                ForEach(AppBarEdge.allCases, id: \.self) {
-                    Text(AppBarOptions.edgeName($0)).tag($0)
-                }
-            }
-            .labelsHidden()
-            .pickerStyle(.menu)
-            .neutralMenuLabel()
-            .controlSize(.regular)
-            .fixedSize()
-            .accessibilityLabel(SettingsCatalog.shortcuts.pocketEdge.text)
-            .accessibilityValue(
-                AppBarOptions.edgeName(shelf.wrappedValue.pocketEdge)
-            )
-        }
-        .searchAnchored(SettingsCatalog.shortcuts.pocketEdge)
-    }
-
-    private var positionRow: some View {
-        let label = SettingsCatalog.shortcuts.pocketPosition.text
-        let readout = SettingsValueReadout.percent(
-            Double(shelf.wrappedValue.pocketPosition) / 100
-        )
-        return ShortcutSettingRow(title: label, help: Self.positionHelp) {
-            HStack(spacing: 6) {
-                SettingsSlider(
-                    value: Binding(
-                        get: { Double(shelf.wrappedValue.pocketPosition) },
-                        set: {
-                            shelf.wrappedValue.pocketPosition =
-                                KiwiShelf.clampPocketPosition(CGFloat($0))
-                        }
-                    ),
-                    range: 0...100,
-                    step: 1,
-                    label: label,
-                    spokenValue: Self.spokenPosition(
-                        readout,
-                        edge: shelf.wrappedValue.pocketEdge
-                    ),
-                    ends: Self.ends(shelf.wrappedValue.pocketEdge)
-                )
-                Text(readout)
-                    .monospacedDigit()
-                    .accessibilityHidden(true)
-            }
-        }
-        .searchAnchored(SettingsCatalog.shortcuts.pocketPosition)
     }
 
     /// The track's ends name where the position runs: left to
@@ -169,21 +103,5 @@ struct PocketGroup: View {
                 "%1$@ from the top",
                 readout
             )
-    }
-
-    static var edgeHelp: String {
-        L(
-            "pocket.edge.help",
-            "The screen edge the Pocket plate sits on. A bar on the "
-                + "same edge keeps it just inside."
-        )
-    }
-
-    static var positionHelp: String {
-        L(
-            "pocket.position.help",
-            "Where along its edge the Pocket plate sits, from the "
-                + "left or top end to the right or bottom end."
-        )
     }
 }
