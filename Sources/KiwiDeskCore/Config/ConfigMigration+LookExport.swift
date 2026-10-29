@@ -14,9 +14,10 @@ extension ConfigMigration {
 
     /// `data`, written at `format`, with every step above it applied.
     static func crossingLookExport(_ data: Data, from format: Int) -> Data {
-        lookExportSteps.filter { format < $0.to }.reduce(data) {
-            bytes,
-            entry in entry.step(bytes) ?? bytes
+        var bytes = data
+        for entry in lookExportSteps where format < entry.to {
+            bytes = entry.step(bytes) ?? bytes
         }
+        return bytes
     }
 }
