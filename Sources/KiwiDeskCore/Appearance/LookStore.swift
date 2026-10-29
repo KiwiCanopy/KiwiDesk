@@ -144,25 +144,25 @@ public final class LookStore {
     /// gallery download (#1740). The one reader of a look file: a
     /// direct `LookExport` decode skips the newer-format refusal.
     public static func importLook(data: Data) throws -> ShelfLook {
+        // The format is read before the body, so a newer file whose
+        // body this build cannot decode still gets the update message.
         guard
-            var file = try? JSONDecoder().decode(LookExport.self, from: data)
-        else { throw StoreError.invalidFile }
-        guard file.format <= LookDocument.currentFormat else {
-            throw StoreError.newerLookFile(file.format)
-        }
-        if file.format < LookDocument.currentFormat {
-            let crossed = ConfigMigration.crossingLookExport(
-                data,
-                from: file.format
+            let stamp = try? JSONDecoder().decode(
+                LookFileStamp.self,
+                from: data
             )
-            guard
-                let lifted = try? JSONDecoder().decode(
-                    LookExport.self,
-                    from: crossed
-                )
-            else { throw StoreError.invalidFile }
-            file = lifted
+        else { throw StoreError.invalidFile }
+        let format = stamp.format ?? 0
+        guard format <= LookDocument.currentFormat else {
+            throw StoreError.newerLookFile(format)
         }
+        let crossed = ConfigMigration.crossingLookExport(data, from: format)
+        guard
+            let file = try? JSONDecoder().decode(
+                LookExport.self,
+                from: crossed
+            )
+        else { throw StoreError.invalidFile }
         return file.credited.admitted
     }
 
@@ -217,4 +217,9 @@ public final class LookStore {
             in: migrationBackups
         )
     }
+}
+
+/// A look file's format alone, read before its body (#1740).
+private struct LookFileStamp: Decodable {
+    var format: Int?
 }

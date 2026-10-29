@@ -7,6 +7,9 @@ import Testing
 /// (#1740): a `LookDocument.currentFormat` bump is how a look-path
 /// rename reaches `looks.json`, so the file's crossing must lift to
 /// that format too, or an older file loses that styling on import.
+/// It trades what it cannot see: an entry carrying the wrong step,
+/// or a second look-path rename landing at the same format, stays
+/// green here and is review's.
 @Suite("Look export steps census")
 struct LookExportStepsCensusTests {
     @Test("the crossing lifts to the current look format")

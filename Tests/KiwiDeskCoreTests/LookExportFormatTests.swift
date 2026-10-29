@@ -105,6 +105,15 @@ struct LookExportFormatTests {
         }
     }
 
+    @Test("a newer file is refused even when its body changed shape")
+    func newerShapeRefuses() {
+        let newer = LookDocument.currentFormat + 1
+        let file = #"{"format": \#(newer), "look": ["reshaped"]}"#
+        #expect(throws: LookStore.StoreError.newerLookFile(newer)) {
+            try LookStore.importLook(data: Data(file.utf8))
+        }
+    }
+
     @Test("an older build's bare export still imports")
     func bareExportImports() throws {
         let data = try JSONEncoder().encode(["look": look()])
