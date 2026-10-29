@@ -57,6 +57,9 @@ public struct ShelfArrangement: Equatable, Sendable {
 
     public var space: Slot?
     public var app: Slot?
+    /// The pocket's pinned segment (#2678), set only by the
+    /// `pocket:` overload.
+    public var pocket: Slot?
     /// Set only while both bars need more than the edge holds.
     public var divider: Divider?
 
