@@ -62,7 +62,7 @@ extension KiwiCore {
             overflowMarks.standingDown = []
             updateOverflowMarks()
             pocketPlate.standingDown = []
-            updatePocketPlate()
+            updatePocketPlate(slots: [:])
             return
         }
         var appBarsShown: [AppBarManager.Bar] = []
@@ -72,6 +72,9 @@ extension KiwiCore {
         var hiding = HidingShelves(
             dotStarts: shelves.handles.dotStarts
         )
+        // The pocket's slot on each screen's bar edge (#2678).
+        var pocketSlots: [DisplayID: CGRect] = [:]
+        let pocketOnShelf = pocketHoldsSeveral
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.
@@ -105,6 +108,7 @@ extension KiwiCore {
                 settings: shown,
                 spaceItems: items,
                 app: app,
+                pocket: pocketOnShelf,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(
@@ -119,6 +123,11 @@ extension KiwiCore {
                 settings: shown
             )
             let plans = planned.filter(\.drawsAny)
+            if let plan = plans.first(where: { $0.arrangement.pocket != nil }),
+                let slot = plan.arrangement.pocket
+            {
+                pocketSlots[display.id] = plan.segment(slot)
+            }
             strips += plans.map {
                 ShelfStrip(
                     display: display.id,
@@ -175,7 +184,7 @@ extension KiwiCore {
         updateOverflowMarks()
         // The pocket plate wears the shelf's look too (#2678).
         pocketPlate.standingDown = standingDown
-        updatePocketPlate()
+        updatePocketPlate(slots: pocketSlots)
     }
 
     /// Drops the bar overlays of displays outside `live` — after the

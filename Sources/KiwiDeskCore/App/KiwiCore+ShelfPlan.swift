@@ -52,6 +52,7 @@ extension KiwiCore {
         settings: TilingSettings,
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
+        pocket: Bool = false,
         drawn: (ShelfEdge) -> Set<ShelfBar>
     ) -> [ShelfPlan] {
         let folded = settings.barEdges(
@@ -74,7 +75,8 @@ extension KiwiCore {
                 spaceItems: settings.spaceBarStyle.edge == edge
                     && bars.contains(.space) ? spaceItems : nil,
                 app: settings.appBarStyle.edge == edge
-                    && bars.contains(.app) ? app : nil
+                    && bars.contains(.app) ? app : nil,
+                pocket: pocket && edge == settings.kiwishelf.pocketEdge
             )
         }
     }
@@ -85,7 +87,8 @@ extension KiwiCore {
         strip: CGRect,
         settings: TilingSettings,
         spaceItems: [SpaceBarOverlay.Item]?,
-        app: AppBarContent?
+        app: AppBarContent?,
+        pocket: Bool
     ) -> ShelfPlan {
         let shelf = settings.kiwishelf
         let edge = shelfEdge.edge
@@ -130,7 +133,12 @@ extension KiwiCore {
                 spaceNeed: spaceNeed,
                 appNeed: appNeed,
                 spaceFloor: spaceFloor,
-                shelf: shelf
+                shelf: shelf,
+                // A section only beside a bar drawn this pass; an
+                // edge drawing none takes the handle (#2678).
+                pocket: pocket && (spaceNeed != nil || appNeed != nil)
+                    ? .init(need: depth, leadsEnd: shelf.pocketLeansEnd)
+                    : nil
             ),
             shelfEdge: shelfEdge,
             needs: [.space: spaceNeed, .app: appNeed].compactMapValues {

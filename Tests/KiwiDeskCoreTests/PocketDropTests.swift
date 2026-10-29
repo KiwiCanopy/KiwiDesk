@@ -54,7 +54,7 @@ struct PocketDropTests {
 
     /// The pointer on the plate's centre, or well off it.
     private func point(_ core: KiwiCore, onPlate: Bool) {
-        let frame = core.pocketPlate.shown?.frame ?? .zero
+        let frame = core.pocketPlate.specs.values.first?.frame ?? .zero
         let at =
             onPlate
             ? CGPoint(x: frame.midX, y: frame.midY)
@@ -81,12 +81,12 @@ struct PocketDropTests {
         let core = try makeCore()
         point(core, onPlate: false)
         move(core, one)
-        let shown = try #require(core.pocketPlate.shown)
+        let shown = try #require(core.pocketPlate.specs.values.first)
         #expect(shown.faded)
         #expect(shown.count == "")
         #expect(!shown.dropHovered)
         end(core, one)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
     }
 
     @Test("a resize shows no plate")
@@ -94,7 +94,7 @@ struct PocketDropTests {
         let core = try makeCore()
         point(core, onPlate: false)
         move(core, one, resize: true)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
     }
 
     @Test("a drop on the plate pockets the window, lit while over it")
@@ -104,7 +104,7 @@ struct PocketDropTests {
         move(core, one)
         point(core, onPlate: true)
         move(core, one)
-        #expect(core.pocketPlate.shown?.dropHovered == true)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
         end(core, one)
         #expect(core.state.pocketPhase(of: one) == .pocketed)
         #expect(core.pocketPlate.dragging == nil)
@@ -127,7 +127,7 @@ struct PocketDropTests {
         move(core, two)
         point(core, onPlate: true)
         move(core, two)
-        #expect(core.pocketPlate.shown?.dropHovered == false)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
         end(core, two)
         #expect(core.state.pocketPhase(of: two) == nil)
         #expect(core.state.pocketedWindows == [one])
@@ -140,11 +140,11 @@ struct PocketDropTests {
         let core = try makeCore()
         point(core, onPlate: true)
         move(core, one)
-        #expect(core.pocketPlate.shown != nil)
+        #expect(core.pocketPlate.specs.values.first != nil)
         move(core, one, resize: true)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
         move(core, one)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
         end(core, one)
         #expect(core.state.pocket.isEmpty)
         #expect(core.pocketPlate.resizing == nil)
@@ -185,11 +185,11 @@ struct PocketDropTests {
         let core = try makeCore()
         point(core, onPlate: false)
         core.handleDragMove(one, start: start, frame: start)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
         var shrunk = start.offsetBy(dx: 30, dy: 30)
         shrunk.size.width -= 50
         core.handleDragMove(one, start: start, frame: shrunk)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
         #expect(core.pocketPlate.resizing == one)
     }
 
@@ -204,7 +204,7 @@ struct PocketDropTests {
         #expect(core.state.pocket.isEmpty)
     }
 
-    @Test("a drop clears the light and the drag's screen")
+    @Test("a drop clears the light")
     func dropClearsDragState() throws {
         let core = try makeCore()
         point(core, onPlate: false)
@@ -213,7 +213,6 @@ struct PocketDropTests {
         move(core, one)
         end(core, one)
         #expect(!core.pocketPlate.dropHovered)
-        #expect(core.pocketPlate.dragDisplay == nil)
     }
 
     @Test("with one window inside the drag's plate is not faded")
@@ -222,28 +221,7 @@ struct PocketDropTests {
         core.execute("pocket", args: [.number(Double(one.raw))])
         point(core, onPlate: false)
         move(core, two)
-        #expect(core.pocketPlate.shown?.faded == false)
-    }
-
-    @Test("the plate keeps its screen while the Space moves under it")
-    func dragHoldsItsScreen() throws {
-        let core = try makeCore()
-        point(core, onPlate: false)
-        move(core, one)
-        let held = try #require(core.pocketPlate.shown?.display)
-        // The active Space moves to a screen no NSScreen backs.
-        let other = DisplayID(424_242)
-        core.state.workspaces.upsertDisplay(
-            Display(
-                id: other,
-                name: "Other",
-                frame: CGRect(x: 5000, y: 0, width: 800, height: 600)
-            )
-        )
-        let space = try #require(core.state.workspaces.activeSpace)
-        core.state.workspaces.assign(space, to: other)
-        core.updatePocketPlate()
-        #expect(core.pocketPlate.shown?.display == held)
+        #expect(core.pocketPlate.specs.values.first?.faded == false)
     }
 
     @Test("a cancelled drag hides the plate it showed")
@@ -251,9 +229,9 @@ struct PocketDropTests {
         let core = try makeCore()
         point(core, onPlate: false)
         move(core, one)
-        #expect(core.pocketPlate.shown != nil)
+        #expect(core.pocketPlate.specs.values.first != nil)
         core.cancelDrag(one)
         #expect(core.pocketPlate.dragging == nil)
-        #expect(core.pocketPlate.shown == nil)
+        #expect(core.pocketPlate.specs.values.first == nil)
     }
 }

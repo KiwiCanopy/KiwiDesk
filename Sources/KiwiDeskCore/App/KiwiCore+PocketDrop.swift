@@ -21,11 +21,6 @@ extension KiwiCore {
         }
         let hovered = pointerOverPocketPlate() && pocketNamedRefusal(id) == nil
         if pocketPlate.dragging != id || pocketPlate.dropHovered != hovered {
-            if pocketPlate.dragging != id {
-                // Held on one screen for the gesture, so the target
-                // never jumps while it is aimed at.
-                pocketPlate.dragDisplay = state.pocketHomeDisplay
-            }
             pocketPlate.dragging = id
             pocketPlate.dropHovered = hovered
             updatePocketPlate()
@@ -93,7 +88,6 @@ extension KiwiCore {
         guard pocketPlate.dragging != nil else { return }
         pocketPlate.dragging = nil
         pocketPlate.dropHovered = false
-        pocketPlate.dragDisplay = nil
         updatePocketPlate()
     }
 
@@ -103,9 +97,10 @@ extension KiwiCore {
         if pocketPlate.dragging == id { endPocketDrag() }
     }
 
-    /// Whether the pointer is over the plate as drawn (Cocoa points).
+    /// Whether the pointer is over a pocket as drawn, on any
+    /// screen (Cocoa points).
     func pointerOverPocketPlate() -> Bool {
-        guard let frame = pocketPlate.shown?.frame else { return false }
-        return frame.contains(drag.cursorLocation())
+        let cursor = drag.cursorLocation()
+        return pocketPlate.shownFrames.contains { $0.contains(cursor) }
     }
 }

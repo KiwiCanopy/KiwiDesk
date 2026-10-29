@@ -422,28 +422,30 @@ while that window is carried — the off-transition's re-home is
 and its panels order in nowhere in a `makeTestCore` twin
 (`ordersPanels`).
 
-## The pocket plate rides the bar pass (#2678)
+## The pocket rides the bar pass (#2678)
 
-**Sync the pocket plate only through `updatePocketPlate()`, at the
-tail of `updateBars()` and on the stand-down that pass took**,
-stored on the overlay as the overflow marks' is; a path that
-changes what it shows without a bar pass calls it, as an emptied
-pocket does. **What it counts, shows for and lists is the one
-`pocketPlateWindows`**, never `pocketedWindows` beside it, and its
-screen is `pocketHomeDisplay`. **The brief pocket and the plate
-read the one `pocketRegion(on:screen:)`, the plate's mark keeping
-the brief pocket's square**, so a play flies into a standing plate
-and draws no second pocket (`drawsPocket`). Its list is the bars'
-click-held peek, its panel answering `shelfBeyondBars`
+**Sync the pocket only through `updatePocketPlate()`, at the tail of
+`updateBars()` with the pass's pinned slots and stand-down**, stored
+on the overlay as the overflow marks' is; a path that changes what
+it shows without a bar pass calls it, as an emptied pocket does.
+**Where it stands on a bar edge is the one
+`ShelfArrangement.arrange(…pocket:)` slot**, read off the plan,
+never a frame of its own beside the shelf; an edge no bar draws on
+falls back to the brief pocket's `pocketRegion(on:screen:)` square.
+It stands on every display while Several windows holds it, and its
+own panel per display keeps the Hug gap passing clicks (#2497).
+**What it counts, shows for and lists is the one
+`pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
+is the bars' click-held peek, its panel answering `shelfBeyondBars`
 (`PocketPlateTests`). **As a drop target it acts through `pocket`
 naming the window and lights on the one `pocketNamedRefusal`**, the
 bar menus' Pocket Window door, so the light and the drop never
 disagree, and it takes a drop only where it is lit — a refused
 window drops as it would anywhere else, told why. It shows for a
 move alone, latched off once the gesture reads as a resize, ranks
-after the Space Bar at move and drop alike, holds one screen for the
-gesture, and every way a gesture ends — a drop, a bar relocate, a
-cancel — goes through `finishPocketGesture` (`PocketDropTests`).
+after the Space Bar at move and drop alike, and every way a gesture
+ends — a drop, a bar relocate, a cancel — goes through
+`finishPocketGesture` (`PocketDropTests`).
 
 ## The ring draws on the `.transient` panel, never a raw window
 
