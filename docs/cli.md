@@ -477,9 +477,18 @@ that way, stopping at the edge; neither takes other arguments
 
 `animations.set_on_state_change` animates a window floating,
 maximizing or going into the Pocket and out, the last as a brief
-pocket that `pocket.set_edge top|bottom|left|right` (default
-`bottom`) and `pocket.set_position 0–100` (default `82`) place
+pocket
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
+
+:::unreleased
+`kiwishelf.set_pocket_edge top|bottom|left|right` (default
+`bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
+place the pocket
+([`kiwishelf.set_pocket_edge`](lua-reference.md#kiwishelfset_pocket_edge)).
+`pocket.set_capacity one|several` (default `one`) lets it hold
+several windows, kept on every screen
+([`pocket.set_capacity`](lua-reference.md#pocketset_capacity)).
+:::
 
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).

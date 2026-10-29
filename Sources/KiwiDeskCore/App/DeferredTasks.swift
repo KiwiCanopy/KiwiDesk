@@ -104,6 +104,9 @@ final class DeferredTasks {
         /// A pocket press's focus hand-off, paid as its plate
         /// lands (#2703).
         case pocketFocus
+        /// Lets a pocket a play held out of its handle sink back
+        /// once the play ends (#2678).
+        case pocketHold
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -124,7 +127,7 @@ final class DeferredTasks {
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
-                .visionHold:
+                .visionHold, .pocketHold:
                 return false
             }
         }

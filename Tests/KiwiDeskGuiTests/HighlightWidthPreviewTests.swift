@@ -15,7 +15,11 @@ struct HighlightWidthPreviewTests {
     private static func tile(width: CGFloat) -> HomeCardBarsTile {
         var settings = TilingSettings()
         settings.kiwishelf.highlightWidth = width
-        return HomeCardBarsTile(settings: settings, scale: scale)
+        return HomeCardBarsTile(
+            settings: settings,
+            pocketStands: false,
+            scale: scale
+        )
     }
 
     @Test("Both bars' specs follow the draft width", arguments: [2.0, 5.0])

@@ -126,6 +126,11 @@ public struct KiwiShelf: Sendable, Equatable {
     public var revealTimeout: Double = 0
     /// How a revealed shelf comes onto its edge (#2497).
     public var revealStyle: RevealStyle = .slide
+    /// The screen edge the pocket sits on (#2678).
+    public var pocketEdge = AppBarEdge.bottom
+    /// Where along `pocketEdge` the pocket sits, in percent; on a
+    /// bar's edge it takes the nearer end (`pocketLeansEnd`).
+    public var pocketPosition: CGFloat = Self.defaultPocketPosition
 
     public init() {}
 

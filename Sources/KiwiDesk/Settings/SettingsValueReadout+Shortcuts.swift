@@ -29,7 +29,7 @@ extension SettingsValueReadout {
             return []
         // App-wide, written at once, never in the draft (#1741).
         case .modeCue, .desktopCue, .hyperKey,
-            .kiwiHubNavigationKeys, .modifierSides:
+            .kiwiHubNavigationKeys, .modifierSides, .pocketCapacity:
             return []
         // A layer's profiles are no config field: the checklist's own
         // rows carry them (`layerDiffRows`, #2022).
@@ -63,28 +63,6 @@ extension SettingsValueReadout {
                     label: FocusWrapWords.title,
                     old: FocusWrapWords.value(old.focusWrap),
                     new: FocusWrapWords.value(new.focusWrap)
-                )
-            ]
-        case .pocketEdge:
-            return [
-                .change(
-                    census,
-                    label: SettingsCatalog.shortcuts.pocketEdge.text,
-                    old: AppBarOptions.edgeName(
-                        old.settings.pocketStyle.edge
-                    ),
-                    new: AppBarOptions.edgeName(
-                        new.settings.pocketStyle.edge
-                    )
-                )
-            ]
-        case .pocketPosition:
-            return [
-                .change(
-                    census,
-                    label: SettingsCatalog.shortcuts.pocketPosition.text,
-                    old: pocketPercent(old),
-                    new: pocketPercent(new)
                 )
             ]
         case .modeCycle:
@@ -321,9 +299,5 @@ extension SettingsValueReadout {
             layers.map { ($0.name, $0) },
             uniquingKeysWith: { first, _ in first }
         )
-    }
-
-    private static func pocketPercent(_ config: GuiConfig) -> String {
-        percent(Double(config.settings.pocketStyle.position) / 100)
     }
 }

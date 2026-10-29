@@ -115,11 +115,12 @@ struct PaletteShelfChromeTests {
         // twin. Its button draws no text of its own — the label
         // lives inside the plate — so dropping this leaves
         // VoiceOver deriving a name from whatever the plate
-        // happens to contain.
+        // happens to contain. The shelf hands it to the shared
+        // `DashedActionTile`, which names the button with it.
         let shelf = try squashed("PaletteShelf.swift")
-        #expect(
-            shelf.contains(".accessibilityLabel(saveCurrentLabel)")
-        )
+        #expect(shelf.contains("label:saveCurrentLabel)"))
+        let dashed = try squashed("DashedActionTile.swift")
+        #expect(dashed.contains(".accessibilityLabel(label)"))
     }
 
     /// Both tiles render through `PaletteTile`, which is what
@@ -130,15 +131,19 @@ struct PaletteShelfChromeTests {
     func bothTilesShareOneFrame() throws {
         let shelf = try squashed("PaletteShelf.swift")
         #expect(shelf.contains("PaletteTile(name:palette.name,"))
-        // The add tile's own call, keyed on the argument that
-        // makes it the add tile — its name is blank, and
-        // squashing the source eats the space inside `" "`.
-        #expect(shelf.contains("dashed:true)"))
-        // Exactly the two: a third tile shape drawn inline is
-        // what this suite exists to stop.
+        // The add tile is the shared `DashedActionTile`, whose
+        // one tile is keyed on the argument that makes it the add
+        // tile — its name is blank, and squashing the source eats
+        // the space inside `" "`.
+        #expect(shelf.contains("DashedActionTile(systemImage:"))
+        let dashed = try squashed("DashedActionTile.swift")
+        #expect(dashed.contains("dashed:true)"))
+        #expect(dashed.components(separatedBy: "PaletteTile(").count == 2)
+        // Exactly the one inline: a second tile shape drawn in the
+        // shelf is what this suite exists to stop.
         #expect(
             shelf.components(separatedBy: "PaletteTile(").count
-                == 3
+                == 2
         )
         // Every way a view can draw a frame, not just the one
         // `PaletteTile` happens to use: a guard-prover run put a

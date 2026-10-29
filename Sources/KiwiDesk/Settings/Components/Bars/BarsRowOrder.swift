@@ -34,9 +34,15 @@ enum BarsRowOrder {
         .kiwishelf(.thickness)
     ]
 
+    /// KiwiShelf card, after a rule: where the pocket sits (#2678).
+    static let kiwishelfPocket: [SettingKey] = [
+        .kiwishelf(.pocketEdge),
+        .kiwishelf(.pocketPosition),
+    ]
+
     /// KiwiShelf card, every at-rest row below the Show group.
     static var kiwishelfAtRest: [SettingKey] {
-        kiwishelfPlacement + kiwishelfDepth
+        kiwishelfPlacement + kiwishelfDepth + kiwishelfPocket
     }
 
     /// KiwiShelf card, behind Position's Each bar disclosure

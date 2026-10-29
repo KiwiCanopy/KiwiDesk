@@ -15,7 +15,11 @@ struct TitleSlotPreviewTests {
     private static func appSpec(titleCap: Int) -> HomeCardBarsTile.BarSpec {
         var settings = TilingSettings()
         settings.appBarStyle.titleCap = titleCap
-        let tile = HomeCardBarsTile(settings: settings, scale: 1.8)
+        let tile = HomeCardBarsTile(
+            settings: settings,
+            pocketStands: false,
+            scale: 1.8
+        )
         return tile.appSpec(
             tile.settings.appBarLook(for: tile.settings.appBarHosts[0]),
             vertical: false
@@ -40,7 +44,11 @@ struct TitleSlotPreviewTests {
 
     @Test("The Space Bar's spec carries no title slot")
     func spaceSpecHasNone() {
-        let tile = HomeCardBarsTile(settings: TilingSettings(), scale: 1.8)
+        let tile = HomeCardBarsTile(
+            settings: TilingSettings(),
+            pocketStands: false,
+            scale: 1.8
+        )
         #expect(tile.spaceSpec(tile.settings.spaceBarLook).titleSlot == nil)
     }
 

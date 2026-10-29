@@ -81,7 +81,7 @@ extension KiwiCore {
         case "toggle_maximized":
             return toggleMaximized()
         case "pocket":
-            return pocketCommand()
+            return pocketCommand(args)
         case "toggle_pocket_window":
             return togglePocketWindowCommand()
         case "override_sticky_reach":

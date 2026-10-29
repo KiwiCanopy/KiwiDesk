@@ -226,7 +226,8 @@ public enum APIReference {
             "set_fill_color", "set_border_color",
             "set_group_badge_color", "set_group_badge_text_color",
             "set_reveal_timeout", "set_reveal_style", "set_fill_fade",
-            "set_tint_hub_and_plates",
+            "set_tint_hub_and_plates", "set_pocket_edge",
+            "set_pocket_position",
         ],
         "grid": [
             "set_type", "set_fill_empty_cells",
@@ -293,7 +294,9 @@ public enum APIReference {
         "floating": [
             "set_mark", "set_color",
         ],
-        "pocket": ["set_color", "set_edge", "set_position"],
+        "pocket": [
+            "set_capacity", "set_color",
+        ],
         "kiwivision": [
             "toggle", "current", "set_dim", "set_blur", "set_fade_duration",
             "set_fade_curve", "set_appearance",

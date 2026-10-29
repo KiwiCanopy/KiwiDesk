@@ -44,6 +44,12 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
+        // Over the pocket plate the drop is the pocket's (#2678).
+        if pocketDragMoved(id, start: start, frame: frame) {
+            dragCrossing.cancelPending(for: id)
+            dragOverlay.hideAll()
+            return
+        }
         guard
             let space = activeSpace,
             space.mode != .floating,

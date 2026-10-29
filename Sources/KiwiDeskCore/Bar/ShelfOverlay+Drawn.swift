@@ -10,6 +10,8 @@ extension ShelfOverlay {
         let sheen: CGFloat
         let sections: [Section]
         let divider: ShelfArrangement.Divider?
+        /// The pocket's view and slot (#2678).
+        let pocket: ShelfPocketPiece.Mount?
         /// The panel's Cocoa frame is flipped against it. Review's:
         /// `GeometryUtils.primaryHeight` has no seam a test can move.
         let primaryHeight: CGFloat

@@ -69,6 +69,12 @@ restated `20...80` satisfies on the day it is written.
   `SettingsColorSurfaceTests`, whose allow-list is the one copy
   of who may. Structure (is it drawn, how wide, how round) stays
   with its feature; only the tint moves.
+- **An edge chooser lists Left · Top · Bottom · Right** (owner,
+  2026-10-29, #2766) — the Dock's spatial Left · Bottom · Right
+  with Top added, never clockwise from Top: it takes `AppBarOptions.edgeOrder` or
+  `StackPositionOptions.order`, never an edge enum's `allCases`,
+  whose case order is stored and stays put
+  (`EdgeChooserOrderTests` ▸ `noCaseOrderInTheGui`).
 - **Grey, don't hide** a control with no effect in the current
   mode (#171) — keep it visible and dimmed. This covers a control
   that *would* work in another mode, so dimming says "switch that

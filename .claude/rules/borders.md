@@ -10,6 +10,8 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Pocket*.swift"
+  - "Sources/KiwiDeskCore/Borders/Pocket*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
   # The state change's ring hold is armed from App/ (#2676).
   - "Sources/KiwiDeskCore/App/KiwiCore+StateChange.swift"
@@ -420,6 +422,38 @@ while that window is carried — the off-transition's re-home is
 and its panels order in nowhere in a `makeTestCore` twin
 (`ordersPanels`).
 
+## The pocket rides the bar pass (#2678)
+
+**Sync the pocket only through `updatePocketPlate()`, inside
+`updateBars()` with the pass's pinned slots, Auto mark centres and
+stand-down, ahead of `syncShelves`**, so each shelf mounts this
+pass's pocket; a path that changes what it shows without a bar pass
+calls it, as an emptied pocket does, and a path that changes whether
+it STANDS — a drag starting or ending, a play's hold — calls
+`updateBars()`, since the slot is the plan's. **Whether it stands is
+the one `pocketStands`** — Several windows, a drag, a play — which
+the plan and the pocket both read (`PocketShelfWiringTests` ▸
+`dragStandsThePocket`). **Where it
+is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
+off `ShelfArrangement.arrange(…pocket:)`, else its handle risen —
+in an Auto edge's row of marks (`ShelfMarkPlacement.row`,
+`ShelfRevealBandTests` ▸ `pocketJoinsTheRow`),
+else at Position — never a frame of its own beside them. On a bar
+edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
+pocket is a shelf section.
+**What it counts, shows for and lists is the one
+`pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
+is the bars' click-held peek, its panel answering `shelfBeyondBars`
+(`PocketPlateTests`). **As a drop target it acts through `pocket`
+naming the window and lights on the one `pocketNamedRefusal`**, the
+bar menus' Pocket Window door, so the light and the drop never
+disagree, and it takes a drop only where it is lit — a refused
+window drops as it would anywhere else, told why. It shows for a
+move alone, latched off once the gesture reads as a resize, ranks
+after the Space Bar at move and drop alike, and every way a gesture
+ends — a drop, a bar relocate, a cancel — goes through
+`finishPocketGesture` (`PocketDropTests`).
+
 ## The ring draws on the `.transient` panel, never a raw window
 
 **A ring renders through `AppKitBorderOverlay` in both draw
@@ -760,8 +794,8 @@ argument (the dead-end bump takes one from
 ships ungated, and no suite in the tree will say so; review is
 the whole net.
 
-One thing IS held, and it is narrower than it looks: the three
-overlay files that animate today are ruled entries in
+One thing IS held, and it is narrower than it looks: the overlay
+files that animate today are ruled entries in
 `BarMotionSeamTests`' `allowed` map, which scans all of Core —
 so a FOURTH file here that starts motion reds until someone
 rules it, and a ruling whose file stops animating reds too. What

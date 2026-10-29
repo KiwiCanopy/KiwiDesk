@@ -22,7 +22,11 @@ struct BarFontSettingsTests {
         var settings = TilingSettings()
         settings.kiwishelf.fontFamily = "Menlo"
         settings.kiwishelf.fontWeight = 540
-        let tile = HomeCardBarsTile(settings: settings, scale: 1.8)
+        let tile = HomeCardBarsTile(
+            settings: settings,
+            pocketStands: false,
+            scale: 1.8
+        )
         let specs = [
             tile.spaceSpec(settings.spaceBarLook),
             tile.appSpec(

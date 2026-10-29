@@ -22,6 +22,8 @@ extension KiwiCore {
         // The whole stored group, so a field v3 adds re-draws too.
         if new.vision != old.vision, before == after { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }
+        // Several windows stands the pocket on the shelf (#2678).
+        if new.pocketCapacity != old.pocketCapacity { updateBars() }
         if new.modifierSides != old.modifierSides {
             keys.modifierSides = new.modifierSides
         }

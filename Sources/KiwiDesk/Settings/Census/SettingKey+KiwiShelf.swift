@@ -42,6 +42,8 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case fillFade = "settings.kiwishelf.fillFade"
     case tintHubAndPlates = "settings.kiwishelf.tintHubAndPlates"
     case revealStyle = "settings.kiwishelf.revealStyle"
+    case pocketEdge = "settings.kiwishelf.pocketEdge"
+    case pocketPosition = "settings.kiwishelf.pocketPosition"
     case fillColor = "settings.kiwishelf.fillColor"
     case borderColor = "settings.kiwishelf.borderColor"
     case itemColor = "settings.kiwishelf.itemColor"
@@ -60,7 +62,7 @@ extension KiwiShelfKey {
             // A master acknowledges divergence through its `?`
             // and carries no gate (`GapsBordersGates.acknowledged`).
             return .row(.bars, .kiwishelf, .atRest)
-        case .thickness, .alignment:
+        case .thickness, .alignment, .pocketEdge, .pocketPosition:
             return .row(.bars, .kiwishelf, .atRest)
         case .spaceBarEdge, .appBarEdge, .spaceBarScreenEdge,
             .appBarScreenEdge:
@@ -277,6 +279,16 @@ extension KiwiShelfKey {
             return .text(
                 "kiwishelf.icon_source.label",
                 help: "kiwishelf.icon_source.help"
+            )
+        case .pocketEdge:
+            return .text(
+                "kiwishelf.pocket_edge",
+                help: "kiwishelf.pocket_edge.help"
+            )
+        case .pocketPosition:
+            return .text(
+                "kiwishelf.pocket_position",
+                help: "kiwishelf.pocket_position.help"
             )
         case .revealStyle:
             return .text(

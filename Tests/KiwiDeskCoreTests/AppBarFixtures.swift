@@ -69,6 +69,8 @@ enum AppBarFixtures {
         shelf.revealStyle = .grow
         shelf.fillFade = 40
         shelf.tintHubAndPlates = false
+        shelf.pocketEdge = .left
+        shelf.pocketPosition = 30
         return shelf
     }
 }

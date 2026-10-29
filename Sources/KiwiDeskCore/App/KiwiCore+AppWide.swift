@@ -64,6 +64,8 @@ extension KiwiCore {
             // The sides too (#2601), applied at once: a line removed
             // reads off, and init.lua setting it again re-arms.
             appWideLedger.live.modifierSides = false
+            // And the pocket's capacity (#2678).
+            appWideLedger.live.pocketCapacity = .one
             return
         }
         guard let config = guiConfigStore.load() else { return }

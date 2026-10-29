@@ -96,6 +96,9 @@ struct VisibleBoundsRoutingTests {
         // cold-start fallback once for the main screen.
         "App/KiwiCore+Shelf.swift": 1,
         "App/KiwiCore+AppBar.swift": 1,
+        // The pocket's handle is chrome on the screen's edge where
+        // no shelf carries it (#2678), drawn on a real screen.
+        "App/KiwiCore+PocketHandle.swift": 1,
         // A bar's refusal pill sits at that bar's edge of the screen
         // where no shelf carries it (#2567).
         "App/KiwiCore+ShelfRevealCue.swift": 1,

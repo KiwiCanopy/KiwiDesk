@@ -26,6 +26,10 @@ extension BarMotionSeamTests {
     /// text rather than only its members.
     static let members: [String: [String]] = [
         "isReduced": [],
+        "pocketRiseTravel": [],
+        "playPocketRise": ["pocketRise(", "isReduced"],
+        "pocketRise": ["reduceMotion"],
+        "pocketRiseStart": [],
         "runLayout": ["duration(", "isReduced"],
         "duration": [],
         "runPlateGlide": ["shelfGlide", "expanding("],
