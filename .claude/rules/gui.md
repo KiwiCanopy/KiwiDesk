@@ -912,7 +912,14 @@ and a row marks itself kept only through `simpleKeptSpace`
 (`SimplePreviewTests` ▸ `shownSpace`, `rowsReadTheKeptSpace`). A
 docked column's width, Simple's or a page's, is answered by the
 one `SettingsView.dockedPanelWidth`, which the save pill centres
-against (`HomeSurfacingTests`). **A row's
+against (`HomeSurfacingTests`). **A change of the shown root or page records its
+motion through the one owner** — `SettingsModel`'s `destination`
+and `settingsRoot` `didSet`s — and a door that means another
+motion names it as `nav.pendingShellMotion` before the change, as
+`openFromCard` does, never by writing `nav.shellMotion` itself
+(`ShellMotionTests` ▸ `causeHasOneOwner`); a leaving branch's
+transition reads no cause, since it plays what it carried at its
+last render. **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a

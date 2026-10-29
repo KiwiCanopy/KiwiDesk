@@ -10,6 +10,7 @@ struct HomeCard: View {
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
+    @Environment(\.shellSpace) private var shellSpace
 
     var body: some View {
         Button(action: open) {
@@ -44,6 +45,16 @@ struct HomeCard: View {
                 RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
                 )
+            )
+            // The box its page grows out of, outside the card's clip
+            // so the morph is not cut to the card (#2737 ruling 13).
+            .background(
+                RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
+                    .fill(SettingsTheme.card)
+                    .shellMatched(
+                        ShellMotion.boxID(destination),
+                        in: shellSpace
+                    )
             )
             // `HoverChip`'s own duration, so the two hover
             // idioms in the tree move at one speed.
@@ -117,6 +128,10 @@ struct HomeCard: View {
                 .font(.headline)
                 .foregroundStyle(SettingsTheme.ink)
                 .lineLimit(1)
+                .shellMatched(
+                    ShellMotion.titleID(destination),
+                    in: shellSpace
+                )
             Spacer(minLength: 4)
             if let shout {
                 shoutBadge(shout)
