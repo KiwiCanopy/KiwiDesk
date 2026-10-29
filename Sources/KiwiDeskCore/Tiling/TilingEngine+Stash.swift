@@ -87,7 +87,10 @@ extension TilingEngine {
         case .bottomRight:
             x = bounds.maxX - stashPeekX
         case .bottomLeft:
-            x = bounds.minX + stashPeekX - frame.width
+            // Rounded toward the screen: an app draws a fractional
+            // width whole, and under 1 pt on screen macOS pulls
+            // the window back to its 40 pt floor (#2753).
+            x = (bounds.minX + stashPeekX - frame.width).rounded(.up)
         }
         return CGRect(
             x: x,
