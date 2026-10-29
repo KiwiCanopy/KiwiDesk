@@ -10,7 +10,6 @@ struct HomeScreen: View {
     @State private var firstRunVisible = false
     /// Current window width classification band (17a).
     @Environment(\.settingsWidth) private var band
-    @Environment(\.shellSpace) private var shellSpace
     /// Whether the cards are in their slots: false only while the
     /// switch's converge has yet to play (#2737 ruling 13).
     @State private var arrived: Bool
