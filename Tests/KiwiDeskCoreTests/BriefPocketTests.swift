@@ -98,16 +98,22 @@ struct BriefPocketTests {
         let request = try #require(core.briefPocket.playing)
         // The one door for where the pocket is (#2678 review 5)…
         #expect(request.pocket == core.pocketLanding(on: request.display))
-        // …at the stored placement: the right edge, 30 % down it.
+        // …at the stored placement: risen out of the right edge,
+        // 30 % down it.
         let visible = GeometryUtils.axVisibleFrame(of: request.screen)
+        let depth =
+            PocketHandleView.tabDepth + PocketPlateView.lift
+            + KiwiCore.pocketRiseSide(
+                thickness: core.tiler.settings.kiwishelf.thickness
+            )
         let band = KiwiCore.pocketHandleFrame(
             visible: visible,
             edge: .right,
             position: 30,
-            depth: 1
+            depth: depth
         )
-        #expect(abs(request.pocket.maxX - visible.maxX) < 1)
-        #expect(abs(request.pocket.midY - band.midY) < 1)
+        #expect(band.maxX == visible.maxX)
+        #expect(band.insetBy(dx: -0.5, dy: -0.5).contains(request.pocket))
         let settings = core.tiler.settings
         #expect(request.shelf != settings.kiwishelf)
         #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
