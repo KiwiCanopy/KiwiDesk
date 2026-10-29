@@ -205,12 +205,13 @@ struct ShelfBorderPreviewTests {
 
     /// The strips draw that edge on every plate and box they
     /// paint: the bar strip's plate and box, the shelf strip's one
-    /// plate. A site that goes back to a bare hairline reds here.
+    /// plate and its pocket piece (#2678). A site that goes back to
+    /// a bare hairline reds here.
     @Test(
         "Every preview plate and box takes the edge",
         arguments: [
             ("HomeCardPlate+BarStrip.swift", 2),
-            ("HomeCardPlate+ShelfStrip.swift", 1),
+            ("HomeCardPlate+ShelfStrip.swift", 2),
         ]
     )
     func stripsTakeTheEdge(file: String, sites: Int) throws {
