@@ -32,9 +32,37 @@ extension SizeBoundLearner {
         /// state-and-layout.md ▸ #1439 states. Consumed by the
         /// first issue.
         var baselineTrusted: Bool
+        /// Issues a settled read has answered (#2758).
+        var answeredIssues = 0
+        /// Times the issue out was sent again after an ordinary
+        /// ask overwrote it, bounded by `maxProbeResends`.
+        var resends = 0
+        /// Whether a layout frame was bent to the issue out, which
+        /// its answer then owes a placement (#2758).
+        var held = false
+        /// The layout frame the issue out was last sent or carried
+        /// for, nil where the engine named none.
+        var served: CGRect?
 
         var expected: CGFloat { anchor.answered }
         var isFloor: Bool { anchor.isFloor }
+
+        /// Whether a layout span is one the anchor already
+        /// answers — its ask or its answer — the one span a probe
+        /// may replace.
+        func standsIn(for span: CGFloat) -> Bool {
+            EffectiveSizeBound.matches(span, anchor.asked)
+                || EffectiveSizeBound.matches(span, anchor.answered)
+        }
+
+        /// Whether an issue is out with no settled answer yet.
+        var isOut: Bool { answeredIssues < issues }
+
+        /// Whether the issue out is still the last ask on its axis.
+        func isInFlight(lastAsked: CGFloat?) -> Bool {
+            guard isOut, let lastAsked else { return false }
+            return EffectiveSizeBound.matches(asked, lastAsked)
+        }
     }
 
     struct AxisProbes: Equatable {
@@ -58,6 +86,14 @@ extension SizeBoundLearner {
     struct ProbeIssue: Equatable {
         var size: CGSize
         var baseline: CGSize?
+        /// Whether an axis took a new issue this pass; false where
+        /// the frame only carries an issue already out (#2758).
+        var fresh = true
+        /// Whether the size is the last ask, carried (#2758).
+        var sameQuestion = false
+        /// Whether it is also carried for the layout frame it was
+        /// last served for: the question already out, in place.
+        var alreadyOut = false
     }
 
     /// The first issue, plus the one re-issue the "probing once
@@ -65,6 +101,12 @@ extension SizeBoundLearner {
     /// (`KiwiCore.observeSizeAnswer`) — so the re-issue waits for
     /// that candidate. A third would be the #1049 loop's shape.
     static let maxProbeIssues = 2
+
+    /// How often an issue out may be sent again after ordinary
+    /// asks overwrote it before its answer (#2758) — the bound
+    /// that keeps an issue no settled read answers from bending
+    /// the layout's frames for good.
+    static let maxProbeResends = 3
 
     /// One point past the bar the pair must clear.
     static var probeDistance: CGFloat {
@@ -150,7 +192,7 @@ extension SizeBoundLearner {
 
     /// Closes the pending probe: its anchor's ask and its own
     /// join the probed list, trimmed to the cap.
-    private static func retire(_ axis: inout AxisProbes) {
+    static func retire(_ axis: inout AxisProbes) {
         guard let probe = axis.pending else { return }
         axis.pending = nil
         axis.probed.append(probe.anchor.asked)
@@ -160,101 +202,6 @@ extension SizeBoundLearner {
                 axis.probed.count - maxProbedPerAxis
             )
         }
-    }
-
-    /// The engine's door: what to issue in place of the layout's
-    /// `target` on this pass, nil when nothing is due. Due only
-    /// where the layout's span is one the anchor already answers
-    /// — its ask or its answer — since the retile would skip that
-    /// as explained and the probe may not displace any other;
-    /// retired when the anchor is gone, when the axis
-    /// corroborated meanwhile, and once `maxProbeIssues` are out.
-    mutating func takeCorroborationProbe(
-        _ id: WindowID,
-        current: CGSize,
-        target: CGSize
-    ) -> ProbeIssue? {
-        guard var ledger = probes[id] else { return nil }
-        var size = target
-        var trusted = false
-        if let asked = takeProbeAxis(
-            &ledger,
-            slot: \.width,
-            entries: bounds[id]?.width ?? [],
-            candidates: candidates[id]?.width ?? [],
-            current: current.width,
-            target: target.width,
-            trusted: &trusted
-        ) {
-            size.width = asked
-        }
-        if let asked = takeProbeAxis(
-            &ledger,
-            slot: \.height,
-            entries: bounds[id]?.height ?? [],
-            candidates: candidates[id]?.height ?? [],
-            current: current.height,
-            target: target.height,
-            trusted: &trusted
-        ) {
-            size.height = asked
-        }
-        probes[id] = ledger
-        guard size != target else { return nil }
-        return ProbeIssue(
-            size: size,
-            baseline: trusted ? current : nil
-        )
-    }
-
-    private mutating func takeProbeAxis(
-        _ ledger: inout ProbeLedger,
-        slot: WritableKeyPath<ProbeLedger, AxisProbes>,
-        entries: [EffectiveSizeBound.Axis],
-        candidates: [EffectiveSizeBound.Axis],
-        current: CGFloat,
-        target: CGFloat,
-        trusted: inout Bool
-    ) -> CGFloat? {
-        guard var probe = ledger[keyPath: slot].pending
-        else { return nil }
-        let anchorStands = entries.contains {
-            EffectiveSizeBound.matches($0.asked, probe.anchor.asked)
-                && EffectiveSizeBound.matches(
-                    $0.answered,
-                    probe.anchor.answered
-                )
-        }
-        let answered = candidates.contains {
-            EffectiveSizeBound.matches($0.asked, probe.asked)
-        }
-        guard anchorStands,
-            !Self.corroborates(entries, floor: probe.isFloor),
-            probe.issues < Self.maxProbeIssues
-        else {
-            Self.retire(&ledger[keyPath: slot])
-            return nil
-        }
-        guard
-            EffectiveSizeBound.matches(target, probe.anchor.asked)
-                || EffectiveSizeBound.matches(
-                    target,
-                    probe.anchor.answered
-                ),
-            probe.issues == 0 || answered
-        else { return nil }
-        // A trusted baseline needs the frame to still be the
-        // anchor's answer — anything else moved it since the
-        // read that earned the trust.
-        if probe.baselineTrusted,
-            EffectiveSizeBound.matches(current, probe.expected)
-        {
-            trusted = true
-        }
-        probe.baselineTrusted = false
-        probe.issues += 1
-        ledger[keyPath: slot].pending = probe
-        return probe.asked
     }
 
     /// Whether a pending probe asked `span` on this axis — the

@@ -1419,7 +1419,17 @@ editing here:
   bounded to two, since an echo-quiet pass can confirm the
   answer it issued, and its flag clear afterwards — are
   `SizeBoundCorroborationProbeEngineTests`'; the drain after
-  that loop is belt, unguarded. The cap
+  that loop is belt, unguarded. An issue stays out until a
+  SETTLED read answers it (#2758): on an ordinary pass the take
+  door — the loop's one probe door, never a second beside it —
+  carries the issue's ask into every target that still asks a
+  span the anchor answers, the loop sends no frame for a
+  question already out, an issue an ordinary ask overwrote is
+  re-sent at most `maxProbeResends` times, and the answer to a
+  frame bent to an issue owes the placement; a new ender of an
+  issue answers it through `noteProbeAnswered`
+  (`SizeBoundProbeHoldTests`, `SizeBoundProbeInFlightTests`).
+  The cap
   consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself
