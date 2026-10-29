@@ -43,15 +43,16 @@ struct SpaceModePictureMenu<Face: View>: View {
     }
 }
 
-/// Each layout's picture for a menu item: its schematic at rest,
-/// rendered once per layout and kept.
+/// Each layout's picture for a menu item: its schematic at rest on
+/// the cards' dark plate, in the plate's palette, so it reads the
+/// same in a light or dark menu and matches the Space cards (#2777).
+/// Rendered once per layout and kept.
 @MainActor
 enum LayoutMenuPictures {
     private static var memo: [LayoutMode: NSImage] = [:]
 
     /// How many windows a picture draws: the schematic's default,
-    /// and Floating's whole scatter, whose single window reads as
-    /// an empty screen at this size.
+    /// and Floating's whole scatter.
     static func windows(for mode: LayoutMode) -> Int {
         let count = LayoutSchematic.windowCount(
             LayoutSchematic.defaultWindowCount,
@@ -65,15 +66,24 @@ enum LayoutMenuPictures {
 
     static func image(_ mode: LayoutMode) -> NSImage {
         if let hit = memo[mode] { return hit }
+        let settings = TilingSettings()
         let renderer = ImageRenderer(
             content: LayoutSchematicView(
                 mode: mode,
-                settings: TilingSettings(),
+                settings: settings,
                 windows: windows(for: mode),
                 scale: .tile
             )
             .scaleEffect(size.width / (SchematicScale.tile.width ?? 132))
             .frame(width: size.width, height: size.height)
+            .background(
+                RoundedRectangle(cornerRadius: 4)
+                    .fill(SettingsTheme.previewPlate)
+            )
+            .environment(
+                \.schematicPalette,
+                HomeCardPlate.palette(settings)
+            )
         )
         renderer.scale = 2
         let image = renderer.nsImage ?? NSImage(size: size)
