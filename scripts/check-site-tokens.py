@@ -606,13 +606,14 @@ def check_promoted_download(dist: pathlib.Path) -> None:
 
 
 def check_guide_routes(dist: pathlib.Path) -> None:
-    """Every guide route the APP links is one the site serves
-    (#1019).
+    """Every guide and gallery route the APP links is one the site
+    serves (#1019, #1740).
 
     The tour's closing card and Home's first-run banner point at
-    `/guide/`, in the reader's own language where the site has
-    that route. `SupportLinks.guideRoutes` is the app's copy of
-    which locales those are — a list in one tree naming pages in
+    `/guide/`, and Browse looks… at `/looks/`, in the reader's own
+    language where the site has that route.
+    `SupportLinks.guideRoutes` and `SupportLinks.looksRoutes` are
+    the app's copies of which locales those are — a list in one tree naming pages in
     another, which is where a hand-kept claim rots.
 
     On the SITE gate for `check_promoted_download`'s reason:
@@ -636,16 +637,18 @@ def check_guide_routes(dist: pathlib.Path) -> None:
     source = (REPO / "Sources/KiwiDesk/SupportLinks.swift").read_text(
         encoding="utf-8"
     )
-    match = re.search(
-        r"guideRoutes:\s*Set<String>\s*=\s*\[([^\]]*)\]", source
-    )
-    if match is None:
-        raise SystemExit(
-            "check-site-tokens: could not read "
-            "SupportLinks.guideRoutes — the app's guide link is "
-            "unguarded until this parser is fixed"
+    linked = {}
+    for name, set_name in (("guide", "guideRoutes"), ("looks", "looksRoutes")):
+        match = re.search(
+            set_name + r":\s*Set<String>\s*=\s*\[([^\]]*)\]", source
         )
-    routes = re.findall(r'"([^"]+)"', match.group(1))
+        if match is None:
+            raise SystemExit(
+                "check-site-tokens: could not read "
+                f"SupportLinks.{set_name} — the app's {name} link is "
+                "unguarded until this parser is fixed"
+            )
+        linked[name] = re.findall(r'"([^"]+)"', match.group(1))
 
     # The HOST first, because a wrong one fails every route at
     # once and no route check can see it: this walks `dist`, so a
@@ -671,25 +674,26 @@ def check_guide_routes(dist: pathlib.Path) -> None:
         raise SystemExit(
             f"check-site-tokens: the app links {host.group(1)}, "
             "which astro.config.mjs does not publish — every "
-            "guide link in every shipped copy is dead"
+            "guide and gallery link in every shipped copy is dead"
         )
 
     # English is the fallback every other catalog lands on, so it
     # is checked whether or not the list names it.
-    for route in ["", *routes]:
-        page = dist / route / "guide" / "index.html" if route else (
-            dist / "guide" / "index.html"
-        )
-        if not page.is_file():
-            raise SystemExit(
-                "check-site-tokens: the app links "
-                f"/{route + '/' if route else ''}guide/, which "
-                f"this build does not serve ({page.relative_to(dist)} "
-                "is missing)"
-            )
+    count = 0
+    for name, routes in linked.items():
+        for route in ["", *routes]:
+            page = dist / route / name / "index.html"
+            if not page.is_file():
+                raise SystemExit(
+                    "check-site-tokens: the app links "
+                    f"/{route + '/' if route else ''}{name}/, which "
+                    "this build does not serve "
+                    f"({page.relative_to(dist)} is missing)"
+                )
+            count += 1
     print(
-        f"guide routes: {host.group(1)} serves the app's "
-        f"{len(routes) + 1} linked page(s)"
+        f"app routes: {host.group(1)} serves the app's "
+        f"{count} linked page(s)"
     )
 
 
