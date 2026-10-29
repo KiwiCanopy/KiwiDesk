@@ -13,10 +13,10 @@ extension SettingsModel {
             reload()
         }
         guard !windowShown else { return }
-        linkedLook = nil
         destination = nil
         settingsRoot = SettingsRootPreference.read(from: preferences)
         settleSimpleTarget()
         nav.resetSurfaces()
+        linkedLook = nil
     }
 }
