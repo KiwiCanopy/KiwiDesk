@@ -185,15 +185,7 @@ extension LayoutCard {
         SegmentedPicker(
             L("layout_params.stack_position", "Stack position"),
             selection: stack.stackPosition,
-            options: [
-                (L("layout_params.position.top", "Top"), .top),
-                (L("layout_params.position.right", "Right"), .right),
-                (
-                    L("layout_params.position.bottom", "Bottom"),
-                    .bottom
-                ),
-                (L("layout_params.position.left", "Left"), .left),
-            ],
+            options: StackPositionOptions.all.map { ($0.1, $0.0) },
             help: LayoutHelp.stackPosition
         )
     }

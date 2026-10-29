@@ -41,24 +41,7 @@ extension SpaceOverrideRows {
                 \.stackPosition
             ),
             global: g.stack.stackPosition,
-            options: [
-                (.top, L("layout_params.position.top", "Top")),
-                (
-                    .right,
-                    L("layout_params.position.right", "Right")
-                ),
-                (
-                    .bottom,
-                    L(
-                        "layout_params.position.bottom",
-                        "Bottom"
-                    )
-                ),
-                (
-                    .left,
-                    L("layout_params.position.left", "Left")
-                ),
-            ],
+            options: StackPositionOptions.all,
             help: LayoutHelp.stackPosition
         )
         OverridePickerRow(
