@@ -154,4 +154,18 @@ struct ShelfPocketPanelTests {
         #expect(second.pocket.isMounted)
         second.hide()
     }
+
+    @Test("a retract plays on the pocket's content too")
+    func retractReachesThePocket() {
+        let overlay = ShelfOverlay()
+        overlay.slides = true
+        overlay.afterCommit = { _ in }
+        overlay.afterReveal = { _, _ in }
+        show(overlay, pocket: NSView())
+        overlay.endRevealMotion()
+        #expect(overlay.hide(animated: true))
+        let pocketKeys = overlay.pocket.content.layer?.animationKeys() ?? []
+        #expect(pocketKeys.contains(BarMotion.revealKey))
+        overlay.hide()
+    }
 }

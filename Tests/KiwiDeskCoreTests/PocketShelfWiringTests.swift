@@ -79,6 +79,13 @@ struct PocketShelfWiringTests {
         core.updateBars()
         #expect(core.pocketStands)
         #expect(core.pocketPlate.slots[display] != nil)
+        // The first pass the pocket stands in mounts it: the pocket
+        // syncs ahead of the shelves.
+        let overlay = try #require(
+            core.shelves.overlayForTesting(display, edge: .bottom)
+        )
+        let mounted = try #require(overlay.pocket.mount?.view)
+        #expect(mounted === core.pocketPlate.sectionMount(on: display))
         core.endPocketDrag()
         #expect(core.pocketPlate.slots[display] == nil)
     }

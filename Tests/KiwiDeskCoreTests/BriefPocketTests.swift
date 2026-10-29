@@ -96,8 +96,18 @@ struct BriefPocketTests {
         core.tiler.settings.kiwishelf.pocketPosition = 30
         #expect(core.execute("pocket").isSuccess)
         let request = try #require(core.briefPocket.playing)
-        // The one door for where the pocket is (#2678 review 5).
+        // The one door for where the pocket is (#2678 review 5)…
         #expect(request.pocket == core.pocketLanding(on: request.display))
+        // …at the stored placement: the right edge, 30 % down it.
+        let visible = GeometryUtils.axVisibleFrame(of: request.screen)
+        let band = KiwiCore.pocketHandleFrame(
+            visible: visible,
+            edge: .right,
+            position: 30,
+            depth: 1
+        )
+        #expect(abs(request.pocket.maxX - visible.maxX) < 1)
+        #expect(abs(request.pocket.midY - band.midY) < 1)
         let settings = core.tiler.settings
         #expect(request.shelf != settings.kiwishelf)
         #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
