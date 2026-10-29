@@ -76,7 +76,9 @@ extension TilingEngine {
     /// screen, `stashPeekX × stashPeekY` remaining visible, the
     /// body spilling off the parked side and the bottom. Size
     /// unchanged. `.bottomLeft` anchors the window's right edge
-    /// so the visible remnant is its top-right corner.
+    /// so the visible remnant is its top-right corner; its x is
+    /// whole, leaving at least `stashPeekX` whatever whole width
+    /// the app draws (#2753). Every park frame comes from here.
     nonisolated static func stashFrame(
         _ frame: CGRect,
         in bounds: CGRect,
@@ -289,7 +291,7 @@ extension TilingEngine {
         animation.cancel(window: window.id)
         // Only the right corner's x is width-free; the left one
         // is measured from the state width, which the size write
-        // makes true (#1508).
+        // makes true (#1508) and the whole x rounds past (#2753).
         setFrame(window.id, target, setSize: corner == .bottomLeft)
     }
 }
