@@ -9,7 +9,7 @@ import Foundation
 /// two shapes that carry `Profile`; `gui.json` carries none.
 extension ConfigMigration {
     /// The profile format that introduced `id`.
-    static let profileIDFormat = 23
+    static let profileIDProfileFormat = 23
     /// The bundle format that carries it on its inline profiles.
     static let profileIDBundleFormat = 29
 
@@ -22,7 +22,7 @@ extension ConfigMigration {
         guard
             stampBelow(
                 data,
-                file: profileIDFormat,
+                file: profileIDProfileFormat,
                 bundle: profileIDBundleFormat
             )
         else { return nil }

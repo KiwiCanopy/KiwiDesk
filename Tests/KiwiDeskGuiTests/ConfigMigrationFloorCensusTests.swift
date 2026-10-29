@@ -3,35 +3,42 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Every format floor a `ConfigMigration` step declares sits at or
-/// below its shape's `currentFormat`. A floor past it means the
-/// bump was dropped: `needsMigration` lets no file at the shipped
-/// format through, so the step never reaches the files it exists
-/// to rescue (#1020).
+/// No `ConfigMigration` floor sits past its shape's
+/// `currentFormat`: that is a dropped bump, since `needsMigration`
+/// then lets no file at the shipped format through and the step
+/// never reaches the files it exists to rescue (#1020). A backstop
+/// for one spelling of that defect only — a floor EQUAL to an
+/// un-bumped format is just as dead and passes here, which is why
+/// profiles.md owes every step a test through `migrated`.
 ///
-/// A floor's shape is the last of Bundle, Gui, Palette or Profile
-/// in its name. Known limit: a step gated by no named floor is
-/// invisible here and still owes its own test through `migrated`
-/// (profiles.md).
+/// Reads the `static let` floors of `ConfigMigration+*.swift` and
+/// the `MachineConfig.moves` table. A floor's shape is its name's
+/// suffix, so a floor misnamed for another shape is checked
+/// against that shape's format and can pass while its own bump is
+/// missing.
 @Suite("Config migration floor census")
 struct ConfigMigrationFloorCensusTests {
     private struct Floor {
         let file: String
         let name: String
-        let value: Int
+        let value: Int?
     }
 
-    /// The step floors on `main` when this census landed; the
-    /// count only grows as steps arrive.
+    /// Below this the scan is reading nothing and every floor
+    /// clause passes vacuously; removing an old step (#902) lowers
+    /// it on purpose.
     private let minimumFloors = 24
 
-    private let shapes: [(token: String, current: Int)] = [
-        ("bundle", SetupBundle.currentFormat),
-        ("gui", GuiConfig.currentFormat),
-        ("palette", PaletteDocument.currentFormat),
-        ("profile", Profile.currentFormat),
+    private let shapes: [(suffix: String, current: Int)] = [
+        ("BundleFormat", SetupBundle.currentFormat),
+        ("GuiFormat", GuiConfig.currentFormat),
+        ("PaletteFormat", PaletteDocument.currentFormat),
+        ("ProfileFormat", Profile.currentFormat),
     ]
 
+    /// Every `static let|var …Format` declaration; `value` is nil
+    /// when it is not a bare integer literal, which the census
+    /// refuses rather than skips.
     private func floors() throws -> [Floor] {
         let dir = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDeskCore/Config")
@@ -40,39 +47,32 @@ struct ConfigMigrationFloorCensusTests {
             .filter {
                 $0.hasPrefix("ConfigMigration+") && $0.hasSuffix(".swift")
             }
-        let pattern = try Regex(#"static let (\w+Format) = (\d+)"#)
+        let declaration = try Regex(
+            #"static (?:let|var) (\w+Format)\b([^\n]*)"#
+        )
+        let literal = try Regex(#"^\s*(?::\s*Int\s*)?=\s*(\d+)\s*$"#)
         return try files.sorted().flatMap { file in
-            let source = SourceScan.stripComments(
-                try String(
-                    contentsOf: dir.appendingPathComponent(file),
-                    encoding: .utf8
-                )
+            let source = try SourceScan.strippedSource(
+                at: dir.appendingPathComponent(file)
             )
-            return source.matches(of: pattern).compactMap {
+            return source.matches(of: declaration).compactMap {
                 match -> Floor? in
-                guard
-                    let name = match.output[1].substring,
-                    let digits = match.output[2].substring,
-                    let value = Int(digits)
+                guard let name = match.output[1].substring
                 else { return nil }
-                return Floor(file: file, name: String(name), value: value)
+                let rest = match.output[2].substring ?? ""
+                let digits = rest.wholeMatch(of: literal)?
+                    .output[1].substring
+                return Floor(
+                    file: file,
+                    name: String(name),
+                    value: digits.flatMap { Int($0) }
+                )
             }
         }
     }
 
-    /// The shape token occurring last in `name`, so
-    /// `profileIDBundleFormat` is a bundle floor.
     private func current(for name: String) -> Int? {
-        let lower = name.lowercased()
-        return
-            shapes
-            .compactMap { shape in
-                lower.range(of: shape.token, options: .backwards).map {
-                    (at: $0.lowerBound, current: shape.current)
-                }
-            }
-            .max { $0.at < $1.at }?
-            .current
+        shapes.first { name.hasSuffix($0.suffix) }?.current
     }
 
     @Test("no step floor sits past its shape's current format")
@@ -80,17 +80,36 @@ struct ConfigMigrationFloorCensusTests {
         let found = try floors()
         #expect(found.count >= minimumFloors, "\(found.count) floors")
         for floor in found {
+            let value = try #require(
+                floor.value,
+                "\(floor.file): \(floor.name) is not an integer literal"
+            )
             let current = try #require(
                 current(for: floor.name),
-                "\(floor.file): \(floor.name) names no shape"
+                "\(floor.file): \(floor.name) ends in no shape suffix"
             )
             #expect(
-                floor.value <= current,
+                value <= current,
                 """
-                \(floor.file): \(floor.name) = \(floor.value) is past \
+                \(floor.file): \(floor.name) = \(value) is past \
                 current format \(current); bump the shape's \
                 currentFormat
                 """
+            )
+        }
+    }
+
+    @Test("no machine-leaf move sits past the formats it strips at")
+    func movesWithinCurrentFormats() {
+        #expect(!MachineConfig.moves.isEmpty)
+        for move in MachineConfig.moves {
+            #expect(
+                move.guiFormat <= GuiConfig.currentFormat,
+                "\(move.keys): gui \(move.guiFormat)"
+            )
+            #expect(
+                move.bundleFormat <= SetupBundle.currentFormat,
+                "\(move.keys): bundle \(move.bundleFormat)"
             )
         }
     }

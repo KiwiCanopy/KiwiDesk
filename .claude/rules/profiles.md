@@ -1021,17 +1021,19 @@ shim, so an older config or backup is accepted — which is right,
 and which silently becomes a lie the first time a `GuiConfig`,
 `Profile` or `ColorPalette` field is renamed. §5 actively
 encourages that rename, so the bump is the reader's
-responsibility here. A step's named floor past its shape's
-`currentFormat` is a dropped bump, and
-`ConfigMigrationFloorCensusTests` reds it; name a new floor
-`*BundleFormat`, `*GuiFormat`, `*PaletteFormat` or
-`*ProfileFormat` so the census can read its shape. A step gated
-by no named floor is invisible to that census, so **every shape a
-step reaches owes one test through `ConfigMigration.migrated`
-from the format the last release shipped, never a direct call
-alone**: a direct call runs the step whatever the stamp says, and
-proves nothing about the bump (`ScrollDurationMigrationTests` ▸
-`bundleProfilesMigrate`).
+responsibility here. **Every shape a step reaches owes one test
+through `ConfigMigration.migrated` from the format the last
+release shipped, floor or no floor, never a direct call alone**:
+a direct call runs the step whatever the stamp says, and proves
+nothing about the bump (`ScrollDurationMigrationTests` ▸
+`bundleProfilesMigrate`). `ConfigMigrationFloorCensusTests` is
+the backstop for one spelling of a dropped bump — a floor past
+its shape's `currentFormat` — and is blind to a floor equal to
+an un-bumped one. It reads a floor's shape from its name, so a
+`static let` floor in a `ConfigMigration+` file ends in
+`BundleFormat`, `GuiFormat`, `PaletteFormat` or `ProfileFormat`
+and is an integer literal; a floor kept in a table owes that
+census a reader of the table, as `MachineConfig.moves` has.
 
 **A long-lived release branch keeps every `currentFormat` above
 `main`'s (#2265).** `needsMigration` stops at the stamp, and a
