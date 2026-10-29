@@ -1,10 +1,12 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
 /// Simple's Look line (#2737 ruling 3): the bundled looks as one
 /// sideways line, each tile its name alone, the description its
 /// hover help and VoiceOver hint, led by the look a gallery link
-/// added (#1740). No palette editing, no saving.
+/// added (#1740) and ended, while the gallery is live, by its
+/// Browse tile. No palette editing, no saving.
 struct SimpleLookCard: View {
     @ObservedObject var model: SettingsModel
 
@@ -15,6 +17,7 @@ struct SimpleLookCard: View {
                     ForEach(Self.looks(in: model), id: \.name) {
                         tile($0)
                     }
+                    if LookGallery.isLive { browseTile }
                 }
                 .padding(.vertical, 2)
             }
@@ -45,6 +48,25 @@ struct SimpleLookCard: View {
             model.applyLook(look)
         }
         .frame(width: Self.tileWidth)
+    }
+
+    /// The gallery's tile at the line's end (#1740 ▸ Browse): its
+    /// site page in the browser. Drawn only while
+    /// `LookGallery.isLive`; Simple never gets a Share door. It is
+    /// Advanced's Browse looks… setting, one census row for both.
+    private var browseTile: some View {
+        LookActionTile(
+            systemImage: "square.grid.2x2",
+            label: Self.browseLabel
+        ) {
+            NSWorkspace.shared.open(SupportLinks.looks)
+        }
+        .frame(width: Self.tileWidth)
+    }
+
+    /// The Browse tile's label.
+    @MainActor static var browseLabel: String {
+        L("simple.look.browse", "Browse looks")
     }
 
     /// The way to the rest of the looks, its link at the slot.

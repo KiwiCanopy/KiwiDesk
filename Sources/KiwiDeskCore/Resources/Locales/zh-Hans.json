@@ -2168,6 +2168,7 @@
   "simple.header.screens_one": "1 台显示器",
   "simple.kiwihub.change": "前往“%2$@”中的%1$@更改这些按键。",
   "simple.kiwihub.unbound": "未设置按键",
+  "simple.look.browse": "浏览造型",
   "simple.look.hint": "想用自己的颜色或保存造型？前往“%2$@”中的%1$@。",
   "simple.look.title": "造型",
   "simple.preview.previewing": "正在预览：%1$@",

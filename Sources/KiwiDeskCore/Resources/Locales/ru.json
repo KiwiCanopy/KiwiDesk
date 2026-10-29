@@ -2168,6 +2168,7 @@
   "simple.header.screens_one": "1 экран",
   "simple.kiwihub.change": "Изменить эти клавиши можно на странице %1$@ в разделе «%2$@».",
   "simple.kiwihub.unbound": "Клавиша не задана",
+  "simple.look.browse": "Смотреть облики",
   "simple.look.hint": "Хочешь свои цвета или сохранить облик? %1$@ — в разделе «%2$@».",
   "simple.look.title": "Облик",
   "simple.preview.previewing": "Предпросмотр: %1$@",

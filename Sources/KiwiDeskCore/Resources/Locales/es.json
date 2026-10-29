@@ -2168,6 +2168,7 @@
   "simple.header.screens_one": "1 pantalla",
   "simple.kiwihub.change": "Cambia estas teclas en %1$@, dentro de «%2$@».",
   "simple.kiwihub.unbound": "Sin tecla",
+  "simple.look.browse": "Explorar looks",
   "simple.look.hint": "¿Quieres colores propios o guardar un look? %1$@ en «%2$@».",
   "simple.look.title": "Look",
   "simple.preview.previewing": "Vista previa: %1$@",

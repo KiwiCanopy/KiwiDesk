@@ -2168,6 +2168,7 @@
   "simple.header.screens_one": "画面1台",
   "simple.kiwihub.change": "これらのキーは「%2$@」の%1$@で変更できます。",
   "simple.kiwihub.unbound": "キー未設定",
+  "simple.look.browse": "デザインを探す",
   "simple.look.hint": "独自のカラーを使いたいときやデザインを保存したいときは、「%2$@」の%1$@をご覧ください。",
   "simple.look.title": "デザイン",
   "simple.preview.previewing": "プレビュー中：%1$@",
