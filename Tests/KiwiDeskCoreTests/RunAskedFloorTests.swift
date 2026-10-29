@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-private let ids = (1...6).map { WindowID(UInt32($0)) }
+private let ids = (1...9).map { WindowID(UInt32($0)) }
 private let screen = CGRect(x: 0, y: 0, width: 1920, height: 800)
 
 @MainActor
@@ -14,13 +14,13 @@ private func isParked(_ frame: CGRect?, in rect: CGRect = screen) -> Bool {
 
 /// Usable 1900 × 780: master w1, a stack zone of w2 and w3 that
 /// fits both at the configured minimum.
-private func context() -> LayoutContext {
+private func context(minimum: CGFloat = 300) -> LayoutContext {
     var context = LayoutContext(
         bounds: screen,
         gaps: .uniform(10),
         focused: ids[1]
     )
-    context.minWindowSize = .square(300)
+    context.minWindowSize = .square(minimum)
     return context
 }
 
@@ -54,9 +54,10 @@ struct RunAskedFloorTests {
 
     private func frames(
         _ bound: EffectiveSizeBound,
+        minimum: CGFloat = 300,
         _ edit: (inout LayoutContext) -> Void = { _ in }
     ) -> [WindowID: CGRect] {
-        var ctx = context()
+        var ctx = context(minimum: minimum)
         ctx.sizeBounds = [ids[2]: bound]
         edit(&ctx)
         return StackLayout().calculateGeometry(for: tiled, in: ctx)
@@ -82,12 +83,30 @@ struct RunAskedFloorTests {
         #expect(isParked(frames[ids[2]]))
     }
 
+    /// At the margin the zone still fits whole, every member at
+    /// its share; one point past it the refusal plans the run.
     @Test("A snap's few points leave the zone fitting")
     func snapNoiseFits() throws {
         let share = try askedShare()
-        let snap = EffectiveSizeBound.corroborationDistinctness
-        let frames = frames(refusal(share, share + snap))
+        let margin = EffectiveSizeBound.refusalMargin
+        let atMargin = frames(refusal(share, share + margin))
+        #expect(abs((atMargin[ids[2]]?.height ?? 0) - share) < 0.5)
+        let past = frames(refusal(share, share + margin + 1))
+        #expect((past[ids[2]]?.height ?? 0) >= share + margin + 0.5)
+    }
+
+    /// Two refusals that disagree, the way Telegram's did: the run
+    /// plans the smaller, the one the app showed it can stand at.
+    @Test("The least refusal plans the run")
+    func leastRefusalPlans() {
+        let bound = EffectiveSizeBound(height: [
+            .init(asked: 300, answered: 550),
+            .init(asked: 400, answered: 700),
+        ])
+        // 200 + 550 + gap fits 780; 700 would not.
+        let frames = frames(bound, minimum: 200)
         #expect(!isParked(frames[ids[2]]))
+        #expect((frames[ids[2]]?.height ?? 0) >= 549.5)
     }
 
     @Test("An answer below its ask plans nothing")
@@ -124,6 +143,8 @@ struct RunAskedFloorTests {
         ctx.grid.type = .rigid
         ctx.grid.columns = 3
         ctx.grid.rows = 2
+        ctx.focused = ids[3]
+        // Nine windows: the last row is a run showing three cells.
         let members = Array(ids)
         let plain = GridLayout().calculateGeometry(for: members, in: ctx)
         let cell = try #require(plain[ids[3]]).width
@@ -134,9 +155,10 @@ struct RunAskedFloorTests {
         ]
         let frames = GridLayout().calculateGeometry(for: members, in: ctx)
         let shown = try #require(frames[ids[3]])
-        #expect(
-            isParked(shown, in: grid)
-                || shown.width >= cell + 300 - 0.5
-        )
+        #expect(!isParked(shown, in: grid))
+        #expect(shown.width >= cell + 300 - 0.5)
+        // The width refusal plans the row's run, never its height.
+        let height = try #require(plain[ids[3]]).height
+        #expect(abs(shown.height - height) < 0.5)
     }
 }

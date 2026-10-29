@@ -29,6 +29,16 @@ extension KiwiCore {
         )
     }
 
+    /// The floor a run plans a member at along `axis` — the
+    /// effective minimum raised to the window's least refusal
+    /// there (#2774), so a weight press clamps where the run
+    /// would scroll. `LayoutContext.plannedFloor`'s clamp twin.
+    func plannedMinSize(of id: WindowID, axis: String) -> Double {
+        let refused = tiler.sizeBound(for: id)?
+            .refusedFloor(horizontal: axis == "x")
+        return max(effectiveMinSize(of: id, axis: axis), refused ?? 0)
+    }
+
     /// One window's learned app-enforced minimum on `axis` (#677),
     /// 0 where none — the one reading both minimums take.
     func learnedMinSize(of id: WindowID, axis: String) -> Double {

@@ -6,8 +6,9 @@ import Foundation
 /// the shown windows alone — the span the layout divides (#933),
 /// and never a hidden window named in a refusal (#1259).
 extension KiwiCore {
-    /// The write for `focused` when its zone's run hides windows,
-    /// nil otherwise — the caller then takes the whole-zone clamp.
+    /// The write for `focused` when its zone is laid by floor and
+    /// weight — a run, hiding windows or not (#2774) — nil
+    /// otherwise, and the caller then takes the whole-zone clamp.
     /// The stack and the track member writers share it, each
     /// stating whether its other axis divides (#1258).
     func resizeInRun(
@@ -20,7 +21,7 @@ extension KiwiCore {
         guard
             let run = tiler.runCovers[space.id]?.runs.first(where: {
                 $0.shown.contains(focused)
-            })
+            }) ?? unhidingRun(of: focused, in: space)
         else { return nil }
         return resizeInRun(
             focused,
@@ -30,6 +31,34 @@ extension KiwiCore {
             space: space,
             otherAxisDivides: otherAxisDivides
         )
+    }
+
+    /// The run `focused` sits in where its zone is laid by floor
+    /// and weight but hides nothing, which no cover records — a
+    /// refusal makes such a zone (#2774).
+    private func unhidingRun(
+        of focused: WindowID,
+        in space: Space
+    ) -> RunCover.Run? {
+        guard let screen = TilingEngine.screen(for: space.id, in: state)
+        else { return nil }
+        let input = tiler.layoutInput(
+            state: state,
+            space: space,
+            screen: screen
+        )
+        guard
+            let zones = RunZone.zones(
+                mode: space.mode,
+                tiled: input.tiled,
+                in: input.context
+            ),
+            let zone = zones.first(where: {
+                $0.members.contains(focused)
+            }),
+            let run = zone.run(in: input.context)
+        else { return nil }
+        return RunCover.Run(zone: zone, run: run, in: input.context)
     }
 
     /// The write for `focused` inside `run` — the recorded one, or

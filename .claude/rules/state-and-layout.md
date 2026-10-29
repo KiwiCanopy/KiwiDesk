@@ -1449,19 +1449,24 @@ editing here:
   (scrolling re-packs, monocle and a lone scrolling window
   center, bsp and stack land a floor's residue inward through
   `SplitOverflow.placed` on the issued frames, #934). A run
-  plans each member no smaller than its least refusal along the
-  run axis — the least answer among its entries that answered
-  more than `corroborationDistinctness` above their ask
-  (`EffectiveSizeBound.refusedFloor`) — read only through
-  `LayoutContext.runFloor` and stood down on a forced pass, so
+  plans each member, along the run axis alone, no smaller than
+  its least refusal there — the least answer among its entries
+  that answered more than `refusalMargin` above their ask
+  (`EffectiveSizeBound.refusedFloor`) — read through
+  `LayoutContext.plannedFloor`, stood down on a forced pass, so
   an app that answers each span differently scrolls the run
   rather than landing inward over a neighbour (#2774,
-  `RunAskedFloorTests`). That reading plans and never emits:
+  `RunAskedFloorTests`); a press on a run member clamps there
+  too (`plannedMinSize`). That reading plans and never emits:
   keep it out of `consumedWidth/Height`, `explains` and
-  `centered`, and read a run's floor through `runFloor`, never
-  `learnedFloor` beside it. The trade: a run never asks that
-  member below the answer, so only a forced pass, an eviction or
-  the settled compliance sweep lowers it. And only
+  `centered`, and out of a shape decision (Grid's cap, a BSP
+  chain's thickness), which keeps `runFloor`'s corroborated
+  reading. The trade: a run never asks that member below the
+  answer, so only what drops the entry lowers it — a forced
+  pass, an eviction, the gesture sweep, a forget — and a
+  refusal learned under another layout plans this run too; a
+  shown member asked above its floor and refused again still
+  lands inward, by at most the spread of its answers. And only
   a SETTLED read — the retile-time gate, the
   settle probe — may clear learning on a compliance (#1049): a
   raw echo's compliance can be the transient half of an app's

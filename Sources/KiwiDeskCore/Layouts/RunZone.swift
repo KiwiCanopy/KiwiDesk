@@ -126,7 +126,7 @@ public struct RunZone: Sendable, Equatable {
         guard let slots, let first = slots.first, let last = slots.last,
             run.visible.count == slots.count,
             zip(run.visible, slots).allSatisfy({ index, slot in
-                context.runFloor(of: members[index], horizontal: !vertical)
+                context.plannedFloor(of: members[index], horizontal: !vertical)
                     <= (vertical ? slot.height : slot.width)
             })
         else { return nil }
@@ -184,7 +184,10 @@ public struct RunZone: Sendable, Equatable {
             ? context.gaps.inner.vertical : context.gaps.inner.horizontal
         let cell = cellFloor(gap: gap)
         let floors = members.map {
-            max(context.runFloor(of: $0, horizontal: !vertical), cell)
+            max(
+                context.plannedFloor(of: $0, horizontal: !vertical),
+                cell
+            )
         }
         let weights = members.map {
             max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
