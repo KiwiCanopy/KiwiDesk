@@ -44,6 +44,23 @@ struct ShelfRevealRefusalWiringTests {
         #expect(standDown.lowerBound < empty.lowerBound)
     }
 
+    @Test("A stood-down shelf refuses with its pill, before the rest")
+    func standDownIsCuedFirst() throws {
+        let body = try Self.body
+        // The command's behaviour is `ShelfRefusalPlaceTests` ▸
+        // `standDownRefusesFirst`; the layout check has no fixture.
+        let cue = try #require(
+            body.range(of: "cueRevealRefusal(.standsDown(bar)")
+        )
+        for later in [
+            ".noAppBarHere", ".alwaysShown(bar)",
+            ".shownBesideAlways(bar)",
+        ] {
+            let range = try #require(body.range(of: later))
+            #expect(cue.lowerBound < range.lowerBound, "\(later)")
+        }
+    }
+
     @Test("Each refusal reads its own sentence")
     func sentencesAreDistinct() {
         LocalizationManager.shared.select("en")
@@ -52,6 +69,7 @@ struct ShelfRevealRefusalWiringTests {
             .shownBesideAlways(.space), .shownBesideAlways(.app),
             .noAppBarHere,
             .nothingToShow(.space), .nothingToShow(.app),
+            .standsDown(.space),
         ]
         let texts = refusals.map(KiwiCore.revealRefusalText)
         #expect(texts.allSatisfy { !$0.isEmpty })
@@ -59,6 +77,11 @@ struct ShelfRevealRefusalWiringTests {
         #expect(
             KiwiCore.revealRefusalText(.nothingToShow(.app))
                 == "No windows for the App Bar here"
+        )
+        // One sentence for both bars: the stand-down hides both.
+        #expect(
+            KiwiCore.revealRefusalText(.standsDown(.app))
+                == KiwiCore.revealRefusalText(.standsDown(.space))
         )
     }
 }

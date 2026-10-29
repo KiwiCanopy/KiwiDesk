@@ -1899,6 +1899,7 @@
   "shelf.reveal_refused.space_beside": "Space Bar 在 App Bar 旁保持顯示",
   "shelf.reveal_refused.space_empty": "此處沒有可供 Space Bar 顯示的空間",
   "shelf.reveal_refused.space_set": "Space Bar 設為「%1$@」",
+  "shelf.reveal_refused.stands_down": "視窗填滿螢幕時，列會維持隱藏",
   "shortcuts.add": "加入",
   "shortcuts.add_application": "加入應用程式",
   "shortcuts.add_binding": "加入快速鍵",
