@@ -1,109 +1,13 @@
 import CoreGraphics
 
-/// The issued corroboration probe still awaiting its settled
-/// answer (#1439, #2758): the layout loop holds a frame that would
-/// only re-ask what the probe stands in for, or the probe's ask is
-/// superseded before the app answers it and the pair never forms.
-/// Pure bookkeeping, like the ledger it reads.
+/// The answer half of an issue out (#1439, #2758): a settled read
+/// of the issue's own ask answers it, which ends the take door's
+/// carrying and owes the placement of a frame bent to it. Pure
+/// bookkeeping, like the ledger it reads.
 extension SizeBoundLearner {
-    private enum InFlightAxis {
-        /// The issue in flight is the last ask and `target`
-        /// re-asks a span the anchor answers.
-        case standsIn(slot: CGRect?)
-        /// Nothing in flight here; `target` keeps the last ask.
-        case unchanged
-        /// `target` asks something else.
-        case changed
-    }
-
-    /// Whether `target` would only supersede `id`'s probe in
-    /// flight, and if so marks the probe held so its answer owes
-    /// the placement. On a probed axis `target` re-asks a span
-    /// the anchor answers, on the other the last ask's own, and
-    /// it lies in the slot the issue stood in for: at the slot's
-    /// origin, or inside it where the layout reshaped the window
-    /// (a residue centred, a park re-anchored at the answer).
-    mutating func holdForProbe(_ id: WindowID, target: CGRect) -> Bool {
-        guard let asked = lastAsks[id]?.size, let ledger = probes[id]
-        else { return false }
-        let axes = [
-            inFlight(
-                ledger.width,
-                asked: asked.width,
-                target: target.width
-            ),
-            inFlight(
-                ledger.height,
-                asked: asked.height,
-                target: target.height
-            ),
-        ]
-        var slot: CGRect?
-        var standsIn = false
-        for axis in axes {
-            switch axis {
-            case .standsIn(let issued):
-                standsIn = true
-                slot = slot ?? issued
-            case .unchanged: break
-            case .changed: return false
-            }
-        }
-        guard standsIn, let slot, Self.sameSlot(target, slot)
-        else { return false }
-        probes[id]?.width.pending?.held = true
-        probes[id]?.height.pending?.held = true
-        return true
-    }
-
-    /// `target` with each axis whose issue is in flight and still
-    /// stood in for carried at the probe's ask, nil where none is
-    /// (#2758): a target that changed on another axis or moved
-    /// slot re-asks the question still out rather than dropping
-    /// it. The carried frame becomes the issue's slot, and its
-    /// answer owes the placement.
-    mutating func carryProbe(_ id: WindowID, target: CGRect) -> CGRect? {
-        guard let asked = lastAsks[id]?.size, var ledger = probes[id]
-        else { return nil }
-        var size = target.size
-        let width = Self.carry(
-            &ledger.width,
-            asked: asked.width,
-            target: target.width,
-            into: &size.width
-        )
-        let height = Self.carry(
-            &ledger.height,
-            asked: asked.height,
-            target: target.height,
-            into: &size.height
-        )
-        guard width || height else { return nil }
-        ledger.width.pending?.slot = target
-        ledger.height.pending?.slot = target
-        probes[id] = ledger
-        return CGRect(origin: target.origin, size: size)
-    }
-
-    /// Carries one axis's issue in flight into `span` where it
-    /// still stands in for `target`, marking it held.
-    static func carry(
-        _ axis: inout AxisProbes,
-        asked: CGFloat?,
-        target: CGFloat,
-        into span: inout CGFloat
-    ) -> Bool {
-        guard let probe = axis.pending,
-            probe.isInFlight(lastAsked: asked),
-            probe.standsIn(for: target)
-        else { return false }
-        span = probe.asked
-        axis.pending?.held = true
-        return true
-    }
-
     /// A settled read of `asked`: every issue in flight on it is
-    /// answered. Returns whether one of them had a frame held.
+    /// answered. Returns whether one of them had a frame bent to
+    /// it, which the caller then owes a placement.
     mutating func noteProbeAnswered(
         _ id: WindowID,
         asked: CGSize
@@ -126,29 +30,5 @@ extension SizeBoundLearner {
         probe.held = false
         probes[id]?[keyPath: slot].pending = probe
         return held
-    }
-
-    private func inFlight(
-        _ axis: AxisProbes,
-        asked: CGFloat,
-        target: CGFloat
-    ) -> InFlightAxis {
-        if let probe = axis.pending, probe.isInFlight(lastAsked: asked) {
-            return probe.standsIn(for: target)
-                ? .standsIn(slot: probe.slot) : .changed
-        }
-        return EffectiveSizeBound.matches(asked, target)
-            ? .unchanged : .changed
-    }
-
-    private static func sameSlot(_ target: CGRect, _ slot: CGRect) -> Bool {
-        let reshaped =
-            !EffectiveSizeBound.matches(target.width, slot.width)
-            || !EffectiveSizeBound.matches(target.height, slot.height)
-        guard reshaped else {
-            return EffectiveSizeBound.matches(target.minX, slot.minX)
-                && EffectiveSizeBound.matches(target.minY, slot.minY)
-        }
-        return slot.contains(CGPoint(x: target.midX, y: target.midY))
     }
 }

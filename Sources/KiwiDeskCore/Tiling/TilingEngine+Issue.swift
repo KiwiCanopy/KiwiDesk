@@ -29,26 +29,26 @@ extension TilingEngine {
         // #1439: a due corroboration probe stands in for
         // an ask the anchor already answers and is meant
         // to be issued, so neither skip below applies. A
-        // forced pass keeps its own ask (#1055).
-        var probe =
+        // forced pass keeps its own ask (#1055), and only an
+        // ordinary pass carries an issue already out (#2758).
+        let probe =
             pass.probes
             ? nil
             : takeCorroborationProbe(
                 id,
                 current: current,
-                target: target
+                target: target,
+                keepsIssueOut: !pass.reissues
             )
-        // #2758: an issued probe is answered before the loop
-        // supersedes it, or the pair never forms: a frame that
-        // only re-asks what it stands in for is held, any other
-        // carries its ask. A re-issuing pass, a forced one
-        // included, keeps its own ask.
-        if probe == nil, !pass.reissues {
-            if boundLearner.holdForProbe(id, target: target) {
-                meter.add(\.framesSkipped)
-                return
-            }
-            probe = carryCorroborationProbe(id, target: target)
+        // #2758: the question already out is not asked again; its
+        // settled answer places the frame.
+        if let probe, !probe.fresh,
+            let asked = boundLearner.lastAsks[id]?.size,
+            EffectiveSizeBound.matches(asked.width, probe.frame.width),
+            EffectiveSizeBound.matches(asked.height, probe.frame.height)
+        {
+            meter.add(\.framesSkipped)
+            return
         }
         // Tolerance: apps clamp what we set (character
         // grids, minimum sizes), so the reported frame is

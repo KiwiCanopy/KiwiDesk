@@ -12,40 +12,36 @@ extension TilingEngine {
         /// The pre-ask size where a trusted baseline lets one
         /// settled read complete the pair, else nil.
         var baseline: CGSize?
+        /// Whether a new issue went out; false where the frame
+        /// only carries an issue already out (#2758).
+        var fresh: Bool
     }
 
-    /// The probe to issue for `id` in place of `target`, nil
-    /// when none is due; recorded for the log on the way out.
+    /// The probe to issue for `id` in place of `target`, nil when
+    /// none is due; a new issue is recorded for the log on the way
+    /// out. `keepsIssueOut` carries an issue already out (#2758).
     func takeCorroborationProbe(
         _ id: WindowID,
         current: CGRect,
-        target: CGRect
+        target: CGRect,
+        keepsIssueOut: Bool
     ) -> CorroborationProbeIssue? {
         guard
             let issue = boundLearner.takeCorroborationProbe(
                 id,
                 current: current.size,
                 target: target.size,
-                slot: target
+                keepsIssueOut: keepsIssueOut
             )
         else { return nil }
-        issuedCorroborationProbes.append((id, issue.size))
+        if issue.fresh {
+            issuedCorroborationProbes.append((id, issue.size))
+        }
         return CorroborationProbeIssue(
             frame: CGRect(origin: target.origin, size: issue.size),
-            baseline: issue.baseline
+            baseline: issue.baseline,
+            fresh: issue.fresh
         )
-    }
-
-    /// The issue in flight for `id` carried into a `target` the
-    /// hold does not cover (#2758), nil when none is; its ask is
-    /// re-sent untrusted, the pre-ask frame having moved since.
-    func carryCorroborationProbe(
-        _ id: WindowID,
-        target: CGRect
-    ) -> CorroborationProbeIssue? {
-        boundLearner.carryProbe(id, target: target).map {
-            CorroborationProbeIssue(frame: $0, baseline: nil)
-        }
     }
 
     /// Drains the pass's issued probes — `takePendingBoundPlacement`'s

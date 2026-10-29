@@ -221,9 +221,11 @@ struct StashSupersedesAskTests {
         let again = learner.takeCorroborationProbe(
             w,
             current: held,
-            target: ask
+            target: ask,
+            keepsIssueOut: true
         )
         #expect(again?.size == first.size)
+        #expect(again?.fresh == false)
         // The same issue, re-sent: no budget spent.
         let issues = learner.probes[w]?.width.pending?.issues
         #expect(issues == 1)
@@ -267,8 +269,12 @@ struct StashSupersedesAskTests {
         let again = engine.boundLearner.takeCorroborationProbe(
             w,
             current: held,
-            target: ask
+            target: ask,
+            keepsIssueOut: true
         )
-        #expect(again != nil)
+        #expect(again?.size == first.size)
+        let resends = engine.boundLearner.probes[w]?.width.pending?
+            .resends
+        #expect(resends == 1)
     }
 }

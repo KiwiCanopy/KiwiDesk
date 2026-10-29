@@ -32,13 +32,13 @@ extension SizeBoundLearner {
         /// state-and-layout.md ▸ #1439 states. Consumed by the
         /// first issue.
         var baselineTrusted: Bool
-        /// The layout frame the latest issue stood in for, nil
-        /// where the engine named none (#2758).
-        var slot: CGRect?
         /// Issues a settled read has answered (#2758).
         var answeredIssues = 0
-        /// Whether a layout frame was held for the issue in
-        /// flight, which its answer then owes a placement.
+        /// Times the issue out was sent again after an ordinary
+        /// ask overwrote it, bounded by `maxProbeResends`.
+        var resends = 0
+        /// Whether a layout frame was bent to the issue out, which
+        /// its answer then owes a placement (#2758).
         var held = false
 
         var expected: CGFloat { anchor.answered }
@@ -46,18 +46,18 @@ extension SizeBoundLearner {
 
         /// Whether a layout span is one the anchor already
         /// answers — its ask or its answer — the one span a probe
-        /// may replace and a held frame may re-ask.
+        /// may replace.
         func standsIn(for span: CGFloat) -> Bool {
             EffectiveSizeBound.matches(span, anchor.asked)
                 || EffectiveSizeBound.matches(span, anchor.answered)
         }
 
-        /// Whether an issue is out with no settled answer yet and
-        /// is still the last ask on its axis.
+        /// Whether an issue is out with no settled answer yet.
+        var isOut: Bool { answeredIssues < issues }
+
+        /// Whether the issue out is still the last ask on its axis.
         func isInFlight(lastAsked: CGFloat?) -> Bool {
-            guard answeredIssues < issues, let lastAsked else {
-                return false
-            }
+            guard isOut, let lastAsked else { return false }
             return EffectiveSizeBound.matches(asked, lastAsked)
         }
     }
@@ -83,6 +83,9 @@ extension SizeBoundLearner {
     struct ProbeIssue: Equatable {
         var size: CGSize
         var baseline: CGSize?
+        /// Whether an axis took a new issue this pass; false where
+        /// the frame only carries an issue already out (#2758).
+        var fresh = true
     }
 
     /// The first issue, plus the one re-issue the "probing once
@@ -90,6 +93,12 @@ extension SizeBoundLearner {
     /// (`KiwiCore.observeSizeAnswer`) — so the re-issue waits for
     /// that candidate. A third would be the #1049 loop's shape.
     static let maxProbeIssues = 2
+
+    /// How often an issue out may be sent again after ordinary
+    /// asks overwrote it before its answer (#2758) — the bound
+    /// that keeps an issue no settled read answers from bending
+    /// the layout's frames for good.
+    static let maxProbeResends = 3
 
     /// One point past the bar the pair must clear.
     static var probeDistance: CGFloat {
