@@ -2,11 +2,12 @@ import AppKit
 
 /// Drives the pocket on screen (#2678): while Several windows holds
 /// it, one pocket on every display, at the slot its shelf pins at a
-/// bar edge's outer end, faded while empty, a count badge from two
-/// inside; during a window drag it shows as the drop target too. A
-/// click lists the windows inside. It wears KiwiShelf's look, so it
-/// is synced at the tail of every `updateBars()` and stands down on
-/// that pass's verdict, which the overlay keeps.
+/// bar edge's outer end or as a handle on an edge no bar shows, faded
+/// while empty, a count badge from two inside; during a window drag
+/// it shows as the drop target too. A click lists the windows inside.
+/// It wears KiwiShelf's look, so it is synced at the tail of every
+/// `updateBars()` and stands down on that pass's verdict, which the
+/// overlay keeps.
 extension KiwiCore {
     /// Whether the pocket stays on screen (#2678): Several windows.
     var pocketHoldsSeveral: Bool { appWide.pocketCapacity == .several }
@@ -58,11 +59,22 @@ extension KiwiCore {
             "Pocket, windows inside: %1$d",
             inside.count
         )
+        let edge = shelf.pocketEdge
+        let rise = Self.pocketRiseSide(thickness: shelf.thickness)
         return state.workspaces.allDisplays.compactMap { display in
-            guard !pocketPlate.standingDown.contains(display.id),
-                let frame = pocketFrame(on: display.id)
+            guard !pocketPlate.standingDown.contains(display.id) else {
+                return nil
+            }
+            let slot = pocketPlate.slots[display.id]
+            // An edge no bar shows takes the handle, the pocket out of
+            // it on hover and during a drag (#2678).
+            let risen =
+                slot == nil
+                && (dragging || pocketPlate.hovered.contains(display.id))
+            guard
+                let frame = slot
+                    ?? pocketHandleFrame(on: display.id, risen: risen)
             else { return nil }
-            let edge = shelf.pocketEdge
             return PocketPlateOverlay.Spec(
                 display: display.id,
                 windows: inside,
@@ -75,28 +87,16 @@ extension KiwiCore {
                 count: count,
                 badgeLeading: edge == .right
                     || (edge.isHorizontal && shelf.pocketLeansEnd),
-                platePiece: !shelf.plateSpans,
+                // The risen pocket is the bare mark.
+                platePiece: slot != nil && !shelf.plateSpans,
                 faded: inside.isEmpty,
                 dropHovered: pocketPlate.dropHovered,
-                name: name
+                name: name,
+                handle: slot == nil ? edge : nil,
+                risen: risen,
+                risenSide: rise
             )
         }
-    }
-
-    /// Where `display`'s pocket stands (AX): its shelf's pinned
-    /// slot, else — an edge no bar draws on — the square at its
-    /// position.
-    func pocketFrame(on display: DisplayID) -> CGRect? {
-        if let slot = pocketPlate.slots[display] { return slot }
-        guard let screen = TilingEngine.screen(for: display) else {
-            return nil
-        }
-        let shelf = tiler.settings.kiwishelf
-        return BriefPocketPlan.pocketFrame(
-            in: pocketRegion(on: display, screen: screen),
-            edge: shelf.pocketEdge,
-            position: shelf.pocketPosition
-        )
     }
 
     /// Whether the pocket is on screen: always while Several windows
@@ -116,6 +116,9 @@ extension KiwiCore {
     func wirePocketPlate() {
         pocketPlate.onClick = { [weak self] view in
             self?.openPocketList(from: view)
+        }
+        pocketPlate.onHover = { [weak self] display, on in
+            self?.pocketHovered(display, on)
         }
         pocketPlate.onPanelPress = { [weak self] hit, type in
             self?.shelves.peek.pressed(on: hit, type: type)

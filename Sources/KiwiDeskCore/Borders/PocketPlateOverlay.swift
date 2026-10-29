@@ -28,6 +28,11 @@ final class PocketPlateOverlay {
         /// A dragged window over it that a drop would take.
         let dropHovered: Bool
         let name: String
+        /// The edge its handle stands on, nil for a bar's section.
+        var handle: AppBarEdge? = nil
+        /// Out of its handle (hover, drag), at this side.
+        var risen = false
+        var risenSide: CGFloat = 0
     }
 
     private struct Shown {
@@ -37,6 +42,10 @@ final class PocketPlateOverlay {
 
     private var shownViews: [DisplayID: Shown] = [:]
     private(set) var specs: [DisplayID: Spec] = [:]
+    /// The displays whose handle the pointer is on.
+    var hovered: Set<DisplayID> = []
+    /// The pointer came onto a display's pocket or left it.
+    var onHover: @MainActor (DisplayID, Bool) -> Void = { _, _ in }
     /// A click on one display's pocket, and a press on its panel.
     var onClick: @MainActor (PocketPlateView) -> Void = { _ in }
     var onPanelPress: @MainActor (NSView?, NSEvent.EventType) -> Void = {
@@ -106,6 +115,18 @@ final class PocketPlateOverlay {
                 badgeLeading: spec.badgeLeading,
                 platePiece: spec.platePiece
             )
+            shown.view.handle.wear(
+                spec.shelf,
+                markHex: spec.markHex,
+                edge: spec.handle ?? .bottom,
+                empty: spec.windows.isEmpty,
+                kiwisOut: spec.risen
+            )
+            shown.view.stand(
+                handle: spec.handle,
+                risen: spec.risen,
+                side: spec.risenSide
+            )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
             // The panel fades, never the glass (bars.md ▸ glass alpha).
@@ -174,6 +195,9 @@ final class PocketPlateOverlay {
             self?.onClick(view)
         }
         view.onPress = view.onClick
+        view.onHover = { [weak self] on in
+            self?.onHover(display, on)
+        }
         let shown = Shown(panel: panel, view: view)
         shownViews[display] = shown
         return shown

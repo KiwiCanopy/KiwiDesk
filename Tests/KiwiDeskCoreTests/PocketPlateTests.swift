@@ -135,10 +135,18 @@ struct PocketPlateTests {
     func platePieceFollowsTheFit() throws {
         let core = makeCore()
         several(core)
+        let display = try #require(
+            core.state.workspaces.allDisplays.first?.id
+        )
+        // A bar pass after each write re-reads the slots, so hand
+        // the slot in after it.
+        let slot = CGRect(x: 1000, y: 860, width: 40, height: 40)
         core.execute("kiwishelf.set_background_fit", args: [.string("full")])
-        #expect(try #require(spec(core)).platePiece == false)
+        core.updatePocketPlate(slots: [display: slot])
+        #expect(core.pocketPlate.specs[display]?.platePiece == false)
         core.execute("kiwishelf.set_background_fit", args: [.string("hug")])
-        #expect(try #require(spec(core)).platePiece)
+        core.updatePocketPlate(slots: [display: slot])
+        #expect(core.pocketPlate.specs[display]?.platePiece == true)
     }
 
     @Test("the badge faces into the screen at the right")
