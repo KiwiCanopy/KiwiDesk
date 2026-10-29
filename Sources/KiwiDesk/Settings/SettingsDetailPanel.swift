@@ -187,8 +187,11 @@ struct SettingsDetailPanel: View {
 /// Builds display rows for uncommitted draft changes.
 @MainActor
 enum SettingsDiffRowSource {
+    /// The pill's list; `foldingLook` false keeps Simple's look
+    /// rows apart, as its one row's ↺ reads them.
     static func rows(
-        for model: SettingsModel
+        for model: SettingsModel,
+        foldingLook: Bool = true
     ) -> [SettingsDiffRow] {
         let diff = SettingsDraftDiff.between(
             config: model.config,
@@ -250,7 +253,7 @@ enum SettingsDiffRowSource {
         // count of the list it opens.
         rows += driftRows(for: model)
         rows += liveRows(for: model, leaving: diff.changedSettings)
-        return rows
+        return foldingLook ? lookFolded(rows, for: model) : rows
     }
 
     /// Filters draft diff rows relevant to specific destination area

@@ -901,7 +901,11 @@ fresh open settles the edit target as they do
 (`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). A control
 Simple starts or stops drawing changes `SimpleCoverage` in the
 same change, since the save pill reads it to keep a row on Simple
-(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). Simple's
+(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). On Simple
+the pill's rows a look paints fold into its one look row in
+`SettingsDiffRowSource.lookFolded`, whose ↺ reverts the rows
+`lookMembers` reads through their own writers; Advanced never
+folds (`SimpleLookRowTests`). Simple's
 preview is its rows' sibling column, so what it shows is asked
 of the one `simplePreviewSpace` over the selection `nav` holds,
 and a row marks itself kept only through `simpleKeptSpace`

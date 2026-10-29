@@ -8,8 +8,8 @@ extension SettingsModel {
     func canRevert(_ row: SettingsDiffRow) -> Bool {
         switch row.revert {
         case .census: SettingsRevertRegister.writers[row.key] != nil
-        case .lua, .look, .ruleReach, .binding, .layerMembers,
-            .lensFields, .lensReach:
+        case .lua, .look, .lookChanges, .ruleReach, .binding,
+            .layerMembers, .lensFields, .lensReach:
             true
         case .layer(let stored, let page):
             !layerRevertBlocked(stored: stored, page: page)
@@ -47,6 +47,8 @@ extension SettingsModel {
             } else {
                 lookReachEdits[profile] = nil
             }
+        case .lookChanges:
+            SettingsDiffRowSource.lookMembers(of: self).forEach(revert)
         case .ruleReach(let app):
             revertRuleReach(of: row.key, app: app)
         case .live:
