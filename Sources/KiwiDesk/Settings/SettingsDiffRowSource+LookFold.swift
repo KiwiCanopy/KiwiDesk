@@ -33,16 +33,17 @@ extension SettingsDiffRowSource {
             .subtracting(changed(unpicked, model))
     }
 
-    /// A draft row among `keys`, or the master of a group with a
-    /// member among them.
+    /// A row among `keys`, or the master of a group with a member
+    /// among them. `keys` comes from the draft diff, and a live row
+    /// never carries a setting the draft edits (`liveRows`), so
+    /// only draft rows can match.
     static func foldsIntoLook(
         _ row: SettingsDiffRow,
         _ keys: Set<SettingKey>
     ) -> Bool {
-        row.section == .draft
-            && (keys.contains(row.key)
-                || SettingKey.summaryGroups[row.key, default: []]
-                    .contains(where: keys.contains))
+        keys.contains(row.key)
+            || SettingKey.summaryGroups[row.key, default: []]
+                .contains(where: keys.contains)
     }
 
     private static func changed(
