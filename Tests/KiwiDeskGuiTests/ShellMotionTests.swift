@@ -157,10 +157,13 @@ struct ShellMotionTests {
             )
         )
         #expect(detail.contains(".background(pageBox)"))
-        // The box stays opaque; only the content on it lags.
+        // The box stays opaque; only the content on it lags, once
+        // per card open, the debt paid where it plays.
         #expect(
             detail.contains(
-                "contentColumn.modifier(PageContentLag(lags:pageExpands))"
+                "contentColumn.modifier(PageContentLag("
+                    + "lags:pageExpands&&model.nav.contentLagPending,"
+                    + "played:{model.nav.contentLagPending=false}"
             )
         )
         let card = try source("HomeCard.swift")
