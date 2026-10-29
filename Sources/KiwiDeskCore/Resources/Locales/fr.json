@@ -883,7 +883,7 @@
   "keybinding.conflict.tooltip.shadows_apps": "Retire %1$@ à chaque app tant qu'il est assigné ici.",
   "keybinding.conflict.tooltip.side_collapse": "Également assigné dans ce calque à %1$@, qui ne diffère que par le côté d'un modificateur. Tant que les modificateurs gauche et droit ne sont pas distingués, un seul des deux se déclenchera. Activez « %2$@ » pour les séparer.",
   "keybinding.conflict.tooltip.system_dead": "Ne fonctionnera pas : macOS répond en premier à ce raccourci, pour %1$@.",
-  "keybinding.conflict.tooltip.system_off": "macOS réserve ce raccourci à %1$@, une fonction actuellement désactivée.",
+  "keybinding.conflict.tooltip.system_off": "À noter : le raccourci %1$@ est désactivé dans Réglages Système. Si vous le réactivez, macOS s'approprie cette combinaison de touches et votre raccourci KiwiDesk cesse de fonctionner.",
   "keybinding.conflict.tooltip.unrecognized": "Ce n'est pas un raccourci reconnu.",
   "keybinding.conflict.unrecognized": "Le raccourci de \"%1$@\" n'est pas un raccourci reconnu.",
   "keybinding.desktop_away.axhint": "Non connecté pour le moment.",
