@@ -636,16 +636,19 @@ def check_guide_routes(dist: pathlib.Path) -> None:
     source = (REPO / "Sources/KiwiDesk/SupportLinks.swift").read_text(
         encoding="utf-8"
     )
-    match = re.search(
-        r"guideRoutes:\s*Set<String>\s*=\s*\[([^\]]*)\]", source
-    )
-    if match is None:
-        raise SystemExit(
-            "check-site-tokens: could not read "
-            "SupportLinks.guideRoutes — the app's guide link is "
-            "unguarded until this parser is fixed"
+    linked = {}
+    # `/looks` (#1740) is routed the same way as `/guide/`.
+    for name, set_name in (("guide", "guideRoutes"), ("looks", "looksRoutes")):
+        match = re.search(
+            set_name + r":\s*Set<String>\s*=\s*\[([^\]]*)\]", source
         )
-    routes = re.findall(r'"([^"]+)"', match.group(1))
+        if match is None:
+            raise SystemExit(
+                "check-site-tokens: could not read "
+                f"SupportLinks.{set_name} — the app's {name} link is "
+                "unguarded until this parser is fixed"
+            )
+        linked[name] = re.findall(r'"([^"]+)"', match.group(1))
 
     # The HOST first, because a wrong one fails every route at
     # once and no route check can see it: this walks `dist`, so a
@@ -676,20 +679,21 @@ def check_guide_routes(dist: pathlib.Path) -> None:
 
     # English is the fallback every other catalog lands on, so it
     # is checked whether or not the list names it.
-    for route in ["", *routes]:
-        page = dist / route / "guide" / "index.html" if route else (
-            dist / "guide" / "index.html"
-        )
-        if not page.is_file():
-            raise SystemExit(
-                "check-site-tokens: the app links "
-                f"/{route + '/' if route else ''}guide/, which "
-                f"this build does not serve ({page.relative_to(dist)} "
-                "is missing)"
-            )
+    count = 0
+    for name, routes in linked.items():
+        for route in ["", *routes]:
+            page = dist / route / name / "index.html"
+            if not page.is_file():
+                raise SystemExit(
+                    "check-site-tokens: the app links "
+                    f"/{route + '/' if route else ''}{name}/, which "
+                    "this build does not serve "
+                    f"({page.relative_to(dist)} is missing)"
+                )
+            count += 1
     print(
         f"guide routes: {host.group(1)} serves the app's "
-        f"{len(routes) + 1} linked page(s)"
+        f"{count} linked page(s)"
     )
 
 

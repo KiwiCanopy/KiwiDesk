@@ -1346,6 +1346,7 @@
   "layout_picker.layout_defaults": "%1$@…",
   "looks.ai.pointer": "Your AI can make you a new look — even one matched to a screenshot of your wallpaper. Start on the %1$@ page.",
   "looks.applied_other_colors": "Applied, with other colors",
+  "looks.browse": "Browse looks…",
   "looks.bundled": "Bundled",
   "looks.byline": "by %1$@",
   "looks.caption": "Apply a bundled or saved look — its colors, where the bars sit, KiwiShelf's shape, font and indicators, the focus border's shape and sheen, and the window gaps. A one-time paint, not a live link; what the bars show is never part of a look. Its gaps move your windows once you save. A look you saved also brings its animations; a bundled one leaves yours as they are.",

@@ -71,6 +71,24 @@ struct GuideLinkRouteTests {
         }
     }
 
+    /// The gallery's `/looks` (#1740 ▸ Browse) narrows the same
+    /// way, against its own list.
+    @Test("the gallery link narrows like the guide")
+    func looksLinkNarrows() {
+        let english = SupportLinks.looks(for: nil)
+        #expect(english.absoluteString.hasSuffix("/looks/"))
+        #expect(SupportLinks.looks(for: "pt-BR") == english)
+        #expect(!SupportLinks.looksRoutes.isEmpty)
+        let shipped = Set(LocalizationManager.shared.available)
+        for locale in SupportLinks.looksRoutes {
+            #expect(shipped.contains(locale))
+            #expect(
+                SupportLinks.looks(for: locale).absoluteString
+                    .hasSuffix("/\(locale)/looks/")
+            )
+        }
+    }
+
     /// A route claimed for a locale the app cannot be in is dead
     /// code that reads as coverage — and it is the shape a
     /// widening typo takes. This is the app's own fact, so it is

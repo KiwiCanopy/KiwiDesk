@@ -73,6 +73,29 @@ enum SupportLinks {
     /// Localized site routes supported on web.
     static let guideRoutes: Set<String> = ["de", "ja"]
 
+    /// The looks gallery's site page (#1740 ▸ Browse), routed by
+    /// locale like `guide`.
+    @MainActor static var looks: URL {
+        looks(for: localizedRoute)
+    }
+
+    /// Resolves the gallery URL for route (`check_guide_routes`).
+    static func looks(for route: String?) -> URL {
+        guard let route, looksRoutes.contains(route) else {
+            return site.appendingPathComponent(
+                "looks",
+                isDirectory: true
+            )
+        }
+        return
+            site
+            .appendingPathComponent(route, isDirectory: true)
+            .appendingPathComponent("looks", isDirectory: true)
+    }
+
+    /// Localized `/looks` routes the site serves.
+    static let looksRoutes: Set<String> = ["de", "ja"]
+
     private static let site = URL(
         string: "https://kiwidesk.kiwicanopy.com/"
     )!

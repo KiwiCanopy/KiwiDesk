@@ -1346,6 +1346,7 @@
   "layout_picker.layout_defaults": "%1$@…",
   "looks.ai.pointer": "Votre IA peut vous créer un nouveau look — même un look assorti à une capture d'écran de votre fond d'écran. Commencez sur la page %1$@.",
   "looks.applied_other_colors": "Appliqué, avec des couleurs différentes",
+  "looks.browse": "Parcourir les looks…",
   "looks.bundled": "Looks intégrés",
   "looks.byline": "par %1$@",
   "looks.caption": "Appliquez un look intégré ou enregistré — ses couleurs, l'emplacement des barres, la forme, la police et les indicateurs de KiwiShelf, la forme et le reflet de la bordure de focus, et les écarts entre les fenêtres. Une application unique, pas un lien en direct ; ce qu'affichent les barres ne fait jamais partie d'un look. Ses écarts déplacent vos fenêtres dès que vous enregistrez. Un look que vous avez enregistré apporte aussi ses animations ; un look intégré laisse les vôtres telles quelles.",
