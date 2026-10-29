@@ -416,7 +416,10 @@ twice, was a question the user answered twice. The argument is
   and Desktop cues — stands down through the same verdict**,
   never a part of it such as `showsPresentation`, which a
   new stand-down case would leave behind (#2348,
-  `ShelfStandDownSeamTests` ▸ `cuesAskTheStandDown`).
+  `ShelfStandDownSeamTests` ▸ `cuesAskTheStandDown`). A bar's
+  show/hide refusal is no such cue: it answers the stand-down
+  with its own pill, ahead of every other reason (#2775,
+  `ShelfRefusalPlaceTests` ▸ `standDownRefusesFirst`).
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:

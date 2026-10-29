@@ -49,11 +49,10 @@ struct ShelfRefusalPlaceTests {
         #expect(spaceBar.strip.height > 0)
     }
 
-    /// The empty pill asks the bar's own content and stands down with
-    /// its shelf: empty and shown → the pill; a window → none; the
-    /// shelf stood down for what is in front → the stand-down's.
+    /// The empty pill asks the bar's own content: empty → the pill;
+    /// a window → none.
     @Test(
-        "The empty refusal asks the bar's content and the stand-down",
+        "The empty refusal asks the bar's content",
         .enabled(if: NSScreen.main != nil)
     )
     func emptyRefusalAsksTheContent() throws {
@@ -72,13 +71,6 @@ struct ShelfRefusalPlaceTests {
         #expect(
             core.emptyRefusal(.app, on: display.id) == .nothingToShow(.app)
         )
-        // Stood down (not a user Space): the stand-down's own pill,
-        // whatever the content (#2775).
-        NativeSpaces.currentSpaceIsUserOverride = { _ in false }
-        #expect(
-            core.emptyRefusal(.app, on: display.id) == .standsDown(.app)
-        )
-        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         core.state.apply(
             .windowCreated(
                 ManagedWindow(

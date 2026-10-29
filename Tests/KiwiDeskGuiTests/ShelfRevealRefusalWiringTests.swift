@@ -52,7 +52,10 @@ struct ShelfRevealRefusalWiringTests {
         let cue = try #require(
             body.range(of: "cueRevealRefusal(.standsDown(bar)")
         )
-        for later in [".noAppBarHere", ".alwaysShown(bar)"] {
+        for later in [
+            ".noAppBarHere", ".alwaysShown(bar)",
+            ".shownBesideAlways(bar)",
+        ] {
             let range = try #require(body.range(of: later))
             #expect(cue.lowerBound < range.lowerBound, "\(later)")
         }

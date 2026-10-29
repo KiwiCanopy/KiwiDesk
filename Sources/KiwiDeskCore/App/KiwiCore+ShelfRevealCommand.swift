@@ -61,16 +61,12 @@ extension KiwiCore {
     }
 
     /// The pill a show/hide with no reveal target owes: nothing to
-    /// show where the bar's own content is empty (#2567), and the
-    /// stand-down's where the shelf stands down for what is in
-    /// front, which is no empty bar (#2775).
+    /// show where the bar's own content is empty (#2567). A shelf
+    /// stood down is answered before this is asked (#2775).
     func emptyRefusal(
         _ bar: ShelfBar,
         on display: DisplayID
     ) -> RevealRefusal? {
-        guard !shelfStandsDown(on: display) else {
-            return .standsDown(bar)
-        }
         let settings = tiler.settings
         let empty =
             bar == .app
