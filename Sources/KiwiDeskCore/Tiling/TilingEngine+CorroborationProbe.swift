@@ -35,6 +35,20 @@ extension TilingEngine {
         )
     }
 
+    /// Whether `target` would only supersede `id`'s issued,
+    /// unanswered probe (#2758): the learner's span verdict, in
+    /// the same slot — `target`'s centre inside `placed`, where
+    /// the probe was sent or the window holds, which a residue's
+    /// centring and a park re-anchored at another size keep.
+    func holdsForProbe(
+        _ id: WindowID,
+        placed: CGRect,
+        target: CGRect
+    ) -> Bool {
+        placed.contains(CGPoint(x: target.midX, y: target.midY))
+            && boundLearner.probeInFlight(id, target: target.size)
+    }
+
     /// Drains the pass's issued probes — `takePendingBoundPlacement`'s
     /// shape, read by `KiwiCore.retile` after the pass.
     func takeIssuedCorroborationProbes() -> [(WindowID, CGSize)] {

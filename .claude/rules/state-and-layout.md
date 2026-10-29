@@ -1418,7 +1418,11 @@ editing here:
   bounded to two, since an echo-quiet pass can confirm the
   answer it issued, and its flag clear afterwards — are
   `SizeBoundCorroborationProbeEngineTests`'; the drain after
-  that loop is belt, unguarded. The cap
+  that loop is belt, unguarded. An issued probe is answered
+  before the loop supersedes it: a frame re-asking only the
+  anchor's spans, in the slot the probe went to, is skipped
+  until the probe's answer lands, on an ordinary pass only
+  (#2758, `SizeBoundProbeInFlightTests`). The cap
   consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself

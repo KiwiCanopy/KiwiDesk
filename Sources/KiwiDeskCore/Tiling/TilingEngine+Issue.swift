@@ -54,6 +54,15 @@ extension TilingEngine {
         // rule: an unanswered ask that left the corner outranks
         // the state frame, here and in the tolerance skip below
         // (#1508, #1912, #2235).
+        // #2758: an issued probe is answered before a frame that
+        // only re-asks what it stands in for, or the pair never
+        // forms. A forced or re-issuing pass keeps its own ask.
+        if probe == nil, !pass.probes, !pass.reissues,
+            holdsForProbe(id, placed: sent ?? current, target: target)
+        {
+            meter.add(\.framesSkipped)
+            return
+        }
         let parks = looksStashed(target)
         let leftThePark =
             parks && sent.map { !Self.parked($0, at: target) } == true
