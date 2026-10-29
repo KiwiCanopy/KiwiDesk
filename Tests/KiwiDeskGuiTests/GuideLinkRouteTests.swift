@@ -39,7 +39,9 @@ struct GuideLinkRouteTests {
                 ),
             encoding: .utf8
         )
-        #expect(declared.contains("guideRoutes"))
+        for name in ["guideRoutes", "looksRoutes"] {
+            #expect(declared.contains("static let \(name): Set<String> = ["))
+        }
     }
 
     /// The app ships eleven catalogs and the site three locales,
@@ -124,7 +126,11 @@ struct GuideLinkRouteTests {
         #expect(
             SupportLinks.guide == SupportLinks.guide(for: "de")
         )
+        #expect(
+            SupportLinks.looks == SupportLinks.looks(for: "de")
+        )
         LocalizationManager.shared.select("es")
         #expect(SupportLinks.guide == SupportLinks.guide(for: nil))
+        #expect(SupportLinks.looks == SupportLinks.looks(for: nil))
     }
 }

@@ -606,13 +606,14 @@ def check_promoted_download(dist: pathlib.Path) -> None:
 
 
 def check_guide_routes(dist: pathlib.Path) -> None:
-    """Every guide route the APP links is one the site serves
-    (#1019).
+    """Every guide and gallery route the APP links is one the site
+    serves (#1019, #1740).
 
     The tour's closing card and Home's first-run banner point at
-    `/guide/`, in the reader's own language where the site has
-    that route. `SupportLinks.guideRoutes` is the app's copy of
-    which locales those are — a list in one tree naming pages in
+    `/guide/`, and Browse looks… at `/looks/`, in the reader's own
+    language where the site has that route.
+    `SupportLinks.guideRoutes` and `SupportLinks.looksRoutes` are
+    the app's copies of which locales those are — a list in one tree naming pages in
     another, which is where a hand-kept claim rots.
 
     On the SITE gate for `check_promoted_download`'s reason:
@@ -637,7 +638,6 @@ def check_guide_routes(dist: pathlib.Path) -> None:
         encoding="utf-8"
     )
     linked = {}
-    # `/looks` (#1740) is routed the same way as `/guide/`.
     for name, set_name in (("guide", "guideRoutes"), ("looks", "looksRoutes")):
         match = re.search(
             set_name + r":\s*Set<String>\s*=\s*\[([^\]]*)\]", source
@@ -674,7 +674,7 @@ def check_guide_routes(dist: pathlib.Path) -> None:
         raise SystemExit(
             f"check-site-tokens: the app links {host.group(1)}, "
             "which astro.config.mjs does not publish — every "
-            "guide link in every shipped copy is dead"
+            "guide and gallery link in every shipped copy is dead"
         )
 
     # English is the fallback every other catalog lands on, so it
@@ -692,7 +692,7 @@ def check_guide_routes(dist: pathlib.Path) -> None:
                 )
             count += 1
     print(
-        f"guide routes: {host.group(1)} serves the app's "
+        f"app routes: {host.group(1)} serves the app's "
         f"{count} linked page(s)"
     )
 
