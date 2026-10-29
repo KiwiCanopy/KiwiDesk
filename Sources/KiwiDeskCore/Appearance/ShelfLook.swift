@@ -21,19 +21,24 @@ public struct ShelfLook: Sendable, Equatable, Codable {
     public var author: String?
     /// The look it started from, while the credit rule keeps it.
     public var basedOn: LookCredit?
+    /// The gallery id it was installed under (#1740), which a look
+    /// started from it credits; nil for any other look.
+    public var galleryID: String?
 
     public init(
         name: String,
         style: [String: JSONValue],
         colors: [String: String],
         author: String? = nil,
-        basedOn: LookCredit? = nil
+        basedOn: LookCredit? = nil,
+        galleryID: String? = nil
     ) {
         self.name = name
         self.style = style
         self.colors = colors
         self.author = author
         self.basedOn = basedOn
+        self.galleryID = galleryID
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -42,6 +47,7 @@ public struct ShelfLook: Sendable, Equatable, Codable {
         case colors
         case author
         case basedOn = "based_on"
+        case galleryID = "gallery_id"
     }
 }
 
@@ -55,7 +61,8 @@ extension ShelfLook {
             style: style.filter { styling.contains($0.key) },
             colors: colors,
             author: author,
-            basedOn: basedOn
+            basedOn: basedOn,
+            galleryID: galleryID
         )
     }
 
@@ -76,16 +83,19 @@ extension ShelfLook {
             style: self.style.filter { style.contains($0.key) },
             colors: ColorPalette(name: "", colors: known).paintedColors,
             author: author,
-            basedOn: basedOn
+            basedOn: basedOn,
+            galleryID: galleryID
         )
     }
 
     /// This look with its credit left out: the body an exported
-    /// file carries under `look`, its credit beside it.
+    /// file carries under `look`, its credit beside it. The gallery
+    /// id stays behind: it is this Mac's record of the install.
     var uncredited: ShelfLook {
         var body = self
         body.author = nil
         body.basedOn = nil
+        body.galleryID = nil
         return body
     }
 }

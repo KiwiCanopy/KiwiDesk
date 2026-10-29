@@ -85,7 +85,7 @@ const de: LegalStrings = {
   },
   datenschutz: {
     title: "Datenschutzerklärung",
-    updated: "28. Oktober 2026",
+    updated: "29. Oktober 2026",
     sections: [
       {
         title: "1. Datenschutz auf einen Blick",
@@ -194,7 +194,9 @@ const de: LegalStrings = {
           `liegen, im öffentlichen Repository KiwiCanopy/KiwiDesk-Looks. Diese Website liest sie ` +
           `beim Erstellen der Seiten aus; dein Browser stellt für die Galerie also keine Anfrage ` +
           `an GitHub. Erst „Herunterladen“, „Like“ und „Diesen Look melden“ öffnen GitHub, wenn ` +
-          `du sie anklickst.</p>`,
+          `du sie anklickst. „Zu KiwiDesk hinzufügen“ öffnet die KiwiDesk-App auf deinem Mac; sie ` +
+          `lädt dann genau diesen einen Look von GitHub herunter und sendet dabei nichts außer ` +
+          `der Anfrage nach dieser Datei.</p>`,
       },
       {
         title: "8. SSL-/TLS-Verschlüsselung",
@@ -343,7 +345,7 @@ const en: LegalStrings = {
   },
   datenschutz: {
     title: "Privacy Policy",
-    updated: "28 October 2026",
+    updated: "29 October 2026",
     sections: [
       {
         title: "1. Privacy at a glance",
@@ -442,7 +444,9 @@ const en: LegalStrings = {
           `<p>The looks gallery (/looks/) shows looks whose data, files and likes live on GitHub, ` +
           `in the public repository KiwiCanopy/KiwiDesk-Looks. This website reads them when it is ` +
           `built, so your browser sends no request to GitHub to show the gallery. Only Download, ` +
-          `Like and Report this look open GitHub, once you click them.</p>`,
+          `Like and Report this look open GitHub, once you click them. Add to KiwiDesk opens the ` +
+          `KiwiDesk app on your Mac, which then downloads that one look from GitHub and sends ` +
+          `nothing but the request for that file.</p>`,
       },
       {
         title: "8. SSL/TLS encryption",
@@ -583,7 +587,7 @@ const ja: LegalStrings = {
   },
   datenschutz: {
     title: "プライバシーポリシー",
-    updated: "2026年10月28日",
+    updated: "2026年10月29日",
     sections: [
       {
         title: "1. 概要",
@@ -672,7 +676,8 @@ const ja: LegalStrings = {
           `公開リポジトリ KiwiCanopy/KiwiDesk-Looks にあります。本ウェブサイトはサイトの構築時にそれらを ` +
           `読み込むため、ギャラリーを表示するためにあなたのブラウザが GitHub へリクエストを送ることは ` +
           `ありません。「ダウンロード」「いいね」「このデザインを報告」は、クリックしたときにだけ GitHub ` +
-          `を開きます。</p>`,
+          `を開きます。「KiwiDesk に追加」は Mac 上の KiwiDesk アプリを開き、アプリがそのデザイン 1 件だけを ` +
+          `GitHub からダウンロードします。その際に送るのは、そのファイルのリクエストだけです。</p>`,
       },
       {
         title: "8. SSL／TLS 暗号化",

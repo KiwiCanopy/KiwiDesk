@@ -17,6 +17,18 @@ extension SettingsModel {
         look.pick(into: &config.settings)
     }
 
+    /// Wears a look a gallery link added as an unsaved change, its
+    /// tile marked (#1740 ▸ Step 3 decisions): on Simple's Look line
+    /// while Simple shows, else on the Looks page. Call after the
+    /// window is shown, whose fresh open reloads the draft.
+    func wearLinkedLook(_ look: ShelfLook) {
+        refreshLooks()
+        linkedLook = look.name
+        applyLook(look)
+        guard !showsSimple else { return }
+        land(on: SettingsAnchor(destination: .looks))
+    }
+
     /// Paints `colors` onto the draft — the "Keep previous colors"
     /// tick's one write — and answers whether it left the draft
     /// clean, `isDirty` being recomputed on the write (#1752).
