@@ -1015,13 +1015,25 @@ change too, and a shared look missing it owes
 and its Revert carry `LookKeys.styling` alone**, never motion
 (`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
 
-Nothing can guard the format bumps above, and they are the
-obligation the format integers rest on: `<=` is decoder tolerance rather than a
-compatibility shim, so an older config or backup is accepted — which is
-right, and which silently becomes a lie the first time a
-`GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
-actively encourages that rename, so the bump is the reader's
-responsibility here.
+The format bumps above are the obligation the format integers
+rest on: `<=` is decoder tolerance rather than a compatibility
+shim, so an older config or backup is accepted — which is right,
+and which silently becomes a lie the first time a `GuiConfig`,
+`Profile` or `ColorPalette` field is renamed. §5 actively
+encourages that rename, so the bump is the reader's
+responsibility here. **Every shape a step reaches owes one test
+through `ConfigMigration.migrated` from the format the last
+release shipped, floor or no floor, never a direct call alone**:
+a direct call runs the step whatever the stamp says, and proves
+nothing about the bump (`ScrollDurationMigrationTests` ▸
+`bundleProfilesMigrate`). `ConfigMigrationFloorCensusTests` is
+the backstop for one spelling of a dropped bump — a floor past
+its shape's `currentFormat` — and is blind to a floor equal to
+an un-bumped one. It reads a floor's shape from its name, so a
+`static let` floor in a `ConfigMigration+` file ends in
+`BundleFormat`, `GuiFormat`, `PaletteFormat` or `ProfileFormat`
+and is an integer literal; a floor kept in a table owes that
+census a reader of the table, as `MachineConfig.moves` has.
 
 **A long-lived release branch keeps every `currentFormat` above
 `main`'s (#2265).** `needsMigration` stops at the stamp, and a

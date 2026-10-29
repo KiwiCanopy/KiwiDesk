@@ -11,7 +11,7 @@ import Foundation
 /// two shapes that carry `Profile`; `gui.json` carries none.
 extension ConfigMigration {
     /// The profile format that made an absent `look` mean shared.
-    static let profileLookFormat = 13
+    static let profileLookProfileFormat = 13
     /// The bundle format that carries it on its inline profiles.
     static let profileLookBundleFormat = 18
 
@@ -25,7 +25,7 @@ extension ConfigMigration {
         guard
             stampBelow(
                 data,
-                file: profileLookFormat,
+                file: profileLookProfileFormat,
                 bundle: profileLookBundleFormat
             )
         else { return nil }
