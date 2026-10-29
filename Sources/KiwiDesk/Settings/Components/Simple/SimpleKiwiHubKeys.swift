@@ -94,7 +94,7 @@ struct SimpleKiwiHubKeys: View {
     @MainActor static var changeHelp: String {
         L(
             "simple.kiwihub.change_help",
-            "Change in %1$@ in %2$@",
+            "Change these keys in %1$@ in %2$@",
             SettingsDestination.shortcuts.title,
             SettingsRootSwitch.advancedTitle
         )
@@ -107,33 +107,26 @@ struct SimpleKiwiHubKeys: View {
             .combo
     }
 
-    /// A combo's keycaps: one per modifier, a sided modifier
-    /// carrying its run's side word, then the key — one rule for
-    /// every chord (#2777 ruling 4).
+    /// A combo's keycaps: one per modifier, each sided one carrying
+    /// its run's side word, then the key — one rule for every chord,
+    /// read from `ChordGlyphs.runs`, never from the drawn string
+    /// (#2777 ruling 4).
     @MainActor static func caps(
         _ combo: String
     ) -> [(glyph: String, side: String?)] {
         guard let parsed = KeyCombo.parse(combo) else {
             return [(combo, nil)]
         }
-        let drawn = ChordGlyphs.render(
-            parsed,
-            layoutChar: LayoutKeyGlyph.char
-        )
-        let mods = ChordGlyphs.modifiers(parsed.modifiers)
-        let separator = ChordGlyphs.separator(parsed.modifiers)
-        let key = String(drawn.dropFirst(mods.count + separator.count))
-        var caps: [(glyph: String, side: String?)] = []
-        var word: String?
-        for token in mods.split(separator: " ") {
-            let glyphs = token.filter { ChordGlyphs.kinds[$0] != nil }
-            if glyphs.count == token.count {
-                caps += glyphs.map { (String($0), word) }
-                word = nil
-            } else {
-                word = String(token)
-            }
+        let chord = ChordGlyphs.runs(parsed, layoutChar: LayoutKeyGlyph.char)
+        let modifiers = chord.runs.flatMap { run in
+            run.glyphs.map { (String($0), run.side.map(sideWord)) }
         }
-        return caps + [(key, nil)]
+        return modifiers + (chord.key.isEmpty ? [] : [(chord.key, nil)])
+    }
+
+    /// A side's word alone, from the catalog's run frame with no run.
+    @MainActor private static func sideWord(_ side: ModifierSide) -> String {
+        ChordGlyphs.word(side, "")
+            .trimmingCharacters(in: .whitespaces)
     }
 }

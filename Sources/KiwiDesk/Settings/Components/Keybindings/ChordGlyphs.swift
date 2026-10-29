@@ -44,17 +44,52 @@ enum ChordGlyphs {
         }
     )
 
+    /// A drawn chord's structure: its modifier runs in order, each
+    /// with its side (nil for an either-side run or the hyper
+    /// glyph), then its key — the one reading `words` draws from,
+    /// so a surface splitting a chord into parts never re-parses
+    /// the localized string (#2777).
+    struct Runs: Equatable {
+        var runs: [(side: ModifierSide?, glyphs: String)]
+        var key: String
+
+        static func == (lhs: Runs, rhs: Runs) -> Bool {
+            lhs.key == rhs.key
+                && lhs.runs.map(\.glyphs) == rhs.runs.map(\.glyphs)
+                && lhs.runs.map(\.side) == rhs.runs.map(\.side)
+        }
+    }
+
+    static func runs(
+        _ combo: KeyCombo,
+        layoutChar: (UInt32) -> String?
+    ) -> Runs {
+        parse(ComboSymbols.render(combo, layoutChar: layoutChar))
+    }
+
     /// Core's lettered glyphs (`R⌘H`) with each same-side run
     /// named once; unchanged where no modifier keeps a side.
     private static func words(_ glyphs: String) -> String {
+        let parsed = parse(glyphs)
+        guard parsed.runs.contains(where: { $0.side != nil }) else {
+            return glyphs
+        }
+        let pieces = parsed.runs.map { run in
+            run.side.map { word($0, run.glyphs) } ?? run.glyphs
+        }
+        return (pieces + (parsed.key.isEmpty ? [] : [parsed.key]))
+            .joined(separator: " ")
+    }
+
+    /// Splits Core's lettered glyphs into same-side runs and the key.
+    private static func parse(_ glyphs: String) -> Runs {
         let chars = Array(glyphs)
-        var pieces: [String] = []
+        var runs: [(side: ModifierSide?, glyphs: String)] = []
         var run = ""
         var runSide: ModifierSide?
-        var sided = false
         func closeRun() {
             guard !run.isEmpty else { return }
-            pieces.append(runSide.map { word($0, run) } ?? run)
+            runs.append((runSide, run))
             run = ""
         }
         var index = 0
@@ -62,7 +97,7 @@ enum ChordGlyphs {
             let char = chars[index]
             if String(char) == ComboSymbols.hyperGlyph {
                 closeRun()
-                pieces.append(String(char))
+                runs.append((nil, String(char)))
                 runSide = nil
                 index += 1
             } else if kinds[char] != nil {
@@ -75,18 +110,14 @@ enum ChordGlyphs {
             {
                 if runSide != side { closeRun() }
                 runSide = side
-                sided = true
                 run.append(chars[index + 1])
                 index += 2
             } else {
                 break
             }
         }
-        guard sided else { return glyphs }
         closeRun()
-        let key = String(chars[index...])
-        return (pieces + (key.isEmpty ? [] : [key]))
-            .joined(separator: " ")
+        return Runs(runs: runs, key: String(chars[index...]))
     }
 
     private static let sides: [Character: ModifierSide] = Dictionary(

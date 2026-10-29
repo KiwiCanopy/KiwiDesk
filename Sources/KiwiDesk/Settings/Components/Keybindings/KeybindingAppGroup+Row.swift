@@ -14,13 +14,12 @@ extension ApplicationsGroup {
                 actionMenu(binding)
             }
             Spacer()
-            if drawsReach {
-                KeyReachColumn(
-                    model: model,
-                    layer: layerName,
-                    binding: binding.wrappedValue
-                )
-            }
+            KeyReachColumn(
+                model: model,
+                layer: layerName,
+                binding: binding.wrappedValue,
+                onlyWhenNarrow: !drawsReach
+            )
             KeyRecorderField(
                 name: recorderName(binding.wrappedValue),
                 combo: binding.wrappedValue.combo,

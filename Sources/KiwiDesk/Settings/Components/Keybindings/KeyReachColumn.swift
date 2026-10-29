@@ -8,10 +8,14 @@ struct KeyReachColumn: View {
     @ObservedObject var model: SettingsModel
     let layer: String
     let binding: KeyBinding
+    /// Draws nothing while the key reaches every profile (Simple,
+    /// #2777): only a narrower reach is worth naming there.
+    var onlyWhenNarrow = false
 
     var body: some View {
         if model.offersReachColumn, !binding.lua.isEmpty,
-            let reading = model.keyReach(key)
+            let reading = model.keyReach(key),
+            !(onlyWhenNarrow && reading.shared && reading.leftOut.isEmpty)
         {
             RuleReachControl(
                 model: model,

@@ -161,7 +161,7 @@ extension SettingsButtonStyleConventionTests {
             ),
             // A Space card's layout menu draws its picture face
             // whole through the button menu style (#2777).
-            "SpaceModePictureMenu.swift": (
+            "SpaceModeMenu.swift": (
                 1, ".buttonStyle(.plain)",
                 "The layout Menu taking plain style, so its face "
                     + "is the card's picture and layout name"

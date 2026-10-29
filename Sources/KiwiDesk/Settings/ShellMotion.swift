@@ -17,8 +17,8 @@ enum ShellMotion {
     }
 }
 
-/// Home leaving under Simple fading in: dimmed and blurred (#2737
-/// ruling 13).
+/// Home leaving as Simple's sections gather: dimmed and blurred
+/// (#2737 ruling 13, #2777).
 struct ShellRecede: ViewModifier {
     let active: Bool
 
@@ -29,8 +29,9 @@ struct ShellRecede: ViewModifier {
     }
 }
 
-/// A Home card arriving from the window's centre under the switch
-/// (#2737 ruling 13): staggered by grid index, after Simple's fade.
+/// A Home card or a Simple section arriving from the window's
+/// centre under the switch (#2737 ruling 13, #2777): staggered by
+/// index, after the leaving root's fade.
 struct HomeConverge: ViewModifier {
     let arrived: Bool
     let index: Int

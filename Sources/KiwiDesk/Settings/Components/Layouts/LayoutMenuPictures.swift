@@ -2,52 +2,13 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// A Space's layout menu whose face is a picture (Simple's Space
-/// cards, #2777): the same layouts and the one write
-/// `SpaceModeMenu` takes, each item drawn with its layout's picture
-/// beside its name, so the drawing stays the label (#291).
-struct SpaceModePictureMenu<Face: View>: View {
-    @ObservedObject var model: SettingsModel
-    let space: SpaceID
-    @ViewBuilder let face: () -> Face
-
-    var body: some View {
-        let mode = SpaceModeMenu.binding(model, space)
-        Menu {
-            Picker("", selection: mode) {
-                ForEach(LayoutMode.allCases, id: \.self) { mode in
-                    Label {
-                        Text(mode.displayName)
-                    } icon: {
-                        Image(nsImage: LayoutMenuPictures.image(mode))
-                    }
-                    .tag(mode)
-                }
-            }
-            .pickerStyle(.inline)
-            .labelsHidden()
-        } label: {
-            face()
-        }
-        // The button style draws the face whole, as the profile
-        // chip's menu does; the face carries its own hover.
-        .menuStyle(.button)
-        .buttonStyle(.plain)
-        .neutralMenuLabel()
-        .menuIndicator(.hidden)
-        .help(L("spaces.mode.help", "Layout mode for this Space"))
-        .accessibilityLabel(
-            L("spaces.mode.help", "Layout mode for this Space")
-        )
-        .accessibilityValue(mode.wrappedValue.displayName)
-    }
-}
-
-/// Each layout's picture for a menu item: its schematic at rest on
-/// a small screen of the cards' plate, in the plate's palette, so
-/// its ghost windows read in a light or dark menu (#2777). The
-/// schematic is inset in the plate, so every layout shows the same
-/// rim whether its windows fill the screen or not.
+/// Each layout's picture for a Layout menu item: its schematic at
+/// rest on a small screen of the cards' plate, in the plate's
+/// palette, so its ghost windows read in a light or dark menu, the
+/// schematic inset so every layout shows the same rim (#2777).
+/// Memoized for the process: every input is fixed — default
+/// settings, and plate tokens alike in light and dark — so a picture
+/// keyed on the appearance or the draft needs a memo key first.
 /// Rendered once per layout and kept.
 @MainActor
 enum LayoutMenuPictures {

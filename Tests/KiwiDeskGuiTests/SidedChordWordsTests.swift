@@ -164,6 +164,12 @@ struct SidedChordWordsTests {
                 ".accessibilityValue(SidedChordWords.label(label))"
             )
         )
+        // Simple's KiwiHub keycaps speak the chord too (#2777).
+        #expect(
+            try read(
+                "Settings/Components/Simple/SimpleKiwiHubKeys.swift"
+            ).contains(".map(SidedChordWords.label)")
+        )
         #expect(
             try read("Jump/LayoutPickText.swift").contains(
                 "SidedChordWords.label(chord)"

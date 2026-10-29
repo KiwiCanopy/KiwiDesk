@@ -59,9 +59,7 @@ final class SpaceReorder: ObservableObject {
     ) {
         var order = dragOrder ?? spaces
         guard
-            let candidate = rowFrames.first(where: {
-                $0.key != space && $0.value.contains(point)
-            }),
+            let candidate = candidate(for: space, at: point),
             let from = order.firstIndex(of: space),
             let to = order.firstIndex(of: candidate.key),
             from != to,
@@ -82,6 +80,25 @@ final class SpaceReorder: ObservableObject {
             )
             dragOrder = order
         }
+    }
+
+    /// The row or card under `point`, else the nearest one at its
+    /// height — a list's rows are judged by height alone, so a
+    /// pointer drifting out of the column still reorders.
+    private func candidate(
+        for space: SpaceID,
+        at point: CGPoint
+    ) -> (key: SpaceID, value: CGRect)? {
+        let others = rowFrames.filter { $0.key != space }
+        if let hit = others.first(where: { $0.value.contains(point) }) {
+            return hit
+        }
+        return
+            others
+            .filter { $0.value.minY <= point.y && point.y <= $0.value.maxY }
+            .min {
+                abs($0.value.midX - point.x) < abs($1.value.midX - point.x)
+            }
     }
 
     /// Whether `point` is past `frame`'s midpoint in the move's

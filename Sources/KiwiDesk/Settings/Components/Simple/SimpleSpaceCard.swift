@@ -47,7 +47,7 @@ struct SimpleSpaceCard: View {
             if let notice {
                 SpaceNameNoticeCaption(notice: notice)
             }
-            SpaceModePictureMenu(model: model, space: space) { face }
+            SpaceModeMenu(model: model, space: space) { face }
                 .frame(maxWidth: .infinity)
             if model.offersScreenMenu || pinnedOffline {
                 HStack(spacing: 6) {
@@ -112,7 +112,9 @@ struct SimpleSpaceCard: View {
         .contentShape(Rectangle())
         .onHover { inside in
             faceHovered = inside
-            // `set()`, never push/pop (gui.md ▸ SwiftUI traps).
+            // `set()`, never push/pop (gui.md ▸ SwiftUI traps); a
+            // drag keeps its closed hand over another card.
+            guard reorder.dragged == nil else { return }
             (inside ? NSCursor.pointingHand : .arrow).set()
         }
     }
@@ -122,7 +124,7 @@ struct SimpleSpaceCard: View {
         let mode = model.config.modes(for: [space])[space] ?? .bsp
         return L(
             "simple.spaces.card.ax",
-            "%1$@, %2$@",
+            "Space %1$@, %2$@",
             model.spaceIdentifierText(space) ?? space.raw,
             mode.displayName
         )

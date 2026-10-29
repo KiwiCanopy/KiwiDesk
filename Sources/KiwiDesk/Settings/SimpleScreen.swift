@@ -42,9 +42,12 @@ struct SimpleScreen: View {
                         .modifier(converge(4, geo.size))
                 }
                 .frame(
-                    width: min(
-                        Self.columnCap,
-                        geo.size.width - 2 * Self.sideRoom
+                    width: max(
+                        0,
+                        min(
+                            Self.columnCap,
+                            geo.size.width - 2 * Self.sideRoom
+                        )
                     )
                 )
                 // The strip's footer reaches the window's bottom

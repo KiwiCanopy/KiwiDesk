@@ -30,11 +30,7 @@ struct SimpleShortcutCards: View {
             drawsKiwiDeskKeys: false,
             // Simple's card has no Shortcuts page around it to say
             // what it holds (owner 2026-10-29).
-            caption: L(
-                "simple.apps.caption",
-                "Give the apps you use most a shortcut that opens "
-                    + "or focuses them"
-            ),
+            caption: Self.caption,
             drawsReach: false
         )
         .environment(
@@ -82,5 +78,14 @@ struct SimpleShortcutCards: View {
 
     private var expander: ShortcutsFamilyRows {
         ShortcutsFamilyRows.ofDraft(model, layer: layer)
+    }
+
+    /// What the card is for, where no Shortcuts page says it (#2777).
+    @MainActor static var caption: String {
+        L(
+            "simple.apps.caption",
+            "Give the apps you use most a shortcut that opens "
+                + "or focuses them"
+        )
     }
 }

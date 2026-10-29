@@ -76,7 +76,9 @@ private struct SchematicFillsWellKey: EnvironmentKey {
 
 extension EnvironmentValues {
     /// Whether a schematic fills a bars tile's well rather than
-    /// drawing its own mini-screen (Simple's preview, #2737).
+    /// drawing its own mini-screen (Simple's Space cards, #2777).
+    /// One writer, `SimpleSpacePicture` (`SimplePreviewTests` ▸
+    /// `fillsWellHasOneWriter`).
     var schematicFillsWell: Bool {
         get { self[SchematicFillsWellKey.self] }
         set { self[SchematicFillsWellKey.self] = newValue }

@@ -67,8 +67,9 @@ struct SettingsNavigation {
     /// at rest (#2777).
     var simpleHover: SimplePreviewHover?
 
-    /// Whether Home's cards still owe the switch's converge; Home
-    /// plays it once and clears this, so a remount does not replay it.
+    /// Whether the root a switch landed on still owes its converge —
+    /// Home's cards or Simple's sections (#2777); the root plays it
+    /// once and clears this, so a remount does not replay it.
     var convergePending = false
 
     /// Originating card destination when popping back to Home.

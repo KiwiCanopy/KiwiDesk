@@ -205,4 +205,40 @@ struct SimplePreviewTests {
         )
         #expect(reorder.dragOrder?.map(\.raw) == ["b", "c", "d", "a"])
     }
+
+    /// The Spaces page's list judges a row by its height alone, so a
+    /// pointer drifting out of the column sideways still reorders.
+    @Test("a list drag reorders with the pointer outside the column")
+    func listDrift() {
+        let reorder = SpaceReorder(listSpace: "test")
+        let spaces = ["a", "b", "c"].map { SpaceID($0) }
+        reorder.rowFrames = [
+            spaces[0]: CGRect(x: 0, y: 0, width: 300, height: 40),
+            spaces[1]: CGRect(x: 0, y: 44, width: 300, height: 40),
+            spaces[2]: CGRect(x: 0, y: 88, width: 300, height: 40),
+        ]
+        reorder.retarget(
+            spaces[0],
+            at: CGPoint(x: 420, y: 70),
+            in: spaces,
+            reduceMotion: true
+        )
+        #expect(reorder.dragOrder?.map(\.raw) == ["b", "a", "c"])
+    }
+
+    /// The well mode is the cards' alone: another writer would strip
+    /// a schematic's own frame and caption wherever it reached.
+    @Test("one view puts a schematic in a well")
+    func fillsWellHasOneWriter() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var sites: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let count = try SourceScan.strippedSource(at: file)
+                .filter { !$0.isWhitespace }
+                .occurrences(of: ".environment(\\.schematicFillsWell,true)")
+            if count > 0 { sites[file.lastPathComponent] = count }
+        }
+        #expect(sites == ["SimpleSpacePicture.swift": 1])
+    }
 }
