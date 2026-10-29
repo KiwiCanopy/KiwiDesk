@@ -12,20 +12,10 @@ enum StackPositionOptions {
         .left, .top, .bottom, .right,
     ]
 
+    /// Titles come from the diff readout's one switch, so the
+    /// chooser and its readout name a position alike.
     @MainActor
     static var all: [(StackParams.StackPosition, String)] {
-        order.map { ($0, title($0)) }
-    }
-
-    @MainActor
-    private static func title(
-        _ position: StackParams.StackPosition
-    ) -> String {
-        switch position {
-        case .top: L("layout_params.position.top", "Top")
-        case .right: L("layout_params.position.right", "Right")
-        case .bottom: L("layout_params.position.bottom", "Bottom")
-        case .left: L("layout_params.position.left", "Left")
-        }
+        order.map { ($0, SettingsValueReadout.layoutPosition($0)) }
     }
 }
