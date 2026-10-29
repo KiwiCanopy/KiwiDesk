@@ -883,7 +883,7 @@
   "keybinding.conflict.tooltip.shadows_apps": "Tira %1$@ de todos os apps enquanto estiver atribuído aqui.",
   "keybinding.conflict.tooltip.side_collapse": "Também atribuído nesta camada a %1$@, que só difere no lado de um modificador. Enquanto os modificadores esquerdo e direito não forem diferenciados, só um dos dois vai funcionar. Ative “%2$@” para separá-los.",
   "keybinding.conflict.tooltip.system_dead": "Não vai funcionar: o macOS responde primeiro a este atalho, para %1$@.",
-  "keybinding.conflict.tooltip.system_off": "O macOS reserva este atalho para %1$@, um recurso que está desativado no momento.",
+  "keybinding.conflict.tooltip.system_off": "Atenção: o atalho de %1$@ está desativado nos Ajustes do Sistema. Se você ativá-lo de novo, o macOS passa a usar essa combinação de teclas e seu atalho do KiwiDesk para de funcionar.",
   "keybinding.conflict.tooltip.unrecognized": "Não é um atalho reconhecido.",
   "keybinding.conflict.unrecognized": "O atalho para \"%1$@\" não é um atalho reconhecido.",
   "keybinding.desktop_away.axhint": "Não conectada no momento.",

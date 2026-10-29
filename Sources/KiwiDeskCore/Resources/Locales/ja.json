@@ -883,7 +883,7 @@
   "keybinding.conflict.tooltip.shadows_apps": "ここに割り当てている間、すべてのAppから%1$@を奪います。",
   "keybinding.conflict.tooltip.side_collapse": "このレイヤーでは、修飾キーの側だけが違う%1$@にも割り当てられています。左右の修飾キーを区別しない間は、動作するのはどちらか一方だけです。区別するには「%2$@」をオンにしてください。",
   "keybinding.conflict.tooltip.system_dead": "動作しません: macOSがこのショートカットを%1$@用として先に処理します。",
-  "keybinding.conflict.tooltip.system_off": "macOSはこのショートカットを%1$@用に予約していますが、現在オフになっています。",
+  "keybinding.conflict.tooltip.system_off": "注意: %1$@のショートカットはシステム設定でオフになっています。オンに戻すとmacOSがこのキーの組み合わせを使うため、KiwiDeskのショートカットは動作しなくなります。",
   "keybinding.conflict.tooltip.unrecognized": "認識されないショートカットです。",
   "keybinding.conflict.unrecognized": "\"%1$@\"のショートカットは認識されないショートカットです。",
   "keybinding.desktop_away.axhint": "現在は接続されていません。",
