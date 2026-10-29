@@ -45,7 +45,7 @@ extension SettingsButtonStyleConventionTests {
             ),
             // Simple's Space row menu (#2737).
             "SimpleSpacesCard.swift": (
-                3, "rowActions",
+                4, "rowActions",
                 "Returned to the row-menu builder the rowActions "
                     + "seam feeds (#845)"
             ),

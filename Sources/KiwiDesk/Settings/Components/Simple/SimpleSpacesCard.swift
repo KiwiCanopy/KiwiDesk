@@ -109,17 +109,61 @@ struct SimpleSpacesCard: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
+        // The tap is the row's ground, never its controls, so a
+        // click into the name field only focuses it; a click on a
+        // row's text, which is no ground, keeps nothing.
         .background(
-            RoundedRectangle(cornerRadius: 6).fill(SettingsTheme.card)
+            rowFill(space).onTapGesture { model.nav.simpleKept = space }
         )
+        .overlay(
+            // Closed on all four sides (#2737 ruling 5): the ring
+            // marks the kept Space, the fill under it the pointer.
+            RoundedRectangle(cornerRadius: 6).strokeBorder(
+                isKept(space) ? Self.keptRing : .clear,
+                lineWidth: 1
+            )
+        )
+        .onHover { model.hoverSimple(.space(space), inside: $0) }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(space.raw)
+        .accessibilityAddTraits(isKept(space) ? [.isSelected] : [])
         .rowActions { actions(space) }
         .spaceDragLift(space, in: reorder)
+    }
+
+    /// The kept row's ring and fill, the pair `SimplePreviewTests`
+    /// ▸ `ringSeparates` measures.
+    static let keptRing = SettingsTheme.accent
+    static let keptFill = SettingsTheme.chipHover
+
+    private func isKept(_ space: SpaceID) -> Bool {
+        model.simpleKeptSpace == space
+    }
+
+    /// Source-list fills: neutral under the pointer, deeper when
+    /// kept — never the accent, which the ring alone carries.
+    private func rowFill(_ space: SpaceID) -> some View {
+        let shape = RoundedRectangle(cornerRadius: 6)
+        return ZStack {
+            shape.fill(SettingsTheme.card)
+            if isKept(space) {
+                shape.fill(Self.keptFill)
+            } else if model.nav.simpleHover == .space(space) {
+                shape.fill(SettingsTheme.chipRest)
+            }
+        }
     }
 
     /// The row menu: the grip's reorder for the keyboard, and the
     /// trash's delete.
     @ViewBuilder
     private func actions(_ space: SpaceID) -> some View {
+        // The keyboard's and VoiceOver's way to the row's click.
+        Button(L("simple.spaces.show_in_preview", "Show in Preview")) {
+            model.nav.simpleKept = space
+        }
+        .disabled(isKept(space))
+        Divider()
         Button(L("spaces.context.move_up", "Move Up")) {
             model.moveSpace(space, by: -1)
         }

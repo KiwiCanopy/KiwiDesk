@@ -63,6 +63,14 @@ struct SettingsNavigation {
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
+    /// The Space a click on a Simple row kept in the preview
+    /// (#2737 ruling 5); on `nav` because the preview is the rows'
+    /// sibling column (gui.md).
+    var simpleKept: SpaceID?
+
+    /// What the pointer previews on Simple, nil at rest.
+    var simpleHover: SimplePreviewHover?
+
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
@@ -91,6 +99,8 @@ struct SettingsNavigation {
         kiwiVisionLens = nil
         kiwiVisionAddRequested = false
         spaceOverridesFocus = nil
+        simpleKept = nil
+        simpleHover = nil
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states
         // no destination rather than one the last visit earned.

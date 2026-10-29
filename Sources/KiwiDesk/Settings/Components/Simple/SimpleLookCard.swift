@@ -30,7 +30,8 @@ struct SimpleLookCard: View {
             model: model,
             look: look,
             caption: nil,
-            help: LookDescriptions.caption(for: look.name)
+            help: LookDescriptions.caption(for: look.name),
+            hover: { model.hoverSimple(.look(look.name), inside: $0) }
         ) {
             model.applyLook(look)
         }

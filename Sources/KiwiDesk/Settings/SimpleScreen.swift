@@ -24,6 +24,7 @@ struct SimpleScreen: View {
                     SimpleShortcutCards(model: model)
                     HomeSupportStrip(model: model)
                 }
+                .frame(maxWidth: SimpleColumns.contentCap)
                 // The strip's footer reaches the window's bottom
                 // inset, as on Home.
                 .frame(
@@ -37,5 +38,8 @@ struct SimpleScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        // A row or tile removed under the pointer sends no leave, so
+        // a hover must not outlive the page (gui.md ▸ SwiftUI traps).
+        .onDisappear { model.nav.simpleHover = nil }
     }
 }
