@@ -3,8 +3,8 @@ import AppKit
 /// Drives the pocket on screen (#2678): while Several windows holds
 /// it, one pocket on every display, at the slot its shelf pins at a
 /// bar edge's outer end or as a handle on an edge no bar shows, faded
-/// while empty, a count badge from two inside; during a window drag
-/// it shows as the drop target too. A click lists the windows inside.
+/// while empty and unlit; during a window drag it shows as the drop
+/// target too. A click lists the windows inside.
 /// It wears KiwiShelf's look, so it is synced at the tail of every
 /// `updateBars()` and stands down on that pass's verdict, which the
 /// overlay keeps.
@@ -108,6 +108,10 @@ extension KiwiCore {
                 let frame = slot
                     ?? pocketHandleFrame(on: display.id, risen: risen)
             else { return nil }
+            // A lit pocket shows full, empty or not (#2776).
+            let lit =
+                pocketPlate.dropHovered
+                || pocketPlate.hovered.contains(display.id)
             return PocketPlateOverlay.Spec(
                 display: display.id,
                 windows: inside,
@@ -118,7 +122,7 @@ extension KiwiCore {
                 shelf: shelf,
                 markHex: tiler.settings.pocketStyle.color,
                 platePiece: Self.pocketWearsPlate(slot: slot, shelf: shelf),
-                faded: inside.isEmpty,
+                faded: inside.isEmpty && !lit,
                 dropHovered: pocketPlate.dropHovered,
                 name: name,
                 handle: slot == nil ? edge : nil,

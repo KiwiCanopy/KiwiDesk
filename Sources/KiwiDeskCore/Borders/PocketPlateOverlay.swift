@@ -22,7 +22,7 @@ final class PocketPlateOverlay {
         /// Its own piece of plate: Hug and Boxed; under Full the
         /// shelf's plate runs beneath it.
         let platePiece: Bool
-        /// The empty pocket, drawn faded.
+        /// The empty pocket at rest, drawn faded; lit, it shows full.
         let faded: Bool
         /// A dragged window over it that a drop would take.
         let dropHovered: Bool

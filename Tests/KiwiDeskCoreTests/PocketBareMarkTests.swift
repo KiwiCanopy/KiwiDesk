@@ -27,6 +27,9 @@ struct PocketBareMarkTests {
         let bare = pocket(platePiece: false)
         #expect(!bare.drawsLitBox)
         #expect(bare.edgeOpacity == 1)
+        // At rest the edge goes (owner, #2776).
+        bare.setLook(.rest)
+        #expect(bare.edgeOpacity == 0)
         // Control: a plated section keeps its hover box, no edge.
         let plated = pocket(platePiece: true)
         #expect(plated.drawsLitBox)

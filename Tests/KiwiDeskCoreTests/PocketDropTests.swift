@@ -84,6 +84,10 @@ struct PocketDropTests {
         let shown = try #require(core.pocketPlate.specs.values.first)
         #expect(shown.faded)
         #expect(!shown.dropHovered)
+        // Hovered, the empty pocket shows full (#2776).
+        core.pocketHovered(shown.display, true)
+        #expect(core.pocketPlate.specs.values.first?.faded == false)
+        core.pocketHovered(shown.display, false)
         end(core, one)
         #expect(core.pocketPlate.specs.values.first == nil)
     }
@@ -103,7 +107,9 @@ struct PocketDropTests {
         move(core, one)
         point(core, onPlate: true)
         move(core, one)
-        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+        let lit = try #require(core.pocketPlate.specs.values.first)
+        #expect(lit.dropHovered)
+        #expect(!lit.faded)
         end(core, one)
         #expect(core.state.pocketPhase(of: one) == .pocketed)
         #expect(core.pocketPlate.dragging == nil)

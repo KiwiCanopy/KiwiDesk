@@ -8,6 +8,9 @@ import AppKit
 final class BriefPocketView: NSView {
     private let content = NSView()
     private let mark = NSImageView()
+    /// The mark again beneath it, carrying the soft edge's wider
+    /// layer: two shadows stack where one stays faint (#2776).
+    private let halo = NSImageView()
     /// The shelf's hover fill, lit while the pointer or a window a
     /// drop would take is over the pocket plate (#2678): flat on a
     /// solid shelf, through `BarHoverFill` on glass.
@@ -43,12 +46,15 @@ final class BriefPocketView: NSView {
         solid.layer?.masksToBounds = true
         content.wantsLayer = true
         mark.imageScaling = .scaleProportionallyUpOrDown
+        halo.imageScaling = .scaleProportionallyUpOrDown
+        halo.isHidden = true
         litFill.wantsLayer = true
         litFill.isHidden = true
         litFill.setAccessibilityElement(false)
         litGlass.isHidden = true
         content.addSubview(litGlass)
         content.addSubview(litFill)
+        content.addSubview(halo)
         content.addSubview(mark)
         addSubview(solid)
         addSubview(content)
@@ -113,6 +119,7 @@ final class BriefPocketView: NSView {
         litFill.layer?.backgroundColor =
             NSColor(kiwiHex: shelf.hoverFillColor).cgColor
         mark.alphaValue = look == .rest ? shelf.dimFactor : 1
+        paintEdge()
     }
 
     override func viewDidChangeEffectiveAppearance() {
@@ -121,13 +128,17 @@ final class BriefPocketView: NSView {
         needsLayout = true
     }
 
-    /// A bare mark's soft edge in its stitch's ink, which holds the
-    /// bag's shape on a window of its own ink (owner, #2776 ▸ D).
-    private func paintEdge(side: CGFloat) {
+    /// A lit bare mark's soft edge in its stitch's ink, which holds
+    /// the bag's shape on a window of its own ink; at rest it draws
+    /// none (owner, #2776 ▸ D).
+    private func paintEdge() {
         mark.wantsLayer = true
-        guard let layer = mark.layer else { return }
-        guard !platePiece else {
-            layer.shadowOpacity = 0
+        halo.wantsLayer = true
+        guard let inner = mark.layer, let outer = halo.layer else { return }
+        let drawn = !platePiece && look == .lit
+        halo.isHidden = !drawn
+        guard drawn else {
+            inner.shadowOpacity = 0
             return
         }
         let ink = NSColor.mark(hex: hex, fallback: .labelColor)
@@ -135,20 +146,27 @@ final class BriefPocketView: NSView {
         effectiveAppearance.performAsCurrentDrawingAppearance {
             edge = PocketMark.opaque(ink).contrastingGlyph
         }
-        layer.shadowColor = edge.cgColor
-        layer.shadowOpacity = 1
-        layer.shadowOffset = .zero
-        layer.shadowRadius = side * Self.edgeBlur
+        let side = mark.frame.width
+        for (layer, blur) in [(inner, Self.edgeBlur), (outer, Self.haloBlur)] {
+            layer.shadowColor = edge.cgColor
+            layer.shadowOpacity = 1
+            layer.shadowOffset = .zero
+            layer.shadowRadius = side * blur
+        }
     }
 
-    /// The bare mark's edge blur, as a share of the mark's side.
-    static let edgeBlur: CGFloat = 0.07
+    /// The edge's two blurs, as shares of the mark's side: a dense
+    /// inner one and a wider one beneath.
+    static let edgeBlur: CGFloat = 0.06
+    static let haloBlur: CGFloat = 0.13
 
     #if DEBUG
         /// Test-only: whether a hover box draws, flat or on glass.
         var drawsLitBox: Bool { !litFill.isHidden || !litGlass.isHidden }
         /// Test-only: the bare mark's edge, 0 where none draws.
-        var edgeOpacity: Float { mark.layer?.shadowOpacity ?? 0 }
+        var edgeOpacity: Float {
+            halo.isHidden ? 0 : mark.layer?.shadowOpacity ?? 0
+        }
     #endif
 
     override func layout() {
@@ -167,9 +185,10 @@ final class BriefPocketView: NSView {
             width: side,
             height: side
         )
+        halo.image = mark.image
+        halo.frame = mark.frame
         paintPlate(radius: radius)
         paintLook()
-        paintEdge(side: side)
         rim.frame = bounds
         ShelfBorder.paint(
             rim,
