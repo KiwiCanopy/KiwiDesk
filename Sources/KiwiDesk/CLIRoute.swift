@@ -13,6 +13,7 @@ enum CLIRoute: CaseIterable, Equatable {
     case completion
     case complete
     case watch
+    case preview
     case socket
 
     /// The spellings that select this route. The socket takes
@@ -26,6 +27,7 @@ enum CLIRoute: CaseIterable, Equatable {
         case .completion: return [CLICompletion.verb]
         case .complete: return [CLICompleter.verb]
         case .watch: return [CLIWatch.verb]
+        case .preview: return [CLIPreview.verb]
         case .socket: return []
         }
     }

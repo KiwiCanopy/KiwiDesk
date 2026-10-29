@@ -1,13 +1,15 @@
 ---
-// One look's picture on the gallery (#1740): its screenshot,
-// downloaded at build time and served from the site through
-// astro:assets, or — without one — a CSS sketch of the desk drawn
-// from the look file's own colors and shapes, labelled "Preview".
+// One look's picture on the gallery (#1740): its screenshot, or the
+// preview KiwiDesk drew for the gallery, downloaded at build time
+// and served from the site through astro:assets, or — without
+// either — a CSS sketch of the desk drawn from the look file's own
+// colors and shapes. The preview and the sketch are labelled
+// "Preview".
 // The sketch's colors arrive as inline custom properties
 // (`sketchStyle` in `src/lib/looks.ts`): look data, not brand
 // colors, so no hex of them is written under `site/src`.
 // An image astro:assets cannot process drops to the sketch too, so
-// a bad screenshot never fails the deploy (`src/lib/looks.ts`).
+// a bad image never fails the deploy (`src/lib/looks.ts`).
 import { getImage } from "astro:assets";
 import { sketchStyle, type Look } from "../lib/looks";
 
@@ -33,7 +35,11 @@ const sizes =
 const widths = size === "card" ? [360, 720] : [680, 1360];
 let picture: Awaited<ReturnType<typeof getImage>> | null = null;
 if (look.image) {
-  const fit = widths.filter((w) => w <= look.image!.width);
+  const source = look.image.width;
+  // A source narrower than the widest slot still serves its own width.
+  const fit = widths
+    .filter((w) => w < source)
+    .concat(source <= Math.max(...widths) ? [source] : []);
   try {
     picture = await getImage({
       src: look.image.src,
