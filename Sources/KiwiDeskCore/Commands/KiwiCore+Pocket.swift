@@ -10,7 +10,10 @@ extension KiwiCore {
     func pocketCommand() -> CommandResponse {
         // A press that emptied the pocket ends there: a filled one
         // passed the #292 preflight, so it never acts on the focus.
-        if emptyPocketIfGone(), state.pocket.isEmpty { return .ok() }
+        if emptyPocketIfGone() {
+            updatePocketPlate()
+            if state.pocket.isEmpty { return .ok() }
+        }
         // Away first: the out window used last (#2678).
         if let id = state.pocketPutBackNext(focused: focusedWindowID) {
             putInPocket(id)
@@ -25,21 +28,10 @@ extension KiwiCore {
         guard state.pocket.isEmpty else {
             return .fail("pocket is unreachable")
         }
-        guard let id = focusedWindowID,
-            let window = state.windows[id]
-        else { return .fail("no focused window") }
-        guard !window.isFullscreen, !window.isTransientOverlay
-        else { return .fail("this window cannot be pocketed") }
-        // Marked first (#2675), its float frame read while it is
-        // still in its Space and filed at the park; a window
-        // already floating keeps its own.
-        let becoming =
-            isEffectiveFloatForPlacement(id)
-            ? nil : becomePocketWindow(id)
-        guard state.markPocketWindow(id)
-        else { return .fail("this window cannot be pocketed") }
-        putInPocket(id, filing: becoming)
-        return .ok()
+        guard let id = focusedWindowID else {
+            return .fail("no focused window")
+        }
+        return markAndPocket(id)
     }
 
     /// Empties every slot whose untracked window's app is gone;
@@ -68,8 +60,11 @@ extension KiwiCore {
     ) {
         rememberPocketFrame(of: id)
         // Read while it still shows: the plate leaves from here.
+        let released = pocketPlate.dropStart.flatMap {
+            $0.window == id ? $0.released : nil
+        }
         let shown = state.windows[id].map {
-            tiler.commandedFrame(of: id) ?? $0.frame
+            released ?? tiler.commandedFrame(of: id) ?? $0.frame
         }
         let cameFrom = state.pocketSlot(of: id)?.cameFrom
         let heldFocus = state.workspaces.lastFocused == id
@@ -174,7 +169,8 @@ extension KiwiCore {
         }
         refreshStickyReach()
         retile(stateChange: id)
-        handPocketFocus(after: play?.end) { [weak self] in
+        handPocketFocus(after: play?.end, leaving: cameFrom) {
+            [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
             else { return }
             self.focusWindow(id, refocusRetile: false, warp: true)
@@ -188,7 +184,7 @@ extension KiwiCore {
     /// on its Space's screen, filed as the frame it comes out at
     /// there, so a take-out only restores. Nil where it may not be
     /// placed now.
-    private func becomePocketWindow(
+    func becomePocketWindow(
         _ id: WindowID
     ) -> (frame: CGRect, screen: String)? {
         guard
@@ -208,7 +204,10 @@ extension KiwiCore {
         guard state.pocketPhase(of: id) == .out,
             let window = state.windows[id]
         else { return }
-        let frame = tiler.commandedFrame(of: id) ?? window.frame
+        let dropped = pocketPlate.dropStart.flatMap {
+            $0.window == id ? $0.frame : nil
+        }
+        let frame = dropped ?? tiler.commandedFrame(of: id) ?? window.frame
         guard
             let display = TilingEngine.screen(containing: frame)?
                 .kiwiDisplayID,

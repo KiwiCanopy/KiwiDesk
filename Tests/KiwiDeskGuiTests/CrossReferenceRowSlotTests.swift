@@ -129,7 +129,6 @@ struct CrossReferenceRowSlotTests {
         "SpacesSection.swift:Self.shortcutsProse",
         "AILookPointer.swift:Self.prose",
         "KiwiShelfKeyRows.swift:Self.caption(key)",  // #761
-        "PocketGroup.swift:Self.inertProse",  // PocketGroupTests
         // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
         "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests

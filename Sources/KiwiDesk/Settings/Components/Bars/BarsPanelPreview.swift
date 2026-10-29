@@ -60,6 +60,7 @@ struct BarsPanelPreview: View {
         VStack(alignment: .leading, spacing: 6) {
             HomeCardBarsTile(
                 settings: settings,
+                pocketStands: model.pocketStandsAtRest,
                 spaceCount: model.config.spaces.count,
                 scale: 1.8,
                 spaceLabels: spaceLabels,

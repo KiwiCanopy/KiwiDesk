@@ -92,19 +92,30 @@ struct BriefPocketTests {
         defer { LiquidGlassGate.override = gate }
         core.tiler.settings.kiwishelf.liquidGlass = true
         core.tiler.settings.shortcutPanelLiquidGlass = true
-        core.tiler.settings.pocketStyle.edge = .right
-        core.tiler.settings.pocketStyle.position = 30
+        core.tiler.settings.kiwishelf.pocketEdge = .right
+        core.tiler.settings.kiwishelf.pocketPosition = 30
         #expect(core.execute("pocket").isSuccess)
         let request = try #require(core.briefPocket.playing)
-        let region = core.tiler.visibleBounds(request.screen)
-        #expect(
-            request.pocket
-                == BriefPocketPlan.pocketFrame(
-                    in: region,
-                    edge: .right,
-                    position: 30
-                )
+        // The one door for where the pocket is (#2678 review 5)…
+        #expect(request.pocket == core.pocketLanding(on: request.display))
+        // …at the stored placement: risen out of the right edge,
+        // 30 % down it.
+        let visible = GeometryUtils.axVisibleFrame(of: request.screen)
+        let rise = KiwiCore.pocketRiseSide(
+            thickness: core.tiler.settings.kiwishelf.thickness
         )
+        let band = KiwiCore.pocketHandleFrame(
+            visible: visible,
+            edge: .right,
+            position: 30,
+            depth: PocketHandleView.tabDepth + PocketPlateView.lift + rise
+        )
+        let risen = PocketPlateView.risenFrame(
+            in: band,
+            edge: .right,
+            side: rise
+        )
+        #expect(request.pocket == risen)
         let settings = core.tiler.settings
         #expect(request.shelf != settings.kiwishelf)
         #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
@@ -293,55 +304,5 @@ struct BriefPocketTests {
 
     private final class Flight: @unchecked Sendable {
         var landed = false
-    }
-
-    @Test("edge and position decode absent as bottom, 82")
-    func storedShape() throws {
-        let absent = try JSONDecoder().decode(
-            PocketStyle.self,
-            from: Data("{}".utf8)
-        )
-        #expect(absent.edge == .bottom)
-        #expect(absent.position == 82)
-        let set = try JSONDecoder().decode(
-            PocketStyle.self,
-            from: Data(#"{"edge":"left","position":140}"#.utf8)
-        )
-        #expect(set.edge == .left)
-        #expect(set.position == 100)
-        let encoded =
-            try JSONSerialization.jsonObject(
-                with: JSONEncoder().encode(PocketStyle())
-            ) as? [String: Any]
-        #expect(encoded?["edge"] as? String == "bottom")
-        #expect(encoded?["position"] as? Double == 82)
-    }
-
-    @Test("the Lua verbs set them and refuse a bad value")
-    func verbs() {
-        let core = makeCore()
-        #expect(
-            core.execute("pocket.set_edge", args: [.string("top")])
-                .isSuccess
-        )
-        #expect(core.tiler.settings.pocketStyle.edge == .top)
-        #expect(
-            !core.execute("pocket.set_edge", args: [.string("middle")])
-                .isSuccess
-        )
-        #expect(
-            core.execute("pocket.set_position", args: [.number(30)])
-                .isSuccess
-        )
-        #expect(core.tiler.settings.pocketStyle.position == 30)
-        #expect(
-            core.execute("pocket.set_position", args: [.number(-5)])
-                .isSuccess
-        )
-        #expect(core.tiler.settings.pocketStyle.position == 0)
-        #expect(
-            !core.execute("pocket.set_position", args: [.string("x")])
-                .isSuccess
-        )
     }
 }

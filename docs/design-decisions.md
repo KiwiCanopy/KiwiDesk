@@ -6135,6 +6135,79 @@ that no key can bring back. An update's in-place relaunch carries
 the slot (`StateSnapshot.pocket`), since that restart is meant to
 be invisible.
 
+:::unreleased
+### The pocket belongs to KiwiShelf (#2678)
+
+**[Rationale]**
+
+**An element of the shelf, not a plate of its own.** KiwiShelf
+already owns each edge's room, look and stand-down; a standalone
+pocket plate on the same edge would re-derive all three and drift
+from each. So the pocket is the shelf's third element, its Edge and
+Position sit on KiwiShelf's card and are stored as
+`kiwishelf.pocket_edge` and `kiwishelf.pocket_position`, and a look
+carries them as it carries the rest of the shelf's placement
+(owner, 2026-10-29). Moving the two keys out of `pocket` owes a
+one-shot `ConfigMigration` step (`PocketPlacementMigrationTests`):
+both decode an absent key as the default, so without it a profile
+loses 4.0.0's values silently. The old `pocket.set_edge` and
+`pocket.set_position` retire with no alias.
+
+**Several windows keeps it on screen, empty included, on every
+display.** One window keeps the pocket out of sight, since its one
+window is a key away. Under Several windows the drop target and the
+list are what the pocket is for, so it stays where the user left it
+— faded while empty, a count badge from two inside — and on every
+display, so it is reachable wherever the pointer is without
+focusing that screen first. A click grows the list of the windows
+inside out of it, by app, each row taking its window out — the
+bars' own click-held list, so it closes and keys as theirs do.
+Under One window it stands only while a window drag
+runs or a window goes in or out under its animation, and on a
+bar's edge its slot then
+opens, the bars gliding aside for it, so a drop and a put-in land on
+the one pocket at its one place (owner, 2026-10-29). Edge and
+Position therefore act whatever the animation switch says and do not
+grey. No "show the pocket" choice sits beside Holds,
+which already decides when the pocket stays.
+
+**Pinned at the shelf's outer end, outside the scrolling run.**
+The bars scroll and resize with their content; a pocket inside
+their run would move under a drag aimed at it. So it takes the
+shelf's end on Position's side — the start below 50 %, the end from
+50 % — and never moves, and Position stays one continuous slider
+rather than a second control for a bar's edge.
+
+**A shelf section in a panel the shelf owns.** A hugging plate is
+the union of its runs (`ShelfArrangement.plateSpan`), and a panel
+takes every click inside its frame, so a pocket in the shelf's own
+panel would make the gap to the bars swallow clicks (#2497). The
+pocket is still the shelf's section: the shelf draws it in a second
+panel of its own, beside the first, and plays every reveal, fade and
+glide on both from the same call, so the pocket comes and goes with
+the bars and never cuts, while the gap between them stays clear.
+A separate overlay following the shelf would copy every reveal
+style by hand (architect review, 2026-10-29). Full keeps one plate;
+Hug gives the pocket its own piece; Boxed gives it its own box.
+
+**On an Auto edge the handle joins the row of marks.** A hidden
+Auto bar leaves its mark at the edge; the pocket's handle takes one
+band more in that row, at the end it leans to, so the pointer
+reaches the bar and the pocket one band apart and never opens one
+for the other. On a Hidden or empty edge it stands alone at
+Position.
+
+**A fixed handle; the risen pocket at the bar's size, within 20 to
+32 pt.** On an edge no bar shows, the handle is an edge mark like
+the Space dots and the App Bar line, so its kiwis do not scale with
+the shelf. Risen — on hover, a drag or a put-in or take-out — the
+pocket takes the size it has on that edge's bar, so a Hidden bar's
+shortcut reveal and a hover show one object at one size. The floor
+is the handle's 20 pt kiwis, which a rise must never shrink; the
+ceiling, 1.6x, is as far as a growth still reads as the pocket
+coming out rather than a jump.
+:::
+
 ### A window changing state animates under its own switch (#2676)
 
 **[Rationale]**
@@ -6168,14 +6241,11 @@ goes in or out, the Space switch's plate flies between it and the
 window — our own overlay, redrawn at each size, never a capture —
 and it nods and fades. The window parks at once and comes back with
 one write, held until the plate lands, so a slow app or a minimum
-size is never in play; no pocket stays on screen (that is #2678's,
-with the several-windows mode). The pocket's placement is an edge
-and a position along it, clear of a bar on that edge, in Shortcuts &
-Gestures ▸ Pocket beside its two keys, Edge as a menu since a
-Shortcuts setting row's control takes the recorder's footprint; the two rows grey while the
-toggle is off, since the pocket then never appears. The bar menus
-offer no Pocket or Take out yet (owner, 2026-10-27): a pocketed
-window has no bar item, so only one of the two could show. The plate's flight follows
+size is never in play; no pocket stays on screen under One window
+(▸ *The pocket belongs to KiwiShelf*). The bar menus
+offer Pocket Window and no Take out (owner, 2026-10-27; #2678): a
+pocketed window has no bar item, so only Pocket could show, and the
+pocket's list is where one comes out. The plate's flight follows
 `animations.duration`, the window duration, at twice it within
 0.2–0.8 s, since a window's own trip is what it draws; the fades and
 the nod take no setting, since they shape how softly the pocket

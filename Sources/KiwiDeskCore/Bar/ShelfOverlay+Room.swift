@@ -102,6 +102,12 @@ extension ShelfOverlay {
         roomGlide = token
         // A union, so a slide in flight keeps its margin too.
         widenRoom(to: restRoom)
+        if let rest = pocket.rest, let strip = drawn?.strip {
+            pocket.placeRoom(
+                pocket.placedRoom.map { $0.union(rest) } ?? rest,
+                strip: strip
+            )
+        }
         afterGlide { [weak self] in
             guard let self, self.roomGlide == token else { return }
             self.roomGlide = nil
@@ -169,6 +175,7 @@ extension ShelfOverlay {
             let strip = drawn?.strip
         else { return }
         placeRoom(restRoom, strip: strip)
+        pocket.placeRoom(nil, strip: strip)
     }
 
     /// The room placed now, grown to cover `rect` as well — save

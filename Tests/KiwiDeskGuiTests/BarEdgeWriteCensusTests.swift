@@ -27,15 +27,12 @@ struct BarEdgeWriteCensusTests {
         "KiwiCore+ShelfFrames.swift": (
             1, "`ShelfFrame`'s own field, a drawn strip's, no bar's"
         ),
+        "PocketHandleView.swift": (
+            1, "the pocket handle's own field, no bar's (#2678)"
+        ),
         "AppBarStyle+Coding.swift": (3, "its coding key and decoder"),
         "SpaceBarStyle+Coding.swift": (3, "its coding key and decoder"),
         "SettingsRevertRegister.swift": (4, revertCopy),
-        "KiwiCore+PocketStyleCommands.swift": (
-            1, "the brief pocket's edge, no bar's (#2680)"
-        ),
-        "SettingsRevertRegister+Rules.swift": (
-            1, "the brief pocket's edge ↺, no bar's (#2680)"
-        ),
     ]
 
     /// A row's ↺ puts the baseline's own value back into the draft,

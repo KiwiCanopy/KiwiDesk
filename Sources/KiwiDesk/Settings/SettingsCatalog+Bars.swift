@@ -9,6 +9,15 @@ struct BarsControls: Sendable {
         "bars.switch.kiwishelf",
         "KiwiShelf"
     )
+    /// Where the pocket sits (#2678).
+    let kiwishelfPocketEdge = SettingsControl(
+        "kiwishelf.pocket_edge",
+        "Pocket edge"
+    )
+    let kiwishelfPocketPosition = SettingsControl(
+        "kiwishelf.pocket_position",
+        "Pocket position"
+    )
     let kiwishelfEdges = SettingsDrawer(
         "kiwishelf.each_bar",
         "Each bar",

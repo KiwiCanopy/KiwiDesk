@@ -132,6 +132,26 @@ struct PocketListTests {
         #expect(core.state.pocket.map(\.window) == [one])
     }
 
+    @Test("Several windows takes a second mark, and One refuses again")
+    func severalTakesSecondMark() {
+        let core = makeCore()
+        #expect(
+            core.execute(
+                "pocket.set_capacity",
+                args: [.string("several")]
+            ).isSuccess
+        )
+        core.state.apply(.windowFocused(one))
+        core.execute("toggle_pocket_window")
+        core.state.apply(.windowFocused(two))
+        #expect(core.execute("toggle_pocket_window").isSuccess)
+        #expect(core.state.pocket.map(\.window) == [one, two])
+        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.state.apply(.windowFocused(three))
+        #expect(!core.execute("toggle_pocket_window").isSuccess)
+        #expect(core.state.pocket.map(\.window) == [one, two])
+    }
+
     @Test("a quit files every pocketed window into the active Space")
     func quitReleasesAll() {
         let core = makeCore()

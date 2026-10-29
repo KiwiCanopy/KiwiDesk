@@ -47,7 +47,8 @@ struct ShelfStripPreviewTests {
     private static func preview(
         spaces: Int,
         windows: Int,
-        shelf: KiwiShelf = KiwiShelf()
+        shelf: KiwiShelf = KiwiShelf(),
+        pocket: Bool = false
     ) -> ShelfStripPreview {
         ShelfStripPreview(
             shelf: shelf,
@@ -55,8 +56,28 @@ struct ShelfStripPreviewTests {
             app: windows > 0 ? spec(items: windows, length: 60) : nil,
             edge: .top,
             vertical: false,
-            scale: 1.8
+            scale: 1.8,
+            pocket: pocket
         )
+    }
+
+    @Test("a standing pocket takes its slot and the bars keep clear")
+    func pocketTakesItsSlot() throws {
+        var shelf = KiwiShelf()
+        shelf.pocketPosition = 100
+        let preview = Self.preview(
+            spaces: 20,
+            windows: 12,
+            shelf: shelf,
+            pocket: true
+        )
+        let placed = preview.arrangement(length: 480)
+        let pocket = try #require(placed.pocket)
+        #expect(pocket.offset + pocket.length <= 480 + 0.5)
+        #expect(pocket.offset > 400)
+        for slot in [placed.space, placed.app].compactMap({ $0 }) {
+            #expect(slot.offset + slot.length <= pocket.offset)
+        }
     }
 
     @Test("An overflowing shelf cuts each run at its slot")

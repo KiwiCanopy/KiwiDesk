@@ -1,11 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Pocket card (#2680): ⌃⌥P and ⌃⌥⇧P, then where the brief
-/// pocket appears. The two placement rows grey while "Animate
-/// float, Pocket & maximize" is off — the pocket then never
-/// appears — with the live pointer to that switch outside the grey
-/// (gui.md ▸ a dim is not a sentence).
+/// The Pocket card (#2680): ⌃⌥P and ⌃⌥⇧P, then what the pocket
+/// holds (#2678) and where its plate sits. The plate shows on every
+/// window drag whatever the animation switch says, so no row greys.
 struct PocketGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
@@ -13,6 +11,8 @@ struct PocketGroup: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.pocketKeys) {
+            // What it holds leads its keys (owner, #2678).
+            capacityRow
             ForEach(ShortcutsRowOrder.pocketAtRest, id: \.id) { key in
                 KeybindingFamilyRows(
                     model: model,
@@ -21,48 +21,26 @@ struct PocketGroup: View {
                     expander: expander
                 )
             }
-            // `ShortcutsRowOrder.pocketList`, drawn here.
-            Group {
-                edgeRow
-                positionRow
-            }
-            .modifier(GreyOut(active: inert))
-            if inert {
-                CrossReferenceRow(
-                    prose: Self.inertProse,
-                    linkTitle: L(
-                        "shortcuts.pocket.xref_link",
-                        "Looks & Animations ▸ Animations"
-                    ),
-                    destination: .looks
-                )
-                .font(.caption)
-            }
         }
     }
 
-    /// The pocket appears only under the state-change animation.
-    private var inert: Bool {
-        !model.config.settings.animations.onStateChange
-    }
-
-    private var pocket: Binding<PocketStyle> {
-        $model.config.settings.pocketStyle
-    }
-
-    /// In the shared setting row's shape (#2670), as a menu: the
-    /// recorder's footprint has no room for four segments.
-    private var edgeRow: some View {
-        ShortcutSettingRow(
-            title: SettingsCatalog.shortcuts.pocketEdge.text,
-            help: Self.edgeHelp
-        ) {
+    /// A menu like Edge's: the recorder's footprint has no room for
+    /// two spelled-out segments.
+    private var capacityRow: some View {
+        let label = SettingsCatalog.shortcuts.pocketCapacity.text
+        return ShortcutSettingRow(title: label, help: Self.capacityHelp) {
+            // App-wide, written at once (#1741).
             Picker(
-                SettingsCatalog.shortcuts.pocketEdge.text,
-                selection: pocket.edge
+                label,
+                selection: Binding(
+                    get: { model.appWide.pocketCapacity },
+                    set: { new in
+                        model.setAppWide { $0.pocketCapacity = new }
+                    }
+                )
             ) {
-                ForEach(AppBarOptions.edgeOrder, id: \.self) {
-                    Text(AppBarOptions.edgeName($0)).tag($0)
+                ForEach(PocketCapacity.allCases, id: \.self) {
+                    Text(Self.capacityName($0)).tag($0)
                 }
             }
             .labelsHidden()
@@ -70,41 +48,33 @@ struct PocketGroup: View {
             .neutralMenuLabel()
             .controlSize(.regular)
             .fixedSize()
-            .accessibilityLabel(SettingsCatalog.shortcuts.pocketEdge.text)
+            .accessibilityLabel(label)
             .accessibilityValue(
-                AppBarOptions.edgeName(pocket.wrappedValue.edge)
+                Self.capacityName(model.appWide.pocketCapacity)
             )
         }
-        .searchAnchored(SettingsCatalog.shortcuts.pocketEdge)
+        .searchAnchored(SettingsCatalog.shortcuts.pocketCapacity)
     }
 
-    private var positionRow: some View {
-        let label = SettingsCatalog.shortcuts.pocketPosition.text
-        let readout = SettingsValueReadout.percent(
-            Double(pocket.wrappedValue.position) / 100
-        )
-        return ShortcutSettingRow(title: label, help: Self.positionHelp) {
-            HStack(spacing: 6) {
-                SettingsSlider(
-                    value: Binding(
-                        get: { Double(pocket.wrappedValue.position) },
-                        set: { pocket.wrappedValue.position = CGFloat($0) }
-                    ),
-                    range: 0...100,
-                    step: 1,
-                    label: label,
-                    spokenValue: Self.spokenPosition(
-                        readout,
-                        edge: pocket.wrappedValue.edge
-                    ),
-                    ends: Self.ends(pocket.wrappedValue.edge)
-                )
-                Text(readout)
-                    .monospacedDigit()
-                    .accessibilityHidden(true)
-            }
+    static func capacityName(_ capacity: PocketCapacity) -> String {
+        switch capacity {
+        case .one: L("pocket.capacity.one", "One window")
+        case .several: L("pocket.capacity.several", "Several windows")
         }
-        .searchAnchored(SettingsCatalog.shortcuts.pocketPosition)
+    }
+
+    /// Names both segments through their own keys (#818).
+    static var capacityHelp: String {
+        L(
+            "pocket.capacity.help",
+            "%1$@: the Pocket keeps a single window. %2$@: mark more, "
+                + "and the Pocket stays on screen on every display; the "
+                + "Pocket key puts away the one you used, or with all "
+                + "inside takes out the one put in last. Applies at "
+                + "once, in every profile.",
+            capacityName(.one),
+            capacityName(.several)
+        )
     }
 
     /// The track's ends name where the position runs: left to
@@ -133,36 +103,5 @@ struct PocketGroup: View {
                 "%1$@ from the top",
                 readout
             )
-    }
-
-    static var edgeHelp: String {
-        L(
-            "pocket.edge.help",
-            "The screen edge the Pocket appears on while a window "
-                + "goes in or comes out. A bar on the same edge "
-                + "keeps it just inside."
-        )
-    }
-
-    static var positionHelp: String {
-        L(
-            "pocket.position.help",
-            "Where along its edge the Pocket appears, from the "
-                + "left or top end to the right or bottom end."
-        )
-    }
-
-    /// Why the rows are grey, the switch named and its page at
-    /// `CrossReferenceRow.linkSlot`.
-    static var inertProse: String {
-        L(
-            "shortcuts.pocket.inert_link",
-            "The Pocket appears only while “%1$@” is on in %2$@.",
-            L(
-                "behavior.animations.state_change",
-                "Animate float, Pocket & maximize"
-            ),
-            CrossReferenceRow.linkSlot
-        )
     }
 }

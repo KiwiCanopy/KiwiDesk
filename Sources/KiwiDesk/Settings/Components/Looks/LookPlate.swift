@@ -21,6 +21,9 @@ struct LookPlate: View {
             .fill(SettingsTheme.sunken)
             HomeCardBarsTile(
                 settings: settings,
+                // A look's card pictures the look; the pocket is no
+                // part of it (#2678).
+                pocketStands: false,
                 spaceCount: spaceLabels.count,
                 spaceLabels: spaceLabels,
                 wellContent: AnyView(focusedWindow)

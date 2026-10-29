@@ -43,6 +43,8 @@ extension KiwiShelf {
         case groupBadgeTextColor = "group_badge_text_color"
         case revealTimeout = "reveal_timeout"
         case revealStyle = "reveal_style"
+        case pocketEdge = "pocket_edge"
+        case pocketPosition = "pocket_position"
     }
 
     /// Decodes a shelf, a missing key taking its default.
@@ -140,6 +142,13 @@ extension KiwiShelf {
         revealStyle =
             try c.decodeIfPresent(RevealStyle.self, forKey: .revealStyle)
             ?? d.revealStyle
+        pocketEdge =
+            try c.decodeIfPresent(AppBarEdge.self, forKey: .pocketEdge)
+            ?? d.pocketEdge
+        pocketPosition = Self.clampPocketPosition(
+            try c.decodeIfPresent(CGFloat.self, forKey: .pocketPosition)
+                ?? d.pocketPosition
+        )
         fillFade = Self.clampFillFade(
             try c.decodeIfPresent(CGFloat.self, forKey: .fillFade)
                 ?? d.fillFade

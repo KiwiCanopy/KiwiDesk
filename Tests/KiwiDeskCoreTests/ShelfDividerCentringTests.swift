@@ -138,7 +138,8 @@ struct ShelfDividerCentringTests {
                 capAxis: length
             ),
             spaceFloor: 0,
-            shelf: shelf
+            shelf: shelf,
+            pocket: nil
         )
         let spaceSlot = try #require(placed.space)
         let appSlot = try #require(placed.app)
