@@ -11,6 +11,9 @@ import Testing
 /// no headless core can drive through a departing display.
 @Suite("Shelf retire wiring (#1838)")
 struct ShelfRetireWiringTests {
+    /// The per-display overlay owners `updateBars()` retires.
+    private static let owners = ["appBars", "spaceBars", "pocketPlate"]
+
     private static func source() throws -> String {
         let url = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources")
@@ -27,10 +30,17 @@ struct ShelfRetireWiringTests {
     @Test("Every retire spares the displays whose shelf is leaving")
     func retireSparesLeavingDisplays() throws {
         let source = try Self.source()
-        // The one retire door: both managers take the one `keep`…
+        // The one retire door: every overlay owner — both bar
+        // managers and the pocket (#2678) — takes the one `keep`…
         let retires =
             source.components(separatedBy: ".retire(except:").count - 1
-        #expect(retires == 2, "both managers, one door")
+        for owner in Self.owners {
+            #expect(
+                source.contains("\(owner).retire(except: keep)"),
+                "\(owner) retires through the door"
+            )
+        }
+        #expect(retires == Self.owners.count, "an owner outside the list")
         #expect(
             source.components(separatedBy: ".retire(except: keep)").count - 1
                 == retires
@@ -66,7 +76,7 @@ struct ShelfRetireWiringTests {
         let doorBody = String(source[decl...])
         #expect(
             doorBody.components(separatedBy: ".retire(except: keep)").count - 1
-                == 2
+                == Self.owners.count
         )
     }
 }

@@ -16,6 +16,7 @@ struct SimpleSpacePicture: View {
         GeometryReader { geo in
             HomeCardBarsTile(
                 settings: settings,
+                pocketStands: model.pocketStandsAtRest,
                 spaceCount: model.config.spaces.count,
                 scale: Self.barScale(forWidth: geo.size.width),
                 spaceLabels: BarsPanelPreview.spaceLabels(of: model.config),

@@ -58,20 +58,41 @@ enum SupportLinks {
 
     /// Resolves guide URL for route (/guide/, `check_guide_routes`).
     static func guide(for route: String?) -> URL {
-        guard let route, guideRoutes.contains(route) else {
-            return site.appendingPathComponent(
-                "guide",
-                isDirectory: true
-            )
+        routed("guide", route: route, served: guideRoutes)
+    }
+
+    /// Localized `/guide/` routes the site serves.
+    static let guideRoutes: Set<String> = ["de", "ja"]
+
+    /// The looks gallery's site page (#1740 ▸ Browse), routed by
+    /// locale like `guide`.
+    @MainActor static var looks: URL {
+        looks(for: localizedRoute)
+    }
+
+    /// Resolves the gallery URL for route (`check_guide_routes`).
+    static func looks(for route: String?) -> URL {
+        routed("looks", route: route, served: looksRoutes)
+    }
+
+    /// Localized `/looks` routes the site serves.
+    static let looksRoutes: Set<String> = ["de", "ja"]
+
+    /// `page` under `route` when the site serves it there, else the
+    /// English page.
+    private static func routed(
+        _ page: String,
+        route: String?,
+        served: Set<String>
+    ) -> URL {
+        guard let route, served.contains(route) else {
+            return site.appendingPathComponent(page, isDirectory: true)
         }
         return
             site
             .appendingPathComponent(route, isDirectory: true)
-            .appendingPathComponent("guide", isDirectory: true)
+            .appendingPathComponent(page, isDirectory: true)
     }
-
-    /// Localized site routes supported on web.
-    static let guideRoutes: Set<String> = ["de", "ja"]
 
     private static let site = URL(
         string: "https://kiwidesk.kiwicanopy.com/"

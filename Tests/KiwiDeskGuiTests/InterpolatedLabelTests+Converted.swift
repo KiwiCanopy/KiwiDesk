@@ -71,8 +71,6 @@ extension InterpolatedLabelTests {
         // The state-change toggle names the reflow toggle its
         // neighbours follow (#2676).
         "behavior.animations.state_change.help": 1,
-        // The Pocket card's grey names the switch it waits on (#2680).
-        "shortcuts.pocket.inert_link": 1,
         // The key panel's Layout Defaults… button (#2229).
         "layout_picker.layout_defaults": 1,
         // The quick menu's Open KiwiHub… row names the product

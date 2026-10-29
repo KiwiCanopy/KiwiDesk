@@ -61,6 +61,8 @@ struct AnnouncedValueTests {
         "SpaceHistoryRow.swift": 1,
         // #2670: the Wrap focus menu, the same shape.
         "FocusWrapRow.swift": 1,
+        // #2678 Holds: a menu in the setting-row shape; Edge moved to
+        // KiwiShelf's card as a DropdownRow (#2678).
         "PocketGroup.swift": 1,
         "KeybindingAppGroup+Action.swift": 1,
         // #1209: the export row's range menu, named by the range

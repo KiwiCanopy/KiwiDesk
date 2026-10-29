@@ -7,6 +7,10 @@ import KiwiDeskCore
 extension SettingsModel {
     var appWide: AppWideSettings { core.appWide }
 
+    /// Whether the pocket stands on the shelf at rest — Several
+    /// windows — which the Bars previews draw (#2678).
+    var pocketStandsAtRest: Bool { appWide.pocketCapacity == .several }
+
     /// What the Hyper key's remap last did (#1870), read live.
     var hyperStatus: HyperKeyStatus { core.keys.hyperStatus }
 

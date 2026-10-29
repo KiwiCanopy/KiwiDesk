@@ -67,6 +67,25 @@ extension SettingsValueReadout {
                 n.order,
                 AppBarOptions.order
             )
+        case .pocketEdge:
+            return [
+                .change(
+                    census,
+                    label: SettingsCatalog.bars.kiwishelfPocketEdge.text,
+                    old: AppBarOptions.edgeName(o.pocketEdge),
+                    new: AppBarOptions.edgeName(n.pocketEdge)
+                )
+            ]
+        case .pocketPosition:
+            return [
+                .change(
+                    census,
+                    label: SettingsCatalog.bars.kiwishelfPocketPosition
+                        .text,
+                    old: percent(Double(o.pocketPosition) / 100),
+                    new: percent(Double(n.pocketPosition) / 100)
+                )
+            ]
         case .revealStyle:
             return spaceBarChoiceRow(
                 census,

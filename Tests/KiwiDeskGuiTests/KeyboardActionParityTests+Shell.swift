@@ -77,7 +77,7 @@ extension KeyboardActionParityTests {
                 "a Home card is the return destination"
             ),
             ShellWiring(
-                "SettingsModel+ShellMotion.swift",
+                "SettingsModel+Converge.swift",
                 "nav.homeReturnFocus = destination",
                 "the push records which card to return to — "
                     + "without it the restore reads nil forever"

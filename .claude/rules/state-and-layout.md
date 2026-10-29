@@ -763,9 +763,10 @@ editing here:
     refuses any window that is not the out slot's; a new entry
     path (a pick, #2678's list) marks first, and a path that adds
     a window beside a marked one asks
-    `StateCoordinator.pocketAcceptsMark`, the one home of the One
-    window cap that #2678's setting widens (`PocketListTests` ▸
-    `secondMarkRefused`). A reader of "the
+    `StateCoordinator.pocketAcceptsMark(_:)`, the one home of the
+    capacity gate — One window's cap, none under Several
+    (`PocketListTests` ▸ `secondMarkRefused`,
+    `severalTakesSecondMark`). A reader of "the
     pocket holds something" states whether it means any slot or
     the windows `pocket` works, since a per-app key's slot (#2612)
     is the one but not the other. "Focused last" among out
@@ -1418,7 +1419,17 @@ editing here:
   bounded to two, since an echo-quiet pass can confirm the
   answer it issued, and its flag clear afterwards — are
   `SizeBoundCorroborationProbeEngineTests`'; the drain after
-  that loop is belt, unguarded. The cap
+  that loop is belt, unguarded. An issue stays out until a
+  SETTLED read answers it (#2758): on an ordinary pass the take
+  door — the loop's one probe door, never a second beside it —
+  carries the issue's ask into every target that still asks a
+  span the anchor answers, the loop sends no frame for a
+  question already out, an issue an ordinary ask overwrote is
+  re-sent at most `maxProbeResends` times, and the answer to a
+  frame bent to an issue owes the placement; a new ender of an
+  issue answers it through `noteProbeAnswered`
+  (`SizeBoundProbeHoldTests`, `SizeBoundProbeInFlightTests`).
+  The cap
   consequence softens: an evicted
   ask beyond a still-corroborated bound consumes without
   re-dancing, while evicting the corroborating pair itself

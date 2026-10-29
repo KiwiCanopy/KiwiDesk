@@ -98,6 +98,7 @@ extension KiwiCore {
         wireBarMenus()
         wireBarPeek()
         wireOverflowMarks()
+        wirePocketPlate()
         appFont.onLoad = { [weak self] in
             self?.updateBars()
         }

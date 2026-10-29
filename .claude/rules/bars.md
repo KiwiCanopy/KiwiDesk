@@ -48,6 +48,10 @@ paths:
   # the gate.
   - "Sources/KiwiDeskCore/Borders/OverflowMark*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
+  # The pocket stands on KiwiShelf and feeds the peek (#2678).
+  - "Sources/KiwiDeskCore/Borders/Pocket*.swift"
+  - "Sources/KiwiDeskCore/Bar/PocketHandleView.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Pocket*.swift"
   - "Sources/KiwiDeskCore/Borders/StickyMarkPlate+Glass.swift"
   # The Space slide's plates (#1956, #2524): KiwiHub's glass on
   # KiwiHub's leaf, wearing the Fill under the toggle (#2569).
@@ -412,7 +416,10 @@ twice, was a question the user answered twice. The argument is
   and Desktop cues — stands down through the same verdict**,
   never a part of it such as `showsPresentation`, which a
   new stand-down case would leave behind (#2348,
-  `ShelfStandDownSeamTests` ▸ `cuesAskTheStandDown`).
+  `ShelfStandDownSeamTests` ▸ `cuesAskTheStandDown`). A bar's
+  show/hide refusal is no such cue: it answers the stand-down
+  with its own pill, ahead of every other reason (#2775,
+  `ShelfRefusalPlaceTests` ▸ `standDownRefusesFirst`).
 - **Keep a bar's `naturalLength` equal to what its render
   draws** — the need the plan hands `ShelfArrangement` restates
   the render's padding, so a change to either side moves both:
@@ -763,6 +770,34 @@ render content into it (#1517). Obligations:
   both hold, or the cue drops rather than the floor.
   `EmptyItemInkTests` measures every bundled palette's answer.
 
+## The pocket is a shelf section (#2678)
+
+The pocket on a bar's edge is the shelf's third section, drawn in a
+second panel the shelf owns (`ShelfPocketPiece`), so the gap between
+the bars' run and the pocket keeps passing clicks (#2497) while the
+pocket rides every motion the shelf plays. Obligations:
+
+- **A motion `ShelfOverlay` plays reaches both contents from one
+  call** — a reveal, a retract, a fade, the plate glide's alpha —
+  through `motionContents` and its helpers, never a call on
+  `content` alone beside them; the pocket's room opens for the
+  motion it resolves to (`openPocketRoom`) and settles with the
+  shelf's (`ShelfPocketPanelTests`).
+- **The pocket's panel is ordered above the shelf's by the
+  overlay itself** (`ShelfPocketPiece.orderIn(above:)`), never left
+  to call order at one level (`ShelfPocketPanelTests` ▸
+  `ordersAboveTheShelf`).
+- **Its panel is the shelf's for every hold and reading**: the
+  reveal target's held section takes the pocket's slot
+  (`KiwiCore+ShelfReveal`), `ShelfManager.surfaceHolds` and the
+  peek's shelf read both panels, and a shelf leaving closes a peek
+  on either (`PocketShelfWiringTests` ▸ `barPassMountsThePocket`
+  holds the shelf reading; the hold and the close are review's).
+- **Every `ShelfArrangement.arrange` caller states its pocket** —
+  the bars-alone placement is reached only through it — so the
+  Settings preview places the bars where the engine does
+  (`ShelfStripPreviewTests` ▸ `pocketTakesItsSlot`).
+
 ## Overflow fades, follows and pages through one home each
 
 Arrows cost a box at each end of every overflowing section and
@@ -923,7 +958,9 @@ Obligations:
   its presses to the same `pressed`, sparing the mark's own LEFT
   press, whose click opens its list (`OverflowMarkPanelSeamTests`,
   `OverflowMarkWiringTests` ▸
-  `leftPressOnAMarkSpares`); a view's
+  `leftPressOnAMarkSpares`), and the pocket plate's panel is a
+  second twin (#2678), `PocketPlatePanel.sendEvent` sparing the
+  plate's own LEFT press; a view's
   own press handler never re-spells the dismissal, so one that
   takes its own press cannot leave a peek standing
   (`BarPeekSeamTests` ▸ `onePressDismissal`,
@@ -1039,7 +1076,9 @@ Obligations:
   draws it rather than on its home Space (`BarPeekSeamTests` ▸
   `oneBarRowPick`, `BarPeekClickTests` ▸
   `refusedRowTakesThePlainSwitch`, `BarPeekAppBarRowTests` ▸
-  `travelerRowActsAsItsItem`). A left click on a click-held list
+  `travelerRowActsAsItsItem`). A pocketed window's row — the
+  pocket plate's list (#2678) — takes `focus_window`, which takes
+  it out, ahead of both arms (`PocketPlateTests` ▸ `rowTakesOut`). A left click on a click-held list
   opens it at once — a fading one included, no dwell and no
   cool-down — pops no menu and moves no focus, a row being the
   pick (#2571, retiring #2063's click cycle); `BarPeek.show`

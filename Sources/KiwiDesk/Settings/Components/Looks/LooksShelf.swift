@@ -76,7 +76,10 @@ struct LooksShelf: View {
             HStack {
                 groupHeader(L("looks.mine", "My looks"))
                 Spacer()
-                if LookGallery.isLive { shareButton }
+                if LookGallery.isLive {
+                    browseButton
+                    shareButton
+                }
                 Button {
                     importLook()
                 } label: {
@@ -174,28 +177,9 @@ struct LooksShelf: View {
 
     /// Trailing "+" tile saving the current look.
     private var addTile: some View {
-        Button {
+        DashedActionTile(systemImage: "plus", label: saveCurrentLabel) {
             saveRequest = NameEditRequest(seed: nextUserName())
-        } label: {
-            PaletteTile(name: " ", dashed: true) {
-                RoundedRectangle(
-                    cornerRadius: PaletteSceneThumbnail.plateRadius
-                )
-                .fill(SettingsTheme.sunken)
-                .overlay(
-                    VStack(spacing: 4) {
-                        Image(systemName: "plus").font(.title2)
-                        Text(saveCurrentLabel)
-                            .font(.caption2)
-                            .multilineTextAlignment(.center)
-                    }
-                    .foregroundStyle(SettingsTheme.ink3)
-                    .padding(4)
-                )
-            }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(saveCurrentLabel)
         .popover(item: $saveRequest) { request in
             savePopover(request)
                 .settingsPopoverChrome()

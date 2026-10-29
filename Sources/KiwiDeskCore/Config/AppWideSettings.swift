@@ -68,6 +68,9 @@ public struct AppWideSettings: Equatable, Sendable {
     /// Whether shortcuts tell left and right modifiers apart
     /// (`modifier.sides`, #2601). Off by default: no keyboard tap.
     public var modifierSides = false
+    /// How many windows the pocket holds (#2678): one person's
+    /// habit, so no profile varies it.
+    public var pocketCapacity = PocketCapacity.one
 
     public init() {}
 
@@ -259,7 +262,8 @@ extension AppWideSettings {
     /// present — the file predates #1741 and the crossing is still
     /// owed. The `desktop` (#2142), `space` (#2228), `mode`
     /// (#2144), `kiwivision` (#2103), `hyper` (#1870) and
-    /// `kiwihub` (#2600) and `modifier` (#2601) groups crossed
+    /// `kiwihub` (#2600), `modifier` (#2601) and `pocket` (#2678)
+    /// groups crossed
     /// nothing, so they never
     /// decide that.
     init?(
@@ -271,7 +275,8 @@ extension AppWideSettings {
         vision: Vision? = nil,
         hyper: Hyper? = nil,
         kiwihub: KiwiHub? = nil,
-        modifier: Modifier? = nil
+        modifier: Modifier? = nil,
+        pocket: Pocket? = nil
     ) {
         guard refusal != nil || quit != nil else { return nil }
         self.init()
@@ -286,6 +291,7 @@ extension AppWideSettings {
         hyperKey = hyper?.key
         if let keys = kiwihub?.key { kiwiHubKeys = keys }
         if let sides = modifier?.sides { modifierSides = sides }
+        if let capacity = pocket?.capacity { pocketCapacity = capacity }
         if let dim = vision?.dim { visionDim = Self.clampedDim(dim) }
         if let blur = vision?.blur { visionBlur = blur }
         if let appearance = vision?.appearance {

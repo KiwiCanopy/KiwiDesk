@@ -40,15 +40,24 @@ struct PocketPositionEndsTests {
     func rowWiresBoth() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Components/Keybindings/"
-                    + "PocketGroup.swift"
+                "Sources/KiwiDesk/Settings/Components/Bars/"
+                    + "KiwiShelfCard+Pocket.swift"
             )
         let source = SourceScan.stripComments(
             try String(contentsOf: file, encoding: .utf8)
         )
         .split(whereSeparator: \.isWhitespace)
         .joined()
-        #expect(source.contains("spokenValue:Self.spokenPosition("))
-        #expect(source.contains("ends:Self.ends(pocket.wrappedValue.edge)"))
+        #expect(
+            source.contains(
+                "spokenValue:PocketGroup.spokenPosition(readout,"
+                    + "edge:shelf.wrappedValue.pocketEdge)"
+            )
+        )
+        #expect(
+            source.contains(
+                "ends:PocketGroup.ends(shelf.wrappedValue.pocketEdge)"
+            )
+        )
     }
 }

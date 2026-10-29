@@ -158,6 +158,14 @@ extension KiwiCore {
                     + "(\(channel.rawValue)); probing once more"
             )
             retile()
+            return
+        }
+        if answer.answeredHeldProbe {
+            onLog(
+                "corroboration probe answered for window "
+                    + "\(id.raw); placing the held frame"
+            )
+            retile()
         }
     }
 }

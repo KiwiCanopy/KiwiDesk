@@ -23,6 +23,7 @@ enum HomeCardPlate {
             return tile(padding: 7, settings: settings) {
                 HomeCardBarsTile(
                     settings: settings,
+                    pocketStands: model.pocketStandsAtRest,
                     spaceCount: model.config.spaces.count
                 )
             }

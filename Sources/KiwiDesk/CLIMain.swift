@@ -22,6 +22,8 @@ func runCLI(_ arguments: [String]) -> Int32 {
         return CLICompleter.run(arguments)
     case .watch:
         return CLIWatch.run(arguments)
+    case .preview:
+        return CLIPreview.run(arguments)
     case .socket:
         return runSocketCommand(arguments)
     }
@@ -184,6 +186,8 @@ let cliUsage = """
       kiwidesk completion zsh|bash|fish
                                       print a shell completion script
       kiwidesk mcp                    MCP server on stdio, for AI apps
+      kiwidesk preview <look.json> <out.png>
+                                      draw a look file's preview
 
     the API, from this binary (no running app needed):
       kiwidesk list_commands          every command, grouped

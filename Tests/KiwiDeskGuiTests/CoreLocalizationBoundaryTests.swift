@@ -108,6 +108,8 @@ struct CoreLocalizationBoundaryTests {
         // The overflow mark's VoiceOver name, one key per direction
         // (#2235); the mark is drawn by Core.
         "App/KiwiCore+OverflowMarks.swift": 4,
+        // The pocket plate's VoiceOver name (#2678); Core draws it.
+        "App/KiwiCore+PocketPlate.swift": 1,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901, a float's two #1826), drawn
         // by Core; one Space
@@ -137,7 +139,7 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+BarMenus.swift": 8,
         // The window rows of the same menus (#1518): Core draws
         // them, and no word crosses into the GUI.
-        "App/KiwiCore+BarWindowMenus.swift": 8,
+        "App/KiwiCore+BarWindowMenus.swift": 9,
         // A Space chip's New Space and Delete Space rows and why a
         // Delete is greyed (#1790), on the same Core-drawn menu.
         "App/KiwiCore+SpaceChipLifecycle.swift": 9,
@@ -150,7 +152,7 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+VisionReach.swift": 1,
         // A bar shortcut's refusal pill (#761), drawn beside the
         // shelf.
-        "App/KiwiCore+ShelfRevealCue.swift": 9,
+        "App/KiwiCore+ShelfRevealCue.swift": 10,
         // A Hyper press with nothing to do (#2480), on the pill
         // Core draws.
         "App/KiwiCore+HyperBarePress.swift": 1,

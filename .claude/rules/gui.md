@@ -69,6 +69,12 @@ restated `20...80` satisfies on the day it is written.
   `SettingsColorSurfaceTests`, whose allow-list is the one copy
   of who may. Structure (is it drawn, how wide, how round) stays
   with its feature; only the tint moves.
+- **An edge chooser lists Left · Top · Bottom · Right** (owner,
+  2026-10-29, #2766) — the Dock's spatial Left · Bottom · Right
+  with Top added, never clockwise from Top: it takes `AppBarOptions.edgeOrder` or
+  `StackPositionOptions.order`, never an edge enum's `allCases`,
+  whose case order is stored and stays put
+  (`EdgeChooserOrderTests` ▸ `noCaseOrderInTheGui`).
 - **Grey, don't hide** a control with no effect in the current
   mode (#171) — keep it visible and dimmed. This covers a control
   that *would* work in another mode, so dimming says "switch that
@@ -911,14 +917,12 @@ from the one `simplePreviewSettings` so a hovered look reaches
 every card, and lights its own Space (#2777, `SimplePreviewTests`
 ▸ `pictureReadsTheHover`). A docked column's width is answered by
 the one `SettingsView.dockedPanelWidth`, which the save pill
-centres against (`HomeSurfacingTests`). **A change of the shown root or page records its
-motion through the one owner** — `SettingsModel`'s `destination`
-and `settingsRoot` `didSet`s — and a door that means another
-motion names it as `nav.pendingShellMotion` before the change, as
-`openFromCard` does, never by writing `nav.shellMotion` itself
-(`ShellMotionTests` ▸ `causeHasOneOwner`); a leaving branch's
-transition reads no cause, since it plays what it carried at its
-last render. **A row's
+centres against (`HomeSurfacingTests`). **Key no shell animation
+on the page shown**: the shell's spring keys on the root alone,
+and only a switch owes the converge of the root it lands on —
+Home's cards or Simple's sections (`ShellMotionTests` ▸
+`shellMountsTheMotion`, `pagesSwapAtOnce`) — a page case in that
+key brings back a morph on every card click. **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a
@@ -2175,6 +2179,13 @@ route and shell completion reads it, so a local verb is never an
 `if` ahead of that switch, and it never takes a spelling a socket
 command has, save the ruled `help` (`CLIRouteTests`,
 `CLIHelpSeamTests`).
+
+**`preview` renders the shelf card's `LookPlate` headless**
+(#1740): keep that view and what it draws free of `NSApp`, an
+environment object and a live model, or the gallery's previews
+stop (`CLIPreviewTests`). Its verb, usage line and PNG size are
+read by the KiwiDesk-Looks CI, so a change there moves that repo
+in step (`CLIPreviewContractTests`).
 
 ## Strings
 

@@ -159,16 +159,16 @@ enum ShortcutsRowOrder {
         .shortcuts(.toggleSticky),
     ]
 
-    /// The Pocket card (#2680): its two keys, then the brief
-    /// pocket's placement, drawn by `PocketGroup`.
+    /// The Pocket card (#2680): what it holds (`pocketList`, drawn
+    /// first by `PocketGroup`, #2678), then its two keys; where it
+    /// sits is KiwiShelf's card.
     static let pocketAtRest: [SettingKey] = [
         .shortcuts(.pocket),
         .shortcuts(.pocketWindow),
     ]
 
     static let pocketList: [SettingKey] = [
-        .shortcuts(.pocketEdge),
-        .shortcuts(.pocketPosition),
+        .shortcuts(.pocketCapacity)
     ]
 
     /// Size & float's `.showMore` tier, empty since #1255 took

@@ -61,6 +61,8 @@ extension KiwiCore {
             retireDepartedBars(live: Set(fallback.map(\.display)))
             overflowMarks.standingDown = []
             updateOverflowMarks()
+            pocketPlate.standingDown = []
+            updatePocketPlate(slots: [:])
             return
         }
         var appBarsShown: [AppBarManager.Bar] = []
@@ -70,6 +72,9 @@ extension KiwiCore {
         var hiding = HidingShelves(
             dotStarts: shelves.handles.dotStarts
         )
+        // The pocket's slot on each screen's bar edge (#2678).
+        var pocketSlots: [DisplayID: CGRect] = [:]
+        let pocketOnShelf = pocketStands
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.
@@ -103,6 +108,7 @@ extension KiwiCore {
                 settings: shown,
                 spaceItems: items,
                 app: app,
+                pocket: pocketOnShelf,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(
@@ -117,6 +123,11 @@ extension KiwiCore {
                 settings: shown
             )
             let plans = planned.filter(\.drawsAny)
+            if let plan = plans.first(where: { $0.arrangement.pocket != nil }),
+                let slot = plan.arrangement.pocket
+            {
+                pocketSlots[display.id] = plan.segment(slot)
+            }
             strips += plans.map {
                 ShelfStrip(
                     display: display.id,
@@ -128,7 +139,8 @@ extension KiwiCore {
                     slides: $0.slides,
                     mark: hiding.marks[
                         ShelfManager.Key(display: display.id, edge: $0.edge)
-                    ]
+                    ],
+                    pocketSlot: $0.arrangement.pocket.map($0.segment)
                 )
             }
             if let app,
@@ -160,6 +172,12 @@ extension KiwiCore {
             appBars.sync(appBarsShown)
             spaceBars.sync(spaceBarsShown)
         }
+        // The pocket wears the shelf's look, and its section rides
+        // the shelf: synced first, so each shelf mounts this pass's
+        // pocket (#2678).
+        pocketPlate.standingDown = standingDown
+        pocketPlate.markBands = hiding.pocketBands
+        updatePocketPlate(slots: pocketSlots)
         // The revealer first, so the shelves judge this pass's
         // hiding edges (#761).
         syncHidingShelves(hiding)
@@ -182,6 +200,7 @@ extension KiwiCore {
         let keep = live.union(shelves.leavingDisplays)
         appBars.retire(except: keep)
         spaceBars.retire(except: keep)
+        pocketPlate.retire(except: keep)
     }
 
     /// One shelf to show: its display, edge and strip, which bars
@@ -197,6 +216,8 @@ extension KiwiCore {
         /// the mark at `mark` a grow reveal grows out of.
         var slides = false
         var mark: BarMotion.RevealMark? = nil
+        /// The pocket's pinned slot on this strip, AX (#2678).
+        var pocketSlot: CGRect? = nil
     }
 
     /// Hands each shelf the sections its bars just rendered on its
@@ -219,7 +240,12 @@ extension KiwiCore {
                         ? appBars.shownOverlay(on: shelf.display) : nil,
                     divider: shelf.divider,
                     slides: shelf.slides,
-                    mark: shelf.mark
+                    mark: shelf.mark,
+                    pocket: shelf.pocketSlot.flatMap { slot in
+                        pocketPlate.sectionMount(on: shelf.display).map {
+                            ShelfPocketPiece.Mount(view: $0, slot: slot)
+                        }
+                    }
                 )
             }
         )

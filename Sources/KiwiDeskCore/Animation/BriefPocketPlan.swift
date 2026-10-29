@@ -19,8 +19,6 @@ enum BriefPocketPlan {
     static let side: CGFloat = 40
     /// The pocket mark inside it, and the size the plate ends at.
     static let markSide: CGFloat = 26
-    /// The pocket's distance from the edge, or from a bar on it.
-    static let margin: CGFloat = 8
     /// The flying plate's corner radius at full size, the Space
     /// switch plate's.
     static let plateRadius = SpaceSlidePlan.cornerRadius
@@ -37,53 +35,6 @@ enum BriefPocketPlan {
     /// twice it, so the default 150 ms flies in 0.3 s.
     static func flight(durationMS: Int) -> TimeInterval {
         min(max(Double(durationMS) * 2 / 1000, 0.2), 0.8)
-    }
-
-    /// The pocket's frame in `region` — the screen's visible
-    /// bounds clear of the bars — on `edge`, its centre `position`
-    /// percent along it (left or top first), kept whole inside.
-    static func pocketFrame(
-        in region: CGRect,
-        edge: AppBarEdge,
-        position: CGFloat
-    ) -> CGRect {
-        let share = max(0, min(position, 100)) / 100
-        let half = side / 2
-        func along(_ low: CGFloat, _ high: CGFloat) -> CGFloat {
-            let lo = low + margin + half
-            let hi = high - margin - half
-            guard hi > lo else { return (low + high) / 2 }
-            return min(max(low + (high - low) * share, lo), hi)
-        }
-        let centre: CGPoint
-        switch edge {
-        case .top:
-            centre = CGPoint(
-                x: along(region.minX, region.maxX),
-                y: region.minY + margin + half
-            )
-        case .bottom:
-            centre = CGPoint(
-                x: along(region.minX, region.maxX),
-                y: region.maxY - margin - half
-            )
-        case .left:
-            centre = CGPoint(
-                x: region.minX + margin + half,
-                y: along(region.minY, region.maxY)
-            )
-        case .right:
-            centre = CGPoint(
-                x: region.maxX - margin - half,
-                y: along(region.minY, region.maxY)
-            )
-        }
-        return CGRect(
-            x: centre.x - half,
-            y: centre.y - half,
-            width: side,
-            height: side
-        )
     }
 
     /// The square the plate ends at inside `pocket`, the mark's.

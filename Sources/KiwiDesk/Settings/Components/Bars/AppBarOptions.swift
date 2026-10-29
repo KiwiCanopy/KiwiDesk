@@ -6,9 +6,14 @@ import KiwiDeskCore
 /// Every list is COMPUTED: a localized value stored for the life
 /// of the process keeps the locale it was first read in (#1311).
 enum AppBarOptions {
+    /// Every edge chooser's order, left to right across the
+    /// screen with top before bottom (#2766) — not the enum's case
+    /// order, which stays as stored.
+    static let edgeOrder: [AppBarEdge] = [.left, .top, .bottom, .right]
+
     @MainActor
     static var edge: [(AppBarEdge, String)] {
-        AppBarEdge.allCases.map { ($0, edgeName($0)) }
+        edgeOrder.map { ($0, edgeName($0)) }
     }
 
     /// An edge's name, as every edge row says it.

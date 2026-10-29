@@ -11,6 +11,9 @@ import SwiftUI
 /// own App Bar look: the frame draws the first host's.
 struct HomeCardBarsTile: View {
     let settings: TilingSettings
+    /// Whether the pocket stands on the shelf, Core's
+    /// `pocketStands` at rest: Several windows (#2678).
+    let pocketStands: Bool
     /// Real space count from draft (owner 2026-08-10).
     var spaceCount: Int = 3
     /// Scale factor (1 on home plate, larger in detail panel).
@@ -221,7 +224,8 @@ struct HomeCardBarsTile: View {
                 app: app,
                 edge: edge,
                 vertical: vertical,
-                scale: scale
+                scale: scale,
+                pocket: pocketStands && settings.kiwishelf.pocketEdge == edge
             )
         }
     }

@@ -53,47 +53,83 @@ struct ShelfRevealBandTests {
         revealer.moved(to: box.point)
     }
 
+    @Test("the pocket's handle takes one band more at the leaning end")
+    func pocketJoinsTheRow() {
+        let length = ShelfMarkPlacement.bandLength
+        var shelf = KiwiShelf()
+        shelf.alignment = .center
+        let end = ShelfMarkPlacement.row(
+            for: [.space],
+            pocketLeansEnd: true,
+            length: 1000,
+            shelf: shelf
+        )
+        // Two bands centred as one row, the pocket after the bar's.
+        #expect(end.bars[.space] == (500 - length)...500)
+        #expect(end.pocket == 500...(500 + length))
+        let start = ShelfMarkPlacement.row(
+            for: [.space],
+            pocketLeansEnd: false,
+            length: 1000,
+            shelf: shelf
+        )
+        #expect(start.pocket == (500 - length)...500)
+        #expect(start.bars[.space] == 500...(500 + length))
+        let none = ShelfMarkPlacement.row(
+            for: [.space],
+            pocketLeansEnd: nil,
+            length: 1000,
+            shelf: shelf
+        )
+        #expect(none.pocket == nil)
+    }
+
     @Test("marks sit as one row where a lone bar would, in order")
     func bandsFormOneRow() {
         let length = ShelfMarkPlacement.bandLength
         var shelf = KiwiShelf()
         shelf.alignment = .center
         shelf.order = .spacesFirst
-        let lone = ShelfMarkPlacement.bands(
+        let lone = ShelfMarkPlacement.row(
             for: [.space],
+            pocketLeansEnd: nil,
             length: 1000,
             shelf: shelf
         )
-        #expect(lone[.space] == (500 - length / 2)...(500 + length / 2))
-        let pair = ShelfMarkPlacement.bands(
+        #expect(lone.bars[.space] == (500 - length / 2)...(500 + length / 2))
+        let pair = ShelfMarkPlacement.row(
             for: [.space, .app],
+            pocketLeansEnd: nil,
             length: 1000,
             shelf: shelf
         )
         // Edge to edge, meeting at the middle of the edge.
-        #expect(pair[.space]?.upperBound == 500)
-        #expect(pair[.app]?.lowerBound == 500)
+        #expect(pair.bars[.space]?.upperBound == 500)
+        #expect(pair.bars[.app]?.lowerBound == 500)
         shelf.order = .appsFirst
-        let swapped = ShelfMarkPlacement.bands(
+        let swapped = ShelfMarkPlacement.row(
             for: [.space, .app],
+            pocketLeansEnd: nil,
             length: 1000,
             shelf: shelf
         )
-        #expect(swapped[.app]?.upperBound == 500)
+        #expect(swapped.bars[.app]?.upperBound == 500)
         shelf.alignment = .start
-        let start = ShelfMarkPlacement.bands(
+        let start = ShelfMarkPlacement.row(
             for: [.space, .app],
+            pocketLeansEnd: nil,
             length: 1000,
             shelf: shelf
         )
-        #expect(start[.app]?.lowerBound == 0)
+        #expect(start.bars[.app]?.lowerBound == 0)
         shelf.alignment = .end
-        let end = ShelfMarkPlacement.bands(
+        let end = ShelfMarkPlacement.row(
             for: [.space, .app],
+            pocketLeansEnd: nil,
             length: 1000,
             shelf: shelf
         )
-        #expect(end[.space]?.upperBound == 1000)
+        #expect(end.bars[.space]?.upperBound == 1000)
     }
 
     @Test("the band is the mark's, never the whole edge")

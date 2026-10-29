@@ -14,7 +14,8 @@ extension KiwiCore {
             unmarkPocketWindow(id)
             return .ok()
         }
-        guard state.pocketAcceptsMark else {
+        let capacity = appWide.pocketCapacity
+        guard state.pocketAcceptsMark(capacity) else {
             return refuseSecondPocketWindow(id)
         }
         guard !window.isFullscreen, !window.isTransientOverlay
@@ -55,7 +56,7 @@ extension KiwiCore {
     }
 
     /// A second window asked to be the pocket window: refused on it.
-    private func refuseSecondPocketWindow(
+    func refuseSecondPocketWindow(
         _ id: WindowID
     ) -> CommandResponse {
         soundIfDrawn(
