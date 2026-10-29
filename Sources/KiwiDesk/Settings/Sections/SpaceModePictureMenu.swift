@@ -66,7 +66,20 @@ enum LayoutMenuPictures {
     /// The picture's size in points, and the plate's rim around
     /// the schematic.
     static let size = CGSize(width: 40, height: 25)
-    static let rim: CGFloat = 2
+    static let rim: CGFloat = 3
+
+    /// The schematic's own canvas, and the scale that fits it inside
+    /// the plate with `rim` showing on every side.
+    private static let tile = CGSize(
+        width: SchematicScale.tile.width ?? 132,
+        height: SchematicScale.tile.height
+    )
+    private static var fit: CGFloat {
+        min(
+            (size.width - 2 * rim) / tile.width,
+            (size.height - 2 * rim) / tile.height
+        )
+    }
 
     static func image(_ mode: LayoutMode) -> NSImage {
         if let hit = memo[mode] { return hit }
@@ -78,14 +91,12 @@ enum LayoutMenuPictures {
                 windows: windows(for: mode),
                 scale: .tile
             )
-            .scaleEffect(
-                (size.width - 2 * rim) / (SchematicScale.tile.width ?? 132)
-            )
+            .scaleEffect(fit)
             .frame(
-                width: size.width - 2 * rim,
-                height: size.height - 2 * rim
+                width: tile.width * fit,
+                height: tile.height * fit
             )
-            .padding(rim)
+            .frame(width: size.width, height: size.height)
             .background(
                 RoundedRectangle(cornerRadius: 4)
                     .fill(SettingsTheme.previewPlate)
