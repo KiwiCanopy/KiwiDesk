@@ -34,11 +34,11 @@ extension LooksShelf {
                     explanation: L(
                         "looks.share.help",
                         "Opens the gallery's submission form in your "
-                            + "browser with this look filled in. While "
-                            + "half or more of a look you added from "
-                            + "someone else is unchanged, the share "
-                            + "credits them. A look you started from a "
-                            + "bundled one credits no one."
+                            + "browser with this look filled in. While at "
+                            + "least half of a look you imported is "
+                            + "unchanged, sharing credits its author. A "
+                            + "look you started from a bundled one "
+                            + "credits no one."
                     ),
                     subject: L("looks.share.title", "Share this look")
                 )
@@ -59,9 +59,9 @@ extension LooksShelf {
     /// The credit the share carries, as one line; nil without one.
     private var creditLine: String? {
         let share = LookShare(name: "", settings: model.config.settings)
-        guard let credit = share.credit, let name = credit.name else {
-            return nil
-        }
+        guard let credit = share.credit,
+            let name = credit.name ?? credit.id
+        else { return nil }
         guard let author = credit.author else {
             return L("looks.share.based_on_name", "Based on %1$@", name)
         }
@@ -86,6 +86,7 @@ extension LooksShelf {
         let version = KiwiDeskVersion.semantic
         shareRequest = nil
         do {
+            failure = nil
             if let url = try share.prefilledURL(version: version) {
                 NSWorkspace.shared.open(url)
                 return
@@ -95,7 +96,6 @@ extension LooksShelf {
             try share.fileData().write(to: file, options: .atomic)
             NSWorkspace.shared.activateFileViewerSelecting([file])
             NSWorkspace.shared.open(share.formURL(version: version))
-            failure = nil
         } catch {
             failure = L(
                 "looks.share_failed",

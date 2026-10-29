@@ -18,18 +18,32 @@ extension ShelfLook {
         settings.lookOrigin = recordsOrigin ? look : nil
     }
 
+    /// The look `settings` wear now, under `name`, with the credit
+    /// its origin still earns — what Save stores and Share sends.
+    public static func current(
+        named name: String,
+        in settings: TilingSettings
+    ) -> ShelfLook {
+        ShelfLook(
+            name: name,
+            style: LookKeys.extract(from: settings),
+            colors: ColorPaletteKeys.extract(from: settings),
+            basedOn: settings.lookCredit
+        )
+    }
+
     /// The credit a look started from this one carries: its author's
     /// own, else the credit it kept.
-    var credit: LookCredit? {
+    public var credit: LookCredit? {
         guard let author else { return basedOn }
         return LookCredit(name: name, author: author)
     }
 }
 
 extension TilingSettings {
-    /// The credit Share and Save attach (`ShelfLook.creditShare`):
-    /// the origin's while half or more of its settings are kept,
-    /// else none. An origin since deleted from the library keeps it.
+    /// The credit Share and Save attach: the origin's while it is
+    /// `stillCredited` (ShelfLook+Credit.swift), else none. An
+    /// origin since deleted from the library keeps it.
     public var lookCredit: LookCredit? {
         guard let lookOrigin, lookOrigin.stillCredited(by: self) else {
             return nil

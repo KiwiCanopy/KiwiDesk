@@ -19,12 +19,7 @@ public struct LookShare: Sendable, Equatable {
     public let look: ShelfLook
 
     public init(name: String, settings: TilingSettings) {
-        look = ShelfLook(
-            name: name,
-            style: LookKeys.extract(from: settings),
-            colors: ColorPaletteKeys.extract(from: settings),
-            basedOn: settings.lookCredit
-        )
+        look = .current(named: name, in: settings)
     }
 
     /// The credit the share carries, nil when none is attached.

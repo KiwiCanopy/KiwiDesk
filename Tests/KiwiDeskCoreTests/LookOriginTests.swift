@@ -100,9 +100,58 @@ struct LookOriginTests {
         #expect(body.origin?.name == "Dusk")
         let follower = body.worn(over: TilingSettings())
         #expect(follower.lookOrigin == settings.lookOrigin)
-        #expect(body.isWorn(by: follower))
+        #expect(body.isStamped(on: follower))
         var cleared = follower
         cleared.lookOrigin = nil
-        #expect(!body.isWorn(by: cleared))
+        // Ownership reads the paint; a re-stamp reads the origin too.
+        #expect(body.isWorn(by: cleared))
+        #expect(!body.isStamped(on: cleared))
+    }
+}
+
+/// The tour's looks step is a pick door too (#1720, #1740): its
+/// paint records or clears the origin, and its Revert puts the
+/// origin back with the rest of the paint.
+@Suite("Look origin in the tour paint")
+@MainActor
+struct LookOriginTourTests {
+    private let authored = ShelfLook(
+        name: "Dusk",
+        style: ["kiwishelf.thickness": .number(30)],
+        colors: [:],
+        author: "Anna"
+    )
+
+    @Test("a tour paint records an authored look and clears a bundled")
+    func paintPicks() {
+        let picked = KiwiCore.painted(
+            TilingSettings(),
+            look: authored,
+            palette: nil
+        )
+        #expect(picked.lookOrigin?.author == "Anna")
+        let bundled = ShelfLook(name: "Plain", style: [:], colors: [:])
+        let cleared = KiwiCore.painted(picked, look: bundled, palette: nil)
+        #expect(cleared.lookOrigin == nil)
+        let palette = ColorPalette(name: "P", colors: [:])
+        let recoloured = KiwiCore.painted(
+            picked,
+            look: nil,
+            palette: palette
+        )
+        #expect(recoloured.lookOrigin == picked.lookOrigin)
+    }
+
+    @Test("a tour Revert returns the origin")
+    func revertReturnsTheOrigin() {
+        let before = KiwiCore.painted(
+            TilingSettings(),
+            look: authored,
+            palette: nil
+        )
+        let bundled = ShelfLook(name: "Plain", style: [:], colors: [:])
+        let after = KiwiCore.painted(before, look: bundled, palette: nil)
+        let reverted = KiwiCore.unpainted(after, to: before)
+        #expect(reverted.lookOrigin == before.lookOrigin)
     }
 }

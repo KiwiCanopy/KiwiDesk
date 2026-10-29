@@ -57,8 +57,15 @@ public struct LookBody: Codable, Sendable, Equatable {
         for leaf in TilingSettings.layoutIndicatorLeaves {
             probe[keyPath: leaf] = nil
         }
-        return settings.lookOrigin == origin
-            && named("").admitted.isApplied(to: probe)
+        return named("").admitted.isApplied(to: probe)
+    }
+
+    /// Whether `settings` wear this look AND carry its origin — what
+    /// a follower's file copy must hold, so a re-stamp also reaches
+    /// one that differs only in its credit (#1740). Ownership
+    /// verdicts read `isWorn`, the paint alone.
+    public func isStamped(on settings: TilingSettings) -> Bool {
+        settings.lookOrigin == origin && isWorn(by: settings)
     }
 
     private enum CodingKeys: String, CodingKey {

@@ -39,12 +39,7 @@ extension KiwiCore {
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
-        let look = ShelfLook(
-            name: name,
-            style: LookKeys.extract(from: settings),
-            colors: ColorPaletteKeys.extract(from: settings),
-            basedOn: settings.lookCredit
-        )
+        let look = ShelfLook.current(named: name, in: settings)
         try lookLibrary.save(look)
         return look
     }

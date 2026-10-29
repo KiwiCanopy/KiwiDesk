@@ -166,13 +166,15 @@ extension SettingsValueReadout {
 extension SettingsValueReadout {
     /// The origin's diff row label.
     static var lookOriginLabel: String {
-        L("looks.origin", "Look credit")
+        L("looks.origin", "Based on")
     }
 
-    /// The look an origin credits, as a diff row reads it.
+    /// The credit an origin carries, as a diff row reads it.
     static func lookCredit(_ origin: ShelfLook?) -> String {
-        guard let origin else { return L("looks.origin.none", "None") }
-        guard let author = origin.author else { return origin.name }
-        return L("looks.origin.by", "%1$@ by %2$@", origin.name, author)
+        guard let credit = origin?.credit, let name = credit.name else {
+            return L("looks.origin.none", "None")
+        }
+        guard let author = credit.author else { return name }
+        return L("looks.origin.by", "%1$@ by %2$@", name, author)
     }
 }
