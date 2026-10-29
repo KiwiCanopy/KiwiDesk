@@ -15,7 +15,8 @@ import Testing
 /// the `MachineConfig.moves` table. A floor's shape is its name's
 /// suffix, so a floor misnamed for another shape is checked
 /// against that shape's format and can pass while its own bump is
-/// missing.
+/// missing. Unscanned: a floor not spelled `static … Format` in a
+/// `ConfigMigration+` file, or a literal passed to `stampBelow`.
 @Suite("Config migration floor census")
 struct ConfigMigrationFloorCensusTests {
     private struct Floor {
