@@ -44,6 +44,12 @@ extension SettingsView {
     ) -> some View {
         HStack(spacing: 0) {
             contentColumn
+                .modifier(
+                    PageContentLag(
+                        lags: pageExpands && model.nav.contentLagPending,
+                        played: { model.nav.contentLagPending = false }
+                    )
+                )
             // `panelDocked` FIRST — the same predicate the pill's
             // centring offset reads: a conjunct added there must
             // move the pill and the mount together (review
@@ -58,9 +64,38 @@ extension SettingsView {
                 )
             }
         }
+        // Grown out of the card it was opened from (#2737 ruling 13).
+        .background(pageBox)
     }
 
-    @ViewBuilder private var contentColumn: some View {
+    /// The page's box, matched to its card's while a card opened it.
+    @ViewBuilder private var pageBox: some View {
+        PageBox(model: model)
+    }
+}
+
+/// A page's box, in the shell's namespace — gated once, where the
+/// shell sets it.
+private struct PageBox: View {
+    @ObservedObject var model: SettingsModel
+    @Environment(\.shellSpace) private var shellSpace
+
+    var body: some View {
+        if let destination = model.destination,
+            model.nav.shellMotion == .expand(destination)
+        {
+            Rectangle()
+                .fill(SettingsTheme.page)
+                .shellMatched(
+                    ShellMotion.boxID(destination),
+                    in: shellSpace
+                )
+        }
+    }
+}
+
+extension SettingsView {
+    @ViewBuilder fileprivate var contentColumn: some View {
         VStack(spacing: 0) {
             if model.hasCustomLua {
                 CustomLuaBanner(savingAdopts: !model.sidecarExists)
@@ -196,6 +231,25 @@ extension SettingsView {
                 )
             )
             model.nav.endFlash(token: token)
+        }
+    }
+}
+
+extension SettingsView {
+    /// Simple's two columns (#2737 ruling 10): the controls, and the
+    /// preview docked beside them where the width docks a panel.
+    @ViewBuilder func simplePane(
+        _ width: SettingsWidthClass
+    ) -> some View {
+        HStack(spacing: 0) {
+            SimpleScreen(model: model)
+            if let preview = dockedPanelWidth(width) {
+                SettingsTheme.hairline.frame(width: 1)
+                ScrollView { SimplePreview(model: model) }
+                    .scrollIndicators(.hidden)
+                    .frame(width: preview)
+                    .background(SettingsTheme.panel)
+            }
         }
     }
 }

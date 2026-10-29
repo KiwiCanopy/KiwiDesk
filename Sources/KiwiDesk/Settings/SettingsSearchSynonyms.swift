@@ -22,6 +22,11 @@ enum SettingsSearchSynonyms {
                 "mission control", "workspace", "virtual desktop",
             ]
         }
+        // The drawer's retired title (#2737), which a user who
+        // learned it still types; "Advanced" now names a root.
+        if id == SettingsCatalog.general.generalAdvanced.control.id {
+            return ["advanced"]
+        }
         return []
     }
 

@@ -27,6 +27,9 @@ import {
 // once its /de/ and /ja/ routes genuinely exist — otherwise the
 // alternates advertise URLs that 404.
 const paths = ["", "nerd", "guide", "changelog", "compare"];
+// "looks" (the gallery, #1740) is deliberately absent: it ships
+// noindex and unlinked until the owner calls it live, and joins
+// this list in the same change that drops its noindex.
 
 // The trailer plays in the #demo section of the landing page in
 // both modes. A <video:video> entry per landing URL is what lets

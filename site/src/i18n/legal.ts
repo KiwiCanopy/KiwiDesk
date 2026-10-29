@@ -85,7 +85,7 @@ const de: LegalStrings = {
   },
   datenschutz: {
     title: "Datenschutzerklärung",
-    updated: "2. Oktober 2026",
+    updated: "28. Oktober 2026",
     sections: [
       {
         title: "1. Datenschutz auf einen Blick",
@@ -189,7 +189,12 @@ const de: LegalStrings = {
           `des Anbieters kiwicanopy.com). Eine Datenübertragung an diese Anbieter findet erst ` +
           `statt, wenn du einen entsprechenden Link aktiv anklickst und die jeweilige Seite ` +
           `aufrufst. Ab diesem Zeitpunkt gelten die Datenschutzbestimmungen des jeweiligen ` +
-          `Anbieters.</p>`,
+          `Anbieters.</p>` +
+          `<p>Die Look-Galerie (/looks/) zeigt Looks, deren Daten, Dateien und Likes auf GitHub ` +
+          `liegen, im öffentlichen Repository KiwiCanopy/KiwiDesk-Looks. Diese Website liest sie ` +
+          `beim Erstellen der Seiten aus; dein Browser stellt für die Galerie also keine Anfrage ` +
+          `an GitHub. Erst „Herunterladen“, „Like“ und „Diesen Look melden“ öffnen GitHub, wenn ` +
+          `du sie anklickst.</p>`,
       },
       {
         title: "8. SSL-/TLS-Verschlüsselung",
@@ -338,7 +343,7 @@ const en: LegalStrings = {
   },
   datenschutz: {
     title: "Privacy Policy",
-    updated: "2 October 2026",
+    updated: "28 October 2026",
     sections: [
       {
         title: "1. Privacy at a glance",
@@ -433,7 +438,11 @@ const en: LegalStrings = {
           `<p>This website links to external services (including GitHub, Ko-fi, and the ` +
           `provider's website kiwicanopy.com). Data is only transmitted to these providers once ` +
           `you actively click a corresponding link and visit the respective page. From that ` +
-          `point on, the privacy policies of the respective provider apply.</p>`,
+          `point on, the privacy policies of the respective provider apply.</p>` +
+          `<p>The looks gallery (/looks/) shows looks whose data, files and likes live on GitHub, ` +
+          `in the public repository KiwiCanopy/KiwiDesk-Looks. This website reads them when it is ` +
+          `built, so your browser sends no request to GitHub to show the gallery. Only Download, ` +
+          `Like and Report this look open GitHub, once you click them.</p>`,
       },
       {
         title: "8. SSL/TLS encryption",
@@ -574,7 +583,7 @@ const ja: LegalStrings = {
   },
   datenschutz: {
     title: "プライバシーポリシー",
-    updated: "2026年10月2日",
+    updated: "2026年10月28日",
     sections: [
       {
         title: "1. 概要",
@@ -658,7 +667,12 @@ const ja: LegalStrings = {
           `<p>本ウェブサイトは外部サービス（GitHub、Ko-fi、および提供者のウェブサイト kiwicanopy.com ` +
           `など）へのリンクを含みます。これらの提供者へのデータ送信は、対応するリンクをあなたが実際に ` +
           `クリックし、当該ページを訪問した時点で初めて発生します。それ以降は、各提供者の ` +
-          `プライバシーポリシーが適用されます。</p>`,
+          `プライバシーポリシーが適用されます。</p>` +
+          `<p>デザインギャラリー（/looks/）に掲載するデザインのデータ、ファイル、いいねは、GitHub の ` +
+          `公開リポジトリ KiwiCanopy/KiwiDesk-Looks にあります。本ウェブサイトはサイトの構築時にそれらを ` +
+          `読み込むため、ギャラリーを表示するためにあなたのブラウザが GitHub へリクエストを送ることは ` +
+          `ありません。「ダウンロード」「いいね」「このデザインを報告」は、クリックしたときにだけ GitHub ` +
+          `を開きます。</p>`,
       },
       {
         title: "8. SSL／TLS 暗号化",

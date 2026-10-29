@@ -85,13 +85,14 @@ struct OverrideMinSizeRowTests {
         let cell = try SourceScan.strippedSource(
             at: root.appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Sections/"
-                    + "SpacesSection+Customize.swift"
+                    + "SpaceCustomizeButton.swift"
             )
         ).filter { !$0.isWhitespace }
         #expect(
             cell.contains(
-                "OverrideCellState.resolve(count:count,live:model.config"
-                    + ".settings.floatingLiveOverrideCount(for:space)"
+                "OverrideCellState.resolve(count:settings"
+                    + ".spaceOverrideCount(for:space),live:settings"
+                    + ".floatingLiveOverrideCount(for:space)"
             )
         )
     }

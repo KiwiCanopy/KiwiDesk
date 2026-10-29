@@ -32,6 +32,7 @@ extension TilingSettings: Codable {
         case shortcutPanel = "shortcut_panel"
         case resize
         case space
+        case lookOrigin = "look_origin"
     }
 
     enum SpaceKeys: String, CodingKey {
@@ -156,6 +157,10 @@ extension TilingSettings: Codable {
                 MouseSettings.self,
                 forKey: .mouse
             ) ?? MouseSettings()
+        lookOrigin = try container.decodeIfPresent(
+            ShelfLook.self,
+            forKey: .lookOrigin
+        )
         try decodeGap(from: container)
         try decodeLayout(from: container)
         try decodeDrag(from: container)

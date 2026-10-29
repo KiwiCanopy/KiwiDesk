@@ -105,12 +105,25 @@ struct SpaceAddNameTests {
             in: source
         )
         #expect(row?.contains("model.config.spaces.append($0)") == true)
-        // A "+" never reuses a live-only Space's name (#1790).
-        let taken = SourceScan.declarationBody(
-            after: "var takenSpaces: [SpaceID]",
-            in: source
+        // A "+" never reuses a live-only Space's name (#1790); the
+        // rule lives on the model, which both row lists read.
+        #expect(
+            source.contains(
+                "var takenSpaces: [SpaceID] { model.takenSpaceNames }"
+            )
         )
-        #expect(taken?.contains("model.liveOnlySpaces") == true)
+        let derived = try String(
+            contentsOf: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/Settings/SettingsModel+Derived.swift"
+                ),
+            encoding: .utf8
+        )
+        let taken = SourceScan.declarationBody(
+            after: "var takenSpaceNames: [SpaceID]",
+            in: derived
+        )
+        #expect(taken?.contains("liveOnlySpaces") == true)
     }
 
     @Test("the row draws the rule's refusal")

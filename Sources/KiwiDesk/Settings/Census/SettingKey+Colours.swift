@@ -43,6 +43,9 @@ enum ColoursKey: String, CaseIterable, Hashable {
     case lookRename = "(action) look.rename"
     case lookExport = "(action) look.export"
     case lookDelete = "(action) look.delete"
+    /// The authored look the current one was picked from (#1740),
+    /// which Share and Save credit; a pick writes it.
+    case lookOrigin = "settings.lookOrigin"
     /// Each role group's colour, written onto its ticked rows
     /// (#1857); it stores nothing of its own.
     case accentPaint = "(action) colors.accent.paint"
@@ -140,6 +143,10 @@ extension ColoursKey {
             return .row(.coloursAndMotion, .palettes, .showMore)
         case .lookApply, .lookSave, .lookImport:
             return .row(.coloursAndMotion, .looks, .atRest)
+        case .lookOrigin:
+            // Written by a pick, drawn by no control: the save pill
+            // narrates it, search never lands on it.
+            return .internalOnly
         case .lookKeepPreviousColors:
             // Present only while a look click replaced colours no
             // saved palette brings back (`KeepColorsOffer`).
@@ -261,6 +268,8 @@ extension ColoursKey {
             return .text("looks.export")
         case .lookDelete:
             return .text("looks.delete")
+        case .lookOrigin:
+            return .none
         // Labelled by their group (#2389): the two wells share
         // the drawn "Ticked rows", so the search join lands each
         // on its own group's title instead (gui.md ▸ #1250).

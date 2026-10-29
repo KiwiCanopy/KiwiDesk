@@ -76,6 +76,10 @@ struct SettingsSearchCatalogSynonymTests {
                 "macos-desktops",
                 "likewise, the moves behind its drawer"
             ),
+            SettingsCatalog.general.generalAdvanced.control.id: (
+                "files-and-reset",
+                "the drawer's retired title, now a root's (#2737)"
+            ),
         ]
     }
 
@@ -161,5 +165,18 @@ struct SettingsSearchCatalogSynonymTests {
                     "searching help reached \(hits.count) row(s)"
             )
         )
+    }
+
+    /// The drawer's retired title still finds it (#2737).
+    @Test("advanced finds Files & Reset")
+    func advancedFindsFilesAndReset() {
+        pinEnglish()
+        defer { reset() }
+        let anchor = SettingsCatalog.general.generalAdvanced.control.id
+        let hits = SettingsSearch.results(
+            query: "advanced",
+            context: SettingsSearchContext()
+        ).settings
+        #expect(hits.contains { $0.anchor.anchor == anchor })
     }
 }

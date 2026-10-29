@@ -79,7 +79,9 @@ struct PopUpTriggerTests {
     }
 
     /// Each trigger takes the seal and no action-button face, and
-    /// its label carries no spacer, which made it greedy.
+    /// its label is never greedy: the Font label carries no spacer,
+    /// and the app picker's pins its chevron to the floor's end
+    /// with one the label's own fixed size bounds (#268).
     @Test("both triggers take the seal and hug their name")
     func triggersHug() throws {
         let font = "Components/Bars/KiwiShelfCard+Font.swift"
@@ -89,9 +91,12 @@ struct PopUpTriggerTests {
         #expect(!trigger.contains("settingsActionButton"))
         for path in [font, picker] {
             let label = try Self.body("} label: {", in: path)
-            #expect(!label.contains("Spacer("), "\(path)'s trigger is greedy")
             #expect(label.contains(".lineLimit(1)"))
         }
+        #expect(
+            !(try Self.body("} label: {", in: font)).contains("Spacer("),
+            "the Font trigger is greedy"
+        )
         // The Font trigger trails (#2439), so it takes no floor: a
         // floor parks a short name's chevron short of the row's
         // edge (#2507).
@@ -103,6 +108,13 @@ struct PopUpTriggerTests {
             .split(whereSeparator: \.isWhitespace).joined()
         #expect(pickerLabel.occurrences(of: ".frame(minWidth:") == 1)
         #expect(pickerLabel.contains(")}.frame(minWidth:"))
+        // Its spacer is bounded by the label's own fixed size.
+        #expect(
+            pickerLabel.contains(
+                ".frame(minWidth:minWidth,alignment:.leading)"
+                    + ".fixedSize(horizontal:true,vertical:false)"
+            )
+        )
         // A tall face keeps the system line box.
         let fontLabel = try Self.body("} label: {", in: font)
         #expect(fontLabel.contains(".frame(height: Self.systemLineHeight)"))

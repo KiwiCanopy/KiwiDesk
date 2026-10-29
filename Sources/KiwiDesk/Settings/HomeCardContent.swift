@@ -113,7 +113,7 @@ enum HomeCardContent {
                 summaries.count
             )
         case .appRules:
-            let rules = ruleCount(model)
+            let rules = model.appRuleCount
             guard rules > 0 else {
                 return L(
                     "home.card.app_rules.none",
@@ -188,13 +188,6 @@ enum HomeCardContent {
         model.config.layers
             .first { $0.isDefault }?
             .bindings.count ?? 0
-    }
-
-    private static func ruleCount(
-        _ model: SettingsModel
-    ) -> Int {
-        model.config.appRules.count
-            + model.config.floatRules.count
     }
 
     private static func edgeName(_ edge: AppBarEdge) -> String {

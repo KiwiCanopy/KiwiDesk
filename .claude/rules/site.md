@@ -369,9 +369,11 @@ freezes.
 
 A value the site takes from outside the repo is read while it
 builds and never from a visitor's browser, which the CSP and the
-privacy policy promise — the star count (`src/lib/stars.ts`) and
-the voices (`src/lib/voices.ts`, Sanity) are the instances. **Every
-such read obeys four rules:**
+privacy policy promise — the star count (`src/lib/stars.ts`), the
+voices (`src/lib/voices.ts`, Sanity) and the looks gallery
+(`src/lib/looks.ts`, the KiwiDesk-Looks repository's `index.json`,
+#1740; watched by `check-site-tokens.py` ▸ `check_looks_rendered`)
+are such reads. **Every such read obeys four rules:**
 
 - **No secret.** Pages passes none to a build (above), so the read
   is unauthenticated against a public source, its id committed.

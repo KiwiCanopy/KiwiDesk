@@ -8,20 +8,26 @@ public struct LookBody: Codable, Sendable, Equatable {
     public var style: [String: JSONValue]
     /// Colour path (`ColorPaletteKeys`) to hex, every path.
     public var colors: [String: String]
+    /// The authored look it was painted from
+    /// (`TilingSettings.lookOrigin`), so every follower credits it.
+    public var origin: ShelfLook?
 
     public init(
         style: [String: JSONValue],
-        colors: [String: String]
+        colors: [String: String],
+        origin: ShelfLook? = nil
     ) {
         self.style = style
         self.colors = colors
+        self.origin = origin
     }
 
     /// The look `settings` wear: every styling and colour path.
     public init(of settings: TilingSettings) {
         self.init(
             style: LookKeys.extract(from: settings),
-            colors: ColorPaletteKeys.extract(from: settings)
+            colors: ColorPaletteKeys.extract(from: settings),
+            origin: settings.lookOrigin
         )
     }
 
@@ -39,6 +45,7 @@ public struct LookBody: Codable, Sendable, Equatable {
         for leaf in TilingSettings.layoutIndicatorLeaves {
             worn[keyPath: leaf] = settings[keyPath: leaf]
         }
+        worn.lookOrigin = origin
         return worn
     }
 
@@ -53,8 +60,17 @@ public struct LookBody: Codable, Sendable, Equatable {
         return named("").admitted.isApplied(to: probe)
     }
 
+    /// Whether `settings` wear this look AND carry its origin — what
+    /// a follower's file copy must hold, so a re-stamp also reaches
+    /// one that differs only in its credit (#1740). Ownership
+    /// verdicts read `isWorn`, the paint alone.
+    public func isStamped(on settings: TilingSettings) -> Bool {
+        settings.lookOrigin == origin && isWorn(by: settings)
+    }
+
     private enum CodingKeys: String, CodingKey {
         case style
         case colors
+        case origin
     }
 }

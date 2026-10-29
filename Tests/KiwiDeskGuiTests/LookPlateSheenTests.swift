@@ -33,7 +33,7 @@ struct LookPlateSheenTests {
             at: root.appendingPathComponent("LookPlate.swift")
         )
         let shelf = try SourceScan.strippedSource(
-            at: root.appendingPathComponent("LooksShelf.swift")
+            at: root.appendingPathComponent("LookTile.swift")
         )
         #expect(!plate.isEmpty && !shelf.isEmpty)
         #expect(!plate.contains("allowsHitTesting"))

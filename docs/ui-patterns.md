@@ -1331,7 +1331,7 @@ the drawer's own label below it (#610). A control anchored at
 its own render site (`.searchAnchored`) is the third shape: the
 row is both the scroll unit and the wash, so it lands at the top
 edge without the heading above it — the gap edges and General ▸
-Advanced's rows land this way. Where such a row sits behind a
+Files & Reset's rows land this way. Where such a row sits behind a
 `SettingsDisclosure`, the drawer opens first — it expands only
 for its own catalog children — and the result's breadcrumb
 names the drawer (#277, #1250).

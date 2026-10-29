@@ -63,9 +63,7 @@ extension SettingsView {
                     SettingsFooter(model: model)
                         .padding(.bottom, SettingsMetrics.savePillLift)
                         .offset(
-                            x: panelDocked(width)
-                                ? -SettingsTheme.panelWidth / 2
-                                : 0
+                            x: -(dockedPanelWidth(width) ?? 0) / 2
                         )
                 }
             }

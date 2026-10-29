@@ -57,7 +57,8 @@ struct DesktopOfferSeamTests {
             + "KeybindingCatalog+Desktops.swift": 1,
         "KiwiDesk/Settings/Components/Keybindings/"
             + "KeybindingCatalog+DisplayName.swift": 1,
-        "KiwiDesk/Settings/Sections/ShortcutsSection.swift": 1,
+        "KiwiDesk/Settings/Components/Keybindings/"
+            + "ShortcutsFamilyRows+Draft.swift": 1,
         "KiwiDesk/Shortcuts/ShortcutsReference.swift": 1,
     ]
 

@@ -83,6 +83,8 @@ struct SettingsCatalogArgumentTests {
             + "SettingsCatalog.kiwiVision.appearanceCard.text",
         "KiwiVisionLensAppsCard.swift: KiwiVisionLensWords.appsTitle",
         "KiwiVisionLensOtherAppsCard.swift: KiwiVisionLensWords.otherTitle",
+        // Simple's cards, UNANCHORED: it has no search (#2737).
+        "SimpleCard.swift: title",
     ]
 
     /// Sanctioned literal-`L()` `SettingsSection` titles —
@@ -178,7 +180,7 @@ struct SettingsCatalogArgumentTests {
         // 51 since #875: deleted the install inventory card.
         // 52 since #1019: About's Guide link self-anchors.
         // 53 since #1307: the Liquid Glass card.
-        // 61 since #1250: General ▸ Advanced's eight rows
+        // 61 since #1250: General ▸ Files & Reset's eight rows
         // self-anchor as the drawer's CHILDREN, each mounted
         // once — the first direct child mounts (the gap rows
         // reach theirs through an indirect parameter).

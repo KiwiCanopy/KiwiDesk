@@ -7,6 +7,9 @@ struct ApplicationsGroup: View {
     @ObservedObject var model: SettingsModel
     @Binding var bindings: [KeyBinding]
     let expander: ShortcutsFamilyRows
+    /// KiwiDesk's own keys close the card on the Shortcuts page;
+    /// Simple draws the app rows alone (#2737).
+    var drawsKiwiDeskKeys = true
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
@@ -54,12 +57,14 @@ struct ApplicationsGroup: View {
                 }
             }
             addRow
-            KiwiDeskKeyRows(
-                model: model,
-                bindings: $bindings,
-                expander: expander
-            )
-            .environment(\.keybindingReservesTrashSlot, true)
+            if drawsKiwiDeskKeys {
+                KiwiDeskKeyRows(
+                    model: model,
+                    bindings: $bindings,
+                    expander: expander
+                )
+                .environment(\.keybindingReservesTrashSlot, true)
+            }
         }
         .onAppear(perform: recomputeOrder)
         // The section view is reused across modes (no per-mode

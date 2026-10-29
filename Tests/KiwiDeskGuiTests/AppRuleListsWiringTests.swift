@@ -237,6 +237,20 @@ struct AppRuleListsWiringTests {
         )
     }
 
+    /// A label inside a native `Menu` draws no chevron of its own:
+    /// AppKit adds its indicator and moves a label's image to the
+    /// front, so the value read with a chevron at each end.
+    @Test(
+        "the value menus leave the chevron to AppKit",
+        arguments: ["AppRuleSpaceRow.swift", "AppRuleFloatRow.swift"]
+    )
+    func menusDrawNoChevron(file: String) throws {
+        let source = try source(file)
+        let labels = source.occurrences(of: "AppRuleMenuLabel(")
+        #expect(labels == 1)
+        #expect(source.occurrences(of: ",chevron:false)") == labels)
+    }
+
     /// The grey rides the Space MENU: moved onto any other control
     /// the menu stays live with nothing to pick (#1022).
     @Test("the Space menu itself greys without a Space")

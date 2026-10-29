@@ -1,7 +1,7 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// General ▸ Advanced: backup export and restore actions (#606).
+/// General ▸ Files & Reset: backup export and restore actions (#606).
 ///
 /// Follows ascending severity ordering defined in `GeneralSection+Reset`.
 extension GeneralSection {

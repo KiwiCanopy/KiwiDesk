@@ -148,7 +148,7 @@ struct LayoutCycleList: View {
     }
 
     private func tick(_ mode: LayoutMode, _ on: Bool) {
-        withAnimation(reduceMotion ? nil : SpacesSection.reorderSpring) {
+        withAnimation(reduceMotion ? nil : SpaceReorder.spring) {
             if on {
                 model.addCycleMode(mode)
             } else {
@@ -234,7 +234,7 @@ struct LayoutCycleList: View {
                 ? y >= candidate.value.midY
                 : y <= candidate.value.midY
         else { return }
-        withAnimation(reduceMotion ? nil : SpacesSection.reorderSpring) {
+        withAnimation(reduceMotion ? nil : SpaceReorder.spring) {
             order.move(
                 fromOffsets: IndexSet(integer: from),
                 toOffset: to > from ? to + 1 : to

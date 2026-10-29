@@ -34,6 +34,13 @@ export default defineConfig({
         hostname: "cdn.sanity.io",
         pathname: "/images/k8d0znuy/**",
       },
+      // The looks gallery's screenshots (#1740, `src/lib/looks.ts`),
+      // re-emitted under dist/ like the voices' photos.
+      {
+        protocol: "https",
+        hostname: "raw.githubusercontent.com",
+        pathname: "/KiwiCanopy/KiwiDesk-Looks/main/**",
+      },
     ],
   },
   // Rewrite the canonical docs' GitHub-style `.md` links to
