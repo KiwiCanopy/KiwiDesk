@@ -128,8 +128,10 @@ enum ConflictText {
         case .dormant(let shortcut):
             return L(
                 "keybinding.conflict.tooltip.system_off",
-                "macOS reserves this shortcut for %1$@, which "
-                    + "is switched off right now.",
+                "Heads up: the %1$@ shortcut is switched off in "
+                    + "System Settings. Turn it back on and macOS "
+                    + "takes this key, so your KiwiDesk shortcut "
+                    + "stops working.",
                 shortcut.localizedName
             )
         }

@@ -883,7 +883,7 @@
   "keybinding.conflict.tooltip.shadows_apps": "여기에 할당되어 있는 동안 모든 앱에서 %1$@을(를) 가져갑니다.",
   "keybinding.conflict.tooltip.side_collapse": "이 레이어에서 보조 키의 쪽만 다른 %1$@에도 할당되어 있습니다. 왼쪽과 오른쪽 보조 키를 구분하지 않는 동안에는 둘 중 하나만 동작합니다. 구분하려면 ‘%2$@’ 옵션을 켜십시오.",
   "keybinding.conflict.tooltip.system_dead": "동작하지 않습니다: macOS가 이 단축키를 %1$@용으로 먼저 처리합니다.",
-  "keybinding.conflict.tooltip.system_off": "macOS가 이 단축키를 %1$@용으로 예약해 두었지만, 지금은 꺼져 있습니다.",
+  "keybinding.conflict.tooltip.system_off": "참고: %1$@ 단축키가 시스템 설정에서 꺼져 있습니다. 다시 켜면 macOS가 이 키 조합을 가져가므로 KiwiDesk 단축키가 동작하지 않게 됩니다.",
   "keybinding.conflict.tooltip.unrecognized": "인식되지 않는 단축키입니다.",
   "keybinding.conflict.unrecognized": "‘%1$@’의 단축키는 인식되지 않는 단축키입니다.",
   "keybinding.desktop_away.axhint": "지금은 연결되어 있지 않습니다.",
