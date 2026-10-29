@@ -1447,7 +1447,12 @@ editing here:
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
   center, bsp and stack land a floor's residue inward through
-  `SplitOverflow.placed` on the issued frames, #934). And only
+  `SplitOverflow.placed` on the issued frames, #934). A run zone
+  plans a member at the app's own answer to the share it asks —
+  an exact per-ask entry, never generalized, stood down on a
+  forced pass — so a refused share scrolls the run rather than
+  landing inward over a neighbour (#2774, `RunAskedFloorTests`);
+  a new run floor reading takes that answer too. And only
   a SETTLED read — the retile-time gate, the
   settle probe — may clear learning on a compliance (#1049): a
   raw echo's compliance can be the transient half of an app's
