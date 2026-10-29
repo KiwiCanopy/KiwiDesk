@@ -3,7 +3,7 @@ import SwiftUI
 
 /// KiwiHub's three keys on Simple (#2777 rulings 3–5), shown and
 /// not edited: each side's glyph — the one its Shortcuts row
-/// wears — over its chord as keycaps and its name, in three equal
+/// wears — and name over its chord as keycaps, in three equal
 /// columns. KiwiHub is the way to every other shortcut, so its keys
 /// stay what the tour taught; changing them is Advanced's, which
 /// the hover names.
@@ -50,13 +50,17 @@ struct SimpleKiwiHubKeys: View {
     private func tile(_ side: Side) -> some View {
         let combo = combo(of: side.command)
         let chord = combo.map(ShortcutsReferenceBuilder.glyphs)
-        return VStack(spacing: 6) {
-            // The glyph the side's row wears on the Shortcuts page.
-            ShortcutsReferenceBuilder.icon(for: side.command).map {
-                Image(systemName: $0)
-                    .font(.system(size: 15))
-                    .foregroundStyle(SettingsTheme.ink2)
+        return VStack(spacing: 8) {
+            // The side, by the glyph its Shortcuts row wears and its
+            // name, over its keys.
+            HStack(spacing: 6) {
+                ShortcutsReferenceBuilder.icon(for: side.command).map {
+                    Image(systemName: $0)
+                }
+                Text(side.scope.title)
             }
+            .font(.callout)
+            .foregroundStyle(SettingsTheme.ink2)
             if let combo {
                 HStack(spacing: 5) {
                     ForEach(
@@ -72,9 +76,6 @@ struct SimpleKiwiHubKeys: View {
                     .foregroundStyle(SettingsTheme.ink3)
                     .padding(.vertical, 4)
             }
-            Text(side.scope.title)
-                .font(.callout)
-                .foregroundStyle(SettingsTheme.ink2)
         }
         .fixedSize()
         .accessibilityElement(children: .ignore)

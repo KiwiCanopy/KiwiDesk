@@ -20,10 +20,11 @@ struct SimpleSpaceCard: View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 6) {
                 SpaceDragHandle(model: model, reorder: reorder, space: space)
+                // The Spaces page's chip, its placeholder included:
+                // the name field beside it already shows the id.
                 IconPicker(
                     icon: model.spaceIconBinding(space),
-                    preview: .chip,
-                    emptyText: model.spaceIdentifierText(space)
+                    preview: .chip
                 )
                 SpaceNameField(
                     space: space,
@@ -87,14 +88,20 @@ struct SimpleSpaceCard: View {
         return VStack(alignment: .leading, spacing: 6) {
             SimpleSpacePicture(model: model, space: space)
                 .frame(maxWidth: .infinity)
+            // Drawn as a pop-up's face, so the menu reads as one
+            // before the pointer finds the picture.
             HStack(spacing: 5) {
                 Image(systemName: mode.symbol)
                 Text(mode.displayName)
-                Image(systemName: "chevron.down")
+                Image(systemName: "chevron.up.chevron.down")
                     .font(.system(size: 9, weight: .semibold))
+                    .foregroundStyle(SettingsTheme.ink2)
             }
             .font(.callout)
-            .foregroundStyle(SettingsTheme.ink2)
+            .foregroundStyle(SettingsTheme.ink)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 4)
+            .background(Capsule().fill(SettingsTheme.chipRest))
         }
         .padding(4)
         .frame(maxWidth: .infinity, alignment: .leading)

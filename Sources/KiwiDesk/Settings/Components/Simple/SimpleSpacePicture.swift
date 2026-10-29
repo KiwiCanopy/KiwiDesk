@@ -51,10 +51,7 @@ struct SimpleSpacePicture: View {
         LayoutSchematicView(
             mode: mode,
             settings: settings.resolved(for: space, activeMode: mode),
-            windows: LayoutSchematic.windowCount(
-                LayoutSchematic.defaultWindowCount,
-                for: mode
-            ),
+            windows: LayoutMenuPictures.windows(for: mode),
             scale: .tile
         )
         // The well is the screen: no frame or caption of the

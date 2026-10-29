@@ -49,6 +49,17 @@ struct SpaceModePictureMenu<Face: View>: View {
 enum LayoutMenuPictures {
     private static var memo: [LayoutMode: NSImage] = [:]
 
+    /// How many windows a picture draws: the schematic's default,
+    /// and Floating's whole scatter, whose single window reads as
+    /// an empty screen at this size.
+    static func windows(for mode: LayoutMode) -> Int {
+        let count = LayoutSchematic.windowCount(
+            LayoutSchematic.defaultWindowCount,
+            for: mode
+        )
+        return mode == .floating ? max(count, 3) : count
+    }
+
     /// The picture's size in points.
     static let size = CGSize(width: 40, height: 25)
 
@@ -58,10 +69,7 @@ enum LayoutMenuPictures {
             content: LayoutSchematicView(
                 mode: mode,
                 settings: TilingSettings(),
-                windows: LayoutSchematic.windowCount(
-                    LayoutSchematic.defaultWindowCount,
-                    for: mode
-                ),
+                windows: windows(for: mode),
                 scale: .tile
             )
             .scaleEffect(size.width / (SchematicScale.tile.width ?? 132))
