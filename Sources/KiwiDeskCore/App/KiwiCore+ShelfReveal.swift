@@ -97,14 +97,18 @@ extension KiwiCore {
             }
             // The pocket's slot holds the bar beside it, never one a
             // sibling's strip lies between (#2678).
-            let pocketBar = plan.arrangement.pocket.flatMap { pocket in
-                [ShelfBar.space, .app].compactMap { bar in
-                    slotOf(bar).map {
-                        let mid = $0.offset + $0.length / 2
-                        return (bar, abs(mid - pocket.offset))
+            var pocketBar: ShelfBar?
+            if let pocket = plan.arrangement.pocket {
+                var nearest = CGFloat.greatestFiniteMagnitude
+                for bar in [ShelfBar.space, .app] {
+                    guard let slot = slotOf(bar) else { continue }
+                    let mid: CGFloat = slot.offset + slot.length / 2
+                    let distance: CGFloat = abs(mid - pocket.offset)
+                    if distance < nearest {
+                        nearest = distance
+                        pocketBar = bar
                     }
                 }
-                .min { $0.1 < $1.1 }?.0
             }
             let section = { (bar: ShelfBar) -> CGRect? in
                 slotOf(bar).map { slot in

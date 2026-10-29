@@ -63,11 +63,8 @@ final class ShelfPocketPiece {
         items.frame = CGRect(origin: .zero, size: strip.size)
         guard let next else {
             let had = mount != nil
-            // Drawn on until its leave lands — while it is still
-            // here: another shelf may have taken the view already.
-            if let view = mount?.view, view.superview === items {
-                leaving = view
-            }
+            // Drawn on until its leave lands (`dropLeaving`).
+            if let view = mount?.view { leaving = view }
             mount = nil
             rest = nil
             return had

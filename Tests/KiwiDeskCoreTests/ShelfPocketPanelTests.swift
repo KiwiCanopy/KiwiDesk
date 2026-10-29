@@ -155,6 +155,22 @@ struct ShelfPocketPanelTests {
         second.hide()
     }
 
+    @Test("a pocket taken by another shelf mid-leave stays there")
+    func pocketTakenMidLeaveStays() {
+        let first = ShelfOverlay()
+        let second = ShelfOverlay()
+        let pocket = NSView()
+        show(first, pocket: pocket)
+        // The first shelf lets go while it still draws the pocket,
+        // the screen's other shelf takes it, then the leave lands.
+        show(first, pocket: nil)
+        show(second, pocket: pocket)
+        first.pocket.orderOut()
+        #expect(pocket.superview === second.pocket.items)
+        first.hide()
+        second.hide()
+    }
+
     @Test("a retract plays on the pocket's content too")
     func retractReachesThePocket() {
         let overlay = ShelfOverlay()
