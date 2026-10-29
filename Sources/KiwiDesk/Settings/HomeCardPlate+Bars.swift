@@ -18,6 +18,9 @@ struct HomeCardBarsTile: View {
     /// Space identifiers for panel scale rendering — Core's own
     /// verdict per Space (#1538).
     var spaceLabels: [SpaceGlyph] = []
+    /// Which Space item draws as current (Simple's Space cards,
+    /// #2777); the first elsewhere.
+    var activeSpace = 0
     /// Whether this frame draws the App Bar — false for the
     /// layouts that host none, where the Space Bar is alone.
     var showsAppBar = true

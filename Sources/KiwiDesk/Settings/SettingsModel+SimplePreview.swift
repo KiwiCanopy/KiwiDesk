@@ -1,44 +1,18 @@
 import KiwiDeskCore
 
-/// What the pointer previews on Simple (#2737 ruling 9).
+/// What the pointer previews on Simple's Space cards (#2777).
 enum SimplePreviewHover: Equatable {
-    case space(SpaceID)
     /// A bundled look, by name, painted over the draft.
     case look(String)
 }
 
-/// Simple's live preview (#2737 rulings 5 and 9): one reading of
-/// which Space it shows, in which look, on which screen — the rows
-/// and the preview column both ask here.
+/// Simple's Space pictures (#2777): one reading of which look they
+/// wear, and where a Space opens.
 extension SettingsModel {
-    /// The Space the preview shows: a hovered one, else the kept
-    /// one, else the first. Nil with no Spaces.
-    var simplePreviewSpace: SpaceID? {
-        if case .space(let hovered) = simplePreviewHover {
-            return hovered
-        }
-        return simpleKeptSpace
-    }
-
-    /// The Space the rows mark kept: the one a click kept while it
-    /// is listed, else the first.
-    var simpleKeptSpace: SpaceID? {
-        if let kept = nav.simpleKept, config.spaces.contains(kept) {
-            return kept
-        }
-        return config.spaces.first
-    }
-
-    /// Whether the preview shows what a click kept, rather than
-    /// what the pointer is over — the frame's ring answers this.
-    var simplePreviewIsKept: Bool { simplePreviewHover == nil }
-
-    /// The hover the preview is drawing, nil when the hovered
-    /// Space or look is gone.
+    /// The hover the pictures are drawing, nil when the hovered
+    /// look is gone.
     var simplePreviewHover: SimplePreviewHover? {
         switch nav.simpleHover {
-        case .space(let space) where config.spaces.contains(space):
-            return .space(space)
         case .look(let name) where hoveredLook(name) != nil:
             return .look(name)
         default:
@@ -81,12 +55,6 @@ extension SettingsModel {
             mainID: PositionalDisplays.liveMainID,
             assignment: placementAssignment()
         )
-    }
-
-    /// The connected screen `space` opens on now — the map lights
-    /// it, and the offline sentence names it.
-    func simpleLanding(of space: SpaceID) -> Display? {
-        simplePlacement(of: space)?.display
     }
 
     /// A Space's Screen pin as its chip draws it: the one reading

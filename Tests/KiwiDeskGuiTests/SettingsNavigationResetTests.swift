@@ -44,7 +44,6 @@ struct SettingsNavigationResetTests {
         nav.kiwiVisionLens = "Writing"
         nav.kiwiVisionAddRequested = true
         nav.spaceOverridesFocus = SpaceID("code")
-        nav.simpleKept = SpaceID("code")
         nav.simpleHover = .look("Kiwi")
         nav.shellMotion = .zoomThrough
         nav.pendingShellMotion = .converge

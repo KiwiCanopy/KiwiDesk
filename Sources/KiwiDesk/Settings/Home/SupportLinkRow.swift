@@ -28,7 +28,7 @@ struct SupportLinkRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .frame(maxWidth: 320, alignment: .leading)
+        .frame(minWidth: 180, maxWidth: .infinity, alignment: .leading)
     }
 }
 

@@ -43,9 +43,9 @@ extension SettingsButtonStyleConventionTests {
                 "Returned to the row-menu builder the rowActions "
                     + "seam feeds (#845, #2673)"
             ),
-            // Simple's Space row menu (#2737).
+            // Simple's Space card menu (#2777).
             "SimpleSpacesCard.swift": (
-                4, "rowActions",
+                3, "rowActions",
                 "Returned to the row-menu builder the rowActions "
                     + "seam feeds (#845)"
             ),
@@ -158,6 +158,13 @@ extension SettingsButtonStyleConventionTests {
                 "The chord popover's container style for the "
                     + "seam-fed menu buttons, which live in the "
                     + "call sites' builder files (#845)"
+            ),
+            // A Space card's layout menu draws its picture face
+            // whole through the button menu style (#2777).
+            "SpaceModePictureMenu.swift": (
+                1, ".buttonStyle(.plain)",
+                "The layout Menu taking plain style, so its face "
+                    + "is the card's picture and layout name"
             ),
             // The profile chip's menu draws its label whole
             // through the button menu style (owner, 2026-10-17).

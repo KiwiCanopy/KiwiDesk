@@ -63,12 +63,8 @@ struct SettingsNavigation {
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
-    /// The Space a click on a Simple row kept in the preview
-    /// (#2737 ruling 5); on `nav` because the preview is the rows'
-    /// sibling column (gui.md).
-    var simpleKept: SpaceID?
-
-    /// What the pointer previews on Simple, nil at rest.
+    /// The look the pointer previews on Simple's Space cards, nil
+    /// at rest (#2777).
     var simpleHover: SimplePreviewHover?
 
     /// Why the shell last changed, so it plays that motion. Written
@@ -115,7 +111,6 @@ struct SettingsNavigation {
         kiwiVisionLens = nil
         kiwiVisionAddRequested = false
         spaceOverridesFocus = nil
-        simpleKept = nil
         simpleHover = nil
         shellMotion = .none
         pendingShellMotion = nil

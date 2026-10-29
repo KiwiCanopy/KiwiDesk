@@ -13,6 +13,10 @@ struct ApplicationsGroup: View {
     /// Under the title, where no page around the card says what it
     /// is for (Simple, #2737).
     var caption: String?
+    /// Whether a row draws which profiles its key reaches; Simple
+    /// says nothing of profiles, and a key made there reaches all
+    /// of them, as one made in Advanced does by default (#2777).
+    var drawsReach = true
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)

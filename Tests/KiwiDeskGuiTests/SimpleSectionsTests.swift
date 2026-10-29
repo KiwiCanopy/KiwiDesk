@@ -107,7 +107,6 @@ struct SimpleSectionsTests {
         LocalizationManager.shared.select("en")
         for prose in [
             SimpleLookCard.hintProse, SimpleSpacesCard.hintProse,
-            SimpleKiwiHubKeys.changeProse,
         ] {
             #expect(prose.contains(CrossReferenceRow.linkSlot))
         }

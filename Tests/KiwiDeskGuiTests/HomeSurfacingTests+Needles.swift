@@ -13,6 +13,10 @@ extension HomeSurfacingTests {
         "Settings/SettingsView.swift": [
             // Home mounts exactly when no area is pushed.
             "ifselection==nil{HomeScreen(model:model)",
+            // Simple is one column with no preview panel: each
+            // Space card is its own preview (#2777).
+            "ifmodel.showsSimple{SimpleScreen(model:model)",
+            "!model.showsSimple&&SettingsDetailPanelOffer.offers(",
             // About is a sheet the shell hosts, opened through the
             // action the shell hands Home (#1536).
             ".sheet(item:$aboutRequest)",
@@ -88,16 +92,7 @@ extension HomeSurfacingTests {
             // Monitors lesson.
             "ifpanelDocked(width),letdestination=model.destination"
                 + "{SettingsTheme.hairline.frame(width:1)"
-                + "SettingsDetailPanel(",
-            // Simple's preview docks through the same answer
-            // the pill centres against, and that answer is the
-            // column the pane lays out (#2737).
-            "ifdockedPanelWidth(width)!=nil{",
-            "SettingsTheme.hairline.frame(width:1)"
-                + "ScrollView{SimplePreview(model:model,"
-                + "columns:columns).frame(width:columns.preview)",
-            ".onChange(of:columns.preview,initial:true){"
-                + "simplePreviewWidth=$1}",
+                + "SettingsDetailPanel("
         ],
         "Settings/SettingsFloatingPanel.swift": [
             // The gesture is declared in the view that takes
@@ -127,9 +122,6 @@ extension HomeSurfacingTests {
             // preference (`DetailPanelTests` owns that half).
             "ifdetachedPreviewShown(width),"
                 + "letdestination=model.destination",
-            // Simple's card rides the same chrome and band.
-            "ifdetachedPreviewShown(width),model.showsSimple{"
-                + "GeometryReader{geoinMovableCard(",
             "close:{previewShown=false}",
             // A new area gets a new card: without the key the
             // structural position is identical across a

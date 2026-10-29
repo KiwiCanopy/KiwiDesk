@@ -1,16 +1,20 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Simple's one page (#2737): Look, Spaces, KiwiHub and Open
-/// applications, ended by the support strip and Home's footer at
-/// every width. Simple owns layout only — every control it draws
-/// is Advanced's own.
+/// Simple's one page (#2737, #2777): KiwiHub, Look, a card per
+/// Space and Open applications, ended by the support strip and
+/// Home's footer, in one centred column at every width. Simple owns
+/// layout only — every control it draws is Advanced's own.
 struct SimpleScreen: View {
     @ObservedObject var model: SettingsModel
     @Environment(\.settingsWidth) private var width
 
     /// The one top gutter, Home's (#1536).
     private static let topGutter: CGFloat = 24
+    /// The column's widest, and the room it keeps from the window's
+    /// edges below that (#2777 ruling 1).
+    static let columnCap: CGFloat = 1120
+    static let sideRoom: CGFloat = 40
 
     var body: some View {
         GeometryReader { geo in
@@ -24,7 +28,12 @@ struct SimpleScreen: View {
                     SimpleShortcutCards(model: model)
                     HomeSupportStrip(model: model)
                 }
-                .frame(maxWidth: SimpleColumns.contentCap)
+                .frame(
+                    width: min(
+                        Self.columnCap,
+                        geo.size.width - 2 * Self.sideRoom
+                    )
+                )
                 // The strip's footer reaches the window's bottom
                 // inset, as on Home.
                 .frame(
@@ -32,10 +41,9 @@ struct SimpleScreen: View {
                         - SettingsMetrics.pageBottom(width),
                     alignment: .top
                 )
-                .padding(.horizontal, SettingsMetrics.paneInset)
                 .padding(.bottom, SettingsMetrics.pageBottom(width))
                 .padding(.top, Self.topGutter)
-                .frame(maxWidth: .infinity, alignment: .leading)
+                .frame(maxWidth: .infinity)
             }
         }
         // A row or tile removed under the pointer sends no leave, so

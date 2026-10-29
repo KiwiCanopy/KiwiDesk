@@ -34,7 +34,8 @@ struct SimpleShortcutCards: View {
                 "simple.apps.caption",
                 "Give the apps you use most a shortcut that opens "
                     + "or focuses them"
-            )
+            ),
+            drawsReach: false
         )
         .environment(
             \.recorderConflictAnchor,

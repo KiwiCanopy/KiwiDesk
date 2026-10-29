@@ -32,6 +32,8 @@ struct SegmentedPicker<Value: Hashable>: View {
     private let options: [(title: String, value: Value)]
     /// Optional field help text (#94).
     private let help: String?
+    /// A neutral pill for a choice no hue may mark (#2777 ruling 14).
+    private let neutral: Bool
     @Namespace private var pillSpace
     @State private var hoveredIndex: Int?
     @FocusState private var focused: Bool
@@ -53,7 +55,8 @@ struct SegmentedPicker<Value: Hashable>: View {
         spokenTitles: [Value: String] = [:],
         selection: Binding<Value>,
         options: [(title: String, value: Value)],
-        help: String? = nil
+        help: String? = nil,
+        neutral: Bool = false
     ) {
         self.label = label
         self.spokenLabel = spokenLabel
@@ -66,6 +69,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         self._selection = selection
         self.options = options
         self.help = help
+        self.neutral = neutral
     }
 
     var body: some View {
@@ -236,7 +240,7 @@ struct SegmentedPicker<Value: Hashable>: View {
         HStack(spacing: 5) {
             labelText(title, selected: selected)
                 .foregroundStyle(
-                    selected
+                    selected && !neutral
                         ? AnyShapeStyle(paint.selectionInk) : restInk(index)
                 )
             if let hint {
@@ -322,7 +326,11 @@ struct SegmentedPicker<Value: Hashable>: View {
 
     private var pill: some View {
         Capsule()
-            .fill(paint.fill(paint.selection))
+            .fill(
+                neutral
+                    ? AnyShapeStyle(SettingsTheme.chipHover)
+                    : paint.fill(paint.selection)
+            )
     }
 
     /// An unselected label's ink: the theme's, or on KiwiHub's Fill

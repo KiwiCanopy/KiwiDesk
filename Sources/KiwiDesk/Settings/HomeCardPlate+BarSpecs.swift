@@ -78,7 +78,7 @@ extension HomeCardBarsTile {
         let count = min(max(spaceCount, 1), 8)
         var items: [BarItem] = []
         for index in 0..<count {
-            let active = index == 0
+            let active = index == activeSpace
             var item = BarItem(
                 color: active
                     ? shelf.activeItemColor

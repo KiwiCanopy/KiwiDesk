@@ -123,7 +123,7 @@ struct ShellMotionTests {
     func shellMountsTheMotion() throws {
         let shell = try source("SettingsView.swift")
         for needle in [
-            "simplePane(width).transition(simpleTransition)",
+            "SimpleScreen(model:model).transition(simpleTransition)",
             "HomeScreen(model:model).transition(homeTransition)",
             "detailPane(width).transition(pageTransition)",
             ".animation(reduceMotion?nil:ShellMotion.spring,"

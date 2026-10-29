@@ -20,7 +20,9 @@ struct SettingsRootSwitch: View {
             options: [
                 (Self.simpleTitle, SettingsRoot.simple),
                 (Self.advancedTitle, SettingsRoot.advanced),
-            ]
+            ],
+            // No hue marks the mode (#2737 ruling 1).
+            neutral: true
         )
         .fixedSize()
     }

@@ -10224,9 +10224,9 @@ of that entry — the offer shapes, the Customize button, Screens
 on any screen count — stands for Advanced.) A `Simple | Advanced`
 segment at the header's trailing edge switches between two
 roots. Advanced is the Settings described everywhere else in
-this file, unchanged. Simple is one page: the Look line, the
-Space rows, KiwiHub's three keys and Open applications on the
-left, a live preview of the desk on the right.
+this file, unchanged. Simple is one centred page: KiwiHub's
+three keys, the Look line, a card per Space and Open
+applications.
 
 #2654 refused this on two grounds, and both are answered by
 construction rather than by promise:
@@ -10279,25 +10279,29 @@ Three things stay one, or the two roots drift apart:
   "Simple" after a link and "Home" after one more click would give
   one button two meanings.
 
-The preview is the reason Simple is two columns. It is drawn
-from the draft on the neutral plate, never on a wallpaper — a
-look carries none, and painting one teaches what the app does
-not do (#702). Hover previews a look or a Space; a click keeps a
-Space, so the keyboard and VoiceOver reach what the pointer
-does. It docks at the panel breakpoint and leaves its column
-below it, as every preview does; the support strip and footer
-end the controls at every width, so the right column is the
-preview and nothing else. Docked, the desk is sized from the
-window — as wide as the column allows, as tall as the window
-allows, up to a cap — and the bars scale with it, while the
-controls keep their full 760 pt cap, which the Open applications
-row needs; what is left is split as equal margins, centring the
-pair (owner 2026-10-29).
-A desk of fixed height left a wide window mostly empty, and
-Simple's reader is the one who wants the picture. The preview
-adds no mark Simple cannot reach — no sticky, pocket or floating
-mark, no drag ghost — since a mark there promises a setting the
+**Each Space is its own preview** (#2777, owner 2026-10-29,
+superseding the docked preview #2737 first ruled). Simple is one
+centred column at every width, and each Space is a card whose
+picture is its layout drawn from the draft in the current look:
+no separate preview to open, dock or hover, and no row selection
+to learn. A docked plate the size of half the window drew empty
+boxes, the least actionable thing on the page with the most area,
+and a kept-row ring in the accent beside a focus ring in the
+look's colour gave two rings two meanings. Putting the picture on
+the control that changes it removes the decision instead of
+moving it. The picture is drawn on the neutral plate, never a
+wallpaper — a look carries none, and painting one teaches what
+the app does not do (#702) — and adds no mark Simple cannot
+reach: a sticky, pocket or floating mark promises a setting the
 page does not hold, and a frozen drag reads as a broken window.
+The picture and its layout name are one Layout menu, since seven
+choices on a card repeated per Space are the crowding #291 gives
+to a menu; the menu's items carry each layout's picture, so the
+drawing stays the label. Cards wrap rather than scroll sideways:
+every Space stays in view, and the page already grows with Open
+applications. KiwiHub's keys are shown with no "change these"
+line — the switch is the door for a user who wants to change
+them, and the hover says where.
 
 **The motion says where the user came from.** The switch
 converges: Simple fades and Home's cards gather out of the

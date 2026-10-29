@@ -905,14 +905,13 @@ same change, since the save pill reads it to keep a row on Simple
 the pill's rows a look pick reaches fold into its one look row
 (`SettingsDiffRowSource.lookFolded`): its members are the keys
 Core's one `ShelfLook.unpicked` would put back, and its ↺ is that
-call; Advanced never folds (`SimpleLookRowTests`). Simple's
-preview is its rows' sibling column, so what it shows is asked
-of the one `simplePreviewSpace` over the selection `nav` holds,
-and a row marks itself kept only through `simpleKeptSpace`
-(`SimplePreviewTests` ▸ `shownSpace`, `rowsReadTheKeptSpace`). A
-docked column's width, Simple's or a page's, is answered by the
-one `SettingsView.dockedPanelWidth`, which the save pill centres
-against (`HomeSurfacingTests`). **A change of the shown root or page records its
+call; Advanced never folds (`SimpleLookRowTests`). Simple offers
+no preview panel: each Space card's picture is its preview, drawn
+from the one `simplePreviewSettings` so a hovered look reaches
+every card, and lights its own Space (#2777, `SimplePreviewTests`
+▸ `pictureReadsTheHover`). A docked column's width is answered by
+the one `SettingsView.dockedPanelWidth`, which the save pill
+centres against (`HomeSurfacingTests`). **A change of the shown root or page records its
 motion through the one owner** — `SettingsModel`'s `destination`
 and `settingsRoot` `didSet`s — and a door that means another
 motion names it as `nav.pendingShellMotion` before the change, as
