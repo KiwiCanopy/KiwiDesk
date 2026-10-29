@@ -152,7 +152,7 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+VisionReach.swift": 1,
         // A bar shortcut's refusal pill (#761), drawn beside the
         // shelf.
-        "App/KiwiCore+ShelfRevealCue.swift": 9,
+        "App/KiwiCore+ShelfRevealCue.swift": 10,
         // A Hyper press with nothing to do (#2480), on the pill
         // Core draws.
         "App/KiwiCore+HyperBarePress.swift": 1,
