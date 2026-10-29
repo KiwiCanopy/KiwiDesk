@@ -86,6 +86,13 @@ extension SizeBoundLearner {
         /// Whether an axis took a new issue this pass; false where
         /// the frame only carries an issue already out (#2758).
         var fresh = true
+        /// Whether the size is the question already out: the last
+        /// ask, carried unchanged (#2758).
+        var alreadyOut = false
+        /// Whether every carried axis re-asks the anchor's answer —
+        /// a residue the layout placed for that size, whose origin
+        /// says nothing about where the issue out should sit.
+        var residue = false
     }
 
     /// The first issue, plus the one re-issue the "probing once

@@ -27,6 +27,7 @@ extension SizeBoundLearner {
         var size = target
         var trusted = false
         var fresh = false
+        var residue = true
         let last = lastAsks[id]?.size
         if let taken = takeProbeAxis(
             &ledger,
@@ -41,6 +42,7 @@ extension SizeBoundLearner {
         ) {
             size.width = taken.span
             fresh = fresh || taken.fresh
+            residue = residue && taken.residue
         }
         if let taken = takeProbeAxis(
             &ledger,
@@ -55,13 +57,22 @@ extension SizeBoundLearner {
         ) {
             size.height = taken.span
             fresh = fresh || taken.fresh
+            residue = residue && taken.residue
         }
         probes[id] = ledger
         guard size != target else { return nil }
+        let alreadyOut =
+            !fresh
+            && last.map {
+                EffectiveSizeBound.matches($0.width, size.width)
+                    && EffectiveSizeBound.matches($0.height, size.height)
+            } == true
         return ProbeIssue(
             size: size,
             baseline: trusted ? current : nil,
-            fresh: fresh
+            fresh: fresh,
+            alreadyOut: alreadyOut,
+            residue: alreadyOut && residue
         )
     }
 
@@ -75,7 +86,7 @@ extension SizeBoundLearner {
         lastAsked: CGFloat?,
         keepsIssueOut: Bool,
         trusted: inout Bool
-    ) -> (span: CGFloat, fresh: Bool)? {
+    ) -> (span: CGFloat, fresh: Bool, residue: Bool)? {
         guard var probe = ledger[keyPath: slot].pending
         else { return nil }
         let anchorStands = entries.contains {
@@ -90,8 +101,7 @@ extension SizeBoundLearner {
         }
         guard anchorStands,
             !Self.corroborates(entries, floor: probe.isFloor),
-            probe.issues < Self.maxProbeIssues || probe.isOut,
-            probe.resends < Self.maxProbeResends
+            probe.issues < Self.maxProbeIssues || probe.isOut
         else {
             Self.retire(&ledger[keyPath: slot])
             return nil
@@ -104,11 +114,19 @@ extension SizeBoundLearner {
         {
             guard keepsIssueOut else { return nil }
             if !probe.isInFlight(lastAsked: lastAsked) {
+                // Overwritten before its answer: re-sent, bounded.
+                guard probe.resends < Self.maxProbeResends else {
+                    Self.retire(&ledger[keyPath: slot])
+                    return nil
+                }
                 probe.resends += 1
             }
             probe.held = true
             ledger[keyPath: slot].pending = probe
-            return (probe.asked, false)
+            let residue =
+                EffectiveSizeBound.matches(target, probe.anchor.answered)
+                && !EffectiveSizeBound.matches(target, probe.anchor.asked)
+            return (probe.asked, false, residue)
         }
         guard probe.issues < Self.maxProbeIssues,
             probe.issues == 0 || answered
@@ -126,6 +144,6 @@ extension SizeBoundLearner {
         probe.resends = 0
         probe.held = false
         ledger[keyPath: slot].pending = probe
-        return (probe.asked, true)
+        return (probe.asked, true, false)
     }
 }

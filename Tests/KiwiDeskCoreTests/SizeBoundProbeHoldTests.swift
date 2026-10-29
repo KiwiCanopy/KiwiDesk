@@ -64,10 +64,16 @@ struct SizeBoundProbeHoldTests {
         #expect(again?.size == CGSize(width: 380, height: probed))
         #expect(residue?.size == CGSize(width: 380, height: probed))
         #expect(again?.fresh == false)
+        // The question already out: at the slot it may move with
+        // the slot, at the answer it is a residue and stays.
+        #expect(again?.alreadyOut == true)
+        #expect(again?.residue == false)
+        #expect(residue?.residue == true)
         // A neighbour's floor widened the column: the width
         // follows the layout, the height stays out.
         let wider = carry(&learner, CGSize(width: 400, height: 550))
         #expect(wider?.size == CGSize(width: 400, height: probed))
+        #expect(wider?.alreadyOut == false)
         // A span the anchor does not answer carries nothing.
         let taller = carry(&learner, CGSize(width: 380, height: 700))
         #expect(taller == nil)
@@ -136,10 +142,16 @@ struct SizeBoundProbeHoldTests {
             learner.recordAsk(w, size: try #require(resent).size)
         }
         // Spent: the next overwrite retires the probe.
-        learner.recordAsk(w, size: taller)
-        let spent = carry(&learner, slot)
+        var spentLearner = learner
+        spentLearner.recordAsk(w, size: taller)
+        let spent = carry(&spentLearner, slot)
         #expect(spent == nil)
-        #expect(learner.probes[w]?.height.pending == nil)
+        #expect(spentLearner.probes[w]?.height.pending == nil)
+        // The last re-send's own answer still counts: it cues the
+        // re-issue rather than retiring the probe.
+        learner.observe(w, currentSize: held, settledRead: true)
+        let reissue = carry(&learner, slot)
+        #expect(reissue?.fresh == true)
     }
 
     @Test("The re-issue is carried too, and pairs once answered")

@@ -31,7 +31,7 @@ extension TilingEngine {
         // to be issued, so neither skip below applies. A
         // forced pass keeps its own ask (#1055), and only an
         // ordinary pass carries an issue already out (#2758).
-        let probe =
+        var probe =
             pass.probes
             ? nil
             : takeCorroborationProbe(
@@ -40,15 +40,21 @@ extension TilingEngine {
                 target: target,
                 keepsIssueOut: !pass.reissues
             )
-        // #2758: the question already out is not asked again; its
-        // settled answer places the frame.
-        if let probe, !probe.fresh,
-            let asked = boundLearner.lastAsks[id]?.size,
-            EffectiveSizeBound.matches(asked.width, probe.frame.width),
-            EffectiveSizeBound.matches(asked.height, probe.frame.height)
-        {
-            meter.add(\.framesSkipped)
-            return
+        // #2758: the question already out is not asked again where
+        // it already sits, nor for a residue placed at the answer's
+        // size; its settled answer places the frame. A moved slot
+        // re-asks it there, keeping the ask's baseline.
+        if let carried = probe, carried.alreadyOut {
+            let placed = commandedFrame(of: id) ?? current
+            let there =
+                abs(placed.minX - carried.frame.minX) <= Self.retileTolerance
+                && abs(placed.minY - carried.frame.minY)
+                    <= Self.retileTolerance
+            if carried.residue || there {
+                meter.add(\.framesSkipped)
+                return
+            }
+            probe?.baseline = boundLearner.lastAsks[id]?.settledFrom
         }
         // Tolerance: apps clamp what we set (character
         // grids, minimum sizes), so the reported frame is
