@@ -119,6 +119,10 @@ extension KiwiShelfCard {
             iconSourceRow
         case .revealStyle:
             revealStyleRow
+        case .pocketEdge:
+            pocketEdgeRow
+        case .pocketPosition:
+            pocketPositionRow
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
             .fillFade, .tintHubAndPlates,
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,

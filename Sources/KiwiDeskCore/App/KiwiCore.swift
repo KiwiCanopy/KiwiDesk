@@ -27,11 +27,11 @@ public final class KiwiCore {
     /// Focus rings (#278) and sticky marks (#414), driven by `retile()`.
     public let borders = BorderManager(watch: WindowServerWatch())
     public let stickyMarks = StickyMarkManager()
-    /// The "+n" marks on a run's edge windows (#2235).
-    public let overflowMarks = OverflowMarkManager()
+    public let overflowMarks = OverflowMarkManager()  // "+n", #2235
     public let vision = VisionManager()  // KiwiVision's plates, #2103
     let spaceSlide = SpaceSlideOverlay()  // #1956, #2524
     let briefPocket = BriefPocketOverlay()  // #2680
+    let pocketPlate = PocketPlateOverlay()  // #2678
     let strandDetector = StrandDetector()
     public let mouse = MouseTracker()
     public let profiles: ProfileManager

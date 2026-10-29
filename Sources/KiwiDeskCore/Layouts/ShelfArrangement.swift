@@ -57,6 +57,9 @@ public struct ShelfArrangement: Equatable, Sendable {
 
     public var space: Slot?
     public var app: Slot?
+    /// The pocket's pinned segment (#2678), set only by the
+    /// `pocket:` overload.
+    public var pocket: Slot?
     /// Set only while both bars need more than the edge holds.
     public var divider: Divider?
 
@@ -96,7 +99,9 @@ public struct ShelfArrangement: Equatable, Sendable {
     /// natural run length, plate included. `spaceFloor` is the
     /// Space section's hard floor (`minimumRange`), below which no
     /// minimum may shrink it.
-    public static func arrange(
+    /// The bars alone; reached only through `arrange(…pocket:)`,
+    /// whose pocket every caller states (#2678 review 6).
+    static func arrangeBars(
         length: CGFloat,
         spaceNeed: CGFloat?,
         appNeed: CGFloat?,

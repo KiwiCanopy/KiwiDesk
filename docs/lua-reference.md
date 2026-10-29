@@ -3031,6 +3031,55 @@ On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
 kiwishelf.set_reveal_style("grow")
 ```
 
+:::unreleased
+### kiwishelf.set_pocket_edge
+
+Replaces `pocket.set_edge`, which is now refused with a Config
+Issue naming this verb; a saved profile keeps its edge.
+
+**Expects:** `"top"`, `"bottom"`, `"left"` or `"right"` (default
+`"bottom"`).
+
+**Does:** sets the screen edge the [pocket](#pocket) sits on, on
+every screen. Where a bar shows on that edge the pocket is a
+section of KiwiShelf; on an edge no bar shows — an `"auto"` or
+`"hidden"` bar at rest, or none — it is a handle
+([`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
+places both). When it is on screen is
+[`pocket.set_capacity`](#pocketset_capacity)'s. A look carries
+it.
+
+**Example:**
+
+```lua
+kiwishelf.set_pocket_edge("right")
+```
+
+### kiwishelf.set_pocket_position
+
+Replaces `pocket.set_position`, which is now refused with a Config
+Issue naming this verb; a saved profile keeps its position.
+
+**Expects:** a number from `0` to `100` (default `82`); outside
+that range it is clamped.
+
+**Does:** sets where along its edge the [pocket](#pocket) sits, in
+percent: `0` is the left or top end, `100` the right or bottom
+end. On an edge where a bar shows, the pocket takes the shelf's
+nearer end instead — its start below `50`, its end from `50` —
+outside the bars' items, so it stays put while they scroll. On an
+edge where an `"auto"` bar rests hidden, its handle joins the bars'
+row of marks, one band more at the end the position leans to. On
+any other edge no bar shows, its handle stands at the position,
+whole on screen at either end. A look carries it.
+
+**Example:**
+
+```lua
+kiwishelf.set_pocket_position(50)  -- mid-edge, or a bar's end
+```
+:::
+
 ### KiwiShelf colours
 
 Same `#RRGGBB` / `#RRGGBBAA` grammar as every other color
@@ -5588,6 +5637,21 @@ app that quit while hidden empties the pocket at the next call. A
 `move_to_space` or `swap` naming the pocketed window's id is
 refused.
 
+:::unreleased
+`pocket` also takes a window id, as the bar menus' Pocket Window
+does: that window goes in, marked first, as
+[`toggle_pocket_window`](#toggle_pocket_window) would mark it, and
+refused the same way while the pocket is taken.
+:::
+
+:::unreleased
+Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
+pocket holds every marked window, in the order each last went in, and a
+call puts away before it takes out: while a marked window is out,
+it puts back the focused one, else the one focused last. Only with
+every marked window in does it take one out, the one put in last.
+:::
+
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another
 Space is refused with the same pill. It comes along when you switch
@@ -5660,6 +5724,11 @@ with [`pocket`](#pocket) before unmarking it. Fails on a window in
 native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
+
+:::unreleased
+Under [`pocket.set_capacity("several")`](#pocketset_capacity) a
+call on another window marks it too, beside the others.
+:::
 
 **Example:**
 
@@ -5812,6 +5881,45 @@ is Automatic; any non-empty value must parse as a hex color.
 floating.set_color("#8E5DE0")
 ```
 
+:::unreleased
+### pocket.set_capacity
+
+**Expects:** `"one"` or `"several"` (default `"one"`).
+
+**Does:** sets how many windows the [pocket](#pocket) holds, on
+every profile alike — the running value, which Settings ▸ Shortcuts
+& Gestures ▸ Pocket stores:
+`"one"` refuses a mark while any window is marked
+([`toggle_pocket_window`](#toggle_pocket_window)), and `"several"`
+marks any number.
+
+Under `"several"` the pocket stays on every screen at
+[`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
+[`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
+faded while empty and badged with the count from two windows
+inside, except where KiwiShelf stands down for a native
+full-screen window or a presentation. On an edge no bar shows it
+rests as a handle, and pointing at the handle brings the pocket up
+out of it. A click on the pocket lists the windows inside by app;
+a row takes its window out. Under `"one"` nothing stays: the pocket
+stands only while a window goes in or out
+([`animations.set_on_state_change`](#animationsset_on_state_change))
+or while you drag one, and on an edge where a bar shows its slot
+then opens, the bars gliding aside for it.
+
+While you drag a window, under either capacity, the pocket comes
+up on every screen as a drop target, and a drop on it pockets that
+window as [`pocket`](#pocket) naming it would; where the pocket
+would refuse it, the pocket does not light and the window goes
+back. Switching back to `"one"` keeps the windows already marked.
+
+**Example:**
+
+```lua
+pocket.set_capacity("several")
+```
+:::
+
 ### pocket.set_color
 
 **Expects:** a hex color string `#RRGGBB` or `#RRGGBBAA`, or an
@@ -5834,37 +5942,6 @@ non-empty value must parse as a hex color.
 ```lua
 pocket.set_color("#E8A33D")  -- an amber pocket
 pocket.set_color("")          -- back to Automatic
-```
-
-### pocket.set_edge
-
-**Expects:** `"top"`, `"bottom"`, `"left"` or `"right"` (default
-`"bottom"`).
-
-**Does:** sets the screen edge the brief pocket appears on while a
-window goes into the [pocket](#pocket) or comes out, under
-[`animations.set_on_state_change`](#animationsset_on_state_change).
-A bar on the same edge keeps it just inside the bar.
-
-**Example:**
-
-```lua
-pocket.set_edge("right")
-```
-
-### pocket.set_position
-
-**Expects:** a number from `0` to `100` (default `82`); outside
-that range it is clamped.
-
-**Does:** sets where along its edge the brief pocket appears, in
-percent: `0` is the left or top end, `100` the right or bottom
-end. The pocket stays whole on screen at either end.
-
-**Example:**
-
-```lua
-pocket.set_position(50)  -- the middle of its edge
 ```
 
 ## Launching Apps
@@ -7586,11 +7663,20 @@ window to its new frame, size included. Going into the Pocket or
 out shows a brief pocket instead: it appears on the screen, a
 plate with the app's icon flies between it and the window,
 it nods and fades out, while the window itself leaves and comes
-back in one move. [`pocket.set_edge`](#pocketset_edge) and
-[`pocket.set_position`](#pocketset_position) place it. Under
+back in one move. Under
 Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
+
+:::unreleased
+[`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
+[`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
+place the pocket the plate flies to, under either
+[`pocket.set_capacity`](#pocketset_capacity): on an edge where a
+bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
+aside for it; on an edge no bar shows, the pocket comes up out of
+its handle.
+:::
 
 **Example:**
 

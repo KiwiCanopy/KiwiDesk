@@ -37,7 +37,8 @@ struct ShelfArrangementTests {
             spaceNeed: spaceNeed,
             appNeed: appNeed,
             spaceFloor: 0,
-            shelf: shelf
+            shelf: shelf,
+            pocket: nil
         )
     }
 
@@ -157,7 +158,8 @@ struct ShelfArrangementTests {
             spaceNeed: 700,
             appNeed: 800,
             spaceFloor: 300,
-            shelf: shelf(minimum: 20)
+            shelf: shelf(minimum: 20),
+            pocket: nil
         )
         #expect(placed.space?.length == 300)
         #expect(placed.app?.length == 700)

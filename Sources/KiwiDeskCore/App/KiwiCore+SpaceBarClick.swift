@@ -78,6 +78,14 @@ extension KiwiCore {
     /// App Bar item does, on the Space that bar draws it in.
     func pickBarRow(_ window: WindowID, on space: SpaceID?) {
         withUserMotion {
+            // A pocket plate's row takes its window out (#2678).
+            if state.isPocketed(window) {
+                execute(
+                    "focus_window",
+                    args: [.number(Double(window.raw))]
+                )
+                return
+            }
             guard let space else {
                 selectFromAppBar(window)
                 return

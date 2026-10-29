@@ -309,7 +309,8 @@ struct CombinedClampTests {
             spaceNeed: 300,
             appNeed: 500,
             spaceFloor: 0,
-            shelf: shelf
+            shelf: shelf,
+            pocket: nil
         )
         let segments = [arrangement.space, arrangement.app]
             .compactMap { $0?.rect(in: strip, horizontal: true) }

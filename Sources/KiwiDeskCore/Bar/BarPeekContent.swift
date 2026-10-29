@@ -15,11 +15,14 @@ enum BarPeekSource: Equatable {
     /// An overflow mark (#2235): the windows one end of a run
     /// hides, nearest the edge first.
     case run([WindowID])
+    /// The pocket plate (#2678): the windows inside, in put-in
+    /// order.
+    case pocket([WindowID])
 
     var windows: [WindowID] {
         switch self {
         case .glyph(let ids), .overflow(let ids), .appItem(let ids),
-            .space(let ids), .run(let ids):
+            .space(let ids), .run(let ids), .pocket(let ids):
             ids
         }
     }
@@ -34,7 +37,7 @@ enum BarPeekSource: Equatable {
     /// (#1945).
     var isList: Bool {
         switch self {
-        case .overflow, .space, .run: true
+        case .overflow, .space, .run, .pocket: true
         case .glyph, .appItem: windows.count > 1
         }
     }
@@ -56,7 +59,7 @@ enum BarPeekSource: Equatable {
     var clickGrowth: Growth? {
         switch self {
         case .run: .fromPill
-        case .overflow: .outOfItem
+        case .overflow, .pocket: .outOfItem
         case .glyph, .appItem: isList ? .outOfItem : nil
         case .space: nil
         }
@@ -74,7 +77,7 @@ enum BarPeekSource: Equatable {
         switch self {
         case .appItem: return .none
         case .glyph: return .name
-        case .overflow, .space, .run: return .full
+        case .overflow, .space, .run, .pocket: return .full
         }
     }
 

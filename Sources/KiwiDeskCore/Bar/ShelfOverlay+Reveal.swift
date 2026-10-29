@@ -85,7 +85,7 @@ extension ShelfOverlay {
     func cutReveal() {
         revealing = nil
         growing = false
-        BarMotion.endReveal(content, items: stripView)
+        endRevealMotion()
     }
 
     /// Slides the content in; a retract in flight is taken back
@@ -99,25 +99,32 @@ extension ShelfOverlay {
     /// room; nil reads it now.
     func revealIn(ordering: Bool = false, from: CGPoint? = nil) {
         let from = from ?? BarMotion.revealShift(of: content)
+        let pocketFrom = BarMotion.revealShift(of: pocket.content)
         // A reveal takes the shelf back from a leave in flight.
         leaving = nil
         leavingSlides = false
-        content.alphaValue = 1
+        setContentAlpha(1, animated: false)
         let token = UUID()
         revealing = token
         openRevealRoom(entering: true)
+        openPocketRoom(entering: true)
         guard ordering else {
-            land(token, after: start(lead: false, from: from))
+            land(
+                token,
+                after: start(lead: false, from: from, pocketFrom: pocketFrom)
+            )
             return
         }
-        BarMotion.playReveal(
-            content,
-            items: stripView,
-            path: revealPath,
-            entering: true,
-            from: from,
-            held: true
-        )
+        for (view, items) in motionContents {
+            BarMotion.playReveal(
+                view,
+                items: items,
+                path: revealPath,
+                entering: true,
+                from: view === content ? from : pocketFrom,
+                held: true
+            )
+        }
         afterCommit { [weak self] in
             guard let self, self.revealing == token, self.leaving == nil
             else { return }
@@ -125,15 +132,22 @@ extension ShelfOverlay {
         }
     }
 
-    private func start(lead: Bool, from: CGPoint? = nil) -> TimeInterval {
-        BarMotion.playReveal(
-            content,
-            items: stripView,
-            path: revealPath,
-            entering: true,
-            from: from,
-            lead: lead
-        )
+    private func start(
+        lead: Bool,
+        from: CGPoint? = nil,
+        pocketFrom: CGPoint? = nil
+    ) -> TimeInterval {
+        motionContents.map { view, items in
+            BarMotion.playReveal(
+                view,
+                items: items,
+                path: revealPath,
+                entering: true,
+                from: view === content ? from : pocketFrom,
+                lead: lead
+            )
+        }
+        .max() ?? 0
     }
 
     /// Ends the reveal `token` started once it has landed, unless
@@ -145,7 +159,7 @@ extension ShelfOverlay {
             else { return }
             self.revealing = nil
             self.growing = false
-            BarMotion.endReveal(self.content, items: self.stripView)
+            self.endRevealMotion()
             self.settleRoom()
         }
     }
@@ -165,22 +179,30 @@ extension ShelfOverlay {
             view.isHidden = false
         }
         revealing = nil
-        let from = BarMotion.revealShift(of: content)
+        let shifts = motionContents.map {
+            BarMotion.revealShift(of: $0.view)
+        }
         openRevealRoom(entering: false)
-        let span = BarMotion.playReveal(
-            content,
-            items: stripView,
-            path: revealPath,
-            entering: false,
-            from: from
-        )
+        openPocketRoom(entering: false)
+        let span =
+            zip(motionContents, shifts).map { pair, from in
+                BarMotion.playReveal(
+                    pair.view,
+                    items: pair.items,
+                    path: revealPath,
+                    entering: false,
+                    from: from
+                )
+            }
+            .max() ?? 0
         afterReveal(span) { [weak self] in
             guard let self, self.leaving == token else { return }
             self.leaving = nil
             self.leavingSlides = false
             self.growing = false
             self.panel?.orderOut(nil)
-            BarMotion.endReveal(self.content, items: self.stripView)
+            self.pocket.orderOut()
+            self.endRevealMotion()
             self.onLeft()
         }
         return true

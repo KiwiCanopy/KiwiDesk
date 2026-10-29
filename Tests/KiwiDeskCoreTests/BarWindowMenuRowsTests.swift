@@ -89,7 +89,8 @@ struct BarWindowMenuRowsTests {
             titles(rows)
                 == [
                     "Safari", "New Window", "Move to Current Space",
-                    "Float Window", "App Rules…", "—", "Close Window",
+                    "Float Window", "Pocket Window", "App Rules…", "—",
+                    "Close Window",
                     "Quit Safari", "—",
                 ] + shelf
         )
@@ -102,8 +103,8 @@ struct BarWindowMenuRowsTests {
         #expect(
             titles(rows)
                 == [
-                    "Safari", "New Window", "Float Window", "App Rules…",
-                    "—",
+                    "Safari", "New Window", "Float Window",
+                    "Pocket Window", "App Rules…", "—",
                     "Close Window", "Quit Safari", "—",
                 ] + shelf
         )

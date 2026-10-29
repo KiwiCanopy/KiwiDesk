@@ -152,6 +152,8 @@ struct ShelfLookApplyTests {
         source.kiwishelf.dimFactor = 0.7
         source.kiwishelf.fillFade = 40
         source.kiwishelf.tintHubAndPlates = false
+        source.kiwishelf.pocketEdge = .left
+        source.kiwishelf.pocketPosition = 30
         source.spaceBarStyle.activeIndicator = .edgeMark
         source.spaceBarStyle.glyphGap = 2
         source.spaceBarStyle.activeDimFactor = 0.5

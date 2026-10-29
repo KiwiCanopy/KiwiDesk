@@ -35,6 +35,7 @@ struct PaletteScenePanel: View {
     private var shelfShape: some View {
         HomeCardBarsTile(
             settings: settings,
+            pocketStands: model.pocketStandsAtRest,
             spaceCount: model.config.spaces.count,
             scale: 1.8,
             spaceLabels: BarsPanelPreview.spaceLabels(of: model.config)

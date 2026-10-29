@@ -197,6 +197,7 @@ struct ShelfFloorWiringTests {
             settings: settings,
             spaceItems: spaces,
             app: app,
+            pocket: false,
             drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 1)

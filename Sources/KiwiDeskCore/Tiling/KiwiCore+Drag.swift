@@ -146,11 +146,22 @@ extension KiwiCore {
             : spaceBarDrop.ended(id, cursor: drag.cursorLocation())
         switch barDrop {
         case .relocate(let target):
+            finishPocketGesture(id)
             moveWindow(id, to: target, follow: false)
             return
         case .placeInSprung, .none:
             break
         }
+        // A drop on the lit pocket plate is the pocket's (#2678),
+        // ranked after the Space Bar as the move ranks them.
+        let pocketed = pocketDragEnded(
+            id,
+            start: start,
+            frame: frame,
+            live: !drag.isLateGesture(id)
+        )
+        finishPocketGesture(id)
+        if pocketed { return }
         // A floating window is excluded from the layout swap/resize
         // logic below, but a drop that leaves it under a top app bar
         // hides its title bar and makes it ungrabbable — clamp it

@@ -27,6 +27,8 @@ final class ShelfManager {
         /// the mark a grow reveal grows out of, AX coordinates.
         var slides = false
         var mark: BarMotion.RevealMark? = nil
+        /// The pocket's view at its slot on this shelf (#2678).
+        var pocket: ShelfPocketPiece.Mount? = nil
     }
 
     /// A Space Bar minimum the divider reached (`committed` on
@@ -51,11 +53,15 @@ final class ShelfManager {
     /// anchored on its panel, or a menu a press on it opened — what
     /// holds a hover reveal although the pointer left (#761).
     func surfaceHolds(_ key: Key) -> Bool {
-        guard let panel = overlays[key]?.panel else { return false }
-        if peek.panel.isShown, peek.shown?.view?.window === panel {
-            return true
+        guard let overlay = overlays[key] else { return false }
+        // The pocket's panel is the shelf's too (#2678).
+        let panels = [overlay.panel, overlay.pocket.panel].compactMap {
+            $0 as NSWindow?
         }
-        return peek.menuTracks(on: panel)
+        return panels.contains { panel in
+            (peek.panel.isShown && peek.shown?.view?.window === panel)
+                || peek.menuTracks(on: panel)
+        }
     }
     #if DEBUG
         /// Whether a shelf orders its panel in. Off in both
@@ -85,8 +91,10 @@ final class ShelfManager {
 
     /// The shelf a bar panel draws — the peek wears it.
     func shelf(drawnIn window: NSWindow) -> KiwiShelf? {
-        overlays.first { $0.value.panel === window }
-            .flatMap { last[$0.key]?.shelf }
+        overlays.first {
+            $0.value.panel === window || $0.value.pocket.panel === window
+        }
+        .flatMap { last[$0.key]?.shelf }
     }
     /// Set while `updateBars` syncs the two bars: their renders
     /// would otherwise re-lay the shelf against the previous plan
@@ -145,6 +153,7 @@ final class ShelfManager {
             // Stood down, turned off or its display gone: a peek
             // standing on this shelf leaves with it (#1946).
             peek.shelfLeft(overlay.panel)
+            peek.shelfLeft(overlay.pocket.panel)
             overlay.hide(animated: true)
             // A kept hiding shelf whose edge stopped hiding goes.
             if !overlay.isVisible, !reveal.hasTarget(on: key) {
@@ -209,6 +218,9 @@ final class ShelfManager {
             }
             self?.peek.pressed(on: $0, type: $1)
         }
+        overlay.pocket.onPress = { [weak self] in
+            self?.peek.pressed(on: $0, type: $1)
+        }
         overlay.contextMenus = contextMenus
         overlay.handle.onMinimum = { [weak self] percent, committed in
             self?.onMinimum(percent, committed)
@@ -222,7 +234,8 @@ final class ShelfManager {
             shelf: LiquidGlassGate.rendered(shelf.shelf),
             sheen: shelf.sheen,
             sections: sections,
-            divider: shelf.divider
+            divider: shelf.divider,
+            pocket: shelf.pocket
         )
         // Placement moves views under a resting pointer and AppKit
         // sends no exit for it: every hover is re-read here, the
