@@ -27,7 +27,14 @@ struct SimpleShortcutCards: View {
             model: model,
             bindings: bindings,
             expander: expander,
-            drawsKiwiDeskKeys: false
+            drawsKiwiDeskKeys: false,
+            // Simple's card has no Shortcuts page around it to say
+            // what it holds (owner 2026-10-29).
+            caption: L(
+                "simple.apps.caption",
+                "Give the apps you use most a shortcut that opens "
+                    + "or focuses them"
+            )
         )
         .environment(
             \.recorderConflictAnchor,

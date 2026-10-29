@@ -1,10 +1,11 @@
 import CoreGraphics
 
 /// Simple's two columns where a panel docks (#2737 ruling 10, as
-/// re-ruled 2026-10-29): the controls take a share of the window
-/// between two bounds, the preview's desk grows to what the rest of
-/// the width and the window's height allow, and what is left over
-/// is split as equal margins, centring the pair. Whether it docks is
+/// re-ruled 2026-10-29): the controls keep their full content cap,
+/// since the Open applications row needs it, the preview's desk
+/// grows to what the rest of the width and the window's height
+/// allow, and what is left over is split as equal margins, centring
+/// the pair. Whether it docks is
 /// `SettingsPreviewForm`'s; the save pill centres against `preview`
 /// through `SettingsView.dockedPanelWidth`.
 struct SimpleColumns: Equatable {
@@ -20,11 +21,8 @@ struct SimpleColumns: Equatable {
     /// The controls' content cap, so a wide window does not
     /// stretch the rows.
     static let contentCap: CGFloat = 760
-    /// The controls column's share of the window and its bounds:
-    /// 580 at the docking width, the content cap plus insets wide.
-    static let controlsShare: CGFloat = 0.48
-    static let controlsMin: CGFloat = 580
-    static let controlsMax = contentCap + 2 * SettingsMetrics.paneInset
+    /// The controls column: the content cap plus its insets.
+    static let controls = contentCap + 2 * SettingsMetrics.paneInset
     /// The widest plate; past it the margins grow instead.
     static let plateCap: CGFloat = 1200
     /// The preview column's horizontal inset, each side.
@@ -50,10 +48,7 @@ struct SimpleColumns: Equatable {
     /// The columns for a pane of `size`, `drawsMap` when the
     /// preview shows the screen map below the plate.
     static func of(_ size: CGSize, drawsMap: Bool) -> SimpleColumns {
-        let controls = min(
-            max(size.width * controlsShare, controlsMin),
-            controlsMax
-        )
+        let controls = Self.controls
         let room = max(0, size.width - controls - 1)
         let heightRoom =
             size.height - chromeHeight

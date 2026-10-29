@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDesk
 
 /// Simple's docked columns (#2737 ruling 10, re-ruled 2026-10-29):
-/// the controls' bounds, a desk sized from the pane, and the pair
-/// centred. Pure arithmetic, off the main actor.
+/// the controls at their cap, a desk sized from the pane, and the
+/// pair centred. Pure arithmetic, off the main actor.
 @Suite("Simple columns")
 struct SimpleColumnsTests {
     private func columns(
@@ -31,18 +31,21 @@ struct SimpleColumnsTests {
         )
     }
 
-    @Test("the docking width leaves the controls their 580")
+    /// The Open applications row needs the whole cap, so the
+    /// controls keep it from the docking width up.
+    @Test("the docking width leaves the controls their cap")
     func dockingWidth() {
         let c = columns(SettingsWidthClass.panelBreakpoint, 800)
-        #expect(c.controls == SimpleColumns.controlsMin)
+        #expect(c.controls >= SimpleColumns.contentCap)
         #expect(c.margin == 0)
+        #expect(c.plate.width > 300)
         expectFits(c, SettingsWidthClass.panelBreakpoint)
     }
 
-    @Test("a wide window centres the pair and caps the controls")
+    @Test("a wide window centres the pair")
     func wideCentres() {
         let c = columns(2000, 800)
-        #expect(c.controls == SimpleColumns.controlsMax)
+        #expect(c.controls == SimpleColumns.controls)
         #expect(c.margin > 0)
         let used = 2 * c.margin + c.controls + 1 + c.preview
         #expect(abs(used - 2000) < 0.001)

@@ -10290,8 +10290,9 @@ end the controls at every width, so the right column is the
 preview and nothing else. Docked, the desk is sized from the
 window — as wide as the column allows, as tall as the window
 allows, up to a cap — and the bars scale with it, while the
-controls keep a bounded share and their 760 pt cap; what is left
-is split as equal margins, centring the pair (owner 2026-10-29).
+controls keep their full 760 pt cap, which the Open applications
+row needs; what is left is split as equal margins, centring the
+pair (owner 2026-10-29).
 A desk of fixed height left a wide window mostly empty, and
 Simple's reader is the one who wants the picture. The preview
 adds no mark Simple cannot reach — no sticky, pocket or floating

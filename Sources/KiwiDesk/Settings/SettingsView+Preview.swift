@@ -22,7 +22,7 @@ extension SettingsView {
     func dockedPanelWidth(_ width: SettingsWidthClass) -> CGFloat? {
         guard panelDocked(width) else { return nil }
         guard model.showsSimple else { return SettingsTheme.panelWidth }
-        return simplePreviewWidth ?? SimpleColumns.controlsMin
+        return simplePreviewWidth ?? 0
     }
 
     /// Whether floating preview overlay is visible.

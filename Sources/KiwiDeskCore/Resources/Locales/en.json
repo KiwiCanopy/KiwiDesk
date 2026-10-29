@@ -2155,6 +2155,7 @@
   "shortcuts.temporary_space.note": "A temporary Space's shortcuts go when the Space does. Add it to the profile in %1$@ to keep them.",
   "shortcuts.tracks.help": "In the track layout, windows line up in tracks — columns, or rows if the axis is flipped — and several can share one. Previous is the track to the left or above, next the one to the right or below. Tune the layout in **%1$@**.",
   "shortcuts.tracks.move": "Move windows in the track layout",
+  "simple.apps.caption": "Give the apps you use most a shortcut that opens or focuses them",
   "simple.conflict.fix": "Fix in %1$@",
   "simple.header.app_rules": "%1$d App Rules",
   "simple.header.app_rules_one": "1 App Rule",

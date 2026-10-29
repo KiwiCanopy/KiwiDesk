@@ -10,6 +10,9 @@ struct ApplicationsGroup: View {
     /// KiwiDesk's own keys close the card on the Shortcuts page;
     /// Simple draws the app rows alone (#2737).
     var drawsKiwiDeskKeys = true
+    /// Under the title, where no page around the card says what it
+    /// is for (Simple, #2737).
+    var caption: String?
     @Environment(\.disabledSystemShortcuts)
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
@@ -32,7 +35,8 @@ struct ApplicationsGroup: View {
 
     var body: some View {
         SettingsSection(
-            SettingsCatalog.shortcuts.openApplications
+            SettingsCatalog.shortcuts.openApplications,
+            caption: caption
         ) {
             if orderedAppIDs.isEmpty {
                 // Worded FROM `shortcuts.app_behavior.help` (#678
