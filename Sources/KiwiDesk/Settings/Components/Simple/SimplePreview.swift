@@ -108,9 +108,10 @@ struct SimplePreview: View {
             )
         )
         .environment(\.schematicPalette, palette)
-        // One description, the schematic's own; the header above
-        // names the Space.
-        .accessibilityElement(children: .combine)
+        // One description: the header above names the Space, the
+        // picture its layout — never the bar strip's own labels.
+        .accessibilityElement(children: .ignore)
+        .accessibilityLabel(mode.displayName)
     }
 
     @ViewBuilder

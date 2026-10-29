@@ -77,6 +77,40 @@ struct SimplePreviewTests {
         #expect(model.nav.simpleHover == nil)
     }
 
+    /// A fallback that is not the main screen is named as itself.
+    @Test("an offline pin names a fallback that is not main as such")
+    func fallbackSentence() {
+        LocalizationManager.shared.select("en")
+        let side = Display(
+            id: DisplayID(2),
+            name: "Side",
+            frame: CGRect(x: 100, y: 0, width: 100, height: 100)
+        )
+        let elsewhere = SettingsModel.offlinePinSentence(
+            waiting: "Dell",
+            fallback: side,
+            fallbackIsMain: false
+        )
+        #expect(elsewhere.contains("Side"))
+        #expect(!elsewhere.contains("main screen"))
+        let main = SettingsModel.offlinePinSentence(
+            waiting: "Dell",
+            fallback: side,
+            fallbackIsMain: true
+        )
+        #expect(main.contains("the main screen"))
+    }
+
+    /// Ruling 10's floor: the docking width leaves the controls 580.
+    @Test("the docked preview leaves the controls their 580")
+    func controlsKeepTheirFloor() {
+        let controls =
+            SettingsWidthClass.panelBreakpoint
+            - SimpleColumns.preview - 1
+        #expect(controls >= 580)
+        #expect(SimpleColumns.contentCap >= controls)
+    }
+
     @Test("an offline pin's caption keeps the hover and both screens")
     func offlineCaption() {
         LocalizationManager.shared.select("en")
@@ -122,11 +156,14 @@ struct SimplePreviewTests {
         let text = try SourceScan.strippedSource(at: file)
             .filter { !$0.isWhitespace }
         #expect(text.contains("model.simpleKeptSpace==space"))
-        // The row draws the measured pair, never a token of its own.
-        #expect(text.contains("shape.fill(Self.keptFill)"))
+        // The ring and the fill are drawn from that reading, in the
+        // measured pair.
         #expect(text.contains("isKept(space)?Self.keptRing:.clear"))
-        #expect(!text.contains("nav.simpleKept=="))
-        #expect(!text.contains("nav.simpleKept!="))
+        #expect(text.contains("ifisKept(space){shape.fill(Self.keptFill)"))
+        // The row only writes the kept Space — the tap and the menu
+        // item — and never reads it.
+        #expect(text.occurrences(of: "nav.simpleKept") == 2)
+        #expect(text.occurrences(of: "nav.simpleKept=space") == 2)
     }
 
     /// The ring is the kept cue, so it must part from the fill it
@@ -136,7 +173,7 @@ struct SimplePreviewTests {
         for dark in [false, true] {
             let ring = try hex(
                 ThemeContrast.resolved(
-                    SettingsTheme.accent,
+                    SimpleSpacesCard.keptRing,
                     dark: dark
                 )
             )
@@ -145,11 +182,11 @@ struct SimplePreviewTests {
                 dark: dark
             )
             let fill = try ThemeContrast.resolved(
-                SettingsTheme.chipHover,
+                SimpleSpacesCard.keptFill,
                 dark: dark
             )
             let alpha = try ThemeContrast.resolvedAlpha(
-                SettingsTheme.chipHover,
+                SimpleSpacesCard.keptFill,
                 dark: dark
             )
             let ground = hex(

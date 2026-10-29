@@ -110,7 +110,8 @@ struct SimpleSpacesCard: View {
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
         // The tap is the row's ground, never its controls, so a
-        // click into the name field only focuses it.
+        // click into the name field only focuses it; a click on a
+        // row's text, which is no ground, keeps nothing.
         .background(
             rowFill(space).onTapGesture { model.nav.simpleKept = space }
         )

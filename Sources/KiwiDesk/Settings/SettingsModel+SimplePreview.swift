@@ -115,8 +115,21 @@ extension SettingsModel {
                     + "for now."
             )
         }
-        let waiting = Display.fingerprintParts(pin).name
-        guard fallback.id == mainDisplay?.id else {
+        return Self.offlinePinSentence(
+            waiting: Display.fingerprintParts(pin).name,
+            fallback: fallback,
+            fallbackIsMain: fallback.id == mainDisplay?.id
+        )
+    }
+
+    /// The sentence for a pin waiting on `waiting`, the Space
+    /// opening on `fallback` meanwhile.
+    static func offlinePinSentence(
+        waiting: String,
+        fallback: Display,
+        fallbackIsMain: Bool
+    ) -> String {
+        guard fallbackIsMain else {
             return L(
                 "spaces.pin_offline_badge.help_fallback",
                 "Pinned to %1$@, which isn't connected.\nOpens on "
