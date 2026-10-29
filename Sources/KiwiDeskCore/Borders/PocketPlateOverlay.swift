@@ -69,9 +69,9 @@ final class PocketPlateOverlay {
     var standingDown: Set<DisplayID> = []
     /// Each screen's pocket slot from the last bar pass, AX.
     var slots: [DisplayID: CGRect] = [:]
-    /// Where each screen's handle centres along an edge of Auto
-    /// marks, its band in their row, AX (#2678).
-    var markCentres: [DisplayID: CGFloat] = [:]
+    /// Each screen's handle band along an edge of Auto marks, its
+    /// place in their row, AX along the edge (#2678).
+    var markBands: [DisplayID: ClosedRange<CGFloat>] = [:]
     /// The window a drag moves, while one does (#2678).
     var dragging: WindowID?
     /// Whether that window is over a pocket and a drop takes it.
@@ -106,7 +106,9 @@ final class PocketPlateOverlay {
     /// The view a display's shelf carries at its pocket slot, while
     /// the pocket stands there as a section.
     func sectionMount(on display: DisplayID) -> NSView? {
-        guard specs[display]?.handle == nil else { return nil }
+        guard let spec = specs[display], spec.handle == nil else {
+            return nil
+        }
         return sectionViews[display]?.holder
     }
 
@@ -230,9 +232,8 @@ final class PocketPlateOverlay {
     /// The shelf a pocket wears in `window`, its panel — the peek
     /// growing out of it wears it too.
     func shelf(drawnIn window: NSWindow) -> KiwiShelf? {
+        // A section's panel is its shelf's, which ShelfManager owns.
         shownViews.first { $0.value.panel === window }
-            .flatMap { specs[$0.key]?.shelf }
-            ?? sectionViews.first { $0.value.view.window === window }
             .flatMap { specs[$0.key]?.shelf }
     }
 

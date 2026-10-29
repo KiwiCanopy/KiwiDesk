@@ -25,11 +25,11 @@ extension KiwiCore {
             : PocketHandleView.restDepth
         let visible = GeometryUtils.axVisibleFrame(of: screen)
         // In an Auto edge's row of marks, else at Position (#2678).
-        if let centre = pocketPlate.markCentres[display] {
+        if let band = pocketPlate.markBands[display] {
             return Self.pocketHandleFrame(
                 visible: visible,
                 edge: shelf.pocketEdge,
-                centre: centre,
+                band: band,
                 depth: depth
             )
         }
@@ -54,39 +54,40 @@ extension KiwiCore {
         let horizontal = edge.isHorizontal
         let low = horizontal ? visible.minX : visible.minY
         let high = horizontal ? visible.maxX : visible.maxY
+        let length = ShelfMarkPlacement.bandLength
+        let start = min(
+            max(low + (high - low) * share - length / 2, low),
+            max(high - length, low)
+        )
         return pocketHandleFrame(
             visible: visible,
             edge: edge,
-            centre: low + (high - low) * share,
+            band: start...(start + length),
             depth: depth
         )
     }
 
-    /// A band `ShelfMarkPlacement.bandLength` long centred on
-    /// `centre` (AX, along `edge`) of `visible`, `depth` deep, kept
-    /// whole on the edge.
+    /// The handle `depth` deep on `edge` of `visible`, along `band`
+    /// (AX, along the edge) — its band in an Auto edge's row of
+    /// marks, taken as the row laid it.
     static func pocketHandleFrame(
         visible: CGRect,
         edge: AppBarEdge,
-        centre: CGFloat,
+        band span: ClosedRange<CGFloat>,
         depth: CGFloat
     ) -> CGRect {
-        let band = ShelfMarkPlacement.bandLength
-        func lead(_ low: CGFloat, _ high: CGFloat) -> CGFloat {
-            let start = centre - band / 2
-            return min(max(start, low), max(high - band, low))
-        }
+        let band = span.upperBound - span.lowerBound
         switch edge {
         case .bottom:
             return CGRect(
-                x: lead(visible.minX, visible.maxX),
+                x: span.lowerBound,
                 y: visible.maxY - depth,
                 width: band,
                 height: depth
             )
         case .top:
             return CGRect(
-                x: lead(visible.minX, visible.maxX),
+                x: span.lowerBound,
                 y: visible.minY,
                 width: band,
                 height: depth
@@ -94,14 +95,14 @@ extension KiwiCore {
         case .left:
             return CGRect(
                 x: visible.minX,
-                y: lead(visible.minY, visible.maxY),
+                y: span.lowerBound,
                 width: depth,
                 height: band
             )
         case .right:
             return CGRect(
                 x: visible.maxX - depth,
-                y: lead(visible.minY, visible.maxY),
+                y: span.lowerBound,
                 width: depth,
                 height: band
             )
@@ -113,8 +114,7 @@ extension KiwiCore {
     /// of its handle — else nil, where none stands (#2678).
     func pocketLanding(on display: DisplayID) -> CGRect? {
         // The one door for where the pocket is (#2678 review 5).
-        guard pocketStands, !pocketPlate.standingDown.contains(display)
-        else { return nil }
+        guard pocketStands(on: display) else { return nil }
         if let slot = pocketPlate.slots[display] { return slot }
         guard let room = pocketHandleFrame(on: display, risen: true) else {
             return nil
@@ -132,7 +132,9 @@ extension KiwiCore {
 
     /// Holds `display`'s pocket out of its handle for a play
     /// `seconds` long, so the window lands on a pocket the screen
-    /// shows; a later play replaces the hold, on any display.
+    /// shows. The latest play wins on every display: a play on
+    /// another screen ends this one's hold, its pocket sinking once
+    /// that play's landing has passed.
     func holdPocketOut(on display: DisplayID, for seconds: TimeInterval) {
         let token = UUID()
         pocketPlate.playing = [display: token]

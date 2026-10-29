@@ -35,8 +35,11 @@ final class ShelfOverlay {
     /// The pocket's section, in a panel of its own (#2678).
     let pocket = ShelfPocketPiece()
     #if DEBUG
-        /// Set by `ShelfManager.ordersPanels` (#1894).
-        var ordersPanel = true
+        /// Set by `ShelfManager.ordersPanels` (#1894); the pocket's
+        /// panel follows it.
+        var ordersPanel = true {
+            didSet { pocket.ordersPanel = ordersPanel }
+        }
     #endif
 
     /// AppKit keeps a visible panel alive after its owner is gone,
@@ -236,6 +239,7 @@ final class ShelfOverlay {
                 horizontal: horizontal,
                 animated: glides
             )
+            pocket.placeView(animated: glides)
             if fadesBack, !slidesBack {
                 setContentAlpha(1, animated: true)
             }

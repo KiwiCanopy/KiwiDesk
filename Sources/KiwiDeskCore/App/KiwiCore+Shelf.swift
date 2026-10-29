@@ -120,8 +120,7 @@ extension KiwiCore {
                 reveal: reveal,
                 gaps: state.workspaces.currentSpace(on: display.id)
                     .map(shown.gaps(for:)) ?? shown.gapsGlobal,
-                settings: shown,
-                pocket: pocketOnShelf
+                settings: shown
             )
             let plans = planned.filter(\.drawsAny)
             if let plan = plans.first(where: { $0.arrangement.pocket != nil }),
@@ -177,7 +176,7 @@ extension KiwiCore {
         // the shelf: synced first, so each shelf mounts this pass's
         // pocket (#2678).
         pocketPlate.standingDown = standingDown
-        pocketPlate.markCentres = hiding.pocketCentres
+        pocketPlate.markBands = hiding.pocketBands
         updatePocketPlate(slots: pocketSlots)
         // The revealer first, so the shelves judge this pass's
         // hiding edges (#761).

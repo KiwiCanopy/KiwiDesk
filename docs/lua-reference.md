@@ -3070,8 +3070,10 @@ percent: `0` is the left or top end, `100` the right or bottom
 end. On an edge where a bar shows, the pocket takes the shelf's
 nearer end instead — its start below `50`, its end from `50` —
 outside the bars' items, so it stays put while they scroll. On an
-edge no bar shows, its handle stands at the position, whole on
-screen at either end. A look carries it.
+edge where an `"auto"` bar rests hidden, its handle joins the bars'
+row of marks, one band more at the end the position leans to. On
+any other edge no bar shows, its handle stands at the position,
+whole on screen at either end. A look carries it.
 
 **Example:**
 
@@ -5901,9 +5903,11 @@ inside, except where KiwiShelf stands down for a native
 full-screen window or a presentation. On an edge no bar shows it
 rests as a handle, and pointing at the handle brings the pocket up
 out of it. A click on the pocket lists the windows inside by app;
-a row takes its window out. Under `"one"` nothing stays: the brief
-pocket shows only while a window goes in or out
-([`animations.set_on_state_change`](#animationsset_on_state_change)).
+a row takes its window out. Under `"one"` nothing stays: the pocket
+stands only while a window goes in or out
+([`animations.set_on_state_change`](#animationsset_on_state_change))
+or while you drag one, and on an edge where a bar shows its slot
+then opens, the bars gliding aside for it.
 
 While you drag a window, under either capacity, the pocket comes
 up on every screen as a drop target, and a drop on it pockets that
@@ -7669,11 +7673,11 @@ float rules make floating, follow
 :::unreleased
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
-place the brief pocket, just inside a bar on that edge. Where a
-pocket already stands on the screen — under
-[`pocket.set_capacity("several")`](#pocketset_capacity) — the plate
-flies to that pocket instead, brought up out of its handle on an
-edge no bar shows.
+place the pocket the plate flies to, under either
+[`pocket.set_capacity`](#pocketset_capacity): on an edge where a
+bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
+aside for it; on an edge no bar shows, the pocket comes up out of
+its handle.
 :::
 
 **Example:**

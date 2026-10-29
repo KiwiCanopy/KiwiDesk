@@ -12,6 +12,13 @@ extension KiwiCore {
     /// Whether the pocket stays on screen (#2678): Several windows.
     var pocketHoldsSeveral: Bool { appWide.pocketCapacity == .several }
 
+    /// Whether the pocket stands on `display` this pass: it stands,
+    /// and that screen does not stand down — what the pocket draws
+    /// and where a play lands both read (#2678 review 5).
+    func pocketStands(on display: DisplayID) -> Bool {
+        pocketStands && !pocketPlate.standingDown.contains(display)
+    }
+
     /// Whether the pocket stands this pass — the one predicate the
     /// shelf's plan and the pocket both read (#2678 review 4).
     var pocketStands: Bool {
@@ -90,9 +97,7 @@ extension KiwiCore {
         // A list open on a risen pocket holds it out (#2678 review 1).
         let listed = pocketListDisplay
         return state.workspaces.allDisplays.compactMap { display in
-            guard !pocketPlate.standingDown.contains(display.id) else {
-                return nil
-            }
+            guard pocketStands(on: display.id) else { return nil }
             let slot = pocketPlate.slots[display.id]
             // An edge no bar shows takes the handle, the pocket out of
             // it on hover and during a drag (#2678).

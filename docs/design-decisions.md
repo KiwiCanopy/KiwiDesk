@@ -6163,7 +6163,8 @@ focusing that screen first. A click grows the list of the windows
 inside out of it, by app, each row taking its window out — the
 bars' own click-held list, so it closes and keys as theirs do.
 Under One window it stands only while a window drag
-runs or a window goes in or out, and on a bar's edge its slot then
+runs or a window goes in or out under its animation, and on a
+bar's edge its slot then
 opens, the bars gliding aside for it, so a drop and a put-in land on
 the one pocket at its one place (owner, 2026-10-29). Edge and
 Position therefore act whatever the animation switch says and do not

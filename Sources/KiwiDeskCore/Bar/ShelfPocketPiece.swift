@@ -63,8 +63,11 @@ final class ShelfPocketPiece {
         items.frame = CGRect(origin: .zero, size: strip.size)
         guard let next else {
             let had = mount != nil
-            // Drawn on until its leave lands (`dropLeaving`).
-            if let view = mount?.view { leaving = view }
+            // Drawn on until its leave lands — while it is still
+            // here: another shelf may have taken the view already.
+            if let view = mount?.view, view.superview === items {
+                leaving = view
+            }
             mount = nil
             rest = nil
             return had
@@ -72,17 +75,26 @@ final class ShelfPocketPiece {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         let local = next.slot.offsetBy(dx: -strip.minX, dy: -strip.minY)
-        if leaving !== next.view { leaving?.removeFromSuperview() }
+        if leaving !== next.view { dropLeaving() }
         leaving = nil
         if next.view.superview !== items {
             mount?.view.removeFromSuperview()
             items.addSubview(next.view)
+            // A view joining lands at its slot; a moved slot glides
+            // with the shelf (`placeView`).
+            next.view.frame = local
         }
-        next.view.frame = CGRect(origin: local.origin, size: local.size)
         let changed = mount != next
         mount = next
         rest = local
         return changed
+    }
+
+    /// Places the mounted view at its slot, gliding where
+    /// `animated` — called inside the shelf's plate glide.
+    func placeView(animated: Bool) {
+        guard let view = mount?.view, let rest else { return }
+        BarMotion.setFrame(view, to: rest, animated: animated)
     }
 
     /// Sizes the panel to `wanted` (strip coordinates, nil the rest)
@@ -116,7 +128,13 @@ final class ShelfPocketPiece {
     /// Orders the panel out and drops the view a leave drew.
     func orderOut() {
         panel?.orderOut(nil)
-        leaving?.removeFromSuperview()
+        dropLeaving()
+    }
+
+    /// Removes the view a leave drew, only from this piece: a
+    /// pocket moved to another shelf of the screen sits there now.
+    private func dropLeaving() {
+        if leaving?.superview === items { leaving?.removeFromSuperview() }
         leaving = nil
     }
 

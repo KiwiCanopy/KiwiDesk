@@ -137,4 +137,21 @@ struct ShelfPocketPanelTests {
         overlay.hide()
         #expect(overlay.pocket.panel?.isVisible != true)
     }
+
+    @Test("a pocket moved to another shelf stays when the first lets go")
+    func movedPocketStaysOnItsNewShelf() {
+        let first = ShelfOverlay()
+        let second = ShelfOverlay()
+        let pocket = NSView()
+        show(first, pocket: pocket)
+        // Its screen's other shelf takes the pocket, then the first
+        // shelf carries none and its leave lands.
+        show(second, pocket: pocket)
+        show(first, pocket: nil)
+        first.pocket.orderOut()
+        first.hide()
+        #expect(pocket.superview === second.pocket.items)
+        #expect(second.pocket.isMounted)
+        second.hide()
+    }
 }

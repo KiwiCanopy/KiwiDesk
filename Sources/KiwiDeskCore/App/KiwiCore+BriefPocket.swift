@@ -28,7 +28,12 @@ extension KiwiCore {
         let timeline = BriefPocketPlan.timeline(direction, flight: flight)
         // Held out first, so the pocket stands where the play lands.
         holdPocketOut(on: display, for: timeline.end)
-        guard let pocket = pocketLanding(on: display) else { return nil }
+        guard let pocket = pocketLanding(on: display) else {
+            // Nothing to land on: the hold ends with the play.
+            pocketPlate.playing[display] = nil
+            updateBars()
+            return nil
+        }
         var request =
             BriefPocketOverlay.Request(
                 display: display,

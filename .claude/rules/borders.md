@@ -432,10 +432,12 @@ calls it, as an emptied pocket does, and a path that changes whether
 it STANDS — a drag starting or ending, a play's hold — calls
 `updateBars()`, since the slot is the plan's. **Whether it stands is
 the one `pocketStands`** — Several windows, a drag, a play — which
-the plan and the pocket both read (`PocketPlateTests`). **Where it
+the plan and the pocket both read (`PocketShelfWiringTests` ▸
+`dragStandsThePocket`). **Where it
 is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
 off `ShelfArrangement.arrange(…pocket:)`, else its handle risen —
-centred in an Auto edge's row of marks (`ShelfMarkPlacement.row`),
+in an Auto edge's row of marks (`ShelfMarkPlacement.row`,
+`ShelfRevealBandTests` ▸ `pocketJoinsTheRow`),
 else at Position — never a frame of its own beside them. On a bar
 edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
 pocket is a shelf section.

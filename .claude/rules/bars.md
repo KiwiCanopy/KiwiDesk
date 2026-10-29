@@ -788,7 +788,8 @@ pocket rides every motion the shelf plays. Obligations:
   reveal target's held section takes the pocket's slot
   (`KiwiCore+ShelfReveal`), `ShelfManager.surfaceHolds` and the
   peek's shelf read both panels, and a shelf leaving closes a peek
-  on either (`ShelfPocketPanelTests`).
+  on either (`PocketShelfWiringTests` ▸ `barPassMountsThePocket`
+  holds the shelf reading; the hold and the close are review's).
 - **Every `ShelfArrangement.arrange` caller states its pocket** —
   the bars-alone placement is reached only through it — so the
   Settings preview places the bars where the engine does

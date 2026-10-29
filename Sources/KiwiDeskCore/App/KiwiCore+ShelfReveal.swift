@@ -33,10 +33,9 @@ extension KiwiCore {
         /// pass so the dots slide only when they must
         /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
         var dotStarts: [ShelfRevealer.Key: Int] = [:]
-        /// Where the pocket's handle centres on each display's edge
-        /// of Auto marks, AX along the edge (#2678): its band in the
-        /// row.
-        var pocketCentres: [DisplayID: CGFloat] = [:]
+        /// The pocket handle's band on each display's edge of Auto
+        /// marks, AX along the edge (#2678): its place in the row.
+        var pocketBands: [DisplayID: ClosedRange<CGFloat>] = [:]
 
         /// Files each hiding bar of `plans` — its target, and its
         /// mark where it hides to one.
@@ -48,8 +47,7 @@ extension KiwiCore {
             appWindows: Int? = nil,
             reveal: ShelfRevealer,
             gaps: Gaps,
-            settings: TilingSettings,
-            pocket: Bool
+            settings: TilingSettings
         ) {
             for plan in plans {
                 let hiding = plan.shelfEdge.bars.keys.filter {
@@ -65,9 +63,7 @@ extension KiwiCore {
                     appWindows: appWindows,
                     reveal: reveal,
                     gaps: gaps,
-                    settings: settings,
-                    pocket: pocket
-                        && plan.edge == settings.kiwishelf.pocketEdge
+                    settings: settings
                 )
             }
         }
@@ -87,8 +83,7 @@ extension KiwiCore {
             appWindows: Int?,
             reveal: ShelfRevealer,
             gaps: Gaps,
-            settings: TilingSettings,
-            pocket: Bool
+            settings: TilingSettings
         ) {
             let primary = GeometryUtils.primaryHeight
             let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
@@ -97,16 +92,28 @@ extension KiwiCore {
             let shown = { reveal.reveal(of: barKey($0)).isShown }
             // Where a shown bar draws: its run inside its slot, never
             // the whole slot, which spans the edge for a lone bar.
+            let slotOf = { (bar: ShelfBar) in
+                bar == .space ? plan.arrangement.space : plan.arrangement.app
+            }
+            // The pocket's slot holds the bar beside it, never one a
+            // sibling's strip lies between (#2678).
+            let pocketBar = plan.arrangement.pocket.flatMap { pocket in
+                [ShelfBar.space, .app].compactMap { bar in
+                    slotOf(bar).map {
+                        let mid = $0.offset + $0.length / 2
+                        return (bar, abs(mid - pocket.offset))
+                    }
+                }
+                .min { $0.1 < $1.1 }?.0
+            }
             let section = { (bar: ShelfBar) -> CGRect? in
-                let slot =
-                    bar == .space
-                    ? plan.arrangement.space : plan.arrangement.app
-                return slot.map { slot in
+                slotOf(bar).map { slot in
                     let drawn = plan.needs[bar].map(slot.drawing) ?? slot
-                    // The pocket's slot is the shelf's too (#2678).
-                    let pocket = plan.arrangement.pocket.map(plan.segment)
                     let run = plan.segment(drawn)
-                    return flip(pocket.map(run.union) ?? run)
+                    guard bar == pocketBar,
+                        let pocket = plan.arrangement.pocket
+                    else { return flip(run) }
+                    return flip(run.union(plan.segment(pocket)))
                 }
             }
             // The mark draws the shelf as rendered: Reduce
@@ -127,7 +134,7 @@ extension KiwiCore {
             }
             let row = ShelfMarkPlacement.row(
                 for: Set(auto),
-                pocketLeansEnd: pocket && !auto.isEmpty
+                pocketLeansEnd: plan.carriesPocket && !auto.isEmpty
                     ? shelf.pocketLeansEnd : nil,
                 length: plan.length,
                 shelf: shelf
@@ -136,8 +143,8 @@ extension KiwiCore {
             if let band = row.pocket {
                 let origin =
                     plan.horizontal ? plan.strip.minX : plan.strip.minY
-                pocketCentres[key.display] =
-                    origin + (band.lowerBound + band.upperBound) / 2
+                pocketBands[key.display] =
+                    (origin + band.lowerBound)...(origin + band.upperBound)
             }
             for (index, bar) in auto.enumerated() {
                 guard let span = spans[bar] else { continue }

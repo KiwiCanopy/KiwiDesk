@@ -207,7 +207,6 @@ final class ShelfManager {
         overlays[key] = overlay
         #if DEBUG
             overlay.ordersPanel = ordersPanels
-            overlay.pocket.ordersPanel = ordersPanels
         #endif
         overlay.onLeft = { [weak self] in self?.retire(key) }
         overlay.slides = shelf.slides

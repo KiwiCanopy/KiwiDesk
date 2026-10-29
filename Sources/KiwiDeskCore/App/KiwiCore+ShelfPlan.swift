@@ -17,6 +17,10 @@ extension KiwiCore {
         /// Each drawn bar's natural run length, which its slot
         /// draws in (`ShelfArrangement.Slot.drawing`).
         var needs: [ShelfBar: CGFloat] = [:]
+        /// Whether the pocket stands on this edge this pass — the
+        /// one answer its slot, its Auto mark band and the reveal
+        /// target read (#2678).
+        var carriesPocket = false
 
         /// Whether the edge hides to a mark (#761).
         var hides: Bool { shelfEdge.hides }
@@ -143,7 +147,8 @@ extension KiwiCore {
             shelfEdge: shelfEdge,
             needs: [.space: spaceNeed, .app: appNeed].compactMapValues {
                 $0
-            }
+            },
+            carriesPocket: pocket
         )
     }
 }
