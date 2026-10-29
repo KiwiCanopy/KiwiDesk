@@ -1399,7 +1399,7 @@
   "looks.share.based_on": "Basiert auf %1$@ von %2$@",
   "looks.share.based_on_name": "Basiert auf %1$@",
   "looks.share.confirm": "Teilen",
-  "looks.share.help": "Öffnet das Einreichungsformular der Galerie in deinem Browser, mit diesem Look schon eingetragen. Solange mindestens die Hälfte eines importierten Looks unverändert ist, nennt das Teilen, von wem er stammt. Ein Look, den du aus einem mitgelieferten begonnen hast, nennt niemanden.",
+  "looks.share.help": "Öffnet das Einreichungsformular der Galerie in deinem Browser, mit diesem Look schon eingetragen. Solange mindestens die Hälfte eines importierten Looks unverändert ist, nennt das Teilen, von wem er stammt. Ein Look, den du mit einem mitgelieferten begonnen hast, nennt niemanden.",
   "looks.share.title": "Diesen Look teilen",
   "looks.share_failed": "KiwiDesk konnte diesen Look nicht zum Teilen vorbereiten.",
   "looks.shared.caption": "Ein Look umfasst alle Farben, den Stil der Leisten, Liquid Glass, die Form des Fokus-Rahmens, die Fensterabstände und die Animationen.",

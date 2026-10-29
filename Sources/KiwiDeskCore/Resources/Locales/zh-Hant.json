@@ -1371,7 +1371,7 @@
   "looks.link_unreachable": "KiwiDesk 無法下載這個造型。請檢查網路連線，然後再試一次。",
   "looks.mine": "我的造型",
   "looks.name_placeholder": "造型名稱",
-  "looks.origin": "基於",
+  "looks.origin": "原始造型",
   "looks.origin.by": "%1$@（作者：%2$@）",
   "looks.origin.none": "無",
   "looks.other_colors": "不同顏色",
