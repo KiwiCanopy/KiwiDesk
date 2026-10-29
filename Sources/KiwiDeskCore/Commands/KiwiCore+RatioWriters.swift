@@ -76,12 +76,12 @@ extension KiwiCore {
             tiled,
             masterCount: stack.masterCount
         )
-        let masterMin = effectiveMinSize(
+        let masterMin = plannedMinSize(
             of: master,
             axis: axis,
             in: space
         )
-        let stackMin = effectiveMinSize(
+        let stackMin = plannedMinSize(
             of: stackZone ?? ArraySlice([]),
             axis: axis,
             in: space
@@ -217,12 +217,12 @@ extension KiwiCore {
                 chain: chain
             )
         }
-        let lowMin = effectiveMinSize(
+        let lowMin = plannedMinSize(
             of: sides?.first ?? [],
             axis: axis,
             in: space
         )
-        let highMin = effectiveMinSize(
+        let highMin = plannedMinSize(
             of: sides?.second ?? [],
             axis: axis,
             in: space

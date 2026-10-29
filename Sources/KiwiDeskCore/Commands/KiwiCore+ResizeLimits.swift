@@ -103,10 +103,40 @@ extension KiwiCore {
         // Every member takes the Space's own floor, never one
         // resolved again per window: a gap between the two would
         // read as a learned bound (#2237).
+        groupMinSize(of: members, axis: axis, in: space) {
+            learnedMinSize(of: $0, axis: axis)
+        }
+    }
+
+    /// `effectiveMinSize` over a group, each member's learned
+    /// floor raised to its least refusal on `axis` (#2774) — what
+    /// a split heal and its press writers stop at, so one refusal
+    /// moves the split that would otherwise overlap it.
+    func plannedMinSize(
+        of members: some Collection<WindowID>,
+        axis: String,
+        in space: Space
+    ) -> (size: Double, carrier: WindowID?) {
+        groupMinSize(of: members, axis: axis, in: space) {
+            let refused = tiler.sizeBound(for: $0)?
+                .refusedFloor(horizontal: axis == "x")
+            return max(
+                learnedMinSize(of: $0, axis: axis),
+                Double(refused ?? 0)
+            )
+        }
+    }
+
+    private func groupMinSize(
+        of members: some Collection<WindowID>,
+        axis: String,
+        in space: Space,
+        learned: (WindowID) -> Double
+    ) -> (size: Double, carrier: WindowID?) {
         var size = Double(minWindowSize(in: space).on(axis: axis))
         var carrier: WindowID? = nil
         for member in members {
-            let min = learnedMinSize(of: member, axis: axis)
+            let min = learned(member)
             if min > size {
                 size = min
                 carrier = member

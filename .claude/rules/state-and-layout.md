@@ -1457,7 +1457,11 @@ editing here:
   an app that answers each span differently scrolls the run
   rather than landing inward over a neighbour (#2774,
   `RunAskedFloorTests`); a press on a run member clamps there
-  too (`plannedMinSize`). That reading plans and never emits:
+  too (`plannedMinSize`), and the split floor heal and its ratio
+  writers read a side's group floor the same way, so one refusal
+  moves the split that would otherwise overlap it
+  (`SplitFloorRefusalHealTests`). That reading plans and never
+  emits:
   keep it out of `consumedWidth/Height`, `explains` and
   `centered`, and out of a shape decision (Grid's cap, a BSP
   chain's thickness), which keeps `shapeFloor`'s corroborated
