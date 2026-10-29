@@ -258,7 +258,10 @@ follows it either way:
 When a Space is not being shown on any screen, KiwiDesk **parks**
 its windows: it moves them into a bottom corner of their own
 screen, leaving a hair of each at the edge, and moves them back
-when their Space is shown again.
+when their Space is shown again. The same park holds the windows
+a Stack, Track, Grid or BSP layout cannot fit, which wait off
+screen until they scroll in, and the windows Monocle is not
+showing.
 
 **A parked window has not gone anywhere.** It is still on the
 same macOS Desktop, still in the same KiwiDesk Space, still
@@ -278,6 +281,25 @@ Space Bar shows the Desktop you are looking at, so a window on
 another Desktop leaves the bar, and *Hide empty Spaces* hides a
 Space holding only such windows. *Open or Focus* still finds it:
 it switches to that Desktop and gives the window the focus.
+
+### With more than one screen
+
+KiwiDesk parks in the bottom corner on the side of the screen
+that has no other screen next to it, and in the bottom-right
+corner when both sides have one. A parked window's top sits about
+48 pt above the screen's bottom edge, a strip 1 pt wide shows,
+and the rest hangs down and out past that side. So give each screen
+one bottom corner with no screen beside it or below it on that
+side; otherwise its parked windows show on the neighbour.
+
+A screen between two taller screens has no free corner: both side
+screens reach below its bottom edge. Raising one side screen in
+System Settings ▸ Displays until its bottom is above that edge frees
+the corner on its side. KiwiDesk never parks on another screen's
+free corner, because macOS then moves the window onto that
+screen's Desktop. AeroSpace's [proper monitor arrangement
+guide](https://nikitabobko.github.io/AeroSpace/guide#proper-monitor-arrangement)
+shows the same rule with pictures.
 
 ## Every profile keeps its own arrangement
 
