@@ -74,8 +74,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocket = "keybinding.pocket"
     /// `toggle_pocket_window` (#2675).
     case pocketWindow = "keybinding.pocket_window"
-    /// What the pocket holds (#2678), then where its plate sits
-    /// (#2680): its edge and its position along it.
+    /// What the pocket holds (#2678); where it stands is
+    /// KiwiShelf's (`SettingKey+KiwiShelf`).
     case pocketCapacity = "appWide.pocketCapacity"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"

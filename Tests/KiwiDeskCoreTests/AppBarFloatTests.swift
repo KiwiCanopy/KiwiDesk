@@ -93,6 +93,7 @@ struct AppBarFloatTests {
                 settings: core.tiler.settings,
                 spaceItems: nil,
                 app: app,
+                pocket: false,
                 drawn: { $0.drawnAtRest }
             ).first
         )

@@ -220,12 +220,13 @@ struct PocketPlateTests {
         #expect(core.state.pocketPhase(of: two) == .pocketed)
     }
 
-    @Test("a click grows the list out of that display's pocket")
+    @Test("a click grows the list out of that display's handle")
     func clickOpensTheList() throws {
         let core = makeCore()
         core.pocketPlate.ordersPanel = true
+        // The handle stands on the real screen's edge.
         core.shelves.peek.visibleArea = { _ in
-            CGRect(x: 0, y: 0, width: 1440, height: 900)
+            CGRect(x: -20_000, y: -20_000, width: 40_000, height: 40_000)
         }
         defer {
             core.shelves.peek.dismiss()
@@ -236,9 +237,8 @@ struct PocketPlateTests {
         let display = try #require(
             core.state.workspaces.allDisplays.first?.id
         )
-        core.updatePocketPlate(
-            slots: [display: CGRect(x: 100, y: 100, width: 40, height: 40)]
-        )
+        // No bar edge: the handle, in a panel of its own.
+        core.updatePocketPlate(slots: [:])
         let view = try #require(core.pocketPlate.view(on: display))
         let window = try #require(
             core.pocketPlate.panelForTesting(on: display)

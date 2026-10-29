@@ -103,13 +103,22 @@ final class BriefPocketView: NSView {
     /// stitch blurs on a thin bar (#2678).
     static let solidBelow: CGFloat = 14
 
-    /// Hides the count badge while the pocket rises; it shows once
-    /// the pocket lands (#2678).
-    func holdBadge(_ held: Bool) {
-        badgeHeld = held
-        count.alphaValue = held ? 0 : 1
+    /// Hides the count badge while the pocket rises and returns the
+    /// rise's token; only the latest rise's landing shows it again,
+    /// so an interrupted rise never shows it mid-flight (#2678
+    /// review 19).
+    func holdBadge() -> Int {
+        badgeRise += 1
+        count.alphaValue = 0
+        return badgeRise
     }
-    private(set) var badgeHeld = false
+
+    /// Shows the badge once `rise`, the latest, has landed.
+    func releaseBadge(rise: Int) {
+        guard rise == badgeRise else { return }
+        count.alphaValue = 1
+    }
+    private(set) var badgeRise = 0
 
     func setLook(_ look: Look) {
         self.look = look

@@ -27,10 +27,11 @@ struct ShelfRetireWiringTests {
     @Test("Every retire spares the displays whose shelf is leaving")
     func retireSparesLeavingDisplays() throws {
         let source = try Self.source()
-        // The one retire door: both managers take the one `keep`…
+        // The one retire door: both bar managers and the pocket
+        // (#2678) take the one `keep`…
         let retires =
             source.components(separatedBy: ".retire(except:").count - 1
-        #expect(retires == 2, "both managers, one door")
+        #expect(retires == 3, "both managers and the pocket, one door")
         #expect(
             source.components(separatedBy: ".retire(except: keep)").count - 1
                 == retires
@@ -66,7 +67,7 @@ struct ShelfRetireWiringTests {
         let doorBody = String(source[decl...])
         #expect(
             doorBody.components(separatedBy: ".retire(except: keep)").count - 1
-                == 2
+                == 3
         )
     }
 }

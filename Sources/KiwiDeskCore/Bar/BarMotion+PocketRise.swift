@@ -1,32 +1,57 @@
 import AppKit
+import QuartzCore
 
 /// The pocket rising out of its handle (#2678, 2026-10-29 ruling):
 /// lift, grow from the handle's kiwis and, on another edge, the turn
 /// upright, all one transform on one damped spring pivoting on the
 /// pocket's base behind the tab; the count badge waits for the
 /// landing. Under Reduce Motion it stands out at once.
-@MainActor
-enum PocketRise {
+extension BarMotion {
     /// How far below its risen place the pocket starts, past the
     /// tab, so the kiwis are what first shows.
-    static let travel: CGFloat =
+    @MainActor static var pocketRiseTravel: CGFloat {
         PocketHandleView.tabDepth + PocketPlateView.lift
-        + PocketHandleView.markSide - PocketHandleView.lookOut
+            + PocketHandleView.markSide - PocketHandleView.lookOut
+    }
 
-    static func play(
+    /// Plays the rise on `pocket`, `side` points risen on `edge`,
+    /// its badge held until the spring lands.
+    @MainActor
+    static func playPocketRise(
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
-        side: CGFloat,
-        reduceMotion: Bool =
-            NSWorkspace.shared.accessibilityDisplayShouldReduceMotion
+        side: CGFloat
     ) {
-        guard !reduceMotion, side > 0, let layer = pocket.layer else {
-            return
+        guard
+            let rise = pocketRise(
+                edge: edge,
+                side: side,
+                reduceMotion: isReduced
+            ),
+            let layer = pocket.layer
+        else { return }
+        let token = pocket.holdBadge()
+        CATransaction.begin()
+        CATransaction.setCompletionBlock { [weak pocket] in
+            MainActor.assumeIsolated {
+                pocket?.releaseBadge(rise: token)
+            }
         }
-        pocket.holdBadge(true)
+        layer.add(rise, forKey: "pocketRise")
+        CATransaction.commit()
+    }
+
+    /// The rise's spring, nil under `reduceMotion` or with no side.
+    @MainActor
+    static func pocketRise(
+        edge: AppBarEdge,
+        side: CGFloat,
+        reduceMotion: Bool
+    ) -> CASpringAnimation? {
+        guard !reduceMotion, side > 0 else { return nil }
         let animation = CASpringAnimation(keyPath: "transform")
         animation.fromValue = NSValue(
-            caTransform3D: start(edge: edge, side: side)
+            caTransform3D: pocketRiseStart(edge: edge, side: side)
         )
         animation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
         // Critically damped: no overshoot to read as a throb.
@@ -34,18 +59,18 @@ enum PocketRise {
         animation.stiffness = 220
         animation.damping = 2 * (220 as CGFloat).squareRoot()
         animation.duration = animation.settlingDuration
-        CATransaction.begin()
-        CATransaction.setCompletionBlock { [weak pocket] in
-            MainActor.assumeIsolated { pocket?.holdBadge(false) }
-        }
-        layer.add(animation, forKey: "pocketRise")
-        CATransaction.commit()
+        return animation
     }
 
     /// Where the rise starts, in the pocket layer's own flipped
     /// coordinates: scaled to the handle's kiwis about its base,
     /// turned with its edge and dropped behind the tab.
-    static func start(edge: AppBarEdge, side: CGFloat) -> CATransform3D {
+    @MainActor
+    static func pocketRiseStart(
+        edge: AppBarEdge,
+        side: CGFloat
+    ) -> CATransform3D {
+        let travel = pocketRiseTravel
         let pivot: CGPoint
         let drop: CGPoint
         switch edge {

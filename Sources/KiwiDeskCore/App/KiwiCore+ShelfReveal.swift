@@ -33,6 +33,10 @@ extension KiwiCore {
         /// pass so the dots slide only when they must
         /// (`ShelfDotWindow`); a mark that stops drawing forgets it.
         var dotStarts: [ShelfRevealer.Key: Int] = [:]
+        /// Where the pocket's handle centres on each display's edge
+        /// of Auto marks, AX along the edge (#2678): its band in the
+        /// row.
+        var pocketCentres: [DisplayID: CGFloat] = [:]
 
         /// Files each hiding bar of `plans` — its target, and its
         /// mark where it hides to one.
@@ -44,7 +48,8 @@ extension KiwiCore {
             appWindows: Int? = nil,
             reveal: ShelfRevealer,
             gaps: Gaps,
-            settings: TilingSettings
+            settings: TilingSettings,
+            pocket: Bool
         ) {
             for plan in plans {
                 let hiding = plan.shelfEdge.bars.keys.filter {
@@ -60,7 +65,9 @@ extension KiwiCore {
                     appWindows: appWindows,
                     reveal: reveal,
                     gaps: gaps,
-                    settings: settings
+                    settings: settings,
+                    pocket: pocket
+                        && plan.edge == settings.kiwishelf.pocketEdge
                 )
             }
         }
@@ -80,7 +87,8 @@ extension KiwiCore {
             appWindows: Int?,
             reveal: ShelfRevealer,
             gaps: Gaps,
-            settings: TilingSettings
+            settings: TilingSettings,
+            pocket: Bool
         ) {
             let primary = GeometryUtils.primaryHeight
             let flip = { GeometryUtils.flip($0, primaryHeight: primary) }
@@ -95,7 +103,10 @@ extension KiwiCore {
                     ? plan.arrangement.space : plan.arrangement.app
                 return slot.map { slot in
                     let drawn = plan.needs[bar].map(slot.drawing) ?? slot
-                    return flip(plan.segment(drawn))
+                    // The pocket's slot is the shelf's too (#2678).
+                    let pocket = plan.arrangement.pocket.map(plan.segment)
+                    let run = plan.segment(drawn)
+                    return flip(pocket.map(run.union) ?? run)
                 }
             }
             // The mark draws the shelf as rendered: Reduce
@@ -114,11 +125,20 @@ extension KiwiCore {
                     section: section(bar)
                 )
             }
-            let spans = ShelfMarkPlacement.bands(
+            let row = ShelfMarkPlacement.row(
                 for: Set(auto),
+                pocketLeansEnd: pocket && !auto.isEmpty
+                    ? shelf.pocketLeansEnd : nil,
                 length: plan.length,
                 shelf: shelf
             )
+            let spans = row.bars
+            if let band = row.pocket {
+                let origin =
+                    plan.horizontal ? plan.strip.minX : plan.strip.minY
+                pocketCentres[key.display] =
+                    origin + (band.lowerBound + band.upperBound) / 2
+            }
             for (index, bar) in auto.enumerated() {
                 guard let span = spans[bar] else { continue }
                 let dots =

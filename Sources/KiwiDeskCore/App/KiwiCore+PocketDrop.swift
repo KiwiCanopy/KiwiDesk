@@ -21,9 +21,11 @@ extension KiwiCore {
         }
         let hovered = pointerOverPocketPlate() && pocketNamedRefusal(id) == nil
         if pocketPlate.dragging != id || pocketPlate.dropHovered != hovered {
+            let joins = pocketPlate.dragging == nil
             pocketPlate.dragging = id
             pocketPlate.dropHovered = hovered
-            updatePocketPlate()
+            // A drag stands the pocket: its slot opens on the shelf.
+            if joins { updateBars() } else { updatePocketPlate() }
         }
         return hovered
     }
@@ -88,7 +90,7 @@ extension KiwiCore {
         guard pocketPlate.dragging != nil else { return }
         pocketPlate.dragging = nil
         pocketPlate.dropHovered = false
-        updatePocketPlate()
+        updateBars()
     }
 
     /// The gesture of `id` is over, normally or not.

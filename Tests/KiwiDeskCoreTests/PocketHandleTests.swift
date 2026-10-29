@@ -115,6 +115,10 @@ struct PocketHandleTests {
         core.updatePocketPlate(
             slots: [display: CGRect(x: 10, y: 10, width: 40, height: 40)]
         )
+        // Hovered and dragged over, a section still never rises.
+        core.pocketPlate.hovered = [display]
+        core.pocketPlate.dragging = WindowID(1)
+        core.updatePocketPlate()
         let shown = try #require(core.pocketPlate.specs[display])
         #expect(shown.handle == nil)
         #expect(!shown.risen)

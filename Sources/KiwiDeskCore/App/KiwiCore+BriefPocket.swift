@@ -21,23 +21,21 @@ extension KiwiCore {
             let screen = TilingEngine.screen(for: display)
         else { return nil }
         let style = tiler.settings.pocketStyle
-        let region = pocketRegion(on: display, screen: screen)
         let glass = briefPocketPlateGlass()
         let flight = BriefPocketPlan.flight(
             durationMS: tiler.settings.animations.durationMS
         )
+        let timeline = BriefPocketPlan.timeline(direction, flight: flight)
+        // Held out first, so the pocket stands where the play lands.
+        holdPocketOut(on: display, for: timeline.end)
+        guard let pocket = pocketLanding(on: display) else { return nil }
         var request =
             BriefPocketOverlay.Request(
                 display: display,
                 screen: screen,
                 direction: direction,
                 window: frame,
-                pocket: pocketLanding(on: display)
-                    ?? BriefPocketPlan.pocketFrame(
-                        in: region,
-                        edge: tiler.settings.kiwishelf.pocketEdge,
-                        position: tiler.settings.kiwishelf.pocketPosition
-                    ),
+                pocket: pocket,
                 iconPid: state.windows[id]?.pid,
                 shelf: briefPocketShelf(),
                 markHex: style.color,
@@ -50,8 +48,6 @@ extension KiwiCore {
         request.drawsPocket = briefPocketDrawsPocket(on: display)
         briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
-        let timeline = BriefPocketPlan.timeline(direction, flight: flight)
-        holdPocketOut(on: display, for: timeline.end)
         return timeline
     }
 
@@ -86,26 +82,6 @@ extension KiwiCore {
             }
             hand()
         }
-    }
-
-    /// The area the pocket sits in on `display`: the screen's
-    /// visible bounds, clear of a bar on the pocket's edge, which
-    /// keeps it just inside. The brief pocket and the plate (#2678)
-    /// read this one region.
-    func pocketRegion(on display: DisplayID, screen: NSScreen) -> CGRect {
-        let edge = tiler.settings.kiwishelf.pocketEdge
-        var region = tiler.visibleBounds(screen)
-        if let space = state.workspaces.currentSpace(on: display) {
-            for (strip, side) in paintedStrips(forSpace: space)
-            where side == edge {
-                region = AppBarGeometry.regionClear(
-                    region,
-                    of: strip,
-                    edge: side
-                )
-            }
-        }
-        return region
     }
 
     /// The plate is the Space switch's, so it follows KiwiHub's

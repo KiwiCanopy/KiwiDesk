@@ -32,6 +32,8 @@ final class ShelfOverlay {
     var roomGlide: UUID?
 
     private(set) var panel: NSPanel?
+    /// The pocket's section, in a panel of its own (#2678).
+    let pocket = ShelfPocketPiece()
     #if DEBUG
         /// Set by `ShelfManager.ordersPanels` (#1894).
         var ordersPanel = true
@@ -143,7 +145,8 @@ final class ShelfOverlay {
         shelf: KiwiShelf,
         sheen: CGFloat,
         sections: [Section],
-        divider range: ShelfArrangement.Divider? = nil
+        divider range: ShelfArrangement.Divider? = nil,
+        pocket mount: ShelfPocketPiece.Mount? = nil
     ) {
         guard !sections.isEmpty, strip.width >= 1, strip.height >= 1
         else {
@@ -157,6 +160,7 @@ final class ShelfOverlay {
             sheen: sheen,
             sections: sections,
             divider: range,
+            pocket: mount,
             primaryHeight: GeometryUtils.primaryHeight,
             environment: .current
         )
@@ -176,6 +180,7 @@ final class ShelfOverlay {
         let fadesBack = glides && leaving != nil
         // Read before the room moves the content's model (#2497).
         let inFlight = BarMotion.revealShift(of: content)
+        let hadPocket = pocket.isMounted
         let slidesBack = fadesBack && leavingSlides
         leaving = nil
         stripView.frame = CGRect(origin: .zero, size: strip.size)
@@ -194,9 +199,17 @@ final class ShelfOverlay {
             strip: strip,
             horizontal: horizontal
         )
+        pocket.take(mount, strip: strip)
+        defer {
+            syncPocketPanel(
+                joined: !hadPocket && pocket.isMounted && glides,
+                left: hadPocket && !pocket.isMounted,
+                animated: glides
+            )
+        }
         // Boxed draws no plate: its grow and unfold both spread over
         // the boxes' span (#2556).
-        revealPlate = (plate ?? restRoom, radius)
+        revealPlate = revealPlate(plate ?? restRoom, radius: radius)
         let travels = BarMotion.shelfGlideLength > 0
         if glides, travels {
             standGlideStarts(sections, in: strip, horizontal: horizontal)
@@ -224,7 +237,7 @@ final class ShelfOverlay {
                 animated: glides
             )
             if fadesBack, !slidesBack {
-                BarMotion.setAlpha(content, to: 1, animated: true)
+                setContentAlpha(1, animated: true)
             }
         }
         // Its landing scheduled after the sections' own (#2497).
@@ -256,11 +269,11 @@ final class ShelfOverlay {
             // Shown transparent and committed so, laid out already,
             // so the fade starts from it (#1838).
             BarMotion.standCommitted {
-                content.alphaValue = 0
+                setContentAlpha(0, animated: false)
                 panel.orderFrontRegardless()
             }
             BarMotion.runPlateGlide {
-                BarMotion.setAlpha(content, to: 1, animated: true)
+                setContentAlpha(1, animated: true)
             }
         }
     }
@@ -284,7 +297,8 @@ final class ShelfOverlay {
         guard animated, BarMotion.shelfGlideLength > 0 else {
             leaving = nil
             panel.orderOut(nil)
-            content.alphaValue = 1
+            pocket.orderOut()
+            setContentAlpha(1, animated: false)
             onLeft()
             return true
         }
@@ -299,40 +313,16 @@ final class ShelfOverlay {
         let token = UUID()
         leaving = token
         BarMotion.runPlateGlide {
-            BarMotion.setAlpha(content, to: 0, animated: true)
+            setContentAlpha(0, animated: true)
         }
         afterGlide { [weak self] in
             guard let self, self.leaving == token else { return }
             self.leaving = nil
             self.panel?.orderOut(nil)
-            self.content.alphaValue = 1
+            self.pocket.orderOut()
+            self.setContentAlpha(1, animated: false)
             self.onLeft()
         }
         return true
-    }
-
-    /// Lays the grip over the divider line while the shelf is
-    /// full (`range`); otherwise the line is plain, with no hover.
-    /// Placed at the line's TARGET frame — the line itself may be
-    /// mid-glide, reporting where it was.
-    private func layoutHandle(
-        range: ShelfArrangement.Divider?,
-        divider target: CGRect?,
-        horizontal: Bool
-    ) {
-        handle.range = range
-        handle.horizontal = horizontal
-        guard range != nil, let target else {
-            handle.isHidden = true
-            handle.setHovered(false)
-            return
-        }
-        handle.isHidden = false
-        handle.frame = Self.handleFrame(
-            divider: target,
-            depth: horizontal
-                ? stripView.bounds.height : stripView.bounds.width,
-            horizontal: horizontal
-        )
     }
 }

@@ -30,6 +30,7 @@ struct BarMotionSeamTests {
         "BarMotion+Reveal.swift", "BarMotion+Mark.swift",
         "BarMotion+Unfold.swift", "BarMotion+Spread.swift",
         "BarMotion+Slide.swift", "BarMotion+Morph.swift",
+        "BarMotion+PocketRise.swift",
     ]
 
     /// Ways to start AppKit or Core Animation motion. Type
@@ -78,9 +79,6 @@ struct BarMotionSeamTests {
             "animates only under StickyMarkOverlay's gate",
         "SizeLimitOverlay.swift":
             "gates at its own site; borders.md owns it",
-        "PocketRise.swift":
-            "gates at its own site, the rise's Reduce Motion read "
-            + "(#2678); borders.md owns it",
     ]
 
     private static func stripped(_ home: String) throws -> String {

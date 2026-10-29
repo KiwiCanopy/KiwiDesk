@@ -23,7 +23,8 @@ struct ShelfDividerDragTests {
             spaceNeed: 700,
             appNeed: 900,
             spaceFloor: 100,
-            shelf: shelf
+            shelf: shelf,
+            pocket: nil
         )
     }
 
@@ -40,7 +41,8 @@ struct ShelfDividerDragTests {
             spaceNeed: 300,
             appNeed: 600,
             spaceFloor: 100,
-            shelf: shelf
+            shelf: shelf,
+            pocket: nil
         )
         #expect(fits.space != nil && fits.app != nil)
         #expect(fits.divider == nil)
@@ -83,7 +85,8 @@ struct ShelfDividerDragTests {
                     spaceNeed: spaceNeed,
                     appNeed: appNeed,
                     spaceFloor: 250,
-                    shelf: shelf
+                    shelf: shelf,
+                    pocket: nil
                 ).divider
             )
         }

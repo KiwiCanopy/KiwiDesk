@@ -52,7 +52,7 @@ extension KiwiCore {
         settings: TilingSettings,
         spaceItems: [SpaceBarOverlay.Item]?,
         app: AppBarContent?,
-        pocket: Bool = false,
+        pocket: Bool,
         drawn: (ShelfEdge) -> Set<ShelfBar>
     ) -> [ShelfPlan] {
         let folded = settings.barEdges(

@@ -36,7 +36,8 @@ struct PocketArrangementTests {
             spaceNeed: 200,
             appNeed: 300,
             spaceFloor: 40,
-            shelf: shelf
+            shelf: shelf,
+            pocket: nil
         )
         #expect(arrange(pocket: nil) == plain)
         #expect(plain.pocket == nil)

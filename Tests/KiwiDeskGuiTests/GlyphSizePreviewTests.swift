@@ -16,7 +16,11 @@ struct GlyphSizePreviewTests {
         var settings = TilingSettings()
         settings.kiwishelf.thickness = 40
         settings.kiwishelf.glyphSize = glyphSize
-        return HomeCardBarsTile(settings: settings, scale: scale)
+        return HomeCardBarsTile(
+            settings: settings,
+            pocketStands: false,
+            scale: scale
+        )
     }
 
     private static func specs(

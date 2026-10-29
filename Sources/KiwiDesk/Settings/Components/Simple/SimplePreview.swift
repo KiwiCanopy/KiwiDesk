@@ -87,6 +87,7 @@ struct SimplePreview: View {
         let shape = RoundedRectangle(cornerRadius: 12)
         return HomeCardBarsTile(
             settings: settings,
+            pocketStands: model.pocketStandsAtRest,
             spaceCount: model.config.spaces.count,
             scale: 1.8,
             spaceLabels: BarsPanelPreview.spaceLabels(of: model.config),

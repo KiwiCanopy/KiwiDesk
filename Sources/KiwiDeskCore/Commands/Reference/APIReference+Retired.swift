@@ -90,9 +90,11 @@ extension APIReference {
         ] {
             map[verb] = "kiwihub.show"
         }
-        // The pocket is KiwiShelf's section or handle (#2678).
-        map["pocket.set_edge"] = "kiwishelf.set_pocket_edge"
-        map["pocket.set_position"] = "kiwishelf.set_pocket_position"
+        // The pocket is KiwiShelf's section or handle (#2678): a
+        // verb retires with the stored key the migration moves.
+        for move in ConfigMigration.pocketPlacementMoves {
+            map["pocket.set_\(move.retired)"] = "kiwishelf.set_\(move.target)"
+        }
         for verb in retiredReasons.keys { map[verb] = .some(nil) }
         return map
     }()

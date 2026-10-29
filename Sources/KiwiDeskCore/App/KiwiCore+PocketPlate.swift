@@ -12,6 +12,16 @@ extension KiwiCore {
     /// Whether the pocket stays on screen (#2678): Several windows.
     var pocketHoldsSeveral: Bool { appWide.pocketCapacity == .several }
 
+    /// Whether the pocket stands this pass — the one predicate the
+    /// shelf's plan and the pocket both read (#2678 review 4).
+    var pocketStands: Bool {
+        Self.pocketStands(
+            several: pocketHoldsSeveral,
+            dragging: pocketPlate.dragging != nil,
+            playing: !pocketPlate.playing.isEmpty
+        )
+    }
+
     /// Takes the bar pass's pocket slots, then syncs.
     func updatePocketPlate(slots: [DisplayID: CGRect]) {
         pocketPlate.slots = slots
@@ -19,18 +29,39 @@ extension KiwiCore {
     }
 
     /// Shows or hides each display's pocket. A list open on one
-    /// closes when that pocket changes — what it lists, or where it
-    /// stands.
+    /// closes when that pocket changes what it lists or where it
+    /// stands — never for its hover, which the pointer leaves as it
+    /// moves onto the list (#2678 review 1).
     func updatePocketPlate() {
         let specs = pocketPlateSpecs()
-        if let view = shelves.peek.shown?.view as? PocketPlateView,
-            let display = pocketPlate.display(of: view),
-            specs.first(where: { $0.display == display })
-                != pocketPlate.specs[display]
+        if let display = pocketListDisplay,
+            !Self.pocketListHolds(
+                was: pocketPlate.specs[display],
+                now: specs.first { $0.display == display }
+            )
         {
             shelves.peek.dismiss()
         }
         pocketPlate.sync(specs)
+    }
+
+    /// The display whose pocket the peek lists, while it does.
+    var pocketListDisplay: DisplayID? {
+        (shelves.peek.shown?.view as? PocketPlateView)
+            .flatMap(pocketPlate.display(of:))
+    }
+
+    /// Whether a list open on a pocket survives its pocket going
+    /// from `was` to `now`: the same windows at the same place — a
+    /// rise or a sink in place is the same place, since a list a
+    /// VoiceOver press opened raises its handle.
+    static func pocketListHolds(
+        was: PocketPlateOverlay.Spec?,
+        now: PocketPlateOverlay.Spec?
+    ) -> Bool {
+        guard let was, let now else { return false }
+        return was.windows == now.windows && was.handle == now.handle
+            && (was.frame == now.frame || was.risen != now.risen)
     }
 
     /// The windows the pocket counts, shows for and lists: those
@@ -45,12 +76,7 @@ extension KiwiCore {
     func pocketPlateSpecs() -> [PocketPlateOverlay.Spec] {
         let inside = pocketPlateWindows
         let dragging = pocketPlate.dragging != nil
-        guard
-            Self.pocketPlateShows(
-                several: pocketHoldsSeveral,
-                dragging: dragging
-            )
-        else { return [] }
+        guard pocketStands else { return [] }
         let shelf = briefPocketShelf()
         // The count shows from two up.
         let count = inside.count >= 2 ? "\(inside.count)" : ""
@@ -61,6 +87,8 @@ extension KiwiCore {
         )
         let edge = shelf.pocketEdge
         let rise = Self.pocketRiseSide(thickness: shelf.thickness)
+        // A list open on a risen pocket holds it out (#2678 review 1).
+        let listed = pocketListDisplay
         return state.workspaces.allDisplays.compactMap { display in
             guard !pocketPlate.standingDown.contains(display.id) else {
                 return nil
@@ -71,7 +99,8 @@ extension KiwiCore {
             let risen =
                 slot == nil
                 && (dragging || pocketPlate.hovered.contains(display.id)
-                    || pocketPlate.playing[display.id] != nil)
+                    || pocketPlate.playing[display.id] != nil
+                    || listed == display.id)
             guard
                 let frame = slot
                     ?? pocketHandleFrame(on: display.id, risen: risen)
@@ -101,9 +130,15 @@ extension KiwiCore {
     }
 
     /// Whether the pocket is on screen: always while Several windows
-    /// holds it, and during a window drag as its drop target.
-    static func pocketPlateShows(several: Bool, dragging: Bool) -> Bool {
-        several || dragging
+    /// holds it; under One window during a window drag, as its drop
+    /// target, and while a window goes in or out — a bar's edge then
+    /// opens its slot (owner ruling 2026-10-29).
+    static func pocketStands(
+        several: Bool,
+        dragging: Bool,
+        playing: Bool
+    ) -> Bool {
+        several || dragging || playing
     }
 
     /// Whether a play on `display` draws its own pocket: not where
@@ -120,6 +155,9 @@ extension KiwiCore {
         }
         pocketPlate.onHover = { [weak self] display, on in
             self?.pocketHovered(display, on)
+        }
+        pocketPlate.onListChanged = { [weak self] in
+            self?.updatePocketPlate()
         }
         pocketPlate.onPanelPress = { [weak self] hit, type in
             self?.shelves.peek.pressed(on: hit, type: type)

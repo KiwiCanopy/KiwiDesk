@@ -120,7 +120,11 @@ struct ShelfBorderPreviewTests {
         settings.kiwishelf.border = border
         settings.kiwishelf.borderWidth = 3
         settings.kiwishelf.borderColor = "#1C1C1E"
-        return HomeCardBarsTile(settings: settings, scale: scale)
+        return HomeCardBarsTile(
+            settings: settings,
+            pocketStands: false,
+            scale: scale
+        )
     }
 
     private static func specs(

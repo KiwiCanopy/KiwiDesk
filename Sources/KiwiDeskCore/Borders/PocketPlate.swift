@@ -70,7 +70,11 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     var sparesLeftPress: Bool { true }
 
-    func listOpenChanged() {}
+    /// The list grown out of it opened or closed, which holds a
+    /// risen pocket out (#2678 review 1).
+    var onListChanged: @MainActor () -> Void = {}
+
+    func listOpenChanged() { onListChanged() }
 
     /// Stands as a section, or as a handle on `edge`, risen to
     /// `side` where `risen`.
@@ -82,7 +86,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         needsLayout = true
         if rising, let edge {
             layoutSubtreeIfNeeded()
-            PocketRise.play(pocket, edge: edge, side: side)
+            BarMotion.playPocketRise(pocket, edge: edge, side: side)
         }
     }
 

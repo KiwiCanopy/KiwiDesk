@@ -79,4 +79,29 @@ extension ShelfOverlay {
                 height: extent
             )
     }
+
+    /// Lays the grip over the divider line while the shelf is
+    /// full (`range`); otherwise the line is plain, with no hover.
+    /// Placed at the line's TARGET frame — the line itself may be
+    /// mid-glide, reporting where it was.
+    func layoutHandle(
+        range: ShelfArrangement.Divider?,
+        divider target: CGRect?,
+        horizontal: Bool
+    ) {
+        handle.range = range
+        handle.horizontal = horizontal
+        guard range != nil, let target else {
+            handle.isHidden = true
+            handle.setHovered(false)
+            return
+        }
+        handle.isHidden = false
+        handle.frame = Self.handleFrame(
+            divider: target,
+            depth: horizontal
+                ? stripView.bounds.height : stripView.bounds.width,
+            horizontal: horizontal
+        )
+    }
 }

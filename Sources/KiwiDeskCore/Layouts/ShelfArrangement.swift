@@ -99,7 +99,9 @@ public struct ShelfArrangement: Equatable, Sendable {
     /// natural run length, plate included. `spaceFloor` is the
     /// Space section's hard floor (`minimumRange`), below which no
     /// minimum may shrink it.
-    public static func arrange(
+    /// The bars alone; reached only through `arrange(…pocket:)`,
+    /// whose pocket every caller states (#2678 review 6).
+    static func arrangeBars(
         length: CGFloat,
         spaceNeed: CGFloat?,
         appNeed: CGFloat?,

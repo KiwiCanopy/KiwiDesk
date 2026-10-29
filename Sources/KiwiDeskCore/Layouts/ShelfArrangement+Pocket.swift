@@ -16,10 +16,10 @@ extension ShelfArrangement {
 
     /// Places the bars and the pocket along an edge `length` long
     /// (#2678): the pocket is pinned at the strip's outer end on its
-    /// side, whole, outside the bars' run, and the bars are placed by
-    /// `arrange` in the room left after it and one gutter — so the
-    /// bars scroll while the pocket never moves. A nil `pocket` is
-    /// `arrange` unchanged.
+    /// side, whole, outside the bars' run, and the bars are placed in
+    /// the room left after it and one gutter — so the bars scroll
+    /// while the pocket never moves. A nil `pocket` places the bars
+    /// alone. The one placement door: every caller states its pocket.
     public static func arrange(
         length: CGFloat,
         spaceNeed: CGFloat?,
@@ -29,7 +29,7 @@ extension ShelfArrangement {
         pocket: PocketAsk?
     ) -> ShelfArrangement {
         guard let pocket else {
-            return arrange(
+            return arrangeBars(
                 length: length,
                 spaceNeed: spaceNeed,
                 appNeed: appNeed,
@@ -41,7 +41,7 @@ extension ShelfArrangement {
         let need = min(max(pocket.need, 0), whole)
         let gutter = max(shelf.itemGap, KiwiShelf.minItemGap)
         let room = max(whole - need - gutter, 0)
-        var placed = arrange(
+        var placed = arrangeBars(
             length: room,
             spaceNeed: spaceNeed,
             appNeed: appNeed,

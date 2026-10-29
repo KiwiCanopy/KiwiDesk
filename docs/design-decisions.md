@@ -6162,9 +6162,12 @@ display, so it is reachable wherever the pointer is without
 focusing that screen first. A click grows the list of the windows
 inside out of it, by app, each row taking its window out — the
 bars' own click-held list, so it closes and keys as theirs do.
-Every window drag raises it in both
-modes, so Edge and Position act whatever the animation switch says
-and do not grey. No "show the pocket" choice sits beside Holds,
+Under One window it stands only while a window drag
+runs or a window goes in or out, and on a bar's edge its slot then
+opens, the bars gliding aside for it, so a drop and a put-in land on
+the one pocket at its one place (owner, 2026-10-29). Edge and
+Position therefore act whatever the animation switch says and do not
+grey. No "show the pocket" choice sits beside Holds,
 which already decides when the pocket stays.
 
 **Pinned at the shelf's outer end, outside the scrolling run.**
@@ -6174,12 +6177,24 @@ shelf's end on Position's side — the start below 50 %, the end from
 50 % — and never moves, and Position stays one continuous slider
 rather than a second control for a bar's edge.
 
-**Its own plate piece under Hug.** A hugging plate is the union of
-its runs (`ShelfArrangement.plateSpan`), so a pocket inside it
-would bridge the gap to the bars with plate over empty edge; its
-own piece, on its own panel, keeps that gap clear and a click
-through it reaching the window beneath (#2497). Full keeps one plate with
-a divider; Boxed gives it its own box.
+**A shelf section in a panel the shelf owns.** A hugging plate is
+the union of its runs (`ShelfArrangement.plateSpan`), and a panel
+takes every click inside its frame, so a pocket in the shelf's own
+panel would make the gap to the bars swallow clicks (#2497). The
+pocket is still the shelf's section: the shelf draws it in a second
+panel of its own, beside the first, and plays every reveal, fade and
+glide on both from the same call, so the pocket comes and goes with
+the bars and never cuts, while the gap between them stays clear.
+A separate overlay following the shelf would copy every reveal
+style by hand (architect review, 2026-10-29). Full keeps one plate;
+Hug gives the pocket its own piece; Boxed gives it its own box.
+
+**On an Auto edge the handle joins the row of marks.** A hidden
+Auto bar leaves its mark at the edge; the pocket's handle takes one
+band more in that row, at the end it leans to, so the pointer
+reaches the bar and the pocket one band apart and never opens one
+for the other. On a Hidden or empty edge it stands alone at
+Position.
 
 **A fixed handle; the risen pocket at the bar's size, within 20 to
 32 pt.** On an edge no bar shows, the handle is an edge mark like

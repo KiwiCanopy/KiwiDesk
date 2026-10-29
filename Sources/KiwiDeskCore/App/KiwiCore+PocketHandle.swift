@@ -23,8 +23,18 @@ extension KiwiCore {
             ? PocketHandleView.tabDepth + PocketPlateView.lift
                 + Self.pocketRiseSide(thickness: shelf.thickness)
             : PocketHandleView.restDepth
+        let visible = GeometryUtils.axVisibleFrame(of: screen)
+        // In an Auto edge's row of marks, else at Position (#2678).
+        if let centre = pocketPlate.markCentres[display] {
+            return Self.pocketHandleFrame(
+                visible: visible,
+                edge: shelf.pocketEdge,
+                centre: centre,
+                depth: depth
+            )
+        }
         return Self.pocketHandleFrame(
-            visible: GeometryUtils.axVisibleFrame(of: screen),
+            visible: visible,
             edge: shelf.pocketEdge,
             position: shelf.pocketPosition,
             depth: depth
@@ -40,10 +50,30 @@ extension KiwiCore {
         position: CGFloat,
         depth: CGFloat
     ) -> CGRect {
-        let band = ShelfMarkPlacement.bandLength
         let share = max(0, min(position, 100)) / 100
+        let horizontal = edge.isHorizontal
+        let low = horizontal ? visible.minX : visible.minY
+        let high = horizontal ? visible.maxX : visible.maxY
+        return pocketHandleFrame(
+            visible: visible,
+            edge: edge,
+            centre: low + (high - low) * share,
+            depth: depth
+        )
+    }
+
+    /// A band `ShelfMarkPlacement.bandLength` long centred on
+    /// `centre` (AX, along `edge`) of `visible`, `depth` deep, kept
+    /// whole on the edge.
+    static func pocketHandleFrame(
+        visible: CGRect,
+        edge: AppBarEdge,
+        centre: CGFloat,
+        depth: CGFloat
+    ) -> CGRect {
+        let band = ShelfMarkPlacement.bandLength
         func lead(_ low: CGFloat, _ high: CGFloat) -> CGFloat {
-            let start = low + (high - low) * share - band / 2
+            let start = centre - band / 2
             return min(max(start, low), max(high - band, low))
         }
         switch edge {
@@ -82,7 +112,8 @@ extension KiwiCore {
     /// pocket drawn there — its bar section, or the pocket risen out
     /// of its handle — else nil, where none stands (#2678).
     func pocketLanding(on display: DisplayID) -> CGRect? {
-        guard pocketPlateSpecs().contains(where: { $0.display == display })
+        // The one door for where the pocket is (#2678 review 5).
+        guard pocketStands, !pocketPlate.standingDown.contains(display)
         else { return nil }
         if let slot = pocketPlate.slots[display] { return slot }
         guard let room = pocketHandleFrame(on: display, risen: true) else {
@@ -101,17 +132,18 @@ extension KiwiCore {
 
     /// Holds `display`'s pocket out of its handle for a play
     /// `seconds` long, so the window lands on a pocket the screen
-    /// shows; a later play replaces the hold.
+    /// shows; a later play replaces the hold, on any display.
     func holdPocketOut(on display: DisplayID, for seconds: TimeInterval) {
         let token = UUID()
-        pocketPlate.playing[display] = token
-        updatePocketPlate()
-        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+        pocketPlate.playing = [display: token]
+        // A play stands the pocket: its slot opens on the shelf.
+        updateBars()
+        deferred.schedule(.pocketHold, after: .seconds(seconds)) {
             [weak self] in
             guard let self, self.pocketPlate.playing[display] == token
             else { return }
             self.pocketPlate.playing[display] = nil
-            self.updatePocketPlate()
+            self.updateBars()
         }
     }
 

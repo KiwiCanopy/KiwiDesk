@@ -174,7 +174,8 @@ struct ShelfDividerWeightTests {
                 spaceNeed: 700,
                 appNeed: 900,
                 spaceFloor: 100,
-                shelf: shelf
+                shelf: shelf,
+                pocket: nil
             ).divider
         )
         let sections: [ShelfOverlay.Section] = [

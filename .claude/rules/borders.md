@@ -424,16 +424,21 @@ and its panels order in nowhere in a `makeTestCore` twin
 
 ## The pocket rides the bar pass (#2678)
 
-**Sync the pocket only through `updatePocketPlate()`, at the tail of
-`updateBars()` with the pass's pinned slots and stand-down**, stored
-on the overlay as the overflow marks' is; a path that changes what
-it shows without a bar pass calls it, as an emptied pocket does.
-**Where it stands on a bar edge is the one
-`ShelfArrangement.arrange(…pocket:)` slot**, read off the plan,
-never a frame of its own beside the shelf; an edge no bar draws on
-falls back to the brief pocket's `pocketRegion(on:screen:)` square.
-It stands on every display while Several windows holds it, and its
-own panel per display keeps the Hug gap passing clicks (#2497).
+**Sync the pocket only through `updatePocketPlate()`, inside
+`updateBars()` with the pass's pinned slots, Auto mark centres and
+stand-down, ahead of `syncShelves`**, so each shelf mounts this
+pass's pocket; a path that changes what it shows without a bar pass
+calls it, as an emptied pocket does, and a path that changes whether
+it STANDS — a drag starting or ending, a play's hold — calls
+`updateBars()`, since the slot is the plan's. **Whether it stands is
+the one `pocketStands`** — Several windows, a drag, a play — which
+the plan and the pocket both read (`PocketPlateTests`). **Where it
+is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
+off `ShelfArrangement.arrange(…pocket:)`, else its handle risen —
+centred in an Auto edge's row of marks (`ShelfMarkPlacement.row`),
+else at Position — never a frame of its own beside them. On a bar
+edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
+pocket is a shelf section.
 **What it counts, shows for and lists is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
 is the bars' click-held peek, its panel answering `shelfBeyondBars`
@@ -788,8 +793,7 @@ ships ungated, and no suite in the tree will say so; review is
 the whole net.
 
 One thing IS held, and it is narrower than it looks: the overlay
-files that animate today — the pocket's rise among them (#2678,
-`PocketRise`) — are ruled entries in
+files that animate today are ruled entries in
 `BarMotionSeamTests`' `allowed` map, which scans all of Core —
 so a FOURTH file here that starts motion reds until someone
 rules it, and a ruling whose file stops animating reds too. What

@@ -767,6 +767,33 @@ render content into it (#1517). Obligations:
   both hold, or the cue drops rather than the floor.
   `EmptyItemInkTests` measures every bundled palette's answer.
 
+## The pocket is a shelf section (#2678)
+
+The pocket on a bar's edge is the shelf's third section, drawn in a
+second panel the shelf owns (`ShelfPocketPiece`), so the gap between
+the bars' run and the pocket keeps passing clicks (#2497) while the
+pocket rides every motion the shelf plays. Obligations:
+
+- **A motion `ShelfOverlay` plays reaches both contents from one
+  call** — a reveal, a retract, a fade, the plate glide's alpha —
+  through `motionContents` and its helpers, never a call on
+  `content` alone beside them; the pocket's room opens for the
+  motion it resolves to (`openPocketRoom`) and settles with the
+  shelf's (`ShelfPocketPanelTests`).
+- **The pocket's panel is ordered above the shelf's by the
+  overlay itself** (`ShelfPocketPiece.orderIn(above:)`), never left
+  to call order at one level (`ShelfPocketPanelTests` ▸
+  `ordersAboveTheShelf`).
+- **Its panel is the shelf's for every hold and reading**: the
+  reveal target's held section takes the pocket's slot
+  (`KiwiCore+ShelfReveal`), `ShelfManager.surfaceHolds` and the
+  peek's shelf read both panels, and a shelf leaving closes a peek
+  on either (`ShelfPocketPanelTests`).
+- **Every `ShelfArrangement.arrange` caller states its pocket** —
+  the bars-alone placement is reached only through it — so the
+  Settings preview places the bars where the engine does
+  (`ShelfStripPreviewTests` ▸ `pocketTakesItsSlot`).
+
 ## Overflow fades, follows and pages through one home each
 
 Arrows cost a box at each end of every overflowing section and

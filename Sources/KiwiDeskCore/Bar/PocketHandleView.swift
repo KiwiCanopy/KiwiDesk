@@ -4,8 +4,8 @@ import AppKit
 /// ruling): the mark's two kiwis looking out from behind a short tab
 /// lying on the screen edge, turned so they face the screen. A fixed
 /// edge mark like the Space dots and the App Bar line — it never
-/// scales with the shelf and carries no count; the kiwis fade while
-/// the pocket is empty.
+/// scales with the shelf and carries no count. An empty pocket's
+/// fade is its panel's alone (#2678 review 18).
 @MainActor
 final class PocketHandleView: NSView {
     /// The tab's depth across the edge and length along it.
@@ -22,7 +22,6 @@ final class PocketHandleView: NSView {
     private var edge = AppBarEdge.bottom
     private var shelf = KiwiShelf()
     private var hex = ""
-    private var empty = false
     /// The kiwis are out with the risen pocket: the tab alone stays.
     private var kiwisOut = false
 
@@ -40,13 +39,11 @@ final class PocketHandleView: NSView {
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
-        empty: Bool,
         kiwisOut: Bool
     ) {
         self.shelf = shelf
         self.hex = hex
         self.edge = edge
-        self.empty = empty
         self.kiwisOut = kiwisOut
         needsDisplay = true
     }
@@ -79,7 +76,7 @@ final class PocketHandleView: NSView {
                 in: markRect,
                 from: .zero,
                 operation: .sourceOver,
-                fraction: empty ? 0.5 : 1,
+                fraction: 1,
                 respectFlipped: true,
                 hints: nil
             )
