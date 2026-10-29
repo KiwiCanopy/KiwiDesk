@@ -71,10 +71,6 @@ struct SettingsNavigation {
     /// What the pointer previews on Simple, nil at rest.
     var simpleHover: SimplePreviewHover?
 
-    /// Why the shell last changed, so it plays that motion. Written
-    /// only by `SettingsModel`'s root `didSet`.
-    var shellMotion: ShellMotion = .none
-
     /// Whether Home's cards still owe the switch's converge; Home
     /// plays it once and clears this, so a remount does not replay it.
     var convergePending = false
@@ -109,7 +105,6 @@ struct SettingsNavigation {
         spaceOverridesFocus = nil
         simpleKept = nil
         simpleHover = nil
-        shellMotion = .none
         convergePending = false
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states

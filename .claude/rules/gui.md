@@ -918,12 +918,11 @@ and a row marks itself kept only through `simpleKeptSpace`
 (`SimplePreviewTests` ▸ `shownSpace`, `rowsReadTheKeptSpace`). A
 docked column's width, Simple's or a page's, is answered by the
 one `SettingsView.dockedPanelWidth`, which the save pill centres
-against (`HomeSurfacingTests`). **A change of the shown root records its motion
-through the one owner** — `SettingsModel`'s `settingsRoot`
-`didSet` — never a door writing `nav.shellMotion` itself
-(`ShellMotionTests` ▸ `causeHasOneOwner`); a page change swaps
-unanimated, and a leaving branch's transition reads no cause,
-since it plays what it carried at its last render. **A row's
+against (`HomeSurfacingTests`). **Key no shell animation on the page shown**: the
+shell's spring keys on the root alone, and only a switch landing
+on Home owes the cards' converge (`ShellMotionTests` ▸
+`shellMountsTheMotion`, `pagesSwapAtOnce`) — a page case in that
+key brings back a morph on every card click. **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a

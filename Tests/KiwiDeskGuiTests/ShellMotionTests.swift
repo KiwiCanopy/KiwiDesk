@@ -4,10 +4,9 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The shell's transitions (#2737 ruling 13): every change of the
-/// shown root or destination records its cause where the change
-/// happens, so the shell plays that cause's motion. Main-actor
-/// spend: models and a scan of the Settings tree.
+/// The shell's transitions (#2737 ruling 13): only the root switch
+/// moves, and only a switch landing on Home owes the cards' converge.
+/// Main-actor spend: models and a scan of the Settings tree.
 @MainActor
 @Suite("Shell motion")
 struct ShellMotionTests {
@@ -17,67 +16,40 @@ struct ShellMotionTests {
         return makeTestModel(defaults: defaults)
     }
 
-    @Test("the switch converges, and owes Home one converge")
+    @Test("the switch to Advanced owes Home one converge")
     func switchConverges() {
         let model = model()
-        #expect(model.nav.shellMotion == .none)
+        #expect(!model.nav.convergePending)
         model.pickRoot(.advanced)
-        #expect(model.nav.shellMotion == .converge)
         #expect(model.nav.convergePending)
         model.nav.convergePending = false
+        // Only Home arriving owes the flight.
         model.pickRoot(.simple)
-        #expect(model.nav.shellMotion == .converge)
+        #expect(!model.nav.convergePending)
         // The bare header link is a switch too.
         model.openAdvanced()
-        #expect(model.nav.shellMotion == .converge)
+        #expect(model.nav.convergePending)
     }
 
-    /// Inside Advanced a page swaps at once: no door records a
-    /// motion, so the shell's spring, keyed on the root, stays still.
-    @Test("a card's page and a landing record no motion")
+    /// Inside Advanced a page swaps at once, so no page write owes
+    /// a converge.
+    @Test("a card's page and a landing owe no converge")
     func pagesSwapAtOnce() {
-        let model = model(.advanced)
-        // Home paid the opening converge.
+        let model = model()
+        model.pickRoot(.advanced)
+        // What Home's onAppear does once the cards have landed.
         model.nav.convergePending = false
-        let opened = model.nav.shellMotion
         model.openFromCard(.bars)
-        #expect(model.nav.shellMotion == opened)
         #expect(model.nav.homeReturnFocus == .bars)
+        model.destination = nil
         model.destination = .looks
         model.destination = nil
-        #expect(model.nav.shellMotion == opened)
         #expect(!model.nav.convergePending)
         // A link from Simple lands on its page, not a converge.
         let simple = self.model()
         simple.destination = .looks
         #expect(simple.showsSimple == false)
-        #expect(simple.nav.shellMotion == .none)
         #expect(!simple.nav.convergePending)
-    }
-
-    /// The cause has one owner, so a new door cannot leave the last
-    /// change's motion standing.
-    @Test("only the root writes the cause")
-    func causeHasOneOwner() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
-        let files = try SourceScan.swiftSources(under: root)
-        #expect(!files.isEmpty)
-        let allowed: [String: Int] = [
-            "SettingsModel+ShellMotion.swift": 1,
-            "SettingsNavigation.swift": 1,
-        ]
-        var found: [String: Int] = [:]
-        for file in files {
-            let text = try SourceScan.strippedSource(at: file)
-                .filter { !$0.isWhitespace }
-            // An assignment, never a comparison.
-            let count =
-                text.occurrences(of: "shellMotion=")
-                - text.occurrences(of: "shellMotion==")
-            if count > 0 { found[file.lastPathComponent] = count }
-        }
-        #expect(found == allowed, "\(found)")
     }
 
     private func source(_ path: String) throws -> String {

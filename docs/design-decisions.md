@@ -10362,10 +10362,9 @@ page at once, and Back returns at once: the switch is the one
 change that transforms the window, and a page is a destination
 the user picks many times a visit, so a morph there spends time
 on every click (owner, 2026-10-29, retiring the card expand that
-shipped briefly). Each change of the root records its cause where
-the change happens, so the shell picks the motion from one field
-rather than guessing from the states. Under Reduce Motion the
-switch is instant, with no fade put in its place.
+shipped briefly). The shell's spring keys on the root alone, so
+a page change cannot ride it. Under Reduce Motion the switch is
+instant, with no fade put in its place.
 
 **Simple has its own visibility rule.** *Grey, don't hide*
 governs the controls within a surface; what Simple draws at all

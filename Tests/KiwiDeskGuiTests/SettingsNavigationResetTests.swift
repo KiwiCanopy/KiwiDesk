@@ -46,7 +46,6 @@ struct SettingsNavigationResetTests {
         nav.spaceOverridesFocus = SpaceID("code")
         nav.simpleKept = SpaceID("code")
         nav.simpleHover = .look("Kiwi")
-        nav.shellMotion = .converge
         nav.convergePending = true
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true

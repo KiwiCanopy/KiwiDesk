@@ -77,7 +77,7 @@ final class SettingsModel: ObservableObject {
     @Published var settingsRoot = SettingsRootPreference.firstOpen {
         didSet {
             if settingsRoot == .simple { destination = nil }
-            recordShellMotion(from: oldValue)
+            recordConverge(from: oldValue)
         }
     }
     /// Distinct setting changes in draft, recomputed beside `isDirty`.

@@ -1,13 +1,8 @@
 import SwiftUI
 
-/// Why the shell's content last changed (#2737 ruling 13): only the
-/// root switch moves; a Home card swaps to its page at once.
-/// Recorded on `nav` beside the change.
-enum ShellMotion: Equatable {
-    case none
-    /// The `Simple | Advanced` switch.
-    case converge
-
+/// The shell's motion (#2737 ruling 13): only the `Simple |
+/// Advanced` switch moves; a Home card swaps to its page at once.
+enum ShellMotion {
     /// The shell's spring; every reader gates it at its call.
     static let spring = Animation.spring(response: 0.7, dampingFraction: 0.86)
     /// Simple fades out before Home's cards arrive.
