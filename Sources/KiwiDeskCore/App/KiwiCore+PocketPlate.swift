@@ -70,7 +70,8 @@ extension KiwiCore {
             // it on hover and during a drag (#2678).
             let risen =
                 slot == nil
-                && (dragging || pocketPlate.hovered.contains(display.id))
+                && (dragging || pocketPlate.hovered.contains(display.id)
+                    || pocketPlate.playing[display.id] != nil)
             guard
                 let frame = slot
                     ?? pocketHandleFrame(on: display.id, risen: risen)

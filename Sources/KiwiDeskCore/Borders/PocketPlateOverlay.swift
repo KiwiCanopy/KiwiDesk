@@ -44,6 +44,10 @@ final class PocketPlateOverlay {
     private(set) var specs: [DisplayID: Spec] = [:]
     /// The displays whose handle the pointer is on.
     var hovered: Set<DisplayID> = []
+    /// The displays a put-in or take-out plays on, each with the
+    /// play that holds it out; the pocket stands out of its handle
+    /// for the play (#2678).
+    var playing: [DisplayID: UUID] = [:]
     /// The pointer came onto a display's pocket or left it.
     var onHover: @MainActor (DisplayID, Bool) -> Void = { _, _ in }
     /// A click on one display's pocket, and a press on its panel.

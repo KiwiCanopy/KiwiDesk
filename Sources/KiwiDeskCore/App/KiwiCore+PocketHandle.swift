@@ -78,6 +78,43 @@ extension KiwiCore {
         }
     }
 
+    /// Where a put-in or take-out lands on `display` (AX): the
+    /// pocket drawn there — its bar section, or the pocket risen out
+    /// of its handle — else nil, where none stands (#2678).
+    func pocketLanding(on display: DisplayID) -> CGRect? {
+        guard pocketPlateSpecs().contains(where: { $0.display == display })
+        else { return nil }
+        if let slot = pocketPlate.slots[display] { return slot }
+        guard let room = pocketHandleFrame(on: display, risen: true) else {
+            return nil
+        }
+        let rise = Self.pocketRiseSide(
+            thickness: tiler.settings.kiwishelf.thickness
+        )
+        // AX coordinates run down, as the view's flipped bounds do.
+        return PocketPlateView.risenFrame(
+            in: room,
+            edge: tiler.settings.kiwishelf.pocketEdge,
+            side: rise
+        )
+    }
+
+    /// Holds `display`'s pocket out of its handle for a play
+    /// `seconds` long, so the window lands on a pocket the screen
+    /// shows; a later play replaces the hold.
+    func holdPocketOut(on display: DisplayID, for seconds: TimeInterval) {
+        let token = UUID()
+        pocketPlate.playing[display] = token
+        updatePocketPlate()
+        DispatchQueue.main.asyncAfter(deadline: .now() + seconds) {
+            [weak self] in
+            guard let self, self.pocketPlate.playing[display] == token
+            else { return }
+            self.pocketPlate.playing[display] = nil
+            self.updatePocketPlate()
+        }
+    }
+
     /// The pointer came onto `display`'s handle or left it.
     func pocketHovered(_ display: DisplayID, _ on: Bool) {
         let was = pocketPlate.hovered.contains(display)

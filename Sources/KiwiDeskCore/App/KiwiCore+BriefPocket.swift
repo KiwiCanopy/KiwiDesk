@@ -32,11 +32,12 @@ extension KiwiCore {
                 screen: screen,
                 direction: direction,
                 window: frame,
-                pocket: BriefPocketPlan.pocketFrame(
-                    in: region,
-                    edge: tiler.settings.kiwishelf.pocketEdge,
-                    position: tiler.settings.kiwishelf.pocketPosition
-                ),
+                pocket: pocketLanding(on: display)
+                    ?? BriefPocketPlan.pocketFrame(
+                        in: region,
+                        edge: tiler.settings.kiwishelf.pocketEdge,
+                        position: tiler.settings.kiwishelf.pocketPosition
+                    ),
                 iconPid: state.windows[id]?.pid,
                 shelf: briefPocketShelf(),
                 markHex: style.color,
@@ -45,11 +46,13 @@ extension KiwiCore {
                     ? tiler.settings.kiwishelf.glassFill : nil,
                 flight: flight
             )
-        // A pocket plate on this screen is the pocket (#2678).
+        // A pocket on this screen is the pocket (#2678).
         request.drawsPocket = briefPocketDrawsPocket(on: display)
         briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
-        return BriefPocketPlan.timeline(direction, flight: flight)
+        let timeline = BriefPocketPlan.timeline(direction, flight: flight)
+        holdPocketOut(on: display, for: timeline.end)
+        return timeline
     }
 
     /// Pays a pocket press's focus hand-off `hand` once the play

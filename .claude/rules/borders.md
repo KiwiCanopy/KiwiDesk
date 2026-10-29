@@ -10,8 +10,8 @@ paths:
   - "Sources/KiwiDeskCore/App/KiwiCore+Settle.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+StickyMarks.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+OverflowMarks.swift"
-  - "Sources/KiwiDeskCore/App/KiwiCore+PocketPlate.swift"
-  - "Sources/KiwiDeskCore/App/KiwiCore+PocketDrop.swift"
+  - "Sources/KiwiDeskCore/App/KiwiCore+Pocket*.swift"
+  - "Sources/KiwiDeskCore/Borders/Pocket*.swift"
   - "Sources/KiwiDeskCore/App/KiwiCore+Marks.swift"
   # The state change's ring hold is armed from App/ (#2676).
   - "Sources/KiwiDeskCore/App/KiwiCore+StateChange.swift"
@@ -787,8 +787,9 @@ argument (the dead-end bump takes one from
 ships ungated, and no suite in the tree will say so; review is
 the whole net.
 
-One thing IS held, and it is narrower than it looks: the three
-overlay files that animate today are ruled entries in
+One thing IS held, and it is narrower than it looks: the overlay
+files that animate today — the pocket's rise among them (#2678,
+`PocketRise`) — are ruled entries in
 `BarMotionSeamTests`' `allowed` map, which scans all of Core —
 so a FOURTH file here that starts motion reds until someone
 rules it, and a ruling whose file stops animating reds too. What

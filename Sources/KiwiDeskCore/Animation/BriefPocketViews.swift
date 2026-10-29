@@ -103,6 +103,14 @@ final class BriefPocketView: NSView {
     /// stitch blurs on a thin bar (#2678).
     static let solidBelow: CGFloat = 14
 
+    /// Hides the count badge while the pocket rises; it shows once
+    /// the pocket lands (#2678).
+    func holdBadge(_ held: Bool) {
+        badgeHeld = held
+        count.alphaValue = held ? 0 : 1
+    }
+    private(set) var badgeHeld = false
+
     func setLook(_ look: Look) {
         self.look = look
         paintLook()
