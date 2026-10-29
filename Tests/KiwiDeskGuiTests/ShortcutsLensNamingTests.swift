@@ -132,15 +132,27 @@ struct ShortcutsLensNamingTests {
     func surfacesHandInTheirLenses() throws {
         #expect(
             try flat(
-                "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "ShortcutsFamilyRows+Draft.swift"
             )
             .contains(
                 "lenses:KeybindingCatalog.lensOffer("
                     // The page's lenses, seeded from the stored
                     // list, so a lens the draft adds takes a chord
-                    // before Save (#2103 PR 7).
+                    // before Save (#2103 PR 7); the Shortcuts page
+                    // and Simple share the factory (#2737).
                     + "stored:model.draftLenses.map(\\.name),"
-                    + "bindings:model.config.layers.flatMap(\\.bindings))"
+                    + "bindings:bindings)"
+            )
+        )
+        // …over every layer's rows, never the selected one's.
+        #expect(
+            try flat(
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "ShortcutsFamilyRows+Draft.swift"
+            )
+            .contains(
+                "letbindings=model.config.layers.flatMap(\\.bindings)"
             )
         )
         #expect(

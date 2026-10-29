@@ -189,7 +189,7 @@ struct KeyboardActionParityTests {
                 "and something has to raise the flag"
             ),
             Wiring(
-                "SpacesSection+ModePicker.swift",
+                "SpacesSection.swift",
                 ".focused($returningRow, equals: space)",
                 "the row's ALWAYS-drawn control is the return "
                     + "destination — the Overrides button that "

@@ -21,6 +21,11 @@ enum SpaceDeleteWording {
         )
     }
 
+    /// The confirm's title, the Spaces page's and Simple's.
+    static var title: String {
+        L("spaces.delete_confirm.title", "Delete this Space?")
+    }
+
     static var delete: String { L("spaces.delete_confirm.delete", "Delete") }
     static var cancel: String { L("spaces.delete_confirm.cancel", "Cancel") }
 }

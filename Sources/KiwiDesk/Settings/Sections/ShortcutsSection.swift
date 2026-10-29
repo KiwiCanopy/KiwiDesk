@@ -261,28 +261,9 @@ struct ShortcutsSection: View {
         )
     }
 
-    /// Family-to-rows expansion built from live state. The
-    /// Desktop list reads EVERY layer's bindings, not the
-    /// selected one's: a row existing only while its layer is
-    /// selected would vanish from under the duplicate block's
-    /// "Go to", which may point into another layer.
+    /// Family-to-rows expansion for the selected layer.
     var expander: ShortcutsFamilyRows {
-        return ShortcutsFamilyRows(
-            spaces: model.config.spaces,
-            icons: model.config.settings.spaceIcons,
-            liveOnly: model.liveOnlyShortcutSpaces,
-            desktops: KeybindingCatalog.desktopOffer(
-                live: model.bindableDesktops,
-                bindings: model.config.layers.flatMap(\.bindings)
-            ),
-            resizeStep: Int(model.config.settings.resizeStep),
-            layerNames: model.config.layers.map(\.name),
-            currentLayer: selected,
-            lenses: KeybindingCatalog.lensOffer(
-                stored: model.draftLenses.map(\.name),
-                bindings: model.config.layers.flatMap(\.bindings)
-            )
-        )
+        ShortcutsFamilyRows.ofDraft(model, layer: selected)
     }
 
     private var layerIndex: Int {

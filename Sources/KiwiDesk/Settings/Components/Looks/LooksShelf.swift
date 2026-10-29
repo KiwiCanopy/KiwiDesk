@@ -117,62 +117,14 @@ struct LooksShelf: View {
         Text(text).font(.subheadline.weight(.semibold))
     }
 
-    /// Look tile: the picture is what a click gives — the look,
-    /// its colors included — over the draft; the mark is Core's
-    /// one reading (`ShelfLook.match`), and a look whose shape is
-    /// live in other colors keeps it, saying so (#1752).
     private func card(_ look: ShelfLook, caption: String?) -> some View {
-        let match = look.match(model.config.settings)
-        let applied = match != .none
-        let other = match == .otherColors
-        return Button {
+        LookTile(model: model, look: look, caption: caption) {
             apply(look)
-        } label: {
-            PaletteTile(
-                name: look.name,
-                caption: caption,
-                isApplied: applied,
-                note: other ? otherColorsNote : nil,
-                appliedSpoken: other ? otherColorsSpoken : nil,
-                captionLines: 2
-            ) {
-                LookPlate(settings: preview(look), spaceLabels: spaceLabels)
-            }
-            .contentShape(Rectangle())
         }
-        .buttonStyle(.plain)
-        .accessibilityAddTraits(applied ? [.isSelected] : [])
-        .help(other ? restoreColorsHelp : "")
         .popover(item: renameBinding(look.name)) { request in
             renamePopover(request)
                 .settingsPopoverChrome()
         }
-    }
-
-    private var otherColorsNote: String {
-        L("looks.other_colors", "Other colors")
-    }
-
-    private var otherColorsSpoken: String {
-        L("looks.applied_other_colors", "Applied, with other colors")
-    }
-
-    private var restoreColorsHelp: String {
-        L(
-            "looks.restore_colors.help",
-            "Click to bring back this look's own colors."
-        )
-    }
-
-    /// The draft with `look` painted on, its colors included.
-    private func preview(_ look: ShelfLook) -> TilingSettings {
-        var settings = model.config.settings
-        look.apply(to: &settings)
-        return settings
-    }
-
-    private var spaceLabels: [SpaceGlyph] {
-        BarsPanelPreview.spaceLabels(of: model.config)
     }
 
     /// Paints `look`, its colors included, onto the draft,

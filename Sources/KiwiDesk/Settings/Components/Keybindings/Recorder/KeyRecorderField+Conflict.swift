@@ -59,6 +59,7 @@ extension KeyRecorderField {
                                 vertical: true
                             )
                         sideSwitchLink
+                        fixElsewhereLink
                     }
                     .frame(maxWidth: 320, alignment: .leading)
                     .padding(14)
@@ -83,6 +84,32 @@ extension KeyRecorderField {
             .buttonStyle(.link)
             .font(.callout)
         }
+    }
+
+    /// The way to the page that can fix the collision, where the
+    /// row is drawn away from it (`RecorderCoordinator.fixElsewhere`).
+    /// A chord macOS reserves for a feature switched off is an info
+    /// line, not a collision, and offers none.
+    @ViewBuilder private var fixElsewhereLink: some View {
+        if let fix = coordinator.fixElsewhere, !readsDormant {
+            Button(
+                L(
+                    "simple.conflict.fix",
+                    "Fix in %1$@",
+                    SettingsRootSwitch.advancedTitle
+                )
+            ) {
+                conflictPopoverShown = false
+                fix(conflictAnchor)
+            }
+            .buttonStyle(.link)
+            .font(.callout)
+        }
+    }
+
+    private var readsDormant: Bool {
+        if case .dormant = reading?.severity { return true }
+        return false
     }
 
     /// The dead row's caption: the same sentence the badge

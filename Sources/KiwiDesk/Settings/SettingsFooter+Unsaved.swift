@@ -67,12 +67,7 @@ extension SettingsFooter {
                 revert: DiffRowRevert(model: model, alwaysVisible: true)
             ) { row in
                 unsavedPopoverShown = false
-                guard
-                    let anchor = SettingsDiffJump.anchor(
-                        for: row
-                    )
-                else { return }
-                model.nav.pendingReveal = anchor
+                model.jump(to: row)
             }
             .padding(14)
         }

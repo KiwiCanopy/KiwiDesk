@@ -132,6 +132,9 @@ struct CrossReferenceRowSlotTests {
         "PocketGroup.swift:Self.inertProse",  // PocketGroupTests
         // KiwiVisionCensusRenderTests ▸ pointerPlacesItsLink.
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
+        "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests
+        "SimpleSpacesCard.swift:Self.hintProse",  // SimpleSectionsTests
+        "SimpleKiwiHubKeys.swift:Self.changeProse",  // SimpleSectionsTests
     ]
 
     // MARK: - The values
@@ -257,8 +260,6 @@ struct CrossReferenceRowSlotTests {
             #expect(!SpacesGateHelp.remote.contains(reason))
         }
     }
-
-    // MARK: - The coupling
 
     /// Every rendered row's prose is one the assertions above
     /// cover. A fourth cross-reference reds here — which is the

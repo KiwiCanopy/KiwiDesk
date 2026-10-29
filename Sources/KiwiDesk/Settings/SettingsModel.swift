@@ -74,7 +74,7 @@ final class SettingsModel: ObservableObject {
     }
     /// The root this window shows (#2737). Only the switch stores
     /// it (`pickRoot`); a fresh open re-reads the stored choice.
-    @Published var settingsRoot: SettingsRoot = .advanced {
+    @Published var settingsRoot = SettingsRootPreference.firstOpen {
         didSet {
             if settingsRoot == .simple { destination = nil }
         }

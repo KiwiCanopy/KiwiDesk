@@ -13,6 +13,9 @@ struct IconPicker: View {
     var symbolsOnly = false
     /// What an empty icon draws as, where it means a default.
     var placeholder: String?
+    /// Text an empty icon draws instead — a Space's own identifier,
+    /// as the Space Bar draws it (#2737).
+    var emptyText: String?
 
     @State private var showing = false
     @State private var search = ""
@@ -31,13 +34,17 @@ struct IconPicker: View {
                 // Fixed glyph slot: every picker button is
                 // the same size whether it holds an emoji, a
                 // symbol, or nothing yet.
-                IconGlyphLabel(icon: icon, placeholder: placeholder)
-                    .foregroundStyle(
-                        icon.isEmpty && placeholder != nil
-                            ? AnyShapeStyle(SettingsTheme.ink3)
-                            : AnyShapeStyle(.foreground)
-                    )
-                    .frame(width: 20)
+                IconGlyphLabel(
+                    icon: icon,
+                    placeholder: placeholder,
+                    emptyText: emptyText
+                )
+                .foregroundStyle(
+                    icon.isEmpty && placeholder != nil
+                        ? AnyShapeStyle(SettingsTheme.ink3)
+                        : AnyShapeStyle(.foreground)
+                )
+                .frame(width: 20)
                 Image(systemName: "chevron.down")
                     .font(.caption2)
                     .foregroundStyle(.secondary)

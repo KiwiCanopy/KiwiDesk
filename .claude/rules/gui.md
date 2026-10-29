@@ -886,13 +886,22 @@ depth switch inside either root** — new depth goes behind its
 container's disclosure or its row's menu (#2654,
 `docs/design-decisions.md` ▸ Settings is one surface; #2737, ▸
 Simple is a second root). Draw a control Simple needs with the
-component Advanced draws it with, never a Simple look-alike —
-review's to hold. Keep every page Advanced's and store the root
+component Advanced draws it with, never a Simple look-alike; a
+control Advanced draws another way — the Screen menu over a
+chip's menu — shares its choices and its one write
+(`SpaceScreenChoice`, `SimpleSectionsTests` ▸
+`placementHasOneDoor`). `SimpleSectionsTests` ▸ `noLookAlikes`
+holds Simple's directory to no look tile, recorder, layout menu or
+Screen vocabulary of its own; the rest is review's. Keep every
+page Advanced's and store the root
 only on the switch's pick (`SimpleRootTests` ▸ `pageFlipsRoot`,
 `landingIsNotAPick`). Simple edits the loaded profile alone: a
 new writer of `settingsRoot = .simple` beside `pickRoot` and a
 fresh open settles the edit target as they do
-(`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). **A row's
+(`SimpleRootTests` ▸ `simpleLeavesAStoredTarget`). A control
+Simple starts or stops drawing changes `SimpleCoverage` in the
+same change, since the save pill reads it to keep a row on Simple
+(`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a

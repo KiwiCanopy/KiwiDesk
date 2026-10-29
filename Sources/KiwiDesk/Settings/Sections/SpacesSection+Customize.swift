@@ -6,51 +6,15 @@ import SwiftUI
 extension SpacesSection {
     /// Destructive row action in trailing danger slot.
     func deleteButton(_ space: SpaceID) -> some View {
-        Button {
-            requestRemove(space)
-        } label: {
-            Image(systemName: "trash")
-        }
-        .buttonStyle(.borderless)
-        .iconButtonAffordance(
-            L("spaces.delete.help", "Delete Space")
-        )
+        SpaceDeleteButton { requestRemove(space) }
     }
 
     /// Per-row Customize button opening the full-pane editor, on
-    /// every row (#2674). Its badge counts the Space's overrides;
-    /// a Floating Space whose overrides all wait for a tiling
-    /// layout dims it (`OverrideCellState`, #678 8a).
+    /// every row (#2674).
     func customizeButton(_ space: SpaceID) -> some View {
-        let count = model.config.settings.spaceOverrideCount(
-            for: space
-        )
-        let isFloating =
-            (model.config.spaceModes[space] ?? .bsp) == .floating
-        let state = OverrideCellState.resolve(
-            count: count,
-            live: model.config.settings.floatingLiveOverrideCount(
-                for: space
-            ),
-            isFloating: isFloating
-        )
-        return Button {
+        SpaceCustomizeButton(model: model, space: space) {
             model.nav.spaceOverridesFocus = space
-        } label: {
-            Image(systemName: "slider.horizontal.3")
-                .overlay(alignment: .topTrailing) {
-                    OverrideCountBadge(state: state)
-                        .offset(x: 5, y: -5)
-                }
-                .padding(.horizontal, 6)
         }
-        .buttonStyle(.borderless)
-        .iconHoverChip()
-        .help(L("spaces.overrides.customize", "Customize…"))
-        .accessibilityLabel(
-            L("spaces.customize.a11y", "Customize Space %1$@", space.raw)
-        )
-        .accessibilityValue(OverrideCountBadge.spokenValue(state))
     }
 
     /// Prompts confirmation if space carries overrides before removing.
@@ -69,9 +33,7 @@ extension SpacesSection {
         )
     }
 
-    var deleteConfirmTitle: String {
-        L("spaces.delete_confirm.title", "Delete this Space?")
-    }
+    var deleteConfirmTitle: String { SpaceDeleteWording.title }
 
     /// Confirmation message with interpolated role names (#818).
     var deleteConfirmMessage: String {
@@ -151,16 +113,13 @@ extension SpacesSection {
         }
         Divider()
         Button(L("spaces.context.move_up", "Move Up")) {
-            nudge(space, by: -1)
+            model.moveSpace(space, by: -1)
         }
-        .disabled(index(of: space) == 0)
+        .disabled(!model.canMoveSpace(space, by: -1))
         Button(L("spaces.context.move_down", "Move Down")) {
-            nudge(space, by: 1)
+            model.moveSpace(space, by: 1)
         }
-        .disabled(
-            index(of: space)
-                == model.config.spaces.count - 1
-        )
+        .disabled(!model.canMoveSpace(space, by: 1))
         Divider()
         Button(
             L("spaces.context.delete", "Delete"),
@@ -168,18 +127,5 @@ extension SpacesSection {
         ) {
             requestRemove(space)
         }
-    }
-
-    private func index(of space: SpaceID) -> Int {
-        model.config.spaces.firstIndex(of: space) ?? 0
-    }
-
-    private func nudge(_ space: SpaceID, by delta: Int) {
-        let from = index(of: space)
-        let to = from + delta
-        guard model.config.spaces.indices.contains(to) else {
-            return
-        }
-        model.config.spaces.swapAt(from, to)
     }
 }

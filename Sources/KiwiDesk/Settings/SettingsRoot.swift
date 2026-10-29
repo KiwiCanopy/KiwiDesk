@@ -16,10 +16,9 @@ enum SettingsRoot: String, CaseIterable, Sendable {
 enum SettingsRootPreference {
     static let key = "settingsRoot"
 
-    /// The root an install opens on until the user picks. Advanced
-    /// while Simple's page is empty; the ruled `.simple` lands with
-    /// Simple's sections (#2737 ruling 15).
-    static let firstOpen = SettingsRoot.advanced
+    /// The root every install opens on until the user picks, an
+    /// updated one too (#2737 ruling 15).
+    static let firstOpen = SettingsRoot.simple
 
     static func read(
         from defaults: UserDefaults
