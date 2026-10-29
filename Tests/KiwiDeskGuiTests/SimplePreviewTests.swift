@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// Simple's live preview (#2737 rulings 5, 9 and 10): which Space it
-/// shows, in which look, how wide it docks, and that the kept row's
-/// ring reads against its fill. Main-actor spend: model construction
-/// and four colour resolutions.
+/// Simple's live preview (#2737 rulings 5 and 9): which Space it
+/// shows, in which look, and that the kept row's ring reads against
+/// its fill; its widths are `SimpleColumnsTests`'. Main-actor spend:
+/// model construction and four colour resolutions.
 @MainActor
 @Suite("Simple preview")
 struct SimplePreviewTests {
@@ -99,16 +99,6 @@ struct SimplePreviewTests {
             fallbackIsMain: true
         )
         #expect(main.contains("the main screen"))
-    }
-
-    /// Ruling 10's floor: the docking width leaves the controls 580.
-    @Test("the docked preview leaves the controls their 580")
-    func controlsKeepTheirFloor() {
-        let controls =
-            SettingsWidthClass.panelBreakpoint
-            - SimpleColumns.preview - 1
-        #expect(controls >= 580)
-        #expect(SimpleColumns.contentCap >= controls)
     }
 
     @Test("an offline pin's caption keeps the hover and both screens")

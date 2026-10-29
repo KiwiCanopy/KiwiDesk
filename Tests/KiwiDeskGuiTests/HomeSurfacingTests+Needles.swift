@@ -90,10 +90,14 @@ extension HomeSurfacingTests {
                 + "{SettingsTheme.hairline.frame(width:1)"
                 + "SettingsDetailPanel(",
             // Simple's preview docks through the same answer
-            // the pill centres against (#2737).
-            "ifletpreview=dockedPanelWidth(width){"
-                + "SettingsTheme.hairline.frame(width:1)"
-                + "ScrollView{SimplePreview(model:model)}",
+            // the pill centres against, and that answer is the
+            // column the pane lays out (#2737).
+            "ifdockedPanelWidth(width)!=nil{",
+            "SettingsTheme.hairline.frame(width:1)"
+                + "ScrollView{SimplePreview(model:model,"
+                + "columns:columns).frame(width:columns.preview)",
+            ".onChange(of:columns.preview,initial:true){"
+                + "simplePreviewWidth=$1}",
         ],
         "Settings/SettingsFloatingPanel.swift": [
             // The gesture is declared in the view that takes
@@ -212,6 +216,10 @@ extension HomeSurfacingTests {
             // focus re-opens stale suggestions after every
             // push/pop (owner 2026-08-10).
             ".id(destination)",
+            // Every page is Advanced's, so the root switch draws
+            // on a page as on Home, the Lua editor alone without
+            // it (#2737 ruling 1, owner 2026-10-29).
+            "if!model.editingLua{SettingsRootSwitch(model:model)}",
         ],
         "Settings/HeaderSearch.swift": [
             // The predicate the query-only panel rests on: a

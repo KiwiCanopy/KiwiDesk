@@ -7,9 +7,12 @@ import SwiftUI
 /// absent on one screen. Static frames: nothing in it moves.
 struct SimplePreview: View {
     @ObservedObject var model: SettingsModel
+    /// The docked columns, which size the desk; nil in the
+    /// floating card, where the desk takes the card's width.
+    var columns: SimpleColumns?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
+        VStack(alignment: .leading, spacing: SimpleColumns.spacing) {
             if let space = model.simplePreviewSpace {
                 Text(header(space))
                     .font(.system(size: 10, weight: .semibold).monospaced())
@@ -29,7 +32,7 @@ struct SimplePreview: View {
                         model: model,
                         lit: model.simpleLanding(of: space)?.id
                     )
-                    .frame(height: Self.mapHeight)
+                    .frame(height: SimpleColumns.mapHeight)
                     .environment(\.schematicPalette, palette)
                     .accessibilityHidden(true)
                 }
@@ -41,13 +44,12 @@ struct SimplePreview: View {
                 .foregroundStyle(SettingsTheme.ink3)
             }
         }
-        .padding(.horizontal, 22)
-        .padding(.top, 18)
+        .padding(.horizontal, SimpleColumns.previewInset)
+        .padding(.top, SimpleColumns.previewTop)
         .frame(maxWidth: .infinity, alignment: .topLeading)
         .allowsHitTesting(false)
     }
 
-    private static let mapHeight: CGFloat = 96
     private static let deskHeight: CGFloat = 300
 
     private var settings: TilingSettings { model.simplePreviewSettings }
@@ -88,15 +90,18 @@ struct SimplePreview: View {
         return HomeCardBarsTile(
             settings: settings,
             spaceCount: model.config.spaces.count,
-            scale: 1.8,
+            scale: columns?.barScale ?? SimpleColumns.barScale,
             spaceLabels: BarsPanelPreview.spaceLabels(of: model.config),
             showsAppBar: settings.appBarVisibility(in: mode)
                 .map(\.showsUnprompted) == true,
             wellContent: AnyView(schematic(space, mode: mode))
         )
-        .padding(12)
-        .frame(height: Self.deskHeight)
-        .frame(maxWidth: .infinity)
+        .padding(SimpleColumns.platePadding)
+        .frame(
+            width: columns?.plate.width,
+            height: columns?.plate.height ?? Self.deskHeight
+        )
+        .frame(maxWidth: columns == nil ? .infinity : nil)
         .background(shape.fill(SettingsTheme.previewPlate))
         .overlay(shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1))
         // The accent ring says the frame shows what a click kept;
@@ -124,8 +129,11 @@ struct SimplePreview: View {
                     LayoutSchematic.defaultWindowCount,
                     for: mode
                 ),
-                scale: .panel
+                scale: .tile
             )
+            // The well is the screen: no frame or caption of the
+            // schematic's own, sized to the well, not past it.
+            .environment(\.schematicFillsWell, true)
         }
     }
 }

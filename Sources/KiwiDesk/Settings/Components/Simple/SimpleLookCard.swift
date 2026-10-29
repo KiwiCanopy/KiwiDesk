@@ -10,13 +10,13 @@ struct SimpleLookCard: View {
 
     var body: some View {
         SimpleCard(title: Self.title) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 10) {
-                    ForEach(Self.looks(in: model), id: \.name) {
-                        tile($0)
-                    }
+            // Centred while the line fits; scrolling once it
+            // overflows (owner 2026-10-29).
+            ViewThatFits(in: .horizontal) {
+                line.frame(maxWidth: .infinity)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    line
                 }
-                .padding(.vertical, 2)
             }
             CrossReferenceRow(
                 prose: Self.hintProse,
@@ -24,6 +24,13 @@ struct SimpleLookCard: View {
                 destination: .looks
             )
         }
+    }
+
+    private var line: some View {
+        HStack(alignment: .top, spacing: 10) {
+            ForEach(Self.looks(in: model), id: \.name) { tile($0) }
+        }
+        .padding(.vertical, 2)
     }
 
     /// The linked look while My looks still holds it, then the

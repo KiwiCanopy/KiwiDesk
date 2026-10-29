@@ -8,9 +8,25 @@ struct SchematicCanvas<Content: View>: View {
     let axLabel: String
     var showsCaption = true
     @Environment(\.schematicPalette) private var palette
+    @Environment(\.schematicFillsWell) private var fillsWell
     @ViewBuilder let content: Content
 
     var body: some View {
+        if fillsWell { well } else { framed }
+    }
+
+    /// The schematic as a bars tile's well (#2737): the well is the
+    /// screen, so no frame, no caption, and its size is the well's.
+    private var well: some View {
+        content
+            .padding(LayoutSchematic.inset)
+            .clipShape(RoundedRectangle(cornerRadius: 4))
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+            .accessibilityElement()
+            .accessibilityLabel(axLabel)
+    }
+
+    private var framed: some View {
         VStack(spacing: 4) {
             screen
                 .accessibilityElement()
@@ -51,5 +67,18 @@ struct SchematicCanvas<Content: View>: View {
         }
         .frame(maxWidth: width == nil ? .infinity : nil)
         .frame(width: width, height: height)
+    }
+}
+
+private struct SchematicFillsWellKey: EnvironmentKey {
+    static let defaultValue = false
+}
+
+extension EnvironmentValues {
+    /// Whether a schematic fills a bars tile's well rather than
+    /// drawing its own mini-screen (Simple's preview, #2737).
+    var schematicFillsWell: Bool {
+        get { self[SchematicFillsWellKey.self] }
+        set { self[SchematicFillsWellKey.self] = newValue }
     }
 }

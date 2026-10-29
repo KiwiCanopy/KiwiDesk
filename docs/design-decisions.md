@@ -10272,6 +10272,12 @@ Three things stay one, or the two roots drift apart:
 - **No hue marks the mode.** The segment's label says which root
   is showing; the accent stays selection's and identity's
   (#1173).
+- **The switch is on every page.** A page is Advanced's, so it
+  carries the segment as Home does (owner 2026-10-29): a user who
+  followed a "… in Advanced" link sees the named way back where
+  they left it. Back keeps meaning Home; a Back that read
+  "Simple" after a link and "Home" after one more click would give
+  one button two meanings.
 
 The preview is the reason Simple is two columns. It is drawn
 from the draft on the neutral plate, never on a wallpaper — a
@@ -10281,7 +10287,16 @@ Space, so the keyboard and VoiceOver reach what the pointer
 does. It docks at the panel breakpoint and leaves its column
 below it, as every preview does; the support strip and footer
 end the controls at every width, so the right column is the
-preview and nothing else.
+preview and nothing else. Docked, the desk is sized from the
+window — as wide as the column allows, as tall as the window
+allows, up to a cap — and the bars scale with it, while the
+controls keep a bounded share and their 760 pt cap; what is left
+is split as equal margins, centring the pair (owner 2026-10-29).
+A desk of fixed height left a wide window mostly empty, and
+Simple's reader is the one who wants the picture. The preview
+adds no mark Simple cannot reach — no sticky, pocket or floating
+mark, no drag ghost — since a mark there promises a setting the
+page does not hold, and a frozen drag reads as a broken window.
 
 **The motion says where the user came from.** The switch
 converges: Simple fades and Home's cards gather out of the

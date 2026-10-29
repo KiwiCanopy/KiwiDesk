@@ -237,19 +237,36 @@ extension SettingsView {
 
 extension SettingsView {
     /// Simple's two columns (#2737 ruling 10): the controls, and the
-    /// preview docked beside them where the width docks a panel.
+    /// preview docked beside them where the width docks a panel,
+    /// the pair centred and the desk sized from the pane.
     @ViewBuilder func simplePane(
         _ width: SettingsWidthClass
     ) -> some View {
-        HStack(spacing: 0) {
-            SimpleScreen(model: model)
-            if let preview = dockedPanelWidth(width) {
-                SettingsTheme.hairline.frame(width: 1)
-                ScrollView { SimplePreview(model: model) }
+        if dockedPanelWidth(width) != nil {
+            GeometryReader { geo in
+                let columns = SimpleColumns.of(
+                    geo.size,
+                    drawsMap: model.offersScreenMenu
+                )
+                HStack(spacing: 0) {
+                    SettingsTheme.page.frame(width: columns.margin)
+                    SimpleScreen(model: model)
+                        .frame(width: columns.controls)
+                    SettingsTheme.hairline.frame(width: 1)
+                    ScrollView {
+                        SimplePreview(model: model, columns: columns)
+                            .frame(width: columns.preview)
+                    }
                     .scrollIndicators(.hidden)
-                    .frame(width: preview)
+                    .frame(maxWidth: .infinity, alignment: .leading)
                     .background(SettingsTheme.panel)
+                }
+                .onChange(of: columns.preview, initial: true) {
+                    simplePreviewWidth = $1
+                }
             }
+        } else {
+            SimpleScreen(model: model)
         }
     }
 }

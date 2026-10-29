@@ -13,6 +13,9 @@ struct SettingsView: View {
     /// Whether the user opened the preview card this mount; false
     /// offers "Show preview" (#1854, `DetailPanelTests`).
     @State var previewShown = false
+    /// Simple's docked preview column as last laid out, which the
+    /// save pill centres against (`SimpleColumns`).
+    @State var simplePreviewWidth: CGFloat?
     /// Arrival destination: the pane the raise below focuses, and
     /// the one element that is also the area's named target
     /// (#996). Non-private — `contentColumn` is in an extension.
