@@ -59,7 +59,6 @@ struct ShelfRefusalPlaceTests {
         let screen = try #require(NSScreen.screens.first)
         let display = try #require(screen.kiwiDisplay)
         let core = makeTestCore()
-        defer { NativeSpaces.currentSpaceIsUserOverride = nil }
         core.tiler.visibleBounds = { _ in screen.frame }
         core.state.apply(.displaysChanged([display]))
         core.resolveSpaceDisplays(mainID: display.id)
@@ -67,7 +66,6 @@ struct ShelfRefusalPlaceTests {
             core.state.workspaces.currentSpace(on: display.id)
         )
         core.state.workspaces.setMode(space, .monocle)
-        NativeSpaces.currentSpaceIsUserOverride = { _ in true }
         #expect(
             core.emptyRefusal(.app, on: display.id) == .nothingToShow(.app)
         )
