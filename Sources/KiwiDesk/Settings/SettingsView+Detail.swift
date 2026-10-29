@@ -58,6 +58,22 @@ extension SettingsView {
                 )
             }
         }
+        // Grown out of the card it was opened from (#2737 ruling 13).
+        .background(pageBox)
+    }
+
+    /// The page's box, matched to its card's while a card opened it.
+    @ViewBuilder private var pageBox: some View {
+        if let destination = model.destination,
+            model.nav.shellMotion == .expand(destination)
+        {
+            Rectangle()
+                .fill(SettingsTheme.page)
+                .shellMatched(
+                    ShellMotion.boxID(destination),
+                    in: reduceMotion ? nil : shellSpace
+                )
+        }
     }
 
     @ViewBuilder private var contentColumn: some View {

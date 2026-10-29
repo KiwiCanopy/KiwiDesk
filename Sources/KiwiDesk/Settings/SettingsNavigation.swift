@@ -71,6 +71,9 @@ struct SettingsNavigation {
     /// What the pointer previews on Simple, nil at rest.
     var simpleHover: SimplePreviewHover?
 
+    /// Why the shell last changed, so it plays that motion.
+    var shellMotion: ShellMotion = .none
+
     /// Originating card destination when popping back to Home.
     var homeReturnFocus: SettingsDestination?
 
@@ -101,6 +104,7 @@ struct SettingsNavigation {
         spaceOverridesFocus = nil
         simpleKept = nil
         simpleHover = nil
+        shellMotion = .none
         // The latch is paired with the write that set it, so it
         // must not outlive the visit — a window re-shown states
         // no destination rather than one the last visit earned.

@@ -21,6 +21,8 @@ extension SettingsView {
                 editingStoredProfile: model.editingStoredProfile
             )
         else { return }
+        // No card stands behind a landing, so it zooms through.
+        model.nav.shellMotion = .zoomThrough
         model.destination = resolved.destination
         // Every KiwiVision anchor but the strip's lives on the
         // Default page, and a landing names no lens (#2103).

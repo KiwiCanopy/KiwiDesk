@@ -21,6 +21,7 @@ extension SettingsModel {
     /// landing the screen shows Advanced while Simple is stored.
     func pickRoot(_ root: SettingsRoot) {
         let apply = { [self] in
+            nav.shellMotion = .converge
             settingsRoot = root
             SettingsRootPreference.write(root, to: preferences)
         }

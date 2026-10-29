@@ -10,6 +10,15 @@ struct HomeScreen: View {
     @State private var firstRunVisible = false
     /// Current window width classification band (17a).
     @Environment(\.settingsWidth) private var band
+    @Environment(\.shellSpace) private var shellSpace
+    /// Whether the cards are in their slots: false only while the
+    /// switch's converge has yet to play (#2737 ruling 13).
+    @State private var arrived: Bool
+
+    init(model: SettingsModel) {
+        self.model = model
+        _arrived = State(initialValue: model.nav.shellMotion != .converge)
+    }
 
     /// Adaptive grid column count, capped at four with the cards
     /// GROWING into a big screen (owner 2026-08-10): `.adaptive`
@@ -49,6 +58,8 @@ struct HomeScreen: View {
         GeometryReader { geo in
             grid(width: geo.size.width, height: geo.size.height)
         }
+        .coordinateSpace(name: HomeConverge.space)
+        .onAppear { arrived = true }
     }
 
     private func grid(
@@ -69,12 +80,16 @@ struct HomeScreen: View {
                         "This Profile"
                     ),
                     cards: offered(HomeCardOrder.thisProfile),
-                    columns: columns(for: width, band: band)
+                    columns: columns(for: width, band: band),
+                    first: 0,
+                    viewport: CGSize(width: width, height: height)
                 )
                 group(
                     L("home.group.whole_app", "Whole App"),
                     cards: offered(HomeCardOrder.wholeApp),
-                    columns: columns(for: width, band: band)
+                    columns: columns(for: width, band: band),
+                    first: offered(HomeCardOrder.thisProfile).count,
+                    viewport: CGSize(width: width, height: height)
                 )
                 // The strip sits at the window's bottom edge when
                 // the cards leave room, and scrolls after them when
@@ -136,7 +151,9 @@ struct HomeScreen: View {
     @ViewBuilder private func group(
         _ title: String,
         cards: [SettingsDestination],
-        columns: [GridItem]
+        columns: [GridItem],
+        first: Int,
+        viewport: CGSize
     ) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             HomeGroupHeading(title)
@@ -145,7 +162,9 @@ struct HomeScreen: View {
                 alignment: .leading,
                 spacing: 16
             ) {
-                ForEach(cards) { destination in
+                ForEach(Array(cards.enumerated()), id: \.element) {
+                    offset,
+                    destination in
                     HomeCard(
                         model: model,
                         destination: destination,
@@ -155,12 +174,20 @@ struct HomeScreen: View {
                         open: { push(destination) }
                     )
                     .focused($focusedCard, equals: destination)
+                    .modifier(
+                        HomeConverge(
+                            arrived: arrived,
+                            index: first + offset,
+                            viewport: viewport
+                        )
+                    )
                 }
             }
         }
     }
 
     private func push(_ destination: SettingsDestination) {
+        model.nav.shellMotion = .expand(destination)
         model.nav.homeReturnFocus = destination
         model.destination = destination
     }

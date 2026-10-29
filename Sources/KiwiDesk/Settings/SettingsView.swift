@@ -19,6 +19,8 @@ struct SettingsView: View {
     @FocusState var contentFocused: Bool
     @Environment(\.accessibilityReduceMotion)
     var reduceMotion
+    /// Where a Home card and its page share a box (#2737).
+    @Namespace var shellSpace
 
     /// Whether current destination supports detail panel.
     var panelOffered: Bool {
@@ -149,12 +151,25 @@ struct SettingsView: View {
         chrome(width) {
             if model.showsSimple {
                 simplePane(width)
+                    .transition(simpleTransition)
             } else if selection == nil {
                 HomeScreen(model: model)
+                    .transition(homeTransition)
             } else {
                 detailPane(width)
+                    .transition(pageTransition)
             }
         }
+        .environment(\.shellSpace, reduceMotion ? nil : shellSpace)
+        // One key, one gated spring: the change's own motion is the
+        // branches' transitions above (#2737 ruling 13).
+        .animation(
+            reduceMotion ? nil : ShellMotion.spring,
+            value: ShellMotion.Key(
+                simple: model.showsSimple,
+                destination: model.destination
+            )
+        )
         .frame(maxWidth: .infinity)
         .ignoresSafeArea(.container, edges: .top)
         .onExitCommand {

@@ -10278,6 +10278,19 @@ below it, as every preview does; the support strip and footer
 end the controls at every width, so the right column is the
 preview and nothing else.
 
+**The motion says where the user came from.** The switch
+converges: Simple fades and Home's cards gather out of the
+window's centre into their slots, so Advanced reads as the same
+settings opened out rather than another window. A card expands
+into its page and Back folds it into the card again, so the page
+is visibly that card's. A landing with no card behind it — a
+search hit, a "… in Advanced" link — zooms through, since a
+morph from a card the user never touched would lie about where
+they came from. Each change records its cause beside itself, so
+the shell picks the motion from one field rather than guessing
+from the states. Under Reduce Motion each swap is instant, with
+no fade put in its place.
+
 **Simple has its own visibility rule.** *Grey, don't hide*
 governs the controls within a surface; what Simple draws at all
 is a scope decision, made once for the whole root. So on one
