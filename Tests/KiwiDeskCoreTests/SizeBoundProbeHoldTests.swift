@@ -186,7 +186,7 @@ struct SizeBoundProbeHoldTests {
     @Test("A new issue on one axis carries the other's issue out")
     func newIssueCarriesTheOtherAxis() throws {
         var learner = try probeOut()
-        learner.promote(
+        _ = learner.promote(
             w,
             asked: 336,
             answered: 380,
