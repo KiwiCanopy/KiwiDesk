@@ -116,6 +116,22 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// The learned minimum height floor; see `minWidth`.
     public var minHeight: CGFloat? { floor(of: height) }
 
+    /// A run's planning floor on one axis (#2774): the least
+    /// answer among the entries that answered more than
+    /// `corroborationDistinctness` above their ask, nil where none
+    /// did. One refusal, read across asks — the deliberate
+    /// exception to the header's rule, because it only PLANS a run
+    /// (`LayoutContext.runFloor`) and never emits; the margin keeps
+    /// a nearest-cell snap's few points out of it.
+    public func refusedFloor(horizontal: Bool) -> CGFloat? {
+        (horizontal ? width : height)
+            .filter {
+                $0.answered - $0.asked > Self.corroborationDistinctness
+            }
+            .map(\.answered)
+            .min()
+    }
+
     /// The learned maximum width ceiling (#1055) — `minWidth`'s
     /// mirror, under the same corroboration rule and for the
     /// same reason: a grid-snapping app answers each ask a few

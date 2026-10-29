@@ -183,16 +183,11 @@ public struct RunZone: Sendable, Equatable {
             vertical
             ? context.gaps.inner.vertical : context.gaps.inner.horizontal
         let cell = cellFloor(gap: gap)
+        let floors = members.map {
+            max(context.runFloor(of: $0, horizontal: !vertical), cell)
+        }
         let weights = members.map {
             max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
-        }
-        let shares = wholeShares(weights, gap)
-        let floors = zip(members, shares).map { id, share in
-            max(
-                context.runFloor(of: id, horizontal: !vertical),
-                refusedAnswer(of: id, at: share, in: context) ?? 0,
-                cell
-            )
         }
         // The emergency whole-zone pile (#44): not even one window
         // fits at the minimum size.
@@ -259,41 +254,6 @@ public struct RunZone: Sendable, Equatable {
         return zip(weights, floors).allSatisfy {
             available * CGFloat($0.0 / total) >= $0.1
         }
-    }
-
-    /// Each member's share were the whole zone shown — the span
-    /// the zone asks it while every member fits.
-    private func wholeShares(
-        _ weights: [Double],
-        _ gap: CGFloat
-    ) -> [CGFloat] {
-        let available = span - gap * CGFloat(members.count - 1)
-        let total = weights.reduce(0, +)
-        guard available > 0, total > 0 else {
-            return weights.map { _ in 0 }
-        }
-        return weights.map { available * CGFloat($0 / total) }
-    }
-
-    /// The app's own answer where it refused the share the zone
-    /// asks it (#2774) — an exact per-ask entry, so an app that
-    /// answers each span differently still scrolls the run rather
-    /// than landing over its neighbour. A forced pass probes past
-    /// it, as `runFloor` does.
-    private func refusedAnswer(
-        of id: WindowID,
-        at share: CGFloat,
-        in context: LayoutContext
-    ) -> CGFloat? {
-        guard !context.probesBeyondBounds, share > 0,
-            let bound = context.sizeBounds[id]
-        else { return nil }
-        let answer =
-            vertical
-            ? bound.consumedHeight(asking: share, generalizing: false)
-            : bound.consumedWidth(asking: share, generalizing: false)
-        guard let answer, answer > share else { return nil }
-        return answer
     }
 
     private func weightedRects(_ plan: Plan) -> [CGRect] {

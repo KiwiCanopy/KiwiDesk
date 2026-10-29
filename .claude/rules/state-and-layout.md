@@ -1366,8 +1366,9 @@ editing here:
   fixture answered by a settled read, by one echo, and by a
   repeated echo) and is what reds if either term is dropped —
   ENTRIES never generalize across asks (a grid-snapping app
-  answers each ask differently; the one deliberate exception is
-  the compliance contradiction sweep, argued on `complied`) —
+  answers each ask differently; the deliberate exceptions are
+  the compliance contradiction sweep, argued on `complied`, and
+  the run's planning floor below) —
   while a CORROBORATED bound does, revocably (#1055, owner
   rulings 2026-08-27/28): `consumedWidth/Height` and `explains`
   answer an ask BEYOND `maxWidth`/`minWidth` with that bound —
@@ -1447,12 +1448,20 @@ editing here:
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
   center, bsp and stack land a floor's residue inward through
-  `SplitOverflow.placed` on the issued frames, #934). A run zone
-  plans a member at the app's own answer to the share it asks —
-  an exact per-ask entry, never generalized, stood down on a
-  forced pass — so a refused share scrolls the run rather than
-  landing inward over a neighbour (#2774, `RunAskedFloorTests`);
-  a new run floor reading takes that answer too. And only
+  `SplitOverflow.placed` on the issued frames, #934). A run
+  plans each member no smaller than its least refusal along the
+  run axis — the least answer among its entries that answered
+  more than `corroborationDistinctness` above their ask
+  (`EffectiveSizeBound.refusedFloor`) — read only through
+  `LayoutContext.runFloor` and stood down on a forced pass, so
+  an app that answers each span differently scrolls the run
+  rather than landing inward over a neighbour (#2774,
+  `RunAskedFloorTests`). That reading plans and never emits:
+  keep it out of `consumedWidth/Height`, `explains` and
+  `centered`, and read a run's floor through `runFloor`, never
+  `learnedFloor` beside it. The trade: a run never asks that
+  member below the answer, so only a forced pass, an eviction or
+  the settled compliance sweep lowers it. And only
   a SETTLED read — the retile-time gate, the
   settle probe — may clear learning on a compliance (#1049): a
   raw echo's compliance can be the transient half of an app's

@@ -142,12 +142,18 @@ public struct ZoneRun: Sendable, Equatable {
 
 extension LayoutContext {
     /// One window's floor for a run (#2235): the learned floor
-    /// along the zone axis, or the configured minimum alone on a
-    /// forced pass, which probes past learned bounds (#1055) like
-    /// `TrackLayout.geometricCap`.
+    /// along the zone axis raised to its least refusal there
+    /// (`EffectiveSizeBound.refusedFloor`, #2774), or the
+    /// configured minimum alone on a forced pass, which probes
+    /// past learned bounds (#1055) like
+    /// `TrackLayout.geometricCap`. The one read of a run's floor.
     func runFloor(of id: WindowID, horizontal: Bool) -> CGFloat {
-        probesBeyondBounds
-            ? minWindowSize.along(horizontal: horizontal)
-            : learnedFloor(of: id, horizontal: horizontal)
+        guard !probesBeyondBounds else {
+            return minWindowSize.along(horizontal: horizontal)
+        }
+        return max(
+            learnedFloor(of: id, horizontal: horizontal),
+            sizeBounds[id]?.refusedFloor(horizontal: horizontal) ?? 0
+        )
     }
 }
