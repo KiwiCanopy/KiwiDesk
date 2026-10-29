@@ -211,35 +211,9 @@ struct PaletteShelf: View {
 
     /// Trailing "+" tile saving current colors as a user palette.
     private var addTile: some View {
-        Button {
+        DashedActionTile(systemImage: "plus", label: saveCurrentLabel) {
             saveRequest = NameEditRequest(seed: nextUserName())
-        } label: {
-            // The label stays INSIDE the plate, where it can wrap:
-            // the name line is one truncating line by design (a
-            // palette name has to stay on it), and "Save current
-            // colors as…" does not survive that in any locale.
-            // The name line still renders, blank, so the tile
-            // keeps the grid's height.
-            PaletteTile(name: " ", dashed: true) {
-                RoundedRectangle(
-                    cornerRadius: PaletteSceneThumbnail.plateRadius
-                )
-                .fill(SettingsTheme.sunken)
-                .overlay(
-                    VStack(spacing: 4) {
-                        Image(systemName: "plus")
-                            .font(.title2)
-                        Text(saveCurrentLabel)
-                            .font(.caption2)
-                            .multilineTextAlignment(.center)
-                    }
-                    .foregroundStyle(SettingsTheme.ink3)
-                    .padding(4)
-                )
-            }
         }
-        .buttonStyle(.plain)
-        .accessibilityLabel(saveCurrentLabel)
         .popover(item: $saveRequest) { request in
             savePopover(request)
                 .settingsPopoverChrome()

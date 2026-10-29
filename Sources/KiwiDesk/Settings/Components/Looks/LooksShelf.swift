@@ -177,7 +177,7 @@ struct LooksShelf: View {
 
     /// Trailing "+" tile saving the current look.
     private var addTile: some View {
-        LookActionTile(systemImage: "plus", label: saveCurrentLabel) {
+        DashedActionTile(systemImage: "plus", label: saveCurrentLabel) {
             saveRequest = NameEditRequest(seed: nextUserName())
         }
         .popover(item: $saveRequest) { request in

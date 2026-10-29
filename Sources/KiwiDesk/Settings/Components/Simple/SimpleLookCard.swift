@@ -55,7 +55,7 @@ struct SimpleLookCard: View {
     /// `LookGallery.isLive`; Simple never gets a Share door. It is
     /// Advanced's Browse looks… setting, one census row for both.
     private var browseTile: some View {
-        LookActionTile(
+        DashedActionTile(
             systemImage: "square.grid.2x2",
             label: Self.browseLabel
         ) {

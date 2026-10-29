@@ -1,11 +1,12 @@
 import SwiftUI
 
-/// The dashed tile that ends a line of look tiles: a symbol over a
-/// label, one action — Save current look as… (#1684) and Simple's
-/// Browse looks (#1740). The label sits inside the plate, where it
-/// can wrap; the name line renders blank so the tile keeps the
+/// The dashed tile that ends a line of look or palette tiles: a
+/// symbol over a label, one action — Save current colors as…, Save
+/// current look as… (#1684) and Simple's Browse looks (#1740). The
+/// label sits inside the plate, where it can wrap, since the name
+/// line truncates; that line renders blank so the tile keeps the
 /// line's height.
-struct LookActionTile: View {
+struct DashedActionTile: View {
     let systemImage: String
     let label: String
     let action: () -> Void
