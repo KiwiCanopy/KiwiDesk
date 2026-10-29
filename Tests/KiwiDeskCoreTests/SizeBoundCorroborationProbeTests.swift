@@ -133,14 +133,14 @@ struct SizeBoundCorroborationProbeTests {
     func reissuedOnceAndOnlyOnceAnswered() throws {
         var learner = believedFloor()
         let first = try #require(take(&learner))
-        // An unrelated retile before the first answer re-asks
-        // nothing: the settle read is still coming.
+        // Sent as the loop sends it. An unrelated retile before the
+        // first answer re-asks nothing: the settle read is coming.
+        learner.recordAsk(w, size: first.size)
         let early = take(&learner)
         #expect(early == nil)
         // The first read seeded the probe's candidate (no trusted
         // baseline here — a raw echo): the "probing once more"
         // retile re-issues, once.
-        learner.recordAsk(w, size: first.size)
         learner.observe(w, currentSize: held, settledRead: false)
         let second = take(&learner)
         let third = take(&learner)

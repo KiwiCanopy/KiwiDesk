@@ -85,9 +85,11 @@ extension SizeBoundLearner {
         return CGRect(origin: target.origin, size: size)
     }
 
-    private static func carry(
+    /// Carries one axis's issue in flight into `span` where it
+    /// still stands in for `target`, marking it held.
+    static func carry(
         _ axis: inout AxisProbes,
-        asked: CGFloat,
+        asked: CGFloat?,
         target: CGFloat,
         into span: inout CGFloat
     ) -> Bool {

@@ -231,9 +231,12 @@ struct StashSupersedesAskTests {
             current: held,
             target: ask
         )
-        // Parked, the probe is re-sent; a plain retire (the
-        // control) leaves it issued and unanswered, so nothing is.
-        #expect((again != nil) == parks)
+        // Re-sent either way: parked, its issue was handed back; a
+        // plain retire leaves it unanswered and superseded, which
+        // re-sends it in place (#2758). The park counts it again.
+        #expect(again != nil)
+        let issues = learner.probes[w]?.width.pending?.issues
+        #expect(issues == 1)
     }
 
     /// The engine wiring of the probe hand-back: `stash` must take

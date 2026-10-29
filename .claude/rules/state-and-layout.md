@@ -1424,7 +1424,9 @@ editing here:
   slot the issue stood in for, until a SETTLED read answers
   that issue, and any other ordinary frame carries the
   issue's ask on each axis it still stands in for rather than
-  dropping it; the held answer owes the placement. The
+  dropping it, and an issue an ordinary ask overwrote before
+  its answer is re-sent in place once the layout asks its span
+  again; the held answer owes the placement. The
   substitution door and the hold read one predicate
   (`CorroborationProbe.standsIn`, `isInFlight`), so a change to
   which span a probe may replace changes both; a new ender of

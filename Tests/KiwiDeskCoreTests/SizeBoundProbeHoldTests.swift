@@ -160,14 +160,41 @@ struct SizeBoundProbeHoldTests {
         #expect(learner.bound(for: w)?.minHeight == 550)
     }
 
-    @Test("A probe an ordinary ask superseded holds nothing")
-    func supersededProbeHoldsNothing() throws {
+    @Test("A superseded probe holds nothing and is re-sent later")
+    func supersededProbeIsResent() throws {
+        // Brave on the device: the run re-packed while its height
+        // probe was out, gave it a taller slot, then took it back.
         var learner = try probeInFlight()
-        learner.recordAsk(w, size: CGSize(width: 380, height: 400))
+        let probed = try #require(learner.lastAsks[w]?.size)
+        let taller = CGSize(width: 380, height: 579)
+        learner.recordAsk(w, size: taller)
         let holds = learner.holdForProbe(w, target: slot)
         #expect(!holds)
         let carried = learner.carryProbe(w, target: slot)
         #expect(carried == nil)
+        // The taller slot is no span the anchor answers.
+        let none = learner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: taller,
+            slot: frame(size: taller)
+        )
+        #expect(none == nil)
+        // Back at the anchor's span: the same issue goes out again.
+        let again = learner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: slot.size,
+            slot: slot
+        )
+        let resent = try #require(again)
+        #expect(resent.size == probed)
+        learner.recordAsk(w, size: resent.size)
+        let next = learner.holdForProbe(w, target: slot)
+        #expect(next)
+        learner.observe(w, currentSize: held, settledRead: true)
+        learner.observe(w, currentSize: held, settledRead: true)
+        #expect(learner.bound(for: w)?.minHeight == 550)
     }
 
     @Test("A held answer that confirms nothing still owes the frame")
@@ -263,5 +290,34 @@ struct SizeBoundProbeHoldTests {
             settledRead: true
         )
         #expect(learner.bound(for: w)?.minHeight == 550)
+    }
+
+    @Test("A probe taken on one axis carries the other's in flight")
+    func takeCarriesTheOtherAxis() throws {
+        // The height probe is out when the width confirms in a
+        // later pass: taking the width probe must not drop it.
+        var learner = try probeInFlight()
+        let probed = try #require(learner.lastAsks[w]?.size.height)
+        let narrow = CGSize(width: 336, height: slot.height)
+        learner.promote(
+            w,
+            asked: narrow.width,
+            answered: 380,
+            axis: \.width,
+            settledRead: true
+        )
+        let narrowSlot = frame(size: narrow)
+        let taken = learner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: narrow,
+            slot: narrowSlot
+        )
+        let issue = try #require(taken)
+        #expect(issue.size.width == 336 - SizeBoundLearner.probeDistance)
+        #expect(issue.size.height == probed)
+        learner.recordAsk(w, size: issue.size)
+        let holds = learner.holdForProbe(w, target: narrowSlot)
+        #expect(holds)
     }
 }

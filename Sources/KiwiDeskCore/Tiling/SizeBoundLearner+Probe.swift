@@ -175,7 +175,7 @@ extension SizeBoundLearner {
 
     /// Closes the pending probe: its anchor's ask and its own
     /// join the probed list, trimmed to the cap.
-    private static func retire(_ axis: inout AxisProbes) {
+    static func retire(_ axis: inout AxisProbes) {
         guard let probe = axis.pending else { return }
         axis.pending = nil
         axis.probed.append(probe.anchor.asked)
@@ -185,110 +185,6 @@ extension SizeBoundLearner {
                 axis.probed.count - maxProbedPerAxis
             )
         }
-    }
-
-    /// The engine's door: what to issue in place of the layout's
-    /// `target` on this pass, nil when nothing is due. Due only
-    /// where the layout's span is one the anchor already answers
-    /// — its ask or its answer — since the retile would skip that
-    /// as explained and the probe may not displace any other;
-    /// retired when the anchor is gone, when the axis
-    /// corroborated meanwhile, and once `maxProbeIssues` are out.
-    mutating func takeCorroborationProbe(
-        _ id: WindowID,
-        current: CGSize,
-        target: CGSize,
-        slot frame: CGRect? = nil
-    ) -> ProbeIssue? {
-        guard var ledger = probes[id] else { return nil }
-        var size = target
-        var trusted = false
-        let last = lastAsks[id]?.size
-        if let asked = takeProbeAxis(
-            &ledger,
-            slot: \.width,
-            entries: bounds[id]?.width ?? [],
-            candidates: candidates[id]?.width ?? [],
-            current: current.width,
-            target: target.width,
-            lastAsked: last?.width,
-            frame: frame,
-            trusted: &trusted
-        ) {
-            size.width = asked
-        }
-        if let asked = takeProbeAxis(
-            &ledger,
-            slot: \.height,
-            entries: bounds[id]?.height ?? [],
-            candidates: candidates[id]?.height ?? [],
-            current: current.height,
-            target: target.height,
-            lastAsked: last?.height,
-            frame: frame,
-            trusted: &trusted
-        ) {
-            size.height = asked
-        }
-        probes[id] = ledger
-        guard size != target else { return nil }
-        return ProbeIssue(
-            size: size,
-            baseline: trusted ? current : nil
-        )
-    }
-
-    private mutating func takeProbeAxis(
-        _ ledger: inout ProbeLedger,
-        slot: WritableKeyPath<ProbeLedger, AxisProbes>,
-        entries: [EffectiveSizeBound.Axis],
-        candidates: [EffectiveSizeBound.Axis],
-        current: CGFloat,
-        target: CGFloat,
-        lastAsked: CGFloat?,
-        frame: CGRect?,
-        trusted: inout Bool
-    ) -> CGFloat? {
-        guard var probe = ledger[keyPath: slot].pending
-        else { return nil }
-        let anchorStands = entries.contains {
-            EffectiveSizeBound.matches($0.asked, probe.anchor.asked)
-                && EffectiveSizeBound.matches(
-                    $0.answered,
-                    probe.anchor.answered
-                )
-        }
-        let answered = candidates.contains {
-            EffectiveSizeBound.matches($0.asked, probe.asked)
-        }
-        // The last issue stays pending until it is answered
-        // (#2758), so its answer still reaches the ladder.
-        guard anchorStands,
-            !Self.corroborates(entries, floor: probe.isFloor),
-            probe.issues < Self.maxProbeIssues
-                || probe.isInFlight(lastAsked: lastAsked)
-        else {
-            Self.retire(&ledger[keyPath: slot])
-            return nil
-        }
-        guard probe.issues < Self.maxProbeIssues,
-            probe.standsIn(for: target),
-            probe.issues == 0 || answered
-        else { return nil }
-        // A trusted baseline needs the frame to still be the
-        // anchor's answer — anything else moved it since the
-        // read that earned the trust.
-        if probe.baselineTrusted,
-            EffectiveSizeBound.matches(current, probe.expected)
-        {
-            trusted = true
-        }
-        probe.baselineTrusted = false
-        probe.issues += 1
-        probe.slot = frame
-        probe.held = false
-        ledger[keyPath: slot].pending = probe
-        return probe.asked
     }
 
     /// Whether a pending probe asked `span` on this axis — the
