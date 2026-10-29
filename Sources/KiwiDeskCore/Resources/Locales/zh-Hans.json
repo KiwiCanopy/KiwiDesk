@@ -883,7 +883,7 @@
   "keybinding.conflict.tooltip.shadows_apps": "只要在此处绑定，就会从每个 App 夺走%1$@。",
   "keybinding.conflict.tooltip.side_collapse": "在本层中也绑定到%1$@，两者仅修饰键的侧别不同。在不区分左右修饰键期间，两者只有一个会生效。开启“%2$@”即可将它们分开。",
   "keybinding.conflict.tooltip.system_dead": "不会生效：macOS 会优先响应此快捷键，用于%1$@。",
-  "keybinding.conflict.tooltip.system_off": "macOS 将此快捷键保留给%1$@，但该功能目前已关闭。",
+  "keybinding.conflict.tooltip.system_off": "提示：%1$@的快捷键已在系统设置中关闭。如果重新开启，macOS 会占用这个按键组合，你的 KiwiDesk 快捷键就会失效。",
   "keybinding.conflict.tooltip.unrecognized": "不是可识别的快捷键。",
   "keybinding.conflict.unrecognized": "\"%1$@\"的快捷键不是可识别的快捷键。",
   "keybinding.desktop_away.axhint": "当前未连接。",
