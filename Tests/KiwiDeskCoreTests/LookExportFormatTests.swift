@@ -38,10 +38,25 @@ struct LookExportFormatTests {
         #expect(Set(body.keys) == ["name", "style", "colors"])
     }
 
+    @Test("every field of a credited look survives export")
+    func everyFieldRoundTrips() throws {
+        var credited = look()
+        credited.author = "Anna"
+        credited.basedOn = LookCredit(
+            name: "Night",
+            author: "Maya",
+            id: "night",
+            removed: nil
+        )
+        let data = try JSONEncoder().encode(LookExport(look: credited))
+        let back = try LookStore.importLook(data: data)
+        #expect(back == credited.admitted)
+    }
+
     @Test("a gallery file imports with its credit")
     func galleryFileImports() throws {
         let file = """
-            {"format": 2, "author": "Anna",
+            {"format": \(LookDocument.currentFormat), "author": "Anna",
              "based_on": {"name": "Night", "author": "Maya",
                           "id": "night"},
              "look": {"name": "Dusk",

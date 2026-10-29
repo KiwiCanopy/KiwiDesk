@@ -137,8 +137,8 @@ extension LooksShelf {
         } catch LookStore.StoreError.newerLookFile {
             failure = L(
                 "looks.import_newer",
-                "This look was made with a newer KiwiDesk. "
-                    + "Update KiwiDesk to add it."
+                "This look was made by a newer KiwiDesk. "
+                    + "Update KiwiDesk to import it."
             )
         } catch {
             failure = libraryFailure

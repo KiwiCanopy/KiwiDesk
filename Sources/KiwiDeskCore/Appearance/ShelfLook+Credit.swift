@@ -4,7 +4,8 @@ import Foundation
 /// started from while half or more of that original's own settings
 /// are unchanged. Only the paths the ORIGINAL sets count, each
 /// styling path and each colour path once, nothing weighted — the
-/// gallery's copy warning reads the same measure (`looksim.py`).
+/// gallery's copy warning reads the same measure (KiwiDesk-Looks'
+/// `scripts/looksim.py`).
 extension ShelfLook {
     /// The share at which a credit stays.
     public static let creditShare = 0.5
@@ -12,7 +13,9 @@ extension ShelfLook {
     /// The share of this look's own settings `settings` still
     /// carries: a styling path counts when applying it would change
     /// nothing, a colour by parsed value (`ColorPalette.sameColor`).
-    /// 0 for a look that names nothing.
+    /// Judges an ADMITTED, well-formed look: a value its setter
+    /// refuses changes nothing and so reads as kept. 0 for a look
+    /// that names nothing.
     public func keptShare(in settings: TilingSettings) -> Double {
         var total = 0
         var kept = 0

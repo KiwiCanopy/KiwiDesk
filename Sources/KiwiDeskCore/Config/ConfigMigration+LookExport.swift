@@ -1,21 +1,22 @@
 import Foundation
 
-/// The exported look file crosses in MEMORY (#1740): a markerless
-/// sidecar has no stamp to end on and is never rewritten, as the
-/// palette sidecar's shelving (profiles.md). A step that renames a
-/// look path or a value a look stores joins `lookExportSteps`
-/// beside its `steps` entry, or an older file loses that styling on
-/// import (`LookExportFormatTests` ▸ `olderFileCrosses`).
+/// The exported look file crosses in MEMORY (#1740): it is never
+/// rewritten, so no stamp ends its crossing, as the palette
+/// sidecar's shelving (profiles.md). Each entry lifts a file below
+/// `to` with the step that renamed a look path at that format; a
+/// `LookDocument.currentFormat` bump owes an entry lifting to it
+/// (`LookExportStepsCensusTests`).
 extension ConfigMigration {
-    static let lookExportSteps: [@Sendable (Data) -> Data?] = [
-        migratingShelfGlideOntoExpand
-    ]
+    static let lookExportSteps: [(to: Int, step: @Sendable (Data) -> Data?)] =
+        [
+            (to: 2, step: migratingShelfGlideOntoExpand)
+        ]
 
-    /// `data` with every look-path step applied, unchanged where
-    /// none rewrites it.
-    static func crossingLookExport(_ data: Data) -> Data {
-        lookExportSteps.reduce(data) { bytes, step in
-            step(bytes) ?? bytes
+    /// `data`, written at `format`, with every step above it applied.
+    static func crossingLookExport(_ data: Data, from format: Int) -> Data {
+        lookExportSteps.filter { format < $0.to }.reduce(data) {
+            bytes,
+            entry in entry.step(bytes) ?? bytes
         }
     }
 }

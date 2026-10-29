@@ -131,8 +131,8 @@ public final class LookStore {
 
     /// Imports a look file, admitted (`ShelfLook.admitted`), with
     /// its credit. A file below the current format crosses in memory
-    /// through the look-path steps, since a markerless sidecar has no
-    /// stamp to end on (profiles.md); a newer one is refused.
+    /// through `ConfigMigration.lookExportSteps`, since the file is
+    /// never rewritten (profiles.md); a newer one is refused.
     public func importLook(from url: URL) throws -> ShelfLook {
         guard let data = try? Data(contentsOf: url) else {
             throw StoreError.invalidFile
@@ -141,25 +141,28 @@ public final class LookStore {
     }
 
     /// `importLook(from:)` over bytes already in hand — a file, or a
-    /// gallery download (#1740).
+    /// gallery download (#1740). The one reader of a look file: a
+    /// direct `LookExport` decode skips the newer-format refusal.
     public static func importLook(data: Data) throws -> ShelfLook {
         guard
-            let root = try? JSONSerialization.jsonObject(with: data)
-                as? [String: Any]
+            var file = try? JSONDecoder().decode(LookExport.self, from: data)
         else { throw StoreError.invalidFile }
-        let format = root["format"] as? Int ?? 0
-        guard format <= LookDocument.currentFormat else {
-            throw StoreError.newerLookFile(format)
+        guard file.format <= LookDocument.currentFormat else {
+            throw StoreError.newerLookFile(file.format)
         }
-        let crossed =
-            format < LookDocument.currentFormat
-            ? ConfigMigration.crossingLookExport(data) : data
-        guard
-            let file = try? JSONDecoder().decode(
-                LookExport.self,
-                from: crossed
+        if file.format < LookDocument.currentFormat {
+            let crossed = ConfigMigration.crossingLookExport(
+                data,
+                from: file.format
             )
-        else { throw StoreError.invalidFile }
+            guard
+                let lifted = try? JSONDecoder().decode(
+                    LookExport.self,
+                    from: crossed
+                )
+            else { throw StoreError.invalidFile }
+            file = lifted
+        }
         return file.credited.admitted
     }
 

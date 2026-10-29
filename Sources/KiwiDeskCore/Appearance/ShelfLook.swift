@@ -83,6 +83,9 @@ extension ShelfLook {
     /// This look with its credit left out: the body an exported
     /// file carries under `look`, its credit beside it.
     var uncredited: ShelfLook {
-        ShelfLook(name: name, style: style, colors: colors)
+        var body = self
+        body.author = nil
+        body.basedOn = nil
+        return body
     }
 }
