@@ -6,6 +6,8 @@ struct SettingsHeaderBar: View {
     @ObservedObject var model: SettingsModel
     @State private var searchExpanded = false
     @Environment(\.settingsWidth) private var width
+    @Environment(\.shellSpace) private var shellSpace
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var destination: SettingsDestination? {
         model.destination
@@ -64,6 +66,14 @@ struct SettingsHeaderBar: View {
         }
     }
 
+    /// The shell's namespace while `destination` is the card a page
+    /// grew out of, so only that page's title travels.
+    private func expanding(
+        _ destination: SettingsDestination
+    ) -> Namespace.ID? {
+        model.nav.shellMotion == .expand(destination) ? shellSpace : nil
+    }
+
     @ViewBuilder private var titleRow: some View {
         if model.showsSimple {
             simpleTitleRow
@@ -73,6 +83,17 @@ struct SettingsHeaderBar: View {
     }
 
     private var advancedTitleRow: some View {
+        advancedTitleItems
+            // The header sits outside the shell's branch spring: its
+            // own, keyed on page-or-Home alone, carries the title in
+            // from a card and leaves a page-to-page jump unanimated.
+            .animation(
+                reduceMotion ? nil : ShellMotion.spring,
+                value: destination == nil
+            )
+    }
+
+    private var advancedTitleItems: some View {
         HStack(spacing: 12) {
             if let destination {
                 backChip
@@ -81,6 +102,10 @@ struct SettingsHeaderBar: View {
                         .font(.title2.weight(.bold))
                         .foregroundStyle(SettingsTheme.ink)
                         .lineLimit(1)
+                        .shellMatched(
+                            ShellMotion.titleID(destination),
+                            in: expanding(destination)
+                        )
                         .accessibilityAddTraits(.isHeader)
                 }
             } else if !titleYields {
