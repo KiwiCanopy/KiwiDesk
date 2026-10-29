@@ -83,6 +83,17 @@ struct SettingsHeaderBar: View {
     }
 
     private var advancedTitleRow: some View {
+        advancedTitleItems
+            // The header sits outside the shell's branch spring: its
+            // own, keyed on page-or-Home alone, carries the title in
+            // from a card and leaves a page-to-page jump unanimated.
+            .animation(
+                reduceMotion ? nil : ShellMotion.spring,
+                value: destination == nil
+            )
+    }
+
+    private var advancedTitleItems: some View {
         HStack(spacing: 12) {
             if let destination {
                 backChip
@@ -94,11 +105,6 @@ struct SettingsHeaderBar: View {
                         .shellMatched(
                             ShellMotion.titleID(destination),
                             in: expanding(destination)
-                        )
-                        // The header sits outside the shell's spring.
-                        .animation(
-                            reduceMotion ? nil : ShellMotion.spring,
-                            value: destination
                         )
                         .accessibilityAddTraits(.isHeader)
                 }

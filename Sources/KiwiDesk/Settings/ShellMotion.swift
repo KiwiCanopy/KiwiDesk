@@ -121,11 +121,14 @@ struct HomeConverge: ViewModifier {
 /// fades in late.
 struct PageContentLag: ViewModifier {
     let lags: Bool
+    /// Told once the fade has started, so a remount does not replay it.
+    let played: () -> Void
     @State private var shown: Bool
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
-    init(lags: Bool) {
+    init(lags: Bool, played: @escaping () -> Void) {
         self.lags = lags
+        self.played = played
         _shown = State(initialValue: !lags)
     }
 
@@ -138,6 +141,9 @@ struct PageContentLag: ViewModifier {
                     : .easeOut(duration: 0.2).delay(ShellMotion.contentLag),
                 value: shown
             )
-            .onAppear { shown = true }
+            .onAppear {
+                shown = true
+                played()
+            }
     }
 }

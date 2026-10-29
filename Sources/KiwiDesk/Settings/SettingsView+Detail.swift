@@ -44,7 +44,12 @@ extension SettingsView {
     ) -> some View {
         HStack(spacing: 0) {
             contentColumn
-                .modifier(PageContentLag(lags: pageExpands))
+                .modifier(
+                    PageContentLag(
+                        lags: pageExpands && model.nav.contentLagPending,
+                        played: { model.nav.contentLagPending = false }
+                    )
+                )
             // `panelDocked` FIRST — the same predicate the pill's
             // centring offset reads: a conjunct added there must
             // move the pill and the mount together (review

@@ -10,6 +10,7 @@ extension SettingsModel {
     func openFromCard(_ destination: SettingsDestination) {
         nav.homeReturnFocus = destination
         nav.pendingShellMotion = .expand(destination)
+        nav.contentLagPending = true
         self.destination = destination
     }
 
@@ -21,14 +22,20 @@ extension SettingsModel {
         from old: SettingsDestination?,
         to new: SettingsDestination?
     ) {
-        guard old != new else { return }
+        // Consumed whatever the write, so a named motion never
+        // outlives the change it was named for.
         defer { nav.pendingShellMotion = nil }
+        guard old != new else { return }
         if let named = nav.pendingShellMotion {
             nav.shellMotion = named
         } else if let old, new == nil, nav.homeReturnFocus == old {
             nav.shellMotion = .expand(old)
         } else {
             nav.shellMotion = .zoomThrough
+            // A landing breaks the line back to the card, so a later
+            // Back does not fold into a card it never left.
+            nav.homeReturnFocus = nil
+            nav.contentLagPending = false
         }
     }
 
@@ -37,6 +44,7 @@ extension SettingsModel {
     func recordShellMotion(from old: SettingsRoot) {
         guard settingsRoot != old, destination == nil else { return }
         nav.shellMotion = .converge
-        nav.convergePending = true
+        // Only Home arriving owes the cards' flight.
+        nav.convergePending = settingsRoot == .advanced
     }
 }

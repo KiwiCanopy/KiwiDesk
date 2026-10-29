@@ -49,6 +49,7 @@ struct SettingsNavigationResetTests {
         nav.shellMotion = .zoomThrough
         nav.pendingShellMotion = .converge
         nav.convergePending = true
+        nav.contentLagPending = true
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true
         nav.trailFocusRequest = 3

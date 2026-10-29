@@ -42,6 +42,29 @@ struct ShellMotionTests {
         #expect(model.nav.shellMotion == .expand(.bars))
     }
 
+    /// Only Home arriving owes the flight, and a landing breaks the
+    /// line back to a card.
+    @Test("a debt is owed only where it is paid")
+    func debtsArePaidWhereOwed() {
+        let model = model(.advanced)
+        model.pickRoot(.simple)
+        #expect(!model.nav.convergePending)
+        model.openAdvanced(SettingsAnchor(destination: .looks))
+        model.destination = .looks
+        model.destination = nil
+        #expect(!model.nav.convergePending)
+        #expect(model.nav.shellMotion == .zoomThrough)
+        // A card's page owes its late fade; a landing pays it off.
+        model.openFromCard(.bars)
+        #expect(model.nav.contentLagPending)
+        model.destination = .looks
+        #expect(!model.nav.contentLagPending)
+        #expect(model.nav.homeReturnFocus == nil)
+        model.destination = .bars
+        model.destination = nil
+        #expect(model.nav.shellMotion == .zoomThrough)
+    }
+
     /// A landing — a search hit, a link, a page-to-page jump —
     /// has no card behind it, so it never morphs from one.
     @Test("a landing with no card zooms through")
