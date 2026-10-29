@@ -5,7 +5,7 @@
  * draws. Build time, never the browser, like `stars.ts` and
  * `voices.ts`: the CSP (`public/_headers`) and the privacy policy
  * promise no third-party request from a visitor's page, so a
- * screenshot goes through astro:assets (`image.remotePatterns`)
+ * look's image goes through astro:assets (`image.remotePatterns`)
  * and is served from the site itself.
  *
  * Unauthenticated against raw.githubusercontent.com, no secret
@@ -14,7 +14,7 @@
  * hiccup never fails the deploy; the site gate reds instead when
  * the built /looks page draws no card (`check-site-tokens.py` ▸
  * `check_looks_rendered`). A failed look file only drops that
- * look's sketch and font, and a screenshot that is unreachable,
+ * look's sketch and font, and an image that is unreachable,
  * not a PNG or too large falls back to the sketch.
  */
 import sharp from "sharp";
@@ -26,9 +26,9 @@ const TIMEOUT_MS = 5000;
 /** The look format KiwiDesk 4.0.0 reads (`LookDocument.currentFormat`);
  * moves with the release that bumps that format. */
 export const RELEASED_LOOK_FORMAT = 2;
-/** The largest screenshot the build downloads, in bytes. */
+/** The largest image the build downloads, in bytes. */
 const MAX_IMAGE_BYTES = 8_000_000;
-/** The longest screenshot edge the build accepts, in pixels. */
+/** The longest image edge the build accepts, in pixels. */
 const MAX_IMAGE_EDGE = 8000;
 
 export const LOOKS_REPO_URL = `https://github.com/${REPO}`;
@@ -47,7 +47,7 @@ export type Credit =
   | { removed: false; name: string; author: string; id: string | null }
   | { removed: true };
 
-/** What the sketch draws when there is no screenshot: the look's
+/** What the sketch draws when there is no image: the look's
  * own colors (validated hex) and the shape of its bars and border. */
 export interface Sketch {
   fill: string | null;
@@ -128,7 +128,7 @@ export const SYSTEM_FONTS: Record<string, string> = {
 const HEX = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
 const ID = /^[a-z0-9][a-z0-9-]*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const IMAGE_PATH = /^looks\/[a-z0-9-]+\/screenshot\.png$/;
+const IMAGE_PATH = /^looks\/[a-z0-9-]+\/(screenshot|preview)\.png$/;
 
 const text = (v: unknown): string | null =>
   typeof v === "string" && v.trim() !== "" ? v.trim() : null;
@@ -179,6 +179,11 @@ function toLook(row: any): { look: Look; file: string } | null {
   }
   const updated = text(row?.updated);
   const path = text(row?.image?.path);
+  // The file name says how the picture was made, never the row's kind.
+  const imageKind = path?.match(IMAGE_PATH)?.[1] as
+    | "screenshot"
+    | "preview"
+    | undefined;
   const fonts = strings(row?.needs_fonts).filter(
     (f) => !Object.hasOwn(SYSTEM_FONTS, f),
   );
@@ -196,10 +201,10 @@ function toLook(row: any): { look: Look; file: string } | null {
     needsFonts: fonts,
     fontUrl: https(row?.font_url),
     image:
-      path && IMAGE_PATH.test(path)
+      path && imageKind
         ? {
             src: RAW + path,
-            kind: row?.image?.kind === "screenshot" ? "screenshot" : "preview",
+            kind: imageKind,
             width: 0,
             height: 0,
           }

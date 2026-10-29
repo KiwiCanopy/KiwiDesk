@@ -40,6 +40,8 @@ struct CLICompleter {
             offer =
                 Self.events.filter { !rest.contains($0) }
                 + [CLIWatch.separator]
+        case .preview:
+            return .shellDefault
         case .socket:
             offer = socketCandidates(first, rest)
         case .version, .mcp, .complete:
