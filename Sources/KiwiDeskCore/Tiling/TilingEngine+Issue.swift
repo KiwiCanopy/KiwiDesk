@@ -40,17 +40,12 @@ extension TilingEngine {
                 target: target,
                 keepsIssueOut: !pass.reissues
             )
-        // #2758: the question already out is not asked again where
-        // it already sits, nor for a residue placed at the answer's
-        // size; its settled answer places the frame. A moved slot
-        // re-asks it there, keeping the ask's baseline.
-        if let carried = probe, carried.alreadyOut {
-            let placed = commandedFrame(of: id) ?? current
-            let there =
-                abs(placed.minX - carried.frame.minX) <= Self.retileTolerance
-                && abs(placed.minY - carried.frame.minY)
-                    <= Self.retileTolerance
-            if carried.residue || there {
+        // #2758: the question already out, for the layout frame it
+        // was served for, is not asked again; its settled answer
+        // places the frame. A moved frame re-asks it there, keeping
+        // the ask's baseline.
+        if let carried = probe, carried.sameQuestion {
+            if carried.alreadyOut {
                 meter.add(\.framesSkipped)
                 return
             }

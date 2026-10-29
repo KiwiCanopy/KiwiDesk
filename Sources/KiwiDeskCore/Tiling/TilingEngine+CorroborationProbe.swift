@@ -15,10 +15,11 @@ extension TilingEngine {
         /// Whether a new issue went out; false where the frame
         /// only carries an issue already out (#2758).
         var fresh: Bool
-        /// The learner's verdicts on a carried frame
-        /// (`SizeBoundLearner.ProbeIssue`).
+        /// The learner's verdicts on a carried frame, as
+        /// `SizeBoundLearner.ProbeIssue` states them.
+        var sameQuestion = false
+        /// See `sameQuestion`.
         var alreadyOut = false
-        var residue = false
     }
 
     /// The probe to issue for `id` in place of `target`, nil when
@@ -35,6 +36,7 @@ extension TilingEngine {
                 id,
                 current: current.size,
                 target: target.size,
+                serving: target,
                 keepsIssueOut: keepsIssueOut
             )
         else { return nil }
@@ -45,8 +47,8 @@ extension TilingEngine {
             frame: CGRect(origin: target.origin, size: issue.size),
             baseline: issue.baseline,
             fresh: issue.fresh,
-            alreadyOut: issue.alreadyOut,
-            residue: issue.residue
+            sameQuestion: issue.sameQuestion,
+            alreadyOut: issue.alreadyOut
         )
     }
 

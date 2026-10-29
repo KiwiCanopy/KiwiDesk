@@ -21,13 +21,14 @@ extension SizeBoundLearner {
         _ id: WindowID,
         current: CGSize,
         target: CGSize,
+        serving frame: CGRect? = nil,
         keepsIssueOut: Bool = false
     ) -> ProbeIssue? {
         guard var ledger = probes[id] else { return nil }
         var size = target
         var trusted = false
         var fresh = false
-        var residue = true
+        var inPlace = true
         let last = lastAsks[id]?.size
         if let taken = takeProbeAxis(
             &ledger,
@@ -37,12 +38,13 @@ extension SizeBoundLearner {
             current: current.width,
             target: target.width,
             lastAsked: last?.width,
+            frame: frame,
             keepsIssueOut: keepsIssueOut,
             trusted: &trusted
         ) {
             size.width = taken.span
             fresh = fresh || taken.fresh
-            residue = residue && taken.residue
+            inPlace = inPlace && taken.inPlace
         }
         if let taken = takeProbeAxis(
             &ledger,
@@ -52,16 +54,17 @@ extension SizeBoundLearner {
             current: current.height,
             target: target.height,
             lastAsked: last?.height,
+            frame: frame,
             keepsIssueOut: keepsIssueOut,
             trusted: &trusted
         ) {
             size.height = taken.span
             fresh = fresh || taken.fresh
-            residue = residue && taken.residue
+            inPlace = inPlace && taken.inPlace
         }
         probes[id] = ledger
         guard size != target else { return nil }
-        let alreadyOut =
+        let sameQuestion =
             !fresh
             && last.map {
                 EffectiveSizeBound.matches($0.width, size.width)
@@ -71,8 +74,8 @@ extension SizeBoundLearner {
             size: size,
             baseline: trusted ? current : nil,
             fresh: fresh,
-            alreadyOut: alreadyOut,
-            residue: alreadyOut && residue
+            sameQuestion: sameQuestion,
+            alreadyOut: sameQuestion && inPlace
         )
     }
 
@@ -84,9 +87,10 @@ extension SizeBoundLearner {
         current: CGFloat,
         target: CGFloat,
         lastAsked: CGFloat?,
+        frame: CGRect?,
         keepsIssueOut: Bool,
         trusted: inout Bool
-    ) -> (span: CGFloat, fresh: Bool, residue: Bool)? {
+    ) -> (span: CGFloat, fresh: Bool, inPlace: Bool)? {
         guard var probe = ledger[keyPath: slot].pending
         else { return nil }
         let anchorStands = entries.contains {
@@ -121,12 +125,11 @@ extension SizeBoundLearner {
                 }
                 probe.resends += 1
             }
+            let inPlace = Self.sameFrame(probe.served, frame)
             probe.held = true
+            probe.served = frame
             ledger[keyPath: slot].pending = probe
-            let residue =
-                EffectiveSizeBound.matches(target, probe.anchor.answered)
-                && !EffectiveSizeBound.matches(target, probe.anchor.asked)
-            return (probe.asked, false, residue)
+            return (probe.asked, false, inPlace)
         }
         guard probe.issues < Self.maxProbeIssues,
             probe.issues == 0 || answered
@@ -143,7 +146,21 @@ extension SizeBoundLearner {
         probe.issues += 1
         probe.resends = 0
         probe.held = false
+        probe.served = frame
         ledger[keyPath: slot].pending = probe
         return (probe.asked, true, false)
+    }
+
+    /// Whether `frame` is the layout frame an issue was served for;
+    /// a door that names none compares by size alone.
+    private static func sameFrame(_ served: CGRect?, _ frame: CGRect?)
+        -> Bool
+    {
+        guard let served, let frame else { return frame == nil }
+        let t = EffectiveSizeBound.matchTolerance
+        return abs(served.minX - frame.minX) <= t
+            && abs(served.minY - frame.minY) <= t
+            && abs(served.width - frame.width) <= t
+            && abs(served.height - frame.height) <= t
     }
 }

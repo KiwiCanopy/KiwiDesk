@@ -64,11 +64,7 @@ struct SizeBoundProbeHoldTests {
         #expect(again?.size == CGSize(width: 380, height: probed))
         #expect(residue?.size == CGSize(width: 380, height: probed))
         #expect(again?.fresh == false)
-        // The question already out: at the slot it may move with
-        // the slot, at the answer it is a residue and stays.
         #expect(again?.alreadyOut == true)
-        #expect(again?.residue == false)
-        #expect(residue?.residue == true)
         // A neighbour's floor widened the column: the width
         // follows the layout, the height stays out.
         let wider = carry(&learner, CGSize(width: 400, height: 550))
@@ -125,6 +121,10 @@ struct SizeBoundProbeHoldTests {
         #expect(!answer.confirmed)
         #expect(!answer.performedProbe)
         #expect(answer.owesPlacement)
+        // Answered: nothing is out any more, so no carry follows.
+        #expect(learner.probes[w]?.height.pending?.isOut == false)
+        let next = carry(&learner, slot)
+        #expect(next?.fresh != false)
     }
 
     @Test("An overwritten issue is re-sent, a bounded number of times")
@@ -233,5 +233,57 @@ struct SizeBoundProbeHoldTests {
         )
         #expect(answer.answeredHeldProbe)
         #expect(learner.bound(for: w)?.maxWidth == 715)
+    }
+
+    @Test("The question out is in place only for the frame it served")
+    func alreadyOutIsPerFrame() throws {
+        var learner = try probeOut()
+        func serve(_ frame: CGRect) -> SizeBoundLearner.ProbeIssue? {
+            learner.takeCorroborationProbe(
+                w,
+                current: held,
+                target: frame.size,
+                serving: frame,
+                keepsIssueOut: true
+            )
+        }
+        // The confirmation's placement re-parks the residue at the
+        // answer's size: a frame the issue has not served yet.
+        let residue = CGRect(x: -374, y: 790, width: 380, height: 550)
+        let first = serve(residue)
+        #expect(first?.sameQuestion == true)
+        #expect(first?.alreadyOut == false)
+        // The same frame again: the question is out, in place.
+        let again = serve(residue)
+        #expect(again?.alreadyOut == true)
+        // The residue's slot moved (a pan, a swap): asked there.
+        let moved = serve(residue.offsetBy(dx: 0, dy: 332))
+        #expect(moved?.sameQuestion == true)
+        #expect(moved?.alreadyOut == false)
+    }
+
+    @Test("A new issue starts its own re-send budget")
+    func reissueResetsTheBudget() throws {
+        var learner = SizeBoundLearner()
+        learner.recordAsk(w, size: slot)
+        learner.observe(w, currentSize: held, settledRead: true)
+        learner.observe(w, currentSize: held, settledRead: true)
+        let first = learner.takeCorroborationProbe(
+            w,
+            current: held,
+            target: slot
+        )
+        let issue = try #require(first)
+        learner.recordAsk(w, size: issue.size)
+        // Overwritten once, then re-sent.
+        learner.recordAsk(w, size: CGSize(width: 380, height: 579))
+        let resent = carry(&learner, slot)
+        learner.recordAsk(w, size: try #require(resent).size)
+        #expect(learner.probes[w]?.height.pending?.resends == 1)
+        // Answered, and re-issued fresh: the budget starts again.
+        learner.observe(w, currentSize: held, settledRead: true)
+        let second = carry(&learner, slot)
+        #expect(second?.fresh == true)
+        #expect(learner.probes[w]?.height.pending?.resends == 0)
     }
 }

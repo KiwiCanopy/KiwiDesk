@@ -40,6 +40,9 @@ extension SizeBoundLearner {
         /// Whether a layout frame was bent to the issue out, which
         /// its answer then owes a placement (#2758).
         var held = false
+        /// The layout frame the issue out was last sent or carried
+        /// for, nil where the engine named none.
+        var served: CGRect?
 
         var expected: CGFloat { anchor.answered }
         var isFloor: Bool { anchor.isFloor }
@@ -86,13 +89,11 @@ extension SizeBoundLearner {
         /// Whether an axis took a new issue this pass; false where
         /// the frame only carries an issue already out (#2758).
         var fresh = true
-        /// Whether the size is the question already out: the last
-        /// ask, carried unchanged (#2758).
+        /// Whether the size is the last ask, carried (#2758).
+        var sameQuestion = false
+        /// Whether it is also carried for the layout frame it was
+        /// last served for: the question already out, in place.
         var alreadyOut = false
-        /// Whether every carried axis re-asks the anchor's answer —
-        /// a residue the layout placed for that size, whose origin
-        /// says nothing about where the issue out should sit.
-        var residue = false
     }
 
     /// The first issue, plus the one re-issue the "probing once
