@@ -50,7 +50,30 @@ extension KiwiCore {
         from url: URL,
         fallbackName: String
     ) throws -> ShelfLook {
-        var look = try lookLibrary.importLook(from: url)
+        try addImported(
+            lookLibrary.importLook(from: url),
+            fallbackName: fallbackName
+        )
+    }
+
+    /// Adds a look a gallery link downloaded (#1740) under a free
+    /// name, keeping the gallery id a look started from it credits.
+    @discardableResult
+    public func installGalleryLook(
+        _ data: Data,
+        from link: LookLink,
+        fallbackName: String
+    ) throws -> ShelfLook {
+        var look = try LookStore.importLook(data: data)
+        look.galleryID = link.id
+        return try addImported(look, fallbackName: fallbackName)
+    }
+
+    private func addImported(
+        _ imported: ShelfLook,
+        fallbackName: String
+    ) throws -> ShelfLook {
+        var look = imported
         let looks = lookLibrary
         look.name = Self.uniqueName(
             base: Self.named(look.name, else: fallbackName)

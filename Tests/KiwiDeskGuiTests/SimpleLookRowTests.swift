@@ -35,6 +35,16 @@ struct SimpleLookRowTests {
             }
         )
         look.style["app_bar.active_indicator"] = .string("edge_mark")
+        // Every outer edge moved alike, so the pill narrates the
+        // gap group's master rather than its members.
+        var gapped = saved
+        gapped.gapsGlobal.outer.top += 7
+        gapped.gapsGlobal.outer.bottom += 7
+        gapped.gapsGlobal.outer.left += 7
+        gapped.gapsGlobal.outer.right += 7
+        let gaps = LookKeys.extract(from: gapped, paths: ["gap.global"])
+        let gap: JSONValue = try #require(gaps["gap.global"])
+        look.style["gap.global"] = gap
         model.applyLook(look)
         model.config.settings.spaceBarStyle.visibility =
             saved.spaceBarStyle.visibility == .hidden ? .always : .hidden
@@ -55,6 +65,7 @@ struct SimpleLookRowTests {
         let keys = rows.map(\.key)
         #expect(!keys.contains(.colours(.lookOrigin)))
         #expect(!keys.contains(.layoutAppBar(.monocleAppBarActiveIndicator)))
+        #expect(!keys.contains(.gaps(.outer)))
         // The bar's on/off is the one row left beside it.
         #expect(rows.count == 2)
         #expect(keys.contains(.kiwishelf(.visibility)))
@@ -68,6 +79,7 @@ struct SimpleLookRowTests {
         #expect(!rows.contains { $0.revert == .lookChanges })
         #expect(keys.contains(.colours(.lookOrigin)))
         #expect(keys.contains(.layoutAppBar(.monocleAppBarActiveIndicator)))
+        #expect(keys.contains(.gaps(.outer)))
         #expect(keys.count > 3)
     }
 

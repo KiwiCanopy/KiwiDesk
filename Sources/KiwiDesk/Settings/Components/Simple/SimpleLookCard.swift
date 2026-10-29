@@ -3,7 +3,8 @@ import SwiftUI
 
 /// Simple's Look line (#2737 ruling 3): the bundled looks as one
 /// sideways line, each tile its name alone, the description its
-/// hover help and VoiceOver hint. No palette editing, no saving.
+/// hover help and VoiceOver hint, led by the look a gallery link
+/// added (#1740). No palette editing, no saving.
 struct SimpleLookCard: View {
     @ObservedObject var model: SettingsModel
 
@@ -11,7 +12,7 @@ struct SimpleLookCard: View {
         SimpleCard(title: Self.title) {
             ScrollView(.horizontal, showsIndicators: false) {
                 HStack(alignment: .top, spacing: 10) {
-                    ForEach(model.core.bundledLooks, id: \.name) {
+                    ForEach(Self.looks(in: model), id: \.name) {
                         tile($0)
                     }
                 }
@@ -25,12 +26,20 @@ struct SimpleLookCard: View {
         }
     }
 
+    /// The linked look while My looks still holds it, then the
+    /// bundled ones.
+    static func looks(in model: SettingsModel) -> [ShelfLook] {
+        let linked = model.userLooks.first { $0.name == model.linkedLook }
+        return (linked.map { [$0] } ?? []) + model.core.bundledLooks
+    }
+
     private func tile(_ look: ShelfLook) -> some View {
         LookTile(
             model: model,
             look: look,
             caption: nil,
-            help: LookDescriptions.caption(for: look.name),
+            help: LookDescriptions.caption(for: look.name)
+                ?? look.author.map(LookTile.byline),
             hover: { model.hoverSimple(.look(look.name), inside: $0) }
         ) {
             model.applyLook(look)

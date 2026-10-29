@@ -45,8 +45,8 @@ struct MonocleParkLayoutTests {
     ) -> CGRect {
         CGRect(
             x: left
-                ? bounds.minX + TilingEngine.stashPeekX
-                    - size.width
+                ? (bounds.minX + TilingEngine.stashPeekX
+                    - size.width).rounded(.up)
                 : bounds.maxX - TilingEngine.stashPeekX,
             y: bounds.maxY - TilingEngine.stashPeekY,
             width: size.width,
@@ -92,6 +92,33 @@ struct MonocleParkLayoutTests {
                     left: true
                 )
         )
+    }
+
+    @Test("A left park at a fractional width takes a whole x")
+    func fractionalLeftParkIsWhole() throws {
+        // The fixture's widths are whole; this one is not, so it
+        // reaches the left corner's rounding (#2753).
+        var context = LayoutContext(
+            bounds: CGRect(x: 0, y: 0, width: 1000.5, height: 800),
+            gaps: .uniform(10)
+        )
+        context.monocle.appBar.visibility = .hidden
+        context.monocle.hideStyle = .park
+        context.focused = w1
+        context.screenNeighbors = ScreenNeighbors(right: true)
+        let parked = try #require(
+            layout.calculateGeometry(for: [w1, w2], in: context)[w2]
+        )
+        #expect(parked.width != parked.width.rounded())
+        #expect(
+            parked
+                == parkFrame(
+                    of: parked.size,
+                    in: context.bounds,
+                    left: true
+                )
+        )
+        #expect(parked.minX == parked.minX.rounded())
     }
 
     @Test("A parked refused-width window parks its OWN size")

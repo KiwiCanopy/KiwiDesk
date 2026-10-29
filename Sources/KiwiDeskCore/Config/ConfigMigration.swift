@@ -23,8 +23,8 @@ public enum ConfigMigration {
     /// on the format stamp, so a step owes a `currentFormat` bump
     /// on EVERY shape it must reach — without one it is dead on
     /// arrival, silently, on exactly the files it exists to rescue
-    /// (#1020, `ScrollDurationMigrationTests`). Nothing pins that
-    /// coupling, which is why it is stated here.
+    /// (#1020, `ScrollDurationMigrationTests`). A named floor past
+    /// its shape's format reds `ConfigMigrationFloorCensusTests`.
     private static let steps: [@Sendable (Data) -> Data?] = [
         migratingLegacyPalettesArray,
         migratingRetiredScrollSpeed,

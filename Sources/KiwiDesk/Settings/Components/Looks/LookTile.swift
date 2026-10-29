@@ -42,6 +42,11 @@ struct LookTile: View {
         .help(other ? restoreColorsHelp : (help ?? ""))
     }
 
+    /// An imported look's caption, its author (#1740).
+    @MainActor static func byline(_ author: String) -> String {
+        L("looks.byline", "by %1$@", author)
+    }
+
     private var otherColorsNote: String {
         L("looks.other_colors", "Other colors")
     }

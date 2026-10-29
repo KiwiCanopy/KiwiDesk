@@ -18,6 +18,7 @@ struct LookOriginDraftTests {
 
     @Test("a pick of an authored look writes the origin to the draft")
     func pickWritesTheDraft() {
+        LocalizationManager.shared.select("en")
         let model = makeTestModel(root: .advanced)
         model.applyLook(authored(model.config.settings))
         #expect(model.config.settings.lookOrigin?.author == "Anna")
@@ -41,6 +42,7 @@ struct LookOriginDraftTests {
 extension LookOriginDraftTests {
     @Test("the row names the credit a saved look kept, not its name")
     func rowNamesTheKeptCredit() {
+        LocalizationManager.shared.select("en")
         let model = makeTestModel(root: .advanced)
         var saved = LookBody(of: model.config.settings).named("Mine")
         saved.basedOn = LookCredit(name: "Dawn", author: "Ben")

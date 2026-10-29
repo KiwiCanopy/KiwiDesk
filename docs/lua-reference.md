@@ -1396,11 +1396,9 @@ for its app still wins). **Hiding** an app (cmd+H, or an app
 that hides itself on the red X) releases its tiles, and
 unhiding returns its windows to the space they came from.
 
-With **multiple screens**, arrange them so no screen
-sits directly right of or below another one's bottom-right
-corner, or the parked windows peek onto the neighbor
-(illustrated in AeroSpace's [proper monitor arrangement
-guide](https://nikitabobko.github.io/AeroSpace/guide#proper-monitor-arrangement)).
+With **multiple screens**, how to arrange them so parked
+windows stay off the neighbour is [With more than one
+screen](spaces-and-desktops.md#with-more-than-one-screen).
 
 ## Per-Layout Tuning
 

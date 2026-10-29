@@ -39,7 +39,9 @@ struct GuideLinkRouteTests {
                 ),
             encoding: .utf8
         )
-        #expect(declared.contains("guideRoutes"))
+        for name in ["guideRoutes", "looksRoutes"] {
+            #expect(declared.contains("static let \(name): Set<String> = ["))
+        }
     }
 
     /// The app ships eleven catalogs and the site three locales,
@@ -67,6 +69,24 @@ struct GuideLinkRouteTests {
             #expect(
                 SupportLinks.guide(for: locale).absoluteString
                     .hasSuffix("/\(locale)/guide/")
+            )
+        }
+    }
+
+    /// The gallery's `/looks` (#1740 ▸ Browse) narrows the same
+    /// way, against its own list.
+    @Test("the gallery link narrows like the guide")
+    func looksLinkNarrows() {
+        let english = SupportLinks.looks(for: nil)
+        #expect(english.absoluteString.hasSuffix("/looks/"))
+        #expect(SupportLinks.looks(for: "pt-BR") == english)
+        #expect(!SupportLinks.looksRoutes.isEmpty)
+        let shipped = Set(LocalizationManager.shared.available)
+        for locale in SupportLinks.looksRoutes {
+            #expect(shipped.contains(locale))
+            #expect(
+                SupportLinks.looks(for: locale).absoluteString
+                    .hasSuffix("/\(locale)/looks/")
             )
         }
     }
@@ -106,7 +126,11 @@ struct GuideLinkRouteTests {
         #expect(
             SupportLinks.guide == SupportLinks.guide(for: "de")
         )
+        #expect(
+            SupportLinks.looks == SupportLinks.looks(for: "de")
+        )
         LocalizationManager.shared.select("es")
         #expect(SupportLinks.guide == SupportLinks.guide(for: nil))
+        #expect(SupportLinks.looks == SupportLinks.looks(for: nil))
     }
 }

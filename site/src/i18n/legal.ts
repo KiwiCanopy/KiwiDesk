@@ -10,7 +10,8 @@
 // NO fonts/embeds from third parties; docs diagrams (Mermaid) render fully
 // client-side. The only client-side storage is three technically-necessary
 // Local-Storage keys (theme + landing mode + language). The KiwiDesk app is
-// distributed via GitHub and is out of scope here. Keep this file honest — a
+// distributed via GitHub and is out of scope here, save the one look download a
+// gallery click hands to it (§7). Keep this file honest — a
 // Datenschutzerklärung must describe the *actual* processing.
 
 import type { Lang } from "../lib/locales";
@@ -85,7 +86,7 @@ const de: LegalStrings = {
   },
   datenschutz: {
     title: "Datenschutzerklärung",
-    updated: "28. Oktober 2026",
+    updated: "29. Oktober 2026",
     sections: [
       {
         title: "1. Datenschutz auf einen Blick",
@@ -98,7 +99,8 @@ const de: LegalStrings = {
           `sowie Dokumentation). Es gibt keine Benutzerkonten, keine Anmeldung, kein ` +
           `Kontaktformular, keine Zahlungsabwicklung und keine Analyse- oder Tracking-Dienste. Die ` +
           `KiwiDesk-App selbst wird über GitHub bereitgestellt; diese Datenschutzerklärung bezieht ` +
-          `sich ausschließlich auf diese Website. Personenbezogene Daten fallen nur in dem ` +
+          `sich ausschließlich auf diese Website, bis auf den Look-Download, den ein Klick in der ` +
+          `Look-Galerie an die App übergibt (Abschnitt 7). Personenbezogene Daten fallen nur in dem ` +
           `technisch unvermeidbaren Umfang an, der zum Ausliefern der Website nötig ist ` +
           `(siehe „Hosting“), sowie bei einer Kontaktaufnahme per E-Mail (Abschnitt 6).</p>`,
       },
@@ -193,8 +195,10 @@ const de: LegalStrings = {
           `<p>Die Look-Galerie (/looks/) zeigt Looks, deren Daten, Dateien und Likes auf GitHub ` +
           `liegen, im öffentlichen Repository KiwiCanopy/KiwiDesk-Looks. Diese Website liest sie ` +
           `beim Erstellen der Seiten aus; dein Browser stellt für die Galerie also keine Anfrage ` +
-          `an GitHub. Erst „Herunterladen“, „Like“ und „Diesen Look melden“ öffnen GitHub, wenn ` +
-          `du sie anklickst.</p>`,
+          `an GitHub. Erst „Datei herunterladen“, „Like“ und „Diesen Look melden“ öffnen GitHub, wenn ` +
+          `du sie anklickst. „Zu KiwiDesk hinzufügen“ öffnet die KiwiDesk-App auf deinem Mac; sie ` +
+          `lädt dann genau diesen einen Look von GitHub herunter und sendet dabei nichts außer ` +
+          `der Anfrage nach dieser Datei.</p>`,
       },
       {
         title: "8. SSL-/TLS-Verschlüsselung",
@@ -343,7 +347,7 @@ const en: LegalStrings = {
   },
   datenschutz: {
     title: "Privacy Policy",
-    updated: "28 October 2026",
+    updated: "29 October 2026",
     sections: [
       {
         title: "1. Privacy at a glance",
@@ -355,7 +359,8 @@ const en: LegalStrings = {
           `its informational and documentation site (a marketing landing page plus ` +
           `documentation). There are no user accounts, no sign-in, no contact form, no payment ` +
           `processing, and no analytics or tracking services. The KiwiDesk app itself is ` +
-          `distributed via GitHub; this privacy policy relates solely to this website. Personal ` +
+          `distributed via GitHub; this privacy policy relates solely to this website, save the look download a click ` +
+          `in the looks gallery hands to the app (section 7). Personal ` +
           `data is only processed to the technically unavoidable extent required to deliver the ` +
           `website (see “Hosting”), and when you contact us by email (section 6).</p>`,
       },
@@ -441,8 +446,10 @@ const en: LegalStrings = {
           `point on, the privacy policies of the respective provider apply.</p>` +
           `<p>The looks gallery (/looks/) shows looks whose data, files and likes live on GitHub, ` +
           `in the public repository KiwiCanopy/KiwiDesk-Looks. This website reads them when it is ` +
-          `built, so your browser sends no request to GitHub to show the gallery. Only Download, ` +
-          `Like and Report this look open GitHub, once you click them.</p>`,
+          `built, so your browser sends no request to GitHub to show the gallery. Only Download file, ` +
+          `Like and Report this look open GitHub, once you click them. Add to KiwiDesk opens the ` +
+          `KiwiDesk app on your Mac, which then downloads that one look from GitHub and sends ` +
+          `nothing but the request for that file.</p>`,
       },
       {
         title: "8. SSL/TLS encryption",
@@ -583,7 +590,7 @@ const ja: LegalStrings = {
   },
   datenschutz: {
     title: "プライバシーポリシー",
-    updated: "2026年10月28日",
+    updated: "2026年10月29日",
     sections: [
       {
         title: "1. 概要",
@@ -594,7 +601,8 @@ const ja: LegalStrings = {
           `本ウェブサイトはその情報・ドキュメントサイト（マーケティング用トップページおよび ` +
           `ドキュメント）です。ユーザーアカウント、ログイン、問い合わせフォーム、決済処理、解析・ ` +
           `トラッキングサービスはいずれもありません。KiwiDesk アプリ本体は GitHub で配布されており、 ` +
-          `本プライバシーポリシーは本ウェブサイトのみを対象とします。個人データは、ウェブサイトの ` +
+          `本プライバシーポリシーは本ウェブサイトのみを対象とします（ただし、デザインギャラリーでの ` +
+          `クリックによりアプリが行うデザインのダウンロードを除きます。第7項参照）。個人データは、ウェブサイトの ` +
           `配信に技術的に避けられない範囲（「ホスティング」参照）と、メールでお問い合わせいただいた場合（第6項）にのみ処理されます。</p>`,
       },
       {
@@ -671,8 +679,9 @@ const ja: LegalStrings = {
           `<p>デザインギャラリー（/looks/）に掲載するデザインのデータ、ファイル、いいねは、GitHub の ` +
           `公開リポジトリ KiwiCanopy/KiwiDesk-Looks にあります。本ウェブサイトはサイトの構築時にそれらを ` +
           `読み込むため、ギャラリーを表示するためにあなたのブラウザが GitHub へリクエストを送ることは ` +
-          `ありません。「ダウンロード」「いいね」「このデザインを報告」は、クリックしたときにだけ GitHub ` +
-          `を開きます。</p>`,
+          `ありません。「ファイルをダウンロード」「いいね」「このデザインを報告」は、クリックしたときにだけ GitHub ` +
+          `を開きます。「KiwiDesk に追加」は Mac 上の KiwiDesk アプリを開き、アプリがそのデザイン 1 件だけを ` +
+          `GitHub からダウンロードします。その際に送るのは、そのファイルのリクエストだけです。</p>`,
       },
       {
         title: "8. SSL／TLS 暗号化",

@@ -76,7 +76,10 @@ struct LooksShelf: View {
             HStack {
                 groupHeader(L("looks.mine", "My looks"))
                 Spacer()
-                if LookGallery.isLive { shareButton }
+                if LookGallery.isLive {
+                    browseButton
+                    shareButton
+                }
                 Button {
                     importLook()
                 } label: {
@@ -90,7 +93,7 @@ struct LooksShelf: View {
             }
             LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
                 ForEach(model.userLooks, id: \.name) { look in
-                    card(look, caption: nil)
+                    card(look, caption: look.author.map(LookTile.byline))
                         .focused($returningTile, equals: look.name)
                         .rowActions { userMenu(look) }
                 }
