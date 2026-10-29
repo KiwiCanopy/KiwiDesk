@@ -51,6 +51,11 @@ struct LookExportFormatTests {
         let data = try JSONEncoder().encode(LookExport(look: credited))
         let back = try LookStore.importLook(data: data)
         #expect(back == credited.admitted)
+        credited.basedOn = LookCredit(removed: true)
+        let removed = try LookStore.importLook(
+            data: JSONEncoder().encode(LookExport(look: credited))
+        )
+        #expect(removed.basedOn?.removed == true)
     }
 
     @Test("a gallery file imports with its credit")
