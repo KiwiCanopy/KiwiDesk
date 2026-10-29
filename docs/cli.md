@@ -395,6 +395,21 @@ live while reproducing:
 same log — one before and one after a repro brackets it; it
 exports nothing.
 
+## Drawing a Look's Preview
+
+:::unreleased
+`preview` draws an exported look file as a 768 × 480 PNG: the
+picture its tile shows in Looks & Animations, on four Spaces in
+dark mode. It reads the file the way Import… does and needs no
+running app; a font the Mac lacks draws in the system font.
+
+```sh
+kiwidesk preview ~/Desktop/Dusk.json ~/Desktop/Dusk.png
+```
+
+The looks gallery draws each look's preview with it (#1740).
+:::
+
 ## Checking the Private Fast Paths
 
 KiwiDesk reaches some of macOS through private WindowServer

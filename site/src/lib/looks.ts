@@ -128,7 +128,7 @@ export const SYSTEM_FONTS: Record<string, string> = {
 const HEX = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
 const ID = /^[a-z0-9][a-z0-9-]*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const IMAGE_PATH = /^looks\/[a-z0-9-]+\/screenshot\.png$/;
+const IMAGE_PATH = /^looks\/[a-z0-9-]+\/(?:screenshot|preview)\.png$/;
 
 const text = (v: unknown): string | null =>
   typeof v === "string" && v.trim() !== "" ? v.trim() : null;
