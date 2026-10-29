@@ -57,7 +57,8 @@ extension AppDelegate {
         default:
             return L(
                 "looks.link_library",
-                "KiwiDesk couldn't add the look to My looks."
+                "KiwiDesk couldn't add the look to %1$@.",
+                L("looks.mine", "My looks")
             )
         }
     }

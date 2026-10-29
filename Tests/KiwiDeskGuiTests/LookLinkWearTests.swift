@@ -52,6 +52,25 @@ struct LookLinkWearTests {
         #expect(SimpleLookCard.looks(in: model).first?.name == "Dusk")
     }
 
+    @Test("a refresh forgets a linked look the library dropped")
+    func refreshForgets() throws {
+        let model = makeTestModel()
+        model.wearLinkedLook(try linked(model))
+        try model.lookStore.delete("Dusk")
+        model.refreshLooks()
+        #expect(model.linkedLook == nil)
+    }
+
+    @Test("a fresh open forgets the linked look")
+    func freshOpenForgets() throws {
+        let model = makeTestModel()
+        model.wearLinkedLook(try linked(model))
+        model.prepareToShow(windowShown: true)
+        #expect(model.linkedLook == "Dusk")
+        model.prepareToShow(windowShown: false)
+        #expect(model.linkedLook == nil)
+    }
+
     @Test("Simple's line drops a linked look My looks no longer holds")
     func simpleDropsAGoneLook() {
         let model = makeTestModel()

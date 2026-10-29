@@ -7,9 +7,9 @@ import Foundation
 /// KiwiDesk-Looks), and its parser reads `based_on` as written here.
 public struct LookShare: Sendable, Equatable {
     /// The issue form a share opens.
-    public static let form = URL(
-        string: "https://github.com/KiwiCanopy/KiwiDesk-Looks/issues/new"
-    )!
+    public static let form = LookLink.gallery.appendingPathComponent(
+        "issues/new"
+    )
     /// The longest form address a share opens with the file inside;
     /// past it the file is written to disk and attached by hand.
     public static let urlLimit = 7000

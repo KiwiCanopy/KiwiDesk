@@ -56,14 +56,9 @@ extension ShelfLook {
     /// reaches, which never changes how fast things move.
     public var stylingOnly: ShelfLook {
         let styling = Set(LookKeys.styling)
-        return ShelfLook(
-            name: name,
-            style: style.filter { styling.contains($0.key) },
-            colors: colors,
-            author: author,
-            basedOn: basedOn,
-            galleryID: galleryID
-        )
+        var out = self
+        out.style = style.filter { styling.contains($0.key) }
+        return out
     }
 
     /// A stored look made fit for use (#1752): styling keys outside
@@ -78,14 +73,10 @@ extension ShelfLook {
         let style = Set(LookKeys.all)
         let colors = Set(ColorPaletteKeys.all)
         let known = self.colors.filter { colors.contains($0.key) }
-        return ShelfLook(
-            name: name,
-            style: self.style.filter { style.contains($0.key) },
-            colors: ColorPalette(name: "", colors: known).paintedColors,
-            author: author,
-            basedOn: basedOn,
-            galleryID: galleryID
-        )
+        var out = self
+        out.style = self.style.filter { style.contains($0.key) }
+        out.colors = ColorPalette(name: "", colors: known).paintedColors
+        return out
     }
 
     /// This look with its credit left out: the body an exported

@@ -983,8 +983,9 @@ refusing a newer file and crossing an older one in memory through
 `ConfigMigration.lookExportSteps`, since the file is never
 rewritten — so a `LookDocument.currentFormat` bump owes an entry
 there lifting to the new format (`LookExportStepsCensusTests`). An
-older build that saves the library drops each look's `author` and
-`based_on`, which its decoder does not know: accepted, since a
+older build that saves the library drops each look's `author`,
+`based_on` and `gallery_id`, which its decoder does not know:
+accepted, since a
 bump would make that build read the whole library as unreadable.
 A look has a fourth home since #1740: the origin a pick records,
 a whole `ShelfLook` in the settings (`TilingSettings.lookOrigin`,
@@ -995,6 +996,14 @@ user's pick goes through `ShelfLook.pick`, never `apply` beside
 it, or the credit Share and Save read goes stale
 (`LookOriginTests`, `LookOriginSaveTests`); a new pick door is
 review's, since nothing scans for one.
+**A look's `gallery_id` is this Mac's record of a gallery
+install (#1740)**: `KiwiCore.installGalleryLook` is its one
+setter, every other door that brings a look in reads files
+through `LookStore.importLook(data:)`, whose `LookExport.credited`
+drops one, and an exported file leaves it behind (`uncredited`),
+so a forged id never reaches Share's `based_on`
+(`LookLinkInstallTests`). A new door that brings a look in takes
+that reader or clears the id itself.
 **And a look stores setting PATHS
 and their wire spellings as data** (`LookKeys`): renaming a key
 or value a look carries — any path in `LookKeys.all`, since

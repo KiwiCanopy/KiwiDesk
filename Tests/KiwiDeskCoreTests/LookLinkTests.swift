@@ -20,9 +20,24 @@ struct LookLinkTests {
     }
 
     @Test(
+        "digits, any host case and 64 characters still parse",
+        arguments: [
+            "kiwidesk://look/neon-2",
+            "KIWIDESK://LOOK/neon",
+            "kiwidesk://look/" + String(repeating: "a", count: 64),
+        ]
+    )
+    func alsoParses(_ text: String) throws {
+        let url = try #require(URL(string: text))
+        #expect(LookLink(url) != nil)
+    }
+
+    @Test(
         "anything else is no link of ours",
         arguments: [
             "https://kiwidesk.kiwicanopy.com/looks/purple-neon",
+            "https://look/purple-neon",
+            "kiwidesk://look/" + String(repeating: "a", count: 65),
             "kiwidesk://profile/purple-neon",
             "kiwidesk://look/",
             "kiwidesk://look/a/b",
@@ -73,6 +88,13 @@ struct LookLinkTests {
         }
     }
 
+    @Test("a body of exactly the limit is still a file")
+    func limitIsInclusive() async throws {
+        let edge = Data(count: LookLink.byteLimit)
+        let data = try await link.fetch(using: answer(200, edge))
+        #expect(data.count == LookLink.byteLimit)
+    }
+
     @Test("another status or an oversized body is no look file")
     func invalid() async {
         await #expect(throws: LookLink.Failure.invalid) {
@@ -91,5 +113,30 @@ struct LookLinkTests {
                 throw URLError(.notConnectedToInternet)
             }
         }
+    }
+}
+
+/// The bundle registers the scheme `LookLink` answers to, or a
+/// gallery link opens nothing (#1740).
+@Suite("Look link scheme registration")
+struct LookLinkSchemeTests {
+    @Test("build-app.sh registers LookLink.scheme")
+    func registered() throws {
+        let script = try buildAppScriptWithoutComments()
+        let types = try #require(
+            script.range(of: "<key>CFBundleURLTypes</key>")
+        )
+        let after = String(script[types.upperBound...])
+        let schemes = try #require(
+            after.range(of: "<key>CFBundleURLSchemes</key>")
+        )
+        let end = try #require(
+            after.range(
+                of: "</array>",
+                range: schemes.upperBound..<after.endIndex
+            )
+        )
+        let list = after[schemes.upperBound..<end.lowerBound]
+        #expect(list.contains("<string>\(LookLink.scheme)</string>"))
     }
 }

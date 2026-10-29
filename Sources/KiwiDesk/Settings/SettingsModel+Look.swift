@@ -38,8 +38,12 @@ extension SettingsModel {
         return !isDirty
     }
 
-    /// Re-reads the user looks from the store.
+    /// Re-reads the user looks from the store, forgetting a linked
+    /// look the library no longer holds.
     func refreshLooks() {
         userLooks = lookStore.userLooks()
+        if !userLooks.contains(where: { $0.name == linkedLook }) {
+            linkedLook = nil
+        }
     }
 }

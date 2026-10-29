@@ -1366,7 +1366,7 @@
   "looks.keep_previous_colors.caption": "These colors aren't saved as a palette.",
   "looks.link_failed": "Couldn't add this look",
   "looks.link_invalid": "The gallery sent a file that isn't a KiwiDesk look.",
-  "looks.link_library": "KiwiDesk couldn't add the look to My looks.",
+  "looks.link_library": "KiwiDesk couldn't add the look to %1$@.",
   "looks.link_missing": "The gallery no longer has this look.",
   "looks.link_unreachable": "KiwiDesk couldn't download the look. Check your connection and try again.",
   "looks.mine": "My looks",

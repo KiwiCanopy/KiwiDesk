@@ -7,11 +7,14 @@ import Foundation
 public struct LookLink: Sendable, Equatable {
     /// The URL scheme `build-app.sh` registers for the app.
     public static let scheme = "kiwidesk"
-    /// The release whose assets are the gallery's look files.
-    public static let releases = URL(
+    /// The gallery's repository, which Share's form lives in too.
+    public static let gallery = URL(
         string: "https://github.com/KiwiCanopy/KiwiDesk-Looks"
-            + "/releases/download/looks/"
     )!
+    /// The release whose assets are the gallery's look files.
+    public static let releases = gallery.appendingPathComponent(
+        "releases/download/looks"
+    )
 
     /// The gallery id.
     public let id: String
@@ -43,7 +46,8 @@ public struct LookLink: Sendable, Equatable {
         case invalid
     }
 
-    /// A look file is a few kilobytes; anything past this is not one.
+    /// A look file is a few kilobytes; an answer past this is
+    /// refused once downloaded, not cut short.
     public static let byteLimit = 512 * 1024
 
     /// Downloads the look's file through `fetch` — `URLSession`'s
@@ -69,7 +73,7 @@ public struct LookLink: Sendable, Equatable {
     }
 
     static func isID(_ text: String) -> Bool {
-        !text.isEmpty && text.count <= 64
+        text.count <= 64
             && text.utf8.allSatisfy {
                 (0x61...0x7A).contains($0) || (0x30...0x39).contains($0)
                     || $0 == 0x2D

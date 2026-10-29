@@ -33,6 +33,11 @@ struct LookLinkInstallTests {
         let stored = try core.lookLibrary.libraryLooks()
             .first { $0.name == "Dusk" }
         #expect(stored?.galleryID == "dusk")
+        let encoded = try JSONEncoder().encode(look)
+        #expect(
+            String(decoding: encoded, as: UTF8.self)
+                .contains("\"gallery_id\":\"dusk\"")
+        )
         #expect(stored?.author == "Anna")
     }
 
@@ -74,6 +79,17 @@ struct LookLinkInstallTests {
         let data = try JSONEncoder().encode(LookExport(look: look))
         #expect(!String(decoding: data, as: UTF8.self).contains("gallery_id"))
         #expect(try LookStore.importLook(data: data).author == "Anna")
+    }
+
+    @Test("an imported file's own gallery id is dropped")
+    func importDropsAForgedID() throws {
+        var look = try LookStore.importLook(data: file())
+        look.galleryID = "forged"
+        var export = LookExport(look: look)
+        export.look.galleryID = "forged"
+        let data = try JSONEncoder().encode(export)
+        #expect(String(decoding: data, as: UTF8.self).contains("forged"))
+        #expect(try LookStore.importLook(data: data).galleryID == nil)
     }
 
     @Test("a file the gallery sent that is no look is refused")

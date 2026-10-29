@@ -325,8 +325,7 @@ extension InterpolatedLabelTests {
         "onboarding.bars.draft_pending": 2,
         "onboarding.bars.hint": 2,
         "onboarding.looks.hint_ai": 2,
-        // The Float card's `?` names the float VALUE it explains
-        // (#1022, #1608).
+        // The Float card's `?` names its float VALUE (#1022, #1608).
         "app_rules.section.help.titles": 1,
         // Automatic floating's `?` points at Tile instead (#2486).
         "app_rules.auto_float.help": 1,
@@ -346,5 +345,6 @@ extension InterpolatedLabelTests {
         // #2258: the Add to Claude Desktop failure names Copy Setup
         // Prompt.
         "ai.setup.claude_desktop.failed": 1,
+        "looks.link_library": 1,  // names My looks (#1740)
     ]
 }

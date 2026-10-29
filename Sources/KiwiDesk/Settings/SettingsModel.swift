@@ -148,7 +148,8 @@ final class SettingsModel: ObservableObject {
     /// (#1684) — `refreshLooks` is its one writer.
     @Published var userLooks: [ShelfLook] = []
     /// The look a gallery link added (#1740), which Simple's Look
-    /// line draws ahead of the bundled ones.
+    /// line draws ahead of the bundled ones until the window's next
+    /// fresh open.
     @Published var linkedLook: String?
     /// Screen counts where multiple profiles claim default flag.
     @Published var duplicateDefaultCounts: [Int] = []
