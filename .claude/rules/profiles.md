@@ -1015,13 +1015,23 @@ change too, and a shared look missing it owes
 and its Revert carry `LookKeys.styling` alone**, never motion
 (`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
 
-Nothing can guard the format bumps above, and they are the
-obligation the format integers rest on: `<=` is decoder tolerance rather than a
-compatibility shim, so an older config or backup is accepted — which is
-right, and which silently becomes a lie the first time a
-`GuiConfig`, `Profile` or `ColorPalette` field is renamed. §5
-actively encourages that rename, so the bump is the reader's
-responsibility here.
+The format bumps above are the obligation the format integers
+rest on: `<=` is decoder tolerance rather than a compatibility
+shim, so an older config or backup is accepted — which is right,
+and which silently becomes a lie the first time a `GuiConfig`,
+`Profile` or `ColorPalette` field is renamed. §5 actively
+encourages that rename, so the bump is the reader's
+responsibility here. A step's named floor past its shape's
+`currentFormat` is a dropped bump, and
+`ConfigMigrationFloorCensusTests` reds it; name a new floor
+`*BundleFormat`, `*GuiFormat`, `*PaletteFormat` or
+`*ProfileFormat` so the census can read its shape. A step gated
+by no named floor is invisible to that census, so **every shape a
+step reaches owes one test through `ConfigMigration.migrated`
+from the format the last release shipped, never a direct call
+alone**: a direct call runs the step whatever the stamp says, and
+proves nothing about the bump (`ScrollDurationMigrationTests` ▸
+`bundleProfilesMigrate`).
 
 **A long-lived release branch keeps every `currentFormat` above
 `main`'s (#2265).** `needsMigration` stops at the stamp, and a
