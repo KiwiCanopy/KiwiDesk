@@ -179,9 +179,7 @@ struct SettingsDetailPanel: View {
     /// Jumps to setting control associated with diff row
     /// (`SettingsView.apply`).
     private func jump(to row: SettingsDiffRow) {
-        guard let anchor = SettingsDiffJump.anchor(for: row)
-        else { return }
-        model.nav.pendingReveal = anchor
+        model.jump(to: row)
     }
 
 }

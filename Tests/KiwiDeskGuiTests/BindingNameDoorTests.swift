@@ -25,6 +25,11 @@ struct BindingNameDoorTests {
     /// rather than on how it is compared: any new read reds until
     /// it is routed through the door or classified here.
     private let allowed: [String: (count: Int, reason: String)] = [
+        "SimpleKiwiHubKeys.swift": (
+            1,
+            "SidedChordWords.label, a chord's spoken words — no "
+                + "binding's label is read (#2737)"
+        ),
         "KeybindingAppGroup+Row.swift": (
             2,
             "an application row's label IS the added app's name: "

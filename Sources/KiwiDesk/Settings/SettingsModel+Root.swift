@@ -10,6 +10,10 @@ extension SettingsModel {
         settingsRoot == .simple && !editingLua
     }
 
+    /// Whether Simple draws the Screen menu: on two or more screens
+    /// only, hidden rather than greyed on one (#2737 ruling 17).
+    var offersScreenMenu: Bool { displays.count >= 2 }
+
     /// The switch's pick, the one write of the stored root. Simple
     /// edits the loaded profile only, so leaving a stored target
     /// for it goes through the profile switch's discard question.
@@ -54,6 +58,17 @@ extension SettingsModel {
     /// flips the root, so no Advanced Home shows in between.
     func openAdvanced(_ anchor: SettingsAnchor? = nil) {
         guard let anchor else { return settingsRoot = .advanced }
+        land(on: anchor)
+    }
+
+    /// A save pill row's jump (#2737 ruling 12): on Simple, a row
+    /// whose control Simple draws stays there; any other row lands
+    /// on its Advanced page.
+    func jump(to row: SettingsDiffRow) {
+        if showsSimple, SimpleCoverage.draws(row, in: self) { return }
+        guard let anchor = SettingsDiffJump.anchor(for: row) else {
+            return
+        }
         land(on: anchor)
     }
 

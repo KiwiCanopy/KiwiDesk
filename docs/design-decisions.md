@@ -10232,11 +10232,16 @@ left, a live preview of the desk on the right.
 construction rather than by promise:
 
 - **A doubled surface.** Simple owns layout and nothing else. It
-  composes the components Advanced already draws — the look
-  tiles, the Space row with its layout menu and the Screen pin
-  menu, the Open applications rows, the support strip — so a
-  change to a control reaches both surfaces, and a Simple-only
-  editor is the defect this entry exists to forbid.
+  composes Advanced's own parts — the look tiles; the Space
+  row's grip, icon chip, name field, layout menu, Customize
+  button, pin chip, trash and add row; the Open applications
+  rows; the support strip — so a change to a control reaches
+  both surfaces. KiwiHub's keys are shown, not edited: KiwiHub
+  is the way to every other shortcut, so Simple teaches its keys
+  and leaves changing them to Advanced. Where Advanced draws
+  a choice another way, as Screens' chip menu, Simple's Screen
+  menu shares its choices and its one write. A Simple-only editor
+  is the defect this entry exists to forbid.
 - **Config presence.** Simple hides what a user made, so it
   names it instead: the header's subtitle counts the App Rules,
   shortcut layers and Lua bindings it does not draw ("kept in
@@ -10279,8 +10284,8 @@ is a scope decision, made once for the whole root. So on one
 screen Simple hides the Screen menu and the screen map rather
 than greying them: a disabled control there teaches a choice the
 user cannot make, and Advanced ▸ Screens still holds the pins.
-Inside a control Simple does draw, the rule binds as before: an
-`init.lua`-owned Look line greys, it does not vanish.
+Inside a control Simple does draw, the rule binds as before: a
+control Advanced greys, Simple greys too.
 
 Simple is a root beside Home, not a navigator, so *Home is the
 only navigator* still holds inside Advanced. Every install opens

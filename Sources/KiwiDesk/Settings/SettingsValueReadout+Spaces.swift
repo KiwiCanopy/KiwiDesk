@@ -99,7 +99,7 @@ extension SettingsValueReadout {
     }
 
     /// Diff rows for space layout mode assignments
-    /// (`SpacesSection.modeBinding`).
+    /// (`SpaceModeMenu`).
     private static func spacesModeRows(
         _ census: SettingKey,
         old: GuiConfig,
