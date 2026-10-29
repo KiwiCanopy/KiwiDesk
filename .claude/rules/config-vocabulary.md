@@ -429,7 +429,9 @@ synonym:
   before shipping (#1713, `GlyphSizeTests`) — and never an *item
   size*, which the **item** row rules out.
 - **limit** / **cap** / **count** — a `limit` is a user-set
-  maximum (`track.set_limit`); `cap` is the same idea where it
+  maximum (`track.set_limit`) — `pocket.set_capacity` is a
+  two-choice *capacity* (`one` / `several`), not a number, so
+  neither; `cap` is the same idea where it
   already reads better (`app_bar.set_title_cap`, and
   `trackCap` / `normalCap` in code); a `count` is how many exist
   right now. `stack.set_master_count` is a retained exception —

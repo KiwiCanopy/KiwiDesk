@@ -43,6 +43,10 @@ struct KiwiShelfCard: View {
                 ForEach(BarsRowOrder.kiwishelfDepth, id: \.id) {
                     row(for: $0)
                 }
+                Divider()
+                ForEach(BarsRowOrder.kiwishelfPocket, id: \.id) {
+                    row(for: $0)
+                }
                 styleDisclosure
                 marginsDisclosure
             }

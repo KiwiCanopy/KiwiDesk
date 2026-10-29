@@ -27,6 +27,8 @@ enum KiwiShelfCommandSetting {
     case dimFactor(CGFloat)
     case revealTimeout(Double)
     case revealStyle(KiwiShelf.RevealStyle)
+    case pocketEdge(AppBarEdge)
+    case pocketPosition(CGFloat)
     case fillFade(CGFloat)
     case tintHubAndPlates(Bool)
     case color(WritableKeyPath<KiwiShelf, String>, String)
@@ -77,6 +79,14 @@ enum KiwiShelfCommandSetting {
                 value.isFinite
             else { return .failure("expected a percentage") }
             return .success(.minimum(value))
+        case "pocket_edge":
+            return BarSettingChoice.value(args, AppBarEdge.self)
+                .map(Self.pocketEdge)
+        case "pocket_position":
+            guard let value = args.first?.numberValue,
+                value.isFinite
+            else { return .failure("expected a percentage (0–100)") }
+            return .success(.pocketPosition(value))
         case "icon_source":
             return BarSettingChoice.value(
                 args,
@@ -189,6 +199,9 @@ enum KiwiShelfCommandSetting {
         case .alignment(let value): shelf.alignment = value
         case .order(let value): shelf.order = value
         case .revealStyle(let value): shelf.revealStyle = value
+        case .pocketEdge(let value): shelf.pocketEdge = value
+        case .pocketPosition(let value):
+            shelf.pocketPosition = KiwiShelf.clampPocketPosition(value)
         case .minimum(let value):
             shelf.minimum = min(
                 max(value, KiwiShelf.minimumRange.lowerBound),

@@ -21,33 +21,26 @@ extension KiwiCore {
             let screen = TilingEngine.screen(for: display)
         else { return nil }
         let style = tiler.settings.pocketStyle
-        var region = tiler.visibleBounds(screen)
-        // A bar on the pocket's edge keeps it just inside.
-        if let space = state.workspaces.currentSpace(on: display) {
-            for (strip, edge) in paintedStrips(forSpace: space)
-            where edge == style.edge {
-                region = AppBarGeometry.regionClear(
-                    region,
-                    of: strip,
-                    edge: edge
-                )
-            }
-        }
         let glass = briefPocketPlateGlass()
         let flight = BriefPocketPlan.flight(
             durationMS: tiler.settings.animations.durationMS
         )
-        briefPocket.play(
+        let timeline = BriefPocketPlan.timeline(direction, flight: flight)
+        // Held out first, so the pocket stands where the play lands.
+        holdPocketOut(on: display, for: timeline.end)
+        guard let pocket = pocketLanding(on: display) else {
+            // Nothing to land on: the hold ends with the play.
+            pocketPlate.playing[display] = nil
+            updateBars()
+            return nil
+        }
+        var request =
             BriefPocketOverlay.Request(
                 display: display,
                 screen: screen,
                 direction: direction,
                 window: frame,
-                pocket: BriefPocketPlan.pocketFrame(
-                    in: region,
-                    edge: style.edge,
-                    position: style.position
-                ),
+                pocket: pocket,
                 iconPid: state.windows[id]?.pid,
                 shelf: briefPocketShelf(),
                 markHex: style.color,
@@ -56,18 +49,23 @@ extension KiwiCore {
                     ? tiler.settings.kiwishelf.glassFill : nil,
                 flight: flight
             )
-        )
+        // A pocket on this screen is the pocket (#2678).
+        request.drawsPocket = briefPocketDrawsPocket(on: display)
+        briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
-        return BriefPocketPlan.timeline(direction, flight: flight)
+        return timeline
     }
 
     /// Pays a pocket press's focus hand-off `hand` once the play
     /// `ends` seconds on is over, so no app activates while the
     /// plate draws (#2703); at once where nothing plays. A later
     /// press replaces it, a nil `hand` only cancels, and it is
-    /// dropped where the state focus or the Space moved meanwhile.
+    /// dropped where the state focus or the Space moved meanwhile —
+    /// save a move back onto `left`, the window a take-out left,
+    /// which macOS re-reports while its raise waits (#2678).
     func handPocketFocus(
         after ends: TimeInterval?,
+        leaving left: WindowID? = nil,
         _ hand: (@MainActor () -> Void)?
     ) {
         deferred.cancel(.pocketFocus)
@@ -82,7 +80,8 @@ extension KiwiCore {
                 self.onLog("pocket: landing focus dropped — Space moved")
                 return
             }
-            guard self.state.workspaces.lastFocused == held else {
+            let now = self.state.workspaces.lastFocused
+            guard now == held || (left != nil && now == left) else {
                 self.onLog("pocket: landing focus dropped — focus moved")
                 return
             }

@@ -814,8 +814,9 @@ editing here:
   `docs/design-decisions.md` ▸ *A Space switch slides, shows the
   Space, or neither*.
 - **Pocketing's motion is DRAWN too, and its window moves once
-  (#2680).** `BriefPocketOverlay` draws the pocket and the plate
-  over the windows; the window parks in the pass that pockets it,
+  (#2680).** `BriefPocketOverlay` draws the brief pocket and the
+  app-icon plate that flies to it over the windows; the window
+  parks in the pass that pockets it,
   and a take-out's one write waits in `FrameApplier`'s hold until
   the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
   `takeOutPlaysAndHolds`), and its ring waits with it through the

@@ -160,7 +160,7 @@ extension ConfigMigration {
 
     /// `text` without the pair at `range`, and the comma that
     /// joined it to a neighbour.
-    private static func removingPair(
+    static func removingPair(
         _ range: NSRange,
         from text: String
     ) -> String {

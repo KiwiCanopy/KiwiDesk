@@ -54,10 +54,13 @@ extension StateCoordinator {
         }
     }
 
-    /// Whether `toggle_pocket_window` may mark another window: One
-    /// window (#2678's default) takes a mark only while the pocket
-    /// is empty. `pocket`'s own mark asks for an empty pocket.
-    var pocketAcceptsMark: Bool { pocket.isEmpty }
+    /// Whether `toggle_pocket_window` may mark another window under
+    /// `capacity` (#2678): One window takes a mark only while the
+    /// pocket is empty, Several always. `pocket`'s own mark asks for
+    /// an empty pocket.
+    func pocketAcceptsMark(_ capacity: PocketCapacity) -> Bool {
+        capacity == .several || pocket.isEmpty
+    }
 
     /// Puts the out window `id` in the pocket: floating, no sticky
     /// scope, filed in no Space, last in put-in order. A slot fills

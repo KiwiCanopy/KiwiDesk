@@ -61,6 +61,7 @@ struct BarsPanelPreviewLabelTests {
         let settings = TilingSettings()
         let items = HomeCardBarsTile(
             settings: settings,
+            pocketStands: false,
             spaceCount: 3,
             spaceLabels: [
                 .symbol("book"), .text("⭐", tinted: false),

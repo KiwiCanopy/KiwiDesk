@@ -11,23 +11,40 @@ public enum ShelfMarkPlacement {
     /// margin a sideways flick lands in.
     public static let bandLength: CGFloat = 64
 
+    /// One edge's row: each bar's band and the pocket's, offsets
+    /// from the edge's start.
+    public struct Row: Equatable, Sendable {
+        public var bars: [ShelfBar: ClosedRange<CGFloat>]
+        /// The pocket handle's band, at the row's leaning end; nil
+        /// where no pocket stands on the edge (#2678).
+        public var pocket: ClosedRange<CGFloat>?
+    }
+
     /// The band of each of `bars` along an edge `length` long, as
     /// offsets from its start (left, or top on a vertical edge):
-    /// adjacent, in `shelf`'s order, as one row at its alignment. A
-    /// row longer than the edge starts at its start.
-    public static func bands(
+    /// adjacent, in `shelf`'s order, as one row at its alignment —
+    /// the pocket's handle one band more at the row's end where
+    /// `pocketLeansEnd`, at its start where false, none where nil.
+    /// A row longer than the edge starts at its start.
+    public static func row(
         for bars: Set<ShelfBar>,
+        pocketLeansEnd: Bool?,
         length: CGFloat,
         shelf: KiwiShelf
-    ) -> [ShelfBar: ClosedRange<CGFloat>] {
+    ) -> Row {
         let ordered = ShelfArrangement.ordered(bars, shelf)
-        let row = bandLength * CGFloat(ordered.count)
-        let first = ShelfArrangement.lead(row, in: length, shelf.alignment)
-        var bands: [ShelfBar: ClosedRange<CGFloat>] = [:]
-        for (index, bar) in ordered.enumerated() {
-            let lead = first + bandLength * CGFloat(index)
-            bands[bar] = lead...(lead + bandLength)
+        let count = ordered.count + (pocketLeansEnd == nil ? 0 : 1)
+        let row = bandLength * CGFloat(count)
+        var next = ShelfArrangement.lead(row, in: length, shelf.alignment)
+        let take = { () -> ClosedRange<CGFloat> in
+            defer { next += bandLength }
+            return next...(next + bandLength)
         }
-        return bands
+        var pocket: ClosedRange<CGFloat>?
+        if pocketLeansEnd == false { pocket = take() }
+        var bands: [ShelfBar: ClosedRange<CGFloat>] = [:]
+        for bar in ordered { bands[bar] = take() }
+        if pocketLeansEnd == true { pocket = take() }
+        return Row(bars: bands, pocket: pocket)
     }
 }

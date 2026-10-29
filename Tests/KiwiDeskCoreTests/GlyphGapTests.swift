@@ -333,6 +333,7 @@ struct GlyphGapPlanTests {
                 settings: settings,
                 spaceItems: items,
                 app: app,
+                pocket: false,
                 drawn: { $0.drawnAtRest }
             ).first,
             let slot = plan.arrangement.space

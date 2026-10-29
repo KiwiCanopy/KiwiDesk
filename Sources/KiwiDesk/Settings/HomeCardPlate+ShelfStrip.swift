@@ -17,6 +17,9 @@ struct ShelfStripPreview: View {
     let edge: AppBarEdge
     let vertical: Bool
     let scale: CGFloat
+    /// Whether the pocket stands on this strip, at the slot Core's
+    /// arrangement pins for it (#2678 review 6).
+    let pocket: Bool
 
     var body: some View {
         GeometryReader { geometry in
@@ -27,6 +30,7 @@ struct ShelfStripPreview: View {
                 plate(placed, length: length)
                 segment(space, placed.space)
                 segment(app, placed.app)
+                pocketPiece(placed.pocket)
                 divider(placed)
             }
         }
@@ -36,7 +40,7 @@ struct ShelfStripPreview: View {
         )
     }
 
-    private var thickness: CGFloat {
+    var thickness: CGFloat {
         max(space?.thickness ?? 0, app?.thickness ?? 0)
     }
 
@@ -62,9 +66,12 @@ struct ShelfStripPreview: View {
                     endPads: endPads($0) / u
                 )
             } ?? 0,
-            shelf: live
+            shelf: live,
+            pocket: pocket
+                ? .init(need: shelf.thickness, leadsEnd: shelf.pocketLeansEnd)
+                : nil
         )
-        return ShelfArrangement(
+        var preview = ShelfArrangement(
             space: placed.space.map { scaled($0, by: u) },
             app: placed.app.map { scaled($0, by: u) },
             divider: placed.divider.map { divider in
@@ -78,6 +85,8 @@ struct ShelfStripPreview: View {
                 return scaled
             }
         )
+        preview.pocket = placed.pocket.map { scaled($0, by: u) }
+        return preview
     }
 
     /// Preview units per real point: the drawn thickness against
@@ -88,7 +97,7 @@ struct ShelfStripPreview: View {
             ? thickness / shelf.thickness : 1
     }
 
-    private func scaled(
+    func scaled(
         _ slot: ShelfArrangement.Slot,
         by u: CGFloat
     ) -> ShelfArrangement.Slot {
@@ -263,6 +272,28 @@ struct ShelfStripPreview: View {
                 )
                 .frame(width: frame.width, height: frame.height)
                 .offset(x: frame.minX, y: frame.minY)
+        }
+    }
+}
+
+/// The pocket's piece (#2678): a stretch of the shelf's plate at the
+/// slot Core's arrangement pins at the strip's outer end.
+extension ShelfStripPreview {
+    @ViewBuilder
+    func pocketPiece(_ slot: ShelfArrangement.Slot?) -> some View {
+        if let slot, let spec = space ?? app {
+            RoundedRectangle(cornerRadius: spec.corner)
+                .fill(Color(kiwiHex: spec.fill))
+                .overlay(PreviewPlateEdge(spec: spec, corner: spec.corner))
+                .frame(
+                    width: vertical ? thickness : slot.length,
+                    height: vertical ? slot.length : thickness
+                )
+                .offset(
+                    x: vertical ? 0 : slot.offset,
+                    y: vertical ? slot.offset : 0
+                )
+                .accessibilityHidden(true)
         }
     }
 }

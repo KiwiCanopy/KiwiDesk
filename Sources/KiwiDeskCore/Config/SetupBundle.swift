@@ -95,7 +95,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// (#2493), in a bundle's `config` and its `[Profile]` alike.
     /// 40 = the seeded pin row on ⌃⌥P runs Pocket (#2446), in a
     /// bundle's `config` and its `[Profile]` alike.
-    public static let currentFormat = 40
+    /// 41 = the pocket's edge and position moved onto KiwiShelf
+    /// (#2678), in a bundle's `[Profile]`.
+    public static let currentFormat = 41
 
     public let format: Int
 

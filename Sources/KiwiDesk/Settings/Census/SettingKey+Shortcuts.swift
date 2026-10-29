@@ -74,10 +74,9 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     case pocket = "keybinding.pocket"
     /// `toggle_pocket_window` (#2675).
     case pocketWindow = "keybinding.pocket_window"
-    /// Where the brief pocket appears (#2680): its edge and its
-    /// position along it.
-    case pocketEdge = "settings.pocketStyle.edge"
-    case pocketPosition = "settings.pocketStyle.position"
+    /// What the pocket holds (#2678); where it stands is
+    /// KiwiShelf's (`SettingKey+KiwiShelf`).
+    case pocketCapacity = "appWide.pocketCapacity"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
@@ -175,9 +174,9 @@ extension ShortcutsKey {
         case .growWidth, .shrinkWidth, .growHeight, .shrinkHeight,
             .resetSizes, .maximize, .toggleFloating, .toggleSticky:
             return .row(.shortcuts, .sizeAndFloat, .atRest)
-        // Its own card (#2680): the two keys moved from Size &
-        // float, then where the brief pocket appears.
-        case .pocket, .pocketWindow, .pocketEdge, .pocketPosition:
+        // Its own card (#2680): what it holds, then its two keys;
+        // where it sits is KiwiShelf's (#2678).
+        case .pocket, .pocketWindow, .pocketCapacity:
             return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -268,10 +267,8 @@ extension ShortcutsKey {
                 "keybinding.pocket_window",
                 help: "keybinding.pocket_window.help"
             )
-        case .pocketEdge:
-            return .text("pocket.edge", help: "pocket.edge.help")
-        case .pocketPosition:
-            return .text("pocket.position", help: "pocket.position.help")
+        case .pocketCapacity:
+            return .text("pocket.capacity", help: "pocket.capacity.help")
         case .showShortcuts:
             return .text("keybinding.show_shortcuts")
         case .openSettings:

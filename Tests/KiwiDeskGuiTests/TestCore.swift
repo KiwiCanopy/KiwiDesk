@@ -263,10 +263,10 @@ func makeTestCore(
         readWritten: { nil },
         writeWritten: { _ in }
     )
-    // A shelf or overflow-mark panel is a real window, and a core
-    // outlives its test (#1894): placed, never ordered in.
+    // Real panels outlive a test core (#1894): placed, never shown.
     core.shelves.ordersPanels = false
     core.overflowMarks.ordersPanels = false
+    core.pocketPlate.ordersPanel = false
     core.shelves.handles.ordersHandlePanels = false
     // The drawn-menu-bar read (#1386) lists the host's real
     // WindowServer windows; a test's displays are fake.

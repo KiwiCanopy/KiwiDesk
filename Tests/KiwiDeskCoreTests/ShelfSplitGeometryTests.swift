@@ -122,6 +122,7 @@ struct ShelfSplitPlanTests {
             settings: settings,
             spaceItems: items(),
             app: app(settings),
+            pocket: false,
             drawn: { $0.drawnAtRest }
         )
     }
@@ -143,6 +144,7 @@ struct ShelfSplitPlanTests {
             settings: settings,
             spaceItems: items(),
             app: app(settings),
+            pocket: false,
             drawn: { $0.drawnAtRest }
         )
         #expect(plans.count == 2)

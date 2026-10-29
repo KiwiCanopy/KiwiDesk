@@ -29,6 +29,8 @@ extension KiwiCore {
                 settings: settings,
                 spaceItems: nil,
                 app: app,
+                // Before any display, no pocket stands.
+                pocket: false,
                 // Before any display, no reveal can stand: at rest.
                 drawn: { $0.drawnAtRest }
             ).first,

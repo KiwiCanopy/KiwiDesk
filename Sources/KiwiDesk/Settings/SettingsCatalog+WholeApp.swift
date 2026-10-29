@@ -118,17 +118,12 @@ struct ShortcutsControls: Sendable {
         "shortcuts.section.size_float",
         "Size & float"
     )
-    /// The Pocket card (#2680), and its two placement rows on
-    /// their census labels.
+    /// The Pocket card (#2680) and its capacity row (#2678).
     let pocketKeys = SettingsControl(
         "shortcuts.section.pocket",
         "Pocket"
     )
-    let pocketEdge = SettingsControl("pocket.edge", "Edge")
-    let pocketPosition = SettingsControl(
-        "pocket.position",
-        "Position along the edge"
-    )
+    let pocketCapacity = SettingsControl("pocket.capacity", "Holds")
     let openApplications = SettingsControl(
         "shortcuts.section.open_applications",
         "Open applications"

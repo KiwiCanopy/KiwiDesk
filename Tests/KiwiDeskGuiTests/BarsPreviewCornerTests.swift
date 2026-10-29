@@ -21,7 +21,7 @@ struct BarsPreviewCornerTests {
         settings.monocle.appBar.visibility = .always
         settings.spaceBarStyle.edge = space
         settings.appBarStyle.edge = app
-        return HomeCardBarsTile(settings: settings)
+        return HomeCardBarsTile(settings: settings, pocketStands: false)
     }
 
     @Test("the preview's outer strip is the engine's first edge")
@@ -38,7 +38,10 @@ struct BarsPreviewCornerTests {
         settings.appBarStyle.edge = .right
         settings.monocle.appBar.visibility = .always
         #expect(
-            HomeCardBarsTile(settings: settings).rowsRunFullWidth
+            HomeCardBarsTile(
+                settings: settings,
+                pocketStands: false
+            ).rowsRunFullWidth
                 == settings.barEdges(space: .always, app: .always)
                 .first?.edge.isHorizontal
         )
