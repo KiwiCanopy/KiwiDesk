@@ -89,6 +89,19 @@ struct PocketPlateTests {
         #expect(shown.count == "")
     }
 
+    @Test("one window inside lifts the fade and draws no badge")
+    func oneInsideNoBadge() throws {
+        let core = makeCore()
+        several(core)
+        core.handle(.windowFocused(one))
+        core.execute("toggle_pocket_window")
+        core.execute("pocket")
+        let shown = try #require(spec(core))
+        #expect(!shown.faded)
+        #expect(shown.count == "")
+        #expect(shown.windows == [one])
+    }
+
     @Test("the badge counts from two inside")
     func badgeFromTwo() throws {
         let core = makeCore()

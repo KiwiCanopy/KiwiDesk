@@ -41,7 +41,9 @@ struct PocketHandleTests {
         #expect(KiwiCore.pocketRiseSide(thickness: 40) == 32)
         #expect(KiwiCore.pocketRiseSide(thickness: 60) == 32)
         #expect(KiwiCore.pocketRiseSide(thickness: 20) == 20)
-        #expect(KiwiCore.pocketRiseSide(thickness: 30) == 22)
+        let cell = SpaceBarItemView.cell(contentDepth: 30)
+        #expect((20...32).contains(cell))
+        #expect(KiwiCore.pocketRiseSide(thickness: 30) == cell)
     }
 
     @Test("the band stands at Position, kept whole on the edge")

@@ -114,7 +114,7 @@ struct PocketPlacementMigrationTests {
         )
     }
 
-    @Test("a bundle's inline profiles move too")
+    @Test("a bundle's inline profiles move through the pipeline")
     func bundleProfilesMove() throws {
         let settings = try legacySettings(edge: "left", position: 5)
         let bundle = try JSONSerialization.data(
@@ -124,12 +124,12 @@ struct PocketPlacementMigrationTests {
                 "profiles": [["settings": settings]],
             ]
         )
-        let out = try #require(
-            ConfigMigration.migratingPocketPlacementOntoShelf(bundle)
-        )
+        let out = try #require(ConfigMigration.migrated(bundle))
         let root = try #require(
             JSONSerialization.jsonObject(with: out) as? [String: Any]
         )
+        let format = try #require(root["format"] as? Int)
+        #expect(format >= ConfigMigration.pocketPlacementBundleFormat)
         let profiles = try #require(root["profiles"] as? [[String: Any]])
         let shelf = try #require(
             (profiles.first?["settings"] as? [String: Any])?["kiwishelf"]

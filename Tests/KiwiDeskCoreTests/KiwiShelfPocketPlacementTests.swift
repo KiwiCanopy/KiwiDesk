@@ -17,14 +17,14 @@ struct KiwiShelfPocketPlacementTests {
         )
     }
 
-    @Test("edge and position decode absent as bottom, 82")
+    @Test("edge and position decode absent as the defaults")
     func storedShape() throws {
         let absent = try JSONDecoder().decode(
             KiwiShelf.self,
             from: Data("{}".utf8)
         )
         #expect(absent.pocketEdge == .bottom)
-        #expect(absent.pocketPosition == 82)
+        #expect(absent.pocketPosition == KiwiShelf().pocketPosition)
         let set = try JSONDecoder().decode(
             KiwiShelf.self,
             from: Data(

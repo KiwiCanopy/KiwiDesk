@@ -54,14 +54,23 @@ struct PocketArrangementTests {
 
     @Test("leaning to the start, the bars move past it")
     func startPinned() throws {
-        let placed = arrange(pocket: .init(need: 50, leadsEnd: false))
+        var start = shelf
+        start.alignment = .start
+        let placed = ShelfArrangement.arrange(
+            length: 1000,
+            spaceNeed: 200,
+            appNeed: 300,
+            spaceFloor: 40,
+            shelf: start,
+            pocket: .init(need: 50, leadsEnd: false)
+        )
         let pocket = try #require(placed.pocket)
         #expect(pocket.offset == 0)
         let first = min(
             try #require(placed.space).offset,
             try #require(placed.app).offset
         )
-        #expect(first >= 50 + 6)
+        #expect(abs(first - (50 + 6)) < 0.001)
     }
 
     @Test("a full shelf keeps the pocket whole where it was")
