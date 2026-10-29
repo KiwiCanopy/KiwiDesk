@@ -58,17 +58,7 @@ struct LookTile: View {
     }
 
     private var preview: TilingSettings {
-        Self.painted(look, over: model.config.settings)
-    }
-
-    /// `settings` with `look` painted on, its colors included.
-    static func painted(
-        _ look: ShelfLook,
-        over settings: TilingSettings
-    ) -> TilingSettings {
-        var painted = settings
-        look.apply(to: &painted)
-        return painted
+        look.painted(over: model.config.settings)
     }
 
     private var spaceLabels: [SpaceGlyph] {

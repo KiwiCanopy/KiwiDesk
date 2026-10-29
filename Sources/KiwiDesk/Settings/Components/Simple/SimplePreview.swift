@@ -61,19 +61,21 @@ struct SimplePreview: View {
     }
 
     /// The hovered Space or look by name; for an offline pin, both
-    /// screens, since the frame draws where it opens now.
+    /// screens as well, since the frame draws where it opens now.
     func caption(_ space: SpaceID) -> String? {
-        if model.spacePinBadge(space) == .offline {
-            return model.offlinePinSentence(space)
-        }
+        var lines: [String] = []
         switch model.simplePreviewHover {
         case .space(let hovered):
-            return previewing(hovered.raw)
+            lines.append(previewing(hovered.raw))
         case .look(let name):
-            return previewing(name)
+            lines.append(previewing(name))
         case nil:
-            return nil
+            break
         }
+        if model.spacePinBadge(space) == .offline {
+            lines.append(model.offlinePinSentence(space))
+        }
+        return lines.isEmpty ? nil : lines.joined(separator: "\n")
     }
 
     private func previewing(_ name: String) -> String {
@@ -81,7 +83,7 @@ struct SimplePreview: View {
     }
 
     private func desk(_ space: SpaceID) -> some View {
-        let mode = model.config.spaceModes[space] ?? .bsp
+        let mode = model.config.modes(for: [space])[space] ?? .bsp
         let shape = RoundedRectangle(cornerRadius: 12)
         return HomeCardBarsTile(
             settings: settings,
@@ -106,8 +108,9 @@ struct SimplePreview: View {
             )
         )
         .environment(\.schematicPalette, palette)
-        .accessibilityElement()
-        .accessibilityLabel(header(space))
+        // One description, the schematic's own; the header above
+        // names the Space.
+        .accessibilityElement(children: .combine)
     }
 
     @ViewBuilder

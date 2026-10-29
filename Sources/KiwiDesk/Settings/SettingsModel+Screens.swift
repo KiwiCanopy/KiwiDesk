@@ -11,11 +11,7 @@ extension SettingsModel {
     /// the fallback screen.
     func resolutions() -> [SpaceID: SpaceResolution] {
         let mainID = PositionalDisplays.liveMainID
-        let assignment =
-            ProfileComposition.compose(
-                displays: displays,
-                mainID: mainID
-            )?.assignment ?? [:]
+        let assignment = placementAssignment()
         var resolved: [SpaceID: SpaceResolution] = [:]
         for space in config.spaces {
             resolved[space] = Self.reading(
@@ -30,6 +26,16 @@ extension SettingsModel {
             )
         }
         return resolved
+    }
+
+    /// The positional plan both placement readers hand
+    /// `SpacePlacement.resolve`: the Screens picture's and Simple's
+    /// preview (#2737), so the two read one plan.
+    func placementAssignment() -> [SpaceID: DisplayID] {
+        ProfileComposition.compose(
+            displays: displays,
+            mainID: PositionalDisplays.liveMainID
+        )?.assignment ?? [:]
     }
 
     /// Screens area row expansion model (`ScreensFamilyRows`,

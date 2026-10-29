@@ -904,10 +904,11 @@ same change, since the save pill reads it to keep a row on Simple
 (`SimpleSectionsTests` ▸ `coverage`, `appRowStays`). Simple's
 preview is its rows' sibling column, so what it shows is asked
 of the one `simplePreviewSpace` over the selection `nav` holds,
-and the rows mark kept through `simpleKeptSpace`
-(`SimplePreviewTests` ▸ `shownSpace`); its docked width is
-`SimpleColumns.dockedPreview`, which the save pill centres
-against (`SimplePreviewTests` ▸ `columns`). **A row's
+and a row marks itself kept only through `simpleKeptSpace`
+(`SimplePreviewTests` ▸ `shownSpace`, `rowsReadTheKeptSpace`). A
+docked column's width, Simple's or a page's, is answered by the
+one `SettingsView.dockedPanelWidth`, which the save pill centres
+against (`HomeSurfacingTests`). **A row's
 menu is never the only door to an editor a row opens**: it is
 invisible at rest, so the row also draws a button, as every Space
 row's Customize does (#2674, `SpaceCustomizeButtonTests`); a

@@ -38,5 +38,8 @@ struct SimpleScreen: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
         }
+        // A row or tile removed under the pointer sends no leave, so
+        // a hover must not outlive the page (gui.md ▸ SwiftUI traps).
+        .onDisappear { model.nav.simpleHover = nil }
     }
 }

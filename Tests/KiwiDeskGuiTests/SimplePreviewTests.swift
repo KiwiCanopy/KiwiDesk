@@ -63,6 +63,8 @@ struct SimplePreviewTests {
         #expect(!model.simplePreviewIsKept)
         model.hoverSimple(.look("No such look"), inside: true)
         #expect(model.simplePreviewSettings == before)
+        #expect(model.simplePreviewHover == nil)
+        #expect(model.simplePreviewIsKept)
     }
 
     @Test("a new visit forgets the kept and hovered Space")
@@ -75,33 +77,56 @@ struct SimplePreviewTests {
         #expect(model.nav.simpleHover == nil)
     }
 
-    /// Docks only where a page's panel docks, and leaves the
-    /// controls at least their ruled 580 pt at the docking width.
-    @Test("the preview docks where a panel docks, leaving 580")
-    func columns() {
-        for width in SettingsWidthClass.allCases {
-            #expect(
-                (SimpleColumns.dockedPreview(width) != nil)
-                    == width.docksPanel
-            )
-        }
-        #expect(SimpleColumns.minimumControls >= 580)
-        #expect(SimpleColumns.contentCap >= SimpleColumns.minimumControls)
-    }
-
-    @Test("an offline pin's preview names both screens")
+    @Test("an offline pin's caption keeps the hover and both screens")
     func offlineCaption() {
         LocalizationManager.shared.select("en")
         let model = model(["a"])
-        model.config.spacePins[SpaceID("a")] = "absent-screen"
-        let preview = SimplePreview(model: model)
-        #expect(model.spacePinBadge(SpaceID("a")) == .offline)
-        #expect(
-            preview.caption(SpaceID("a"))
-                == model.offlinePinSentence(SpaceID("a"))
+        let core = model.core
+        for display in core.state.workspaces.allDisplays {
+            core.state.workspaces.removeDisplay(display.id)
+        }
+        core.state.workspaces.upsertDisplay(
+            Display(
+                id: DisplayID(1),
+                name: "Built-in",
+                frame: CGRect(x: 0, y: 0, width: 100, height: 100)
+            )
         )
-        model.config.spacePins[SpaceID("a")] = nil
-        #expect(preview.caption(SpaceID("a")) == nil)
+        let space = SpaceID("a")
+        model.config.spacePins[space] = "Dell:200x100"
+        let preview = SimplePreview(model: model)
+        let sentence = model.offlinePinSentence(space)
+        // Names the screen it waits for and the one the map lights.
+        #expect(sentence.contains("Dell"))
+        #expect(sentence.contains("Built-in"))
+        #expect(model.simpleLanding(of: space)?.name == "Built-in")
+        #expect(preview.caption(space) == sentence)
+        model.hoverSimple(.space(space), inside: true)
+        let hovered = preview.caption(space) ?? ""
+        #expect(hovered.contains("Previewing a"))
+        #expect(hovered.contains(sentence))
+        model.config.spacePins[space] = nil
+        model.hoverSimple(.space(space), inside: false)
+        #expect(preview.caption(space) == nil)
+    }
+
+    /// A row that compared `nav.simpleKept` itself would ring a
+    /// deleted Space's neighbour wrong; the one reading is held.
+    @Test("rows mark kept through the one reading")
+    func rowsReadTheKeptSpace() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Simple/"
+                    + "SimpleSpacesCard.swift"
+            )
+        let text = try SourceScan.strippedSource(at: file)
+            .filter { !$0.isWhitespace }
+        #expect(text.contains("model.simpleKeptSpace==space"))
+        // The row draws the measured pair, never a token of its own.
+        #expect(text.contains("shape.fill(Self.keptFill)"))
+        #expect(text.contains("isKept(space)?Self.keptRing:.clear"))
+        #expect(!text.contains("nav.simpleKept=="))
+        #expect(!text.contains("nav.simpleKept!="))
     }
 
     /// The ring is the kept cue, so it must part from the fill it

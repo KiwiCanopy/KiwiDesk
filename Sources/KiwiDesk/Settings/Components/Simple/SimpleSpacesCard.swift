@@ -109,22 +109,31 @@ struct SimpleSpacesCard: View {
         }
         .padding(.horizontal, 4)
         .padding(.vertical, 4)
-        .background(rowFill(space))
+        // The tap is the row's ground, never its controls, so a
+        // click into the name field only focuses it.
+        .background(
+            rowFill(space).onTapGesture { model.nav.simpleKept = space }
+        )
         .overlay(
             // Closed on all four sides (#2737 ruling 5): the ring
             // marks the kept Space, the fill under it the pointer.
             RoundedRectangle(cornerRadius: 6).strokeBorder(
-                isKept(space) ? SettingsTheme.accent : .clear,
+                isKept(space) ? Self.keptRing : .clear,
                 lineWidth: 1
             )
         )
-        .contentShape(RoundedRectangle(cornerRadius: 6))
         .onHover { model.hoverSimple(.space(space), inside: $0) }
-        .onTapGesture { model.nav.simpleKept = space }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel(space.raw)
         .accessibilityAddTraits(isKept(space) ? [.isSelected] : [])
         .rowActions { actions(space) }
         .spaceDragLift(space, in: reorder)
     }
+
+    /// The kept row's ring and fill, the pair `SimplePreviewTests`
+    /// ▸ `ringSeparates` measures.
+    static let keptRing = SettingsTheme.accent
+    static let keptFill = SettingsTheme.chipHover
 
     private func isKept(_ space: SpaceID) -> Bool {
         model.simpleKeptSpace == space
@@ -137,7 +146,7 @@ struct SimpleSpacesCard: View {
         return ZStack {
             shape.fill(SettingsTheme.card)
             if isKept(space) {
-                shape.fill(SettingsTheme.chipHover)
+                shape.fill(Self.keptFill)
             } else if model.nav.simpleHover == .space(space) {
                 shape.fill(SettingsTheme.chipRest)
             }
@@ -148,6 +157,12 @@ struct SimpleSpacesCard: View {
     /// trash's delete.
     @ViewBuilder
     private func actions(_ space: SpaceID) -> some View {
+        // The keyboard's and VoiceOver's way to the row's click.
+        Button(L("simple.spaces.show_in_preview", "Show in Preview")) {
+            model.nav.simpleKept = space
+        }
+        .disabled(isKept(space))
+        Divider()
         Button(L("spaces.context.move_up", "Move Up")) {
             model.moveSpace(space, by: -1)
         }

@@ -115,6 +115,10 @@ struct SettingsView: View {
         .onChange(of: model.destination) { _, _ in
             previewShown = false
         }
+        // The card is per mount, and a root switch is a navigation.
+        .onChange(of: model.showsSimple) { _, _ in
+            previewShown = false
+        }
         // The Mac Checklist's one read (#1365), at the shell so
         // the Home card and the section count the same snapshot:
         // on appear, and whenever the window comes back forward

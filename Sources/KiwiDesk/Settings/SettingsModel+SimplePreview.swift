@@ -62,28 +62,31 @@ extension SettingsModel {
         guard case .look(let name) = simplePreviewHover,
             let look = hoveredLook(name)
         else { return config.settings }
-        return LookTile.painted(look, over: config.settings)
+        return look.painted(over: config.settings)
     }
 
     private func hoveredLook(_ name: String) -> ShelfLook? {
         core.bundledLooks.first { $0.name == name }
     }
 
-    /// The connected screen `space` opens on now, through the
-    /// runtime's own placement — a pin to a missing screen lands
-    /// on its fallback, the main screen (#2737 ruling 5).
-    func simpleLanding(of space: SpaceID) -> Display? {
+    /// Where `space` is placed now, by the runtime's own
+    /// precedence: a pin to a missing screen carries the screen it
+    /// falls back to, which need not be the main one.
+    func simplePlacement(of space: SpaceID) -> SpacePlacement.Resolution? {
         SpacePlacement.resolve(
             space: space,
             pins: config.spacePins,
             mainSpaces: config.mainSpaces,
             displays: displays,
             mainID: PositionalDisplays.liveMainID,
-            assignment: ProfileComposition.compose(
-                displays: displays,
-                mainID: PositionalDisplays.liveMainID
-            )?.assignment ?? [:]
-        )?.display
+            assignment: placementAssignment()
+        )
+    }
+
+    /// The connected screen `space` opens on now — the map lights
+    /// it, and the offline sentence names it.
+    func simpleLanding(of space: SpaceID) -> Display? {
+        simplePlacement(of: space)?.display
     }
 
     /// A Space's Screen pin as its chip draws it: the one reading
@@ -96,10 +99,14 @@ extension SettingsModel {
         )
     }
 
-    /// "Pin offline"'s sentence, naming both screens where it can:
-    /// the chip's hover and the preview's caption read this one.
+    /// "Pin offline"'s sentence, naming the screen the pin waits
+    /// for and the one the Space opens on meanwhile — the same
+    /// fallback the preview's map lights. The chip's hover and the
+    /// preview's caption read this one.
     func offlinePinSentence(_ space: SpaceID) -> String {
-        guard let pin = config.spacePins[space], let main = mainDisplay
+        guard
+            case .pinnedAbsent(let pin, let fallback) =
+                simplePlacement(of: space)
         else {
             return L(
                 "spaces.pin_offline_badge.help",
@@ -108,12 +115,22 @@ extension SettingsModel {
                     + "for now."
             )
         }
+        let waiting = Display.fingerprintParts(pin).name
+        guard fallback.id == mainDisplay?.id else {
+            return L(
+                "spaces.pin_offline_badge.help_fallback",
+                "Pinned to %1$@, which isn't connected.\nOpens on "
+                    + "%2$@ until it's back.",
+                waiting,
+                fallback.name
+            )
+        }
         return L(
             "spaces.pin_offline_badge.help_named",
             "Pinned to %1$@, which isn't connected.\nOpens on %2$@, "
                 + "the main screen, until it's back.",
-            Display.fingerprintParts(pin).name,
-            main.name
+            waiting,
+            fallback.name
         )
     }
 }

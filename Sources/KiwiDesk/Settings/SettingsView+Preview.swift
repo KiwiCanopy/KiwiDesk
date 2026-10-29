@@ -22,7 +22,7 @@ extension SettingsView {
     func dockedPanelWidth(_ width: SettingsWidthClass) -> CGFloat? {
         guard panelDocked(width) else { return nil }
         return model.showsSimple
-            ? SimpleColumns.dockedPreview(width)
+            ? SimpleColumns.preview
             : SettingsTheme.panelWidth
     }
 
