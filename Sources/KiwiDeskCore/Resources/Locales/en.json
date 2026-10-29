@@ -883,7 +883,7 @@
   "keybinding.conflict.tooltip.shadows_apps": "Takes %1$@ away from every app while it is bound here.",
   "keybinding.conflict.tooltip.side_collapse": "Also bound in this layer to %1$@, which differs only in a modifier's side. While left and right modifiers aren't told apart, only one of the two will fire. Turn on %2$@ to separate them.",
   "keybinding.conflict.tooltip.system_dead": "Won't work: macOS answers this shortcut first, for %1$@.",
-  "keybinding.conflict.tooltip.system_off": "macOS reserves this shortcut for %1$@, which is switched off right now.",
+  "keybinding.conflict.tooltip.system_off": "Heads up: the %1$@ shortcut is switched off in System Settings. Turn it back on and macOS takes this key, so your KiwiDesk shortcut stops working.",
   "keybinding.conflict.tooltip.unrecognized": "Not a recognized shortcut.",
   "keybinding.conflict.unrecognized": "Shortcut for \"%1$@\" isn't a recognized shortcut.",
   "keybinding.desktop_away.axhint": "Not connected right now.",
