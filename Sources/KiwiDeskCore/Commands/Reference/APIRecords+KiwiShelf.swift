@@ -167,8 +167,7 @@ extension APIReference {
         ),
         "set_pocket_position": APIRecord(
             "Sets where along its edge the pocket sits, 0–100 "
-                + "percent from the left or top; on a bar's edge it "
-                + "takes the nearer end.",
+                + "percent; a bar's edge takes the nearer end.",
             .number("percent")
         ),
         "set_reveal_timeout": APIRecord(
