@@ -158,7 +158,7 @@ struct SettingsSummaryGroupTests {
     @Test("the outer slider's nudge is one Outer gap row")
     func outerNudgeIsOneRow() throws {
         pinEnglish()
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.config.settings.gapsGlobal.outer = .init(
             top: 14,
             bottom: 14,
@@ -176,7 +176,7 @@ struct SettingsSummaryGroupTests {
     @Test("the inner slider's nudge is one Inner gap row")
     func innerNudgeIsOneRow() {
         pinEnglish()
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.config.settings.gapsGlobal.inner.horizontal = 3
         model.config.settings.gapsGlobal.inner.vertical = 3
         #expect(gapRows(model).map(\.key) == [.gaps(.inner)])
@@ -185,7 +185,7 @@ struct SettingsSummaryGroupTests {
     @Test("edges that differ list each changed edge alone")
     func differingEdgesListApart() {
         pinEnglish()
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.config.settings.gapsGlobal.outer.top = 2
         model.config.settings.gapsGlobal.outer.left = 4
         #expect(
@@ -199,7 +199,7 @@ struct SettingsSummaryGroupTests {
     @Test("one edge brought level with the rest folds the group")
     func levellingEdgeFolds() {
         pinEnglish()
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.cleanConfig.settings.gapsGlobal.outer.right = 4
         model.config = model.cleanConfig
         model.config.settings.gapsGlobal.outer.right =
@@ -210,7 +210,7 @@ struct SettingsSummaryGroupTests {
     @Test("a folded row's revert takes every edge back")
     func foldedRevertTakesAll() throws {
         pinEnglish()
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         let clean = model.cleanConfig.settings.gapsGlobal.outer
         model.config.settings.gapsGlobal.outer = .init(
             top: 30,
@@ -227,7 +227,7 @@ struct SettingsSummaryGroupTests {
     @Test("a live change of every edge is one live row")
     func liveRowFolds() throws {
         pinEnglish()
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         var saved = model.cleanConfig.settings
         saved.gapsGlobal.outer = .init(top: 2, bottom: 2, left: 2, right: 2)
         var live = model.cleanConfig.settings
@@ -276,7 +276,7 @@ struct MinSizeSummaryTests {
     @Test("a master width nudge is one row")
     func widthNudgeIsOneRow() {
         LocalizationManager.shared.select("en")
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.setMinSize(420, axis: .width, for: nil)
         #expect(sizeRows(model) == [.behaviour(.minWindowSize)])
     }
@@ -284,7 +284,7 @@ struct MinSizeSummaryTests {
     @Test("one layout's width is that row alone")
     func layoutEditListsApart() {
         LocalizationManager.shared.select("en")
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.setMinSize(420, axis: .width, for: .stack)
         #expect(sizeRows(model) == [.behaviour(.minSizeStackWidth)])
     }
@@ -294,7 +294,7 @@ struct MinSizeSummaryTests {
     @Test("a width nudge over differing heights lists apart")
     func differingHeightsListApart() {
         LocalizationManager.shared.select("en")
-        let model = makeTestModel()
+        let model = makeTestModel(root: .advanced)
         model.cleanConfig.settings.minWindowSizes.stack.height = 150
         model.config = model.cleanConfig
         model.setMinSize(420, axis: .width, for: nil)

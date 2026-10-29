@@ -48,7 +48,10 @@ extension SettingsModel {
                 lookReachEdits[profile] = nil
             }
         case .lookChanges:
-            SettingsDiffRowSource.lookMembers(of: self).forEach(revert)
+            config.settings = ShelfLook.unpicked(
+                config.settings,
+                to: cleanConfig.settings
+            )
         case .ruleReach(let app):
             revertRuleReach(of: row.key, app: app)
         case .live:

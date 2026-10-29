@@ -98,13 +98,7 @@ extension KiwiCore {
             ),
             palette: nil
         )
-        for leaf in TilingSettings.liquidGlassLeaves {
-            settings[keyPath: leaf] = before[keyPath: leaf]
-        }
-        for leaf in TilingSettings.layoutIndicatorLeaves {
-            settings[keyPath: leaf] = before[keyPath: leaf]
-        }
-        settings.lookOrigin = before.lookOrigin
+        ShelfLook.restorePickReach(of: &settings, from: before)
         return settings
     }
 

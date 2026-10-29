@@ -1,8 +1,9 @@
 import KiwiDeskCore
 
 /// Simple's one look row (#2745 ruling): on Simple, every draft row
-/// a look paints folds into "Changes to the look", whose ↺ takes
-/// them all back. Advanced keeps a row per setting.
+/// a look pick reaches folds into "Changes to the look", whose ↺
+/// takes the pick back (`ShelfLook.unpicked`). Advanced keeps a row
+/// per setting.
 extension SettingsDiffRowSource {
     /// `rows` with Simple's look rows folded into one, where the
     /// first of them stood; unchanged on Advanced.
@@ -10,27 +11,50 @@ extension SettingsDiffRowSource {
         _ rows: [SettingsDiffRow],
         for model: SettingsModel
     ) -> [SettingsDiffRow] {
-        guard model.showsSimple,
-            let first = rows.firstIndex(where: foldsIntoLook)
-        else { return rows }
-        var folded = rows.filter { !foldsIntoLook($0) }
+        guard model.showsSimple else { return rows }
+        let keys = lookKeys(of: model)
+        let folds = { (row: SettingsDiffRow) in foldsIntoLook(row, keys) }
+        guard let first = rows.firstIndex(where: folds) else { return rows }
+        var folded = rows.filter { !folds($0) }
         folded.insert(lookRow, at: first)
         return folded
     }
 
-    /// The draft rows Simple's look row stands for.
-    static func lookMembers(
-        of model: SettingsModel
-    ) -> [SettingsDiffRow] {
-        rows(for: model, foldingLook: false).filter(foldsIntoLook)
+    /// The changed keys the look row stands for: those taking the
+    /// pick back would leave unchanged, so the row's members are
+    /// exactly what its ↺ reverts.
+    static func lookKeys(of model: SettingsModel) -> Set<SettingKey> {
+        var unpicked = model.config
+        unpicked.settings = ShelfLook.unpicked(
+            model.config.settings,
+            to: model.cleanConfig.settings
+        )
+        return Set(changed(model.config, model))
+            .subtracting(changed(unpicked, model))
     }
 
-    /// A draft row a look pick writes: a look-painted path, or the
-    /// origin the pick records.
-    static func foldsIntoLook(_ row: SettingsDiffRow) -> Bool {
+    /// A draft row among `keys`, or the master of a group with a
+    /// member among them.
+    static func foldsIntoLook(
+        _ row: SettingsDiffRow,
+        _ keys: Set<SettingKey>
+    ) -> Bool {
         row.section == .draft
-            && (SimpleCoverage.isLookPainted(row.key)
-                || row.key == .colours(.lookOrigin))
+            && (keys.contains(row.key)
+                || SettingKey.summaryGroups[row.key, default: []]
+                    .contains(where: keys.contains))
+    }
+
+    private static func changed(
+        _ config: GuiConfig,
+        _ model: SettingsModel
+    ) -> [SettingKey] {
+        SettingsDraftDiff.between(
+            config: config,
+            cleanConfig: model.cleanConfig,
+            luaSource: model.luaSource,
+            cleanLuaSource: model.cleanLuaSource
+        ).changedSettings
     }
 
     private static var lookRow: SettingsDiffRow {

@@ -4,94 +4,95 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// Simple's one look row (#2745 ruling): on Simple a look's rows
-/// fold into "Changes to the look", whose ↺ takes them all back;
-/// Advanced keeps a row per setting. Main-actor spend: model
+/// Simple's one look row (#2745 ruling): on Simple a look pick's
+/// rows fold into "Changes to the look", whose ↺ takes the pick
+/// back; Advanced keeps a row per setting. Main-actor spend: model
 /// construction and a few diff walks.
 @MainActor
 @Suite("Simple look row")
 struct SimpleLookRowTests {
-    /// A model on `root` wearing the first bundled look that moves
-    /// more than one look row, plus one edit no look paints.
+    /// A model on `root` whose saved profile carries an authored
+    /// origin and a per-layout App Bar indicator, then picks a
+    /// bundled look naming the indicator — so the pick reaches past
+    /// its keys — plus one edit no look paints.
     private func model(_ root: SettingsRoot) throws -> SettingsModel {
         let defaults = makeScratchDefaults().defaults
         SettingsRootPreference.write(root, to: defaults)
         let model = makeTestModel(defaults: defaults)
-        let clean = model.config.settings
-        let look = try #require(
-            model.core.bundledLooks.first { look in
-                model.config.settings = clean
-                model.applyLook(look)
-                return SettingsDiffRowSource.rows(
-                    for: model,
-                    foldingLook: false
-                ).filter(SettingsDiffRowSource.foldsIntoLook).count > 1
+        var saved = model.config.settings
+        saved.lookOrigin = ShelfLook(
+            name: "Authored",
+            style: [:],
+            colors: [:],
+            author: "Someone"
+        )
+        saved.monocle.appBar.activeIndicator = .outline
+        model.cleanConfig.settings = saved
+        model.config.settings = saved
+        var look = try #require(
+            model.core.bundledLooks.first {
+                $0.match(saved) == .none
             }
         )
-        model.config.settings = clean
+        look.style["app_bar.active_indicator"] = .string("edge_mark")
         model.applyLook(look)
         model.config.settings.spaceBarStyle.visibility =
-            clean.spaceBarStyle.visibility == .hidden ? .always : .hidden
+            saved.spaceBarStyle.visibility == .hidden ? .always : .hidden
         return model
-    }
-
-    /// The rows no look paints.
-    private func others(_ rows: [SettingsDiffRow]) -> [String] {
-        rows.filter { !SettingsDiffRowSource.foldsIntoLook($0) }
-            .filter { $0.revert != .lookChanges }.map(\.id)
     }
 
     private func rows(_ model: SettingsModel) -> [SettingsDiffRow] {
         SettingsDiffRowSource.rows(for: model)
     }
 
-    @Test("on Simple a look's rows are one row, the rest their own")
+    @Test("on Simple a pick's rows are one row, the rest their own")
     func simpleFolds() throws {
-        let model = try model(.simple)
-        let rows = rows(model)
+        let simple = try model(.simple)
+        let rows = rows(simple)
         #expect(rows.filter { $0.revert == .lookChanges }.count == 1)
-        #expect(!rows.contains(where: SettingsDiffRowSource.foldsIntoLook))
-        #expect(!others(rows).isEmpty)
-        // The row stands for more than one setting.
-        #expect(SettingsDiffRowSource.lookMembers(of: model).count > 1)
+        // Its every reach is folded: the origin and the per-layout
+        // indicator the pick cleared leave no row of their own.
+        let keys = rows.map(\.key)
+        #expect(!keys.contains(.colours(.lookOrigin)))
+        #expect(!keys.contains(.layoutAppBar(.monocleAppBarActiveIndicator)))
+        // The bar's on/off is the one row left beside it.
+        #expect(rows.count == 2)
+        #expect(keys.contains(.kiwishelf(.visibility)))
     }
 
     @Test("on Advanced every setting keeps its row")
     func advancedKeepsRows() throws {
-        let model = try model(.advanced)
-        let rows = rows(model)
+        let advanced = try model(.advanced)
+        let rows = rows(advanced)
+        let keys = rows.map(\.key)
         #expect(!rows.contains { $0.revert == .lookChanges })
-        #expect(
-            rows.filter(SettingsDiffRowSource.foldsIntoLook).count > 1
-        )
+        #expect(keys.contains(.colours(.lookOrigin)))
+        #expect(keys.contains(.layoutAppBar(.monocleAppBarActiveIndicator)))
+        #expect(keys.count > 3)
     }
 
-    @Test("the look row's ↺ takes back every look change, and no other")
+    @Test("the look row's ↺ takes the pick back, and no other")
     func revertTakesTheLook() throws {
         let model = try model(.simple)
-        let before = rows(model)
-        let row = try #require(before.first { $0.revert == .lookChanges })
+        let edited = model.config.settings.spaceBarStyle.visibility
+        let row = try #require(
+            rows(model).first { $0.revert == .lookChanges }
+        )
         #expect(model.canRevert(row))
         #expect(!model.revertTakesGroup(row))
         model.revert(row)
-        #expect(SettingsDiffRowSource.lookMembers(of: model).isEmpty)
-        #expect(
-            LookKeys.extract(from: model.config.settings)
-                == LookKeys.extract(from: model.cleanConfig.settings)
-        )
-        #expect(
-            ColorPaletteKeys.extract(from: model.config.settings)
-                == ColorPaletteKeys.extract(from: model.cleanConfig.settings)
-        )
-        // The bar's on/off stays edited.
-        #expect(others(rows(model)) == others(before))
-        #expect(!others(before).isEmpty)
+        var expected = model.cleanConfig.settings
+        expected.spaceBarStyle.visibility = edited
+        #expect(model.config.settings == expected)
+        #expect(rows(model).map(\.key) == [.kiwishelf(.visibility)])
     }
 
     @Test("the look row's jump stays on Simple")
     func jumpStays() throws {
         let model = try model(.simple)
-        let row = try #require(rows(model).first { $0.revert == .lookChanges })
+        let row = try #require(
+            rows(model).first { $0.revert == .lookChanges }
+        )
         #expect(SimpleCoverage.draws(row, in: model))
         model.jump(to: row)
         #expect(model.showsSimple)

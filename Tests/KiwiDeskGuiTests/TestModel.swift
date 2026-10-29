@@ -17,13 +17,18 @@ import Foundation
 /// pinned identical.
 ///
 /// Pass `defaults:` to keep a handle for asserting persistence;
-/// omitted, a fresh scratch domain is minted per model.
+/// omitted, a fresh scratch domain is minted per model. Pass
+/// `root:` to store a Settings root first: a suite asserting the
+/// save pill's per-setting rows names `.advanced`, since Simple
+/// folds a look's rows into one (#2745).
 @MainActor
 func makeTestModel(
     core: KiwiCore? = nil,
-    defaults: UserDefaults? = nil
+    defaults: UserDefaults? = nil,
+    root: SettingsRoot? = nil
 ) -> SettingsModel {
     let domain = defaults ?? makeScratchDefaults().defaults
+    if let root { SettingsRootPreference.write(root, to: domain) }
     let model = SettingsModel(
         core: core ?? makeTestCore(),
         preferences: domain
