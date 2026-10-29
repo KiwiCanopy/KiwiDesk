@@ -8,6 +8,14 @@ import SwiftUI
 struct SimpleScreen: View {
     @ObservedObject var model: SettingsModel
     @Environment(\.settingsWidth) private var width
+    /// Whether the sections are in place: false only while the
+    /// switch's converge has yet to play (#2777).
+    @State private var arrived: Bool
+
+    init(model: SettingsModel) {
+        self.model = model
+        _arrived = State(initialValue: !model.nav.convergePending)
+    }
 
     /// The one top gutter, Home's (#1536).
     private static let topGutter: CGFloat = 24
@@ -23,10 +31,15 @@ struct SimpleScreen: View {
                     // First: it teaches the keys the tour taught,
                     // before any control (ui-designer, #2737).
                     SimpleKiwiHubKeys(model: model)
+                        .modifier(converge(0, geo.size))
                     SimpleLookCard(model: model)
+                        .modifier(converge(1, geo.size))
                     SimpleSpacesCard(model: model)
+                        .modifier(converge(2, geo.size))
                     SimpleShortcutCards(model: model)
+                        .modifier(converge(3, geo.size))
                     HomeSupportStrip(model: model)
+                        .modifier(converge(4, geo.size))
                 }
                 .frame(
                     width: min(
@@ -46,8 +59,18 @@ struct SimpleScreen: View {
                 .frame(maxWidth: .infinity)
             }
         }
+        .coordinateSpace(name: HomeConverge.space)
+        .onAppear {
+            arrived = true
+            model.nav.convergePending = false
+        }
         // A row or tile removed under the pointer sends no leave, so
         // a hover must not outlive the page (gui.md ▸ SwiftUI traps).
         .onDisappear { model.nav.simpleHover = nil }
+    }
+
+    /// Section `index`'s flight from the window's centre.
+    private func converge(_ index: Int, _ viewport: CGSize) -> HomeConverge {
+        HomeConverge(arrived: arrived, index: index, viewport: viewport)
     }
 }

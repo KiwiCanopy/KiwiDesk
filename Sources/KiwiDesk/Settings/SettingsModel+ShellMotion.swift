@@ -44,7 +44,8 @@ extension SettingsModel {
     func recordShellMotion(from old: SettingsRoot) {
         guard settingsRoot != old, destination == nil else { return }
         nav.shellMotion = .converge
-        // Only Home arriving owes the cards' flight.
-        nav.convergePending = settingsRoot == .advanced
+        // Either root arriving owes its cards' flight: Home's grid,
+        // or Simple's sections (#2777).
+        nav.convergePending = true
     }
 }

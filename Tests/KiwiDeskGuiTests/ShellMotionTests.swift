@@ -42,13 +42,15 @@ struct ShellMotionTests {
         #expect(model.nav.shellMotion == .expand(.bars))
     }
 
-    /// Only Home arriving owes the flight, and a landing breaks the
-    /// line back to a card.
+    /// Either root arriving owes the flight, and a landing breaks
+    /// the line back to a card.
     @Test("a debt is owed only where it is paid")
     func debtsArePaidWhereOwed() {
         let model = model(.advanced)
         model.pickRoot(.simple)
-        #expect(!model.nav.convergePending)
+        // Simple's sections fly in too (#2777), and pay it on arrival.
+        #expect(model.nav.convergePending)
+        model.nav.convergePending = false
         model.openAdvanced(SettingsAnchor(destination: .looks))
         model.destination = .looks
         model.destination = nil
@@ -132,6 +134,18 @@ struct ShellMotionTests {
         ] {
             #expect(shell.contains(needle), "\(needle)")
         }
+        // Simple's sections take Home's flight and pay its debt
+        // (#2777).
+        let simple = try source("SimpleScreen.swift")
+        #expect(simple.contains(".modifier(converge(0,geo.size))"))
+        #expect(
+            simple.contains("State(initialValue:!model.nav.convergePending)")
+        )
+        #expect(
+            simple.contains(
+                ".onAppear{arrived=truemodel.nav.convergePending=false}"
+            )
+        )
         let home = try source("HomeScreen.swift")
         #expect(home.contains(".modifier(HomeConverge(arrived:arrived,"))
         #expect(

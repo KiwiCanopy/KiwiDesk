@@ -44,8 +44,10 @@ struct SpaceModePictureMenu<Face: View>: View {
 }
 
 /// Each layout's picture for a menu item: its schematic at rest on
-/// the cards' dark plate, in the plate's palette, so it reads the
-/// same in a light or dark menu and matches the Space cards (#2777).
+/// a small screen of the cards' plate, in the plate's palette, so
+/// its ghost windows read in a light or dark menu (#2777). The
+/// schematic is inset in the plate, so every layout shows the same
+/// rim whether its windows fill the screen or not.
 /// Rendered once per layout and kept.
 @MainActor
 enum LayoutMenuPictures {
@@ -61,8 +63,10 @@ enum LayoutMenuPictures {
         return mode == .floating ? max(count, 3) : count
     }
 
-    /// The picture's size in points.
+    /// The picture's size in points, and the plate's rim around
+    /// the schematic.
     static let size = CGSize(width: 40, height: 25)
+    static let rim: CGFloat = 2
 
     static func image(_ mode: LayoutMode) -> NSImage {
         if let hit = memo[mode] { return hit }
@@ -74,8 +78,14 @@ enum LayoutMenuPictures {
                 windows: windows(for: mode),
                 scale: .tile
             )
-            .scaleEffect(size.width / (SchematicScale.tile.width ?? 132))
-            .frame(width: size.width, height: size.height)
+            .scaleEffect(
+                (size.width - 2 * rim) / (SchematicScale.tile.width ?? 132)
+            )
+            .frame(
+                width: size.width - 2 * rim,
+                height: size.height - 2 * rim
+            )
+            .padding(rim)
             .background(
                 RoundedRectangle(cornerRadius: 4)
                     .fill(SettingsTheme.previewPlate)

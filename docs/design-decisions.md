@@ -10307,7 +10307,8 @@ them, and the hover says where.
 converges: Simple fades and Home's cards gather out of the
 window's centre into their slots, so Advanced reads as the same
 settings opened out rather than another window; back, Home
-recedes under Simple fading in. A card expands into its page and
+recedes and Simple's sections gather the same way, so neither
+root is the other's afterthought (#2777). A card expands into its page and
 Back folds it into the card again, so the page is visibly that
 card's. A landing with no card behind it — a
 search hit, a "… in Advanced" link — zooms through, since a

@@ -39,9 +39,11 @@ struct SimpleSpacePicture: View {
     static let padding: CGFloat = 6
 
     /// The bars' scale for a tile `width` wide: the 1.8 the preview
-    /// was tuned on at 441.6 pt, in proportion.
+    /// was tuned on at 441.6 pt, in proportion, held at 1 — past it
+    /// the App Bar's items add a title their measured length leaves
+    /// out, and a card has no room for one anyway.
     static func barScale(forWidth width: CGFloat) -> CGFloat {
-        1.8 * width / 441.6
+        min(1.8 * width / 441.6, 1)
     }
 
     private func schematic(

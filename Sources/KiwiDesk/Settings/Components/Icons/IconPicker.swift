@@ -30,7 +30,7 @@ struct IconPicker: View {
         Button {
             showing = true
         } label: {
-            HStack(spacing: 6) {
+            HStack(spacing: 4) {
                 // Fixed glyph slot: every picker button is
                 // the same size whether it holds an emoji, a
                 // symbol, or nothing yet.
@@ -50,7 +50,9 @@ struct IconPicker: View {
                     .foregroundStyle(.secondary)
             }
         }
-        .settingsActionButton()
+        // A button opening a picker of its own wears the pop-up
+        // trigger's face, as the Font and app pickers do (#2777).
+        .settingsPopUpTrigger()
         // Large like the menu pickers beside it (the space
         // row's mode dropdown): the trigger is a chooser
         // button and must sit level with that family, even

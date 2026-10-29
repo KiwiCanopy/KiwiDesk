@@ -6,10 +6,17 @@ import SwiftUI
 /// removal is one fixed motion. The spring is gated where the shell
 /// keys it; a transition's own timing names the gate in its argument.
 extension SettingsView {
-    /// Simple fades: out ahead of Home's cards, in behind them.
+    /// Simple's sections arrive card by card under a switch, as
+    /// Home's do (`HomeConverge`, #2777), and otherwise fade in; it
+    /// always leaves fading, ahead of Home's cards.
     var simpleTransition: AnyTransition {
-        .opacity.animation(
+        let fade = AnyTransition.opacity.animation(
             reduceMotion ? nil : .easeOut(duration: ShellMotion.simpleFade)
+        )
+        return .asymmetric(
+            insertion: model.nav.shellMotion == .converge
+                ? .identity : fade,
+            removal: fade
         )
     }
 

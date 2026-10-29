@@ -1,8 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A Space's layout menu, every layout (#123): drawn by the Spaces
-/// page's rows; Simple's cards take `SpaceModePictureMenu` (#2777).
+/// A Space's layout menu, every layout (#123), each item drawn with
+/// its layout's picture: the Spaces page's rows; Simple's cards
+/// take `SpaceModePictureMenu`, whose face is a picture (#2777).
 struct SpaceModeMenu: View {
     @ObservedObject var model: SettingsModel
     let space: SpaceID
@@ -14,10 +15,13 @@ struct SpaceModeMenu: View {
         )
         Picker("", selection: binding) {
             ForEach(LayoutMode.allCases, id: \.self) { mode in
-                Label(
-                    mode.displayName,
-                    systemImage: mode.symbol
-                )
+                // The layout's picture, as Simple's cards' menu
+                // draws it: one drawing per layout (#2777).
+                Label {
+                    Text(mode.displayName)
+                } icon: {
+                    Image(nsImage: LayoutMenuPictures.image(mode))
+                }
                 .tag(mode)
             }
         }
