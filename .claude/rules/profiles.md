@@ -975,8 +975,18 @@ the same three answers or argues a different one — and since
 the same answers.** A breaking `ShelfLook` or `LookDocument`
 change bumps `LookDocument.currentFormat` for `looks.json` AND
 `SetupBundle.currentFormat`, which carries `[ShelfLook]` inline,
-and rules the markerless `LookExport` sidecar deliberately, as
-the palette sidecar above was. **And a look stores setting PATHS
+and rules the `LookExport` sidecar deliberately, as the palette
+sidecar above was. Since #1740 that file states its `format`
+(`LookDocument.currentFormat` when written) and carries its credit
+beside the body: `LookStore.importLook(data:)` is its one reader,
+refusing a newer file and crossing an older one in memory through
+`ConfigMigration.lookExportSteps`, since the file is never
+rewritten — so a `LookDocument.currentFormat` bump owes an entry
+there lifting to the new format (`LookExportStepsCensusTests`). An
+older build that saves the library drops each look's `author` and
+`based_on`, which its decoder does not know: accepted, since a
+bump would make that build read the whole library as unreadable.
+**And a look stores setting PATHS
 and their wire spellings as data** (`LookKeys`): renaming a key
 or value a look carries — any path in `LookKeys.all`, since
 #1752 any colour path in `ColorPaletteKeys.all`, and a field

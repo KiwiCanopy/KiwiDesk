@@ -9,6 +9,8 @@ public final class LookStore {
         case notFound(String)
         case duplicateName(String)
         case invalidFile
+        /// A look file a newer build wrote (#1740), its format.
+        case newerLookFile(Int)
         /// Unreadable or newer-format library.
         case unreadableLibrary
     }
@@ -127,15 +129,41 @@ public final class LookStore {
         try Self.encoder.encode(file).write(to: url)
     }
 
-    /// Imports a look file, admitted (`ShelfLook.admitted`).
+    /// Imports a look file, admitted (`ShelfLook.admitted`), with
+    /// its credit. A file below the current format crosses in memory
+    /// through `ConfigMigration.lookExportSteps`, since the file is
+    /// never rewritten (profiles.md); a newer one is refused.
     public func importLook(from url: URL) throws -> ShelfLook {
-        guard let data = try? Data(contentsOf: url),
-            let file = try? JSONDecoder().decode(
-                LookExport.self,
+        guard let data = try? Data(contentsOf: url) else {
+            throw StoreError.invalidFile
+        }
+        return try Self.importLook(data: data)
+    }
+
+    /// `importLook(from:)` over bytes already in hand — a file, or a
+    /// gallery download (#1740). The one reader of a look file: a
+    /// direct `LookExport` decode skips the newer-format refusal.
+    public static func importLook(data: Data) throws -> ShelfLook {
+        // The format is read before the body, so a newer file whose
+        // body this build cannot decode still gets the update message.
+        guard
+            let stamp = try? JSONDecoder().decode(
+                LookFileStamp.self,
                 from: data
             )
         else { throw StoreError.invalidFile }
-        return file.look.admitted
+        let format = stamp.format ?? 0
+        guard format <= LookDocument.currentFormat else {
+            throw StoreError.newerLookFile(format)
+        }
+        let crossed = ConfigMigration.crossingLookExport(data, from: format)
+        guard
+            let file = try? JSONDecoder().decode(
+                LookExport.self,
+                from: crossed
+            )
+        else { throw StoreError.invalidFile }
+        return file.credited.admitted
     }
 
     private static var encoder: JSONEncoder { LookDocument.encoder }
@@ -189,4 +217,9 @@ public final class LookStore {
             in: migrationBackups
         )
     }
+}
+
+/// A look file's format alone, read before its body (#1740).
+private struct LookFileStamp: Decodable {
+    var format: Int?
 }

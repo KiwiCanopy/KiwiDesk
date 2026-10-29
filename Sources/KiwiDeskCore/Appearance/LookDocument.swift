@@ -60,16 +60,47 @@ struct LookDocument: Codable {
 
 /// An exported look (#1684): the look alone, which owns its
 /// colours (#1752), so the file carries everything another Mac
-/// needs. Bare, like the palette sidecar — a breaking `ShelfLook`
-/// change must rule this file deliberately.
+/// needs, with the format it was written in and its credit (#1740).
+/// A file without `format` is an older build's and reads as format
+/// 0; the look body never carries the credit, which sits beside it.
 public struct LookExport: Codable, Sendable, Equatable {
+    public var format: Int
+    public var author: String?
+    public var basedOn: LookCredit?
     public var look: ShelfLook
 
+    /// Splits the credit `look` carries out beside its body.
     public init(look: ShelfLook) {
-        self.look = look
+        format = LookDocument.currentFormat
+        author = look.author
+        basedOn = look.basedOn
+        self.look = look.uncredited
+    }
+
+    /// The look with its credit put back on it.
+    public var credited: ShelfLook {
+        var out = look
+        out.author = author
+        out.basedOn = basedOn
+        return out
     }
 
     private enum CodingKeys: String, CodingKey {
+        case format
+        case author
+        case basedOn = "based_on"
         case look
+    }
+
+    public init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        format =
+            try container.decodeIfPresent(Int.self, forKey: .format) ?? 0
+        author = try container.decodeIfPresent(String.self, forKey: .author)
+        basedOn = try container.decodeIfPresent(
+            LookCredit.self,
+            forKey: .basedOn
+        )
+        look = try container.decode(ShelfLook.self, forKey: .look)
     }
 }

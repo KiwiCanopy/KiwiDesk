@@ -16,21 +16,32 @@ public struct ShelfLook: Sendable, Equatable, Codable {
     /// shipped colours included, so applying a look leaves no
     /// earlier colour behind.
     public var colors: [String: String]
+    /// Who made it, kept from an imported look (#1740); nil for the
+    /// user's own and a bundled one.
+    public var author: String?
+    /// The look it started from, while the credit rule keeps it.
+    public var basedOn: LookCredit?
 
     public init(
         name: String,
         style: [String: JSONValue],
-        colors: [String: String]
+        colors: [String: String],
+        author: String? = nil,
+        basedOn: LookCredit? = nil
     ) {
         self.name = name
         self.style = style
         self.colors = colors
+        self.author = author
+        self.basedOn = basedOn
     }
 
     private enum CodingKeys: String, CodingKey {
         case name
         case style
         case colors
+        case author
+        case basedOn = "based_on"
     }
 }
 
@@ -42,7 +53,9 @@ extension ShelfLook {
         return ShelfLook(
             name: name,
             style: style.filter { styling.contains($0.key) },
-            colors: colors
+            colors: colors,
+            author: author,
+            basedOn: basedOn
         )
     }
 
@@ -61,7 +74,18 @@ extension ShelfLook {
         return ShelfLook(
             name: name,
             style: self.style.filter { style.contains($0.key) },
-            colors: ColorPalette(name: "", colors: known).paintedColors
+            colors: ColorPalette(name: "", colors: known).paintedColors,
+            author: author,
+            basedOn: basedOn
         )
+    }
+
+    /// This look with its credit left out: the body an exported
+    /// file carries under `look`, its credit beside it.
+    var uncredited: ShelfLook {
+        var body = self
+        body.author = nil
+        body.basedOn = nil
+        return body
     }
 }
