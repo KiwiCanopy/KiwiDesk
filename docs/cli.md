@@ -520,6 +520,17 @@ cannot call them.
 folder's status
 ([`get_config_status`](lua-reference.md#get_config_status)).
 
+:::unreleased
+`get_settings [pointer] [space]` reads the live settings back, by
+the same ids `keep_settings` takes
+([`get_settings`](lua-reference.md#get_settings)):
+
+```bash
+kiwidesk get_settings /settings/layout/stack/stack_position
+kiwidesk get_settings /settings/layout/stack/stack_position 3
+```
+:::
+
 `look.list`, `look.current`, `look.apply <name>`, `look.save
 <name>` and `look.delete <name>` reach the look library
 ([Looks](lua-reference.md#looks)). `look.apply` wears a look

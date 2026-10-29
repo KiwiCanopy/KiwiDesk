@@ -8118,6 +8118,40 @@ nothing, is `dead_shortcut`, with its `layer`, `chord` and a
 `newer_on_another_mac` / `newer_here` with the `file` a newer
 KiwiDesk wrote.
 
+:::unreleased
+### get_settings
+
+**Expects:** optionally a JSON Pointer, and optionally a Space id
+after it.
+
+**Does:** returns the live settings document, or the value the
+pointer names in it. The pointers are the ids a change report
+prints and [`keep_settings`](cli.md#raw-ipc-protocol) takes: the
+profile's settings under `/settings`, keyed by the Lua names, and
+the app-wide values beside it (`/focus_wrap`, `/space_modes/3`).
+A pointer that names nothing, or a value that is not a pointer, is
+refused.
+
+Without a Space, a per-Space override is read at its own pointer
+(`/settings/layout/stack/override/3/stack_position`), and a Space
+with no override there is refused. With a Space, `/settings`
+answers as that Space uses it: each override folded onto its
+global value and the override maps empty. An unknown Space is
+refused.
+
+A call from `init.lua` while the config loads reads the settings
+applied so far.
+
+**Example:**
+
+```lua
+local side = KiwiDesk.get_settings(
+  "/settings/layout/stack/stack_position", "2")
+stack.set_stack_position_override(
+  "2", side == "left" and "right" or "left")
+```
+:::
+
 ### list_windows
 
 **Expects:** optionally a Space id; every tracked window otherwise.
