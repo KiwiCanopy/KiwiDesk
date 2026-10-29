@@ -101,19 +101,21 @@ struct BriefPocketTests {
         // …at the stored placement: risen out of the right edge,
         // 30 % down it.
         let visible = GeometryUtils.axVisibleFrame(of: request.screen)
-        let depth =
-            PocketHandleView.tabDepth + PocketPlateView.lift
-            + KiwiCore.pocketRiseSide(
-                thickness: core.tiler.settings.kiwishelf.thickness
-            )
+        let rise = KiwiCore.pocketRiseSide(
+            thickness: core.tiler.settings.kiwishelf.thickness
+        )
         let band = KiwiCore.pocketHandleFrame(
             visible: visible,
             edge: .right,
             position: 30,
-            depth: depth
+            depth: PocketHandleView.tabDepth + PocketPlateView.lift + rise
         )
-        #expect(band.maxX == visible.maxX)
-        #expect(band.insetBy(dx: -0.5, dy: -0.5).contains(request.pocket))
+        let risen = PocketPlateView.risenFrame(
+            in: band,
+            edge: .right,
+            side: rise
+        )
+        #expect(request.pocket == risen)
         let settings = core.tiler.settings
         #expect(request.shelf != settings.kiwishelf)
         #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
