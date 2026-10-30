@@ -132,8 +132,14 @@ extension SettingsModel {
             now.colors[$0.key] == was.colors[$0.key]
                 && now.colors[$0.key] != $0.value
         }
+        // A pick, not a wear: keep the per-layout indicators the
+        // apply clears, as `LookBody.worn` keeps them (#2368).
+        let before = config.settings
         ShelfLook(name: "", style: style, colors: colors)
             .apply(to: &config.settings)
+        for leaf in TilingSettings.layoutIndicatorLeaves {
+            config.settings[keyPath: leaf] = before[keyPath: leaf]
+        }
         if now.origin == was.origin {
             config.settings.lookOrigin = worn.lookOrigin
         }

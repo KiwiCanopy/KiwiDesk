@@ -53,7 +53,13 @@ extension SettingsModel {
             reload()
             return
         }
-        let yours = config
+        var yours = config
+        // A staged "Use" paint is the shared look as it was, not an
+        // edit of yours: it comes off here and is painted again from
+        // the shared look as the arrival leaves it (#2820).
+        if case .use(_, let paintBase) = lookShare {
+            yours.settings = ShelfLook.unpicked(yours.settings, to: paintBase)
+        }
         let yoursLua = luaSource
         let base = cleanConfig
         let baseLua = cleanLuaSource
@@ -133,16 +139,13 @@ extension SettingsModel {
         reachEdits = reach
         lookReachEdits = look
         // A staged switch stays only for a profile still stored with
-        // its own look, a "Use" re-based on that look as just read;
+        // its own look, a "Use" painted again over the re-laid draft;
         // otherwise there is nothing to switch (#2820).
         switch share {
         case .make(let profile) where lookReachStored[profile] == false:
             lookShare = share
         case .use(let profile, _) where lookReachStored[profile] == false:
-            lookShare = .use(
-                profile: profile,
-                paintBase: cleanConfig.settings
-            )
+            stageLookSwitch(profile, .use)
         case .make(let profile), .use(let profile, _):
             lookReachEdits[profile] = nil
         case nil:
