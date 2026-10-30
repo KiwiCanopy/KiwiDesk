@@ -4,8 +4,9 @@ import SwiftUI
 
 /// `kiwidesk preview <look.json> <out.png>`: a look file's gallery
 /// preview (#1740 ▸ Preview) — the shelf card's `LookPlate` at its
-/// own size, painted over default settings on a fixed four-Space
-/// desk in dark mode, scaled to a fixed pixel size. Reads the file
+/// own size with its pocket mark standing, painted over default
+/// settings on a fixed four-Space desk in dark mode, scaled to a
+/// fixed pixel size. Reads the file
 /// like Import… does; needs no running app. The verb, `usage` and
 /// `pixels` are the KiwiDesk-Looks CI's contract
 /// (`CLIPreviewContractTests`).
@@ -56,7 +57,8 @@ enum CLIPreview {
         let config = desk(look)
         let plate = LookPlate(
             settings: config.settings,
-            spaceLabels: BarsPanelPreview.spaceLabels(of: config)
+            spaceLabels: BarsPanelPreview.spaceLabels(of: config),
+            drawsPocket: true
         )
         .frame(width: points.width)
         .environment(\.colorScheme, .dark)
@@ -73,10 +75,14 @@ enum CLIPreview {
             .representation(using: .png, properties: [:])
     }
 
-    /// Spaces 1–4 in BSP, wearing `look` over default settings.
+    /// Spaces 1–4 in BSP, wearing `look` over default settings with
+    /// the pocket on the Space Bar's edge, where the starter and
+    /// every bundled look put it; a look carrying its own edge wins.
     static func desk(_ look: ShelfLook) -> GuiConfig {
         var config = GuiConfig()
-        config.settings = look.painted(over: TilingSettings())
+        var base = TilingSettings()
+        base.kiwishelf.pocketEdge = base.spaceBarStyle.edge
+        config.settings = look.painted(over: base)
         config.spaces = (1...4).map { SpaceID($0) }
         return config
     }

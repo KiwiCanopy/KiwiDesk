@@ -17737,6 +17737,27 @@ default has no reference to borrow (owner, 2026-09-29).
 A look has one description, shared by the Settings card and the
 tour, Glass's included (`LookDescriptionsTests`).
 
+:::unreleased
+**[Principle] A look's picture is a desk in the look, on the
+look's own ground (#1740, owner 2026-10-30).** The look tile, Simple's
+Look line, the tour and the gallery's `preview.png` draw one
+picture, `LookPlate`: the bars on their edges in the look's font and
+indicators, three whole windows at its gaps, the focused one in its
+ring, sheen and glow. Its ground is the look's own shelf colour
+darkened, with a faint haze of its focus colour — overturning, for
+this picture alone, the desktop plate's fixed ground and Simple's
+"neutral plate, never a wallpaper". A look is chosen by its mood,
+which a neutral plate hides; the ground stays the look's own colour,
+so it teaches nothing the look does not set (#702). Two further
+departures are the gallery's draw: the windows carry placeholder
+lines and the App Bar shows Finder, Safari and Mail — their own icons,
+or their App Font glyphs for a look drawing symbols — because a
+desk of blank boxes reads as nobody's Mac. The icons are read from
+the drawing Mac, so a gallery PNG can differ with its macOS version.
+The pocket mark stands on the gallery picture only: at tile size it
+has no room, and #2678 keeps it off the card.
+:::
+
 **[Principle] Profiles share one look unless one keeps its own
 (#1752).** Keeping several profiles on the same look meant
 applying it once per profile, and the copies drifted apart

@@ -20,6 +20,9 @@ struct ShelfStripPreview: View {
     /// Whether the pocket stands on this strip, at the slot Core's
     /// arrangement pins for it (#2678 review 6).
     let pocket: Bool
+    /// The pocket mark's colour, `pocket.color`; empty takes the
+    /// mark's label ink (#2671).
+    var pocketHex = ""
 
     var body: some View {
         GeometryReader { geometry in
@@ -279,24 +282,26 @@ struct ShelfStripPreview: View {
     }
 }
 
-/// The pocket's piece (#2678): a stretch of the shelf's plate at the
-/// slot Core's arrangement pins at the strip's outer end.
+/// The pocket's piece (#2678): the bare mark at the slot Core's
+/// arrangement pins at the strip's outer end, drawing no box or
+/// plate of its own under any style (#2776).
 extension ShelfStripPreview {
     @ViewBuilder
     func pocketPiece(_ slot: ShelfArrangement.Slot?) -> some View {
-        if let slot, let spec = space ?? app {
-            RoundedRectangle(cornerRadius: spec.corner)
-                .fill(Color(kiwiHex: spec.fill))
-                .overlay(PreviewPlateEdge(spec: spec, corner: spec.corner))
-                .frame(
-                    width: vertical ? thickness : slot.length,
-                    height: vertical ? slot.length : thickness
-                )
-                .offset(
-                    x: vertical ? 0 : slot.offset,
-                    y: vertical ? slot.offset : 0
-                )
-                .accessibilityHidden(true)
+        if let slot {
+            let side = min(slot.length, thickness) * 0.82
+            Image(
+                nsImage: PocketMark.mark.image(size: side, hex: pocketHex)
+            )
+            .frame(
+                width: vertical ? thickness : slot.length,
+                height: vertical ? slot.length : thickness
+            )
+            .offset(
+                x: vertical ? 0 : slot.offset,
+                y: vertical ? slot.offset : 0
+            )
+            .accessibilityHidden(true)
         }
     }
 }

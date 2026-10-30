@@ -21,13 +21,15 @@ struct CLIPreviewTests {
         #expect(Self.pixels(near: (0x56, 0x4A, 0xB6), in: amber) == 0)
     }
 
-    /// `SettingsTheme.sunken`'s two values: the plate draws the dark
-    /// one whatever the host's appearance.
-    @Test("the desk is dark")
-    func drawsDark() throws {
-        let image = try drawn(focused: "#564AB6")
-        #expect(Self.pixels(near: (0x23, 0x2B, 0x26), in: image) > 500)
-        #expect(Self.pixels(near: (0xF4, 0xF7, 0xF1), in: image) == 0)
+    /// The ground is the look's own shelf colour a step darker
+    /// over `SettingsTheme.lookGround` (#1740): 0x2E5A88 at 85 %
+    /// over 0x0D0D12, read in a corner the focus haze misses. The
+    /// retired neutral plate, `sunken`, draws nowhere.
+    @Test("the ground is the look's own shelf colour")
+    func groundIsTheShelf() throws {
+        let image = try drawn(focused: "#564AB6", fill: "#2E5A88")
+        #expect(Self.pixels(near: (0x29, 0x4E, 0x76), in: image) > 500)
+        #expect(Self.pixels(near: (0x23, 0x2B, 0x26), in: image) == 0)
     }
 
     /// The card's own plate, scaled up: a taller plate is another
@@ -75,10 +77,13 @@ struct CLIPreviewTests {
         #expect(CLIPreview.run(["kiwidesk", "preview"]) == 1)
     }
 
-    private func drawn(focused: String) throws -> CGImage {
+    private func drawn(
+        focused: String,
+        fill: String? = nil
+    ) throws -> CGImage {
         let dir = try Self.scratch()
         let out = dir.appendingPathComponent("out.png")
-        let look = try Self.lookFile(focused: focused, in: dir)
+        let look = try Self.lookFile(focused: focused, fill: fill, in: dir)
         try #require(Self.run(look, out) == 0)
         let source = try #require(
             CGImageSourceCreateWithURL(out as CFURL, nil)
@@ -105,12 +110,14 @@ struct CLIPreviewTests {
 
     private static func lookFile(
         focused: String,
+        fill: String? = nil,
         in dir: URL
     ) throws -> URL {
+        let shelf = fill.map { ", \"kiwishelf.fill_color\": \"\($0)\"" }
         let json = """
             {"format": 2, "author": "Anna", "look": {"name": "Dusk",
              "style": {"border.sheen": 0},
-             "colors": {"border.focused_color": "\(focused)"}}}
+             "colors": {"border.focused_color": "\(focused)"\(shelf ?? "")}}}
             """
         let url = dir.appendingPathComponent("look.json")
         try Data(json.utf8).write(to: url)
