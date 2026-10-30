@@ -71,6 +71,10 @@ final class PocketPlateOverlay {
     /// Each screen's handle band along an edge of Auto marks, its
     /// place in their row, AX along the edge (#2678).
     var markBands: [DisplayID: ClosedRange<CGFloat>] = [:]
+    /// Each screen's drawn bar strip on the pocket's edge from the
+    /// last bar pass, AX, which the One-window pocket stands inside
+    /// (#2793).
+    var barStrips: [DisplayID: CGRect] = [:]
     /// The window a drag moves, while one does (#2678).
     var dragging: WindowID?
     /// The display whose pocket that window is over, while a drop

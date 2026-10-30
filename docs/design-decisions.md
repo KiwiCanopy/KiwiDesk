@@ -6176,10 +6176,19 @@ focusing that screen first. A click grows the list of the windows
 inside out of it, by app, each row taking its window out — the
 bars' own click-held list, so it closes and keys as theirs do.
 Under One window it stands only while a window drag
-runs or a window goes in or out under its animation, and on a
-bar's edge its slot then
-opens, the bars gliding aside for it, so a drop and a put-in land on
-the one pocket at its one place (owner, 2026-10-29). Edge and
+runs or a window goes in or out under its animation (owner,
+2026-10-29). On a bar's edge it then stands at Position just
+inside the bars' strip, one inner margin past it on the window
+side, and opens no slot (owner, 2026-10-30, #2793): a slot opening
+glided the bars aside for a second, so the Space Bar read as
+jumping, and a Space a drag was aimed at slid out from under the
+pointer. Standing over the bar's end instead would cover the last
+item, since during a drag the pocket stands above the bars' level.
+A pocket that never joins the shelf has no reason to take its end,
+so it takes Position as on an edge no bar shows; the trade is that
+moving from One window to Several moves it to the shelf's end. A
+transient drop target over content is how macOS shows one, and the
+mark's two-tone edge (#2776) reads over any window. Edge and
 Position therefore act whatever the animation switch says and do not
 grey. No "show the pocket" choice sits beside Holds,
 which already decides when the pocket stays.

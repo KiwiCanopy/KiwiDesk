@@ -94,12 +94,19 @@ extension KiwiCore {
         let rise = Self.pocketRiseSide(thickness: shelf.thickness)
         // A list open on a risen pocket holds it out (#2678 review 1).
         let listed = pocketListDisplay
-        return state.workspaces.allDisplays.compactMap { display in
+        return state.workspaces.allDisplays.compactMap {
+            display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
             let slot = pocketPlate.slots[display.id]
+            // Under One window on a bar's edge, the whole mark just
+            // inside the strip (#2793).
+            let inStrip =
+                slot == nil ? pocketInsideFrame(on: display.id) : nil
             // Where the bars read Always, the whole mark stands on an
             // edge no bar shows (#2784 ▸ 8).
-            let whole = slot == nil && pocketRestsWhole(on: display)
+            let whole =
+                slot == nil
+                && (inStrip != nil || pocketRestsWhole(on: display))
             // An edge no bar shows takes the handle, the pocket out of
             // it on hover and during a drag (#2678).
             let risen =
@@ -108,7 +115,7 @@ extension KiwiCore {
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
             guard
-                let frame = slot
+                let frame = slot ?? inStrip
                     ?? (whole
                         ? pocketMarkFrame(on: display.id)
                         : pocketHandleFrame(on: display.id, risen: risen))
@@ -134,7 +141,8 @@ extension KiwiCore {
                 handle: slot == nil ? edge : nil,
                 risen: risen,
                 risenSide: rise,
-                outer: shelf.outerMargin,
+                // Inside the strip the mark stands at its frame's edge.
+                outer: inStrip == nil ? shelf.outerMargin : 0,
                 whole: whole
             )
         }
@@ -142,8 +150,8 @@ extension KiwiCore {
 
     /// Whether the pocket is on screen: always while Several windows
     /// holds it; under One window during a window drag, as its drop
-    /// target, and while a window goes in or out — a bar's edge then
-    /// opens its slot (owner ruling 2026-10-29).
+    /// target, and while a window goes in or out — on a bar's edge
+    /// just inside the strip, which opens no slot (#2793).
     static func pocketStands(
         several: Bool,
         dragging: Bool,
