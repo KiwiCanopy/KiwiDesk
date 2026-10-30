@@ -6153,6 +6153,18 @@ both decode an absent key as the default, so without it a profile
 loses 4.0.0's values silently. The old `pocket.set_edge` and
 `pocket.set_position` retire with no alias.
 
+**The starter and every bundled look put it on the Space Bar's
+edge.** The Space Bar is the menu bar (▸ *The App Bar is the dock;
+the Space Bar is the menu bar*), and the pocket sits with it as a
+menu-bar extra does, not with the dock (owner, 2026-10-30). The
+type default stays `bottom`, so no stored profile moves. Every
+bundled look carries the edge, Taskbar its own and the rest
+Glass's, since a look applies only the keys it carries
+(`LookCatalogTests` ▸ `pocketRidesTheSpaceBar`). The rule is what a
+first run and a look seed, not a runtime link: the pocket edge is
+one for every screen, so a screen's own Space Bar edge (#1948)
+leaves the pocket where it is.
+
 **Several windows keeps it on screen, empty included, on every
 display.** One window keeps the pocket out of sight, since its one
 window is a key away. Under Several windows the drop target and

@@ -77,6 +77,21 @@ struct LookCatalogTests {
         }
     }
 
+    /// The pocket rides the Space Bar, the menu bar (owner,
+    /// 2026-10-30): Glass through the starter, every other look
+    /// through its own key or Glass's.
+    @Test("each look's pocket sits on its Space Bar's edge")
+    func pocketRidesTheSpaceBar() {
+        for look in bundled {
+            let edge = look.style["space_bar.edge"]
+            #expect(edge != nil, "\(look.name)")
+            #expect(
+                look.style["kiwishelf.pocket_edge"] == edge,
+                "\(look.name)"
+            )
+        }
+    }
+
     /// A Glass the starter's look keys disagree with moves a first
     /// run's windows (#1739) — its gaps then, its App Bar edge
     /// since #1528; the derivation itself is
