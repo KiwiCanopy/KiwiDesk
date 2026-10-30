@@ -75,6 +75,13 @@ struct NavRowRenderSeamTests {
         #expect(body.contains(".id(command.lua)"))
         #expect(!body.contains("model."))
         #expect(!body.contains("ShortcutsReferenceBuilder."))
+        // The rows, reached through the row's own accessors; the
+        // shared-clear dialog reads them only while it is asked.
+        let dialog = try #require(body.range(of: ".confirmationDialog("))
+        let drawing = body[..<dialog.lowerBound]
+        for reach in ["bindings", "index", "rows.", "sharedFrom"] {
+            #expect(!drawing.contains(reach), "body reads \(reach)")
+        }
     }
 
     @Test("every mount draws the row equatable")

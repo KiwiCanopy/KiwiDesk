@@ -81,6 +81,7 @@ struct LayerConflictsTests {
 
     @Test("The whole-config list answers row by row, a repeated id too")
     func conflictsListMatches() {
+        let layer = layer
         var twin = row("alt+j", "t()")
         twin.id = layer[0].id
         let layers = [

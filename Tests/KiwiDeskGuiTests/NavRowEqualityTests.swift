@@ -145,4 +145,32 @@ struct NavRowEqualityTests {
         let model = try makeModel(reach: false)
         #expect(row(model, layer: "Gaming") != row(model))
     }
+
+    @Test("With no reach drawn, its own combo alone moves it")
+    func bareComboMovesIt() throws {
+        let model = try makeModel(reach: false)
+        let before = row(model)
+        model.config.layers[0].bindings[0].combo = "alt+j"
+        let after = row(model)
+        #expect(after.drawn.reading == before.drawn.reading)
+        #expect(after != before)
+    }
+
+    @Test("A reach column's combo moves it")
+    func reachColumnComboMovesIt() throws {
+        let model = try makeModel()
+        let reading = try #require(row(model).drawn.reach?.reading)
+        var binding = model.config.layers[0].bindings[0]
+        let column = { (binding: KeyBinding) in
+            KeyReachColumn(
+                model: model,
+                layer: KeyLayer.defaultName,
+                binding: binding,
+                reading: reading
+            )
+        }
+        let before = column(binding)
+        binding.combo = "alt+j"
+        #expect(column(binding) != before)
+    }
 }

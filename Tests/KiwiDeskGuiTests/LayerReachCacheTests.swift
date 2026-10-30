@@ -152,4 +152,26 @@ struct LayerReachCacheTests {
         #expect(edited != plain)
         #expect(edited == expected)
     }
+
+    /// Nothing loaded can list the profiles in the order the loaded
+    /// one did, so the mark is a key of its own.
+    @Test("The loaded profile going away after a read is seen")
+    func loadedMovesTheMemo() throws {
+        let model = try makeModel()
+        let loaded = try #require(model.activeProfile)
+        model.target = .storedProfile("Home")
+        let (first, rest) = (
+            model.profileSummaries.filter { $0.name == loaded },
+            model.profileSummaries.filter { $0.name != loaded }
+        )
+        model.profileSummaries = first + rest
+        let order = model.profileMenuOrder
+        let before = try #require(model.layerReach(layer))
+        model.activeProfile = nil
+        try #require(model.profileMenuOrder == order)
+        let after = try #require(model.layerReach(layer))
+        #expect(before.loaded == loaded)
+        #expect(after.loaded == nil)
+        #expect(after == uncached(model))
+    }
 }
