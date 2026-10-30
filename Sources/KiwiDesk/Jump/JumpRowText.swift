@@ -10,6 +10,9 @@ enum JumpRowText {
     struct Place: Equatable {
         let glyph: SpaceGlyph?
         let text: String
+        /// `text` split around the screen's name, the one part a
+        /// narrow row shortens (#2792); nil where none is named.
+        var screen: ScreenRun? = nil
     }
 
     /// A Space's name: a numbered Space keeps the noun, a named one
@@ -21,9 +24,10 @@ enum JumpRowText {
 
     /// The trailing column at rest, nil where there is nothing to
     /// say. The Desktop shows only for a window on a Desktop its
-    /// screen is not showing. A hidden app and a minimized window
-    /// sit under their section's header, which says so; a
-    /// minimized window names the Space it belongs to.
+    /// screen is not showing, and the screen only for one off the
+    /// screen KiwiHub opened on (#2792). A hidden app and a
+    /// minimized window sit under their section's header, which
+    /// says so; a minimized window names the Space it belongs to.
     static func place(of entry: JumpEntry) -> Place? {
         if entry.isHiddenApp { return nil }
         switch entry.status {
@@ -39,8 +43,14 @@ enum JumpRowText {
         case .away(let desktop):
             return awayPlace(entry, desktop: desktop)
         case .shown:
-            return entry.space.map {
-                Place(glyph: entry.spaceIcon, text: spaceName($0))
+            return entry.space.map { space in
+                guard let screen = entry.screen else {
+                    return Place(
+                        glyph: entry.spaceIcon,
+                        text: spaceName(space)
+                    )
+                }
+                return shownPlace(entry, space: space, screen: screen)
             }
         // Its header says where it is.
         case .pocketed:
@@ -142,6 +152,14 @@ enum JumpRowText {
         desktop: Int?
     ) -> Place? {
         let name = entry.space.map(spaceName)
+        if let screen = entry.screen {
+            return awayScreenPlace(
+                entry,
+                name: name,
+                desktop: desktop,
+                screen: screen
+            )
+        }
         switch (name, desktop) {
         case (let name?, let desktop?):
             return Place(
@@ -162,7 +180,7 @@ enum JumpRowText {
         }
     }
 
-    private static func desktopName(_ number: Int) -> String {
+    static func desktopName(_ number: Int) -> String {
         L("jump.place.desktop", "Desktop %1$d", number)
     }
 
@@ -176,6 +194,7 @@ enum JumpRowText {
         if entry.isPocketed {
             return L("jump.status.pocketed", "In your pocket")
         }
+        if let spoken = spokenScreenPlace(entry) { return spoken }
         guard case .away(let desktop?) = entry.status,
             !entry.isHiddenApp
         else { return place(of: entry)?.text }

@@ -35,6 +35,9 @@ struct JumpRowView: View {
     /// The row's padding inside its selection.
     static let padding: CGFloat = 10
     static let spacing: CGFloat = 10
+    /// The title's floor: below it a screen's name shortens
+    /// instead (#2792).
+    static let titleMinWidth: CGFloat = 120
 
     private var showsNumber: Bool { commandHeld && number != nil }
     /// The selection's fill is fixed in both modes, so its inks are.
@@ -85,12 +88,12 @@ struct JumpRowView: View {
                 .foregroundStyle(titleInk)
                 .lineLimit(1)
                 .truncationMode(.tail)
+                .frame(minWidth: Self.titleMinWidth, alignment: .leading)
             Spacer(minLength: 12)
             trailing
                 .font(.callout)
                 .foregroundStyle(secondaryInk)
                 .lineLimit(1)
-                .fixedSize()
                 .layoutPriority(1)
             if showsNumber, let number {
                 Text(verbatim: shiftHeld ? "⇧⌘\(number)" : "⌘\(number)")
