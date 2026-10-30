@@ -87,6 +87,11 @@ for (const l of looks) {
 const tagList = [...tagCounts]
   .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
   .map(([tag]) => tag);
+// A fixed cut, not what fits: the rest sit behind a disclosure, so
+// the group stays one or two rows however large the gallery grows.
+const TOP_TAGS = 8;
+const topTags = tagList.slice(0, TOP_TAGS);
+const moreTags = tagList.slice(TOP_TAGS);
 
 const norm = (s: string): string =>
   s.normalize("NFKD").replace(/\p{M}/gu, "").toLowerCase();
@@ -96,7 +101,7 @@ const fontOf = (l: Look): string | null => {
   return Object.hasOwn(SYSTEM_FONTS, font) ? t(SYSTEM_FONTS[font]) : font;
 };
 /** What the search box matches: name, author, description,
- * keywords, font and "Inspired by" (#1740 ▸ Keywords). */
+ * keywords, tags, font and "Inspired by" (#1740 ▸ Keywords). */
 const haystack = (l: Look): string =>
   norm(
     [
@@ -104,6 +109,7 @@ const haystack = (l: Look): string =>
       l.author,
       l.description,
       ...l.keywords,
+      ...l.tags,
       l.sketch?.font ?? "",
       ...l.needsFonts,
       l.inspiredBy ?? "",
@@ -199,10 +205,35 @@ const MAX_CARD_TAGS = 4;
           <button type="button" class="chip" data-tag="" aria-pressed="true">
             {t("looks_tag_all")}
           </button>
-          {tagList.map((tag) => (
+          {topTags.map((tag) => (
             <button type="button" class="chip" data-tag={tag}
               aria-pressed="false">{tag}</button>
           ))}
+          {moreTags.length > 0 && (
+            <>
+              {/* Collapsed, a chosen tag from the rest moves here,
+                  just before the toggle, so the choice stays seen. */}
+              <span class="chips__picked" data-tags-picked></span>
+              <button type="button" class="chips__toggle"
+                data-tags-toggle aria-expanded="false"
+                aria-controls="looks-more-tags"
+                data-more={t("looks_tags_show_more")}
+                data-fewer={t("looks_tags_show_fewer")}>
+                <span data-tags-toggle-label>{t("looks_tags_show_more")}</span>
+                <svg width="12" height="12" viewBox="0 0 12 12" fill="none"
+                  stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                  <path d="M3 4.5l3 3 3-3" stroke-linecap="round"
+                    stroke-linejoin="round" />
+                </svg>
+              </button>
+              <span class="chips__more" id="looks-more-tags" hidden>
+                {moreTags.map((tag) => (
+                  <button type="button" class="chip" data-tag={tag}
+                    aria-pressed="false">{tag}</button>
+                ))}
+              </span>
+            </>
+          )}
         </div>
       </div>
     )}
@@ -297,7 +328,11 @@ const MAX_CARD_TAGS = 4;
         );
       })}
     </ul>
-    <p class="result-none" data-looks-none hidden>{t("looks_none_match")}</p>
+    <div class="result-none" data-looks-none hidden>
+      <p>{t("looks_none_match")}</p>
+      <button type="button" class="btn btn--ghost btn--sm"
+        data-looks-reset>{t("looks_show_all")}</button>
+    </div>
 
     {discover.map((look) => {
       const credit = creditHtml(look);
@@ -533,10 +568,51 @@ const MAX_CARD_TAGS = 4;
     background: var(--ghost-bg);
     border-color: var(--border);
   }
+  /* Pressed is a filled chip with a check, so it never rests on the
+     accent colour alone. */
   .chip[aria-pressed="true"] {
-    color: var(--text);
-    background: var(--nav-hover-bg);
+    color: var(--bg-0);
+    background: var(--accent);
     border-color: var(--accent);
+  }
+  .chip[aria-pressed="true"]::before {
+    content: "✓ ";
+  }
+  /* The extras and the picked slot flow in the chips' own row. */
+  .chips__more,
+  .chips__picked {
+    display: contents;
+  }
+  .chips__more[hidden] {
+    display: none;
+  }
+  /* A disclosure, not a tag value: dashed, with a chevron. */
+  .chips__toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    font: inherit;
+    font-size: 0.84rem;
+    font-weight: 550;
+    padding: 0.3rem 0.8rem;
+    border-radius: 999px;
+    cursor: pointer;
+    color: var(--text-dim);
+    background: none;
+    border: 1px dashed var(--border-strong);
+  }
+  .chips__toggle:hover {
+    color: var(--text);
+  }
+  .chips__toggle[aria-expanded="true"] svg {
+    transform: rotate(180deg);
+  }
+  @media (pointer: coarse) {
+    .chip,
+    .chips__toggle {
+      min-height: 44px;
+      padding-block: 0.6rem;
+    }
   }
   .result-count {
     margin: 0.5rem 0 1rem;
@@ -672,6 +748,12 @@ const MAX_CARD_TAGS = 4;
   .result-none {
     margin: 1rem 0;
     color: var(--text-dim);
+  }
+  .result-none[hidden] {
+    display: none;
+  }
+  .result-none p {
+    margin: 0 0 0.75rem;
   }
 
   /* ---- Detail: one centered column, shown when targeted ---- */
@@ -905,14 +987,60 @@ const MAX_CARD_TAGS = 4;
         apply();
       }),
     );
+    // The disclosure: extras stay in their own order when shown; a
+    // chosen extra sits in the picked slot while they are hidden.
+    const toggle = toolbar.querySelector<HTMLElement>("[data-tags-toggle]");
+    const toggleLabel = toggle?.querySelector<HTMLElement>(
+      "[data-tags-toggle-label]",
+    );
+    const more = toolbar.querySelector<HTMLElement>("#looks-more-tags");
+    const picked = toolbar.querySelector<HTMLElement>("[data-tags-picked]");
+    const extras = more
+      ? (Array.from(more.querySelectorAll("[data-tag]")) as HTMLElement[])
+      : [];
+    const place = () => {
+      if (!more || !picked) return;
+      const open = !more.hidden;
+      // Moves only a chip whose slot changes, so a focused chip is
+      // never re-inserted where it already is.
+      extras.forEach((chip, i) => {
+        const home = open || chip.dataset.tag !== tag ? more : picked;
+        if (chip.parentElement === home) return;
+        if (home === picked) return void picked.append(chip);
+        const next = extras.slice(i + 1).find((c) => c.parentElement === more);
+        more.insertBefore(chip, next ?? null);
+      });
+    };
+    toggle?.addEventListener("click", () => {
+      if (!more) return;
+      const open = more.hidden;
+      more.hidden = !open;
+      toggle.setAttribute("aria-expanded", String(open));
+      if (toggleLabel) {
+        toggleLabel.textContent =
+          (open ? toggle.dataset.fewer : toggle.dataset.more) ?? "";
+      }
+      place();
+    });
+
+    const chooseTag = (value: string) => {
+      tag = value;
+      toolbar.querySelectorAll<HTMLElement>("[data-tag]").forEach((b) =>
+        b.setAttribute("aria-pressed", String((b.dataset.tag ?? "") === tag)),
+      );
+      place();
+      apply();
+    };
     toolbar.querySelectorAll<HTMLElement>("[data-tag]").forEach((b) =>
-      b.addEventListener("click", () => {
-        tag = b.dataset.tag ?? "";
-        press("[data-tag]", b);
-        apply();
-      }),
+      b.addEventListener("click", () => chooseTag(b.dataset.tag ?? "")),
     );
     input?.addEventListener("input", apply);
+    root.querySelector<HTMLElement>("[data-looks-reset]")
+      ?.addEventListener("click", () => {
+        if (input) input.value = "";
+        chooseTag("");
+        input?.focus();
+      });
     toolbar.hidden = false;
   }
 </script>
