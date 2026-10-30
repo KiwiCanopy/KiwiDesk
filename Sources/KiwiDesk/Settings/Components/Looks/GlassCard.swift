@@ -87,6 +87,9 @@ struct GlassCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+        if AppBarStyle.glassAvailable, key == .colours(.liquidGlassMaster) {
+            GlassSystemPointer()
+        }
     }
 
     @ViewBuilder private func row(_ key: SettingKey) -> some View {
