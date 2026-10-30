@@ -50,6 +50,8 @@ struct PocketPlaceTests {
         core.tiler.settings.spaceBarStyle.setEdge(bar)
         core.tiler.settings.spaceBarStyle.visibility = .always
         core.tiler.settings.kiwishelf.pocketEdge = pocket
+        // A margin, so a landing that drops it differs from the drawing.
+        core.tiler.settings.kiwishelf.outerMargin = 8
         return (core, display)
     }
 
@@ -74,11 +76,14 @@ struct PocketPlaceTests {
             core.pocketPlate.dragging = one
             core.updateBars()
             let place = core.pocketPlace(on: display.id)
-            #expect(
-                pocket == .bottom
-                    ? place == .inside(core.pocketInsideFrame(on: display.id)!)
-                    : place == .whole(slides: true)
-            )
+            if pocket == .bottom {
+                let inside = try #require(
+                    core.pocketInsideFrame(on: display.id)
+                )
+                #expect(place == .inside(inside))
+            } else {
+                #expect(place == .whole(slides: true))
+            }
             #expect(core.pocketPlate.specs[display.id]?.slides == true)
             let landing = core.pocketLanding(on: display.id)
             #expect(landing != nil)
@@ -95,6 +100,16 @@ struct PocketPlaceTests {
         }
         #expect(core.pocketLanding(on: display.id) == slot)
         #expect(core.pocketPlate.specs[display.id]?.slides == false)
+        // Under Several on an edge no bar shows, the bars Always: the
+        // whole mark at rest, which never slides (#2784 ▸ 8).
+        let (rest, shown) = try makeCore(pocket: .left)
+        rest.execute("pocket.set_capacity", args: [.string("several")])
+        rest.updateBars()
+        #expect(rest.pocketPlace(on: shown.id) == .whole(slides: false))
+        #expect(rest.pocketPlate.specs[shown.id]?.slides == false)
+        let landing = rest.pocketLanding(on: shown.id)
+        #expect(landing != nil)
+        #expect(landing == drawnLanding(rest, shown.id))
     }
 
     @Test("a leave holds the panel until its landing; a return keeps it")
@@ -111,17 +126,20 @@ struct PocketPlaceTests {
         // The leave plays and waits for its landing.
         #expect(core.pocketPlate.leaving[display.id] != nil)
         #expect(landings.count == 1)
-        // Back before it lands: the return keeps the panel, and the
-        // stale landing does nothing.
+        // Back before it lands: the return stands it at once, with no
+        // second entrance.
         core.pocketPlate.dragging = one
         core.updateBars()
         #expect(core.pocketPlate.leaving[display.id] == nil)
-        landings.removeFirst()()
-        #expect(core.pocketPlate.specs[display.id] != nil)
-        // Gone again, its landing ends the leave.
+        let view = try #require(core.pocketPlate.view(on: display.id))
+        #expect(view.layer?.animation(forKey: "pocketEntrance") == nil)
+        // Gone again: the first, stale landing leaves the new leave
+        // standing, and only its own landing ends it.
         core.endPocketDrag()
         let token = core.pocketPlate.leaving[display.id]
         #expect(token != nil)
+        landings.removeFirst()()
+        #expect(core.pocketPlate.leaving[display.id] == token)
         landings.removeFirst()()
         #expect(core.pocketPlate.leaving[display.id] == nil)
     }

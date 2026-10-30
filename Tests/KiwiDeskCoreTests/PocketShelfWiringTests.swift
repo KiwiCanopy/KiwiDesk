@@ -74,6 +74,8 @@ struct PocketShelfWiringTests {
     @Test("under One window a drag stands the pocket inside the strip")
     func dragStandsThePocket() throws {
         let (core, display) = try makeCore()
+        // A margin, so the inside frame's own outer of 0 is told apart.
+        core.tiler.settings.kiwishelf.outerMargin = 8
         core.updateBars()
         #expect(core.pocketPlate.slots[display] == nil)
         #expect(!core.pocketStands)

@@ -169,7 +169,6 @@ final class PocketPlateOverlay {
             shown(spec)
             ?? made(spec.display, section: spec.handle == nil)
         let old = specs[spec.display]
-        // Out of sight, or on its way back in, a sliding pocket enters.
         // Out of sight, a sliding pocket enters; one taken back mid-
         // leave stands at once.
         let enters =
