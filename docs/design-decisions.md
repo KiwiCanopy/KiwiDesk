@@ -18028,6 +18028,21 @@ only WHETHER, never WHICH.
 the Fill too, and with it off the rule above stands (▸ the
 shortcuts panel entry).
 
+:::unreleased
+**How see-through the glass is belongs to macOS.** (Owner and
+ui-designer, 2026-10-30.) From macOS 27, System Settings ▸
+Appearance ▸ Liquid Glass sets how clear every glass surface is —
+KiwiHub and both bars included, checked on device — and Looks &
+Animations links to it under the switch rather than offering a
+Regular/Clear picker or a readability fallback of its own. A
+KiwiDesk picker would be a second control over the same material,
+fighting the system's, and the user's one setting about glass
+would stop governing every app. A user who wants an opaque hub
+picks a look without glass. What KiwiDesk owes at the slider's
+clear end is the reading floor of its own Fill (▸ Reading
+surfaces fade above a floor), never an override of the slider.
+:::
+
 **Reduce transparency stands every glass surface down, live, and
 moves no stored value.** (#1374, owner ruling 2026-09-13.) The
 platform does not do this for us: `NSGlassEffectView` draws its

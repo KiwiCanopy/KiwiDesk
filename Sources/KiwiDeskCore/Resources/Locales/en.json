@@ -320,6 +320,8 @@
   "colors.liquid_glass.differ.help": "These surfaces are set differently right now. Turning this on switches it on for all of them.",
   "colors.liquid_glass.help": "Lays macOS's translucent material over the Space Bar, the App Bar, %2$@, the drag ghost and drop zone, the sticky mark and the plates a Space switch slides. KiwiShelf's %1$@ color tints the bars, fading from their screen edge as far as “%3$@” sets; with “%4$@” on, it tints %2$@ and the plates too. The drag ghost, drop zone and sticky mark take their own colors.",
   "colors.liquid_glass.reduce_transparency.help": "System Settings ▸ Accessibility ▸ Display ▸ Reduce transparency is on, so the glass stays off regardless of this setting.",
+  "colors.liquid_glass.system": "The glass's transparency follows %1$@.",
+  "colors.liquid_glass.system.path": "System Settings ▸ Appearance ▸ Liquid Glass",
   "colors.mixed": "mixed",
   "colors.scene.caption": "KiwiShelf's shape, both bars with their active items, the focused and unfocused rings with their state marks, and the drag ghost beside its drop zone.",
   "colors.scene.title": "Current colors",
