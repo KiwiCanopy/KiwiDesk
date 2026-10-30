@@ -68,7 +68,10 @@ struct ShelfStripPreview: View {
             } ?? 0,
             shelf: live,
             pocket: pocket
-                ? .init(need: shelf.thickness, leadsEnd: shelf.pocketLeansEnd)
+                ? .init(
+                    need: ShelfArrangement.pocketNeed(depth: shelf.thickness),
+                    leadsEnd: shelf.pocketLeansEnd
+                )
                 : nil
         )
         var preview = ShelfArrangement(

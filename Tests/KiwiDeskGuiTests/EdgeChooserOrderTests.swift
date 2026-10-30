@@ -55,7 +55,7 @@ struct EdgeChooserOrderTests {
             ),
             (
                 "Settings/Components/Bars/KiwiShelfCard+Pocket.swift",
-                "ForEach(AppBarOptions.edgeOrder,"
+                "AppBarOptions.edge.map"
             ),
         ]
     )

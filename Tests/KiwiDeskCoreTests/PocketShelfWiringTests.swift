@@ -86,6 +86,8 @@ struct PocketShelfWiringTests {
         )
         let mounted = try #require(overlay.pocket.mount?.view)
         #expect(mounted === core.pocketPlate.sectionMount(on: display))
+        // A level above the shelf and the drag's ghost (#2776).
+        #expect(overlay.pocket.panel?.level == BarPanel.aboveLevel)
         core.endPocketDrag()
         #expect(core.pocketPlate.slots[display] == nil)
     }
@@ -154,9 +156,6 @@ struct PocketShelfWiringTests {
             frame: frame,
             shelf: KiwiShelf(),
             markHex: "",
-            count: "",
-            badgeLeading: false,
-            platePiece: false,
             faded: windows.isEmpty,
             dropHovered: false,
             name: "",
