@@ -40,6 +40,8 @@ extension KiwiCore {
             if case .window(let id) = target,
                 state.isPocketed(id)
             {
+                // Out on the panel's screen: its gates first.
+                if canTakePocketOut(id) { enterMoveHereSpace(active) }
                 return takePocketOut(id)
             }
             guard case .window(let id) = target else {
@@ -217,12 +219,11 @@ extension KiwiCore {
             ?? state.workspaces.activeSpace
     }
 
-    /// Makes `space` active once a move into it is dispatched, so a
-    /// refusal switches nothing and the owed arrival focus pays in
-    /// the active Space. No warp: the pointer is on that screen
-    /// already, where the panel opened under it.
+    /// Makes `space` active, through the #2548 hand-off, once a move
+    /// into it passed its gates: a refusal switches nothing, and the
+    /// owed arrival focus pays in the active Space.
     func enterMoveHereSpace(_ space: SpaceID) {
         guard space != state.workspaces.activeSpace else { return }
-        switchSpace(to: space, warp: false)
+        switchSpace(to: space, warp: true)
     }
 }

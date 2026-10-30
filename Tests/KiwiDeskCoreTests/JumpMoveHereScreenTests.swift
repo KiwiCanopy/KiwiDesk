@@ -185,6 +185,21 @@ struct JumpMoveHereScreenTests {
         #expect(core.jumpSnapshot().here == "1")
     }
 
+    /// The pocket's take-out reads the active Space, so the panel's
+    /// screen is entered first.
+    @Test("a pocketed window comes out on KiwiHub's screen")
+    func pocketComesOutOnThePanelScreen() {
+        let core = makeCore()
+        defer { teardown() }
+        track(core, 1, in: "1")
+        core.state.apply(.windowFocused(WindowID(1)))
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.state.pocketPhase(of: WindowID(1)) == .pocketed)
+        #expect(core.moveHere(.window(WindowID(1)), on: DisplayID(2)))
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "5")
+        #expect(core.state.workspaces.activeSpace == "5")
+    }
+
     /// The hop lands on screen 2's shown Desktop, and the focus
     /// owed for Space 5 pays at the arrival.
     @Test("an away window hops onto KiwiHub's screen and is focused")

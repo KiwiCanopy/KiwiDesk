@@ -20,9 +20,7 @@ extension KiwiCore {
     /// The Space shown on the screen holding `point` (Cocoa), else
     /// the active one.
     func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
-        displayUnderPointer(point)
-            .flatMap { state.workspaces.activeSpace(on: $0) }
-            ?? state.workspaces.activeSpace
+        moveHereSpace(on: displayUnderPointer(point))
     }
 
     /// The screen holding `point` (Cocoa), nil off every screen.
