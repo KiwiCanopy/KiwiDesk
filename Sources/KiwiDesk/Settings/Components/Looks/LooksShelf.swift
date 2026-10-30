@@ -76,10 +76,7 @@ struct LooksShelf: View {
             HStack {
                 groupHeader(L("looks.mine", "My looks"))
                 Spacer()
-                if LookGallery.isLive {
-                    browseButton
-                    shareButton
-                }
+                browseButton
                 Button {
                     importLook()
                 } label: {
@@ -90,6 +87,7 @@ struct LooksShelf: View {
                 }
                 .settingsActionButton()
                 .controlSize(.small)
+                shareButton
             }
             LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
                 ForEach(model.userLooks, id: \.name) { look in
@@ -116,6 +114,8 @@ struct LooksShelf: View {
                 .foregroundStyle(SettingsTheme.ink3)
             }
         }
+        // Groups part wider than a header from its grid (#1740).
+        .padding(.top, 12)
     }
 
     private func groupHeader(_ text: String) -> some View {

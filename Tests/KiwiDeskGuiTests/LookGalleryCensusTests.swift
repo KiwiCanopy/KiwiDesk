@@ -2,21 +2,34 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Turning `LookGallery.isLive` on owes each gallery door its
-/// `SettingKey` census row (#1740 ▸ Launch together), so the flip
-/// reds until the rows exist. A door the switch gates joins
-/// `doors` in the change that draws it.
+/// Each gallery door owes its `SettingKey` census row (#1740 ▸
+/// Launch together), on the Looks shelf's at-rest tier, labelled by
+/// the key the door draws. A further door joins `doors` in the
+/// change that draws it.
 @Suite("Looks gallery doors")
 @MainActor
 struct LookGalleryCensusTests {
-    static let doors = ["(action) look.browse", "(action) look.share"]
+    static let doors: [(row: String, label: String)] = [
+        ("(action) look.browse", "looks.browse"),
+        ("(action) look.share", "looks.share"),
+    ]
 
-    @Test("a live gallery has a census row per door")
-    func liveDoorsHaveRows() {
-        guard LookGallery.isLive else { return }
-        let ids = Set(SettingKey.allCases.map(\.id))
+    @Test("every gallery door has a census row on the Looks shelf")
+    func doorsHaveRows() {
         for door in Self.doors {
-            #expect(ids.contains(door), "no census row for \(door)")
+            let key = SettingKey.allCases.first { $0.id == door.row }
+            guard let key else {
+                Issue.record("no census row for \(door.row)")
+                continue
+            }
+            #expect(
+                key.placement == .row(.coloursAndMotion, .looks, .atRest),
+                "\(door.row) is off the shelf's at-rest tier"
+            )
+            #expect(
+                key.text == .text(door.label),
+                "\(door.row) is not labelled \(door.label)"
+            )
         }
     }
 }
