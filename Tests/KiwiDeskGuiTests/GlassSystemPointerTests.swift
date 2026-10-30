@@ -10,7 +10,9 @@ import Testing
 @Suite("The Liquid Glass switch points at macOS's slider")
 struct GlassSystemPointerTests {
     @Test("the sentence carries the link slot exactly once")
+    @MainActor
     func proseHasTheSlot() {
+        LocalizationManager.shared.select("en")
         let prose = GlassSystemPointer.prose
         #expect(prose.occurrences(of: CrossReferenceRow.linkSlot) == 1)
     }
