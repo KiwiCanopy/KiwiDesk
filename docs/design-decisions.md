@@ -7573,6 +7573,26 @@ rows take; a per-screen position would give one Desktop two
 numbers in one app. The dots carry the position on that screen,
 and shape alone marks the current one, so colour carries nothing.
 
+**Amended with #2792: the number is the screen's own** (owner
+ruling 2026-10-30). The premise above was wrong under "Displays
+have separate Spaces": there Mission Control draws each screen's
+strip from 1, so the global number was the label it draws on one
+screen only. Every label KiwiDesk draws — the plate, KiwiHub's
+rows, the Settings Desktop rows — now counts per screen, and a
+KiwiHub row on another screen than KiwiHub's names that screen
+first (`Work · DELL U2723 · Desktop 1`, as Mission Control groups
+its strips), last when spoken, its name the one part a narrow row
+shortens. What a command takes stays global — `focus_desktop`,
+`bind_profile_to_desktop`, the Go to Desktop N titles — since a
+key's title must say what it does and macOS's own "Switch to
+Desktop N" counts that way; a shortcut row states where its
+number lands now instead. The two agree on one screen and on the
+screen Mission Control lists first, and a binding fires on the
+main screen only (#888). The "one Desktop, two numbers" cost this
+entry refused is the one taken: a label and a command count
+differently on a second screen, and `docs/spaces-and-desktops.md`
+says so once.
+
 **The profile line shows only when the switch changed the live
 profile.** A Desktop with no binding loads nothing, and naming the
 profile that merely stayed would be noise on every press.
@@ -13454,10 +13474,13 @@ lights ↩ Apply, or its digits under ⌘. Navigation (⇥, ← →) and
 bridges (⌘, Edit) never light, the Shortcuts side lights nothing
 since ↩ runs nothing there, and an empty list lights nothing. Ink
 alone carries it, with no tint or weight, and it swaps without
-motion. The way here follows the chord's reach: ⇧ alone moves the
-selected row, so only it shows its "Space n → Space m"; under ⇧⌘
-every numbered row is a target through its digit, so each shows
-its own.
+motion. The way here follows the chord's reach: ⇧ alone moves one
+row — the hovered row where its ⇧-click moves a window, else the
+selected row ⇧↩ moves (#2808) — so only that row shows its
+"Space n → Space m"; under ⇧⌘ every numbered row is a target
+through its digit, so each shows its own. Lighting every row under
+⇧ would answer no "what does pressing now do", and repaint the
+whole list on the lighter chord.
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu

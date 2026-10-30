@@ -163,6 +163,9 @@ struct ProfileSpacesSeamTests {
             // nowhere — the GUI reads it per refresh.
             "Profiles/KiwiCore+DesktopScreens.swift":
                 (1, "the live screen NAME per key, unstored"),
+            // The same shape for the per-screen number (#2792).
+            "OS/NativeSpaces+Desktop.swift":
+                (2, "the live screen NUMBER per key, computed"),
         ]
         let root = coreRoot
         let prefix = root.path + "/"

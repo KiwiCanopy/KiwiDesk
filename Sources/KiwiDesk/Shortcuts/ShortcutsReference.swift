@@ -12,6 +12,7 @@ enum ShortcutsReferenceBuilder {
         spaces: [SpaceID],
         spaceIcons: [SpaceID: String],
         desktops: [Int],
+        landings: [Int: DesktopLanding] = [:],
         resizeStep: Int,
         layerNames: [String],
         lenses: [String] = [],
@@ -50,7 +51,8 @@ enum ShortcutsReferenceBuilder {
         // so it is also the dim set.
         let offer = KeybindingCatalog.desktopOffer(
             live: desktops,
-            bindings: layer.bindings
+            bindings: layer.bindings,
+            landings: landings
         )
         let places = ShortcutFold.places(
             spaces: spaces,
@@ -83,6 +85,7 @@ enum ShortcutsReferenceBuilder {
                     combo: combo,
                     icon: binding.meta.usableSymbol ?? icon(for: cmd),
                     unavailable: cmd.unavailable != nil,
+                    detail: cmd.detail?(),
                     fold: ShortcutFold.tag(
                         for: cmd,
                         at: places[cmd.lua],

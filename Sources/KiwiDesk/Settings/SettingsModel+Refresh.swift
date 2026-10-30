@@ -50,6 +50,8 @@ extension SettingsModel {
         desktopKeys = desktops.keysByNumber
         presentDesktopKeys = desktops.presentKeys
         desktopScreens = core.desktopScreens(in: desktops)
+        desktopScreenNumbers = desktops.screenNumbersByKey
+        desktopLandings = core.desktopLandings(in: desktops)
         currentDesktop = desktops.authority
         currentDesktopKey = desktops.mainCurrentKey
         let resolved = core.profileVerdict(

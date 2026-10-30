@@ -86,7 +86,9 @@ enum ShortcutFold {
             key: String(rendered.dropFirst(modifiers.count + separator.count)),
             separator: separator,
             ownDigit: digit?.row == combo.keyCode,
+            // A row saying where it lands keeps its line (#2792).
             plain: !named && command.unavailable == nil
+                && command.detail == nil
         )
     }
 

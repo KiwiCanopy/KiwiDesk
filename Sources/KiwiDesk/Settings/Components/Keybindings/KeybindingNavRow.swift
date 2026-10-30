@@ -34,6 +34,7 @@ struct NavRow: View, Equatable {
         let help: String?
         let icon: String?
         let unavailable: String?
+        let detail: String?
         let liveOnly: LiveOnlySpace.Kind?
         let isPocket: Bool
         let binding: KeyBinding?
@@ -60,6 +61,7 @@ struct NavRow: View, Equatable {
             help: command.help?(),
             icon: ShortcutsReferenceBuilder.icon(for: command),
             unavailable: command.unavailable?(),
+            detail: command.detail?(),
             liveOnly: command.liveOnly,
             isPocket: command.lua == KeybindingCatalog.pocket.lua,
             binding: binding,
@@ -114,7 +116,14 @@ struct NavRow: View, Equatable {
                         IconGlyphLabel(icon: glyph)
                     }
                 }
-            Text(drawn.title)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(drawn.title)
+                if let detail = drawn.detail {
+                    Text(detail)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
             if let kind = drawn.liveOnly {
                 LiveOnlySpaceChip(kind: kind)
             }

@@ -112,6 +112,7 @@ struct PaletteShelf: View {
                 .foregroundStyle(SettingsTheme.ink3)
             }
         }
+        .padding(.top, SettingsMetrics.shelfGroupGap)
     }
 
     /// Reveals the Focus-border card where Glow lives.

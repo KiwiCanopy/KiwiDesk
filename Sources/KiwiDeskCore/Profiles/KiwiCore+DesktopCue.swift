@@ -29,10 +29,12 @@ extension KiwiCore {
         loadedProfile: String?
     ) {
         guard let owed = desktopCue.owed else { return }
+        let display = cueDisplay(owed.displayUUID, in: snapshot)
         let verdict = DesktopCueLedger.verdict(
             for: owed,
             in: snapshot,
-            display: cueDisplay(owed.displayUUID, in: snapshot),
+            display: display,
+            screen: display.flatMap(screenLabel),
             loadedProfile: loadedProfile,
             now: wallClock()
         )
@@ -56,8 +58,20 @@ extension KiwiCore {
         in snapshot: DesktopSnapshot
     ) -> DisplayID? {
         if let display = display(forUUID: uuid) { return display }
-        let shared = Set(snapshot.spaces.map(\.displayUUID)).count == 1
-        return shared ? display(forUUID: snapshot.mainUUID) : nil
+        return sharedDesktopKey(in: snapshot) != nil
+            ? display(forUUID: snapshot.mainUUID) : nil
+    }
+
+    /// The shared managed-display id every Desktop sits under with
+    /// "Displays have separate Spaces" off: the snapshot's sole key,
+    /// and one neither a tracked screen nor the main screen's UUID
+    /// answers to, so a screen not tracked yet is no shared key
+    /// (#2770).
+    func sharedDesktopKey(in snapshot: DesktopSnapshot) -> String? {
+        guard let key = snapshot.soleDisplayKey,
+            display(forUUID: key) == nil, key != snapshot.mainUUID
+        else { return nil }
+        return key
     }
 
     /// `KiwiDesk.set_desktop_cue(bool)` (#2142): turns the plate

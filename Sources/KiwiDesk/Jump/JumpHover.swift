@@ -20,6 +20,26 @@ enum JumpHover: Equatable {
     ) -> Bool {
         hover == target && !selected && clickable
     }
+
+    /// The row whose ⇧ action the way here promises (#2808): the
+    /// lifted row where its ⇧-click moves a window, else the
+    /// selection, which ⇧↩ moves — one row at a time.
+    static func shiftRow(
+        hover: JumpHover?,
+        selection: Int?,
+        movesHere: (Int) -> Bool
+    ) -> Int? {
+        guard case .row(let index) = hover,
+            lifts(
+                .row(index),
+                hover: hover,
+                selected: index == selection,
+                clickable: true
+            ),
+            movesHere(index)
+        else { return selection }
+        return index
+    }
 }
 
 extension JumpModel {

@@ -58,7 +58,7 @@ final class AppIconCache {
             for (id, path) in KeybindingCatalog.diskAppIconPaths {
                 if memo[id] == nil {
                     memo[id] = Self.downsized(
-                        NSWorkspace.shared.icon(forFile: path)
+                        Self.fileIcon(atPath: path)
                     )
                 }
                 await Task.yield()
@@ -70,14 +70,22 @@ final class AppIconCache {
         if let url = NSWorkspace.shared.urlForApplication(
             withBundleIdentifier: bundleID
         ) {
-            return downsized(
-                NSWorkspace.shared.icon(forFile: url.path)
-            )
+            return downsized(fileIcon(atPath: url.path))
         }
         return downsized(
             NSWorkspace.shared.icon(
                 for: .applicationBundle
             )
+        )
+    }
+
+    /// The icon of the bundle at `path`, symlinks resolved first:
+    /// macOS 27 links `/Applications/Safari.app` into its cryptex,
+    /// and a link path draws the alias arrow (#2819).
+    static func fileIcon(atPath path: String) -> NSImage {
+        NSWorkspace.shared.icon(
+            forFile: URL(fileURLWithPath: path)
+                .resolvingSymlinksInPath().path
         )
     }
 

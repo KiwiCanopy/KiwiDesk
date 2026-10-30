@@ -107,7 +107,7 @@ KiwiDesk.on("focus_change", function(window_id, app)
         .. app .. "'")
 end)
 
--- macOS Desktop indicator (Mission Control number). With
+-- macOS Desktop indicator (the number focus_desktop takes). With
 -- "Displays have separate Spaces" on, secondary screens report
 -- their own switches too — filter on the main screen so the
 -- indicator tracks the Desktop that selects profiles:

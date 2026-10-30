@@ -130,7 +130,8 @@ extension SettingsValueReadout {
             .paletteExport, .paletteDelete, .paletteImport,
             .paletteNeonGlowHint, .lookApply, .lookKeepPreviousColors,
             .lookAppliesTo,
-            .lookSave, .lookImport, .lookRename, .lookExport,
+            .lookSave, .lookBrowse, .lookImport, .lookShare,
+            .lookRename, .lookExport,
             .lookDelete, .accentPaint, .secondAccentPaint:
             // Actions and a link: no stored model path, so no
             // value pair to narrate — a group colour's writes are
