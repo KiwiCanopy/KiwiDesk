@@ -41,8 +41,10 @@ struct StackTogglePositionTests {
         #expect(core.execute(verb).isSuccess)
         #expect(side(core) == .left)
         #expect(core.execute(verb).isSuccess)
-        #expect(side(core) == .right)
+        #expect(side(core) == nil)
+        #expect(core.tiler.settings.stack.override["1"] == nil)
         #expect(core.tiler.settings.stack.stackPosition == .right)
+        #expect(core.unsavedLiveSettings() == nil)
     }
 
     @Test("the flip reads the resolved side, override before global")
@@ -91,6 +93,11 @@ struct StackTogglePositionTests {
         #expect(over.stackPosition == .left)
         #expect(over.masterRatio == 0.7)
         #expect(over.masterCount == 2)
+        #expect(core.execute(verb).isSuccess)
+        let back = try #require(core.tiler.settings.stack.override["1"])
+        #expect(back.stackPosition == nil)
+        #expect(back.masterRatio == 0.7)
+        #expect(back.masterCount == 2)
     }
 
     @Test("the flip is live, unsaved, and revert_settings undoes it")

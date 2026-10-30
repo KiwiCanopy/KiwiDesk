@@ -125,7 +125,9 @@ extension KiwiCore {
     /// `stack.toggle_stack_position([space])` (#2771): writes the
     /// side opposite the Space's resolved one into its override, a
     /// live change `revert_settings` undoes. The focused Space by
-    /// default; sizing is left as it is.
+    /// default; sizing is left as it is. A flip onto the global
+    /// side clears the override instead, so a second press leaves
+    /// no unsaved leaf pinning the Space.
     private func toggleStackPosition(
         _ args: [JSONValue]
     ) -> CommandResponse {
@@ -143,10 +145,16 @@ extension KiwiCore {
         }
         let side = tiler.settings.resolvedStack(for: space)
             .stackPosition.opposite
-        return applyStackOverride(
-            field: "stack_position",
-            [.string(space.raw), .string(side.rawValue)]
-        )
+        guard side == tiler.settings.stack.stackPosition else {
+            return applyStackOverride(
+                field: "stack_position",
+                [.string(space.raw), .string(side.rawValue)]
+            )
+        }
+        var over = tiler.settings.stack.override[space] ?? StackOverride()
+        over.stackPosition = nil
+        tiler.settings.stack.override[space] = over.isEmpty ? nil : over
+        return .ok()
     }
 
     // MARK: - Shared value parsers (global + per-space override)

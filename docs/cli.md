@@ -711,8 +711,9 @@ every lens with why it cannot turn on.
 :::unreleased
 `stack.toggle_stack_position [space]` moves a space's stack zone
 to the opposite side (left ↔ right, top ↔ bottom), the focused
-space when no id is given. The change is live and unsaved, and
-`revert_settings` undoes it
+space when no id is given. The change is live and unsaved;
+`revert_settings` with its leaf id
+([below](#raw-ipc-protocol)) undoes it
 ([Lua reference](lua-reference.md#stacktoggle_stack_position)).
 :::
 

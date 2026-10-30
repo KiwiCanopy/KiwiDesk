@@ -1696,8 +1696,11 @@ side it shows now, its
 [override](#stackset_stack_position_override) or else the
 [global value](#stackset_stack_position). It writes the override
 for that space as a live change: Settings lists it under **Live,
-not saved**, and `kiwidesk revert_settings` puts it
-back. The master ratio and every other size stay as they are.
+not saved**, and its Revert puts it back, as does
+[`revert_settings`](cli.md#raw-ipc-protocol) with the leaf id a
+change report names. A flip back onto the global side clears the
+override. The master ratio and every other size stay as they
+are.
 
 **Example:**
 
