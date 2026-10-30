@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "La ventana enfocada en la Space Bar y el hueco en el que se suelta una ventana arrastrada.",
   "colors.second_accent.title": "Segundo acento",
   "colors.sheen": "Reflejo",
-  "colors.sheen.caption": "Aclara la parte superior del contorno de foco, del resaltado y el contorno de las barras y de los contornos al arrastrar; desliza a la izquierda para oscurecerla.",
+  "colors.sheen.caption": "Aclara la parte superior del contorno de foco y del resaltado y el contorno de las barras; desliza a la izquierda para oscurecerla.",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "Más oscuro en %1$@",

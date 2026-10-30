@@ -28,12 +28,14 @@ extension ConfigMigration {
 
     @Sendable
     static func migratingRetiredDragLook(_ data: Data) -> Data? {
-        guard belowDragLookFloor(data) else { return nil }
         let needles = (dragMarkerKeys.map { "\"\($0)\"" } + ["\"drag."])
             .map { Data($0.utf8) }
         return surgicallyApplying(
             data,
-            gate: { data in needles.contains { data.range(of: $0) != nil } },
+            gate: { data in
+                needles.contains { data.range(of: $0) != nil }
+                    && belowDragLookFloor(data)
+            },
             rewriting: withoutDragLook,
             editing: surgicallyDroppedDragLook
         )

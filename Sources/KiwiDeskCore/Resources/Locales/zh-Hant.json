@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "Space Bar 上的焦點視窗，以及拖移的視窗將放入的位置。",
   "colors.second_accent.title": "第二強調色",
   "colors.sheen": "光澤",
-  "colors.sheen.caption": "提亮焦點邊框、列的高亮與邊框，以及拖曳邊框的上緣；向左滑動則改為調暗。",
+  "colors.sheen.caption": "提亮焦點邊框，以及列的高亮與邊框的上緣；向左滑動則改為調暗。",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "調暗 %1$@",

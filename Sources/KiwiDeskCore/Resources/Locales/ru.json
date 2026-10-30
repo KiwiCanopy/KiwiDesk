@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "Окно в фокусе на Space Bar и место, куда встанет перетаскиваемое окно.",
   "colors.second_accent.title": "Второй акцент",
   "colors.sheen": "Блик",
-  "colors.sheen.caption": "Осветляет верх рамки фокуса, подсветки и рамки панелей и рамок при перетаскивании; сдвинь влево, чтобы вместо этого затемнить его.",
+  "colors.sheen.caption": "Осветляет верх рамки фокуса, подсветки и рамки панелей; сдвинь влево, чтобы вместо этого затемнить его.",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "Темнее на %1$@",

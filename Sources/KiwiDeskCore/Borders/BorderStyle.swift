@@ -45,8 +45,8 @@ public struct BorderStyle: Sendable, Equatable {
     public var glowSize: CGFloat = 0
     /// Stacking order (#367).
     public var drawOrder: DrawOrder = .behind
-    /// The painted sheen (#1644) on the focused ring, the shelf's
-    /// highlight and border, and the drag markers' borders: a signed
+    /// The painted sheen (#1644) on the focused ring and the shelf's
+    /// highlight and border: a signed
     /// strength in `sheenRange` — positive lightens the top,
     /// negative darkens it, 0 draws none.
     public var sheen: CGFloat = 0.5

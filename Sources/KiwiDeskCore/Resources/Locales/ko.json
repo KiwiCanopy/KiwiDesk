@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "Space Bar의 포커스된 윈도우와, 드래그한 윈도우가 놓일 자리입니다.",
   "colors.second_accent.title": "두 번째 강조",
   "colors.sheen": "광택",
-  "colors.sheen.caption": "포커스 테두리, 바의 하이라이트와 테두리, 드래그 테두리의 위쪽을 밝게 합니다. 왼쪽으로 밀면 대신 어둡게 합니다.",
+  "colors.sheen.caption": "포커스 테두리, 바의 하이라이트와 테두리의 위쪽을 밝게 합니다. 왼쪽으로 밀면 대신 어둡게 합니다.",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "어둡게 %1$@",

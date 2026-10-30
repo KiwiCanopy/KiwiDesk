@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "A janela com foco na Space Bar e o slot em que uma janela arrastada é solta.",
   "colors.second_accent.title": "Segunda cor de ênfase",
   "colors.sheen": "Reflexo",
-  "colors.sheen.caption": "Clareia o topo do contorno de foco, do destaque e do contorno das barras e dos contornos ao arrastar; deslize para a esquerda para escurecê-lo.",
+  "colors.sheen.caption": "Clareia o topo do contorno de foco, do destaque e do contorno das barras; deslize para a esquerda para escurecê-lo.",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "Mais escuro em %1$@",

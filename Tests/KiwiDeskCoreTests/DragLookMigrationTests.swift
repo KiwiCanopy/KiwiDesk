@@ -229,13 +229,28 @@ struct DragLookMigrationTests {
             ("palettes", ConfigMigration.dragLookPaletteFormat),
             ("looks", ConfigMigration.dragLookLookFormat),
         ] {
+            for (stamp, runs) in [(format, false), (format - 1, true)] {
+                let data = try JSONSerialization.data(
+                    withJSONObject: [
+                        "format": stamp,
+                        key: [["name": "P", "colors": Self.colors]],
+                    ]
+                )
+                let out = ConfigMigration.migratingRetiredDragLook(data)
+                #expect((out != nil) == runs, "\(key) at \(stamp)")
+            }
+        }
+        let bundleFloor = ConfigMigration.dragLookBundleFormat
+        for (stamp, runs) in [(bundleFloor, false), (bundleFloor - 1, true)] {
             let data = try JSONSerialization.data(
                 withJSONObject: [
-                    "format": format,
-                    key: [["name": "P", "colors": Self.colors]],
+                    "format": stamp,
+                    SetupBundle.shapeMarker: "test",
+                    "palettes": [["name": "P", "colors": Self.colors]],
                 ]
             )
-            #expect(ConfigMigration.migratingRetiredDragLook(data) == nil)
+            let out = ConfigMigration.migratingRetiredDragLook(data)
+            #expect((out != nil) == runs, "bundle at \(stamp)")
         }
     }
 

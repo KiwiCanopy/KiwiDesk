@@ -66,11 +66,11 @@ struct WindowStrokeTests {
         ]
     )
     @MainActor
-    func retiredVerbsNameTheBorder(verb: String, replacement: String) {
+    func retiredVerbsFail(verb: String, message: String) {
         let core = makeTestCore()
         let response = core.execute(verb, args: [.number(4)])
         #expect(!response.isSuccess)
-        #expect(response.error?.contains(replacement) == true)
+        #expect(response.error?.contains(message) == true)
         #expect(core.tiler.settings == TilingSettings())
     }
 

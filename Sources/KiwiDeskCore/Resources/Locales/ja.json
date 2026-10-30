@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "Space Bar上のフォーカス中のウインドウと、ドラッグしたウインドウが収まるドロップ先です。",
   "colors.second_accent.title": "第2アクセント",
   "colors.sheen": "光沢",
-  "colors.sheen.caption": "フォーカスボーダー、バーのハイライトとボーダー、ドラッグ時のボーダーの上端を明るくします。左にスライドすると暗くなります。",
+  "colors.sheen.caption": "フォーカスボーダー、バーのハイライトとボーダーの上端を明るくします。左にスライドすると暗くなります。",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "暗さ +%1$@",

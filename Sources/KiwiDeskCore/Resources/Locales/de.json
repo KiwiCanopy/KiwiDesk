@@ -319,7 +319,7 @@
   "colors.second_accent.caption": "Das fokussierte Fenster in der Space Bar und der Platz, an dem ein gezogenes Fenster landet.",
   "colors.second_accent.title": "Zweiter Akzent",
   "colors.sheen": "Glanz",
-  "colors.sheen.caption": "Hellt die Oberkante des Fokus-Rahmens, der Hervorhebung und des Rahmens der Leisten und der Rahmen beim Ziehen auf; nach links schieben, um sie stattdessen abzudunkeln.",
+  "colors.sheen.caption": "Hellt die Oberkante des Fokus-Rahmens, der Hervorhebung und des Rahmens der Leisten auf; nach links schieben, um sie stattdessen abzudunkeln.",
   "colors.sheen.readout.darker": "−%1$@",
   "colors.sheen.readout.lighter": "+%1$@",
   "colors.sheen.spoken.darker": "Dunkler um %1$@",
