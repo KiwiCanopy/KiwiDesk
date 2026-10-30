@@ -30,6 +30,10 @@ enum SettingsMetrics {
     /// rather than the ring being restyled.
     static let focusRingInset: CGFloat = 6
 
+    /// Extra room above a shelf's second group (My looks, My
+    /// palettes), so groups part wider than a header from its grid.
+    static let shelfGroupGap: CGFloat = 12
+
     /// `OverrideChrome` leading padding and checkbox spacing.
     static let overrideRowInset: CGFloat = 8
 

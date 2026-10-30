@@ -33,7 +33,7 @@ struct SimpleLookCard: View {
     private var line: some View {
         HStack(alignment: .top, spacing: 10) {
             ForEach(Self.looks(in: model), id: \.name) { tile($0) }
-            if LookGallery.isLive { browseTile }
+            browseTile
         }
         .padding(.vertical, 2)
     }
@@ -76,9 +76,8 @@ struct SimpleLookCard: View {
     }
 
     /// The gallery's tile at the line's end (#1740 ▸ Browse): its
-    /// site page in the browser. Drawn only while
-    /// `LookGallery.isLive`; Simple never gets a Share door. It is
-    /// Advanced's Browse looks… setting, one census row for both.
+    /// site page in the browser; Simple never gets a Share door. It
+    /// is Advanced's Browse looks… setting, one census row for both.
     private var browseTile: some View {
         DashedActionTile(
             systemImage: "square.grid.2x2",
