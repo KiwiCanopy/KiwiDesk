@@ -149,22 +149,24 @@ struct GetSettingsCommandTests {
     @Test("the spawn map reads the shared placement table")
     func spawnMapReadsTheTable() {
         let core = core()
-        var expected: [LayoutMode: SpawnPlacement] = [:]
-        for (mode, path) in TilingSettings.spawnPlacementPaths {
-            let flipped: SpawnPlacement =
-                core.tiler.settings[keyPath: path] == .first
-                ? .last : .first
-            core.tiler.settings[keyPath: path] = flipped
-            expected[mode] = flipped
+        // Two passes, so a constant in the map matches one at most.
+        for value: SpawnPlacement in [.beforeFocused, .afterFocused] {
+            for (_, path) in TilingSettings.spawnPlacementPaths {
+                core.tiler.settings[keyPath: path] = value
+            }
+            core.handle(
+                .windowDestroyed(WindowID(999_999), wasMinimized: false)
+            )
+            let modes: [LayoutMode] = [
+                .bsp, .stack, .scrolling, .grid, .monocle,
+            ]
+            #expect(
+                core.state.spawnPlacements
+                    == Dictionary(
+                        uniqueKeysWithValues: modes.map { ($0, value) }
+                    )
+            )
         }
-        core.handle(
-            .windowDestroyed(WindowID(999_999), wasMinimized: false)
-        )
-        #expect(core.state.spawnPlacements == expected)
-        #expect(
-            Set(expected.keys)
-                == [.bsp, .stack, .scrolling, .grid, .monocle]
-        )
     }
 
     @Test("an empty pointer names the whole document")
