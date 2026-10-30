@@ -23,4 +23,17 @@ extension TilingSettings {
         }
         return minWindowSizes[layout]
     }
+
+    /// `space`'s floor folded onto every layout through the one
+    /// read above, the per-Space map then empty —
+    /// `resolved(for:)`'s half (#2782).
+    mutating func foldMinWindowSize(for space: SpaceID) {
+        for layout in MinWindowSizes.Layout.allCases {
+            minWindowSizes[layout] = minWindowSize(
+                for: layout.mode,
+                in: space
+            )
+        }
+        minWindowSizeOverride = [:]
+    }
 }

@@ -8127,28 +8127,33 @@ after it.
 **Does:** returns the live settings document, or the value the
 pointer names in it. The pointers are the ids a change report
 prints and [`keep_settings`](cli.md#raw-ipc-protocol) takes: the
-profile's settings under `/settings`, keyed by the Lua names, and
-the app-wide values beside it (`/focus_wrap`, `/space_modes/3`).
-A pointer that names nothing, or a value that is not a pointer, is
-refused.
+live settings under `/settings`, keyed by the Lua names, and beside
+them `/space_modes`, `/app_wide`, `/app_rules`, `/float_rules`,
+`/float_automatically` and `/focus_wrap`. An empty pointer names
+the whole document; a pointer that names nothing, or a value that
+is not a pointer, is refused.
 
 Without a Space, a per-Space override is read at its own pointer
 (`/settings/layout/stack/override/3/stack_position`), and a Space
 with no override there is refused. With a Space, `/settings`
 answers as that Space uses it: each override folded onto its
-global value and the override maps empty. An unknown Space is
-refused.
+global value, the override maps empty or absent, and the Space
+icons only that Space's. A size a resize moved is not a setting and
+is not reported. An unknown Space is refused.
 
-A call from `init.lua` while the config loads reads the settings
-applied so far.
+A call while the config loads can answer the previous load's
+values or settings not yet applied; read from a binding or an
+event instead.
 
 **Example:**
 
 ```lua
-local side = KiwiDesk.get_settings(
-  "/settings/layout/stack/stack_position", "2")
-stack.set_stack_position_override(
-  "2", side == "left" and "right" or "left")
+KiwiDesk.bind("hyper+f", function()
+  local side = KiwiDesk.get_settings(
+    "/settings/layout/stack/stack_position", "2")
+  stack.set_stack_position_override(
+    "2", side == "left" and "right" or "left")
+end)
 ```
 :::
 

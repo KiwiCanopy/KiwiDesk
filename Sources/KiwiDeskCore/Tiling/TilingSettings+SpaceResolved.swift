@@ -4,20 +4,31 @@ import Foundation
 /// the global it overrides (#2782) — a hand list of the maps, held
 /// to the others by `SpaceMapParityTests`.
 extension TilingSettings {
+    /// The layouts whose params carry `newWindowPlacement`, which
+    /// a Space's `placementOverride` outranks: the spawn map and
+    /// `resolved(for:)` both read this one list.
+    static var spawnPlacementPaths:
+        [(LayoutMode, WritableKeyPath<TilingSettings, SpawnPlacement>)]
+    {
+        [
+            (.bsp, \.bsp.newWindowPlacement),
+            (.stack, \.stack.newWindowPlacement),
+            (.scrolling, \.scrolling.newWindowPlacement),
+            (.grid, \.grid.newWindowPlacement),
+            (.monocle, \.monocle.newWindowPlacement),
+        ]
+    }
+
     /// These settings as `space` uses them: each override folded
-    /// in through the `resolved*(for:)` readers, every per-Space
-    /// map then empty. Config only, like those readers — a size a
-    /// resize moved is the session layer's, not a setting.
+    /// in through the `resolved*(for:)` readers and the override
+    /// maps emptied; `spaceIcons` keeps only the Space's own icon,
+    /// which overrides nothing. Config only, like those readers —
+    /// a size a resize moved is the session layer's.
     public func resolved(for space: SpaceID) -> TilingSettings {
         var out = self
         out.gapsGlobal = gaps(for: space)
         out.gapsOverride = [:]
-        if let own = minWindowSizeOverride[space] {
-            for layout in MinWindowSizes.Layout.allCases {
-                out.minWindowSizes[layout] = own
-            }
-        }
-        out.minWindowSizeOverride = [:]
+        out.foldMinWindowSize(for: space)
         out.bsp = resolvedBsp(for: space)
         out.stack = resolvedStack(for: space)
         out.scrolling = resolvedScrolling(for: space)
@@ -25,11 +36,9 @@ extension TilingSettings {
         out.monocle = resolvedMonocle(for: space)
         out.track = resolvedTrack(for: space)
         if let own = placementOverride[space] {
-            out.bsp.newWindowPlacement = own
-            out.stack.newWindowPlacement = own
-            out.scrolling.newWindowPlacement = own
-            out.grid.newWindowPlacement = own
-            out.monocle.newWindowPlacement = own
+            for (_, path) in Self.spawnPlacementPaths {
+                out[keyPath: path] = own
+            }
         }
         out.placementOverride = [:]
         out.spaceIcons = spaceIcons[space].map { [space: $0] } ?? [:]

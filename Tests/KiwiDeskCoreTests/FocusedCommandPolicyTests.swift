@@ -71,6 +71,8 @@ struct FocusedCommandPolicyTests {
         "shortcut.list_groups",
         "get_state",
         "get_config_status",
+        // Reads the live settings back, acts on no window (#2782).
+        "get_settings",
         "explain_app",
         "get_layout_info",
         "list_monitors",

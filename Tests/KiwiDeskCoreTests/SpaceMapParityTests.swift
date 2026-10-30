@@ -9,7 +9,7 @@ import Testing
 // each hand-enumerate every `[SpaceID: _]` map.
 // These tests DISCOVER the maps by reflection (depth 2, so the
 // per-layout `override` maps inside the param structs count),
-// so adding a ninth map without touching both functions — or
+// so adding a ninth map without touching every function — or
 // without populating it below — fails red instead of silently
 // orphaning entries.
 
@@ -103,7 +103,7 @@ struct SpaceMapParityTests {
         )
     }
 
-    @Test("resolved(for:) folds every per-space map (#2782)")
+    @Test("resolved(for:) leaves no other Space's entry (#2782)")
     func resolvedCoversEveryMap() {
         let dicts = dictionaryDescriptions(
             populated().resolved(for: renamed)

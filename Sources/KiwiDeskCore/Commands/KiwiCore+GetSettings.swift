@@ -11,7 +11,7 @@ extension KiwiCore {
         var path: [String] = []
         if let value = args.first, value != .null {
             guard let pointer = value.stringValue,
-                let parsed = KeepPointer.path(pointer)
+                let parsed = pointer.isEmpty ? [] : KeepPointer.path(pointer)
             else {
                 return .fail("expected a JSON Pointer such as /settings")
             }

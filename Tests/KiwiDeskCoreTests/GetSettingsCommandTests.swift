@@ -65,6 +65,19 @@ struct GetSettingsCommandTests {
         #expect(
             get(core, [.string(position), .number(1)]) == .string("right")
         )
+        #expect(
+            get(core, [.string(position), .null]) == .string("right")
+        )
+        let whole = get(core, [.null, .string("2")])
+        #expect(whole != core.keepDocument)
+        #expect(
+            whole.flatMap {
+                KeepPointer.value(
+                    at: KeepPointer.path(position) ?? [],
+                    in: $0
+                )
+            } == .string("left")
+        )
         let overrides = "/settings/layout/stack/override"
         let folded = core.execute(
             KiwiCore.getSettingsCommand,
@@ -73,28 +86,78 @@ struct GetSettingsCommandTests {
         #expect(!folded.isSuccess)
     }
 
-    @Test("resolved(for:) folds each Space-wide override in")
+    @Test("resolved(for:) folds every per-Space map in")
     func resolvedFoldsOverrides() {
         var settings = TilingSettings()
         let space = SpaceID("2")
         settings.gapsOverride[space] = .uniform(7)
         settings.minWindowSizeOverride[space] = .square(123)
         settings.placementOverride[space] = .first
+        settings.spaceIcons[space] = "globe"
+        settings.spaceIcons[SpaceID("1")] = "star"
+        var bsp = BspOverride()
+        bsp.splitRatioH = 0.31
+        settings.bsp.override[space] = bsp
         var stack = StackOverride()
         stack.stackPosition = .left
         settings.stack.override[space] = stack
+        var scrolling = ScrollingOverride()
+        scrolling.orientation = .vertical
+        settings.scrolling.override[space] = scrolling
+        var grid = GridOverride()
+        grid.columns = 9
+        settings.grid.override[space] = grid
+        var monocle = MonocleOverride()
+        monocle.orientation = .vertical
+        settings.monocle.override[space] = monocle
+        var track = TrackOverride()
+        track.limit = 7
+        settings.track.override[space] = track
         let own = settings.resolved(for: space)
         #expect(own.gapsGlobal == .uniform(7))
         for layout in MinWindowSizes.Layout.allCases {
             #expect(own.minWindowSizes[layout] == .square(123))
         }
-        #expect(own.stack.newWindowPlacement == .first)
-        #expect(own.bsp.newWindowPlacement == .first)
+        for (mode, path) in TilingSettings.spawnPlacementPaths {
+            #expect(own[keyPath: path] == .first, "\(mode)")
+        }
+        #expect(own.spaceIcons == [space: "globe"])
+        #expect(own.bsp.splitRatioH == 0.31)
         #expect(own.stack.stackPosition == .left)
+        #expect(own.scrolling.orientation == .vertical)
+        #expect(own.grid.columns == 9)
+        #expect(own.monocle.orientation == .vertical)
+        #expect(own.track.limit == 7)
         let other = settings.resolved(for: SpaceID("1"))
-        #expect(other.gapsGlobal == settings.gapsGlobal)
+        #expect(other.bsp.splitRatioH == settings.bsp.splitRatioH)
+        #expect(other.track.limit == settings.track.limit)
         #expect(other.minWindowSizes == settings.minWindowSizes)
-        #expect(other.stack.stackPosition == settings.stack.stackPosition)
+        #expect(
+            other.stack.stackPosition == settings.stack.stackPosition
+        )
+    }
+
+    @Test("the spawn map reads the shared placement table")
+    func spawnMapReadsTheTable() {
+        let core = core()
+        var expected: [LayoutMode: SpawnPlacement] = [:]
+        for (mode, path) in TilingSettings.spawnPlacementPaths {
+            let flipped: SpawnPlacement =
+                core.tiler.settings[keyPath: path] == .first
+                ? .last : .first
+            core.tiler.settings[keyPath: path] = flipped
+            expected[mode] = flipped
+        }
+        core.handle(
+            .windowDestroyed(WindowID(999_999), wasMinimized: false)
+        )
+        #expect(core.state.spawnPlacements == expected)
+    }
+
+    @Test("an empty pointer names the whole document")
+    func emptyPointer() {
+        let core = core()
+        #expect(get(core, [.string("")]) == core.keepDocument)
     }
 
     @Test("a missing leaf, a non-pointer and an unknown Space refuse")
