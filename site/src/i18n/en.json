@@ -542,7 +542,6 @@
   "looks_badge_screenshot": "Screenshot",
   "looks_badge_preview": "Preview",
   "looks_picture_alt_screenshot": "Screenshot of {name}",
-  "looks_picture_alt_preview": "Preview of {name}",
   "looks_by": "by {author}",
   "looks_based_on": "based on {name} by {author}",
   "looks_based_on_removed": "based on a removed look",

@@ -542,7 +542,6 @@
   "looks_badge_screenshot": "スクリーンショット",
   "looks_badge_preview": "プレビュー",
   "looks_picture_alt_screenshot": "{name} のスクリーンショット",
-  "looks_picture_alt_preview": "{name} のプレビュー",
   "looks_by": "作者: {author}",
   "looks_based_on": "{author} の {name} がベース",
   "looks_based_on_removed": "削除されたデザインがベース",

@@ -1,12 +1,12 @@
 /**
  * The looks gallery (#1740), read ONCE per build from the public
  * `KiwiCanopy/KiwiDesk-Looks` repo: its generated `index.json`,
- * then each look's own file for the colors the preview sketch
- * draws and the lines the Nerd landing quotes. Build time, never the browser, like `stars.ts` and
- * `voices.ts`: the CSP (`public/_headers`) and the privacy policy
- * promise no third-party request from a visitor's page, so a
- * look's image goes through astro:assets (`image.remotePatterns`)
- * and is served from the site itself.
+ * then each look's own file for what the sketch draws and the
+ * lines the Nerd landing quotes. Build time, never the browser,
+ * like `stars.ts` and `voices.ts`: the CSP (`public/_headers`) and
+ * the privacy policy promise no third-party request from a
+ * visitor's page, so a look's screenshot goes through astro:assets
+ * (`image.remotePatterns`) and is served from the site itself.
  *
  * Unauthenticated against raw.githubusercontent.com, no secret
  * (`.claude/rules/site.md` ▸ *Build-time reads*). A failed index
@@ -67,8 +67,27 @@ export interface Sketch {
   hug: boolean;
   centered: boolean;
   font: string | null;
+  /** `kiwishelf.font_weight`, 100–900. */
+  weight: number;
+  /** The active indicator's colour, `kiwishelf.highlight_color`. */
+  highlight: string | null;
+  /** How each bar marks its active item. */
+  spaceMark: Mark;
+  appMark: Mark;
+  /** Indicator weight in points, 1–6 (`kiwishelf.highlight_width`). */
+  highlightWidth: number;
+  /** The shelf border's colour, `null` when the look draws none. */
+  border: string | null;
+  /** Its width in points, 1–4. */
+  borderWidth: number;
+  /** Bar thickness and item gap in points. */
+  thickness: number;
+  itemGap: number;
+  /** `kiwishelf.order`: the Space Bar's section leads a shared bar. */
+  spacesFirst: boolean;
 }
 export type Edge = "top" | "bottom" | "left" | "right";
+export type Mark = "outline" | "edge_mark";
 
 export interface Look {
   id: string;
@@ -83,11 +102,10 @@ export interface Look {
   version: string | null;
   needsFonts: string[];
   fontUrl: string | null;
-  /** Remote image the build downloads, how it was made, and its
+  /** The look's screenshot, which the build downloads, and its
    * pixel size (read from the PNG the build fetched). */
   image: {
     src: string;
-    kind: "screenshot" | "preview";
     width: number;
     height: number;
   } | null;
@@ -149,7 +167,10 @@ export const SYSTEM_FONTS: Record<string, string> = {
 const HEX = /^#[0-9a-f]{6}(?:[0-9a-f]{2})?$/i;
 const ID = /^[a-z0-9][a-z0-9-]*$/;
 const DATE = /^\d{4}-\d{2}-\d{2}$/;
-const IMAGE_PATH = /^looks\/[a-z0-9-]+\/(screenshot|preview)\.png$/;
+// A screenshot only. The `preview.png` the looks repo's CI draws is
+// not read: the sketch below pictures the same look file, drawn by
+// the page itself, and the owner prefers it (2026-10-30).
+const IMAGE_PATH = /^looks\/[a-z0-9-]+\/screenshot\.png$/;
 
 const text = (v: unknown): string | null =>
   typeof v === "string" && v.trim() !== "" ? v.trim() : null;
@@ -200,11 +221,6 @@ function toLook(row: any): { look: Look; file: string } | null {
   }
   const updated = text(row?.updated);
   const path = text(row?.image?.path);
-  // The file name says how the picture was made, never the row's kind.
-  const imageKind = path?.match(IMAGE_PATH)?.[1] as
-    | "screenshot"
-    | "preview"
-    | undefined;
   const fonts = strings(row?.needs_fonts).filter(
     (f) => !Object.hasOwn(SYSTEM_FONTS, f),
   );
@@ -222,13 +238,8 @@ function toLook(row: any): { look: Look; file: string } | null {
     needsFonts: fonts,
     fontUrl: https(row?.font_url),
     image:
-      path && imageKind
-        ? {
-            src: RAW + path,
-            kind: imageKind,
-            width: 0,
-            height: 0,
-          }
+      path && IMAGE_PATH.test(path)
+        ? { src: RAW + path, width: 0, height: 0 }
         : null,
     lookFormat: count(row?.look_format),
     added,
@@ -293,6 +304,8 @@ function toSketch(doc: any): Sketch {
   const appEdge = edge(style["app_bar.edge"]);
   const width = Number(style["border.width"]);
   const round = Number(style["kiwishelf.corner_roundness"]);
+  const mark = (v: unknown, fallback: Mark): Mark =>
+    v === "outline" || v === "edge_mark" ? v : fallback;
   return {
     fill: color(colors["kiwishelf.fill_color"]),
     item: color(colors["kiwishelf.item_color"]),
@@ -310,7 +323,29 @@ function toSketch(doc: any): Sketch {
     hug: style["kiwishelf.background_fit"] === "hug",
     centered: style["kiwishelf.alignment"] !== "start",
     font: text(style["kiwishelf.font_family"]),
+    weight: points(style["kiwishelf.font_weight"], 100, 900, 400),
+    highlight: color(colors["kiwishelf.highlight_color"]),
+    // Each bar's own documented default when the file omits it.
+    spaceMark: mark(style["space_bar.active_indicator"], "outline"),
+    appMark: mark(style["app_bar.active_indicator"], "edge_mark"),
+    highlightWidth: points(style["kiwishelf.highlight_width"], 1, 6, 2),
+    border:
+      style["kiwishelf.border"] === true
+        ? color(colors["kiwishelf.border_color"])
+        : null,
+    borderWidth: points(style["kiwishelf.border_width"], 1, 4, 1),
+    thickness: points(style["kiwishelf.thickness"], 20, 60, 30),
+    itemGap: points(style["kiwishelf.item_gap"], 0, 20, 6),
+    spacesFirst: style["kiwishelf.order"] !== "apps_first",
   };
+}
+
+/** A number from the file clamped to `min`–`max`, else `fallback`. */
+function points(v: unknown, min: number, max: number, fallback: number) {
+  const n = Number(v);
+  return typeof v === "number" && Number.isFinite(n)
+    ? Math.min(Math.max(n, min), max)
+    : fallback;
 }
 
 /** The pixel size of a PNG, or why `bytes` is not one we accept.
@@ -449,10 +484,35 @@ export const formatDate = (iso: string, lang: string): string =>
     .format(new Date(`${iso}T00:00:00Z`));
 
 /**
+ * A CSS font stack for a look's family: the family by name, which a
+ * Mac that has it draws, then the generic its name suggests. The
+ * site ships no look's font, so a visitor without it sees the
+ * generic, and the card's "Needs font" line says so. `null` for a
+ * name that is not plain letters, digits, spaces, dots and hyphens.
+ */
+export function fontStack(font: string | null): string | null {
+  if (!font || font === "System") return "system-ui, sans-serif";
+  if (font === "System Monospaced") return "ui-monospace, monospace";
+  if (!/^[\p{L}\p{N} .-]{1,64}$/u.test(font)) return null;
+  const generic =
+    /mono|code|courier|menlo|consol/i.test(font) ? "monospace"
+    : /chancery|script|brush|hand|zapfino|snell/i.test(font) ? "cursive"
+    : /serif|charter|georgia|times|garamond|baskerville|palatino|didot|bodoni|hoefler|new york|caslon|cochin|book/i.test(font)
+      && !/sans/i.test(font) ? "serif"
+    : "sans-serif";
+  return `"${font}", ${generic}`;
+}
+
+/**
  * The sketch's inline custom properties. The values are look DATA
  * from the gallery, not brand colors, so they live in the built
  * page's `style` attributes and nowhere in `site/src`.
  */
+/** cqi per point of the look's bars, larger than life so a card's
+ * tiles read. */
+const BAR_PT = 0.28;
+const cqi = (n: number): string => `${n.toFixed(2)}cqi`;
+
 export function sketchStyle(s: Sketch | null): string {
   if (!s) return "";
   const props: [string, string | null][] = [
@@ -462,6 +522,16 @@ export function sketchStyle(s: Sketch | null): string {
     ["--lk-ring", s.ring],
     ["--lk-ring-w", `${(s.ringWidth / 4).toFixed(2)}cqi`],
     ["--lk-round", s.roundness.toFixed(2)],
+    // The bars draw at one scale, BAR_PT cqi per point, so tile,
+    // gap, border and indicator keep the look's proportions.
+    ["--lk-hl", s.highlight],
+    ["--lk-hl-w", cqi(s.highlightWidth * BAR_PT)],
+    ["--lk-border", s.border],
+    ["--lk-border-w", cqi(s.borderWidth * BAR_PT)],
+    ["--lk-tile", cqi(s.thickness * BAR_PT)],
+    ["--lk-gap", cqi(s.itemGap * BAR_PT)],
+    ["--lk-font", fontStack(s.font)],
+    ["--lk-weight", String(s.weight)],
   ];
   return props
     .filter(([, v]) => v !== null)

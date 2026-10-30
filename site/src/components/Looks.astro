@@ -260,8 +260,7 @@ const MAX_CARD_TAGS = 4;
             <LookPicture look={look} size="card"
               badgeScreenshot={t("looks_badge_screenshot")}
               badgePreview={t("looks_badge_preview")}
-              altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })}
-              altPreview={f("looks_picture_alt_preview", { name: look.name })} />
+              altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })} />
             <div class="card__body">
               <h2 class="card__title">
                 <a href={`#${anchor(look.id)}`}>{look.name}</a>
@@ -351,8 +350,7 @@ const MAX_CARD_TAGS = 4;
           <LookPicture look={look} size="detail"
             badgeScreenshot={t("looks_badge_screenshot")}
             badgePreview={t("looks_badge_preview")}
-            altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })}
-            altPreview={f("looks_picture_alt_preview", { name: look.name })} />
+            altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })} />
           <h2 id={titleId(look.id)}>{look.name}</h2>
           <p class="byline">{f("looks_by", { author: look.author })}</p>
           {credit && <p class="based" set:html={credit} />}
