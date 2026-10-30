@@ -1103,7 +1103,7 @@
   "kiwishelf.show.scrolling": "%1$@のApp Bar",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "「%1$@」に設定したApp Barが同じ端にある間は、表示されたままになります。",
-  "kiwishelf.show.visibility.help": "「常に」はバーを画面に表示したままにします。「自動」はポインタが帯の上に止まるまで、バーを細い帯だけ残して隠します。「非表示」は何も描画しません。ショートカットを使うと、ウインドウの上に表示されます。App Barを表示できるのは%1$@と%2$@だけです。Space Barが非表示のときは、各画面がどのスペースにあるかをメニューバーに表示します。",
+  "kiwishelf.show.visibility.help": "「常に」はバーを画面に表示したままにします。「自動」はポインタが帯の上に止まるまで、バーを細い帯だけ残して隠します。「非表示」では Pocket のハンドルだけが残り、ウインドウはそれを避けて配置されます。バーのショートカットを使うと、ウインドウの上にバーが表示されます。App Barを表示できるのは%1$@と%2$@だけです。Space Barが非表示のときは、各画面がどのスペースにあるかをメニューバーに表示します。",
   "kiwishelf.thickness": "厚み",
   "kiwishelf.thickness.help": "両方のバーに共通の厚みです。自動グリフサイズはこの厚みに合わせて変わります。",
   "kiwishelf.tint_hub_and_plates": "%1$@とプレートを色付け",

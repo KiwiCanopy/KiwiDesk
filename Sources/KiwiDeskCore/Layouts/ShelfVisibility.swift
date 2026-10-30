@@ -3,7 +3,8 @@ import Foundation
 /// Whether a bar stays on screen (#761): `always`; `auto`, which
 /// hides it to a mark the pointer reveals; or `hidden`, which
 /// draws nothing and reserves nothing until the bar's shortcut
-/// shows it over the windows. Each bar stores its own — the App
+/// shows it over the windows — save the resting pocket's handle
+/// and its strip (#2784). Each bar stores its own — the App
 /// Bar one per layout that can carry it — and two bars on one
 /// edge resolve through `TilingSettings.barEdges(space:app:)`:
 /// the edge reserves for its most present bar.

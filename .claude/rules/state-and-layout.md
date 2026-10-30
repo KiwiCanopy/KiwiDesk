@@ -122,8 +122,9 @@ editing here:
   `KiwiDeskCore`; its `allowed` map is the exemption list.
 - A layout **span** reads one hook further in:
   `TilingEngine.layoutBounds(on:for:)` (#537), which reserves the
-  KiwiShelf strip where a bar draws in that Space's layout (#293,
-  #1517, #1731; the reservation per edge is bars.md's) so a resize divides its
+  KiwiShelf strip where a bar draws in that Space's layout or the
+  pocket rests (#293, #1517, #1731, #2784; the reservation per
+  edge is bars.md's) so a resize divides its
   delta by the region the layout filled, not the whole display. Routing
   through `visibleBounds` and then dividing by the display
   passes the guard above and is still the bug —
@@ -2481,9 +2482,9 @@ editing here:
   dispatch — save that a `space_bar.*`, `app_bar.*` or `kiwishelf.*` write may
   skip the pass, running the one `repaintBarsAndFloatNet` tail
   (the bars, then every strip reader) instead, only while it leaves every layout's
-  `TilingSettings.shelfReservation(in:on:)` on every connected
-  screen — the whole input `layoutBounds(from:mode:on:)`
-  reads — unchanged (#1524, #1948,
+  `TilingSettings.shelfReservation(in:on:pocketAtRest:)` on every
+  connected screen — the whole input
+  `layoutBounds(from:mode:on:pocketAtRest:)` reads — unchanged (#1524, #1948,
   `BarReserveCoreTests` ▸ `unchangedReservationSkipsTheRetile`).
   Event-driven retiles stay on the `.event` default so
   echo lag can't wobble windows. Profile applies classify

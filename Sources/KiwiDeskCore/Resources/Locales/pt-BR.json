@@ -1103,7 +1103,7 @@
   "kiwishelf.show.scrolling": "App Bar no %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Continua visível enquanto uma App Bar em “%1$@” compartilha a borda dela.",
-  "kiwishelf.show.visibility.help": "“Sempre” mantém a barra na tela. “Auto” a oculta, deixando só uma faixa fina, até o cursor repousar sobre ela. “Oculta” não desenha nada: o atalho dela ainda a mostra, sobre as suas janelas. Só %1$@ e %2$@ podem ter uma App Bar. Com a Space Bar oculta, a barra de menus mostra o espaço em que cada tela está.",
+  "kiwishelf.show.visibility.help": "“Sempre” mantém a barra na tela. “Auto” a oculta, deixando só uma faixa fina, até o cursor repousar sobre ela. “Oculta” deixa só a alça do Pocket, que as janelas evitam; o atalho da barra ainda a mostra, sobre as suas janelas. Só %1$@ e %2$@ podem ter uma App Bar. Com a Space Bar oculta, a barra de menus mostra o espaço em que cada tela está.",
   "kiwishelf.thickness": "Espessura",
   "kiwishelf.thickness.help": "Uma só espessura para as duas barras. Um tamanho do glifo automático a acompanha.",
   "kiwishelf.tint_hub_and_plates": "Tingir o %1$@ e as placas",

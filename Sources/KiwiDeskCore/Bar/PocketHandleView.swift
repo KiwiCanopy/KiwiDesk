@@ -15,11 +15,10 @@ final class PocketHandleView: NSView {
     /// The kiwis are drawn at the mark's grid at this side, their
     /// lower part behind the tab.
     static let markSide: CGFloat = 20
-    /// How far the kiwis' image reaches past the tab: about three
-    /// quarters of each slice shows.
-    static let lookOut: CGFloat = 7.5
-    /// The handle's whole depth at rest.
-    static var restDepth: CGFloat { tabDepth + lookOut }
+    /// The handle's whole depth at rest, `PocketMarkGeometry`'s.
+    static var restDepth: CGFloat { PocketMarkGeometry.handleDepth }
+    /// How far the kiwis' image reaches past the tab.
+    static var lookOut: CGFloat { restDepth - tabDepth }
 
     private var edge = AppBarEdge.bottom
     private var shelf = KiwiShelf()

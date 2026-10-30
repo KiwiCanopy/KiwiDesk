@@ -94,13 +94,23 @@ struct BarAutoHideFoldTests {
         #expect(hidden.shelfEdges(in: .bsp, on: nil).isEmpty)
         #expect(hidden.hidingEdges(in: .bsp, on: nil) == [.top])
         let visible = CGRect(x: 0, y: 0, width: 1000, height: 800)
-        let bounds = hidden.layoutBounds(from: visible, mode: .bsp, on: nil)
+        let bounds = hidden.layoutBounds(
+            from: visible,
+            mode: .bsp,
+            on: nil,
+            pocketAtRest: false
+        )
         #expect(
             visible.height - bounds.height == 3 + KiwiShelf.hiddenDepth + 5
         )
         hidden.spaceBarStyle.reserve = false
         #expect(
-            hidden.layoutBounds(from: visible, mode: .bsp, on: nil)
+            hidden.layoutBounds(
+                from: visible,
+                mode: .bsp,
+                on: nil,
+                pocketAtRest: false
+            )
                 == visible
         )
         let shown = settings(space: .always, app: .always)

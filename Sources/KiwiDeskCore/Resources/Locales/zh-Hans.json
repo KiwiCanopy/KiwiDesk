@@ -1103,7 +1103,7 @@
   "kiwishelf.show.scrolling": "%1$@中的 App Bar",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "设为“%1$@”的 App Bar 与其共用同一条边缘时，保持显示。",
-  "kiwishelf.show.visibility.help": "“始终”让栏一直留在屏幕上。“自动”会把栏隐藏成一道细条，直到指针停留在细条上。“隐藏”不绘制任何内容：仍可用其快捷键显示，覆盖在窗口之上。只有%1$@和%2$@可以带有 App Bar。隐藏 Space Bar 后，菜单栏会显示每个屏幕所在的空间。",
+  "kiwishelf.show.visibility.help": "“始终”让栏一直留在屏幕上。“自动”会把栏隐藏成一道细条，直到指针停留在细条上。“隐藏”只留下 Pocket 的把手，窗口会避开它；栏仍可用其快捷键显示，覆盖在窗口之上。只有%1$@和%2$@可以带有 App Bar。隐藏 Space Bar 后，菜单栏会显示每个屏幕所在的空间。",
   "kiwishelf.thickness": "厚度",
   "kiwishelf.thickness.help": "两个栏共用一个厚度。自动图形大小会跟随它。",
   "kiwishelf.tint_hub_and_plates": "为 %1$@ 和薄板着色",

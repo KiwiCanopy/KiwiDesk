@@ -212,6 +212,12 @@ public struct KiwiShelf: Sendable, Equatable {
         outerMargin + Self.hiddenDepth + innerMargin
     }
 
+    /// What an edge where the pocket's handle rests reserves
+    /// (#2784): the shelf's own rule with the handle's depth.
+    public var pocketHandleReservation: CGFloat {
+        outerMargin + PocketMarkGeometry.handleDepth + innerMargin
+    }
+
     /// True if Liquid Glass is on and the platform draws it.
     public var glassEnabled: Bool {
         liquidGlass && AppBarStyle.glassAvailable

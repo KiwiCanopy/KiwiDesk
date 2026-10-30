@@ -31,6 +31,9 @@ final class PocketPlateOverlay {
         var risenSide: CGFloat = 0
         /// The shelf's outer margin, between the edge and the handle.
         var outer: CGFloat = 0
+        /// The whole mark stands at rest on an edge no bar shows,
+        /// with no handle (#2784 ▸ 8).
+        var whole = false
     }
 
     /// One display's pocket: a handle's panel, or a section's
@@ -189,7 +192,8 @@ final class PocketPlateOverlay {
                 handle: spec.handle,
                 risen: spec.risen,
                 side: spec.risenSide,
-                outer: spec.outer
+                outer: spec.outer,
+                whole: spec.whole
             )
         }
     }

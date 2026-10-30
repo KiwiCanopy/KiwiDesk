@@ -31,6 +31,7 @@ paths:
   - "Sources/KiwiDesk/Settings/HomeCardPlate+ShelfStrip.swift"
   - "Sources/KiwiDeskCore/Layouts/KiwiShelf*.swift"
   - "Sources/KiwiDeskCore/Layouts/Shelf*.swift"
+  - "Sources/KiwiDeskCore/Layouts/PocketMarkGeometry.swift"
   - "Sources/KiwiDeskCore/Layouts/SpaceBarStyle*.swift"
   - "Sources/KiwiDeskCore/Layouts/AppBarStyle*.swift"
   - "Sources/KiwiDeskCore/Layouts/LayoutAppBar*.swift"
@@ -38,6 +39,8 @@ paths:
   # The edge folds (reserve, hide) and the bars' visibility door
   # (#1524, #761).
   - "Sources/KiwiDeskCore/Tiling/TilingSettings+Shelf.swift"
+  # Where the pocket rests and the strip it keeps (#2784).
+  - "Sources/KiwiDeskCore/Tiling/TilingSettings+PocketRest.swift"
   # Glass hosts outside Bar/ (#1620, #1621): they take their tint
   # through GlassTint.apply and their stand-down through the gate,
   # whose obligations live here.
@@ -120,19 +123,22 @@ twice, was a question the user answered twice. The argument is
   registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
   one as its own Config Issue.
 - **Reserve each edge a bar draws on through the one
-  `TilingSettings.layoutBounds(from:mode:on:)`, listed by the one
-  `shelfEdges(in:on:)`, unless every bar drawing on that edge has
-  `reserve` off (#1524)** — `barEdges(space:app:)`'s reserving
+  `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)`,
+  listed by the one `shelfEdges(in:on:)`, unless every bar
+  drawing on that edge has `reserve` off (#1524)** —
+  `barEdges(space:app:)`'s reserving
   subset, while the live plan (`KiwiCore.shelfPlans`) takes
   `barEdges` whole, so the strips drawn and the edges reserved
   come from one derivation — the Space
   Bar's edge in every layout
   while it is not `hidden`, the App Bar's only in the layouts
   whose own App Bar is not `hidden` and only where the Space Bar
-  does not already hold it — never a layout, a bar or a mode carving a strip of
-  its own, and never a second "does a bar draw here" predicate
-  beside it. A switch between two layouts that draw on the same
-  edges moves no window; a switch into or out of a layout whose
+  does not already hold it — never a layout, a bar or a mode
+  carving a strip of its own, save the pocket's resting strip (▸
+  The pocket is a shelf section), and never a second "does a bar
+  draw here" predicate beside it. A switch between two layouts
+  that draw on the same edges moves no window; a switch into or
+  out of a layout whose
   App Bar draws on an edge nothing else holds is the ruled price
   (`docs/design-decisions.md` ▸ One shelf holds both bars).
   `ShelfGeometryTests` ▸ `reservesWhereABarDraws` holds the fused
@@ -151,8 +157,9 @@ twice, was a question the user answered twice. The argument is
   live plan reads every edge `barEdges` lists, `shelfEdges(in:on:)`
   keeps the reserving ones, the float region carves only the
   painted strips on those edges (`KiwiCore.reservedStrips`),
-  and a bar write that leaves `shelfReservation(in:on:)` alone
-  repaints the bars and re-clamps the floats without a pass.
+  and a bar write that leaves
+  `shelfReservation(in:on:pocketAtRest:)` alone repaints the bars
+  and re-clamps the floats without a pass.
   `reserve` is a bar's own, global like
   its edge (`AppBarStyle.layoutFixedKeys`). **A per-screen edge
   (#1948) resolves before this fold, through the one
@@ -185,8 +192,8 @@ twice, was a question the user answered twice. The argument is
   TYPE `[String: AppBarEdge]`, module-wide: a store of that type
   that must encode an empty map takes a type of its own.
   **A new input to `layoutBounds` enters
-  through `shelfReservation(in:on:)`, and the skip comparison
-  covers every axis that input is keyed by** —
+  through `shelfReservation(in:on:pocketAtRest:)`, and the skip
+  comparison covers every axis that input is keyed by** —
   `KiwiCore.shelfReservations` compares every mode on every
   connected screen, or a bar write skips a pass the bounds owed
   (`ScreenEdgeCoreTests` ▸ `screenWriteOwesThePass`).
@@ -201,7 +208,8 @@ twice, was a question the user answered twice. The argument is
   bar (`ShelfEdge.reservation`: `always` over `auto` over
   `hidden`, so a `hidden` bar's `reserve` reserves nothing), an
   `auto` edge only its constant sliver (`hidingEdges`,
-  `KiwiShelf.hiddenReservation`) and a `hidden` one nothing; what a
+  `KiwiShelf.hiddenReservation`) and a `hidden` one nothing, save
+  where the pocket rests (▸ The pocket is a shelf section); what a
   bar shows at rest beside its sibling is the one `ShelfEdge.shown`,
   never a comparison at a call site. The fold reads stored values,
   never what a layout draws, so a layout switch moves windows only
@@ -817,6 +825,28 @@ pocket rides every motion the shelf plays. Obligations:
   the one `PocketMarkGeometry`, which the shelf's placement and the
   risen size read too. A box for it is a ruling in
   `docs/design-decisions.md` first.
+- **How the pocket rests is asked of the one
+  `TilingSettings.pocketRest`** (#2784) — a section, the handle, or
+  the whole mark on an edge no bar sits on while the bars read
+  Always — by the reservation (`pocketReservation`), the whole
+  mark's drawing and the float region (`reservedStrips`); a live
+  section stands only where the bar pass draws a bar
+  (`pocketPlate.slots`). The pocket's strip enters `layoutBounds`
+  only through `shelfReservation(in:on:pocketAtRest:)`, an edge
+  reserving the deepest strip it is asked for
+  (`ShelfReservation.depth(of:)`).
+  The handle's rest depth is the one `PocketMarkGeometry.handleDepth`,
+  which the reservation reads too (`PocketReservationTests`,
+  `PocketReservationCoreTests` ▸ `wholeFollowsTheRest`).
+- **An app-wide write that moves `shelfReservations` owes a pass,
+  and one that moves none a repaint** — the capacity is the first
+  input to the bounds no bar write carries: it reaches them through
+  `TilingEngine.pocketAtRest` — the capacity alone, never
+  `pocketStands`, so a drag or a play never retiles — which
+  `shelfReservations` reads too, and `appWideLiveChanged` compares
+  the reservations either side (`PocketReservationCoreTests` ▸
+  `capacityMovesTheBounds`,
+  `sectionMovesNothing`).
 - **A play lights the standing pocket; a count change lights it only
   where no play runs** (#2776): `playBriefPocket` schedules
   `PocketPlateOverlay.light` on `DeferredTasks.Key.pocketLight`, and

@@ -251,6 +251,11 @@ public final class TilingEngine {
         nil
     }
 
+    /// Whether the pocket stands at rest, under Several windows, so
+    /// its edge reserves its strip (#2784); `bootstrapCoreServices`
+    /// wires it to `KiwiCore.pocketHoldsSeveral`.
+    var pocketAtRest: @MainActor () -> Bool = { false }
+
     /// The fingerprint `screen`'s bar edges resolve under in
     /// `settings` (the live ones unless a draft is handed in) —
     /// nil while no bar has a screen of its own, skipping the read.
