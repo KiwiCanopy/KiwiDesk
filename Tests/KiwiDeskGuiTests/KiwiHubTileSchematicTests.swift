@@ -57,6 +57,12 @@ struct KiwiHubTileSchematicTests {
             KiwiHubPaint().schematicPalette(selected: false, lifted: true)
                 == nil
         )
+        // Untinted reads `tinted`, never a nil hover ink alone.
+        var untinted = KiwiHubPaint()
+        untinted.hoverInk = .white
+        #expect(
+            untinted.schematicPalette(selected: false, lifted: true) == nil
+        )
     }
 
     @Test("the tile hands its schematic the paint's palette")

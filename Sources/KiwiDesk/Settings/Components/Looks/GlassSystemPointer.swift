@@ -3,8 +3,8 @@ import SwiftUI
 
 /// Where the glass's see-through level lives: macOS's own Liquid
 /// Glass slider, which KiwiDesk follows rather than overrides
-/// (ui-designer, 2026-10-30). The path quotes the Appearance
-/// pane's loctable (config-vocabulary.md ▸ quote Apple verbatim).
+/// (`docs/design-decisions.md` ▸ One Liquid Glass switch). The
+/// path quotes the Appearance pane's loctable.
 struct GlassSystemPointer: View {
     var body: some View {
         let (leading, trailing) = CrossReferenceRow.split(Self.prose)
@@ -26,7 +26,7 @@ struct GlassSystemPointer: View {
     static var prose: String {
         L(
             "colors.liquid_glass.system",
-            "How see-through the glass is follows %1$@.",
+            "The glass's transparency follows %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

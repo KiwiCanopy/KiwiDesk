@@ -126,7 +126,7 @@ extension KiwiHubPaint {
                 base: selection
             )
         }
-        guard lifted, let hoverInk else { return nil }
+        guard tinted, lifted, let hoverInk else { return nil }
         return SchematicPalette(
             accent: hoverInk,
             ink: hoverInk,

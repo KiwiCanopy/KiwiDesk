@@ -1,4 +1,5 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
@@ -14,12 +15,16 @@ struct GlassSystemPointerTests {
         #expect(prose.occurrences(of: CrossReferenceRow.linkSlot) == 1)
     }
 
-    @Test("the link opens System Settings' Appearance pane")
-    func linkOpensAppearance() {
+    @Test("the switch alone carries the pointer, where glass is")
+    @MainActor
+    func onlyTheSwitchPoints() {
         #expect(
-            GlassSystemPointer.appearancePane.absoluteString
-                == "x-apple.systempreferences:"
-                + "com.apple.Appearance-Settings.extension"
+            GlassCard.showsSystemPointer(.colours(.liquidGlassMaster))
+                == AppBarStyle.glassAvailable
+        )
+        #expect(!GlassCard.showsSystemPointer(.kiwishelf(.fillFade)))
+        #expect(
+            !GlassCard.showsSystemPointer(.kiwishelf(.tintHubAndPlates))
         )
     }
 
@@ -37,11 +42,7 @@ struct GlassSystemPointerTests {
         )
         #expect(card.occurrences(of: "GlassSystemPointer()") == 1)
         #expect(
-            card.occurrences(
-                of: "if AppBarStyle.glassAvailable, "
-                    + "key == .colours(.liquidGlassMaster) {\n"
-                    + "            GlassSystemPointer()"
-            ) == 1
+            card.occurrences(of: "if Self.showsSystemPointer(key) {") == 1
         )
     }
 }
