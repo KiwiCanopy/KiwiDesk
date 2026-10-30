@@ -223,9 +223,10 @@ twice, was a question the user answered twice. The argument is
   or band dwell, never the drag's start — and holds or retracts
   any shown bar as a move does; the revealer's own monitors hear
   it through the one `ShelfRevealer.heard` mask, never a second
-  monitor or tap, and a left drag counts only while
-  `ShelfRevealer.windowMoving`, the pocket plate's move verdict,
-  says a window moves — never a re-derivation in the revealer
+  monitor or tap, and a left drag counts only while the core's
+  one `windowMoveInFlight` — the pocket plate's move verdict asked
+  of the live gesture — says a window moves, never a re-derivation
+  in the revealer
   (#2795, `ShelfRevealDragTests` ▸ `dragLeavesTheAppBar`,
   `ShelfRevealDragTests` ▸ `nonWindowDragIsUnheard`,
   `ShelfRevealWiringTests` ▸ `liveArmsHearTheDrag`,

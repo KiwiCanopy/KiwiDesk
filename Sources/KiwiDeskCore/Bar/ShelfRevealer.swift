@@ -20,9 +20,9 @@ final class ShelfRevealer {
     /// the pointer left — the hover peek, a bar menu; wired in
     /// Bootstrap. A retract it holds is asked again later.
     var holds: @MainActor (ShelfManager.Key) -> Bool = { _ in false }
-    /// Whether a window move is in flight — the drag pipeline's
-    /// move verdict the pocket plate keeps, wired in Bootstrap. A
-    /// left drag that moves no window reveals nothing (#2795).
+    /// Whether a window move is in flight — the core's one
+    /// `windowMoveInFlight`, wired in Bootstrap. A left drag that
+    /// moves no window reveals nothing (#2795).
     var windowMoving: @MainActor () -> Bool = { false }
     /// Installs the pointer monitors (`heard`): live in
     /// production, pinned inert by both `makeTestCore` twins

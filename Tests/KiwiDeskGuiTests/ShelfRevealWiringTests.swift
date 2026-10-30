@@ -26,8 +26,20 @@ struct ShelfRevealWiringTests {
     @Test("A drag counts only while a window moves")
     func windowMoveIsWired() throws {
         let boot = try Self.source("App/KiwiCore+Bootstrap.swift")
-        #expect(boot.contains("shelves.reveal.windowMoving = {"))
-        #expect(boot.contains("self?.pocketPlate.dragging != nil"))
+        let wired = boot.ranges(
+            of: "shelves.reveal.windowMoving = { [weak self] in"
+        )
+        #expect(wired.count == 1)
+        if let open = wired.first {
+            let body = boot[open.upperBound...].prefix { $0 != "}" }
+            #expect(body.contains("self?.windowMoveInFlight == true"))
+        }
+        let plate = try Self.source("App/KiwiCore+PocketDrop.swift")
+        #expect(
+            plate.contains(
+                "pocketPlate.dragging.map { drag.hasGesture($0) } == true"
+            )
+        )
     }
 
     @Test("The revealer syncs before the shelves on both paths")

@@ -199,4 +199,24 @@ struct ShelfRevealDragTests {
         rig.fireAll()
         #expect(rig.revealer.reveal(of: Self.app) == .hidden)
     }
+
+    /// A cancel straight on the coordinator skips the plate's
+    /// clear; the answer still ends with the gesture.
+    @Test("a window move ends with its gesture, however it ends")
+    func moveEndsWithItsGesture() {
+        let core = makeTestCore()
+        let id = WindowID(900_795)
+        core.drag.isAnimating = { _ in false }
+        core.drag.isMousePressed = { false }
+        core.pocketPlate.dragging = id
+        #expect(!core.windowMoveInFlight)
+        core.drag.windowMoved(
+            id,
+            frame: CGRect(x: 100, y: 100, width: 400, height: 300),
+            validated: true
+        )
+        #expect(core.windowMoveInFlight)
+        core.drag.cancel(id)
+        #expect(!core.windowMoveInFlight)
+    }
 }

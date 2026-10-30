@@ -107,7 +107,7 @@ extension KiwiCore {
             self?.shelves.surfaceHolds(key) == true
         }
         shelves.reveal.windowMoving = { [weak self] in
-            self?.pocketPlate.dragging != nil
+            self?.windowMoveInFlight == true
         }
         shelves.handles.onPress = { [weak self] key in
             self?.toggleBarReveal(key)
