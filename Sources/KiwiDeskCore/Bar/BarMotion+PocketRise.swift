@@ -109,7 +109,9 @@ extension BarMotion {
             let slide = pocketEntrance(
                 edge: edge,
                 travel: travel,
-                flipped: view.isFlipped,
+                // The slide runs in the superview's space, not the
+                // view's own.
+                flipped: view.superview?.isFlipped ?? false,
                 entering: entering,
                 reduceMotion: isReduced
             ),
@@ -121,7 +123,8 @@ extension BarMotion {
 
     /// The entrance's additive slide, nil under `reduceMotion` or with
     /// no travel: from `travel` points toward `edge` in, or back out,
-    /// on the shelf's reveal curve.
+    /// on the shelf's reveal curve. `flipped` is whether the space the
+    /// position moves in, the superview's, runs y down.
     @MainActor
     static func pocketEntrance(
         edge: AppBarEdge,
