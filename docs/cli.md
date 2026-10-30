@@ -213,7 +213,7 @@ In Claude Code, the KiwiDesk plugin adds the server and a skill
 (`/kiwidesk:drive`) on how to change things live and keep them:
 
 ```sh
-/plugin marketplace add KiwiCanopy/kiwidesk-claude
+/plugin marketplace add KiwiCanopy/KiwiDesk-Claude
 /plugin install kiwidesk@kiwidesk
 ```
 

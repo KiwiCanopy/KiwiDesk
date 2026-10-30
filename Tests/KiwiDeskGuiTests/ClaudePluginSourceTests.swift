@@ -5,7 +5,7 @@ import Testing
 @testable import KiwiDesk
 
 /// The Claude Code plugin's source under `plugins/` (#2258 ▸
-/// Ruling 3), the folder the release copies to kiwidesk-claude: it
+/// Ruling 3), the folder the release copies to KiwiDesk-Claude: it
 /// starts the server under its own name and arguments, its skill
 /// teaches every tool the server offers, and the version is the
 /// release sync's to stamp.

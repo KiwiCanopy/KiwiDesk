@@ -24,7 +24,7 @@ is not found, it says so and exits.
 ## Install
 
 ```sh
-/plugin marketplace add KiwiCanopy/kiwidesk-claude
+/plugin marketplace add KiwiCanopy/KiwiDesk-Claude
 /plugin install kiwidesk@kiwidesk
 ```
 
