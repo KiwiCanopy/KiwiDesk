@@ -26,6 +26,16 @@ extension SettingsModel {
         )
     }
 
+    /// The draft's shortcut rivals, built once per encode: every
+    /// shortcut row asks them (#2783).
+    var encodedKeyRivals: KeyRivals? {
+        guard let reach = encodedReach else { return nil }
+        if let rivals = encodedCache?.rivals { return rivals }
+        let rivals = KeyRivals(reach.keyLayers)
+        encodedCache?.rivals = rivals
+        return rivals
+    }
+
     /// Drops every reach memo when a stored input moves.
     func dropReachCaches() {
         layeredCache = nil
@@ -247,4 +257,7 @@ struct EncodedReachCache {
 
     let key: Key
     let value: RuleReachSnapshot?
+    /// The value's shortcut rivals, built at the first row's ask
+    /// (`encodedKeyRivals`, #2783).
+    var rivals: KeyRivals?
 }

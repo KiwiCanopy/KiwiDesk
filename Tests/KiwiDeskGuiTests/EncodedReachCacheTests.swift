@@ -86,6 +86,22 @@ struct EncodedReachCacheTests {
         #expect(after == model.encodeReach())
     }
 
+    @Test("The rivals are built once per encode, from its table")
+    func rivalsFollowTheEncode() throws {
+        let model = try makeModel()
+        let first = try #require(model.encodedKeyRivals)
+        #expect(model.encodedCache?.rivals == first)
+        model.config.layers[0].bindings.append(
+            KeyBinding(combo: "alt+h", lua: reload, kind: .custom)
+        )
+        // The new encode starts with no rivals of its own.
+        let table = try #require(model.encodedReach?.keyLayers)
+        #expect(model.encodedCache?.rivals == nil)
+        let after = try #require(model.encodedKeyRivals)
+        #expect(after == KeyRivals(table))
+        #expect(model.encodedCache?.rivals == after)
+    }
+
     @Test("A stored-table re-read drops the memo")
     func storedReadDropsTheMemo() throws {
         let model = try makeModel()
