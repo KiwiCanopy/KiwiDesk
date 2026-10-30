@@ -80,7 +80,7 @@ extension KiwiCore {
         let effectiveMin = max(
             Double(ScrollSize.minPoints),
             space.focused.map {
-                effectiveMinSize(of: $0, axis: axis)
+                plannedMinSize(of: $0, axis: axis)
             } ?? 0
         )
         let drawn = context.usable

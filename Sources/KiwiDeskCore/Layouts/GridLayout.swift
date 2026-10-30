@@ -53,11 +53,11 @@ public struct GridLayout: LayoutSystem {
             MinSize(
                 width: max(
                     floor.width,
-                    context.runFloor(of: id, horizontal: true)
+                    context.shapeFloor(of: id, horizontal: true)
                 ),
                 height: max(
                     floor.height,
-                    context.runFloor(of: id, horizontal: false)
+                    context.shapeFloor(of: id, horizontal: false)
                 )
             )
         }

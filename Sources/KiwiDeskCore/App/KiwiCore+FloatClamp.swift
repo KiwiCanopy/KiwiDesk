@@ -137,10 +137,10 @@ extension KiwiCore {
             // than write a frame it cannot have. Scrolling rules
             // the same clash the same way.
             let floorW = CGFloat(
-                effectiveMinSize(of: id, axis: "x")
+                plannedMinSize(of: id, axis: "x")
             )
             let floorH = CGFloat(
-                effectiveMinSize(of: id, axis: "y")
+                plannedMinSize(of: id, axis: "y")
             )
             if result.width > region.width + slack {
                 result.size.width = Self.floorWinsExtent(

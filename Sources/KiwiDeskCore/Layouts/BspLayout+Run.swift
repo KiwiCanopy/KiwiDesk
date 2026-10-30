@@ -81,7 +81,7 @@ extension BspLayout {
         if start > 0 {
             let thickness =
                 members.map {
-                    context.runFloor(of: $0, horizontal: vertical)
+                    context.shapeFloor(of: $0, horizontal: vertical)
                 }.max() ?? 0
             if let parts = divide(
                 regions[start - 1],

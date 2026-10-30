@@ -29,6 +29,24 @@ extension KiwiCore {
         )
     }
 
+    /// The floor a clamp stops at on `axis`: the effective minimum
+    /// raised to the window's least refusal there (#2774), the
+    /// clamp twin of `LayoutContext.plannedFloor`.
+    func plannedMinSize(of id: WindowID, axis: String) -> Double {
+        max(
+            effectiveMinSize(of: id, axis: axis),
+            refusedMinSize(of: id, axis: axis)
+        )
+    }
+
+    /// The window's least refusal on `axis`, 0 where none.
+    private func refusedMinSize(of id: WindowID, axis: String) -> Double {
+        Double(
+            tiler.sizeBound(for: id)?
+                .refusedFloor(horizontal: axis == "x") ?? 0
+        )
+    }
+
     /// One window's learned app-enforced minimum on `axis` (#677),
     /// 0 where none — the one reading both minimums take.
     func learnedMinSize(of id: WindowID, axis: String) -> Double {
@@ -43,13 +61,14 @@ extension KiwiCore {
     /// minimum resolves to (#1261). `raisedBy` is a floor the
     /// clamp adds beside the setting — the scrolling slot's
     /// `ScrollSize.minPoints` — so a learned floor under it is
-    /// not what bound.
+    /// not what bound. A refusal counts as the app's (#2774), the
+    /// floor the run clamps stop at.
     func minimumIsAppBound(
         of id: WindowID,
         axis: String,
         raisedBy floor: Double = 0
     ) -> Bool {
-        effectiveMinSize(of: id, axis: axis)
+        plannedMinSize(of: id, axis: axis)
             > max(
                 Double(minWindowSize(of: id).on(axis: axis)),
                 floor
@@ -92,10 +111,37 @@ extension KiwiCore {
         // Every member takes the Space's own floor, never one
         // resolved again per window: a gap between the two would
         // read as a learned bound (#2237).
+        groupMinSize(of: members, axis: axis, in: space) {
+            learnedMinSize(of: $0, axis: axis)
+        }
+    }
+
+    /// `effectiveMinSize` over a group, each member's learned
+    /// floor raised to its least refusal on `axis` (#2774) — what
+    /// every sizing clamp and heal stops at.
+    func plannedMinSize(
+        of members: some Collection<WindowID>,
+        axis: String,
+        in space: Space
+    ) -> (size: Double, carrier: WindowID?) {
+        groupMinSize(of: members, axis: axis, in: space) {
+            max(
+                learnedMinSize(of: $0, axis: axis),
+                refusedMinSize(of: $0, axis: axis)
+            )
+        }
+    }
+
+    private func groupMinSize(
+        of members: some Collection<WindowID>,
+        axis: String,
+        in space: Space,
+        learned: (WindowID) -> Double
+    ) -> (size: Double, carrier: WindowID?) {
         var size = Double(minWindowSize(in: space).on(axis: axis))
         var carrier: WindowID? = nil
         for member in members {
-            let min = learnedMinSize(of: member, axis: axis)
+            let min = learned(member)
             if min > size {
                 size = min
                 carrier = member

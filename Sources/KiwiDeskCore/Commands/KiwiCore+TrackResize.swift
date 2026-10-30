@@ -316,7 +316,7 @@ extension KiwiCore {
         )
         let members = Array(column)
         let minSizes = members.map {
-            effectiveMinSize(of: $0, axis: alongAxis)
+            plannedMinSize(of: $0, axis: alongAxis)
         }
         let outcome = StackLayout.weightStep(
             weights: weights,

@@ -174,8 +174,8 @@ extension KiwiCore {
         write: (Double, Double) -> Void
     ) {
         guard !low.isEmpty, !high.isEmpty else { return }
-        let lowMin = effectiveMinSize(of: low, axis: axis, in: space)
-        let highMin = effectiveMinSize(
+        let lowMin = plannedMinSize(of: low, axis: axis, in: space)
+        let highMin = plannedMinSize(
             of: high,
             axis: axis,
             in: space
