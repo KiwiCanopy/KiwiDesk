@@ -63,6 +63,20 @@ struct ApplyHealPassTests {
         return (core, space)
     }
 
+    /// Awaits the slot until it stops re-arming: the body takes
+    /// two quiet looks before it runs.
+    private func payOwedPass(_ core: KiwiCore) async throws {
+        var owed = try #require(core.deferred.task(for: .applyHealPass))
+        for _ in 0..<10 {
+            await owed.value
+            guard let next = core.deferred.task(for: .applyHealPass),
+                next != owed
+            else { return }
+            owed = next
+        }
+        Issue.record("the apply heal pass kept re-arming")
+    }
+
     private func ratio(_ core: KiwiCore, _ space: SpaceID) -> Double {
         core.tiler.settings.resolvedStack(
             for: core.state.workspaces[space]!
@@ -77,8 +91,7 @@ struct ApplyHealPassTests {
         // The apply's own pass drew the reseeded ratio: the heal
         // stood down on its probe.
         #expect(ratio(core, space) == 0.6)
-        let owed = try #require(core.deferred.task(for: .applyHealPass))
-        await owed.value
+        try await payOwedPass(core)
         #expect(ratio(core, space) < 0.6)
         let frame = try #require(
             core.tiler.calculatedFrames(state: core.state)[WindowID(2)]
@@ -87,7 +100,8 @@ struct ApplyHealPassTests {
     }
 
     /// The body waits out an animation still landing the apply's
-    /// frames, re-arming rather than healing over it.
+    /// frames, and one quiet look after it, re-arming rather than
+    /// healing over the settle probe's read.
     @Test("The pass waits for the apply's frames to land")
     func waitsOutTheAnimation() throws {
         let (core, space) = makeHealedCore()
@@ -98,19 +112,49 @@ struct ApplyHealPassTests {
         }
         let screen = try #require(NSScreen.main)
         core.tiler.animation.animate(
-            window: WindowID(999),
+            window: WindowID(1),
             on: screen,
             from: CGRect(x: 0, y: 0, width: 100, height: 100),
             to: CGRect(x: 800, y: 0, width: 100, height: 100)
         )
         #expect(core.tiler.animation.activeCount > 0)
-        core.payApplyHealPass()
+        let later = ContinuousClock.now + .seconds(60)
+        // Moving, then the first quiet look: neither runs it.
+        core.payApplyHealPass(until: later, restedAtLastLook: true)
         #expect(core.deferred.isScheduled(.applyHealPass))
         #expect(ratio(core, space) == 0.6)
-        core.tiler.animation.cancel(window: WindowID(999))
-        core.payApplyHealPass()
+        core.tiler.animation.cancel(window: WindowID(1))
+        core.payApplyHealPass(until: later, restedAtLastLook: false)
+        #expect(ratio(core, space) == 0.6)
+        core.payApplyHealPass(until: later, restedAtLastLook: true)
         #expect(ratio(core, space) < 0.6)
+        // The hour-long sleeps the pass's tail scheduled.
+        core.deferred.cancelAll()
+    }
+
+    /// A window that never stops moving cannot hold the pass past
+    /// its deadline.
+    @Test("The deadline runs the pass whatever is owed")
+    func deadlineRunsThePass() throws {
+        let (core, space) = makeHealedCore()
+        core.execute("stack.set_master_ratio", args: [.number(0.6)])
         core.deferred.cancel(.applyHealPass)
+        let screen = try #require(NSScreen.main)
+        core.tiler.animation.animate(
+            window: WindowID(1),
+            on: screen,
+            from: CGRect(x: 0, y: 0, width: 100, height: 100),
+            to: CGRect(x: 800, y: 0, width: 100, height: 100)
+        )
+        #expect(core.applyFramesLanding())
+        core.payApplyHealPass(
+            until: .now - .seconds(1),
+            restedAtLastLook: false
+        )
+        #expect(!core.deferred.isScheduled(.applyHealPass))
+        #expect(ratio(core, space) < 0.6)
+        core.tiler.animation.cancel(window: WindowID(1))
+        core.deferred.cancelAll()
     }
 
     @Test("An ordinary pass owes none")

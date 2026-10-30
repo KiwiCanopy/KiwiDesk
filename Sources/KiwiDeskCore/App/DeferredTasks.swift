@@ -111,7 +111,8 @@ final class DeferredTasks {
         /// it or leaves it (#2776).
         case pocketLight
         /// The ordinary pass an explicit apply owes, once its
-        /// frames settle (#2785).
+        /// asks are answered (#2785). Ambient: it coalesces every
+        /// apply, whoever made it.
         case applyHealPass
 
         /// Whether a body in this slot runs as its scheduler's
@@ -123,8 +124,7 @@ final class DeferredTasks {
             case .focusFollow, .spaceSettle, .moveSettle,
                 .desktopSettle, .desktopMoveReap, .desktopFollowReap,
                 .desktopSwitchVerify, .borderDropSettle, .floatRaise,
-                .awayReachReap, .gatherReap, .pocketFocus,
-                .applyHealPass:
+                .awayReachReap, .gatherReap, .pocketFocus:
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
@@ -134,7 +134,8 @@ final class DeferredTasks {
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
-                .visionHold, .pocketHold, .pocketLight:
+                .visionHold, .pocketHold, .pocketLight,
+                .applyHealPass:
                 return false
             }
         }
