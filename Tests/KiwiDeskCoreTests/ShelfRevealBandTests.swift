@@ -69,8 +69,10 @@ struct ShelfRevealBandTests {
         let half = length / 2
         #expect(apart.bars[.space] == (500 - half)...(500 + half))
         #expect(apart.pocket == (1000 - length)...1000)
-        // Meeting the row: it joins it at the slot's end.
+        // Meeting the row: it joins it at the end it leans to, where
+        // its slot stands.
         shelf.alignment = .start
+        shelf.pocketPosition = 0
         let start = ShelfMarkPlacement.row(
             for: [.space],
             pocket: 0...40,

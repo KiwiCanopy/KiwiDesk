@@ -11,7 +11,7 @@ import AppKit
 final class PocketPlateOverlay {
     /// What one display's pocket draws: its screen, its windows,
     /// its frame (AppKit), the gated shelf, the mark's colour, the
-    /// count badge, the edge it stands on and VoiceOver's name.
+    /// edge it stands on and VoiceOver's name.
     struct Spec: Equatable {
         let display: DisplayID
         /// The windows it lists.
@@ -19,8 +19,7 @@ final class PocketPlateOverlay {
         let frame: CGRect
         let shelf: KiwiShelf
         let markHex: String
-        /// Its own piece of plate: Hug and Boxed; under Full the
-        /// shelf's plate runs beneath it.
+        /// Its own box, as `KiwiCore.pocketWearsPlate` answers.
         let platePiece: Bool
         /// The empty pocket at rest, drawn faded; lit, it shows full.
         let faded: Bool
@@ -50,7 +49,8 @@ final class PocketPlateOverlay {
     private var shownViews: [DisplayID: Shown] = [:]
     private var sectionViews: [DisplayID: Shown] = [:]
     private(set) var specs: [DisplayID: Spec] = [:]
-    /// The displays whose handle the pointer is on.
+    /// The displays whose pocket the pointer is on, handle or
+    /// section.
     var hovered: Set<DisplayID> = []
     /// The displays a put-in or take-out plays on, each with the
     /// play that holds it out; the pocket stands out of its handle
@@ -75,8 +75,9 @@ final class PocketPlateOverlay {
     var markBands: [DisplayID: ClosedRange<CGFloat>] = [:]
     /// The window a drag moves, while one does (#2678).
     var dragging: WindowID?
-    /// Whether that window is over a pocket and a drop takes it.
-    var dropHovered = false
+    /// The display whose pocket that window is over, while a drop
+    /// takes it; only that pocket lights.
+    var dropHovered: DisplayID?
     /// The dropped window, its frame before the drag and where it
     /// was let go, which the brief pocket flies from.
     var dropStart: (window: WindowID, frame: CGRect, released: CGRect)?
@@ -118,13 +119,6 @@ final class PocketPlateOverlay {
             ? sectionViews[spec.display] : shownViews[spec.display]
     }
 
-    #if DEBUG
-        /// Test-only: the handle panel standing on `display`.
-        func handlePanel(on display: DisplayID) -> NSPanel? {
-            shownViews[display]?.panel
-        }
-    #endif
-
     /// Every shown pocket's frame, AppKit coordinates.
     var shownFrames: [CGRect] { specs.values.map(\.frame) }
 
@@ -139,8 +133,9 @@ final class PocketPlateOverlay {
         for (display, shown) in shownViews
         where wanted[display]?.handle == nil {
             shown.panel?.orderOut(nil)
-            // An ordered-out handle hears no exit (#2678 review 20).
-            hovered.remove(display)
+            // An ordered-out handle hears no exit (#2678 review 20);
+            // a section's hover on that display stays its own.
+            if shown.view.dropHover() { hovered.remove(display) }
         }
         for spec in wanted.values { show(spec) }
         specs = wanted
@@ -187,8 +182,9 @@ final class PocketPlateOverlay {
             }
         }
         orderIn(shown, spec: spec, changed: changed)
-        // Sized and ordered in first: a pocket that rises out of a
-        // handle made this pass has no layer to rise on before.
+        // Sized and ordered in first: under One window the handle is
+        // made in the pass it rises, and a rise played before showed
+        // none on device (#2776).
         if changed {
             shown.view.stand(
                 handle: spec.handle,
@@ -201,7 +197,7 @@ final class PocketPlateOverlay {
 
     private func orderIn(_ shown: Shown, spec: Spec, changed: Bool) {
         guard let panel = shown.panel else { return }
-        let level = spec.aboveDrag ? BarPanel.aboveLevel : BarPanel.level
+        let level = BarPanel.pocketLevel(duringDrag: spec.aboveDrag)
         if panel.level != level { panel.level = level }
         #if DEBUG
             guard ordersPanel else { return }

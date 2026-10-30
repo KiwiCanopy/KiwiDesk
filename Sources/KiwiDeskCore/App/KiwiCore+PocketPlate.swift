@@ -110,7 +110,7 @@ extension KiwiCore {
             else { return nil }
             // A lit pocket shows full, empty or not (#2776).
             let lit =
-                pocketPlate.dropHovered
+                pocketPlate.dropHovered == display.id
                 || pocketPlate.hovered.contains(display.id)
             return PocketPlateOverlay.Spec(
                 display: display.id,
@@ -123,7 +123,7 @@ extension KiwiCore {
                 markHex: tiler.settings.pocketStyle.color,
                 platePiece: Self.pocketWearsPlate(slot: slot, shelf: shelf),
                 faded: inside.isEmpty && !lit,
-                dropHovered: pocketPlate.dropHovered,
+                dropHovered: pocketPlate.dropHovered == display.id,
                 name: name,
                 handle: slot == nil ? edge : nil,
                 risen: risen,

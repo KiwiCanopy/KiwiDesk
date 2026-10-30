@@ -32,9 +32,9 @@ final class BriefPocketView: NSView {
     private let rim = ShelfBorder.make()
     private var glass: NSView?
     private var shelf = KiwiShelf()
-    /// Draws its own plate (the brief pocket, and the pocket under
-    /// Hug and Boxed); under Full the shelf's plate runs beneath.
-    private var platePiece = true
+    /// Draws its own box, as `KiwiCore.pocketWearsPlate` answers;
+    /// otherwise the bare mark (#2776).
+    private var platePiece = false
     private var hex = ""
 
     override var isFlipped: Bool { true }
@@ -70,7 +70,7 @@ final class BriefPocketView: NSView {
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
-        platePiece: Bool = true
+        platePiece: Bool
     ) {
         self.shelf = shelf
         self.hex = hex
@@ -141,10 +141,9 @@ final class BriefPocketView: NSView {
             inner.shadowOpacity = 0
             return
         }
-        let ink = NSColor.mark(hex: hex, fallback: .labelColor)
         var edge = NSColor.black
         effectiveAppearance.performAsCurrentDrawingAppearance {
-            edge = PocketMark.opaque(ink).contrastingGlyph
+            edge = PocketMark.stitchInk(hex: hex)
         }
         let side = mark.frame.width
         for (layer, blur) in [(inner, Self.edgeBlur), (outer, Self.haloBlur)] {
@@ -165,7 +164,11 @@ final class BriefPocketView: NSView {
         var drawsLitBox: Bool { !litFill.isHidden || !litGlass.isHidden }
         /// Test-only: the bare mark's edge, 0 where none draws.
         var edgeOpacity: Float {
-            halo.isHidden ? 0 : mark.layer?.shadowOpacity ?? 0
+            guard !halo.isHidden, halo.image != nil,
+                let inner = mark.layer, let outer = halo.layer,
+                inner.shadowRadius > 0, outer.shadowRadius > inner.shadowRadius
+            else { return 0 }
+            return min(inner.shadowOpacity, outer.shadowOpacity)
         }
     #endif
 

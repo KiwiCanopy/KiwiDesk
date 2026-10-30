@@ -217,7 +217,7 @@ struct PocketDropTests {
         point(core, onPlate: true)
         move(core, one)
         end(core, one)
-        #expect(!core.pocketPlate.dropHovered)
+        #expect(core.pocketPlate.dropHovered == nil)
     }
 
     @Test("with one window inside the drag's plate is not faded")

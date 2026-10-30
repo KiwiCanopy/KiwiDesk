@@ -118,7 +118,7 @@ final class ShelfPocketPiece {
     /// Orders the panel in above `shelf`, the shelf's own panel.
     func orderIn(above shelf: NSWindow) {
         guard let panel, let mount else { return }
-        let level = mount.raised ? BarPanel.aboveLevel : BarPanel.level
+        let level = BarPanel.pocketLevel(duringDrag: mount.raised)
         if panel.level != level { panel.level = level }
         #if DEBUG
             guard ordersPanel else { return }

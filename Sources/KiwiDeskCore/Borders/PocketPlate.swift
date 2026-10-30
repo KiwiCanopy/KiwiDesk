@@ -181,6 +181,15 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     override func mouseExited(with event: NSEvent) { setHovered(false) }
 
+    /// Ends a hover whose exit will not come, telling nobody; true
+    /// where one was on.
+    func dropHover() -> Bool {
+        guard hovered else { return false }
+        hovered = false
+        paintLit()
+        return true
+    }
+
     func setHovered(_ on: Bool) {
         guard on != hovered else { return }
         hovered = on

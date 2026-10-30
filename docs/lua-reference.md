@@ -5908,8 +5908,8 @@ marks any number.
 Under `"several"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
-faded while empty and badged with the count from two windows
-inside, except where KiwiShelf stands down for a native
+faded while empty until you point at it or drag a window over it,
+and with no count, except where KiwiShelf stands down for a native
 full-screen window or a presentation. On an edge no bar shows it
 rests as a handle, and pointing at the handle brings the pocket up
 out of it. A click on the pocket lists the windows inside by app;
@@ -5945,9 +5945,13 @@ white, as [`sticky.set_color`](#stickyset_color)'s glyph does.
 Each bundled palette sets its own pocket color. Neither the
 mark's plate nor the badge's disc takes the color: the disc keeps
 the count-badge fill. `""` is Automatic: the mark's pocket and
-outlines take the label color, black in light mode and white in
+its outline take the label color, black in light mode and white in
 dark, and the badge's pocket the disc's auto-contrast ink. Any
 non-empty value must parse as a hex color.
+
+:::unreleased
+Under Automatic too, the kiwis draw no outline.
+:::
 
 **Example:**
 

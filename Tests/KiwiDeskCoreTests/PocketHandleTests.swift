@@ -106,13 +106,24 @@ struct PocketHandleTests {
     @Test("a window drag raises the pocket on every display")
     func dragRises() throws {
         let core = try makeCore()
+        core.tiler.settings.kiwishelf.outerMargin = 8
         core.pocketPlate.dragging = WindowID(7)
         let shown = try #require(spec(core))
         #expect(shown.risen)
+        // Risen, it still stands one outer margin in.
+        let shelf = core.tiler.settings.kiwishelf
+        let depth =
+            shown.handle?.isHorizontal == false
+            ? shown.frame.width : shown.frame.height
+        #expect(
+            depth
+                == 8 + PocketHandleView.tabDepth + PocketPlateView.lift
+                + KiwiCore.pocketRiseSide(thickness: shelf.thickness)
+        )
         // Above the drag's ghost, which shares the bars' level.
         #expect(shown.aboveDrag)
         let panel = try #require(
-            core.pocketPlate.handlePanel(on: shown.display)
+            core.pocketPlate.panelForTesting(on: shown.display)
         )
         #expect(panel.level == BarPanel.aboveLevel)
         core.pocketPlate.dragging = nil
@@ -134,5 +145,19 @@ struct PocketHandleTests {
         let shown = try #require(core.pocketPlate.specs[display])
         #expect(shown.handle == nil)
         #expect(!shown.risen)
+    }
+
+    @Test("a section's hover outlasts the handle it replaced")
+    func sectionKeepsItsHover() throws {
+        let core = try makeCore()
+        let display = try #require(spec(core)?.display)
+        // The edge gains a bar: the handle gives way to a section.
+        let slot = CGRect(x: 1000, y: 860, width: 40, height: 40)
+        core.updatePocketPlate(slots: [display: slot])
+        core.pocketHovered(display, true)
+        // A later pass keeps it lit, so the empty pocket stays full.
+        core.updatePocketPlate(slots: [display: slot])
+        #expect(core.pocketPlate.hovered.contains(display))
+        #expect(core.pocketPlate.specs[display]?.faded == false)
     }
 }

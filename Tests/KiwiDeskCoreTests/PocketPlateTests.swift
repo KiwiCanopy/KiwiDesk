@@ -143,7 +143,7 @@ struct PocketPlateTests {
         )
     }
 
-    @Test("Full lays no piece of its own; Hug and Boxed do")
+    @Test("Plain lays no piece of its own, Hug or Full; Boxed does")
     func platePieceFollowsTheFit() throws {
         let core = makeCore()
         several(core)
@@ -157,6 +157,13 @@ struct PocketPlateTests {
         core.updatePocketPlate(slots: [display: slot])
         #expect(core.pocketPlate.specs[display]?.platePiece == false)
         core.execute("kiwishelf.set_background_fit", args: [.string("hug")])
+        core.updatePocketPlate(slots: [display: slot])
+        // At a hugging shelf's corner it sits bare, like a bag (#2776).
+        #expect(core.pocketPlate.specs[display]?.platePiece == false)
+        core.execute(
+            "kiwishelf.set_background_style",
+            args: [.string("boxed")]
+        )
         core.updatePocketPlate(slots: [display: slot])
         #expect(core.pocketPlate.specs[display]?.platePiece == true)
     }

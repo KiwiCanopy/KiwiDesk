@@ -3,13 +3,21 @@ import AppKit
 /// Shared panel creation and window level constants for bar overlays (#293).
 public enum BarPanel {
     /// Window level where bar overlays render (`DragOverlay`,
-    /// `JumpPanelController`).
+    /// `JumpPanelController`, the pocket's section and handle
+    /// panels at rest).
     public static let level: NSWindow.Level = .floating
 
-    /// Window level one step above bars for modal onboarding overlays (#828).
+    /// Window level one step above bars: modal onboarding overlays
+    /// (#828), and the pocket while a window drag runs.
     public static let aboveLevel = NSWindow.Level(
         rawValue: level.rawValue + 1
     )
+
+    /// The pocket's level: above the drag's ghost and drop zone,
+    /// which share the bars' level, while a window drag runs (#2776).
+    static func pocketLevel(duringDrag: Bool) -> NSWindow.Level {
+        duringDrag ? aboveLevel : level
+    }
 
     /// Creates non-activating, transparent, all-spaces panel for bar overlays.
     @MainActor

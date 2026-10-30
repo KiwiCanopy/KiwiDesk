@@ -81,12 +81,23 @@ public enum PocketMark {
             radius: 2.6
         )
         stitch.transform(using: transform)
-        cloth.contrastingGlyph.setStroke()
+        Self.stitchInk(of: cloth).setStroke()
         stitch.lineWidth = 1.2 * transform.m11
         stitch.lineCapStyle = .round
         let dash = 1.6 * transform.m11
         stitch.setLineDash([dash, dash], count: 2, phase: 0)
         stitch.stroke()
+    }
+
+    /// The stitch's ink on a pocket in mark colour `hex`, resolved
+    /// in the drawing appearance; the bare mark's edge wears it too
+    /// (#2776).
+    static func stitchInk(hex: String) -> NSColor {
+        stitchInk(of: opaque(NSColor.mark(hex: hex, fallback: .labelColor)))
+    }
+
+    private static func stitchInk(of cloth: NSColor) -> NSColor {
+        cloth.contrastingGlyph
     }
 
     /// `ink` resolved in the drawing appearance at full alpha;

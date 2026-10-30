@@ -59,9 +59,9 @@ final class BriefPocketOverlay {
         /// False while the pocket plate stands at the pocket (#2678):
         /// the plate flies to it, and no second pocket is drawn.
         var drawsPocket = true
-        /// The pocket it draws wears a plate: on a bar's edge, as
-        /// the section does; risen out of a handle, the bare mark.
-        var platePiece = true
+        /// The pocket it draws wears its box, as the section does;
+        /// `KiwiCore.pocketWearsPlate` is the one answer (#2776).
+        let platePiece: Bool
         /// Whether the plate draws Liquid Glass, and the Fill it
         /// wears there, nil for the untinted glass.
         let plateGlass: Bool

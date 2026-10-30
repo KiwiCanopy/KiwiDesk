@@ -34,6 +34,7 @@ extension KiwiCore {
             updateBars()
             return nil
         }
+        let shelf = briefPocketShelf()
         var request =
             BriefPocketOverlay.Request(
                 display: display,
@@ -42,8 +43,12 @@ extension KiwiCore {
                 window: frame,
                 pocket: pocket,
                 iconPid: state.windows[id]?.pid,
-                shelf: briefPocketShelf(),
+                shelf: shelf,
                 markHex: style.color,
+                platePiece: Self.pocketWearsPlate(
+                    slot: pocketPlate.slots[display],
+                    shelf: shelf
+                ),
                 plateGlass: glass,
                 plateTint: tiler.settings.panelsWearFill(glassDrawn: glass)
                     ? tiler.settings.kiwishelf.glassFill : nil,
@@ -51,10 +56,6 @@ extension KiwiCore {
             )
         // A pocket on this screen is the pocket (#2678).
         request.drawsPocket = briefPocketDrawsPocket(on: display)
-        request.platePiece = Self.pocketWearsPlate(
-            slot: pocketPlate.slots[display],
-            shelf: request.shelf
-        )
         briefPocket.play(request)
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return timeline

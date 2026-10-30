@@ -53,7 +53,7 @@ public enum ShelfMarkPlacement {
         }
         return row(
             for: bars,
-            pocketLeansEnd: middle >= length / 2,
+            pocketLeansEnd: shelf.pocketLeansEnd,
             length: length,
             shelf: shelf
         )

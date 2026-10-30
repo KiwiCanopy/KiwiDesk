@@ -797,6 +797,17 @@ pocket rides every motion the shelf plays. Obligations:
   the bars-alone placement is reached only through it — so the
   Settings preview places the bars where the engine does
   (`ShelfStripPreviewTests` ▸ `pocketTakesItsSlot`).
+- **Whether the pocket draws its own box is the one
+  `KiwiCore.pocketWearsPlate`**, which the pocket's spec and the
+  brief pocket's request both take as a required value — Boxed
+  alone; under Plain, Hug or Full, and risen out of a handle, it is
+  the bare mark (#2776, `PocketBareMarkTests` ▸ `plateOnlyOnABar`,
+  `PocketPlateTests` ▸ `platePieceFollowsTheFit`).
+- **While a window drag runs, every pocket panel — the section and
+  the handle — takes `BarPanel.pocketLevel(duringDrag:)`**, above
+  the drag's ghost and drop zone, which share the bars' level
+  (#2776, `PocketBareMarkTests` ▸ `sectionRisesForADrag`,
+  `PocketHandleTests` ▸ `dragRises`).
 
 ## Overflow fades, follows and pages through one home each
 
