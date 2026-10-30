@@ -128,7 +128,8 @@ struct ScrollingColumnCapTests {
                 bounds: settings.layoutBounds(
                     from: visible,
                     mode: .scrolling,
-                    on: nil
+                    on: nil,
+                    pocketAtRest: false
                 ),
                 space: SpaceID("1")
             ) == 5

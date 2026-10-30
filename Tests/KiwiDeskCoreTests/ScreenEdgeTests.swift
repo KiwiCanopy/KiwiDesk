@@ -165,12 +165,14 @@ struct ScreenEdgeTests {
         let studio = settings.layoutBounds(
             from: visible,
             mode: .bsp,
-            on: Self.studio
+            on: Self.studio,
+            pocketAtRest: false
         )
         let laptop = settings.layoutBounds(
             from: visible,
             mode: .bsp,
-            on: Self.laptop
+            on: Self.laptop,
+            pocketAtRest: false
         )
         #expect(studio.minX == visible.minX + 32)
         #expect(studio.minY == visible.minY)

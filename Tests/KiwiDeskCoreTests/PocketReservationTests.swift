@@ -56,6 +56,13 @@ struct PocketReservationTests {
     func autoEdgeTakesTheDeeper() {
         let auto = settings(space: .auto, pocket: .top)
         let shelf = auto.kiwishelf
+        // The handle outreaches the dots, so the max is observable.
+        #expect(PocketMarkGeometry.handleDepth > KiwiShelf.hiddenDepth)
+        #expect(
+            shelf.pocketHandleReservation
+                == shelf.outerMargin + PocketMarkGeometry.handleDepth
+                + shelf.innerMargin
+        )
         #expect(
             reserved(auto, at: .top)
                 == max(shelf.pocketHandleReservation, shelf.hiddenReservation)

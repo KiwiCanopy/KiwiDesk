@@ -114,7 +114,8 @@ struct BarMarginTests {
             settings(shelf, edge: .bottom).layoutBounds(
                 from: visible,
                 mode: .scrolling,
-                on: nil
+                on: nil,
+                pocketAtRest: false
             ),
             outer: Gaps.uniform(10).outer
         )
@@ -129,7 +130,8 @@ struct BarMarginTests {
         let one = settings(shelf, edge: .top).layoutBounds(
             from: visible,
             mode: .scrolling,
-            on: nil
+            on: nil,
+            pocketAtRest: false
         )
         let both = settings(shelf, edge: .top, spaceBar: true)
             .layoutBounds(
