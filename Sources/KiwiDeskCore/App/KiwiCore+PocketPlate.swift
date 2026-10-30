@@ -97,16 +97,21 @@ extension KiwiCore {
         return state.workspaces.allDisplays.compactMap { display in
             guard pocketStands(on: display.id) else { return nil }
             let slot = pocketPlate.slots[display.id]
+            // Where the bars read Always, the whole mark stands on an
+            // edge no bar shows (#2784 ▸ 8).
+            let whole = slot == nil && pocketRestsWhole(on: display)
             // An edge no bar shows takes the handle, the pocket out of
             // it on hover and during a drag (#2678).
             let risen =
-                slot == nil
+                slot == nil && !whole
                 && (dragging || pocketPlate.hovered.contains(display.id)
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
             guard
                 let frame = slot
-                    ?? pocketHandleFrame(on: display.id, risen: risen)
+                    ?? (whole
+                        ? pocketMarkFrame(on: display.id)
+                        : pocketHandleFrame(on: display.id, risen: risen))
             else { return nil }
             // A lit pocket shows full, empty or not (#2776).
             let lit =
@@ -124,10 +129,13 @@ extension KiwiCore {
                 faded: inside.isEmpty && !lit,
                 dropHovered: pocketPlate.dropHovered == display.id,
                 name: name,
+                // The whole mark stands on the edge it would hold a
+                // handle on, with none drawn.
                 handle: slot == nil ? edge : nil,
                 risen: risen,
                 risenSide: rise,
-                outer: shelf.outerMargin
+                outer: shelf.outerMargin,
+                whole: whole
             )
         }
     }

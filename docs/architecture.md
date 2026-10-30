@@ -180,9 +180,9 @@ of only the Spaces that just left view; a window parked longer
 keeps its place (`StashDepartures`).
 
 A `space_bar.*` or `app_bar.*` write that leaves every layout's
-`shelfReservation(in:on:)` — the input `layoutBounds` reads —
-unchanged on every screen runs no pass at all: it repaints the bars and
-re-clamps the floats (#1524).
+`shelfReservation(in:on:pocketAtRest:)` — the input
+`layoutBounds` reads — unchanged on every screen runs no pass at
+all: it repaints the bars and re-clamps the floats (#1524).
 
 A shelf whose bars are all `auto` reserves only its sliver
 (`TilingSettings.hidingEdges`, `KiwiShelf.hiddenReservation`) and
@@ -194,6 +194,13 @@ draws its Space dots or line (`ShelfHandles`), one panel per
 bar, and a reveal or a retract from
 the pointer monitor or the show/hide action calls `updateBars()`
 alone — never a retile.
+
+:::unreleased
+The pocket's resting strip is part of that input: under Several
+windows `TilingSettings.pocketReservation` adds its edge, and
+`ShelfReservation` reserves each edge's deepest strip (#2784). A
+`pocket.set_capacity` change retiles only where it moves one.
+:::
 
 A Space switch is always that one instant reissue, and how it
 shows itself is read once, through `drawnSpaceTransition`

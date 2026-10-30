@@ -53,7 +53,12 @@ struct BarReserveTests {
         )
         #expect(neither.shelfEdges(in: .monocle, on: nil).isEmpty)
         #expect(
-            neither.layoutBounds(from: visible, mode: .monocle, on: nil)
+            neither.layoutBounds(
+                from: visible,
+                mode: .monocle,
+                on: nil,
+                pocketAtRest: false
+            )
                 == visible
         )
     }
@@ -69,7 +74,12 @@ struct BarReserveTests {
         )
         #expect(split.shelfEdges(in: .bsp, on: nil).isEmpty)
         #expect(split.shelfEdges(in: .monocle, on: nil) == [.bottom])
-        let bounds = split.layoutBounds(from: visible, mode: .monocle, on: nil)
+        let bounds = split.layoutBounds(
+            from: visible,
+            mode: .monocle,
+            on: nil,
+            pocketAtRest: false
+        )
         #expect(bounds.minY == visible.minY)
         #expect(bounds.maxY == visible.maxY - 32)
     }

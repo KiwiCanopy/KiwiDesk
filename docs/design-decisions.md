@@ -6219,11 +6219,23 @@ so a point never opens one for the other. On a Hidden or empty edge
 it stands alone at Position.
 
 **A fixed handle; the risen pocket at the bar's size, its mark
-within 20 to 32 pt.** On an edge no bar shows, the handle is an
-edge mark like the Space dots and the App Bar line: the kiwis
-alone, looking out from behind a tab, the pocket out of sight, one
-outer margin in from the edge as the bars' handles sit (owner,
-device 2026-10-29). Its kiwis do not scale with the shelf. Risen —
+within 20 to 32 pt.** On an edge whose bars hide, Auto or Hidden,
+the handle is an edge mark like the Space dots and the App Bar
+line: the kiwis alone, looking out from behind a tab, the pocket
+out of sight, one outer margin in from the edge as the bars'
+handles sit (owner, device 2026-10-29). It rests 11 pt deep, the
+6 pt tab and 5 pt of kiwi — a whole point, so it lands on a pixel
+at 1x and 2x — as the bars' handles do, so a row of them reads as
+one (owner, 2026-10-30); its edge keeps its strip (#2784, the
+*Amended* under App Bar ▸ *A shelf can hide*). On an edge no bar
+sits on, the pocket follows the bars' Show, the more present of
+the two: under Always the whole bare mark stands at rest, a
+section deep and faded while empty, and the edge keeps the
+shelf's own strip; under Auto or Hidden it is the handle (owner,
+2026-10-30, overruling a handle on every edge no bar shows). The
+pocket is KiwiShelf's piece, and a user who puts it on another
+edge wants to see it there. Its kiwis do not scale with the shelf.
+Risen —
 on hover, a drag or a put-in or take-out — the pocket takes the
 size it has as a section on that edge's bar, mark for mark
 (#2776), so a Hidden bar's shortcut reveal and a hover show one
@@ -16102,6 +16114,24 @@ reserving the full strip was rejected (the user would give up the
 information and keep paying the area). An update changes nothing
 a user sees: a bar stored on becomes `always`, one stored off
 `hidden`.
+
+:::unreleased
+*Amended* (owner, 2026-10-29, #2784): an edge where the pocket's
+handle rests keeps the handle's strip by the same rule — the
+outer margin, the handle's depth and the inner margin — so "a
+`hidden` edge reserves nothing" now holds for a `hidden` edge
+with no handle. Under Several windows the handle stands there for
+good, as permanent as the dots, and windows tiled flush beneath
+it lost a strip of their edge and its clicks. Every handle rests
+11 pt deep since (owner, 2026-10-30): with the pocket held under
+Several windows by default and on the Space Bar's edge, that edge
+paid for the handle's depth already, so the dots and the line
+taking it cost almost nothing more and keep one row. A handle that
+stands
+only for a drag or a put-in or take-out reserves nothing, so
+pocketing never retiles the Space, and the bars' `reserve` switch
+on that edge still turns the strip off.
+:::
 
 A fresh install's starter takes `auto` (#2515), and only beside
 the welcome tour's bars step, which shows what Auto does and

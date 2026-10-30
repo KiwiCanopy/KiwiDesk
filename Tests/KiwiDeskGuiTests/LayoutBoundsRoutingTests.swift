@@ -112,8 +112,8 @@ struct LayoutBoundsRoutingTests {
         // Settings DRAFT, whose Space Bar may differ from the
         // live one `layoutBounds(on:)` reserves — so it takes the
         // raw size and reserves the draft's own strip through
-        // `TilingSettings.layoutBounds(from:mode:on:)`, the same seam one
-        // level down (`ScrollingColumnCapDoorTests`).
+        // `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)`,
+        // the same seam one level down (`ScrollingColumnCapDoorTests`).
         "App/KiwiCore+ScrollingColumnCap.swift": 1,
         // A maximized window (#2448) fills the whole visible frame
         // because the shelf stands down while it shows, so the

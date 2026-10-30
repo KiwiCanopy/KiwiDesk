@@ -435,11 +435,13 @@ the one `pocketStands`** — Several windows, a drag, a play — which
 the plan and the pocket both read (`PocketShelfWiringTests` ▸
 `dragStandsThePocket`). **Where it
 is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
-off `ShelfArrangement.arrange(…pocket:)`, else its handle risen —
-on an Auto edge where the shown pocket stands, joining the row of
-marks where it would meet it (`ShelfMarkPlacement.row`,
-`ShelfRevealBandTests` ▸ `handleStandsOnTheSlot`),
-else at Position — never a frame of its own beside them. On a bar
+off `ShelfArrangement.arrange(…pocket:)`, else the whole mark
+(`pocketMarkFrame(on:)`) where `TilingSettings.pocketRest` says
+`.mark` (#2784), else its handle risen — on an Auto edge where
+the shown pocket stands, joining the row of marks where it would
+meet it (`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
+`handleStandsOnTheSlot`), else at Position — never a frame of its
+own beside them. On a bar
 edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
 pocket is a shelf section.
 **What it counts, shows for and lists is the one

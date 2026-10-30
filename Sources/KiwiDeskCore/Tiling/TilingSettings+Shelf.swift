@@ -222,24 +222,33 @@ extension TilingSettings {
     func layoutBounds(
         from visible: CGRect,
         mode: LayoutMode,
-        on screen: String?
+        on screen: String?,
+        pocketAtRest: Bool
     ) -> CGRect {
-        shelfReservation(in: mode, on: screen).remaining(in: visible)
+        shelfReservation(in: mode, on: screen, pocketAtRest: pocketAtRest)
+            .remaining(in: visible)
     }
 
-    /// The whole input `layoutBounds(from:mode:on:)` reads for
-    /// `mode` on `screen` — what a bar write must change to owe a
-    /// pass (#1524, `BarReserveCoreTests` ▸
-    /// `unchangedReservationSkipsTheRetile`).
+    /// The whole input `layoutBounds(from:mode:on:pocketAtRest:)`
+    /// reads for `mode` on `screen` — what a bar write must change
+    /// to owe a pass (#1524, `BarReserveCoreTests` ▸
+    /// `unchangedReservationSkipsTheRetile`). `pocketAtRest`: the
+    /// pocket stands on screen at rest, under Several (#2784).
     public func shelfReservation(
         in mode: LayoutMode,
-        on screen: String?
+        on screen: String?,
+        pocketAtRest: Bool
     ) -> ShelfReservation {
-        ShelfReservation(
+        let pocket =
+            pocketAtRest
+            ? pocketReservation(in: mode, on: screen) : nil
+        return ShelfReservation(
             edges: shelfEdges(in: mode, on: screen),
             depth: kiwishelf.reservation,
             hiding: hidingEdges(in: mode, on: screen),
-            hidingDepth: kiwishelf.hiddenReservation
+            hidingDepth: kiwishelf.hiddenReservation,
+            pocket: pocket?.edge,
+            pocketDepth: pocket?.depth ?? 0
         )
     }
 }

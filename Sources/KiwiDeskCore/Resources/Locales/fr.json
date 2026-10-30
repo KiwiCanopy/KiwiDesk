@@ -1092,7 +1092,7 @@
   "kiwishelf.show.scrolling": "App Bar en %1$@",
   "kiwishelf.show.space_bar": "Space Bar",
   "kiwishelf.show.space_bar.beside_always": "Reste affichée tant qu'une App Bar réglée sur « %1$@ » partage son bord.",
-  "kiwishelf.show.visibility.help": "« Toujours » garde une barre à l'écran. « Auto » la masque en ne laissant qu'une fine bande jusqu'à ce que le pointeur s'y arrête. « Masquée » n'affiche rien : son raccourci la fait quand même apparaître, par-dessus vos fenêtres. Seuls %1$@ et %2$@ peuvent accueillir une App Bar. Quand la Space Bar est masquée, la barre des menus indique l'espace affiché sur chaque écran.",
+  "kiwishelf.show.visibility.help": "« Toujours » garde une barre à l'écran. « Auto » la masque en ne laissant qu'une fine bande jusqu'à ce que le pointeur s'y arrête. « Masquée » ne laisse que la poignée de la Pocket, que les fenêtres évitent ; le raccourci de la barre la fait quand même apparaître, par-dessus vos fenêtres. Seuls %1$@ et %2$@ peuvent accueillir une App Bar. Quand la Space Bar est masquée, la barre des menus indique l'espace affiché sur chaque écran.",
   "kiwishelf.thickness": "Épaisseur",
   "kiwishelf.thickness.help": "Une seule épaisseur pour les deux barres. Une taille de glyphe automatique la suit.",
   "kiwishelf.tint_hub_and_plates": "Teinter %1$@ et les plaques",

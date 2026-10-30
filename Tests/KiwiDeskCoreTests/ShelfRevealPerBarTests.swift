@@ -45,11 +45,19 @@ struct ShelfRevealPerBarTests {
         var settings = TilingSettings()
         settings.spaceBarStyle.setEdge(.top)
         settings.spaceBarStyle.visibility = .hidden
-        let hidden = settings.shelfReservation(in: .bsp, on: nil)
+        let hidden = settings.shelfReservation(
+            in: .bsp,
+            on: nil,
+            pocketAtRest: false
+        )
         #expect(hidden.edges.isEmpty)
         #expect(hidden.hiding.isEmpty)
         settings.spaceBarStyle.visibility = .auto
-        let auto = settings.shelfReservation(in: .bsp, on: nil)
+        let auto = settings.shelfReservation(
+            in: .bsp,
+            on: nil,
+            pocketAtRest: false
+        )
         #expect(auto.edges.isEmpty)
         #expect(auto.hiding == [.top])
     }
@@ -155,11 +163,19 @@ struct ShelfRevealPerBarTests {
         settings.spaceBarStyle.reserve = true
         settings.appBarStyle.reserve = false
         settings.monocle.appBar.visibility = .always
-        let always = settings.shelfReservation(in: .monocle, on: nil)
+        let always = settings.shelfReservation(
+            in: .monocle,
+            on: nil,
+            pocketAtRest: false
+        )
         #expect(always.edges.isEmpty)
         #expect(always.hiding.isEmpty)
         settings.monocle.appBar.visibility = .auto
-        let auto = settings.shelfReservation(in: .monocle, on: nil)
+        let auto = settings.shelfReservation(
+            in: .monocle,
+            on: nil,
+            pocketAtRest: false
+        )
         #expect(auto.edges.isEmpty)
         #expect(auto.hiding.isEmpty)
     }
@@ -177,7 +193,11 @@ struct ShelfRevealPerBarTests {
             settings.monocle.appBar.visibility = spaceAlways ? .auto : .always
             settings.spaceBarStyle.reserve = !spaceAlways
             settings.appBarStyle.reserve = spaceAlways
-            let reserved = settings.shelfReservation(in: .monocle, on: nil)
+            let reserved = settings.shelfReservation(
+                in: .monocle,
+                on: nil,
+                pocketAtRest: false
+            )
             #expect(reserved.edges == [.top])
             #expect(reserved.hiding.isEmpty)
         }

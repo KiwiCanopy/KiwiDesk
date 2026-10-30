@@ -43,9 +43,19 @@ struct ShelfSplitGeometryTests {
     @Test("A split App Bar's strip leaves the layout in its layouts only")
     func splitReservationReflows() {
         let split = settings(space: .top, app: .bottom)
-        let bsp = split.layoutBounds(from: visible, mode: .bsp, on: nil)
+        let bsp = split.layoutBounds(
+            from: visible,
+            mode: .bsp,
+            on: nil,
+            pocketAtRest: false
+        )
         let monocle =
-            split.layoutBounds(from: visible, mode: .monocle, on: nil)
+            split.layoutBounds(
+                from: visible,
+                mode: .monocle,
+                on: nil,
+                pocketAtRest: false
+            )
         #expect(bsp.minY == visible.minY + 32)
         #expect(bsp.maxY == visible.maxY)
         #expect(monocle.minY == visible.minY + 32)
@@ -149,7 +159,12 @@ struct ShelfSplitPlanTests {
         )
         #expect(plans.count == 2)
         let bounds =
-            settings.layoutBounds(from: visible, mode: .monocle, on: nil)
+            settings.layoutBounds(
+                from: visible,
+                mode: .monocle,
+                on: nil,
+                pocketAtRest: false
+            )
         for plan in plans {
             #expect(!plan.strip.intersects(bounds), "\(plan.edge)")
         }

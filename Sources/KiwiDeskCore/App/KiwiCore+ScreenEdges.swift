@@ -31,15 +31,26 @@ extension KiwiCore {
 
     /// Every layout's layout-bounds input on every connected
     /// screen, and with no screen (the bars' own edges) — read
-    /// through the one `shelfReservation(in:on:)` `layoutBounds`
+    /// through the one `shelfReservation(in:on:pocketAtRest:)` `layoutBounds`
     /// reads, so a bar write that moves one screen's strip owes
     /// the pass (#1524, #1948).
     var shelfReservations: [ShelfReservation] {
+        // The bounds' own read, so the skip and the bounds agree.
+        shelfReservations(pocketAtRest: tiler.pocketAtRest())
+    }
+
+    /// `shelfReservations` with the pocket at rest or not, for a
+    /// change of the capacity that decides it (#2784).
+    func shelfReservations(pocketAtRest: Bool) -> [ShelfReservation] {
         let screens: [String?] =
             [nil] + state.workspaces.allDisplays.map(\.fingerprint)
         return screens.flatMap { screen in
             LayoutMode.allCases.map {
-                tiler.settings.shelfReservation(in: $0, on: screen)
+                tiler.settings.shelfReservation(
+                    in: $0,
+                    on: screen,
+                    pocketAtRest: pocketAtRest
+                )
             }
         }
     }

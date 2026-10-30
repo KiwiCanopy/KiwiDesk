@@ -6,7 +6,7 @@ import CoreGraphics
 /// in every layout where a bar draws on it.
 public enum ShelfGeometry {
     // Layout span flows must route via
-    // TilingSettings.layoutBounds(from:mode:on:)
+    // TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)
     // (#537, LayoutBoundsRoutingTests).
 
     /// The strip on `edge` of visible bounds — the outer margin in

@@ -22,8 +22,18 @@ extension KiwiCore {
         // The whole stored group, so a field v3 adds re-draws too.
         if new.vision != old.vision, before == after { updateVision() }
         if new.hyperKey != old.hyperKey { oweHyperRemap() }
-        // Several windows stands the pocket on the shelf (#2678).
-        if new.pocketCapacity != old.pocketCapacity { updateBars() }
+        // Several windows stands the pocket on the shelf (#2678),
+        // and its edge then reserves its strip (#2784).
+        if new.pocketCapacity != old.pocketCapacity {
+            let reserved = { (capacity: PocketCapacity) in
+                self.shelfReservations(pocketAtRest: capacity == .several)
+            }
+            if reserved(old.pocketCapacity) != reserved(new.pocketCapacity) {
+                retile(pass: .apply)
+            } else {
+                updateBars()
+            }
+        }
         if new.modifierSides != old.modifierSides {
             keys.modifierSides = new.modifierSides
         }
