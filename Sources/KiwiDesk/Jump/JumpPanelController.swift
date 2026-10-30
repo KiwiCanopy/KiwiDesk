@@ -46,8 +46,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// Why window management is held (#2050), if it is; the View
     /// side greys its chips meanwhile (#2309 ruling 9).
     var hold: () -> CoreHold = { .running }
-    /// The Space the View side's Layout line acts on, read with the screen
-    /// the panel opens on so the two never disagree.
+    /// The Space the View side's Layout line and Move here act on,
+    /// read with the screen the panel opens on so the two never
+    /// disagree (#2791).
     var pickerSpace: SpaceID?
 
     /// A scope's own shortcut (#2229).
@@ -190,7 +191,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             core.jump(to: entry.target)
             return
         }
-        core.moveHere(entry.target)
+        core.moveHere(entry.target, into: pickerSpace)
     }
 
     /// Whether a pick arms the own-window handoff distrust: never

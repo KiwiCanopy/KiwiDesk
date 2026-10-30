@@ -24,9 +24,20 @@ extension KiwiCore {
     /// arrival. Returns false, cued, where it cannot move. A hidden
     /// app has no window to move yet: it is unhidden, and the
     /// window it brings back focused is moved here at its report.
+    /// `space` is the Space shown where the pick was made — the
+    /// screen KiwiHub opened on — and becomes the active one first,
+    /// so every arm reads one target (#2791).
     @discardableResult
-    public func moveHere(_ target: JumpEntry.Target) -> Bool {
+    public func moveHere(
+        _ target: JumpEntry.Target,
+        into space: SpaceID? = nil
+    ) -> Bool {
         withUserMotion {
+            if let space, space != state.workspaces.activeSpace,
+                state.workspaces.visibleSpaces.contains(space)
+            {
+                switchSpace(to: space, warp: true)
+            }
             guard let active = state.workspaces.activeSpace else {
                 jump(to: target)
                 return true
