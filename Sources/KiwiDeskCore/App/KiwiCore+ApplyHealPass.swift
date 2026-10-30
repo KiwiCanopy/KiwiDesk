@@ -14,8 +14,8 @@ extension KiwiCore {
         Int(sizeBoundProbeGraceSeconds * 1000) + 200
     )
 
-    /// The longest an apply waits for its answers before the pass
-    /// runs anyway, so a read that never lands cannot hold it.
+    /// The longest the pass waits from the last apply before it
+    /// runs anyway, so a window that never rests cannot hold it.
     static let applyHealPassBound: Duration = .seconds(5)
 
     /// Arms the pass. `retile` calls it for every apply pass that

@@ -42,7 +42,12 @@ struct ApplyHealPassNeedleTests {
             in: "KiwiCore+Retile.swift",
             under: "App"
         )
-        #expect(retile.contains("let pass = run.pass"))
-        #expect(retile.contains("if pass.probes { oweApplyHealPass() }"))
+        // After the gate's verdict, or the arm reads the caller's
+        // pass: a held apply arms early and a merged one never.
+        let running = try #require(retile.range(of: "let pass = run.pass"))
+        let arm = try #require(
+            retile.range(of: "if pass.probes { oweApplyHealPass() }")
+        )
+        #expect(running.lowerBound < arm.lowerBound)
     }
 }
