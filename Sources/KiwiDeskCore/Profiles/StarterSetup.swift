@@ -172,6 +172,7 @@ public enum StarterSetup {
             hosts: hosts(sizes)
         )
         settings.appBarStyle.setEdge(appBarEdge)
+        settings.kiwishelf.pocketEdge = pocketEdge
         settings.spaceBarStyle.visibility = barVisibility
         settings.monocle.appBar.visibility = barVisibility
         settings.scrolling.appBar.visibility = barVisibility
@@ -185,6 +186,11 @@ public enum StarterSetup {
     /// — which Glass also carries; a preset keeps the type
     /// default `.top`, so no stored profile moves (#1528).
     public static let appBarEdge = AppBarEdge.bottom
+
+    /// The starter's pocket edge: the Space Bar's, the bar that
+    /// stays in view (owner, 2026-10-30). Starter-only, like
+    /// `appBarEdge`; the type default stays `.bottom`.
+    public static let pocketEdge = AppBarEdge.top
 
     /// The starter's bars (#761): Auto, which the tour's bars step
     /// explains and lets the user change (#2515). Starter-only,

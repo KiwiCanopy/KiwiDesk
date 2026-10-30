@@ -6153,6 +6153,14 @@ both decode an absent key as the default, so without it a profile
 loses 4.0.0's values silently. The old `pocket.set_edge` and
 `pocket.set_position` retire with no alias.
 
+**The starter and every bundled look put it on the Space Bar's
+edge.** The Space Bar is the bar that stays in view, and the edge
+a coming Kiwi handle reserves, so the pocket rides it rather than
+the App Bar's dock (owner, 2026-10-30). The type default stays
+`bottom`, so no stored profile moves; each bundled look names the
+edge, since a look applies only the keys it carries
+(`LookCatalogTests` ▸ `pocketRidesTheSpaceBar`).
+
 **Several windows keeps it on screen, empty included, on every
 display.** One window keeps the pocket out of sight, since its one
 window is a key away. Under Several windows the drop target and
