@@ -60,12 +60,6 @@ struct ColorsVerdictAnchorTests {
             \.kiwishelf.border,
             \.borderStyle.enabled,
             \.borderStyle.unfocusedEnabled,
-            \.dragGhost.enabled,
-            \.dragGhost.border,
-            \.dragGhost.fill,
-            \.dragDropZone.enabled,
-            \.dragDropZone.border,
-            \.dragDropZone.fill,
         ]
         var out: [TilingSettings] = []
         for mask in 0..<(1 << (flags.count + 1)) {
@@ -84,7 +78,7 @@ struct ColorsVerdictAnchorTests {
     @Test("every dimmed row is explained beneath its card")
     func everyDimmedRowIsAnchored() {
         let all = states()
-        #expect(all.count == 2048)
+        #expect(all.count == 32)
         var dimmed = 0
         for settings in all {
             let gates = ColorsAndGlassGates(settings: settings)
@@ -122,7 +116,7 @@ struct ColorsVerdictAnchorTests {
             }
         }
         // Vacuity: the walk dims rows at all.
-        #expect(dimmed > 10_000)
+        #expect(dimmed > 32)
     }
 
     /// The census half: a row the census gates is dimmed by the
@@ -135,7 +129,7 @@ struct ColorsVerdictAnchorTests {
             $0.isColourRow
                 && SettingsDraftDiff.namesModelPath($0.id)
         }
-        #expect(keys.count == 20)
+        #expect(keys.count == 16)
         // Every such row is on a card the walk above reads, so a
         // row moved between groups cannot leave it (#2593).
         #expect(Set(keys).isSubset(of: cards.flatMap(\.keys)))

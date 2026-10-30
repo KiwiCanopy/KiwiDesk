@@ -9,8 +9,10 @@ struct BordersCard: View {
     private var caption: String {
         L(
             "border.shared.caption",
-            "The focus ring, the drag ghost and the drop zone "
-                + "are strokes KiwiDesk draws around a window."
+            "%1$@ sets the focus ring; %2$@ also shape the drag "
+                + "ghost and the drop zone.",
+            L("border.width", "Width"),
+            L("border.corner_style", "Corners")
         )
     }
 

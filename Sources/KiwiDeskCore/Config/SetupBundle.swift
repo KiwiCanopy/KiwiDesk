@@ -97,7 +97,9 @@ public struct SetupBundle: Codable, Sendable, Equatable {
     /// bundle's `config` and its `[Profile]` alike.
     /// 41 = the pocket's edge and position moved onto KiwiShelf
     /// (#2678), in a bundle's `[Profile]`.
-    public static let currentFormat = 41
+    /// 42 = the drag markers' look retired (#2797), in every shape a
+    /// bundle carries.
+    public static let currentFormat = 42
 
     public let format: Int
 

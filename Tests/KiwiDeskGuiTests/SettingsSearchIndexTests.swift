@@ -197,10 +197,9 @@ struct SettingsSearchIndexTests {
                 // `.atRest` in the census, as they render, so
                 // the #277 anchors they carried for a day are
                 // gone (the sticky reach row is bridge-gated and
-                // unindexed here); the four drag Border/Fill rows
-                // stay anchor-less by ruling — two census rows
-                // per label key, unsplit; 19 with #1799's mark.
-                .gapsAndBorders: 19,
+                // unindexed here); 19 with #1799's mark; 15 since
+                // #2797 retired the four drag Border/Fill rows.
+                .gapsAndBorders: 15,
                 // The bar cards' open rows are anchor-less by the
                 // #277 ruling (#1517); 19 by #1535, #1689, #1683
                 // and #1725, 13 since #2507: Fine-tuning's four

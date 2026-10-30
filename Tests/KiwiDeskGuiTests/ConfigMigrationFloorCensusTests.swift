@@ -33,6 +33,7 @@ struct ConfigMigrationFloorCensusTests {
     private let shapes: [(suffix: String, current: Int)] = [
         ("BundleFormat", SetupBundle.currentFormat),
         ("GuiFormat", GuiConfig.currentFormat),
+        ("LookFormat", LookDocument.currentFormat),
         ("PaletteFormat", PaletteDocument.currentFormat),
         ("ProfileFormat", Profile.currentFormat),
     ]

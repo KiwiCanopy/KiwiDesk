@@ -14,9 +14,7 @@ struct GapsAndBordersGateTests {
         border: Bool = true,
         glow: Bool = true,
         ghost: Bool = true,
-        ghostBorder: Bool = true,
         dropZone: Bool = true,
-        dropZoneBorder: Bool = true,
         outerEdgesDiffer: Bool = false,
         innerAxesDiffer: Bool = false
     ) -> TilingSettings {
@@ -24,9 +22,7 @@ struct GapsAndBordersGateTests {
         s.borderStyle.enabled = border
         s.borderStyle.glow = glow
         s.dragGhost.enabled = ghost
-        s.dragGhost.border = ghostBorder
         s.dragDropZone.enabled = dropZone
-        s.dragDropZone.border = dropZoneBorder
         s.gapsGlobal.outer = Gaps.Outer(
             top: 10,
             bottom: outerEdgesDiffer ? 4 : 10,
@@ -113,9 +109,7 @@ struct GapsAndBordersGateTests {
                 border: false,
                 glow: false,
                 ghost: false,
-                ghostBorder: false,
-                dropZone: false,
-                dropZoneBorder: false
+                dropZone: false
             )
         )
         for key in SettingKey.allCases
@@ -156,64 +150,6 @@ struct GapsAndBordersGateTests {
                 $0.borderStyle.glow = false
             }
             .inertReason(for: key) == nil
-        )
-    }
-
-    /// A column greys wholesale off its own Enabled toggle and
-    /// off nothing else. Its Border toggle gates no row in this
-    /// area since #754 took the width row out, so Border being
-    /// off must leave every row in the column live — a resolver
-    /// still reading it would grey Fill for a reason Fill does
-    /// not have.
-    @Test("the ghost column gates on enabled alone")
-    func ghostColumnLayers() {
-        let off = gates { $0.dragGhost.enabled = false }
-        #expect(
-            off.inertReason(for: .borders(.dragGhostBorder))
-                == .visualOff
-        )
-        #expect(
-            off.inertReason(for: .borders(.dragGhostFill))
-                == .visualOff
-        )
-        let noBorder = gates { $0.dragGhost.border = false }
-        #expect(
-            noBorder.inertReason(
-                for: .borders(.dragGhostBorder)
-            ) == nil
-        )
-        #expect(
-            noBorder.inertReason(
-                for: .borders(.dragGhostFill)
-            ) == nil
-        )
-        #expect(
-            gates().inertReason(for: .borders(.dragGhostBorder))
-                == nil
-        )
-    }
-
-    @Test("the drop-zone column gates on enabled alone")
-    func dropZoneColumnLayers() {
-        let off = gates { $0.dragDropZone.enabled = false }
-        #expect(
-            off.inertReason(for: .borders(.dragDropZoneBorder))
-                == .visualOff
-        )
-        #expect(
-            off.inertReason(for: .borders(.dragDropZoneFill))
-                == .visualOff
-        )
-        let noBorder = gates { $0.dragDropZone.border = false }
-        #expect(
-            noBorder.inertReason(
-                for: .borders(.dragDropZoneBorder)
-            ) == nil
-        )
-        #expect(
-            noBorder.inertReason(
-                for: .borders(.dragDropZoneFill)
-            ) == nil
         )
     }
 

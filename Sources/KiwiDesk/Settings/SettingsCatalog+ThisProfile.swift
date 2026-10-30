@@ -219,22 +219,9 @@ struct ColorsDrawerControls: Sendable {
         "Hover fill"
     )
     let tintFocusBorder = SettingsControl("border.title", "Focus border")
-    let tintGhostBorder = SettingsControl(
-        "colors.ghost_border",
-        "Ghost border"
-    )
-    let tintGhostFill = SettingsControl("colors.ghost_fill", "Ghost fill")
     let tintFocusedWindow = SettingsControl(
         "space_bar.color.focused_item",
         "Focused window"
-    )
-    let tintDropZoneBorder = SettingsControl(
-        "colors.drop_zone_border",
-        "Drop zone border"
-    )
-    let tintDropZoneFill = SettingsControl(
-        "colors.drop_zone_fill",
-        "Drop zone fill"
     )
     let tintFrontAppIndicator = SettingsControl(
         "space_bar.color.focused_highlight",

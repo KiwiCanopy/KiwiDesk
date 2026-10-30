@@ -17,18 +17,8 @@ enum BordersKey: String, CaseIterable, Hashable {
     case stickyColor = "settings.stickyStyle.color"
     case stickyDesktopReach = "settings.stickyStyle.desktopReach"
     case floatingMark = "settings.floatingStyle.mark"
-    case dragGhostEnabled = "settings.dragGhost.enabled"
-    case dragGhostBorder = "settings.dragGhost.border"
-    case dragGhostBorderColor = "settings.dragGhost.borderColor"
-    case dragGhostBorderAlignment = "settings.dragGhost.borderAlignment"
-    case dragGhostFill = "settings.dragGhost.fill"
-    case dragGhostFillColor = "settings.dragGhost.fillColor"
     case dragDropZoneEnabled = "settings.dragDropZone.enabled"
-    case dragDropZoneBorder = "settings.dragDropZone.border"
-    case dragDropZoneBorderColor = "settings.dragDropZone.borderColor"
-    case dragDropZoneBorderAlignment = "settings.dragDropZone.borderAlignment"
-    case dragDropZoneFill = "settings.dragDropZone.fill"
-    case dragDropZoneFillColor = "settings.dragDropZone.fillColor"
+    case dragGhostEnabled = "settings.dragGhost.enabled"
     case floatingColor = "settings.floatingStyle.color"
     case pocketColor = "settings.pocketStyle.color"
 }
@@ -118,63 +108,6 @@ extension BordersKey {
             )
         case .dragGhostEnabled, .dragDropZoneEnabled:
             return .row(.gapsAndBorders, .dragAndDrop, .atRest)
-        case .dragGhostBorder, .dragGhostFill:
-            return .row(
-                .gapsAndBorders,
-                .dragAndDrop,
-                .showMore,
-                gate: .setting(.borders(.dragGhostEnabled))
-            )
-        case .dragDropZoneBorder, .dragDropZoneFill:
-            return .row(
-                .gapsAndBorders,
-                .dragAndDrop,
-                .showMore,
-                gate: .setting(.borders(.dragDropZoneEnabled))
-            )
-        case .dragGhostBorderColor:
-            return .row(
-                .coloursAndMotion,
-                .accent,
-                .showMore,
-                gate: .anyOf([
-                    .borders(.dragGhostEnabled),
-                    .borders(.dragGhostBorder),
-                ])
-            )
-        case .dragGhostFillColor:
-            return .row(
-                .coloursAndMotion,
-                .accent,
-                .showMore,
-                gate: .anyOf([
-                    .borders(.dragGhostEnabled),
-                    .borders(.dragGhostFill),
-                ])
-            )
-        case .dragGhostBorderAlignment,
-            .dragDropZoneBorderAlignment:
-            return .luaOnly
-        case .dragDropZoneBorderColor:
-            return .row(
-                .coloursAndMotion,
-                .secondAccent,
-                .showMore,
-                gate: .anyOf([
-                    .borders(.dragDropZoneEnabled),
-                    .borders(.dragDropZoneBorder),
-                ])
-            )
-        case .dragDropZoneFillColor:
-            return .row(
-                .coloursAndMotion,
-                .secondAccent,
-                .showMore,
-                gate: .anyOf([
-                    .borders(.dragDropZoneEnabled),
-                    .borders(.dragDropZoneFill),
-                ])
-            )
         }
     }
 }

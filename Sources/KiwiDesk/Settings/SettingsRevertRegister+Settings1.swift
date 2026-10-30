@@ -69,22 +69,7 @@ extension SettingsRevertRegister {
             .leaf(\.settings.stickyStyle.desktopReach),
         .borders(.floatingMark): .leaf(\.settings.floatingStyle.mark),
         .borders(.dragGhostEnabled): .leaf(\.settings.dragGhost.enabled),
-        .borders(.dragGhostBorder): .leaf(\.settings.dragGhost.border),
-        .borders(.dragGhostBorderColor):
-            .leaf(\.settings.dragGhost.borderColor),
-        .borders(.dragGhostBorderAlignment):
-            .leaf(\.settings.dragGhost.borderAlignment),
-        .borders(.dragGhostFill): .leaf(\.settings.dragGhost.fill),
-        .borders(.dragGhostFillColor): .leaf(\.settings.dragGhost.fillColor),
         .borders(.dragDropZoneEnabled): .leaf(\.settings.dragDropZone.enabled),
-        .borders(.dragDropZoneBorder): .leaf(\.settings.dragDropZone.border),
-        .borders(.dragDropZoneBorderColor):
-            .leaf(\.settings.dragDropZone.borderColor),
-        .borders(.dragDropZoneBorderAlignment):
-            .leaf(\.settings.dragDropZone.borderAlignment),
-        .borders(.dragDropZoneFill): .leaf(\.settings.dragDropZone.fill),
-        .borders(.dragDropZoneFillColor):
-            .leaf(\.settings.dragDropZone.fillColor),
         .borders(.floatingColor): .leaf(\.settings.floatingStyle.color),
         .borders(.pocketColor): .leaf(\.settings.pocketStyle.color),
         .colours(.shortcutPanelLiquidGlass):

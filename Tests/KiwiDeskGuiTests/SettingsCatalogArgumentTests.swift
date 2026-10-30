@@ -27,11 +27,6 @@ struct SettingsCatalogArgumentTests {
         // `GapRow`s can reach the children tersely.
         "GapsEditor.swift: perEdge",
         "GapsEditor.swift: perAxis",
-        // The drag column helper takes its `SettingsControl` as
-        // a parameter; both callers pass catalog declarations
-        // (`dragGhost` / `dragDropZone`), which the dotted-
-        // reference sweep still covers.
-        "DragVisualsEditor.swift: control",
         // The two role groups share one card view (#1857), which
         // takes its control from `ColorRole.control` — the
         // `accentGroup` / `secondAccentGroup` declarations, which

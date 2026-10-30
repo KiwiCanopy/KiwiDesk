@@ -5,8 +5,9 @@ import Foundation
 /// type — never on `ColorPalette`, which also travels inside
 /// `SetupBundle`, where the bundle's own format governs (#945).
 struct PaletteDocument: Codable {
-    /// Format version of palettes.json schema (0 = legacy bare array, #939).
-    static let currentFormat = 2
+    /// Format version of palettes.json schema (0 = legacy bare array,
+    /// #939; 3 since the drag markers' palette paths retired, #2797).
+    static let currentFormat = 3
 
     /// Decoded format version preserved without normalization (#945).
     var format: Int

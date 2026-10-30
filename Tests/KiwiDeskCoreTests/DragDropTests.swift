@@ -8,14 +8,18 @@ import Testing
 @Suite("Drag drop resolution", .serialized)
 @MainActor
 struct DragDropTests {
+    /// The ghost is off for a fresh setup (#2797); these suites
+    /// read the preview's gating off it, so it is turned on.
     private func makeCore() -> KiwiCore {
-        makeTestCore(
+        let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-drag-\(UUID().uuidString)"
                 )
         )
+        core.tiler.settings.dragGhost.enabled = true
+        return core
     }
 
     private func addWindow(

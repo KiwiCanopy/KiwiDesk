@@ -24,8 +24,8 @@ struct LookSetterCensusTests {
     @Test("a path is spelled as its namespace's set_ verb")
     func setterSpelling() {
         #expect(
-            APIReference.lookSetter(for: "drag.ghost.fill_color")
-                == "drag.set_ghost_fill_color"
+            APIReference.lookSetter(for: "sticky.color")
+                == "sticky.set_color"
         )
         #expect(
             APIReference.lookSetter(for: "gap.global")

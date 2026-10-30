@@ -56,46 +56,12 @@ extension ColorsAndGlassRow {
                 automatic: true,
                 hex: settings.pocketStyle.color
             )
-        case .dragGhostBorderColor:
-            dragRow(ghost: true, fill: false)
-        case .dragGhostFillColor:
-            dragRow(ghost: true, fill: true)
-        case .dragDropZoneBorderColor:
-            dragRow(ghost: false, fill: false)
-        case .dragDropZoneFillColor:
-            dragRow(ghost: false, fill: true)
         default:
             let _ = assertionFailure(
                 "non-colour Borders key in Colors & glass: "
                     + key.rawValue
             )
             EmptyView()
-        }
-    }
-
-    /// Swatch row for one drag tint, labelled by its visual
-    /// since the two visuals sit in different groups (#1857).
-    @ViewBuilder private func dragRow(
-        ghost: Bool,
-        fill: Bool
-    ) -> some View {
-        let visual = ghost ? settings.dragGhost : settings.dragDropZone
-        HexColorField(
-            label: dragLabel(ghost: ghost, fill: fill),
-            hex: fill ? visual.fillColor : visual.borderColor
-        )
-    }
-
-    private func dragLabel(ghost: Bool, fill: Bool) -> String {
-        switch (ghost, fill) {
-        case (true, false):
-            return L("colors.ghost_border", "Ghost border")
-        case (true, true):
-            return L("colors.ghost_fill", "Ghost fill")
-        case (false, false):
-            return L("colors.drop_zone_border", "Drop zone border")
-        case (false, true):
-            return L("colors.drop_zone_fill", "Drop zone fill")
         }
     }
 }

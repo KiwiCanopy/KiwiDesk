@@ -15,8 +15,6 @@ struct ColorsAndGlassPathsTests {
         "kiwishelf": "kiwishelf",
         "spaceBarStyle": "space_bar",
         "borderStyle": "border",
-        "dragGhost": "drag.ghost",
-        "dragDropZone": "drag.drop_zone",
         "stickyStyle": "sticky",
         "floatingStyle": "floating",
         "pocketStyle": "pocket",

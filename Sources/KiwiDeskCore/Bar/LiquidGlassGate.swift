@@ -67,12 +67,21 @@ enum LiquidGlassGate {
         return copy
     }
 
-    /// A surface's stored glass leaf as drawn — the drag markers'
-    /// and the sticky mark's (#1620/#1621): off while transparency
-    /// is reduced, their flat look keeping its stored fill, never
-    /// made opaque (design-decisions ▸ Reduce transparency).
+    /// A surface's stored glass leaf as drawn — the drop zone's and
+    /// the sticky mark's (#1620/#1621): off while transparency is
+    /// reduced, the stood-down look never made opaque
+    /// (design-decisions ▸ Reduce transparency).
     static func rendered(glass stored: Bool) -> Bool {
         stored && drawsGlass
+    }
+
+    /// The drag drop zone's frost as drawn (#2797): glass where the
+    /// stored leaf draws it, the blur material where it does not,
+    /// flat grey while transparency is reduced. A surface, not a
+    /// Bool, since its fallback splits on this gate's own read.
+    static func rendered(frost stored: Bool) -> DragMarkerView.Surface {
+        if rendered(glass: stored) { return .glass }
+        return reducesTransparency ? .flat : .material
     }
 
     /// KiwiVision's stored blur as drawn (#2103): off while

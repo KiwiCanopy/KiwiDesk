@@ -1111,11 +1111,9 @@ bars' Style children and the Gaps drawers' `GapEdgeControls`
 are the shape. The census↔catalog join reads the label key and
 no instance (`SettingsSearchJoinTests` holds that no two
 catalog entries in one destination carry one census row's
-key), so two census rows sharing a label key — the drag
-columns' `Border` and `Fill` — stay anchor-less until the
-census row carries an instance the join can read, never
-resolved onto the first declared (`SettingsSearchDrawerAnchorTests`
-▸ `gapsAndBordersRowsCarryAnchors`); which rows the fill takes at
+key), so two census rows sharing a label key stay anchor-less
+until the census row carries an instance the join can read,
+never resolved onto the first declared; which rows the fill takes at
 all is `docs/design-decisions.md` ▸ *A search hit lands on the
 control only where the section hides it* (#277).
 

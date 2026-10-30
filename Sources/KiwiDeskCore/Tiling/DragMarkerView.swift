@@ -1,40 +1,70 @@
 import AppKit
 
-/// One drag marker's drawing — border over its fill, or over glass
-/// tinted by that fill and fading downward (#1620). The live drag's
-/// panels and the Settings picture of them host this one view, so
-/// the picture calls the engine rather than re-drawing it (#702,
-/// #1645).
+/// One drag marker's drawing (#2797): the drop zone an untinted
+/// frosted plate with a thin light rim, the ghost a two-tone outline
+/// with no fill. The live drag's panels and the Settings picture of
+/// them host this one view, so the picture calls the engine rather
+/// than re-drawing it (#702, #1645).
 @MainActor
 public final class DragMarkerView: NSView {
+    /// Which marker the view draws.
+    public enum Kind: Sendable, Equatable {
+        case dropZone
+        case ghost
+    }
+
+    /// What the drop zone is frosted with, as drawn.
+    enum Surface: Equatable {
+        /// Liquid Glass, untinted and thinned.
+        case glass
+        /// The system blur material, where glass is off.
+        case material
+        /// Flat grey, while transparency is reduced.
+        case flat
+    }
+
     private(set) var glass: NSView?
+    private(set) var material: NSVisualEffectView?
     let tint = GlassBackdrop()
-    /// The border's sheen (#1644), above the glass like the flat
-    /// border it replaces.
-    let rim = SheenRimView()
+    /// The ghost's outline: a light halo beneath a dark line.
+    let halo = CAShapeLayer()
+    let line = CAShapeLayer()
     private var preview: PreviewInput?
     private var gateToken: NSObjectProtocol?
 
     /// What a Settings picture asked to draw, kept for re-draws.
     private struct PreviewInput {
-        let style: DragVisual
-        let stroke: WindowStroke
+        let kind: Kind
+        let cornerRadius: CGFloat
         let storedGlass: Bool
-        let sheen: CGFloat
     }
 
-    /// Both markers' glass is thinned: the drop zone lies over the
-    /// window a drop swaps with, which should stay readable through
-    /// it, and the ghost matches it (owner, device 2026-09-25).
-    /// Opacity is the one public strength the material takes;
-    /// `.clear` is already its lightest style.
+    /// The drop zone's glass is thinned: it lies over the window a
+    /// drop swaps with, which should stay readable through it (owner,
+    /// device 2026-09-25). Opacity is the one public strength the
+    /// material takes; `.clear` is already its lightest style. The
+    /// blur material takes the same opacity.
     static let glassOpacity: CGFloat = 0.6
+    /// The drop zone's rim, drawn over every surface.
+    static let rimWidth: CGFloat = 1
+    static let rimColor = NSColor(white: 1, alpha: 0.5)
+    /// The drop zone under Reduce transparency: grey at about 22 %.
+    static let flatColor = NSColor(white: 0.5, alpha: 0.22)
+    /// The ghost's outline, as the bare pocket mark's edge: a dark
+    /// line centred in a wider light halo.
+    static let lineWidth: CGFloat = 1.5
+    static let lineColor = NSColor(white: 0, alpha: 0.6)
+    static let haloWidth: CGFloat = 4
+    static let haloColor = NSColor(white: 1, alpha: 0.6)
 
     public override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
-        rim.autoresizingMask = [.width, .height]
-        addSubview(rim)
+        for shape in [halo, line] {
+            shape.fillColor = nil
+            shape.isHidden = true
+            layer?.addSublayer(shape)
+        }
     }
 
     public convenience init() { self.init(frame: .zero) }
@@ -42,22 +72,19 @@ public final class DragMarkerView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// Draws `style` the way a drag draws it. `storedGlass` is the
+    /// Draws `kind` the way a drag draws it. `storedGlass` is the
     /// `dragLiquidGlass` leaf, resolved through the gate at each
     /// draw and re-drawn live when Reduce transparency flips
-    /// (#1374); `sheen` is `border.sheen`, which no gate touches
-    /// (#1644).
+    /// (#1374).
     public func showPreview(
-        _ style: DragVisual,
-        stroke: WindowStroke,
-        storedGlass: Bool,
-        sheen: CGFloat
+        _ kind: Kind,
+        cornerRadius: CGFloat,
+        storedGlass: Bool
     ) {
         preview = PreviewInput(
-            style: style,
-            stroke: stroke,
-            storedGlass: storedGlass,
-            sheen: sheen
+            kind: kind,
+            cornerRadius: cornerRadius,
+            storedGlass: storedGlass
         )
         observeGate()
         redrawPreview()
@@ -65,12 +92,15 @@ public final class DragMarkerView: NSView {
 
     private func redrawPreview() {
         guard let input = preview else { return }
-        render(
-            input.style,
-            stroke: input.stroke,
-            glass: LiquidGlassGate.rendered(glass: input.storedGlass),
-            sheen: input.sheen
-        )
+        switch input.kind {
+        case .ghost:
+            renderGhost(cornerRadius: input.cornerRadius)
+        case .dropZone:
+            renderDropZone(
+                cornerRadius: input.cornerRadius,
+                surface: LiquidGlassGate.rendered(frost: input.storedGlass)
+            )
+        }
     }
 
     public override func viewDidMoveToWindow() {
@@ -106,74 +136,117 @@ public final class DragMarkerView: NSView {
         redrawPreview()
     }
 
-    /// Paints the marker; `glass` is already resolved by the gate.
-    func render(
-        _ style: DragVisual,
-        stroke: WindowStroke,
-        glass: Bool,
-        sheen: CGFloat
-    ) {
+    /// Paints the ghost's outline inside its bounds.
+    func renderGhost(cornerRadius radius: CGFloat) {
         guard let layer else { return }
-        let radius = stroke.cornerRadius
         layer.cornerRadius = radius
-        // A layer's border draws above its sublayers, so it stays
-        // solid over the glass (`DragPairSeparationTests`, #511);
-        // the sheen's rim takes its place, above the glass too.
-        let ramp = sheen != 0 && style.border
-        layer.borderWidth = style.border && !ramp ? stroke.width : 0
-        layer.borderColor = Self.color(style.borderColor).cgColor
-        rim.layer?.cornerRadius = radius
-        rim.needsDisplay = true
-        rim.paint =
-            ramp
-            ? SheenRimView.Paint(
-                hex: style.borderColor,
-                width: stroke.width,
-                strength: sheen
-            )
-            : nil
-        if glass, let plate = glassView() {
-            layer.backgroundColor = NSColor.clear.cgColor
-            plate.isHidden = false
+        layer.borderWidth = 0
+        layer.backgroundColor = NSColor.clear.cgColor
+        glass?.isHidden = true
+        material?.isHidden = true
+        outline(radius: radius)
+    }
+
+    /// Paints the drop zone on `surface`, already resolved through
+    /// `LiquidGlassGate.rendered(frost:)`.
+    func renderDropZone(cornerRadius radius: CGFloat, surface: Surface) {
+        guard let layer else { return }
+        layer.cornerRadius = radius
+        halo.isHidden = true
+        line.isHidden = true
+        // A layer's border draws above its sublayers, so the rim
+        // stays over the glass and the material.
+        layer.borderWidth = Self.rimWidth
+        layer.borderColor = Self.rimColor.cgColor
+        frost(surface, radius: radius)
+    }
+
+    private func frost(_ surface: Surface, radius: CGFloat) {
+        let plate = surface == .glass ? glassView() : nil
+        let drawn = surface == .glass && plate == nil ? .material : surface
+        layer?.backgroundColor =
+            drawn == .flat
+            ? Self.flatColor.cgColor
+            : NSColor.clear.cgColor
+        glass?.isHidden = drawn != .glass
+        if let plate, drawn == .glass {
             plate.alphaValue = Self.glassOpacity
             GlassPlate.update(plate, frame: bounds, cornerRadius: radius)
             GlassTint.apply(
                 tint,
                 in: plate,
                 cornerRadius: radius,
-                fill: GlassFill(hex: style.fill ? style.fillColor : ""),
+                fill: GlassFill(hex: ""),
                 edge: .top
             )
+        }
+        guard drawn == .material else {
+            material?.isHidden = true
             return
         }
-        self.glass?.isHidden = true
-        layer.backgroundColor =
-            style.fill
-            ? Self.color(style.fillColor).cgColor
-            : NSColor.clear.cgColor
+        let blur = materialView()
+        blur.isHidden = false
+        blur.alphaValue = Self.glassOpacity
+        blur.frame = bounds
+        blur.layer?.cornerRadius = radius
     }
 
-    /// The marker's glass, hosted once; nil below macOS 26.
+    /// The ghost's two strokes on one path, inset so the halo stays
+    /// inside the slot.
+    private func outline(radius: CGFloat) {
+        let inset = Self.haloWidth / 2
+        let rect = bounds.insetBy(dx: inset, dy: inset)
+        guard rect.width > 0, rect.height > 0 else {
+            halo.isHidden = true
+            line.isHidden = true
+            return
+        }
+        let corner = min(
+            max(0, radius - inset),
+            rect.width / 2,
+            rect.height / 2
+        )
+        let path = CGPath(
+            roundedRect: rect,
+            cornerWidth: corner,
+            cornerHeight: corner,
+            transform: nil
+        )
+        let strokes = [
+            (halo, Self.haloWidth, Self.haloColor),
+            (line, Self.lineWidth, Self.lineColor),
+        ]
+        for (shape, width, color) in strokes {
+            shape.isHidden = false
+            shape.frame = bounds
+            shape.path = path
+            shape.lineWidth = width
+            shape.strokeColor = color.cgColor
+        }
+    }
+
+    /// The drop zone's glass, hosted once; nil below macOS 26.
     private func glassView() -> NSView? {
         if let glass { return glass }
         guard let plate = GlassPlate.make() else { return nil }
         plate.autoresizingMask = [.width, .height]
-        addSubview(plate, positioned: .below, relativeTo: rim)
+        addSubview(plate, positioned: .below, relativeTo: nil)
         glass = plate
         return plate
     }
 
-    /// Colors come as user-set hex strings; a string that no
-    /// longer parses falls back to the system accent color.
-    private static func color(_ hex: String) -> NSColor {
-        guard let c = DragVisual.parseHex(hex) else {
-            return .controlAccentColor
-        }
-        return NSColor(
-            srgbRed: c.red,
-            green: c.green,
-            blue: c.blue,
-            alpha: c.alpha
-        )
+    /// The drop zone's blur material, hosted once.
+    private func materialView() -> NSVisualEffectView {
+        if let material { return material }
+        let view = NSVisualEffectView()
+        view.material = .popover
+        view.blendingMode = .behindWindow
+        view.state = .active
+        view.wantsLayer = true
+        view.layer?.masksToBounds = true
+        view.autoresizingMask = [.width, .height]
+        addSubview(view, positioned: .below, relativeTo: nil)
+        material = view
+        return view
     }
 }

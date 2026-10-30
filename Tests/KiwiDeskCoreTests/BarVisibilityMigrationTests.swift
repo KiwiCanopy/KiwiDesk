@@ -80,8 +80,10 @@ struct BarVisibilityMigrationTests {
         #expect(settings.spaceBarStyle.visibility == .hidden)
         #expect(settings.monocle.appBar.visibility == .always)
         #expect(settings.scrolling.appBar.visibility == .hidden)
+        // No bar keeps an `enabled`; the drag ghost's, off for a
+        // fresh setup (#2797), is the one left.
         let text = try #require(String(data: out, encoding: .utf8))
-        #expect(!text.contains("\"enabled\" : false"))
+        #expect(text.components(separatedBy: "\"enabled\" : false").count == 2)
     }
 
     @Test("an update shows every user what they saw")

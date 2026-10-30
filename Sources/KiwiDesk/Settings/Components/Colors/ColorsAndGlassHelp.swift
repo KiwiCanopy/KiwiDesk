@@ -29,33 +29,6 @@ enum ColorsAndGlassHelp {
         )
     }
 
-    static var dragOff: String {
-        L(
-            "colors.drag_off.help",
-            "This drag visual is off, so its colors aren't "
-                + "drawn. Turn it on in %1$@.",
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    static var dragBorderOff: String {
-        L(
-            "colors.drag_border_off.help",
-            "This visual draws no border. Turn %1$@ on in %2$@.",
-            L("drag.border", "Border"),
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
-    static var dragFillOff: String {
-        L(
-            "colors.drag_fill_off.help",
-            "This visual draws no fill. Turn %1$@ on in %2$@.",
-            L("drag.fill", "Fill"),
-            SettingsDestination.gapsAndBorders.title
-        )
-    }
-
     /// The unfocused row's remote gate, as the sentence a
     /// `CrossReferenceRow` links to Gaps & Borders (#1310): the
     /// row and the switch by their own keys (#818); `%3$@` is the

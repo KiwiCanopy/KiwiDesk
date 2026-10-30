@@ -9,7 +9,8 @@ import Foundation
 extension ConfigMigration {
     static let lookExportSteps: [(to: Int, step: @Sendable (Data) -> Data?)] =
         [
-            (to: 2, step: migratingShelfGlideOntoExpand)
+            (to: 2, step: migratingShelfGlideOntoExpand),
+            (to: 3, step: migratingRetiredDragLook),
         ]
 
     /// `data`, written at `format`, with every step above it applied.
