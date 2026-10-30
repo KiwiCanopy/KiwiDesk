@@ -10,6 +10,8 @@ struct JumpRowView: View {
     let isSelected: Bool
     /// The pointer lifts this row, grey (#2365).
     var isLifted = false
+    /// The row ⇧ alone acts on (`JumpHover.shiftRow`, #2808).
+    let ownsShift: Bool
     /// The ⌘ number this row takes, nil from row 10 on.
     let number: Int?
     let commandHeld: Bool
@@ -49,11 +51,11 @@ struct JumpRowView: View {
             ? AnyShapeStyle(paint.selectionInkSecondary)
             : AnyShapeStyle(.secondary)
     }
-    /// ⇧ alone moves the selected row (⇧↩); ⇧⌘ reaches every
+    /// ⇧ alone acts on one row (`ownsShift`); ⇧⌘ reaches every
     /// numbered row through its digit, so each shows its way here.
     var showsWayHere: Bool {
         shiftHeld && wayHere != nil
-            && (isSelected || (commandHeld && number != nil))
+            && (ownsShift || (commandHeld && number != nil))
     }
 
     var body: some View {

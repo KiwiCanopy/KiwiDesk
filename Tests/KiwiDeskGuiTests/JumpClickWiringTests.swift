@@ -49,6 +49,13 @@ struct JumpClickWiringTests {
             )
         )
         #expect(panel.contains("hover:model.hover,onApply:"))
+        // The ⇧ way here follows the one derived row (#2808).
+        #expect(
+            panel.contains(
+                "letshiftRow=JumpHover.shiftRow(hover:model.hover,"
+            )
+        )
+        #expect(panel.contains("ownsShift:index==shiftRow,"))
         let side = try Self.squashed("JumpViewSide.swift")
         #expect(
             side.contains(
