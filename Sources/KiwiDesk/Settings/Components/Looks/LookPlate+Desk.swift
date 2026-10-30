@@ -29,7 +29,7 @@ struct LookDesk: View {
 
     /// The strip a lone pocket keeps clear on its edge.
     private var reserve: (edges: Edge.Set, depth: CGFloat) {
-        let depth = LookPlate.lonePocketSide
+        let depth = LookPlate.lonePocketSide * plate.size.desk
         switch plate.pocketReserve {
         case .top: return (.top, depth)
         case .bottom: return (.bottom, depth)
@@ -46,7 +46,7 @@ struct LookDesk: View {
     /// A gap on the picture: the gaps diagram's remap at the
     /// plate's size.
     private func gap(_ real: CGFloat) -> CGFloat {
-        GapPreviewScale.mini(real) * Self.gapShare
+        GapPreviewScale.mini(real) * Self.gapShare * plate.size.desk
     }
 
     /// The gaps diagram's mini screen against this plate.
@@ -55,7 +55,7 @@ struct LookDesk: View {
     private var shape: RoundedRectangle {
         RoundedRectangle(
             cornerRadius: settings.borderStyle.cornerStyle == .square
-                ? 0 : 3
+                ? 0 : 3 * plate.size.desk
         )
     }
 

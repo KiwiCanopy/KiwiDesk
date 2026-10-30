@@ -13,10 +13,27 @@ struct LookPlate: View {
     /// The draft with the look painted on.
     let settings: TilingSettings
     let spaceLabels: [SpaceGlyph]
-    /// Whether the pocket mark stands on its edge: the gallery's
-    /// picture alone, since a tile has no room for it (owner,
+    /// Where the picture is shown: a tile, or the gallery's PNG.
+    var size = Size.tile
+
+    /// A tile keeps its bars large enough to read at 72 pt; the
+    /// gallery's taller canvas gives them a desk's share at their
+    /// font's own size, which has a floor no scale goes under, and
+    /// alone stands the pocket, which a tile has no room for (owner,
     /// 2026-10-30; #2678 keeps it off the card).
-    var drawsPocket = false
+    enum Size {
+        case tile, gallery
+
+        @MainActor var height: CGFloat {
+            PaletteSceneThumbnail.baseHeight * desk
+        }
+        /// The desk's own geometry — gaps, the ring, the pocket —
+        /// grows with the canvas; the bars keep their font's size.
+        var desk: CGFloat { self == .tile ? 1 : 2 }
+        var drawsPocket: Bool { self == .gallery }
+    }
+
+    private var drawsPocket: Bool { size.drawsPocket }
 
     var body: some View {
         ZStack {
@@ -43,9 +60,10 @@ struct LookPlate: View {
         .clipShape(
             RoundedRectangle(
                 cornerRadius: PaletteSceneThumbnail.plateRadius
+                    * size.height / PaletteSceneThumbnail.baseHeight
             )
         )
-        .frame(height: PaletteSceneThumbnail.baseHeight)
+        .frame(height: size.height)
         .frame(maxWidth: .infinity)
         // Hidden from VoiceOver, never from the pointer: the plate is
         // most of a card's Button label, so a click on it is the click.
@@ -65,7 +83,7 @@ struct LookPlate: View {
     private var lonePocket: some View {
         GeometryReader { plate in
             let shelf = settings.kiwishelf
-            let side = Self.lonePocketSide
+            let side = Self.lonePocketSide * size.desk
             let along = shelf.pocketPosition / 100
             let inset = side / 2 + 2
             let x: CGFloat =
@@ -93,15 +111,15 @@ struct LookPlate: View {
     /// The lone pocket's side on the plate.
     static let lonePocketSide = PaletteSceneThumbnail.baseHeight * 0.13
 
+    /// The bars' scale on the picture: smaller than the Bars
+    /// card's, so both bars and the pocket fit a tile's width.
+    static let barScale: CGFloat = 0.62
+
     /// The edge a lone pocket reserves its strip on, as the live
     /// one does (#2801); nil where it stands on a bar or not at all.
     var pocketReserve: AppBarEdge? {
         drawsPocket && !pocketOnABar ? settings.kiwishelf.pocketEdge : nil
     }
-
-    /// The bars' scale on the picture: smaller than the Bars
-    /// card's, so both bars and the pocket fit a tile's width.
-    static let barScale: CGFloat = 0.62
 
     /// The look's own shelf colour over a night, darkened a step,
     /// a faint haze of the focus colour from the top.
@@ -118,7 +136,7 @@ struct LookPlate: View {
                 ],
                 center: .top,
                 startRadius: 0,
-                endRadius: PaletteSceneThumbnail.baseHeight * 0.9
+                endRadius: size.height * 0.9
             )
         }
     }
@@ -158,6 +176,6 @@ struct LookPlate: View {
         BorderPreviewScale.width(
             settings.borderStyle.clampedWidth,
             to: 0.75...3
-        )
+        ) * size.desk
     }
 }

@@ -3,12 +3,11 @@ import KiwiDeskCore
 import SwiftUI
 
 /// `kiwidesk preview <look.json> <out.png>`: a look file's gallery
-/// preview (#1740 ▸ Preview) — the shelf card's `LookPlate` at its
-/// own size with its pocket mark standing, painted over default
-/// settings on a fixed four-Space desk in dark mode, scaled to a
-/// fixed pixel size. Reads the file
-/// like Import… does; needs no running app. The verb, `usage` and
-/// `pixels` are the KiwiDesk-Looks CI's contract
+/// preview (#1740 ▸ Preview) — the shelf card's `LookPlate` at
+/// gallery size, painted over default settings on a fixed
+/// four-Space desk in dark mode, scaled to a fixed pixel size.
+/// Reads the file like Import… does; needs no running app. The
+/// verb, `usage` and `pixels` are the KiwiDesk-Looks CI's contract
 /// (`CLIPreviewContractTests`).
 enum CLIPreview {
     static let verb = "preview"
@@ -18,10 +17,10 @@ enum CLIPreview {
     /// The PNG's size, the site card's 16:10 at its 720 px slot.
     static let pixels = CGSize(width: 768, height: 480)
 
-    /// The card's plate, 16:10 at its own height.
+    /// The gallery's plate, 16:10 at its own height.
     @MainActor static let points = CGSize(
-        width: PaletteSceneThumbnail.baseHeight * 1.6,
-        height: PaletteSceneThumbnail.baseHeight
+        width: LookPlate.Size.gallery.height * 1.6,
+        height: LookPlate.Size.gallery.height
     )
 
     static func run(_ arguments: [String]) -> Int32 {
@@ -58,7 +57,7 @@ enum CLIPreview {
         let plate = LookPlate(
             settings: config.settings,
             spaceLabels: BarsPanelPreview.spaceLabels(of: config),
-            drawsPocket: true
+            size: .gallery
         )
         .frame(width: points.width)
         .environment(\.colorScheme, .dark)

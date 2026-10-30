@@ -42,6 +42,6 @@ extension HomeCardBarsTile.BarSpec {
     /// An art item's side: the App Bar glyph's slot at the bar's
     /// font size, so an icon sits at the digits' height.
     var artSide: CGFloat {
-        fontSize * AppBarStyle.glyphSlotRatio * 1.05
+        fontSize * AppBarStyle.glyphSlotRatio * 1.2
     }
 }

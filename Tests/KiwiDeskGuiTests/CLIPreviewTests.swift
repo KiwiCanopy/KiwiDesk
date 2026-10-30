@@ -32,12 +32,12 @@ struct CLIPreviewTests {
         #expect(Self.pixels(near: (0x23, 0x2B, 0x26), in: image) == 0)
     }
 
-    /// The card's own plate, scaled up: a taller plate is another
-    /// layout, its bars a smaller share of the desk.
-    @Test("the plate is the shelf card's, on four Spaces")
+    /// The look's picture at gallery size, scaled up: its own
+    /// canvas, where the bars take a desk's share (#1740).
+    @Test("the plate is the gallery's picture, on four Spaces")
     func cardPlateOnFourSpaces() throws {
         #expect(
-            CLIPreview.points.height == PaletteSceneThumbnail.baseHeight
+            CLIPreview.points.height == LookPlate.Size.gallery.height
         )
         let file = try Self.lookFile(focused: "#564AB6", in: Self.scratch())
         let look = try LookStore.importLook(data: Data(contentsOf: file))

@@ -63,17 +63,17 @@ struct LookPlateDeskTests {
         #expect(items.map(\.active) == [true, false, false])
     }
 
-    /// The gallery's PNG is the one picture standing the pocket;
-    /// every card leaves it at its default.
-    @Test("only the gallery's picture stands the pocket")
-    func pocketIsTheGallerys() throws {
+    /// The gallery's PNG is the one picture drawn at gallery size,
+    /// the one standing the pocket; every card takes the tile.
+    @Test("only the gallery's picture is drawn at gallery size")
+    func onlyThePreviewIsTheGallery() throws {
         let root = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Sources/KiwiDesk")
         var standing: [String] = []
         for file in try SourceScan.swiftSources(under: root) {
             let source = try SourceScan.strippedSource(at: file)
                 .filter { !$0.isWhitespace }
-            if source.contains("drawsPocket:true") {
+            if source.contains("size:.gallery") {
                 standing.append(file.lastPathComponent)
             }
         }
