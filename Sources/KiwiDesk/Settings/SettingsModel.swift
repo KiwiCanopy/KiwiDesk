@@ -312,7 +312,7 @@ final class SettingsModel: ObservableObject {
         }
     }
     /// Whether each stored profile follows the shared look (#1752),
-    /// as last read — the Shared look switch's baseline.
+    /// as last read — the "Look applies to" checklist's baseline.
     var lookReachStored: [String: Bool] = [:]
     /// The checklist's ticks over `lookReachStored`, staged until a
     /// Save (`SettingsModel+LookReach`).
@@ -321,7 +321,6 @@ final class SettingsModel: ObservableObject {
             if !suppressDirty { recomputeDirty() }
         }
     }
-    var lookShare: LookShareStage?
 
     /// Injected preferences seam allowing scratch domain in tests.
     init(

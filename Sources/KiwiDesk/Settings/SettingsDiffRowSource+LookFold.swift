@@ -3,8 +3,7 @@ import KiwiDeskCore
 /// Simple's one look row (#2745 ruling): on Simple, every draft row
 /// a look pick reaches folds into "Changes to the look", whose ↺
 /// takes the pick back (`ShelfLook.unpicked`). Advanced keeps a row
-/// per setting, save the rows a staged "Use the shared look" painted,
-/// which fold into its switch row on either root (#2820).
+/// per setting.
 extension SettingsDiffRowSource {
     /// `rows` with Simple's look rows folded into one, where the
     /// first of them stood; unchanged on Advanced.
@@ -12,7 +11,6 @@ extension SettingsDiffRowSource {
         _ rows: [SettingsDiffRow],
         for model: SettingsModel
     ) -> [SettingsDiffRow] {
-        let rows = sharePaintFolded(rows, for: model)
         guard model.showsSimple else { return rows }
         let keys = lookKeys(of: model)
         let folds = { (row: SettingsDiffRow) in foldsIntoLook(row, keys) }
@@ -20,30 +18,6 @@ extension SettingsDiffRowSource {
         var folded = rows.filter { !folds($0) }
         folded.insert(lookRow, at: first)
         return folded
-    }
-
-    /// `rows` without those still wearing a staged "Use the shared
-    /// look" (#2820): its switch row stands for them, and its ↺ takes
-    /// the paint and the switch back together. A leaf changed since
-    /// keeps its own row — it is an edit of the shared look.
-    static func sharePaintFolded(
-        _ rows: [SettingsDiffRow],
-        for model: SettingsModel
-    ) -> [SettingsDiffRow] {
-        guard case .use = model.lookShare,
-            let shared = model.core.sharedLook
-        else { return rows }
-        var painted = model.config
-        painted.settings = shared.worn(over: model.config.settings)
-        let apart = SettingsDraftDiff.between(
-            config: model.config,
-            cleanConfig: painted,
-            luaSource: model.luaSource,
-            cleanLuaSource: model.luaSource
-        ).changedSettings
-        let keys = Set(changed(model.config, model))
-            .subtracting(apart)
-        return rows.filter { !foldsIntoLook($0, keys) }
     }
 
     /// The changed keys the look row stands for: those taking the

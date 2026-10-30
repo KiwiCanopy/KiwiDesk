@@ -347,10 +347,11 @@ look if the profile it was saved from does. With a Lua-owned
 
 :::unreleased
 **Looks & Animations ▸ Shared look ▸ Look** sets the profile you
-are editing to **Shared** or **This profile only**. A look the
-switch replaces — the profile's own look, or the shared look that
-**Make This the Shared Look** replaces — is gone unless it is in
-**My looks**.
+are editing to **Shared** or **This profile only**, at once rather
+than with **Save**, and only while nothing else is unsaved. A look
+the switch replaces — the profile's own look, or the shared look
+that **Make This the Shared Look** replaces — is gone unless it is
+in **My looks**.
 :::
 
 The animations are part of the look too: a profile using the

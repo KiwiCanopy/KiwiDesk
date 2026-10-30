@@ -2,10 +2,9 @@ import KiwiDeskCore
 import SwiftUI
 
 /// The card's one choice (#2820 ▸ Ruling 1): Shared or This profile
-/// only, for this page's profile alone. Switching an own look to
-/// Shared asks first (`LookShareSheet`). The switch is staged and
-/// lands with the Save; saving the own look to My looks, which the
-/// prompt offers, is written at once.
+/// only, for this page's profile alone, written at once and greyed
+/// while the draft has unsaved edits. Switching an own look to
+/// Shared asks first (`LookShareSheet`).
 extension SharedLookSection {
     var choice: some View {
         Picker(
@@ -43,15 +42,13 @@ extension SharedLookSection {
     private func pick(_ shared: Bool) {
         guard let edited, shared != follows else { return }
         guard shared else {
-            model.stageLookSwitch(edited, .own)
+            model.applyLookSwitch(edited, .own)
             return
         }
-        // Back to a stored Shared, or no shared look yet to lose
-        // against: nothing asks.
-        guard model.lookReachStored[edited] == false,
-            model.core.sharedLook != nil
-        else {
-            model.stageLookSwitch(edited, .use)
+        // No shared look yet: this profile's look seeds it, so
+        // nothing is lost and nothing asks.
+        guard model.core.sharedLook != nil else {
+            model.applyLookSwitch(edited, .use)
             return
         }
         shareRequest = request(for: edited)
@@ -84,8 +81,8 @@ extension SharedLookSection {
             return
         }
         switch choice {
-        case .useShared: model.stageLookSwitch(request.profile, .use)
-        case .makeShared: model.stageLookSwitch(request.profile, .make)
+        case .useShared: model.applyLookSwitch(request.profile, .use)
+        case .makeShared: model.applyLookSwitch(request.profile, .make)
         }
     }
 

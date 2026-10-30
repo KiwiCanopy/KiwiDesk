@@ -30,7 +30,7 @@ struct SharedLookSection: View {
                 SettingsRowLabel(label: choiceLabel)
             } control: {
                 choice
-                    .disabled(greyReason != nil)
+                    .disabled(greyReason != nil || model.isDirty)
             }
             if let greyReason {
                 Text(greyReason)
@@ -39,6 +39,16 @@ struct SharedLookSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             } else if let edited {
                 notes(edited)
+                if model.isDirty {
+                    Text(
+                        L(
+                            "looks.reach.unsaved",
+                            "Save or revert your changes first."
+                        )
+                    )
+                    .font(.caption)
+                    .foregroundStyle(SettingsTheme.ink3)
+                }
             }
         }
         .sheet(item: $shareRequest) { request in

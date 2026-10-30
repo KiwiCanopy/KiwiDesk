@@ -1,11 +1,12 @@
 import KiwiDeskCore
 
-/// The Shared look switch's draft half (#1752, #2820): its picks
-/// are staged like any edit and written by a Save through the one
-/// `KiwiCore.saveLookReach`, before that Save's `gui.json` write.
+/// The Shared look switch (#1752, #2820): which profiles follow the
+/// shared look. The page's switch writes at once through the one
+/// `KiwiCore.saveLookReach`; a staged switch, which no page makes
+/// now, is written by a Save before that Save's `gui.json` write.
 extension SettingsModel {
     /// Whether each profile follows the shared look, as the page
-    /// shows it: the stored switches, the draft's picks over them.
+    /// shows it: the stored switches, any staged ones over them.
     var lookFollows: [String: Bool] {
         lookReachStored.merging(lookReachEdits) { $1 }
     }
@@ -20,48 +21,31 @@ extension SettingsModel {
         }
     }
 
-    /// The page's switch (#2820), the one writer of what it
-    /// stages: the follow, the share and the draft's paint move
-    /// together. `.use` paints the shared look over the draft only
-    /// for a profile stored with its own, so the page shows what the
-    /// Save keeps; switching back from it takes the paint off.
-    func stageLookSwitch(_ profile: String, _ pick: LookSwitch) {
-        restorePaintedLook()
-        let stored = lookReachStored[profile]
-        switch pick {
-        case .own:
-            setLookFollows(profile, false)
-        case .make:
-            lookShare = .make(profile: profile)
-            setLookFollows(profile, true)
-        case .use:
-            if stored == false, let shared = core.sharedLook {
-                lookShare = .use(profile: profile, paintBase: config.settings)
-                config.settings = shared.worn(over: config.settings)
+    /// The page's switch (#2820), written at once and only over a
+    /// clean draft, whose look is then the stored one: `.make` lands
+    /// the look the page shows as the shared one. The page reloads,
+    /// so it shows what was written. False where it was refused or
+    /// the write failed, with a warning.
+    @discardableResult
+    func applyLookSwitch(_ profile: String, _ pick: LookSwitch) -> Bool {
+        guard !isDirty else { return false }
+        let sharing =
+            pick == .make
+            ? (profile: profile, look: LookBody(of: config.settings))
+            : nil
+        do {
+            try core.withUserMotion {
+                try core.saveLookReach(
+                    [profile: pick != .own],
+                    sharing: sharing
+                )
             }
-            setLookFollows(profile, true)
+        } catch {
+            warnLookReachFailed(error)
+            return false
         }
-    }
-
-    /// The switch back to what is stored, its paint taken off — the
-    /// pill row's ↺.
-    func revertLookSwitch(_ profile: String) {
-        restorePaintedLook()
-        lookShare = nil
-        if let stored = lookReachStored[profile] {
-            setLookFollows(profile, stored)
-        } else {
-            lookReachEdits[profile] = nil
-        }
-    }
-
-    /// Takes a staged "Use the shared look" off the draft: its paint
-    /// and the share, never the follow.
-    private func restorePaintedLook() {
-        if case .use(_, let base) = lookShare {
-            config.settings = ShelfLook.unpicked(config.settings, to: base)
-        }
-        lookShare = nil
+        reload()
+        return true
     }
 
     /// The profiles other than `edited` that wear the shared look,
@@ -70,33 +54,35 @@ extension SettingsModel {
         profileMenuOrder.filter { $0 != edited && lookFollows[$0] == true }
     }
 
-    /// Re-reads the stored switches and drops the picks — a reload,
-    /// a Revert, a landed Save.
+    /// Re-reads the stored switches and drops the staged ones — a
+    /// reload, a Revert, a landed Save.
     func resetLookReach() {
         lookReachStored = core.lookReach()
-        lookShare = nil
         lookReachEdits = [:]
     }
 
     /// Writes the staged switches; false where the write failed,
-    /// the picks then staying unsaved with a warning.
+    /// the switches then staying unsaved with a warning.
     @discardableResult
     func saveLookReach() -> Bool {
         guard !lookReachEdits.isEmpty else { return true }
-        repaintSharedLook()
         do {
-            try core.saveLookReach(lookReachEdits, sharing: sharing)
+            try core.saveLookReach(lookReachEdits)
             resetLookReach()
             return true
         } catch {
-            profileWarning = L(
-                "profiles.save_failed",
-                "Saving failed: %1$@",
-                Self.lookReachFailure(error)
-            )
-            core.onLog("look reach save failed: \(error)")
+            warnLookReachFailed(error)
             return false
         }
+    }
+
+    private func warnLookReachFailed(_ error: Error) {
+        profileWarning = L(
+            "profiles.save_failed",
+            "Saving failed: %1$@",
+            Self.lookReachFailure(error)
+        )
+        core.onLog("look reach save failed: \(error)")
     }
 
     /// What a failed look-switch write says after "Saving failed:".
@@ -108,56 +94,6 @@ extension SettingsModel {
             "looks.reach.shared_not_written",
             "The shared look couldn't be written."
         )
-    }
-
-    /// A staged "Use the shared look" painted again on the leaves
-    /// taken back to the own look since — a setting's ↺, Simple's
-    /// look row — from the shared look as it is at the Save, so no
-    /// own value lands as an edit of the shared look (#2820). A leaf
-    /// the user changed since is an edit of the shared look, and
-    /// stays.
-    private func repaintSharedLook() {
-        guard case .use(_, let base) = lookShare,
-            let shared = core.sharedLook
-        else { return }
-        let worn = shared.worn(over: config.settings)
-        let now = LookBody(of: config.settings)
-        let was = LookBody(of: base)
-        let want = LookBody(of: worn)
-        let style = want.style.filter {
-            now.style[$0.key] == was.style[$0.key]
-                && now.style[$0.key] != $0.value
-        }
-        let colors = want.colors.filter {
-            now.colors[$0.key] == was.colors[$0.key]
-                && now.colors[$0.key] != $0.value
-        }
-        // A pick, not a wear: keep the per-layout indicators the
-        // apply clears, as `LookBody.worn` keeps them (#2368).
-        let before = config.settings
-        ShelfLook(name: "", style: style, colors: colors)
-            .apply(to: &config.settings)
-        for leaf in TilingSettings.layoutIndicatorLeaves {
-            config.settings[keyPath: leaf] = before[keyPath: leaf]
-        }
-        if now.origin == was.origin {
-            config.settings.lookOrigin = worn.lookOrigin
-        }
-    }
-
-    /// The profile staged to make its look the shared one, with the
-    /// look the page shows it wearing — over live as it is now on
-    /// the loaded profile's Save, as that Save rebases (#2262).
-    private var sharing: (profile: String, look: LookBody)? {
-        guard case .make(let profile) = lookShare else { return nil }
-        let shown =
-            editingProfile == nil
-            ? config.settings.rebased(
-                from: cleanConfig.settings,
-                onto: core.tiler.settings
-            )
-            : config.settings
-        return (profile, LookBody(of: shown))
     }
 
     /// The save pill's rows for the staged switches, one per profile
@@ -172,26 +108,16 @@ extension SettingsModel {
                 .colours(.lookAppliesTo),
                 instance: "look.\(profile)",
                 label: profile,
-                note: lookReachNote(profile, follows: follows)
+                note: follows
+                    ? L("looks.reach.diff.uses_shared", "Uses the shared look")
+                    : L(
+                        "looks.reach.diff.own",
+                        "Keeps the look it wears as its own"
+                    )
             )
             row.revert = .look(profile: profile)
             return row
         }
-    }
-
-    private func lookReachNote(_ profile: String, follows: Bool) -> String {
-        guard follows else {
-            return L(
-                "looks.reach.diff.own",
-                "Keeps the look it wears as its own"
-            )
-        }
-        return lookShare?.makes(profile) == true
-            ? L(
-                "looks.reach.diff.becomes_shared",
-                "Its look becomes the shared look"
-            )
-            : L("looks.reach.diff.uses_shared", "Uses the shared look")
     }
 }
 
@@ -200,20 +126,4 @@ enum LookSwitch {
     case own
     case use
     case make
-}
-
-/// What the switch staged beyond the follow (#2820): one profile's
-/// share at a time, since a page stages only its own.
-enum LookShareStage {
-    /// "Use the shared look", with the draft from before the shared
-    /// look was painted over it.
-    case use(profile: String, paintBase: TilingSettings)
-    /// "Make this the shared look": the draft's look lands as the
-    /// shared one at the Save.
-    case make(profile: String)
-
-    func makes(_ name: String) -> Bool {
-        if case .make(let profile) = self { return profile == name }
-        return false
-    }
 }

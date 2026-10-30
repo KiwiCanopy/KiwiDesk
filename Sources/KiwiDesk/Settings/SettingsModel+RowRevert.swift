@@ -42,7 +42,11 @@ extension SettingsModel {
         case .lua:
             luaSource = cleanLuaSource
         case .look(let profile):
-            revertLookSwitch(profile)
+            if let stored = lookReachStored[profile] {
+                setLookFollows(profile, stored)
+            } else {
+                lookReachEdits[profile] = nil
+            }
         case .lookChanges:
             config.settings = ShelfLook.unpicked(
                 config.settings,

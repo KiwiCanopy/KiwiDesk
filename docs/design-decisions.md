@@ -17846,21 +17846,21 @@ Look** lands the look the page shows as the shared one
 that change. Neither keeps a hidden copy of what it replaces: a
 kept last-own copy would be stored state no surface shows, so an
 own look survives only through the library, which the prompt
-offers to write at once — the one write that does not wait for
-the Save. The prompt is a sheet with commits by this ruling (gui.md
-▸ A picture whose object is NOT the draft): it shows both looks,
-which a dialog cannot. "Use" paints the draft so the page shows
-what the Save keeps; the leaves still wearing it fold into the
-switch's one pill row, and the Save paints the shared look, as it
-is then, again on any leaf taken back to the own look, which would
-otherwise land as an edit of the shared look. A leaf changed since
-is such an edit, and stays. The switch is written before the profile or
-`gui.json` write it guards, because a profile going own keeps the
-look it wore before the Save's edits and a profile going shared
-must not have the old shared look painted over the draft's
-(`SharedLookSeamTests` ▸ `switchFirst`, `LookReachTests`,
-`LookReachModelTests`). An own look carries no ⚠, since it is a
-choice rather than a divergence.
+offers to write first. The prompt is a sheet with commits by this
+ruling (gui.md ▸ A picture whose object is NOT the draft): it
+shows both looks, which a dialog cannot.
+
+**The switch writes at once, and only over a clean draft** (owner,
+2026-10-30). Staged in the draft, a Use had to paint the shared
+look into it to show what the Save keeps, and every way the
+painted leaves could part from the switch — one taken back alone,
+an edit after it, a sync arriving under it — could land an own
+value as an edit of the shared look. Written at once, the page
+reloads to what was written and nothing is in between. While the draft has unsaved edits the
+choice greys with its reason, since a write under them would
+leave a draft built on the look it replaced (`LookReachModelTests`,
+`LookReachTests`). An own look carries no ⚠, since it is a choice
+rather than a divergence.
 
 **The App Bar is the dock; the Space Bar is the menu bar**
 (owner, 2026-09-28, #1528). The starter splits them — Space Bar
