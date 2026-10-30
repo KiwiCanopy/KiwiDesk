@@ -178,6 +178,11 @@ struct JumpPanelView: View {
     private var rows: some View {
         let list = model.list
         let here = JumpRowText.here(of: list.snapshot)
+        let shiftRow = JumpHover.shiftRow(
+            hover: model.hover,
+            selection: list.selection,
+            movesHere: { list.results[$0].entry.movesHere && here != nil }
+        )
         // Eager: a lazy stack left a row below the fold unbuilt, so
         // the selection's scroll found no row to reach.
         return VStack(spacing: 0) {
@@ -192,7 +197,7 @@ struct JumpPanelView: View {
                     if let section = list.section(at: index) {
                         sectionHeader(section)
                     }
-                    row(index, match, here: here)
+                    row(index, match, here: here, shiftRow: shiftRow)
                 }
                 .id(index)
             }
@@ -202,7 +207,8 @@ struct JumpPanelView: View {
     private func row(
         _ index: Int,
         _ match: JumpSearch.Match,
-        here: JumpRowText.Place?
+        here: JumpRowText.Place?,
+        shiftRow: Int?
     ) -> some View {
         let list = model.list
         return JumpRowView(
@@ -215,8 +221,7 @@ struct JumpPanelView: View {
                 selected: index == list.selection,
                 clickable: true
             ),
-            liftElsewhere: model.hover != nil
-                && model.hover != .row(index),
+            ownsShift: index == shiftRow,
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,

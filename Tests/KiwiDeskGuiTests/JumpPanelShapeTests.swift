@@ -123,6 +123,7 @@ struct JumpPanelShapeTests {
                 match: match,
                 icon: nil,
                 isSelected: selected,
+                ownsShift: selected,
                 number: number,
                 commandHeld: command,
                 shiftHeld: shift,
@@ -142,30 +143,25 @@ struct JumpPanelShapeTests {
     }
 
     /// A ⇧-click moves the hovered row, so it claims the way here
-    /// and the selected row gives it up (#2808).
+    /// and the selected row gives it up — unless that click moves
+    /// nothing, where ⇧↩'s selection keeps it (#2808).
     @Test("the hovered row takes ⇧'s way here from the selection")
-    func wayHereFollowsHover() throws {
-        let entry = JumpListTests.row(1, "Safari")
-        let match = try #require(JumpSearch.matches([entry], query: "").first)
-        let here = JumpRowText.Place(glyph: nil, text: "Space 2")
-        func shows(selected: Bool, lifted: Bool, elsewhere: Bool) -> Bool {
-            JumpRowView(
-                match: match,
-                icon: nil,
-                isSelected: selected,
-                isLifted: lifted,
-                liftElsewhere: elsewhere,
-                number: 12,
-                commandHeld: false,
-                shiftHeld: true,
-                wayHere: here,
-                onActivate: { _ in }
-            ).showsWayHere
+    func wayHereFollowsHover() {
+        func row(_ hover: JumpHover?, moves: Set<Int> = [0, 1, 2]) -> Int? {
+            JumpHover.shiftRow(
+                hover: hover,
+                selection: 0,
+                movesHere: { moves.contains($0) }
+            )
         }
-        #expect(shows(selected: false, lifted: true, elsewhere: false))
-        #expect(!shows(selected: true, lifted: false, elsewhere: true))
-        #expect(shows(selected: true, lifted: false, elsewhere: false))
-        #expect(!shows(selected: false, lifted: false, elsewhere: true))
+        #expect(row(.row(2)) == 2)
+        #expect(row(nil) == 0)
+        #expect(row(.row(0)) == 0)
+        #expect(row(.row(2), moves: [0]) == 0)
+        #expect(
+            JumpHover.shiftRow(hover: nil, selection: nil) { _ in true }
+                == nil
+        )
     }
 
     @Test("⇧ rewrites the digits to what they then do")
