@@ -1366,8 +1366,9 @@ editing here:
   fixture answered by a settled read, by one echo, and by a
   repeated echo) and is what reds if either term is dropped —
   ENTRIES never generalize across asks (a grid-snapping app
-  answers each ask differently; the one deliberate exception is
-  the compliance contradiction sweep, argued on `complied`) —
+  answers each ask differently; the deliberate exceptions are
+  the compliance contradiction sweep, argued on `complied`, and
+  the run's planning floor below) —
   while a CORROBORATED bound does, revocably (#1055, owner
   rulings 2026-08-27/28): `consumedWidth/Height` and `explains`
   answer an ask BEYOND `maxWidth`/`minWidth` with that bound —
@@ -1447,7 +1448,33 @@ editing here:
   (ends the endless re-issue) and the layouts place the residue
   (scrolling re-packs, monocle and a lone scrolling window
   center, bsp and stack land a floor's residue inward through
-  `SplitOverflow.placed` on the issued frames, #934). And only
+  `SplitOverflow.placed` on the issued frames, #934). Every
+  SIZING reader — a run planning its members along its axis
+  (`LayoutContext.plannedFloor`), a resize clamp, the split and
+  track floor heals, the float fits (`plannedMinSize`) — reads a
+  window no smaller than its least refusal: the least answer
+  among its entries that answered more than `refusalMargin` above
+  their ask (`EffectiveSizeBound.refusedFloor`), stood down on a
+  forced pass, so an app that answers each span differently
+  scrolls the run or moves the split rather than landing inward
+  over a neighbour (#2774, `RunAskedFloorTests`,
+  `RunPressFloorTests`, `SplitFloorRefusalHealTests`). A SHAPE
+  decision — how many tracks or cells exist (Grid's cap, Track's
+  `geometricCap`), how thick a BSP chain is — keeps
+  `shapeFloor`'s corroborated reading, since one refusal there
+  would remove a track for good; so do the readers bound to a
+  shape's own floor, Track's across-track heal and its press
+  clamp (the cap's reading, #1355) and Grid's track floors,
+  which a refusal leaves overlapping until it corroborates. The reading never emits: keep
+  it out of `consumedWidth/Height`, `explains` and `centered`.
+  The trade: a window is never asked below its refusal again,
+  so only what drops the entry lowers it — a forced pass, an
+  eviction, the gesture sweep, a forget — and a healed ratio
+  keeps its value until a press or a sizing reset moves it; a
+  refusal learned under another layout counts here too; a shown
+  member asked above its floor and refused again still lands
+  inward, by at most the spread of its answers, and a
+  member outside any run keeps #934's inward residue. And only
   a SETTLED read — the retile-time gate, the
   settle probe — may clear learning on a compliance (#1049): a
   raw echo's compliance can be the transient half of an app's
@@ -1813,7 +1840,8 @@ editing here:
   ratio or the stack master ratio so a side draws its members'
   LEARNED floor — `SplitDomain.healedRatio` is the math, the
   `flooredWeights` shape, judging the stored ratio where the
-  render pins it and sinking a side only for a learned floor,
+  render pins it and sinking a side only for a learned floor or a
+  refusal (#2774),
   since the global floor is the render clamp's (#383) — written
   through the capped writers with NO focus, so the write clamps
   like a press and cues nothing, over the LOCAL members and the
@@ -1969,7 +1997,7 @@ editing here:
   carry `appBound`, carried for the SENTENCE — a consumer that
   ACTS on it owes a ruling here first; the builders in
   `KiwiCore+SizeLimitPill` answer it through the one
-  `minimumIsAppBound`, from the same `effectiveMinSize` every
+  `minimumIsAppBound`, from the same `plannedMinSize` every
   clamp measured against — a floor a clamp adds beside the
   setting (the scrolling slot's `ScrollSize.minPoints`) rides
   `raisedBy`, never the verdict — and a call site never hands

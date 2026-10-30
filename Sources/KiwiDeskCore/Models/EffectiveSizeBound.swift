@@ -116,6 +116,17 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// The learned minimum height floor; see `minWidth`.
     public var minHeight: CGFloat? { floor(of: height) }
 
+    /// A run's planning floor on one axis (#2774): the least
+    /// answer among the entries that answered more than
+    /// `refusalMargin` above their ask, nil where none did.
+    /// Planning only (`LayoutContext.plannedFloor`), never emitted.
+    public func refusedFloor(horizontal: Bool) -> CGFloat? {
+        (horizontal ? width : height)
+            .filter { $0.answered - $0.asked > Self.refusalMargin }
+            .map(\.answered)
+            .min()
+    }
+
     /// The learned maximum width ceiling (#1055) — `minWidth`'s
     /// mirror, under the same corroboration rule and for the
     /// same reason: a grid-snapping app answers each ask a few
@@ -188,6 +199,13 @@ public struct EffectiveSizeBound: Sendable, Equatable {
     /// only once asks drift past it — a few extra silent
     /// presses, not a wrong answer.
     static let corroborationDistinctness: CGFloat = 12
+
+    /// The overshoot a nearest-cell snap can produce on the snaps
+    /// `corroborationDistinctness` protects (q ≤ 2·(t + tolerance),
+    /// so q/2): an answer past it is a refusal, not grid noise.
+    static var refusalMargin: CGFloat {
+        corroborationDistinctness + matchTolerance
+    }
 
     private func pairedFloor(of entries: [Axis]) -> CGFloat? {
         let floors = entries.filter { $0.isFloor }

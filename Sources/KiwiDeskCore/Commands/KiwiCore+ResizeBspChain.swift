@@ -90,7 +90,7 @@ extension KiwiCore {
             delta: delta,
             span: Double(span),
             minSizes: chain.members.map {
-                effectiveMinSize(of: $0, axis: axis)
+                plannedMinSize(of: $0, axis: axis)
             }
         )
         if delta < 0, outcome.hitOwnMinimum {

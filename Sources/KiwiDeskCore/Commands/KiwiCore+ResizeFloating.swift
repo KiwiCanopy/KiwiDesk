@@ -27,7 +27,7 @@ extension KiwiCore {
             return .fail("unknown window")
         }
         let minSize = CGFloat(
-            effectiveMinSize(of: id, axis: axis)
+            plannedMinSize(of: id, axis: axis)
         )
         // Does THIS WRITE belong to a glide? The per-WRITE
         // scope, never the hold's lifetime
