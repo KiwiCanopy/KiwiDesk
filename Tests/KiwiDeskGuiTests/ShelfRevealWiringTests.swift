@@ -32,7 +32,10 @@ struct ShelfRevealWiringTests {
         #expect(wired.count == 1)
         if let open = wired.first {
             let body = boot[open.upperBound...].prefix { $0 != "}" }
-            #expect(body.contains("self?.windowMoveInFlight == true"))
+            #expect(
+                body.trimmingCharacters(in: .whitespacesAndNewlines)
+                    == "self?.windowMoveInFlight == true"
+            )
         }
         let plate = try Self.source("App/KiwiCore+PocketDrop.swift")
         #expect(
