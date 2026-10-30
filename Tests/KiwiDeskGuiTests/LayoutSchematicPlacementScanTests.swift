@@ -51,6 +51,8 @@ struct LayoutSchematicPlacementScanTests {
         let repo = SourceScan.repoRoot(from: #filePath)
         return [
             "Sources/KiwiDesk/Settings/Components/Layouts",
+            // Simple's Space card pictures (#2777).
+            "Sources/KiwiDesk/Settings/Components/Simple",
             "Sources/KiwiDesk/Settings/Components/Profiles",
             "Sources/KiwiDesk/Onboarding",
             "Sources/KiwiDesk/Jump",

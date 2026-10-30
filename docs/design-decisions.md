@@ -10321,17 +10321,18 @@ of that entry — the offer shapes, the Customize button, Screens
 on any screen count — stands for Advanced.) A `Simple | Advanced`
 segment at the header's trailing edge switches between two
 roots. Advanced is the Settings described everywhere else in
-this file, unchanged. Simple is one page: the Look line, the
-Space rows, KiwiHub's three keys and Open applications on the
-left, a live preview of the desk on the right.
+this file, unchanged. Simple is one centred page: KiwiHub's
+three keys, the Look line, a card per Space and Open
+applications.
 
 #2654 refused this on two grounds, and both are answered by
 construction rather than by promise:
 
 - **A doubled surface.** Simple owns layout and nothing else. It
   composes Advanced's own parts — the look tiles; the Space
-  row's grip, icon chip, name field, layout menu, Customize
-  button, pin chip, trash and add row; the Open applications
+  row's grip, icon chip, name field, layout menu (its items and
+  write one, its face the card's picture), Customize button, pin
+  chip, trash and add row; the Open applications
   rows; the support strip — so a change to a control reaches
   both surfaces. KiwiHub's keys are shown, not edited: KiwiHub
   is the way to every other shortcut, so Simple teaches its keys
@@ -10367,37 +10368,60 @@ Three things stay one, or the two roots drift apart:
   into Advanced is a visible, named link. The search tag and
   silent flip #2654 deleted stay deleted.
 - **No hue marks the mode.** The segment's label says which root
-  is showing; the accent stays selection's and identity's
-  (#1173).
+  is showing, and its selected segment is neutral (#2777): a root
+  is not a selection the accent marks, and the accent stays
+  selection's and identity's elsewhere (#1173).
 
-The preview is the reason Simple is two columns. It is drawn
-from the draft on the neutral plate, never on a wallpaper — a
-look carries none, and painting one teaches what the app does
-not do (#702). Hover previews a look or a Space; a click keeps a
-Space, so the keyboard and VoiceOver reach what the pointer
-does. It docks at the panel breakpoint and leaves its column
-below it, as every preview does; the support strip and footer
-end the controls at every width, so the right column is the
-preview and nothing else.
+**The switch is on every page.** A page is Advanced's, so it
+carries the segment as Home does (owner 2026-10-29): a user who
+followed a "… in Advanced" link sees the named way back where
+they left it. Back keeps meaning Home; a Back that read "Simple"
+after a link and "Home" after one more click would give one button
+two meanings.
+
+**Each Space is its own preview** (#2777, owner 2026-10-29,
+superseding the docked preview #2737 first ruled). Simple is one
+centred column at every width, and each Space is a card whose
+picture is its layout drawn from the draft in the current look:
+no separate preview to open or dock, and no row selection to
+learn; hovering a look repaints every card. A docked plate the size of half the window drew empty
+boxes, the least actionable thing on the page with the most area,
+and a kept-row ring in the accent beside a focus ring in the
+look's colour gave two rings two meanings. Putting the picture on
+the control that changes it removes the decision instead of
+moving it. The picture is drawn on the neutral plate, never a
+wallpaper — a look carries none, and painting one teaches what
+the app does not do (#702) — and adds no mark Simple cannot
+reach: a sticky, pocket or floating mark promises a setting the
+page does not hold, and a frozen drag reads as a broken window.
+The picture and its layout name are one Layout menu, since every
+layout on a card repeated per Space is the crowding #291 gives to
+a menu; the menu's items carry each layout's picture, so the
+drawing stays the label. Cards wrap rather than scroll sideways:
+every Space stays in view, and the page already grows with Open
+applications. KiwiHub's keys are shown with no "change these"
+line — the switch is the door for a user who wants to change
+them, and the hover says where.
 
 **The motion says where the user came from.** The switch
 converges: Simple fades and Home's cards gather out of the
 window's centre into their slots, so Advanced reads as the same
 settings opened out rather than another window; back, Home
-recedes under Simple fading in. Inside Advanced a card opens its
-page at once, and Back returns at once: the switch is the one
-change that transforms the window, and a page is a destination
-the user picks many times a visit, so a morph there spends time
-on every click (owner, 2026-10-29, retiring the card expand that
-shipped briefly). The shell's spring keys on the root alone, so
-a page change cannot ride it. Under Reduce Motion the switch is
-instant, with no fade put in its place.
+recedes and Simple's sections gather the same way, so neither
+root is the other's afterthought (#2777). Inside Advanced a card
+opens its page at once, and Back returns at once: the switch is
+the one change that transforms the window, and a page is a
+destination the user picks many times a visit, so a morph there
+spends time on every click (owner, 2026-10-29, retiring the card
+expand that shipped briefly). The shell's spring keys on the root
+alone, so a page change cannot ride it. Under Reduce Motion the
+switch is instant, with no fade put in its place.
 
 **Simple has its own visibility rule.** *Grey, don't hide*
 governs the controls within a surface; what Simple draws at all
 is a scope decision, made once for the whole root. So on one
-screen Simple hides the Screen menu and the screen map rather
-than greying them: a disabled control there teaches a choice the
+screen Simple hides the Screen menu rather than greying it: a
+disabled control there teaches a choice the
 user cannot make, and Advanced ▸ Screens still holds the pins.
 Inside a control Simple does draw, the rule binds as before: a
 control Advanced greys, Simple greys too.
@@ -11401,7 +11425,9 @@ ghost-over-row double vision) kept reading as broken. The
 reorder is therefore a plain vertical `DragGesture` on the
 grab handle: the row itself lifts (shadow + slight scale)
 and steps slot to slot — it never leaves the column, only
-the pointer's vertical position matters, and there is no
+the pointer's height matters (a row out of the column counts by
+its height; Simple's grid of cards by position, #2777), and
+there is no
 ghost at all. (`List.onMove` was rejected too: it brings
 list chrome that fights the card sections and shows no
 better affordance.) Each row is a bordered card, the handle

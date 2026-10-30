@@ -1,25 +1,30 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// KiwiHub's three keys on Simple (#2737 ruling 6), shown and not
-/// edited: KiwiHub is the way to every other shortcut, so its keys
-/// stay what the tour taught. Changing them is Advanced's.
+/// KiwiHub's three keys on Simple (#2777 rulings 3–5), shown and
+/// not edited: each side's glyph — the one its Shortcuts row
+/// wears — and name over its chord as keycaps, in three equal
+/// columns. KiwiHub is the way to every other shortcut, so its keys
+/// stay what the tour taught; changing them is Advanced's, which
+/// the hover names.
 struct SimpleKiwiHubKeys: View {
     @ObservedObject var model: SettingsModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            HomeGroupHeading(L("kiwihub.name", "KiwiHub"))
-            HStack(spacing: 16) {
-                ForEach(Self.sides, id: \.scope) { side in
-                    key(side)
-                }
+        SimpleCard(
+            title: L("kiwihub.name", "KiwiHub"),
+            caption: L(
+                "simple.kiwihub.caption",
+                "Every other shortcut starts here"
+            ),
+            plated: false
+        ) {
+            // A long translation stacks the sides.
+            ViewThatFits(in: .horizontal) {
+                HStack(alignment: .top, spacing: 16) { tiles }
+                VStack(alignment: .leading, spacing: 14) { tiles }
             }
-            CrossReferenceRow(
-                prose: Self.changeProse,
-                linkTitle: SettingsDestination.shortcuts.title,
-                destination: .shortcuts
-            )
+            .padding(.top, 4)
         }
     }
 
@@ -36,39 +41,86 @@ struct SimpleKiwiHubKeys: View {
         Side(scope: .view, command: KeybindingCatalog.showLayoutPicker),
     ]
 
-    private func key(_ side: Side) -> some View {
-        let chord = chord(of: side.command)
-        return HStack(spacing: 6) {
-            Text(side.scope.title)
-                .foregroundStyle(SettingsTheme.ink)
-            Text(verbatim: chord ?? "—")
-                .font(.callout.monospaced())
-                .foregroundStyle(SettingsTheme.ink2)
+    private var tiles: some View {
+        ForEach(Self.sides, id: \.scope) {
+            tile($0).frame(maxWidth: .infinity)
         }
-        .font(.callout)
+    }
+
+    private func tile(_ side: Side) -> some View {
+        let combo = combo(of: side.command)
+        let chord = combo.map(ShortcutsReferenceBuilder.glyphs)
+        return VStack(spacing: 8) {
+            // The side, by the glyph its Shortcuts row wears and its
+            // name, over its keys.
+            HStack(spacing: 6) {
+                ShortcutsReferenceBuilder.icon(for: side.command).map {
+                    Image(systemName: $0)
+                }
+                Text(side.scope.title)
+            }
+            .font(.callout)
+            .foregroundStyle(SettingsTheme.ink2)
+            if let combo {
+                HStack(spacing: 5) {
+                    ForEach(
+                        Array(Self.caps(combo).enumerated()),
+                        id: \.offset
+                    ) { index, cap in
+                        if index > 0 { ChordKeycap.plus }
+                        ChordKeycap(text: cap.glyph, side: cap.side)
+                    }
+                }
+            } else {
+                Text(L("simple.kiwihub.unbound", "No key"))
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .padding(.vertical, 4)
+            }
+        }
+        .fixedSize()
         .accessibilityElement(children: .ignore)
         .accessibilityLabel(side.scope.title)
         .accessibilityValue(
             chord.map(SidedChordWords.label)
                 ?? L("simple.kiwihub.unbound", "No key")
         )
-        .help(chord.map(SidedChordWords.help) ?? "")
+        .help(
+            chord.map { SidedChordWords.help($0) + "\n" + Self.changeHelp }
+                ?? Self.changeHelp
+        )
     }
 
-    /// The default layer's chord for `command`, drawn as glyphs.
-    private func chord(of command: NavCommand) -> String? {
-        model.config.layers.first(where: \.isDefault)?.bindings
-            .first { command.runs($0.lua) && !$0.combo.isEmpty }
-            .map { ShortcutsReferenceBuilder.glyphs($0.combo) }
-    }
-
-    /// The way to change them, its link at the slot.
-    @MainActor static var changeProse: String {
+    /// Where the keys change, on the pointer only (#2777 ruling 5).
+    @MainActor static var changeHelp: String {
         L(
-            "simple.kiwihub.change",
-            "Change these keys in %1$@ in %2$@.",
-            CrossReferenceRow.linkSlot,
+            "simple.kiwihub.change_help",
+            "Change these keys in %1$@ in %2$@",
+            SettingsDestination.shortcuts.title,
             SettingsRootSwitch.advancedTitle
         )
+    }
+
+    /// The default layer's combo for `command`.
+    private func combo(of command: NavCommand) -> String? {
+        model.config.layers.first(where: \.isDefault)?.bindings
+            .first { command.runs($0.lua) && !$0.combo.isEmpty }?
+            .combo
+    }
+
+    /// A combo's keycaps: one per modifier, each sided one carrying
+    /// its run's side word, then the key — one rule for every chord,
+    /// read from `ChordGlyphs.runs`, never from the drawn string
+    /// (#2777 ruling 4).
+    @MainActor static func caps(
+        _ combo: String
+    ) -> [(glyph: String, side: String?)] {
+        guard let parsed = KeyCombo.parse(combo) else {
+            return [(combo, nil)]
+        }
+        let chord = ChordGlyphs.runs(parsed, layoutChar: LayoutKeyGlyph.char)
+        let modifiers = chord.runs.flatMap { run in
+            run.glyphs.map { (String($0), run.side.map(ChordGlyphs.sideWord)) }
+        }
+        return modifiers + (chord.key.isEmpty ? [] : [(chord.key, nil)])
     }
 }

@@ -28,7 +28,14 @@ struct SupportLinkRow: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
-        .frame(maxWidth: 320, alignment: .leading)
+        // An ideal of the minimum, so a strip deciding whether three
+        // fit side by side asks this width, not an unwrapped caption.
+        .frame(
+            minWidth: 180,
+            idealWidth: 180,
+            maxWidth: .infinity,
+            alignment: .leading
+        )
     }
 }
 

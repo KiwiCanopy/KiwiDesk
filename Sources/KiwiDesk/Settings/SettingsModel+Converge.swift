@@ -11,11 +11,11 @@ extension SettingsModel {
         self.destination = destination
     }
 
-    /// Owes Home its cards' flight when the switch lands on Home.
-    /// Called after the destination, so a link from Simple landing on
-    /// a page owes none.
+    /// Owes the root the switch lands on its cards' flight: Home's
+    /// grid, or Simple's sections (#2777). Called after the
+    /// destination, so a link from Simple landing on a page owes none.
     func recordConverge(from old: SettingsRoot) {
         guard settingsRoot != old, destination == nil else { return }
-        nav.convergePending = settingsRoot == .advanced
+        nav.convergePending = true
     }
 }

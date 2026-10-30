@@ -63,16 +63,13 @@ struct SettingsNavigation {
     /// Active space ID for pushed space overrides editor (#678).
     var spaceOverridesFocus: SpaceID?
 
-    /// The Space a click on a Simple row kept in the preview
-    /// (#2737 ruling 5); on `nav` because the preview is the rows'
-    /// sibling column (gui.md).
-    var simpleKept: SpaceID?
-
-    /// What the pointer previews on Simple, nil at rest.
+    /// The look the pointer previews on Simple's Space cards, nil
+    /// at rest (#2777).
     var simpleHover: SimplePreviewHover?
 
-    /// Whether Home's cards still owe the switch's converge; Home
-    /// plays it once and clears this, so a remount does not replay it.
+    /// Whether the root a switch landed on still owes its converge —
+    /// Home's cards or Simple's sections (#2777); the root plays it
+    /// once and clears this, so a remount does not replay it.
     var convergePending = false
 
     /// Originating card destination when popping back to Home.
@@ -103,7 +100,6 @@ struct SettingsNavigation {
         kiwiVisionLens = nil
         kiwiVisionAddRequested = false
         spaceOverridesFocus = nil
-        simpleKept = nil
         simpleHover = nil
         convergePending = false
         // The latch is paired with the write that set it, so it

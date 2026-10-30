@@ -16,16 +16,17 @@ struct ShellMotionTests {
         return makeTestModel(defaults: defaults)
     }
 
-    @Test("the switch to Advanced owes Home one converge")
+    @Test("the switch owes the root it lands on one converge")
     func switchConverges() {
         let model = model()
         #expect(!model.nav.convergePending)
         model.pickRoot(.advanced)
         #expect(model.nav.convergePending)
         model.nav.convergePending = false
-        // Only Home arriving owes the flight.
+        // Simple's sections fly in too (#2777), and pay it on arrival.
         model.pickRoot(.simple)
-        #expect(!model.nav.convergePending)
+        #expect(model.nav.convergePending)
+        model.nav.convergePending = false
         // The bare header link is a switch too.
         model.openAdvanced()
         #expect(model.nav.convergePending)
@@ -65,7 +66,7 @@ struct ShellMotionTests {
     func shellMountsTheMotion() throws {
         let shell = try source("SettingsView.swift")
         for needle in [
-            "simplePane(width).transition(simpleTransition)",
+            "SimpleScreen(model:model).transition(simpleTransition)",
             "HomeScreen(model:model).transition(homeTransition)",
             "detailPane(width).transition(pageTransition)",
             ".animation(reduceMotion?nil:ShellMotion.spring,"
@@ -76,6 +77,18 @@ struct ShellMotionTests {
         ] {
             #expect(shell.contains(needle), "\(needle)")
         }
+        // Simple's sections take Home's flight and pay its debt
+        // (#2777).
+        let simple = try source("SimpleScreen.swift")
+        #expect(simple.contains(".modifier(converge(0,geo.size))"))
+        #expect(
+            simple.contains("State(initialValue:!model.nav.convergePending)")
+        )
+        #expect(
+            simple.contains(
+                ".onAppear{arrived=truemodel.nav.convergePending=false}"
+            )
+        )
         let home = try source("HomeScreen.swift")
         #expect(home.contains(".modifier(HomeConverge(arrived:arrived,"))
         #expect(

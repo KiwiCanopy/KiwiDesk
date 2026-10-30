@@ -13,6 +13,10 @@ extension HomeSurfacingTests {
         "Settings/SettingsView.swift": [
             // Home mounts exactly when no area is pushed.
             "ifselection==nil{HomeScreen(model:model)",
+            // Simple is one column with no preview panel: each
+            // Space card is its own preview (#2777).
+            "ifmodel.showsSimple{SimpleScreen(model:model)",
+            "!model.showsSimple&&SettingsDetailPanelOffer.offers(",
             // About is a sheet the shell hosts, opened through the
             // action the shell hands Home (#1536).
             ".sheet(item:$aboutRequest)",
@@ -88,12 +92,7 @@ extension HomeSurfacingTests {
             // Monitors lesson.
             "ifpanelDocked(width),letdestination=model.destination"
                 + "{SettingsTheme.hairline.frame(width:1)"
-                + "SettingsDetailPanel(",
-            // Simple's preview docks through the same answer
-            // the pill centres against (#2737).
-            "ifletpreview=dockedPanelWidth(width){"
-                + "SettingsTheme.hairline.frame(width:1)"
-                + "ScrollView{SimplePreview(model:model)}",
+                + "SettingsDetailPanel("
         ],
         "Settings/SettingsFloatingPanel.swift": [
             // The gesture is declared in the view that takes
@@ -123,9 +122,6 @@ extension HomeSurfacingTests {
             // preference (`DetailPanelTests` owns that half).
             "ifdetachedPreviewShown(width),"
                 + "letdestination=model.destination",
-            // Simple's card rides the same chrome and band.
-            "ifdetachedPreviewShown(width),model.showsSimple{"
-                + "GeometryReader{geoinMovableCard(",
             "close:{previewShown=false}",
             // A new area gets a new card: without the key the
             // structural position is identical across a
@@ -212,6 +208,10 @@ extension HomeSurfacingTests {
             // focus re-opens stale suggestions after every
             // push/pop (owner 2026-08-10).
             ".id(destination)",
+            // Every page is Advanced's, so the root switch draws
+            // on a page as on Home, the Lua editor alone without
+            // it (#2737 ruling 1, owner 2026-10-29).
+            "if!model.editingLua{SettingsRootSwitch(model:model)}",
         ],
         "Settings/HeaderSearch.swift": [
             // The predicate the query-only panel rests on: a

@@ -45,7 +45,8 @@ struct AnnouncedValueTests {
         "KiwiVisionLensAppsCard.swift": 1,
         // #1393: the trash that asks where a shared rule goes.
         "AppRuleIdentity.swift": 1,
-        "SpaceModeMenu.swift": 1,
+        // #2777: the pop-up and the card's picture-faced menu.
+        "SpaceModeMenu.swift": 2,
         // #2737: a Space's Screen menu, named for its row.
         "SpaceScreenMenu.swift": 1,
         // #1790: a temporary or held Space's greyed mode readout.

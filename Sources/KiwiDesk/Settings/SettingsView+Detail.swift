@@ -199,22 +199,3 @@ extension SettingsView {
         }
     }
 }
-
-extension SettingsView {
-    /// Simple's two columns (#2737 ruling 10): the controls, and the
-    /// preview docked beside them where the width docks a panel.
-    @ViewBuilder func simplePane(
-        _ width: SettingsWidthClass
-    ) -> some View {
-        HStack(spacing: 0) {
-            SimpleScreen(model: model)
-            if let preview = dockedPanelWidth(width) {
-                SettingsTheme.hairline.frame(width: 1)
-                ScrollView { SimplePreview(model: model) }
-                    .scrollIndicators(.hidden)
-                    .frame(width: preview)
-                    .background(SettingsTheme.panel)
-            }
-        }
-    }
-}
