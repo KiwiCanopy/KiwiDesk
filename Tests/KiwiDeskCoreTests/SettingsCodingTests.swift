@@ -103,6 +103,9 @@ struct SettingsCodingTests {
         #expect(pocket["color"] as? String == "")
         #expect(shelf["pocket_edge"] as? String == "bottom")
         #expect(shelf["pocket_position"] as? Double == 82)
+        // `kiwishelf.set_reading_contrast` →
+        // `kiwishelf.reading_contrast` (#2569): Lua-only.
+        #expect(shelf["reading_contrast"] as? Double == 2.2)
         // The `quit` group left for gui.json with #1741
         // (`AppWideSettingsTests`); the key set above holds its
         // absence.

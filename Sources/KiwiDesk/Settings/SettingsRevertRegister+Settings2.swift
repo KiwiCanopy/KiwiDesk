@@ -35,6 +35,8 @@ extension SettingsRevertRegister {
         .kiwishelf(.revealTimeout):
             .leaf(\.settings.kiwishelf.revealTimeout),
         .kiwishelf(.fillFade): .leaf(\.settings.kiwishelf.fillFade),
+        .kiwishelf(.readingContrast):
+            .leaf(\.settings.kiwishelf.readingContrast),
         .kiwishelf(.tintHubAndPlates):
             .leaf(\.settings.kiwishelf.tintHubAndPlates),
         .kiwishelf(.revealStyle):

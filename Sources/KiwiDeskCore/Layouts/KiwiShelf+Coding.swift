@@ -38,6 +38,7 @@ extension KiwiShelf {
         case fillColor = "fill_color"
         case fillFade = "fill_fade"
         case tintHubAndPlates = "tint_hub_and_plates"
+        case readingContrast = "reading_contrast"
         case borderColor = "border_color"
         case groupBadgeColor = "group_badge_color"
         case groupBadgeTextColor = "group_badge_text_color"
@@ -156,6 +157,10 @@ extension KiwiShelf {
         tintHubAndPlates =
             try c.decodeIfPresent(Bool.self, forKey: .tintHubAndPlates)
             ?? d.tintHubAndPlates
+        readingContrast = Self.clampReadingContrast(
+            try c.decodeIfPresent(Double.self, forKey: .readingContrast)
+                ?? d.readingContrast
+        )
         try decodeColors(from: c)
     }
 

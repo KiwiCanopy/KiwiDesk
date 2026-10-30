@@ -151,6 +151,7 @@ struct ShelfLookApplyTests {
         source.kiwishelf.iconSource = .appFont
         source.kiwishelf.dimFactor = 0.7
         source.kiwishelf.fillFade = 40
+        source.kiwishelf.readingContrast = 3
         source.kiwishelf.tintHubAndPlates = false
         source.kiwishelf.pocketEdge = .left
         source.kiwishelf.pocketPosition = 30
