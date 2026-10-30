@@ -4,11 +4,12 @@ import Testing
 @testable import KiwiDeskCore
 
 // Forget-proof guard for the per-space map list (#68,
-// AGENTS.md §5 parity rule): `TilingSettings.renameSpace` and
-// `removeSpace` each hand-enumerate every `[SpaceID: _]` map.
+// AGENTS.md §5 parity rule): `TilingSettings.renameSpace`,
+// `removeSpace`, `restoreSpace` and `resolved(for:)` (#2782)
+// each hand-enumerate every `[SpaceID: _]` map.
 // These tests DISCOVER the maps by reflection (depth 2, so the
 // per-layout `override` maps inside the param structs count),
-// so adding a ninth map without touching both functions — or
+// so adding a ninth map without touching every function — or
 // without populating it below — fails red instead of silently
 // orphaning entries.
 
@@ -99,6 +100,16 @@ struct SpaceMapParityTests {
         #expect(
             dicts.filter { $0.contains(probe.raw) }.count
                 == dicts.count
+        )
+    }
+
+    @Test("resolved(for:) leaves no other Space's entry (#2782)")
+    func resolvedCoversEveryMap() {
+        let dicts = dictionaryDescriptions(
+            populated().resolved(for: renamed)
+        )
+        #expect(
+            !dicts.contains { $0.contains(probe.raw) }
         )
     }
 

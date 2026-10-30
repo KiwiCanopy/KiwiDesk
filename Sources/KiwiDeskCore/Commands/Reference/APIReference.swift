@@ -100,6 +100,7 @@ public enum APIReference {
             ),
             ("get_state", "get_state"),
             ("get_config_status", "get_config_status"),
+            ("get_settings", "get_settings"),
             ("explain_window", "explain_window"),
             ("explain_app", "explain_app"),
             ("get_layout_info", "get_layout_info"),
