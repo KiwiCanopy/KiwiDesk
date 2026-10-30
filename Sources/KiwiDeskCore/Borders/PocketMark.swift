@@ -89,13 +89,6 @@ public enum PocketMark {
         stitch.stroke()
     }
 
-    /// The stitch's ink on a pocket in mark colour `hex`, resolved
-    /// in the drawing appearance; the bare mark's edge wears it too
-    /// (#2776).
-    static func stitchInk(hex: String) -> NSColor {
-        stitchInk(of: opaque(NSColor.mark(hex: hex, fallback: .labelColor)))
-    }
-
     private static func stitchInk(of cloth: NSColor) -> NSColor {
         cloth.contrastingGlyph
     }

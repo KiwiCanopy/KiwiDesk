@@ -1,40 +1,26 @@
 import AppKit
 
-/// The brief pocket itself (#2680): a rounded plate in KiwiShelf's
-/// look — its Fill as tinted glass or solid, and its rim, as the
-/// overflow mark wears it — holding the pocket mark. Redrawn at
-/// each size the nod gives it, never scaled.
+/// The pocket mark (#2680, #2776): bare on the screen, never a box.
+/// Lit, it wears a two-tone edge — a dark line and a light halo, so
+/// one of them reads on any ground — and hovered it lifts. Redrawn
+/// at each size the nod gives it, never scaled.
 @MainActor
 final class BriefPocketView: NSView {
+    /// Carries the light halo and the lift.
     private let content = NSView()
+    /// Carries the dark line.
     private let mark = NSImageView()
-    /// The mark again beneath it, carrying the soft edge's wider
-    /// layer: two shadows stack where one stays faint (#2776).
-    private let halo = NSImageView()
-    /// The shelf's hover fill, lit while the pointer or a window a
-    /// drop would take is over the pocket plate (#2678): flat on a
-    /// solid shelf, through `BarHoverFill` on glass.
-    private let litFill = NSView()
-    private let litGlass = GlassBackdrop()
-    /// How the pocket plate stands, as an inactive Space chip does;
-    /// the brief pocket is always `.active`.
+    /// How the pocket stands; the brief pocket is always `.active`.
     enum Look: Equatable {
-        /// Ink dimmed down the shelf's ladder, no fill.
+        /// No edge.
         case rest
-        /// The chip's hover: its fill, hover ink, full.
+        /// Hovered, or a window a drop would take over it: the edge,
+        /// lifted.
         case lit
-        /// Full item ink, no fill: a window just went in.
+        /// A window just went in or out: the edge alone.
         case active
     }
     private(set) var look = Look.active
-    private let solid = NSView()
-    private let tint = GlassBackdrop()
-    private let rim = ShelfBorder.make()
-    private var glass: NSView?
-    private var shelf = KiwiShelf()
-    /// Draws its own box, as `KiwiCore.pocketWearsPlate` answers;
-    /// otherwise the bare mark (#2776).
-    private var platePiece = false
     private var hex = ""
 
     override var isFlipped: Bool { true }
@@ -42,48 +28,21 @@ final class BriefPocketView: NSView {
     override init(frame: CGRect) {
         super.init(frame: frame)
         wantsLayer = true
-        solid.wantsLayer = true
-        solid.layer?.masksToBounds = true
         content.wantsLayer = true
+        mark.wantsLayer = true
         mark.imageScaling = .scaleProportionallyUpOrDown
-        halo.imageScaling = .scaleProportionallyUpOrDown
-        halo.isHidden = true
-        litFill.wantsLayer = true
-        litFill.isHidden = true
-        litFill.setAccessibilityElement(false)
-        litGlass.isHidden = true
-        content.addSubview(litGlass)
-        content.addSubview(litFill)
-        content.addSubview(halo)
         content.addSubview(mark)
-        addSubview(solid)
         addSubview(content)
-        addSubview(rim)
         setAccessibilityElement(false)
     }
 
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// Wears the gated `shelf` and the mark in `hex`, the pocket
-    /// mark's colour.
-    func wear(
-        _ shelf: KiwiShelf,
-        markHex hex: String,
-        platePiece: Bool
-    ) {
-        self.shelf = shelf
+    /// Wears the mark in `hex`, the pocket mark's colour.
+    func wear(markHex hex: String) {
         self.hex = hex
-        self.platePiece = platePiece
         needsLayout = true
-    }
-
-    /// The shelf's own corner at this depth, so a piece reads as
-    /// the shelf's plate (#2678).
-    private var plateRadius: CGFloat {
-        shelf.resolvedCornerRadius(
-            forThickness: min(bounds.width, bounds.height)
-        )
     }
 
     /// Below this side the mark draws its solid badge form: the
@@ -91,93 +50,63 @@ final class BriefPocketView: NSView {
     static let solidBelow: CGFloat = 14
 
     func setLook(_ look: Look) {
+        guard look != self.look else { return }
         self.look = look
-        paintLook()
+        paintLook(animated: true)
     }
 
-    /// The chip's readings: the fill, and the dim that reaches the
-    /// mark alone — never the plate or glass.
-    private func paintLook() {
-        // A bare mark lights by its ink alone: no box (#2776).
-        let lit = look == .lit && platePiece
-        let radius = plateRadius
-        litGlass.frame = bounds
-        litFill.layer?.cornerRadius = radius
-        let glassShown = BarHoverFill.paint(
-            litGlass,
-            showsHover: lit,
-            hex: shelf.hoverFillColor,
-            shelf: shelf,
-            edge: .top,
-            cornerRadius: radius,
-            corners: [
-                .layerMinXMinYCorner, .layerMaxXMinYCorner,
-                .layerMinXMaxYCorner, .layerMaxXMaxYCorner,
-            ]
-        )
-        litFill.isHidden = !lit || glassShown
-        litFill.layer?.backgroundColor =
-            NSColor(kiwiHex: shelf.hoverFillColor).cgColor
-        mark.alphaValue = look == .rest ? shelf.dimFactor : 1
-        paintEdge()
-    }
+    /// The edge's two tones, black and white whatever the mark's
+    /// colour, and their blurs as shares of its side (#2776).
+    static let lineBlur: CGFloat = 0.05
+    static let lineOpacity: Float = 0.55
+    static let haloBlur: CGFloat = 0.14
+    static let haloOpacity: Float = 0.85
+    /// The hovered mark's scale.
+    static let lift: CGFloat = 1.06
 
-    override func viewDidChangeEffectiveAppearance() {
-        super.viewDidChangeEffectiveAppearance()
-        // Automatic ink, and with it the edge, follows the appearance.
-        needsLayout = true
-    }
-
-    /// A bare mark's soft edge in its stitch's ink, which holds the
-    /// bag's shape on a window of its own ink: lit or a window just
-    /// in, never at rest (owner, #2776 ▸ D).
-    private func paintEdge() {
-        mark.wantsLayer = true
-        halo.wantsLayer = true
-        guard let inner = mark.layer, let outer = halo.layer else { return }
-        let drawn = !platePiece && look != .rest
-        halo.isHidden = !drawn
-        guard drawn else {
-            inner.shadowOpacity = 0
-            return
-        }
-        var edge = NSColor.black
-        effectiveAppearance.performAsCurrentDrawingAppearance {
-            edge = PocketMark.stitchInk(hex: hex)
-        }
+    private func paintLook(animated: Bool) {
+        guard let line = mark.layer, let halo = content.layer else { return }
         let side = mark.frame.width
-        for (layer, blur) in [(inner, Self.edgeBlur), (outer, Self.haloBlur)] {
-            layer.shadowColor = edge.cgColor
-            layer.shadowOpacity = 1
-            layer.shadowOffset = .zero
-            layer.shadowRadius = side * blur
-        }
+        line.shadowColor = NSColor.black.cgColor
+        line.shadowOffset = .zero
+        line.shadowRadius = side * Self.lineBlur
+        halo.shadowColor = NSColor.white.cgColor
+        halo.shadowOffset = .zero
+        halo.shadowRadius = side * Self.haloBlur
+        let lit = look != .rest
+        let scale = look == .lit ? Self.lift : 1
+        let centre = CGPoint(x: bounds.midX, y: bounds.midY)
+        var lift = CATransform3DMakeTranslation(centre.x, centre.y, 0)
+        lift = CATransform3DScale(lift, scale, scale, 1)
+        lift = CATransform3DTranslate(lift, -centre.x, -centre.y, 0)
+        BarMotion.playPocketLight(
+            [
+                (line, lit ? Self.lineOpacity : 0),
+                (halo, lit ? Self.haloOpacity : 0),
+            ],
+            lift: halo,
+            to: lift,
+            lighting: lit,
+            animated: animated
+        )
     }
-
-    /// The edge's two blurs, as shares of the mark's side: a dense
-    /// inner one and a wider one beneath.
-    static let edgeBlur: CGFloat = 0.06
-    static let haloBlur: CGFloat = 0.13
 
     #if DEBUG
-        /// Test-only: whether a hover box draws, flat or on glass.
-        var drawsLitBox: Bool { !litFill.isHidden || !litGlass.isHidden }
-        /// Test-only: the bare mark's edge, 0 where none draws.
+        /// Test-only: the edge, 0 where none draws — the fainter of
+        /// its two tones.
         var edgeOpacity: Float {
-            guard !halo.isHidden, halo.image != nil,
-                let inner = mark.layer, let outer = halo.layer,
-                inner.shadowRadius > 0, outer.shadowRadius > inner.shadowRadius
+            guard let line = mark.layer, let halo = content.layer,
+                line.shadowRadius > 0, halo.shadowRadius > line.shadowRadius
             else { return 0 }
-            return min(inner.shadowOpacity, outer.shadowOpacity)
+            return min(line.shadowOpacity, halo.shadowOpacity)
         }
+        /// Test-only: the mark's scale.
+        var liftScale: CGFloat { content.layer?.sublayerTransform.m11 ?? 1 }
     #endif
 
     override func layout() {
         super.layout()
-        let radius = plateRadius
         content.frame = bounds
-        litFill.frame = bounds
-        litFill.layer?.cornerRadius = radius
         let square = min(bounds.width, bounds.height)
         let side = square * BriefPocketPlan.markSide / BriefPocketPlan.side
         let variant: PocketMark = side < Self.solidBelow ? .badge : .mark
@@ -188,68 +117,13 @@ final class BriefPocketView: NSView {
             width: side,
             height: side
         )
-        halo.image = mark.image
-        halo.frame = mark.frame
-        paintPlate(radius: radius)
-        paintLook()
-        rim.frame = bounds
-        ShelfBorder.paint(
-            rim,
-            shelf: shelf,
-            surface: shelf.drawsPlate ? .plate : .box,
-            under: nil,
-            cornerRadius: radius,
-            sheen: 0
-        )
+        paintLook(animated: false)
     }
 
-    private func paintPlate(radius: CGFloat) {
-        rim.isHidden = !platePiece
-        guard platePiece else {
-            solid.isHidden = true
-            glass?.isHidden = true
-            if let glass, GlassPlate.holds(glass, content) {
-                GlassPlate.release(glass)
-            }
-            if content.superview !== self {
-                addSubview(content, positioned: .above, relativeTo: solid)
-            }
-            return
-        }
-        if shelf.glassEnabled, let glass = glassView() {
-            solid.isHidden = true
-            glass.isHidden = false
-            GlassPlate.setContent(glass, content)
-            GlassPlate.update(glass, frame: bounds, cornerRadius: radius)
-            GlassTint.apply(
-                tint,
-                in: glass,
-                cornerRadius: radius,
-                fill: shelf.glassFill,
-                edge: .top
-            )
-            return
-        }
-        if let glass, GlassPlate.holds(glass, content) {
-            GlassPlate.release(glass)
-        }
-        glass?.isHidden = true
-        solid.isHidden = false
-        solid.frame = bounds
-        solid.layer?.cornerRadius = radius
-        solid.layer?.backgroundColor =
-            NSColor(kiwiFill: shelf.fillColor).cgColor
-        if content.superview !== self {
-            addSubview(content, positioned: .above, relativeTo: solid)
-        }
-    }
-
-    private func glassView() -> NSView? {
-        if let glass { return glass }
-        guard let made = GlassPlate.make() else { return nil }
-        addSubview(made, positioned: .below, relativeTo: rim)
-        glass = made
-        return made
+    override func viewDidChangeEffectiveAppearance() {
+        super.viewDidChangeEffectiveAppearance()
+        // Automatic ink follows the appearance.
+        needsLayout = true
     }
 }
 

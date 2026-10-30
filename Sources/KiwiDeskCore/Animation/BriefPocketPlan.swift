@@ -24,12 +24,12 @@ enum BriefPocketPlan {
     static let plateRadius = SpaceSlidePlan.cornerRadius
 
     static let fadeIn: TimeInterval = 0.12
-    static let nod: TimeInterval = 0.18
+    static let nod: TimeInterval = 0.22
     static let fadeOut: TimeInterval = 0.2
     /// The plate's own fade where it meets or leaves the pocket.
     static let plateFade: TimeInterval = 0.12
     /// How far the pocket swells at the top of its nod.
-    static let nodScale: CGFloat = 1.15
+    static let nodScale: CGFloat = 1.12
 
     /// The flight's length at `durationMS`, the window duration:
     /// twice it, so the default 150 ms flies in 0.3 s.

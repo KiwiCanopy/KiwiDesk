@@ -120,11 +120,6 @@ struct BriefPocketTests {
             side: rise
         )
         #expect(request.pocket == risen)
-        // Risen out of its handle, the pocket wears no plate.
-        #expect(!request.platePiece)
-        let settings = core.tiler.settings
-        #expect(request.shelf != settings.kiwishelf)
-        #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
         #expect(!request.plateGlass)
     }
 

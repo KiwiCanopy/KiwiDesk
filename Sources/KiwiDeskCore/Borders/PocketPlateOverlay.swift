@@ -19,8 +19,6 @@ final class PocketPlateOverlay {
         let frame: CGRect
         let shelf: KiwiShelf
         let markHex: String
-        /// Its own box, as `KiwiCore.pocketWearsPlate` answers.
-        let platePiece: Bool
         /// The empty pocket at rest, drawn faded; lit, it shows full.
         let faded: Bool
         /// A dragged window over it that a drop would take.
@@ -84,8 +82,8 @@ final class PocketPlateOverlay {
     /// The gesture read as a resize, which shows no drop target.
     var resizing: WindowID?
 
-    /// The empty pocket's opacity.
-    static let fadedAlpha: CGFloat = 0.55
+    /// The empty pocket's opacity at rest (owner, #2776).
+    static let fadedAlpha: CGFloat = 0.4
 
     #if DEBUG
         /// Whether the pockets order their panels in; off in both
@@ -146,17 +144,15 @@ final class PocketPlateOverlay {
             shown(spec)
             ?? made(spec.display, section: spec.handle == nil)
         let old = specs[spec.display]
-        if let old, spec.windows.count > old.windows.count {
-            flashFilled(shown.view, on: spec.display)
+        if let old, spec.windows.count != old.windows.count {
+            let went = spec.windows.count > old.windows.count
+            let hold = went ? Self.inHold : Self.outHold
+            flash(shown, on: spec.display, for: hold)
         }
         // A form change reconfigures the other form's view.
         let changed = spec != old || old?.handle != spec.handle
         if changed {
-            shown.view.pocket.wear(
-                spec.shelf,
-                markHex: spec.markHex,
-                platePiece: spec.platePiece
-            )
+            shown.view.pocket.wear(markHex: spec.markHex)
             shown.view.handle.wear(
                 spec.shelf,
                 markHex: spec.markHex,
@@ -165,11 +161,7 @@ final class PocketPlateOverlay {
             )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
-            // An ancestor fades, never the glass (bars.md ▸ glass
-            // alpha): the handle's panel, or the section's holder.
-            let alpha = spec.faded ? Self.fadedAlpha : 1
-            shown.panel?.alphaValue = alpha
-            shown.holder?.alphaValue = alpha
+            paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
             if let panel = shown.panel, panel.frame != spec.frame {
                 panel.setFrame(spec.frame, display: false)
@@ -222,24 +214,44 @@ final class PocketPlateOverlay {
         specs = specs.filter { live.contains($0.key) }
     }
 
-    /// How long a put-in holds the pocket at full ink.
-    static let filledHold: TimeInterval = 1.2
+    /// How long a window going in, and one coming out, lights the
+    /// pocket (#2776).
+    static let inHold: TimeInterval = 0.5
+    static let outHold: TimeInterval = 0.4
     /// Each display's light, so one display's flash never strands
     /// another's lit (#2678 review 8).
-    private var filledGeneration: [DisplayID: Int] = [:]
+    private var flashGeneration: [DisplayID: Int] = [:]
+    private var flashing: Set<DisplayID> = []
 
-    /// Holds `view` at full ink after a window went in, then lets it
-    /// rest — a timer, its own, since the light is no motion.
-    private func flashFilled(_ view: PocketPlateView, on display: DisplayID) {
-        let mine = (filledGeneration[display] ?? 0) + 1
-        filledGeneration[display] = mine
-        view.justFilled = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.filledHold) {
-            [weak self, weak view] in
-            guard let self, self.filledGeneration[display] == mine
+    /// Lights `shown` full for `hold`, then lets it rest — a timer,
+    /// its own, since the light is no motion.
+    private func flash(
+        _ shown: Shown,
+        on display: DisplayID,
+        for hold: TimeInterval
+    ) {
+        let mine = (flashGeneration[display] ?? 0) + 1
+        flashGeneration[display] = mine
+        flashing.insert(display)
+        shown.view.flashing = true
+        DispatchQueue.main.asyncAfter(deadline: .now() + hold) {
+            [weak self] in
+            guard let self, self.flashGeneration[display] == mine
             else { return }
-            view?.justFilled = false
+            self.flashing.remove(display)
+            shown.view.flashing = false
+            if let spec = self.specs[display] { self.paintFade(shown, spec) }
         }
+    }
+
+    /// Fades the empty pocket at rest; a flash shows it full. An
+    /// ancestor fades (bars.md ▸ glass alpha): the handle's panel,
+    /// or the section's holder.
+    private func paintFade(_ shown: Shown, _ spec: Spec) {
+        let faded = spec.faded && !flashing.contains(spec.display)
+        let alpha = faded ? Self.fadedAlpha : 1
+        shown.panel?.alphaValue = alpha
+        shown.holder?.alphaValue = alpha
     }
 
     /// The shelf a pocket wears in `window`, its panel — the peek

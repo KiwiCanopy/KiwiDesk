@@ -6189,11 +6189,13 @@ panel of its own, beside the first, and plays every reveal, fade and
 glide on both from the same call, so the pocket comes and goes with
 the bars and never cuts, while the gap between them stays clear.
 A separate overlay following the shelf would copy every reveal
-style by hand (architect review, 2026-10-29). Under Boxed the pocket
-takes its own box like every item; under Plain it draws no plate of
-its own — at a hugging shelf's corner it sits on the screen like a
-bag, and under Full on the shelf's plate (owner, device 2026-10-29,
-#2776, reversing its own piece under Hug).
+style by hand (architect review, 2026-10-29). The pocket draws no
+plate or box of its own under any style: at a hugging shelf's
+corner or beside Boxed items it sits on the screen like a bag, and
+under Full on the shelf's plate (owner, device 2026-10-30, #2776,
+reversing its box under Boxed). A box says "a list of items"; the
+pocket is one object a window drops into, as the Trash sits bare at
+the Dock's end, and one bare look keeps one lit look everywhere.
 
 **On an Auto edge the handle stands where the pocket shows.** A
 hidden Auto bar leaves its handle at the edge, and the pocket's
@@ -6216,23 +6218,28 @@ object at one size. The floor is the handle's 20 pt kiwis, which a
 rise must never shrink; the ceiling, 1.6x, is as far as a growth
 still reads as the pocket coming out rather than a jump.
 
-**A bare pocket is the mark alone, edged softly in its stitch's
-ink while lit or as a window goes in or out** (owner, device
-2026-10-29, #2776). Risen out of its handle, or a Plain shelf's
-section, it draws no plate, so it lights as a Space chip's ink
-does, dimmed at rest and full on hover or under a drop, never as a
-box. A bare mark sits straight on whatever window is behind it,
-and its ink follows the system appearance, not that window: black
-ink measured 1.26:1 on a #1E1E1E window and white ink 1.00:1 on a
-white one, and most bundled pocket colours fall below 3:1 on one
-of the two (`ColorVision`). So, lit or as a window goes in or
-comes out, it wears a soft edge in the stitch's ink, which
-contrasts with whichever ground the bag loses to; at rest it draws
-none, since an edge standing on the screen read as a border. A
-hover ring in the highlight colour was weighed and set aside for
-this, since it reads like the focused-window ring and leaves the
-bag lost at rest and in a drag; a coloured glow is the focused
-ring's alone.
+**The pocket is the mark alone: faded while empty, in full colour
+while anything is inside, and edged in black and white while lit
+or as a window goes in or out** (owner, prototype 2026-10-30,
+#2776). It draws no box, so it lights by its mark: full on hover
+or under a drop, the edge then, and a slight lift on hover. A bare
+mark sits straight on whatever window is behind it, and its ink
+follows the system appearance, not that window: black ink measured
+1.26:1 on a #1E1E1E window and white ink 1.00:1 on a white one, and
+most bundled pocket colours fall below 3:1 on one of the two
+(`ColorVision`). So the edge is two tones fixed whatever the pocket
+colour — a tight dark line inside a wider light halo, as the
+pointer is drawn — one of which reads on any ground; a single tone
+in the stitch's ink vanished on a window of that ink, and tones
+derived from the pocket colour collapse where it meets the
+background. Matching the edge to the window behind or the one
+dragged would need a screen capture, which needs Screen Recording.
+The lift is the cue that holds on every ground, a full pocket's
+included, where no fade can change; the Dock signals a hover and a
+drop target by size the same way. At rest the edge goes, since an
+edge standing on the screen read as a border. A hover ring in the
+highlight colour was weighed and set aside, since it reads like the
+focused-window ring; a coloured glow is the focused ring's alone.
 :::
 
 ### A window changing state animates under its own switch (#2676)

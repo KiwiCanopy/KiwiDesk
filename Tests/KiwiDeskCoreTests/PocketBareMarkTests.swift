@@ -3,54 +3,35 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The pocket off a bar's edge is the bare mark (#2776): it lights by
-/// its ink and a soft edge, never a box; its handle shows the kiwis
-/// alone; and while a window drag runs it stands above the drag's
-/// ghost, which shares the bars' level.
+/// The pocket is the bare mark under every shelf style (#2776): it
+/// lights by a two-tone edge and lifts when hovered, never a box; its
+/// handle shows the kiwis alone; and while a window drag runs it
+/// stands above the drag's ghost, which shares the bars' level.
 @Suite("Pocket bare mark (#2776)", .serialized)
 @MainActor
 struct PocketBareMarkTests {
-    private func pocket(platePiece: Bool) -> BriefPocketView {
+    private func pocket() -> BriefPocketView {
         let view = BriefPocketView(
             frame: CGRect(x: 0, y: 0, width: 32, height: 32)
         )
-        var shelf = KiwiShelf()
-        shelf.liquidGlass = false
-        view.wear(shelf, markHex: "", platePiece: platePiece)
-        view.setLook(.lit)
+        view.wear(markHex: "")
         view.layoutSubtreeIfNeeded()
         return view
     }
 
-    @Test("a bare pocket lights with no box and wears its edge")
-    func bareLightsWithoutABox() {
-        let bare = pocket(platePiece: false)
-        #expect(!bare.drawsLitBox)
-        #expect(bare.edgeOpacity == 1)
-        // A window just in keeps it; at rest it goes (owner, #2776).
-        bare.setLook(.active)
-        #expect(bare.edgeOpacity == 1)
-        bare.setLook(.rest)
-        #expect(bare.edgeOpacity == 0)
-        // Control: a plated section keeps its hover box, no edge.
-        let plated = pocket(platePiece: true)
-        #expect(plated.drawsLitBox)
-        #expect(plated.edgeOpacity == 0)
-    }
-
-    @Test("the pocket wears a box only as a Boxed shelf's section")
-    func plateOnlyOnABar() {
-        var shelf = KiwiShelf()
-        shelf.backgroundStyle = .boxed
-        let slot = CGRect(x: 0, y: 0, width: 40, height: 40)
-        #expect(KiwiCore.pocketWearsPlate(slot: slot, shelf: shelf))
-        #expect(!KiwiCore.pocketWearsPlate(slot: nil, shelf: shelf))
-        // Plain: bare at a hugging shelf's corner and on a full plate.
-        shelf.backgroundStyle = .plain
-        for fit in [KiwiShelf.BackgroundFit.hug, .full] {
-            shelf.backgroundFit = fit
-            #expect(!KiwiCore.pocketWearsPlate(slot: slot, shelf: shelf))
-        }
+    @Test("the pocket lights by a two-tone edge and lifts when hovered")
+    func lightsByTheEdge() {
+        let view = pocket()
+        view.setLook(.lit)
+        #expect(view.edgeOpacity == BriefPocketView.lineOpacity)
+        #expect(view.liftScale == BriefPocketView.lift)
+        // A window just in or out keeps the edge, never the lift.
+        view.setLook(.active)
+        #expect(view.edgeOpacity == BriefPocketView.lineOpacity)
+        #expect(view.liftScale == 1)
+        view.setLook(.rest)
+        #expect(view.edgeOpacity == 0)
+        #expect(view.liftScale == 1)
     }
 
     /// The pixel at grid point `at` of `image` drawn at 2x.

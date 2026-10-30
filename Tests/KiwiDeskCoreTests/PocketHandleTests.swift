@@ -82,7 +82,6 @@ struct PocketHandleTests {
         let shown = try #require(spec(core))
         #expect(shown.handle == core.tiler.settings.kiwishelf.pocketEdge)
         #expect(!shown.risen)
-        #expect(!shown.platePiece)
         let depth =
             shown.handle?.isHorizontal == false
             ? shown.frame.width : shown.frame.height

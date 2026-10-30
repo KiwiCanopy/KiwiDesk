@@ -197,8 +197,8 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         onHover(on)
     }
 
-    /// A window just went in: full ink a moment, then rest.
-    var justFilled = false {
+    /// A window just went in or out: the edge a moment, then rest.
+    var flashing = false {
         didSet { paintLit() }
     }
 
@@ -206,7 +206,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     func paintLit() {
         pocket.setLook(
             hovered || dropHovered
-                ? .lit : justFilled ? .active : .rest
+                ? .lit : flashing ? .active : .rest
         )
     }
 

@@ -34,7 +34,6 @@ extension KiwiCore {
             updateBars()
             return nil
         }
-        let shelf = briefPocketShelf()
         var request =
             BriefPocketOverlay.Request(
                 display: display,
@@ -43,12 +42,7 @@ extension KiwiCore {
                 window: frame,
                 pocket: pocket,
                 iconPid: state.windows[id]?.pid,
-                shelf: shelf,
                 markHex: style.color,
-                platePiece: Self.pocketWearsPlate(
-                    slot: pocketPlate.slots[display],
-                    shelf: shelf
-                ),
                 plateGlass: glass,
                 plateTint: tiler.settings.panelsWearFill(glassDrawn: glass)
                     ? tiler.settings.kiwishelf.glassFill : nil,
@@ -100,11 +94,5 @@ extension KiwiCore {
         LiquidGlassGate.rendered(
             glass: tiler.settings.shortcutPanelLiquidGlass
         )
-    }
-
-    /// The pocket wears KiwiShelf's look as drawn, as the overflow
-    /// mark does.
-    func briefPocketShelf() -> KiwiShelf {
-        LiquidGlassGate.rendered(tiler.settings.kiwishelf)
     }
 }

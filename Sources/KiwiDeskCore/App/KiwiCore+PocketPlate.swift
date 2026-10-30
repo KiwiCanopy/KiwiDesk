@@ -84,7 +84,7 @@ extension KiwiCore {
         let inside = pocketPlateWindows
         let dragging = pocketPlate.dragging != nil
         guard pocketStands else { return [] }
-        let shelf = briefPocketShelf()
+        let shelf = LiquidGlassGate.rendered(tiler.settings.kiwishelf)
         let name = L(
             "pocket.plate.ax",
             "Pocket, windows inside: %1$d",
@@ -121,7 +121,6 @@ extension KiwiCore {
                 ),
                 shelf: shelf,
                 markHex: tiler.settings.pocketStyle.color,
-                platePiece: Self.pocketWearsPlate(slot: slot, shelf: shelf),
                 faded: inside.isEmpty && !lit,
                 dropHovered: pocketPlate.dropHovered == display.id,
                 name: name,
@@ -144,13 +143,6 @@ extension KiwiCore {
         playing: Bool
     ) -> Bool {
         several || dragging || playing
-    }
-
-    /// Whether the pocket draws its own plate: its box, as a section
-    /// on a Boxed shelf's edge; under Plain, Hug and Full alike, and
-    /// risen out of a handle, it is the bare mark (#2776).
-    static func pocketWearsPlate(slot: CGRect?, shelf: KiwiShelf) -> Bool {
-        slot != nil && !shelf.drawsPlate
     }
 
     /// Whether a play on `display` draws its own pocket: not where

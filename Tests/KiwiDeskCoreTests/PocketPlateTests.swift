@@ -143,31 +143,6 @@ struct PocketPlateTests {
         )
     }
 
-    @Test("Plain lays no piece of its own, Hug or Full; Boxed does")
-    func platePieceFollowsTheFit() throws {
-        let core = makeCore()
-        several(core)
-        let display = try #require(
-            core.state.workspaces.allDisplays.first?.id
-        )
-        // A bar pass after each write re-reads the slots, so hand
-        // the slot in after it.
-        let slot = CGRect(x: 1000, y: 860, width: 40, height: 40)
-        core.execute("kiwishelf.set_background_fit", args: [.string("full")])
-        core.updatePocketPlate(slots: [display: slot])
-        #expect(core.pocketPlate.specs[display]?.platePiece == false)
-        core.execute("kiwishelf.set_background_fit", args: [.string("hug")])
-        core.updatePocketPlate(slots: [display: slot])
-        // At a hugging shelf's corner it sits bare, like a bag (#2776).
-        #expect(core.pocketPlate.specs[display]?.platePiece == false)
-        core.execute(
-            "kiwishelf.set_background_style",
-            args: [.string("boxed")]
-        )
-        core.updatePocketPlate(slots: [display: slot])
-        #expect(core.pocketPlate.specs[display]?.platePiece == true)
-    }
-
     @Test("capacity is app-wide, decodes as stored, refuses a bad value")
     func capacityStored() throws {
         // App-wide (#2678): gui.json's `pocket` group.
