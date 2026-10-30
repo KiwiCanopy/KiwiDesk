@@ -75,8 +75,8 @@ final class PocketPlateOverlay {
     /// place in their row, AX along the edge (#2678).
     var markBands: [DisplayID: ClosedRange<CGFloat>] = [:]
     /// Each screen's bar strip on the pocket's edge from the last
-    /// bar pass, drawn or hiding, AX, which the One-window pocket
-    /// stands inside (#2793).
+    /// bar pass, AX (`KiwiCore.pocketStrip`), which the One-window
+    /// pocket stands inside (#2793).
     var barStrips: [DisplayID: CGRect] = [:]
     /// The window a drag moves, while one does (#2678).
     var dragging: WindowID?
@@ -95,6 +95,13 @@ final class PocketPlateOverlay {
     /// Each display's sliding pocket on its way out, its leave's
     /// token, so a return in the meantime keeps its panel (#2793).
     var leaving: [DisplayID: UUID] = [:]
+    /// Whether a panel is on screen; a test pins it, since no test
+    /// panel orders in.
+    var isOnScreen: @MainActor (NSWindow) -> Bool = { $0.isVisible }
+    /// Runs a leave's landing after its span; a test hands a queue.
+    var afterLeave:
+        @MainActor (TimeInterval, @escaping @MainActor () -> Void) -> Void =
+            BarMotion.afterReveal
 
     /// The empty pocket's opacity at rest (owner, #2776).
     static let fadedAlpha: CGFloat = 0.4
@@ -151,10 +158,7 @@ final class PocketPlateOverlay {
             {
                 continue
             }
-            shown.panel?.orderOut(nil)
-            // An ordered-out handle hears no exit (#2678 review 20);
-            // a section's hover on that display stays its own.
-            if shown.view.dropHover() { hovered.remove(display) }
+            orderOut(shown, on: display)
         }
         for spec in wanted.values { show(spec) }
         specs = wanted
@@ -166,10 +170,10 @@ final class PocketPlateOverlay {
             ?? made(spec.display, section: spec.handle == nil)
         let old = specs[spec.display]
         // Out of sight, or on its way back in, a sliding pocket enters.
+        // Out of sight, a sliding pocket enters; one taken back mid-
+        // leave stands at once.
         let enters =
-            spec.slides
-            && (shown.panel?.isVisible != true
-                || leaving[spec.display] != nil)
+            spec.slides && shown.panel.map { !isOnScreen($0) } == true
         if leaving.removeValue(forKey: spec.display) != nil {
             shown.view.layer?.removeAnimation(forKey: "pocketEntrance")
         }
@@ -297,6 +301,8 @@ final class PocketPlateOverlay {
             .transient, .ignoresCycle, .canJoinAllSpaces, .stationary,
         ]
         panel.contentView = view
+        // Layer-backed from the start, so its first entrance slides.
+        view.wantsLayer = true
         panel.onPress = { [weak self] hit, type in
             self?.onPanelPress(hit, type)
         }

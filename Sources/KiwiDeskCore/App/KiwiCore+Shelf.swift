@@ -129,12 +129,12 @@ extension KiwiCore {
             {
                 pocketSlots[display.id] = plan.segment(slot)
             }
-            // A hiding bar's strip too: a reveal never moves it (#2793).
-            if let plan = planned.first(where: {
-                $0.edge == shown.kiwishelf.pocketEdge
-            }) {
-                pocketStrips[display.id] = plan.strip
-            }
+            pocketStrips[display.id] = Self.pocketStrip(
+                in: planned,
+                edge: shown.kiwishelf.pocketEdge,
+                hiding: { hiding.marks[$0] != nil },
+                display: display.id
+            )
             strips += plans.map {
                 ShelfStrip(
                     display: display.id,

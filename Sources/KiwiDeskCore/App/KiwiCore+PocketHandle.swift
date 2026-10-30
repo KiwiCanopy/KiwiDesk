@@ -164,14 +164,10 @@ extension KiwiCore {
     func pocketLanding(on display: DisplayID) -> CGRect? {
         // The one door for where the pocket is (#2678 review 5).
         guard pocketStands(on: display) else { return nil }
-        if let slot = pocketPlate.slots[display] { return slot }
-        if let inside = pocketInsideFrame(on: display) { return inside }
         let shelf = tiler.settings.kiwishelf
-        // Under One window, which has no handle, the whole mark
-        // (#2793).
-        if let shown = state.workspaces.allDisplays.first(where: {
-            $0.id == display
-        }), !pocketHoldsSeveral || pocketRestsWhole(on: shown) {
+        switch pocketPlace(on: display) {
+        case .section(let frame), .inside(let frame): return frame
+        case .whole:
             return pocketMarkFrame(on: display).map {
                 PocketPlateView.room(
                     in: $0,
@@ -179,6 +175,7 @@ extension KiwiCore {
                     outer: shelf.outerMargin
                 )
             }
+        case .handle: break
         }
         guard let room = pocketHandleFrame(on: display, risen: true) else {
             return nil

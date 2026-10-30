@@ -40,9 +40,9 @@ struct PocketInsideTests {
             strip: left,
             edge: .left,
             position: 0,
-            inner: 0
+            inner: 6
         )
-        #expect(frame == CGRect(x: 32, y: 0, width: 28, height: 28))
+        #expect(frame == CGRect(x: 38, y: 0, width: 28, height: 28))
         let right = CGRect(x: 1408, y: 0, width: 28, height: 800)
         let other = KiwiCore.pocketInsideFrame(
             strip: right,

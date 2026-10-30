@@ -26,7 +26,7 @@ extension KiwiCore {
             updateBars()
             // A drag that starts on the pocket, a title bar under it,
             // arms it only once the pointer has left it (#2793).
-            pocketPlate.armed = pocketUnderPointer() == nil
+            pocketPlate.armed = false
         }
         let under = pocketUnderPointer()
         if under == nil { pocketPlate.armed = true }
@@ -78,19 +78,24 @@ extension KiwiCore {
             live && pocketPlate.dragging == id && pocketPlate.armed
             && pocketUnderPointer() != nil
         let lit = over && pocketPlate.dropHovered != nil
-        endPocketDrag()
-        if over, !lit, pocketNamedRefusal(id) == .taken {
-            _ = refuseSecondPocketWindow(id)
+        guard lit else {
+            endPocketDrag()
+            if over, pocketNamedRefusal(id) == .taken {
+                _ = refuseSecondPocketWindow(id)
+            }
+            return false
         }
-        guard lit else { return false }
         // An out window comes out next where it was before the drag,
         // never on the plate it was dropped on.
         pocketPlate.dropStart = (id, start, frame)
         defer { pocketPlate.dropStart = nil }
+        // The put-in's play holds the pocket before the drag lets it
+        // go, so a sliding pocket never leaves between them (#2793).
         let response = execute(
             "pocket",
             args: [.number(Double(id.raw))]
         )
+        endPocketDrag()
         // Refused at the drop after all: the ordinary drop takes it.
         return response.isSuccess
     }

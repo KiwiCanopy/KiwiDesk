@@ -88,6 +88,13 @@ struct PocketShelfWiringTests {
         #expect(inside.maxY <= strip.minY)
         let spec = try #require(core.pocketPlate.specs[display])
         #expect(spec.whole && spec.handle == .bottom && !spec.risen)
+        // Drawn at the inside frame, at its edge, sliding out of it.
+        let drawn = GeometryUtils.flip(
+            spec.frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
+        #expect(drawn == inside)
+        #expect(spec.outer == 0 && spec.slides)
         #expect(core.pocketLanding(on: display) == inside)
         #expect(core.pocketPlate.sectionMount(on: display) == nil)
         core.endPocketDrag()

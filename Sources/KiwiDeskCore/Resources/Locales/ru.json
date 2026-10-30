@@ -1073,7 +1073,7 @@
   "kiwishelf.pocket_edge": "Край Pocket",
   "kiwishelf.pocket_edge.help": "Край экрана, у которого находится Pocket.",
   "kiwishelf.pocket_position": "Положение Pocket",
-  "kiwishelf.pocket_position.help": "Если у этого края стоит панель, Pocket занимает ближний конец.",
+  "kiwishelf.pocket_position.help": "Если выбрано «%1$@», Pocket занимает ближний конец панели.",
   "kiwishelf.reveal_duration": "Длительность появления",
   "kiwishelf.reveal_duration.help": "Сколько времени появляется скрытая панель, каким бы способом она ни появлялась; исчезает она чуть быстрее. При значении 0 — мгновенно.",
   "kiwishelf.reveal_style.fade": "Проявление",

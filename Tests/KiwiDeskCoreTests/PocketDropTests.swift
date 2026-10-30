@@ -287,4 +287,32 @@ struct PocketDropTests {
         move(core, one)
         #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
     }
+
+    @Test("a drag that starts on a taken pocket is refused only once off it")
+    func takenRefusesOnlyOnceArmed() throws {
+        let core = try makeCore()
+        core.execute("pocket", args: [.number(Double(one.raw))])
+        var spoken: [String] = []
+        core.borders.announceRefusal = { spoken.append($0) }
+        let pointer = Pointer()
+        core.drag.cursorLocation = { [unowned core] in
+            let frame =
+                core.pocketPlate.specs.values.first?.frame ?? .zero
+            return pointer.onPocket
+                ? CGPoint(x: frame.midX, y: frame.midY)
+                : CGPoint(x: frame.minX - 400, y: frame.minY + 400)
+        }
+        // Started and let go on it, never off it: no refusal (#2793).
+        move(core, two)
+        end(core, two)
+        #expect(spoken.isEmpty)
+        // Off it once, the same drop is refused.
+        move(core, two)
+        pointer.onPocket = false
+        move(core, two)
+        pointer.onPocket = true
+        move(core, two)
+        end(core, two)
+        #expect(spoken.count == 1)
+    }
 }

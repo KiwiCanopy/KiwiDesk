@@ -1073,7 +1073,7 @@
   "kiwishelf.pocket_edge": "Pocket 邊緣",
   "kiwishelf.pocket_edge.help": "Pocket 所在的螢幕邊緣。",
   "kiwishelf.pocket_position": "Pocket 位置",
-  "kiwishelf.pocket_position.help": "在有列的邊緣上，Pocket 會位於較近的一端。",
+  "kiwishelf.pocket_position.help": "選擇「%1$@」時，Pocket 會位於列較近的一端。",
   "kiwishelf.reveal_duration": "出現效果時間長度",
   "kiwishelf.reveal_duration.help": "隱藏的列出現所需的時間，無論以哪種方式出現；隱藏時會稍快一些。設為 0 時會立即完成。",
   "kiwishelf.reveal_style.fade": "淡入",
