@@ -2129,6 +2129,13 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   caret and scrambles fast input. The representable also hands
   its coordinator the current binding on every update
   (`LuaSourceEditorCaretTests`).
+- **A row drawn `.equatable()` so a draft write can skip it
+  observes nothing, and its body draws only the value it compares**
+  (#2783): read what the body draws once, at init, into one
+  synthesized-`Equatable` value. A `Binding` it holds stays boxed out
+  of SwiftUI's sight, and it must find its rows when called, since a
+  skipped render keeps the last binding that drew
+  (`NavRowRenderSeamTests`, `NavRowEqualityTests`).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
   removed under the pointer (a link that deletes itself, a row
   rebuilt by rename) never delivers the balancing
