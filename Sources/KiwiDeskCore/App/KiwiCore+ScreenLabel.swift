@@ -14,7 +14,11 @@ extension KiwiCore {
         guard displays.filter({ $0.name == named.name }).count > 1 else {
             return ScreenLabel(name: named.name)
         }
-        let place = screenPlaces(displays).firstIndex(of: display)
+        // The order the presets' "Main screen" / "Screen 2" number.
+        let place = PositionalDisplays.ordered(
+            displays,
+            mainID: PositionalDisplays.liveMainID
+        ).firstIndex { $0.id == display }
         return ScreenLabel(name: named.name, twinPlace: place)
     }
 
@@ -33,18 +37,5 @@ extension KiwiCore {
             out[number] = DesktopLanding(screen: screen, number: local)
         }
         return out
-    }
-
-    /// The main screen first, then the rest in reading order —
-    /// left to right, top to bottom in AppKit's y-up frame.
-    private func screenPlaces(_ displays: [Display]) -> [DisplayID] {
-        let main = NativeSpaces.mainDisplayUUID().flatMap {
-            displaysByUUID()[$0]?.id
-        }
-        let rest = displays.filter { $0.id != main }.sorted {
-            ($0.frame.minX, -$0.frame.minY, $0.id.raw)
-                < ($1.frame.minX, -$1.frame.minY, $1.id.raw)
-        }
-        return (main.map { [$0] } ?? []) + rest.map(\.id)
     }
 }

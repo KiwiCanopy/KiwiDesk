@@ -1,8 +1,8 @@
 import Foundation
 
 /// A screen as a label names it (#2792): its own name, and its
-/// place where another connected screen shares that name — 0 for
-/// the main screen, then reading order — which the GUI narrates
+/// place where another connected screen shares that name — its
+/// index in `PositionalDisplays.ordered` — which the GUI narrates
 /// as "Main screen" / "Screen 2" (#96).
 public struct ScreenLabel: Sendable, Equatable {
     public let name: String

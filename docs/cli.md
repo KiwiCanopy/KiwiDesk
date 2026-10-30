@@ -1052,8 +1052,8 @@ lifecycle; the `reason` field says why the set changed:
   `vanished` (the window is on a
   macOS Desktop no screen is showing; it returns as
   `returned`). A `vanished` payload also carries `desktop`,
-  the Mission Control number of the Desktop holding the
-  window, where the Desktop can be read; every other reason —
+  the number of the Desktop holding the window, counted across
+  every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)), where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
 
 A window re-shown after a `closed` destroy — an app whose close
@@ -1101,7 +1101,8 @@ Bulk reassignments (profile load, session restore) stay silent:
 `desktop_change` fires when the visible Desktop changes on any
 screen — a swipe, Mission Control, or a `focus_desktop` /
 `move_to_desktop_and_follow` command; its data carries the 1-based
-Desktop number now current on the screen that switched, that
+Desktop number now current on the screen that switched, counted
+across every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)), that
 screen's positional number (`monitor`: 1 is the main screen,
 secondaries follow left to right — the same 1-based positional
 numbering a screen argument takes), and the active profile:

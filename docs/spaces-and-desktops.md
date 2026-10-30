@@ -224,15 +224,17 @@ uses two counts:
   Desktop N" does.
 
 On one screen, and on the screen Mission Control lists first,
-the two agree. On another screen they differ: the second screen's
+the two agree. A Settings row for a Desktop that is not present
+keeps the number it was last seen at, counted across every
+screen. On another screen they differ: the second screen's
 first Desktop may be **Go to Desktop 7**, and Settings ▸
-Shortcuts shows which screen and Desktop each such row reaches
-right now.
+Shortcuts and KiwiHub's Shortcuts side show which screen and
+Desktop each such row reaches right now.
 :::
 
 ## A binding follows its Desktop, not its number
 
-Mission Control numbers Desktops by **position**: add a Desktop
+Desktops are numbered by **position**: add a Desktop
 before a bound one, delete one, drag them around in Mission
 Control, plug a screen in or unplug it, and everything after the
 change is renumbered.
@@ -257,7 +259,7 @@ The merged one goes quiet; plugging the screen back in restores
 it, identifier and all, and its binding comes back with it.
 
 On a Mac where KiwiDesk cannot write the identifier, bindings
-key by the Mission Control number — the behaviour above minus
+key by the Desktop's number — the behaviour above minus
 the protection.
 
 A binding follows its **profile** the same way: it names the

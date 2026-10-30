@@ -84,20 +84,16 @@ final class DesktopCueLedger {
         else { return .waiting }
         guard snapshot.currentSpaceIsUser(on: owed.displayUUID),
             let display,
-            let number = snapshot.number(of: owed.space)
+            let position = snapshot.screenNumber(of: owed.space)
         else { return .settled(nil) }
-        let row = snapshot.spaces
-            .filter { $0.displayUUID == owed.displayUUID && $0.isUser }
-            .compactMap { snapshot.number(of: $0.id) }
-            .sorted()
-        guard let index = row.firstIndex(of: number) else {
-            return .settled(nil)
-        }
+        let count = snapshot.spaces.filter {
+            $0.displayUUID == owed.displayUUID && $0.isUser
+        }.count
         return .settled(
             DesktopSwitchCue(
                 display: display,
-                position: index + 1,
-                count: row.count,
+                position: position,
+                count: count,
                 loadedProfile: loadedProfile,
                 screen: screen
             )

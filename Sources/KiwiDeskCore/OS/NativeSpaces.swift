@@ -150,7 +150,8 @@ public enum NativeSpaces {
     /// 1-based number of `id` among its own screen's user
     /// Desktops — the label that screen's Mission Control strip
     /// draws under "Displays have separate Spaces" (#2792). Equal
-    /// to `number(of:in:)` on the main screen and on one screen.
+    /// to `number(of:in:)` on one screen and on the screen listed
+    /// first.
     public static func screenNumber(
         of id: SkyLight.SpaceID,
         in spaces: [NativeSpace]

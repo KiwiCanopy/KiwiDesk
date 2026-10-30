@@ -155,3 +155,30 @@ struct DesktopShortcutLandingTests {
         #expect(lone.allSatisfy { $0.detail == nil })
     }
 }
+
+/// A Desktop row that names its landing keeps its own line: a fold
+/// would drop it (#2792).
+@Suite("Desktop landing rows never fold")
+@MainActor
+struct DesktopLandingFoldTests {
+    @Test("a landing row is not plain")
+    func landingIsNotPlain() {
+        let landed = KeybindingCatalog.goToDesktop(
+            [1],
+            landings: [
+                1: DesktopLanding(screen: ScreenLabel(name: "A"), number: 1)
+            ]
+        )[0]
+        let lone = KeybindingCatalog.goToDesktop([1])[0]
+        func tag(_ command: NavCommand) -> ShortcutFold.Tag? {
+            ShortcutFold.tag(
+                for: command,
+                at: .init(family: .goToDesktop, position: 1),
+                combo: KeyCombo.parse("control+option+shift+command+1"),
+                rendered: "⌃⌥⇧⌘1"
+            )
+        }
+        #expect(tag(lone)?.plain == true)
+        #expect(tag(landed)?.plain == false)
+    }
+}

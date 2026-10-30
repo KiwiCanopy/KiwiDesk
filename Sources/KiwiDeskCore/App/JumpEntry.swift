@@ -50,9 +50,9 @@ public struct JumpEntry: Sendable, Equatable {
     /// the row sits under "Other apps", after every member's (#2103
     /// ruling 36). False for every row while no lens is on.
     public let isOtherApp: Bool
-    /// The screen the window is on where that is not the screen
-    /// KiwiHub opened on (#2792); nil there, with one screen, and
-    /// for a minimized window or a hidden app.
+    /// The screen a shown or away window is on where that is not
+    /// the screen KiwiHub opened on (#2792); nil there, with one
+    /// screen, and for every other status.
     public let screen: ScreenLabel?
 
     public init(

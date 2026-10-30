@@ -13,11 +13,7 @@ extension KiwiCore {
     /// on any other screen names that screen (#2792).
     public func jumpSnapshot(on display: DisplayID? = nil) -> JumpSnapshot {
         let here = moveHereSpace(on: display)
-        let hub =
-            display
-            ?? state.workspaces.activeSpace.flatMap {
-                state.workspaces.display(of: $0)
-            }
+        let hub = display ?? here.flatMap { state.workspaces.display(of: $0) }
         return JumpSnapshot(
             entries: jumpEntries(here: here, hub: hub),
             here: here,
@@ -101,7 +97,7 @@ extension KiwiCore {
                     state.isPocketed(window.id)
                     ? .pocketed
                     : window.isFullscreen ? .fullscreen : .shown
-                let shownOn = (state.stickyRenderSpace(of: window) ?? space)
+                let shownOn = state.renderSpace(of: window)
                     .flatMap { state.workspaces.display(of: $0) }
                 return JumpEntry(
                     target: .window(window.id),
