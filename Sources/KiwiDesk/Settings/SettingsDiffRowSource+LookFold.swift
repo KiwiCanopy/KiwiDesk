@@ -22,22 +22,27 @@ extension SettingsDiffRowSource {
         return folded
     }
 
-    /// `rows` without those a staged "Use the shared look" painted
-    /// (#2820): its switch row stands for them, and its ↺ takes the
-    /// paint and the switch back together, so one leaf cannot be
-    /// reverted alone and land as an edit of the shared look.
+    /// `rows` without those still wearing a staged "Use the shared
+    /// look" (#2820): its switch row stands for them, and its ↺ takes
+    /// the paint and the switch back together. A leaf changed since
+    /// keeps its own row — it is an edit of the shared look.
     static func sharePaintFolded(
         _ rows: [SettingsDiffRow],
         for model: SettingsModel
     ) -> [SettingsDiffRow] {
-        guard case .use(_, let base) = model.lookShare else { return rows }
-        var unpainted = model.config
-        unpainted.settings = ShelfLook.unpicked(
-            model.config.settings,
-            to: base
-        )
+        guard case .use = model.lookShare,
+            let shared = model.core.sharedLook
+        else { return rows }
+        var painted = model.config
+        painted.settings = shared.worn(over: model.config.settings)
+        let apart = SettingsDraftDiff.between(
+            config: model.config,
+            cleanConfig: painted,
+            luaSource: model.luaSource,
+            cleanLuaSource: model.luaSource
+        ).changedSettings
         let keys = Set(changed(model.config, model))
-            .subtracting(changed(unpainted, model))
+            .subtracting(apart)
         return rows.filter { !foldsIntoLook($0, keys) }
     }
 

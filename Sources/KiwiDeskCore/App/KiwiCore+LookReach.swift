@@ -30,20 +30,13 @@ extension KiwiCore {
     /// re-resolved, never the whole profile re-applied
     /// (`LookReachTests`). `sharing` names a profile going shared
     /// and the look it is shown wearing, which lands as the shared
-    /// one first, reaching every follower (#2820); it is written
-    /// ahead of the rest, so another profile going shared in the
-    /// same Save wears that look.
+    /// one, reaching every follower (#2820).
     /// Call it before any `gui.json` write of the same Save.
     public func saveLookReach(
         _ follows: [String: Bool],
         sharing: (profile: String, look: LookBody)? = nil
     ) throws {
-        let first = sharing?.profile
-        let order = follows.sorted {
-            ($0.key == first ? 0 : 1, $0.key)
-                < ($1.key == first ? 0 : 1, $1.key)
-        }
-        for (name, follow) in order {
+        for (name, follow) in follows.sorted(by: { $0.key < $1.key }) {
             let look: LookReference? = follow ? nil : .own
             var profile = try profiles.read(name: name)
             guard profile.look != look else { continue }

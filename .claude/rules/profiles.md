@@ -1816,8 +1816,8 @@ obligations (#1752, #2820).** A Save writes each profile's Shared
 or own switch through the one `KiwiCore.saveLookReach`: only a
 switch that changed is written, a profile going own freezes the
 look it wears into its file, a profile staged to make its look
-the shared one lands it through `landSharedLook` before any other
-switch (its `sharing` argument), the writes are non-adopting, and
+the shared one lands it through `landSharedLook` (its `sharing`
+argument), the writes are non-adopting, and
 it runs before any `gui.json` write of the same Save
 (`LookReachTests`). A follower's look itself is
 the shared one, so a write of it lands in `gui.json` through the

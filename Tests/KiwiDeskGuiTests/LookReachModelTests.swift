@@ -105,6 +105,22 @@ struct LookReachModelTests {
         #expect(model.core.sharedLook == shared)
     }
 
+    /// A look edit made after Use is an edit of the shared look: it
+    /// keeps its row and the Save keeps it.
+    @Test("an edit after Use survives the Save's repaint")
+    func editAfterUseSurvives() throws {
+        let model = try model()
+        model.core.crossWith(LookBody(of: TilingSettings()))
+        model.lookReachStored["Home"] = false
+        model.config.settings.kiwishelf.fillColor = "#0A0B0C"
+        model.cleanConfig = model.config
+        model.stageLookSwitch("Home", .use)
+        model.config.settings.kiwishelf.fillColor = "#0A0B0E"
+        #expect(SettingsDiffRowSource.rows(for: model).count == 2)
+        #expect(model.saveLookReach())
+        #expect(model.config.settings.kiwishelf.fillColor == "#0A0B0E")
+    }
+
     @Test("Make this the shared look stages the source and its row")
     func makeStagesTheSource() throws {
         let model = try model()

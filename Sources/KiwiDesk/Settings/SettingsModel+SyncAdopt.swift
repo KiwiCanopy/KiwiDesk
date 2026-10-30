@@ -132,12 +132,17 @@ extension SettingsModel {
         }
         reachEdits = reach
         lookReachEdits = look
-        // A "Use" paint was taken against the draft the adopt
-        // replaced, and a "Make" for a profile now stored shared has
-        // nothing to switch, so either drops with its edit (#2820).
+        // A staged switch stays only for a profile still stored with
+        // its own look, a "Use" re-based on that look as just read;
+        // otherwise there is nothing to switch (#2820).
         switch share {
         case .make(let profile) where lookReachStored[profile] == false:
             lookShare = share
+        case .use(let profile, _) where lookReachStored[profile] == false:
+            lookShare = .use(
+                profile: profile,
+                paintBase: cleanConfig.settings
+            )
         case .make(let profile), .use(let profile, _):
             lookReachEdits[profile] = nil
         case nil:

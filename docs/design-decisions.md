@@ -17850,10 +17850,11 @@ offers to write at once — the one write that does not wait for
 the Save. The prompt is a sheet with commits by this ruling (gui.md
 ▸ A picture whose object is NOT the draft): it shows both looks,
 which a dialog cannot. "Use" paints the draft so the page shows
-what the Save keeps, and its leaves fold into the switch's one
-pill row, since one leaf taken back alone would land at the Save
-as an edit of the shared look; the Save paints the shared look
-again as it is then. The switch is written before the profile or
+what the Save keeps; the leaves still wearing it fold into the
+switch's one pill row, and the Save paints the shared look, as it
+is then, again on any leaf taken back to the own look, which would
+otherwise land as an edit of the shared look. A leaf changed since
+is such an edit, and stays. The switch is written before the profile or
 `gui.json` write it guards, because a profile going own keeps the
 look it wore before the Save's edits and a profile going shared
 must not have the old shared look painted over the draft's

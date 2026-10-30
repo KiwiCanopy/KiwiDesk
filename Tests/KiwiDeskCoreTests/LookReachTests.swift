@@ -139,24 +139,6 @@ struct LookReachTests {
         #expect(core.tiler.settings.kiwishelf.fillColor == odd)
     }
 
-    /// The sharing profile lands first, so another profile going
-    /// shared in the same Save wears its look (profiles.md).
-    @Test("the sharing profile lands before every other switch")
-    func sharingLandsFirst() throws {
-        let core = try crossedCore()
-        try core.profiles.save(profile("Zed", fill: odd))
-        try core.profiles.save(profile("Abe", fill: "#0D0E0F"))
-        let shown = LookBody(
-            of: try core.profiles.read(name: "Zed").settings
-        )
-        try core.saveLookReach(
-            ["Abe": true, "Zed": true],
-            sharing: ("Zed", shown)
-        )
-        let abe = try core.profiles.read(name: "Abe")
-        #expect(abe.settings.kiwishelf.fillColor == odd)
-    }
-
     @Test("without sharing, going shared takes the shared look")
     func useKeepsTheSharedLook() throws {
         let core = try crossedCore()

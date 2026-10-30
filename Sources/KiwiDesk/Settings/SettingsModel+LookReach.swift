@@ -110,22 +110,48 @@ extension SettingsModel {
         )
     }
 
-    /// A staged "Use the shared look" painted again, from the shared
-    /// look as it is at the Save: the paint can have been taken off
-    /// a leaf at a time, or the shared look moved since, and the
-    /// draft's look is what the Save doors land (#2820).
+    /// A staged "Use the shared look" painted again on the leaves
+    /// taken back to the own look since — a setting's ↺, Simple's
+    /// look row — from the shared look as it is at the Save, so no
+    /// own value lands as an edit of the shared look (#2820). A leaf
+    /// the user changed since is an edit of the shared look, and
+    /// stays.
     private func repaintSharedLook() {
-        guard case .use = lookShare, let shared = core.sharedLook else {
-            return
+        guard case .use(_, let base) = lookShare,
+            let shared = core.sharedLook
+        else { return }
+        let worn = shared.worn(over: config.settings)
+        let now = LookBody(of: config.settings)
+        let was = LookBody(of: base)
+        let want = LookBody(of: worn)
+        let style = want.style.filter {
+            now.style[$0.key] == was.style[$0.key]
+                && now.style[$0.key] != $0.value
         }
-        config.settings = shared.worn(over: config.settings)
+        let colors = want.colors.filter {
+            now.colors[$0.key] == was.colors[$0.key]
+                && now.colors[$0.key] != $0.value
+        }
+        ShelfLook(name: "", style: style, colors: colors)
+            .apply(to: &config.settings)
+        if now.origin == was.origin {
+            config.settings.lookOrigin = worn.lookOrigin
+        }
     }
 
     /// The profile staged to make its look the shared one, with the
-    /// look the page shows it wearing — what the Save lands.
+    /// look the page shows it wearing — over live as it is now on
+    /// the loaded profile's Save, as that Save rebases (#2262).
     private var sharing: (profile: String, look: LookBody)? {
         guard case .make(let profile) = lookShare else { return nil }
-        return (profile, LookBody(of: config.settings))
+        let shown =
+            editingProfile == nil
+            ? config.settings.rebased(
+                from: cleanConfig.settings,
+                onto: core.tiler.settings
+            )
+            : config.settings
+        return (profile, LookBody(of: shown))
     }
 
     /// The save pill's rows for the staged switches, one per profile
