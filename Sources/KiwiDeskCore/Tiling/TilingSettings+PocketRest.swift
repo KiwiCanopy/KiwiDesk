@@ -61,7 +61,7 @@ extension TilingSettings {
         guard reserves else { return nil }
         switch pocketRest(in: mode, on: screen) {
         case .section: return nil
-        case .handle: return (pocketEdge, kiwishelf.pocketHandleReservation)
+        case .handle: return (pocketEdge, kiwishelf.hiddenReservation)
         case .mark: return (pocketEdge, kiwishelf.reservation)
         }
     }

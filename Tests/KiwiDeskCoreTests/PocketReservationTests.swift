@@ -43,7 +43,7 @@ struct PocketReservationTests {
         #expect(hidden.pocketRest(in: .bsp, on: nil) == .handle)
         #expect(
             reserved(hidden, at: .top)
-                == hidden.kiwishelf.pocketHandleReservation
+                == hidden.kiwishelf.hiddenReservation
         )
         // No pocket at rest: a Hidden edge reserves nothing.
         #expect(reserved(hidden, at: .top, resting: false) == 0)
@@ -56,16 +56,11 @@ struct PocketReservationTests {
     func autoEdgeTakesTheDeeper() {
         let auto = settings(space: .auto, pocket: .top)
         let shelf = auto.kiwishelf
-        // The handle outreaches the dots, so the max is observable.
-        #expect(PocketMarkGeometry.handleDepth > KiwiShelf.hiddenDepth)
-        #expect(
-            shelf.pocketHandleReservation
-                == shelf.outerMargin + PocketMarkGeometry.handleDepth
-                + shelf.innerMargin
-        )
+        // The kiwi handle rests as deep as the bars' handles (#2784).
+        #expect(PocketMarkGeometry.handleDepth == KiwiShelf.hiddenDepth)
         #expect(
             reserved(auto, at: .top)
-                == max(shelf.pocketHandleReservation, shelf.hiddenReservation)
+                == max(shelf.hiddenReservation, shelf.hiddenReservation)
         )
         #expect(
             reserved(auto, at: .top, resting: false)
@@ -91,7 +86,7 @@ struct PocketReservationTests {
         #expect(auto.pocketRest(in: .bsp, on: nil) == .handle)
         #expect(
             reserved(auto, at: .bottom)
-                == auto.kiwishelf.pocketHandleReservation
+                == auto.kiwishelf.hiddenReservation
         )
         // The Space Bar's reserve off frees it, an App Bar this
         // layout does not host holding nothing.

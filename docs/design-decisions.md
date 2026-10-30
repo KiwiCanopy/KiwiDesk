@@ -6213,7 +6213,8 @@ line: the kiwis alone, looking out from behind a tab, the pocket
 out of sight, one outer margin in from the edge as the bars'
 handles sit (owner, device 2026-10-29). It rests 11 pt deep, the
 6 pt tab and 5 pt of kiwi — a whole point, so it lands on a pixel
-at 1x and 2x — and its edge keeps its strip (#2784, the
+at 1x and 2x — as the bars' handles do, so a row of them reads as
+one (owner, 2026-10-30); its edge keeps its strip (#2784, the
 *Amended* under App Bar ▸ *A shelf can hide*). On an edge no bar
 sits on, the pocket follows the bars' Show, the more present of
 the two: under Always the whole bare mark stands at rest, a
@@ -16167,8 +16168,12 @@ outer margin, the handle's depth and the inner margin — so "a
 `hidden` edge reserves nothing" now holds for a `hidden` edge
 with no handle. Under Several windows the handle stands there for
 good, as permanent as the dots, and windows tiled flush beneath
-it lost a strip of their edge and its clicks. On an `auto` edge
-the deeper of the dots and the handle wins. A handle that stands
+it lost a strip of their edge and its clicks. Every handle rests
+11 pt deep since (owner, 2026-10-30): with the pocket held under
+Several windows by default and on the Space Bar's edge, that edge
+paid for the handle's depth already, so the dots and the line
+taking it cost almost nothing more and keep one row. A handle that
+stands
 only for a drag or a put-in or take-out reserves nothing, so
 pocketing never retiles the Space, and the bars' `reserve` switch
 on that edge still turns the strip off.

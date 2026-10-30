@@ -835,9 +835,11 @@ pocket rides every motion the shelf plays. Obligations:
   only through `shelfReservation(in:on:pocketAtRest:)`, an edge
   reserving the deepest strip it is asked for
   (`ShelfReservation.depth(of:)`).
-  The handle's rest depth is the one `PocketMarkGeometry.handleDepth`,
-  which the reservation reads too (`PocketReservationTests`,
-  `PocketReservationCoreTests` ▸ `wholeFollowsTheRest`).
+  Every edge handle — the dots, the line and the kiwis — rests the
+  one `KiwiShelf.hiddenDepth` deep, which the reservation reads
+  too, never a depth of its own (`PocketReservationTests` ▸
+  `autoEdgeTakesTheDeeper`, `PocketReservationCoreTests` ▸
+  `wholeFollowsTheRest`).
 - **An app-wide write that moves `shelfReservations` owes a pass,
   and one that moves none a repaint** — the capacity is the first
   input to the bounds no bar write carries: it reaches them through

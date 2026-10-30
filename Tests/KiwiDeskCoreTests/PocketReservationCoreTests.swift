@@ -56,7 +56,7 @@ struct PocketReservationCoreTests {
         let after = core.tiler.layoutBounds(on: screen, for: space)
         #expect(
             before.height - after.height
-                == core.tiler.settings.kiwishelf.pocketHandleReservation
+                == core.tiler.settings.kiwishelf.hiddenReservation
         )
         #expect(passes(meter) == 1)
     }
