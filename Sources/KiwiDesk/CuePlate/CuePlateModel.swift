@@ -93,22 +93,23 @@ final class CuePlateModel: ObservableObject {
         }
     }
 
-    /// The spoken cue: "Desktop 2 of 4", "Desktop 4, 2 of 3" where
-    /// the screen's own count starts past 1, and the profile a
+    /// The spoken cue: "Desktop 2 of 4", "Desktop 1 of 3 on DELL
+    /// U2723" with more than one screen (#2792), and the profile a
     /// binding loaded after it.
     static func spoken(_ cue: DesktopSwitchCue) -> String {
         let desktop =
-            cue.number == cue.position
-            ? L(
+            cue.screen.map {
+                L(
+                    "desktop_cue.ax.screen",
+                    "Desktop %1$d of %2$d on %3$@",
+                    cue.position,
+                    cue.count,
+                    $0.displayName
+                )
+            }
+            ?? L(
                 "desktop_cue.ax.same",
                 "Desktop %1$d of %2$d",
-                cue.number,
-                cue.count
-            )
-            : L(
-                "desktop_cue.ax",
-                "Desktop %1$d, %2$d of %3$d",
-                cue.number,
                 cue.position,
                 cue.count
             )

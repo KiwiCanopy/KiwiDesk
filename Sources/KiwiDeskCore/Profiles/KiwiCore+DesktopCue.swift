@@ -29,10 +29,12 @@ extension KiwiCore {
         loadedProfile: String?
     ) {
         guard let owed = desktopCue.owed else { return }
+        let display = cueDisplay(owed.displayUUID, in: snapshot)
         let verdict = DesktopCueLedger.verdict(
             for: owed,
             in: snapshot,
-            display: cueDisplay(owed.displayUUID, in: snapshot),
+            display: display,
+            screen: display.flatMap(screenLabel),
             loadedProfile: loadedProfile,
             now: wallClock()
         )

@@ -18,6 +18,13 @@ struct DesktopRow: Hashable {
     /// of its keys (#1436) — resolved ONCE here, so the card and
     /// the census read one answer.
     let binding: DesktopBinding?
+    /// The number the row draws: its number on its own screen
+    /// (#2792), nil where `number` stands — a dormant row's last
+    /// seen number, or a reading that named none.
+    var screenNumber: Int? = nil
+
+    /// The number a label draws.
+    var shownNumber: Int { screenNumber ?? number }
 }
 
 /// Which binding a Desktops-card row edits (#1436): the profile
@@ -142,6 +149,7 @@ struct ProfilesFamilyRows {
         keys: [Int: DesktopKey],
         present: Set<DesktopKey>,
         screens: [DesktopKey: String],
+        screenNumbers: [DesktopKey: Int] = [:],
         bindings: [DesktopKey: DesktopBinding]
     ) -> [DesktopRow] {
         // A Desktop is BOUND under either of its keys — its
@@ -163,7 +171,8 @@ struct ProfilesFamilyRows {
                     number: number,
                     isDormant: false,
                     screen: screens[key] ?? record?.screen,
-                    binding: record
+                    binding: record,
+                    screenNumber: screenNumbers[key]
                 )
             }
         }
