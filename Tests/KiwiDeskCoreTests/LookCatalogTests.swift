@@ -77,9 +77,9 @@ struct LookCatalogTests {
         }
     }
 
-    /// The pocket rides the Space Bar, the bar that stays in view
-    /// (owner, 2026-10-30): Glass through the starter, every other
-    /// look through its own key or Glass's.
+    /// The pocket rides the Space Bar, the menu bar (owner,
+    /// 2026-10-30): Glass through the starter, every other look
+    /// through its own key or Glass's.
     @Test("each look's pocket sits on its Space Bar's edge")
     func pocketRidesTheSpaceBar() {
         for look in bundled {
