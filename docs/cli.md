@@ -490,10 +490,9 @@ several windows, kept on every screen
 ([`pocket.set_capacity`](lua-reference.md#pocketset_capacity)).
 :::
 
-
 :::unreleased
 `kiwishelf.set_reading_contrast 1–4.5` (default `2.2`) sets the
-contrast text keeps where the Fill fades on KiwiHub, the plates
+contrast text keeps where the fill fades on KiwiHub, the plates
 and the peek; `1` leaves the full fade
 ([`kiwishelf.set_reading_contrast`](lua-reference.md#kiwishelfset_reading_contrast)).
 :::

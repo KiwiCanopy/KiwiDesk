@@ -7,9 +7,9 @@ import AppKit
 /// black wallpaper.
 extension KiwiShelf {
     /// Default contrast a reading surface's worst ink holds at the
-    /// fade's far end (`readingContrast`). Equal to `idleInkFloor`
-    /// today, never an alias: that floor guards dimmed idle ink on
-    /// a bar. Measured 2026-10-30: at 1.5 the tinted default look
+    /// fade's far end (`readingContrast`). Never an alias of
+    /// `idleInkFloor`: that floor guards dimmed idle ink on a bar.
+    /// Measured 2026-10-30: at 1.5 the tinted default look
     /// with macOS's Liquid Glass slider at its minimum failed over
     /// a white window (model ~1.9:1). Retune on real glass over
     /// white AND black, never from the model alone.

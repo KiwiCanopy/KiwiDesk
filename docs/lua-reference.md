@@ -2735,6 +2735,11 @@ reading, at a higher floor while macOS's Increase contrast is on.
 No effect while the glass is off or the fill has no color.
 Stored as `kiwishelf.fill_fade`.
 
+:::unreleased
+Where that fade stops is
+[`set_reading_contrast`](#kiwishelfset_reading_contrast).
+:::
+
 The GUI twin is **Fill fade** under the **Liquid Glass** switch
 on Looks &amp; Animations, reading **Off** at `0`; it is hidden
 below macOS 26 and greys while glass is off or stood down, or
@@ -2797,8 +2802,10 @@ dimmest text at this ratio over a white or a black window. `1`
 leaves the full fade. A ratio the fill cannot reach draws it
 flat, with no fade. While macOS's Increase contrast is on the
 floor is at least `3`, which draws the default fill flat. No
-effect while the glass is off or the fill has no color. Stored
-as `kiwishelf.reading_contrast`.
+effect while the glass is off or the fill has no color, nor on
+KiwiHub and the plates while
+[`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
+off. Stored as `kiwishelf.reading_contrast`.
 
 Settings has no row for it. A look carries it beside the fill.
 

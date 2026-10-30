@@ -127,10 +127,12 @@ struct PeekInkContrastTests {
             let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
             let share = max(GlassTint.farShare(fade: 100), fill.minShare)
             let ground = shelf.fill(cappedAt: anchor * share)
+            var missed = false
             for (ink, layer) in shelf.readingInks {
                 let value = try #require(
                     shelf.worstContrast(ink, nil, on: ground, beneath: layer)
                 )
+                if value < floor - 0.01 { missed = true }
                 // Where the Fill's own anchor cannot hold it, the
                 // floor is the whole anchor and nothing fades.
                 #expect(
@@ -139,10 +141,10 @@ struct PeekInkContrastTests {
                 )
             }
             // A floor is a net, not a lift: a share that already
-            // holds it is left to the fade. Increase Contrast may
-            // paint flat (owner, 2026-10-30).
+            // holds it is left to the fade. Only an anchor that
+            // misses the increased floor paints flat (2026-10-30).
             #expect(
-                increaseContrast || fill.minShare < 1,
+                fill.minShare < 1 || (increaseContrast && missed),
                 "\(palette.name)"
             )
         }

@@ -18456,33 +18456,13 @@ grounds. 1.4:1 was okay, 1.5:1 readable everywhere, and 1.6:1 a
 bit better; `ui-designer` concurred. So the hover peek, the
 overflow mark's list, KiwiHub and the cue plates follow Fill
 fade, but their far end stops at the share that keeps their
-worst ink at a floor over white or black
+worst ink at 1.5:1 over white or black
 (`KiwiShelf.readingInkFloor`). That share is computed per Fill
-from ColorVision and never stored. The floor was 1.5:1 until
-2026-10-30, when the owner checked the tinted default look on
-device with macOS's Liquid Glass slider at its minimum: over a
-white window its bottom faded to about 1.9:1 for white text,
-which failed. The owner and `ui-designer` raised it to 2.2:1. It
-equals the bars' idle floor (`KiwiShelf.idleInkFloor`) but stays
-its own constant, because the two guard different surfaces and
-a shared number would let a retune of one move the other. The
-owner chose to follow macOS's slider rather than override it.
-Under macOS Increase Contrast the floor is 3.0:1
-(`KiwiShelf.increasedReadingInkFloor`), applied live. With the
-default floor at 2.2 the bars' floor would change nothing there.
-At 3.0 the default look's Fill draws flat: its titles hold
-about 4.6:1, and its hovered row about 2.6:1, the most its
-anchor gives. Where a Fill's anchor cannot reach the floor, the
-Fill stays flat at its anchor and the guards accept that. A user
-can set the floor with `kiwishelf.set_reading_contrast`, 1 to
-4.5:1. 1 leaves the full fade, and a ratio the Fill cannot reach
-draws it flat. Increase Contrast raises a lower value to 3.0 and
-never lowers a higher one. The verb is Lua-only, under the GUI
-curates, Lua is open rule. A look carries it beside the Fill
-(owner, 2026-10-30), so a look with a light Fill can ship its
-own floor, and switching looks moves the floor with the Fill. The floor is
-silent: no help text names it, because it is a net under the
-slider, not a second control. The model composites over a flat wallpaper and
+from ColorVision and never stored. Under macOS Increase Contrast
+the floor is the bars' own 2.2:1 (`KiwiShelf.idleInkFloor`),
+applied live, and the fade stays on. The floor is silent: no help
+text names it, because it is a net under the slider, not a
+second control. The model composites over a flat wallpaper and
 leaves out the glass's milky layer, so it reads the screen
 pessimistically. Retune the floor on real glass over white and
 black, never from the model alone (`PeekInkContrastTests`,
@@ -18492,6 +18472,38 @@ not lines read top to bottom, and their ink at the anchor edge is
 the cap's job above. A Fill with no colour leaves nothing to
 floor: the peek and the list then draw on plain `.clear` glass
 (▸ Reduce transparency, *A Fill with no colour is one state*).
+
+:::unreleased
+**Amended: the floor is 2.2:1, and 3.0:1 under Increase
+Contrast** (#2569, owner and `ui-designer`, 2026-10-30). The
+owner checked the tinted default look on device with macOS's
+Liquid Glass slider at its minimum: at 1.5:1 the bottom of
+KiwiHub over a white window failed (about 1.9:1 for white text in
+the model). 2.2:1 read fine over white and black. The floor
+equals the bars' idle floor (`KiwiShelf.idleInkFloor`) but stays
+its own constant (`KiwiShelf.readingInkFloor`): the two guard
+different surfaces, and one shared number would let a retune of
+one move the other. KiwiDesk does not read or compensate for
+macOS's Liquid Glass slider; the floor alone holds the text.
+Increase Contrast takes its own floor
+(`KiwiShelf.increasedReadingInkFloor`), because the bars' 2.2:1
+would now change nothing there. At 3.0:1 the default look paints
+flat: its hovered row reaches only about 2.6:1 even unfaded
+(`PeekInkContrastTests`), and a Fill whose anchor cannot reach
+the floor stays whole at its anchor. A user can set the floor
+(`kiwishelf.set_reading_contrast`), and Increase Contrast only
+ever raises it. The verb is Lua-only, under ▸ *the GUI curates,
+Lua is open*. A look carries it beside the Fill (owner,
+2026-10-30), so a look with a light Fill can ship its own floor,
+and picking a look moves the floor with its Fill. Settings names
+no floor: there it stays a net under the slider, not a second
+control. The fades read `KiwiShelf.readingFloor`, never a
+constant. KiwiHub's dividers (▸ Shortcuts, *Tint KiwiHub and
+plates*) are measured against the default floor: it now holds the tertiary
+ink at 2.2:1, so the 1.15:1 and 1.5:1 divider floors hold with
+room to spare, and a user floor below the default is outside that
+guard (`PanelDividerContrastTests`).
+:::
 
 The finish is ON by default on every surface (owner ruling
 2026-09-10: the bars are the app's face, and a fresh install or a
