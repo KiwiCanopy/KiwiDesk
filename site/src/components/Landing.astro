@@ -28,6 +28,7 @@ import { Icon } from "astro-icon/components";
 import ThemeHead from "./ThemeHead.astro";
 import FaviconLinks from "./FaviconLinks.astro";
 import PhRankPill from "./PhRankPill.astro";
+import LooksTeaser from "./LooksTeaser.astro";
 import logoMark from "../assets/brand/logo.svg";
 import kiwiMark from "../assets/brand/kiwi-mark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
@@ -1053,6 +1054,9 @@ const jsonLd = [
     </section>
     )}
 
+    {/* ============ Looks teaser (Simple only) ============ */}
+    {isSimple && <LooksTeaser t={t} lang={lang} mode="simple" />}
+
     {/* ============ Maker quote (Simple only) ============ */}
     {isSimple && (
     <section class="simple-only" id="maker-quote-simple">
@@ -1180,6 +1184,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
       </div>
     </section>
     )}
+
+    {/* ============ Looks teaser (Nerd only) ============ */}
+    {isDev && <LooksTeaser t={t} lang={lang} mode="dev" />}
 
     {/* ============ Maker quote (Nerd only) ==============
          Sits AFTER the Lua and CLI sections rather than between

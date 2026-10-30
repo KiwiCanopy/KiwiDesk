@@ -23,6 +23,7 @@ import {
   recentOrder,
   popularOrder,
   wasUpdated,
+  lookAnchor,
   mainAction,
   needsNewerApp,
   shortCount,
@@ -120,7 +121,7 @@ const haystack = (l: Look): string =>
  * prefixed so no look id collides with the page's own, and suffixed
  * after `_`, which a look id cannot hold, so none collides with
  * another look's. */
-const anchor = (id: string): string => `look-${id}`;
+const anchor = lookAnchor;
 const titleId = (id: string): string => `look-${id}_title`;
 const cardId = (id: string): string => `look-${id}_card`;
 

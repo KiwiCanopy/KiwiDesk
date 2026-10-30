@@ -577,5 +577,12 @@
   "looks_license": "Every look here is shared under {cc}CC BY 4.0{/cc}: use it freely, and credit its author when you pass it on.",
   "looks_report": "Report this look",
   "looks_back": "All looks",
-  "looks_footer": "Looks are contributed through {repo} and shared under {cc}CC BY 4.0{/cc}."
+  "looks_footer": "Looks are contributed through {repo} and shared under {cc}CC BY 4.0{/cc}.",
+  "looks_teaser_title_simple": "Give your desk a fresh look",
+  "looks_teaser_lead_simple": "A look sets the colors, bars and focus border KiwiDesk draws. Pick one other people made and add it in a click, or share your own.",
+  "looks_teaser_title_dev": "Your look is a JSON file",
+  "looks_teaser_lead_dev": "Every look is a JSON file in a public GitHub repo, shared under CC BY 4.0. A <code>kiwidesk://</code> link adds one to the app, and <code>kiwidesk preview</code> renders yours as a card before you share it.",
+  "looks_teaser_browse": "Browse looks",
+  "looks_teaser_repo": "View the repo",
+  "looks_teaser_code_aria": "Part of a look file"
 }

@@ -1706,6 +1706,65 @@ def check_looks_rendered(dist: pathlib.Path) -> None:
     print(f"looks: {drawn} card(s) drawn across {len(pages)} page(s)")
 
 
+def check_looks_teaser(dist: pathlib.Path) -> None:
+    """Every landing page draws the looks teaser (#1740).
+
+    `LooksTeaser.astro` draws no section when the looks read fails,
+    like the voices, so this is its watcher: each landing must
+    carry `section#looks` with at least one card, every card must
+    land on a detail section its locale's /looks page builds, and
+    the Nerd page must quote a look file. Its subject is the
+    teaser's own markup, not the gallery's, so an emptied teaser
+    reds here even while /looks still draws.
+    """
+    section = re.compile(
+        r'<section\b[^>]*\bid="looks"[^>]*>(.*?)</section>', re.S
+    )
+    card = re.compile(
+        r'<a\b[^>]*\bclass="[^"]*\blt-card\b[^"]*"[^>]*>'
+    )
+    href = re.compile(r'\bhref="([^"#]*)#([^"]+)"')
+    drawn = 0
+    for locale in ("", "de", "ja"):
+        looks_page = dist / locale / LOOKS_PAGE
+        details = (
+            set(re.findall(r'<article\b[^>]*\bid="([^"]+)"',
+                           looks_page.read_text()))
+            if looks_page.exists() else set()
+        )
+        for landing in LANDINGS:
+            page = dist / locale / landing
+            where = page.relative_to(dist)
+            if not page.exists():
+                fail(f"landing page {where} was not built")
+            match = section.search(page.read_text())
+            if not match:
+                fail(
+                    f"{where} draws no looks teaser. The build's read of "
+                    "the KiwiDesk-Looks index failed or offered no look; "
+                    "its `[looks]` warning in the build log says why."
+                )
+            cards = card.findall(match.group(1))
+            if not cards:
+                fail(f"{where}: the looks teaser draws no card")
+            for tag in cards:
+                link = href.search(tag)
+                want = "/" + (f"{locale}/" if locale else "") + "looks/"
+                if not link or link.group(1) != want:
+                    fail(f"{where}: a teaser card does not link {want}: "
+                         f"{tag[:120]}")
+                if link.group(2) not in details:
+                    fail(f"{where}: teaser card #{link.group(2)} has no "
+                         f"detail section on {want}")
+            if landing.startswith("nerd/") and (
+                "data-look-excerpt" not in match.group(1)
+            ):
+                fail(f"{where}: the looks teaser quotes no look file")
+            drawn += len(cards)
+    print(f"looks teaser: {drawn} card(s) across "
+          f"{3 * len(LANDINGS)} landing page(s)")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1734,6 +1793,7 @@ def main() -> None:
     check_no_sanity_in_dist(dist)
     check_voices_rendered(dist)
     check_looks_rendered(dist)
+    check_looks_teaser(dist)
 
 
 if __name__ == "__main__":

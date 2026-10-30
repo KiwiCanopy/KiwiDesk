@@ -2,7 +2,7 @@
  * The looks gallery (#1740), read ONCE per build from the public
  * `KiwiCanopy/KiwiDesk-Looks` repo: its generated `index.json`,
  * then each look's own file for the colors the preview sketch
- * draws. Build time, never the browser, like `stars.ts` and
+ * draws and the lines the Nerd landing quotes. Build time, never the browser, like `stars.ts` and
  * `voices.ts`: the CSP (`public/_headers`) and the privacy policy
  * promise no third-party request from a visitor's page, so a
  * look's image goes through astro:assets (`image.remotePatterns`)
@@ -101,7 +101,28 @@ export interface Look {
   downloads: number;
   downloadUrl: string;
   sketch: Sketch | null;
+  /** The look file's path in the repo, as the index names it. */
+  file: string;
+  /** A few lines of the look file, for the Nerd landing's panel. */
+  excerpt: Excerpt | null;
 }
+
+/** Lines quoted from a look file: its format, name, and the
+ * `EXCERPT_KEYS` it carries, each value already validated. */
+export interface Excerpt {
+  format: number;
+  name: string;
+  colors: [string, string][];
+  style: [string, number | string | boolean][];
+}
+const EXCERPT_KEYS = {
+  colors: [
+    "border.focused_color",
+    "kiwishelf.fill_color",
+    "kiwishelf.active_item_color",
+  ],
+  style: ["border.width", "kiwishelf.corner_roundness", "space_bar.edge"],
+};
 
 /**
  * The main button: one place for its label key and target. It hands
@@ -218,6 +239,8 @@ function toLook(row: any): { look: Look; file: string } | null {
     downloads: count(row?.downloads),
     downloadUrl,
     sketch: null,
+    file,
+    excerpt: null,
   };
   return { look, file };
 }
@@ -228,38 +251,66 @@ async function get(url: string): Promise<any> {
   return res.json();
 }
 
-/** The sketch values of one look file, or `null` when unreadable. */
-async function readSketch(look: Look, file: string): Promise<Sketch | null> {
+/** A look file's quotable lines, or `null` when it has none. */
+function toExcerpt(doc: any): Excerpt | null {
+  const format = count(doc?.format);
+  const name = text(doc?.look?.name);
+  if (!format || !name) return null;
+  const colors = EXCERPT_KEYS.colors
+    .map((k): [string, string | null] => [k, color(doc.look.colors?.[k])])
+    .filter((e): e is [string, string] => e[1] !== null);
+  const style = EXCERPT_KEYS.style
+    .map((k): [string, unknown] => [k, doc.look.style?.[k]])
+    .filter((e): e is [string, number | string | boolean] =>
+      (typeof e[1] === "number" && Number.isFinite(e[1])) ||
+      typeof e[1] === "boolean" ||
+      (typeof e[1] === "string" && /^[a-z_]{1,24}$/.test(e[1])),
+    );
+  return colors.length > 0 && style.length > 0
+    ? { format, name, colors, style }
+    : null;
+}
+
+/** One look file's sketch values and excerpt; `null`s when unreadable. */
+async function readFile(
+  look: Look,
+  file: string,
+): Promise<{ sketch: Sketch | null; excerpt: Excerpt | null }> {
   try {
     const doc = await get(RAW + file.replace(/^\/+/, ""));
-    const colors = doc?.look?.colors ?? {};
-    const style = doc?.look?.style ?? {};
-    const spaceEdge = edge(style["space_bar.edge"]);
-    const appEdge = edge(style["app_bar.edge"]);
-    const width = Number(style["border.width"]);
-    const round = Number(style["kiwishelf.corner_roundness"]);
-    return {
-      fill: color(colors["kiwishelf.fill_color"]),
-      item: color(colors["kiwishelf.item_color"]),
-      active: color(colors["kiwishelf.active_item_color"]),
-      ring: color(colors["border.focused_color"]),
-      ringWidth: Number.isFinite(width) ? Math.min(Math.max(width, 0), 12) : 3,
-      glow: style["border.glow"] === true,
-      square: style["border.corner_style"] === "square",
-      glass: style["kiwishelf.liquid_glass"] === true,
-      roundness: Number.isFinite(round)
-        ? Math.min(Math.max(round, 0), 100) / 100
-        : 0.5,
-      edges: spaceEdge === appEdge ? [spaceEdge] : [spaceEdge, appEdge],
-      boxed: style["kiwishelf.background_style"] === "boxed",
-      hug: style["kiwishelf.background_fit"] === "hug",
-      centered: style["kiwishelf.alignment"] !== "start",
-      font: text(style["kiwishelf.font_family"]),
-    };
+    return { sketch: toSketch(doc), excerpt: toExcerpt(doc) };
   } catch (error) {
     console.warn(`[looks] no sketch for ${look.id}: ${error}`);
-    return null;
+    return { sketch: null, excerpt: null };
   }
+}
+
+/** The sketch values of a look file. */
+function toSketch(doc: any): Sketch {
+  const colors = doc?.look?.colors ?? {};
+  const style = doc?.look?.style ?? {};
+  const spaceEdge = edge(style["space_bar.edge"]);
+  const appEdge = edge(style["app_bar.edge"]);
+  const width = Number(style["border.width"]);
+  const round = Number(style["kiwishelf.corner_roundness"]);
+  return {
+    fill: color(colors["kiwishelf.fill_color"]),
+    item: color(colors["kiwishelf.item_color"]),
+    active: color(colors["kiwishelf.active_item_color"]),
+    ring: color(colors["border.focused_color"]),
+    ringWidth: Number.isFinite(width) ? Math.min(Math.max(width, 0), 12) : 3,
+    glow: style["border.glow"] === true,
+    square: style["border.corner_style"] === "square",
+    glass: style["kiwishelf.liquid_glass"] === true,
+    roundness: Number.isFinite(round)
+      ? Math.min(Math.max(round, 0), 100) / 100
+      : 0.5,
+    edges: spaceEdge === appEdge ? [spaceEdge] : [spaceEdge, appEdge],
+    boxed: style["kiwishelf.background_style"] === "boxed",
+    hug: style["kiwishelf.background_fit"] === "hug",
+    centered: style["kiwishelf.alignment"] !== "start",
+    font: text(style["kiwishelf.font_family"]),
+  };
 }
 
 /** The pixel size of a PNG, or why `bytes` is not one we accept.
@@ -333,11 +384,11 @@ async function read(): Promise<Look[]> {
     if (valid.length === 0) return none("the index lists no look");
     return await Promise.all(
       valid.map(async ({ look, file }) => {
-        const [shown, sketch] = await Promise.all([
+        const [shown, read] = await Promise.all([
           withServedImage(look),
-          readSketch(look, file),
+          readFile(look, file),
         ]);
-        return { ...shown, sketch };
+        return { ...shown, ...read };
       }),
     );
   } catch (error) {
@@ -369,6 +420,9 @@ export const popularOrder = (list: Look[]): Look[] =>
       b.downloads - a.downloads ||
       a.name.localeCompare(b.name),
   );
+
+/** The id of a look's detail section on /looks/. */
+export const lookAnchor = (id: string): string => `look-${id}`;
 
 /** Whether Recent labels the look "Updated" rather than "New". */
 export const wasUpdated = (look: Look): boolean =>

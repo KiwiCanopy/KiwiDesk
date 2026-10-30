@@ -577,5 +577,12 @@
   "looks_license": "ここにあるデザインはすべて {cc}CC BY 4.0{/cc} で共有されています。自由に使えますが、ほかの人に渡すときは作者を明記してください。",
   "looks_report": "このデザインを報告",
   "looks_back": "すべてのデザイン",
-  "looks_footer": "デザインは {repo} を通じて寄せられ、{cc}CC BY 4.0{/cc} で共有されています。"
+  "looks_footer": "デザインは {repo} を通じて寄せられ、{cc}CC BY 4.0{/cc} で共有されています。",
+  "looks_teaser_title_simple": "ワンクリックで、新しいデザインに。",
+  "looks_teaser_lead_simple": "デザインとは、KiwiDesk が描く色、バー、フォーカスボーダーのことです。ほかの人が作ったデザインをワンクリックで追加するか、自分のデザインを共有しましょう。",
+  "looks_teaser_title_dev": "デザインは JSON ファイル",
+  "looks_teaser_lead_dev": "どのデザインも、公開 GitHub リポジトリにある JSON ファイルで、CC BY 4.0 で共有されています。<code>kiwidesk://</code> リンクで App に追加でき、<code>kiwidesk preview</code> を使えば、共有する前に自分のデザインをカードとして描画できます。",
+  "looks_teaser_browse": "デザインを見る",
+  "looks_teaser_repo": "リポジトリを見る",
+  "looks_teaser_code_aria": "デザインファイルの一部"
 }
