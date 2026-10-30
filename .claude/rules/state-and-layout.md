@@ -383,7 +383,18 @@ editing here:
   `enterMoveHereSpace` only once its move is dispatched, so a
   refusal switches nothing and the arrival pays in the active
   Space (#2791, `JumpMoveHereScreenTests`); the `move_here` verb
-  has no panel and keeps the focused Space. A Move here on a
+  has no panel and keeps the focused Space. Move here's hop
+  (`hopAwayWindows`' `only:`) may take a window from any screen's
+  Desktop while `gather`'s keeps its own screen's, and the hop owes
+  its focus with `relocates`, since a landing on another screen —
+  or under one shared Desktop set — is not certain (#2770,
+  `JumpMoveHereCrossScreenTests`). A hop that lands where it was
+  filed owes no filing, so its payment places a float through
+  `reanchorFloat` itself — a ruled exception beside the #492
+  drop-commit, since macOS moved the window with no write of ours
+  and an app may report its pre-move frame — and only for a hop,
+  never a plain Jump's un-minimize (`JumpMoveHereTargetWiringTests`).
+  A Move here on a
   HIDDEN app owes its second debt, `JumpState.owedApp`, to the
   window the unhide brings back focused, and it is paid at that
   app's first HONORED focus REPORT rather than an arrival — ahead

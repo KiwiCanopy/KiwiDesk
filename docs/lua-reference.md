@@ -5999,8 +5999,10 @@ See [Finding a bundle identifier](#finding-a-bundle-identifier).
 on, in the order the Space Bar lists them, after the windows
 already there. Floating windows stay floating and sticky windows
 stay sticky; a window in native full screen keeps its own Space.
-Windows up on another macOS Desktop are moved onto the Desktop
-you are looking at, without switching to theirs — that needs the
+Windows up on another macOS Desktop of the same screen are moved
+onto the Desktop you are looking at, without switching to theirs;
+another screen's Desktops are left alone, unless "Displays have
+separate Spaces" is off and every screen shares them. That needs the
 Desktop bridge; without it they stay where they are. It never
 launches the app: with no window to move, it does nothing and
 reports an error.

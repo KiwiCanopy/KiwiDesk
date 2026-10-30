@@ -50,4 +50,30 @@ struct JumpMoveHereTargetWiringTests {
             )
         }
     }
+
+    /// A Move here hop's float is placed from the frame it reports,
+    /// after the filing and only for a hop: an app may report its
+    /// pre-move frame after macOS carried it, while a plain Jump's
+    /// un-minimize keeps its frame (#2770).
+    @Test("only a hop's payment places the float, after the filing")
+    func paymentPlacesTheHoppedFloat() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/JumpState.swift"
+            )
+        let source = try SourceScan.blankedSource(at: file)
+            .split(whereSeparator: \.isWhitespace).joined()
+        let pay = try #require(source.range(of: "funcpayMoveHereFocus("))
+        let body = String(source[pay.upperBound...])
+        let file2 = try #require(body.range(of: "fileMembership(window,"))
+        let place = try #require(
+            body.range(
+                of: "}elseifowed.hopped,reanchorFloat(window,to:owed.space)"
+            )
+        )
+        let focus = try #require(body.range(of: "focusWindow(window,"))
+        #expect(file2.lowerBound < place.lowerBound)
+        #expect(place.lowerBound < focus.lowerBound)
+        #expect(body.occurrences(of: "reanchorFloat(") == 1)
+    }
 }

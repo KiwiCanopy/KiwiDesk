@@ -17,6 +17,16 @@ public struct DesktopSnapshot: Sendable {
     /// Raw native spaces in this snapshot.
     public let spaces: [NativeSpace]
 
+    /// The one display id every Desktop sits under, nil where the
+    /// Desktops name more than one. With "Displays have separate
+    /// Spaces" off it is the shared managed-display id, which no
+    /// screen's UUID names; a caller tells the two apart by whether
+    /// a screen answers to it.
+    public var soleDisplayKey: String? {
+        let keys = Set(spaces.map(\.displayUUID))
+        return keys.count == 1 ? keys.first : nil
+    }
+
     /// Mission Control number of `space` in this snapshot.
     public func number(of space: SkyLight.SpaceID) -> Int? {
         NativeSpaces.number(of: space, in: spaces)
