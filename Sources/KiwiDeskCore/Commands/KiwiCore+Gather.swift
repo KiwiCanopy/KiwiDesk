@@ -74,17 +74,21 @@ extension KiwiCore {
             }
     }
 
-    /// Moves the app's windows up on another Desktop of `target`'s
-    /// screen onto the Desktop that screen shows, and only once the
-    /// bridge accepted points each one's remembered Space at
-    /// `target`. Another screen's Desktop is left alone: the
-    /// arrival's screen-home net (#1010) would file it there. An
-    /// UNFILED entry — no remembered Space at all — is skipped
-    /// too, since its arrival would take its app rule. Performed
+    /// Moves the app's windows up on another Desktop onto the
+    /// Desktop `target`'s screen shows, and only once the bridge
+    /// accepted points each one's remembered Space at `target`, so
+    /// the arrival files it there. `gather` takes `target`'s screen's
+    /// own Desktops alone — with one shared Desktop set there is no
+    /// screen to keep, so it takes every one: a watched departure
+    /// arrives on the screen its frame is on, a restored filing in
+    /// `target`. `only` narrows the hop to one
+    /// window (#1875's Move here), which may come from any screen;
+    /// its owed focus files it into `target` wherever it lands
+    /// (#2770). An UNFILED entry — no remembered Space at all — is
+    /// skipped, since its arrival would take its app rule. Performed
     /// is not applied (os-private-apis.md): the arrival, or the
     /// reap's reconcile, is the verification. Returns the windows
     /// whose move was dispatched, or nil where the bridge refused.
-    /// `only` narrows the hop to one window (#1875's Bring here).
     func hopAwayWindows(
         bundleID: String,
         into target: SpaceID,
@@ -92,17 +96,17 @@ extension KiwiCore {
     ) -> [WindowID]? {
         guard canDriveDesktops,
             let reach = awayReach(bundleID: bundleID),
-            let uuid = state.workspaces.display(of: target)
-                .flatMap(NativeSpaces.displayUUID(for:))
-                ?? reach.snapshot.mainUUID,
+            let uuid = hopDisplayKey(for: target, in: reach.snapshot),
             let shown = reach.snapshot.currentSpaces[uuid]
         else { return [] }
         let windows = reach.windows.map(\.window).filter { window in
-            (only == nil || window.id == only)
-                && state.rememberedSpaces[window.id] != nil
-                && reach.snapshot.spaces.first {
-                    $0.id == window.nativeSpace
-                }?.displayUUID == uuid
+            guard state.rememberedSpaces[window.id] != nil else {
+                return false
+            }
+            if let only { return window.id == only }
+            return reach.snapshot.spaces.first {
+                $0.id == window.nativeSpace
+            }?.displayUUID == uuid
         }
         guard !windows.isEmpty else { return [] }
         guard WMBridge.moveWindows(windows.map(\.id), to: shown) else {
@@ -129,6 +133,30 @@ extension KiwiCore {
             }
         }
         return windows.map(\.id)
+    }
+
+    /// The snapshot's key for the screen `target` lays out on: its
+    /// own UUID where listed, the main screen's where its screen is
+    /// unknown, and the shared key with "Displays have separate
+    /// Spaces" off (#2770). A tracked screen the reading does not
+    /// list — a topology read mid-reconfigure — refuses rather than
+    /// landing the window on another screen.
+    func hopDisplayKey(
+        for target: SpaceID,
+        in snapshot: DesktopSnapshot
+    ) -> String? {
+        let shared = sharedDesktopKey(in: snapshot)
+        let named = state.workspaces.display(of: target)
+            .flatMap(NativeSpaces.displayUUID(for:))
+        if let named {
+            return snapshot.currentSpaces[named] != nil ? named : shared
+        }
+        if let main = snapshot.mainUUID,
+            snapshot.currentSpaces[main] != nil
+        {
+            return main
+        }
+        return shared
     }
 
     /// The refusal a key press would otherwise meet in silence:
