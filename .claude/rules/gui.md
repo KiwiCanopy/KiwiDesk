@@ -126,7 +126,9 @@ restated `20...80` satisfies on the day it is written.
   through the closures its row hands it (#2324 ruling 14), and
   the sync sheet at Save,
   whose one Save runs through the closure the shell hands it
-  (#2450; a further one is a ruling too). A read-only sheet also
+  (#2450), and the switch-to-Shared prompt, whose answer runs
+  through the closure the Shared look card hands it (#2820; a
+  further one is a ruling too). A read-only sheet also
   answers the keyboard both ways:
   Return on its one dismissal, and Escape, which a
   `Button` cannot carry beside `.defaultAction` so the content

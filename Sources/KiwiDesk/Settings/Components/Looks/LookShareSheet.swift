@@ -51,8 +51,8 @@ struct LookShareSheet: View {
 
     private var question: String {
         L(
-            "looks.share.question",
-            "Use the shared look on %1$@?",
+            "looks.reach.prompt.question",
+            "Use the Shared Look on “%1$@”?",
             request.profile
         )
     }
@@ -60,16 +60,16 @@ struct LookShareSheet: View {
     private var context: String {
         guard !request.users.isEmpty else {
             return L(
-                "looks.share.context_alone",
-                "%1$@ has its own look. No other profile uses the "
-                    + "shared look.",
+                "looks.reach.prompt.context_alone",
+                "“%1$@” has its own look. No other profile uses "
+                    + "the shared look.",
                 request.profile
             )
         }
         return L(
-            "looks.share.context",
-            "%1$@ has its own look. These profiles use the shared "
-                + "look: %2$@",
+            "looks.reach.prompt.context",
+            "“%1$@” has its own look. These profiles use the "
+                + "shared look: %2$@",
             request.profile,
             ListFormatter.localizedString(byJoining: request.users)
         )
@@ -79,11 +79,17 @@ struct LookShareSheet: View {
         HStack(alignment: .top, spacing: 12) {
             picture(
                 request.own,
-                caption: L("looks.share.own_picture", "This profile's look")
+                caption: L(
+                    "looks.reach.prompt.own_picture",
+                    "This profile's look"
+                )
             )
             picture(
                 request.shared,
-                caption: L("looks.share.shared_picture", "Shared look")
+                caption: L(
+                    "looks.reach.prompt.shared_picture",
+                    "Shared look"
+                )
             )
         }
         .accessibilityHidden(true)
@@ -105,8 +111,8 @@ struct LookShareSheet: View {
         if let savedAs = request.savedAs {
             Text(
                 L(
-                    "looks.share.already_saved",
-                    "Already in %1$@ as %2$@.",
+                    "looks.reach.prompt.already_saved",
+                    "Already in %1$@ as “%2$@”.",
                     myLooks,
                     savedAs
                 )
@@ -116,8 +122,8 @@ struct LookShareSheet: View {
         } else {
             Toggle(
                 L(
-                    "looks.share.save_first",
-                    "Save %1$@'s current look to %2$@ first",
+                    "looks.reach.prompt.save_first",
+                    "Save the current look of “%1$@” to %2$@ first",
                     request.profile,
                     myLooks
                 ),
@@ -129,24 +135,20 @@ struct LookShareSheet: View {
 
     private var buttons: some View {
         VStack(alignment: .trailing, spacing: 6) {
-            HStack {
-                Spacer()
-                Button(L("looks.share.cancel", "Cancel")) { dismiss() }
-                    .keyboardShortcut(.cancelAction)
-                    .settingsActionButton()
-                Button(makeTitle) { choose(.makeShared) }
-                    .settingsActionButton()
-                Button(L("looks.share.use", "Use the Shared Look")) {
-                    choose(.useShared)
+            // A long translation stacks the three rather than cut a
+            // title (localization.md ▸ #859).
+            ViewThatFits(in: .horizontal) {
+                HStack {
+                    Spacer()
+                    actions
                 }
-                .keyboardShortcut(.defaultAction)
-                .kiwiProminentButton()
+                VStack(alignment: .trailing, spacing: 6) { actions }
             }
             if !request.users.isEmpty {
                 Text(
                     L(
-                        "looks.share.make_reaches",
-                        "%1$@ also changes %2$@.",
+                        "looks.reach.prompt.make_reaches",
+                        "“%1$@” also changes %2$@.",
                         makeTitle,
                         ListFormatter.localizedString(
                             byJoining: request.users
@@ -159,8 +161,21 @@ struct LookShareSheet: View {
         }
     }
 
+    @ViewBuilder private var actions: some View {
+        Button(L("looks.reach.prompt.cancel", "Cancel")) { dismiss() }
+            .keyboardShortcut(.cancelAction)
+            .settingsActionButton()
+        Button(makeTitle) { choose(.makeShared) }
+            .settingsActionButton()
+        Button(L("looks.reach.prompt.use", "Use the Shared Look")) {
+            choose(.useShared)
+        }
+        .keyboardShortcut(.defaultAction)
+        .kiwiProminentButton()
+    }
+
     private var makeTitle: String {
-        L("looks.share.make", "Make This the Shared Look")
+        L("looks.reach.prompt.make", "Make This the Shared Look")
     }
 
     /// The library section's own title, interpolated (gui.md).

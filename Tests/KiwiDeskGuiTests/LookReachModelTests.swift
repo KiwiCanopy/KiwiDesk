@@ -61,24 +61,59 @@ struct LookReachModelTests {
         model.lookReachStored["Home"] = false
         model.config.settings.kiwishelf.fillColor = "#0A0B0C"
         let before = model.config.settings
-        model.useSharedLook("Home")
+        model.stageLookSwitch("Home", .use)
         #expect(model.lookFollows["Home"] == true)
         let shared = try #require(model.core.sharedLook)
         #expect(shared.isWorn(by: model.config.settings))
-        model.keepOwnLook("Home")
+        model.stageLookSwitch("Home", .own)
         #expect(model.lookReachEdits.isEmpty)
         #expect(model.config.settings == before)
+    }
+
+    /// One painted leaf reverted alone would land as an edit of the
+    /// shared look at the Save, so the paint folds into its row.
+    @Test("a Use paint is one pill row")
+    func usePaintIsOneRow() throws {
+        let model = try model()
+        model.core.crossWith(LookBody(of: TilingSettings()))
+        model.lookReachStored["Home"] = false
+        model.config.settings.kiwishelf.fillColor = "#0A0B0C"
+        model.cleanConfig = model.config
+        model.stageLookSwitch("Home", .use)
+        let rows = SettingsDiffRowSource.rows(for: model)
+        #expect(rows.map(\.label) == ["Home"])
+    }
+
+    /// A paint taken back a leaf at a time (Simple's look row, a
+    /// setting's ↺) would land the own look as the shared one, so
+    /// the Save paints the shared look again.
+    @Test("a Save paints a staged Use again")
+    func saveRepaintsUse() throws {
+        let model = try model()
+        model.core.crossWith(LookBody(of: TilingSettings()))
+        model.lookReachStored["Home"] = false
+        model.config.settings.kiwishelf.fillColor = "#0A0B0C"
+        let own = model.config.settings
+        model.stageLookSwitch("Home", .use)
+        model.config.settings = ShelfLook.unpicked(
+            model.config.settings,
+            to: own
+        )
+        let shared = try #require(model.core.sharedLook)
+        #expect(model.saveLookReach())
+        #expect(shared.isWorn(by: model.config.settings))
+        #expect(model.core.sharedLook == shared)
     }
 
     @Test("Make this the shared look stages the source and its row")
     func makeStagesTheSource() throws {
         let model = try model()
         model.lookReachStored["Home"] = false
-        model.makeSharedLook("Home")
-        #expect(model.lookShare.source == "Home")
+        model.stageLookSwitch("Home", .make)
+        #expect(model.lookShare?.makes("Home") == true)
         #expect(model.lookReachDiffRows().map(\.label) == ["Home"])
-        model.keepOwnLook("Home")
-        #expect(model.lookShare.source == nil)
+        model.stageLookSwitch("Home", .own)
+        #expect(model.lookShare == nil)
         #expect(model.lookReachEdits.isEmpty)
     }
 
@@ -93,11 +128,13 @@ struct LookReachModelTests {
         model.resetLookReach()
         #expect(model.lookReachStored["Home"] == false)
         #expect(model.core.sharedLook != nil)
-        model.makeSharedLook("Home")
+        // The page shows the draft's look, which is what lands.
+        model.config.settings.kiwishelf.fillColor = "#0A0B0D"
+        model.stageLookSwitch("Home", .make)
         #expect(model.saveLookReach())
         #expect(
             model.core.sharedLook?.colors["kiwishelf.fill_color"]
-                == "#0A0B0C"
+                == "#0A0B0D"
         )
         #expect(try model.core.profiles.read(name: "Home").look == nil)
     }

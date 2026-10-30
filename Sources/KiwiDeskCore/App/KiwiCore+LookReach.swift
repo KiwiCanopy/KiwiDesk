@@ -29,32 +29,34 @@ extension KiwiCore {
     /// profile never moves `currentName`; the live screen's look is
     /// re-resolved, never the whole profile re-applied
     /// (`LookReachTests`). `sharing` names a profile going shared
-    /// whose own look becomes the shared one first, reaching every
-    /// follower (#2820); it is written ahead of the rest, so another
-    /// profile going shared in the same Save wears that look.
+    /// and the look it is shown wearing, which lands as the shared
+    /// one first, reaching every follower (#2820); it is written
+    /// ahead of the rest, so another profile going shared in the
+    /// same Save wears that look.
     /// Call it before any `gui.json` write of the same Save.
     public func saveLookReach(
         _ follows: [String: Bool],
-        sharing: String? = nil
+        sharing: (profile: String, look: LookBody)? = nil
     ) throws {
+        let first = sharing?.profile
         let order = follows.sorted {
-            ($0.key == sharing ? 0 : 1, $0.key)
-                < ($1.key == sharing ? 0 : 1, $1.key)
+            ($0.key == first ? 0 : 1, $0.key)
+                < ($1.key == first ? 0 : 1, $1.key)
         }
         for (name, follow) in order {
             let look: LookReference? = follow ? nil : .own
             var profile = try profiles.read(name: name)
             guard profile.look != look else { continue }
-            if follow, name == sharing, sharedLook != nil, isGuiManaged {
-                guard landSharedLook(LookBody(of: profile.settings)) else {
+            if follow, let sharing, name == sharing.profile,
+                sharedLook != nil, isGuiManaged
+            {
+                guard landSharedLook(sharing.look) else {
                     throw LookReachError.sharedLookNotWritten
                 }
             }
             if look == nil, sharedLook == nil, isGuiManaged {
                 // No shared look yet: this one's look seeds it, and
-                // the election settles every other profile. Core
-                // only — Settings greys every box before a shared
-                // look exists, since every profile is own then.
+                // the election settles every other profile.
                 crossWith(LookBody(of: profile.settings))
                 profile = try profiles.read(name: name)
                 guard profile.look != look else { continue }

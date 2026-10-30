@@ -132,7 +132,17 @@ extension SettingsModel {
         }
         reachEdits = reach
         lookReachEdits = look
-        lookShare = share
+        // A "Use" paint was taken against the draft the adopt
+        // replaced, and a "Make" for a profile now stored shared has
+        // nothing to switch, so either drops with its edit (#2820).
+        switch share {
+        case .make(let profile) where lookReachStored[profile] == false:
+            lookShare = share
+        case .make(let profile), .use(let profile, _):
+            lookReachEdits[profile] = nil
+        case nil:
+            break
+        }
         suppressDirty = false
         recomputeDirty()
         sync.arrived = isDirty ? change : nil

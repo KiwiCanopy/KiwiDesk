@@ -321,7 +321,7 @@ final class SettingsModel: ObservableObject {
             if !suppressDirty { recomputeDirty() }
         }
     }
-    var lookShare = LookShareStage()
+    var lookShare: LookShareStage?
 
     /// Injected preferences seam allowing scratch domain in tests.
     init(

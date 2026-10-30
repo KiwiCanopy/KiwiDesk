@@ -8,7 +8,7 @@ import Testing
 /// The loaded profile's Save with a look edit AND a checklist tick
 /// (#1752): the edit reaches the shared look, and the profile the
 /// tick unticked keeps the look from before the Save — the order
-/// `SharedLookSeamTests` ▸ `checklistFirst` pins by spelling, held
+/// `SharedLookSeamTests` ▸ `switchFirst` pins by spelling, held
 /// here by behaviour.
 @Suite("Shared look live Save (#1752)", .serialized)
 @MainActor

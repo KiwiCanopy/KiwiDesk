@@ -287,7 +287,8 @@ is set from Lua (`quit.set_layout`).
 **`look`** holds the shared look: every color, the bars' styling,
 Liquid Glass, the focus border's shape and the global gaps, worn
 by every profile without its own. Settings writes it; choose
-which profiles use it in **Looks & Animations ▸ Shared look**.
+whether each profile uses it in **Looks & Animations ▸ Shared
+look**.
 
 A `profile_bindings` entry names its profiles as a list,
 `profiles`, one per screen count, each for all screen setups — a
@@ -346,12 +347,10 @@ look if the profile it was saved from does. With a Lua-owned
 
 :::unreleased
 **Looks & Animations ▸ Shared look ▸ Look** sets the profile you
-are editing to **Shared** or **This profile only**. Switching a
-profile with its own look to Shared asks first: **Use the Shared
-Look** replaces its own look, and **Make This the Shared Look**
-makes its look the shared one for every profile using it. An own
-look replaced this way is gone unless it is in **My looks**; the
-prompt offers to save it there first.
+are editing to **Shared** or **This profile only**. A look the
+switch replaces — the profile's own look, or the shared look that
+**Make This the Shared Look** replaces — is gone unless it is in
+**My looks**.
 :::
 
 The animations are part of the look too: a profile using the
