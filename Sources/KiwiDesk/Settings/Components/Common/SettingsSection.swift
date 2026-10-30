@@ -40,11 +40,12 @@ struct SettingsSection<Content: View>: View {
         subsection: Bool = false,
         help: String? = nil,
         trailing: String? = nil,
+        plated: Bool = true,
         @ViewBuilder content: () -> Content
     ) {
         self.title = title
         self.control = nil
-        self.plated = true
+        self.plated = plated
         self.symbol = symbol
         self.caption = caption
         self.subsection = subsection

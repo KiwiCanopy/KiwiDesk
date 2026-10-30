@@ -5,10 +5,16 @@ import SwiftUI
 /// A transition's own timing names the Reduce Motion gate in its
 /// argument.
 extension SettingsView {
-    /// Simple fades: out ahead of Home's cards, in behind them.
+    /// Simple's sections arrive card by card under a switch, as
+    /// Home's do (`HomeConverge`, #2777), and otherwise fade in; it
+    /// always leaves fading, ahead of Home's cards.
     var simpleTransition: AnyTransition {
-        .opacity.animation(
+        let fade = AnyTransition.opacity.animation(
             reduceMotion ? nil : .easeOut(duration: ShellMotion.simpleFade)
+        )
+        return .asymmetric(
+            insertion: model.nav.convergePending ? .identity : fade,
+            removal: fade
         )
     }
 

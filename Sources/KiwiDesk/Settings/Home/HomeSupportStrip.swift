@@ -16,28 +16,11 @@ struct HomeSupportStrip: View {
                 HomeGroupHeading(
                     L("home.support.heading", "Community & Support")
                 )
-                FlowLayout(spacing: 12) {
-                    SupportLinkRow(
-                        mark: BrandAssets.markDiscord,
-                        title: L(
-                            "home.support.discord",
-                            "Join the Discord server"
-                        ),
-                        caption: discordCaption,
-                        url: SupportLinks.discord
-                    )
-                    SupportLinkRow(
-                        mark: BrandAssets.markGitHub,
-                        title: L("home.support.github", "View on GitHub"),
-                        caption: gitHubCaption,
-                        url: SupportLinks.gitHub
-                    )
-                    SupportLinkRow(
-                        mark: BrandAssets.markKofi,
-                        title: L("home.support.kofi", "Support KiwiDesk"),
-                        caption: koFiCaption,
-                        url: SupportLinks.koFi
-                    )
+                // Three even columns, stacked once they do not fit
+                // (#2777 ruling 13).
+                ViewThatFits(in: .horizontal) {
+                    HStack(alignment: .top, spacing: 20) { supportLinks }
+                    VStack(alignment: .leading, spacing: 12) { supportLinks }
                 }
             }
             // The links follow the last group at the group spacing;
@@ -45,6 +28,31 @@ struct HomeSupportStrip: View {
             Spacer(minLength: 20)
             footer
         }
+    }
+
+    /// The three ways out of the app, each with its mark.
+    @ViewBuilder private var supportLinks: some View {
+        SupportLinkRow(
+            mark: BrandAssets.markDiscord,
+            title: L(
+                "home.support.discord",
+                "Join the Discord server"
+            ),
+            caption: discordCaption,
+            url: SupportLinks.discord
+        )
+        SupportLinkRow(
+            mark: BrandAssets.markGitHub,
+            title: L("home.support.github", "View on GitHub"),
+            caption: gitHubCaption,
+            url: SupportLinks.gitHub
+        )
+        SupportLinkRow(
+            mark: BrandAssets.markKofi,
+            title: L("home.support.kofi", "Support KiwiDesk"),
+            caption: koFiCaption,
+            url: SupportLinks.koFi
+        )
     }
 
     // Hoisted out of `body`: a `+`-joined literal inside a builder

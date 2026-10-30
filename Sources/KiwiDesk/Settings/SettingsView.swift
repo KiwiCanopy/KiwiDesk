@@ -22,8 +22,9 @@ struct SettingsView: View {
 
     /// Whether current destination supports detail panel.
     var panelOffered: Bool {
-        (model.showsSimple
-            || SettingsDetailPanelOffer.offers(model.destination))
+        // Simple draws each Space as its own preview (#2777).
+        !model.showsSimple
+            && SettingsDetailPanelOffer.offers(model.destination)
             && !model.editingLua
     }
 
@@ -154,7 +155,7 @@ struct SettingsView: View {
         chrome(width) {
             Group {
                 if model.showsSimple {
-                    simplePane(width)
+                    SimpleScreen(model: model)
                         .transition(simpleTransition)
                 } else if selection == nil {
                     HomeScreen(model: model)

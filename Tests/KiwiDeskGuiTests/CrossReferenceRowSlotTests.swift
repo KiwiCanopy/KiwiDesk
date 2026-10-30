@@ -133,7 +133,6 @@ struct CrossReferenceRowSlotTests {
         "KiwiVisionSection.swift:Self.prose(chord:chord)",
         "SimpleLookCard.swift:Self.hintProse",  // SimpleSectionsTests
         "SimpleSpacesCard.swift:Self.hintProse",  // SimpleSectionsTests
-        "SimpleKiwiHubKeys.swift:Self.changeProse",  // SimpleSectionsTests
     ]
 
     // MARK: - The values

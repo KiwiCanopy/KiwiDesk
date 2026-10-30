@@ -896,7 +896,10 @@ component Advanced draws it with, never a Simple look-alike; a
 control Advanced draws another way — the Screen menu over a
 chip's menu — shares its choices and its one write
 (`SpaceScreenChoice`, `SimpleSectionsTests` ▸
-`placementHasOneDoor`). `SimpleSectionsTests` ▸ `noLookAlikes`
+`placementHasOneDoor`), and a control Simple draws with another
+face takes that face as a parameter of Advanced's own component,
+as the Space card hands `SpaceModeMenu` its picture
+(`LayoutMenuItemsTests` ▸ `oneItemList`). `SimpleSectionsTests` ▸ `noLookAlikes`
 holds Simple's directory to no look tile, recorder, layout menu or
 Screen vocabulary of its own; the rest is review's. Keep every
 page Advanced's and store the root
@@ -911,16 +914,16 @@ same change, since the save pill reads it to keep a row on Simple
 the pill's rows a look pick reaches fold into its one look row
 (`SettingsDiffRowSource.lookFolded`): its members are the keys
 Core's one `ShelfLook.unpicked` would put back, and its ↺ is that
-call; Advanced never folds (`SimpleLookRowTests`). Simple's
-preview is its rows' sibling column, so what it shows is asked
-of the one `simplePreviewSpace` over the selection `nav` holds,
-and a row marks itself kept only through `simpleKeptSpace`
-(`SimplePreviewTests` ▸ `shownSpace`, `rowsReadTheKeptSpace`). A
-docked column's width, Simple's or a page's, is answered by the
-one `SettingsView.dockedPanelWidth`, which the save pill centres
-against (`HomeSurfacingTests`). **Key no shell animation on the page shown**: the
-shell's spring keys on the root alone, and only a switch landing
-on Home owes the cards' converge (`ShellMotionTests` ▸
+call; Advanced never folds (`SimpleLookRowTests`). Simple offers
+no preview panel: each Space card's picture is its preview, drawn
+from the one `simplePreviewSettings` so a hovered look reaches
+every card, and lights its own Space (#2777, `SimplePreviewTests`
+▸ `pictureReadsTheHover`). A docked column's width is answered by
+the one `SettingsView.dockedPanelWidth`, which the save pill
+centres against (`HomeSurfacingTests`). **Key no shell animation
+on the page shown**: the shell's spring keys on the root alone,
+and only a switch owes the converge of the root it lands on —
+Home's cards or Simple's sections (`ShellMotionTests` ▸
 `shellMountsTheMotion`, `pagesSwapAtOnce`) — a page case in that
 key brings back a morph on every card click. **A row's
 menu is never the only door to an editor a row opens**: it is

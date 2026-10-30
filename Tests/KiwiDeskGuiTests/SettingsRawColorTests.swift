@@ -231,6 +231,9 @@ struct SettingsRawColorTests {
             "the preview's fade is a MASK — only its alpha "
             + "reaches the screen, black is 'opaque' and never "
             + "drawn",
+        "SimpleLookCard.swift":
+            "the Look line's trailing fade is a MASK — only its "
+            + "alpha reaches the screen",
         "SegmentedPicker.swift":
             "retired by the dark pass — entry lives only so a "
             + "white pill returning reds the stale-exemption "

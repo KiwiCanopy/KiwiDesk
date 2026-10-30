@@ -5,10 +5,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// Simple's live preview (#2737 rulings 5, 9 and 10): which Space it
-/// shows, in which look, how wide it docks, and that the kept row's
-/// ring reads against its fill. Main-actor spend: model construction
-/// and four colour resolutions.
+/// Simple's Space pictures (#2777 rulings 6, 9 and 11): the look
+/// they wear, the Space each lights, how a pin offline is named,
+/// and the grid's reorder. Main-actor spend: model construction and
+/// two source reads.
 @MainActor
 @Suite("Simple preview")
 struct SimplePreviewTests {
@@ -20,31 +20,14 @@ struct SimplePreviewTests {
         return model
     }
 
-    @Test("a hover outranks the kept Space, the kept the first")
-    func shownSpace() {
-        let model = model(["a", "b", "c"])
-        #expect(model.simplePreviewSpace?.raw == "a")
-        #expect(model.simplePreviewIsKept)
-        model.nav.simpleKept = SpaceID("b")
-        #expect(model.simplePreviewSpace?.raw == "b")
-        model.hoverSimple(.space(SpaceID("c")), inside: true)
-        #expect(model.simplePreviewSpace?.raw == "c")
-        #expect(!model.simplePreviewIsKept)
-        #expect(model.simpleKeptSpace?.raw == "b")
-        // A kept Space deleted falls back to the first.
-        model.hoverSimple(.space(SpaceID("c")), inside: false)
-        model.config.spaces.removeAll { $0.raw == "b" }
-        #expect(model.simplePreviewSpace?.raw == "a")
-    }
-
-    /// The next row's enter can land before this row's leave.
+    /// The next tile's enter can land before this tile's leave.
     @Test("a leave clears only its own hover")
     func leaveKeepsTheNext() {
-        let model = model(["a", "b"])
-        model.hoverSimple(.space(SpaceID("b")), inside: true)
-        model.hoverSimple(.space(SpaceID("a")), inside: false)
-        #expect(model.nav.simpleHover == .space(SpaceID("b")))
-        model.hoverSimple(.space(SpaceID("b")), inside: false)
+        let model = model(["a"])
+        model.hoverSimple(.look("B"), inside: true)
+        model.hoverSimple(.look("A"), inside: false)
+        #expect(model.nav.simpleHover == .look("B"))
+        model.hoverSimple(.look("B"), inside: false)
         #expect(model.nav.simpleHover == nil)
     }
 
@@ -60,20 +43,16 @@ struct SimplePreviewTests {
         model.hoverSimple(.look(look.name), inside: true)
         #expect(model.simplePreviewSettings != before)
         #expect(model.config.settings == before)
-        #expect(!model.simplePreviewIsKept)
         model.hoverSimple(.look("No such look"), inside: true)
         #expect(model.simplePreviewSettings == before)
         #expect(model.simplePreviewHover == nil)
-        #expect(model.simplePreviewIsKept)
     }
 
-    @Test("a new visit forgets the kept and hovered Space")
+    @Test("a new visit forgets the hovered look")
     func visitResets() {
-        let model = model(["a", "b"])
-        model.nav.simpleKept = SpaceID("b")
-        model.nav.simpleHover = .space(SpaceID("a"))
+        let model = model(["a"])
+        model.nav.simpleHover = .look("A")
         model.nav.resetSurfaces()
-        #expect(model.nav.simpleKept == nil)
         #expect(model.nav.simpleHover == nil)
     }
 
@@ -101,18 +80,8 @@ struct SimplePreviewTests {
         #expect(main.contains("the main screen"))
     }
 
-    /// Ruling 10's floor: the docking width leaves the controls 580.
-    @Test("the docked preview leaves the controls their 580")
-    func controlsKeepTheirFloor() {
-        let controls =
-            SettingsWidthClass.panelBreakpoint
-            - SimpleColumns.preview - 1
-        #expect(controls >= 580)
-        #expect(SimpleColumns.contentCap >= controls)
-    }
-
-    @Test("an offline pin's caption keeps the hover and both screens")
-    func offlineCaption() {
+    @Test("an offline pin names the screen it waits for and its fallback")
+    func offlineSentence() {
         LocalizationManager.shared.select("en")
         let model = model(["a"])
         let core = model.core
@@ -128,87 +97,149 @@ struct SimplePreviewTests {
         )
         let space = SpaceID("a")
         model.config.spacePins[space] = "Dell:200x100"
-        let preview = SimplePreview(model: model)
         let sentence = model.offlinePinSentence(space)
-        // Names the screen it waits for and the one the map lights.
         #expect(sentence.contains("Dell"))
         #expect(sentence.contains("Built-in"))
         // Its one screen is the main one, and the sentence says so.
         #expect(sentence.contains("the main screen"))
-        #expect(model.simpleLanding(of: space)?.name == "Built-in")
-        #expect(preview.caption(space) == sentence)
-        model.hoverSimple(.space(space), inside: true)
-        let hovered = preview.caption(space) ?? ""
-        #expect(hovered.contains("Previewing a"))
-        #expect(hovered.contains(sentence))
-        model.config.spacePins[space] = nil
-        model.hoverSimple(.space(space), inside: false)
-        #expect(preview.caption(space) == nil)
     }
 
-    /// A row that compared `nav.simpleKept` itself would ring a
-    /// deleted Space's neighbour wrong; the one reading is held.
-    @Test("rows mark kept through the one reading")
-    func rowsReadTheKeptSpace() throws {
+    /// A card drawing the stored settings would ignore a hovered
+    /// look, and one lighting a fixed item would light the first
+    /// Space on every card.
+    @Test("a card's picture wears the hovered look and lights itself")
+    func pictureReadsTheHover() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDesk/Settings/Components/Simple/"
-                    + "SimpleSpacesCard.swift"
+                    + "SimpleSpacePicture.swift"
             )
         let text = try SourceScan.strippedSource(at: file)
             .filter { !$0.isWhitespace }
-        #expect(text.contains("model.simpleKeptSpace==space"))
-        // The ring and the fill are drawn from that reading, in the
-        // measured pair.
-        #expect(text.contains("isKept(space)?Self.keptRing:.clear"))
-        #expect(text.contains("ifisKept(space){shape.fill(Self.keptFill)"))
-        // The row only writes the kept Space — the tap and the menu
-        // item — and never reads it.
-        #expect(text.occurrences(of: "nav.simpleKept") == 2)
-        #expect(text.occurrences(of: "nav.simpleKept=space") == 2)
+        #expect(text.contains("letsettings=model.simplePreviewSettings"))
+        #expect(text.contains("HomeCardBarsTile(settings:settings,"))
+        #expect(
+            text.contains(
+                "activeSpace:model.config.spaces.firstIndex(of:space)??0,"
+            )
+        )
+        #expect(!text.contains("config.settings"))
     }
 
-    /// The ring is the kept cue, so it must part from the fill it
-    /// rims for a protanope too (#2737 ruling 5).
-    @Test("the kept ring separates from the kept fill")
-    func ringSeparates() throws {
-        for dark in [false, true] {
-            let card = try ThemeContrast.resolved(
-                SettingsTheme.card,
-                dark: dark
+    /// On one line of cards the drag crosses a card's middle
+    /// sideways; between lines, or down a list, it crosses it
+    /// vertically.
+    @Test("a drag crosses a card along the line it moves on")
+    func gridCrossing() {
+        let card = CGRect(x: 200, y: 0, width: 200, height: 150)
+        let left = CGPoint(x: 260, y: 140)
+        let right = CGPoint(x: 340, y: 10)
+        #expect(
+            !SpaceReorder.crossed(
+                card,
+                at: left,
+                forward: true,
+                sameLine: true
             )
-            let ground = try over(SimpleSpacesCard.keptFill, card, dark)
-            // The ring draws at its own alpha over that same ground.
-            let ring = try over(SimpleSpacesCard.keptRing, ground, dark)
-            let separation = try #require(
-                ColorVision.separation(hex(ring), hex(ground))
+        )
+        #expect(
+            SpaceReorder.crossed(
+                card,
+                at: right,
+                forward: true,
+                sameLine: true
             )
-            #expect(
-                separation >= ColorVision.separationFloor,
-                "\(dark ? "dark" : "light"): \(separation)"
+        )
+        #expect(
+            SpaceReorder.crossed(
+                card,
+                at: left,
+                forward: false,
+                sameLine: true
             )
-        }
-    }
-
-    /// `color` composited at its resolved alpha over `ground`.
-    private func over(
-        _ color: Color,
-        _ ground: (r: Double, g: Double, b: Double),
-        _ dark: Bool
-    ) throws -> (r: Double, g: Double, b: Double) {
-        let top = try ThemeContrast.resolved(color, dark: dark)
-        let a = try ThemeContrast.resolvedAlpha(color, dark: dark)
-        return (
-            top.r * a + ground.r * (1 - a),
-            top.g * a + ground.g * (1 - a),
-            top.b * a + ground.b * (1 - a)
+        )
+        // Off the line, only the vertical middle counts.
+        #expect(
+            SpaceReorder.crossed(
+                card,
+                at: left,
+                forward: true,
+                sameLine: false
+            )
+        )
+        #expect(
+            !SpaceReorder.crossed(
+                card,
+                at: right,
+                forward: true,
+                sameLine: false
+            )
         )
     }
 
-    private func hex(_ rgb: (r: Double, g: Double, b: Double)) -> String {
-        "#"
-            + [rgb.r, rgb.g, rgb.b]
-            .map { String(format: "%02X", Int(($0 * 255).rounded())) }
-            .joined()
+    @Test("a grid drag reorders across lines")
+    func gridRetarget() {
+        let reorder = SpaceReorder(listSpace: "test")
+        let spaces = ["a", "b", "c", "d"].map { SpaceID($0) }
+        // Two per line: a b / c d.
+        reorder.rowFrames = [
+            spaces[0]: CGRect(x: 0, y: 0, width: 100, height: 80),
+            spaces[1]: CGRect(x: 110, y: 0, width: 100, height: 80),
+            spaces[2]: CGRect(x: 0, y: 90, width: 100, height: 80),
+            spaces[3]: CGRect(x: 110, y: 90, width: 100, height: 80),
+        ]
+        // `a` along its line past `b`'s middle, above its vertical
+        // middle, so only the sideways reading crosses.
+        reorder.retarget(
+            spaces[0],
+            at: CGPoint(x: 170, y: 20),
+            in: spaces,
+            reduceMotion: true
+        )
+        #expect(reorder.dragOrder?.map(\.raw) == ["b", "a", "c", "d"])
+        // Then down onto `d`, past its vertical middle.
+        reorder.retarget(
+            spaces[0],
+            at: CGPoint(x: 150, y: 140),
+            in: spaces,
+            reduceMotion: true
+        )
+        #expect(reorder.dragOrder?.map(\.raw) == ["b", "c", "d", "a"])
+    }
+
+    /// The Spaces page's list judges a row by its height alone, so a
+    /// pointer drifting out of the column sideways still reorders.
+    @Test("a list drag reorders with the pointer outside the column")
+    func listDrift() {
+        let reorder = SpaceReorder(listSpace: "test")
+        let spaces = ["a", "b", "c"].map { SpaceID($0) }
+        reorder.rowFrames = [
+            spaces[0]: CGRect(x: 0, y: 0, width: 300, height: 40),
+            spaces[1]: CGRect(x: 0, y: 44, width: 300, height: 40),
+            spaces[2]: CGRect(x: 0, y: 88, width: 300, height: 40),
+        ]
+        reorder.retarget(
+            spaces[0],
+            at: CGPoint(x: 420, y: 70),
+            in: spaces,
+            reduceMotion: true
+        )
+        #expect(reorder.dragOrder?.map(\.raw) == ["b", "a", "c"])
+    }
+
+    /// The well mode is the cards' alone: another writer would strip
+    /// a schematic's own frame and caption wherever it reached.
+    @Test("one view puts a schematic in a well")
+    func fillsWellHasOneWriter() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        var sites: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let count = try SourceScan.strippedSource(at: file)
+                .filter { !$0.isWhitespace }
+                .occurrences(of: ".environment(\\.schematicFillsWell,")
+            if count > 0 { sites[file.lastPathComponent] = count }
+        }
+        #expect(sites == ["SimpleSpacePicture.swift": 1])
     }
 }
