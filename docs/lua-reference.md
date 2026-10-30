@@ -1684,6 +1684,30 @@ stack.set_master_ratio_override("3", 0.7)
 stack.set_stack_position_override("3", "bottom")
 ```
 
+### stack.toggle_stack_position
+
+:::unreleased
+**Expects:** an optional space identifier; without one, the
+focused space.
+
+**Does:** moves that space's stack zone to the opposite side —
+`"left"` ↔ `"right"`, `"top"` ↔ `"bottom"` — starting from the
+side it shows now, its
+[override](#stackset_stack_position_override) or else the
+[global value](#stackset_stack_position). It writes the override
+for that space as a live change: Settings lists it under **Live,
+not saved**, and `kiwidesk revert_settings` puts it
+back. The master ratio and every other size stay as they are.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("hyper+f", function()
+  stack.toggle_stack_position()
+end)
+```
+:::
+
 ### stack.set_master_orientation_override
 
 **Expects:**
