@@ -76,9 +76,12 @@ extension HomeCardBarsTile {
         _ shelf: KiwiShelf
     ) -> [BarItem] {
         let count = min(max(spaceCount, 1), 8)
+        // A window of the first eight, shifted so the active Space
+        // is always among them (a card for Space 9 lights itself).
+        let first = max(0, activeSpace - (count - 1))
         var items: [BarItem] = []
-        for index in 0..<count {
-            let active = index == 0
+        for index in first..<(first + count) {
+            let active = index == activeSpace
             var item = BarItem(
                 color: active
                     ? shelf.activeItemColor

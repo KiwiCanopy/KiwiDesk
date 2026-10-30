@@ -12,20 +12,45 @@ struct SimpleLookCard: View {
 
     var body: some View {
         SimpleCard(title: Self.title) {
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 10) {
-                    ForEach(Self.looks(in: model), id: \.name) {
-                        tile($0)
-                    }
-                    if LookGallery.isLive { browseTile }
+            // Centred while the line fits; scrolling once it
+            // overflows (owner 2026-10-29), its trailing edge faded
+            // so the line's end reads as more to come.
+            ViewThatFits(in: .horizontal) {
+                line.frame(maxWidth: .infinity)
+                ScrollView(.horizontal, showsIndicators: false) {
+                    line.padding(.trailing, Self.fade)
                 }
-                .padding(.vertical, 2)
+                .mask(Self.trailingFade)
             }
             CrossReferenceRow(
                 prose: Self.hintProse,
                 linkTitle: SettingsDestination.looks.title,
                 destination: .looks
             )
+        }
+    }
+
+    private var line: some View {
+        HStack(alignment: .top, spacing: 10) {
+            ForEach(Self.looks(in: model), id: \.name) { tile($0) }
+            if LookGallery.isLive { browseTile }
+        }
+        .padding(.vertical, 2)
+    }
+
+    /// The fade's length; the scrolled line ends past it, so its
+    /// last tile clears the fade once scrolled to.
+    private static let fade: CGFloat = 28
+
+    private static var trailingFade: some View {
+        HStack(spacing: 0) {
+            Color.black
+            LinearGradient(
+                colors: [.black, .clear],
+                startPoint: .leading,
+                endPoint: .trailing
+            )
+            .frame(width: fade)
         }
     }
 

@@ -29,7 +29,9 @@ struct LookTile: View {
                 isApplied: applied,
                 note: other ? otherColorsNote : nil,
                 appliedSpoken: other ? otherColorsSpoken : nil,
-                captionLines: 2
+                // Simple's line draws the name alone (#2737 ruling
+                // 3), so it reserves no caption room.
+                captionLines: caption == nil ? 0 : 2
             ) {
                 LookPlate(settings: preview, spaceLabels: spaceLabels)
             }
