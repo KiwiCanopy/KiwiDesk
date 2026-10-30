@@ -13435,10 +13435,13 @@ lights ↩ Apply, or its digits under ⌘. Navigation (⇥, ← →) and
 bridges (⌘, Edit) never light, the Shortcuts side lights nothing
 since ↩ runs nothing there, and an empty list lights nothing. Ink
 alone carries it, with no tint or weight, and it swaps without
-motion. The way here follows the chord's reach: ⇧ alone moves the
-selected row, so only it shows its "Space n → Space m"; under ⇧⌘
-every numbered row is a target through its digit, so each shows
-its own.
+motion. The way here follows the chord's reach: ⇧ alone moves one
+row — the hovered row where its ⇧-click moves a window, else the
+selected row ⇧↩ moves (#2808) — so only that row shows its
+"Space n → Space m"; under ⇧⌘ every numbered row is a target
+through its digit, so each shows its own. Lighting every row under
+⇧ would answer no "what does pressing now do", and repaint the
+whole list on the lighter chord.
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
