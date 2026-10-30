@@ -214,7 +214,7 @@ uses two counts:
 - **What KiwiDesk shows** counts per screen, as Mission Control
   does: KiwiHub's window switcher, the Desktop switch plate and
   the Desktop rows in Settings. A KiwiHub row for a window on
-  another screen names that screen too — `Work · DELL U2723
+  another screen names that screen too — `Work · DELL U2723 ·
   Desktop 1`.
 - **What a command or binding takes** counts across every screen,
   the screen Mission Control lists first counted first:

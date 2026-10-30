@@ -39,9 +39,10 @@ struct JumpRowScreenTests {
         }
         #expect(text("work", .shown) == "work · DELL U2723")
         #expect(
-            text("work", .away(desktop: 1)) == "work · DELL U2723 Desktop 1"
+            text("work", .away(desktop: 1))
+                == "work · DELL U2723 · Desktop 1"
         )
-        #expect(text(nil, .away(desktop: 2)) == "DELL U2723 Desktop 2")
+        #expect(text(nil, .away(desktop: 2)) == "DELL U2723 · Desktop 2")
         #expect(text("work", .away(desktop: nil)) == "work · DELL U2723")
         #expect(text(nil, .away(desktop: nil)) == nil)
         // KiwiHub's own screen, or one screen: unchanged.
@@ -69,7 +70,7 @@ struct JumpRowScreenTests {
                 == JumpRowText.ScreenRun(
                     lead: "work · ",
                     name: "DELL U2723",
-                    trail: " Desktop 3"
+                    trail: " · Desktop 3"
                 )
         )
     }

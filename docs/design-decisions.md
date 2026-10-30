@@ -7561,7 +7561,7 @@ strip from 1, so the global number was the label it draws on one
 screen only. Every label KiwiDesk draws — the plate, KiwiHub's
 rows, the Settings Desktop rows — now counts per screen, and a
 KiwiHub row on another screen than KiwiHub's names that screen
-first (`Work · DELL U2723 Desktop 1`, as Mission Control groups
+first (`Work · DELL U2723 · Desktop 1`, as Mission Control groups
 its strips), last when spoken, its name the one part a narrow row
 shortens. What a command takes stays global — `focus_desktop`,
 `bind_profile_to_desktop`, the Go to Desktop N titles — since a

@@ -2,8 +2,8 @@ import Foundation
 import KiwiDeskCore
 
 /// A row's place on another screen (#2792): the screen is named
-/// first on the row, beside the Desktop, as Mission Control groups
-/// its strips, and last when spoken.
+/// before the Desktop, a dot between every part, and last when
+/// spoken.
 extension JumpRowText {
     /// `Place.text` split around the screen's name.
     struct ScreenRun: Equatable {
@@ -39,7 +39,7 @@ extension JumpRowText {
             return framed(
                 L(
                     "jump.place.away_screen",
-                    "%1$@ · %2$@ Desktop %3$d",
+                    "%1$@ · %2$@ · Desktop %3$d",
                     name,
                     mark,
                     desktop
@@ -51,7 +51,7 @@ extension JumpRowText {
             return framed(
                 L(
                     "jump.place.desktop_screen",
-                    "%1$@ Desktop %2$d",
+                    "%1$@ · Desktop %2$d",
                     mark,
                     desktop
                 ),

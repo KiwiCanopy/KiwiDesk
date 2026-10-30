@@ -21,6 +21,14 @@ struct DesktopNumberWiringTests {
             "Sources/KiwiDeskCore/Profiles/KiwiCore+DesktopCue.swift"
         )
         #expect(cue.contains("screen:display.flatMap(screenLabel),"))
+        // Literals kept: the plate's digit is an interpolation.
+        let plate = try SourceScan.strippedSource(
+            at: SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent(
+                    "Sources/KiwiDesk/CuePlate/DesktopCueView.swift"
+                )
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(plate.contains("Text(verbatim:\"\\(cue.position)\")"))
         let card = try Self.squashed(
             "Sources/KiwiDesk/Settings/Components/Profiles/DesktopsGroup.swift"
         )
