@@ -161,6 +161,12 @@ extension APIReference {
                 + "0–100; 0 is one even color.",
             .number("percent")
         ),
+        "set_reading_contrast": APIRecord(
+            "Sets the contrast text on KiwiHub, the cue plates and "
+                + "the peek keeps where the Fill fades, 1–4.5; 1 "
+                + "leaves the full fade.",
+            .number("ratio")
+        ),
         "set_pocket_edge": APIRecord(
             "Sets the screen edge the pocket sits on.",
             .choice("edge", AppBarEdge.self)

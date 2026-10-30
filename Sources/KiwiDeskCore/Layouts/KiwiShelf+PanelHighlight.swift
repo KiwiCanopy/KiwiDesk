@@ -27,7 +27,7 @@ extension KiwiShelf {
     /// The share of the dim panel ink a divider draws at (#2596,
     /// ui-designer): about Apple's separator, label ink at ~0.2.
     /// The far end of the panel Fill holds the dim ink at exactly
-    /// `readingInkFloor` over white, so a retune of that floor moves
+    /// `readingFloor` over white, so a retune of that floor moves
     /// the divider's contrast with it (`PanelDividerContrastTests`).
     public static let panelDividerAlpha: CGFloat = 0.35
     /// The divider's share under Increase Contrast.

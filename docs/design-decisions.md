@@ -18456,13 +18456,33 @@ grounds. 1.4:1 was okay, 1.5:1 readable everywhere, and 1.6:1 a
 bit better; `ui-designer` concurred. So the hover peek, the
 overflow mark's list, KiwiHub and the cue plates follow Fill
 fade, but their far end stops at the share that keeps their
-worst ink at 1.5:1 over white or black
+worst ink at a floor over white or black
 (`KiwiShelf.readingInkFloor`). That share is computed per Fill
-from ColorVision and never stored. Under macOS Increase Contrast
-the floor is the bars' own 2.2:1 (`KiwiShelf.idleInkFloor`),
-applied live, and the fade stays on. The floor is silent: no help
-text names it, because it is a net under the slider, not a
-second control. The model composites over a flat wallpaper and
+from ColorVision and never stored. The floor was 1.5:1 until
+2026-10-30, when the owner checked the tinted default look on
+device with macOS's Liquid Glass slider at its minimum: over a
+white window its bottom faded to about 1.9:1 for white text,
+which failed. The owner and `ui-designer` raised it to 2.2:1. It
+equals the bars' idle floor (`KiwiShelf.idleInkFloor`) but stays
+its own constant, because the two guard different surfaces and
+a shared number would let a retune of one move the other. The
+owner chose to follow macOS's slider rather than override it.
+Under macOS Increase Contrast the floor is 3.0:1
+(`KiwiShelf.increasedReadingInkFloor`), applied live. With the
+default floor at 2.2 the bars' floor would change nothing there.
+At 3.0 the default look's Fill draws flat: its titles hold
+about 4.6:1, and its hovered row about 2.6:1, the most its
+anchor gives. Where a Fill's anchor cannot reach the floor, the
+Fill stays flat at its anchor and the guards accept that. A user
+can set the floor with `kiwishelf.set_reading_contrast`, 1 to
+4.5:1. 1 leaves the full fade, and a ratio the Fill cannot reach
+draws it flat. Increase Contrast raises a lower value to 3.0 and
+never lowers a higher one. The verb is Lua-only, under the GUI
+curates, Lua is open rule. A look carries it beside the Fill
+(owner, 2026-10-30), so a look with a light Fill can ship its
+own floor, and switching looks moves the floor with the Fill. The floor is
+silent: no help text names it, because it is a net under the
+slider, not a second control. The model composites over a flat wallpaper and
 leaves out the glass's milky layer, so it reads the screen
 pessimistically. Retune the floor on real glass over white and
 black, never from the model alone (`PeekInkContrastTests`,

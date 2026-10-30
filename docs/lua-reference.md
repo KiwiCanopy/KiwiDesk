@@ -2782,6 +2782,33 @@ fill has no color.
 kiwishelf.set_tint_hub_and_plates(false)
 ```
 
+:::unreleased
+### kiwishelf.set_reading_contrast
+
+**Expects:** a contrast ratio from `1` to `4.5` (default `2.2`);
+outside that range it is clamped.
+
+**Does:** sets the contrast the text on the hover peek, the
+overflow mark's list, [KiwiHub](#kiwihubshow) and the Space,
+Desktop and layout plates keeps where
+[`set_fill_fade`](#kiwishelfset_fill_fade) fades their fill
+(#2569). Their fade stops at the strength that holds their
+dimmest text at this ratio over a white or a black window. `1`
+leaves the full fade. A ratio the fill cannot reach draws it
+flat, with no fade. While macOS's Increase contrast is on the
+floor is at least `3`, which draws the default fill flat. No
+effect while the glass is off or the fill has no color. Stored
+as `kiwishelf.reading_contrast`.
+
+Settings has no row for it. A look carries it beside the fill.
+
+**Example:**
+
+```lua
+kiwishelf.set_reading_contrast(3)
+```
+:::
+
 ### kiwishelf.set_background_fit
 
 **Expects:** `"full"` or `"hug"` (default `"hug"`).

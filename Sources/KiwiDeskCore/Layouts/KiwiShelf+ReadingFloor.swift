@@ -3,18 +3,42 @@ import AppKit
 /// The floor a READING surface's fade keeps (#2569 ▸ Ruling): the
 /// hover peek, the overflow mark's list, KiwiHub and the cue plates
 /// fade like the bar, but their far end never drops below the share
-/// that holds their worst ink at `readingInkFloor` over a white or a
+/// that holds their worst ink at `readingFloor` over a white or a
 /// black wallpaper.
 extension KiwiShelf {
-    /// Contrast a reading surface's worst ink holds at the fade's
-    /// far end. Below `idleInkFloor` on purpose: that floor is for
-    /// dimmed idle ink on a bar, and the owner judged 1.5 readable
-    /// on real `.clear` glass over a white window for all ten
-    /// bundled palettes (2026-10-24); the model composites over a
-    /// flat wallpaper and leaves out the glass's own milky layer,
-    /// so it reads the screen pessimistically. Retune it on real
-    /// glass over white AND black, never from the model alone.
-    public static let readingInkFloor = 1.5
+    /// Default contrast a reading surface's worst ink holds at the
+    /// fade's far end (`readingContrast`). Equal to `idleInkFloor`
+    /// today, never an alias: that floor guards dimmed idle ink on
+    /// a bar. Measured 2026-10-30: at 1.5 the tinted default look
+    /// with macOS's Liquid Glass slider at its minimum failed over
+    /// a white window (model ~1.9:1). Retune on real glass over
+    /// white AND black, never from the model alone.
+    public static let readingInkFloor = 2.2
+
+    /// The floor under Increase Contrast, never below the user's
+    /// own (owner, 2026-10-30): the default look's Fill holds it
+    /// only at its anchor, so it paints flat.
+    public static let increasedReadingInkFloor = 3.0
+
+    /// Bounds of `readingContrast` (#2569): 1 is no floor, the full
+    /// fade; a ratio the Fill cannot reach paints it flat.
+    public static let readingContrastRange: ClosedRange<Double> = 1...4.5
+
+    /// `value` within `readingContrastRange`.
+    public static func clampReadingContrast(_ value: Double) -> Double {
+        min(
+            max(value, readingContrastRange.lowerBound),
+            readingContrastRange.upperBound
+        )
+    }
+
+    /// The contrast the reading fades hold: `readingContrast`,
+    /// raised to `increasedReadingInkFloor` under Increase Contrast.
+    public func readingFloor(increaseContrast: Bool) -> Double {
+        increaseContrast
+            ? max(readingContrast, Self.increasedReadingInkFloor)
+            : readingContrast
+    }
 
     /// The inks the peek draws, each over the layer it sits on:
     /// titles, the header, a hovered row on its fill.
@@ -27,8 +51,7 @@ extension KiwiShelf {
     }
 
     /// The peek's Fill: the shelf's fade, floored at the share that
-    /// holds `readingInkFloor`, or `idleInkFloor` under Increase
-    /// Contrast.
+    /// holds `readingFloor(increaseContrast:)`.
     public func readingGlassFill(increaseContrast: Bool) -> GlassFill {
         readingGlassFill(inks: readingInks, increaseContrast: increaseContrast)
     }
@@ -60,11 +83,13 @@ extension KiwiShelf {
         inks: [(ink: String, layer: String?)],
         increaseContrast: Bool
     ) -> GlassFill {
-        let floor = increaseContrast ? Self.idleInkFloor : Self.readingInkFloor
-        return GlassFill(
+        GlassFill(
             hex: fillColor,
             fade: fillFade,
-            minShare: readingShare(holding: floor, inks: inks)
+            minShare: readingShare(
+                holding: readingFloor(increaseContrast: increaseContrast),
+                inks: inks
+            )
         )
     }
 
@@ -105,11 +130,10 @@ extension KiwiShelf {
     /// The far end of KiwiHub's selection and hover fills: Fill
     /// fade's own share, never below `highlightFloorShare`, and
     /// raised to the share at which each fill's ink holds the
-    /// reading floor (`idleInkFloor` under Increase Contrast) over
-    /// the panel's both ends (`HighlightFadeContrastTests`).
+    /// reading floor (`readingFloor(increaseContrast:)`) over the
+    /// panel's both ends (`HighlightFadeContrastTests`).
     public func highlightFadeShare(increaseContrast: Bool) -> CGFloat {
-        let floor =
-            increaseContrast ? Self.idleInkFloor : Self.readingInkFloor
+        let floor = readingFloor(increaseContrast: increaseContrast)
         let base = max(
             GlassTint.farShare(fade: fillFade),
             Self.highlightFloorShare

@@ -113,6 +113,10 @@ public struct KiwiShelf: Sendable, Equatable {
     /// wear the Fill on `.clear` glass with the active rim; off,
     /// they draw today's frosted, untinted glass (#2569).
     public var tintHubAndPlates = true
+    /// The contrast a reading surface's worst ink holds at the
+    /// fade's far end (#2569): Lua/CLI only, within
+    /// `readingContrastRange`; 1 leaves the full fade.
+    public var readingContrast = KiwiShelf.readingInkFloor
     /// The border's colour (#1679): `itemColor`'s hex at alpha
     /// 0x59, spelled out (`ShelfBorderTests` pins the relation) and
     /// held against the wallpaper the plate blends into

@@ -124,7 +124,7 @@ extension KiwiShelfCard {
         case .pocketPosition:
             pocketPositionRow
         case .fontSize, .glyphSize, .liquidGlass, .dimFactor, .revealTimeout,
-            .fillFade, .tintHubAndPlates,
+            .fillFade, .tintHubAndPlates, .readingContrast,
             .spaceBarScreenEdge, .appBarScreenEdge, .fillColor,
             .borderColor, .itemColor, .activeItemColor, .highlightColor,
             .hoverFillColor, .hoverItemColor, .groupBadgeColor,

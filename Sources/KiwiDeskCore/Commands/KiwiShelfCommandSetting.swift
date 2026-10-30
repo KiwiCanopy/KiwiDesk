@@ -31,6 +31,7 @@ enum KiwiShelfCommandSetting {
     case pocketPosition(CGFloat)
     case fillFade(CGFloat)
     case tintHubAndPlates(Bool)
+    case readingContrast(Double)
     case color(WritableKeyPath<KiwiShelf, String>, String)
 
     /// Parses a setter's field (the verb minus `set_`) and args.
@@ -134,6 +135,11 @@ enum KiwiShelfCommandSetting {
                 value.isFinite
             else { return .failure("expected a percentage") }
             return .success(.fillFade(value))
+        case "reading_contrast":
+            guard let value = args.first?.numberValue,
+                value.isFinite
+            else { return .failure("expected a contrast ratio (1–4.5)") }
+            return .success(.readingContrast(value))
         case "reveal_timeout":
             guard let value = args.first?.numberValue,
                 value.isFinite
@@ -237,6 +243,8 @@ enum KiwiShelfCommandSetting {
         case .tintHubAndPlates(let value): shelf.tintHubAndPlates = value
         case .fillFade(let value):
             shelf.fillFade = KiwiShelf.clampFillFade(value)
+        case .readingContrast(let value):
+            shelf.readingContrast = KiwiShelf.clampReadingContrast(value)
         case .color(let path, let hex): shelf[keyPath: path] = hex
         }
     }
