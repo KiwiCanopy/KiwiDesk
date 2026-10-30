@@ -2170,7 +2170,12 @@ editing here:
   docstring, the one home of the measurement. A window that
   left WITH ITS DESKTOP keeps its capture — the restore sweep
   spares every id the away ledger knows — so it comes back to
-  its place, not the middle. And a `captureState` consumer
+  its place, not the middle — while it returns on the screen it
+  left; an arrival on another screen drops the capture through
+  the one `dropCaptureLeftOnAnotherScreen`, ahead of the fold, so
+  the landing frame stands as a drag's does (#2770,
+  `JumpMoveHereCrossScreenTests`, `JumpMoveHereTargetWiringTests`).
+  And a `captureState` consumer
   takes `sessionSnapshot`, never `state.snapshot()`, which
   writes a parked float's corner into the session file. Held by
   `StashCornerLiftTests`, `FloatStrandRecoveryTests` (the

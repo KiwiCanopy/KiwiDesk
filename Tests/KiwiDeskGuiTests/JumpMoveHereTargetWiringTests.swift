@@ -50,4 +50,21 @@ struct JumpMoveHereTargetWiringTests {
             )
         }
     }
+
+    /// A cross-screen arrival drops the capture it left with, in
+    /// the arrival arm ahead of the fold, which consumes the away
+    /// entry the drop asks about (#2770).
+    @Test("the arrival arm drops a stale capture ahead of the fold")
+    func arrivalDropsTheStaleCapture() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Events.swift"
+            )
+        let source = try SourceScan.blankedSource(at: file)
+        let drop = try #require(
+            source.range(of: "dropCaptureLeftOnAnotherScreen(window)")
+        )
+        let fold = try #require(source.range(of: "state.apply(event)"))
+        #expect(drop.lowerBound < fold.lowerBound)
+    }
 }

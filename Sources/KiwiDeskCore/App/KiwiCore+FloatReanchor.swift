@@ -109,4 +109,33 @@ extension KiwiCore {
             reanchorFloat(id, to: space)
         }
     }
+
+    /// Drops an away window's float capture where it arrives on
+    /// another screen than the capture's (#2770): the capture is
+    /// where it left, and delivered it pulls the window back there,
+    /// so the landing frame stands, as a drag's does. An unread
+    /// screen keeps the capture.
+    func dropCaptureLeftOnAnotherScreen(_ window: ManagedWindow) {
+        guard state.awayWindows[window.id] != nil,
+            let capture = tiler.stashOriginal(window.id)
+        else { return }
+        let arriving = TilingEngine.screen(containing: window.frame)?
+            .kiwiDisplayID
+        let left = TilingEngine.screen(containing: capture)?
+            .kiwiDisplayID
+        guard Self.captureIsElsewhere(arriving: arriving, left: left)
+        else { return }
+        tiler.forgetStash(window.id)
+        onLog("arrival: w\(window.id.raw) left its capture on another screen")
+    }
+
+    /// Whether a capture taken on `left` is stale for a window
+    /// arriving on `arriving`: both read, and apart.
+    nonisolated static func captureIsElsewhere(
+        arriving: DisplayID?,
+        left: DisplayID?
+    ) -> Bool {
+        guard let arriving, let left else { return false }
+        return arriving != left
+    }
 }
