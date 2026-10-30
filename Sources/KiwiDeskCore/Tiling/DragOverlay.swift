@@ -1,11 +1,10 @@
 import AppKit
 
-/// Visual drag feedback overlay showing ghost slot and drop
-/// zone highlights. Both are borderless click-through panels
-/// that never take focus or join the window cycle; frames are
-/// AX coordinates, flipped at the AppKit boundary. Under Liquid
-/// Glass a marker is glass tinted by its fill, fading downward,
-/// with its border kept solid on top (#1620).
+/// Visual drag feedback: the ghost at the dragged window's home slot
+/// and the drop zone at the slot a drop would swap with (#2797).
+/// Both are borderless click-through panels that never take focus or
+/// join the window cycle; frames are AX coordinates, flipped at the
+/// AppKit boundary.
 @MainActor
 public final class DragOverlay {
     /// One marker's panel and the drawing it hosts.
@@ -41,87 +40,34 @@ public final class DragOverlay {
         dropZone?.panel.isVisible ?? false
     }
 
-    /// Marks the dragged window's home slot in AX coordinates.
-    /// `glassBeneath` is the dragged window when the marker is
-    /// glass, nil when it is flat: ONE argument, so a glass marker
-    /// cannot exist without the window it sits directly beneath —
-    /// at the normal level, re-ordered there on every show — so the
-    /// glass never blurs the window in hand (#1620). Flat markers
-    /// keep the floating level.
+    /// Marks the dragged window's home slot in AX coordinates, the
+    /// panel directly beneath `window`, the window being dragged.
     public func showGhost(
         at frame: CGRect,
-        style: DragVisual,
-        stroke: WindowStroke,
-        glassBeneath window: CGWindowID?,
-        sheen: CGFloat
+        cornerRadius: CGFloat,
+        beneath window: CGWindowID
     ) {
         let marker = ghost ?? Marker(panel: makePanel())
         ghost = marker
-        show(
-            marker,
-            at: frame,
-            style: style,
-            stroke: stroke,
-            beneath: window,
-            sheen: sheen
-        )
+        place(marker.panel, at: frame, below: window)
+        marker.view.renderGhost(cornerRadius: cornerRadius)
     }
 
-    /// Marks the swap target's slot in AX coordinates, glass and
-    /// ordered like the ghost.
-    public func showDropZone(
+    /// Marks the swap target's slot in AX coordinates, ordered like
+    /// the ghost, on `surface` from `LiquidGlassGate.rendered(frost:)`.
+    func showDropZone(
         at frame: CGRect,
-        style: DragVisual,
-        stroke: WindowStroke,
-        glassBeneath window: CGWindowID?,
-        sheen: CGFloat
+        cornerRadius: CGFloat,
+        surface: DragMarkerView.Surface,
+        beneath window: CGWindowID
     ) {
         let marker = dropZone ?? Marker(panel: makePanel())
         dropZone = marker
-        show(
-            marker,
-            at: frame,
-            style: style,
-            stroke: stroke,
-            beneath: window,
-            sheen: sheen
+        place(marker.panel, at: frame, below: window)
+        marker.view.renderDropZone(
+            cornerRadius: cornerRadius,
+            surface: surface
         )
-    }
-
-    private func show(
-        _ marker: Marker,
-        at frame: CGRect,
-        style: DragVisual,
-        stroke: WindowStroke,
-        beneath window: CGWindowID?,
-        sheen: CGFloat
-    ) {
-        place(
-            marker.panel,
-            at: adjustedFrame(frame, style: style, width: stroke.width),
-            below: window
-        )
-        marker.view.render(
-            style,
-            stroke: stroke,
-            glass: window != nil,
-            sheen: sheen
-        )
-    }
-
-    private func adjustedFrame(
-        _ frame: CGRect,
-        style: DragVisual,
-        width: CGFloat
-    ) -> CGRect {
-        guard style.border else { return frame }
-        let offset = width / 2
-        switch style.borderAlignment {
-        case .inside:
-            return frame.insetBy(dx: offset, dy: offset)
-        case .outside:
-            return frame.insetBy(dx: -offset, dy: -offset)
-        }
     }
 
     public func hideGhost() {
@@ -137,12 +83,13 @@ public final class DragOverlay {
         hideDropZone()
     }
 
-    /// Sets the frame and orders the panel in: above everything,
-    /// or directly beneath `window` at the normal level.
+    /// Sets the frame and orders the panel in at the normal level,
+    /// directly beneath `window`: never over a bar or the pocket, and
+    /// never blurring the window in hand (#1620, #2797).
     private func place(
         _ panel: NSPanel,
         at frame: CGRect,
-        below window: CGWindowID?
+        below window: CGWindowID
     ) {
         panel.setFrame(
             GeometryUtils.flip(
@@ -151,20 +98,11 @@ public final class DragOverlay {
             ),
             display: true
         )
-        if let window {
-            // Every show, not only on a change: a window raised
-            // mid-drag would otherwise bury the marker, which the
-            // floating level could never be (the sticky mark's
-            // re-order is the same shape).
-            panel.level = .normal
-            panel.order(.below, relativeTo: Int(window))
-            return
-        }
-        guard !panel.isVisible || panel.level != .floating else {
-            return
-        }
-        panel.level = .floating
-        panel.orderFrontRegardless()
+        // Every show, not only on a change: a window raised mid-drag
+        // would otherwise bury the marker (the sticky mark's
+        // re-order is the same shape).
+        panel.level = .normal
+        panel.order(.below, relativeTo: Int(window))
     }
 
     private func makePanel() -> NSPanel {
@@ -178,7 +116,7 @@ public final class DragOverlay {
         panel.backgroundColor = .clear
         panel.hasShadow = false
         panel.ignoresMouseEvents = true
-        panel.level = .floating
+        panel.level = .normal
         panel.isReleasedWhenClosed = false
         panel.animationBehavior = .none
         panel.collectionBehavior = [

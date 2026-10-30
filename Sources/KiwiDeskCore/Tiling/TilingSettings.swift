@@ -64,13 +64,13 @@ public struct TilingSettings: Sendable, Equatable {
     public var floatingStyle = FloatingStyle()
     /// Pocket mark appearance (`pocket.*`, #2671).
     public var pocketStyle = PocketStyle()
-    /// Drag ghost visual settings (`drag.ghost`).
+    /// The drag ghost's switch (`drag.ghost`).
     public var dragGhost = DragVisual.ghostDefault
-    /// Drag drop zone visual settings (`drag.drop_zone`).
+    /// The drag drop zone's switch (`drag.drop_zone`).
     public var dragDropZone = DragVisual.dropZoneDefault
-    /// Liquid Glass on the drag ghost and drop zone (#1620) — one
-    /// leaf for both markers, written by the one Liquid Glass row
-    /// beside the shelf's and the panel's (#1307).
+    /// Liquid Glass on the drop zone (#1620, #2797), written by the
+    /// one Liquid Glass row beside the shelf's and the panel's
+    /// (#1307); the ghost is an outline and wears none.
     public var dragLiquidGlass = true
     /// Per-trigger animation settings (`animations.*`).
     public var animations = AnimationSettings()

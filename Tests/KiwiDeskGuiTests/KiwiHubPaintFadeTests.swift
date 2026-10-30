@@ -47,12 +47,16 @@ struct KiwiHubPaintFadeTests {
             axis: Self.axis,
             increaseContrast: increaseContrast
         )
-        let share = try #require(paint.fadeShare)
         let expected = shelf.highlightFadeShare(
             increaseContrast: increaseContrast
         )
+        // A share of 1 is no fade: the paint draws flat.
+        guard expected < 1 else {
+            #expect(paint.fadeShare == nil)
+            return
+        }
+        let share = try #require(paint.fadeShare)
         #expect(share == expected)
-        #expect(share < 1)
     }
 
     @Test("No axis, or the untinted paint, draws flat")

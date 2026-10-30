@@ -31,6 +31,7 @@ paths:
   - "Sources/KiwiDesk/Settings/HomeCardPlate+ShelfStrip.swift"
   - "Sources/KiwiDeskCore/Layouts/KiwiShelf*.swift"
   - "Sources/KiwiDeskCore/Layouts/Shelf*.swift"
+  - "Sources/KiwiDeskCore/Layouts/PocketMarkGeometry.swift"
   - "Sources/KiwiDeskCore/Layouts/SpaceBarStyle*.swift"
   - "Sources/KiwiDeskCore/Layouts/AppBarStyle*.swift"
   - "Sources/KiwiDeskCore/Layouts/LayoutAppBar*.swift"
@@ -38,6 +39,8 @@ paths:
   # The edge folds (reserve, hide) and the bars' visibility door
   # (#1524, #761).
   - "Sources/KiwiDeskCore/Tiling/TilingSettings+Shelf.swift"
+  # Where the pocket rests and the strip it keeps (#2784).
+  - "Sources/KiwiDeskCore/Tiling/TilingSettings+PocketRest.swift"
   # Glass hosts outside Bar/ (#1620, #1621): they take their tint
   # through GlassTint.apply and their stand-down through the gate,
   # whose obligations live here.
@@ -120,19 +123,22 @@ twice, was a question the user answered twice. The argument is
   registered, ▸ `retiredCallIsAnIssue` that `init.lua` reports
   one as its own Config Issue.
 - **Reserve each edge a bar draws on through the one
-  `TilingSettings.layoutBounds(from:mode:on:)`, listed by the one
-  `shelfEdges(in:on:)`, unless every bar drawing on that edge has
-  `reserve` off (#1524)** — `barEdges(space:app:)`'s reserving
+  `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)`,
+  listed by the one `shelfEdges(in:on:)`, unless every bar
+  drawing on that edge has `reserve` off (#1524)** —
+  `barEdges(space:app:)`'s reserving
   subset, while the live plan (`KiwiCore.shelfPlans`) takes
   `barEdges` whole, so the strips drawn and the edges reserved
   come from one derivation — the Space
   Bar's edge in every layout
   while it is not `hidden`, the App Bar's only in the layouts
   whose own App Bar is not `hidden` and only where the Space Bar
-  does not already hold it — never a layout, a bar or a mode carving a strip of
-  its own, and never a second "does a bar draw here" predicate
-  beside it. A switch between two layouts that draw on the same
-  edges moves no window; a switch into or out of a layout whose
+  does not already hold it — never a layout, a bar or a mode
+  carving a strip of its own, save the pocket's resting strip (▸
+  The pocket is a shelf section), and never a second "does a bar
+  draw here" predicate beside it. A switch between two layouts
+  that draw on the same edges moves no window; a switch into or
+  out of a layout whose
   App Bar draws on an edge nothing else holds is the ruled price
   (`docs/design-decisions.md` ▸ One shelf holds both bars).
   `ShelfGeometryTests` ▸ `reservesWhereABarDraws` holds the fused
@@ -151,8 +157,9 @@ twice, was a question the user answered twice. The argument is
   live plan reads every edge `barEdges` lists, `shelfEdges(in:on:)`
   keeps the reserving ones, the float region carves only the
   painted strips on those edges (`KiwiCore.reservedStrips`),
-  and a bar write that leaves `shelfReservation(in:on:)` alone
-  repaints the bars and re-clamps the floats without a pass.
+  and a bar write that leaves
+  `shelfReservation(in:on:pocketAtRest:)` alone repaints the bars
+  and re-clamps the floats without a pass.
   `reserve` is a bar's own, global like
   its edge (`AppBarStyle.layoutFixedKeys`). **A per-screen edge
   (#1948) resolves before this fold, through the one
@@ -185,8 +192,8 @@ twice, was a question the user answered twice. The argument is
   TYPE `[String: AppBarEdge]`, module-wide: a store of that type
   that must encode an empty map takes a type of its own.
   **A new input to `layoutBounds` enters
-  through `shelfReservation(in:on:)`, and the skip comparison
-  covers every axis that input is keyed by** —
+  through `shelfReservation(in:on:pocketAtRest:)`, and the skip
+  comparison covers every axis that input is keyed by** —
   `KiwiCore.shelfReservations` compares every mode on every
   connected screen, or a bar write skips a pass the bounds owed
   (`ScreenEdgeCoreTests` ▸ `screenWriteOwesThePass`).
@@ -201,7 +208,8 @@ twice, was a question the user answered twice. The argument is
   bar (`ShelfEdge.reservation`: `always` over `auto` over
   `hidden`, so a `hidden` bar's `reserve` reserves nothing), an
   `auto` edge only its constant sliver (`hidingEdges`,
-  `KiwiShelf.hiddenReservation`) and a `hidden` one nothing; what a
+  `KiwiShelf.hiddenReservation`) and a `hidden` one nothing, save
+  where the pocket rests (▸ The pocket is a shelf section); what a
   bar shows at rest beside its sibling is the one `ShelfEdge.shown`,
   never a comparison at a call site. The fold reads stored values,
   never what a layout draws, so a layout switch moves windows only
@@ -755,13 +763,14 @@ render content into it (#1517). Obligations:
   gates it** in `OverlayGlassGateTests` ▸ `everyGlassHostIsGated`,
   derived from `GlassPlate.make(` callers — the one copy of who
   hosts glass, so a new host reds until it has a gate. The drag
-  markers and the sticky mark host
+  drop zone and the sticky mark host
   glass the same way and take the same rule where each is
-  rendered — `handleDragMove` when a marker shows,
+  rendered — `handleDragMove` when the drop zone shows,
   `updateStickyMarks`, which the flip re-runs — handing the gate
   the stored leaf once (`OverlayGlassGateTests` ▸
   `overlaysTakeTheGate`, `OverlayGlassTests` ▸ `gateStandsDown`).
-  Their stood-down look is their flat one, not made opaque
+  Their stood-down look is see-through, never made opaque — the
+  drop zone's flat grey plate, the mark's badge
   (`docs/design-decisions.md` ▸ Reduce transparency).
 - **Every rule a bar draws takes its geometry and ink from
   `BarDivider`** — the in-item rule, the layer and front-app
@@ -817,6 +826,30 @@ pocket rides every motion the shelf plays. Obligations:
   the one `PocketMarkGeometry`, which the shelf's placement and the
   risen size read too. A box for it is a ruling in
   `docs/design-decisions.md` first.
+- **How the pocket rests is asked of the one
+  `TilingSettings.pocketRest`** (#2784) — a section, the handle, or
+  the whole mark on an edge no bar sits on while the bars read
+  Always — by the reservation (`pocketReservation`), the whole
+  mark's drawing and the float region (`reservedStrips`); a live
+  section stands only where the bar pass draws a bar
+  (`pocketPlate.slots`). The pocket's strip enters `layoutBounds`
+  only through `shelfReservation(in:on:pocketAtRest:)`, an edge
+  reserving the deepest strip it is asked for
+  (`ShelfReservation.depth(of:)`).
+  Every edge handle — the dots, the line and the kiwis — rests the
+  one `KiwiShelf.hiddenDepth` deep, which the reservation reads
+  too, never a depth of its own (`PocketReservationTests` ▸
+  `autoEdgeTakesTheDeeper`, `PocketReservationCoreTests` ▸
+  `wholeFollowsTheRest`).
+- **An app-wide write that moves `shelfReservations` owes a pass,
+  and one that moves none a repaint** — the capacity is the first
+  input to the bounds no bar write carries: it reaches them through
+  `TilingEngine.pocketAtRest` — the capacity alone, never
+  `pocketStands`, so a drag or a play never retiles — which
+  `shelfReservations` reads too, and `appWideLiveChanged` compares
+  the reservations either side (`PocketReservationCoreTests` ▸
+  `capacityMovesTheBounds`,
+  `sectionMovesNothing`).
 - **A play lights the standing pocket; a count change lights it only
   where no play runs** (#2776): `playBriefPocket` schedules
   `PocketPlateOverlay.light` on `DeferredTasks.Key.pocketLight`, and
@@ -825,8 +858,8 @@ pocket rides every motion the shelf plays. Obligations:
 - **Every pocket panel — the section and the handle — stands at
   `BarPanel.pocketLevel`, a level above the shelf's, and is never
   lowered to it**: a click fronts the shelf's panel within its
-  level, which under Full spans the pocket's slot, and a window
-  drag's ghost and drop zone share the bars' level (#2776,
+  level, which under Full spans the pocket's slot (#2776; the drag
+  markers sit at window level since #2797,
   `PocketBareMarkTests` ▸ `sectionStandsAboveTheShelf`,
   `PocketHandleTests` ▸ `dragRises` for the handle during a drag;
   at rest, review's). Within a shared level the
@@ -1030,8 +1063,8 @@ Obligations:
   decided once in `BarPeekPanel.show` through the gate
   (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted like the
   bar, fading from the shelf's edge but never past the reading
-  floor, `KiwiShelf.readingGlassFill` — the bars' own ink floor
-  under Increase Contrast (#2569, overturning #1946's uniform
+  floor, `KiwiShelf.readingGlassFill` at
+  `readingFloor(increaseContrast:)` (#2569, overturning #1946's uniform
   tint; `PeekInkContrastTests` measures both ends, a hovered
   row's included); its shelf is the one
   `ShelfManager` drew the anchor's panel with; its text asks
@@ -1519,7 +1552,7 @@ Obligations:
   outside `GlassPlate`, in either Sources tree).
 - **Build the fade in `GlassTint.apply`, from an edge every call
   site hands it — never a default** (#1622). A surface on no
-  screen edge — the drag markers, the sticky mark — hands `.top`
+  screen edge — the drag drop zone, the sticky mark — hands `.top`
   by ruling, a fade downward (#1620, #1621). The
   backdrop is a `GlassBackdrop`, whose BACKING layer is the
   gradient so it rides the plate glide; a sublayer would jump to
@@ -1534,9 +1567,10 @@ Obligations:
   surface's Fill carries the floor its ink needs as `minShare`,
   minted by `readingGlassFill` and never a share typed at a call
   site. An EMPTY Fill is no colour there —
-  clear glass, nothing pinned — which the drag marker's fill-off
-  and the sticky mark's Automatic both hand it
-  (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
+  clear glass, nothing pinned — which the drop zone, untinted
+  since #2797, and the sticky mark's Automatic both hand it
+  (`DragMarkerSurfaceTests` ▸ `dropZoneIsUntintedGlass`,
+  `OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
   whether a Fill has a colour through the one
   `KiwiShelf.hasColour` — empty, unparseable and zero alpha are
   one state (#2569) — and paint a solid Fill through
@@ -1592,13 +1626,13 @@ Obligations:
   layout — rather than removing them; that ownership is #2425's
   open half.
 - **A glass surface is thinned only by a ruling, and only on its
-  own view's opacity.** Both drag markers' glass sits at
+  own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays
   readable (owner, device 2026-09-25); there the
   `maxAlpha` premise — a floor on how much refraction survives —
   does not hold, by that ruling. A second thinned surface argues
   its own entry in `docs/design-decisions.md` first
-  (`OverlayGlassTests` ▸ `markerGlassIsThinned`).
+  (`DragMarkerSurfaceTests` ▸ `dropZoneIsUntintedGlass`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —
@@ -1621,10 +1655,13 @@ Obligations:
   the cap is the bar's own ink, which is fixed palette hex with
   no vibrancy path, so the plate is its legibility floor at the
   fade's anchor edge. At the far end a READING surface's ink is
-  held by `KiwiShelf.readingInkFloor` (`idleInkFloor` under
-  Increase Contrast), never by the #1308 pin, and that number is
-  retuned on real glass over white and black, as its docstring
-  says (#2569, `PeekInkContrastTests`); the bars follow Fill fade
+  held by `KiwiShelf.readingFloor(increaseContrast:)` — the
+  user's `reading_contrast`, default `readingInkFloor`, raised to
+  `increasedReadingInkFloor` under Increase Contrast — never by
+  the #1308 pin. A new reading surface takes its floor from that
+  function, never from a constant, and the defaults are retuned
+  on real glass over white and black, as their docstrings say
+  (#2569, `PeekInkContrastTests`); the bars follow Fill fade
   without a floor. A retune of either measures the ink at both
   ends, Fill fade at 100.
 - **The glass's light/dark variant is PINNED from the Fill in

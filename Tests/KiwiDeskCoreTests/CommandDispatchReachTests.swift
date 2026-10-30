@@ -67,7 +67,6 @@ struct CommandDispatchReachTests {
         "unknown bar setting: ",
         "unknown space bar setting: ",
         "unknown kiwishelf setting: ",
-        "unknown drag setting: ",
     ]
 
     /// `"unknown …:` literals that refuse an ARGUMENT — the arm

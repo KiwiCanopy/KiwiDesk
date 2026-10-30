@@ -435,11 +435,13 @@ the one `pocketStands`** — Several windows, a drag, a play — which
 the plan and the pocket both read (`PocketShelfWiringTests` ▸
 `dragStandsThePocket`). **Where it
 is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
-off `ShelfArrangement.arrange(…pocket:)`, else its handle risen —
-on an Auto edge where the shown pocket stands, joining the row of
-marks where it would meet it (`ShelfMarkPlacement.row`,
-`ShelfRevealBandTests` ▸ `handleStandsOnTheSlot`),
-else at Position — never a frame of its own beside them. On a bar
+off `ShelfArrangement.arrange(…pocket:)`, else the whole mark
+(`pocketMarkFrame(on:)`) where `TilingSettings.pocketRest` says
+`.mark` (#2784), else its handle risen — on an Auto edge where
+the shown pocket stands, joining the row of marks where it would
+meet it (`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
+`handleStandsOnTheSlot`), else at Position — never a frame of its
+own beside them. On a bar
 edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
 pocket is a shelf section.
 **What it counts, shows for and lists is the one
@@ -840,8 +842,8 @@ is review's (`HyperBarePressCueTests`, `RefusalCueSeamTests`).
 
 ## The sheen is one ramp, painted by the surface that owns the stroke
 
-`border.sheen` (#1644) reaches the focused ring, the shelf's
-highlight and border, and the drag borders. **A surface paints it
+`border.sheen` (#1644) reaches the focused ring and the shelf's
+highlight and border. **A surface paints it
 from `BorderSheen`'s colours** — `SheenRimView` for a view, the
 shared `BorderSheen.draw` for a context, a Settings picture
 through `SheenPaint` — never a ramp of its own, and reads the
@@ -856,8 +858,9 @@ move (`BorderSheenFlatBandTests`).
 
 **A stroke KiwiDesk draws around a window takes its width and
 corner style from the focus border, and stores none of its
-own** (#1742): the drag markers read them through
-`TilingSettings.windowStroke`, and a new marker surface reads
+own** (#1742), save a line whose width a ruled design fixes —
+the drag markers', which take the corner style alone through
+`TilingSettings.windowStroke` (#2797); a new marker surface reads
 the same. Do not re-add a per-stroke width or radius, in the
 model, a verb or a look — the split drifted three times, each
 fix a fan-out to keep the stores agreeing (#754, #1739), and the

@@ -230,6 +230,10 @@ extension KiwiCore {
                 self?.screenFingerprint(of: $0)
             }
         }
+        // A resting pocket's edge reserves its strip (#2784).
+        tiler.pocketAtRest = { [weak self] in
+            self?.pocketHoldsSeveral ?? false
+        }
         // The loop owns whether an app's EUI is on at rest; the
         // applier's holds only borrow it (#1508).
         tiler.applier.enhancedUIAtRest = { [weak self] pid in

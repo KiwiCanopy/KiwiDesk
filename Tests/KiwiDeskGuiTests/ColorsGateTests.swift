@@ -116,29 +116,6 @@ struct ColorsGateTests {
             ColorsAndGlassGates(settings: settings)
                 .verdict(for: focusedItem) == nil
         )
-
-        // A drag tint names its visual's switch first, its own
-        // part's second.
-        settings.dragGhost.enabled = false
-        settings.dragGhost.border = false
-        gates = ColorsAndGlassGates(settings: settings)
-        #expect(
-            gates.verdict(for: .borders(.dragGhostBorderColor))?.help
-                == ColorsAndGlassHelp.dragOff
-        )
-        #expect(
-            gates.verdict(for: .borders(.dragDropZoneBorderColor))
-                == nil
-        )
-        settings.dragGhost.enabled = true
-        gates = ColorsAndGlassGates(settings: settings)
-        #expect(
-            gates.verdict(for: .borders(.dragGhostBorderColor))?.help
-                == ColorsAndGlassHelp.dragBorderOff
-        )
-        #expect(
-            gates.verdict(for: .borders(.dragGhostFillColor)) == nil
-        )
     }
 
     /// A role group draws ONE link per page whose switch dims a
@@ -163,29 +140,16 @@ struct ColorsGateTests {
             ).isEmpty
         )
 
-        // Every bar hidden, the ring off and the ghost's border
-        // off: a hidden bar greys no colour (#761), so the ring's
-        // page alone.
+        // Every bar hidden and the ring off: a hidden bar greys no
+        // colour (#761), so the ring's page alone.
         settings.spaceBarStyle.visibility = .hidden
         settings.monocle.appBar.visibility = .hidden
         settings.scrolling.appBar.visibility = .hidden
         settings.borderStyle.enabled = false
-        settings.dragGhost.border = false
         gates = ColorsAndGlassGates(settings: settings)
         #expect(
             gates.dimmedDestinations(
                 of: ColorsRowOrder.accentRows
-            ) == [.gapsAndBorders]
-        )
-
-        // The drop zone off dims only the Second accent's drag
-        // rows; with the bars back, Gaps & Borders alone.
-        settings.spaceBarStyle.visibility = .always
-        settings.dragDropZone.enabled = false
-        gates = ColorsAndGlassGates(settings: settings)
-        #expect(
-            gates.dimmedDestinations(
-                of: ColorsRowOrder.secondAccentRows
             ) == [.gapsAndBorders]
         )
 

@@ -1040,7 +1040,8 @@ the backstop for one spelling of a dropped bump — a floor past
 its shape's `currentFormat` — and is blind to a floor equal to
 an un-bumped one. It reads a floor's shape from its name, so a
 `static let` floor in a `ConfigMigration+` file ends in
-`BundleFormat`, `GuiFormat`, `PaletteFormat` or `ProfileFormat`
+`BundleFormat`, `GuiFormat`,
+`LookFormat`, `PaletteFormat` or `ProfileFormat`
 and is an integer literal; a floor kept in a table owes that
 census a reader of the table, as `MachineConfig.moves` has.
 

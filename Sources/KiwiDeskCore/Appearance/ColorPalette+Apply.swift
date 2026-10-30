@@ -41,8 +41,6 @@ extension ColorPalette {
                 .apply(to: &settings.spaceBarStyle)
         case "border" where parts.count == 2:
             applyBorder(parts[1], hex, to: &settings.borderStyle)
-        case "drag" where parts.count == 3:
-            applyDrag(parts[1], parts[2], hex, to: &settings)
         // The mark tints (#678 Colours phase, #2671). Each struct
         // IS the mark, so its one color key is bare `color`.
         case "sticky" where parts == ["sticky", "color"]:
@@ -64,27 +62,6 @@ extension ColorPalette {
         switch key {
         case "focused_color": border.focusedColor = hex
         case "unfocused_color": border.unfocusedColor = hex
-        default: break
-        }
-    }
-
-    private func applyDrag(
-        _ element: String,
-        _ key: String,
-        _ hex: String,
-        to settings: inout TilingSettings
-    ) {
-        let keyPath: WritableKeyPath<TilingSettings, DragVisual>
-        switch element {
-        case "ghost": keyPath = \.dragGhost
-        case "drop_zone": keyPath = \.dragDropZone
-        default: return
-        }
-        switch key {
-        case "border_color":
-            settings[keyPath: keyPath].borderColor = hex
-        case "fill_color":
-            settings[keyPath: keyPath].fillColor = hex
         default: break
         }
     }

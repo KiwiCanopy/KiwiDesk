@@ -49,9 +49,9 @@ struct SheenRow: View {
             Text(
                 L(
                     "colors.sheen.caption",
-                    "Lightens the top of the focus border, the bars' "
-                        + "highlight and border, and drag borders; "
-                        + "slide left to darken it instead."
+                    "Lightens the top of the focus border and the "
+                        + "bars' highlight and border; slide left to "
+                        + "darken it instead."
                 )
             )
             .font(.caption)

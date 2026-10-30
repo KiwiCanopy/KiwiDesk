@@ -44,7 +44,7 @@ vocabulary spans Lua and profile JSON:
   `layout.bsp.ratio_h`, `stack.set_master_ratio` →
   `layout.stack.master_ratio`. Multi-part element names nest
   further when the element is a configurable unit:
-  `drag.set_ghost_fill_color` → `drag.ghost.fill_color`.
+  `drag.set_ghost_enabled` → `drag.ghost.enabled`.
   **A `set_X` verb whose optional scope argument (a screen, a
   Space) writes a sparse map stores that map at `X_override`
   beside `X`, keyed by the scope's identifier** — a Space by its

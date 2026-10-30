@@ -43,6 +43,8 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     private(set) var handleEdge: AppBarEdge?
     /// Whether the pocket is out of its handle, and at what side.
     private(set) var risen = false
+    /// The whole mark stands at rest, with no handle (#2784).
+    private(set) var whole = false
     private var risenSide: CGFloat = 0
     /// The shelf's outer margin, kept clear between the edge and the
     /// handle as the bars' handles keep it (#2678).
@@ -85,10 +87,12 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         handle edge: AppBarEdge?,
         risen: Bool,
         side: CGFloat,
-        outer: CGFloat = 0
+        outer: CGFloat = 0,
+        whole: Bool = false
     ) {
         let rising = risen && !self.risen && edge != nil
         handleEdge = edge
+        self.whole = whole
         self.risen = risen
         risenSide = side
         self.outer = outer
@@ -107,8 +111,15 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
             pocket.frame = bounds
             return
         }
-        handle.isHidden = false
         let room = Self.room(in: bounds, edge: edge, outer: outer)
+        // The whole mark on an edge no bar shows: no tab (#2784).
+        guard !whole else {
+            handle.isHidden = true
+            pocket.isHidden = false
+            pocket.frame = room
+            return
+        }
+        handle.isHidden = false
         handle.frame = room
         pocket.isHidden = !risen
         pocket.frame = Self.risenFrame(in: room, edge: edge, side: risenSide)

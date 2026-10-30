@@ -31,7 +31,8 @@ extension TilingEngine {
         settings.layoutBounds(
             from: visibleBounds(screen),
             mode: space.mode,
-            on: fingerprint(of: screen)
+            on: fingerprint(of: screen),
+            pocketAtRest: pocketAtRest()
         )
     }
 }

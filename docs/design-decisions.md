@@ -6219,11 +6219,23 @@ so a point never opens one for the other. On a Hidden or empty edge
 it stands alone at Position.
 
 **A fixed handle; the risen pocket at the bar's size, its mark
-within 20 to 32 pt.** On an edge no bar shows, the handle is an
-edge mark like the Space dots and the App Bar line: the kiwis
-alone, looking out from behind a tab, the pocket out of sight, one
-outer margin in from the edge as the bars' handles sit (owner,
-device 2026-10-29). Its kiwis do not scale with the shelf. Risen —
+within 20 to 32 pt.** On an edge whose bars hide, Auto or Hidden,
+the handle is an edge mark like the Space dots and the App Bar
+line: the kiwis alone, looking out from behind a tab, the pocket
+out of sight, one outer margin in from the edge as the bars'
+handles sit (owner, device 2026-10-29). It rests 11 pt deep, the
+6 pt tab and 5 pt of kiwi — a whole point, so it lands on a pixel
+at 1x and 2x — as the bars' handles do, so a row of them reads as
+one (owner, 2026-10-30); its edge keeps its strip (#2784, the
+*Amended* under App Bar ▸ *A shelf can hide*). On an edge no bar
+sits on, the pocket follows the bars' Show, the more present of
+the two: under Always the whole bare mark stands at rest, a
+section deep and faded while empty, and the edge keeps the
+shelf's own strip; under Auto or Hidden it is the handle (owner,
+2026-10-30, overruling a handle on every edge no bar shows). The
+pocket is KiwiShelf's piece, and a user who puts it on another
+edge wants to see it there. Its kiwis do not scale with the shelf.
+Risen —
 on hover, a drag or a put-in or take-out — the pocket takes the
 size it has as a section on that edge's bar, mark for mark
 (#2776), so a Hidden bar's shortcut reveal and a hover show one
@@ -10613,11 +10625,11 @@ lens's chip, the draft's lens.
 
 **A composite question needs a composite picture, in the colours
 the user actually set.** (#793, owner 2026-08-16.) Advanced
-Colours edits twenty-five colours in four groups, and four group
-previews can answer "is this row right?" while leaving "do these
-work *together*?" unanswerable without saving and looking at the
-real desktop. The accent ladders, the two rings, the state marks
-and the drag pair are judged against each other. So the panel
+Colours edits its colours in groups, and group previews can
+answer "is this row right?" while leaving "do these work
+*together*?" unanswerable without saving and looking at the real
+desktop. The accent ladders, the two rings and the state marks
+are judged against each other. So the panel
 draws one scene holding every role at once — which does not
 contradict that page's own reasoning: grouping by *where you see
 it* decides the ROWS, and never settled whether the PICTURE should
@@ -14921,9 +14933,7 @@ don't assume from tone.
   tinted glyph is the *entire* active state — the item's own fill
   is clear. It is the largest mark either bar makes, so a palette
   that gives it the second hue has the subordinate colour
-  outshouting the item it qualifies. Neither palette loses the hue
-  it gave up: both still carry it on `drag.drop_zone.*`, where a
-  second signal reads as distinct rather than as competing. Where
+  outshouting the item it qualifies. Where
   the *focused* accent sits is the separation clause above's
   decision, not this one's.
 - **A primary that cannot carry the ring is LIGHTENED, never
@@ -15007,17 +15017,10 @@ don't assume from tone.
   migration on next launch is neither. It also means a retune can
   look like nothing happened to anyone with saved profiles; that
   is the cost.
-- **Drag ghost / drop-zone:** a deliberate two-hue split (border
-  opaque + fill ~15–25 %) so origin reads apart from target — and
-  it is held to the **same CVD separation floor as the two
-  accents** (#511, `DragPairSeparationTests`; **enforced**),
-  because origin and target are the only two overlays on screen at
-  once. **Target tracks `space_bar.focused_item_color`** — true
-  for the shipped default and every bundled palette but
-  Monochrome, Sunset and Ultraviolet, which keep a third colour and
-  clear the floor anyway. Origin is a green darkened for stroke duty,
-  but *not* necessarily the ring's green: see the overlay note
-  below for why the shipped ghost had to leave the hue family.
+- **Drag ghost / drop zone:** no colour of their own (#2797).
+  Origin and target separate by material and lightness, so no
+  colour-vision floor holds the pair (▸ Drag markers separate by
+  material, not hue).
 
 **The unfocused ring's grey sits at 85–90 % alpha with its
 LIGHTNESS set per palette** (#1384), so that the ring composites
@@ -15125,7 +15128,7 @@ brand-token change — shifting a brand hex means editing
 `bundled.json` by hand in the same change set.
 
 **Content overlays are the brand green, darkened for duty.** The
-focus ring and drag ghost paint over *arbitrary* third-party
+focus ring paints over *arbitrary* third-party
 window content. The bright kiwi accent (`#8DB354`/`#AACB5D`) is a
 fill-only color — too light to survive as a thin stroke on light
 windows (`#AACB5D` ≈ 1.5:1 on white, fails AA) — so the **ring**
@@ -15137,9 +15140,7 @@ full-saturation same-hue `#538A00` still did on device). So the
 ring leaves the 84° family, shifting ~12° toward true green to
 `#4A9816` (H96 S75 L34), which escapes the cast and still clears
 3:1 on near-white (~3.6:1) and near-black (~5.8:1) while staying
-unmistakably on-brand green. The **ghost** does not share the
-ring's hue — see the origin/target paragraph below (#511); the
-3:1-at-both-ends bar is what it keeps. The default ring width is 5
+unmistakably on-brand green. The default ring width is 5
 pt rather than 2: a thicker stroke is not just more visible, it
 reads at a *more saturated* color than a hairline can (a 2 pt
 line's anti-aliased edges wash its effective contrast out), which
@@ -15149,65 +15150,33 @@ still tiles cleanly with unfocused rings on: each ring reaches its
 width into the 10 pt default inner gap, so `2 × 5 = 10` fills the
 gap edge-to-edge without overlap (6 pt would overlap). That
 couples the width default to the gap default — changing either
-without the other re-opens or overlaps the ring band. The drag
-drop-zone keeps a distinct hue as a darkened amber `#C2790A` (the
-old `#E8A33D` had the same light-window problem), so origin still
-reads apart from target. The ring's ~12° hue shift (#578) is the
+without the other re-opens or overlaps the ring band. The ring's
+~12° hue shift (#578) is the
 one place the green-forward identity's rule for ink and borders —
 keep the hue, drop the lightness where a role needs contrast — is
 broken: at the contrast-mandated lightness the 84° hue had no
 non-mossy option left, so hue moved where lightness could not. The
-bars keep 84°; only the ring (and, separately, the ghost) leave
-it.
+bars keep 84°; only the ring leaves it.
 
-**The drag ghost is the one place that move ran out of room
-(#511).** Origin and target are the only two overlays on screen
-*simultaneously*, so they are the only pair that has to separate
-from each other, and a yellow-green against an amber is exactly
-what red-green vision loss erases — they measured **4.7/441**,
-worse than the 22 #470 called one colour. The target could not
-move (its amber is the hex the Space Bar's focused accent
-converged onto), so the ghost had to. What it could not keep was
-the ring's *chroma*: stacking the 3:1-on-both-ends bar onto the
-separation floor caps the ring's hue family at **S0.45**, so the
-ring's own S0.75 cannot satisfy all three at any lightness — the
-ghost could not simply be a darker or lighter `#588613`. Drop to
-the shipped ghost's S0.40 and the ring's hue does qualify, but
-only just: `#799D43` measures **61**, a point over the floor,
-where the emerald band (which caps at full saturation) gives
-**76** at the same chroma. That trade — chroma against separation,
-not impossibility — is pinned by
-`DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`,
-which is also where to start when re-deriving it; the numbers here
-are quoted from that guard rather than the other way round. So the
-ghost alone moved to a deep emerald `#347957` — hue 150, S0.40,
-**76/441**, 5.2:1 on near-white and 4.0:1 on near-black, margin on
-all three while keeping real chroma. The ring has no partner to
-separate from, so nothing asks it to move *for CVD*; its own shift
-to `#4A9816` is the unrelated moss reason (#578). Origin is
-therefore green-but-not-*the*-green, which is the cost, and the
-alternative (`#2F4A0C`, a yellow-green at 85/441) was rejected for
-falling to 2.11:1 on near-black — that would have traded a
-colour-vision defect for a contrast one. Bundled palettes follow
-the same rule: target tracks `space_bar.focused_item_color` in all
-but those three, without which Clean Light, Slate and True Dark ship
-origin and target as the *same hex* (separation 0, for every
-viewer, not only CVD). Monochrome, Sunset and Ultraviolet keep a
-third colour and already clear the floor.
-`DragPairSeparationTests` guards all of it.
+:::unreleased
+**The drag pair needs no colour-vision floor (#2797).** Origin
+and target were once the only two overlays on screen at once
+that had to separate by hue, and #511 held them to the accents'
+floor. They now separate by material and lightness (▸ Drag
+markers separate by material, not hue), which every viewer
+reads, so the floor and its guard retired with the hues.
+:::
 
 The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
 hue back up (`BorderStyle.glowColor`) instead of staying darkened.
 The Space Bar's own `focused_item_color` — a separate
-"viewing-not-active" semantic — converged onto the **same**
-`#C2790A` in #470 rather than getting its own amber. The bar owns
-its backdrop, so it never needed the drop-zone's *contrast*
-darkening; it turned out to need the identical darkening for a
+"viewing-not-active" semantic — converged in #470 onto
+`#C2790A`, then the drop zone's amber, rather than getting an
+amber of its own. The bar owns its backdrop, so it never needed a
+stroke's *contrast* darkening; it needed the same darkening for a
 different reason (state separation from the green under
-colour-vision deficiency — see the lightness clause above), and
-reusing the ratified hex beat minting a second amber for one
-palette.
+colour-vision deficiency — see the lightness clause above).
 
 **The App Bar has its own sidebar destination.** (#229; #293
 merged both bars into one **Bars** destination, and the #678 Phase
@@ -15255,14 +15224,14 @@ noticed something on screen is wrong, not looking for
 
 **Amended by #1857 (2026-10-11): the accent groups by role.**
 That premise fails for one colour. "My green" is one thing a user
-notices, drawn on four surfaces — the active Space, the bar's
-highlight, the focus border and the drag ghost — and the palette
-rules already treat it as one role, held apart from a second
-accent by the two colour-vision pair floors (active item against
-the Space Bar's focused window, the ghost against the drop zone).
+notices, drawn on three surfaces — the active Space, the bar's
+highlight and the focus border — and the palette rules already
+treat it as one role, held apart from a second accent by the
+colour-vision pair floor (active item against the Space Bar's
+focused window).
 So the colours open with two role groups side by side,
-**Accent** and **Second accent**, which are exactly one half of
-each pair, and groups by surface everywhere else, where the
+**Accent** and **Second accent**, one half of that pair each, and
+groups by surface everywhere else, where the
 premise holds. A role group is not a second home: every colour
 still renders in one place, which is why the ring's row there is
 "Focus border" and "Focused window" names only the Space Bar ink.
@@ -15273,17 +15242,16 @@ window marks — would invent a role no palette rule defines.
 its own** (#1857). Retinting a look used to mean editing each of
 the accent's wells in turn, so each role group carries one well,
 "Ticked rows", whose pick lands on every ticked row of the group
-— at that row's own alpha, since a hover fill and a ghost fill are
-the accent at their own strength, and a pick never makes a stroke
+— at that row's own alpha, since a hover fill is the accent at
+its own strength, and a pick never makes a stroke
 translucent. It stores nothing: the writes land on the existing
 leaves in the draft, so Revert is the undo and nothing migrates.
 The ticks are scratch, re-seeded each time the page opens from
 the palette itself — a row starts ticked when it already draws
 its group's first colour, ignoring alpha — because ticking by
 meaning would undo the palettes' own splits: the shipped default
-darkens its ring for stroke contrast and draws an emerald ghost
-for the drag pair, and a seed by meaning would paint the bar's
-green onto both the moment the page opened. A dimmed row is left
+darkens its ring for stroke contrast, and a seed by meaning would
+paint the bar's green onto it the moment the page opened. A dimmed row is left
 alone, and a row whose empty value follows another colour takes
 no tick at all, or a pick would pin a hex over that pairing.
 While the ticked rows differ, the well shows the first and says
@@ -15356,15 +15324,15 @@ list from the Home grid's card order, pinned set-equal to it by
 page above Bars would answer "App Bar" with a grid of swatches
 instead of with the App Bar's own card.
 
+:::unreleased
 **Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
-window's position with another), and Ghost / Drop zone are
-smaller subsections — each with a one-sentence caption
-("the position your window is dragged from" / "will snap
-into when dropped") instead of the parenthetical jargon
-titles ("dragged window", "swap target"). Section captions
-are a `SettingsSection` affordance, so other groups can
-adopt the same pattern.
+window's position with another), and its two toggles say what
+each one marks ("Show drop zone", "Mark where the window came
+from") instead of naming the marker. Section captions are a
+`SettingsSection` affordance, so other groups can adopt the same
+pattern.
+:::
 
 **[Principle] The drop target follows the cursor; a
 cross-display drop MOVES, a same-display drop swaps.** (#492.)
@@ -15504,34 +15472,56 @@ in its caption, which is contextual-help/Lua-reference work, not a
 Settings control. A future contributor must not re-derive "size is
 the user's choice" from the old #444/#493 record and revert this.
 
-**Ghost and Drop zone are two side-by-side columns.** (#231.) Each
-column leads with its own live preview and puts its controls
-directly beneath, so toggling a column's border or fill never
-scrolls that preview off-screen — the failure mode of the earlier
-one-strip-then-two-stacked-sections layout. They are a genuine A/B
-pair (same schema, edited by comparison), which is exactly where
-macOS System Settings itself reaches for twin panels (Displays'
-Arrangement, Desktop & Dock's light/dark), so twin columns state
-the pairing once instead of duplicating preview-then-controls
-structure. What a column keeps is what only that column can answer
-— whether its border and its fill are drawn at all; the stroke's
-width and corners belong to the page's shared card and the
-alignment to Lua alone (#754). The narrowing that lets a
-half-width row hold a colour field (`dragColumnLabelColumn`) and
-the in-group short form it is for ("Border color" → "Border",
-with the full name kept for VoiceOver through `a11yLabel`) travel
-with those rows: they live on in Colors & glass' twin drag
-columns, which take the width as `ColorsAndGlassRow`'s
-`labelWidth:`, and this editor no longer pushes the narrow axis in through
-`settingsLabelColumn` at all — what remains here is toggles, which
-draw their own labels. Wherever the ghost and drop zone are drawn
-— the Gaps & Borders panel's composite scene (#793) — the drawing
-shows the stored alignment, which only Lua sets, and the width and
-corners the markers actually draw. Schematic, not pixel-exact, and
-it remaps the full value range instead of hard-capping halfway.
-The alignment drawing earns its keep twice over, the control
-having been dead before it — SwiftUI `.strokeBorder` always draws
-inside.
+**[Principle]**
+
+:::unreleased
+**Drag markers separate by material, not hue (#2797).** A drag
+answers one question — where will this window land — so the
+target is the marker on by default: an untinted frosted plate
+over the slot. With Liquid Glass it is the glass, thinned, with a
+thin light rim; without it, the system blur material and the rim;
+under Reduce transparency, flat grey at about 22 % with the rim.
+The window a drop swaps with stays readable through each. The
+ghost at the origin is off by default: the home slot empties
+while the window is in hand, which already shows where the
+displaced window goes, and macOS's own tiling shows only the
+landing. Turned on, it draws a two-tone outline — a dark line
+inside a light halo, as the bare pocket mark's edge — with no
+fill. The pair then differs in material and lightness, which
+every viewer reads, so it needs no colour-vision floor, and
+neither marker competes with the pocket's red or the Space Bar's
+green beside it. Set aside (2026-10-30): the Space switch's
+plates with app icons, since two windows of one app read alike
+and the target hides the window it would swap with; outlines
+only; a single tinted target; a thumbnail carry; and a live swap
+preview, which writes to another app over AX mid-drag.
+
+**The ghost's off reaches fresh setups only.** `DragVisual`
+encodes whole, so a saved profile states `enabled: true` and
+nothing in it tells a choice from the old default; #1359's
+answer holds and no step re-defaults it. The cost is a user with
+saved profiles who keeps the ghost until they turn it off, one
+toggle away.
+
+**Retiring the tint is not a ruling against colour.** The
+markers' colour, fill, border and alignment settings left with
+their palette keys, through `APIReference.retired` and one
+`ConfigMigration` step, because a fixed marker leaves them
+nothing to set. A later change may bring a tint back as a new
+setting with its own ruling (owner, 2026-10-30).
+
+**Drag & drop is two toggles.** Show drop zone, on, and Mark
+where the window came from, off. #231's twin columns compared
+two styles, and with the styles gone a toggle needs no column
+of its own.
+
+**Every marker sits at window level, ordered directly beneath
+the dragged window**, with glass or without, so no marker reaches
+over a bar or the pocket — a flat drop zone at the bars' level
+covered the pocket's handle (2026-10-29). Over the pocket the
+drop zone stands down and only the pocket lights, since the drop
+goes there.
+:::
 
 **[Trade-off]**
 
@@ -15618,6 +15608,16 @@ ghost and the drop zone store no width or radius of their own
 question once, in a card above the sections that draw the
 strokes.
 
+:::unreleased
+**The drag markers keep the corner style alone (#2797).** Their
+lines are part of a fixed design — the ghost's two-tone outline,
+the drop zone's 1 pt hairline rim — that no setting reaches, so no second answer
+exists to disagree with the ring's, and the width question is the
+ring's alone. The corner style still reaches them, because a
+marker traces the slot a window will fill and the window's corners
+are the border's.
+:::
+
 The rejected shape is a **Use one width for all borders** toggle
 over two masters, with the per-stroke sliders left on screen and
 dimmed, and the reason generalises: a toggle that turns a defect
@@ -15678,65 +15678,19 @@ decided, so a stored value reads as it did.
 
 **[Rationale]**
 
-**Border alignment is Lua-only, and both drag markers are laid
-`inside`.** Inside-vs-outside is a real choice — at 1–3 pt it
-moves a stroke by half its width — but only two of KiwiDesk's
-three strokes can be asked it. The focus ring outsets its
-window and has no alignment concept at all, so a GUI control
-would make the page symmetric in every respect except the one
-row where it silently covers two of three. A page that asks the
-same question of some strokes and not others teaches the wrong
-model of what the strokes are, and the cost of not asking it in
-the GUI is a value a `drag.set_ghost_border_alignment` call
-sets in one line.
-
-**Inside, because a marker has to describe its target
-exactly.** The ghost and the drop zone exist to answer one
-question — where will this window land. Laid inside, the
-stroke's outer edge IS the slot boundary, so the marker traces
-the landing area and nothing else. Laid outside it claims a
-region larger than the slot by the stroke width on all four
-sides: the answer it gives is wrong by exactly the amount it is
-drawn, and wrong in the direction that matters, since the thing
-being promised is a size. A ring can afford that; a marker
-whose whole job is the promise cannot.
-
-**The ring outsets under a constraint the markers do not
-share**, which is what makes "match the ring" the wrong
-instinct rather than a competing taste. The ring surrounds a
-*real window* whose pixels must not be covered, so outward is
-the only direction left to it. A drag marker is painted over a
-target region — an empty slot, or a window the drop will act
-on — and has no content to protect. Reading the ring's
-appearance off it and applying it here copies the result
-without the reason, and pays the cost with none of the benefit.
-
-Inside is also the geometry that survives every gap. Two
-outward strokes on adjacent slots exactly fill the shipped
-inner gap at the shipped width (`2 × 5` into 10 pt, the
-coupling `Gaps.Inner` documents) and eat window pixels below
-`2 × width`; at zero gaps the ghost's stroke and the drop
-zone's land in the same band, where one hides the other and
-the drag loses the very marker it is being steered by. Drawn
-inside, adjacent markers sit flush and both stay wholly
-visible at any gap. The current stacking is no defence against
-that and must not be leaned on: both overlays are floating
-panels ordered front when shown, so the drop zone sits on top
-only for being shown second. Inside makes the question moot
-instead of resting on that.
-
-**Alignment must not become adaptive** — inside at narrow gaps,
-outward elsewhere. A setting whose effective value is decided
-by another setting is invisible in both places anyone reads it,
-the Lua call and the profile JSON, and the verb stops being
-authoritative:
-`drag.set_ghost_border_alignment("outside")` would come to mean
-*outside, unless*. It is the objection that already sank the
-shared width as a stored pick in the principle above, arriving
-here at the per-stroke value instead of at the shared row. The
-verbs stay per
-stroke and unclamped — the GUI curates, Lua stays open — so an
-outward pair is one call away for whoever wants it.
+:::unreleased
+**Both drag markers are drawn inside their slot, with no
+alignment to set** (#754, #2797). The markers exist to answer
+one question — where will this window land. Inside, the marker's
+outer edge IS the slot boundary, so it traces the landing area
+and nothing else; laid outside it would claim a region larger
+than the slot, wrong in the direction that matters, since the
+thing promised is a size. The ring outsets under a constraint
+the markers do not share — it surrounds a real window whose
+pixels must not be covered — so "match the ring" copies its
+result without its reason. Inside also survives every gap:
+adjacent markers sit flush and both stay wholly visible.
+:::
 
 ### App Bar
 
@@ -16160,6 +16114,24 @@ reserving the full strip was rejected (the user would give up the
 information and keep paying the area). An update changes nothing
 a user sees: a bar stored on becomes `always`, one stored off
 `hidden`.
+
+:::unreleased
+*Amended* (owner, 2026-10-29, #2784): an edge where the pocket's
+handle rests keeps the handle's strip by the same rule — the
+outer margin, the handle's depth and the inner margin — so "a
+`hidden` edge reserves nothing" now holds for a `hidden` edge
+with no handle. Under Several windows the handle stands there for
+good, as permanent as the dots, and windows tiled flush beneath
+it lost a strip of their edge and its clicks. Every handle rests
+11 pt deep since (owner, 2026-10-30): with the pocket held under
+Several windows by default and on the Space Bar's edge, that edge
+paid for the handle's depth already, so the dots and the line
+taking it cost almost nothing more and keep one row. A handle that
+stands
+only for a drag or a put-in or take-out reserves nothing, so
+pocketing never retiles the Space, and the bars' `reserve` switch
+on that edge still turns the strip off.
+:::
 
 A fresh install's starter takes `auto` (#2515), and only beside
 the welcome tour's bars step, which shows what Auto does and
@@ -17611,9 +17583,8 @@ book per-profile would fragment a palette you saved while editing
 one profile away from the next, for no gain, since profiles
 already own the color *state* a palette writes into. A palette is
 a sparse map keyed by the same fully-qualified color paths the
-profile JSON uses (`drag.ghost.fill_color` vs
-`drag.drop_zone.fill_color` — bare wire keys collide between
-groups), so it is **not** a
+profile JSON uses (`sticky.color` vs `pocket.color` — bare wire
+keys collide between groups), so it is **not** a
 `TilingSettings` field and never widens the profile schema; it
 lives in its own global `palettes.json` plus a bundled resource.
 This colors-only scope is **strict: no palette carries a non-color
@@ -17684,8 +17655,8 @@ stopped at the shelf did not reproduce it. Width, corners, glow
 and glow size are how the ring looks; whether either ring draws,
 and whether it stacks over an app's own chrome, stay
 functionality. The width and corners are every window
-stroke's (#1742), so a look restyles the drag ghost and drop
-zone with the ring through the same writes `border.set_width`
+stroke's (#1742), so a look restyles the drag markers' corners
+with the ring through the same writes `border.set_width`
 and `border.set_corner_style` make. Only the global gaps ride; a
 Space's own override (Lua's) stays. **Gaps move windows**, so a look is the first
 paint that rearranges them — once the draft is saved, as any gap
@@ -18104,14 +18075,16 @@ above, and a row reading On over glass the machine is not
 drawing leaves a flip that changes nothing on screen with no
 in-app word why.
 
-**The drag visuals and the sticky mark keep their flat look under
-it, not made opaque** (#1620, #1621). A marker exists to be seen
-through: an opaque drop zone would hide the window a drop swaps
-with, and an opaque ghost the slot the displaced window moves
-into. So under the setting each draws exactly what it draws with
-the finish off — the markers their border over the stored fill,
-the mark its `.hudWindow` badge — a disc in the colour, or the
-bare glyph on Automatic.
+:::unreleased
+**The drag markers and the sticky mark stay see-through under it,
+never made opaque** (#1620, #1621, #2797). A marker exists to be
+seen through: an opaque drop zone would hide the window a drop
+swaps with. So under the setting the drop zone draws flat grey at
+about 22 % with its rim in place of the frosted plate, the
+ghost's outline draws as always, and the mark draws its
+`.hudWindow` badge — a disc in the colour, or the bare glyph on
+Automatic.
+:::
 
 **The panel's key did not merge with the bars'**: separate
 leaves, one row, through `SettingKey.masterWrites`. The bars
@@ -18191,30 +18164,32 @@ took nearly all the lift from the default green ring, which is
 the one most people see; it traded the look the owner approved
 at the sitting for a guarantee the band already gives.
 
-**Both drag markers' glass is thinned (owner, device 2026-09-25).**
-The drop zone lies over the window a drop would swap with, which
-should stay readable through it, and the ghost matches it so the
-pair reads as one kind of marker; `.clear` is already the
-material's lightest style, so the view's own opacity is the one
-public strength left.
+:::unreleased
+**The drop zone's glass is thinned (owner, device 2026-09-25).**
+It lies over the window a drop would swap with, which should stay
+readable through it; `.clear` is already the material's lightest
+style, so the view's own opacity is the one public strength left,
+and the blur material takes the same opacity where glass is off.
+:::
 
-**Glass drag markers sit at the normal level, ordered directly
+:::unreleased
+**Every drag marker sits at the normal level, ordered directly
 beneath the window being dragged and re-ordered there on every
-move; flat ones keep the floating level.** At
-the floating level the glass would blur the window in hand
-whenever it crossed its home slot or hovered the target, which
-is exactly when the drop zone shows. Beneath it, both markers
-still sit above the windows below it, and the home slot is empty
-for the drag.
+move** (#1620, #2797). At the floating level a glass marker would
+blur the window in hand whenever it crossed its home slot or
+hovered the target, and a flat one covered the bars and the
+pocket's handle. Beneath it, the markers still sit above the
+windows below, and the home slot is empty for the drag.
+:::
 
-**The Settings drag preview hosts Core's marker, tinted glass
-and all.** (#1645.) It draws the engine's own `DragMarkerView`,
+**The Settings drag preview hosts Core's marker, glass and
+all.** (#1645.) It draws the engine's own `DragMarkerView`,
 so the picture is the drag rather than a re-drawing of it
 (#702). That does not breach #1295's "this tree's glass is
 untinted": that ruling governs Settings *chrome* — a surface
 the window draws for itself — while a hosted engine view is a
 picture of a surface the product draws on screen, and a picture
-that dropped the tint would show a marker no drag draws.
+that dropped the glass would show a marker no drag draws.
 
 **Liquid Glass is an orthogonal finish toggle, not a third
 `background_style`.** (#390; revised 2026-07-20.) A third
@@ -18360,9 +18335,9 @@ user's taste. The far end is never fully clear, as #1622 ruled.
 The anchor stays capped at `maxAlpha`. Fill fade governs
 KiwiShelf's Fill and the hover drawn on it: the bars, a hovered
 bar item, the overflow marks and their list, the peek, and the
-panels the toggle tints. The drag ghost,
-the drop zone and the sticky mark have colours of their own and
-keep #1622's fade. No crossing is owed, because an absent key
+panels the toggle tints. The sticky mark has a colour of its
+own and keeps #1622's fade; the drag markers wear none. No
+crossing is owed, because an absent key
 decodes 100, which is the look every file already had.
 
 Fill fade is a look key, so a bundled look sets its own (owner,
@@ -18472,6 +18447,38 @@ not lines read top to bottom, and their ink at the anchor edge is
 the cap's job above. A Fill with no colour leaves nothing to
 floor: the peek and the list then draw on plain `.clear` glass
 (▸ Reduce transparency, *A Fill with no colour is one state*).
+
+:::unreleased
+**Amended: the floor is 2.2:1, and 3.0:1 under Increase
+Contrast** (#2569, owner and `ui-designer`, 2026-10-30). The
+owner checked the tinted default look on device with macOS's
+Liquid Glass slider at its minimum: at 1.5:1 the bottom of
+KiwiHub over a white window failed (about 1.9:1 for white text in
+the model). 2.2:1 read fine over white and black. The floor
+equals the bars' idle floor (`KiwiShelf.idleInkFloor`) but stays
+its own constant (`KiwiShelf.readingInkFloor`): the two guard
+different surfaces, and one shared number would let a retune of
+one move the other. KiwiDesk does not read or compensate for
+macOS's Liquid Glass slider; the floor alone holds the text.
+Increase Contrast takes its own floor
+(`KiwiShelf.increasedReadingInkFloor`), because the bars' 2.2:1
+would now change nothing there. At 3.0:1 the default look paints
+flat: its hovered row reaches only about 2.6:1 even unfaded
+(`PeekInkContrastTests`), and a Fill whose anchor cannot reach
+the floor stays whole at its anchor. A user can set the floor
+(`kiwishelf.set_reading_contrast`), and Increase Contrast only
+ever raises it. The verb is Lua-only, under ▸ *the GUI curates,
+Lua is open*. A look carries it beside the Fill (owner,
+2026-10-30), so a look with a light Fill can ship its own floor,
+and picking a look moves the floor with its Fill. Settings names
+no floor: there it stays a net under the slider, not a second
+control. The fades read `KiwiShelf.readingFloor`, never a
+constant. KiwiHub's dividers (▸ Shortcuts, *Tint KiwiHub and
+plates*) are measured against the default floor: it now holds the tertiary
+ink at 2.2:1, so the 1.15:1 and 1.5:1 divider floors hold with
+room to spare, and a user floor below the default is outside that
+guard (`PanelDividerContrastTests`).
+:::
 
 The finish is ON by default on every surface (owner ruling
 2026-09-10: the bars are the app's face, and a fresh install or a

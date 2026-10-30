@@ -83,22 +83,4 @@ extension SettingsValueReadout {
             return L("diff.value.draw_order.front", "In front")
         }
     }
-
-    /// Border alignment label (#754).
-    static func bordersAlignmentLabel(
-        _ alignment: BorderAlignment
-    ) -> String {
-        switch alignment {
-        case .inside:
-            return L(
-                "diff.value.border_alignment.inside",
-                "Inside"
-            )
-        case .outside:
-            return L(
-                "diff.value.border_alignment.outside",
-                "Outside"
-            )
-        }
-    }
 }

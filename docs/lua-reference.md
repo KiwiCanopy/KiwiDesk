@@ -2735,6 +2735,11 @@ reading, at a higher floor while macOS's Increase contrast is on.
 No effect while the glass is off or the fill has no color.
 Stored as `kiwishelf.fill_fade`.
 
+:::unreleased
+Where that fade stops is
+[`set_reading_contrast`](#kiwishelfset_reading_contrast).
+:::
+
 The GUI twin is **Fill fade** under the **Liquid Glass** switch
 on Looks &amp; Animations, reading **Off** at `0`; it is hidden
 below macOS 26 and greys while glass is off or stood down, or
@@ -2781,6 +2786,35 @@ fill has no color.
 ```lua
 kiwishelf.set_tint_hub_and_plates(false)
 ```
+
+:::unreleased
+### kiwishelf.set_reading_contrast
+
+**Expects:** a contrast ratio from `1` to `4.5` (default `2.2`);
+outside that range it is clamped.
+
+**Does:** sets the contrast the text on the hover peek, the
+overflow mark's list, [KiwiHub](#kiwihubshow) and the Space,
+Desktop and layout plates keeps where
+[`set_fill_fade`](#kiwishelfset_fill_fade) fades their fill
+(#2569). Their fade stops at the strength that holds their
+dimmest text at this ratio over a white or a black window. `1`
+leaves the full fade. A ratio the fill cannot reach draws it
+flat, with no fade. While macOS's Increase contrast is on the
+floor is at least `3`, which draws the default fill flat. No
+effect while the glass is off or the fill has no color, nor on
+KiwiHub and the plates while
+[`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
+off. Stored as `kiwishelf.reading_contrast`.
+
+Settings has no row for it. A look carries it beside the fill.
+
+**Example:**
+
+```lua
+kiwishelf.set_reading_contrast(3)
+```
+:::
 
 ### kiwishelf.set_background_fit
 
@@ -3042,10 +3076,13 @@ Issue naming this verb; a saved profile keeps its edge.
 
 **Does:** sets the screen edge the [pocket](#pocket) sits on, on
 every screen. Where a bar shows on that edge the pocket is a
-section of KiwiShelf; on an edge no bar shows — an `"auto"` or
-`"hidden"` bar at rest, or none — it is a handle
+section of KiwiShelf, and where the bars there rest `"auto"` or
+`"hidden"` it is a handle. On an edge no bar sits on it follows
+the more present of the two bars' visibilities (the App Bar's in
+monocle and scrolling only): whole under `"always"`, a handle
+otherwise
 ([`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
-places both). When it is on screen is
+places all three). When it is on screen is
 [`pocket.set_capacity`](#pocketset_capacity)'s. A look carries
 it.
 
@@ -3071,8 +3108,8 @@ outside the bars' items, so it stays put while they scroll. On an
 edge where an `"auto"` bar rests hidden, its handle stands where
 the pocket shows once the bar comes in, joining the bars' handles
 in one row where it would meet them. On any other edge no bar
-shows, its handle stands at the position, whole on screen at either
-end. A look carries it.
+shows, the handle, or the pocket where it rests whole, stands at
+the position, kept on screen at either end. A look carries it.
 
 **Example:**
 
@@ -3292,7 +3329,8 @@ right one.
 
 On an edge the two bars share, the strip stays reserved while
 either bar reserves it, so `false` frees it only when the
-Space Bar on that edge reserves nothing either — hidden, or
+Space Bar on that edge reserves nothing either — hidden with no
+pocket resting there, or
 its own [`space_bar.set_reserve`](#space_barset_reserve) off.
 
 Global only: no layout sets its own.
@@ -3468,7 +3506,8 @@ right one.
 
 On an edge the two bars share, the strip stays reserved while
 either bar reserves it, so `false` frees it only when the
-App Bar on that edge reserves nothing either — hidden, or
+App Bar on that edge reserves nothing either — hidden with no
+pocket resting there, or
 its own [`app_bar.set_reserve`](#app_barset_reserve) off.
 
 **Example:**
@@ -3511,6 +3550,13 @@ App Bar in monocle and scrolling.
   [`space_bar.toggle_reveal`](#space_bartoggle_reveal) shows it,
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
+
+:::unreleased
+On the pocket's edge, under
+[`pocket.set_capacity("several")`](#pocketset_capacity), an
+`"auto"` or `"hidden"` bar's edge also keeps clear of the
+pocket's resting handle.
+:::
 
 :::unreleased
 A window drag opens an `"auto"` Space Bar as the pointer does
@@ -3928,96 +3974,29 @@ placement override does not apply to track spaces.
 
 Dragging a tiled window over another window's slot and releasing
 swaps the two; dropping anywhere else snaps the window back.
-While you drag, KiwiDesk draws two visuals:
 
-- **Ghost** (`drag.set_ghost_*`): the dragged window's slot —
-  where it snaps back, and where the displaced window would
-  move.
-- **Drop zone** (`drag.set_drop_zone_*`): the slot under the
-  window's center, the window a drop would swap with.
+:::unreleased
+While you drag, KiwiDesk can draw two markers, each just below the
+window you are holding:
 
-### drag.set_ghost_enabled
+- **Drop zone** (`drag.set_drop_zone_enabled`, on by default): an
+  untinted frosted plate with a thin light rim over the slot a drop
+  would swap with. While the pointer is over the pocket, the drop
+  goes there and only the pocket lights.
+- **Ghost** (`drag.set_ghost_enabled`, off by default): a two-tone
+  outline, a dark line inside a light halo, over the dragged
+  window's slot — where it snaps back, and where the displaced
+  window would move.
 
-**Expects:** `true` or `false`.
-
-**Does:** shows or hides the ghost visual.
-
-**Example:**
-
-```lua
-drag.set_ghost_enabled(true)
-```
-
-### drag.set_ghost_border
-
-**Expects:** `true` or `false`.
-
-**Does:** enables the border on the ghost visual.
-
-**Example:**
-
-```lua
-drag.set_ghost_border(true)
-```
-
-### drag.set_ghost_border_alignment
-
-**Expects:** `"inside"` or `"outside"` (default `"inside"`).
-
-**Does:** positions the border inside or outside the slot
-boundary; at `inside` the marker's outer edge is the slot
-boundary itself. Lua-only — the Settings app offers no control
-for it (see [design decisions](design-decisions.md)).
-
-**Example:**
-
-```lua
-drag.set_ghost_border_alignment("outside")
-```
-
-### drag.set_ghost_border_color
-
-**Expects:** a hex color.
-
-**Does:** sets the ghost border color (default `#347957`, deep
-emerald).
-
-**Example:**
-
-```lua
-drag.set_ghost_border_color("#347957")
-```
-
-### drag.set_ghost_fill
-
-**Expects:** `true` or `false`.
-
-**Does:** enables the fill on the ghost visual.
-
-**Example:**
-
-```lua
-drag.set_ghost_fill(true)
-```
-
-### drag.set_ghost_fill_color
-
-**Expects:** a hex color.
-
-**Does:** sets the ghost fill color (default `#34795740`,
-deep emerald with 25% alpha).
-
-**Example:**
-
-```lua
-drag.set_ghost_fill_color("#34795740")
-```
+Both take their corners from
+[`border.set_corner_style`](#borderset_corner_style); their look
+is otherwise fixed.
 
 ### drag.set_drop_zone_enabled
 
-**Expects:** `true` or `false`.
+**Expects:** `true` or `false` (default `true`).
 
-**Does:** shows or hides the drop zone visual.
+**Does:** shows or hides the drop zone.
 
 **Example:**
 
@@ -4025,91 +4004,37 @@ drag.set_ghost_fill_color("#34795740")
 drag.set_drop_zone_enabled(true)
 ```
 
-### drag.set_drop_zone_border
+### drag.set_ghost_enabled
 
-**Expects:** `true` or `false`.
+**Expects:** `true` or `false` (default `false`; a profile that
+already stores `enabled` keeps it).
 
-**Does:** enables the border on the drop zone visual.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border(true)
-```
-
-### drag.set_drop_zone_border_alignment
-
-**Expects:** `"inside"` or `"outside"` (default `"inside"`).
-
-**Does:** positions the border inside or outside the slot boundary.
-Lua-only, and independent of the ghost's alignment — see
-`drag.set_ghost_border_alignment`.
+**Does:** shows or hides the ghost.
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_alignment("outside")
-```
-
-### drag.set_drop_zone_border_color
-
-**Expects:** a hex color.
-
-**Does:** sets the drop zone border color (default `#C2790A`,
-amber).
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border_color("#C2790A")
-```
-
-### drag.set_drop_zone_fill
-
-**Expects:** `true` or `false`.
-
-**Does:** enables the fill on the drop zone visual.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_fill(true)
-```
-
-### drag.set_drop_zone_fill_color
-
-**Expects:** a hex color.
-
-**Does:** sets the drop zone fill color (default `#C2790A40`,
-amber with 25% alpha).
-
-**Example:**
-
-```lua
-drag.set_drop_zone_fill_color("#C2790A40")
+drag.set_ghost_enabled(true)
 ```
 
 ### drag.set_liquid_glass
 
 **Expects:** a boolean (default `true`).
 
-**Does:** draws the ghost and the drop zone as macOS 26 Liquid
-Glass. Each is tinted by its own fill color, strongest at the top
-and fading downward, and keeps its border solid on top; with the
-fill off the glass is clear. Both use a thinner glass, so the
-window a drop would swap with stays readable through it.
-While you drag, both sit just below the window you are holding,
-so the glass never covers it. Off,
-below macOS 26, or while macOS's Reduce transparency is on, they
-draw flat: the border over the fill color, floating above the
-windows. Settings writes this through the one **Liquid Glass**
-switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+**Does:** draws the drop zone as macOS 26 Liquid Glass, untinted
+and thinned so the window a drop would swap with stays readable
+through it. Off, or below macOS 26, it draws the system blur
+material instead; while macOS's Reduce transparency is on, a flat
+grey at about 22 %. Settings writes this through the one **Liquid
+Glass** switch
+([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
 **Example:**
 
 ```lua
 drag.set_liquid_glass(false)
 ```
+:::
 
 ### Retired drag verbs
 
@@ -4117,14 +4042,24 @@ These verbs are retired. A call in `init.lua` is reported in
 Config Issues, naming what replaces it; over the CLI it fails
 with `<verb> was retired — use <replacement>`.
 
-- `drag.set_ghost_border_width` and
-  `drag.set_drop_zone_border_width` →
-  [`border.set_width`](#borderset_width).
 - `drag.set_corner_radius` →
   [`border.set_corner_style`](#borderset_corner_style).
 
 A saved profile's `drag.corner_radius` and each visual's
 `border_width` are no longer read.
+
+:::unreleased
+The markers' own look is retired with nothing to replace it, for
+the ghost and the drop zone alike: `drag.set_ghost_border`,
+`drag.set_ghost_border_color`, `drag.set_ghost_border_alignment`,
+`drag.set_ghost_border_width`, `drag.set_ghost_fill`,
+`drag.set_ghost_fill_color` and their `drag.set_drop_zone_*`
+twins fail with a message starting `<verb> was retired: the drag
+markers' look is fixed`. A saved
+setup's values for them, and a palette's or a look's
+`drag.ghost.*` and `drag.drop_zone.*` colours, are dropped when
+KiwiDesk next reads the file.
+:::
 
 ## Focus Border
 
@@ -4162,8 +4097,10 @@ touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
 
-The drag ghost and the drop zone draw their stroke at this width
-too.
+:::unreleased
+The drag markers draw lines of a fixed width, and take only the
+corner style from the border.
+:::
 
 **Example:**
 
@@ -4287,7 +4224,7 @@ magnitudes; a non-number fails.
 
 **Does:** paints a sheen on the top of the focused border, the
 shelf's [highlight](#kiwishelfset_highlight_width) and
-[border](#kiwishelfset_border), and the drag borders. A positive
+[border](#kiwishelfset_border). A positive
 value lightens the top toward white, a negative one darkens it
 toward black, each fading into the colour, which holds to the
 bottom; `0` draws none. `1` moves the top 90% of the way. Only
@@ -5917,11 +5854,14 @@ Under `"several"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
 faded while empty until you point at it or drag a window over it,
 and with no count, except where KiwiShelf stands down for a native
-full-screen window or a presentation. On an edge no bar shows it
-rests as a handle, and pointing at the handle brings the pocket up
-out of it. A click on the pocket lists the windows inside by app;
-a row takes its window out. Under `"one"` nothing stays: the pocket
-stands only while a window goes in or out
+full-screen window or a presentation. Where it rests as a handle
+([`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says
+where), pointing at the handle brings the pocket up out of it.
+Windows keep clear of the resting handle or pocket unless
+`reserve` is off for every bar on that edge, or on an edge no bar
+sits on, for both bars. A click on the pocket lists the windows
+inside by app; a row takes its window out. Under `"one"` nothing
+stays: the pocket stands only while a window goes in or out
 ([`animations.set_on_state_change`](#animationsset_on_state_change))
 or while you drag one, and on an edge where a bar shows its slot
 then opens, the bars gliding aside for it.
@@ -7420,17 +7360,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "fallback_space": "1",      // rehome target
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
-    "drag": {
-      "ghost": {
-        "enabled": true, "border": true,
-        "border_color": "#347957", "border_alignment": "inside",
-        "fill": true, "fill_color": "#34795740"
-      },
-      "drop_zone": {
-        "enabled": true, "border": true,
-        "border_color": "#C2790A", "border_alignment": "inside",
-        "fill": true, "fill_color": "#C2790A40"
-      }
+        "drag": {
+      "ghost": { "enabled": false },
+      "drop_zone": { "enabled": true }
     },
     "gap": {
       "global": {
@@ -7700,8 +7632,10 @@ place the pocket the plate flies to, under either
 [`pocket.set_capacity`](#pocketset_capacity): on an edge where a
 bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
 aside for it; on an edge no bar shows, the pocket comes up out of
-its handle. That pocket lights as the window goes in or
-out, and nods as one lands in it.
+its handle, or stands whole where
+[`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says it
+does. That pocket lights as the window goes in or out, and nods
+as one lands in it.
 :::
 
 **Example:**

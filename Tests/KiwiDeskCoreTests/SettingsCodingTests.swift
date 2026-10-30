@@ -103,6 +103,9 @@ struct SettingsCodingTests {
         #expect(pocket["color"] as? String == "")
         #expect(shelf["pocket_edge"] as? String == "bottom")
         #expect(shelf["pocket_position"] as? Double == 82)
+        // `kiwishelf.set_reading_contrast` →
+        // `kiwishelf.reading_contrast` (#2569): Lua-only.
+        #expect(shelf["reading_contrast"] as? Double == 2.2)
         // The `quit` group left for gui.json with #1741
         // (`AppWideSettingsTests`); the key set above holds its
         // absence.
@@ -229,39 +232,24 @@ struct SettingsCodingTests {
         )
         // `drag.set_liquid_glass` (#1620), on by default.
         #expect(drag["liquid_glass"] as? Bool == true)
+        // The markers store their switch alone (#2797): the drop
+        // zone on, the ghost off for a fresh setup.
         let ghost = try object(drag["ghost"])
-        #expect(
-            Set(ghost.keys) == [
-                "border", "border_color",
-                "border_alignment", "enabled", "fill", "fill_color",
-            ]
-        )
-        // Kiwi defaults: emerald ghost (origin), amber drop zone
-        // (target) — hue carries origin vs. target, and since
-        // #511 it has to do so under red-green vision loss too,
-        // which is why the ghost is no longer the ring's
-        // yellow-green (see DragVisual.ghostDefault).
-        #expect(ghost["border_color"] as? String == "#347957")
-        #expect(ghost["fill_color"] as? String == "#34795740")
-        #expect(ghost["border_alignment"] as? String == "inside")
+        #expect(Set(ghost.keys) == ["enabled"])
+        #expect(ghost["enabled"] as? Bool == false)
         let zone = try object(drag["drop_zone"])
-        #expect(zone["border_color"] as? String == "#C2790A")
-        #expect(zone["fill_color"] as? String == "#C2790A40")
-        #expect(zone["border_alignment"] as? String == "inside")
+        #expect(Set(zone.keys) == ["enabled"])
+        #expect(zone["enabled"] as? Bool == true)
     }
 
-    @Test("Partial drag visuals keep the default look")
+    @Test("A saved ghost keeps the switch it stored")
     func partialDragDecode() throws {
-        let json = #"{"drag":{"ghost":{"enabled":false}}}"#
+        let json = #"{"drag":{"ghost":{"enabled":true}}}"#
         let decoded = try JSONDecoder().decode(
             TilingSettings.self,
             from: Data(json.utf8)
         )
-        #expect(!decoded.dragGhost.enabled)
-        #expect(
-            decoded.dragGhost.borderColor
-                == DragVisual.ghostDefault.borderColor
-        )
+        #expect(decoded.dragGhost.enabled)
         #expect(decoded.dragDropZone == .dropZoneDefault)
     }
 

@@ -73,5 +73,8 @@ extension GuiConfig {
     ///
     /// **17 (#2446)**: the seeded pin row on ⌃⌥P runs Pocket
     /// (`migratingPinChordOntoPocket`).
-    public static let currentFormat = 17
+    ///
+    /// **18 (#2797)**: the drag markers' palette paths left the
+    /// shared look's colours (`migratingRetiredDragLook`).
+    public static let currentFormat = 18
 }

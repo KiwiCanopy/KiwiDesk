@@ -1,10 +1,10 @@
 import CoreGraphics
 import Foundation
 
-/// The drag markers' reading of the border's stroke (#1742): the
-/// ghost and the drop zone draw the focus border's width and
-/// corner style and store none of their own. The ring derives its
-/// own radius per window (`BorderGeometry`).
+/// The border's stroke as the window strokes read it (#1742): the
+/// drag markers take its corner style alone, their line widths
+/// fixed by design (#2797), and store none of their own. The ring
+/// derives its own radius per window (`BorderGeometry`).
 public struct WindowStroke: Sendable, Equatable {
     /// Stroke width in points.
     public var width: CGFloat

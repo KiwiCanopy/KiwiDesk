@@ -7,7 +7,8 @@ import CoreGraphics
 /// — the edge reserves at the depth its most present RESERVING bar
 /// asks: the full strip for `always`, the sliver
 /// (`KiwiShelf.hiddenReservation`) for `auto`, nothing for
-/// `hidden`. A reveal is an overlay.
+/// `hidden` — the resting pocket's strip apart
+/// (`ShelfReservation.pocket`, #2784). A reveal is an overlay.
 public struct ShelfEdge: Sendable, Equatable {
     public let edge: AppBarEdge
     /// Each bar on this edge and its stored visibility.
@@ -74,29 +75,36 @@ public struct ShelfEdge: Sendable, Equatable {
 
 /// What the shelves take off a screen in one layout: the edges
 /// it reserves at the shelf's depth, the hiding edges it reserves
-/// at the sliver's (#761), and each depth — the whole input
-/// `TilingSettings.layoutBounds(from:mode:on:)` reads, so two equal
-/// values leave every layout's bounds alone (#1524).
+/// at the sliver's (#761), the pocket's edge at its own (#2784),
+/// and each depth — the whole input
+/// `TilingSettings.layoutBounds(from:mode:on:pocketAtRest:)` reads,
+/// so two equal values leave every layout's bounds alone (#1524).
 public struct ShelfReservation: Sendable, Equatable {
     public let edges: [AppBarEdge]
     public let depth: CGFloat
     public var hiding: [AppBarEdge] = []
     public var hidingDepth: CGFloat = 0
+    public var pocket: AppBarEdge? = nil
+    public var pocketDepth: CGFloat = 0
+
+    /// What `edge` reserves: the deepest that asks for it.
+    public func depth(of edge: AppBarEdge) -> CGFloat {
+        max(
+            edges.contains(edge) ? depth : 0,
+            hiding.contains(edge) ? hidingDepth : 0,
+            pocket == edge ? pocketDepth : 0
+        )
+    }
 
     /// `visible` minus each edge's reservation.
     public func remaining(in visible: CGRect) -> CGRect {
-        let full = edges.reduce(visible) { frame, edge in
-            AppBarGeometry.remaining(
+        AppBarEdge.allCases.reduce(visible) { frame, edge in
+            let reserved = depth(of: edge)
+            guard reserved > 0 else { return frame }
+            return AppBarGeometry.remaining(
                 frame,
                 edge: edge,
-                reserving: depth
-            )
-        }
-        return hiding.reduce(full) { frame, edge in
-            AppBarGeometry.remaining(
-                frame,
-                edge: edge,
-                reserving: hidingDepth
+                reserving: reserved
             )
         }
     }

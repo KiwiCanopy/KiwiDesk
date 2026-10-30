@@ -227,8 +227,8 @@ public enum APIReference {
             "set_fill_color", "set_border_color",
             "set_group_badge_color", "set_group_badge_text_color",
             "set_reveal_timeout", "set_reveal_style", "set_fill_fade",
-            "set_tint_hub_and_plates", "set_pocket_edge",
-            "set_pocket_position",
+            "set_tint_hub_and_plates", "set_reading_contrast",
+            "set_pocket_edge", "set_pocket_position",
         ],
         "grid": [
             "set_type", "set_fill_empty_cells",
@@ -270,15 +270,7 @@ public enum APIReference {
             "set_layout", "set_grid_target_depth",
         ],
         "drag": [
-            "set_ghost_enabled", "set_ghost_border",
-            "set_ghost_border_alignment",
-            "set_ghost_border_color", "set_ghost_fill",
-            "set_ghost_fill_color",
-            "set_drop_zone_enabled", "set_drop_zone_border",
-            "set_drop_zone_border_alignment",
-            "set_drop_zone_border_color",
-            "set_drop_zone_fill",
-            "set_drop_zone_fill_color",
+            "set_ghost_enabled", "set_drop_zone_enabled",
             "set_liquid_glass",
         ],
         "border": [

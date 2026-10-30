@@ -14,27 +14,6 @@ struct ColorsAndGlassGates {
     var borderOn: Bool { settings.borderStyle.enabled }
     var unfocusedOn: Bool { settings.borderStyle.unfocusedEnabled }
 
-    // MARK: - Drag visuals
-
-    func dragVisual(_ ghost: Bool) -> DragVisual {
-        ghost ? settings.dragGhost : settings.dragDropZone
-    }
-
-    /// Whether a drag tint draws nothing: its visual is off, or
-    /// the part it tints is (#527).
-    func dragInert(ghost: Bool, fill: Bool) -> Bool {
-        let visual = dragVisual(ghost)
-        return !visual.enabled || (fill ? !visual.fill : !visual.border)
-    }
-
-    /// The hover reason for one drag tint.
-    func dragHelp(ghost: Bool, fill: Bool) -> String {
-        if !dragVisual(ghost).enabled { return ColorsAndGlassHelp.dragOff }
-        return fill
-            ? ColorsAndGlassHelp.dragFillOff
-            : ColorsAndGlassHelp.dragBorderOff
-    }
-
     // MARK: - KiwiShelf
 
     /// The shelf draws no border, so its colour is inert (#1679).

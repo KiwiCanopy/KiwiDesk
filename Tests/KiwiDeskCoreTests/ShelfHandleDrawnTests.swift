@@ -18,11 +18,12 @@ struct ShelfHandleDrawnTests {
         edge: AppBarEdge = .top,
         rim: CGFloat = 3
     ) -> ShelfHandleSpec {
-        ShelfHandleSpec(
+        let depth = ShelfHandleSpec.depth
+        return ShelfHandleSpec(
             mark: mark,
             frame: edge.isHorizontal
-                ? CGRect(x: 100, y: 0, width: 36, height: 8)
-                : CGRect(x: 0, y: 100, width: 8, height: 36),
+                ? CGRect(x: 100, y: 0, width: 36, height: depth)
+                : CGRect(x: 0, y: 100, width: depth, height: 36),
             edge: edge,
             fill: GlassFill(hex: "#3366CC"),
             currentInk: "#000000",

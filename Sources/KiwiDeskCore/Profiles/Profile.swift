@@ -44,12 +44,13 @@ public struct Profile: Codable, Sendable, Equatable {
     /// `overflow_style` retired (#2235), 30 since the per-layout
     /// `wrap_focus` switches retired for `focus_wrap` (#2493), 31
     /// since the seeded pin row on ⌃⌥P runs Pocket (#2446), 32
-    /// since the pocket's edge and position are KiwiShelf's (#2678).
+    /// since the pocket's edge and position are KiwiShelf's (#2678),
+    /// 33 since the drag markers' look retired (#2797).
     /// The bump is what RUNS a step: `needsMigration`
     /// short-circuits on it, so a step reaching this shape owes one
     /// whatever it rewrites — a retired key decodes to the default
     /// and an absent leaf to the NEW default, silently, without it.
-    public static let currentFormat = 32
+    public static let currentFormat = 33
 
     public var format: Int
     /// Stable across renames (#2324); `ProfileManager.write` keeps
