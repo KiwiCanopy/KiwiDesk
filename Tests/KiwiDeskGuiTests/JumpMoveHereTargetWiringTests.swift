@@ -64,7 +64,7 @@ struct JumpMoveHereTargetWiringTests {
         let source = try SourceScan.blankedSource(at: file)
             .split(whereSeparator: \.isWhitespace).joined()
         let pay = try #require(source.range(of: "funcpayMoveHereFocus("))
-        let body = source[pay.upperBound...]
+        let body = String(source[pay.upperBound...])
         let file2 = try #require(body.range(of: "fileMembership(window,"))
         let place = try #require(
             body.range(
