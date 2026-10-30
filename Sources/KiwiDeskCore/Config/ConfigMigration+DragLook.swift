@@ -3,7 +3,8 @@ import Foundation
 /// Retires the drag markers' look (#2797, `DragLookMigrationTests`):
 /// the knobs leave `drag.ghost` and `drag.drop_zone`, the four
 /// palette paths every colour map. Stands down at the formats it
-/// introduced, so a later key of the same spelling is kept.
+/// introduced, so a later key of the same spelling is kept; an
+/// exported look's floor is its `lookExportSteps` entry.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps naming
     /// what it was written to name.

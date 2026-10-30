@@ -77,7 +77,8 @@ enum LiquidGlassGate {
 
     /// The drag drop zone's frost as drawn (#2797): glass where the
     /// stored leaf draws it, the blur material where it does not,
-    /// flat grey while transparency is reduced.
+    /// flat grey while transparency is reduced. A surface, not a
+    /// Bool, since its fallback splits on this gate's own read.
     static func rendered(frost stored: Bool) -> DragMarkerView.Surface {
         if rendered(glass: stored) { return .glass }
         return reducesTransparency ? .flat : .material
