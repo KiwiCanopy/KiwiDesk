@@ -229,6 +229,7 @@ twice, was a question the user answered twice. The argument is
   in the revealer
   (#2795, `ShelfRevealDragTests` ▸ `dragLeavesTheAppBar`,
   `ShelfRevealDragTests` ▸ `nonWindowDragIsUnheard`,
+  `ShelfRevealDragTests` ▸ `moveEndsWithItsGesture`,
   `ShelfRevealWiringTests` ▸ `liveArmsHearTheDrag`,
   `ShelfRevealWiringTests` ▸ `windowMoveIsWired`).
   Whether a hiding bar is shown is asked of `ShelfManager.reveal`
