@@ -16253,6 +16253,23 @@ own, one value for every bar. No reveal on a Space switch: the
 dots already show the new Space. A look never carries the mode,
 which is functionality, not styling.
 
+:::unreleased
+A window drag opens an Auto Space Bar the same way, so a mouse user
+has its Spaces as drop targets (#2795, owner ruling, 2026-10-30):
+the dragged pointer pushing the edge inside the band, or resting in
+the band, reveals it in the shelf's own reveal style, and it
+retracts as a hover reveal does once the pointer leaves it. A drop
+on the bar keeps it shown under the pointer. Never at the drag's
+start: that would slide the bars in over the windows on every swap,
+where
+the auto-hidden Dock and Mission Control's Spaces bar both wait for
+an edge push. The drag opens the Space Bar alone, since an App Bar
+item takes no dropped window, and a Hidden bar keeps to its
+shortcut. The revealer hears the drag through its own pointer
+monitors, a left drag being a move with the button held; it costs
+no second tap.
+:::
+
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,
 `ShelfArrangement`, which both live bars take their segments

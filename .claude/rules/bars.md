@@ -218,7 +218,13 @@ twice, was a question the user answered twice. The argument is
   which Settings' note asks too — refuses through the
   refusal-pill door's shelf twin,
   `flashRefusalPill(near:on:edge:text:symbol:)`; a `hidden` bar's
-  timed pin ends hidden, since no hover can retract it.
+  timed pin ends hidden, since no hover can retract it. **A
+  window drag's move opens only an `auto` Space Bar** — its push
+  or band dwell, never the drag's start — and holds or retracts
+  any shown bar as a move does; the revealer's own monitors hear
+  it through the one `ShelfRevealer.heard` mask, never a second
+  monitor or tap (#2795, `ShelfRevealDragTests`,
+  `ShelfRevealWiringTests` ▸ `liveArmsHearTheDrag`).
   Whether a hiding bar is shown is asked of `ShelfManager.reveal`
   per bar in `updateBars()`, and a second shown-answer
   beside it is review's; a FORCED reveal is the revealer's one

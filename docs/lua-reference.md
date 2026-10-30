@@ -3511,6 +3511,14 @@ App Bar in monocle and scrolling.
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
 
+:::unreleased
+A window drag opens an `"auto"` Space Bar the same way, so its
+Spaces take the drop: push the screen's edge inside the dots' band,
+or rest in the band. It goes back 0.5 s after the dragged pointer
+leaves the bar and its band. A drag never opens the App Bar, and a
+`"hidden"` bar keeps to its shortcut.
+:::
+
 A shown `auto` or `hidden` bar draws over the windows, so a
 reveal moves no window; setting the value moves the windows at
 most once. A bar set not to reserve

@@ -20,13 +20,13 @@ final class ShelfRevealer {
     /// the pointer left — the hover peek, a bar menu; wired in
     /// Bootstrap. A retract it holds is asked again later.
     var holds: @MainActor (ShelfManager.Key) -> Bool = { _ in false }
-    /// Installs the mouse-moved monitors: live in production,
-    /// pinned inert by both `makeTestCore` twins (tests.md ▸
-    /// machine touch). A move delivered without a point is read
-    /// through `location`.
+    /// Installs the pointer monitors (`heard`): live in
+    /// production, pinned inert by both `makeTestCore` twins
+    /// (tests.md ▸ machine touch). A move delivered without a
+    /// point is read through `location`; the flag is a left drag.
     var makeMonitor:
-        @MainActor (@escaping @MainActor (CGPoint?) -> Void) -> Any? =
-            ShelfRevealer.live
+        @MainActor (@escaping @MainActor (CGPoint?, Bool) -> Void)
+            -> Any? = ShelfRevealer.live
     var removeMonitor: (Any) -> Void = { monitors in
         for monitor in monitors as? [Any] ?? [monitors] {
             NSEvent.removeMonitor(monitor)
@@ -148,8 +148,10 @@ final class ShelfRevealer {
         return true
     }
 
-    /// One pointer move, Cocoa screen space.
-    func moved(to point: CGPoint) {
+    /// One pointer move, Cocoa screen space. A drag's move opens
+    /// only a Space Bar, its drop targets (#2795); it holds and
+    /// retracts any shown bar as a move does.
+    func moved(to point: CGPoint, dragging: Bool = false) {
         for (key, target) in targets where target.hovers {
             if suppressed.contains(key) {
                 if !target.zone.contains(point) { suppressed.remove(key) }
@@ -158,7 +160,8 @@ final class ShelfRevealer {
             switch reveal(of: key) {
             // Asked per target: a sibling this move revealed — a
             // push at the seam of two bands — stands this one down.
-            case .hidden where yields(key):
+            case .hidden where yields(key),
+                .hidden where dragging && key.bar != .space:
                 cancelTimer(key)
                 setArming(key, false)
             case .hidden: hiddenMove(key, target, point)
@@ -301,9 +304,12 @@ final class ShelfRevealer {
     private func syncMonitor() {
         if running, targets.values.contains(where: \.hovers) {
             guard monitor == nil else { return }
-            monitor = makeMonitor { [weak self] point in
+            monitor = makeMonitor { [weak self] point, dragging in
                 guard let self else { return }
-                self.moved(to: point ?? self.location())
+                self.moved(
+                    to: point ?? self.location(),
+                    dragging: dragging
+                )
             }
         } else if let monitor {
             removeMonitor(monitor)

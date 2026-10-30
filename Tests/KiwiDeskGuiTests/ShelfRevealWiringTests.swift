@@ -4,7 +4,8 @@ import Testing
 /// The two wirings no unit test reaches (#761): what holds a
 /// reveal is the shelf manager's one answer, and `updateBars()`
 /// hands the revealer this pass's hiding shelves before the shelves
-/// read them to keep or drop a panel.
+/// read them to keep or drop a panel; and both pointer monitors
+/// hear a left drag, flagged as one (#2795).
 @Suite("Shelf reveal wiring (#761)")
 struct ShelfRevealWiringTests {
     private static func source(_ path: String) throws -> String {
@@ -32,5 +33,19 @@ struct ShelfRevealWiringTests {
         for (first, then) in zip(hiding, shelves) {
             #expect(first.lowerBound < then.lowerBound)
         }
+    }
+
+    /// `ShelfRevealDragTests` drives the flag from a fake monitor;
+    /// this holds the live arms to the mask and the flag.
+    @Test("Both live arms hear the drag and flag it")
+    func liveArmsHearTheDrag() throws {
+        let live = try Self.source("Bar/ShelfRevealer+Live.swift")
+        #expect(live.ranges(of: "matching: heard").count == 2)
+        #expect(!live.contains("matching: .mouseMoved"))
+        #expect(
+            live.ranges(of: ".type == .leftMouseDragged").count == 2
+        )
+        #expect(live.contains("deliver(point, dragging)"))
+        #expect(live.contains("deliver(nil, dragging)"))
     }
 }
