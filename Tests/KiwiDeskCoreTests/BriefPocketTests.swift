@@ -99,27 +99,23 @@ struct BriefPocketTests {
         let request = try #require(core.briefPocket.playing)
         // The one door for where the pocket is (#2678 review 5)…
         #expect(request.pocket == core.pocketLanding(on: request.display))
-        // …at the stored placement: risen out of the right edge,
-        // 30 % down it.
+        // …at the stored placement: the whole mark, no handle under
+        // One window (#2793), on the right edge 30 % down it.
         let visible = GeometryUtils.axVisibleFrame(of: request.screen)
-        let rise = KiwiCore.pocketRiseSide(
-            thickness: core.tiler.settings.kiwishelf.thickness
-        )
+        let side = core.tiler.settings.kiwishelf.thickness
         // One outer margin in from the edge, as the bars' handles.
         let outer = core.tiler.settings.kiwishelf.outerMargin
         let band = KiwiCore.pocketHandleFrame(
             visible: visible,
             edge: .right,
             position: 30,
-            depth: outer + PocketHandleView.tabDepth
-                + PocketPlateView.lift + rise
+            depth: outer + side
         )
-        let risen = PocketPlateView.risenFrame(
-            in: PocketPlateView.room(in: band, edge: .right, outer: outer),
-            edge: .right,
-            side: rise
+        let mark = band.insetBy(dx: 0, dy: (band.height - side) / 2)
+        #expect(
+            request.pocket
+                == PocketPlateView.room(in: mark, edge: .right, outer: outer)
         )
-        #expect(request.pocket == risen)
         #expect(!request.plateGlass)
     }
 

@@ -74,7 +74,8 @@ extension KiwiCore {
         )
         // The pocket's slot on each screen's bar edge (#2678).
         var pocketSlots: [DisplayID: CGRect] = [:]
-        let pocketOnShelf = pocketStands
+        // Under One window it stands inside its edge's strip (#2793).
+        var pocketStrips: [DisplayID: CGRect] = [:]
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
             // the plan and every style a bar draws carry it.
@@ -108,7 +109,7 @@ extension KiwiCore {
                 settings: shown,
                 spaceItems: items,
                 app: app,
-                pocket: pocketOnShelf,
+                pocket: pocketHoldsSeveral,
                 drawn: { reveal.drawn($0, display: display.id) }
             )
             hiding.file(
@@ -128,6 +129,12 @@ extension KiwiCore {
             {
                 pocketSlots[display.id] = plan.segment(slot)
             }
+            pocketStrips[display.id] = Self.pocketStrip(
+                in: planned,
+                edge: shown.kiwishelf.pocketEdge,
+                hiding: { hiding.marks[$0] != nil },
+                display: display.id
+            )
             strips += plans.map {
                 ShelfStrip(
                     display: display.id,
@@ -177,6 +184,7 @@ extension KiwiCore {
         // pocket (#2678).
         pocketPlate.standingDown = standingDown
         pocketPlate.markBands = hiding.pocketBands
+        pocketPlate.barStrips = pocketStrips
         updatePocketPlate(slots: pocketSlots)
         // The revealer first, so the shelves judge this pass's
         // hiding edges (#761).

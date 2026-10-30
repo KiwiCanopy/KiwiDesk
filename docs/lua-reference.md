@@ -3077,14 +3077,16 @@ Issue naming this verb; a saved profile keeps its edge.
 `"bottom"`; the starter setup seeds `"top"`).
 
 **Does:** sets the screen edge the [pocket](#pocket) sits on, on
-every screen. Where a bar shows on that edge the pocket is a
-section of KiwiShelf, and where the bars there rest `"auto"` or
-`"hidden"` it is a handle. On an edge no bar sits on it follows
-the more present of the two bars' visibilities (the App Bar's in
-monocle and scrolling only): whole under `"always"`, a handle
-otherwise
-([`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
-places all three). When it is on screen is
+every screen. Under
+[`pocket.set_capacity("several")`](#pocketset_capacity), where a
+bar shows on that edge the pocket is a section of KiwiShelf, and
+where the bars there rest `"auto"` or `"hidden"` it is a handle.
+On an edge no bar sits on it follows the more present of the two
+bars' visibilities (the App Bar's in monocle and scrolling only):
+whole under `"always"`, a handle otherwise. Under `"one"` it is
+the whole mark on every edge, with no handle.
+[`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
+places it. When it is on screen is
 [`pocket.set_capacity`](#pocketset_capacity)'s. A look carries
 it.
 
@@ -3104,14 +3106,17 @@ that range it is clamped.
 
 **Does:** sets where along its edge the [pocket](#pocket) sits, in
 percent: `0` is the left or top end, `100` the right or bottom
-end. On an edge where a bar shows, the pocket takes the shelf's
+end. Under `"one"` ([`pocket.set_capacity`](#pocketset_capacity))
+the pocket stands at the position on every edge. Under
+`"several"`, on an edge where a bar shows, it takes the shelf's
 nearer end instead — its start below `50`, its end from `50` —
-outside the bars' items, so it stays put while they scroll. On an
+outside the bars' items, so it stays put while they scroll; on an
 edge where an `"auto"` bar rests hidden, its handle stands where
 the pocket shows once the bar comes in, joining the bars' handles
-in one row where it would meet them. On any other edge no bar
+in one row where it would meet them; on any other edge no bar
 shows, the handle, or the pocket where it rests whole, stands at
-the position, kept on screen at either end. A look carries it.
+the position. It is kept on screen at either end. A look carries
+it.
 
 **Example:**
 
@@ -5865,14 +5870,17 @@ sits on, for both bars. A click on the pocket lists the windows
 inside by app; a row takes its window out. Under `"one"` nothing
 stays: the pocket stands only while a window goes in or out
 ([`animations.set_on_state_change`](#animationsset_on_state_change))
-or while you drag one, and on an edge where a bar shows its slot
-then opens, the bars gliding aside for it.
+or while you drag one. It has no handle: it slides out of its edge
+at the position, just inside the bar on an edge where one sits,
+moving no bar, and otherwise one outer margin in from the screen
+edge.
 
 While you drag a window, under either capacity, the pocket comes
 up on every screen as a drop target, and a drop on it pockets that
 window as [`pocket`](#pocket) naming it would; where the pocket
 would refuse it, the pocket does not light and the window goes
-back. Switching back to `"one"` keeps the windows already marked.
+back. A drag that starts with the pointer over the pocket takes
+no drop there until the pointer has left it. Switching back to `"one"` keeps the windows already marked.
 
 **Example:**
 
@@ -7632,12 +7640,12 @@ float rules make floating, follow
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
 place the pocket the plate flies to, under either
-[`pocket.set_capacity`](#pocketset_capacity): on an edge where a
-bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
-aside for it; on an edge no bar shows, the pocket comes up out of
-its handle, or stands whole where
+[`pocket.set_capacity`](#pocketset_capacity): under `"several"`
+the pocket that stays, which on an edge no bar shows comes up out
+of its handle, or stands whole where
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says it
-does. That pocket lights as the window goes in or out, and nods
+does; under `"one"` a pocket that slides out of its edge and moves
+no bar. That pocket lights as the window goes in or out, and nods
 as one lands in it.
 :::
 

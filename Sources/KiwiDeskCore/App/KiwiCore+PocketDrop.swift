@@ -19,14 +19,22 @@ extension KiwiCore {
         guard pocketMoveVerdict(id, start: start, frame: frame) else {
             return false
         }
-        let hovered =
-            pocketNamedRefusal(id) == nil ? pocketUnderPointer() : nil
-        if pocketPlate.dragging != id || pocketPlate.dropHovered != hovered {
-            let joins = pocketPlate.dragging == nil
+        if pocketPlate.dragging != id {
             pocketPlate.dragging = id
+            pocketPlate.dropHovered = nil
+            // A drag stands the pocket, its place the bar pass's.
+            updateBars()
+            // A drag that starts on the pocket, a title bar under it,
+            // arms it only once the pointer has left it (#2793).
+            pocketPlate.armed = false
+        }
+        let under = pocketUnderPointer()
+        if under == nil { pocketPlate.armed = true }
+        let hovered =
+            pocketPlate.armed && pocketNamedRefusal(id) == nil ? under : nil
+        if pocketPlate.dropHovered != hovered {
             pocketPlate.dropHovered = hovered
-            // A drag stands the pocket: its slot opens on the shelf.
-            if joins { updateBars() } else { updatePocketPlate() }
+            updatePocketPlate()
         }
         return hovered != nil
     }
@@ -67,22 +75,27 @@ extension KiwiCore {
         live: Bool
     ) -> Bool {
         let over =
-            live && pocketPlate.dragging == id
+            live && pocketPlate.dragging == id && pocketPlate.armed
             && pocketUnderPointer() != nil
         let lit = over && pocketPlate.dropHovered != nil
-        endPocketDrag()
-        if over, !lit, pocketNamedRefusal(id) == .taken {
-            _ = refuseSecondPocketWindow(id)
+        guard lit else {
+            endPocketDrag()
+            if over, pocketNamedRefusal(id) == .taken {
+                _ = refuseSecondPocketWindow(id)
+            }
+            return false
         }
-        guard lit else { return false }
         // An out window comes out next where it was before the drag,
         // never on the plate it was dropped on.
         pocketPlate.dropStart = (id, start, frame)
         defer { pocketPlate.dropStart = nil }
+        // The put-in's play holds the pocket before the drag lets it
+        // go, so a sliding pocket never leaves between them (#2793).
         let response = execute(
             "pocket",
             args: [.number(Double(id.raw))]
         )
+        endPocketDrag()
         // Refused at the drop after all: the ordinary drop takes it.
         return response.isSuccess
     }
@@ -100,6 +113,7 @@ extension KiwiCore {
         guard pocketPlate.dragging != nil else { return }
         pocketPlate.dragging = nil
         pocketPlate.dropHovered = nil
+        pocketPlate.armed = false
         updateBars()
     }
 

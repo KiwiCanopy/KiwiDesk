@@ -1081,7 +1081,7 @@
   "kiwishelf.pocket_edge": "Pocket の端",
   "kiwishelf.pocket_edge.help": "Pocket が置かれる画面の端です。",
   "kiwishelf.pocket_position": "Pocket の位置",
-  "kiwishelf.pocket_position.help": "バーのある端では、Pocket は近いほうの端に寄ります。",
+  "kiwishelf.pocket_position.help": "「%1$@」のときは、Pocket はバーの近いほうの端に寄ります。",
   "kiwishelf.reveal_duration": "表示エフェクトの継続時間",
   "kiwishelf.reveal_duration.help": "非表示のバーが現れるまでにかかる時間です。現れ方に関わらず適用され、隠れるときは少し速くなります。0にすると、すぐに切り替わります。",
   "kiwishelf.reveal_style.fade": "フェード",

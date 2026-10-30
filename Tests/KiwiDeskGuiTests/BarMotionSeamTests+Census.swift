@@ -30,6 +30,8 @@ extension BarMotionSeamTests {
         "playPocketRise": ["pocketRise(", "isReduced"],
         "pocketRise": ["reduceMotion"],
         "pocketRiseStart": [],
+        "playPocketEntrance": ["pocketEntrance(", "isReduced"],
+        "pocketEntrance": ["reduceMotion"],
         "playPocketLight": ["pocketLightDuration(", "isReduced"],
         "pocketLightDuration": ["reduceMotion"],
         "pocketEase": ["duration"],

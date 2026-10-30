@@ -67,29 +67,51 @@ struct PocketShelfWiringTests {
         // The pocket's panel is the shelf's for the peek's look.
         let panel = try #require(overlay.pocket.panel)
         #expect(core.shelves.shelf(drawnIn: panel) != nil)
+        // A level above the shelf and the drag's ghost (#2776).
+        #expect(panel.level == BarPanel.aboveLevel)
     }
 
-    @Test("under One window no slot opens at rest, and a drag opens it")
+    @Test("under One window a drag stands the pocket inside the strip")
     func dragStandsThePocket() throws {
         let (core, display) = try makeCore()
+        // A margin, so the inside frame's own outer of 0 is told apart.
+        core.tiler.settings.kiwishelf.outerMargin = 8
         core.updateBars()
         #expect(core.pocketPlate.slots[display] == nil)
         #expect(!core.pocketStands)
         core.pocketPlate.dragging = one
         core.updateBars()
         #expect(core.pocketStands)
-        #expect(core.pocketPlate.slots[display] != nil)
-        // The first pass the pocket stands in mounts it: the pocket
-        // syncs ahead of the shelves.
-        let overlay = try #require(
-            core.shelves.overlayForTesting(display, edge: .bottom)
-        )
-        let mounted = try #require(overlay.pocket.mount?.view)
-        #expect(mounted === core.pocketPlate.sectionMount(on: display))
-        // A level above the shelf and the drag's ghost (#2776).
-        #expect(overlay.pocket.panel?.level == BarPanel.aboveLevel)
-        core.endPocketDrag()
+        // Under One window the bar's edge opens no slot: the pocket
+        // stands just inside the strip, in a panel of its own (#2793).
         #expect(core.pocketPlate.slots[display] == nil)
+        let strip = try #require(core.pocketPlate.barStrips[display])
+        let inside = try #require(core.pocketInsideFrame(on: display))
+        #expect(inside.maxY <= strip.minY)
+        let spec = try #require(core.pocketPlate.specs[display])
+        #expect(spec.whole && spec.handle == .bottom && !spec.risen)
+        // Drawn at the inside frame, at its edge, sliding out of it.
+        let drawn = GeometryUtils.flip(
+            spec.frame,
+            primaryHeight: GeometryUtils.primaryHeight
+        )
+        #expect(drawn == inside)
+        #expect(spec.outer == 0 && spec.slides)
+        #expect(core.pocketLanding(on: display) == inside)
+        #expect(core.pocketPlate.sectionMount(on: display) == nil)
+        core.endPocketDrag()
+        #expect(core.pocketPlate.specs[display] == nil)
+    }
+
+    @Test("under Several the drag finds the pocket in its slot")
+    func severalKeepsTheSlot() throws {
+        let (core, display) = try makeCore()
+        core.execute("pocket.set_capacity", args: [.string("several")])
+        core.pocketPlate.dragging = one
+        core.updateBars()
+        #expect(core.pocketPlate.slots[display] != nil)
+        #expect(core.pocketInsideFrame(on: display) == nil)
+        #expect(core.pocketPlate.sectionMount(on: display) != nil)
     }
 
     @Test("the pocket stands on a second display at its own slot")

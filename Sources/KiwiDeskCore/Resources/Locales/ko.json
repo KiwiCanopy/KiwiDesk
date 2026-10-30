@@ -1081,7 +1081,7 @@
   "kiwishelf.pocket_edge": "Pocket 가장자리",
   "kiwishelf.pocket_edge.help": "Pocket이 놓이는 화면 가장자리입니다.",
   "kiwishelf.pocket_position": "Pocket 위치",
-  "kiwishelf.pocket_position.help": "바가 있는 가장자리에서는 Pocket이 더 가까운 끝에 놓입니다.",
+  "kiwishelf.pocket_position.help": "‘%1$@’일 때는 Pocket이 바의 더 가까운 끝에 놓입니다.",
   "kiwishelf.reveal_duration": "나타내기 지속 시간",
   "kiwishelf.reveal_duration.help": "가려진 바가 나타나는 데 걸리는 시간이며, 나타나는 방식과 관계없이 적용됩니다. 사라질 때는 조금 더 빠릅니다. 0이면 즉시 바뀝니다.",
   "kiwishelf.reveal_style.fade": "페이드",
