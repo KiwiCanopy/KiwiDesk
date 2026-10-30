@@ -147,6 +147,13 @@ extension KiwiCore {
         if landed != owed.space {
             fileMembership(window, into: owed.space, from: landed)
         }
+        // macOS carried a hopped window across screens with no write
+        // of ours, and an app may still report its pre-move frame: a
+        // float placed from it, on the arrival retile, takes a frame
+        // the window and its ring agree on (#2770).
+        if reanchorFloat(window, to: owed.space) {
+            onLog("move here: w\(window.raw) placed on its new screen")
+        }
         focusWindow(window, refocusRetile: false, warp: true)
         onLog("move here: focus handed to w\(window.raw)")
     }

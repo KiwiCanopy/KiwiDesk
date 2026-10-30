@@ -67,4 +67,23 @@ struct JumpMoveHereTargetWiringTests {
         let fold = try #require(source.range(of: "state.apply(event)"))
         #expect(drop.lowerBound < fold.lowerBound)
     }
+
+    /// A hopped float is placed from the frame it reports, in the
+    /// arrival payment ahead of the focus hand-off: an app may report
+    /// its pre-move frame after macOS carried it (#2770).
+    @Test("the arrival payment places a hopped float")
+    func paymentPlacesTheFloat() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDeskCore/App/JumpState.swift"
+            )
+        let source = try SourceScan.blankedSource(at: file)
+        let pay = try #require(source.range(of: "func payMoveHereFocus("))
+        let tail = source[pay.upperBound...]
+        let place = try #require(
+            tail.range(of: "reanchorFloat(window, to: owed.space)")
+        )
+        let focus = try #require(tail.range(of: "focusWindow(window,"))
+        #expect(place.lowerBound < focus.lowerBound)
+    }
 }
