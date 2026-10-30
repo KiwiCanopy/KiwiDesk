@@ -150,18 +150,12 @@ const ghMark = ghMarkRaw
 const MAX_CARD_TAGS = 4;
 ---
 
-{/* Not linked from the nav or the footer and kept out of the
-    sitemap until the owner calls the gallery live (#1740), so the
-    page carries noindex until then. Going live: drop `noindex`
-    here, add "looks" to `paths` in src/pages/sitemap.xml.ts, and
-    link it from PageShell's footer. */}
 <PageShell
   lang={lang}
   slug={slug}
   title={t("looks_meta_title")}
   desc={t("looks_meta_desc")}
   ogImage={ogImage}
-  noindex={true}
   mainClass="looks"
 >
   <div class="wrap" data-looks>

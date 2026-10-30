@@ -1644,8 +1644,7 @@ def check_looks_rendered(dist: pathlib.Path) -> None:
     outage during the build reds every site PR until it clears.
     Each card owes a detail section at `look-<id>`, so its title
     link lands, and a page is noindex exactly when no sitemap lists
-    it — the gallery goes live by dropping noindex and adding the
-    sitemap entry together, and either alone reds.
+    it, so hiding or listing the gallery is one change to both.
     """
     tag = re.compile(r"<(li|article|meta)\b([^>]*)>")
     attr = re.compile(r'([\w:-]+)\s*=\s*"([^"]*)"')
