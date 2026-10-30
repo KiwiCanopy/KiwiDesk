@@ -19,8 +19,8 @@ extension KiwiCore {
         pocketStands && !pocketPlate.standingDown.contains(display)
     }
 
-    /// Whether the pocket stands this pass — the one predicate the
-    /// shelf's plan and the pocket both read (#2678 review 4).
+    /// Whether the pocket shows this pass; the shelf's plan reads the
+    /// capacity alone, so a drag or a play moves no bar (#2793).
     var pocketStands: Bool {
         Self.pocketStands(
             several: pocketHoldsSeveral,
@@ -94,25 +94,24 @@ extension KiwiCore {
         let rise = Self.pocketRiseSide(thickness: shelf.thickness)
         // A list open on a risen pocket holds it out (#2678 review 1).
         let listed = pocketListDisplay
-        return state.workspaces.allDisplays.compactMap { display in
+        return state.workspaces.allDisplays.compactMap {
+            display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
-            let slot = pocketPlate.slots[display.id]
-            // Where the bars read Always, the whole mark stands on an
-            // edge no bar shows (#2784 ▸ 8).
-            let whole = slot == nil && pocketRestsWhole(on: display)
-            // An edge no bar shows takes the handle, the pocket out of
-            // it on hover and during a drag (#2678).
+            let place = pocketPlace(on: display.id)
+            // A handle's pocket rises out of it on hover, during a drag
+            // or a play, and while its list is open (#2678).
             let risen =
-                slot == nil && !whole
+                place == .handle
                 && (dragging || pocketPlate.hovered.contains(display.id)
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
-            guard
-                let frame = slot
-                    ?? (whole
-                        ? pocketMarkFrame(on: display.id)
-                        : pocketHandleFrame(on: display.id, risen: risen))
-            else { return nil }
+            let found: CGRect? =
+                switch place {
+                case .section(let frame), .inside(let frame): frame
+                case .whole: pocketMarkFrame(on: display.id)
+                case .handle: pocketHandleFrame(on: display.id, risen: risen)
+                }
+            guard let frame = found else { return nil }
             // A lit pocket shows full, empty or not (#2776).
             let lit =
                 pocketPlate.dropHovered == display.id
@@ -131,19 +130,21 @@ extension KiwiCore {
                 name: name,
                 // The whole mark stands on the edge it would hold a
                 // handle on, with none drawn.
-                handle: slot == nil ? edge : nil,
+                handle: place.isSection ? nil : edge,
                 risen: risen,
                 risenSide: rise,
-                outer: shelf.outerMargin,
-                whole: whole
+                // Inside the strip the mark stands at its frame's edge.
+                outer: Self.pocketOuter(place, shelf: shelf),
+                whole: !place.isSection && place != .handle,
+                slides: place.slides
             )
         }
     }
 
     /// Whether the pocket is on screen: always while Several windows
     /// holds it; under One window during a window drag, as its drop
-    /// target, and while a window goes in or out — a bar's edge then
-    /// opens its slot (owner ruling 2026-10-29).
+    /// target, and while a window goes in or out — on a bar's edge
+    /// just inside the strip, which opens no slot (#2793).
     static func pocketStands(
         several: Bool,
         dragging: Bool,

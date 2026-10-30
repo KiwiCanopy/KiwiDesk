@@ -1081,7 +1081,7 @@
   "kiwishelf.pocket_edge": "Pocket 边缘",
   "kiwishelf.pocket_edge.help": "Pocket 所在的屏幕边缘。",
   "kiwishelf.pocket_position": "Pocket 位置",
-  "kiwishelf.pocket_position.help": "在有栏的边缘上，Pocket 会位于较近的一端。",
+  "kiwishelf.pocket_position.help": "选择“%1$@”时，Pocket 会位于栏较近的一端。",
   "kiwishelf.reveal_duration": "出现效果时长",
   "kiwishelf.reveal_duration.help": "隐藏的栏出现所需的时间，无论以哪种方式出现；隐藏时会稍快一些。设为 0 时会立即完成。",
   "kiwishelf.reveal_style.fade": "淡入",

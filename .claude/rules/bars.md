@@ -794,10 +794,16 @@ render content into it (#1517). Obligations:
 
 ## The pocket is a shelf section (#2678)
 
-The pocket on a bar's edge is the shelf's third section, drawn in a
-second panel the shelf owns (`ShelfPocketPiece`), so the gap between
-the bars' run and the pocket keeps passing clicks (#2497) while the
-pocket rides every motion the shelf plays. Obligations:
+Under Several windows the pocket on a bar's edge is the shelf's
+third section, drawn in a second panel the shelf owns
+(`ShelfPocketPiece`), so the gap between the bars' run and the
+pocket keeps passing clicks (#2497) while the pocket rides every
+motion the shelf plays. **Under One window it never takes a slot:
+the plan states the pocket by the capacity alone**, so a drag or a
+play moves no bar (#2793, `PocketShelfWiringTests` ▸
+`severalKeepsTheSlot`, `dragStandsThePocket`; where it stands then is
+[borders.md](borders.md)'s ▸ The pocket rides the bar pass).
+Obligations:
 
 - **A motion `ShelfOverlay` plays reaches both contents from one
   call** — a reveal, a retract, a fade, the plate glide's alpha —

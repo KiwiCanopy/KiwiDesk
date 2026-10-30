@@ -1081,7 +1081,7 @@
   "kiwishelf.pocket_edge": "Borde del Pocket",
   "kiwishelf.pocket_edge.help": "Borde de la pantalla en el que se sitúa el Pocket.",
   "kiwishelf.pocket_position": "Posición del Pocket",
-  "kiwishelf.pocket_position.help": "En el borde de una barra, el Pocket ocupa el extremo más cercano.",
+  "kiwishelf.pocket_position.help": "Con «%1$@», el Pocket ocupa el extremo más cercano de una barra.",
   "kiwishelf.reveal_duration": "Duración de aparición",
   "kiwishelf.reveal_duration.help": "Cuánto tarda en aparecer una barra oculta, sea cual sea su forma de aparecer; al ocultarse va un poco más rápido. A 0 es instantáneo.",
   "kiwishelf.reveal_style.fade": "Fundido",

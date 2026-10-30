@@ -1081,7 +1081,7 @@
   "kiwishelf.pocket_edge": "Pocket edge",
   "kiwishelf.pocket_edge.help": "The screen edge the Pocket sits on.",
   "kiwishelf.pocket_position": "Pocket position",
-  "kiwishelf.pocket_position.help": "On a bar's edge, the Pocket takes the nearer end.",
+  "kiwishelf.pocket_position.help": "With “%1$@”, the Pocket takes a bar's nearer end.",
   "kiwishelf.reveal_duration": "Reveal duration",
   "kiwishelf.reveal_duration.help": "How long a hidden bar takes to appear, whichever way it reveals; it leaves a little quicker. 0 makes it instant.",
   "kiwishelf.reveal_style.fade": "Fade",

@@ -1081,7 +1081,7 @@
   "kiwishelf.pocket_edge": "Pocket-Kante",
   "kiwishelf.pocket_edge.help": "Die Bildschirmkante, an der die Pocket sitzt.",
   "kiwishelf.pocket_position": "Pocket-Position",
-  "kiwishelf.pocket_position.help": "An der Kante einer Leiste rückt die Pocket an das nähere Ende.",
+  "kiwishelf.pocket_position.help": "Bei „%1$@“ rückt die Pocket an das nähere Ende einer Leiste.",
   "kiwishelf.reveal_duration": "Erscheinungsdauer",
   "kiwishelf.reveal_duration.help": "Wie lange eine ausgeblendete Leiste braucht, um zu erscheinen, gleich auf welche Weise; das Ausblenden geht etwas schneller. Bei 0 erfolgt es ohne Übergang.",
   "kiwishelf.reveal_style.fade": "Einblenden",

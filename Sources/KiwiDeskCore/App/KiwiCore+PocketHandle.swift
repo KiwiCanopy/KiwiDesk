@@ -164,11 +164,10 @@ extension KiwiCore {
     func pocketLanding(on display: DisplayID) -> CGRect? {
         // The one door for where the pocket is (#2678 review 5).
         guard pocketStands(on: display) else { return nil }
-        if let slot = pocketPlate.slots[display] { return slot }
         let shelf = tiler.settings.kiwishelf
-        if let shown = state.workspaces.allDisplays.first(where: {
-            $0.id == display
-        }), pocketRestsWhole(on: shown) {
+        switch pocketPlace(on: display) {
+        case .section(let frame), .inside(let frame): return frame
+        case .whole:
             return pocketMarkFrame(on: display).map {
                 PocketPlateView.room(
                     in: $0,
@@ -176,6 +175,7 @@ extension KiwiCore {
                     outer: shelf.outerMargin
                 )
             }
+        case .handle: break
         }
         guard let room = pocketHandleFrame(on: display, risen: true) else {
             return nil
@@ -201,7 +201,7 @@ extension KiwiCore {
     func holdPocketOut(on display: DisplayID, for seconds: TimeInterval) {
         let token = UUID()
         pocketPlate.playing = [display: token]
-        // A play stands the pocket: its slot opens on the shelf.
+        // A play stands the pocket, its place the bar pass's.
         updateBars()
         deferred.schedule(.pocketHold, after: .seconds(seconds)) {
             [weak self] in
