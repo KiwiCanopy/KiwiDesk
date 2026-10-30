@@ -76,17 +76,18 @@ extension KiwiCore {
 
     /// Moves the app's windows up on another Desktop onto the
     /// Desktop `target`'s screen shows, and only once the bridge
-    /// accepted points each one's remembered Space at `target`.
-    /// `gather` takes `target`'s screen's own Desktops alone; `only`
-    /// narrows the hop to one window (#1875's Move here), which may
-    /// come from another screen's Desktop, the bridge carrying it to
-    /// that screen so the arrival's screen-home net (#1010) files it
-    /// into `target` (#2770). An UNFILED entry — no remembered Space
-    /// at all — is skipped, since its arrival would take its app
-    /// rule. Performed is not applied (os-private-apis.md): the
-    /// arrival, or the reap's reconcile, is the verification.
-    /// Returns the windows whose move was dispatched, or nil where
-    /// the bridge refused.
+    /// accepted points each one's remembered Space at `target`, so
+    /// the arrival files it there. `gather` takes `target`'s screen's
+    /// own Desktops alone — with one shared Desktop set there is no
+    /// screen to keep, so it takes every one, each window arriving on
+    /// the screen its frame is on. `only` narrows the hop to one
+    /// window (#1875's Move here), which may come from any screen;
+    /// its owed focus files it into `target` wherever it lands
+    /// (#2770). An UNFILED entry — no remembered Space at all — is
+    /// skipped, since its arrival would take its app rule. Performed
+    /// is not applied (os-private-apis.md): the arrival, or the
+    /// reap's reconcile, is the verification. Returns the windows
+    /// whose move was dispatched, or nil where the bridge refused.
     func hopAwayWindows(
         bundleID: String,
         into target: SpaceID,
@@ -94,14 +95,7 @@ extension KiwiCore {
     ) -> [WindowID]? {
         guard canDriveDesktops,
             let reach = awayReach(bundleID: bundleID),
-            let uuid = Self.hopDisplayKey(
-                [
-                    state.workspaces.display(of: target)
-                        .flatMap(NativeSpaces.displayUUID(for:)),
-                    reach.snapshot.mainUUID,
-                ],
-                in: reach.snapshot
-            ),
+            let uuid = hopDisplayKey(for: target, in: reach.snapshot),
             let shown = reach.snapshot.currentSpaces[uuid]
         else { return [] }
         let windows = reach.windows.map(\.window).filter { window in
@@ -140,22 +134,28 @@ extension KiwiCore {
         return windows.map(\.id)
     }
 
-    /// The snapshot's key for the screen a hop lands on: the first
-    /// candidate it lists a current Desktop for, else its one key —
-    /// with "Displays have separate Spaces" off every Desktop sits
-    /// under one shared display id, which no screen's UUID names
-    /// (#2770).
-    nonisolated static func hopDisplayKey(
-        _ candidates: [String?],
+    /// The snapshot's key for the screen `target` lays out on: its
+    /// own UUID where listed, the main screen's where its screen is
+    /// unknown, and the shared key with "Displays have separate
+    /// Spaces" off (#2770). A screen the reading does not list — a
+    /// topology read mid-reconfigure — refuses rather than landing
+    /// the window on another screen.
+    func hopDisplayKey(
+        for target: SpaceID,
         in snapshot: DesktopSnapshot
     ) -> String? {
-        if let named = candidates.compactMap({ $0 }).first(where: {
-            snapshot.currentSpaces[$0] != nil
-        }) {
-            return named
+        let shared = sharedDesktopKey(in: snapshot)
+        let named = state.workspaces.display(of: target)
+            .flatMap(NativeSpaces.displayUUID(for:))
+        if let named {
+            return snapshot.currentSpaces[named] != nil ? named : shared
         }
-        let keys = snapshot.currentSpaces.keys
-        return keys.count == 1 ? keys.first : nil
+        if let main = snapshot.mainUUID,
+            snapshot.currentSpaces[main] != nil
+        {
+            return main
+        }
+        return shared
     }
 
     /// The refusal a key press would otherwise meet in silence:

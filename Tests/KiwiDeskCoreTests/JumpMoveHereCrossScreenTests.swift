@@ -149,22 +149,57 @@ struct JumpMoveHereCrossScreenTests {
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("1"))
     }
 
-    @Test("the hop's screen key: a named screen, else the one shared key")
+    /// Landed off `target`'s screen — the net re-homed it, or one
+    /// shared Desktop set left its frame where it was — the owed
+    /// focus still files it into the panel's Space.
+    @Test("a hop that lands elsewhere is filed into the target")
+    func landingElsewhereRelocates() {
+        let core = makeCore()
+        defer { teardown() }
+        park(core, on: 11)
+        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
+        core.state.rememberedSpaces[WindowID(7)] = .departed("1")
+        core.handle(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(7),
+                    pid: pid,
+                    appName: "Notes",
+                    appBundleID: bundle
+                )
+            )
+        )
+        #expect(core.state.workspaces.space(of: WindowID(7)) == "5")
+        #expect(core.state.workspaces.lastFocused == WindowID(7))
+    }
+
+    @Test("the hop's screen key refuses a screen the reading lacks")
     func hopDisplayKey() {
-        func snapshot(_ current: [String: UInt64]) -> DesktopSnapshot {
+        let core = makeCore()
+        defer { teardown() }
+        func snapshot(
+            _ current: [String: UInt64],
+            main: String? = nil
+        ) -> DesktopSnapshot {
             DesktopSnapshot(
                 authority: nil,
-                mainUUID: nil,
+                mainUUID: main,
                 mainCurrentSpace: nil,
                 currentSpaces: current,
-                spaces: []
+                spaces: current.map {
+                    authoritySpace($0.value, display: $0.key, current: true)
+                }
             )
         }
-        let two = snapshot(["UUID-A": 10, "UUID-B": 20])
-        #expect(KiwiCore.hopDisplayKey(["UUID-B"], in: two) == "UUID-B")
-        #expect(KiwiCore.hopDisplayKey([nil, "UUID-A"], in: two) == "UUID-A")
-        #expect(KiwiCore.hopDisplayKey(["UUID-C"], in: two) == nil)
-        let shared = snapshot(["Main": 10])
-        #expect(KiwiCore.hopDisplayKey(["UUID-A"], in: shared) == "Main")
+        let two = snapshot(["UUID-A": 10, "UUID-B": 20], main: "UUID-A")
+        #expect(core.hopDisplayKey(for: "5", in: two) == "UUID-B")
+        // Screen 2 dropped from the reading: no landing on screen 1.
+        let one = snapshot(["UUID-A": 10], main: "UUID-A")
+        #expect(core.hopDisplayKey(for: "5", in: one) == nil)
+        // A Space with no screen yet lands on the main one.
+        #expect(core.hopDisplayKey(for: "9", in: two) == "UUID-A")
+        // One shared Desktop set, under an id no screen answers to.
+        let shared = snapshot(["Main": 10], main: "UUID-A")
+        #expect(core.hopDisplayKey(for: "5", in: shared) == "Main")
     }
 }
