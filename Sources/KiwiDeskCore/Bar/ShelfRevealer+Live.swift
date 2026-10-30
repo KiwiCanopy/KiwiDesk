@@ -3,21 +3,31 @@ import AppKit
 /// The revealer's live machine touch (#761): the pointer monitors
 /// both `makeTestCore` twins pin inert, and the live delayed call.
 extension ShelfRevealer {
+    /// The pointer events the revealer hears: moves, and a left
+    /// drag's moves, so a window drag can open the Space Bar
+    /// (#2795). A held button sends no `.mouseMoved`.
+    static let heard: NSEvent.EventTypeMask = [
+        .mouseMoved, .leftMouseDragged,
+    ]
+
     /// Both arms, as `PointerRest`'s: moves go to the ACTIVE app,
     /// so while KiwiDesk is active only the local monitor hears.
+    /// Each delivery says whether the left button drags.
     static func live(
-        _ deliver: @escaping @MainActor (CGPoint?) -> Void
+        _ deliver: @escaping @MainActor (CGPoint?, Bool) -> Void
     ) -> Any? {
         let global = NSEvent.addGlobalMonitorForEvents(
-            matching: .mouseMoved
+            matching: heard
         ) {
             let point = $0.locationInWindow
-            Task { @MainActor in deliver(point) }
+            let dragging = $0.type == .leftMouseDragged
+            Task { @MainActor in deliver(point, dragging) }
         }
         let local = NSEvent.addLocalMonitorForEvents(
-            matching: .mouseMoved
+            matching: heard
         ) { event in
-            Task { @MainActor in deliver(nil) }
+            let dragging = event.type == .leftMouseDragged
+            Task { @MainActor in deliver(nil, dragging) }
             return event
         }
         return [global, local].compactMap { $0 }

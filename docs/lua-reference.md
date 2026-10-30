@@ -3512,6 +3512,13 @@ App Bar in monocle and scrolling.
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
 
+:::unreleased
+A window drag opens an `"auto"` Space Bar as the pointer does
+above, so the window can be dropped on a Space
+([`move_to_space`](#move_to_space)); a drag never opens the App
+Bar, and a left drag that moves no window opens neither.
+:::
+
 A shown `auto` or `hidden` bar draws over the windows, so a
 reveal moves no window; setting the value moves the windows at
 most once. A bar set not to reserve

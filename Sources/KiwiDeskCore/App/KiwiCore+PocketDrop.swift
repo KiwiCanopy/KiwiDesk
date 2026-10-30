@@ -87,6 +87,14 @@ extension KiwiCore {
         return response.isSuccess
     }
 
+    /// Whether a window MOVE is in flight: the plate's move verdict,
+    /// asked of the live gesture too, since a cancel straight on the
+    /// coordinator skips the plate's clear. The bar reveal's one
+    /// answer (#2795).
+    var windowMoveInFlight: Bool {
+        pocketPlate.dragging.map { drag.hasGesture($0) } == true
+    }
+
     /// Drops the plate's drag state; a cancelled drag ends here.
     func endPocketDrag() {
         guard pocketPlate.dragging != nil else { return }
