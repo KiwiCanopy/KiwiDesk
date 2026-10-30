@@ -105,6 +105,8 @@ struct StackTogglePositionTests {
         let core = try KeepFixture.core()
         #expect(core.unsavedLiveSettings() == nil)
         #expect(core.execute(verb).isSuccess)
+        #expect(side(core) == .left)
+        #expect(core.tiler.settings.stack.stackPosition == .right)
         let unsaved = try #require(core.unsavedLiveSettings())
         let ids = Array(unsaved.leaves.keys)
         #expect(ids.count == 1)
