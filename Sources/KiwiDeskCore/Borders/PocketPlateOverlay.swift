@@ -31,9 +31,6 @@ final class PocketPlateOverlay {
         var risenSide: CGFloat = 0
         /// The shelf's outer margin, between the edge and the handle.
         var outer: CGFloat = 0
-        /// A window drag runs: the pocket stands above its ghost,
-        /// which shares the bars' level (owner, device 2026-10-29).
-        var aboveDrag = false
     }
 
     /// One display's pocket: a handle's panel, or a section's
@@ -189,8 +186,6 @@ final class PocketPlateOverlay {
 
     private func orderIn(_ shown: Shown, spec: Spec, changed: Bool) {
         guard let panel = shown.panel else { return }
-        let level = BarPanel.pocketLevel(duringDrag: spec.aboveDrag)
-        if panel.level != level { panel.level = level }
         #if DEBUG
             guard ordersPanel else { return }
         #endif
@@ -301,9 +296,7 @@ final class PocketPlateOverlay {
                 defer: true
             )
         )
-        // The bars' peer; ordered in after its shelf's panel, which
-        // may run beneath it under Full.
-        panel.level = BarPanel.level
+        panel.level = BarPanel.pocketLevel
         // The pocket is beside the Spaces, so it is on every Desktop.
         panel.collectionBehavior = [
             .transient, .ignoresCycle, .canJoinAllSpaces, .stationary,

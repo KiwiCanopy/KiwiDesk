@@ -127,8 +127,7 @@ extension KiwiCore {
                 handle: slot == nil ? edge : nil,
                 risen: risen,
                 risenSide: rise,
-                outer: shelf.outerMargin,
-                aboveDrag: dragging
+                outer: shelf.outerMargin
             )
         }
     }

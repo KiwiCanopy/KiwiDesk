@@ -120,14 +120,10 @@ struct PocketHandleTests {
                 + KiwiCore.pocketRiseSide(thickness: shelf.thickness)
         )
         // Above the drag's ghost, which shares the bars' level.
-        #expect(shown.aboveDrag)
         let panel = try #require(
             core.pocketPlate.panelForTesting(on: shown.display)
         )
         #expect(panel.level == BarPanel.aboveLevel)
-        core.pocketPlate.dragging = nil
-        _ = spec(core)
-        #expect(panel.level == BarPanel.level)
     }
 
     @Test("a bar edge's slot keeps the section, never the handle")

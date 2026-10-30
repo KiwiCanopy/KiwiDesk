@@ -76,39 +76,33 @@ struct PocketBareMarkTests {
         #expect(try alpha(of: mark, at: (12, 15)) > 0.5)
     }
 
-    @Test("a dragged window finds the section above its ghost")
-    func sectionRisesForADrag() throws {
+    @Test("the section stands a level above its shelf and any ghost")
+    func sectionStandsAboveTheShelf() throws {
         let overlay = ShelfOverlay()
         let strip = CGRect(x: 100, y: 300, width: 1000, height: 40)
         let slot = CGRect(x: 1060, y: 300, width: 40, height: 40)
         let plate = CGRect(x: 0, y: 0, width: 300, height: 40)
-        let view = NSView()
-        let show = { (raised: Bool) in
-            overlay.show(
-                strip: strip,
-                edge: .top,
-                shelf: KiwiShelf(),
-                sheen: 0,
-                sections: [
-                    .init(
-                        view: NSView(),
-                        slot: strip,
-                        plate: plate,
-                        content: plate
-                    )
-                ],
-                pocket: ShelfPocketPiece.Mount(
-                    view: view,
-                    slot: slot,
-                    raised: raised
+        overlay.show(
+            strip: strip,
+            edge: .top,
+            shelf: KiwiShelf(),
+            sheen: 0,
+            sections: [
+                .init(
+                    view: NSView(),
+                    slot: strip,
+                    plate: plate,
+                    content: plate
                 )
-            )
-        }
-        show(true)
+            ],
+            pocket: ShelfPocketPiece.Mount(view: NSView(), slot: slot)
+        )
+        // A click fronts the shelf's panel within its level, so only
+        // a higher level keeps the pocket over it (#2776).
         let panel = try #require(overlay.pocket.panel)
+        let shelf = try #require(overlay.panel)
         #expect(panel.level == BarPanel.aboveLevel)
-        show(false)
-        #expect(panel.level == BarPanel.level)
+        #expect(panel.level > shelf.level)
         overlay.hide()
     }
 }

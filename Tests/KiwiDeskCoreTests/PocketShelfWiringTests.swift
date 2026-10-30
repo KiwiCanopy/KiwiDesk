@@ -63,7 +63,6 @@ struct PocketShelfWiringTests {
         )
         let mount = try #require(overlay.pocket.mount)
         #expect(mount.slot == slot)
-        #expect(!mount.raised)
         #expect(mount.view === core.pocketPlate.sectionMount(on: display))
         // The pocket's panel is the shelf's for the peek's look.
         let panel = try #require(overlay.pocket.panel)
@@ -88,7 +87,7 @@ struct PocketShelfWiringTests {
         let mounted = try #require(overlay.pocket.mount?.view)
         #expect(mounted === core.pocketPlate.sectionMount(on: display))
         // Above the drag's ghost while it runs (#2776).
-        #expect(overlay.pocket.mount?.raised == true)
+        #expect(overlay.pocket.panel?.level == BarPanel.aboveLevel)
         core.endPocketDrag()
         #expect(core.pocketPlate.slots[display] == nil)
     }

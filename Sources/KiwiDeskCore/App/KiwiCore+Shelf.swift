@@ -243,11 +243,7 @@ extension KiwiCore {
                     mark: shelf.mark,
                     pocket: shelf.pocketSlot.flatMap { slot in
                         pocketPlate.sectionMount(on: shelf.display).map {
-                            ShelfPocketPiece.Mount(
-                                view: $0,
-                                slot: slot,
-                                raised: pocketPlate.dragging != nil
-                            )
+                            ShelfPocketPiece.Mount(view: $0, slot: slot)
                         }
                     }
                 )

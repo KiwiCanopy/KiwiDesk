@@ -802,11 +802,13 @@ pocket rides every motion the shelf plays. Obligations:
   the one `BarMotion.playPocketLight` (`PocketBareMarkTests` ▸
   `lightsByTheEdge`); a box for it is a ruling in
   `docs/design-decisions.md` first.
-- **While a window drag runs, every pocket panel — the section and
-  the handle — takes `BarPanel.pocketLevel(duringDrag:)`**, above
-  the drag's ghost and drop zone, which share the bars' level
-  (#2776, `PocketBareMarkTests` ▸ `sectionRisesForADrag`,
-  `PocketHandleTests` ▸ `dragRises`).
+- **Every pocket panel — the section and the handle — stands at
+  `BarPanel.pocketLevel`, a level above the shelf's**: a click fronts
+  the shelf's panel within its level, which under Full spans the
+  pocket's slot, and a window drag's ghost and drop zone share the
+  bars' level (#2776, `PocketBareMarkTests` ▸
+  `sectionStandsAboveTheShelf`, `PocketHandleTests` ▸ `dragRises`).
+  `orderIn(above:)` stays, for a shelf that joins that level.
 
 ## Overflow fades, follows and pages through one home each
 

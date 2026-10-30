@@ -74,6 +74,17 @@ final class PocketHandleView: NSView {
             height: Self.markSide
         )
         if !kiwisOut {
+            // Cut at the tab rather than covered by it: the tab wears
+            // the Fill as the bars' handles do, its alpha kept (#2776).
+            context.saveGState()
+            context.clip(
+                to: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: along,
+                    height: across - Self.tabDepth
+                )
+            )
             mark.draw(
                 in: markRect,
                 from: .zero,
@@ -82,6 +93,7 @@ final class PocketHandleView: NSView {
                 respectFlipped: true,
                 hints: nil
             )
+            context.restoreGState()
         }
         let tab = CGRect(
             x: (along - Self.tabLength) / 2,
@@ -94,7 +106,7 @@ final class PocketHandleView: NSView {
             xRadius: Self.tabDepth / 2,
             yRadius: Self.tabDepth / 2
         )
-        NSColor(kiwiFill: shelf.fillColor).withAlphaComponent(1).setFill()
+        NSColor(kiwiFill: shelf.fillColor).setFill()
         path.fill()
         context.restoreGState()
     }
