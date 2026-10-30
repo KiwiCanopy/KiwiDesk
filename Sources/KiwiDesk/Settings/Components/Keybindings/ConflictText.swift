@@ -23,11 +23,22 @@ enum ConflictText {
         disabled: Set<SystemShortcut>,
         sides: Bool
     ) -> ConflictSeverity? {
-        KeybindingConflicts.conflict(
-            for: binding,
-            in: bindings,
-            distinguishingSides: sides
-        ).map { ConflictSeverity.of($0, disabled: disabled) }
+        severity(
+            of: KeybindingConflicts.conflict(
+                for: binding,
+                in: bindings,
+                distinguishingSides: sides
+            ),
+            disabled: disabled
+        )
+    }
+
+    /// The tier of a conflict already found.
+    static func severity(
+        of conflict: Conflict?,
+        disabled: Set<SystemShortcut>
+    ) -> ConflictSeverity? {
+        conflict.map { ConflictSeverity.of($0, disabled: disabled) }
     }
 
     /// The tier and its sentence in one value — what every row
@@ -42,10 +53,12 @@ enum ConflictText {
     ) -> ConflictReading? {
         guard
             let severity = severity(
-                for: binding,
-                in: bindings,
-                disabled: disabled,
-                sides: sides
+                of: LayerConflictMemo.conflict(
+                    for: binding,
+                    in: bindings,
+                    sides: sides
+                ),
+                disabled: disabled
             )
         else { return nil }
         return ConflictReading(
@@ -135,5 +148,55 @@ enum ConflictText {
                 shortcut.localizedName
             )
         }
+    }
+}
+
+/// The page's layer conflicts, taken once per draft: every row's
+/// reading asked `KeybindingConflicts.conflict(for:in:)`, which
+/// parses the layer's every combo, so a page of rows parsed them
+/// once per row on each draft write (#2783). It answers what that
+/// call answers (`ConflictTextMemoTests`).
+@MainActor
+enum LayerConflictMemo {
+    private struct Taken {
+        let rows: [KeyBinding]
+        let sides: Bool
+        let byID: [UUID: KeyBinding]
+        let conflicts: [UUID: Conflict]
+    }
+
+    private static var last: Taken?
+
+    static func conflict(
+        for binding: KeyBinding,
+        in bindings: [KeyBinding],
+        sides: Bool
+    ) -> Conflict? {
+        if last?.rows != bindings || last?.sides != sides {
+            last = Taken(
+                rows: bindings,
+                sides: sides,
+                byID: Dictionary(
+                    bindings.map { ($0.id, $0) },
+                    uniquingKeysWith: { first, _ in first }
+                ),
+                conflicts: KeybindingConflicts.rowConflicts(
+                    of: bindings,
+                    distinguishingSides: sides
+                )
+            )
+        }
+        // A row from outside the layer, or an edited copy of one,
+        // is judged on its own.
+        guard let last, last.byID[binding.id] == binding,
+            bindings.count == last.byID.count
+        else {
+            return KeybindingConflicts.conflict(
+                for: binding,
+                in: bindings,
+                distinguishingSides: sides
+            )
+        }
+        return last.conflicts[binding.id]
     }
 }
