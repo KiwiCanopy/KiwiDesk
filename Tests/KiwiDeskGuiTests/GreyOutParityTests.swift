@@ -123,14 +123,6 @@ struct GreyOutParityTests {
             "reduceMotion && !key.placement.exemptFromContainerGate",
             1
         ),
-        // Each drag column's outer gate resolves through
-        // `GapsBordersGates` (#678 Phase 3) — the enabled reason
-        // wraps border, width, alignment and fill.
-        (
-            "DragVisualsEditor.swift",
-            "active: enabledReason != nil",
-            1
-        ),
         // `StickyMarkEditor` is deliberately absent: its coverage
         // guard was dropped in #678 Phase 3, the mark being what
         // survives the Space Bar rather than what depends on it.

@@ -7,60 +7,18 @@ import Foundation
 extension APIReference {
     static let dragRecords: [String: APIRecord] = [
         "set_ghost_enabled": APIRecord(
-            "Shows or hides the ghost visual.",
+            "Shows or hides the ghost, a two-tone outline at the "
+                + "dragged window's home slot.",
             .boolean("enabled")
-        ),
-        "set_ghost_border": APIRecord(
-            "Enables or disables the border on the ghost visual.",
-            .boolean("enabled")
-        ),
-        "set_ghost_border_alignment": APIRecord(
-            "Positions the ghost border inside or outside the "
-                + "slot.",
-            .choice("alignment", BorderAlignment.self)
-        ),
-        "set_ghost_border_color": APIRecord(
-            "Sets the border color of the ghost visual.",
-            .color("hex")
-        ),
-        "set_ghost_fill": APIRecord(
-            "Enables or disables the fill on the ghost visual.",
-            .boolean("enabled")
-        ),
-        "set_ghost_fill_color": APIRecord(
-            "Sets the fill color of the ghost visual.",
-            .color("hex")
         ),
         "set_drop_zone_enabled": APIRecord(
-            "Shows or hides the drop zone visual.",
+            "Shows or hides the drop zone, a frosted plate over the "
+                + "slot a drop would swap with.",
             .boolean("enabled")
-        ),
-        "set_drop_zone_border": APIRecord(
-            "Enables or disables the border on the drop zone "
-                + "visual.",
-            .boolean("enabled")
-        ),
-        "set_drop_zone_border_alignment": APIRecord(
-            "Positions the drop zone border inside or outside the "
-                + "slot.",
-            .choice("alignment", BorderAlignment.self)
-        ),
-        "set_drop_zone_border_color": APIRecord(
-            "Sets the border color of the drop zone visual.",
-            .color("hex")
-        ),
-        "set_drop_zone_fill": APIRecord(
-            "Enables or disables the fill on the drop zone "
-                + "visual.",
-            .boolean("enabled")
-        ),
-        "set_drop_zone_fill_color": APIRecord(
-            "Sets the fill color of the drop zone visual.",
-            .color("hex")
         ),
         "set_liquid_glass": APIRecord(
-            "Draws both drag visuals as macOS 26 Liquid Glass, "
-                + "tinted by their fill colors.",
+            "Draws the drop zone as macOS 26 Liquid Glass rather "
+                + "than the blur material.",
             .boolean("enabled")
         ),
     ]

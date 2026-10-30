@@ -11,18 +11,16 @@ enum PaletteSceneScale {
 /// Census of drawn and withheld palette roles (`PaletteSceneRoleTests`,
 /// `ColorPaletteKeys.all`).
 enum PaletteSceneRoles {
-    /// The seven roles drawn by the shelf tile.
+    /// The five roles drawn by the shelf tile.
     static let tile: Set<String> = [
         "kiwishelf.fill_color",
         "kiwishelf.item_color",
         "kiwishelf.active_item_color",
         "kiwishelf.highlight_color",
         "border.focused_color",
-        "drag.ghost.fill_color",
-        "drag.ghost.border_color",
     ]
 
-    /// The eighteen roles drawn by the detail panel (#231).
+    /// The fourteen roles drawn by the detail panel.
     static let panel: Set<String> = [
         // The shelf: plate and its border — drawn while the
         // draft's border is on (#1679) — the accent
@@ -44,11 +42,6 @@ enum PaletteSceneRoles {
         "sticky.color",
         "floating.color",
         "pocket.color",
-        // Drag visuals twinned (#231).
-        "drag.ghost.fill_color",
-        "drag.ghost.border_color",
-        "drag.drop_zone.fill_color",
-        "drag.drop_zone.border_color",
     ]
 
     /// Roles withheld from still frame rendering (#708).

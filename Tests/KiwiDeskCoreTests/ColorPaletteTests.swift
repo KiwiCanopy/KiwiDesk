@@ -36,11 +36,11 @@ struct ColorPaletteTests {
         #expect(all.contains("kiwishelf.fill_color"))
         #expect(!all.contains("space_bar.fill_color"))
         #expect(!all.contains("app_bar.fill_color"))
-        // Space-only key present; border + both drag elements too.
+        // Space-only key present, border too; the drag markers
+        // wear no colour (#2797).
         #expect(all.contains("space_bar.focused_item_color"))
         #expect(all.contains("border.focused_color"))
-        #expect(all.contains("drag.ghost.fill_color"))
-        #expect(all.contains("drag.drop_zone.border_color"))
+        #expect(!all.contains { $0.hasPrefix("drag.") })
         // The two mark tints joined in the #678 Colours phase, so
         // Colors & glass' "save these as a palette" bridge
         // carries every row it shows.

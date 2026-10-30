@@ -79,8 +79,7 @@ struct SettingsColorSurfaceTests {
         )
         // A scan that matched nothing would pass having looked
         // at nothing. Fewer call sites than census rows is
-        // correct: the four drag tints share one builder, since
-        // both columns edit the same `DragVisual` shape.
+        // correct: rows of one shape share a builder.
         #expect(found >= 14)
     }
 
@@ -165,8 +164,8 @@ struct SettingsColorSurfaceTests {
         // 17 rows since #1517: the shelf's eight colours replaced
         // the two bars' seventeen; 18 since #1679, the border; 19
         // since #1856, the front chip's indicator; 20 since #2671,
-        // the pocket mark.
-        #expect(placed.count == 20)
+        // the pocket mark; 16 since #2797 retired the drag tints.
+        #expect(placed.count == 16)
         #expect(placed.count == ColorPaletteKeys.all.count)
     }
 

@@ -55,20 +55,22 @@ struct WindowStrokeTests {
         }
     }
 
+    /// The corners still follow the border; the markers' widths are
+    /// fixed since #2797, so their verbs name no replacement.
     @Test(
-        "the per-stroke verbs are retired to the border's",
+        "the per-stroke verbs are retired",
         arguments: [
-            ("drag.set_ghost_border_width", "border.set_width"),
-            ("drag.set_drop_zone_border_width", "border.set_width"),
+            ("drag.set_ghost_border_width", "look is fixed"),
+            ("drag.set_drop_zone_border_width", "look is fixed"),
             ("drag.set_corner_radius", "border.set_corner_style"),
         ]
     )
     @MainActor
-    func retiredVerbsNameTheBorder(verb: String, replacement: String) {
+    func retiredVerbsFail(verb: String, message: String) {
         let core = makeTestCore()
         let response = core.execute(verb, args: [.number(4)])
         #expect(!response.isSuccess)
-        #expect(response.error?.contains(replacement) == true)
+        #expect(response.error?.contains(message) == true)
         #expect(core.tiler.settings == TilingSettings())
     }
 
@@ -78,7 +80,7 @@ struct WindowStrokeTests {
     func dragVisualStoresNoStroke() {
         let labels = Mirror(reflecting: DragVisual.ghostDefault)
             .children.compactMap(\.label)
-        #expect(labels.contains("borderColor"))
+        #expect(labels.contains("enabled"))
         for label in labels {
             #expect(
                 !label.localizedCaseInsensitiveContains("width")
@@ -100,14 +102,23 @@ struct WindowStrokeTests {
     }
 
     /// Both drag render paths hand the markers the border's
-    /// stroke — the engine's and the Settings picture's.
+    /// corners — the engine's and the Settings picture's (#2797).
     @Test("the drag paths hand over the border's stroke")
     func dragPathsReadTheStroke() async throws {
-        for (path, count) in [
-            ("Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift", 2),
+        for (path, needle, count) in [
+            (
+                "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
+                "settings.windowStroke.cornerRadius", 1
+            ),
+            // Both markers are handed that read.
+            (
+                "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
+                "cornerRadius: corner,", 2
+            ),
             (
                 "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"
-                    + "GapsBordersPanelPreview.swift", 2
+                    + "GapsBordersPanelPreview.swift",
+                "cornerRadius: settings.windowStroke.cornerRadius,", 2
             ),
         ] {
             // Code only: a needle kept alive in a comment beside a
@@ -116,10 +127,7 @@ struct WindowStrokeTests {
                 .split(separator: "\n", omittingEmptySubsequences: false)
                 .map { $0.components(separatedBy: "//")[0] }
                 .joined(separator: "\n")
-            let hits =
-                text.components(
-                    separatedBy: "stroke: settings.windowStroke,"
-                ).count - 1
+            let hits = text.components(separatedBy: needle).count - 1
             #expect(hits == count, "\(path) hands \(hits)")
         }
     }

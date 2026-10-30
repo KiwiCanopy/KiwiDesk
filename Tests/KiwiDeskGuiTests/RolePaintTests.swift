@@ -42,9 +42,7 @@ struct RolePaintTests {
         var settings = TilingSettings()
         settings.spaceBarStyle.focusedItemColor = "#E0A030"
         settings.spaceBarStyle.focusedHighlightColor = "#E0A030"
-        settings.dragDropZone.borderColor = "#3070E0"
         let seeded = RolePaint.seed(.secondAccent, settings)
-        #expect(!seeded.contains(.borders(.dragDropZoneBorderColor)))
         #expect(
             !seeded.contains(.spaceBar(.spaceBarFocusedHighlightColor))
         )
@@ -57,8 +55,6 @@ struct RolePaintTests {
         settings.kiwishelf.highlightColor = "#8DB354"
         settings.kiwishelf.hoverFillColor = "#AACB5D80"
         settings.borderStyle.focusedColor = "#4A9816"
-        settings.dragGhost.borderColor = "#347957"
-        settings.dragGhost.fillColor = "#34795740"
         return settings
     }
 
@@ -71,29 +67,31 @@ struct RolePaintTests {
         #expect(out.kiwishelf.activeItemColor == "#2F7FD6")
         #expect(out.kiwishelf.hoverFillColor == "#2F7FD680")
         #expect(out.borderStyle.focusedColor == "#2F7FD6")
-        #expect(out.dragGhost.fillColor == "#2F7FD640")
         // Untouched: a colour outside the group.
         #expect(out.kiwishelf.itemColor == settings.kiwishelf.itemColor)
     }
 
     @Test("a pick leaves unticked, dimmed and follower rows alone")
     func pickSkipsWhatItMustNotWrite() {
-        var settings = TilingSettings()
+        var settings = accentSettings()
         settings.spaceBarStyle.focusedItemColor = "#C2790A"
-        settings.dragDropZone.borderColor = "#C2790A"
-        settings.dragDropZone.fillColor = "#C2790A40"
         settings.spaceBarStyle.focusedHighlightColor = ""
-        let ticked = Set(ColorRole.secondAccent.keys)
         let out = paint(
+            .accent,
+            settings,
+            ticked: Set(ColorRole.accent.keys),
+            dimmed: [.kiwishelf(.hoverFillColor)]
+        ).painted("#123456")
+        #expect(out.borderStyle.focusedColor == "#123456")
+        #expect(out.kiwishelf.hoverFillColor == "#AACB5D80")
+        // A follower takes no write, its anchor does.
+        let followed = paint(
             .secondAccent,
             settings,
-            ticked: ticked,
-            dimmed: [.borders(.dragDropZoneFillColor)]
+            ticked: Set(ColorRole.secondAccent.keys)
         ).painted("#123456")
-        #expect(out.spaceBarStyle.focusedItemColor == "#123456")
-        #expect(out.dragDropZone.borderColor == "#123456")
-        #expect(out.dragDropZone.fillColor == "#C2790A40")
-        #expect(out.spaceBarStyle.focusedHighlightColor == "")
+        #expect(followed.spaceBarStyle.focusedItemColor == "#123456")
+        #expect(followed.spaceBarStyle.focusedHighlightColor == "")
         // Unticked.
         let none = paint(.accent, settings, ticked: [])
         #expect(none.targets.isEmpty)

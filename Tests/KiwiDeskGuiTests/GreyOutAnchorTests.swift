@@ -78,14 +78,6 @@ struct GreyOutAnchorTests {
             "prose: ColorsAndGlassHelp.dimmedReference",
             1
         ),
-        // The column header `?` anchor reads the resolver's
-        // enabled reason (#678 Phase 3): one call site, both
-        // columns route through it.
-        (
-            "DragVisualsEditor.swift",
-            "help: enabledReason.map(GapsBordersGateHelp.sentence)",
-            1
-        ),
         // (The bindings card's inline explanation retired with
         // #888: the separate-Spaces grey is gone, and the one
         // reason left has its cause on the surface, so the rows
