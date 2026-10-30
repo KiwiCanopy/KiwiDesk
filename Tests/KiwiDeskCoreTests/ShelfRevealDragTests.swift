@@ -13,6 +13,7 @@ import Testing
 @Suite("Shelf reveal on a drag (#2795)")
 @MainActor
 struct ShelfRevealDragTests {
+    @MainActor
     final class Rig {
         let revealer = ShelfRevealer()
         var point = CGPoint(x: 500, y: 400)
