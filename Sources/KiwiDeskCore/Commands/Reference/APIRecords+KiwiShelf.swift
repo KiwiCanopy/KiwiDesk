@@ -162,9 +162,8 @@ extension APIReference {
             .number("percent")
         ),
         "set_reading_contrast": APIRecord(
-            "Sets the contrast text on KiwiHub, the cue plates and "
-                + "the peek keeps where the Fill fades, 1–4.5; 1 "
-                + "leaves the full fade.",
+            "Sets the contrast reading text keeps where the Fill "
+                + "fades, 1–4.5; 1 is the full fade.",
             .number("ratio")
         ),
         "set_pocket_edge": APIRecord(
