@@ -22,6 +22,13 @@ public struct DesktopSnapshot: Sendable {
         NativeSpaces.number(of: space, in: spaces)
     }
 
+    /// `space`'s number on its own screen, as that screen's
+    /// Mission Control strip labels it (#2792). A label, never a
+    /// lookup key: verbs and bindings count with `number(of:)`.
+    public func screenNumber(of space: SkyLight.SpaceID) -> Int? {
+        NativeSpaces.screenNumber(of: space, in: spaces)
+    }
+
     /// Returns Desktop carrying Mission Control `wanted` number (#25).
     public func space(numbered wanted: Int) -> NativeSpace? {
         spaces.first { number(of: $0.id) == wanted }
@@ -48,6 +55,18 @@ public struct DesktopSnapshot: Sendable {
             },
             uniquingKeysWith: { first, _ in first }
         )
+    }
+
+    /// Each present user Desktop's number on its own screen
+    /// (#2792), under every key it answers to — the label a
+    /// per-Desktop row draws, never what it resolves through.
+    public var screenNumbersByKey: [DesktopKey: Int] {
+        var out: [DesktopKey: Int] = [:]
+        for space in spaces where space.isUser {
+            guard let n = screenNumber(of: space.id) else { continue }
+            for key in keys(of: space.id) { out[key] = n }
+        }
+        return out
     }
 
     /// The binding authority as a key (#1147): the Desktop the

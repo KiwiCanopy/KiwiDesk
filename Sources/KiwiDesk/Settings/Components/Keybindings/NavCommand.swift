@@ -17,6 +17,9 @@ struct NavCommand: Identifiable, Hashable {
     /// Explanation of why command action cannot run in current environment
     /// (`keybindingRowStyle`).
     var unavailable: (@MainActor () -> String)? = nil
+    /// A line under the title saying where the row acts right now
+    /// (#2792: the screen and Desktop a global number lands on).
+    var detail: (@MainActor () -> String)? = nil
     /// A live Space the profile does not hold, whose chip the row
     /// wears (#1827).
     var liveOnly: LiveOnlySpace.Kind? = nil

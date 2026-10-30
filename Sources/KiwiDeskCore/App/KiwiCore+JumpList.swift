@@ -9,22 +9,30 @@ import AppKit
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
     /// `display` is the screen the panel opened on: "here" is the
-    /// Space Move here would file into from it (#2791).
+    /// Space Move here would file into from it (#2791), and a row
+    /// on any other screen names that screen (#2792).
     public func jumpSnapshot(on display: DisplayID? = nil) -> JumpSnapshot {
         let here = moveHereSpace(on: display)
+        let hub =
+            display
+            ?? state.workspaces.activeSpace.flatMap {
+                state.workspaces.display(of: $0)
+            }
         return JumpSnapshot(
-            entries: jumpEntries(here: here),
+            entries: jumpEntries(here: here, hub: hub),
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon)
         )
     }
 
     func jumpEntries(
-        here: SpaceID? = nil
+        here: SpaceID? = nil,
+        hub: DisplayID? = nil
     ) -> [JumpEntry] {
         let here = here ?? state.workspaces.activeSpace
         let windows =
-            trackedJumpEntries(here: here) + awayJumpEntries(here: here)
+            trackedJumpEntries(here: here, hub: hub)
+            + awayJumpEntries(here: here, hub: hub)
             + minimizedJumpEntries(here: here)
         let ordered = windows.enumerated().sorted { lhs, rhs in
             if lhs.element.tier != rhs.element.tier {
@@ -80,12 +88,21 @@ extension KiwiCore {
         return state.focusRecencyRank(of: id)
     }
 
-    private func trackedJumpEntries(here: SpaceID?) -> [JumpEntry] {
+    private func trackedJumpEntries(
+        here: SpaceID?,
+        hub: DisplayID?
+    ) -> [JumpEntry] {
         state.windows.all
             .filter { !$0.isTransientOverlay }
             .sorted { $0.id.raw < $1.id.raw }
             .map { window in
                 let space = state.workspaces.space(of: window.id)
+                let status: JumpEntry.Status =
+                    state.isPocketed(window.id)
+                    ? .pocketed
+                    : window.isFullscreen ? .fullscreen : .shown
+                let shownOn = (state.stickyRenderSpace(of: window) ?? space)
+                    .flatMap { state.workspaces.display(of: $0) }
                 return JumpEntry(
                     target: .window(window.id),
                     pid: window.pid,
@@ -93,11 +110,11 @@ extension KiwiCore {
                     title: window.title,
                     space: space,
                     spaceIcon: space.flatMap(jumpSpaceIcon),
-                    status: state.isPocketed(window.id)
-                        ? .pocketed
-                        : window.isFullscreen ? .fullscreen : .shown,
+                    status: status,
                     movesHere: jumpMovesHere(window, from: space, into: here),
-                    isOtherApp: jumpIsOtherApp(window.appRef)
+                    isOtherApp: jumpIsOtherApp(window.appRef),
+                    screen: status == .shown
+                        ? jumpScreen(shownOn, hub: hub) : nil
                 )
             }
     }
@@ -105,7 +122,10 @@ extension KiwiCore {
     /// The away ledger's UP entries — a window parked while away is
     /// not reachable (#1146). The Desktop number comes from ONE
     /// topology reading, taken only when there is an entry.
-    private func awayJumpEntries(here: SpaceID?) -> [JumpEntry] {
+    private func awayJumpEntries(
+        here: SpaceID?,
+        hub: DisplayID?
+    ) -> [JumpEntry] {
         let away = state.awayWindows.values
             .filter(\.isUp)
             .sorted { $0.id.raw < $1.id.raw }
@@ -113,6 +133,7 @@ extension KiwiCore {
         let snapshot = NativeSpaces.desktopSnapshot()
         return away.map { entry in
             let space = state.rememberedSpace(of: entry.id)
+            let host = snapshot.spaces.first { $0.id == entry.nativeSpace }
             return JumpEntry(
                 target: .window(entry.id),
                 pid: entry.pid,
@@ -120,14 +141,29 @@ extension KiwiCore {
                 title: entry.title,
                 space: space,
                 spaceIcon: space.flatMap(jumpSpaceIcon),
-                status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
+                status: .away(
+                    desktop: snapshot.screenNumber(of: entry.nativeSpace)
+                ),
                 movesHere: canDriveDesktops && entry.appBundleID != nil
                     && here != nil,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: entry.appBundleID, name: entry.appName)
+                ),
+                screen: jumpScreen(
+                    display(forUUID: host?.displayUUID),
+                    hub: hub
                 )
             )
         }
+    }
+
+    /// The screen a row names: `display` where it is not `hub`.
+    private func jumpScreen(
+        _ display: DisplayID?,
+        hub: DisplayID?
+    ) -> ScreenLabel? {
+        guard let display, let hub, display != hub else { return nil }
+        return screenLabel(of: display)
     }
 
     /// The minimize record is advisory: a window closed while

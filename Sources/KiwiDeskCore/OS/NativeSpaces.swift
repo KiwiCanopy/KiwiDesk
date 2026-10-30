@@ -147,6 +147,24 @@ public enum NativeSpaces {
             .map { $0 + 1 }
     }
 
+    /// 1-based number of `id` among its own screen's user
+    /// Desktops — the label that screen's Mission Control strip
+    /// draws under "Displays have separate Spaces" (#2792). Equal
+    /// to `number(of:in:)` on the main screen and on one screen.
+    public static func screenNumber(
+        of id: SkyLight.SpaceID,
+        in spaces: [NativeSpace]
+    ) -> Int? {
+        guard let host = spaces.first(where: { $0.id == id }) else {
+            return nil
+        }
+        return
+            spaces
+            .filter { $0.isUser && $0.displayUUID == host.displayUUID }
+            .firstIndex { $0.id == id }
+            .map { $0 + 1 }
+    }
+
     /// The durable key `id` files under (#1147) — the array
     /// form of `DesktopSnapshot.key(of:)`, for a caller holding
     /// the topology rather than a snapshot. Both spell the

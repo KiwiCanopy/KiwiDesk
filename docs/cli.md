@@ -594,7 +594,7 @@ every lens with why it cannot turn on.
 | | `focus_space_back` / `focus_space_forward` | — (the Spaces you visited; see `set_space_history`) |
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
-| | `focus_desktop` | Desktop number (Mission Control's) |
+| | `focus_desktop` | Desktop number, counted across every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)) |
 | | `move_to_desktop` | Desktop number, [space id] — moves the focused window there; you stay. `space id` names the Space it lands in |
 | | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
 | | `move_space_to_display` | space id, display index or name |

@@ -204,6 +204,32 @@ exactly those screens connected, that set's profile loads; any
 other setup of the count loads the one for all setups. Either
 loads over a profile saved for exactly those screens.
 
+:::unreleased
+## A Desktop has two numbers
+
+With "Displays have separate Spaces" on and more than one screen,
+Mission Control numbers each screen's Desktops from 1. KiwiDesk
+uses two counts:
+
+- **What KiwiDesk shows** counts per screen, as Mission Control
+  does: KiwiHub's window switcher, the Desktop switch plate and
+  the Desktop rows in Settings. A KiwiHub row for a window on
+  another screen names that screen too — `Work · DELL U2723
+  Desktop 1`.
+- **What a command or binding takes** counts across every screen,
+  the screen Mission Control lists first counted first:
+  [`focus_desktop`](lua-reference.md#focus_desktop),
+  `move_to_desktop`, `bind_profile_to_desktop`, and the
+  **Go to Desktop N** shortcuts, as macOS's own "Switch to
+  Desktop N" does.
+
+On one screen, and on the screen Mission Control lists first,
+the two agree. On another screen they differ: the second screen's
+first Desktop may be **Go to Desktop 7**, and Settings ▸
+Shortcuts shows which screen and Desktop each such row reaches
+right now.
+:::
+
 ## A binding follows its Desktop, not its number
 
 Mission Control numbers Desktops by **position**: add a Desktop
