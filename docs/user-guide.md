@@ -340,14 +340,19 @@ a profile never changes them.
 
 The look is shared unless a profile keeps its own. The shared
 look sits in `gui.json`; a profile with its own carries
-`"look": "own"` and keeps it in its JSON. **Looks & Animations ▸
-Shared look ▸ Applies to** ticks the profiles using the shared
-look. The profile you are editing cannot change its own box, so
-to give a profile its own look or share one, open a profile that
-uses the shared look and untick or tick it there; on a profile
-with its own look the list is greyed. A new profile shares the
+`"look": "own"` and keeps it in its JSON. A new profile shares the
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
+
+:::unreleased
+**Looks & Animations ▸ Shared look ▸ Look** sets the profile you
+are editing to **Shared** or **This profile only**. Switching a
+profile with its own look to Shared asks first: **Use the Shared
+Look** replaces its own look, and **Make This the Shared Look**
+makes its look the shared one for every profile using it. An own
+look replaced this way is gone unless it is in **My looks**; the
+prompt offers to save it there first.
+:::
 
 The animations are part of the look too: a profile using the
 shared look takes its animations, and a look you save keeps them.

@@ -72,6 +72,8 @@ struct AnnouncedValueTests {
         // #2544: a Lua binding's shortcut group menu, named for its
         // row.
         "ShortcutGroupField.swift": 1,
+        // #2820: the Shared look card's Look choice.
+        "SharedLookSection+Choice.swift": 1,
     ]
 
     @Test("a named picker or menu gives its value back")

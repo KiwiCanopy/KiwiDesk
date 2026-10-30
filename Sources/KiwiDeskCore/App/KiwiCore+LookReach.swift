@@ -1,6 +1,6 @@
 import Foundation
 
-/// The "Look applies to" checklist's writes (#1752): which profiles
+/// The Shared look switch's writes (#1752, #2820): which profiles
 /// follow the shared look. A Settings Save commits them through the
 /// one `saveLookReach`, the look's sibling of `saveRuleReach`, with
 /// that door's obligations (profiles.md ▸ A Settings Save may write
@@ -28,13 +28,28 @@ extension KiwiCore {
     /// election. Writes are non-adopting, so reaching another
     /// profile never moves `currentName`; the live screen's look is
     /// re-resolved, never the whole profile re-applied
-    /// (`LookReachTests`).
+    /// (`LookReachTests`). `sharing` names a profile going shared
+    /// whose own look becomes the shared one first, reaching every
+    /// follower (#2820); it is written ahead of the rest, so another
+    /// profile going shared in the same Save wears that look.
     /// Call it before any `gui.json` write of the same Save.
-    public func saveLookReach(_ follows: [String: Bool]) throws {
-        for (name, follow) in follows.sorted(by: { $0.key < $1.key }) {
+    public func saveLookReach(
+        _ follows: [String: Bool],
+        sharing: String? = nil
+    ) throws {
+        let order = follows.sorted {
+            ($0.key == sharing ? 0 : 1, $0.key)
+                < ($1.key == sharing ? 0 : 1, $1.key)
+        }
+        for (name, follow) in order {
             let look: LookReference? = follow ? nil : .own
             var profile = try profiles.read(name: name)
             guard profile.look != look else { continue }
+            if follow, name == sharing, sharedLook != nil, isGuiManaged {
+                guard landSharedLook(LookBody(of: profile.settings)) else {
+                    throw LookReachError.sharedLookNotWritten
+                }
+            }
             if look == nil, sharedLook == nil, isGuiManaged {
                 // No shared look yet: this one's look seeds it, and
                 // the election settles every other profile. Core
@@ -54,4 +69,10 @@ extension KiwiCore {
         }
         reresolveLiveLook()
     }
+}
+
+/// Why `saveLookReach` stopped: the shared look a profile was to
+/// become could not be written, so no switch was changed.
+public enum LookReachError: Error {
+    case sharedLookNotWritten
 }

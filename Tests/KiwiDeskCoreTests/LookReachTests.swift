@@ -4,7 +4,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The "Look applies to" checklist's writes (#1752): going own
+/// The Shared look switch's writes (#1752): going own
 /// freezes the look worn now, going shared keeps the copy unread,
 /// a profile no change reached is not rewritten, and the live
 /// profile the checklist reached is re-applied.
@@ -117,5 +117,28 @@ struct LookReachTests {
         try core.saveLookReach(["Odd": true])
         #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
         #expect(core.guiConfigStore.load()?.look == core.sharedLook)
+    }
+
+    /// #2820: "Make this the shared look" — the profile's own look
+    /// lands as the shared one and reaches every follower, live too.
+    @Test("sharing makes the profile's own look the shared one")
+    func sharingLandsItsLook() throws {
+        let core = try crossedCore()
+        try core.profiles.save(profile("Odd", fill: odd))
+        try core.saveLookReach(["Odd": true], sharing: "Odd")
+        #expect(core.sharedLook?.colors["kiwishelf.fill_color"] == odd)
+        #expect(try core.profiles.read(name: "Odd").look == nil)
+        let work = try core.profiles.read(name: "Work")
+        #expect(work.settings.kiwishelf.fillColor == odd)
+        #expect(core.tiler.settings.kiwishelf.fillColor == odd)
+    }
+
+    @Test("without sharing, going shared takes the shared look")
+    func useKeepsTheSharedLook() throws {
+        let core = try crossedCore()
+        let before = core.sharedLook
+        try core.profiles.save(profile("Odd", fill: odd))
+        try core.saveLookReach(["Odd": true])
+        #expect(core.sharedLook == before)
     }
 }

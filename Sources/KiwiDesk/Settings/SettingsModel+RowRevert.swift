@@ -42,6 +42,8 @@ extension SettingsModel {
         case .lua:
             luaSource = cleanLuaSource
         case .look(let profile):
+            restorePaintedLook()
+            if lookShare.source == profile { lookShare.source = nil }
             if let stored = lookReachStored[profile] {
                 setLookFollows(profile, stored)
             } else {

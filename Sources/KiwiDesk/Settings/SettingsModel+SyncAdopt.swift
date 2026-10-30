@@ -59,6 +59,7 @@ extension SettingsModel {
         let baseLua = cleanLuaSource
         let reach = reachEdits
         let look = lookReachEdits
+        let share = lookShare
         let previous = sync.conflicts
         let previousTaken = sync.taken
         reload()
@@ -131,6 +132,7 @@ extension SettingsModel {
         }
         reachEdits = reach
         lookReachEdits = look
+        lookShare = share
         suppressDirty = false
         recomputeDirty()
         sync.arrived = isDirty ? change : nil
