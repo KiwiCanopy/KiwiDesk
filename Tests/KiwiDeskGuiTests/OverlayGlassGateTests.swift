@@ -58,8 +58,8 @@ struct OverlayGlassGateTests {
             stored: "glass: tiler.settings.shortcutPanelLiquidGlass"
         ),
         (
-            file: "App/KiwiCore+BriefPocket.swift",
-            function: "func briefPocketShelf(",
+            file: "App/KiwiCore+PocketPlate.swift",
+            function: "func pocketPlateSpecs(",
             stored: "tiler.settings.kiwishelf"
         ),
         (

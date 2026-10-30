@@ -42,7 +42,6 @@ extension KiwiCore {
                 window: frame,
                 pocket: pocket,
                 iconPid: state.windows[id]?.pid,
-                shelf: briefPocketShelf(),
                 markHex: style.color,
                 plateGlass: glass,
                 plateTint: tiler.settings.panelsWearFill(glassDrawn: glass)
@@ -52,6 +51,25 @@ extension KiwiCore {
         // A pocket on this screen is the pocket (#2678).
         request.drawsPocket = briefPocketDrawsPocket(on: display)
         briefPocket.play(request)
+        // The play draws no pocket where one stands, so that one
+        // lights, and nods as a window lands in it (#2776).
+        if !request.drawsPocket {
+            let into = direction == .into
+            let delay = into ? timeline.nodBegin : 0
+            deferred.schedule(.pocketLight, after: .seconds(delay)) {
+                [weak self] in
+                // A play ended or cut short meanwhile lights nothing.
+                guard let self, self.pocketPlate.playing[display] != nil
+                else { return }
+                self.pocketPlate.light(
+                    display,
+                    for: into
+                        ? PocketPlateOverlay.inHold
+                        : PocketPlateOverlay.outHold,
+                    nods: into
+                )
+            }
+        }
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return timeline
     }
@@ -95,11 +113,5 @@ extension KiwiCore {
         LiquidGlassGate.rendered(
             glass: tiler.settings.shortcutPanelLiquidGlass
         )
-    }
-
-    /// The pocket wears KiwiShelf's look as drawn, as the overflow
-    /// mark does.
-    func briefPocketShelf() -> KiwiShelf {
-        LiquidGlassGate.rendered(tiler.settings.kiwishelf)
     }
 }

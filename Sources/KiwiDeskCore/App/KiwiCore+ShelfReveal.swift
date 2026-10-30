@@ -136,10 +136,14 @@ extension KiwiCore {
                     section: section(bar)
                 )
             }
+            // The handle stands where the shown pocket does (#2678).
+            let pocketSlot = plan.arrangement.pocket.map {
+                $0.offset...($0.offset + $0.length)
+            }
             let row = ShelfMarkPlacement.row(
                 for: Set(auto),
-                pocketLeansEnd: plan.carriesPocket && !auto.isEmpty
-                    ? shelf.pocketLeansEnd : nil,
+                pocket: plan.carriesPocket && !auto.isEmpty
+                    ? pocketSlot : nil,
                 length: plan.length,
                 shelf: shelf
             )

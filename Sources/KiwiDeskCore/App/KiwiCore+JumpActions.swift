@@ -20,14 +20,19 @@ extension KiwiCore {
         }
     }
 
-    /// Moves `target` into the active Space and focuses it at its
-    /// arrival. Returns false, cued, where it cannot move. A hidden
-    /// app has no window to move yet: it is unhidden, and the
-    /// window it brings back focused is moved here at its report.
+    /// Moves `target` into the Space `display` shows — the screen
+    /// KiwiHub opened on, read at the pick — else the active Space,
+    /// and focuses it at its arrival (#2791). Returns false, cued,
+    /// where it cannot move. A hidden app has no window to move
+    /// yet: it is unhidden, and the window it brings back focused
+    /// is moved here at its report.
     @discardableResult
-    public func moveHere(_ target: JumpEntry.Target) -> Bool {
+    public func moveHere(
+        _ target: JumpEntry.Target,
+        on display: DisplayID? = nil
+    ) -> Bool {
         withUserMotion {
-            guard let active = state.workspaces.activeSpace else {
+            guard let active = moveHereSpace(on: display) else {
                 jump(to: target)
                 return true
             }
@@ -35,6 +40,8 @@ extension KiwiCore {
             if case .window(let id) = target,
                 state.isPocketed(id)
             {
+                // Out on the panel's screen: its gates first.
+                if canTakePocketOut(id) { enterMoveHereSpace(active) }
                 return takePocketOut(id)
             }
             guard case .window(let id) = target else {
@@ -53,6 +60,7 @@ extension KiwiCore {
             }
             if let parked = minimized(id) {
                 // Filed here at its arrival, wherever it lands.
+                enterMoveHereSpace(active)
                 jump.owe(id, in: active, at: wallClock(), relocates: true)
                 openOrFocus.deminiaturize(parked.pid, id)
                 openOrFocus.activate(parked.pid)
@@ -149,9 +157,11 @@ extension KiwiCore {
             guard block == .global, window.stickyScope == .global else {
                 return !stickyMoveRefused(window.id, to: active)
             }
+            enterMoveHereSpace(active)
             pickBarRow(window.id, on: nil)
             return true
         }
+        enterMoveHereSpace(active)
         if state.workspaces.space(of: window.id) != active {
             let moved = execute(
                 "move_to_space",
@@ -195,7 +205,25 @@ extension KiwiCore {
             )
             return false
         }
+        enterMoveHereSpace(active)
         jump.owe(away.id, in: active, at: wallClock(), relocates: false)
         return true
+    }
+
+    /// The Space a Move here from `display` files into: the one
+    /// that screen shows, else the active one (#2791). The panel's
+    /// list reads it too, so a row's "moves here" names the Space
+    /// the pick lands in.
+    func moveHereSpace(on display: DisplayID?) -> SpaceID? {
+        display.flatMap { state.workspaces.activeSpace(on: $0) }
+            ?? state.workspaces.activeSpace
+    }
+
+    /// Makes `space` active, through the #2548 hand-off, once a move
+    /// into it passed its gates: a refusal switches nothing, and the
+    /// owed arrival focus pays in the active Space.
+    func enterMoveHereSpace(_ space: SpaceID) {
+        guard space != state.workspaces.activeSpace else { return }
+        switchSpace(to: space, warp: true)
     }
 }

@@ -436,8 +436,9 @@ the plan and the pocket both read (`PocketShelfWiringTests` ▸
 `dragStandsThePocket`). **Where it
 is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
 off `ShelfArrangement.arrange(…pocket:)`, else its handle risen —
-in an Auto edge's row of marks (`ShelfMarkPlacement.row`,
-`ShelfRevealBandTests` ▸ `pocketJoinsTheRow`),
+on an Auto edge where the shown pocket stands, joining the row of
+marks where it would meet it (`ShelfMarkPlacement.row`,
+`ShelfRevealBandTests` ▸ `handleStandsOnTheSlot`),
 else at Position — never a frame of its own beside them. On a bar
 edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
 pocket is a shelf section.

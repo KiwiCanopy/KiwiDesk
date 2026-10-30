@@ -19,7 +19,8 @@ extension KiwiCore {
         guard pocketMoveVerdict(id, start: start, frame: frame) else {
             return false
         }
-        let hovered = pointerOverPocketPlate() && pocketNamedRefusal(id) == nil
+        let hovered =
+            pocketNamedRefusal(id) == nil ? pocketUnderPointer() : nil
         if pocketPlate.dragging != id || pocketPlate.dropHovered != hovered {
             let joins = pocketPlate.dragging == nil
             pocketPlate.dragging = id
@@ -27,7 +28,7 @@ extension KiwiCore {
             // A drag stands the pocket: its slot opens on the shelf.
             if joins { updateBars() } else { updatePocketPlate() }
         }
-        return hovered
+        return hovered != nil
     }
 
     /// Whether the gesture of `id` is a move the plate takes part in,
@@ -66,8 +67,9 @@ extension KiwiCore {
         live: Bool
     ) -> Bool {
         let over =
-            live && pocketPlate.dragging == id && pointerOverPocketPlate()
-        let lit = over && pocketPlate.dropHovered
+            live && pocketPlate.dragging == id
+            && pocketUnderPointer() != nil
+        let lit = over && pocketPlate.dropHovered != nil
         endPocketDrag()
         if over, !lit, pocketNamedRefusal(id) == .taken {
             _ = refuseSecondPocketWindow(id)
@@ -97,7 +99,7 @@ extension KiwiCore {
     func endPocketDrag() {
         guard pocketPlate.dragging != nil else { return }
         pocketPlate.dragging = nil
-        pocketPlate.dropHovered = false
+        pocketPlate.dropHovered = nil
         updateBars()
     }
 
@@ -107,10 +109,12 @@ extension KiwiCore {
         if pocketPlate.dragging == id { endPocketDrag() }
     }
 
-    /// Whether the pointer is over a pocket as drawn, on any
-    /// screen (Cocoa points).
-    func pointerOverPocketPlate() -> Bool {
+    /// The display whose pocket, as drawn, the pointer is over
+    /// (Cocoa points), nil where none.
+    func pocketUnderPointer() -> DisplayID? {
         let cursor = drag.cursorLocation()
-        return pocketPlate.shownFrames.contains { $0.contains(cursor) }
+        return pocketPlate.specs.values.first {
+            $0.frame.contains(cursor)
+        }?.display
     }
 }

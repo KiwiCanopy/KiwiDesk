@@ -174,23 +174,17 @@ struct PocketMarkColorTests {
         #expect(try hex(edge) == amber)
     }
 
-    /// The slices lose their outline with a colour set (#2704):
-    /// (4, 7) sits in the left slice's stroke, outside its green
-    /// and above the pocket.
-    @Test("a coloured mark draws its kiwis bare")
-    func colouredKiwisAreBare() throws {
-        let rim = (x: 4, y: 7)
-        let coloured = try pocketPixel(
-            StickyMarkOverlay.pocketImage(hex: amber),
-            at: rim
-        )
-        #expect(coloured.alphaComponent < 0.5)
-        // Control: Automatic keeps the outline there.
-        let automatic = try pocketPixel(
-            StickyMarkOverlay.pocketImage(hex: ""),
-            at: rim
-        )
-        #expect(automatic.alphaComponent > 0.5)
+    /// The slices draw no outline in any ink (#2704; Automatic too,
+    /// owner 2026-10-29): (4, 7) sits where the left slice's stroke
+    /// drew, outside its green and above the pocket.
+    @Test("every mark draws its kiwis bare")
+    func kiwisAreBare() throws {
+        for hex in [amber, ""] {
+            let image = StickyMarkOverlay.pocketImage(hex: hex)
+            #expect(try pocketPixel(image, at: (4, 7)).alphaComponent < 0.5)
+            // Control: the slice itself draws, one point inside.
+            #expect(try pocketPixel(image, at: (6, 7)).alphaComponent > 0.5)
+        }
     }
 
     @Test("automatic fills the pocket opaque in the mark ink")

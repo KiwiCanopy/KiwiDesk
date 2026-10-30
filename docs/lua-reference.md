@@ -3068,10 +3068,11 @@ percent: `0` is the left or top end, `100` the right or bottom
 end. On an edge where a bar shows, the pocket takes the shelf's
 nearer end instead — its start below `50`, its end from `50` —
 outside the bars' items, so it stays put while they scroll. On an
-edge where an `"auto"` bar rests hidden, its handle joins the bars'
-row of marks, one band more at the end the position leans to. On
-any other edge no bar shows, its handle stands at the position,
-whole on screen at either end. A look carries it.
+edge where an `"auto"` bar rests hidden, its handle stands where
+the pocket shows once the bar comes in, joining the bars' handles
+in one row where it would meet them. On any other edge no bar
+shows, its handle stands at the position, whole on screen at either
+end. A look carries it.
 
 **Example:**
 
@@ -5914,8 +5915,8 @@ marks any number.
 Under `"several"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position),
-faded while empty and badged with the count from two windows
-inside, except where KiwiShelf stands down for a native
+faded while empty until you point at it or drag a window over it,
+and with no count, except where KiwiShelf stands down for a native
 full-screen window or a presentation. On an edge no bar shows it
 rests as a handle, and pointing at the handle brings the pocket up
 out of it. A click on the pocket lists the windows inside by app;
@@ -5951,9 +5952,13 @@ white, as [`sticky.set_color`](#stickyset_color)'s glyph does.
 Each bundled palette sets its own pocket color. Neither the
 mark's plate nor the badge's disc takes the color: the disc keeps
 the count-badge fill. `""` is Automatic: the mark's pocket and
-outlines take the label color, black in light mode and white in
+its outline take the label color, black in light mode and white in
 dark, and the badge's pocket the disc's auto-contrast ink. Any
 non-empty value must parse as a hex color.
+
+:::unreleased
+Under Automatic too, the kiwis draw no outline.
+:::
 
 **Example:**
 
@@ -7693,7 +7698,8 @@ place the pocket the plate flies to, under either
 [`pocket.set_capacity`](#pocketset_capacity): on an edge where a
 bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
 aside for it; on an edge no bar shows, the pocket comes up out of
-its handle.
+its handle. That pocket lights as the window goes in or
+out, and nods as one lands in it.
 :::
 
 **Example:**
