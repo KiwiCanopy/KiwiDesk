@@ -138,9 +138,10 @@ struct LayerRowWriterCensusTests {
     private static let holders: [String: (Int, String)] = [
         "KiwiDesk/Settings/Components/Keybindings/KeybindingNavRow.swift":
             (
-                1,
+                2,
                 "a catalog row: appends only when its action has no"
-                    + " navigation row"
+                    + " navigation row; held as a value and taken at"
+                    + " init (#2783)"
             ),
         "KiwiDesk/Settings/Components/Keybindings/Recorder/"
             + "RecorderCoordinator.swift":

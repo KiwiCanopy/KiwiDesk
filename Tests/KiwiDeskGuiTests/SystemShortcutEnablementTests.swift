@@ -131,7 +131,10 @@ struct ConflictAccessorRoutingTests {
             "SettingsModel+ConflictMessages.swift": [
                 "actionable", "conflict",
             ],
-            "ConflictText.swift": ["conflict"],
+            // `rowConflicts` is the per-row entry taken for a
+            // whole layer at once (#2783); each row still reads its
+            // tier through the disabled set.
+            "ConflictText.swift": ["conflict", "rowConflicts"],
         ]
         var actionableHits = 0
         var familyHits = 0

@@ -14,6 +14,10 @@ struct KeybindingFamilyRows: View {
     /// shared card; a family under its own section or drawer
     /// title has none to separate it from (#1125, #2655).
     var showsHeading = true
+    @Environment(\.keybindingLayerName)
+    private var layerName
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
 
     var body: some View {
         let commands = renderedRows
@@ -37,8 +41,11 @@ struct KeybindingFamilyRows: View {
                 NavRow(
                     model: model,
                     bindings: $bindings,
-                    command: command
+                    command: command,
+                    layer: layerName,
+                    disabled: disabledSystemShortcuts
                 )
+                .equatable()
             }
             liveOnlyNotes(commands)
         }

@@ -235,7 +235,7 @@ struct BindingNameDoorTests {
         #expect(body.contains("RuleReachControl("))
         #expect(body.contains("subject: subject,"))
         let subject = try #require(
-            text.range(of: "var subject: String {")
+            text.range(of: "static func subject(")
         )
         let trash = try #require(
             text.range(of: "struct KeyReachTrash")

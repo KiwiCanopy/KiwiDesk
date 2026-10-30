@@ -9,9 +9,26 @@ extension SettingsModel {
         _ name: String,
         edits: RuleReachEdits? = nil
     ) -> RuleReachReading? {
-        guard let reach = edits.map({ layeredReach($0) }) ?? layeredReach,
-            let editing = reachProfile
-        else { return nil }
+        if let edits { return layerReach(name, in: layeredReach(edits)) }
+        let key = LayerReachCache.Key(
+            layered: layeredReachKey,
+            order: profileMenuOrder,
+            loaded: reachLoaded,
+            isLoaded: reachIsLoaded
+        )
+        if layerCache?.key != key { layerCache = LayerReachCache(key: key) }
+        if let hit = layerCache?.readings[name] { return hit }
+        let value = layerReach(name, in: layeredReach)
+        layerCache?.readings[name] = value
+        return value
+    }
+
+    /// The reading of `name` over the pass `reach`, uncached.
+    private func layerReach(
+        _ name: String,
+        in reach: RuleReachSnapshot?
+    ) -> RuleReachReading? {
+        guard let reach, let editing = reachProfile else { return nil }
         let table = reach.layerTable
         let everyone = table.profiles
         let order = profileMenuOrder.filter(everyone.contains)
@@ -149,4 +166,20 @@ extension SettingsModel {
         }
         return rows(a) == rows(b)
     }
+}
+
+/// The layer readings taken over one layer pass (#2783). `Key`
+/// lists every input `layerReach` reads beyond the
+/// pass's stored tables, which `dropReachCaches` covers
+/// (`LayerReachCacheTests`).
+struct LayerReachCache {
+    struct Key: Equatable {
+        let layered: LayeredReachCache.Key
+        let order: [String]
+        let loaded: String?
+        let isLoaded: Bool
+    }
+
+    let key: Key
+    var readings: [String: RuleReachReading?] = [:]
 }

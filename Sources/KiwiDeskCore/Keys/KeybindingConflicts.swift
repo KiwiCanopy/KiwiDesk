@@ -32,13 +32,22 @@ public enum KeybindingConflicts {
         distinguishingSides: Bool
     ) -> [Conflict] {
         layers.flatMap { layer in
-            layer.bindings.compactMap { binding in
-                conflict(
-                    for: binding,
-                    in: layer.bindings,
-                    distinguishingSides: distinguishingSides
-                )
+            let rows = layer.bindings
+            // Keyed by id, so a layer repeating one is judged by row.
+            guard Set(rows.map(\.id)).count == rows.count else {
+                return rows.compactMap {
+                    conflict(
+                        for: $0,
+                        in: rows,
+                        distinguishingSides: distinguishingSides
+                    )
+                }
             }
+            let byID = rowConflicts(
+                of: rows,
+                distinguishingSides: distinguishingSides
+            )
+            return rows.compactMap { byID[$0.id] }
         }
     }
 
@@ -55,14 +64,34 @@ public enum KeybindingConflicts {
         guard let parsed = KeyCombo.parse(binding.combo) else {
             return Conflict(binding: binding, target: .unrecognized)
         }
+        let rivals = bindings.lazy
+            .filter { !$0.combo.isEmpty }
+            .compactMap { other in
+                KeyCombo.parse(other.combo).map { (other, $0) }
+            }
+        return conflict(
+            for: binding,
+            parsed: parsed,
+            among: rivals,
+            distinguishingSides: distinguishingSides
+        )
+    }
+
+    /// The rule over rows already parsed, in their layer's order.
+    static func conflict(
+        for binding: KeyBinding,
+        parsed: KeyCombo,
+        among rivals: some Sequence<(KeyBinding, KeyCombo)>,
+        distinguishingSides: Bool
+    ) -> Conflict? {
         // Compared as registered: a held Hyper row IS its bare
         // chord (#1870), so `hyper+cmd+space` meets Spotlight, and
         // a sided row its either-side chord, as macOS fires it.
         let combo = parsed.registered
-        for other in bindings
-        where other.id != binding.id && !other.combo.isEmpty {
-            guard let otherCombo = KeyCombo.parse(other.combo)
-            else { continue }
+        // `rowConflicts` hands only rows of the same registered
+        // chord, so a clause matching across chords breaks it
+        // (`LayerConflictsTests`).
+        for (other, otherCombo) in rivals where other.id != binding.id {
             guard otherCombo.registered == combo else { continue }
             let sided =
                 parsed.modifiers.isSided

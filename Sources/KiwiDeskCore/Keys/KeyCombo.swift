@@ -22,7 +22,7 @@ public struct KeyCombo: Hashable, Sendable {
             return nil
         }
         var modifiers: HotkeyModifiers = []
-        var named: Set<String> = []
+        var named: Set<ModifierKind?> = []
         for part in parts.dropLast() {
             guard let token = modifierToken(part) else { return nil }
             // One token per modifier: `lcmd+rcmd` or `cmd+rcmd`
@@ -39,15 +39,16 @@ public struct KeyCombo: Hashable, Sendable {
         )
     }
 
-    /// A modifier spelling's bits and the modifier it names, nil
-    /// for none.
+    /// A modifier spelling's bits and the modifier it names — nil
+    /// for Hyper — or nil for none. The name is the kind, never its
+    /// string, which reflects on a hot path (#2783).
     private static func modifierToken(
         _ part: String
-    ) -> (name: String, bits: HotkeyModifiers)? {
-        if part == "hyper" { return ("hyper", .hyper) }
-        if let kind = plainKinds[part] { return ("\(kind)", kind.plain) }
+    ) -> (name: ModifierKind?, bits: HotkeyModifiers)? {
+        if part == "hyper" { return (nil, .hyper) }
+        if let kind = plainKinds[part] { return (kind, kind.plain) }
         guard let (kind, side) = sideTokens[part] else { return nil }
-        return ("\(kind)", kind.plain.union(.side(side, of: kind)))
+        return (kind, kind.plain.union(.side(side, of: kind)))
     }
 
     private static let plainKinds: [String: ModifierKind] = [
