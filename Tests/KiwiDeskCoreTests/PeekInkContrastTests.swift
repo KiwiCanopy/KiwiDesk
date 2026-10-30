@@ -104,7 +104,7 @@ struct PeekInkContrastTests {
     }
 
     /// The far end of the strongest fade holds the reading floor,
-    /// and the bars' own floor under Increase Contrast (#2569 ▸
+    /// and the increased one under Increase Contrast (#2569 ▸
     /// Ruling): the peek fades like the bar, never past either.
     @Test(
         "The peek's faint end holds the reading floor",
@@ -113,8 +113,10 @@ struct PeekInkContrastTests {
     func faintEndHoldsTheFloor(increaseContrast: Bool) throws {
         let floor =
             increaseContrast
-            ? KiwiShelf.idleInkFloor : KiwiShelf.readingInkFloor
-        try #require(KiwiShelf.readingInkFloor < KiwiShelf.idleInkFloor)
+            ? KiwiShelf.increasedReadingInkFloor : KiwiShelf.readingInkFloor
+        try #require(
+            KiwiShelf.readingInkFloor < KiwiShelf.increasedReadingInkFloor
+        )
         for palette in PaletteCatalog.bundled() {
             var shelf = painted(palette)
             shelf.fillFade = 100
@@ -125,18 +127,26 @@ struct PeekInkContrastTests {
             let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
             let share = max(GlassTint.farShare(fade: 100), fill.minShare)
             let ground = shelf.fill(cappedAt: anchor * share)
+            var missed = false
             for (ink, layer) in shelf.readingInks {
                 let value = try #require(
                     shelf.worstContrast(ink, nil, on: ground, beneath: layer)
                 )
+                if value < floor - 0.01 { missed = true }
+                // Where the Fill's own anchor cannot hold it, the
+                // floor is the whole anchor and nothing fades.
                 #expect(
-                    value >= floor - 0.01,
+                    value >= floor - 0.01 || fill.minShare == 1,
                     "\(palette.name) \(ink) at \(share): \(value)"
                 )
             }
             // A floor is a net, not a lift: a share that already
-            // holds it is left to the fade.
-            #expect(fill.minShare < 1, "\(palette.name)")
+            // holds it is left to the fade. Only an anchor that
+            // misses the increased floor paints flat (2026-10-30).
+            #expect(
+                fill.minShare < 1 || (increaseContrast && missed),
+                "\(palette.name)"
+            )
         }
     }
 

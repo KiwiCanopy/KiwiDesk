@@ -41,6 +41,7 @@ enum KiwiShelfKey: String, CaseIterable, Hashable {
     case revealTimeout = "settings.kiwishelf.revealTimeout"
     case fillFade = "settings.kiwishelf.fillFade"
     case tintHubAndPlates = "settings.kiwishelf.tintHubAndPlates"
+    case readingContrast = "settings.kiwishelf.readingContrast"
     case revealStyle = "settings.kiwishelf.revealStyle"
     case pocketEdge = "settings.kiwishelf.pocketEdge"
     case pocketPosition = "settings.kiwishelf.pocketPosition"
@@ -123,6 +124,9 @@ extension KiwiShelfKey {
             return .luaOnly
         case .revealTimeout:
             // Lua/CLI until its Settings row lands (#761).
+            return .luaOnly
+        case .readingContrast:
+            // A power-user floor: GUI curates, Lua is open (#2569).
             return .luaOnly
         case .fillFade, .tintHubAndPlates:
             // The Liquid Glass group, under its switch (#2569):
@@ -261,7 +265,7 @@ extension KiwiShelfKey {
                 "kiwishelf.inner_margin",
                 help: "kiwishelf.inner_margin.help"
             )
-        case .liquidGlass, .dimFactor, .revealTimeout:
+        case .liquidGlass, .dimFactor, .revealTimeout, .readingContrast:
             return .none
         case .fillFade:
             return .text(

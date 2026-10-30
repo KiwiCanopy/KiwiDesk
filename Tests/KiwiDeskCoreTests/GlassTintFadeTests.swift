@@ -253,9 +253,9 @@ struct GlassTintFadeTests {
         #expect(tint.gradient?.startPoint == Self.anchor(.bottom))
         let alphas = Self.alphas(tint)
         try #require(alphas.count == 2, "\(alphas)")
-        #expect(alphas[0] > alphas[1], "\(alphas)")
-        // The reading floor stops the fade (#2569 ▸ Ruling), the
-        // bars' floor under Increase Contrast.
+        #expect(alphas[0] >= alphas[1], "\(alphas)")
+        // The reading floor stops the fade (#2569 ▸ Ruling); under
+        // Increase Contrast the default Fill paints flat.
         let floor = shelf.readingGlassFill(
             increaseContrast: increaseContrast
         ).minShare

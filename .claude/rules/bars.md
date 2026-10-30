@@ -1063,8 +1063,8 @@ Obligations:
   decided once in `BarPeekPanel.show` through the gate
   (`BarPeekSeamTests` ▸ `peekTakesTheGate`) and tinted like the
   bar, fading from the shelf's edge but never past the reading
-  floor, `KiwiShelf.readingGlassFill` — the bars' own ink floor
-  under Increase Contrast (#2569, overturning #1946's uniform
+  floor, `KiwiShelf.readingGlassFill` at
+  `readingFloor(increaseContrast:)` (#2569, overturning #1946's uniform
   tint; `PeekInkContrastTests` measures both ends, a hovered
   row's included); its shelf is the one
   `ShelfManager` drew the anchor's panel with; its text asks
@@ -1655,10 +1655,13 @@ Obligations:
   the cap is the bar's own ink, which is fixed palette hex with
   no vibrancy path, so the plate is its legibility floor at the
   fade's anchor edge. At the far end a READING surface's ink is
-  held by `KiwiShelf.readingInkFloor` (`idleInkFloor` under
-  Increase Contrast), never by the #1308 pin, and that number is
-  retuned on real glass over white and black, as its docstring
-  says (#2569, `PeekInkContrastTests`); the bars follow Fill fade
+  held by `KiwiShelf.readingFloor(increaseContrast:)` — the
+  user's `reading_contrast`, default `readingInkFloor`, raised to
+  `increasedReadingInkFloor` under Increase Contrast — never by
+  the #1308 pin. A new reading surface takes its floor from that
+  function, never from a constant, and the defaults are retuned
+  on real glass over white and black, as their docstrings say
+  (#2569, `PeekInkContrastTests`); the bars follow Fill fade
   without a floor. A retune of either measures the ink at both
   ends, Fill fade at 100.
 - **The glass's light/dark variant is PINNED from the Fill in

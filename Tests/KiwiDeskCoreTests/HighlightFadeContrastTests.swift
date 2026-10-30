@@ -86,7 +86,7 @@ struct HighlightFadeContrastTests {
     func fadedInksHoldTheFloor(increaseContrast: Bool) throws {
         let floor =
             increaseContrast
-            ? KiwiShelf.idleInkFloor : KiwiShelf.readingInkFloor
+            ? KiwiShelf.increasedReadingInkFloor : KiwiShelf.readingInkFloor
         var measured = 0
         for palette in PaletteCatalog.bundled() {
             let shelf = painted(palette)
@@ -107,8 +107,10 @@ struct HighlightFadeContrastTests {
                         ground: ground
                     )
                     measured += 1
+                    // A fill whose ink misses the floor even unfaded
+                    // stays whole: nothing fades.
                     #expect(
-                        value >= floor - 0.01,
+                        value >= floor - 0.01 || share == 1,
                         "\(palette.name) \(ink) on \(layer): \(value)"
                     )
                 }

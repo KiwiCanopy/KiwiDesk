@@ -184,6 +184,12 @@ extension SettingsValueReadout {
                 trimmed(o.dimFactor),
                 trimmed(n.dimFactor)
             )
+        case .readingContrast:
+            return spaceBarRow(
+                census,
+                trimmed(o.readingContrast),
+                trimmed(n.readingContrast)
+            )
         case .revealTimeout:
             return spaceBarRow(
                 census,

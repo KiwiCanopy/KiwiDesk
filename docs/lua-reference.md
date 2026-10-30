@@ -2735,6 +2735,11 @@ reading, at a higher floor while macOS's Increase contrast is on.
 No effect while the glass is off or the fill has no color.
 Stored as `kiwishelf.fill_fade`.
 
+:::unreleased
+Where that fade stops is
+[`set_reading_contrast`](#kiwishelfset_reading_contrast).
+:::
+
 The GUI twin is **Fill fade** under the **Liquid Glass** switch
 on Looks &amp; Animations, reading **Off** at `0`; it is hidden
 below macOS 26 and greys while glass is off or stood down, or
@@ -2781,6 +2786,35 @@ fill has no color.
 ```lua
 kiwishelf.set_tint_hub_and_plates(false)
 ```
+
+:::unreleased
+### kiwishelf.set_reading_contrast
+
+**Expects:** a contrast ratio from `1` to `4.5` (default `2.2`);
+outside that range it is clamped.
+
+**Does:** sets the contrast the text on the hover peek, the
+overflow mark's list, [KiwiHub](#kiwihubshow) and the Space,
+Desktop and layout plates keeps where
+[`set_fill_fade`](#kiwishelfset_fill_fade) fades their fill
+(#2569). Their fade stops at the strength that holds their
+dimmest text at this ratio over a white or a black window. `1`
+leaves the full fade. A ratio the fill cannot reach draws it
+flat, with no fade. While macOS's Increase contrast is on the
+floor is at least `3`, which draws the default fill flat. No
+effect while the glass is off or the fill has no color, nor on
+KiwiHub and the plates while
+[`set_tint_hub_and_plates`](#kiwishelfset_tint_hub_and_plates) is
+off. Stored as `kiwishelf.reading_contrast`.
+
+Settings has no row for it. A look carries it beside the fill.
+
+**Example:**
+
+```lua
+kiwishelf.set_reading_contrast(3)
+```
+:::
 
 ### kiwishelf.set_background_fit
 

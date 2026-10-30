@@ -44,7 +44,7 @@ public enum GlassTint {
     ///
     /// Since #1622 this binds the anchor edge only; the far end
     /// runs at `farShare` of it, and a reading surface's ink there
-    /// is held by its floor (`KiwiShelf.readingInkFloor`, #2569).
+    /// is held by its floor (`KiwiShelf.readingFloor`, #2569).
     static let maxAlpha: CGFloat = 0.65
 
     /// The fade's far end as a share of the anchor's alpha at the
