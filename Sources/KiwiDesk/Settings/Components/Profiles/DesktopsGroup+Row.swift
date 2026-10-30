@@ -107,7 +107,7 @@ extension DesktopsGroup {
                     L(
                         "desktops.desktop",
                         "Desktop %1$d",
-                        row.number
+                        row.shownNumber
                     )
                 )
                 .fontWeight(.medium)

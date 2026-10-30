@@ -400,8 +400,9 @@ Space's focus where it is.
 
 ### focus_desktop
 
-**Expects:** a macOS Desktop number — the number Mission Control
-shows, the same one `bind_profile_to_desktop` keys on.
+**Expects:** a macOS Desktop number, counted across every screen
+— the same one `bind_profile_to_desktop` keys on ([which
+count](spaces-and-desktops.md#a-desktop-has-two-numbers)).
 
 **Does:** switches to that Desktop — the *macOS* Desktop, not a
 KiwiDesk Space — as a swipe would: the screen that Desktop
@@ -1106,8 +1107,9 @@ KiwiDesk.set_focus_wrap("this_screen")
 [`focus_desktop`](#focus_desktop) or
 [`move_to_desktop_and_follow`](#move_to_desktop_and_follow) —
 shows a plate in the middle of the screen that switched: the
-Desktop's Mission Control number, a dot for each Desktop on that
-screen with the current one filled, and the profile a
+Desktop's number on that screen ([which
+count](spaces-and-desktops.md#a-desktop-has-two-numbers)), a dot
+for each Desktop on that screen with the current one filled, and the profile a
 [Desktop binding](#bind_profile_to_desktop) loaded, if one did
 (#2142). It takes no focus or click, fades after about a
 second, and stays away from a screen showing a full-screen app
@@ -6752,9 +6754,9 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
-| `desktop_change` | `desktop` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main screen) |
+| `desktop_change` | `desktop` (Desktop number now current on the screen that switched, counted across every screen), `monitor` (that screen's positional number; 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, else `nil`) |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, counted across every screen, else `nil`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 | `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
 
@@ -7093,8 +7095,9 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
 
 **Expects:**
 
-- A Desktop number, as Mission Control counts them (1-based;
-  fullscreen apps don't count).
+- A Desktop number, counted across every screen (1-based;
+  fullscreen apps don't count) — [which
+  count](spaces-and-desktops.md#a-desktop-has-two-numbers).
 - A profile name.
 - Optionally, the fingerprint of every screen in one screen
   setup, as `list_monitors` prints them.

@@ -18,7 +18,8 @@ extension ShortcutsFamilyRows {
             liveOnly: model.liveOnlyShortcutSpaces,
             desktops: KeybindingCatalog.desktopOffer(
                 live: model.bindableDesktops,
-                bindings: bindings
+                bindings: bindings,
+                landings: model.desktopLandings
             ),
             resizeStep: Int(model.config.settings.resizeStep),
             layerNames: model.config.layers.map(\.name),

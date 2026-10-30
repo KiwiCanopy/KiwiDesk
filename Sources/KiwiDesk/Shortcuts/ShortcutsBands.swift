@@ -20,6 +20,13 @@ struct ShortcutRowView: View {
                 .lineLimit(1)
                 .truncationMode(.tail)
                 .accessibilityLabel(row.spokenLabel ?? row.label)
+            if let detail = row.detail {
+                Text(detail)
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
+            }
             Spacer(minLength: 12)
             if let accessory = row.accessoryIcon {
                 Image(systemName: accessory)

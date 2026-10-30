@@ -552,6 +552,17 @@ them against one two-screen arrangement where they differ, and
 `KiwiCore.bindableDesktops(in:)` is where the list meets the
 capability.
 
+**A Desktop LABEL counts per screen; a Desktop the user TYPES or
+a verb takes counts globally (#2792).** A number KiwiDesk draws or
+speaks for a Desktop — KiwiHub's rows, the switch plate, a Settings
+Desktop row — is its place on its own screen, read through
+`DesktopSnapshot.screenNumber(of:)` or `screenNumbersByKey`, never
+`number(of:)`; the number a command, a binding or a shortcut's
+title carries stays `number(of:)`'s, and a row that shows both says
+where the global one lands through `KiwiCore.desktopLandings(in:)`.
+`DesktopScreenNumberTests` holds the two counts on one two-screen
+arrangement; a new label reading the global number is review's.
+
 The returning-focus memory that sits beside this one
 (`KiwiCore+DesktopFocusMemory.swift`, #1207) is
 [state-and-layout.md](state-and-layout.md)'s — keyed by the
