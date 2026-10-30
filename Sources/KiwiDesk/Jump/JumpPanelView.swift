@@ -215,6 +215,8 @@ struct JumpPanelView: View {
                 selected: index == list.selection,
                 clickable: true
             ),
+            liftElsewhere: model.hover != nil
+                && model.hover != .row(index),
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,

@@ -141,6 +141,33 @@ struct JumpPanelShapeTests {
         #expect(!shows(selected: true, number: 1, command: true, shift: false))
     }
 
+    /// A ⇧-click moves the hovered row, so it claims the way here
+    /// and the selected row gives it up (#2808).
+    @Test("the hovered row takes ⇧'s way here from the selection")
+    func wayHereFollowsHover() throws {
+        let entry = JumpListTests.row(1, "Safari")
+        let match = try #require(JumpSearch.matches([entry], query: "").first)
+        let here = JumpRowText.Place(glyph: nil, text: "Space 2")
+        func shows(selected: Bool, lifted: Bool, elsewhere: Bool) -> Bool {
+            JumpRowView(
+                match: match,
+                icon: nil,
+                isSelected: selected,
+                isLifted: lifted,
+                liftElsewhere: elsewhere,
+                number: 12,
+                commandHeld: false,
+                shiftHeld: true,
+                wayHere: here,
+                onActivate: { _ in }
+            ).showsWayHere
+        }
+        #expect(shows(selected: false, lifted: true, elsewhere: false))
+        #expect(!shows(selected: true, lifted: false, elsewhere: true))
+        #expect(shows(selected: true, lifted: false, elsewhere: false))
+        #expect(!shows(selected: false, lifted: false, elsewhere: true))
+    }
+
     @Test("⇧ rewrites the digits to what they then do")
     func digitHintFollowsShift() {
         LocalizationManager.shared.select("en")
