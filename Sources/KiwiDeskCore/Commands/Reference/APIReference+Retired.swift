@@ -121,6 +121,12 @@ extension APIReference {
         ] {
             map[verb] = appBarDrawsBoth
         }
+        // The drag markers' look is fixed (#2797).
+        for marker in ConfigMigration.dragMarkerKeys {
+            for knob in ConfigMigration.retiredDragKnobs {
+                map["drag.set_\(marker)_\(knob)"] = dragLookIsFixed
+            }
+        }
         // Stack and Track scroll their overflow (#2235).
         for layout in ["stack", "track"] {
             map["\(layout).set_overflow_style"] = overflowScrolls
@@ -139,6 +145,9 @@ extension APIReference {
     private static let overflowScrolls =
         "a Stack zone or Track track scrolls the windows that "
         + "do not fit"
+    private static let dragLookIsFixed =
+        "the drag markers' look is fixed: an untinted drop zone and "
+        + "a two-tone ghost outline"
     private static let appBarDrawsBoth =
         "the App Bar always draws each item's icon and title"
 

@@ -78,7 +78,7 @@ struct WindowStrokeTests {
     func dragVisualStoresNoStroke() {
         let labels = Mirror(reflecting: DragVisual.ghostDefault)
             .children.compactMap(\.label)
-        #expect(labels.contains("borderColor"))
+        #expect(labels.contains("enabled"))
         for label in labels {
             #expect(
                 !label.localizedCaseInsensitiveContains("width")
@@ -100,14 +100,18 @@ struct WindowStrokeTests {
     }
 
     /// Both drag render paths hand the markers the border's
-    /// stroke — the engine's and the Settings picture's.
+    /// corners — the engine's and the Settings picture's (#2797).
     @Test("the drag paths hand over the border's stroke")
     func dragPathsReadTheStroke() async throws {
-        for (path, count) in [
-            ("Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift", 2),
+        for (path, needle, count) in [
+            (
+                "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
+                "settings.windowStroke.cornerRadius", 1
+            ),
             (
                 "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"
-                    + "GapsBordersPanelPreview.swift", 2
+                    + "GapsBordersPanelPreview.swift",
+                "stroke: settings.windowStroke,", 2
             ),
         ] {
             // Code only: a needle kept alive in a comment beside a
@@ -116,10 +120,7 @@ struct WindowStrokeTests {
                 .split(separator: "\n", omittingEmptySubsequences: false)
                 .map { $0.components(separatedBy: "//")[0] }
                 .joined(separator: "\n")
-            let hits =
-                text.components(
-                    separatedBy: "stroke: settings.windowStroke,"
-                ).count - 1
+            let hits = text.components(separatedBy: needle).count - 1
             #expect(hits == count, "\(path) hands \(hits)")
         }
     }

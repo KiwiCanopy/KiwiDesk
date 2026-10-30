@@ -44,7 +44,8 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
-        // Over the pocket plate the drop is the pocket's (#2678).
+        // Over the pocket plate the drop is the pocket's, so only
+        // the pocket lights (#2678, #2797).
         if pocketDragMoved(id, start: start, frame: frame) {
             dragCrossing.cancelPending(for: id)
             dragOverlay.hideAll()
@@ -165,16 +166,12 @@ extension KiwiCore {
             dragOverlay.hideAll()
             return
         }
-        let glass = LiquidGlassGate.rendered(
-            glass: settings.dragLiquidGlass
-        )
+        let corner = settings.windowStroke.cornerRadius
         if settings.dragGhost.enabled {
             dragOverlay.showGhost(
                 at: slot,
-                style: settings.dragGhost,
-                stroke: settings.windowStroke,
-                glassBeneath: glass ? id.raw : nil,
-                sheen: settings.borderStyle.sheen
+                cornerRadius: corner,
+                beneath: id.raw
             )
         }
         // Target the slot under the CURSOR, not the dragged
@@ -197,10 +194,11 @@ extension KiwiCore {
         {
             dragOverlay.showDropZone(
                 at: targetSlot,
-                style: settings.dragDropZone,
-                stroke: settings.windowStroke,
-                glassBeneath: glass ? id.raw : nil,
-                sheen: settings.borderStyle.sheen
+                cornerRadius: corner,
+                glass: LiquidGlassGate.rendered(
+                    glass: settings.dragLiquidGlass
+                ),
+                beneath: id.raw
             )
         } else {
             dragOverlay.hideDropZone()

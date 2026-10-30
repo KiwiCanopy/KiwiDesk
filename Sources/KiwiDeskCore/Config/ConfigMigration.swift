@@ -54,6 +54,7 @@ public enum ConfigMigration {
         migratingRetiredWrapFocus,
         migratingPinChordOntoPocket,
         migratingPocketPlacementOntoShelf,
+        migratingRetiredDragLook,
     ]
 
     /// Runs after `steps`, and is skipped by

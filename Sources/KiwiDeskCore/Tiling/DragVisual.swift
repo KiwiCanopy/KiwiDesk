@@ -1,78 +1,29 @@
 import Foundation
 
-/// Border alignment options for drag visual strokes
-/// (#754, `SettingsCodingTests`, `docs/design-decisions.md`).
-public enum BorderAlignment: String, Sendable, Codable,
-    Equatable, CaseIterable
-{
-    case inside
-    case outside
-}
-
-/// Visual styling configuration for drag-and-drop ghost and drop-zone
-/// indicators. The stroke's width and corners are every window
-/// outline's, `TilingSettings.windowStroke` (#1742).
+/// One drag marker's switch (`drag.ghost`, `drag.drop_zone`). Its
+/// look is fixed: the drop zone an untinted frosted plate, the ghost
+/// a two-tone outline (#2797, `DragMarkerView`); the corners are
+/// every window outline's, `TilingSettings.windowStroke` (#1742).
 public struct DragVisual: Sendable, Equatable, Encodable {
     public var enabled: Bool
-    public var border: Bool
-    public var borderColor: String
-    public var borderAlignment: BorderAlignment
-    public var fill: Bool
-    public var fillColor: String
 
-    /// Default ghost visual styling; the hue argument is
-    /// re-derivable via
-    /// `DragPairSeparationTests.ringHueFamilyCannotSeparateAtChroma`
-    /// (`docs/accepted-limitations.md`, #511, #470, #578).
-    /// Defaults mirrored in docs/lua-reference.md (drag colors) —
-    /// change both.
-    public static let ghostDefault = DragVisual(
-        enabled: true,
-        border: true,
-        borderColor: "#347957",
-        borderAlignment: .inside,
-        fill: true,
-        fillColor: "#34795740"
-    )
+    /// The ghost, off for a fresh setup (#2797); a saved profile
+    /// keeps the `enabled` it stored, since the struct encodes whole.
+    public static let ghostDefault = DragVisual(enabled: false)
 
-    /// Default drop zone visual styling (#511, `docs/lua-reference.md`).
-    public static let dropZoneDefault = DragVisual(
-        enabled: true,
-        border: true,
-        borderColor: "#C2790A",
-        borderAlignment: .inside,
-        fill: true,
-        fillColor: "#C2790A40"
-    )
+    /// The drop zone, on.
+    public static let dropZoneDefault = DragVisual(enabled: true)
 
-    public init(
-        enabled: Bool,
-        border: Bool,
-        borderColor: String,
-        borderAlignment: BorderAlignment,
-        fill: Bool,
-        fillColor: String
-    ) {
+    public init(enabled: Bool) {
         self.enabled = enabled
-        self.border = border
-        self.borderColor = borderColor
-        self.borderAlignment = borderAlignment
-        self.fill = fill
-        self.fillColor = fillColor
     }
 
-    /// Serialization coding keys (`CaseIterable` for palette reflection,
-    /// #375).
+    /// Serialization coding keys.
     enum CodingKeys: String, CodingKey, CaseIterable {
         case enabled
-        case border
-        case borderColor = "border_color"
-        case borderAlignment = "border_alignment"
-        case fill
-        case fillColor = "fill_color"
     }
 
-    /// Decodes visual settings with fallback defaults for missing properties.
+    /// Decodes the switch over `defaults` when absent.
     public init(
         from decoder: Decoder,
         defaults: DragVisual
@@ -85,31 +36,6 @@ public struct DragVisual: Sendable, Equatable, Encodable {
                 Bool.self,
                 forKey: .enabled
             ) ?? defaults.enabled
-        border =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .border
-            ) ?? defaults.border
-        borderColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .borderColor
-            ) ?? defaults.borderColor
-        borderAlignment =
-            try container.decodeIfPresent(
-                BorderAlignment.self,
-                forKey: .borderAlignment
-            ) ?? defaults.borderAlignment
-        fill =
-            try container.decodeIfPresent(
-                Bool.self,
-                forKey: .fill
-            ) ?? defaults.fill
-        fillColor =
-            try container.decodeIfPresent(
-                String.self,
-                forKey: .fillColor
-            ) ?? defaults.fillColor
     }
 
     /// sRGB components parsed from a hex color string.

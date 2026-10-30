@@ -40,12 +40,8 @@ enum GapsBordersRowOrder {
 
     /// Drag-and-drop visual setting keys (#754).
     static let dragAndDrop: [SettingKey] = [
-        .borders(.dragGhostEnabled),
-        .borders(.dragGhostBorder),
-        .borders(.dragGhostFill),
         .borders(.dragDropZoneEnabled),
-        .borders(.dragDropZoneBorder),
-        .borders(.dragDropZoneFill),
+        .borders(.dragGhostEnabled),
     ]
 
     /// Row order mapped by container.

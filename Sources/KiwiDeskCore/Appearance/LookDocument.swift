@@ -7,8 +7,9 @@ import Foundation
 struct LookDocument: Codable {
     /// Format version of the looks.json schema: 2 since a look's
     /// `animations.on_shelf` / `shelf_duration` paths became
-    /// `on_expand` / `expand_duration` (owner ruling, 2026-10-21).
-    static let currentFormat = 2
+    /// `on_expand` / `expand_duration` (owner ruling, 2026-10-21), 3
+    /// since the drag markers' palette paths retired (#2797).
+    static let currentFormat = 3
 
     static var encoder: JSONEncoder {
         let encoder = JSONEncoder()

@@ -38,10 +38,6 @@ enum ColorsAndGlassAnchors {
     private static func borders(_ key: BordersKey) -> SettingsControl? {
         switch key {
         case .borderFocusedColor: return rows.tintFocusBorder
-        case .dragGhostBorderColor: return rows.tintGhostBorder
-        case .dragGhostFillColor: return rows.tintGhostFill
-        case .dragDropZoneBorderColor: return rows.tintDropZoneBorder
-        case .dragDropZoneFillColor: return rows.tintDropZoneFill
         case .borderUnfocusedColor: return rows.tintUnfocusedBorder
         case .stickyColor: return rows.tintStickyMark
         case .floatingColor: return rows.tintFloatingMark

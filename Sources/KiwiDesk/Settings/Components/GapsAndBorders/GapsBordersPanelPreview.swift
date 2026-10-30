@@ -35,23 +35,23 @@ struct GapsBordersPanelPreview: View {
         }
     }
 
-    /// Ghost and drop zone drag previews (#231).
+    /// Drop zone and ghost drag previews (#231, #2797).
     private var dragPair: some View {
         VStack(alignment: .leading, spacing: 10) {
-            labelled(SettingsCatalog.gapsAndBorders.dragGhost) {
-                DragVisualPreview(
-                    visual: settings.dragGhost,
-                    stroke: settings.windowStroke,
-                    glass: settings.dragLiquidGlass,
-                    sheen: settings.borderStyle.sheen
-                )
-            }
             labelled(SettingsCatalog.gapsAndBorders.dragDropZone) {
                 DragVisualPreview(
+                    kind: .dropZone,
                     visual: settings.dragDropZone,
                     stroke: settings.windowStroke,
-                    glass: settings.dragLiquidGlass,
-                    sheen: settings.borderStyle.sheen
+                    glass: settings.dragLiquidGlass
+                )
+            }
+            labelled(SettingsCatalog.gapsAndBorders.dragGhost) {
+                DragVisualPreview(
+                    kind: .ghost,
+                    visual: settings.dragGhost,
+                    stroke: settings.windowStroke,
+                    glass: settings.dragLiquidGlass
                 )
             }
         }

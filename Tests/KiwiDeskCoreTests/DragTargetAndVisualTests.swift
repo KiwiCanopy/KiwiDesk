@@ -17,46 +17,54 @@ struct DragVisualCommandTests {
         )
     }
 
-    @Test("drag.* commands update every visual setting")
+    @Test("drag.* commands flip each marker's switch")
     func commands() {
         let core = makeCore()
+        // Off the shipped defaults, so neither passes on them.
+        core.execute("drag.set_ghost_enabled", args: [.bool(true)])
         core.execute(
-            "drag.set_ghost_enabled",
-            args: [.bool(false)]
-        )
-        core.execute(
-            "drag.set_ghost_fill_color",
-            args: [.string("#112233")]
-        )
-        // `outside` is the value the ghost does NOT ship with,
-        // so the assertion below cannot pass on the default.
-        core.execute(
-            "drag.set_ghost_border_alignment",
-            args: [.string("outside")]
-        )
-        core.execute(
-            "drag.set_drop_zone_border",
+            "drag.set_drop_zone_enabled",
             args: [.bool(false)]
         )
         let settings = core.tiler.settings
-        #expect(!settings.dragGhost.enabled)
-        #expect(settings.dragGhost.fillColor == "#112233")
-        #expect(settings.dragGhost.borderAlignment == .outside)
-        // Per stroke, not per pair: the ghost was moved
-        // `.outside` above and the drop zone stays on the
-        // shipped default, `.inside`.
-        #expect(
-            settings.dragDropZone.borderAlignment == .inside
-        )
-        #expect(!settings.dragDropZone.border)
+        #expect(settings.dragGhost.enabled)
+        #expect(!settings.dragDropZone.enabled)
     }
 
-    @Test("Bad colors and unknown settings are rejected")
+    @Test("A fresh setup shows the drop zone and no ghost (#2797)")
+    func defaults() {
+        let settings = TilingSettings()
+        #expect(!settings.dragGhost.enabled)
+        #expect(settings.dragDropZone.enabled)
+    }
+
+    /// The look is fixed: every knob the markers had retires by
+    /// name, for both markers, and changes nothing.
+    @Test("The retired look verbs fail and change nothing")
+    func retiredLookVerbs() {
+        let core = makeCore()
+        for marker in ["ghost", "drop_zone"] {
+            for knob in ConfigMigration.retiredDragKnobs {
+                let verb = "drag.set_\(marker)_\(knob)"
+                #expect(APIReference.retired[verb] != nil, "\(verb)")
+                #expect(
+                    !APIReference.dispatchable.contains(verb),
+                    "\(verb)"
+                )
+                let reply = core.execute(verb, args: [.bool(true)])
+                #expect(!reply.isSuccess, "\(verb)")
+            }
+        }
+        #expect(core.tiler.settings.dragGhost == .ghostDefault)
+        #expect(core.tiler.settings.dragDropZone == .dropZoneDefault)
+    }
+
+    @Test("Bad arguments and unknown settings are rejected")
     func rejectsBadInput() {
         let core = makeCore()
         #expect(
             !core.execute(
-                "drag.set_ghost_border_color",
+                "drag.set_ghost_enabled",
                 args: [.string("kiwi")]
             ).isSuccess
         )

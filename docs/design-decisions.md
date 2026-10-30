@@ -15446,6 +15446,7 @@ the user's choice" from the old #444/#493 record and revert this.
 
 **[Principle]**
 
+:::unreleased
 **Drag markers separate by material, not hue (#2797).** A drag
 answers one question — where will this window land — so the
 target is the marker on by default: an untinted frosted plate
@@ -15492,6 +15493,7 @@ over a bar or the pocket — a flat drop zone at the bars' level
 covered the pocket's handle (2026-10-29). Over the pocket the
 drop zone stands down and only the pocket lights, since the drop
 goes there.
+:::
 
 **[Trade-off]**
 

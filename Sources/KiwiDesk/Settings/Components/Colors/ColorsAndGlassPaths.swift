@@ -35,13 +35,6 @@ enum ColorsAndGlassPaths {
         case .borders(.stickyColor): return \.stickyStyle.color
         case .borders(.floatingColor): return \.floatingStyle.color
         case .borders(.pocketColor): return \.pocketStyle.color
-        case .borders(.dragGhostBorderColor):
-            return \.dragGhost.borderColor
-        case .borders(.dragGhostFillColor): return \.dragGhost.fillColor
-        case .borders(.dragDropZoneBorderColor):
-            return \.dragDropZone.borderColor
-        case .borders(.dragDropZoneFillColor):
-            return \.dragDropZone.fillColor
         default: return nil
         }
     }

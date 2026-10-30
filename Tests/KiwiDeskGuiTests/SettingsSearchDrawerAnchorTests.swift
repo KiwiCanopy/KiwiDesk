@@ -222,7 +222,7 @@ struct SettingsSearchDrawerAnchorTests {
         }
     }
 
-    /// The Focus border and Sticky rows: an anchor follows the
+    /// The Focus border, Sticky and Drag & drop rows: an anchor follows the
     /// census TIER, both ways (`docs/design-decisions.md` ▸ a
     /// search hit lands on the control only where the section
     /// hides it) — a `.showMore` row lands on its own control,
@@ -230,13 +230,8 @@ struct SettingsSearchDrawerAnchorTests {
     /// carries none; since #1473 every row of both cards is at
     /// rest, so the clause holds the second arm alone until a
     /// disclosure returns. Read with the bridge present so the
-    /// sticky reach row is indexed. The drag ghost / drop zone `Border`
-    /// and `Fill` rows are the stated residue: two census rows
-    /// share one label key per column, and the label-key join
-    /// reads no instance, so they stay anchor-less until the
-    /// census row carries one — never resolved onto the first
-    /// column declared. The premise is asserted rather than the
-    /// count: every anchor-less drag row shares its label key.
+    /// sticky reach row is indexed. The drag rows are two switches
+    /// at rest, each its own label key, since #2797.
     @Test("a Gaps & Borders row lands on its own control")
     func gapsAndBordersRowsCarryAnchors() {
         pinEnglish()
@@ -246,7 +241,7 @@ struct SettingsSearchDrawerAnchorTests {
         SettingsSearchIndex.canDriveDesktops = true
         let rows = SettingsSearchIndex.rows()
         for container in [
-            SettingsContainer.focusBorder, .stickyWindows,
+            SettingsContainer.focusBorder, .stickyWindows, .dragAndDrop,
         ] {
             let held = indexedRows(in: .gapsAndBorders, container)
             #expect(!held.isEmpty, Comment(rawValue: "\(container)"))
@@ -262,19 +257,6 @@ struct SettingsSearchDrawerAnchorTests {
                     Comment(rawValue: key.id)
                 )
             }
-        }
-        let drag = indexedRows(in: .gapsAndBorders, .dragAndDrop)
-            .filter { key in
-                let row = rows.first { $0.key == key }
-                return row?.anchor.anchor == nil
-            }
-        #expect(!drag.isEmpty)
-        let byLabel = Dictionary(grouping: drag) { key -> String in
-            guard case .key(let k) = key.text.label else { return "" }
-            return k
-        }
-        for (label, keys) in byLabel {
-            #expect(keys.count > 1, Comment(rawValue: label))
         }
     }
 

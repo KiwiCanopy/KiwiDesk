@@ -761,7 +761,8 @@ render content into it (#1517). Obligations:
   `updateStickyMarks`, which the flip re-runs — handing the gate
   the stored leaf once (`OverlayGlassGateTests` ▸
   `overlaysTakeTheGate`, `OverlayGlassTests` ▸ `gateStandsDown`).
-  Their stood-down look is their flat one, not made opaque
+  Their stood-down look is see-through, never made opaque — the
+  drop zone's flat grey plate, the mark's badge
   (`docs/design-decisions.md` ▸ Reduce transparency).
 - **Every rule a bar draws takes its geometry and ink from
   `BarDivider`** — the in-item rule, the layer and front-app
@@ -1534,8 +1535,8 @@ Obligations:
   surface's Fill carries the floor its ink needs as `minShare`,
   minted by `readingGlassFill` and never a share typed at a call
   site. An EMPTY Fill is no colour there —
-  clear glass, nothing pinned — which the drag marker's fill-off
-  and the sticky mark's Automatic both hand it
+  clear glass, nothing pinned — which the drop zone, untinted
+  since #2797, and the sticky mark's Automatic both hand it
   (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
   whether a Fill has a colour through the one
   `KiwiShelf.hasColour` — empty, unparseable and zero alpha are
@@ -1592,7 +1593,7 @@ Obligations:
   layout — rather than removing them; that ownership is #2425's
   open half.
 - **A glass surface is thinned only by a ruling, and only on its
-  own view's opacity.** Both drag markers' glass sits at
+  own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays
   readable (owner, device 2026-09-25); there the
   `maxAlpha` premise — a floor on how much refraction survives —

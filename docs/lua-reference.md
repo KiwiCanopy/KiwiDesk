@@ -3928,96 +3928,29 @@ placement override does not apply to track spaces.
 
 Dragging a tiled window over another window's slot and releasing
 swaps the two; dropping anywhere else snaps the window back.
-While you drag, KiwiDesk draws two visuals:
 
-- **Ghost** (`drag.set_ghost_*`): the dragged window's slot —
-  where it snaps back, and where the displaced window would
-  move.
-- **Drop zone** (`drag.set_drop_zone_*`): the slot under the
-  window's center, the window a drop would swap with.
+:::unreleased
+While you drag, KiwiDesk can draw two markers, each just below the
+window you are holding:
 
-### drag.set_ghost_enabled
+- **Drop zone** (`drag.set_drop_zone_enabled`, on by default): an
+  untinted frosted plate with a thin light rim over the slot a drop
+  would swap with. While the pointer is over the pocket, the drop
+  goes there and only the pocket lights.
+- **Ghost** (`drag.set_ghost_enabled`, off by default): a two-tone
+  outline, a dark line inside a light halo, over the dragged
+  window's slot — where it snaps back, and where the displaced
+  window would move.
 
-**Expects:** `true` or `false`.
-
-**Does:** shows or hides the ghost visual.
-
-**Example:**
-
-```lua
-drag.set_ghost_enabled(true)
-```
-
-### drag.set_ghost_border
-
-**Expects:** `true` or `false`.
-
-**Does:** enables the border on the ghost visual.
-
-**Example:**
-
-```lua
-drag.set_ghost_border(true)
-```
-
-### drag.set_ghost_border_alignment
-
-**Expects:** `"inside"` or `"outside"` (default `"inside"`).
-
-**Does:** positions the border inside or outside the slot
-boundary; at `inside` the marker's outer edge is the slot
-boundary itself. Lua-only — the Settings app offers no control
-for it (see [design decisions](design-decisions.md)).
-
-**Example:**
-
-```lua
-drag.set_ghost_border_alignment("outside")
-```
-
-### drag.set_ghost_border_color
-
-**Expects:** a hex color.
-
-**Does:** sets the ghost border color (default `#347957`, deep
-emerald).
-
-**Example:**
-
-```lua
-drag.set_ghost_border_color("#347957")
-```
-
-### drag.set_ghost_fill
-
-**Expects:** `true` or `false`.
-
-**Does:** enables the fill on the ghost visual.
-
-**Example:**
-
-```lua
-drag.set_ghost_fill(true)
-```
-
-### drag.set_ghost_fill_color
-
-**Expects:** a hex color.
-
-**Does:** sets the ghost fill color (default `#34795740`,
-deep emerald with 25% alpha).
-
-**Example:**
-
-```lua
-drag.set_ghost_fill_color("#34795740")
-```
+Both take their corners from
+[`border.set_corner_style`](#borderset_corner_style); their look
+is otherwise fixed.
 
 ### drag.set_drop_zone_enabled
 
-**Expects:** `true` or `false`.
+**Expects:** `true` or `false` (default `true`).
 
-**Does:** shows or hides the drop zone visual.
+**Does:** shows or hides the drop zone.
 
 **Example:**
 
@@ -4025,91 +3958,37 @@ drag.set_ghost_fill_color("#34795740")
 drag.set_drop_zone_enabled(true)
 ```
 
-### drag.set_drop_zone_border
+### drag.set_ghost_enabled
 
-**Expects:** `true` or `false`.
+**Expects:** `true` or `false` (default `false`; a profile saved
+before this keeps the value it stored).
 
-**Does:** enables the border on the drop zone visual.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border(true)
-```
-
-### drag.set_drop_zone_border_alignment
-
-**Expects:** `"inside"` or `"outside"` (default `"inside"`).
-
-**Does:** positions the border inside or outside the slot boundary.
-Lua-only, and independent of the ghost's alignment — see
-`drag.set_ghost_border_alignment`.
+**Does:** shows or hides the ghost.
 
 **Example:**
 
 ```lua
-drag.set_drop_zone_border_alignment("outside")
-```
-
-### drag.set_drop_zone_border_color
-
-**Expects:** a hex color.
-
-**Does:** sets the drop zone border color (default `#C2790A`,
-amber).
-
-**Example:**
-
-```lua
-drag.set_drop_zone_border_color("#C2790A")
-```
-
-### drag.set_drop_zone_fill
-
-**Expects:** `true` or `false`.
-
-**Does:** enables the fill on the drop zone visual.
-
-**Example:**
-
-```lua
-drag.set_drop_zone_fill(true)
-```
-
-### drag.set_drop_zone_fill_color
-
-**Expects:** a hex color.
-
-**Does:** sets the drop zone fill color (default `#C2790A40`,
-amber with 25% alpha).
-
-**Example:**
-
-```lua
-drag.set_drop_zone_fill_color("#C2790A40")
+drag.set_ghost_enabled(true)
 ```
 
 ### drag.set_liquid_glass
 
 **Expects:** a boolean (default `true`).
 
-**Does:** draws the ghost and the drop zone as macOS 26 Liquid
-Glass. Each is tinted by its own fill color, strongest at the top
-and fading downward, and keeps its border solid on top; with the
-fill off the glass is clear. Both use a thinner glass, so the
-window a drop would swap with stays readable through it.
-While you drag, both sit just below the window you are holding,
-so the glass never covers it. Off,
-below macOS 26, or while macOS's Reduce transparency is on, they
-draw flat: the border over the fill color, floating above the
-windows. Settings writes this through the one **Liquid Glass**
-switch ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
+**Does:** draws the drop zone as macOS 26 Liquid Glass, untinted
+and thinned so the window a drop would swap with stays readable
+through it. Off, or below macOS 26, it draws the system blur
+material instead; while macOS's Reduce transparency is on, a flat
+grey at about 22 %. Settings writes this through the one **Liquid
+Glass** switch
+([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
 **Example:**
 
 ```lua
 drag.set_liquid_glass(false)
 ```
+:::
 
 ### Retired drag verbs
 
@@ -4125,6 +4004,18 @@ with `<verb> was retired — use <replacement>`.
 
 A saved profile's `drag.corner_radius` and each visual's
 `border_width` are no longer read.
+
+:::unreleased
+The markers' own look is retired with nothing to replace it, for
+the ghost and the drop zone alike: `drag.set_ghost_border`,
+`drag.set_ghost_border_color`, `drag.set_ghost_border_alignment`,
+`drag.set_ghost_fill`, `drag.set_ghost_fill_color` and their
+`drag.set_drop_zone_*` twins fail with
+`<verb> was retired: the drag markers' look is fixed`. A saved
+setup's values for them, and a palette's or a look's
+`drag.ghost.*` and `drag.drop_zone.*` colours, are dropped when
+KiwiDesk next reads the file.
+:::
 
 ## Focus Border
 

@@ -38,23 +38,10 @@ extension BordersKey {
             )
         case .stickyColor:
             return .text("sticky.color")
-        case .dragGhostEnabled, .dragDropZoneEnabled:
-            return .text("drag.enabled")
-        case .dragGhostBorder, .dragDropZoneBorder:
-            return .text("drag.border")
-        case .dragGhostBorderColor:
-            return .text("colors.ghost_border")
-        case .dragDropZoneBorderColor:
-            return .text("colors.drop_zone_border")
-        case .dragGhostBorderAlignment,
-            .dragDropZoneBorderAlignment:
-            return .none
-        case .dragGhostFill, .dragDropZoneFill:
-            return .text("drag.fill")
-        case .dragGhostFillColor:
-            return .text("colors.ghost_fill")
-        case .dragDropZoneFillColor:
-            return .text("colors.drop_zone_fill")
+        case .dragGhostEnabled:
+            return .text("drag.ghost.show")
+        case .dragDropZoneEnabled:
+            return .text("drag.drop_zone.show")
         case .floatingColor:
             return .text("floating.color")
         case .pocketColor:

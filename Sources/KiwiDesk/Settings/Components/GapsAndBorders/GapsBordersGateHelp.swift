@@ -27,12 +27,6 @@ enum GapsBordersGateHelp {
                 "Turn on %1$@ to adjust its size.",
                 L("border.glow", "Glow effect")
             )
-        case .visualOff:
-            return L(
-                "drag.disabled.help",
-                "Turn on %1$@ to edit this visual.",
-                L("drag.enabled", "Enabled")
-            )
         }
     }
 
