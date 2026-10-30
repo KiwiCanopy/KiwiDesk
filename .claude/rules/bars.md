@@ -218,7 +218,20 @@ twice, was a question the user answered twice. The argument is
   which Settings' note asks too — refuses through the
   refusal-pill door's shelf twin,
   `flashRefusalPill(near:on:edge:text:symbol:)`; a `hidden` bar's
-  timed pin ends hidden, since no hover can retract it.
+  timed pin ends hidden, since no hover can retract it. **A
+  window drag's move opens only an `auto` Space Bar** — its push
+  or band dwell, never the drag's start — and holds or retracts
+  any shown bar as a move does; the revealer's own monitors hear
+  it through the one `ShelfRevealer.heard` mask, never a second
+  monitor or tap, and a left drag counts only while the core's
+  one `windowMoveInFlight` — the pocket plate's move verdict asked
+  of the live gesture — says a window moves, never a re-derivation
+  in the revealer
+  (#2795, `ShelfRevealDragTests` ▸ `dragLeavesTheAppBar`,
+  `ShelfRevealDragTests` ▸ `nonWindowDragIsUnheard`,
+  `ShelfRevealDragTests` ▸ `moveEndsWithItsGesture`,
+  `ShelfRevealWiringTests` ▸ `liveArmsHearTheDrag`,
+  `ShelfRevealWiringTests` ▸ `windowMoveIsWired`).
   Whether a hiding bar is shown is asked of `ShelfManager.reveal`
   per bar in `updateBars()`, and a second shown-answer
   beside it is review's; a FORCED reveal is the revealer's one
@@ -783,10 +796,6 @@ pocket rides every motion the shelf plays. Obligations:
   `content` alone beside them; the pocket's room opens for the
   motion it resolves to (`openPocketRoom`) and settles with the
   shelf's (`ShelfPocketPanelTests`).
-- **The pocket's panel is ordered above the shelf's by the
-  overlay itself** (`ShelfPocketPiece.orderIn(above:)`), never left
-  to call order at one level (`ShelfPocketPanelTests` ▸
-  `ordersAboveTheShelf`).
 - **Its panel is the shelf's for every hold and reading**: the
   reveal target's held section takes the pocket's slot
   (`KiwiCore+ShelfReveal`), `ShelfManager.surfaceHolds` and the
@@ -797,6 +806,32 @@ pocket rides every motion the shelf plays. Obligations:
   the bars-alone placement is reached only through it — so the
   Settings preview places the bars where the engine does
   (`ShelfStripPreviewTests` ▸ `pocketTakesItsSlot`).
+- **The pocket draws no box or plate of its own under any style**
+  (#2776): it lights through its mark, its edge and lift played by
+  the one `BarMotion.playPocketLight` and a standing pocket's nod by
+  the one `BarMotion.playPocketNod`, whose curve is
+  `BriefPocketPlan.nodSwell`'s, the brief pocket's own
+  (`BarMotionSeamTests` ▸ `motionHasOneHome`; the looks,
+  `PocketBareMarkTests` ▸ `lightsByTheEdge`);
+  its geometry — the mark's share, the edge's spill, the lift — is
+  the one `PocketMarkGeometry`, which the shelf's placement and the
+  risen size read too. A box for it is a ruling in
+  `docs/design-decisions.md` first.
+- **A play lights the standing pocket; a count change lights it only
+  where no play runs** (#2776): `playBriefPocket` schedules
+  `PocketPlateOverlay.light` on `DeferredTasks.Key.pocketLight`, and
+  `show` skips its count flash while `playing` names the display, so
+  one event lights once (`PocketBareMarkTests` ▸ `lightShowsFull`).
+- **Every pocket panel — the section and the handle — stands at
+  `BarPanel.pocketLevel`, a level above the shelf's, and is never
+  lowered to it**: a click fronts the shelf's panel within its
+  level, which under Full spans the pocket's slot, and a window
+  drag's ghost and drop zone share the bars' level (#2776,
+  `PocketBareMarkTests` ▸ `sectionStandsAboveTheShelf`,
+  `PocketHandleTests` ▸ `dragRises` for the handle during a drag;
+  at rest, review's). Within a shared level the
+  overlay orders it above itself (`ShelfPocketPiece.orderIn(above:)`,
+  `ShelfPocketPanelTests` ▸ `ordersAboveTheShelf`).
 
 ## Overflow fades, follows and pages through one home each
 

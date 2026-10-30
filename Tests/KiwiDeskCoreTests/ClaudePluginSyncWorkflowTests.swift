@@ -3,7 +3,7 @@ import Testing
 
 /// `.github/workflows/claude-plugin.yml` (#2258 ▸ Ruling 3): on a
 /// published release it copies the RELEASED tag's `plugins/` to
-/// KiwiCanopy/kiwidesk-claude with the release's version, through
+/// KiwiCanopy/KiwiDesk-Claude with the release's version, through
 /// that repository's own deploy key.
 @Suite("Claude plugin sync workflow")
 struct ClaudePluginSyncWorkflowTests {
@@ -70,7 +70,7 @@ struct ClaudePluginSyncWorkflowTests {
     @Test("it writes through the marketplace's deploy key")
     func deployKey() throws {
         let yaml = try workflowSource(Self.file)
-        #expect(yaml.contains("repository: KiwiCanopy/kiwidesk-claude"))
+        #expect(yaml.contains("repository: KiwiCanopy/KiwiDesk-Claude"))
         let uses =
             yaml.components(
                 separatedBy: "secrets.CLAUDE_PLUGIN_DEPLOY_KEY"

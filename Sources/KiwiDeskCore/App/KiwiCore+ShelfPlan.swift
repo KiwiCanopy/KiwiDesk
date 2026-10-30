@@ -141,7 +141,10 @@ extension KiwiCore {
                 // A section only beside a bar drawn this pass; an
                 // edge drawing none takes the handle (#2678).
                 pocket: pocket && (spaceNeed != nil || appNeed != nil)
-                    ? .init(need: depth, leadsEnd: shelf.pocketLeansEnd)
+                    ? .init(
+                        need: ShelfArrangement.pocketNeed(depth: depth),
+                        leadsEnd: shelf.pocketLeansEnd
+                    )
                     : nil
             ),
             shelfEdge: shelfEdge,

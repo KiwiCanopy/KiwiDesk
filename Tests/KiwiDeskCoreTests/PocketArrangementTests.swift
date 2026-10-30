@@ -50,7 +50,7 @@ struct PocketArrangementTests {
         #expect(pocket.offset == 950)
         #expect(pocket.length == 50)
         let app = try #require(placed.app)
-        #expect(app.offset + app.length <= 1000 - 50 - 6)
+        #expect(app.offset + app.length <= 1000 - 50)
     }
 
     @Test("leaning to the start, the bars move past it")
@@ -71,7 +71,7 @@ struct PocketArrangementTests {
             try #require(placed.space).offset,
             try #require(placed.app).offset
         )
-        #expect(abs(first - (50 + 6)) < 0.001)
+        #expect(abs(first - 50) < 0.001)
     }
 
     @Test("a full shelf keeps the pocket whole where it was")
@@ -84,7 +84,7 @@ struct PocketArrangementTests {
         )
         #expect(full.pocket == roomy.pocket)
         let app = try #require(full.app)
-        #expect(app.offset + app.length <= 1000 - 50 - 6)
+        #expect(app.offset + app.length <= 1000 - 50)
         #expect(full.divider != nil)
     }
 
@@ -96,7 +96,7 @@ struct PocketArrangementTests {
         )
         let app = try #require(placed.app)
         #expect(app.offset == 0)
-        #expect(app.length == CGFloat(1000 - 50 - 6))
+        #expect(app.length == CGFloat(1000 - 50))
         #expect(placed.pocket?.offset == 950)
     }
 

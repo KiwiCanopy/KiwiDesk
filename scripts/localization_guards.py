@@ -11,7 +11,7 @@ for any corpus of translated strings:
 
 1. `foreign_scripts` — the writing system is wrong for the locale
    (ported from KiwiCV's `scripts/i18n/check-scripts.cjs` via
-   KiwiCanopy-web's `scripts/check-scripts.mjs`, which had already
+   KiwiCanopy-Web's `scripts/check-scripts.mjs`, which had already
    adapted it to flat `{key: string}` JSON — KiwiDesk's exact
    shape).
 2. `tagged_stub` — English text with a locale marker appended,

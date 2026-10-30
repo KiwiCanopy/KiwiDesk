@@ -172,6 +172,9 @@ public enum StarterSetup {
             hosts: hosts(sizes)
         )
         settings.appBarStyle.setEdge(appBarEdge)
+        // The pocket rides the Space Bar, the menu bar (owner,
+        // 2026-10-30); the type default stays bottom.
+        settings.kiwishelf.pocketEdge = settings.spaceBarStyle.edge
         settings.spaceBarStyle.visibility = barVisibility
         settings.monocle.appBar.visibility = barVisibility
         settings.scrolling.appBar.visibility = barVisibility

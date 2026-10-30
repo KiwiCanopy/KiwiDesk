@@ -5,6 +5,7 @@
     "style": {
       "space_bar.edge": "bottom",
       "app_bar.edge": "bottom",
+      "kiwishelf.pocket_edge": "bottom",
       "kiwishelf.background_fit": "full",
       "kiwishelf.corner_roundness": 0,
       "kiwishelf.thickness": 44,

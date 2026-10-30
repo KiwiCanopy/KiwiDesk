@@ -6,10 +6,16 @@ public enum BarPanel {
     /// `JumpPanelController`).
     public static let level: NSWindow.Level = .floating
 
-    /// Window level one step above bars for modal onboarding overlays (#828).
+    /// Window level one step above bars: modal onboarding overlays
+    /// (#828), the hover peek, and the pocket's panels.
     public static let aboveLevel = NSWindow.Level(
         rawValue: level.rawValue + 1
     )
+
+    /// The pocket's level, the section's and the handle's: above the
+    /// shelf, so a click that fronts the shelf's panel never covers
+    /// it, and above a window drag's ghost and drop zone (#2776).
+    static let pocketLevel = aboveLevel
 
     /// Creates non-activating, transparent, all-spaces panel for bar overlays.
     @MainActor

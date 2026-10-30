@@ -1,8 +1,9 @@
 import AppKit
 
 /// The pocket's handle on an edge no bar shows (#2678, 2026-10-29
-/// ruling): the mark's two kiwis looking out from behind a short tab
-/// lying on the screen edge, turned so they face the screen. A fixed
+/// ruling): the two kiwis alone looking out from behind a short tab
+/// lying on the screen edge, the pocket itself out of sight (owner,
+/// device 2026-10-29), turned so they face the screen. A fixed
 /// edge mark like the Space dots and the App Bar line — it never
 /// scales with the shelf and carries no count. An empty pocket's
 /// fade is its panel's alone (#2678 review 18).
@@ -11,11 +12,12 @@ final class PocketHandleView: NSView {
     /// The tab's depth across the edge and length along it.
     static let tabDepth: CGFloat = 6
     static let tabLength: CGFloat = 30
-    /// The kiwis are the mark drawn at this side, its lower part
-    /// behind the tab.
+    /// The kiwis are drawn at the mark's grid at this side, their
+    /// lower part behind the tab.
     static let markSide: CGFloat = 20
-    /// How far the kiwis look out past the tab.
-    static let lookOut: CGFloat = 10
+    /// How far the kiwis' image reaches past the tab: about three
+    /// quarters of each slice shows.
+    static let lookOut: CGFloat = 7.5
     /// The handle's whole depth at rest.
     static var restDepth: CGFloat { tabDepth + lookOut }
 
@@ -61,7 +63,7 @@ final class PocketHandleView: NSView {
         context.translateBy(x: bounds.midX, y: bounds.midY)
         context.rotate(by: Self.turn(for: edge))
         context.translateBy(x: -along / 2, y: -across / 2)
-        let mark = PocketMark.mark.image(
+        let mark = PocketMark.kiwis.image(
             size: Self.markSide,
             hex: hex
         )
@@ -72,6 +74,17 @@ final class PocketHandleView: NSView {
             height: Self.markSide
         )
         if !kiwisOut {
+            // Cut at the tab rather than covered by it: the tab wears
+            // the Fill as the bars' handles do, its alpha kept (#2776).
+            context.saveGState()
+            context.clip(
+                to: CGRect(
+                    x: 0,
+                    y: 0,
+                    width: along,
+                    height: across - Self.tabDepth
+                )
+            )
             mark.draw(
                 in: markRect,
                 from: .zero,
@@ -80,6 +93,7 @@ final class PocketHandleView: NSView {
                 respectFlipped: true,
                 hints: nil
             )
+            context.restoreGState()
         }
         let tab = CGRect(
             x: (along - Self.tabLength) / 2,
@@ -92,7 +106,7 @@ final class PocketHandleView: NSView {
             xRadius: Self.tabDepth / 2,
             yRadius: Self.tabDepth / 2
         )
-        NSColor(kiwiFill: shelf.fillColor).withAlphaComponent(1).setFill()
+        NSColor(kiwiFill: shelf.fillColor).setFill()
         path.fill()
         context.restoreGState()
     }

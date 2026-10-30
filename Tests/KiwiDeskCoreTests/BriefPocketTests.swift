@@ -94,6 +94,7 @@ struct BriefPocketTests {
         core.tiler.settings.shortcutPanelLiquidGlass = true
         core.tiler.settings.kiwishelf.pocketEdge = .right
         core.tiler.settings.kiwishelf.pocketPosition = 30
+        core.tiler.settings.kiwishelf.outerMargin = 8
         #expect(core.execute("pocket").isSuccess)
         let request = try #require(core.briefPocket.playing)
         // The one door for where the pocket is (#2678 review 5)…
@@ -104,21 +105,21 @@ struct BriefPocketTests {
         let rise = KiwiCore.pocketRiseSide(
             thickness: core.tiler.settings.kiwishelf.thickness
         )
+        // One outer margin in from the edge, as the bars' handles.
+        let outer = core.tiler.settings.kiwishelf.outerMargin
         let band = KiwiCore.pocketHandleFrame(
             visible: visible,
             edge: .right,
             position: 30,
-            depth: PocketHandleView.tabDepth + PocketPlateView.lift + rise
+            depth: outer + PocketHandleView.tabDepth
+                + PocketPlateView.lift + rise
         )
         let risen = PocketPlateView.risenFrame(
-            in: band,
+            in: PocketPlateView.room(in: band, edge: .right, outer: outer),
             edge: .right,
             side: rise
         )
         #expect(request.pocket == risen)
-        let settings = core.tiler.settings
-        #expect(request.shelf != settings.kiwishelf)
-        #expect(request.shelf == LiquidGlassGate.rendered(settings.kiwishelf))
         #expect(!request.plateGlass)
     }
 

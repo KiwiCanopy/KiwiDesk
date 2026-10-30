@@ -53,8 +53,6 @@ final class BriefPocketOverlay {
         let window: CGRect
         let pocket: CGRect
         let iconPid: pid_t?
-        /// KiwiShelf as drawn, glass gated.
-        let shelf: KiwiShelf
         let markHex: String
         /// False while the pocket plate stands at the pocket (#2678):
         /// the plate flies to it, and no second pocket is drawn.
@@ -101,7 +99,7 @@ final class BriefPocketOverlay {
         root.addSubview(pocketHost)
         root.addSubview(plateHost)
         let pocket = BriefPocketView(frame: .zero)
-        pocket.wear(request.shelf, markHex: request.markHex)
+        pocket.wear(markHex: request.markHex)
         pocketHost.addSubview(pocket)
         let plate = BriefPocketPlateView(
             glass: request.plateGlass,
