@@ -3,9 +3,9 @@ import Testing
 
 @testable import KiwiDesk
 
-/// KiwiHub hands Move here the Space shown on the screen it opened
-/// on (#2791): `JumpMoveHereScreenTests` drives the core door and
-/// stays green on a panel that never passes the Space.
+/// KiwiHub hands its list and Move here the screen it opened on
+/// (#2791): `JumpMoveHereScreenTests` drives the core doors and
+/// stays green on a panel that never passes the screen.
 @Suite("KiwiHub Move here target wiring (#2791)")
 struct JumpMoveHereTargetWiringTests {
     private static func squashed(_ file: URL) throws -> String {
@@ -13,7 +13,7 @@ struct JumpMoveHereTargetWiringTests {
             .split(whereSeparator: \.isWhitespace).joined()
     }
 
-    @Test("the pick moves into the panel's screen's Space")
+    @Test("the list and the pick read the panel's screen")
     func pickPassesThePanelSpace() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let controller = try Self.squashed(
@@ -21,15 +21,17 @@ struct JumpMoveHereTargetWiringTests {
                 "Sources/KiwiDesk/Jump/JumpPanelController.swift"
             )
         )
+        #expect(controller.contains("hubDisplay=core.jumpDisplay()"))
         #expect(
-            controller.contains("pickerSpace=core.layoutPickerSpace()")
+            controller.occurrences(of: "core.jumpSnapshot(on:hubDisplay)")
+                == 1
         )
         #expect(
             controller.occurrences(
-                of: "core.moveHere(entry.target,into:pickerSpace)"
+                of: "core.moveHere(entry.target,on:hubDisplay)"
             ) == 1
         )
-        // No GUI caller reaches the door without a Space.
+        // No GUI caller reaches either door without the screen.
         let files = try SourceScan.swiftSources(
             under: root.appendingPathComponent("Sources/KiwiDesk")
         )
@@ -38,7 +40,12 @@ struct JumpMoveHereTargetWiringTests {
             let source = try Self.squashed(file)
             #expect(
                 source.occurrences(of: ".moveHere(")
-                    == source.occurrences(of: ",into:pickerSpace)"),
+                    == source.occurrences(of: ",on:hubDisplay)"),
+                "\(file.lastPathComponent)"
+            )
+            #expect(
+                source.occurrences(of: ".jumpSnapshot(")
+                    == source.occurrences(of: "(on:hubDisplay)"),
                 "\(file.lastPathComponent)"
             )
         }

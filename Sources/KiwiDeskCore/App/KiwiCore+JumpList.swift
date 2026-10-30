@@ -8,19 +8,24 @@ import AppKit
 /// user is in (owner, 2026-10-12). Read once
 /// when the panel opens; the panel keeps that snapshot.
 extension KiwiCore {
-    public func jumpSnapshot() -> JumpSnapshot {
-        let here = state.workspaces.activeSpace
+    /// `display` is the screen the panel opened on: "here" is the
+    /// Space Move here would file into from it (#2791).
+    public func jumpSnapshot(on display: DisplayID? = nil) -> JumpSnapshot {
+        let here = moveHereSpace(on: display)
         return JumpSnapshot(
-            entries: jumpEntries(),
+            entries: jumpEntries(here: here),
             here: here,
             hereIcon: here.flatMap(jumpSpaceIcon)
         )
     }
 
-    func jumpEntries() -> [JumpEntry] {
+    func jumpEntries(
+        here: SpaceID? = nil
+    ) -> [JumpEntry] {
+        let here = here ?? state.workspaces.activeSpace
         let windows =
-            trackedJumpEntries() + awayJumpEntries()
-            + minimizedJumpEntries()
+            trackedJumpEntries(here: here) + awayJumpEntries(here: here)
+            + minimizedJumpEntries(here: here)
         let ordered = windows.enumerated().sorted { lhs, rhs in
             if lhs.element.tier != rhs.element.tier {
                 return lhs.element.tier < rhs.element.tier
@@ -75,7 +80,7 @@ extension KiwiCore {
         return state.focusRecencyRank(of: id)
     }
 
-    private func trackedJumpEntries() -> [JumpEntry] {
+    private func trackedJumpEntries(here: SpaceID?) -> [JumpEntry] {
         state.windows.all
             .filter { !$0.isTransientOverlay }
             .sorted { $0.id.raw < $1.id.raw }
@@ -91,7 +96,7 @@ extension KiwiCore {
                     status: state.isPocketed(window.id)
                         ? .pocketed
                         : window.isFullscreen ? .fullscreen : .shown,
-                    movesHere: jumpMovesHere(window, from: space),
+                    movesHere: jumpMovesHere(window, from: space, into: here),
                     isOtherApp: jumpIsOtherApp(window.appRef)
                 )
             }
@@ -100,7 +105,7 @@ extension KiwiCore {
     /// The away ledger's UP entries — a window parked while away is
     /// not reachable (#1146). The Desktop number comes from ONE
     /// topology reading, taken only when there is an entry.
-    private func awayJumpEntries() -> [JumpEntry] {
+    private func awayJumpEntries(here: SpaceID?) -> [JumpEntry] {
         let away = state.awayWindows.values
             .filter(\.isUp)
             .sorted { $0.id.raw < $1.id.raw }
@@ -117,7 +122,7 @@ extension KiwiCore {
                 spaceIcon: space.flatMap(jumpSpaceIcon),
                 status: .away(desktop: snapshot.number(of: entry.nativeSpace)),
                 movesHere: canDriveDesktops && entry.appBundleID != nil
-                    && state.workspaces.activeSpace != nil,
+                    && here != nil,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: entry.appBundleID, name: entry.appName)
                 )
@@ -128,7 +133,7 @@ extension KiwiCore {
     /// The minimize record is advisory: a window closed while
     /// minimized fires no event, so a record the WindowServer no
     /// longer lists is left out. No reading keeps every record.
-    private func minimizedJumpEntries() -> [JumpEntry] {
+    private func minimizedJumpEntries(here: SpaceID?) -> [JumpEntry] {
         let known = jump.knownWindows()
         return state.minimizeOrder.reversed().filter { record in
             known.map { $0.contains(record.id) } ?? true
@@ -141,7 +146,7 @@ extension KiwiCore {
                 space: nil,
                 spaceIcon: nil,
                 status: .minimized,
-                movesHere: state.workspaces.activeSpace != nil,
+                movesHere: here != nil,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: record.bundleID, name: record.app)
                 )
@@ -185,12 +190,12 @@ extension KiwiCore {
     /// only when it runs.
     private func jumpMovesHere(
         _ window: ManagedWindow,
-        from space: SpaceID?
+        from space: SpaceID?,
+        into here: SpaceID?
     ) -> Bool {
-        guard let active = state.workspaces.activeSpace,
-            !window.isFullscreen, space != active
+        guard let here, !window.isFullscreen, space != here
         else { return false }
-        return stickyMoveBlock(window.id, to: active) == nil
+        return stickyMoveBlock(window.id, to: here) == nil
     }
 
     /// The Space's own icon, the bar chip's reading, nil without

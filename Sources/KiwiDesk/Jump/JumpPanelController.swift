@@ -46,10 +46,12 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     /// Why window management is held (#2050), if it is; the View
     /// side greys its chips meanwhile (#2309 ruling 9).
     var hold: () -> CoreHold = { .running }
-    /// The Space the View side's Layout line and Move here act on,
-    /// read with the screen the panel opens on so the two never
-    /// disagree (#2791).
+    /// The Space the View side's Layout line acts on, read with the screen
+    /// the panel opens on so the two never disagree.
     var pickerSpace: SpaceID?
+    /// The screen the panel opened on: its list's "here" and Move
+    /// here's target are the Space it shows (#2791).
+    private var hubDisplay: DisplayID?
 
     /// A scope's own shortcut (#2229).
     func toggle(_ scope: JumpScope = .windows) {
@@ -78,6 +80,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     func show(_ scope: JumpScope = .windows) {
         let screen = PanelHandBack.screenUnderPointer()
         pickerSpace = core.layoutPickerSpace()
+        hubDisplay = core.jumpDisplay()
         let visible =
             screen?.visibleFrame
             ?? CGRect(x: 0, y: 0, width: 1440, height: 900)
@@ -85,7 +88,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             visible: visible,
             shelves: core.shelfFrames()
         )
-        let snapshot = core.jumpSnapshot()
+        let snapshot = core.jumpSnapshot(on: hubDisplay)
         let model = JumpModel(
             snapshot: snapshot,
             icons: Self.icons(for: snapshot),
@@ -191,7 +194,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             core.jump(to: entry.target)
             return
         }
-        core.moveHere(entry.target, into: pickerSpace)
+        core.moveHere(entry.target, on: hubDisplay)
     }
 
     /// Whether a pick arms the own-window handoff distrust: never

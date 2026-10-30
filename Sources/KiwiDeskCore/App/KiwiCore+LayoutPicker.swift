@@ -11,15 +11,26 @@ extension KiwiCore {
         spaceUnderPointer(shelves.contextMenus.pointer())
     }
 
+    /// The screen under the pointer: the one KiwiHub opens on, and
+    /// whose shown Space its Move here files into (#2791).
+    public func jumpDisplay() -> DisplayID? {
+        displayUnderPointer(shelves.contextMenus.pointer())
+    }
+
     /// The Space shown on the screen holding `point` (Cocoa), else
     /// the active one.
     func spaceUnderPointer(_ point: NSPoint) -> SpaceID? {
+        displayUnderPointer(point)
+            .flatMap { state.workspaces.activeSpace(on: $0) }
+            ?? state.workspaces.activeSpace
+    }
+
+    /// The screen holding `point` (Cocoa), nil off every screen.
+    func displayUnderPointer(_ point: NSPoint) -> DisplayID? {
         let screens = ScreenList.all.compactMap { screen in
             screen.kiwiDisplayID.map { (frame: screen.frame, id: $0) }
         }
         return Self.display(at: point, among: screens)
-            .flatMap { state.workspaces.activeSpace(on: $0) }
-            ?? state.workspaces.activeSpace
     }
 
     /// Which of `screens` holds `point`, through the one lookup

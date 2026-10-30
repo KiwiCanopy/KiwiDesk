@@ -127,23 +127,62 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         track(core, 2, in: "2")
-        #expect(core.moveHere(.window(WindowID(2)), into: "5"))
+        #expect(core.moveHere(.window(WindowID(2)), on: DisplayID(2)))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
         #expect(core.state.workspaces.activeSpace == "5")
         #expect(core.state.workspaces.lastFocused == WindowID(2))
     }
 
-    /// Space 2 lays out on screen 1 but is not shown there: the
-    /// pick cannot have been made on it, so the focus decides.
-    @Test("a Space no screen shows is not a target")
-    func unshownSpaceIsIgnored() {
+    /// A refusal switches nothing: the gate runs before the switch.
+    @Test("a refused Move here leaves the focused screen active")
+    func refusalSwitchesNothing() {
         let core = makeCore()
         defer { teardown() }
         track(core, 1, in: "1")
-        track(core, 3, in: "5")
-        #expect(core.moveHere(.window(WindowID(3)), into: "2"))
-        #expect(core.state.workspaces.space(of: WindowID(3)) == "1")
+        var fullscreen = window(3)
+        fullscreen.isFullscreen = true
+        core.state.apply(.windowCreated(fullscreen))
+        core.state.workspaces.add(WindowID(3), to: "2")
+        #expect(!core.moveHere(.window(WindowID(3)), on: DisplayID(2)))
         #expect(core.state.workspaces.activeSpace == "1")
+        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
+    }
+
+    /// Read at the pick: screen 2 now shows Space 6, so that is
+    /// where the window goes.
+    @Test("the target is what the panel's screen shows at the pick")
+    func targetIsReadAtThePick() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.workspaces.assign("6", to: DisplayID(2))
+        core.state.workspaces.show("6", on: DisplayID(2))
+        track(core, 1, in: "1")
+        track(core, 2, in: "2")
+        #expect(core.moveHere(.window(WindowID(2)), on: DisplayID(2)))
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "6")
+        #expect(core.state.workspaces.activeSpace == "6")
+    }
+
+    /// The list names the Space the pick lands in, and judges its
+    /// rows against it.
+    @Test("the panel's list reads the same here as the move")
+    func snapshotReadsTheSameHere() {
+        let core = makeCore()
+        defer { teardown() }
+        track(core, 1, in: "1")
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        track(core, 2, in: "1")
+        track(core, 3, in: "5")
+        let snapshot = core.jumpSnapshot(on: DisplayID(2))
+        #expect(snapshot.here == "5")
+        let moves = Dictionary(
+            uniqueKeysWithValues: snapshot.entries.map {
+                ($0.target, $0.movesHere)
+            }
+        )
+        #expect(moves[.window(WindowID(2))] == true)
+        #expect(moves[.window(WindowID(3))] == false)
+        #expect(core.jumpSnapshot().here == "1")
     }
 
     /// The hop lands on screen 2's shown Desktop, and the focus
@@ -155,7 +194,7 @@ struct JumpMoveHereScreenTests {
         track(core, 1, in: "1")
         core.state.workspaces.focus(WindowID(1), in: "1")
         park(core)
-        #expect(core.moveHere(.window(WindowID(7)), into: "5"))
+        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
         #expect(Bridge.moves.map(\.1) == [20])
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("5"))
         #expect(core.jump.owed?.space == "5")
