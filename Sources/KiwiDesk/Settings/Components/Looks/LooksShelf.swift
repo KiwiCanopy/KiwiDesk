@@ -114,8 +114,7 @@ struct LooksShelf: View {
                 .foregroundStyle(SettingsTheme.ink3)
             }
         }
-        // Groups part wider than a header from its grid (#1740).
-        .padding(.top, 12)
+        .padding(.top, SettingsMetrics.shelfGroupGap)
     }
 
     private func groupHeader(_ text: String) -> some View {

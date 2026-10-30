@@ -94,7 +94,7 @@ struct ColorsCensusRenderTests {
     /// The look shelf's at-rest half, hand-listed for the palette
     /// shelf's reason (#1684): a tile grid, the "Keep previous
     /// colors" row a click surfaces (#1752), a trailing add-tile and
-    /// the header's buttons in their drawn order (#1740).
+    /// the header's buttons, the gallery's doors among them (#1740).
     @Test("the look shelf's at-rest actions are the census's")
     func looksAtRest() {
         #expect(

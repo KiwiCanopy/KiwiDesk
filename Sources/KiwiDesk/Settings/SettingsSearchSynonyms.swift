@@ -146,6 +146,8 @@ enum SettingsSearchSynonyms {
             return ["theme", "color scheme"]
         case .colours(.lookSave):
             return ["theme", "design", "skin"]
+        case .colours(.lookBrowse), .colours(.lookShare):
+            return ["gallery", "community"]
         case .general(.language):
             return ["locale", "translation"]
         case .general(.appearance):
