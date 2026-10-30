@@ -92,7 +92,7 @@ struct GetSettingsCommandTests {
         let space = SpaceID("2")
         settings.gapsOverride[space] = .uniform(7)
         settings.minWindowSizeOverride[space] = .square(123)
-        settings.placementOverride[space] = .first
+        settings.placementOverride[space] = .beforeFocused
         settings.spaceIcons[space] = "globe"
         settings.spaceIcons[SpaceID("1")] = "star"
         var bsp = BspOverride()
@@ -118,8 +118,17 @@ struct GetSettingsCommandTests {
         for layout in MinWindowSizes.Layout.allCases {
             #expect(own.minWindowSizes[layout] == .square(123))
         }
-        for (mode, path) in TilingSettings.spawnPlacementPaths {
-            #expect(own[keyPath: path] == .first, "\(mode)")
+        // Named here, not read from `spawnPlacementPaths`, so a row
+        // dropped from that table reds; `.beforeFocused` is no
+        // layout's default.
+        for placement in [
+            own.bsp.newWindowPlacement,
+            own.stack.newWindowPlacement,
+            own.scrolling.newWindowPlacement,
+            own.grid.newWindowPlacement,
+            own.monocle.newWindowPlacement,
+        ] {
+            #expect(placement == .beforeFocused)
         }
         #expect(own.spaceIcons == [space: "globe"])
         #expect(own.bsp.splitRatioH == 0.31)
@@ -152,6 +161,10 @@ struct GetSettingsCommandTests {
             .windowDestroyed(WindowID(999_999), wasMinimized: false)
         )
         #expect(core.state.spawnPlacements == expected)
+        #expect(
+            Set(expected.keys)
+                == [.bsp, .stack, .scrolling, .grid, .monocle]
+        )
     }
 
     @Test("an empty pointer names the whole document")
