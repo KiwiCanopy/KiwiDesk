@@ -79,8 +79,9 @@ extension KiwiCore {
     /// accepted points each one's remembered Space at `target`, so
     /// the arrival files it there. `gather` takes `target`'s screen's
     /// own Desktops alone — with one shared Desktop set there is no
-    /// screen to keep, so it takes every one, each window arriving on
-    /// the screen its frame is on. `only` narrows the hop to one
+    /// screen to keep, so it takes every one: a watched departure
+    /// arrives on the screen its frame is on, a restored filing in
+    /// `target`. `only` narrows the hop to one
     /// window (#1875's Move here), which may come from any screen;
     /// its owed focus files it into `target` wherever it lands
     /// (#2770). An UNFILED entry — no remembered Space at all — is
@@ -137,9 +138,9 @@ extension KiwiCore {
     /// The snapshot's key for the screen `target` lays out on: its
     /// own UUID where listed, the main screen's where its screen is
     /// unknown, and the shared key with "Displays have separate
-    /// Spaces" off (#2770). A screen the reading does not list — a
-    /// topology read mid-reconfigure — refuses rather than landing
-    /// the window on another screen.
+    /// Spaces" off (#2770). A tracked screen the reading does not
+    /// list — a topology read mid-reconfigure — refuses rather than
+    /// landing the window on another screen.
     func hopDisplayKey(
         for target: SpaceID,
         in snapshot: DesktopSnapshot

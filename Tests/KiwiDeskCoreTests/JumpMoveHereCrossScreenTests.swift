@@ -201,5 +201,8 @@ struct JumpMoveHereCrossScreenTests {
         // One shared Desktop set, under an id no screen answers to.
         let shared = snapshot(["Main": 10], main: "UUID-A")
         #expect(core.hopDisplayKey(for: "5", in: shared) == "Main")
+        // A screen not tracked yet is the main one, not a shared set.
+        let untracked = snapshot(["UUID-C": 30], main: "UUID-C")
+        #expect(core.hopDisplayKey(for: "5", in: untracked) == nil)
     }
 }
