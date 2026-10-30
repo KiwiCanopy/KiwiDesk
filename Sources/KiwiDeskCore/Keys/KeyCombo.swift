@@ -40,9 +40,8 @@ public struct KeyCombo: Hashable, Sendable {
     }
 
     /// A modifier spelling's bits and the modifier it names — nil
-    /// for Hyper — or nil for none. The name is the kind itself:
-    /// a string of it reflects, and every shortcut row parses every
-    /// combo of its layer (#2783).
+    /// for Hyper — or nil for none. The name is the kind, never its
+    /// string, which reflects on a hot path (#2783).
     private static func modifierToken(
         _ part: String
     ) -> (name: ModifierKind?, bits: HotkeyModifiers)? {

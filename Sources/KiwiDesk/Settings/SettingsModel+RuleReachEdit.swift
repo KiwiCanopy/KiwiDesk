@@ -40,7 +40,7 @@ extension SettingsModel {
                 { ShortcutsReferenceBuilder.glyphs($0) }
             )
         else { return nil }
-        row.takenBy = keyTakers(key, in: reach, editing: row.editing)
+        row.takenBy = keyTakers(key, editing: row.editing)
         let layer = RuleReachTable<String>.keyParts(key).layer
         if let layerRow = layerReach(layer) {
             row.lacking = Set(row.profiles).subtracting(layerRow.users)
@@ -80,13 +80,13 @@ extension SettingsModel {
     /// the key from.
     private func keyTakers(
         _ key: String,
-        in reach: RuleReachSnapshot,
         editing: String
     ) -> [String: String] {
+        guard let reach = encodedReach, let rivals = encodedKeyRivals
+        else { return [:] }
         let table = reach.keyLayers
         guard let combo = table.resolved(key, for: editing), !combo.isEmpty
         else { return [:] }
-        let rivals = encodedKeyRivals ?? KeyRivals(table)
         var result: [String: String] = [:]
         for profile in table.profiles where profile != editing {
             guard let rival = rivals.rival(of: key, for: profile, combo: combo)

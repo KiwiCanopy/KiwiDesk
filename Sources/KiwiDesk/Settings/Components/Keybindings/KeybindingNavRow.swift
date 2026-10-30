@@ -5,11 +5,14 @@ import SwiftUI
 /// (#34, #68 §3.6.2).
 ///
 /// It observes nothing: its parent, which observes the model,
-/// builds it in every render, and it reads what it draws in its
-/// init and compares by that, so a draft write that leaves the row
-/// as it was skips it whole (#2783). A parent draws it
-/// `.equatable()` and hands it the layer and the disabled set from
-/// its own environment. Its actions read the draft when called.
+/// builds it in every render, and its body draws only `drawn`, read
+/// at init, which is what it compares by — so a draft write that
+/// leaves the row as it was skips it whole (#2783). A parent draws
+/// it `.equatable()` and hands it the layer and the disabled set
+/// from its own environment. Its actions read the draft when
+/// called, through a binding that must find its rows when called
+/// rather than capture where they were: a skipped render keeps the
+/// binding of the last one that drew.
 struct NavRow: View, Equatable {
     let model: SettingsModel
     /// The layer's rows, out of SwiftUI's sight: a `Binding` the
@@ -18,17 +21,25 @@ struct NavRow: View, Equatable {
     private let rows: Rows
     let command: NavCommand
     let layerName: String
-    let disabledSystemShortcuts: Set<SystemShortcut>
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
     /// A clear of a shortcut other profiles share asks where it
     /// goes, as the trash does (#1393).
     @State private var confirmingClear = false
-    private let title: String
-    private let help: String?
-    private let binding: KeyBinding?
-    private let reach: KeyReachColumn?
-    private let reading: ConflictReading?
+    let drawn: Drawn
+
+    /// Everything the body draws; equal values draw the same row.
+    struct Drawn: Equatable {
+        let title: String
+        let help: String?
+        let icon: String?
+        let unavailable: String?
+        let liveOnly: LiveOnlySpace.Kind?
+        let isPocket: Bool
+        let binding: KeyBinding?
+        let reach: KeyReachColumn?
+        let reading: ConflictReading?
+    }
 
     init(
         model: SettingsModel,
@@ -41,36 +52,48 @@ struct NavRow: View, Equatable {
         rows = Rows(binding: bindings)
         self.command = command
         layerName = layer
-        disabledSystemShortcuts = disabled
-        title = command.resolvedLabel
-        help = command.help?()
         let rows = bindings.wrappedValue
         let index = Self.index(of: command, in: rows)
         let binding = index.map { rows[$0] }
-        self.binding = binding
-        reach = binding.map {
-            KeyReachColumn(model: model, layer: layer, binding: $0)
-        }
-        reading = Self.reading(
-            at: index,
-            in: rows,
-            model: model,
-            disabledSystemShortcuts: disabled
+        drawn = Drawn(
+            title: command.resolvedLabel,
+            help: command.help?(),
+            icon: ShortcutsReferenceBuilder.icon(for: command),
+            unavailable: command.unavailable?(),
+            liveOnly: command.liveOnly,
+            isPocket: command.lua == KeybindingCatalog.pocket.lua,
+            binding: binding,
+            reach: binding.flatMap { binding in
+                KeyReachColumn.reading(
+                    model: model,
+                    layer: layer,
+                    binding: binding
+                ).map {
+                    KeyReachColumn(
+                        model: model,
+                        layer: layer,
+                        binding: binding,
+                        reading: $0
+                    )
+                }
+            },
+            reading: Self.reading(
+                at: index,
+                in: rows,
+                model: model,
+                disabledSystemShortcuts: disabled
+            )
         )
     }
 
-    /// A plain box, which SwiftUI does not look inside for dynamic
-    /// properties.
+    /// A plain box: SwiftUI reads no dynamic property inside it.
     private struct Rows {
         let binding: Binding<[KeyBinding]>
     }
 
     nonisolated static func == (a: Self, b: Self) -> Bool {
-        a.command.lua == b.command.lua && a.title == b.title
-            && a.command.liveOnly == b.command.liveOnly
-            && a.help == b.help && a.layerName == b.layerName
-            && a.binding == b.binding && a.reach == b.reach
-            && a.reading == b.reading
+        a.command.lua == b.command.lua && a.layerName == b.layerName
+            && a.drawn == b.drawn
     }
 
     var body: some View {
@@ -80,34 +103,32 @@ struct NavRow: View, Equatable {
             Color.clear
                 .frame(width: SettingsMetrics.shortcutIconSlot)
                 .overlay {
-                    if command.lua == KeybindingCatalog.pocket.lua {
+                    if drawn.isPocket {
                         // The mark itself, as the panel draws it.
                         Image(
                             nsImage: PocketMark.mark.image(size: 16, hex: "")
                         )
                         .frame(width: 16, height: 16)
                         .accessibilityHidden(true)
-                    } else if let glyph = ShortcutsReferenceBuilder.icon(
-                        for: command
-                    ) {
+                    } else if let glyph = drawn.icon {
                         IconGlyphLabel(icon: glyph)
                     }
                 }
-            Text(title)
-            if let kind = command.liveOnly {
+            Text(drawn.title)
+            if let kind = drawn.liveOnly {
                 LiveOnlySpaceChip(kind: kind)
             }
-            if let help {
-                HelpButton(explanation: help, subject: title)
+            if let help = drawn.help {
+                HelpButton(explanation: help, subject: drawn.title)
             }
             Spacer()
-            if let reach {
+            if let reach = drawn.reach {
                 reach
             }
             KeyRecorderField(
-                name: title,
-                combo: binding?.combo ?? "",
-                reading: reading,
+                name: drawn.title,
+                combo: drawn.binding?.combo ?? "",
+                reading: drawn.reading,
                 preflight: preflight,
                 onRecord: record,
                 onClear: clear
@@ -116,7 +137,7 @@ struct NavRow: View, Equatable {
                 AppRuleDeleteButton.slot
             }
         }
-        .keybindingRowStyle(unavailable: command.unavailable?())
+        .keybindingRowStyle(unavailable: drawn.unavailable)
         .confirmationDialog(
             L(
                 "shortcuts.clear_shared.title",

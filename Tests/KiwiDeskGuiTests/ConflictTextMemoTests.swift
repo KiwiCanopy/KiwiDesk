@@ -78,25 +78,47 @@ struct ConflictTextMemoTests {
         #expect(reading == direct(edited, rows, sides: false))
     }
 
-    @Test("The reading every row surface takes reads the memo")
-    func readingTakesTheMemo() {
-        let rows = [row("alt+h", "a()"), row("alt+h", "b()")]
-        let reading = ConflictText.reading(
-            for: rows[0],
+    @Test("A layer holding one id twice is judged row by row")
+    func duplicateIDIsDirect() {
+        let first = row("alt+h", "a()")
+        var twin = row("alt+j", "b()")
+        twin.id = first.id
+        let rows = [first, twin, row("alt+h", "c()")]
+        let reading = LayerConflictMemo.conflict(
+            for: first,
             in: rows,
-            config: GuiConfig(),
-            disabled: [],
             sides: false
         )
-        #expect(
-            reading?.severity
-                == ConflictText.severity(
-                    for: rows[0],
-                    in: rows,
-                    disabled: [],
-                    sides: false
-                )
+        #expect(reading == direct(first, rows, sides: false))
+        let twinReading = LayerConflictMemo.conflict(
+            for: twin,
+            in: rows,
+            sides: false
         )
-        #expect(reading != nil)
+        #expect(twinReading == direct(twin, rows, sides: false))
+    }
+
+    @Test("The reading every row surface takes reads the memo")
+    func readingTakesTheMemo() throws {
+        let path =
+            "Sources/KiwiDesk/Settings/Components/Keybindings/"
+            + "ConflictText.swift"
+        let text = SourceScan.stripComments(
+            try String(
+                contentsOf: SourceScan.repoRoot(from: #filePath)
+                    .appendingPathComponent(path),
+                encoding: .utf8
+            )
+        )
+        let start = try #require(text.range(of: "static func reading("))
+        let end = try #require(
+            text.range(
+                of: "static func tooltip(",
+                range: start.upperBound..<text.endIndex
+            )
+        )
+        let body = text[start.upperBound..<end.lowerBound]
+        #expect(body.contains("LayerConflictMemo.conflict("))
+        #expect(!body.contains("KeybindingConflicts."))
     }
 }

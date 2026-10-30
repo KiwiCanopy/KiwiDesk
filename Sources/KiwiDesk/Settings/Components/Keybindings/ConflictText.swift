@@ -151,11 +151,9 @@ enum ConflictText {
     }
 }
 
-/// The page's layer conflicts, taken once per draft: every row's
-/// reading asked `KeybindingConflicts.conflict(for:in:)`, which
-/// parses the layer's every combo, so a page of rows parsed them
-/// once per row on each draft write (#2783). It answers what that
-/// call answers (`ConflictTextMemoTests`).
+/// The page's layer conflicts, taken once per layer value (#2783).
+/// It answers what `KeybindingConflicts.conflict(for:in:)` answers
+/// (`ConflictTextMemoTests`).
 @MainActor
 enum LayerConflictMemo {
     private struct Taken {

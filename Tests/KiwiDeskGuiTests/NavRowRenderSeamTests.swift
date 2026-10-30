@@ -57,6 +57,26 @@ struct NavRowRenderSeamTests {
         #expect(text.components(separatedBy: "Binding<").count - 1 == 2)
     }
 
+    /// What the body reads beside `drawn` would skip a render
+    /// when it moved; only the identity `command.lua` is compared.
+    @Test("the row's body draws only what it compares")
+    func bodyDrawsTheComparedValue() throws {
+        let text = try source("Keybindings/KeybindingNavRow.swift")
+        let start = try #require(text.range(of: "var body: some View"))
+        let end = try #require(
+            text.range(
+                of: "private var bindings:",
+                range: start.upperBound..<text.endIndex
+            )
+        )
+        let body = text[start.upperBound..<end.lowerBound]
+        #expect(body.contains("drawn."))
+        #expect(body.components(separatedBy: "command.").count - 1 == 1)
+        #expect(body.contains(".id(command.lua)"))
+        #expect(!body.contains("model."))
+        #expect(!body.contains("ShortcutsReferenceBuilder."))
+    }
+
     @Test("every mount draws the row equatable")
     func mountsAreEquatable() throws {
         let files = try SourceScan.swiftSources(

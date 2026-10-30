@@ -11,10 +11,7 @@ public struct KeyRivals: Equatable, Sendable {
 
     public init(_ table: RuleReachTable<String>) {
         var keys: [String: [String: [String: [String]]]] = [:]
-        let all = Set(table.base.keys)
-            .union(table.entries.values.flatMap(\.keys))
-            .sorted()
-        for key in all {
+        for key in table.keyIDs {
             let layer = RuleReachTable<String>.keyParts(key).layer
             for profile in table.profiles {
                 guard let combo = table.resolved(key, for: profile)

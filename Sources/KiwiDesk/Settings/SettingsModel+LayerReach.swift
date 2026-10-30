@@ -13,7 +13,6 @@ extension SettingsModel {
         let key = LayerReachCache.Key(
             layered: layeredReachKey,
             order: profileMenuOrder,
-            loaded: reachLoaded,
             isLoaded: reachIsLoaded
         )
         if layerCache?.key != key { layerCache = LayerReachCache(key: key) }
@@ -168,16 +167,15 @@ extension SettingsModel {
     }
 }
 
-/// The layer readings taken over one layer pass. Every shortcut row
-/// reads its layer's, so one keystroke re-read it once per row
-/// (#2783). `Key` lists every input `layerReach` reads beyond the
-/// pass's stored tables, which `dropReachCaches` covers
+/// The layer readings taken over one layer pass (#2783). `Key`
+/// lists every input `layerReach` reads beyond the
+/// pass's stored tables, which `dropReachCaches` covers; the loaded
+/// mark follows from `isLoaded`, the page and the order
 /// (`LayerReachCacheTests`).
 struct LayerReachCache {
     struct Key: Equatable {
         let layered: LayeredReachCache.Key
         let order: [String]
-        let loaded: String?
         let isLoaded: Bool
     }
 

@@ -19,7 +19,7 @@ struct LayerReachCacheTests {
     private let gaming = "Gaming"
 
     /// gui.json binds focus left and shares Gaming; Work is loaded,
-    /// Home stored.
+    /// Home and Travel stored.
     private func makeModel() throws -> SettingsModel {
         let core = makeTestCore()
         var config = GuiConfig()
@@ -36,6 +36,7 @@ struct LayerReachCacheTests {
         try core.guiConfigStore.save(config)
         try core.profiles.save(profile("Work"))
         try core.profiles.write(profile("Home"))
+        try core.profiles.write(profile("Travel"))
         let model = makeTestModel(core: core)
         model.reload()
         return model
@@ -52,9 +53,12 @@ struct LayerReachCacheTests {
     }
 
     /// The reading with the memo emptied first.
-    private func uncached(_ model: SettingsModel) -> RuleReachReading? {
+    private func uncached(
+        _ model: SettingsModel,
+        _ name: String? = nil
+    ) -> RuleReachReading? {
         model.layerCache = nil
-        return model.layerReach(layer)
+        return model.layerReach(name ?? layer)
     }
 
     @Test("A read fills the memo and a second read reuses it")
@@ -112,5 +116,40 @@ struct LayerReachCacheTests {
         _ = model.layerReach(layer, edits: edits)
         #expect(model.layerCache?.key == key)
         #expect(model.layerCache?.readings[layer] == .some(reading))
+    }
+
+    @Test("A new profile order after a read is seen by the next read")
+    func orderMovesTheMemo() throws {
+        let model = try makeModel()
+        let before = try #require(model.layerReach(layer))
+        model.profileSummaries.reverse()
+        let after = try #require(model.layerReach(layer))
+        #expect(after.profiles != before.profiles)
+        #expect(after == uncached(model))
+    }
+
+    @Test("Leaving the loaded target after a read is seen by the next read")
+    func targetMovesTheMemo() throws {
+        let model = try makeModel()
+        let fresh = "Fresh"
+        let before = try #require(model.layerReach(fresh))
+        model.target = .storedProfile(try #require(model.reachLoaded))
+        let after = try #require(model.layerReach(fresh))
+        #expect(after.shared != before.shared)
+        #expect(after == uncached(model, fresh))
+    }
+
+    @Test("A reading taken with edits of its own reads those edits")
+    func explicitEditsAreRead() throws {
+        let picked = try makeModel()
+        picked.setLayerAllProfiles(gaming, false)
+        picked.setLayerProfile(gaming, "Home", false)
+        let edits = picked.reachEdits
+        let expected = try #require(picked.layerReach(gaming))
+        let model = try makeModel()
+        let plain = try #require(model.layerReach(gaming))
+        let edited = model.layerReach(gaming, edits: edits)
+        #expect(edited != plain)
+        #expect(edited == expected)
     }
 }

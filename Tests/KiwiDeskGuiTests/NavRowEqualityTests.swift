@@ -21,8 +21,9 @@ struct NavRowEqualityTests {
         NavCommand(label: "Focus left", lua: focus)
     }
 
-    /// Work is loaded and Home stored, so the row draws a reach.
-    private func makeModel() throws -> SettingsModel {
+    /// Work is loaded and Home stored, so the row draws a reach;
+    /// with no page to reach from it draws none.
+    private func makeModel(reach: Bool = true) throws -> SettingsModel {
         let core = makeTestCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
@@ -40,6 +41,7 @@ struct NavRowEqualityTests {
         try core.profiles.write(profile("Home"))
         let model = makeTestModel(core: core)
         model.reload()
+        if !reach { model.reachPage = nil }
         return model
     }
 
@@ -53,15 +55,19 @@ struct NavRowEqualityTests {
         )
     }
 
-    private func row(_ model: SettingsModel) -> NavRow {
+    private func row(
+        _ model: SettingsModel,
+        _ command: NavCommand? = nil,
+        layer: String = KeyLayer.defaultName
+    ) -> NavRow {
         NavRow(
             model: model,
             bindings: Binding(
                 get: { model.config.layers[0].bindings },
                 set: { model.config.layers[0].bindings = $0 }
             ),
-            command: command,
-            layer: KeyLayer.defaultName,
+            command: command ?? self.command,
+            layer: layer,
             disabled: []
         )
     }
@@ -101,5 +107,42 @@ struct NavRowEqualityTests {
         )
         model.reachEdits.reach[.key, default: [:]][key] = .listed(["Work"])
         #expect(row(model) != before)
+    }
+
+    @Test("Its command going unavailable moves it")
+    func unavailableMovesIt() throws {
+        let model = try makeModel()
+        var away = command
+        away.unavailable = { "Not connected right now." }
+        #expect(row(model, away) != row(model))
+    }
+
+    @Test("Its command's glyph moves it")
+    func iconMovesIt() throws {
+        let model = try makeModel()
+        var star = command
+        star.icon = "star"
+        var moon = command
+        moon.icon = "moon"
+        #expect(row(model, star) != row(model, moon))
+    }
+
+    @Test("With no reach drawn, its combo and its conflict still move it")
+    func bindingAndReadingMoveIt() throws {
+        let model = try makeModel(reach: false)
+        let before = row(model)
+        #expect(before.drawn.reach == nil)
+        model.config.layers[0].bindings[1].combo = "alt+h"
+        let conflicted = row(model)
+        #expect(conflicted.drawn.binding == before.drawn.binding)
+        #expect(conflicted != before)
+        model.config.layers[0].bindings[0].combo = "alt+j"
+        #expect(row(model) != conflicted)
+    }
+
+    @Test("Its layer moves it")
+    func layerMovesIt() throws {
+        let model = try makeModel(reach: false)
+        #expect(row(model, layer: "Gaming") != row(model))
     }
 }

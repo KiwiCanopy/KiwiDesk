@@ -112,13 +112,20 @@ struct KiwiVisionLensHeader: View {
 
     /// The default layer's rows, where the header reads and
     /// writes a lens chord; a chord on another layer is that
-    /// layer's, edited on Shortcuts.
+    /// layer's, edited on Shortcuts. Found when called, never at
+    /// render (`NavRow`).
     private var defaultBindings: Binding<[KeyBinding]> {
-        let index = model.config.layers.firstIndex(where: \.isDefault)
-        return Binding(
-            get: { index.map { model.config.layers[$0].bindings } ?? [] },
-            set: { rows in
-                guard let index else { return }
+        Binding(
+            get: { [model] in
+                model.config.layers.first(where: \.isDefault)?.bindings
+                    ?? []
+            },
+            set: { [model] rows in
+                guard
+                    let index = model.config.layers.firstIndex(
+                        where: \.isDefault
+                    )
+                else { return }
                 model.config.layers[index].bindings = rows
             }
         )

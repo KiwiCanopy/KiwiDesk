@@ -32,13 +32,22 @@ public enum KeybindingConflicts {
         distinguishingSides: Bool
     ) -> [Conflict] {
         layers.flatMap { layer in
-            layer.bindings.compactMap { binding in
-                conflict(
-                    for: binding,
-                    in: layer.bindings,
-                    distinguishingSides: distinguishingSides
-                )
+            let rows = layer.bindings
+            // Keyed by id, so a layer repeating one is judged by row.
+            guard Set(rows.map(\.id)).count == rows.count else {
+                return rows.compactMap {
+                    conflict(
+                        for: $0,
+                        in: rows,
+                        distinguishingSides: distinguishingSides
+                    )
+                }
             }
+            let byID = rowConflicts(
+                of: rows,
+                distinguishingSides: distinguishingSides
+            )
+            return rows.compactMap { byID[$0.id] }
         }
     }
 
@@ -79,6 +88,9 @@ public enum KeybindingConflicts {
         // chord (#1870), so `hyper+cmd+space` meets Spotlight, and
         // a sided row its either-side chord, as macOS fires it.
         let combo = parsed.registered
+        // `rowConflicts` hands only rows of the same registered
+        // chord, so a clause matching across chords breaks it
+        // (`LayerConflictsTests`).
         for (other, otherCombo) in rivals where other.id != binding.id {
             guard otherCombo.registered == combo else { continue }
             let sided =

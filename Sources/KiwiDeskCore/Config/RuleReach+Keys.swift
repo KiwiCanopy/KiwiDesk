@@ -113,13 +113,20 @@ extension RuleReachTable where Value == String {
     /// for `key` may take its combo from.
     public func rivals(of key: String) -> [String] {
         let layer = Self.keyParts(key).layer
-        return Set(base.keys).union(entries.values.flatMap(\.keys))
-            .filter { $0 != key && Self.keyParts($0).layer == layer }
-            .sorted()
+        return keyIDs.filter {
+            $0 != key && Self.keyParts($0).layer == layer
+        }
+    }
+
+    /// Every action the table names, sorted: what `rivals(of:)` and
+    /// `KeyRivals` both walk (#2783).
+    var keyIDs: [String] {
+        Set(base.keys).union(entries.values.flatMap(\.keys)).sorted()
     }
 
     /// The action `profile` binds to `key`'s combo instead, if any —
-    /// the one ticking would take the key from.
+    /// the one ticking would take the key from. Pages ask the
+    /// `KeyRivals` index; this scan is its oracle (`KeyRivalsTests`).
     public func rival(of key: String, for profile: String, combo: String)
         -> String?
     {

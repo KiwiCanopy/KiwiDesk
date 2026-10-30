@@ -65,4 +65,38 @@ struct LayerConflictsTests {
         #expect(all[layer[8].id]?.target == .unrecognized)
         #expect(all[layer[9].id] == nil)
     }
+
+    /// Every layer's conflicts in order, row by row.
+    private func rowByRow(_ layers: [KeyLayer], sides: Bool) -> [Conflict] {
+        layers.flatMap { layer in
+            layer.bindings.compactMap {
+                KeybindingConflicts.conflict(
+                    for: $0,
+                    in: layer.bindings,
+                    distinguishingSides: sides
+                )
+            }
+        }
+    }
+
+    @Test("The whole-config list answers row by row, a repeated id too")
+    func conflictsListMatches() {
+        var twin = row("alt+j", "t()")
+        twin.id = layer[0].id
+        let layers = [
+            KeyLayer(name: KeyLayer.defaultName, bindings: layer),
+            KeyLayer(
+                name: "Twins",
+                bindings: [layer[0], twin, row("alt+h", "u()")]
+            ),
+        ]
+        for sides in [false, true] {
+            let all = KeybindingConflicts.conflicts(
+                in: layers,
+                distinguishingSides: sides
+            )
+            #expect(all == rowByRow(layers, sides: sides))
+            #expect(all.count > 3)
+        }
+    }
 }

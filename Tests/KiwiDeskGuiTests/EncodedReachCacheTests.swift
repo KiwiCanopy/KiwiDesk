@@ -17,7 +17,9 @@ struct EncodedReachCacheTests {
     private let reload = "KiwiDesk.reload_config()"
 
     /// gui.json binds focus left; Work is loaded, Home stored.
-    private func makeModel() throws -> SettingsModel {
+    private func makeModel(_ extra: [KeyBinding] = []) throws
+        -> SettingsModel
+    {
         let core = makeTestCore()
         var config = GuiConfig()
         config.spaces = [SpaceID("1")]
@@ -26,7 +28,7 @@ struct EncodedReachCacheTests {
                 name: KeyLayer.defaultName,
                 bindings: [
                     KeyBinding(combo: "alt+h", lua: focus, kind: .navigation)
-                ]
+                ] + extra
             )
         ]
         try core.guiConfigStore.save(config)
@@ -110,5 +112,25 @@ struct EncodedReachCacheTests {
         let stored = model.ruleReachStored
         model.ruleReachStored = stored
         #expect(model.encodedCache == nil)
+    }
+
+    /// Rivals from a table where reload holds focus's combo too.
+    private func plantedRivals() throws -> KeyRivals {
+        let other = try makeModel([
+            KeyBinding(combo: "alt+h", lua: reload, kind: .custom)
+        ])
+        return try #require(other.encodedKeyRivals)
+    }
+
+    @Test("A read takes the stored rivals, and a row's takers follow them")
+    func rivalsAreReadFromTheMemo() throws {
+        let model = try makeModel()
+        let planted = try plantedRivals()
+        _ = model.encodedReach
+        #expect(model.encodedKeyRivals != planted)
+        #expect(model.keyReach(key(focus))?.takenBy["Home"] == nil)
+        model.encodedCache?.rivals = planted
+        #expect(model.encodedKeyRivals == planted)
+        #expect(model.keyReach(key(focus))?.takenBy["Home"] != nil)
     }
 }
