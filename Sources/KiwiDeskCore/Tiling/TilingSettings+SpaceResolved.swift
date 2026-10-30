@@ -5,8 +5,9 @@ import Foundation
 /// to the others by `SpaceMapParityTests`.
 extension TilingSettings {
     /// The layouts whose params carry `newWindowPlacement`, which
-    /// a Space's `placementOverride` outranks: the spawn map and
-    /// `resolved(for:)` both read this one list.
+    /// a Space's `placementOverride` outranks: the spawn map
+    /// `KiwiCore.handle` hands State and `resolved(for:)` both read
+    /// it. State's own default map is a bare fallback it replaces.
     static var spawnPlacementPaths:
         [(LayoutMode, WritableKeyPath<TilingSettings, SpawnPlacement>)]
     {
