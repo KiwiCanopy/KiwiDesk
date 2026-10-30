@@ -11,6 +11,10 @@ struct OrphanedShortcutsGroup: View {
     @Binding var bindings: [KeyBinding]
     let spaces: [SpaceID]
     let layers: [String]
+    @Environment(\.keybindingLayerName)
+    private var layerName
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
 
     var body: some View {
         let commands = OrphanedShortcuts.commands(
@@ -34,8 +38,11 @@ struct OrphanedShortcutsGroup: View {
                         NavRow(
                             model: model,
                             bindings: $bindings,
-                            command: command
+                            command: command,
+                            layer: layerName,
+                            disabled: disabledSystemShortcuts
                         )
+                        .equatable()
                     }
                 }
                 .opacity(0.6)

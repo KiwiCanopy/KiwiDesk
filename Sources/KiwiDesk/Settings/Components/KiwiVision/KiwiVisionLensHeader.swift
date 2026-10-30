@@ -10,6 +10,10 @@ struct KiwiVisionLensHeader: View {
     let lens: String
     @State private var renameRequest: NameEditRequest?
     @State private var deleting: LensDeleteRequest?
+    @Environment(\.keybindingLayerName)
+    private var layerName
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -37,8 +41,11 @@ struct KiwiVisionLensHeader: View {
             NavRow(
                 model: model,
                 bindings: defaultBindings,
-                command: KeybindingCatalog.toggleLens(lens)
+                command: KeybindingCatalog.toggleLens(lens),
+                layer: layerName,
+                disabled: disabledSystemShortcuts
             )
+            .equatable()
             if let layer = otherLayer {
                 Text(KiwiVisionLensWords.chordElsewhere(layer))
                     .font(.caption)

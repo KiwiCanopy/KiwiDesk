@@ -5,8 +5,12 @@ import SwiftUI
 /// closed label with a ⚠ beside it where a profile differs — the
 /// names ride its tooltip and the spoken value, the checklist
 /// holds the detail — and the checklist popover.
+///
+/// It draws only what it is handed and observes nothing; the model
+/// rides along for the checklist, which observes it while open
+/// (#2783).
 struct RuleReachControl: View {
-    @ObservedObject var model: SettingsModel
+    let model: SettingsModel
     let family: RuleFamily
     let app: String
     /// What the row is about, in words (`RuleReachChecklist`).

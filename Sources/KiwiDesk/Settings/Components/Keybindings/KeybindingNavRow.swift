@@ -3,19 +3,75 @@ import SwiftUI
 
 /// Single navigation shortcut row with label and recorder field
 /// (#34, #68 §3.6.2).
-struct NavRow: View {
-    @ObservedObject var model: SettingsModel
-    @Binding var bindings: [KeyBinding]
+///
+/// It observes nothing: its parent, which observes the model,
+/// builds it in every render, and it reads what it draws in its
+/// init and compares by that, so a draft write that leaves the row
+/// as it was skips it whole (#2783). A parent draws it
+/// `.equatable()` and hands it the layer and the disabled set from
+/// its own environment. Its actions read the draft when called.
+struct NavRow: View, Equatable {
+    let model: SettingsModel
+    /// The layer's rows, out of SwiftUI's sight: a `Binding` the
+    /// view stored would re-render the row on every write to any of
+    /// them (#2783).
+    private let rows: Rows
     let command: NavCommand
-    @Environment(\.keybindingLayerName)
-    private var layerName
-    @Environment(\.disabledSystemShortcuts)
-    private var disabledSystemShortcuts
+    let layerName: String
+    let disabledSystemShortcuts: Set<SystemShortcut>
     @Environment(\.keybindingReservesTrashSlot)
     private var reservesTrashSlot
     /// A clear of a shortcut other profiles share asks where it
     /// goes, as the trash does (#1393).
     @State private var confirmingClear = false
+    private let title: String
+    private let help: String?
+    private let binding: KeyBinding?
+    private let reach: KeyReachColumn?
+    private let reading: ConflictReading?
+
+    init(
+        model: SettingsModel,
+        bindings: Binding<[KeyBinding]>,
+        command: NavCommand,
+        layer: String,
+        disabled: Set<SystemShortcut>
+    ) {
+        self.model = model
+        rows = Rows(binding: bindings)
+        self.command = command
+        layerName = layer
+        disabledSystemShortcuts = disabled
+        title = command.resolvedLabel
+        help = command.help?()
+        let rows = bindings.wrappedValue
+        let index = Self.index(of: command, in: rows)
+        let binding = index.map { rows[$0] }
+        self.binding = binding
+        reach = binding.map {
+            KeyReachColumn(model: model, layer: layer, binding: $0)
+        }
+        reading = Self.reading(
+            at: index,
+            in: rows,
+            model: model,
+            disabledSystemShortcuts: disabled
+        )
+    }
+
+    /// A plain box, which SwiftUI does not look inside for dynamic
+    /// properties.
+    private struct Rows {
+        let binding: Binding<[KeyBinding]>
+    }
+
+    nonisolated static func == (a: Self, b: Self) -> Bool {
+        a.command.lua == b.command.lua && a.title == b.title
+            && a.command.liveOnly == b.command.liveOnly
+            && a.help == b.help && a.layerName == b.layerName
+            && a.binding == b.binding && a.reach == b.reach
+            && a.reading == b.reading
+    }
 
     var body: some View {
         HStack {
@@ -37,27 +93,20 @@ struct NavRow: View {
                         IconGlyphLabel(icon: glyph)
                     }
                 }
-            Text(command.resolvedLabel)
+            Text(title)
             if let kind = command.liveOnly {
                 LiveOnlySpaceChip(kind: kind)
             }
-            if let help = command.help {
-                HelpButton(
-                    explanation: help(),
-                    subject: command.resolvedLabel
-                )
+            if let help {
+                HelpButton(explanation: help, subject: title)
             }
             Spacer()
-            if let index {
-                KeyReachColumn(
-                    model: model,
-                    layer: layerName,
-                    binding: bindings[index]
-                )
+            if let reach {
+                reach
             }
             KeyRecorderField(
-                name: command.resolvedLabel,
-                combo: index.map { bindings[$0].combo } ?? "",
+                name: title,
+                combo: binding?.combo ?? "",
                 reading: reading,
                 preflight: preflight,
                 onRecord: record,
@@ -75,7 +124,8 @@ struct NavRow: View {
             ),
             isPresented: $confirmingClear
         ) {
-            if let reading = sharedFrom {
+            // Read only while asked, never in every row's render.
+            if confirmingClear, let reading = sharedFrom {
                 Button(RuleReachWords.removeHere(reading)) { clear(.here) }
                 Button(RuleReachWords.removeEverywhere(reading)) {
                     clear(.everywhere)
@@ -85,13 +135,28 @@ struct NavRow: View {
         .id(command.lua)
     }
 
-    private var index: Int? {
+    private var bindings: [KeyBinding] {
+        get { rows.binding.wrappedValue }
+        nonmutating set { rows.binding.wrappedValue = newValue }
+    }
+
+    private var index: Int? { Self.index(of: command, in: bindings) }
+
+    private static func index(
+        of command: NavCommand,
+        in bindings: [KeyBinding]
+    ) -> Int? {
         bindings.firstIndex {
             $0.kind == .navigation && command.runs($0.lua)
         }
     }
 
-    private var reading: ConflictReading? {
+    private static func reading(
+        at index: Int?,
+        in bindings: [KeyBinding],
+        model: SettingsModel,
+        disabledSystemShortcuts: Set<SystemShortcut>
+    ) -> ConflictReading? {
         guard let index else { return nil }
         return ConflictText.reading(
             for: bindings[index],
@@ -110,7 +175,7 @@ struct NavRow: View {
             excluding: { [command] in
                 $0.kind == .navigation && command.runs($0.lua)
             },
-            bindings: $bindings,
+            bindings: rows.binding,
             config: model.config,
             commit: { record($0) }
         )
