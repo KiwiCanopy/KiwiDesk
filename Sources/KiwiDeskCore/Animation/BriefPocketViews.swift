@@ -59,10 +59,10 @@ final class BriefPocketView: NSView {
     /// colour, and their blurs as shares of its side (#2776).
     static let lineBlur: CGFloat = 0.05
     static let lineOpacity: Float = 0.55
-    static let haloBlur: CGFloat = 0.14
+    nonisolated static let haloBlur: CGFloat = 0.14
     static let haloOpacity: Float = 0.85
     /// The hovered mark's scale.
-    static let lift: CGFloat = 1.06
+    nonisolated static let lift: CGFloat = 1.06
 
     private func paintLook(animated: Bool) {
         guard let line = mark.layer, let halo = content.layer else { return }
@@ -91,6 +91,15 @@ final class BriefPocketView: NSView {
         )
     }
 
+    /// Swells once about its centre: a window landing in it.
+    func nod() {
+        guard let layer = content.layer else { return }
+        BarMotion.playPocketNod(
+            layer,
+            centre: CGPoint(x: bounds.midX, y: bounds.midY)
+        )
+    }
+
     #if DEBUG
         /// Test-only: the edge, 0 where none draws — the fainter of
         /// its two tones.
@@ -107,8 +116,13 @@ final class BriefPocketView: NSView {
     override func layout() {
         super.layout()
         content.frame = bounds
-        let square = min(bounds.width, bounds.height)
-        let side = square * BriefPocketPlan.markSide / BriefPocketPlan.side
+        // A section's slot is narrower than deep: the mark takes the
+        // depth's share, kept inside the slot (#2776).
+        let long = max(bounds.width, bounds.height)
+        let side = min(
+            long * BriefPocketPlan.markSide / BriefPocketPlan.side,
+            min(bounds.width, bounds.height)
+        )
         let variant: PocketMark = side < Self.solidBelow ? .badge : .mark
         mark.image = variant.image(size: side, hex: hex)
         mark.frame = CGRect(

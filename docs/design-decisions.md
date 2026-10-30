@@ -6206,14 +6206,14 @@ place would meet the bars' handles it joins their row at its end,
 so a point never opens one for the other. On a Hidden or empty edge
 it stands alone at Position.
 
-**A fixed handle; the risen pocket at the bar's size, within 20 to
-32 pt.** On an edge no bar shows, the handle is an edge mark like
+**A fixed handle; the risen pocket at the bar's size, its mark
+within 20 to 32 pt.** On an edge no bar shows, the handle is an edge mark like
 the Space dots and the App Bar line: the kiwis alone, looking out
 from behind a tab, the pocket out of sight, one outer margin in
 from the edge as the bars' handles sit (owner, device 2026-10-29).
 Its kiwis do not scale with the shelf. Risen — on hover, a drag or
-a put-in or take-out — the pocket takes the size it has on that
-edge's bar, so a Hidden bar's shortcut reveal and a hover show one
+a put-in or take-out — the pocket takes the size it has as a section
+on that edge's bar, mark for mark (#2776), so a Hidden bar's shortcut reveal and a hover show one
 object at one size. The floor is the handle's 20 pt kiwis, which a
 rise must never shrink; the ceiling, 1.6x, is as far as a growth
 still reads as the pocket coming out rather than a jump.

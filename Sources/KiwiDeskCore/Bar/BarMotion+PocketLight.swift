@@ -32,6 +32,43 @@ extension BarMotion {
         )
     }
 
+    /// Nods `layer` once about `centre` from its own sublayer
+    /// transform, the brief pocket's nod; nothing under Reduce
+    /// Motion.
+    @MainActor
+    static func playPocketNod(_ layer: CALayer, centre: CGPoint) {
+        guard
+            let nod = pocketNod(
+                from: layer.sublayerTransform,
+                centre: centre,
+                reduceMotion: isReduced
+            )
+        else { return }
+        layer.add(nod, forKey: "pocketNod")
+    }
+
+    /// The nod's swell from `base` and back, nil under
+    /// `reduceMotion`.
+    static func pocketNod(
+        from base: CATransform3D,
+        centre: CGPoint,
+        reduceMotion: Bool
+    ) -> CAKeyframeAnimation? {
+        guard !reduceMotion else { return nil }
+        let scale = BriefPocketPlan.nodScale
+        var swell = CATransform3DTranslate(base, centre.x, centre.y, 0)
+        swell = CATransform3DScale(swell, scale, scale, 1)
+        swell = CATransform3DTranslate(swell, -centre.x, -centre.y, 0)
+        let animation = CAKeyframeAnimation(keyPath: "sublayerTransform")
+        animation.values = [base, swell, base].map {
+            NSValue(caTransform3D: $0)
+        }
+        animation.keyTimes = [0, 0.4, 1]
+        animation.duration = BriefPocketPlan.nod
+        animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
+        return animation
+    }
+
     /// The light's length: in quickly, out slower, nothing under
     /// `reduceMotion`.
     static func pocketLightDuration(

@@ -33,6 +33,8 @@ extension BarMotionSeamTests {
         "playPocketLight": ["pocketLightDuration(", "isReduced"],
         "pocketLightDuration": ["reduceMotion"],
         "pocketEase": ["duration"],
+        "playPocketNod": ["pocketNod(", "isReduced"],
+        "pocketNod": ["reduceMotion"],
         "runLayout": ["duration(", "isReduced"],
         "duration": [],
         "runPlateGlide": ["shelfGlide", "expanding("],

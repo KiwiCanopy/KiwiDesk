@@ -36,14 +36,14 @@ struct PocketHandleTests {
         return core.pocketPlate.specs.values.first
     }
 
-    @Test("the risen size is the bar's, kept within 20...32 pt")
+    @Test("the risen pocket is a section's, its mark within 20...32 pt")
     func riseSide() {
-        #expect(KiwiCore.pocketRiseSide(thickness: 40) == 32)
-        #expect(KiwiCore.pocketRiseSide(thickness: 60) == 32)
-        #expect(KiwiCore.pocketRiseSide(thickness: 20) == 20)
-        let cell = SpaceBarItemView.cell(contentDepth: 30)
-        #expect((20...32).contains(cell))
-        #expect(KiwiCore.pocketRiseSide(thickness: 30) == cell)
+        let share = BriefPocketPlan.markSide / BriefPocketPlan.side
+        let mark = { KiwiCore.pocketRiseSide(thickness: $0) * share }
+        // A section's on that bar, its mark alike (#2776).
+        #expect(KiwiCore.pocketRiseSide(thickness: 40) == 40)
+        #expect(abs(mark(60) - 32) < 0.001)
+        #expect(abs(mark(20) - PocketHandleView.markSide) < 0.001)
     }
 
     @Test("the band stands at Position, kept whole on the edge")

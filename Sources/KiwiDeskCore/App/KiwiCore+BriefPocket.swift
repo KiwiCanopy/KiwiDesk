@@ -51,6 +51,18 @@ extension KiwiCore {
         // A pocket on this screen is the pocket (#2678).
         request.drawsPocket = briefPocketDrawsPocket(on: display)
         briefPocket.play(request)
+        // The play draws no pocket where one stands, so that one
+        // lights, and nods as a window lands in it (#2776).
+        if !request.drawsPocket {
+            let into = direction == .into
+            pocketPlate.light(
+                display,
+                after: into ? timeline.nodBegin : 0,
+                for: into
+                    ? PocketPlateOverlay.inHold : PocketPlateOverlay.outHold,
+                nods: into
+            )
+        }
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return timeline
     }

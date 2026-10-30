@@ -3,14 +3,22 @@ import AppKit
 /// The pocket's handle on an edge no bar shows (#2678, 2026-10-29
 /// ruling): a fixed mark at Position on the screen's edge, out of
 /// which the pocket rises on hover and during a window drag, to the
-/// size it has on that edge's bar kept within 20...32 pt.
+/// size it has on that edge's bar, its mark kept within 20...32 pt.
 extension KiwiCore {
-    /// The risen pocket's side: the bar's glyph cell, never smaller
+    /// The risen pocket's side: a section's on a bar `thickness`
+    /// deep, so the mark draws alike (#2776), its mark never smaller
     /// than the handle's kiwis nor more than 1.6x them.
     static func pocketRiseSide(thickness: CGFloat) -> CGFloat {
-        let cell = SpaceBarItemView.cell(contentDepth: thickness)
-        return min(max(cell, PocketHandleView.markSide), 32)
+        let share = BriefPocketPlan.markSide / BriefPocketPlan.side
+        let mark = min(
+            max(thickness * share, PocketHandleView.markSide),
+            pocketRiseMarkCap
+        )
+        return mark / share
     }
+
+    /// The risen mark's largest side.
+    static let pocketRiseMarkCap: CGFloat = 32
 
     /// The handle's frame on `display` (AX), risen or at rest.
     func pocketHandleFrame(on display: DisplayID, risen: Bool) -> CGRect? {

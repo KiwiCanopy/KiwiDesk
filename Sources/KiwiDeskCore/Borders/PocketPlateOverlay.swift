@@ -244,6 +244,26 @@ final class PocketPlateOverlay {
         }
     }
 
+    /// Lights `display`'s pocket `delay` seconds on for `hold`, and
+    /// nods it where `nods`: a play's window landing or leaving
+    /// (#2776). The play stands the pocket by then.
+    func light(
+        _ display: DisplayID,
+        after delay: TimeInterval,
+        for hold: TimeInterval,
+        nods: Bool
+    ) {
+        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+            [weak self] in
+            guard let self, let spec = self.specs[display],
+                let shown = self.shown(spec)
+            else { return }
+            self.flash(shown, on: display, for: hold)
+            self.paintFade(shown, spec)
+            if nods { shown.view.pocket.nod() }
+        }
+    }
+
     /// Fades the empty pocket at rest; a flash shows it full. An
     /// ancestor fades (bars.md ▸ glass alpha): the handle's panel,
     /// or the section's holder.
