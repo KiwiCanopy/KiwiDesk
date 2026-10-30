@@ -35,7 +35,7 @@ final class PocketPlateOverlay {
 
     /// One display's pocket: a handle's panel, or a section's
     /// holder, which its shelf mounts and this fades.
-    private struct Shown {
+    struct Shown {
         let panel: PocketPlatePanel?
         let holder: NSView?
         let view: PocketPlateView
@@ -109,7 +109,7 @@ final class PocketPlateOverlay {
         return sectionViews[display]?.holder
     }
 
-    private func shown(_ spec: Spec) -> Shown? {
+    func shown(_ spec: Spec) -> Shown? {
         spec.handle == nil
             ? sectionViews[spec.display] : shownViews[spec.display]
     }
@@ -141,7 +141,17 @@ final class PocketPlateOverlay {
             shown(spec)
             ?? made(spec.display, section: spec.handle == nil)
         let old = specs[spec.display]
-        if let old, spec.windows.count != old.windows.count {
+        // A light running as the pocket changes form carries over.
+        if let old, old.handle != spec.handle,
+            self.shown(old)?.view.flashing == true
+        {
+            shown.view.flashing = true
+        }
+        // A play lights the pocket itself, as its window lands or
+        // leaves (`light`); a count change no play shows lights here.
+        if let old, playing[spec.display] == nil,
+            spec.windows.count != old.windows.count
+        {
             let went = spec.windows.count > old.windows.count
             let hold = went ? Self.inHold : Self.outHold
             flash(shown, on: spec.display, for: hold)
@@ -170,7 +180,7 @@ final class PocketPlateOverlay {
                 )
             }
         }
-        orderIn(shown, spec: spec, changed: changed)
+        orderIn(shown)
         // Sized and ordered in first: under One window the handle is
         // made in the pass it rises, and a rise played before showed
         // none on device (#2776).
@@ -184,14 +194,14 @@ final class PocketPlateOverlay {
         }
     }
 
-    private func orderIn(_ shown: Shown, spec: Spec, changed: Bool) {
+    private func orderIn(_ shown: Shown) {
         guard let panel = shown.panel else { return }
         #if DEBUG
             guard ordersPanel else { return }
         #endif
-        if !panel.isVisible || changed {
-            panel.orderFrontRegardless()
-        }
+        // Its own level keeps it over the shelf; re-fronting on a
+        // change would put it over a peek grown out of it (#2776).
+        if !panel.isVisible { panel.orderFrontRegardless() }
     }
 
     /// Drops every display's pocket outside `live`, a display that
@@ -209,65 +219,9 @@ final class PocketPlateOverlay {
         specs = specs.filter { live.contains($0.key) }
     }
 
-    /// How long a window going in, and one coming out, lights the
-    /// pocket (#2776).
-    static let inHold: TimeInterval = 0.5
-    static let outHold: TimeInterval = 0.4
     /// Each display's light, so one display's flash never strands
-    /// another's lit (#2678 review 8).
-    private var flashGeneration: [DisplayID: Int] = [:]
-    private var flashing: Set<DisplayID> = []
-
-    /// Lights `shown` full for `hold`, then lets it rest — a timer,
-    /// its own, since the light is no motion.
-    private func flash(
-        _ shown: Shown,
-        on display: DisplayID,
-        for hold: TimeInterval
-    ) {
-        let mine = (flashGeneration[display] ?? 0) + 1
-        flashGeneration[display] = mine
-        flashing.insert(display)
-        shown.view.flashing = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + hold) {
-            [weak self] in
-            guard let self, self.flashGeneration[display] == mine
-            else { return }
-            self.flashing.remove(display)
-            shown.view.flashing = false
-            if let spec = self.specs[display] { self.paintFade(shown, spec) }
-        }
-    }
-
-    /// Lights `display`'s pocket `delay` seconds on for `hold`, and
-    /// nods it where `nods`: a play's window landing or leaving
-    /// (#2776). The play stands the pocket by then.
-    func light(
-        _ display: DisplayID,
-        after delay: TimeInterval,
-        for hold: TimeInterval,
-        nods: Bool
-    ) {
-        DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
-            [weak self] in
-            guard let self, let spec = self.specs[display],
-                let shown = self.shown(spec)
-            else { return }
-            self.flash(shown, on: display, for: hold)
-            self.paintFade(shown, spec)
-            if nods { shown.view.pocket.nod() }
-        }
-    }
-
-    /// Fades the empty pocket at rest; a flash shows it full. An
-    /// ancestor fades (bars.md ▸ glass alpha): the handle's panel,
-    /// or the section's holder.
-    private func paintFade(_ shown: Shown, _ spec: Spec) {
-        let faded = spec.faded && !flashing.contains(spec.display)
-        let alpha = faded ? Self.fadedAlpha : 1
-        shown.panel?.alphaValue = alpha
-        shown.holder?.alphaValue = alpha
-    }
+    /// another's lit (#2678 review 8); `PocketPlateOverlay+Light`'s.
+    var flashGeneration: [DisplayID: Int] = [:]
 
     /// The shelf a pocket wears in `window`, its panel — the peek
     /// growing out of it wears it too.

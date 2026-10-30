@@ -114,7 +114,7 @@ final class ShelfPocketPiece {
 
     /// Orders the panel in above `shelf`, the shelf's own panel.
     func orderIn(above shelf: NSWindow) {
-        guard let panel, let mount else { return }
+        guard let panel, mount != nil else { return }
         #if DEBUG
             guard ordersPanel else { return }
         #endif

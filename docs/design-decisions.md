@@ -6157,8 +6157,7 @@ loses 4.0.0's values silently. The old `pocket.set_edge` and
 display.** One window keeps the pocket out of sight, since its one
 window is a key away. Under Several windows the drop target and
 the list are what the pocket is for, so it stays where the user
-left it — faded while empty and unlit, full on hover or under a
-drop (#2776), and drawing no count: the list names what is inside
+left it — drawing no count: the list names what is inside
 and VoiceOver hears how many (owner, device 2026-10-29) — and on
 every display, so it is reachable wherever the pointer is without
 focusing that screen first. A click grows the list of the windows
@@ -6189,8 +6188,9 @@ panel of its own, beside the first, and plays every reveal, fade and
 glide on both from the same call, so the pocket comes and goes with
 the bars and never cuts, while the gap between them stays clear.
 A separate overlay following the shelf would copy every reveal
-style by hand (architect review, 2026-10-29). The pocket draws no
-plate or box of its own under any style: at a hugging shelf's
+style by hand (architect review, 2026-10-29). The pocket, and the brief
+pocket a play draws where none stands, draw no plate or box of
+their own under any style: at a hugging shelf's
 corner or beside Boxed items it sits on the screen like a bag, and
 under Full on the shelf's plate (owner, device 2026-10-30, #2776,
 reversing its box under Boxed). A box says "a list of items"; the
@@ -6207,13 +6207,14 @@ so a point never opens one for the other. On a Hidden or empty edge
 it stands alone at Position.
 
 **A fixed handle; the risen pocket at the bar's size, its mark
-within 20 to 32 pt.** On an edge no bar shows, the handle is an edge mark like
-the Space dots and the App Bar line: the kiwis alone, looking out
-from behind a tab, the pocket out of sight, one outer margin in
-from the edge as the bars' handles sit (owner, device 2026-10-29).
-Its kiwis do not scale with the shelf. Risen — on hover, a drag or
-a put-in or take-out — the pocket takes the size it has as a section
-on that edge's bar, mark for mark (#2776), so a Hidden bar's shortcut reveal and a hover show one
+within 20 to 32 pt.** On an edge no bar shows, the handle is an
+edge mark like the Space dots and the App Bar line: the kiwis
+alone, looking out from behind a tab, the pocket out of sight, one
+outer margin in from the edge as the bars' handles sit (owner,
+device 2026-10-29). Its kiwis do not scale with the shelf. Risen —
+on hover, a drag or a put-in or take-out — the pocket takes the
+size it has as a section on that edge's bar, mark for mark
+(#2776), so a Hidden bar's shortcut reveal and a hover show one
 object at one size. The floor is the handle's 20 pt kiwis, which a
 rise must never shrink; the ceiling, 1.6x, is as far as a growth
 still reads as the pocket coming out rather than a jump.
@@ -6222,7 +6223,8 @@ still reads as the pocket coming out rather than a jump.
 while anything is inside, and edged in black and white while lit
 or as a window goes in or out** (owner, prototype 2026-10-30,
 #2776). It draws no box, so it lights by its mark: full on hover
-or under a drop, the edge then, and a slight lift on hover. A bare
+or under a drop, the edge then, and a slight lift
+for either. A bare
 mark sits straight on whatever window is behind it, and its ink
 follows the system appearance, not that window: black ink measured
 1.26:1 on a #1E1E1E window and white ink 1.00:1 on a white one, and
@@ -6269,8 +6271,8 @@ and maximize, not a style. A Genie stays refused because it means
 "minimized to the Dock" and needs a private API
 ([the overflow mark's peek](#layout-and-resize-behavior)).
 Pocketing draws a brief pocket rather than moving the real window
-(#2680, replacing #2676's slide to the park corner): a pocket in
-KiwiShelf's look appears at its placement for the moment a window
+(#2680, replacing #2676's slide to the park corner): a pocket
+appears at its placement for the moment a window
 goes in or out, the Space switch's plate flies between it and the
 window — our own overlay, redrawn at each size, never a capture —
 and it nods and fades. The window parks at once and comes back with

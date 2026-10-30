@@ -5,8 +5,8 @@ import Testing
 
 /// The pocket is the bare mark under every shelf style (#2776): it
 /// lights by a two-tone edge and lifts when hovered, never a box; its
-/// handle shows the kiwis alone; and while a window drag runs it
-/// stands above the drag's ghost, which shares the bars' level.
+/// handle shows the kiwis alone; and it stands a level above the
+/// shelf, and so above a window drag's ghost.
 @Suite("Pocket bare mark (#2776)", .serialized)
 @MainActor
 struct PocketBareMarkTests {
@@ -24,7 +24,7 @@ struct PocketBareMarkTests {
         let view = pocket()
         view.setLook(.lit)
         #expect(view.edgeOpacity == BriefPocketView.lineOpacity)
-        #expect(view.liftScale == BriefPocketView.lift)
+        #expect(view.liftScale == PocketMarkGeometry.lift)
         // A window just in or out keeps the edge, never the lift.
         view.setLook(.active)
         #expect(view.edgeOpacity == BriefPocketView.lineOpacity)
@@ -63,6 +63,57 @@ struct PocketBareMarkTests {
             rep.colorAt(x: point.x * 2, y: point.y * 2)
         )
         return color.alphaComponent
+    }
+
+    @Test("a play's light shows the empty pocket full")
+    func lightShowsFull() throws {
+        let overlay = PocketPlateOverlay()
+        let display = DisplayID(900_501)
+        overlay.sync([
+            PocketPlateOverlay.Spec(
+                display: display,
+                windows: [],
+                frame: CGRect(x: 0, y: 0, width: 40, height: 40),
+                shelf: KiwiShelf(),
+                markHex: "",
+                faded: true,
+                dropHovered: false,
+                name: ""
+            )
+        ])
+        let holder = try #require(overlay.sectionMount(on: display))
+        #expect(holder.alphaValue == PocketPlateOverlay.fadedAlpha)
+        overlay.light(display, for: 60, nods: false)
+        #expect(overlay.view(on: display)?.flashing == true)
+        #expect(holder.alphaValue == 1)
+    }
+
+    @Test("the light and the nod stand down under Reduce Motion")
+    func lightDecisions() {
+        #expect(
+            BarMotion.pocketLightDuration(lighting: true, reduceMotion: true)
+                == 0
+        )
+        #expect(
+            BarMotion.pocketLightDuration(lighting: true, reduceMotion: false)
+                > 0
+        )
+        let centre = CGPoint(x: 20, y: 20)
+        #expect(
+            BarMotion.pocketNod(
+                from: CATransform3DIdentity,
+                centre: centre,
+                reduceMotion: true
+            ) == nil
+        )
+        let nod = BarMotion.pocketNod(
+            from: CATransform3DIdentity,
+            centre: centre,
+            reduceMotion: false
+        )
+        let peak = (nod?.values as? [NSValue])?
+            .map { $0.caTransform3DValue.m11 }.max()
+        #expect(abs((peak ?? 0) - BriefPocketPlan.nodScale) < 0.001)
     }
 
     @Test("the handle's kiwis come without the bag")

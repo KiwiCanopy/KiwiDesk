@@ -783,10 +783,6 @@ pocket rides every motion the shelf plays. Obligations:
   `content` alone beside them; the pocket's room opens for the
   motion it resolves to (`openPocketRoom`) and settles with the
   shelf's (`ShelfPocketPanelTests`).
-- **The pocket's panel is ordered above the shelf's by the
-  overlay itself** (`ShelfPocketPiece.orderIn(above:)`), never left
-  to call order at one level (`ShelfPocketPanelTests` ▸
-  `ordersAboveTheShelf`).
 - **Its panel is the shelf's for every hold and reading**: the
   reveal target's held section takes the pocket's slot
   (`KiwiCore+ShelfReveal`), `ShelfManager.surfaceHolds` and the
@@ -799,16 +795,30 @@ pocket rides every motion the shelf plays. Obligations:
   (`ShelfStripPreviewTests` ▸ `pocketTakesItsSlot`).
 - **The pocket draws no box or plate of its own under any style**
   (#2776): it lights through its mark, its edge and lift played by
-  the one `BarMotion.playPocketLight` (`PocketBareMarkTests` ▸
-  `lightsByTheEdge`); a box for it is a ruling in
+  the one `BarMotion.playPocketLight` and a standing pocket's nod by
+  the one `BarMotion.playPocketNod`, whose curve is
+  `BriefPocketPlan.nodSwell`'s, the brief pocket's own
+  (`BarMotionSeamTests` ▸ `motionHasOneHome`; the looks,
+  `PocketBareMarkTests` ▸ `lightsByTheEdge`);
+  its geometry — the mark's share, the edge's spill, the lift — is
+  the one `PocketMarkGeometry`, which the shelf's placement and the
+  risen size read too. A box for it is a ruling in
   `docs/design-decisions.md` first.
+- **A play lights the standing pocket; a count change lights it only
+  where no play runs** (#2776): `playBriefPocket` schedules
+  `PocketPlateOverlay.light` on `DeferredTasks.Key.pocketLight`, and
+  `show` skips its count flash while `playing` names the display, so
+  one event lights once (`PocketBareMarkTests` ▸ `lightShowsFull`).
 - **Every pocket panel — the section and the handle — stands at
-  `BarPanel.pocketLevel`, a level above the shelf's**: a click fronts
-  the shelf's panel within its level, which under Full spans the
-  pocket's slot, and a window drag's ghost and drop zone share the
-  bars' level (#2776, `PocketBareMarkTests` ▸
-  `sectionStandsAboveTheShelf`, `PocketHandleTests` ▸ `dragRises`).
-  `orderIn(above:)` stays, for a shelf that joins that level.
+  `BarPanel.pocketLevel`, a level above the shelf's, and is never
+  lowered to it**: a click fronts the shelf's panel within its
+  level, which under Full spans the pocket's slot, and a window
+  drag's ghost and drop zone share the bars' level (#2776,
+  `PocketBareMarkTests` ▸ `sectionStandsAboveTheShelf`,
+  `PocketHandleTests` ▸ `dragRises` for the handle during a drag;
+  at rest, review's). Within a shared level the
+  overlay orders it above itself (`ShelfPocketPiece.orderIn(above:)`,
+  `ShelfPocketPanelTests` ▸ `ordersAboveTheShelf`).
 
 ## Overflow fades, follows and pages through one home each
 

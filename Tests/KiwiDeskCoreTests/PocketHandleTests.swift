@@ -42,7 +42,7 @@ struct PocketHandleTests {
         let mark = { KiwiCore.pocketRiseSide(thickness: $0) * share }
         // A section's on that bar, its mark alike (#2776).
         #expect(KiwiCore.pocketRiseSide(thickness: 40) == 40)
-        #expect(abs(mark(60) - 32) < 0.001)
+        #expect(abs(mark(60) - KiwiCore.pocketRiseMarkCap) < 0.001)
         #expect(abs(mark(20) - PocketHandleView.markSide) < 0.001)
     }
 
@@ -119,7 +119,7 @@ struct PocketHandleTests {
                 == 8 + PocketHandleView.tabDepth + PocketPlateView.lift
                 + KiwiCore.pocketRiseSide(thickness: shelf.thickness)
         )
-        // Above the drag's ghost, which shares the bars' level.
+        // A level above the shelf, and so above the drag's ghost.
         let panel = try #require(
             core.pocketPlate.panelForTesting(on: shown.display)
         )

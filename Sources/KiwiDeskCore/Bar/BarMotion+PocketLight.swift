@@ -47,7 +47,8 @@ extension BarMotion {
         layer.add(nod, forKey: "pocketNod")
     }
 
-    /// The nod's swell from `base` and back, nil under
+    /// The nod's swell from `base` and back, sampled from
+    /// `BriefPocketPlan.nodSwell` so both pockets nod alike; nil under
     /// `reduceMotion`.
     static func pocketNod(
         from base: CATransform3D,
@@ -55,17 +56,18 @@ extension BarMotion {
         reduceMotion: Bool
     ) -> CAKeyframeAnimation? {
         guard !reduceMotion else { return nil }
-        let scale = BriefPocketPlan.nodScale
-        var swell = CATransform3DTranslate(base, centre.x, centre.y, 0)
-        swell = CATransform3DScale(swell, scale, scale, 1)
-        swell = CATransform3DTranslate(swell, -centre.x, -centre.y, 0)
+        let steps = 12
+        let times = (0...steps).map { CGFloat($0) / CGFloat(steps) }
         let animation = CAKeyframeAnimation(keyPath: "sublayerTransform")
-        animation.values = [base, swell, base].map {
-            NSValue(caTransform3D: $0)
+        animation.values = times.map { u in
+            let scale = BriefPocketPlan.nodSwell(at: u)
+            var swell = CATransform3DTranslate(base, centre.x, centre.y, 0)
+            swell = CATransform3DScale(swell, scale, scale, 1)
+            swell = CATransform3DTranslate(swell, -centre.x, -centre.y, 0)
+            return NSValue(caTransform3D: swell)
         }
-        animation.keyTimes = [0, 0.4, 1]
+        animation.keyTimes = times.map { NSNumber(value: Double($0)) }
         animation.duration = BriefPocketPlan.nod
-        animation.timingFunction = CAMediaTimingFunction(name: .easeOut)
         return animation
     }
 
@@ -87,6 +89,13 @@ extension BarMotion {
         to value: Any,
         for duration: TimeInterval
     ) {
+        // A re-paint at the value already written leaves its ease
+        // running: a layout re-paints after the look eased (#2776).
+        if let held = layer.value(forKeyPath: key) as? NSObject,
+            held.isEqual(value)
+        {
+            return
+        }
         let shown =
             layer.presentation()?.value(forKeyPath: key)
             ?? layer.value(forKeyPath: key)

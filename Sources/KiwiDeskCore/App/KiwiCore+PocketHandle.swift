@@ -6,10 +6,10 @@ import AppKit
 /// size it has on that edge's bar, its mark kept within 20...32 pt.
 extension KiwiCore {
     /// The risen pocket's side: a section's on a bar `thickness`
-    /// deep, so the mark draws alike (#2776), its mark never smaller
-    /// than the handle's kiwis nor more than 1.6x them.
+    /// deep, so the mark draws alike (#2776), its mark kept between
+    /// `PocketHandleView.markSide` and `pocketRiseMarkCap`.
     static func pocketRiseSide(thickness: CGFloat) -> CGFloat {
-        let share = BriefPocketPlan.markSide / BriefPocketPlan.side
+        let share = PocketMarkGeometry.markShare
         let mark = min(
             max(thickness * share, PocketHandleView.markSide),
             pocketRiseMarkCap

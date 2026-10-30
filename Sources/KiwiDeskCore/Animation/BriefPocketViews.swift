@@ -2,8 +2,9 @@ import AppKit
 
 /// The pocket mark (#2680, #2776): bare on the screen, never a box.
 /// Lit, it wears a two-tone edge — a dark line and a light halo, so
-/// one of them reads on any ground — and hovered it lifts. Redrawn
-/// at each size the nod gives it, never scaled.
+/// one of them reads on any ground — and hovered it lifts. The brief
+/// pocket redraws it at each size its nod gives; standing, it nods
+/// and lifts by scale.
 @MainActor
 final class BriefPocketView: NSView {
     /// Carries the light halo and the lift.
@@ -56,25 +57,21 @@ final class BriefPocketView: NSView {
     }
 
     /// The edge's two tones, black and white whatever the mark's
-    /// colour, and their blurs as shares of its side (#2776).
-    static let lineBlur: CGFloat = 0.05
+    /// colour (#2776); their blurs are `PocketMarkGeometry`'s.
     static let lineOpacity: Float = 0.55
-    nonisolated static let haloBlur: CGFloat = 0.14
     static let haloOpacity: Float = 0.85
-    /// The hovered mark's scale.
-    nonisolated static let lift: CGFloat = 1.06
 
     private func paintLook(animated: Bool) {
         guard let line = mark.layer, let halo = content.layer else { return }
         let side = mark.frame.width
         line.shadowColor = NSColor.black.cgColor
         line.shadowOffset = .zero
-        line.shadowRadius = side * Self.lineBlur
+        line.shadowRadius = side * PocketMarkGeometry.lineBlur
         halo.shadowColor = NSColor.white.cgColor
         halo.shadowOffset = .zero
-        halo.shadowRadius = side * Self.haloBlur
+        halo.shadowRadius = side * PocketMarkGeometry.haloBlur
         let lit = look != .rest
-        let scale = look == .lit ? Self.lift : 1
+        let scale = look == .lit ? PocketMarkGeometry.lift : 1
         let centre = CGPoint(x: bounds.midX, y: bounds.midY)
         var lift = CATransform3DMakeTranslation(centre.x, centre.y, 0)
         lift = CATransform3DScale(lift, scale, scale, 1)
@@ -120,7 +117,7 @@ final class BriefPocketView: NSView {
         // depth's share, kept inside the slot (#2776).
         let long = max(bounds.width, bounds.height)
         let side = min(
-            long * BriefPocketPlan.markSide / BriefPocketPlan.side,
+            long * PocketMarkGeometry.markShare,
             min(bounds.width, bounds.height)
         )
         let variant: PocketMark = side < Self.solidBelow ? .badge : .mark

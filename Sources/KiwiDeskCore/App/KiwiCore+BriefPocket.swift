@@ -55,13 +55,20 @@ extension KiwiCore {
         // lights, and nods as a window lands in it (#2776).
         if !request.drawsPocket {
             let into = direction == .into
-            pocketPlate.light(
-                display,
-                after: into ? timeline.nodBegin : 0,
-                for: into
-                    ? PocketPlateOverlay.inHold : PocketPlateOverlay.outHold,
-                nods: into
-            )
+            let delay = into ? timeline.nodBegin : 0
+            deferred.schedule(.pocketLight, after: .seconds(delay)) {
+                [weak self] in
+                // A play ended or cut short meanwhile lights nothing.
+                guard let self, self.pocketPlate.playing[display] != nil
+                else { return }
+                self.pocketPlate.light(
+                    display,
+                    for: into
+                        ? PocketPlateOverlay.inHold
+                        : PocketPlateOverlay.outHold,
+                    nods: into
+                )
+            }
         }
         onLog("pocket: w\(id.raw) brief pocket \(direction)")
         return timeline

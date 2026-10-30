@@ -145,6 +145,12 @@ enum BriefPocketPlan {
             * (1 - ramp(t, from: timeline.liftBegin, by: fadeOut))
     }
 
+    /// The nod's scale `u` of the way through it, 0...1: the one
+    /// curve the brief pocket and the standing pocket share (#2776).
+    static func nodSwell(at u: CGFloat) -> CGFloat {
+        1 + (nodScale - 1) * CGFloat(sin(Double.pi * Double(u)))
+    }
+
     /// The pocket's frame `t` seconds in: `pocket`, swollen about
     /// its centre by the nod and redrawn at that size.
     static func pocketFrame(
@@ -153,8 +159,7 @@ enum BriefPocketPlan {
         timeline: Timeline
     ) -> CGRect {
         let u = ramp(t, from: timeline.nodBegin, by: nod)
-        let swell = (nodScale - 1) * CGFloat(sin(Double.pi * Double(u)))
-        let grow = pocket.width * swell / 2
+        let grow = pocket.width * (nodSwell(at: u) - 1) / 2
         return pocket.insetBy(dx: -grow, dy: -grow)
     }
 

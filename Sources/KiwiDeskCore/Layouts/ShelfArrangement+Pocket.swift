@@ -17,10 +17,8 @@ extension ShelfArrangement {
     /// The pocket's length along an edge `depth` deep: its mark, and
     /// room each side for the mark's lit edge and lift (#2776).
     public static func pocketNeed(depth: CGFloat) -> CGFloat {
-        let mark = depth * BriefPocketPlan.markSide / BriefPocketPlan.side
-        let spill =
-            BriefPocketView.haloBlur + (BriefPocketView.lift - 1) / 2
-        return mark + 2 * (mark * spill).rounded(.up)
+        let mark = PocketMarkGeometry.markSide(depth: depth)
+        return mark + 2 * PocketMarkGeometry.spill(mark: mark)
     }
 
     /// Places the bars and the pocket along an edge `length` long

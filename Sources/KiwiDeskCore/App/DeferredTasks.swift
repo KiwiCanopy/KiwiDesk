@@ -107,6 +107,9 @@ final class DeferredTasks {
         /// Lets a pocket a play held out of its handle sink back
         /// once the play ends (#2678).
         case pocketHold
+        /// Lights the standing pocket as a play's window lands in
+        /// it or leaves it (#2776).
+        case pocketLight
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -127,7 +130,7 @@ final class DeferredTasks {
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
-                .visionHold, .pocketHold:
+                .visionHold, .pocketHold, .pocketLight:
                 return false
             }
         }

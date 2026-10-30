@@ -7691,7 +7691,8 @@ place the pocket the plate flies to, under either
 [`pocket.set_capacity`](#pocketset_capacity): on an edge where a
 bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
 aside for it; on an edge no bar shows, the pocket comes up out of
-its handle.
+its handle. That pocket lights as the window goes in or
+out, and nods as one lands in it.
 :::
 
 **Example:**

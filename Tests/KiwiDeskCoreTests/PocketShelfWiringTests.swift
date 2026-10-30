@@ -86,7 +86,7 @@ struct PocketShelfWiringTests {
         )
         let mounted = try #require(overlay.pocket.mount?.view)
         #expect(mounted === core.pocketPlate.sectionMount(on: display))
-        // Above the drag's ghost while it runs (#2776).
+        // A level above the shelf and the drag's ghost (#2776).
         #expect(overlay.pocket.panel?.level == BarPanel.aboveLevel)
         core.endPocketDrag()
         #expect(core.pocketPlate.slots[display] == nil)
