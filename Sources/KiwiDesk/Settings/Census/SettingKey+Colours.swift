@@ -39,7 +39,11 @@ enum ColoursKey: String, CaseIterable, Hashable {
     /// Which profiles follow the shared look (#1752).
     case lookAppliesTo = "(action) look.applies_to"
     case lookSave = "(action) look.save"
+    /// The gallery's doors (#1740); Simple's Browse tile is this
+    /// row too.
+    case lookBrowse = "(action) look.browse"
     case lookImport = "(action) look.import"
+    case lookShare = "(action) look.share"
     case lookRename = "(action) look.rename"
     case lookExport = "(action) look.export"
     case lookDelete = "(action) look.delete"
@@ -141,7 +145,8 @@ extension ColoursKey {
         case .paletteRename, .paletteExport, .paletteDelete:
             // Context menu actions pinned by ColorsCensusRenderTests.
             return .row(.coloursAndMotion, .palettes, .showMore)
-        case .lookApply, .lookSave, .lookImport:
+        case .lookApply, .lookSave, .lookBrowse, .lookImport,
+            .lookShare:
             return .row(.coloursAndMotion, .looks, .atRest)
         case .lookOrigin:
             // Written by a pick, drawn by no control: the save pill
@@ -260,8 +265,12 @@ extension ColoursKey {
             return .text("app_rules.reach")
         case .lookSave:
             return .text("looks.save_current")
+        case .lookBrowse:
+            return .text("looks.browse")
         case .lookImport:
             return .text("looks.import")
+        case .lookShare:
+            return .text("looks.share")
         case .lookRename:
             return .text("looks.rename")
         case .lookExport:

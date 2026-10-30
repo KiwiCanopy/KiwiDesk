@@ -22,8 +22,8 @@ struct DesktopSwitchCueTests {
         .init(displayUUID: uuid, space: space, at: time ?? at)
     }
 
-    @Test("a second screen's Desktop keeps its global number")
-    func globalNumberLocalDots() {
+    @Test("a second screen's Desktop takes its number on that screen")
+    func screenNumberLocalDots() {
         defer { resetAuthorityOverrides() }
         let snapshot = authoritySnapshot(mainCurrent: 10, secondaryCurrent: 21)
         let verdict = DesktopCueLedger.verdict(
@@ -38,7 +38,6 @@ struct DesktopSwitchCueTests {
                 == .settled(
                     DesktopSwitchCue(
                         display: DisplayID(2),
-                        number: 4,
                         position: 2,
                         count: 2,
                         loadedProfile: "Work"
@@ -136,7 +135,6 @@ struct DesktopSwitchCueTests {
             shown == [
                 DesktopSwitchCue(
                     display: DisplayID(1),
-                    number: 2,
                     position: 2,
                     count: 2,
                     loadedProfile: nil

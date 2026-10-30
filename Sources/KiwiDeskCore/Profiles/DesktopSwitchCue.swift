@@ -6,30 +6,32 @@ import Foundation
 public struct DesktopSwitchCue: Equatable, Sendable {
     /// The screen that switched — the only one the plate draws on.
     public let display: DisplayID
-    /// The Desktop's Mission Control number, global across
-    /// screens: the label Mission Control draws and the number
-    /// `focus_desktop` takes. A label, never a lookup key (#1147).
-    public let number: Int
-    /// 1-based place among that screen's Desktops — the filled dot.
+    /// 1-based place among that screen's Desktops — the number
+    /// the plate draws, as that screen's Mission Control strip
+    /// labels it (#2792), and the filled dot. A label, never a
+    /// lookup key (#1147).
     public let position: Int
     /// How many Desktops that screen has — one dot each.
     public let count: Int
     /// The profile this switch loaded through a Desktop binding;
     /// nil where the live profile stayed.
     public let loadedProfile: String?
+    /// The screen that switched, nil with one screen connected —
+    /// spoken only, since the plate draws on that screen.
+    public let screen: ScreenLabel?
 
     public init(
         display: DisplayID,
-        number: Int,
         position: Int,
         count: Int,
-        loadedProfile: String?
+        loadedProfile: String?,
+        screen: ScreenLabel? = nil
     ) {
         self.display = display
-        self.number = number
         self.position = position
         self.count = count
         self.loadedProfile = loadedProfile
+        self.screen = screen
     }
 }
 
@@ -71,6 +73,7 @@ final class DesktopCueLedger {
         for owed: Owed,
         in snapshot: DesktopSnapshot,
         display: DisplayID?,
+        screen: ScreenLabel? = nil,
         loadedProfile: String?,
         now: Date
     ) -> Verdict {
@@ -81,22 +84,18 @@ final class DesktopCueLedger {
         else { return .waiting }
         guard snapshot.currentSpaceIsUser(on: owed.displayUUID),
             let display,
-            let number = snapshot.number(of: owed.space)
+            let position = snapshot.screenNumber(of: owed.space)
         else { return .settled(nil) }
-        let row = snapshot.spaces
-            .filter { $0.displayUUID == owed.displayUUID && $0.isUser }
-            .compactMap { snapshot.number(of: $0.id) }
-            .sorted()
-        guard let index = row.firstIndex(of: number) else {
-            return .settled(nil)
-        }
+        let count = snapshot.spaces.filter {
+            $0.displayUUID == owed.displayUUID && $0.isUser
+        }.count
         return .settled(
             DesktopSwitchCue(
                 display: display,
-                number: number,
-                position: index + 1,
-                count: row.count,
-                loadedProfile: loadedProfile
+                position: position,
+                count: count,
+                loadedProfile: loadedProfile,
+                screen: screen
             )
         )
     }

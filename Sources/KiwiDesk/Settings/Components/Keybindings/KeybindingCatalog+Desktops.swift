@@ -7,7 +7,8 @@ extension KeybindingCatalog {
     /// "Go to Desktop …" command rows (#26).
     static func goToDesktop(
         _ desktops: [Int],
-        absent: Set<Int> = []
+        absent: Set<Int> = [],
+        landings: [Int: DesktopLanding] = [:]
     ) -> [NavCommand] {
         desktops.map { number in
             NavCommand(
@@ -22,7 +23,8 @@ extension KeybindingCatalog {
                         String(number)
                     )
                 },
-                unavailable: awayMark(number, in: absent)
+                unavailable: awayMark(number, in: absent),
+                detail: landing(number, in: landings, absent: absent)
             )
         }
     }
@@ -30,11 +32,20 @@ extension KeybindingCatalog {
     /// Interleaved "Move to Desktop" and "Move & follow" rows (#4, #25).
     static func moveToDesktop(
         _ desktops: [Int],
-        absent: Set<Int> = []
+        absent: Set<Int> = [],
+        landings: [Int: DesktopLanding] = [:]
     ) -> [NavCommand] {
         zip(
-            moveToDesktopRows(desktops, absent: absent),
-            moveToDesktopFollowRows(desktops, absent: absent)
+            moveToDesktopRows(
+                desktops,
+                absent: absent,
+                landings: landings
+            ),
+            moveToDesktopFollowRows(
+                desktops,
+                absent: absent,
+                landings: landings
+            )
         )
         .flatMap { [$0, $1] }
     }
@@ -42,7 +53,8 @@ extension KeybindingCatalog {
     /// "Move to Desktop …" command rows (#25).
     static func moveToDesktopRows(
         _ desktops: [Int],
-        absent: Set<Int> = []
+        absent: Set<Int> = [],
+        landings: [Int: DesktopLanding] = [:]
     ) -> [NavCommand] {
         desktops.map { number in
             NavCommand(
@@ -57,7 +69,8 @@ extension KeybindingCatalog {
                         String(number)
                     )
                 },
-                unavailable: awayMark(number, in: absent)
+                unavailable: awayMark(number, in: absent),
+                detail: landing(number, in: landings, absent: absent)
             )
         }
     }
@@ -65,7 +78,8 @@ extension KeybindingCatalog {
     /// "Move to Desktop … & follow" command rows.
     static func moveToDesktopFollowRows(
         _ desktops: [Int],
-        absent: Set<Int> = []
+        absent: Set<Int> = [],
+        landings: [Int: DesktopLanding] = [:]
     ) -> [NavCommand] {
         desktops.map { number in
             NavCommand(
@@ -81,7 +95,8 @@ extension KeybindingCatalog {
                         String(number)
                     )
                 },
-                unavailable: awayMark(number, in: absent)
+                unavailable: awayMark(number, in: absent),
+                detail: landing(number, in: landings, absent: absent)
             )
         }
     }
@@ -100,6 +115,32 @@ extension KeybindingCatalog {
         }
     }
 
+    /// Where a row's Desktop number lands now (#2792): its screen
+    /// and number there, or that no Desktop has the number. Nil on
+    /// one screen, where the row's own number says it.
+    private static func landing(
+        _ number: Int,
+        in landings: [Int: DesktopLanding],
+        absent: Set<Int>
+    ) -> (@MainActor () -> String)? {
+        if let landing = landings[number] {
+            return {
+                L(
+                    "keybinding.desktop_landing",
+                    "%1$@ · Desktop %2$d",
+                    landing.screen.displayName,
+                    landing.number
+                )
+            }
+        }
+        guard !landings.isEmpty, absent.contains(number) else {
+            return nil
+        }
+        return {
+            L("keybinding.desktop_absent", "Not present right now")
+        }
+    }
+
     /// The caption over Desktop rows whose Desktop is away, in
     /// Settings and the Shortcuts sheet alike.
     @MainActor static var desktopAwayCaption: String {
@@ -115,6 +156,8 @@ extension KeybindingCatalog {
     struct DesktopOffer: Equatable {
         var desktops: [Int] = []
         var absent: Set<Int> = []
+        /// Where each number lands now, with more than one screen.
+        var landings: [Int: DesktopLanding] = [:]
 
         static let none = DesktopOffer()
     }
@@ -143,7 +186,8 @@ extension KeybindingCatalog {
     /// Builds desktop offer from live topology and bound shortcuts (#92).
     static func desktopOffer(
         live: [Int],
-        bindings: [KeyBinding]
+        bindings: [KeyBinding],
+        landings: [Int: DesktopLanding] = [:]
     ) -> DesktopOffer {
         let bound = Set(
             bindings.filter(recordsDesktop)
@@ -152,7 +196,8 @@ extension KeybindingCatalog {
         let liveSet = Set(live)
         return DesktopOffer(
             desktops: liveSet.union(bound).sorted(),
-            absent: bound.subtracting(liveSet)
+            absent: bound.subtracting(liveSet),
+            landings: landings
         )
     }
 

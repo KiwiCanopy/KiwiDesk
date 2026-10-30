@@ -4,7 +4,7 @@ import SwiftUI
 
 /// Share this look… (#1740 ▸ Share): a name popover, then the
 /// gallery's submission form in the browser with the current look
-/// prefilled. Drawn only while `LookGallery.isLive`.
+/// prefilled.
 extension LooksShelf {
     var shareButton: some View {
         Button {

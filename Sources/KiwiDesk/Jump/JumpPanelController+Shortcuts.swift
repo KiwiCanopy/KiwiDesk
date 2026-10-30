@@ -71,6 +71,7 @@ extension JumpPanelController {
         // or Custom), never hide or invent one — safe for a
         // read-only glance, and a layer switch re-reads the sheet
         // (#820, #2246).
+        let desktops = NativeSpaces.desktopSnapshot()
         let reference = ShortcutsReferenceBuilder.build(
             layer: layer,
             // Every live Space, so a temporary or held Space's
@@ -80,9 +81,8 @@ extension JumpPanelController {
                 after: config.spaces
             ),
             spaceIcons: config.settings.spaceIcons,
-            desktops: core.bindableDesktops(
-                in: NativeSpaces.desktopSnapshot()
-            ),
+            desktops: core.bindableDesktops(in: desktops),
+            landings: core.desktopLandings(in: desktops),
             resizeStep: Int(config.settings.resizeStep),
             layerNames: layers.map(\.name),
             lenses: core.kiwiVisionLensChoices.map(\.name),
