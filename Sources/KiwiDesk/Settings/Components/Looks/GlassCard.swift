@@ -40,6 +40,9 @@ struct GlassCard: View {
                         row(key).modifier(GreyOut(active: greyed(key)))
                     }
                     reasonCaption(for: key)
+                    if Self.showsSystemPointer(key) {
+                        GlassSystemPointer()
+                    }
                 }
             }
         }
@@ -87,6 +90,14 @@ struct GlassCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
+    }
+
+    /// Whether `key`'s row carries the pointer to macOS's Liquid
+    /// Glass slider: the switch alone, wherever glass is drawn;
+    /// live under Reduce transparency, which the slider can turn
+    /// off (Apple's own Appearance copy).
+    static func showsSystemPointer(_ key: SettingKey) -> Bool {
+        AppBarStyle.glassAvailable && key == .colours(.liquidGlassMaster)
     }
 
     @ViewBuilder private func row(_ key: SettingKey) -> some View {

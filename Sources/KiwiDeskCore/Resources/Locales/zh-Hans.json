@@ -313,6 +313,8 @@
   "colors.liquid_glass.differ.help": "目前这些元素的设置各不相同。开启后将同时应用于全部。",
   "colors.liquid_glass.help": "在 Space Bar、App Bar、%2$@、残影和放置区域、Sticky 标记以及空间切换时滑动的薄板上覆盖 macOS 的半透明材质。KiwiShelf 的“%1$@”颜色为两个栏着色，从栏所在的屏幕边缘开始渐淡，渐淡范围由“%3$@”决定；开启“%4$@”后，它也会为 %2$@ 和薄板着色。残影、放置区域和 Sticky 标记使用各自的颜色。",
   "colors.liquid_glass.reduce_transparency.help": "系统设置 ▸ 辅助功能 ▸ 显示 ▸ 降低透明度已开启，因此无论此设置如何，玻璃效果都将保持关闭。",
+  "colors.liquid_glass.system": "玻璃效果的透明程度跟随 %1$@ 中的设置。",
+  "colors.liquid_glass.system.path": "系统设置 ▸ 外观 ▸ Liquid Glass",
   "colors.mixed": "混合",
   "colors.scene.caption": "KiwiShelf 的形状、两个栏及其活动项目、焦点与非焦点窗口的边框及其状态标记，以及放置区域旁的残影。",
   "colors.scene.title": "当前颜色",

@@ -3038,7 +3038,7 @@ Replaces `pocket.set_edge`, which is now refused with a Config
 Issue naming this verb; a saved profile keeps its edge.
 
 **Expects:** `"top"`, `"bottom"`, `"left"` or `"right"` (default
-`"bottom"`).
+`"bottom"`; the starter setup seeds `"top"`).
 
 **Does:** sets the screen edge the [pocket](#pocket) sits on, on
 every screen. Where a bar shows on that edge the pocket is a

@@ -6153,6 +6153,18 @@ both decode an absent key as the default, so without it a profile
 loses 4.0.0's values silently. The old `pocket.set_edge` and
 `pocket.set_position` retire with no alias.
 
+**The starter and every bundled look put it on the Space Bar's
+edge.** The Space Bar is the menu bar (▸ *The App Bar is the dock;
+the Space Bar is the menu bar*), and the pocket sits with it as a
+menu-bar extra does, not with the dock (owner, 2026-10-30). The
+type default stays `bottom`, so no stored profile moves. Every
+bundled look carries the edge, Taskbar its own and the rest
+Glass's, since a look applies only the keys it carries
+(`LookCatalogTests` ▸ `pocketRidesTheSpaceBar`). The rule is what a
+first run and a look seed, not a runtime link: the pocket edge is
+one for every screen, so a screen's own Space Bar edge (#1948)
+leaves the pocket where it is.
+
 **Several windows keeps it on screen, empty included, on every
 display.** One window keeps the pocket out of sight, since its one
 window is a key away. Under Several windows the drop target and
@@ -17956,6 +17968,21 @@ only WHETHER, never WHICH.
 *Tint KiwiHub and plates* (#2569) gives KiwiHub and the plates
 the Fill too, and with it off the rule above stands (▸ the
 shortcuts panel entry).
+
+:::unreleased
+**How see-through the glass is belongs to macOS.** (Owner and
+ui-designer, 2026-10-30.) From macOS 27, System Settings ▸
+Appearance ▸ Liquid Glass sets how clear every glass surface is —
+KiwiHub and both bars included, checked on device — and Looks &
+Animations links to it under the switch rather than offering a
+Regular/Clear picker or a readability fallback of its own. A
+KiwiDesk picker would be a second control over the same material,
+fighting the system's, and the user's one setting about glass
+would stop governing every app. A user who wants an opaque hub
+picks a look without glass. What KiwiDesk owes at the slider's
+clear end is the reading floor of its own Fill (▸ Reading
+surfaces fade above a floor), never an override of the slider.
+:::
 
 **Reduce transparency stands every glass surface down, live, and
 moves no stored value.** (#1374, owner ruling 2026-09-13.) The

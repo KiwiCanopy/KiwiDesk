@@ -313,6 +313,8 @@
   "colors.liquid_glass.differ.help": "Al momento queste superfici sono impostate in modo diverso. Attivando questa opzione, viene applicata a tutte.",
   "colors.liquid_glass.help": "Applica il materiale traslucido di macOS alla Space Bar, alla App Bar, a %2$@, alla sagoma, alla zona di rilascio, al marcatore Sticky e alle piastre che un cambio di spazio fa scorrere. Il colore «%1$@» di KiwiShelf tinge le barre sfumando dal bordo dello schermo in cui si trovano, fin dove stabilisce «%3$@»; con «%4$@» attivo, tinge anche %2$@ e le piastre. La sagoma, la zona di rilascio e il marcatore Sticky usano colori propri.",
   "colors.liquid_glass.reduce_transparency.help": "Impostazioni di Sistema ▸ Accessibilità ▸ Schermo ▸ Riduci la trasparenza è attivo, quindi l'effetto vetro resta disattivato indipendentemente da questa impostazione.",
+  "colors.liquid_glass.system": "La trasparenza dell'effetto vetro segue l'impostazione in %1$@.",
+  "colors.liquid_glass.system.path": "Impostazioni di Sistema ▸ Aspetto ▸ Liquid Glass",
   "colors.mixed": "misti",
   "colors.scene.caption": "La forma di KiwiShelf, entrambe le barre con i loro elementi attivi, il contorno con focus e quello senza focus con i rispettivi marcatori di stato, e la sagoma accanto alla sua zona di rilascio.",
   "colors.scene.title": "Colori attuali",

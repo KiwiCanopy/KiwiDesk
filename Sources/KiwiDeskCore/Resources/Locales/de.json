@@ -313,6 +313,8 @@
   "colors.liquid_glass.differ.help": "Diese Flächen sind gerade unterschiedlich eingestellt. Wenn du diese Option einschaltest, gilt sie für alle.",
   "colors.liquid_glass.help": "Legt das transluzente Material von macOS über die Space Bar, die App Bar, %2$@, den Ghost und die Drop-Zone, die Sticky-Markierung sowie die Flächen, die ein Space-Wechsel gleiten lässt. Die Farbe „%1$@“ von KiwiShelf tönt die Leisten und verblasst von ihrer Bildschirmkante aus so weit, wie „%3$@“ es festlegt; ist „%4$@“ an, tönt sie auch %2$@ und die Flächen. Ghost, Drop-Zone und Sticky-Markierung nehmen ihre eigenen Farben an.",
   "colors.liquid_glass.reduce_transparency.help": "Systemeinstellungen ▸ Bedienungshilfen ▸ Anzeige ▸ Transparenz reduzieren ist aktiviert, daher bleibt der Glaseffekt unabhängig von dieser Einstellung aus.",
+  "colors.liquid_glass.system": "Wie durchsichtig der Glaseffekt ist, richtet sich nach %1$@.",
+  "colors.liquid_glass.system.path": "Systemeinstellungen ▸ Erscheinungsbild ▸ Liquid Glass",
   "colors.mixed": "gemischt",
   "colors.scene.caption": "Die Form von KiwiShelf, beide Leisten mit ihren aktiven Elementen, der fokussierte und der nicht fokussierte Rahmen mit ihren Zustandsmarkierungen und der Ghost neben seiner Drop-Zone.",
   "colors.scene.title": "Aktuelle Farben",
