@@ -517,9 +517,9 @@
   "what_learn": "Die Grundlagen lernen",
   "what_title": "Was ist KiwiDesk eigentlich?",
   "looks_meta_title": "KiwiDesk Looks — probier einen Look von jemand anderem",
-  "looks_meta_desc": "Looks, die andere für KiwiDesk gemacht haben, den Tiling-Fenstermanager für macOS: Lade einen herunter oder teile deinen eigenen.",
+  "looks_meta_desc": "Looks, die andere für KiwiDesk gemacht haben, den Tiling-Fenstermanager für macOS: Füg einen zu KiwiDesk hinzu oder teile deinen eigenen.",
   "looks_eyebrow": "Looks",
-  "looks_title": "Dein Setup, in fremden Kleidern.",
+  "looks_title": "Ein frischer Look für KiwiDesk.",
   "looks_lead": "Probier einen Look, den jemand anderes gemacht hat, oder teile deinen eigenen.",
   "looks_share": "Teile deinen",
   "looks_share_note": "Ein Look sind die Farben, Leisten, das Glas, die Abstände, die Schrift und der Fokus-Rahmen, die KiwiDesk zeichnet.",
@@ -574,5 +574,5 @@
   "looks_license": "Jeder Look hier steht unter {cc}CC BY 4.0{/cc}: Nutze ihn frei, und nenne seinen Autor, wenn du ihn weitergibst.",
   "looks_report": "Diesen Look melden",
   "looks_back": "Alle Looks",
-  "looks_footer": "Looks kommen über {repo} hinzu und stehen unter {cc}CC BY 4.0{/cc}."
+  "looks_footer": "Looks werden über {repo} eingereicht und stehen unter {cc}CC BY 4.0{/cc}."
 }
