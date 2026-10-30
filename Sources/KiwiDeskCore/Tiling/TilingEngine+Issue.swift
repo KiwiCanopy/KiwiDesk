@@ -8,7 +8,7 @@ extension TilingEngine {
     /// `LayoutAskSeamTests`).
     func issueLayoutFrame(
         _ id: WindowID,
-        target: CGRect,
+        target asked: CGRect,
         state: StateCoordinator,
         pass: RetilePass,
         animated: Bool,
@@ -17,6 +17,11 @@ extension TilingEngine {
     ) {
         guard let current = state.windows[id]?.frame
         else { return }
+        let target = Self.parkAtDrawnWidth(
+            asked,
+            drawn: current,
+            screens: allScreenBounds()
+        )
         // #677: the settled, echo-quiet state frame is the
         // app's answer to the engine's last ask — the gate
         // and its argument live on `observeAppAnswer`. Its
@@ -128,6 +133,32 @@ extension TilingEngine {
         ) {
             onInstantLayoutAsk(id)
         }
+    }
+
+    /// A bottom-left park re-anchored at the width the window
+    /// draws now where that is wider than the ask: the corner
+    /// anchors the right edge, and the drawn width is already at
+    /// least the app's minimum, so the first park leaves the peek
+    /// before the learner knows it (#2759). Any other frame, and
+    /// the right corner, whose x is width-free, pass unchanged.
+    static func parkAtDrawnWidth(
+        _ target: CGRect,
+        drawn: CGRect,
+        screens: [CGRect]
+    ) -> CGRect {
+        guard drawn.width > target.width,
+            let screen = screens.first(where: {
+                parked(
+                    target,
+                    at: stashFrame(target, in: $0, corner: .bottomLeft)
+                )
+            })
+        else { return target }
+        let wide = CGRect(
+            origin: target.origin,
+            size: CGSize(width: drawn.width, height: target.height)
+        )
+        return stashFrame(wide, in: screen, corner: .bottomLeft)
     }
 
     /// Whether a layout frame parks or unparks a window — a corner

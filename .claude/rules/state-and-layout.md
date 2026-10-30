@@ -1317,8 +1317,12 @@ editing here:
   spelled beside it: every parked judge rebuilds its target
   through that function, so a hand-spelled x reads as parked
   while it drops the left corner's whole-x rounding
-  (`StashLeftPeekTests`, #2753); a window already at its park is
-  skipped on a re-issuing pass too (▸ `liftedParkIsKept`). A
+  (`StashLeftPeekTests`, #2753); the loop lays a bottom-left park
+  at the width the window draws where that is wider than the ask,
+  through the one `parkAtDrawnWidth`, since the corner anchors the
+  right edge (`ParkDrawnWidthTests`, #2759); a window already at
+  its park is skipped on a re-issuing pass too
+  (▸ `liftedParkIsKept`). A
   z-order restore or gate that judges frames computed now leaves
   out what `parkedByRun` names, and a classifier of the last
   pass's slots takes `shownSlots()` (`RunRestWiringTests`); a
