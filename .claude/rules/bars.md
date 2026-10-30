@@ -826,8 +826,8 @@ pocket rides every motion the shelf plays. Obligations:
 - **Every pocket panel — the section and the handle — stands at
   `BarPanel.pocketLevel`, a level above the shelf's, and is never
   lowered to it**: a click fronts the shelf's panel within its
-  level, which under Full spans the pocket's slot, and a window
-  drag's ghost and drop zone share the bars' level (#2776,
+  level, which under Full spans the pocket's slot (#2776; the drag
+  markers sit at window level since #2797,
   `PocketBareMarkTests` ▸ `sectionStandsAboveTheShelf`,
   `PocketHandleTests` ▸ `dragRises` for the handle during a drag;
   at rest, review's). Within a shared level the
