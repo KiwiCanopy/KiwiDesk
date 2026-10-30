@@ -13,6 +13,7 @@ extension KiwiCore {
         into active: SpaceID,
         matching text: String?
     ) {
+        enterMoveHereSpace(active)
         jump.oweApp(pid, in: active, at: wallClock(), matching: text)
         jump(to: .hiddenApp(pid))
     }

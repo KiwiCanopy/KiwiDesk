@@ -127,14 +127,19 @@ extension KiwiCore {
         }
     }
 
+    /// Whether `takePocketOut` takes `id` out, its own gates read
+    /// ahead of it by a caller that switches first (#2791).
+    func canTakePocketOut(_ id: WindowID) -> Bool {
+        state.pocketPhase(of: id) == .pocketed && state.windows[id] != nil
+    }
+
     /// Takes the pocketed window `id` out onto the active Space's
     /// screen, at the frame it last had there or centred, floating
     /// and focused. False where it cannot be reached: not pocketed,
     /// not tracked (its app hidden) or no Space to show it on.
     @discardableResult
     func takePocketOut(_ id: WindowID) -> Bool {
-        guard state.pocketPhase(of: id) == .pocketed,
-            let window = state.windows[id],
+        guard canTakePocketOut(id), let window = state.windows[id],
             let target = state.workspaces.activeSpace
         else { return false }
         let cameFrom = state.workspaces.lastFocused
