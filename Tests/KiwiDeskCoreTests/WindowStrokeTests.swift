@@ -118,7 +118,7 @@ struct WindowStrokeTests {
             (
                 "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"
                     + "GapsBordersPanelPreview.swift",
-                "stroke: settings.windowStroke,", 2
+                "cornerRadius: settings.windowStroke.cornerRadius,", 2
             ),
         ] {
             // Code only: a needle kept alive in a comment beside a

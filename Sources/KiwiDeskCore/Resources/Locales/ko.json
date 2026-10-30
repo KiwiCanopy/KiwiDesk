@@ -273,7 +273,7 @@
   "border.glow_size.disabled": "크기를 조절하려면 ‘%1$@’을(를) 켜십시오.",
   "border.preview.ax": "테두리 미리보기: 테두리가 있는 포커스된 윈도우와 그 옆의 포커스되지 않은 윈도우.",
   "border.preview.ax_sticky": "테두리 미리보기: 테두리와 모든 공간용 Sticky 마크가 있는 포커스된 윈도우와 그 옆의 화면 하나용 Sticky 마크가 있는 포커스되지 않은 윈도우.",
-  "border.shared.caption": "포커스 테두리, 고스트, 놓을 위치는 KiwiDesk가 윈도우 주위에 그리는 선입니다.",
+  "border.shared.caption": "‘%1$@’은(는) 포커스 테두리에 적용되고, ‘%2$@’은(는) 고스트와 놓을 위치의 모양에도 적용됩니다.",
   "border.shared.title": "모든 테두리 공통",
   "border.title": "포커스 테두리",
   "border.unfocused_color.a11y": "포커스되지 않은 윈도우의 테두리 색상",

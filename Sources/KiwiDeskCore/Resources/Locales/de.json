@@ -273,7 +273,7 @@
   "border.glow_size.disabled": "Aktiviere „%1$@“, um seine Größe anzupassen.",
   "border.preview.ax": "Rahmen-Vorschau: ein fokussiertes Fenster mit seinem Rahmen, daneben ein nicht fokussiertes.",
   "border.preview.ax_sticky": "Rahmen-Vorschau: ein fokussiertes Fenster mit seinem Rahmen und der Sticky-Markierung für jeden Space, daneben ein nicht fokussiertes mit der Markierung für nur einen Bildschirm.",
-  "border.shared.caption": "Fokus-Rahmen, Ghost und Drop-Zone sind Linien, die KiwiDesk um ein Fenster zeichnet.",
+  "border.shared.caption": "„%1$@“ gilt für den Fokus-Rahmen; „%2$@“ formt auch Ghost und Drop-Zone.",
   "border.shared.title": "Für alle Rahmen",
   "border.title": "Fokus-Rahmen",
   "border.unfocused_color.a11y": "Rahmenfarbe nicht fokussierter Fenster",

@@ -273,7 +273,7 @@
   "border.glow_size.disabled": "若要调整其大小，请打开“%1$@”。",
   "border.preview.ax": "边框预览：带边框的焦点窗口，旁边是非焦点窗口。",
   "border.preview.ax_sticky": "边框预览：带边框和所有空间 Sticky 标记的焦点窗口，旁边是带单个显示器 Sticky 标记的非焦点窗口。",
-  "border.shared.caption": "焦点边框、残影和放置区域都是 KiwiDesk 在窗口周围绘制的线条。",
+  "border.shared.caption": "“%1$@”用于焦点边框；“%2$@”还决定残影和放置区域的形状。",
   "border.shared.title": "所有边框通用",
   "border.title": "焦点边框",
   "border.unfocused_color.a11y": "非焦点窗口的边框颜色",

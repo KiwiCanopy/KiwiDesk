@@ -273,7 +273,7 @@
   "border.glow_size.disabled": "サイズを調整するには「%1$@」をオンにしてください。",
   "border.preview.ax": "ボーダーのプレビュー: 枠の付いたフォーカス中のウインドウと、その隣にフォーカスされていないウインドウ。",
   "border.preview.ax_sticky": "ボーダーのプレビュー: 枠とすべてのスペース用の Sticky マークが付いたフォーカス中のウインドウと、その隣に1つの画面用の Sticky マークが付いたフォーカスされていないウインドウ。",
-  "border.shared.caption": "フォーカスボーダー、ゴースト、ドロップ先は、KiwiDesk がウインドウの周囲に描く線です。",
+  "border.shared.caption": "「%1$@」はフォーカスボーダーに適用されます。「%2$@」はゴーストとドロップ先の形にも適用されます。",
   "border.shared.title": "すべてのボーダー共通",
   "border.title": "フォーカスボーダー",
   "border.unfocused_color.a11y": "フォーカスされていないウインドウの境界線のカラー",

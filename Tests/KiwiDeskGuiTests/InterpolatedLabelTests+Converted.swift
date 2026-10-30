@@ -240,6 +240,8 @@ extension InterpolatedLabelTests {
         // control at all. `KeybindingOverrideEnvironment` carries
         // the argument.
         "border.glow_size.disabled": 1,
+        // #2797: the card's two rows by their own keys.
+        "border.shared.caption": 2,
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
         "sticky.caption": 2,

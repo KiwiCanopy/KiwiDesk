@@ -5,8 +5,9 @@ import SwiftUI
 struct DragVisualPreview: View {
     let kind: DragMarkerView.Kind
     let visual: DragVisual
-    /// Every window outline's corners (#1742).
-    let stroke: WindowStroke
+    /// Every window outline's corner radius (#1742); the markers'
+    /// line widths are fixed (#2797).
+    let cornerRadius: CGFloat
     /// The stored `dragLiquidGlass` leaf; Core gates it.
     let glass: Bool
 
@@ -31,7 +32,7 @@ struct DragVisualPreview: View {
     private var mock: some View {
         DragMarkerHost(
             kind: kind,
-            cornerRadius: stroke.cornerRadius > 0
+            cornerRadius: cornerRadius > 0
                 ? FocusBorderPreview.roundedRadius : 0,
             glass: glass
         )

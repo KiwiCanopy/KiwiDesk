@@ -273,7 +273,7 @@
   "border.glow_size.disabled": "Attiva «%1$@» per modificarne la dimensione.",
   "border.preview.ax": "Anteprima del contorno: una finestra con focus e il suo contorno, accanto a una senza focus.",
   "border.preview.ax_sticky": "Anteprima del contorno: una finestra con focus, con il suo contorno e il marcatore Sticky per tutti gli spazi, accanto a una senza focus con il marcatore per un solo schermo.",
-  "border.shared.caption": "Il contorno di focus, la sagoma e la zona di rilascio sono tratti che KiwiDesk disegna attorno a una finestra.",
+  "border.shared.caption": "«%1$@» regola il contorno di focus; «%2$@» dà forma anche alla sagoma e alla zona di rilascio.",
   "border.shared.title": "Comune a tutti i contorni",
   "border.title": "Contorno di focus",
   "border.unfocused_color.a11y": "Colore del contorno delle finestre senza focus",

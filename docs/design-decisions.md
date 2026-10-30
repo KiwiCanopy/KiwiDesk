@@ -15587,7 +15587,7 @@ strokes.
 :::unreleased
 **The drag markers keep the corner style alone (#2797).** Their
 lines are part of a fixed design — the ghost's two-tone outline,
-the drop zone's rim — that no setting reaches, so no second answer
+the drop zone's 1 pt hairline rim — that no setting reaches, so no second answer
 exists to disagree with the ring's, and the width question is the
 ring's alone. The corner style still reaches them, because a
 marker traces the slot a window will fill and the window's corners

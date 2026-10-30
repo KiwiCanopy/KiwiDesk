@@ -42,7 +42,7 @@ struct GapsBordersPanelPreview: View {
                 DragVisualPreview(
                     kind: .dropZone,
                     visual: settings.dragDropZone,
-                    stroke: settings.windowStroke,
+                    cornerRadius: settings.windowStroke.cornerRadius,
                     glass: settings.dragLiquidGlass
                 )
             }
@@ -50,7 +50,7 @@ struct GapsBordersPanelPreview: View {
                 DragVisualPreview(
                     kind: .ghost,
                     visual: settings.dragGhost,
-                    stroke: settings.windowStroke,
+                    cornerRadius: settings.windowStroke.cornerRadius,
                     glass: settings.dragLiquidGlass
                 )
             }

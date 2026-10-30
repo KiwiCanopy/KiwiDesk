@@ -273,7 +273,7 @@
   "border.glow_size.disabled": "Turn on %1$@ to adjust its size.",
   "border.preview.ax": "Border preview: a focused window with its ring, beside an unfocused one.",
   "border.preview.ax_sticky": "Border preview: a focused window with its ring and the everywhere-sticky mark, beside an unfocused one with the one-screen mark.",
-  "border.shared.caption": "The focus ring, the drag ghost and the drop zone are strokes KiwiDesk draws around a window.",
+  "border.shared.caption": "%1$@ sets the focus ring; %2$@ also shape the drag ghost and the drop zone.",
   "border.shared.title": "Shared by all borders",
   "border.title": "Focus border",
   "border.unfocused_color.a11y": "Unfocused window border color",
