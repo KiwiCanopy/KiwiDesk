@@ -3,10 +3,10 @@ import Combine
 import KiwiDeskCore
 import SwiftUI
 
-/// A Space list's drag-to-reorder (#68, #299): the Spaces page and
-/// Simple's rows (#2737) share it. The live order during a drag is
-/// written back once on drop — a per-crossing profile write
-/// re-evaluated the whole config (#299).
+/// A Space list's drag-to-reorder (#68, #299): the Spaces page's
+/// rows and Simple's grid of cards (#2777) share it. The live
+/// order during a drag is written back once on drop — a
+/// per-crossing profile write re-evaluated the whole config.
 @MainActor
 final class SpaceReorder: ObservableObject {
     @Published var dragged: SpaceID?
@@ -45,30 +45,33 @@ final class SpaceReorder: ObservableObject {
         dragged = nil
     }
 
-    /// Swaps only once the pointer crosses the candidate row's
-    /// MIDPOINT — plain band containment oscillates with
-    /// variable-height rows: after a short row passes a tall one,
-    /// the pointer can still sit inside the tall row's new band
-    /// and the next movement swaps them straight back.
+    /// Swaps only once the pointer crosses the candidate's MIDPOINT
+    /// — plain band containment oscillates with variable-height
+    /// rows: after a short row passes a tall one, the pointer can
+    /// still sit inside the tall row's new band and the next
+    /// movement swaps them straight back. In a grid the midpoint is
+    /// taken across a line of cards, and down a column otherwise.
     func retarget(
         _ space: SpaceID,
-        at y: CGFloat,
+        at point: CGPoint,
         in spaces: [SpaceID],
         reduceMotion: Bool
     ) {
         var order = dragOrder ?? spaces
         guard
-            let candidate = rowFrames.first(where: {
-                $0.key != space
-                    && $0.value.minY <= y
-                    && y <= $0.value.maxY
-            }),
+            let candidate = candidate(for: space, at: point),
             let from = order.firstIndex(of: space),
             let to = order.firstIndex(of: candidate.key),
             from != to,
-            to > from
-                ? y >= candidate.value.midY
-                : y <= candidate.value.midY
+            Self.crossed(
+                candidate.value,
+                at: point,
+                forward: to > from,
+                sameLine: rowFrames[space].map {
+                    $0.minY < candidate.value.maxY
+                        && candidate.value.minY < $0.maxY
+                } ?? false
+            )
         else { return }
         withAnimation(reduceMotion ? nil : Self.spring) {
             order.move(
@@ -77,6 +80,38 @@ final class SpaceReorder: ObservableObject {
             )
             dragOrder = order
         }
+    }
+
+    /// The row or card under `point`, else the nearest one at its
+    /// height — a list's rows are judged by height alone, so a
+    /// pointer drifting out of the column still reorders.
+    private func candidate(
+        for space: SpaceID,
+        at point: CGPoint
+    ) -> (key: SpaceID, value: CGRect)? {
+        let others = rowFrames.filter { $0.key != space }
+        if let hit = others.first(where: { $0.value.contains(point) }) {
+            return hit
+        }
+        return
+            others
+            .filter { $0.value.minY <= point.y && point.y <= $0.value.maxY }
+            .min {
+                abs($0.value.midX - point.x) < abs($1.value.midX - point.x)
+            }
+    }
+
+    /// Whether `point` is past `frame`'s midpoint in the move's
+    /// direction: across it on one line of cards, down it otherwise.
+    static func crossed(
+        _ frame: CGRect,
+        at point: CGPoint,
+        forward: Bool,
+        sameLine: Bool
+    ) -> Bool {
+        let (value, mid) =
+            sameLine ? (point.x, frame.midX) : (point.y, frame.midY)
+        return forward ? value >= mid : value <= mid
     }
 
     /// Reorder transition spring animation (#299).
@@ -160,7 +195,7 @@ struct SpaceDragHandle: View {
                 }
                 reorder.retarget(
                     space,
-                    at: value.location.y,
+                    at: value.location,
                     in: model.config.spaces,
                     reduceMotion: reduceMotion
                 )

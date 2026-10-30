@@ -13,7 +13,7 @@ struct PaletteTile<Plate: View>: View {
     var appliedSpoken: String?
     var dashed = false
     /// Lines the caption wraps to, reserved so a row of tiles
-    /// ends level.
+    /// ends level; zero draws no caption line at all.
     var captionLines = 1
     @ViewBuilder var plate: () -> Plate
     @State private var hovered = false
@@ -35,10 +35,12 @@ struct PaletteTile<Plate: View>: View {
             plate()
                 .frame(height: Self.plateHeight)
             nameLine
-            Text(caption ?? " ")
-                .font(.caption2)
-                .foregroundStyle(SettingsTheme.ink3)
-                .lineLimit(captionLines, reservesSpace: true)
+            if captionLines > 0 {
+                Text(caption ?? " ")
+                    .font(.caption2)
+                    .foregroundStyle(SettingsTheme.ink3)
+                    .lineLimit(captionLines, reservesSpace: true)
+            }
         }
         .padding(Self.inset)
         .frame(maxWidth: .infinity)

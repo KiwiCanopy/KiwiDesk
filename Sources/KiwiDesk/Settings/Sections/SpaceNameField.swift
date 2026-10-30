@@ -12,6 +12,9 @@ struct SpaceNameField: View {
     let isAvailable: (SpaceID) -> Bool
     let onRename: (SpaceID) -> Void
     let onNotice: (SpaceNameNotice?) -> Void
+    /// The field's width; nil takes what the row leaves (a Space
+    /// card, #2777).
+    let width: CGFloat?
 
     @State private var draft: String
     @State private var announcement: DispatchWorkItem?
@@ -21,12 +24,14 @@ struct SpaceNameField: View {
         space: SpaceID,
         isAvailable: @escaping (SpaceID) -> Bool,
         onRename: @escaping (SpaceID) -> Void,
-        onNotice: @escaping (SpaceNameNotice?) -> Void
+        onNotice: @escaping (SpaceNameNotice?) -> Void,
+        width: CGFloat? = 180
     ) {
         self.space = space
         self.isAvailable = isAvailable
         self.onRename = onRename
         self.onNotice = onNotice
+        self.width = width
         _draft = State(initialValue: space.raw)
     }
 
@@ -40,7 +45,8 @@ struct SpaceNameField: View {
                 L("diff.label.space_name", "Space name")
             )
             .fontWeight(.medium)
-            .frame(width: 180, alignment: .leading)
+            .frame(width: width, alignment: .leading)
+            .frame(maxWidth: width == nil ? .infinity : nil)
             .commitsOnSave($focused, commit)
             .onChange(of: notice) { _, notice in onNotice(notice) }
             // A row removed mid-edit runs no `onChange`: retire

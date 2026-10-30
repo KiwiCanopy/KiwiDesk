@@ -50,31 +50,6 @@ struct OnboardingKeycap: View {
 
     /// Visual keycap chip; gateway chords draw accent ink on accent fill.
     private func chip(_ text: String) -> some View {
-        Text(text)
-            .font(.system(size: 12, weight: .semibold).monospaced())
-            .foregroundStyle(
-                family.isGateway
-                    ? SettingsTheme.accentInk
-                    : SettingsTheme.ink
-            )
-            .padding(.horizontal, 9)
-            .padding(.vertical, 4)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(
-                        family.isGateway
-                            ? SettingsTheme.accent
-                            : SettingsTheme.sunken
-                    )
-            )
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(
-                        family.isGateway
-                            ? SettingsTheme.accentInk.opacity(0.22)
-                            : SettingsTheme.ink2.opacity(0.3),
-                        lineWidth: 1.2
-                    )
-            )
+        ChordKeycap(text: text, accent: family.isGateway)
     }
 }
