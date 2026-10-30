@@ -6188,7 +6188,16 @@ A pocket that never joins the shelf has no reason to take its end,
 so it takes Position as on an edge no bar shows; the trade is that
 moving from One window to Several moves it to the shelf's end. A
 transient drop target over content is how macOS shows one, and the
-mark's two-tone edge (#2776) reads over any window. Edge and
+mark's two-tone edge (#2776) reads over any window. One window
+draws no handle on any edge: the handle and its rise are for a
+pocket that rests, so under One window an edge no bar shows takes
+the bare mark one outer margin in from the edge, as the whole mark
+under Always does. Whichever spot it takes, it slides out of what
+stands on its edge, the bar or the screen edge, on the shelf's
+fixed slide (0.28 s in, 0.2 s out; at once under Reduce Motion), so
+it says where it came from. A drag that starts on its spot, a title
+bar under it, arms the drop only once the pointer has left it, so a
+nudge never pockets the window. Edge and
 Position therefore act whatever the animation switch says and do not
 grey. No "show the pocket" choice sits beside Holds,
 which already decides when the pocket stays.

@@ -5863,9 +5863,10 @@ sits on, for both bars. A click on the pocket lists the windows
 inside by app; a row takes its window out. Under `"one"` nothing
 stays: the pocket stands only while a window goes in or out
 ([`animations.set_on_state_change`](#animationsset_on_state_change))
-or while you drag one, and on an edge where a bar shows it stands
-at the position just inside the bar, on the window side, moving no
-bar.
+or while you drag one, sliding out of its edge at the position:
+just inside the bar on an edge where one sits, moving no bar, and
+otherwise one outer margin in from the screen edge, with no
+handle.
 
 While you drag a window, under either capacity, the pocket comes
 up on every screen as a drop target, and a drop on it pockets that

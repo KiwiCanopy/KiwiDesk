@@ -34,6 +34,9 @@ final class PocketPlateOverlay {
         /// The whole mark stands at rest on an edge no bar shows,
         /// with no handle (#2784 ▸ 8).
         var whole = false
+        /// The One-window pocket, which slides out of its edge as it
+        /// comes and back as it goes (#2793).
+        var slides = false
     }
 
     /// One display's pocket: a handle's panel, or a section's
@@ -71,12 +74,15 @@ final class PocketPlateOverlay {
     /// Each screen's handle band along an edge of Auto marks, its
     /// place in their row, AX along the edge (#2678).
     var markBands: [DisplayID: ClosedRange<CGFloat>] = [:]
-    /// Each screen's drawn bar strip on the pocket's edge from the
-    /// last bar pass, AX, which the One-window pocket stands inside
-    /// (#2793).
+    /// Each screen's bar strip on the pocket's edge from the last
+    /// bar pass, drawn or hiding, AX, which the One-window pocket
+    /// stands inside (#2793).
     var barStrips: [DisplayID: CGRect] = [:]
     /// The window a drag moves, while one does (#2678).
     var dragging: WindowID?
+    /// Whether that drag's pointer has been off every pocket: one
+    /// that starts on a pocket takes no drop until it has (#2793).
+    var armed = false
     /// The display whose pocket that window is over, while a drop
     /// takes it; only that pocket lights.
     var dropHovered: DisplayID?
@@ -85,6 +91,10 @@ final class PocketPlateOverlay {
     var dropStart: (window: WindowID, frame: CGRect, released: CGRect)?
     /// The gesture read as a resize, which shows no drop target.
     var resizing: WindowID?
+
+    /// Each display's sliding pocket on its way out, its leave's
+    /// token, so a return in the meantime keeps its panel (#2793).
+    var leaving: [DisplayID: UUID] = [:]
 
     /// The empty pocket's opacity at rest (owner, #2776).
     static let fadedAlpha: CGFloat = 0.4
@@ -134,6 +144,13 @@ final class PocketPlateOverlay {
         // or became a section.
         for (display, shown) in shownViews
         where wanted[display]?.handle == nil {
+            // A sliding pocket leaves once; its landing orders it out.
+            if wanted[display] == nil, leaving[display] != nil { continue }
+            if wanted[display] == nil, let old = specs[display], old.slides,
+                leave(shown, old)
+            {
+                continue
+            }
             shown.panel?.orderOut(nil)
             // An ordered-out handle hears no exit (#2678 review 20);
             // a section's hover on that display stays its own.
@@ -148,6 +165,14 @@ final class PocketPlateOverlay {
             shown(spec)
             ?? made(spec.display, section: spec.handle == nil)
         let old = specs[spec.display]
+        // Out of sight, or on its way back in, a sliding pocket enters.
+        let enters =
+            spec.slides
+            && (shown.panel?.isVisible != true
+                || leaving[spec.display] != nil)
+        if leaving.removeValue(forKey: spec.display) != nil {
+            shown.view.layer?.removeAnimation(forKey: "pocketEntrance")
+        }
         // A light running as the pocket changes form carries over.
         if let old, old.handle != spec.handle,
             self.shown(old)?.view.flashing == true
@@ -198,6 +223,14 @@ final class PocketPlateOverlay {
                 side: spec.risenSide,
                 outer: spec.outer,
                 whole: spec.whole
+            )
+        }
+        if enters, let edge = spec.handle {
+            BarMotion.playPocketEntrance(
+                shown.view,
+                edge: edge,
+                travel: Self.depth(of: spec),
+                entering: true
             )
         }
     }

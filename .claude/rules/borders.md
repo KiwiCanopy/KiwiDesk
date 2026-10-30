@@ -439,7 +439,10 @@ is is the one `pocketLanding(on:)`**: its slot on a bar edge under
 Several, read off `ShelfArrangement.arrange(…pocket:)`; under One
 window just inside that edge's drawn strip at Position, the one
 `pocketInsideFrame(on:)`, opening no slot (#2793,
-`PocketInsideTests`); else the whole mark (`pocketMarkFrame(on:)`) where `TilingSettings.pocketRest` says
+`PocketInsideTests`), sliding out of that edge
+(`BarMotion.playPocketEntrance`); else the whole mark
+(`pocketMarkFrame(on:)`) under One window, which draws no handle,
+or where `TilingSettings.pocketRest` says
 `.mark` (#2784), else its handle risen — on an Auto edge where
 the shown pocket stands, joining the row of marks where it would
 meet it (`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
@@ -456,7 +459,10 @@ bar menus' Pocket Window door, so the light and the drop never
 disagree, and it takes a drop only where it is lit — a refused
 window drops as it would anywhere else, told why. It shows for a
 move alone, latched off once the gesture reads as a resize, ranks
-after the Space Bar at move and drop alike, and every way a gesture
+after the Space Bar at move and drop alike, takes a drop only once
+the pointer has been off it, so a drag that starts on its spot
+never pockets its window (#2793, `PocketDropTests` ▸
+`startOnThePocketArmsLater`), and every way a gesture
 ends — a drop, a bar relocate, a cancel — goes through
 `finishPocketGesture` (`PocketDropTests`).
 

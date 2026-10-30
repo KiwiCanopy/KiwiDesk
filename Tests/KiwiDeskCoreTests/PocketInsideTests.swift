@@ -1,4 +1,4 @@
-import CoreGraphics
+import AppKit
 import Testing
 
 @testable import KiwiDeskCore
@@ -69,5 +69,52 @@ struct PocketInsideTests {
             inner: 0
         )
         #expect(start.minX == top.minX)
+    }
+}
+
+/// The One-window pocket's entrance (#2793): a slide out of its edge,
+/// none under Reduce Motion.
+@Suite("Pocket entrance (#2793)")
+@MainActor
+struct PocketEntranceTests {
+    private func start(_ edge: AppBarEdge, flipped: Bool) -> CGPoint? {
+        BarMotion.pocketEntrance(
+            edge: edge,
+            travel: 30,
+            flipped: flipped,
+            entering: true,
+            reduceMotion: false
+        )?.fromValue.flatMap { ($0 as? NSValue)?.pointValue }
+    }
+
+    @Test("it starts past its edge, toward the edge")
+    func startsPastTheEdge() {
+        #expect(start(.top, flipped: true) == CGPoint(x: 0, y: -30))
+        #expect(start(.top, flipped: false) == CGPoint(x: 0, y: 30))
+        #expect(start(.bottom, flipped: false) == CGPoint(x: 0, y: -30))
+        #expect(start(.left, flipped: true) == CGPoint(x: -30, y: 0))
+        #expect(start(.right, flipped: true) == CGPoint(x: 30, y: 0))
+    }
+
+    @Test("Reduce Motion stands it at once; the leave is quicker")
+    func reducedAndLeave() {
+        #expect(
+            BarMotion.pocketEntrance(
+                edge: .top,
+                travel: 30,
+                flipped: true,
+                entering: true,
+                reduceMotion: true
+            ) == nil
+        )
+        let leave = BarMotion.pocketEntrance(
+            edge: .top,
+            travel: 30,
+            flipped: true,
+            entering: false,
+            reduceMotion: false
+        )
+        #expect(leave?.duration == BarMotion.pocketLeave)
+        #expect(BarMotion.pocketLeave < BarMotion.revealSlide)
     }
 }

@@ -103,10 +103,12 @@ extension KiwiCore {
             let inStrip =
                 slot == nil ? pocketInsideFrame(on: display.id) : nil
             // Where the bars read Always, the whole mark stands on an
-            // edge no bar shows (#2784 ▸ 8).
+            // edge no bar shows (#2784 ▸ 8); under One window, which
+            // has no handle, on every edge (#2793).
             let whole =
                 slot == nil
-                && (inStrip != nil || pocketRestsWhole(on: display))
+                && (inStrip != nil || !pocketHoldsSeveral
+                    || pocketRestsWhole(on: display))
             // An edge no bar shows takes the handle, the pocket out of
             // it on hover and during a drag (#2678).
             let risen =
@@ -143,7 +145,8 @@ extension KiwiCore {
                 risenSide: rise,
                 // Inside the strip the mark stands at its frame's edge.
                 outer: inStrip == nil ? shelf.outerMargin : 0,
-                whole: whole
+                whole: whole,
+                slides: slot == nil && !pocketHoldsSeveral
             )
         }
     }

@@ -74,8 +74,7 @@ extension KiwiCore {
         )
         // The pocket's slot on each screen's bar edge (#2678).
         var pocketSlots: [DisplayID: CGRect] = [:]
-        // Under One window the pocket opens no slot; it stands
-        // inside the strip drawn on its edge (#2793).
+        // Under One window it stands inside its edge's strip (#2793).
         var pocketStrips: [DisplayID: CGRect] = [:]
         for display in displays {
             // Each bar's edge as THIS screen has it (#1948), so
@@ -130,7 +129,8 @@ extension KiwiCore {
             {
                 pocketSlots[display.id] = plan.segment(slot)
             }
-            if let plan = plans.first(where: {
+            // A hiding bar's strip too: a reveal never moves it (#2793).
+            if let plan = planned.first(where: {
                 $0.edge == shown.kiwishelf.pocketEdge
             }) {
                 pocketStrips[display.id] = plan.strip

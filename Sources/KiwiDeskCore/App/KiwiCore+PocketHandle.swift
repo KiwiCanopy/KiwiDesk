@@ -167,9 +167,11 @@ extension KiwiCore {
         if let slot = pocketPlate.slots[display] { return slot }
         if let inside = pocketInsideFrame(on: display) { return inside }
         let shelf = tiler.settings.kiwishelf
+        // Under One window, which has no handle, the whole mark
+        // (#2793).
         if let shown = state.workspaces.allDisplays.first(where: {
             $0.id == display
-        }), pocketRestsWhole(on: shown) {
+        }), !pocketHoldsSeveral || pocketRestsWhole(on: shown) {
             return pocketMarkFrame(on: display).map {
                 PocketPlateView.room(
                     in: $0,

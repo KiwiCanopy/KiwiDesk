@@ -258,4 +258,33 @@ struct PocketDropTests {
         #expect(core.pocketPlate.dragging == nil)
         #expect(core.pocketPlate.specs.values.first == nil)
     }
+
+    /// Whether the pointer sits on the pocket, read at each move.
+    private final class Pointer { var onPocket = true }
+
+    @Test("a drag that starts on the pocket arms it only once off it")
+    func startOnThePocketArmsLater() throws {
+        let core = try makeCore()
+        let pointer = Pointer()
+        core.drag.cursorLocation = { [unowned core] in
+            let frame =
+                core.pocketPlate.specs.values.first?.frame ?? .zero
+            return pointer.onPocket
+                ? CGPoint(x: frame.midX, y: frame.midY)
+                : CGPoint(x: frame.minX - 400, y: frame.minY + 400)
+        }
+        // A title bar under the pocket: the drag lights nothing and
+        // its drop pockets nothing (#2793).
+        move(core, one)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        end(core, one)
+        #expect(core.state.pocketPhase(of: one) == nil)
+        // Off the pocket once, it arms.
+        move(core, one)
+        pointer.onPocket = false
+        move(core, one)
+        pointer.onPocket = true
+        move(core, one)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+    }
 }
