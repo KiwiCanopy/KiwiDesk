@@ -15,14 +15,11 @@ extension KiwiCore {
         // focus, the pre-echo focus, a float flip, and the appear
         // facts (#166). handle() only composes the clock/AX-aware
         // side effects on top; the pure classifiers stay below.
-        state.spawnPlacements = [
-            .bsp: tiler.settings.bsp.newWindowPlacement,
-            .stack: tiler.settings.stack.newWindowPlacement,
-            .scrolling:
-                tiler.settings.scrolling.newWindowPlacement,
-            .grid: tiler.settings.grid.newWindowPlacement,
-            .monocle: tiler.settings.monocle.newWindowPlacement,
-        ]
+        state.spawnPlacements = Dictionary(
+            uniqueKeysWithValues: TilingSettings.spawnPlacementPaths.map {
+                ($0.0, tiler.settings[keyPath: $0.1])
+            }
+        )
         state.spawnOverride = tiler.settings.placementOverride
         state.trackParams = tiler.settings.track
         // Fill-then-spill needs each track space's capacity (#437),

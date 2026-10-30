@@ -8,23 +8,39 @@ extension SettingsModel {
     /// shortcut files — what the key table encodes row edits
     /// against. nil without a checklist.
     var layeredReach: RuleReachSnapshot? {
-        let key = LayeredReachCache.Key(
-            edits: reachEdits,
-            page: config.layers,
-            profile: reachProfile,
-            switchedBase: switchedShortcutBase,
-            spaces: config.spaces
-        )
+        let key = layeredReachKey
         if let cache = layeredCache, cache.key == key { return cache.value }
         let value = layeredReach(reachEdits)
         layeredCache = LayeredReachCache(key: key, value: value)
         return value
     }
 
-    /// Drops both reach memos when a stored input moves.
+    /// Every draft input the layer pass reads.
+    var layeredReachKey: LayeredReachCache.Key {
+        LayeredReachCache.Key(
+            edits: reachEdits,
+            page: config.layers,
+            profile: reachProfile,
+            switchedBase: switchedShortcutBase,
+            spaces: config.spaces
+        )
+    }
+
+    /// The draft's shortcut rivals, built once per encode: every
+    /// shortcut row asks them (#2783).
+    var encodedKeyRivals: KeyRivals? {
+        guard let reach = encodedReach else { return nil }
+        if let rivals = encodedCache?.rivals { return rivals }
+        let rivals = KeyRivals(reach.keyLayers)
+        encodedCache?.rivals = rivals
+        return rivals
+    }
+
+    /// Drops every reach memo when a stored input moves.
     func dropReachCaches() {
         layeredCache = nil
         encodedCache = nil
+        layerCache = nil
     }
 
     /// The pass over `edits`, uncached — for a reading taken
@@ -241,4 +257,7 @@ struct EncodedReachCache {
 
     let key: Key
     let value: RuleReachSnapshot?
+    /// The value's shortcut rivals, built at the first row's ask
+    /// (`encodedKeyRivals`, #2783).
+    var rivals: KeyRivals?
 }

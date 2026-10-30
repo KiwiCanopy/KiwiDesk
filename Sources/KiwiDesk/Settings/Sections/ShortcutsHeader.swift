@@ -109,7 +109,9 @@ struct ShortcutsHeader: View {
                 )
             }
         } message: {
-            Text(resetMessage)
+            // Counted only while asked: every page render built it
+            // (#2783).
+            if confirmingReset { Text(resetMessage) }
         }
     }
 

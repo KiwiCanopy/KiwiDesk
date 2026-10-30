@@ -375,7 +375,14 @@ editing here:
   return and the #1564 sticky return down — the follow's
   register therefore names no Jump site
   (`JumpActionsTests` ▸ `moveHereAwayPaysAtArrival`;
-  `JumpFocusTests` holds each stand-down arm). A Move here on a
+  `JumpFocusTests` holds each stand-down arm). **KiwiHub's "here"
+  is the Space its screen shows, read through the one
+  `moveHereSpace(on:)`** by its list's rows and its Move here alike,
+  and an arm makes that Space active through
+  `enterMoveHereSpace` only once its move is dispatched, so a
+  refusal switches nothing and the arrival pays in the active
+  Space (#2791, `JumpMoveHereScreenTests`); the `move_here` verb
+  has no panel and keeps the focused Space. A Move here on a
   HIDDEN app owes its second debt, `JumpState.owedApp`, to the
   window the unhide brings back focused, and it is paid at that
   app's first HONORED focus REPORT rather than an arrival — ahead

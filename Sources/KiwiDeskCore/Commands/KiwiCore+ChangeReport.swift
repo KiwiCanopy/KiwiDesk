@@ -43,7 +43,7 @@ extension KiwiCore {
     /// The live values a keep can name: the settings as their file
     /// stores them, each live Space's layout, and the app-wide
     /// values by their `gui.json` groups, which a report names and
-    /// no keep writes.
+    /// no keep writes. `get_settings` (#2782) reads it back too.
     var keepDocument: JSONValue {
         var modes: [String: JSONValue] = [:]
         for space in state.workspaces.allSpaces {

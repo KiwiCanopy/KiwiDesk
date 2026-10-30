@@ -15,7 +15,8 @@ struct MinWindowSizeReadCensusTests {
     /// File → why it may name the stored value.
     private static let allowed: [String: String] = [
         "TilingSettings.swift": "declares it",
-        "TilingSettings+MinWindowSize.swift": "the resolver",
+        "TilingSettings+MinWindowSize.swift":
+            "the resolver and its per-Space fold",
         "TilingSettings+Coding.swift": "decodes it",
         "TilingSettings+Encoding.swift": "encodes it",
         "KiwiCore+GapCommands.swift": "the Lua setter writes it",
@@ -36,7 +37,8 @@ struct MinWindowSizeReadCensusTests {
     /// File → why it may name a Space's own stored floor (#2422).
     private static let overrideAllowed: [String: String] = [
         "TilingSettings.swift": "declares it",
-        "TilingSettings+MinWindowSize.swift": "the resolver",
+        "TilingSettings+MinWindowSize.swift":
+            "the resolver and its per-Space fold",
         "TilingSettings+Coding.swift": "decodes it",
         "TilingSettings+Encoding.swift": "encodes it",
         "TilingSettings+SpaceRename.swift":

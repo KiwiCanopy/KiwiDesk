@@ -152,6 +152,12 @@ extension APIReference {
         "get_config_status": APIRecord(
             "Returns the Config Issues and the sync folder's status."
         ),
+        KiwiCore.getSettingsCommand: APIRecord(
+            "Returns the live settings or one leaf by JSON Pointer, "
+                + "as a named Space uses them.",
+            .text("pointer", optional: true),
+            .space("space", optional: true)
+        ),
         "explain_window": APIRecord(
             "Explains why a window floats or tiles, its Space and "
                 + "app rules, and what would change them.",

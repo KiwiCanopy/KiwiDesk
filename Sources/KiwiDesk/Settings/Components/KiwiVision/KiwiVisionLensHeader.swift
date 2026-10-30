@@ -10,6 +10,10 @@ struct KiwiVisionLensHeader: View {
     let lens: String
     @State private var renameRequest: NameEditRequest?
     @State private var deleting: LensDeleteRequest?
+    @Environment(\.keybindingLayerName)
+    private var layerName
+    @Environment(\.disabledSystemShortcuts)
+    private var disabledSystemShortcuts
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -37,8 +41,11 @@ struct KiwiVisionLensHeader: View {
             NavRow(
                 model: model,
                 bindings: defaultBindings,
-                command: KeybindingCatalog.toggleLens(lens)
+                command: KeybindingCatalog.toggleLens(lens),
+                layer: layerName,
+                disabled: disabledSystemShortcuts
             )
+            .equatable()
             if let layer = otherLayer {
                 Text(KiwiVisionLensWords.chordElsewhere(layer))
                     .font(.caption)
@@ -105,13 +112,20 @@ struct KiwiVisionLensHeader: View {
 
     /// The default layer's rows, where the header reads and
     /// writes a lens chord; a chord on another layer is that
-    /// layer's, edited on Shortcuts.
+    /// layer's, edited on Shortcuts. Found when called, never at
+    /// render (`NavRow`).
     private var defaultBindings: Binding<[KeyBinding]> {
-        let index = model.config.layers.firstIndex(where: \.isDefault)
-        return Binding(
-            get: { index.map { model.config.layers[$0].bindings } ?? [] },
-            set: { rows in
-                guard let index else { return }
+        Binding(
+            get: { [model] in
+                model.config.layers.first(where: \.isDefault)?.bindings
+                    ?? []
+            },
+            set: { [model] rows in
+                guard
+                    let index = model.config.layers.firstIndex(
+                        where: \.isDefault
+                    )
+                else { return }
                 model.config.layers[index].bindings = rows
             }
         )

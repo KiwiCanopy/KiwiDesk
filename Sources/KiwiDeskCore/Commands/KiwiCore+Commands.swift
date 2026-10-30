@@ -173,6 +173,8 @@ extension KiwiCore {
             return .ok(stateJSON())
         case Self.configStatusCommand:
             return .ok(configStatusJSON())
+        case Self.getSettingsCommand:
+            return getSettings(args)
         case "explain_window":
             return explainWindow(args)
         case "explain_app":

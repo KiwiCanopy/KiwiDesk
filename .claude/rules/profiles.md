@@ -1619,7 +1619,10 @@ fact about its command*. The obligations:
   live store a verb writes joins one of those roots, or its verb
   reports nothing and the AI app is never told the change is
   unkept; nothing scans for a store left out, so that is
-  review's.
+  review's. Every root is also user-readable through
+  `get_settings` (#2782, `GetSettingsCommandTests` ▸
+  `wholeDocument`), so a new root carries a stored or Lua-named
+  shape, never an internal one.
 - **A keep moves nothing live.** Its edit lands the shared look
   without repainting the live one (`LiveProfileEdit.repaintsLiveLook`),
   so a look leaf the keep did not name stays pending rather than
