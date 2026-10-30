@@ -20,12 +20,12 @@ struct OverlayGlassGateTests {
         (
             file: "Tiling/KiwiCore+DragMove.swift",
             function: "func handleDragMove(",
-            stored: "glass: settings.dragLiquidGlass"
+            stored: "frost: settings.dragLiquidGlass"
         ),
         (
             file: "Tiling/DragMarkerView.swift",
             function: "func redrawPreview(",
-            stored: "glass: input.storedGlass"
+            stored: "frost: input.storedGlass"
         ),
         (
             file: "App/KiwiCore+StickyMarks.swift",

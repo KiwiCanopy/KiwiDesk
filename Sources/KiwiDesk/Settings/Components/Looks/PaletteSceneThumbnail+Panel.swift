@@ -24,18 +24,6 @@ extension PaletteSceneThumbnail {
                 )
                 pocketTile
             }
-            HStack(spacing: 7 * scale) {
-                dragTile(
-                    fill: color("drag.ghost.fill_color"),
-                    border: sheened("drag.ghost.border_color"),
-                    dashed: false
-                )
-                dragTile(
-                    fill: color("drag.drop_zone.fill_color"),
-                    border: sheened("drag.drop_zone.border_color"),
-                    dashed: true
-                )
-            }
             named(SettingsCatalog.bars.appBarCard) {
                 appBarStrip
             }
@@ -215,27 +203,5 @@ extension PaletteSceneThumbnail {
             )
             .padding(3 * scale)
         }
-    }
-
-    /// Ghost and drop zone comparison tile (#231).
-    private func dragTile(
-        fill: Color,
-        border: AnyShapeStyle,
-        dashed: Bool
-    ) -> some View {
-        RoundedRectangle(cornerRadius: 4 * scale)
-            .fill(fill)
-            .overlay(
-                RoundedRectangle(cornerRadius: 4 * scale)
-                    .stroke(
-                        border,
-                        style: StrokeStyle(
-                            lineWidth: 2 * scale,
-                            dash: dashed ? [3 * scale] : []
-                        )
-                    )
-            )
-            .frame(maxWidth: .infinity)
-            .frame(height: 22 * scale)
     }
 }

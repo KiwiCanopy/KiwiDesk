@@ -9,7 +9,7 @@ import Testing
 /// does, and the focused window stays findable by it. Only the
 /// lifted top may pass the bar; the band runs to the bottom. The
 /// configured colours' own contrast is measured where it always was
-/// (`BorderRingSeparationTests`, `DragPairSeparationTests`); this
+/// (`BorderRingSeparationTests`); this
 /// suite pins the SHAPE that carries it over, never a number
 /// (#1021).
 @Suite("Border sheen flat band (#1644)")
@@ -19,8 +19,7 @@ struct BorderSheenFlatBandTests {
     private static var strokes: [(name: String, hex: String)] {
         let keys = [
             "border.focused_color", "kiwishelf.highlight_color",
-            "kiwishelf.border_color", "drag.ghost.border_color",
-            "drag.drop_zone.border_color",
+            "kiwishelf.border_color",
         ]
         var out: [(String, String)] = [
             ("default ring", BorderStyle().focusedColor),

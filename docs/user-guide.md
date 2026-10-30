@@ -462,12 +462,11 @@ A new window of a running app follows its app rule the same way.
 
 ### Shared by all borders
 
-**Width** and **Corners** at the top set the focus ring, the
-drag ghost and the drop zone together. Keep gaps at least twice
-the width so two neighbouring rings do not touch. Each overlay's
-alignment is Lua-only; [design decisions](design-decisions.md)
-has why the GUI offers no switch, the [Lua
-reference](lua-reference.md) the verbs.
+:::unreleased
+**Width** and **Corners** at the top set the focus ring; the drag
+markers take the corners too. Keep gaps at least twice the width
+so two neighbouring rings do not touch.
+:::
 
 ### Focus Border
 
@@ -610,10 +609,12 @@ Floating windows come last, past a thin line and the floating
 symbol. They cannot be dragged; **Tile Window** on the item's
 right-click menu tiles one.
 
+:::unreleased
 **Liquid Glass** is one switch for both bars, the shortcuts
-panel, the drag ghost and drop zone, and the sticky mark
+panel, the drag drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
-flat look instead.
+flat look instead, the drop zone a blur.
+:::
 
 It covers the floating mark too.
 

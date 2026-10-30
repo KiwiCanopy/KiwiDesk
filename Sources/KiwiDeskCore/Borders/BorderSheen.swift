@@ -1,10 +1,10 @@
 import AppKit
 
 /// The painted sheen (#1644): a lighter top edge fading into the
-/// colour, which holds to the bottom, on the focused ring,
-/// the shelf's highlight and border, and the drag markers'
-/// borders. Only HSL lightness moves — hue, saturation and alpha
-/// stay the stroke's — so it is never real glass on a thin line
+/// colour, which holds to the bottom, on the focused ring and
+/// the shelf's highlight and border. Only HSL lightness moves —
+/// hue, saturation and alpha stay the stroke's — so it is never
+/// real glass on a thin line
 /// (owner 2026-09-26). The one ramp every surface and preview
 /// draws, so none can drift.
 public enum BorderSheen {

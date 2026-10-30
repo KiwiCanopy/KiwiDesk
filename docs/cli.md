@@ -665,14 +665,9 @@ every lens with why it cannot turn on.
 | | `scroll_gesture.set_step_distance` | pt (10–1000, default 60) — travel per extra window of a long swipe |
 | Sleep/Wake | `enable_wake_restore` | true\|false |
 | | `set_wake_restore_delay` | ms |
-| Drag | `drag.set_ghost_enabled` | true\|false |
-| | `drag.set_ghost_border` / `drag.set_ghost_fill` | true\|false |
-| | `drag.set_ghost_border_alignment` | `inside\|outside` (default inside, Lua-only) |
-| | `drag.set_ghost_border_color` / `drag.set_ghost_fill_color` | #RRGGBB[AA] |
-| | `drag.set_drop_zone_enabled` | true\|false |
-| | `drag.set_drop_zone_border` / `drag.set_drop_zone_fill` | true\|false |
-| | `drag.set_drop_zone_border_alignment` | `inside\|outside` (default inside, Lua-only) |
-| | `drag.set_drop_zone_border_color` / `drag.set_drop_zone_fill_color` | #RRGGBB[AA] |
+| Drag | `drag.set_drop_zone_enabled` | true\|false (default `true`) |
+| | `drag.set_ghost_enabled` | true\|false (default `false`) |
+| | `drag.set_liquid_glass` | true\|false (default `true`) — the drop zone's glass |
 | Stack | `stack.promote` / `stack.demote` | — |
 | | `stack.set_master_count` | n |
 | | `stack.set_master_ratio` | 0.1–0.9 |
@@ -823,10 +818,15 @@ or a float rule floats
 that had the nudge off becomes `keep`, and a call to
 `set_float_nudge` fails naming its replacement.
 
-`drag.set_ghost_border_width` and
-`drag.set_drop_zone_border_width` fail naming `border.set_width`,
-and `drag.set_corner_radius` fails naming
-`border.set_corner_style`.
+`drag.set_corner_radius` fails naming `border.set_corner_style`.
+
+:::unreleased
+The drag markers' look is fixed: for the ghost and the drop zone
+alike, `_border`, `_border_color`, `_border_alignment`,
+`_border_width`, `_fill` and `_fill_color` fail with a message
+starting `<verb> was retired: the drag markers' look is fixed`,
+and the ghost is off for a fresh setup.
+:::
 
 `bind_profile_to_desktop` files one profile per screen count on a
 Desktop, for all screen setups: a second profile of another count

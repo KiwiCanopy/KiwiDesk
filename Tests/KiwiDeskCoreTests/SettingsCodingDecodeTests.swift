@@ -33,8 +33,8 @@ struct SettingsCodingDecodeTests {
         settings.floatScaleOnDisplayChange = false
         settings.resizeStep = 75
         settings.shortcutPanelLiquidGlass = true
-        settings.dragGhost.enabled = false
-        settings.dragDropZone.fillColor = "#11223344"
+        settings.dragGhost.enabled = true
+        settings.dragDropZone.enabled = false
         settings.borderStyle.enabled = false
         settings.borderStyle.width = 6
         settings.borderStyle.focusedColor = "#010203"

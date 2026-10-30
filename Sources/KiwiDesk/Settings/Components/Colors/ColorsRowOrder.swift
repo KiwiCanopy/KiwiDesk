@@ -63,15 +63,11 @@ enum ColorsRowOrder {
         .kiwishelf(.highlightColor),
         .kiwishelf(.hoverFillColor),
         .borders(.borderFocusedColor),
-        .borders(.dragGhostBorderColor),
-        .borders(.dragGhostFillColor),
     ]
 
     /// The Second accent group (#1857), its follower last.
     static let secondAccentRows: [SettingKey] = [
         .spaceBar(.spaceBarFocusedItemColor),
-        .borders(.dragDropZoneBorderColor),
-        .borders(.dragDropZoneFillColor),
         .spaceBar(.spaceBarFocusedHighlightColor),
     ]
 

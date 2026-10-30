@@ -142,16 +142,8 @@ settings.bsp.newWindowPlacement
 settings.bsp.splitRatioH
 settings.bsp.splitRatioV
 settings.bsp.strategy
-settings.dragDropZone.border
-settings.dragDropZone.borderColor
 settings.dragDropZone.enabled
-settings.dragDropZone.fill
-settings.dragDropZone.fillColor
-settings.dragGhost.border
-settings.dragGhost.borderColor
 settings.dragGhost.enabled
-settings.dragGhost.fill
-settings.dragGhost.fillColor
 settings.floatingStyle.color
 settings.floatingStyle.mark
 settings.gapsGlobal.inner (master)

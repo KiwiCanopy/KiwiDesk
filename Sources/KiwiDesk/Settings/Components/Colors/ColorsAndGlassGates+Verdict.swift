@@ -58,14 +58,6 @@ extension ColorsAndGlassGates {
                     help: ColorsAndGlassHelp.unfocusedOff,
                     link: .ownSentence(.gapsAndBorders)
                 )
-        case .borders(.dragGhostBorderColor):
-            return dragVerdict(ghost: true, fill: false)
-        case .borders(.dragGhostFillColor):
-            return dragVerdict(ghost: true, fill: true)
-        case .borders(.dragDropZoneBorderColor):
-            return dragVerdict(ghost: false, fill: false)
-        case .borders(.dragDropZoneFillColor):
-            return dragVerdict(ghost: false, fill: true)
         default:
             return nil
         }
@@ -101,16 +93,5 @@ extension ColorsAndGlassGates {
             help: ColorsAndGlassHelp.borderOff,
             link: .page(.gapsAndBorders)
         )
-    }
-
-    private func dragVerdict(
-        ghost: Bool,
-        fill: Bool
-    ) -> ColorRowVerdict? {
-        dragInert(ghost: ghost, fill: fill)
-            ? ColorRowVerdict(
-                help: dragHelp(ghost: ghost, fill: fill),
-                link: .page(.gapsAndBorders)
-            ) : nil
     }
 }

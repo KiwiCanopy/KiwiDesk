@@ -12,7 +12,6 @@ struct GapsBordersGates {
         /// the Focus Border card's rows (#1360).
         case fitBorderOff
         case glowOff
-        case visualOff
     }
 
     /// Container-level gate reason.
@@ -35,13 +34,6 @@ struct GapsBordersGates {
             .borders(.borderGlowSizeAuto):
             guard settings.borderStyle.enabled else { return nil }
             return settings.borderStyle.glow ? nil : .glowOff
-        case .borders(.dragGhostBorder),
-            .borders(.dragGhostFill):
-            return settings.dragGhost.enabled ? nil : .visualOff
-        case .borders(.dragDropZoneBorder),
-            .borders(.dragDropZoneFill):
-            return settings.dragDropZone.enabled
-                ? nil : .visualOff
         case .borders(.borderFitGaps),
             .borders(.borderFitGapsExtraSpacing):
             // Fit reads the border it sizes for (#1360).
@@ -78,10 +70,6 @@ struct GapsBordersGates {
         .borders(.borderGlowSizeAuto),
         .borders(.borderFitGaps),
         .borders(.borderFitGapsExtraSpacing),
-        .borders(.dragGhostBorder),
-        .borders(.dragGhostFill),
-        .borders(.dragDropZoneBorder),
-        .borders(.dragDropZoneFill),
     ]
 
     /// Declared-but-answered-elsewhere set. The sticky-reach

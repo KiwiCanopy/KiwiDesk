@@ -58,11 +58,6 @@ struct GapsAndBordersGateWiringTests {
                 "gates.inertReason("
                     + "for:.borders(.borderGlowSizeAuto))",
             ],
-            "DragVisualsEditor.swift": [
-                "gates.inertReason(for:.borders(.dragGhostBorder))",
-                "gates.inertReason("
-                    + "for:.borders(.dragDropZoneBorder))",
-            ],
         ]
         for (name, needles) in consults {
             // Whitespace-free source, so a needle survives the
@@ -112,7 +107,6 @@ struct GapsAndBordersGateWiringTests {
             "border.controls.disabled",
             "border.fit_gaps.disabled",
             "border.glow_size.disabled",
-            "drag.disabled.help",
             // Not an InertReason, same authoring rule: a master's
             // mixed-followers `?` is one sentence, in the help
             // enum, never re-typed beside the card.

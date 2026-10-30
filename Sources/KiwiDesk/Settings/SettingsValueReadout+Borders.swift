@@ -94,44 +94,8 @@ extension SettingsValueReadout {
             )
         case .dragGhostEnabled:
             return bordersOnOffRow(census, og.enabled, ng.enabled)
-        case .dragGhostBorder:
-            return bordersOnOffRow(census, og.border, ng.border)
-        case .dragGhostBorderColor:
-            return bordersHexRow(
-                census,
-                og.borderColor,
-                ng.borderColor
-            )
-        case .dragGhostBorderAlignment:
-            return bordersRow(
-                census,
-                bordersAlignmentLabel(og.borderAlignment),
-                bordersAlignmentLabel(ng.borderAlignment)
-            )
-        case .dragGhostFill:
-            return bordersOnOffRow(census, og.fill, ng.fill)
-        case .dragGhostFillColor:
-            return bordersHexRow(census, og.fillColor, ng.fillColor)
         case .dragDropZoneEnabled:
             return bordersOnOffRow(census, od.enabled, nd.enabled)
-        case .dragDropZoneBorder:
-            return bordersOnOffRow(census, od.border, nd.border)
-        case .dragDropZoneBorderColor:
-            return bordersHexRow(
-                census,
-                od.borderColor,
-                nd.borderColor
-            )
-        case .dragDropZoneBorderAlignment:
-            return bordersRow(
-                census,
-                bordersAlignmentLabel(od.borderAlignment),
-                bordersAlignmentLabel(nd.borderAlignment)
-            )
-        case .dragDropZoneFill:
-            return bordersOnOffRow(census, od.fill, nd.fill)
-        case .dragDropZoneFillColor:
-            return bordersHexRow(census, od.fillColor, nd.fillColor)
         case .floatingColor:
             return bordersAutoHexRow(
                 census,

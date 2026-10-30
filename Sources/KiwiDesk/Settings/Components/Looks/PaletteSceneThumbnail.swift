@@ -111,10 +111,7 @@ struct PaletteSceneThumbnail: View {
     private var tileScene: some View {
         VStack(spacing: 6 * scale) {
             barStrip
-            HStack(spacing: 6 * scale) {
-                window
-                ghost
-            }
+            window
         }
     }
 
@@ -162,19 +159,5 @@ struct PaletteSceneThumbnail: View {
             )
             .frame(maxWidth: .infinity)
             .frame(height: 24 * scale)
-    }
-
-    /// The drag ghost swatch.
-    private var ghost: some View {
-        RoundedRectangle(cornerRadius: 4 * scale)
-            .fill(color("drag.ghost.fill_color"))
-            .overlay(
-                RoundedRectangle(cornerRadius: 4 * scale)
-                    .stroke(
-                        color("drag.ghost.border_color"),
-                        lineWidth: 2 * scale
-                    )
-            )
-            .frame(width: 26 * scale, height: 24 * scale)
     }
 }

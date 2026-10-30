@@ -104,17 +104,11 @@ struct JumpLayoutTile: View {
             width: (SchematicScale.tile.width ?? 0) * scale,
             height: SchematicScale.tile.height * scale
         )
-        .environment(\.schematicPalette, isSelected ? onFill : nil)
-        .accessibilityHidden(true)
-    }
-
-    /// The schematic's inks on the accent fill.
-    private var onFill: SchematicPalette {
-        SchematicPalette(
-            accent: paint.selectionInk,
-            ink: paint.selectionInk,
-            base: paint.selection
+        .environment(
+            \.schematicPalette,
+            paint.schematicPalette(selected: isSelected, lifted: isLifted)
         )
+        .accessibilityHidden(true)
     }
 
     @ViewBuilder private var selection: some View {

@@ -21,14 +21,6 @@ public enum ColorPaletteKeys {
                 prefix: "border"
             )
             + colorPaths(
-                DragVisual.CodingKeys.allCases,
-                prefix: "drag.ghost"
-            )
-            + colorPaths(
-                DragVisual.CodingKeys.allCases,
-                prefix: "drag.drop_zone"
-            )
-            + colorPaths(
                 StickyStyle.CodingKeys.allCases,
                 prefix: "sticky"
             )

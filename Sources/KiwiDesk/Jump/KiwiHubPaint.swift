@@ -114,6 +114,25 @@ extension KiwiHubPaint {
         if selected { return selectionInk }
         return lifted ? hoverInk : nil
     }
+
+    /// A layout tile's schematic inks on its fill: the selection's
+    /// ink selected, the hover ink lifted under the toggle, so no
+    /// accent stroke sits on a highlight; nil keeps the brand's.
+    func schematicPalette(selected: Bool, lifted: Bool) -> SchematicPalette? {
+        if selected {
+            return SchematicPalette(
+                accent: selectionInk,
+                ink: selectionInk,
+                base: selection
+            )
+        }
+        guard tinted, lifted, let hoverInk else { return nil }
+        return SchematicPalette(
+            accent: hoverInk,
+            ink: hoverInk,
+            base: rowHover
+        )
+    }
 }
 
 extension View {

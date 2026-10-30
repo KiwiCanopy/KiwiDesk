@@ -12,14 +12,18 @@ import Testing
 @Suite("Floating drag visuals", .serialized)
 @MainActor
 struct FloatingDragVisualTests {
+    /// The ghost is on, so its absence below is the gate's and not
+    /// the fresh-setup default's (#2797).
     private func makeCore() -> KiwiCore {
-        makeTestCore(
+        let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
                 .appendingPathComponent(
                     "kiwi-floatdrag-\(UUID().uuidString)"
                 )
         )
+        core.tiler.settings.dragGhost.enabled = true
+        return core
     }
 
     private func addWindow(
