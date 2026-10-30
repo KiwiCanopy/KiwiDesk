@@ -41,7 +41,11 @@ extension KiwiCore {
     /// tracked window moving, so the settle probe, which reads a
     /// grace after each window's own settle, has read first — asked
     /// per window, the heal reading every answer — or once the
-    /// deadline has passed.
+    /// deadline has passed. A slow app's read can still land after
+    /// the heal's ask and is judged against it: the heal asks at or
+    /// above the learned floor, so only #1055's lowered-minimum
+    /// signal waits for the next apply. Accepted; a longer delay
+    /// only slows every Save.
     func payApplyHealPass(
         until deadline: ContinuousClock.Instant,
         restedAtLastLook: Bool
