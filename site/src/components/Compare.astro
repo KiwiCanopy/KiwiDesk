@@ -188,6 +188,16 @@ const rows = [
   // means exactly that, and the table note links KiwiDesk's answer.
   "overflow",
   "onscreen",
+  // Checked 2026-10-30 against each tool's own docs: yabai's wiki
+  // Configuration page and CHANGELOG (borders removed in 6.0.0);
+  // AeroSpace's README ("Fancy appearance features are not
+  // practical") and its goodies page; Rift's
+  // reference/configuration/ui; OmniWM's README and
+  // omniwm.app/omnishell/configuration/profiles-palettes/.
+  // OmniWM's OmniShell, unreleased in v0.7.6, adds an in-app style
+  // gallery: recheck the OmniWM cell when it ships. The table note
+  // links the gallery itself.
+  "looks",
   "licence",
   "permissions",
   "sip",
@@ -338,7 +348,9 @@ const jsonLd = [
       .replace("{/guide}", "</a>")
       .replace("{overflow}",
         `<a href="${src.luaRef}#when-windows-no-longer-fit">`)
-      .replace("{/overflow}", "</a>")} />
+      .replace("{/overflow}", "</a>")
+      .replace("{looks}", `<a href="${localePath(lang, "/looks/")}">`)
+      .replace("{/looks}", "</a>")} />
   </p>
 
   <section class="cmp__anchors" aria-labelledby="different">
