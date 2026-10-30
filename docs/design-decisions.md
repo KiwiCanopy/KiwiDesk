@@ -10601,11 +10601,11 @@ lens's chip, the draft's lens.
 
 **A composite question needs a composite picture, in the colours
 the user actually set.** (#793, owner 2026-08-16.) Advanced
-Colours edits twenty-five colours in four groups, and four group
-previews can answer "is this row right?" while leaving "do these
-work *together*?" unanswerable without saving and looking at the
-real desktop. The accent ladders, the two rings, the state marks
-and the drag pair are judged against each other. So the panel
+Colours edits its colours in groups, and group previews can
+answer "is this row right?" while leaving "do these work
+*together*?" unanswerable without saving and looking at the real
+desktop. The accent ladders, the two rings and the state marks
+are judged against each other. So the panel
 draws one scene holding every role at once — which does not
 contradict that page's own reasoning: grouping by *where you see
 it* decides the ROWS, and never settled whether the PICTURE should
@@ -14909,9 +14909,7 @@ don't assume from tone.
   tinted glyph is the *entire* active state — the item's own fill
   is clear. It is the largest mark either bar makes, so a palette
   that gives it the second hue has the subordinate colour
-  outshouting the item it qualifies. Neither palette loses the hue
-  it gave up: both still carry it on `drag.drop_zone.*`, where a
-  second signal reads as distinct rather than as competing. Where
+  outshouting the item it qualifies. Where
   the *focused* accent sits is the separation clause above's
   decision, not this one's.
 - **A primary that cannot carry the ring is LIGHTENED, never
@@ -15128,19 +15126,22 @@ still tiles cleanly with unfocused rings on: each ring reaches its
 width into the 10 pt default inner gap, so `2 × 5 = 10` fills the
 gap edge-to-edge without overlap (6 pt would overlap). That
 couples the width default to the gap default — changing either
-without the other re-opens or overlaps the ring band. The ring's ~12° hue shift (#578) is the
+without the other re-opens or overlaps the ring band. The ring's
+~12° hue shift (#578) is the
 one place the green-forward identity's rule for ink and borders —
 keep the hue, drop the lightness where a role needs contrast — is
 broken: at the contrast-mandated lightness the 84° hue had no
 non-mossy option left, so hue moved where lightness could not. The
 bars keep 84°; only the ring leaves it.
 
+:::unreleased
 **The drag pair needs no colour-vision floor (#2797).** Origin
 and target were once the only two overlays on screen at once
 that had to separate by hue, and #511 held them to the accents'
 floor. They now separate by material and lightness (▸ Drag
 markers separate by material, not hue), which every viewer
 reads, so the floor and its guard retired with the hues.
+:::
 
 The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
@@ -15205,7 +15206,8 @@ treat it as one role, held apart from a second accent by the
 colour-vision pair floor (active item against the Space Bar's
 focused window).
 So the colours open with two role groups side by side,
-**Accent** and **Second accent**, one half of that pair each, and groups by surface everywhere else, where the
+**Accent** and **Second accent**, one half of that pair each, and
+groups by surface everywhere else, where the
 premise holds. A role group is not a second home: every colour
 still renders in one place, which is why the ring's row there is
 "Focus border" and "Focused window" names only the Space Bar ink.
@@ -15298,6 +15300,7 @@ list from the Home grid's card order, pinned set-equal to it by
 page above Bars would answer "App Bar" with a grid of swatches
 instead of with the App Bar's own card.
 
+:::unreleased
 **Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
 window's position with another), and its two toggles say what
@@ -15305,6 +15308,7 @@ each one marks ("Show drop zone", "Mark where the window came
 from") instead of naming the marker. Section captions are a
 `SettingsSection` affordance, so other groups can adopt the same
 pattern.
+:::
 
 **[Principle] The drop target follows the cursor; a
 cross-display drop MOVES, a same-display drop swaps.** (#492.)
@@ -15578,9 +15582,17 @@ stroke's, derived once as `TilingSettings.windowStroke`, and the
 ghost and the drop zone store no width or radius of their own
 (#1742, owner ruling 2026-09-28). Gaps & Borders asks each
 question once, in a card above the sections that draw the
-strokes. The two markers keep the corner style alone: their lines
-are fixed by their design — the ghost's two-tone outline, the
-drop zone's rim — so the width is the ring's (#2797).
+strokes.
+
+:::unreleased
+**The drag markers keep the corner style alone (#2797).** Their
+lines are part of a fixed design — the ghost's two-tone outline,
+the drop zone's rim — that no setting reaches, so no second answer
+exists to disagree with the ring's, and the width question is the
+ring's alone. The corner style still reaches them, because a
+marker traces the slot a window will fill and the window's corners
+are the border's.
+:::
 
 The rejected shape is a **Use one width for all borders** toggle
 over two masters, with the per-stroke sliders left on screen and
@@ -15642,6 +15654,7 @@ decided, so a stored value reads as it did.
 
 **[Rationale]**
 
+:::unreleased
 **Both drag markers are drawn inside their slot, with no
 alignment to set** (#754, #2797). The markers exist to answer
 one question — where will this window land. Inside, the marker's
@@ -15653,6 +15666,7 @@ the markers do not share — it surrounds a real window whose
 pixels must not be covered — so "match the ring" copies its
 result without its reason. Inside also survives every gap:
 adjacent markers sit flush and both stay wholly visible.
+:::
 
 ### App Bar
 
@@ -18004,6 +18018,7 @@ above, and a row reading On over glass the machine is not
 drawing leaves a flip that changes nothing on screen with no
 in-app word why.
 
+:::unreleased
 **The drag markers and the sticky mark stay see-through under it,
 never made opaque** (#1620, #1621, #2797). A marker exists to be
 seen through: an opaque drop zone would hide the window a drop
@@ -18012,6 +18027,7 @@ about 22 % with its rim in place of the frosted plate, the
 ghost's outline draws as always, and the mark draws its
 `.hudWindow` badge — a disc in the colour, or the bare glyph on
 Automatic.
+:::
 
 **The panel's key did not merge with the bars'**: separate
 leaves, one row, through `SettingKey.masterWrites`. The bars
@@ -18091,12 +18107,15 @@ took nearly all the lift from the default green ring, which is
 the one most people see; it traded the look the owner approved
 at the sitting for a guarantee the band already gives.
 
+:::unreleased
 **The drop zone's glass is thinned (owner, device 2026-09-25).**
 It lies over the window a drop would swap with, which should stay
 readable through it; `.clear` is already the material's lightest
 style, so the view's own opacity is the one public strength left,
 and the blur material takes the same opacity where glass is off.
+:::
 
+:::unreleased
 **Every drag marker sits at the normal level, ordered directly
 beneath the window being dragged and re-ordered there on every
 move** (#1620, #2797). At the floating level a glass marker would
@@ -18104,6 +18123,7 @@ blur the window in hand whenever it crossed its home slot or
 hovered the target, and a flat one covered the bars and the
 pocket's handle. Beneath it, the markers still sit above the
 windows below, and the home slot is empty for the drag.
+:::
 
 **The Settings drag preview hosts Core's marker, glass and
 all.** (#1645.) It draws the engine's own `DragMarkerView`,
@@ -18259,7 +18279,8 @@ The anchor stays capped at `maxAlpha`. Fill fade governs
 KiwiShelf's Fill and the hover drawn on it: the bars, a hovered
 bar item, the overflow marks and their list, the peek, and the
 panels the toggle tints. The sticky mark has a colour of its
-own and keeps #1622's fade; the drag markers wear none. No crossing is owed, because an absent key
+own and keeps #1622's fade; the drag markers wear none. No
+crossing is owed, because an absent key
 decodes 100, which is the look every file already had.
 
 Fill fade is a look key, so a bundled look sets its own (owner,

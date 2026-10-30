@@ -305,7 +305,7 @@
   "colors.dimmed.xref": "Les couleurs estompées ici ne sont pas dessinées pour l'instant — activez ce qu'elles colorent dans %1$@.",
   "colors.focused_item_inert.xref": "« %1$@ » ne teinte rien tant que « %2$@ » est réglé sur « %3$@ » — réglez-le sur « %4$@ » dans %5$@.",
   "colors.front_app_off.help": "Aucun segment de l'app au premier plan n'est dessiné, son indicateur ne l'est donc pas. Activez « %1$@ » dans %2$@.",
-  "colors.glass.caption": "Un matériau translucide sur les deux barres, %1$@, la silhouette et la zone de dépôt, la marque Sticky et les plaques que fait glisser un changement d'espace.",
+  "colors.glass.caption": "Un matériau translucide sur les deux barres, %1$@, la zone de dépôt, la marque Sticky et les plaques que fait glisser un changement d'espace.",
   "colors.include_row.a11y": "Inclure « %1$@ » dans « %2$@ »",
   "colors.kiwishelf_border_off.help": "La bordure est désactivée, sa couleur n'est donc pas dessinée. Activez « %1$@ » dans %2$@.",
   "colors.kiwishelf_border_off.xref": "La couleur de la bordure n'est pas dessinée tant que « %1$@ » est désactivé — activez-le dans %2$@.",

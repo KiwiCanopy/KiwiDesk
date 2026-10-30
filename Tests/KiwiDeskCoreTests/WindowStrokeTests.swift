@@ -55,11 +55,13 @@ struct WindowStrokeTests {
         }
     }
 
+    /// The corners still follow the border; the markers' widths are
+    /// fixed since #2797, so their verbs name no replacement.
     @Test(
-        "the per-stroke verbs are retired to the border's",
+        "the per-stroke verbs are retired",
         arguments: [
-            ("drag.set_ghost_border_width", "border.set_width"),
-            ("drag.set_drop_zone_border_width", "border.set_width"),
+            ("drag.set_ghost_border_width", "look is fixed"),
+            ("drag.set_drop_zone_border_width", "look is fixed"),
             ("drag.set_corner_radius", "border.set_corner_style"),
         ]
     )
@@ -107,6 +109,11 @@ struct WindowStrokeTests {
             (
                 "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
                 "settings.windowStroke.cornerRadius", 1
+            ),
+            // Both markers are handed that read.
+            (
+                "Sources/KiwiDeskCore/Tiling/KiwiCore+DragMove.swift",
+                "cornerRadius: corner,", 2
             ),
             (
                 "Sources/KiwiDesk/Settings/Components/GapsAndBorders/"

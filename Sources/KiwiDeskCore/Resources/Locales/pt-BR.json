@@ -305,7 +305,7 @@
   "colors.dimmed.xref": "As cores esmaecidas aqui não são desenhadas agora — ative o que elas colorem em %1$@.",
   "colors.focused_item_inert.xref": "“%1$@” não colore nada enquanto “%2$@” estiver em “%3$@” — mude para “%4$@” em %5$@.",
   "colors.front_app_off.help": "Nenhum segmento do app em primeiro plano é desenhado, então seu indicador não é desenhado. Ative “%1$@” em %2$@.",
-  "colors.glass.caption": "Um material translúcido sobre as duas barras, o %1$@, a silhueta e a zona de destino, a marca Sticky e as placas que uma troca de espaço desliza.",
+  "colors.glass.caption": "Um material translúcido sobre as duas barras, o %1$@, a zona de destino, a marca Sticky e as placas que uma troca de espaço desliza.",
   "colors.include_row.a11y": "Incluir “%1$@” em “%2$@”",
   "colors.kiwishelf_border_off.help": "O contorno está desativado, então sua cor não é desenhada. Ative “%1$@” em %2$@.",
   "colors.kiwishelf_border_off.xref": "A cor do contorno não é desenhada enquanto “%1$@” estiver desativado — ative-o em %2$@.",

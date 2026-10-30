@@ -72,13 +72,6 @@ public final class DragMarkerView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// The drop zone's surface for `glass`, already resolved through
-    /// `LiquidGlassGate.rendered(glass:)`.
-    static func surface(glass: Bool) -> Surface {
-        if glass { return .glass }
-        return LiquidGlassGate.reducesTransparency ? .flat : .material
-    }
-
     /// Draws `kind` the way a drag draws it. `storedGlass` is the
     /// `dragLiquidGlass` leaf, resolved through the gate at each
     /// draw and re-drawn live when Reduce transparency flips
@@ -99,13 +92,15 @@ public final class DragMarkerView: NSView {
 
     private func redrawPreview() {
         guard let input = preview else { return }
-        render(
-            input.kind,
-            cornerRadius: input.cornerRadius,
-            surface: Self.surface(
-                glass: LiquidGlassGate.rendered(glass: input.storedGlass)
+        switch input.kind {
+        case .ghost:
+            renderGhost(cornerRadius: input.cornerRadius)
+        case .dropZone:
+            renderDropZone(
+                cornerRadius: input.cornerRadius,
+                surface: LiquidGlassGate.rendered(frost: input.storedGlass)
             )
-        )
+        }
     }
 
     public override func viewDidMoveToWindow() {
@@ -141,31 +136,29 @@ public final class DragMarkerView: NSView {
         redrawPreview()
     }
 
-    /// Paints the marker inside its bounds; `surface` is already
-    /// resolved and only the drop zone reads it.
-    func render(
-        _ kind: Kind,
-        cornerRadius radius: CGFloat,
-        surface: Surface
-    ) {
+    /// Paints the ghost's outline inside its bounds.
+    func renderGhost(cornerRadius radius: CGFloat) {
         guard let layer else { return }
         layer.cornerRadius = radius
-        switch kind {
-        case .ghost:
-            layer.borderWidth = 0
-            layer.backgroundColor = NSColor.clear.cgColor
-            glass?.isHidden = true
-            material?.isHidden = true
-            outline(radius: radius)
-        case .dropZone:
-            halo.isHidden = true
-            line.isHidden = true
-            // A layer's border draws above its sublayers, so the rim
-            // stays over the glass and the material.
-            layer.borderWidth = Self.rimWidth
-            layer.borderColor = Self.rimColor.cgColor
-            frost(surface, radius: radius)
-        }
+        layer.borderWidth = 0
+        layer.backgroundColor = NSColor.clear.cgColor
+        glass?.isHidden = true
+        material?.isHidden = true
+        outline(radius: radius)
+    }
+
+    /// Paints the drop zone on `surface`, already resolved through
+    /// `LiquidGlassGate.rendered(frost:)`.
+    func renderDropZone(cornerRadius radius: CGFloat, surface: Surface) {
+        guard let layer else { return }
+        layer.cornerRadius = radius
+        halo.isHidden = true
+        line.isHidden = true
+        // A layer's border draws above its sublayers, so the rim
+        // stays over the glass and the material.
+        layer.borderWidth = Self.rimWidth
+        layer.borderColor = Self.rimColor.cgColor
+        frost(surface, radius: radius)
     }
 
     private func frost(_ surface: Surface, radius: CGFloat) {

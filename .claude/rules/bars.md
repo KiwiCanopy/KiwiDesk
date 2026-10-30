@@ -755,9 +755,9 @@ render content into it (#1517). Obligations:
   gates it** in `OverlayGlassGateTests` ▸ `everyGlassHostIsGated`,
   derived from `GlassPlate.make(` callers — the one copy of who
   hosts glass, so a new host reds until it has a gate. The drag
-  markers and the sticky mark host
+  drop zone and the sticky mark host
   glass the same way and take the same rule where each is
-  rendered — `handleDragMove` when a marker shows,
+  rendered — `handleDragMove` when the drop zone shows,
   `updateStickyMarks`, which the flip re-runs — handing the gate
   the stored leaf once (`OverlayGlassGateTests` ▸
   `overlaysTakeTheGate`, `OverlayGlassTests` ▸ `gateStandsDown`).
@@ -1520,7 +1520,7 @@ Obligations:
   outside `GlassPlate`, in either Sources tree).
 - **Build the fade in `GlassTint.apply`, from an edge every call
   site hands it — never a default** (#1622). A surface on no
-  screen edge — the drag markers, the sticky mark — hands `.top`
+  screen edge — the drag drop zone, the sticky mark — hands `.top`
   by ruling, a fade downward (#1620, #1621). The
   backdrop is a `GlassBackdrop`, whose BACKING layer is the
   gradient so it rides the plate glide; a sublayer would jump to
@@ -1537,7 +1537,8 @@ Obligations:
   site. An EMPTY Fill is no colour there —
   clear glass, nothing pinned — which the drop zone, untinted
   since #2797, and the sticky mark's Automatic both hand it
-  (`OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
+  (`DragMarkerSurfaceTests` ▸ `dropZoneIsUntintedGlass`,
+  `OverlayGlassTests` ▸ `uncolouredMarkIsClearGlass`). Ask
   whether a Fill has a colour through the one
   `KiwiShelf.hasColour` — empty, unparseable and zero alpha are
   one state (#2569) — and paint a solid Fill through
@@ -1599,7 +1600,7 @@ Obligations:
   `maxAlpha` premise — a floor on how much refraction survives —
   does not hold, by that ruling. A second thinned surface argues
   its own entry in `docs/design-decisions.md` first
-  (`OverlayGlassTests` ▸ `markerGlassIsThinned`).
+  (`DragMarkerSurfaceTests` ▸ `dropZoneIsUntintedGlass`).
 - **`GlassPlate` takes no colour at all.** It is geometry. The
   channel it used to drive carries none of a Fill's hue — see
   `docs/design-decisions.md` ▸ Liquid Glass for the measurement —

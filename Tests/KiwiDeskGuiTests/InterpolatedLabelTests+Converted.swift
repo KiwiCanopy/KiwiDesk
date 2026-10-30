@@ -144,10 +144,6 @@ extension InterpolatedLabelTests {
         "kiwishelf.tint_hub_and_plates.help": 1,
         "kiwishelf.fill_fade.help": 2,
         "kiwishelf.color.fill.help": 2,
-        // #1745: the switch by its own key, then the pane.
-        "colors.drag_border_off.help": 2,
-        "colors.drag_fill_off.help": 2,
-        "colors.drag_off.help": 1,
         // #1310: the focused-item row's link sentence names the
         // row, the picker, its current value and the value to
         // set — four by key; the fifth slot is the link.
@@ -244,7 +240,6 @@ extension InterpolatedLabelTests {
         // control at all. `KeybindingOverrideEnvironment` carries
         // the argument.
         "border.glow_size.disabled": 1,
-        "drag.disabled.help": 1,
         "border.fit_gaps.updated_new": 1,
         "scroll_grid.animate_focus_shifts.help": 1,
         "sticky.caption": 2,

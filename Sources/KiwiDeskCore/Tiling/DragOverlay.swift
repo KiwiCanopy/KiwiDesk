@@ -50,29 +50,23 @@ public final class DragOverlay {
         let marker = ghost ?? Marker(panel: makePanel())
         ghost = marker
         place(marker.panel, at: frame, below: window)
-        marker.view.render(
-            .ghost,
-            cornerRadius: cornerRadius,
-            surface: .flat
-        )
+        marker.view.renderGhost(cornerRadius: cornerRadius)
     }
 
     /// Marks the swap target's slot in AX coordinates, ordered like
-    /// the ghost. `glass` is the stored leaf already resolved through
-    /// `LiquidGlassGate.rendered(glass:)`.
-    public func showDropZone(
+    /// the ghost, on `surface` from `LiquidGlassGate.rendered(frost:)`.
+    func showDropZone(
         at frame: CGRect,
         cornerRadius: CGFloat,
-        glass: Bool,
+        surface: DragMarkerView.Surface,
         beneath window: CGWindowID
     ) {
         let marker = dropZone ?? Marker(panel: makePanel())
         dropZone = marker
         place(marker.panel, at: frame, below: window)
-        marker.view.render(
-            .dropZone,
+        marker.view.renderDropZone(
             cornerRadius: cornerRadius,
-            surface: DragMarkerView.surface(glass: glass)
+            surface: surface
         )
     }
 

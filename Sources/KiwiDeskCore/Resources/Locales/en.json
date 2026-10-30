@@ -305,7 +305,7 @@
   "colors.dimmed.xref": "Dimmed colors here aren't drawn right now — turn on what they color in %1$@.",
   "colors.focused_item_inert.xref": "“%1$@” tints nothing while “%2$@” is “%3$@” — set it to “%4$@” in %5$@.",
   "colors.front_app_off.help": "No front-app segment draws, so its indicator isn't drawn. Turn on “%1$@” in %2$@.",
-  "colors.glass.caption": "A translucent material over both bars, %1$@, the drag ghost and drop zone, the sticky mark and the plates a Space switch slides.",
+  "colors.glass.caption": "A translucent material over both bars, %1$@, the drag drop zone, the sticky mark and the plates a Space switch slides.",
   "colors.include_row.a11y": "Include %1$@ in %2$@",
   "colors.kiwishelf_border_off.help": "The border is off, so its color isn't drawn. Turn on “%1$@” in %2$@.",
   "colors.kiwishelf_border_off.xref": "The border color isn't drawn while “%1$@” is off — turn it on in %2$@.",

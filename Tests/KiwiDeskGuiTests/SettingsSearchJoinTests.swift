@@ -16,7 +16,7 @@ struct SettingsSearchJoinTests {
     /// No destination declares two catalog entries carrying one
     /// indexed census row's label key — the instanced drawers
     /// share `bars.style`, which no census row carries, so they
-    /// pass; a second `drag.border` control would not.
+    /// pass; a second `drag.ghost.show` control would not.
     @Test("one census label key names at most one entry")
     func labelKeysJoinAtMostOneEntry() {
         var checked = 0

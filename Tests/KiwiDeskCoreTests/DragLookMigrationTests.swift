@@ -190,14 +190,53 @@ struct DragLookMigrationTests {
             String(decoding: data, as: UTF8.self)
                 .split(separator: "\n", omittingEmptySubsequences: false)
         }
-        // Five knobs on each marker and four palette paths.
-        #expect(lines(data).count - lines(out).count == 14)
+        // Each marker's knobs and every drag palette path.
+        let paths = Self.colors.keys.filter { $0.hasPrefix("drag.") }
+        #expect(
+            lines(data).count - lines(out).count
+                == 2 * Self.knobs.count + paths.count
+        )
         #expect(!mentionsRetired(out))
         // The kiwishelf's own `border` switch is no marker's knob.
         let edited = try root(out)
         let settings = try #require(edited["settings"] as? [String: Any])
         let shelf = try #require(settings["kiwishelf"] as? [String: Any])
         #expect(shelf["border"] != nil)
+    }
+
+    /// Not idempotent by construction — the walk ignores depth — so
+    /// it stands down at the formats it introduced (#1354's shape).
+    @Test("the step stands down at its own floors")
+    func standsDownAtTheFloor() throws {
+        let floors: [(key: String, format: Int, extra: [String: Any])] = [
+            (
+                "settings", ConfigMigration.dragLookProfileFormat,
+                ["monitor_sets": [String: Any]()]
+            ),
+            ("settings", ConfigMigration.dragLookGuiFormat, [:]),
+        ]
+        for floor in floors {
+            var root = floor.extra
+            root["format"] = floor.format
+            root[floor.key] = try legacySettings()
+            let data = try JSONSerialization.data(withJSONObject: root)
+            #expect(ConfigMigration.migratingRetiredDragLook(data) == nil)
+            root["format"] = floor.format - 1
+            let below = try JSONSerialization.data(withJSONObject: root)
+            #expect(ConfigMigration.migratingRetiredDragLook(below) != nil)
+        }
+        for (key, format) in [
+            ("palettes", ConfigMigration.dragLookPaletteFormat),
+            ("looks", ConfigMigration.dragLookLookFormat),
+        ] {
+            let data = try JSONSerialization.data(
+                withJSONObject: [
+                    "format": format,
+                    key: [["name": "P", "colors": Self.colors]],
+                ]
+            )
+            #expect(ConfigMigration.migratingRetiredDragLook(data) == nil)
+        }
     }
 
     @Test("a file without the retired keys is left alone")

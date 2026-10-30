@@ -305,7 +305,7 @@
   "colors.dimmed.xref": "I colori attenuati qui non vengono disegnati al momento — attiva ciò che colorano in %1$@.",
   "colors.focused_item_inert.xref": "«%1$@» non colora nulla finché «%2$@» è impostato su «%3$@» — impostalo su «%4$@» in %5$@.",
   "colors.front_app_off.help": "Non viene disegnato alcun segmento dell'app in primo piano, quindi il suo indicatore non viene disegnato. Attiva «%1$@» in %2$@.",
-  "colors.glass.caption": "Un materiale traslucido su entrambe le barre, su %1$@, sulla sagoma, sulla zona di rilascio, sul marcatore Sticky e sulle piastre che un cambio di spazio fa scorrere.",
+  "colors.glass.caption": "Un materiale traslucido su entrambe le barre, su %1$@, sulla zona di rilascio, sul marcatore Sticky e sulle piastre che un cambio di spazio fa scorrere.",
   "colors.include_row.a11y": "Includi «%1$@» in «%2$@»",
   "colors.kiwishelf_border_off.help": "Il contorno è disattivato, quindi il suo colore non viene disegnato. Attiva «%1$@» in %2$@.",
   "colors.kiwishelf_border_off.xref": "Il colore del contorno non viene disegnato finché «%1$@» è disattivato — attivalo in %2$@.",

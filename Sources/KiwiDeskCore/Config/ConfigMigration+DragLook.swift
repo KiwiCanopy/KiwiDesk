@@ -1,18 +1,14 @@
 import Foundation
 
-/// Retires the drag markers' look (#2797, `DragLookMigrationTests`,
-/// `ConfigMigrationRoutingTests`): the ghost's and the drop zone's
-/// colour, fill, border and alignment leave `drag.ghost` and
-/// `drag.drop_zone`, and their four palette paths leave every colour
-/// map — a palette, a look, a look's recorded origin. Changes no
-/// value — no decoder reads the keys since — and ends the file in
-/// the new shape, as `overflow_style`'s step did (#2235). Unscoped
-/// by depth: no other object is keyed `ghost` or `drop_zone`, and
-/// the dotted paths are unique spellings.
+/// Retires the drag markers' look (#2797, `DragLookMigrationTests`):
+/// the knobs leave `drag.ghost` and `drag.drop_zone`, the four
+/// palette paths every colour map. Stands down at the formats it
+/// introduced, so a later key of the same spelling is kept.
 extension ConfigMigration {
     /// Spelled rather than derived: a historical step keeps naming
     /// what it was written to name.
     static let dragMarkerKeys = ["ghost", "drop_zone"]
+    static let dragGroupKey = "drag"
     static let retiredDragKnobs = [
         "border", "border_color", "border_alignment", "fill",
         "fill_color",
@@ -23,8 +19,16 @@ extension ConfigMigration {
         }
     )
 
+    /// The formats this step introduced, per shape, spelled as history.
+    static let dragLookProfileFormat = 33
+    static let dragLookGuiFormat = 18
+    static let dragLookBundleFormat = 42
+    static let dragLookPaletteFormat = 3
+    static let dragLookLookFormat = 3
+
     @Sendable
     static func migratingRetiredDragLook(_ data: Data) -> Data? {
+        guard belowDragLookFloor(data) else { return nil }
         let needles = (dragMarkerKeys.map { "\"\($0)\"" } + ["\"drag."])
             .map { Data($0.utf8) }
         return surgicallyApplying(
@@ -35,8 +39,24 @@ extension ConfigMigration {
         )
     }
 
-    /// Tree walker: the knobs out of every `ghost` / `drop_zone`
-    /// object, the palette paths out of every object, at any depth.
+    private static func belowDragLookFloor(_ data: Data) -> Bool {
+        guard
+            let root = try? JSONSerialization.jsonObject(with: data)
+                as? [String: Any]
+        else { return false }
+        let format = root["format"] as? Int ?? 0
+        switch shape(of: root) {
+        case .bundle: return format < dragLookBundleFormat
+        case .profile: return format < dragLookProfileFormat
+        case .gui: return format < dragLookGuiFormat
+        case .palettes: return format < dragLookPaletteFormat
+        case .looks: return format < dragLookLookFormat
+        }
+    }
+
+    /// Tree walker: the knobs out of `drag.ghost` and
+    /// `drag.drop_zone`, the palette paths out of every object, at
+    /// any depth.
     static func withoutDragLook(_ node: Any) -> (Any, Bool) {
         if let dict = node as? [String: Any] {
             var out: [String: Any] = [:]
@@ -46,14 +66,10 @@ extension ConfigMigration {
                     changed = true
                     continue
                 }
-                if dragMarkerKeys.contains(key),
-                    var marker = value as? [String: Any]
-                {
-                    for knob in retiredDragKnobs
-                    where marker.removeValue(forKey: knob) != nil {
-                        changed = true
-                    }
-                    out[key] = marker
+                if key == dragGroupKey, let drag = value as? [String: Any] {
+                    let (stripped, did) = withoutDragKnobs(drag)
+                    out[key] = stripped
+                    changed = changed || did
                     continue
                 }
                 let (child, childChanged) = withoutDragLook(value)
@@ -73,6 +89,25 @@ extension ConfigMigration {
             return (out, changed)
         }
         return (node, false)
+    }
+
+    /// `drag` with each marker's knobs removed.
+    private static func withoutDragKnobs(
+        _ drag: [String: Any]
+    ) -> ([String: Any], Bool) {
+        var out = drag
+        var changed = false
+        for marker in dragMarkerKeys {
+            guard var visual = drag[marker] as? [String: Any] else {
+                continue
+            }
+            for knob in retiredDragKnobs
+            where visual.removeValue(forKey: knob) != nil {
+                changed = true
+            }
+            out[marker] = visual
+        }
+        return (out, changed)
     }
 
     /// The textual edit: the knobs deleted inside each marker's own

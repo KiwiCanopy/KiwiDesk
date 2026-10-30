@@ -154,8 +154,8 @@ struct GlassCard: View {
         L(
             "colors.glass.caption",
             "A translucent material over both bars, %1$@, the "
-                + "drag ghost and drop zone, the sticky mark and the "
-                + "plates a Space switch slides.",
+                + "drag drop zone, the sticky mark and the plates a "
+                + "Space switch slides.",
             JumpScope.panelName
         )
     }

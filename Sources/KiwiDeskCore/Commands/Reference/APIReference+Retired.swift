@@ -67,10 +67,8 @@ extension APIReference {
         // The centred strip draws one more glyph at a row's end,
         // so the count is a span, not a cap (#1528).
         map["space_bar.set_glyph_cap"] = "space_bar.set_glyph_span"
-        // Every window stroke takes the border's width and
-        // corners (#1742).
-        map["drag.set_ghost_border_width"] = "border.set_width"
-        map["drag.set_drop_zone_border_width"] = "border.set_width"
+        // Every window stroke takes the border's corners (#1742);
+        // the markers' widths are fixed (#2797, `retiredReasons`).
         map["drag.set_corner_radius"] = "border.set_corner_style"
         map["pull_or_spawn"] = "focus_or_spawn"
         // A bar is never off, only hidden until its shortcut (#761).
@@ -123,7 +121,7 @@ extension APIReference {
         }
         // The drag markers' look is fixed (#2797).
         for marker in ConfigMigration.dragMarkerKeys {
-            for knob in ConfigMigration.retiredDragKnobs {
+            for knob in ConfigMigration.retiredDragKnobs + ["border_width"] {
                 map["drag.set_\(marker)_\(knob)"] = dragLookIsFixed
             }
         }

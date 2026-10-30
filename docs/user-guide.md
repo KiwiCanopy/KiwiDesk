@@ -613,7 +613,7 @@ right-click menu tiles one.
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
-flat look instead.
+flat look instead, the drop zone a blur.
 :::
 
 It covers the floating mark too.

@@ -3960,8 +3960,8 @@ drag.set_drop_zone_enabled(true)
 
 ### drag.set_ghost_enabled
 
-**Expects:** `true` or `false` (default `false`; a profile saved
-before this keeps the value it stored).
+**Expects:** `true` or `false` (default `false`; a profile that
+already stores `enabled` keeps it).
 
 **Does:** shows or hides the ghost.
 
@@ -3996,9 +3996,6 @@ These verbs are retired. A call in `init.lua` is reported in
 Config Issues, naming what replaces it; over the CLI it fails
 with `<verb> was retired — use <replacement>`.
 
-- `drag.set_ghost_border_width` and
-  `drag.set_drop_zone_border_width` →
-  [`border.set_width`](#borderset_width).
 - `drag.set_corner_radius` →
   [`border.set_corner_style`](#borderset_corner_style).
 
@@ -4009,9 +4006,10 @@ A saved profile's `drag.corner_radius` and each visual's
 The markers' own look is retired with nothing to replace it, for
 the ghost and the drop zone alike: `drag.set_ghost_border`,
 `drag.set_ghost_border_color`, `drag.set_ghost_border_alignment`,
-`drag.set_ghost_fill`, `drag.set_ghost_fill_color` and their
-`drag.set_drop_zone_*` twins fail with
-`<verb> was retired: the drag markers' look is fixed`. A saved
+`drag.set_ghost_border_width`, `drag.set_ghost_fill`,
+`drag.set_ghost_fill_color` and their `drag.set_drop_zone_*`
+twins fail with a message starting `<verb> was retired: the drag
+markers' look is fixed`. A saved
 setup's values for them, and a palette's or a look's
 `drag.ghost.*` and `drag.drop_zone.*` colours, are dropped when
 KiwiDesk next reads the file.
@@ -4053,8 +4051,10 @@ touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
 
-The drag ghost and the drop zone draw their stroke at this width
-too.
+:::unreleased
+The drag markers draw lines of a fixed width, and take only the
+corner style from the border.
+:::
 
 **Example:**
 
@@ -4178,7 +4178,7 @@ magnitudes; a non-number fails.
 
 **Does:** paints a sheen on the top of the focused border, the
 shelf's [highlight](#kiwishelfset_highlight_width) and
-[border](#kiwishelfset_border), and the drag borders. A positive
+[border](#kiwishelfset_border). A positive
 value lightens the top toward white, a negative one darkens it
 toward black, each fading into the colour, which holds to the
 bottom; `0` draws none. `1` moves the top 90% of the way. Only
@@ -7309,17 +7309,9 @@ stripped, grouped by namespace — `set_gap_override` becomes
   "fallback_space": "1",      // rehome target
   "saved_at": "2026-07-04T12:00:00Z",
   "settings": {
-    "drag": {
-      "ghost": {
-        "enabled": true, "border": true,
-        "border_color": "#347957", "border_alignment": "inside",
-        "fill": true, "fill_color": "#34795740"
-      },
-      "drop_zone": {
-        "enabled": true, "border": true,
-        "border_color": "#C2790A", "border_alignment": "inside",
-        "fill": true, "fill_color": "#C2790A40"
-      }
+        "drag": {
+      "ghost": { "enabled": false },
+      "drop_zone": { "enabled": true }
     },
     "gap": {
       "global": {

@@ -21,9 +21,11 @@ struct DragFreshSetupPreviewTests {
         )
     }
 
-    @Test("A fresh setup's drag shows the drop zone and no ghost")
+    @Test(
+        "A fresh setup's drag shows the drop zone and no ghost",
+        .enabled(if: NSScreen.main != nil, "needs a screen for slots")
+    )
     func onlyTheDropZone() throws {
-        guard NSScreen.main != nil else { return }
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory

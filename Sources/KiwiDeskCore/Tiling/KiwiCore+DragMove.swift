@@ -195,8 +195,8 @@ extension KiwiCore {
             dragOverlay.showDropZone(
                 at: targetSlot,
                 cornerRadius: corner,
-                glass: LiquidGlassGate.rendered(
-                    glass: settings.dragLiquidGlass
+                surface: LiquidGlassGate.rendered(
+                    frost: settings.dragLiquidGlass
                 ),
                 beneath: id.raw
             )

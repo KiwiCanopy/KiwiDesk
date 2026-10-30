@@ -840,8 +840,8 @@ is review's (`HyperBarePressCueTests`, `RefusalCueSeamTests`).
 
 ## The sheen is one ramp, painted by the surface that owns the stroke
 
-`border.sheen` (#1644) reaches the focused ring, the shelf's
-highlight and border, and the drag borders. **A surface paints it
+`border.sheen` (#1644) reaches the focused ring and the shelf's
+highlight and border. **A surface paints it
 from `BorderSheen`'s colours** — `SheenRimView` for a view, the
 shared `BorderSheen.draw` for a context, a Settings picture
 through `SheenPaint` — never a ramp of its own, and reads the

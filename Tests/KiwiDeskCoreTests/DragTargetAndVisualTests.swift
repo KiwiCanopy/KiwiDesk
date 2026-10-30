@@ -43,8 +43,14 @@ struct DragVisualCommandTests {
     @Test("The retired look verbs fail and change nothing")
     func retiredLookVerbs() {
         let core = makeCore()
+        // Spelled here, not read off the step's list, which the
+        // retired map also derives from.
+        let knobs = [
+            "border", "border_color", "border_alignment",
+            "border_width", "fill", "fill_color",
+        ]
         for marker in ["ghost", "drop_zone"] {
-            for knob in ConfigMigration.retiredDragKnobs {
+            for knob in knobs {
                 let verb = "drag.set_\(marker)_\(knob)"
                 #expect(APIReference.retired[verb] != nil, "\(verb)")
                 #expect(

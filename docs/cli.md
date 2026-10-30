@@ -818,16 +818,14 @@ or a float rule floats
 that had the nudge off becomes `keep`, and a call to
 `set_float_nudge` fails naming its replacement.
 
-`drag.set_ghost_border_width` and
-`drag.set_drop_zone_border_width` fail naming `border.set_width`,
-and `drag.set_corner_radius` fails naming
-`border.set_corner_style`.
+`drag.set_corner_radius` fails naming `border.set_corner_style`.
 
 :::unreleased
-The drag markers' look is fixed: every `drag.set_ghost_*` and
-`drag.set_drop_zone_*` verb but `_enabled` fails with `<verb> was
-retired: the drag markers' look is fixed`, and the ghost is off
-for a fresh setup.
+The drag markers' look is fixed: for the ghost and the drop zone
+alike, `_border`, `_border_color`, `_border_alignment`,
+`_border_width`, `_fill` and `_fill_color` fail with a message
+starting `<verb> was retired: the drag markers' look is fixed`,
+and the ghost is off for a fresh setup.
 :::
 
 `bind_profile_to_desktop` files one profile per screen count on a

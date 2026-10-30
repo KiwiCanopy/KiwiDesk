@@ -115,6 +115,25 @@ struct PocketDropTests {
         #expect(core.pocketPlate.dragging == nil)
     }
 
+    /// The drop zone shows first, over window two's slot, so its
+    /// absence over the plate is the stand-down's (#2797).
+    @Test("over the plate the drop zone stands down")
+    func dropZoneStandsDown() throws {
+        let core = try makeCore()
+        defer { core.dragOverlay.hideAll() }
+        let slots = core.tiler.calculatedFrames(state: core.state)
+        let target = try #require(slots[two])
+        core.drag.cursorLocation = {
+            GeometryUtils.axPoint(CGPoint(x: target.midX, y: target.midY))
+        }
+        move(core, one)
+        try #require(core.dragOverlay.isDropZoneVisible)
+        point(core, onPlate: true)
+        move(core, one)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+        #expect(!core.dragOverlay.isDropZoneVisible)
+    }
+
     @Test("a drop off the plate pockets nothing")
     func dropOffPlate() throws {
         let core = try makeCore()

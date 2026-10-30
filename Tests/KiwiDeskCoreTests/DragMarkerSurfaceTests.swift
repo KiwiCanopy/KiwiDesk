@@ -45,6 +45,7 @@ struct DragMarkerSurfaceTests {
 
     /// The rim every drop zone surface wears, over a clear ground.
     private static func expectRim(_ marker: DragOverlay.Marker) {
+        #expect(DragMarkerView.rimWidth > 0, "no rim drawn")
         let layer = marker.view.layer
         #expect(layer?.borderWidth == DragMarkerView.rimWidth)
         #expect((Self.white(layer?.borderColor) ?? 0) > 0.5)
@@ -63,13 +64,14 @@ struct DragMarkerSurfaceTests {
         overlay.showDropZone(
             at: Self.slot,
             cornerRadius: Self.radius,
-            glass: true,
+            surface: LiquidGlassGate.rendered(frost: true),
             beneath: CGWindowID(dragged.windowNumber)
         )
         let marker = try #require(overlay.dropZone)
         let glass = try #require(marker.glass, "no glass hosted")
         #expect(!glass.isHidden)
         try #require(DragMarkerView.glassOpacity < 1)
+        try #require(DragMarkerView.glassOpacity > 0)
         #expect(glass.alphaValue == DragMarkerView.glassOpacity)
         #expect(marker.tint.gradient?.colors == nil, "the glass is tinted")
         #expect(marker.view.material?.isHidden ?? true)
@@ -88,7 +90,7 @@ struct DragMarkerSurfaceTests {
         overlay.showDropZone(
             at: Self.slot,
             cornerRadius: Self.radius,
-            glass: false,
+            surface: LiquidGlassGate.rendered(frost: false),
             beneath: CGWindowID(dragged.windowNumber)
         )
         let marker = try #require(overlay.dropZone)
@@ -113,7 +115,7 @@ struct DragMarkerSurfaceTests {
         overlay.showDropZone(
             at: Self.slot,
             cornerRadius: Self.radius,
-            glass: LiquidGlassGate.rendered(glass: true),
+            surface: LiquidGlassGate.rendered(frost: true),
             beneath: CGWindowID(dragged.windowNumber)
         )
         let marker = try #require(overlay.dropZone)
@@ -176,7 +178,7 @@ struct DragMarkerSurfaceTests {
             overlay.showDropZone(
                 at: Self.slot,
                 cornerRadius: Self.radius,
-                glass: false,
+                surface: .material,
                 beneath: id
             )
         }
