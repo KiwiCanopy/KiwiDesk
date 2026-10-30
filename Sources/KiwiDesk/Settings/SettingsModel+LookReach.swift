@@ -28,7 +28,7 @@ extension SettingsModel {
     /// the write failed, with a warning.
     @discardableResult
     func applyLookSwitch(_ profile: String, _ pick: LookSwitch) -> Bool {
-        guard !isDirty else { return false }
+        guard !lookSwitchHeld else { return false }
         let sharing =
             pick == .make
             ? (profile: profile, look: LookBody(of: config.settings))
@@ -46,6 +46,13 @@ extension SettingsModel {
         }
         reload()
         return true
+    }
+
+    /// Whether the switch waits for the user: unsaved draft edits,
+    /// or live changes not yet kept to the file, which a write
+    /// would otherwise land unasked (#2820).
+    var lookSwitchHeld: Bool {
+        isDirty || unsavedLive?.leaves.isEmpty == false
     }
 
     /// The profiles other than `edited` that wear the shared look,

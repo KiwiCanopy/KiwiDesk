@@ -101,6 +101,21 @@ struct LookReachModelTests {
         #expect(try model.core.profiles.read(name: "Home").look == .own)
     }
 
+    @Test("an unkept live change refuses the switch")
+    func unkeptLiveRefuses() throws {
+        let model = try model()
+        var live = TilingSettings()
+        live.kiwishelf.fillColor = "#0A0B0F"
+        model.unsavedLive = UnsavedLiveSettings(
+            saved: TilingSettings(),
+            live: live,
+            leaves: ["kiwishelf.fill_color": live]
+        )
+        #expect(!model.isDirty)
+        #expect(!model.applyLookSwitch("Home", .own))
+        #expect(try model.core.profiles.read(name: "Home").look == nil)
+    }
+
     @Test("a dirty draft refuses the switch and writes nothing")
     func dirtyRefuses() throws {
         let model = try model()

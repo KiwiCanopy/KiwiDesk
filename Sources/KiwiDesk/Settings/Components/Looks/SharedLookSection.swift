@@ -30,7 +30,7 @@ struct SharedLookSection: View {
                 SettingsRowLabel(label: choiceLabel)
             } control: {
                 choice
-                    .disabled(greyReason != nil || model.isDirty)
+                    .disabled(greyReason != nil || model.lookSwitchHeld)
             }
             if let greyReason {
                 Text(greyReason)
@@ -39,7 +39,7 @@ struct SharedLookSection: View {
                     .fixedSize(horizontal: false, vertical: true)
             } else if let edited {
                 notes(edited)
-                if model.isDirty {
+                if model.lookSwitchHeld {
                     Text(
                         L(
                             "looks.reach.unsaved",
