@@ -51,39 +51,29 @@ struct JumpMoveHereTargetWiringTests {
         }
     }
 
-    /// A cross-screen arrival drops the capture it left with, in
-    /// the arrival arm ahead of the fold, which consumes the away
-    /// entry the drop asks about (#2770).
-    @Test("the arrival arm drops a stale capture ahead of the fold")
-    func arrivalDropsTheStaleCapture() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDeskCore/App/KiwiCore+Events.swift"
-            )
-        let source = try SourceScan.blankedSource(at: file)
-        let drop = try #require(
-            source.range(of: "dropCaptureLeftOnAnotherScreen(window)")
-        )
-        let fold = try #require(source.range(of: "state.apply(event)"))
-        #expect(drop.lowerBound < fold.lowerBound)
-    }
-
-    /// A hopped float is placed from the frame it reports, in the
-    /// arrival payment ahead of the focus hand-off: an app may report
-    /// its pre-move frame after macOS carried it (#2770).
-    @Test("the arrival payment places a hopped float")
-    func paymentPlacesTheFloat() throws {
+    /// A Move here hop's float is placed from the frame it reports,
+    /// after the filing and only for a hop: an app may report its
+    /// pre-move frame after macOS carried it, while a plain Jump's
+    /// un-minimize keeps its frame (#2770).
+    @Test("only a hop's payment places the float, after the filing")
+    func paymentPlacesTheHoppedFloat() throws {
         let file = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent(
                 "Sources/KiwiDeskCore/App/JumpState.swift"
             )
         let source = try SourceScan.blankedSource(at: file)
-        let pay = try #require(source.range(of: "func payMoveHereFocus("))
-        let tail = source[pay.upperBound...]
+            .split(whereSeparator: \.isWhitespace).joined()
+        let pay = try #require(source.range(of: "funcpayMoveHereFocus("))
+        let body = source[pay.upperBound...]
+        let file2 = try #require(body.range(of: "fileMembership(window,"))
         let place = try #require(
-            tail.range(of: "reanchorFloat(window, to: owed.space)")
+            body.range(
+                of: "}elseifowed.hopped,reanchorFloat(window,to:owed.space)"
+            )
         )
-        let focus = try #require(tail.range(of: "focusWindow(window,"))
+        let focus = try #require(body.range(of: "focusWindow(window,"))
+        #expect(file2.lowerBound < place.lowerBound)
         #expect(place.lowerBound < focus.lowerBound)
+        #expect(body.occurrences(of: "reanchorFloat(") == 1)
     }
 }

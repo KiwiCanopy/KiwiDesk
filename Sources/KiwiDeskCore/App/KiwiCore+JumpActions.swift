@@ -207,7 +207,13 @@ extension KiwiCore {
         }
         // It may land on another screen than `active`'s (#2770).
         enterMoveHereSpace(active)
-        jump.owe(away.id, in: active, at: wallClock(), relocates: true)
+        jump.owe(
+            away.id,
+            in: active,
+            at: wallClock(),
+            relocates: true,
+            hopped: true
+        )
         return true
     }
 

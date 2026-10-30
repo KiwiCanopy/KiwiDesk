@@ -44,7 +44,6 @@ extension KiwiCore {
                 TilingEngine.screen(
                     containing: window.frame
                 )?.kiwiDisplayID
-            dropCaptureLeftOnAnotherScreen(window)  // #2770
             // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()
             claimCrossSessionArrival(window)  // #1385

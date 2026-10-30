@@ -118,20 +118,8 @@ struct JumpMoveHereCrossScreenTests {
         #expect(Bridge.moves.map(\.1) == [20])
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("5"))
         #expect(core.jump.owed?.space == "5")
+        #expect(core.jump.owed?.hopped == true)
         #expect(core.state.workspaces.activeSpace == "5")
-    }
-
-    /// A float's capture is the place it left on the other
-    /// screen: delivered on its return, it pulled the window and its
-    /// ring back there. An unread screen keeps it.
-    @Test("a capture left on another screen is stale")
-    func captureElsewhere() {
-        let one = DisplayID(1)
-        let two = DisplayID(2)
-        #expect(KiwiCore.captureIsElsewhere(arriving: two, left: one))
-        #expect(!KiwiCore.captureIsElsewhere(arriving: one, left: one))
-        #expect(!KiwiCore.captureIsElsewhere(arriving: nil, left: one))
-        #expect(!KiwiCore.captureIsElsewhere(arriving: two, left: nil))
     }
 
     /// `gather` keeps its screen: another screen's Desktop is not
