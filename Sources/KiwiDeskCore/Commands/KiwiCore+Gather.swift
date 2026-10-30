@@ -74,17 +74,19 @@ extension KiwiCore {
             }
     }
 
-    /// Moves the app's windows up on another Desktop of `target`'s
-    /// screen onto the Desktop that screen shows, and only once the
-    /// bridge accepted points each one's remembered Space at
-    /// `target`. Another screen's Desktop is left alone: the
-    /// arrival's screen-home net (#1010) would file it there. An
-    /// UNFILED entry — no remembered Space at all — is skipped
-    /// too, since its arrival would take its app rule. Performed
-    /// is not applied (os-private-apis.md): the arrival, or the
-    /// reap's reconcile, is the verification. Returns the windows
-    /// whose move was dispatched, or nil where the bridge refused.
-    /// `only` narrows the hop to one window (#1875's Bring here).
+    /// Moves the app's windows up on another Desktop onto the
+    /// Desktop `target`'s screen shows, and only once the bridge
+    /// accepted points each one's remembered Space at `target`.
+    /// `gather` takes `target`'s screen's own Desktops alone; `only`
+    /// narrows the hop to one window (#1875's Move here), which may
+    /// come from another screen's Desktop, the bridge carrying it to
+    /// that screen so the arrival's screen-home net (#1010) files it
+    /// into `target` (#2770). An UNFILED entry — no remembered Space
+    /// at all — is skipped, since its arrival would take its app
+    /// rule. Performed is not applied (os-private-apis.md): the
+    /// arrival, or the reap's reconcile, is the verification.
+    /// Returns the windows whose move was dispatched, or nil where
+    /// the bridge refused.
     func hopAwayWindows(
         bundleID: String,
         into target: SpaceID,
@@ -92,17 +94,24 @@ extension KiwiCore {
     ) -> [WindowID]? {
         guard canDriveDesktops,
             let reach = awayReach(bundleID: bundleID),
-            let uuid = state.workspaces.display(of: target)
-                .flatMap(NativeSpaces.displayUUID(for:))
-                ?? reach.snapshot.mainUUID,
+            let uuid = Self.hopDisplayKey(
+                [
+                    state.workspaces.display(of: target)
+                        .flatMap(NativeSpaces.displayUUID(for:)),
+                    reach.snapshot.mainUUID,
+                ],
+                in: reach.snapshot
+            ),
             let shown = reach.snapshot.currentSpaces[uuid]
         else { return [] }
         let windows = reach.windows.map(\.window).filter { window in
-            (only == nil || window.id == only)
-                && state.rememberedSpaces[window.id] != nil
-                && reach.snapshot.spaces.first {
-                    $0.id == window.nativeSpace
-                }?.displayUUID == uuid
+            guard state.rememberedSpaces[window.id] != nil else {
+                return false
+            }
+            if let only { return window.id == only }
+            return reach.snapshot.spaces.first {
+                $0.id == window.nativeSpace
+            }?.displayUUID == uuid
         }
         guard !windows.isEmpty else { return [] }
         guard WMBridge.moveWindows(windows.map(\.id), to: shown) else {
@@ -129,6 +138,24 @@ extension KiwiCore {
             }
         }
         return windows.map(\.id)
+    }
+
+    /// The snapshot's key for the screen a hop lands on: the first
+    /// candidate it lists a current Desktop for, else its one key —
+    /// with "Displays have separate Spaces" off every Desktop sits
+    /// under one shared display id, which no screen's UUID names
+    /// (#2770).
+    nonisolated static func hopDisplayKey(
+        _ candidates: [String?],
+        in snapshot: DesktopSnapshot
+    ) -> String? {
+        if let named = candidates.compactMap({ $0 }).first(where: {
+            snapshot.currentSpaces[$0] != nil
+        }) {
+            return named
+        }
+        let keys = snapshot.currentSpaces.keys
+        return keys.count == 1 ? keys.first : nil
     }
 
     /// The refusal a key press would otherwise meet in silence:
