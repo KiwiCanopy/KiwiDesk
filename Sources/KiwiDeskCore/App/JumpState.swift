@@ -29,6 +29,8 @@ final class JumpState {
         /// Move here: file the window into `space` if it lands
         /// anywhere else; a Jump's focus only stands down there.
         let relocates: Bool
+        /// Move here's hop from another Desktop (#2770).
+        let hopped: Bool
     }
 
     private(set) var owed: Owed?
@@ -89,14 +91,16 @@ final class JumpState {
         _ window: WindowID,
         in space: SpaceID,
         at now: Date,
-        relocates: Bool
+        relocates: Bool,
+        hopped: Bool = false
     ) {
         owed = Owed(
             window: window,
             space: space,
             at: now,
             commandedAt: .now,
-            relocates: relocates
+            relocates: relocates,
+            hopped: hopped
         )
     }
 
@@ -146,6 +150,9 @@ extension KiwiCore {
         }
         if landed != owed.space {
             fileMembership(window, into: owed.space, from: landed)
+        } else if owed.hopped, reanchorFloat(window, to: owed.space) {
+            // A hopped float may report its pre-move frame (#2770).
+            onLog("move here: w\(window.raw) placed on its new screen")
         }
         focusWindow(window, refocusRetile: false, warp: true)
         onLog("move here: focus handed to w\(window.raw)")
