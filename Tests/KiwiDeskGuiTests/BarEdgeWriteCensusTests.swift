@@ -121,6 +121,10 @@ struct BarEdgeWriteCensusTests {
             "`updateBars()` hands it each display's onScreen copy"
         ),
         "HomeCardPlate+Bars.swift": (1, pictureDeferral),
+        "TilingSettings+PocketRest.swift": (
+            2,
+            "`pocketRest` and `pocketReservation` over onScreen (#2784)"
+        ),
     ]
 
     /// Settings readers of a bar's own edge (or of the bars'

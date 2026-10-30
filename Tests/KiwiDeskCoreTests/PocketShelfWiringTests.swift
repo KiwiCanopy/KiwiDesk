@@ -120,6 +120,9 @@ struct PocketShelfWiringTests {
     func risenListStaysOpen() throws {
         let (core, display) = try makeCore()
         core.tiler.settings.spaceBarStyle.edge = .top
+        // Hidden, so the bottom edge rests a handle, not the whole
+        // pocket (#2784).
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.execute("pocket.set_capacity", args: [.string("several")])
         core.pocketPlate.ordersPanel = true
         // The handle stands on the real screen's edge.

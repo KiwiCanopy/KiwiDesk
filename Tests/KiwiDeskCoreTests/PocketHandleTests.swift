@@ -27,6 +27,9 @@ struct PocketHandleTests {
             Display(id: id, name: "Main", frame: screen.frame)
         )
         core.state.workspaces.assign(space, to: id)
+        // Hidden bars leave the pocket its handle on any edge; under
+        // Always an edge no bar sits on rests it whole (#2784).
+        core.tiler.settings.spaceBarStyle.visibility = .hidden
         core.execute("pocket.set_capacity", args: [.string("several")])
         return core
     }
