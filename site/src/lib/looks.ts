@@ -23,9 +23,9 @@ const REPO = "KiwiCanopy/KiwiDesk-Looks";
 const RAW = `https://raw.githubusercontent.com/${REPO}/main/`;
 const INDEX_FORMAT = 1;
 const TIMEOUT_MS = 5000;
-/** The look format KiwiDesk 4.0.0 reads (`LookDocument.currentFormat`);
+/** The look format KiwiDesk 4.1.0 reads (`LookDocument.currentFormat`);
  * moves with the release that bumps that format. */
-export const RELEASED_LOOK_FORMAT = 2;
+export const RELEASED_LOOK_FORMAT = 3;
 /** The largest image the build downloads, in bytes. */
 const MAX_IMAGE_BYTES = 8_000_000;
 /** The longest image edge the build accepts, in pixels. */
