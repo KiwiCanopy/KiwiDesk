@@ -258,4 +258,61 @@ struct PocketDropTests {
         #expect(core.pocketPlate.dragging == nil)
         #expect(core.pocketPlate.specs.values.first == nil)
     }
+
+    /// Whether the pointer sits on the pocket, read at each move.
+    private final class Pointer { var onPocket = true }
+
+    @Test("a drag that starts on the pocket arms it only once off it")
+    func startOnThePocketArmsLater() throws {
+        let core = try makeCore()
+        let pointer = Pointer()
+        core.drag.cursorLocation = { [unowned core] in
+            let frame =
+                core.pocketPlate.specs.values.first?.frame ?? .zero
+            return pointer.onPocket
+                ? CGPoint(x: frame.midX, y: frame.midY)
+                : CGPoint(x: frame.minX - 400, y: frame.minY + 400)
+        }
+        // A title bar under the pocket: the drag lights nothing and
+        // its drop pockets nothing (#2793).
+        move(core, one)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        end(core, one)
+        #expect(core.state.pocketPhase(of: one) == nil)
+        // Off the pocket once, it arms.
+        move(core, one)
+        pointer.onPocket = false
+        move(core, one)
+        pointer.onPocket = true
+        move(core, one)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == true)
+    }
+
+    @Test("a drag that starts on a taken pocket is refused only once off it")
+    func takenRefusesOnlyOnceArmed() throws {
+        let core = try makeCore()
+        core.execute("pocket", args: [.number(Double(one.raw))])
+        var spoken: [String] = []
+        core.borders.announceRefusal = { spoken.append($0) }
+        let pointer = Pointer()
+        core.drag.cursorLocation = { [unowned core] in
+            let frame =
+                core.pocketPlate.specs.values.first?.frame ?? .zero
+            return pointer.onPocket
+                ? CGPoint(x: frame.midX, y: frame.midY)
+                : CGPoint(x: frame.minX - 400, y: frame.minY + 400)
+        }
+        // Started and let go on it, never off it: no refusal (#2793).
+        move(core, two)
+        end(core, two)
+        #expect(spoken.isEmpty)
+        // Off it once, the same drop is refused.
+        move(core, two)
+        pointer.onPocket = false
+        move(core, two)
+        pointer.onPocket = true
+        move(core, two)
+        end(core, two)
+        #expect(spoken.count == 1)
+    }
 }

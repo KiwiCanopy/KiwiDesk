@@ -430,20 +430,32 @@ stand-down, ahead of `syncShelves`**, so each shelf mounts this
 pass's pocket; a path that changes what it shows without a bar pass
 calls it, as an emptied pocket does, and a path that changes whether
 it STANDS — a drag starting or ending, a play's hold — calls
-`updateBars()`, since the slot is the plan's. **Whether it stands is
-the one `pocketStands`** — Several windows, a drag, a play — which
-the plan and the pocket both read (`PocketShelfWiringTests` ▸
-`dragStandsThePocket`). **Where it
-is is the one `pocketLanding(on:)`**: its slot on a bar edge, read
-off `ShelfArrangement.arrange(…pocket:)`, else the whole mark
-(`pocketMarkFrame(on:)`) where `TilingSettings.pocketRest` says
-`.mark` (#2784), else its handle risen — on an Auto edge where
-the shown pocket stands, joining the row of marks where it would
-meet it (`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
+`updateBars()`, since the bar pass refreshes what places it: the
+slot, the strip it stands inside and the stand-down. **Whether it
+shows is the one `pocketStands`** — Several windows, a drag, a play
+— while the shelf's plan states the pocket by the capacity alone, so
+a drag or a play moves no bar (#2793, `PocketShelfWiringTests` ▸
+`dragStandsThePocket`). **Where it is is the one
+`pocketPlace(on:)`, which the drawing and `pocketLanding(on:)` both
+read** (`PocketPlaceTests` ▸ `landingIsTheDrawing`): its slot on a
+bar edge under Several, read off `ShelfArrangement.arrange(…pocket:)`;
+under One window just inside that edge's bar strip at Position, a
+drawn one or an Auto bar's while it hides (`pocketStrip`), opening
+no slot (#2793, `PocketInsideTests`); else the whole mark
+(`pocketMarkFrame(on:)`) under One window, which draws no handle, or
+where `TilingSettings.pocketRest` says `.mark` (#2784); else its
+handle risen — on an Auto edge where the shown pocket stands,
+joining the row of marks where it would meet it
+(`ShelfMarkPlacement.row`, `ShelfRevealBandTests` ▸
 `handleStandsOnTheSlot`), else at Position — never a frame of its
-own beside them. On a bar
-edge it is a shelf section, its rules [bars.md](bars.md)'s ▸ The
-pocket is a shelf section.
+own beside them. The One-window pocket slides out of its edge
+(`BarMotion.playPocketEntrance`) and its panel orders out only at
+the slide back's landing, through the overlay's `afterLeave`, a
+return before it keeping the panel; every order-out drops its hover
+through the one `orderOut(_:on:)` (`PocketPlaceTests` ▸
+`leaveLandsOrReturns`). On a bar edge under Several it is a shelf
+section, its rules [bars.md](bars.md)'s ▸ The pocket is a shelf
+section.
 **What it counts, shows for and lists is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
 is the bars' click-held peek, its panel answering `shelfBeyondBars`
@@ -453,7 +465,10 @@ bar menus' Pocket Window door, so the light and the drop never
 disagree, and it takes a drop only where it is lit — a refused
 window drops as it would anywhere else, told why. It shows for a
 move alone, latched off once the gesture reads as a resize, ranks
-after the Space Bar at move and drop alike, and every way a gesture
+after the Space Bar at move and drop alike, takes a drop only once
+the pointer has been off it, so a drag that starts on its spot
+never pockets its window (#2793, `PocketDropTests` ▸
+`startOnThePocketArmsLater`), and every way a gesture
 ends — a drop, a bar relocate, a cancel — goes through
 `finishPocketGesture` (`PocketDropTests`).
 
