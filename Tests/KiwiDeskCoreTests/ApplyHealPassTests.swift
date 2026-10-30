@@ -86,6 +86,33 @@ struct ApplyHealPassTests {
         #expect(frame.width >= 700)
     }
 
+    /// The body waits out an animation still landing the apply's
+    /// frames, re-arming rather than healing over it.
+    @Test("The pass waits for the apply's frames to land")
+    func waitsOutTheAnimation() throws {
+        let (core, space) = makeHealedCore()
+        core.execute("stack.set_master_ratio", args: [.number(0.6)])
+        core.deferred.cancel(.applyHealPass)
+        core.deferred.sleep = { _ in
+            try? await Task.sleep(for: .seconds(3600))
+        }
+        let screen = try #require(NSScreen.main)
+        core.tiler.animation.animate(
+            window: WindowID(999),
+            on: screen,
+            from: CGRect(x: 0, y: 0, width: 100, height: 100),
+            to: CGRect(x: 800, y: 0, width: 100, height: 100)
+        )
+        #expect(core.tiler.animation.activeCount > 0)
+        core.payApplyHealPass()
+        #expect(core.deferred.isScheduled(.applyHealPass))
+        #expect(ratio(core, space) == 0.6)
+        core.tiler.animation.cancel(window: WindowID(999))
+        core.payApplyHealPass()
+        #expect(ratio(core, space) < 0.6)
+        core.deferred.cancel(.applyHealPass)
+    }
+
     @Test("An ordinary pass owes none")
     func eventPassOwesNothing() {
         let (core, _) = makeHealedCore()
