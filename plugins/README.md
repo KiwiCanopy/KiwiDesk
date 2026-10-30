@@ -6,7 +6,7 @@ for macOS. Its one plugin connects Claude Code to KiwiDesk's own MCP
 server, so you can set up and control KiwiDesk by asking Claude.
 
 ```sh
-/plugin marketplace add KiwiCanopy/kiwidesk-claude
+/plugin marketplace add KiwiCanopy/KiwiDesk-Claude
 /plugin install kiwidesk@kiwidesk
 ```
 

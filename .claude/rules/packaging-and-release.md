@@ -630,11 +630,11 @@ alternate way to build or publish one.
 from `plugins/` (#2258).** `.github/workflows/claude-plugin.yml`
 copies the PUBLISHED tag's `plugins/` folder — never `main`'s, and
 a manual dispatch refuses a draft's tag — to
-`KiwiCanopy/kiwidesk-claude` through that repository's own deploy
+`KiwiCanopy/KiwiDesk-Claude` through that repository's own deploy
 key, and stamps the release's version into the plugin manifest
 there; the source keeps no version of its own
 (`ClaudePluginSyncWorkflowTests`, `ClaudePluginSourceTests` ▸
-`noVersionInSource`). kiwidesk-claude is an exact mirror, so a
+`noVersionInSource`). KiwiDesk-Claude is an exact mirror, so a
 change to the marketplace or the plugin is made in `plugins/` and
 never in that repository. A new `kiwidesk mcp` tool owes the
 plugin's skill a line (`ClaudePluginSourceTests` ▸

@@ -27,6 +27,6 @@ jobs:
             echo "PLAN_DISPATCH_TOKEN not set; skipping"
             exit 0
           fi
-          gh api repos/KiwiCanopy/KiwiDesk-plan/dispatches \
+          gh api repos/KiwiCanopy/KiwiDesk-Plan/dispatches \
             -f event_type=issue-opened \
             -F "client_payload[number]=$NUMBER"
