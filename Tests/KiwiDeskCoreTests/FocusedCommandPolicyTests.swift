@@ -116,6 +116,8 @@ struct FocusedCommandPolicyTests {
         // Show or hide a hiding shelf, touching no window (#761).
         "space_bar.toggle_reveal",
         "app_bar.toggle_reveal",
+        // Flips a Space's stack side, touching no window (#2771).
+        "stack.toggle_stack_position",
     ]
 
     /// A command that does not act on the implicit focused window:
