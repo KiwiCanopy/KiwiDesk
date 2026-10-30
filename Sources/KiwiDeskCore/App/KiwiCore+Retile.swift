@@ -155,6 +155,8 @@ extension KiwiCore {
             )
         }
         _ = tiler.takePendingBoundPlacement()
+        // The heal stood down on an apply's probe (#2785).
+        if pass.probes { oweApplyHealPass() }
         // The window changing state hides its ring until it lands,
         // a held pass's included (#2676).
         if let stateChange { holdRingForStateChange(stateChange) }

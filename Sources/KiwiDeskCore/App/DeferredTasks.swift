@@ -110,6 +110,9 @@ final class DeferredTasks {
         /// Lights the standing pocket as a play's window lands in
         /// it or leaves it (#2776).
         case pocketLight
+        /// The ordinary pass an explicit apply owes, once its
+        /// frames settle (#2785).
+        case applyHealPass
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -120,7 +123,8 @@ final class DeferredTasks {
             case .focusFollow, .spaceSettle, .moveSettle,
                 .desktopSettle, .desktopMoveReap, .desktopFollowReap,
                 .desktopSwitchVerify, .borderDropSettle, .floatRaise,
-                .awayReachReap, .gatherReap, .pocketFocus:
+                .awayReachReap, .gatherReap, .pocketFocus,
+                .applyHealPass:
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
