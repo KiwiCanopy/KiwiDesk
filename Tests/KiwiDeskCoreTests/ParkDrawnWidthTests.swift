@@ -44,7 +44,7 @@ struct ParkDrawnWidthTests {
         let issued = TilingEngine.parkAtDrawnWidth(
             asked,
             drawn: drawn,
-            screens: [Self.screen, Self.right]
+            in: Self.screen
         )
         #expect(issued == park(width: 500, corner: .bottomLeft))
         #expect(issued.maxX - Self.screen.minX == TilingEngine.stashPeekX)
@@ -58,7 +58,7 @@ struct ParkDrawnWidthTests {
             TilingEngine.parkAtDrawnWidth(
                 asked,
                 drawn: drawn,
-                screens: [Self.screen]
+                in: Self.screen
             ) == asked
         )
     }
@@ -73,7 +73,7 @@ struct ParkDrawnWidthTests {
                 TilingEngine.parkAtDrawnWidth(
                     frame,
                     drawn: drawn,
-                    screens: [Self.screen]
+                    in: Self.screen
                 ) == frame
             )
         }
@@ -119,8 +119,12 @@ struct ParkDrawnWidthTests {
         core.retile(animated: false)
         let cover = try #require(core.tiler.runCovers[space])
         #expect(!cover.behind.isEmpty)
+        // The issued set names the park the retile sent, so a
+        // reader of where a window is agrees with it.
+        let issued = core.tiler.placedFrames(state: core.state)
         for id in cover.behind.keys {
             let sent = try #require(core.tiler.commandedFrame(of: id))
+            #expect(issued[id] == sent)
             #expect(core.tiler.looksStashed(sent))
             #expect(sent.width == 700)
             #expect(sent.maxX - Self.screen.minX == TilingEngine.stashPeekX)

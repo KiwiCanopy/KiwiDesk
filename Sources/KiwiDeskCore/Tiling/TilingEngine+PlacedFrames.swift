@@ -61,6 +61,11 @@ extension TilingEngine {
             if recordingCovers { runCovers[input.space.id] = cover }
             var computed = laidOut(input, placed: placed, cover: cover)
             if placed {
+                computed = parkingAtDrawnWidth(
+                    computed,
+                    state: state,
+                    in: input.context.parkBounds ?? input.context.bounds
+                )
                 computed = fillingMaximized(
                     computed,
                     input: input,
