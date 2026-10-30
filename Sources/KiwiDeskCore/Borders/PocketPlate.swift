@@ -44,6 +44,9 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     /// Whether the pocket is out of its handle, and at what side.
     private(set) var risen = false
     private var risenSide: CGFloat = 0
+    /// The shelf's outer margin, kept clear between the edge and the
+    /// handle as the bars' handles keep it (#2678).
+    private var outer: CGFloat = 0
     /// A left press landed on the plate; its release decides.
     private var armed = false
     private var tracking: NSTrackingArea?
@@ -76,13 +79,19 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     func listOpenChanged() { onListChanged() }
 
-    /// Stands as a section, or as a handle on `edge`, risen to
-    /// `side` where `risen`.
-    func stand(handle edge: AppBarEdge?, risen: Bool, side: CGFloat) {
+    /// Stands as a section, or as a handle on `edge` `outer` in from
+    /// it, risen to `side` where `risen`.
+    func stand(
+        handle edge: AppBarEdge?,
+        risen: Bool,
+        side: CGFloat,
+        outer: CGFloat = 0
+    ) {
         let rising = risen && !self.risen && edge != nil
         handleEdge = edge
         self.risen = risen
         risenSide = side
+        self.outer = outer
         needsLayout = true
         if rising, let edge {
             layoutSubtreeIfNeeded()
@@ -99,9 +108,31 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
             return
         }
         handle.isHidden = false
-        handle.frame = bounds
+        let room = Self.room(in: bounds, edge: edge, outer: outer)
+        handle.frame = room
         pocket.isHidden = !risen
-        pocket.frame = Self.risenFrame(in: bounds, edge: edge, side: risenSide)
+        pocket.frame = Self.risenFrame(in: room, edge: edge, side: risenSide)
+    }
+
+    /// The handle's room inside `bounds`, which reach the screen edge
+    /// so a push to it still finds the handle: `outer` in from `edge`.
+    static func room(
+        in bounds: CGRect,
+        edge: AppBarEdge,
+        outer: CGFloat
+    ) -> CGRect {
+        var room = bounds
+        switch edge {
+        case .bottom: room.size.height -= outer
+        case .top:
+            room.origin.y += outer
+            room.size.height -= outer
+        case .left:
+            room.origin.x += outer
+            room.size.width -= outer
+        case .right: room.size.width -= outer
+        }
+        return room
     }
 
     /// Where the risen pocket stands inside the handle's room: on its
@@ -150,6 +181,15 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     override func mouseExited(with event: NSEvent) { setHovered(false) }
 
+    /// Ends a hover whose exit will not come, telling nobody; true
+    /// where one was on.
+    func dropHover() -> Bool {
+        guard hovered else { return false }
+        hovered = false
+        paintLit()
+        return true
+    }
+
     func setHovered(_ on: Bool) {
         guard on != hovered else { return }
         hovered = on
@@ -157,8 +197,8 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         onHover(on)
     }
 
-    /// A window just went in: full ink a moment, then rest.
-    var justFilled = false {
+    /// A window just went in or out: the edge a moment, then rest.
+    var flashing = false {
         didSet { paintLit() }
     }
 
@@ -166,7 +206,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     func paintLit() {
         pocket.setLook(
             hovered || dropHovered
-                ? .lit : justFilled ? .active : .rest
+                ? .lit : flashing ? .active : .rest
         )
     }
 

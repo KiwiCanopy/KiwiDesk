@@ -145,6 +145,7 @@ final class ShelfPocketPiece {
             )
         )
         panel.onPress = { [weak self] in self?.onPress($0, $1) }
+        panel.level = BarPanel.pocketLevel
         root.wantsLayer = true
         root.layer?.masksToBounds = true
         panel.contentView = root

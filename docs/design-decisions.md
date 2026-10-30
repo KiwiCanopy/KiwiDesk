@@ -6155,10 +6155,11 @@ loses 4.0.0's values silently. The old `pocket.set_edge` and
 
 **Several windows keeps it on screen, empty included, on every
 display.** One window keeps the pocket out of sight, since its one
-window is a key away. Under Several windows the drop target and the
-list are what the pocket is for, so it stays where the user left it
-— faded while empty, a count badge from two inside — and on every
-display, so it is reachable wherever the pointer is without
+window is a key away. Under Several windows the drop target and
+the list are what the pocket is for, so it stays where the user
+left it — drawing no count: the list names what is inside
+and VoiceOver hears how many (owner, device 2026-10-29) — and on
+every display, so it is reachable wherever the pointer is without
 focusing that screen first. A click grows the list of the windows
 inside out of it, by app, each row taking its window out — the
 bars' own click-held list, so it closes and keys as theirs do.
@@ -6187,25 +6188,60 @@ panel of its own, beside the first, and plays every reveal, fade and
 glide on both from the same call, so the pocket comes and goes with
 the bars and never cuts, while the gap between them stays clear.
 A separate overlay following the shelf would copy every reveal
-style by hand (architect review, 2026-10-29). Full keeps one plate;
-Hug gives the pocket its own piece; Boxed gives it its own box.
+style by hand (architect review, 2026-10-29). The pocket, and the brief
+pocket a play draws where none stands, draw no plate or box of
+their own under any style: at a hugging shelf's
+corner or beside Boxed items it sits on the screen like a bag, and
+under Full on the shelf's plate (owner, device 2026-10-30, #2776,
+reversing its box under Boxed). A box says "a list of items"; the
+pocket is one object a window drops into, as the Trash sits bare at
+the Dock's end, and one bare look keeps one lit look everywhere.
 
-**On an Auto edge the handle joins the row of marks.** A hidden
-Auto bar leaves its mark at the edge; the pocket's handle takes one
-band more in that row, at the end it leans to, so the pointer
-reaches the bar and the pocket one band apart and never opens one
-for the other. On a Hidden or empty edge it stands alone at
-Position.
+**On an Auto edge the handle stands where the pocket shows.** A
+hidden Auto bar leaves its handle at the edge, and the pocket's
+handle stands where the pocket appears once that bar comes in, so
+the hand reaches for one place either way (owner, device
+2026-10-29, reversing the handle at the row's end). Where that
+place would meet the bars' handles it joins their row at its end,
+so a point never opens one for the other. On a Hidden or empty edge
+it stands alone at Position.
 
-**A fixed handle; the risen pocket at the bar's size, within 20 to
-32 pt.** On an edge no bar shows, the handle is an edge mark like
-the Space dots and the App Bar line, so its kiwis do not scale with
-the shelf. Risen — on hover, a drag or a put-in or take-out — the
-pocket takes the size it has on that edge's bar, so a Hidden bar's
-shortcut reveal and a hover show one object at one size. The floor
-is the handle's 20 pt kiwis, which a rise must never shrink; the
-ceiling, 1.6x, is as far as a growth still reads as the pocket
-coming out rather than a jump.
+**A fixed handle; the risen pocket at the bar's size, its mark
+within 20 to 32 pt.** On an edge no bar shows, the handle is an
+edge mark like the Space dots and the App Bar line: the kiwis
+alone, looking out from behind a tab, the pocket out of sight, one
+outer margin in from the edge as the bars' handles sit (owner,
+device 2026-10-29). Its kiwis do not scale with the shelf. Risen —
+on hover, a drag or a put-in or take-out — the pocket takes the
+size it has as a section on that edge's bar, mark for mark
+(#2776), so a Hidden bar's shortcut reveal and a hover show one
+object at one size. The floor is the handle's 20 pt kiwis, which a
+rise must never shrink; the ceiling, 1.6x, is as far as a growth
+still reads as the pocket coming out rather than a jump.
+
+**The pocket is the mark alone: faded while empty, in full colour
+while anything is inside, and edged in black and white while lit
+or as a window goes in or out** (owner, prototype 2026-10-30,
+#2776). It draws no box, so it lights by its mark: full on hover
+or under a drop, the edge then, and a slight lift
+for either. A bare
+mark sits straight on whatever window is behind it, and its ink
+follows the system appearance, not that window: black ink measured
+1.26:1 on a #1E1E1E window and white ink 1.00:1 on a white one, and
+most bundled pocket colours fall below 3:1 on one of the two
+(`ColorVision`). So the edge is two tones fixed whatever the pocket
+colour — a tight dark line inside a wider light halo, as the
+pointer is drawn — one of which reads on any ground; a single tone
+in the stitch's ink vanished on a window of that ink, and tones
+derived from the pocket colour collapse where it meets the
+background. Matching the edge to the window behind or the one
+dragged would need a screen capture, which needs Screen Recording.
+The lift is the cue that holds on every ground, a full pocket's
+included, where no fade can change; the Dock signals a hover and a
+drop target by size the same way. At rest the edge goes, since an
+edge standing on the screen read as a border. A hover ring in the
+highlight colour was weighed and set aside, since it reads like the
+focused-window ring; a coloured glow is the focused ring's alone.
 :::
 
 ### A window changing state animates under its own switch (#2676)
@@ -6235,8 +6271,8 @@ and maximize, not a style. A Genie stays refused because it means
 "minimized to the Dock" and needs a private API
 ([the overflow mark's peek](#layout-and-resize-behavior)).
 Pocketing draws a brief pocket rather than moving the real window
-(#2680, replacing #2676's slide to the park corner): a pocket in
-KiwiShelf's look appears at its placement for the moment a window
+(#2680, replacing #2676's slide to the park corner): a pocket
+appears at its placement for the moment a window
 goes in or out, the Space switch's plate flies between it and the
 window — our own overlay, redrawn at each size, never a capture —
 and it nods and fades. The window parks at once and comes back with
@@ -14509,10 +14545,14 @@ white line on a pocket the label ink judged against nothing. The
 pocket's outline is the colour itself and the kiwi slices draw no
 outline (owner, #2704): a contrasting outline read as a black
 border around the mark, so the stitch alone carries the inner
-contrast. Automatic keeps its outlines, which are the fill's ink
-and draw no border. No gap is cut out of the pocket around the
-slices: the owner judged it unnecessary for a pocket colour near
-the kiwi green.
+contrast. No gap is cut out of the pocket around the slices: the
+owner judged it unnecessary for a pocket colour near the kiwi green.
+
+:::unreleased
+Automatic draws the slices bare too (owner, 2026-10-29, #2776): its
+outline, in the fill's ink, read as a dark ring above the pocket
+wherever the kiwis show alone, as on the pocket's handle.
+:::
 
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).

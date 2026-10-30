@@ -11,7 +11,7 @@ import AppKit
 final class PocketPlateOverlay {
     /// What one display's pocket draws: its screen, its windows,
     /// its frame (AppKit), the gated shelf, the mark's colour, the
-    /// count badge, the edge it stands on and VoiceOver's name.
+    /// edge it stands on and VoiceOver's name.
     struct Spec: Equatable {
         let display: DisplayID
         /// The windows it lists.
@@ -19,14 +19,7 @@ final class PocketPlateOverlay {
         let frame: CGRect
         let shelf: KiwiShelf
         let markHex: String
-        /// Empty from two down: no badge is drawn.
-        let count: String
-        /// The badge takes the corner facing into the screen.
-        let badgeLeading: Bool
-        /// Its own piece of plate: Hug and Boxed; under Full the
-        /// shelf's plate runs beneath it.
-        let platePiece: Bool
-        /// The empty pocket, drawn faded.
+        /// The empty pocket at rest, drawn faded; lit, it shows full.
         let faded: Bool
         /// A dragged window over it that a drop would take.
         let dropHovered: Bool
@@ -36,11 +29,13 @@ final class PocketPlateOverlay {
         /// Out of its handle (hover, drag), at this side.
         var risen = false
         var risenSide: CGFloat = 0
+        /// The shelf's outer margin, between the edge and the handle.
+        var outer: CGFloat = 0
     }
 
     /// One display's pocket: a handle's panel, or a section's
     /// holder, which its shelf mounts and this fades.
-    private struct Shown {
+    struct Shown {
         let panel: PocketPlatePanel?
         let holder: NSView?
         let view: PocketPlateView
@@ -49,7 +44,8 @@ final class PocketPlateOverlay {
     private var shownViews: [DisplayID: Shown] = [:]
     private var sectionViews: [DisplayID: Shown] = [:]
     private(set) var specs: [DisplayID: Spec] = [:]
-    /// The displays whose handle the pointer is on.
+    /// The displays whose pocket the pointer is on, handle or
+    /// section.
     var hovered: Set<DisplayID> = []
     /// The displays a put-in or take-out plays on, each with the
     /// play that holds it out; the pocket stands out of its handle
@@ -74,16 +70,17 @@ final class PocketPlateOverlay {
     var markBands: [DisplayID: ClosedRange<CGFloat>] = [:]
     /// The window a drag moves, while one does (#2678).
     var dragging: WindowID?
-    /// Whether that window is over a pocket and a drop takes it.
-    var dropHovered = false
+    /// The display whose pocket that window is over, while a drop
+    /// takes it; only that pocket lights.
+    var dropHovered: DisplayID?
     /// The dropped window, its frame before the drag and where it
     /// was let go, which the brief pocket flies from.
     var dropStart: (window: WindowID, frame: CGRect, released: CGRect)?
     /// The gesture read as a resize, which shows no drop target.
     var resizing: WindowID?
 
-    /// The empty pocket's opacity.
-    static let fadedAlpha: CGFloat = 0.55
+    /// The empty pocket's opacity at rest (owner, #2776).
+    static let fadedAlpha: CGFloat = 0.4
 
     #if DEBUG
         /// Whether the pockets order their panels in; off in both
@@ -112,7 +109,7 @@ final class PocketPlateOverlay {
         return sectionViews[display]?.holder
     }
 
-    private func shown(_ spec: Spec) -> Shown? {
+    func shown(_ spec: Spec) -> Shown? {
         spec.handle == nil
             ? sectionViews[spec.display] : shownViews[spec.display]
     }
@@ -131,8 +128,9 @@ final class PocketPlateOverlay {
         for (display, shown) in shownViews
         where wanted[display]?.handle == nil {
             shown.panel?.orderOut(nil)
-            // An ordered-out handle hears no exit (#2678 review 20).
-            hovered.remove(display)
+            // An ordered-out handle hears no exit (#2678 review 20);
+            // a section's hover on that display stays its own.
+            if shown.view.dropHover() { hovered.remove(display) }
         }
         for spec in wanted.values { show(spec) }
         specs = wanted
@@ -143,37 +141,34 @@ final class PocketPlateOverlay {
             shown(spec)
             ?? made(spec.display, section: spec.handle == nil)
         let old = specs[spec.display]
-        if let old, spec.windows.count > old.windows.count {
-            flashFilled(shown.view, on: spec.display)
+        // A light running as the pocket changes form carries over.
+        if let old, old.handle != spec.handle,
+            self.shown(old)?.view.flashing == true
+        {
+            shown.view.flashing = true
+        }
+        // A play lights the pocket itself, as its window lands or
+        // leaves (`light`); a count change no play shows lights here.
+        if let old, playing[spec.display] == nil,
+            spec.windows.count != old.windows.count
+        {
+            let went = spec.windows.count > old.windows.count
+            let hold = went ? Self.inHold : Self.outHold
+            flash(shown, on: spec.display, for: hold)
         }
         // A form change reconfigures the other form's view.
         let changed = spec != old || old?.handle != spec.handle
         if changed {
-            shown.view.pocket.wear(
-                spec.shelf,
-                markHex: spec.markHex,
-                badge: spec.count.isEmpty ? nil : spec.count,
-                badgeLeading: spec.badgeLeading,
-                platePiece: spec.platePiece
-            )
+            shown.view.pocket.wear(markHex: spec.markHex)
             shown.view.handle.wear(
                 spec.shelf,
                 markHex: spec.markHex,
                 edge: spec.handle ?? .bottom,
                 kiwisOut: spec.risen
             )
-            shown.view.stand(
-                handle: spec.handle,
-                risen: spec.risen,
-                side: spec.risenSide
-            )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
-            // An ancestor fades, never the glass (bars.md ▸ glass
-            // alpha): the handle's panel, or the section's holder.
-            let alpha = spec.faded ? Self.fadedAlpha : 1
-            shown.panel?.alphaValue = alpha
-            shown.holder?.alphaValue = alpha
+            paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
             if let panel = shown.panel, panel.frame != spec.frame {
                 panel.setFrame(spec.frame, display: false)
@@ -185,13 +180,28 @@ final class PocketPlateOverlay {
                 )
             }
         }
+        orderIn(shown)
+        // Sized and ordered in first: under One window the handle is
+        // made in the pass it rises, and a rise played before showed
+        // none on device (#2776).
+        if changed {
+            shown.view.stand(
+                handle: spec.handle,
+                risen: spec.risen,
+                side: spec.risenSide,
+                outer: spec.outer
+            )
+        }
+    }
+
+    private func orderIn(_ shown: Shown) {
         guard let panel = shown.panel else { return }
         #if DEBUG
             guard ordersPanel else { return }
         #endif
-        if !panel.isVisible || changed {
-            panel.orderFrontRegardless()
-        }
+        // Its own level keeps it over the shelf; re-fronting on a
+        // change would put it over a peek grown out of it (#2776).
+        if !panel.isVisible { panel.orderFrontRegardless() }
     }
 
     /// Drops every display's pocket outside `live`, a display that
@@ -209,25 +219,9 @@ final class PocketPlateOverlay {
         specs = specs.filter { live.contains($0.key) }
     }
 
-    /// How long a put-in holds the pocket at full ink.
-    static let filledHold: TimeInterval = 1.2
     /// Each display's light, so one display's flash never strands
-    /// another's lit (#2678 review 8).
-    private var filledGeneration: [DisplayID: Int] = [:]
-
-    /// Holds `view` at full ink after a window went in, then lets it
-    /// rest — a timer, its own, since the light is no motion.
-    private func flashFilled(_ view: PocketPlateView, on display: DisplayID) {
-        let mine = (filledGeneration[display] ?? 0) + 1
-        filledGeneration[display] = mine
-        view.justFilled = true
-        DispatchQueue.main.asyncAfter(deadline: .now() + Self.filledHold) {
-            [weak self, weak view] in
-            guard let self, self.filledGeneration[display] == mine
-            else { return }
-            view?.justFilled = false
-        }
-    }
+    /// another's lit (#2678 review 8); `PocketPlateOverlay+Light`'s.
+    var flashGeneration: [DisplayID: Int] = [:]
 
     /// The shelf a pocket wears in `window`, its panel — the peek
     /// growing out of it wears it too.
@@ -256,9 +250,7 @@ final class PocketPlateOverlay {
                 defer: true
             )
         )
-        // The bars' peer; ordered in after its shelf's panel, which
-        // may run beneath it under Full.
-        panel.level = BarPanel.level
+        panel.level = BarPanel.pocketLevel
         // The pocket is beside the Spaces, so it is on every Desktop.
         panel.collectionBehavior = [
             .transient, .ignoresCycle, .canJoinAllSpaces, .stationary,

@@ -6,25 +6,15 @@ import SwiftUI
 /// edge no bar shows.
 extension KiwiShelfCard {
     var pocketEdgeRow: some View {
-        let label = SettingsCatalog.bars.kiwishelfPocketEdge.text
-        return DropdownRow(
-            label: label,
-            spokenValue: AppBarOptions.edgeName(
-                shelf.wrappedValue.pocketEdge
-            ),
+        SegmentedPicker(
+            SettingsCatalog.bars.kiwishelfPocketEdge.text,
+            selection: shelf.pocketEdge,
+            options: AppBarOptions.edge.map { ($0.1, $0.0) },
             help: L(
                 "kiwishelf.pocket_edge.help",
                 "The screen edge the Pocket sits on."
             )
-        ) {
-            Picker(label, selection: shelf.pocketEdge) {
-                ForEach(AppBarOptions.edgeOrder, id: \.self) {
-                    Text(AppBarOptions.edgeName($0)).tag($0)
-                }
-            }
-        } trailing: {
-            EmptyView()
-        }
+        )
         .searchAnchored(SettingsCatalog.bars.kiwishelfPocketEdge)
     }
 
