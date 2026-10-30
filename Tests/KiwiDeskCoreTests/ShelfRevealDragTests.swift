@@ -8,8 +8,9 @@ import Testing
 /// A window drag opens an Auto Space Bar, its drop targets (#2795):
 /// a dragged pointer pushing the edge or dwelling in the band
 /// reveals it, the App Bar stays hidden, and a drag-born reveal
-/// retracts as a hover reveal does. Every move arrives through the
-/// monitor's own delivery, so the drag flag's wiring is read too.
+/// retracts as a hover reveal does; a left drag that moves no
+/// window opens nothing. Every move arrives through the monitor's
+/// own delivery, so the drag flag's wiring is read too.
 @Suite("Shelf reveal on a drag (#2795)")
 @MainActor
 struct ShelfRevealDragTests {
@@ -17,6 +18,8 @@ struct ShelfRevealDragTests {
     final class Rig {
         let revealer = ShelfRevealer()
         var point = CGPoint(x: 500, y: 400)
+        /// The drag pipeline's verdict: a window move in flight.
+        var moving = true
         var deliver: ((CGPoint?, Bool) -> Void)?
         var timers: [(delay: TimeInterval, body: () -> Void)] = []
 
@@ -76,6 +79,7 @@ struct ShelfRevealDragTests {
         }
         rig.revealer.removeMonitor = { _ in }
         rig.revealer.location = { rig.point }
+        rig.revealer.windowMoving = { rig.moving }
         rig.revealer.schedule = { delay, body in
             rig.timers.append((delay, body))
             return ShelfRevealTimer()
@@ -165,6 +169,33 @@ struct ShelfRevealDragTests {
         #expect(rig.revealer.reveal(of: Self.app) == .hover)
         rig.send(CGPoint(x: 500, y: 400), dragging: true)
         #expect(rig.delays == [ShelfReveal.retractDelay])
+        rig.fireAll()
+        #expect(rig.revealer.reveal(of: Self.app) == .hidden)
+    }
+
+    /// A selection or a file dragged to the edge moves no window.
+    @Test("a left drag that moves no window opens nothing")
+    func nonWindowDragIsUnheard() {
+        let rig = make()
+        defer { rig.revealer.stop() }
+        rig.moving = false
+        rig.send(CGPoint(x: 500, y: 800), dragging: true)
+        rig.send(CGPoint(x: 500, y: 795), dragging: true)
+        #expect(rig.revealer.reveal(of: Self.space) == .hidden)
+        #expect(rig.timers.isEmpty)
+        #expect(!rig.revealer.arming.contains(Self.space))
+    }
+
+    /// The press lands inside the delay a plain move armed; the
+    /// drag's own events may not have arrived yet.
+    @Test("an App Bar dwell begun before the drag opens nothing")
+    func dwellBeforeTheDragRefuses() {
+        let rig = make()
+        defer { rig.revealer.stop() }
+        rig.moving = false
+        rig.send(CGPoint(x: 500, y: 4), dragging: false)
+        #expect(rig.delays == [ShelfReveal.revealDelay])
+        rig.moving = true
         rig.fireAll()
         #expect(rig.revealer.reveal(of: Self.app) == .hidden)
     }

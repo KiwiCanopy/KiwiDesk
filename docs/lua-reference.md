@@ -3512,11 +3512,10 @@ App Bar in monocle and scrolling.
   screen is on.
 
 :::unreleased
-A window drag opens an `"auto"` Space Bar the same way, so its
-Spaces take the drop: push the screen's edge inside the dots' band,
-or rest in the band. It goes back 0.5 s after the dragged pointer
-leaves the bar and its band. A drag never opens the App Bar, and a
-`"hidden"` bar keeps to its shortcut.
+A window drag opens an `"auto"` Space Bar as the pointer does
+above, so the window can be dropped on a Space
+([`move_to_space`](#move_to_space)); a drag never opens the App
+Bar, and a left drag that moves no window opens neither.
 :::
 
 A shown `auto` or `hidden` bar draws over the windows, so a

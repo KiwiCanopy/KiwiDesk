@@ -5,7 +5,8 @@ import Testing
 /// reveal is the shelf manager's one answer, and `updateBars()`
 /// hands the revealer this pass's hiding shelves before the shelves
 /// read them to keep or drop a panel; and both pointer monitors
-/// hear a left drag, flagged as one (#2795).
+/// hear a left drag, flagged as one, which counts only while the
+/// drag pipeline moves a window (#2795).
 @Suite("Shelf reveal wiring (#761)")
 struct ShelfRevealWiringTests {
     private static func source(_ path: String) throws -> String {
@@ -20,6 +21,13 @@ struct ShelfRevealWiringTests {
         let boot = try Self.source("App/KiwiCore+Bootstrap.swift")
         #expect(boot.contains("shelves.reveal.holds = {"))
         #expect(boot.contains("shelves.surfaceHolds(key)"))
+    }
+
+    @Test("A drag counts only while a window moves")
+    func windowMoveIsWired() throws {
+        let boot = try Self.source("App/KiwiCore+Bootstrap.swift")
+        #expect(boot.contains("shelves.reveal.windowMoving = {"))
+        #expect(boot.contains("self?.pocketPlate.dragging != nil"))
     }
 
     @Test("The revealer syncs before the shelves on both paths")

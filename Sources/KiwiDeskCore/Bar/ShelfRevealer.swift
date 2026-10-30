@@ -20,6 +20,10 @@ final class ShelfRevealer {
     /// the pointer left — the hover peek, a bar menu; wired in
     /// Bootstrap. A retract it holds is asked again later.
     var holds: @MainActor (ShelfManager.Key) -> Bool = { _ in false }
+    /// Whether a window move is in flight — the drag pipeline's
+    /// move verdict the pocket plate keeps, wired in Bootstrap. A
+    /// left drag that moves no window reveals nothing (#2795).
+    var windowMoving: @MainActor () -> Bool = { false }
     /// Installs the pointer monitors (`heard`): live in
     /// production, pinned inert by both `makeTestCore` twins
     /// (tests.md ▸ machine touch). A move delivered without a
@@ -148,10 +152,12 @@ final class ShelfRevealer {
         return true
     }
 
-    /// One pointer move, Cocoa screen space. A drag's move opens
-    /// only a Space Bar, its drop targets (#2795); it holds and
-    /// retracts any shown bar as a move does.
+    /// One pointer move, Cocoa screen space. A window drag's move
+    /// opens only a Space Bar, its drop targets (#2795), and holds
+    /// or retracts any shown bar as a move does; any other left
+    /// drag is not heard.
     func moved(to point: CGPoint, dragging: Bool = false) {
+        if dragging, !windowMoving() { return }
         for (key, target) in targets where target.hovers {
             if suppressed.contains(key) {
                 if !target.zone.contains(point) { suppressed.remove(key) }
@@ -199,6 +205,8 @@ final class ShelfRevealer {
             guard let target = self.targets[key],
                 self.reveal(of: key) == .hidden,
                 !self.yields(key),
+                // A drag begun during the delay opens no App Bar.
+                key.bar == .space || !self.windowMoving(),
                 target.band?.contains(self.location()) == true
             else {
                 let near = self.targets[key]?.near

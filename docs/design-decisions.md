@@ -16254,20 +16254,19 @@ dots already show the new Space. A look never carries the mode,
 which is functionality, not styling.
 
 :::unreleased
-A window drag opens an Auto Space Bar the same way, so a mouse user
-has its Spaces as drop targets (#2795, owner ruling, 2026-10-30):
-the dragged pointer pushing the edge inside the band, or resting in
-the band, reveals it in the shelf's own reveal style, and it
-retracts as a hover reveal does once the pointer leaves it. A drop
-on the bar keeps it shown under the pointer. Never at the drag's
-start: that would slide the bars in over the windows on every swap,
-where
-the auto-hidden Dock and Mission Control's Spaces bar both wait for
-an edge push. The drag opens the Space Bar alone, since an App Bar
-item takes no dropped window, and a Hidden bar keeps to its
-shortcut. The revealer hears the drag through its own pointer
-monitors, a left drag being a move with the button held; it costs
-no second tap.
+A window drag opens an Auto Space Bar by the same push or dwell, so
+a mouse user has its Spaces as drop targets (#2795, owner ruling,
+2026-10-30). Never at the drag's start: that would slide the Space
+Bar in over the windows on every swap, where the auto-hidden Dock
+waits for an edge push. The drag opens the Space Bar alone, since an
+App Bar item takes no dropped window, and a Hidden bar keeps to its
+shortcut. Only a window move counts, as the pocket plate's verdict
+reads it: a text selection or a file dragged to the edge, or a
+window's edge pulled to resize it, wants no Space, and a bar sliding
+in over it would cover what the drag aims at. A drag-born reveal
+retracts as a hover reveal does, once the pointer leaves the bar,
+rather than at the drop: a bar held for the rest of the drag would
+sit over the windows the user drags back to.
 :::
 
 *One placement rule, asked by every picture of it.* Where each
