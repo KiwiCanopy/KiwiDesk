@@ -7,21 +7,16 @@ import SwiftUI
 /// Shared asks first (`LookShareSheet`).
 extension SharedLookSection {
     var choice: some View {
-        Picker(
-            choiceTitle,
+        SegmentedPicker(
+            spokenLabel: choiceTitle,
+            hugsLabels: true,
             selection: Binding(
                 get: { follows },
                 set: { pick($0) }
-            )
-        ) {
-            Text(sharedTitle).tag(true)
-            Text(ownTitle).tag(false)
-        }
-        .pickerStyle(.segmented)
-        .labelsHidden()
+            ),
+            options: [(sharedTitle, true), (ownTitle, false)]
+        )
         .fixedSize()
-        .accessibilityLabel(choiceTitle)
-        .accessibilityValue(follows ? sharedTitle : ownTitle)
     }
 
     private var choiceTitle: String { L("looks.reach.choice", "Look") }

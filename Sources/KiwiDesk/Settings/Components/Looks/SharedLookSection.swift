@@ -102,7 +102,7 @@ struct SharedLookSection: View {
                     L(
                         "looks.shared.also_used_by",
                         "Also used by %1$@.",
-                        ListFormatter.localizedString(byJoining: users)
+                        LocalizedList.join(users)
                     )
                 )
                 .foregroundStyle(SettingsTheme.ink3)

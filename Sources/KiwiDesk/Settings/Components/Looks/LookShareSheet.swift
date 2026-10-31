@@ -71,7 +71,7 @@ struct LookShareSheet: View {
             "“%1$@” has its own look. These profiles use the "
                 + "shared look: %2$@",
             request.profile,
-            ListFormatter.localizedString(byJoining: request.users)
+            LocalizedList.join(request.users)
         )
     }
 
@@ -150,9 +150,7 @@ struct LookShareSheet: View {
                         "looks.reach.prompt.make_reaches",
                         "“%1$@” also changes %2$@.",
                         makeTitle,
-                        ListFormatter.localizedString(
-                            byJoining: request.users
-                        )
+                        LocalizedList.join(request.users)
                     )
                 )
                 .font(.caption)
