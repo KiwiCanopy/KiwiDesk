@@ -72,6 +72,9 @@ struct SettingsRawColorTests {
         "ColorField+Commit.swift":
             "same RGBA tuple accessors in the commit's hex "
             + "normalisation",
+        "HomeCardPlate+Legibility.swift":
+            "same RGBA accessors in the plate's legibility "
+            + "arithmetic",
     ]
 
     @Test("no fixed system hue is drawn in the Settings tree")

@@ -1,6 +1,6 @@
 import Foundation
 
-/// The app's one hex colour parser (#2811).
+/// Parses hex colour strings into sRGB components (#2811).
 public enum HexColor {
     /// sRGB components parsed from a hex color string.
     public struct RGBA: Sendable, Equatable {
