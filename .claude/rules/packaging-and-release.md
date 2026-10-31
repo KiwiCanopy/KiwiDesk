@@ -786,8 +786,9 @@ a whole top-level directory.
 instruction lane (#2712)**: lint and the suites that read those
 paths, never the whole suite or the release build. They cannot join
 the ignore list, since tests read them. The `changes` job picks the
-lane for a pull request alone — `main`'s push run stays the
-full-suite backstop — any other path clears it, and every full
+lane for a pull request, or a dispatch standing in for one
+(`filter_paths`) — `main`'s push run stays the full-suite
+backstop — any other path clears it, and every full
 test step gates on `light != 'true'`, so a filter that failed runs
 everything. The
 suites run are `.github/ci-instruction-readers.txt`, held to the

@@ -3,7 +3,8 @@
 # (#2712): the suites `.github/ci-instruction-readers.txt` names.
 #
 # Usage: scripts/ci-instruction-filter [list]
-#   Run from the repo root; the list defaults to the one above. Exits non-zero on an empty list or on a
+#   Run from the repo root; the list defaults to the one
+#   above. Exits non-zero on an empty list or on a
 #   name no `struct` under Tests/ declares, since a filter matching
 #   nothing passes green with nothing run.
 set -euo pipefail
