@@ -558,6 +558,7 @@
   "looks_added_on": "Added {date}",
   "looks_updated_on": "Updated {date} · version {n}",
   "looks_font": "Font: {font}",
+  "looks_wallpaper": "Wallpaper: {name}",
   "looks_font_system": "System",
   "looks_font_system_mono": "System Monospaced",
   "looks_inspired_by": "Inspired by {palette}",
