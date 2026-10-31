@@ -51,6 +51,9 @@ enum CLIPreview {
         return 0
     }
 
+    /// Pixels per point of the gallery's plate.
+    @MainActor static var scale: CGFloat { pixels.height / points.height }
+
     /// The PNG bytes of `look`'s plate on the fixed desk.
     @MainActor static func render(_ look: ShelfLook) -> Data? {
         let config = desk(look)
@@ -62,16 +65,41 @@ enum CLIPreview {
         .frame(width: points.width)
         .environment(\.colorScheme, .dark)
         let renderer = ImageRenderer(content: plate)
-        renderer.scale = pixels.height / points.height
+        renderer.scale = scale
         var image: CGImage?
         // The theme's tokens resolve through the drawing appearance,
         // which a headless process takes from the host.
         NSAppearance(named: .darkAqua)?.performAsCurrentDrawingAppearance {
-            image = renderer.cgImage
+            renderer.render(rasterizationScale: scale) { _, draw in
+                image = drawn(draw)
+            }
         }
         guard let image else { return nil }
         return NSBitmapImageRep(cgImage: image)
             .representation(using: .png, properties: [:])
+    }
+
+    /// The plate drawn into a bitmap of our own (#1740): under load
+    /// `cgImage` draws gradients and shadows a level apart from one
+    /// render to the next, and a gallery PNG must keep its bytes.
+    @MainActor private static func drawn(
+        _ draw: (CGContext) -> Void
+    ) -> CGImage? {
+        guard
+            let space = CGColorSpace(name: CGColorSpace.sRGB),
+            let context = CGContext(
+                data: nil,
+                width: Int(pixels.width),
+                height: Int(pixels.height),
+                bitsPerComponent: 8,
+                bytesPerRow: 0,
+                space: space,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            )
+        else { return nil }
+        context.scaleBy(x: scale, y: scale)
+        draw(context)
+        return context.makeImage()
     }
 
     /// Spaces 1–4 in BSP, wearing `look` over default settings with
