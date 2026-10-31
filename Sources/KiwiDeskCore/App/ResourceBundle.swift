@@ -1,8 +1,17 @@
 import Foundation
+import os
 
 /// Locates SwiftPM resource bundles inside `.app` and bare binaries (#89).
 /// Replaces `Bundle.module` to prevent signing failures and launch crashes.
 public enum ResourceBundle {
+    /// Its own `Logger`: this runs before any core exists, so no
+    /// `onLog` seam can carry it. Interpolate `privacy: .public`,
+    /// or macOS redacts the value, as it does all of `NSLog` (#2835).
+    private static let logger = Logger(
+        subsystem: KiwiLog.subsystem,
+        category: "resources"
+    )
+
     /// Locates resource bundle under `Bundle.main.resourceURL`,
     /// else `fallback`. `Bundle.module` resolves via a `.build`
     /// absolute path baked on the BUILD machine — it works there
@@ -23,11 +32,12 @@ public enum ResourceBundle {
                 return bundle
             }
             if Bundle.main.bundleURL.pathExtension == "app" {
-                NSLog(
-                    "KiwiDesk: resource bundle %@.bundle missing "
-                        + "from the app bundle; falling back to "
-                        + "built-in defaults.",
-                    name
+                logger.error(
+                    """
+                    KiwiDesk: resource bundle \
+                    \(name, privacy: .public).bundle missing from \
+                    the app bundle; falling back to built-in defaults.
+                    """
                 )
                 return .main
             }
