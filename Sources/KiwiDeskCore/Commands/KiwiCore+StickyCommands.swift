@@ -63,7 +63,7 @@ extension KiwiCore {
         guard let hex = args.first?.stringValue else {
             return .fail("expected hex color (#RRGGBB[AA]) or \"\"")
         }
-        guard hex.isEmpty || DragVisual.parseHex(hex) != nil else {
+        guard hex.isEmpty || HexColor.parse(hex) != nil else {
             return .fail("expected hex color (#RRGGBB[AA]) or \"\"")
         }
         write(hex)
