@@ -35,9 +35,9 @@ public final class StickyMarkManager {
             Glyph(kind: .pocket, symbolName: "", color: color)
         }
 
-        /// The plate's tint: the pocket's colour fills the pocket
-        /// itself, so its plate stays untinted (#2671).
-        var plateHex: String { kind == .pocket ? "" : color }
+        /// The tint a template symbol takes; the pocket's colour is
+        /// drawn into its own image, so it takes none (#2671, #2831).
+        var symbolHex: String { kind == .pocket ? "" : color }
 
         public static func floating(color: String = "") -> Glyph {
             Glyph(

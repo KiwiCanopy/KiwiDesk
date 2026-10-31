@@ -129,7 +129,7 @@ struct PocketMarkColorTests {
             .first { $0.window == WindowID(1) }?.glyphs
         #expect(glyphs == [.pocket(color: amber)])
         // The pocket fills itself; its plate stays untinted.
-        #expect(glyphs?.first?.plateHex == "")
+        #expect(glyphs?.first?.symbolHex == "")
     }
 
     /// A mark wearing `glyphs` on a window wide enough for two
@@ -147,17 +147,17 @@ struct PocketMarkColorTests {
         return overlay.plate
     }
 
-    @Test("the pocket's plate takes no tint, outer slot or inner")
-    func plateStaysUntinted() {
-        #expect(plate([.pocket(color: amber)]).roundel.isHidden)
-        let inner = plate([.sticky(), .pocket(color: amber)])
-        #expect(inner.slotCount == 2)
-        #expect(inner.innerRoundel.isHidden)
-        // Control: a floating glyph's colour does tint its disc.
-        #expect(!plate([.floating(color: amber)]).roundel.isHidden)
+    /// A floating glyph's colour goes on its symbol, outer slot or
+    /// inner (#2831); the pocket's is drawn into its own image.
+    @Test("a colour goes on its glyph's symbol")
+    func colourOnSymbol() throws {
+        let outer = plate([.floating(color: amber)])
+        let tint = try #require(outer.symbol.contentTintColor)
+        #expect(try hex(tint) == amber)
         let floating = plate([.sticky(), .floating(color: amber)])
         #expect(floating.slotCount == 2)
-        #expect(!floating.innerRoundel.isHidden)
+        let innerTint = try #require(floating.innerSymbol.contentTintColor)
+        #expect(try hex(innerTint) == amber)
     }
 
     @Test("the window mark draws its pocket opaque in the colour")
@@ -242,7 +242,7 @@ struct PocketMarkColorTests {
             )
         )
         view.layout()
-        let badge = try #require(view.floatingBadgeViews.first ?? nil)
+        let badge = try #require(view.pocketBadgeViews.first ?? nil)
         #expect(badge.symbolName == StateBadgeView.pocketName)
         // The pocket takes the colour; the disc stays the count
         // badge's own, as the window mark's plate stays untinted.

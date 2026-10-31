@@ -88,8 +88,8 @@ final class StickyMarkOverlay {
         glyphs.contains { $0.kind == .sticky }
     }
 
-    /// Draws the mark as tinted glass or the `.hudWindow` badge
-    /// (#1621).
+    /// Draws the mark as frosted glass or the `.hudWindow` badge
+    /// (#1621, #2831).
     func setGlass(_ on: Bool) {
         plate.setGlass(on)
     }
@@ -101,7 +101,7 @@ final class StickyMarkOverlay {
         let changed = wanted != glyphs
         glyphs = wanted
         if changed, panel != nil { applyGlyphs() }
-        plate.setMarkColor(wanted[0].plateHex)
+        plate.setMarkColor(wanted[0].symbolHex)
     }
 
     /// Draws as many glyphs as `frame` fits (#1799).
@@ -124,7 +124,7 @@ final class StickyMarkOverlay {
         let inner = count > 1 && glyphs.count > 1 ? glyphs[1] : nil
         plate.setInner(
             inner.flatMap(Self.image),
-            hex: inner?.plateHex ?? ""
+            hex: inner?.symbolHex ?? ""
         )
     }
 
@@ -280,15 +280,14 @@ final class StickyMarkOverlay {
         for frame: CGRect,
         width: CGFloat
     ) -> CGRect {
-        var mark = CGRect(
+        // Every mark, the pocket's included, at the inset corner
+        // (#2831 part 4).
+        let mark = CGRect(
             x: frame.maxX - width - Self.inset,
             y: frame.minY + Self.inset,
             width: width,
             height: Self.size
         )
-        if glyphs.first?.kind == .pocket {
-            mark = Self.overCorner(of: frame, width: width)
-        }
         return GeometryUtils.flip(
             mark,
             primaryHeight: GeometryUtils.primaryHeight
@@ -296,7 +295,9 @@ final class StickyMarkOverlay {
     }
 
     private func makePanel() -> NSPanel {
-        let panel = NSPanel(
+        // Its glass wears the key-window rim (#2831); the flat
+        // badge's `.hudWindow` is pinned active, so it reads alike.
+        let panel = ActiveGlassPanel(
             contentRect: CGRect(
                 x: 0,
                 y: 0,

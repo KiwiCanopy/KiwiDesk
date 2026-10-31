@@ -192,7 +192,9 @@ extension SpaceBarItemView {
         badge.layer?.cornerRadius = diameter / 2
     }
 
-    /// Positions sticky and floating state badges on glyph cell (#414).
+    /// Positions the state badges on a glyph cell, one corner per
+    /// state (#414, #2831 part 3): sticky top left, floating bottom
+    /// left, pocket bottom right; the count holds top right.
     private func layoutStateBadges(
         at index: Int,
         onCellAt offset: CGFloat,
@@ -200,29 +202,21 @@ extension SpaceBarItemView {
     ) {
         let side = StateBadgeMetrics.side(cell: cell)
         let box = cellRect(at: offset, cell: cell)
-        if index < stickyBadgeViews.count,
-            let badge = stickyBadgeViews[index]
-        {
+        let left = box.minX - 1
+        let right = box.maxX - side + 1
+        let bottom = box.maxY - side + 1
+        let corners: [([StateBadgeView?], CGPoint)] = [
+            (stickyBadgeViews, CGPoint(x: left, y: box.minY - 1)),
+            (floatingBadgeViews, CGPoint(x: left, y: bottom)),
+            (pocketBadgeViews, CGPoint(x: right, y: bottom)),
+        ]
+        for (views, origin) in corners {
+            guard index < views.count, let badge = views[index]
+            else { continue }
             badge.frame = backingAlignedRect(
                 CGRect(
-                    x: box.minX - 1,
-                    y: box.minY - 1,
-                    width: side,
-                    height: side
-                ),
-                options: .alignAllEdgesNearest
-            )
-            badge.needsLayout = true
-        }
-        if index < floatingBadgeViews.count,
-            let badge = floatingBadgeViews[index]
-        {
-            badge.frame = backingAlignedRect(
-                CGRect(
-                    x: box.minX - 1,
-                    y: box.maxY - side + 1,
-                    width: side,
-                    height: side
+                    origin: origin,
+                    size: CGSize(width: side, height: side)
                 ),
                 options: .alignAllEdgesNearest
             )

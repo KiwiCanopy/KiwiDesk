@@ -162,7 +162,8 @@ extension KiwiCore {
                 )
         }
         let members = group.compactMap { state.windows[$0] }
-        // A pocket window wears the pocket badge alone (#2446).
+        // A pocket window wears the pocket badge, never the float
+        // one; floating counts the other windows (#2446, #2831).
         let plain = members.filter { state.pocketPhase(of: $0.id) == nil }
         return SpaceBarItemView.App(
             name: name,

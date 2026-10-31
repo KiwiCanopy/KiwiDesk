@@ -895,19 +895,26 @@ paths. The product
 ruling is `docs/design-decisions.md` ▸ One width and one corner
 style for every window stroke.
 
-## A mark's colour reaches its plate through `plateHex`
+## A state's colour paints its symbol, never the glass or a disc
 
-**A plate's tint is read through `Glyph.plateHex`, never
-`Glyph.color`** (#2671): the pocket mark's colour fills the pocket
-itself, opaque, so its plate stays untinted, and the Space Bar's
-pocket badge keeps the count badge's disc the same way. Draw the
-on-window mark in a mark colour through the one
-`PocketMark.image(size:hex:)`, which outlines the pocket in the
-colour itself, draws the slices with no outline and inks only the
-stitch with `contrastingGlyph`, as `StickyMarkPlate.paint` inks a
-disc (#2704); the
-badge's pocket alone falls back to its disc's `contrastingGlyph`,
-in `applyStateBadge` (`PocketMarkColorTests`).
+**A template symbol's tint is read through `Glyph.symbolHex`,
+never `Glyph.color`** (#2671, #2831): the pocket mark's colour is
+drawn into its own image, opaque, so it takes no tint, while a
+sticky or floating colour inks its symbol through
+`StickyMarkPlate.paint`, which draws no disc. The mark's glass
+stays untinted (`OverlayGlassTests` ▸ `stickyMarkTogglesGlass`), and
+every Space Bar state badge keeps the count badge's own disc, its
+symbol in the state colour or the disc's `contrastingGlyph` on
+Automatic, in `applyStateBadge` (`PocketMarkColorTests`,
+`SpaceBarStateBadgeInkTests`). Draw the on-window pocket in a mark
+colour through the one `PocketMark.image(size:hex:)`, which
+outlines the pocket in the colour itself, draws the slices with no
+outline and inks only the stitch with `contrastingGlyph` (#2704).
+The mark draws frosted glass on an `ActiveGlassPanel`, which wears
+the key-window rim, and every window mark sits at the one inset
+corner, the pocket's included (`StickyMarkCornerTests`); each Space
+Bar state badge takes its own corner of the glyph
+(`SpaceBarPocketBadgeCornerTests`).
 
 ## Exercising the fallback path
 
