@@ -122,7 +122,7 @@ struct SpaceSlidePlanTests {
     func grazingFloatKeepsTileIcons() {
         let left = CGRect(x: 0, y: 0, width: 495, height: 800)
         let right = CGRect(x: 505, y: 0, width: 495, height: 800)
-        let float = CGRect(x: 480, y: 600, width: 40, height: 120)
+        let float = CGRect(x: 450, y: 600, width: 100, height: 120)
         let plates = SpaceSlidePlan.plates(
             [
                 entry(1, left, pid: 1),
@@ -135,6 +135,39 @@ struct SpaceSlidePlanTests {
         )
         #expect(Set(plates.map(\.pile)).count == 1)
         #expect(plates.compactMap(\.iconPid).sorted() == [1, 2, 3])
+    }
+
+    /// A front plate over a corner of the back plate's icon square
+    /// hides that icon: the spot is covered once any part is.
+    @Test("a plate over part of an icon's spot takes it")
+    func partlyCoveredIconIsDropped() {
+        let back = CGRect(x: 0, y: 0, width: 600, height: 600)
+        // The back icon is the centred 96 pt square, 252...348;
+        // this float overlaps only its bottom-right corner.
+        let float = CGRect(x: 330, y: 330, width: 200, height: 200)
+        let plates = SpaceSlidePlan.plates(
+            [
+                entry(1, back, pid: 1),
+                entry(2, float, pid: 2, floating: true),
+            ],
+            focus: nil,
+            stack: [:],
+            in: page
+        )
+        #expect(plates.compactMap(\.iconPid) == [2])
+    }
+
+    /// A plate too small for an icon carries no pid (#2837).
+    @Test("a plate with no room for an icon carries none")
+    func noRoomNoIcon() {
+        let plates = SpaceSlidePlan.plates(
+            [entry(1, CGRect(x: 0, y: 0, width: 60, height: 60))],
+            focus: nil,
+            stack: [:],
+            in: page
+        )
+        #expect(plates.count == 1)
+        #expect(plates.first?.iconPid == nil)
     }
 
     @Test("a window thin on one axis draws no plate")
