@@ -10,7 +10,7 @@ extension BorderStyle {
 
     /// Derives brightened glow bloom hex color from ring color (#358).
     public static func glowColor(from hex: String) -> String {
-        guard let c = DragVisual.parseHex(hex) else { return hex }
+        guard let c = HexColor.parse(hex) else { return hex }
         var (h, s, l) = rgbToHSL(r: c.red, g: c.green, b: c.blue)
         // Floor saturation only when hue exists (achromatic blooms stay grey).
         if s > 0 { s = max(s, 0.80) }

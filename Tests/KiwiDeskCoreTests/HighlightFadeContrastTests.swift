@@ -28,7 +28,7 @@ struct HighlightFadeContrastTests {
 
     /// `hex` with its alpha scaled by `share`.
     private func scaled(_ hex: String, by share: CGFloat) -> String? {
-        guard let rgba = DragVisual.parseHex(hex) else { return nil }
+        guard let rgba = HexColor.parse(hex) else { return nil }
         let bytes = [rgba.red, rgba.green, rgba.blue, rgba.alpha * share]
             .map { String(format: "%02X", Int(($0 * 255).rounded())) }
         return "#" + bytes.joined()
@@ -66,7 +66,7 @@ struct HighlightFadeContrastTests {
         increaseContrast: Bool
     ) throws -> (grounds: [String], share: CGFloat) {
         let fill = shelf.panelGlassFill(increaseContrast: increaseContrast)
-        let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
+        let rgba = try #require(HexColor.parse(shelf.fillColor))
         let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
         let far = max(GlassTint.farShare(fade: fill.fade), fill.minShare)
         let alpha = CGFloat(rgba.alpha)

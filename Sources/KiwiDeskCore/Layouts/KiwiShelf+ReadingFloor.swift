@@ -100,7 +100,7 @@ extension KiwiShelf {
         holding floor: Double,
         inks: [(ink: String, layer: String?)]
     ) -> CGFloat {
-        guard let rgba = DragVisual.parseHex(fillColor) else { return 0 }
+        guard let rgba = HexColor.parse(fillColor) else { return 0 }
         let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
         func holds(_ share: CGFloat) -> Bool {
             let ground = fill(cappedAt: anchor * share)
@@ -138,7 +138,7 @@ extension KiwiShelf {
             GlassTint.farShare(fade: fillFade),
             Self.highlightFloorShare
         )
-        guard let rgba = DragVisual.parseHex(fillColor) else { return base }
+        guard let rgba = HexColor.parse(fillColor) else { return base }
         let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
         let panel = panelGlassFill(increaseContrast: increaseContrast)
         let far = max(GlassTint.farShare(fade: panel.fade), panel.minShare)

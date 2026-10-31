@@ -32,12 +32,12 @@ extension ColorPalette {
     }
 
     /// Compares two color strings for equivalent parsed value
-    /// (`DragVisual.parseHex`). An unparseable hex matches only an
+    /// (`HexColor.parse`). An unparseable hex matches only an
     /// identical unparseable one, so a malformed palette cannot
     /// read as applied to anything.
     static func sameColor(_ a: String, _ b: String) -> Bool {
-        let left = DragVisual.parseHex(a)
-        let right = DragVisual.parseHex(b)
+        let left = HexColor.parse(a)
+        let right = HexColor.parse(b)
         if let left, let right { return left == right }
         return left == nil && right == nil
             && a.caseInsensitiveCompare(b) == .orderedSame
@@ -46,14 +46,14 @@ extension ColorPalette {
     /// `#RRGGBB` of any parseable hex, its alpha dropped; nil
     /// where it does not parse (#1857).
     public static func rgbHex(_ hex: String) -> String? {
-        guard let c = DragVisual.parseHex(hex) else { return nil }
+        guard let c = HexColor.parse(hex) else { return nil }
         return "#" + [c.red, c.green, c.blue].map(byteHex).joined()
     }
 
     /// The `AA` a hex carries, or "" where it is opaque or does
     /// not parse — what a colour write keeps of the old value.
     public static func alphaSuffix(_ hex: String) -> String {
-        guard let c = DragVisual.parseHex(hex), c.alpha < 1 else {
+        guard let c = HexColor.parse(hex), c.alpha < 1 else {
             return ""
         }
         return byteHex(c.alpha)

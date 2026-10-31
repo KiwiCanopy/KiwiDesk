@@ -94,7 +94,7 @@ enum LiquidGlassGate {
     /// A Fill at full alpha, keeping its hue. A fully transparent
     /// Fill stays so: it asked for no plate, and none is opaque.
     static func opaque(_ hex: String) -> String {
-        guard let rgba = DragVisual.parseHex(hex), rgba.alpha > 0
+        guard let rgba = HexColor.parse(hex), rgba.alpha > 0
         else { return hex }
         let digits = hex.hasPrefix("#") ? hex.dropFirst() : hex[...]
         return "#" + digits.prefix(6)

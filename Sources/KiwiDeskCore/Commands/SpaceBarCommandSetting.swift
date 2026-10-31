@@ -198,7 +198,7 @@ enum SpaceBarCommandSetting {
         _ args: [JSONValue]
     ) -> Result<String, AppBarSettingError> {
         guard let hex = args.first?.stringValue,
-            DragVisual.parseHex(hex) != nil
+            HexColor.parse(hex) != nil
         else {
             return .failure("expected #RRGGBB or #RRGGBBAA")
         }
@@ -211,7 +211,7 @@ enum SpaceBarCommandSetting {
         _ args: [JSONValue]
     ) -> Result<String, AppBarSettingError> {
         guard let hex = args.first?.stringValue,
-            hex.isEmpty || DragVisual.parseHex(hex) != nil
+            hex.isEmpty || HexColor.parse(hex) != nil
         else {
             return .failure("expected #RRGGBB, #RRGGBBAA or \"\"")
         }

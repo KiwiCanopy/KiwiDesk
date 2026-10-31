@@ -40,8 +40,8 @@ extension ColorSwatch {
             return KiwiShelf.hasColour(current)
                 ? KiwiShelf.cleared(current) : nil
         }
-        guard let rgba = DragVisual.parseHex(draft),
-            rgba != DragVisual.parseHex(current)
+        guard let rgba = HexColor.parse(draft),
+            rgba != HexColor.parse(current)
         else { return nil }
         let ns = NSColor(
             srgbRed: CGFloat(rgba.red),

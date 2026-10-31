@@ -21,7 +21,7 @@ struct PeekInkContrastTests {
 
     /// `fill` at `min(its alpha, cap)`, as an `#RRGGBBAA` hex.
     private func capped(_ fill: String, at cap: CGFloat) -> String? {
-        guard let rgba = DragVisual.parseHex(fill) else { return nil }
+        guard let rgba = HexColor.parse(fill) else { return nil }
         let alpha = min(rgba.alpha, Double(cap))
         let bytes = [rgba.red, rgba.green, rgba.blue, alpha].map {
             String(format: "%02X", Int(($0 * 255).rounded()))
@@ -123,7 +123,7 @@ struct PeekInkContrastTests {
             let fill = shelf.readingGlassFill(
                 increaseContrast: increaseContrast
             )
-            let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
+            let rgba = try #require(HexColor.parse(shelf.fillColor))
             let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
             let share = max(GlassTint.farShare(fade: 100), fill.minShare)
             let ground = shelf.fill(cappedAt: anchor * share)

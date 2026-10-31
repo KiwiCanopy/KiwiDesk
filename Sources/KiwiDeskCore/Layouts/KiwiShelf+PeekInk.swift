@@ -46,7 +46,7 @@ extension KiwiShelf {
     /// `fillColor` at no more than `cap` alpha, as `#RRGGBBAA`;
     /// an unparseable colour passes through.
     func fill(cappedAt cap: CGFloat) -> String {
-        guard let rgba = DragVisual.parseHex(fillColor) else {
+        guard let rgba = HexColor.parse(fillColor) else {
             return fillColor
         }
         let alpha = min(rgba.alpha, Double(cap))
