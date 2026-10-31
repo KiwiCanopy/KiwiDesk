@@ -37,9 +37,8 @@ struct StickyMarkCornerTests {
     func frostedWithRim() throws {
         let mark = overlay(glass: true, glyphs: [sticky])
         defer { mark.hide() }
-        // The class is the guard: an `ActiveGlassPanel` answers YES
-        // unless told otherwise, and nothing tells the mark's.
-        _ = try #require(mark.panelForTest as? ActiveGlassPanel)
+        let panel = try #require(mark.panelForTest as? ActiveGlassPanel)
+        #expect(panel.wearsActiveLook, "the mark's rim was switched off")
         try #require(Self.drawsGlass, "no glass below macOS 26")
         if #available(macOS 26, *) {
             let glass = try #require(
