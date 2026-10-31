@@ -103,9 +103,13 @@ extension GeneralSection {
     /// fires only while dirty: the message names both
     /// consequences, saved data replaced and the draft dropped.
     private func confirmRestore(_ bundle: SetupBundle) {
+        // The Settings window, key again once the open panel closes.
+        guard let window = NSApp.keyWindow ?? NSApp.mainWindow else {
+            return
+        }
         RestoreConfirm.ask(
             model.core.restoreChoices(for: bundle),
-            over: NSApp.keyWindow
+            over: window
         ) { replacingInitLua in
             backupError = model.restoreBackup(
                 bundle,

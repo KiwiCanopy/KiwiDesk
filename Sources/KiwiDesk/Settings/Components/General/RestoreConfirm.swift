@@ -2,28 +2,27 @@ import AppKit
 import KiwiDeskCore
 
 /// The restore confirm (#606, #2730): a native `NSAlert` sheet
-/// with one destructive Restore and, where the backup offers a
-/// choice, Export's "Include init.lua" checkbox, off every time.
-/// An `NSAlert` sheet, so a quit ends it as Cancel (`QuitSheets`).
+/// with one destructive Restore and, wherever the backup carries
+/// an init.lua it may restore, Export's "Include init.lua"
+/// checkbox, off every time. A sheet, so a quit ends it as Cancel
+/// (`QuitSheets`).
 @MainActor
 enum RestoreConfirm {
-    /// Asks over `window` (app-modal where nil) and calls
-    /// `restore` with whether the backup's init.lua comes too;
-    /// nothing is called on Cancel.
+    /// Asks over `window` and calls `restore` with whether the
+    /// backup's init.lua comes too; nothing is called on Cancel.
     static func ask(
         _ choices: RestoreChoices,
-        over window: NSWindow?,
+        over window: NSWindow,
         restore: @escaping (_ replacingInitLua: Bool) -> Void
     ) {
         let (alert, option) = alert(for: choices)
-        let answer = { (response: NSApplication.ModalResponse) in
-            guard response == .alertFirstButtonReturn else { return }
-            restore(replacingInitLua(choices, ticked: option?.isOn))
-        }
-        if let window {
-            alert.beginSheetModal(for: window, completionHandler: answer)
-        } else {
-            answer(alert.runModal())
+        let escape = cancelsOnEscape(alert)
+        alert.beginSheetModal(for: window) { response in
+            if let escape { NSEvent.removeMonitor(escape) }
+            let ticked = option?.isOn ?? false
+            guard let replacing = answer(response, choices, ticked: ticked)
+            else { return }
+            restore(replacing)
         }
     }
 
@@ -45,29 +44,53 @@ enum RestoreConfirm {
         let cancel = alert.addButton(
             withTitle: L("spaces.delete_confirm.cancel", "Cancel")
         )
-        // Replaces saved data: Return and Escape both cancel.
+        // Replaces saved data: Return and Escape cancel, Restore
+        // takes a click.
         confirm.keyEquivalent = ""
         cancel.keyEquivalent = "\r"
-        guard offersInitLuaChoice(choices) else { return (alert, nil) }
-        let option = BackupInitLuaOption(hasInitLua: true, luaOwned: false)
+        confirm.isEnabled = canRestore(choices, ticked: false)
+        guard choices.withInitLua else { return (alert, nil) }
+        let option = BackupInitLuaOption()
+        option.onToggle = { ticked in
+            confirm.isEnabled = canRestore(choices, ticked: ticked)
+        }
         option.view.frame.size = option.view.fittingSize
         alert.accessoryView = option.view
         return (alert, option)
     }
 
-    /// The checkbox shows only where both restores are offered;
-    /// otherwise the message names the one there is.
-    static func offersInitLuaChoice(_ choices: RestoreChoices) -> Bool {
-        choices.plain && choices.withInitLua
+    /// Escape presses Cancel. NSAlert gives Escape to the button
+    /// titled Cancel through its key equivalent, which Return takes
+    /// here (measured 2026-10-31: the sheet then ignores Escape).
+    private static func cancelsOnEscape(_ alert: NSAlert) -> Any? {
+        let cancel = alert.buttons[1]
+        return NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
+            event in
+            guard event.window === alert.window, event.keyCode == 53,
+                event.modifierFlags
+                    .intersection(.deviceIndependentFlagsMask).isEmpty
+            else { return event }
+            cancel.performClick(nil)
+            return nil
+        }
     }
 
-    /// The restore Restore runs: the box's answer where it shows,
-    /// else the only restore offered.
-    static func replacingInitLua(
+    /// Restore needs the box ticked where the backup restores only
+    /// with its init.lua, so running it is never a default (#2517).
+    static func canRestore(_ choices: RestoreChoices, ticked: Bool) -> Bool {
+        choices.plain || (choices.withInitLua && ticked)
+    }
+
+    /// Whether init.lua comes too for `response`, nil on anything
+    /// but Restore.
+    static func answer(
+        _ response: NSApplication.ModalResponse,
         _ choices: RestoreChoices,
-        ticked: Bool?
-    ) -> Bool {
-        guard offersInitLuaChoice(choices) else { return !choices.plain }
-        return ticked ?? false
+        ticked: Bool
+    ) -> Bool? {
+        guard response == .alertFirstButtonReturn,
+            canRestore(choices, ticked: ticked)
+        else { return nil }
+        return choices.withInitLua && ticked
     }
 }

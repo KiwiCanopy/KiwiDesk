@@ -164,10 +164,11 @@ command away with `kiwidesk export_setup` and `kiwidesk
 restore_setup` ([CLI](cli.md#commands)).
 
 :::unreleased
-When you restore, the confirm offers the same **Include init.lua**
-checkbox, off each time: ticked, the backup's `init.lua` replaces
-yours and runs at once. A Mac whose settings come from `init.lua`
-restores settings only together with the backup's own.
+When you restore a backup that carries one, the confirm offers
+the same **Include init.lua** checkbox, off each time: ticked, the
+backup's `init.lua` replaces yours and runs at once. A Mac whose
+settings come from `init.lua` restores settings only with the box
+ticked.
 :::
 
 Saved looks travel in a backup beside the palettes, and restore

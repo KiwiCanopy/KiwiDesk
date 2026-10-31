@@ -139,9 +139,11 @@ enum SetupBackupText {
             // Everything the lead names is replaced with none.
             tail = L(
                 "general.advanced.backup.restore.confirm.init_lua_only",
-                "This backup holds only an init.lua. Restoring it puts "
-                    + "the backup's in place of yours, which goes to "
-                    + "the Trash, and KiwiDesk runs it."
+                "This backup holds only an init.lua. With “%1$@” "
+                    + "turned on, restoring puts the backup's in place "
+                    + "of yours, which goes to the Trash, and KiwiDesk "
+                    + "runs it.",
+                BackupInitLuaOption.label
             )
         } else if !choices.withInitLua {
             tail = L(
@@ -161,8 +163,10 @@ enum SetupBackupText {
             tail = L(
                 "general.advanced.backup.restore.confirm.lua_owned",
                 "Your settings here come from init.lua, so this "
-                    + "backup can only be restored together with its "
-                    + "own init.lua, which KiwiDesk then runs."
+                    + "backup restores only together with its own "
+                    + "init.lua: turn on “%1$@” to restore it, and "
+                    + "KiwiDesk then runs it.",
+                BackupInitLuaOption.label
             )
         }
         return lead + " " + tail

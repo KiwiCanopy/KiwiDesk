@@ -29,14 +29,14 @@ struct RestoreMessageTests {
         #expect(choose.contains("The backup also includes an init.lua."))
         // Names the checkbox by its own label (#2730).
         #expect(choose.contains("“\(BackupInitLuaOption.label)” off"))
-        #expect(
-            message(.luaOwnsThisMac, withInitLua: true)
-                .contains("Your settings here come from init.lua")
-        )
+        let owned = message(.luaOwnsThisMac, withInitLua: true)
+        #expect(owned.contains("Your settings here come from init.lua"))
+        #expect(owned.contains("“\(BackupInitLuaOption.label)”"))
         // The lead names everything replaced, here with none.
         let only = message(.empty, withInitLua: true)
         #expect(only.contains("every profile"))
         #expect(only.hasSuffix("and KiwiDesk runs it."))
         #expect(only.contains("This backup holds only an init.lua."))
+        #expect(only.contains("“\(BackupInitLuaOption.label)”"))
     }
 }
