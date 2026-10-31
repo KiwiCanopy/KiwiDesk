@@ -786,8 +786,10 @@ a whole top-level directory.
 instruction lane (#2712)**: lint and the suites that read those
 paths, never the whole suite or the release build. They cannot join
 the ignore list, since tests read them. The `changes` job picks the
-lane, any other path clears it, and every test step gates on
-`light != 'true'`, so a filter that failed runs everything. The
+lane for a pull request alone — `main`'s push run stays the
+full-suite backstop — any other path clears it, and every full
+test step gates on `light != 'true'`, so a filter that failed runs
+everything. The
 suites run are `.github/ci-instruction-readers.txt`, held to the
 tree both ways by `CiInstructionLaneTests`: a suite that starts
 reading `.claude/` or `AGENTS.md` joins that list in the same
@@ -795,7 +797,8 @@ change, and a reader the suite's literal scan cannot see — a path
 assembled from other components, or one a spawned script reads —
 is review's.
 
-**The one skip beside the list is the release stamp (#2106)**:
+**The one whole-CI skip beside the list is the release stamp
+(#2106)**:
 `scripts/ci-stamp-only` answers yes only for a `chore/stamp-*`
 branch whose sole change is one `semantic` literal in
 `KiwiDeskVersion.swift`. What gates that tree is downstream —

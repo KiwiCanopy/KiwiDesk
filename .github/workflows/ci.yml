@@ -115,10 +115,14 @@ jobs:
             echo "run=true" >> "$GITHUB_OUTPUT"
             exit 0
           fi
+          # --no-renames: a file moved into an ignored or
+          # instruction path still names the path it left.
           if [ "$EVENT" = "pull_request" ]; then
-            changed="$(git diff --name-only "$base"...HEAD)"
+            changed="$(git diff --name-only --no-renames \
+              "$base"...HEAD)"
           else
-            changed="$(git diff --name-only "$base" HEAD)"
+            changed="$(git diff --name-only --no-renames \
+              "$base" HEAD)"
           fi
           if [ -z "$changed" ]; then
             echo "empty diff — running everything"
@@ -144,8 +148,14 @@ jobs:
           # A change confined to `.claude/` and AGENTS.md takes the
           # light lane (#2712): lint and the suites that read them,
           # listed in .github/ci-instruction-readers.txt. Any other
-          # path runs everything.
+          # path runs everything, and so does a push: main's push
+          # run stays the full-suite backstop.
           light=false
+          lane=false
+          case "$EVENT" in
+            pull_request) lane=true ;;
+            workflow_dispatch) lane="$FILTER" ;;
+          esac
           while IFS= read -r file; do
             [ -n "$file" ] || continue
             ignored=false
@@ -164,13 +174,15 @@ jobs:
               [ "$ignored" = true ] && break
             done < .github/ci-ignore.txt
             [ "$ignored" = true ] && continue
-            case "$file" in
-              .claude/*|AGENTS.md)
-                echo "instruction file: $file"
-                light=true
-                continue
-                ;;
-            esac
+            if [ "$lane" = true ]; then
+              case "$file" in
+                .claude/*|AGENTS.md)
+                  echo "instruction file: $file"
+                  light=true
+                  continue
+                  ;;
+              esac
+            fi
             echo "not ignored: $file"
             run=true
             light=false
@@ -261,11 +273,12 @@ jobs:
       # AGENTS.md, held to the tree by CiInstructionLaneTests.
       - name: Instruction readers
         if: needs.changes.outputs.light == 'true'
-        run: >-
-          scripts/warning-gate swift test
-          --filter "$(scripts/ci-instruction-filter)"
-          -Xswiftc -warnings-as-errors
-          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
+        # The filter on its own line, so a refusal fails the step.
+        run: |
+          filter="$(scripts/ci-instruction-filter)"
+          scripts/warning-gate swift test --filter "$filter" \
+            -Xswiftc -warnings-as-errors \
+            -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
   release-build:
     needs: changes

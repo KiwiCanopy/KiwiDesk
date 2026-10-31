@@ -8,13 +8,18 @@ import Testing
 /// must not have, so the list is held to the tree both ways.
 ///
 /// **A reader is a test file whose comment-free source spells a
-/// `".claude"` / `".claude/…"` or `"AGENTS.md"` literal.** What
-/// this cannot see is CiPathFilterTests' residue, one level over:
-/// a path assembled from components none of which is `.claude`,
-/// and a path a spawned `scripts/` tool reads on a test's behalf.
-/// No script under `scripts/` reads `.claude/` outside its
-/// comments today; one that starts to, and a suite running it,
-/// is review's.
+/// one-line literal naming `.claude` or `AGENTS.md` as a path
+/// component.** Every type such a file declares or extends must be
+/// a suite the filter can run. What this cannot see is
+/// CiPathFilterTests' residue, one level over: a path assembled
+/// from components none of which is `.claude`, a path inside a
+/// multi-line literal, a suite reaching a reader's helper with no
+/// literal of its own, and a path a spawned `scripts/` tool reads
+/// on a test's behalf. A suite of those shapes joins the list
+/// through `consumers`, with its reason, in the change that makes
+/// it one. The walk is its own rather than
+/// `CiPathFilterTests.testSources()`, which skips that suite's own
+/// file by design.
 @Suite("CI instruction lane (#2712)")
 struct CiInstructionLaneTests {
     /// Test files that spell a reader literal and read nothing,
@@ -24,6 +29,10 @@ struct CiInstructionLaneTests {
         "KiwiDeskCoreTests/BarPeekContentTests.swift":
             "\"AGENTS.md\" is a window-title fixture"
     ]
+
+    /// Suites the list carries though they spell no reader literal,
+    /// each with what it reads — the one copy of who may.
+    static let consumers: [String: String] = [:]
 
     private static let own = "KiwiDeskCoreTests/CiInstructionLaneTests.swift"
 
@@ -56,12 +65,13 @@ struct CiInstructionLaneTests {
 
     private static var readerLiteral: Regex<AnyRegexOutput> {
         try! Regex(
-            #""(\.claude(/[^"]*)?|AGENTS\.md)""#
+            #""([^"\n]*/)?(\.claude(/[^"\n]*)?|AGENTS\.md)""#
         )
     }
     private static var topLevelType: Regex<AnyRegexOutput> {
         try! Regex(
-            #"(?m)^(?:@MainActor\s+)?(?:final\s+)?"#
+            #"(?m)^(?:@MainActor\s+)?(?:(?:file)?private\s+)?"#
+                + #"(?:final\s+)?"#
                 + #"(?:struct|class|enum|extension)\s+(\w+)"#
         )
     }
@@ -108,7 +118,10 @@ struct CiInstructionLaneTests {
         var readers: Set<String> = []
         for (path, text) in files
         where text.contains(Self.readerLiteral) && Self.exempt[path] == nil {
-            readers.formUnion(types(in: text))
+            // A literal in a free function names no suite at all.
+            let declared = types(in: text)
+            #expect(!declared.isEmpty, "\(path) reads, in no type")
+            readers.formUnion(declared)
         }
         try #require(!readers.isEmpty, "no reader found at all")
         // A helper type reading the paths hides its consumers from
@@ -129,9 +142,14 @@ struct CiInstructionLaneTests {
             \(readers.subtracting(list).sorted())
             """
         )
+        let named = readers.union(Self.consumers.keys)
         #expect(
-            list.subtracting(readers).isEmpty,
-            "listed but reading nothing: \(list.subtracting(readers).sorted())"
+            Set(Self.consumers.keys).isSubset(of: suites),
+            "a consumer is no suite: \(Self.consumers.keys.sorted())"
+        )
+        #expect(
+            list.subtracting(named).isEmpty,
+            "listed but reading nothing: \(list.subtracting(named).sorted())"
         )
     }
 
@@ -157,13 +175,40 @@ struct CiInstructionLaneTests {
         try #require(run.status == 0, "\(run.stderr)")
         let pattern = run.stdout.trimmingCharacters(in: .newlines)
         let list = try listed()
-        #expect(pattern == "\\.(\(list.sorted().joined(separator: "|")))/")
+        try #require(pattern.hasPrefix("\\.(") && pattern.hasSuffix(")/"))
+        let body = pattern.dropFirst(3).dropLast(2)
+        #expect(Set(body.split(separator: "|").map(String.init)) == list)
         let regex = try Regex(pattern)
         #expect(
             "KiwiDeskCoreTests.RuleCitationTests/citations()"
                 .contains(regex)
         )
         #expect(!"KiwiDeskCoreTests.ExecTests/x()".contains(regex))
+    }
+
+    @Test("the filter script refuses an empty list and an unknown suite")
+    func filterRefuses() throws {
+        let dir = testTemporaryDirectory.appendingPathComponent(
+            "ci-lane-\(UUID().uuidString)"
+        )
+        try FileManager.default.createDirectory(
+            at: dir,
+            withIntermediateDirectories: true
+        )
+        for (name, text) in [
+            ("empty", "# nothing\n\n"),
+            ("unknown", "RuleCitationTests\nNoSuchSuiteTests\n"),
+        ] {
+            let list = dir.appendingPathComponent(name)
+            try text.write(to: list, atomically: true, encoding: .utf8)
+            let run = try spawn(
+                "/bin/bash",
+                ["scripts/ci-instruction-filter", list.path],
+                currentDirectory: repoRoot
+            )
+            #expect(run.status != 0, "\(name) list was accepted")
+            #expect(run.stdout.isEmpty, "\(name): \(run.stdout)")
+        }
     }
 
     @Test("ci.yml picks the lane in the changes job and swaps the tests")
@@ -173,7 +218,26 @@ struct CiInstructionLaneTests {
             CiPathFilterTests.jobBlock("changes", in: yaml)
         )
         #expect(changes.contains("light: ${{ steps.filter.outputs.light }}"))
-        #expect(changes.contains(".claude/*|AGENTS.md)"))
+        // The lane's paths exactly: a wider arm puts paths on the
+        // lane that no reader scan covers.
+        let arms = changes.split(separator: "\n")
+            .map { $0.trimmingCharacters(in: .whitespaces) }
+            .filter { $0.hasSuffix(")") && $0.contains(".claude") }
+        #expect(arms == [".claude/*|AGENTS.md)"])
+        #expect(
+            changes.contains(
+                "AGENTS.md)\n"
+                    + "                  echo \"instruction file: $file\"\n"
+                    + "                  light=true\n"
+            )
+        )
+        // A push keeps the full run; renames name both ends.
+        #expect(changes.contains("pull_request) lane=true ;;"))
+        #expect(changes.contains("if [ \"$lane\" = true ]; then"))
+        #expect(
+            changes.components(separatedBy: "--name-only --no-renames")
+                .count == 3
+        )
         #expect(
             changes.contains("echo \"light=$light\" >> \"$GITHUB_OUTPUT\"")
         )
@@ -199,8 +263,9 @@ struct CiInstructionLaneTests {
         let readers = try workflowStep("Instruction readers", in: yaml)
         #expect(readers.contains("if: needs.changes.outputs.light == 'true'"))
         #expect(
-            readers.contains("--filter \"$(scripts/ci-instruction-filter)\"")
+            readers.contains("filter=\"$(scripts/ci-instruction-filter)\"")
         )
+        #expect(readers.contains("swift test --filter \"$filter\""))
         // The release build stays off the lane: nothing it builds
         // reads an instruction file.
         let release = CiPathFilterTests.jobGate("release-build", in: yaml)
@@ -218,9 +283,10 @@ struct CiInstructionLaneTests {
             .filter { !$0.isEmpty && !$0.hasPrefix("#") }
         for entry in entries {
             let prefix = entry.replacingOccurrences(of: "**", with: "")
-            for path in [".claude/rules/x.md", "AGENTS.md"] {
+            for path in [".claude/", "AGENTS.md"] {
                 #expect(
-                    !(entry == path || path.hasPrefix(prefix)),
+                    !(entry == path || path.hasPrefix(prefix)
+                        || prefix.hasPrefix(path)),
                     "\(entry) would skip the lane for \(path)"
                 )
             }
