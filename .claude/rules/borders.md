@@ -910,9 +910,11 @@ Automatic, in `applyStateBadge` (`PocketMarkColorTests`,
 colour through the one `PocketMark.image(size:hex:)`, which
 outlines the pocket in the colour itself, draws the slices with no
 outline and inks only the stitch with `contrastingGlyph` (#2704).
-Every window mark sits at the one inset corner, the pocket's
-included (`StickyMarkCornerTests`), and each Space Bar state badge
-takes its own corner of the glyph (`SpaceBarPocketBadgeCornerTests`).
+The mark draws frosted glass on an `ActiveGlassPanel`, which wears
+the key-window rim, and every window mark sits at the one inset
+corner, the pocket's included (`StickyMarkCornerTests`); each Space
+Bar state badge takes its own corner of the glyph
+(`SpaceBarPocketBadgeCornerTests`).
 
 ## Exercising the fallback path
 

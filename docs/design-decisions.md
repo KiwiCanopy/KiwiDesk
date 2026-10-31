@@ -14663,11 +14663,13 @@ wherever the kiwis show alone, as on the pocket's handle.
 2026-10-31). `sticky.color`, `floating.color` and `pocket.color`
 paint the glyph itself, on the window mark and on the Space Bar
 badge alike, so the badge and the mark still read as one sign in
-one colour, now on the symbol. The mark's glass stays clear and
-keeps the inactive look: a device check (owner, 2026-10-31) showed
-the key-window rim on a small two-glyph pill over window text
-framing it like a sticker. With the finish off it is a neutral
-plate, no disc. Every Space Bar state badge
+one colour, now on the symbol. The mark's glass is untinted,
+frosted and wears the key-window rim (owner, device check
+2026-10-31): clear glass with the rim framed a small two-glyph pill
+over window text like a sticker, and clear glass without it read as
+a grey film, while frosted glass with the rim reads as one light
+object over any window. With the finish off it is a neutral plate,
+no disc. Every Space Bar state badge
 keeps the count badge's own disc, as the pocket's already did,
 and each takes its own corner of the glyph — sticky top left,
 floating bottom left, pocket bottom right — so position tells

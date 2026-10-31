@@ -5846,8 +5846,9 @@ The floating mark draws the same way, tinted by
 shares its plate.
 
 :::unreleased
-The glass stays clear: a color goes on the glyph, never the
-glass.
+The glass is frosted and untinted: a color goes on the glyph,
+never the glass, and the mark wears the same key-window rim as the
+bars.
 :::
 
 **Example:**

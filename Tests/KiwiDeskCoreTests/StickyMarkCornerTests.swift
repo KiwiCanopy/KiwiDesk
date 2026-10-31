@@ -3,9 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Every window mark — the pocket's included — sits at the same
-/// inset corner of its window (#2831 part 4).
-@Suite("Window mark corner (#2831)")
+/// The window mark (#2831): frosted glass on a panel that wears the
+/// key-window rim, and every mark — the pocket's included — at the
+/// same inset corner of its window.
+@Suite("Window mark glass and corner (#2831)")
 @MainActor
 struct StickyMarkCornerTests {
     private let frame = CGRect(x: 200, y: 200, width: 900, height: 600)
@@ -25,6 +26,20 @@ struct StickyMarkCornerTests {
 
     private var sticky: StickyMarkManager.Glyph {
         .sticky(StickyStyle.symbolName, color: "")
+    }
+
+    @Test("the mark is frosted glass on a rimmed panel")
+    func frostedWithRim() throws {
+        let mark = overlay(glass: true, glyphs: [sticky])
+        defer { mark.hide() }
+        let panel = try #require(mark.panelForTest as? ActiveGlassPanel)
+        #expect(panel.wearsActiveLook)
+        guard #available(macOS 26, *) else { return }
+        let glass = try #require(
+            mark.plate.glass as? NSGlassEffectView,
+            "no glass hosted"
+        )
+        #expect(glass.style == .regular)
     }
 
     @Test("the pocket mark sits at the sticky mark's corner")
