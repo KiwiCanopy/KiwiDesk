@@ -44,10 +44,11 @@ extension KiwiCore {
     /// layer also skips (review): those windows are legitimate
     /// focus recipients, and their in-flight raise-activations
     /// would race the Finder activate — focus settling on a
-    /// VISIBLE window never re-creates the #463 hazard.
+    /// VISIBLE window never re-creates the #463 hazard. A float
+    /// the WindowServer draws at no size is no recipient (#2850).
     func yieldFocusAfterEmptySwitch() {
         guard
-            floatLayerTargets().isEmpty,
+            drawnFloatTargets().isEmpty,
             let last = state.workspaces.lastFocused,
             let lastSpace = state.workspaces.space(of: last),
             !state.workspaces.visibleSpaces.contains(lastSpace),

@@ -1054,7 +1054,9 @@ editing here:
   **The raise lifts only floats the WindowServer draws (#2840).**
   A float drawn with a side of 1 pt or less is left out through
   the one `floatIsDrawn` verdict, which the raise reads through
-  `drawnFloatTargets` and the per-focus gate directly;
+  `drawnFloatTargets` and the per-focus gate directly, as does
+  the empty-switch Finder yield, for which an undrawn float is no
+  focus recipient (#2850, `EmptySwitchYieldVisibilityTests`);
   `floatLayerTargets` never asks it, so the target set stays a
   pure state filter. The verdict is read live per raise through
   the watch's `readWindowBounds` seam, never a fact cached at

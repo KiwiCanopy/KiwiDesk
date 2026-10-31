@@ -71,7 +71,8 @@ extension KiwiCore {
         return targets
     }
 
-    /// The targets the float raise lifts: `floatLayerTargets` less
+    /// The targets the float raise lifts, and the floats that hold
+    /// off the empty-switch yield (#2850): `floatLayerTargets` less
     /// a window the WindowServer draws at no visible size (#2840).
     /// `floatLayerTargets` stays a pure state filter and owns no
     /// visibility; this reads it live, per raise, through the
