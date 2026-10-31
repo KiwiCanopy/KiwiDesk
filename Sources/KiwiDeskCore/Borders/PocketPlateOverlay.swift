@@ -9,36 +9,6 @@ import AppKit
 /// drop onto it.
 @MainActor
 final class PocketPlateOverlay {
-    /// What one display's pocket draws: its screen, its windows,
-    /// its frame (AppKit), the gated shelf, the mark's colour, the
-    /// edge it stands on and VoiceOver's name.
-    struct Spec: Equatable {
-        let display: DisplayID
-        /// The windows it lists.
-        let windows: [WindowID]
-        let frame: CGRect
-        let shelf: KiwiShelf
-        let markHex: String
-        /// The empty pocket at rest, drawn faded; lit, it shows full.
-        let faded: Bool
-        /// A dragged window over it that a drop would take.
-        let dropHovered: Bool
-        let name: String
-        /// The edge its handle stands on, nil for a bar's section.
-        var handle: AppBarEdge? = nil
-        /// Out of its handle (hover, drag), at this side.
-        var risen = false
-        var risenSide: CGFloat = 0
-        /// The shelf's outer margin, between the edge and the handle.
-        var outer: CGFloat = 0
-        /// The whole mark stands at rest on an edge no bar shows,
-        /// with no handle (#2784 ▸ 8).
-        var whole = false
-        /// The One-window pocket, which slides out of its edge as it
-        /// comes and back as it goes (#2793).
-        var slides = false
-    }
-
     /// One display's pocket: a handle's panel, or a section's
     /// holder, which its shelf mounts and this fades.
     struct Shown {
@@ -52,7 +22,13 @@ final class PocketPlateOverlay {
     private(set) var specs: [DisplayID: Spec] = [:]
     /// The displays whose pocket the pointer is on, handle or
     /// section.
-    var hovered: Set<DisplayID> = []
+    var hovered: Set<DisplayID> = [] {
+        // Every hover dropped drops its dwell with it (#2807).
+        didSet { dwelled.formIntersection(hovered) }
+    }
+    /// The hovered displays whose handle the pointer has dwelt on or
+    /// pushed against: the pocket rises out of it (#2807).
+    var dwelled: Set<DisplayID> = []
     /// The displays a put-in or take-out plays on, each with the
     /// play that holds it out; the pocket stands out of its handle
     /// for the play (#2678).
@@ -61,6 +37,8 @@ final class PocketPlateOverlay {
     var onListChanged: @MainActor () -> Void = {}
     /// The pointer came onto a display's pocket or left it.
     var onHover: @MainActor (DisplayID, Bool) -> Void = { _, _ in }
+    /// The pointer pushed against the edge on a display's handle.
+    var onPush: @MainActor (DisplayID) -> Void = { _ in }
     /// A click on one display's pocket, and a press on its panel.
     var onClick: @MainActor (PocketPlateView) -> Void = { _ in }
     var onPanelPress: @MainActor (NSView?, NSEvent.EventType) -> Void = {
@@ -92,6 +70,9 @@ final class PocketPlateOverlay {
     /// The gesture read as a resize, which shows no drop target.
     var resizing: WindowID?
 
+    /// Each display's peek taken back, while its panel keeps the
+    /// peek's room (#2807).
+    var peekHolds: [DisplayID: UUID] = [:]
     /// Each display's sliding pocket on its way out, its leave's
     /// token, so a return in the meantime keeps its panel (#2793).
     var leaving: [DisplayID: UUID] = [:]
@@ -191,29 +172,28 @@ final class PocketPlateOverlay {
             let hold = went ? Self.inHold : Self.outHold
             flash(shown, on: spec.display, for: hold)
         }
+        // Where the kiwis stand before this pass moves them.
+        let risePeek = shown.view.handle.peek
         // A form change reconfigures the other form's view.
         let changed = spec != old || old?.handle != spec.handle
         if changed {
+            // A peek taken back keeps its room until the kiwis are in,
+            // or the panel cuts them as they go (#2807).
+            let unpeeks =
+                old?.peeking == true && !spec.peeking && !spec.risen
             shown.view.pocket.wear(markHex: spec.markHex)
-            shown.view.handle.wear(
+            let held = shown.view.handle.wear(
                 spec.shelf,
                 markHex: spec.markHex,
                 edge: spec.handle ?? .bottom,
-                kiwisOut: spec.risen
+                kiwisOut: spec.risen,
+                peeking: spec.peeking
             )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
             paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
-            if let panel = shown.panel, panel.frame != spec.frame {
-                panel.setFrame(spec.frame, display: false)
-            }
-            if shown.panel != nil {
-                shown.view.frame = CGRect(
-                    origin: .zero,
-                    size: spec.frame.size
-                )
-            }
+            hold(shown, at: spec, until: unpeeks && held)
         }
         orderIn(shown)
         // Sized and ordered in first: under One window the handle is
@@ -225,7 +205,8 @@ final class PocketPlateOverlay {
                 risen: spec.risen,
                 side: spec.risenSide,
                 outer: spec.outer,
-                whole: spec.whole
+                whole: spec.whole,
+                peek: risePeek
             )
         }
         if enters, let edge = spec.handle {
@@ -319,6 +300,7 @@ final class PocketPlateOverlay {
         view.onHover = { [weak self] on in
             self?.onHover(display, on)
         }
+        view.onPush = { [weak self] in self?.onPush(display) }
         view.onListChanged = { [weak self] in self?.onListChanged() }
     }
 
