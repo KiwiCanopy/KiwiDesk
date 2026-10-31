@@ -49,18 +49,33 @@ struct AwayDestroyPruneTests {
         )
     }
 
+    /// The check reads nothing inside the event port's drain,
+    /// where `windowServerChanged` runs: it waits for the slot.
     @Test("a destroy the compositor confirms prunes the entry")
-    func confirmedDestroyPrunes() {
+    func confirmedDestroyPrunes() async {
         defer { resetAuthorityOverrides() }
-        let (core, _) = makeCore()
-        defer { core.deferred.cancelAll() }
+        let (core, logs) = makeCore()
+        defer {
+            core.deferred.cancelAll()
+            core.eventLoop.stop()
+        }
+        #expect(core.eventLoop.beginScan())
+        core.eventLoop.scanChunk(budget: nil)
         fileAway(core, 7)
         #expect(core.state.awayWindows[WindowID(7)] != nil)
-        core.desktopMemory.readWindowSpace = { _ in .gone }
+        var reads = 0
+        core.desktopMemory.readWindowSpace = { _ in
+            reads += 1
+            return .gone
+        }
+        core.deferred.sleep = { _ in }
         core.windowServerChanged(.destroyed, id: WindowID(7))
-        #expect(core.deferred.isScheduled(.awayDestroyCheck))
-        core.pruneDestroyedAway()
+        #expect(reads == 0)
+        #expect(core.state.awayWindows[WindowID(7)] != nil)
+        await core.deferred.task(for: .awayDestroyCheck)?.value
+        #expect(reads == 1)
         #expect(core.state.awayWindows[WindowID(7)] == nil)
+        #expect(logs().contains { $0.hasPrefix("away: w7 (App100) closed") })
     }
 
     @Test("a window still hosted is left to the census")

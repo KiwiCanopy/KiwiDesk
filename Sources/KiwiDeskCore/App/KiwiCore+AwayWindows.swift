@@ -16,7 +16,7 @@ extension KiwiCore {
     static let awayBackstopInterval: Duration = .seconds(60)
 
     var awayCensusCadence: Duration {
-        windowCreates.isLive
+        windowCreates.isLive && NativeSpaces.canReadWindowSpaces
             ? Self.awayBackstopInterval : Self.awayCensusInterval
     }
 
@@ -27,11 +27,14 @@ extension KiwiCore {
         guard state.awayWindows[id] != nil else { return }
         onLog("away: w\(id.raw) destroyed by WindowServer")
         desktopMemory.awayDestroyed.insert(id)
+        // The set gathers a burst; the check is never pushed later.
+        guard !deferred.isScheduled(.awayDestroyCheck) else { return }
         deferred.schedule(
             .awayDestroyCheck,
             after: Self.wakeUpGrace
         ) { [weak self] in
-            self?.pruneDestroyedAway()
+            guard let self, self.eventLoop.isRunning else { return }
+            self.pruneDestroyedAway()
         }
     }
 
