@@ -97,15 +97,13 @@ extension BarMotion {
     }
 
     /// Moves the handle's kiwis out by `PocketHandleView.peekDepth`
-    /// while `peeking`, or back, over `hoverGrow` (#2807), running
-    /// `landed` once they stand there; false where nothing moves and
-    /// `landed` never runs. Under Reduce Motion they never peek.
+    /// while `peeking`, or back, over `hoverGrow` (#2807); false
+    /// where nothing moves. Under Reduce Motion they never peek.
     @MainActor
     @discardableResult
     static func playPocketPeek(
         _ handle: PocketHandleView,
-        peeking: Bool,
-        landed: (@MainActor () -> Void)? = nil
+        peeking: Bool
     ) -> Bool {
         let target = pocketPeek(peeking: peeking, reduceMotion: isReduced)
         guard handle.peekTarget != target else { return false }
@@ -114,8 +112,6 @@ extension BarMotion {
             context.duration = hoverGrow
             context.timingFunction = CAMediaTimingFunction(name: .easeOut)
             handle.animator().peek = target
-        } completionHandler: {
-            MainActor.assumeIsolated { landed?() }
         }
         return true
     }

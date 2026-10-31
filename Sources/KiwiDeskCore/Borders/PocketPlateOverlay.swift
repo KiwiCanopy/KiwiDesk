@@ -70,6 +70,9 @@ final class PocketPlateOverlay {
     /// The gesture read as a resize, which shows no drop target.
     var resizing: WindowID?
 
+    /// Each display's peek taken back, while its panel keeps the
+    /// peek's room (#2807).
+    var peekHolds: [DisplayID: UUID] = [:]
     /// Each display's sliding pocket on its way out, its leave's
     /// token, so a return in the meantime keeps its panel (#2793).
     var leaving: [DisplayID: UUID] = [:]
@@ -169,6 +172,8 @@ final class PocketPlateOverlay {
             let hold = went ? Self.inHold : Self.outHold
             flash(shown, on: spec.display, for: hold)
         }
+        // Where the kiwis stand before this pass moves them.
+        let risePeek = shown.view.handle.peek
         // A form change reconfigures the other form's view.
         let changed = spec != old || old?.handle != spec.handle
         if changed {
@@ -176,25 +181,19 @@ final class PocketPlateOverlay {
             // or the panel cuts them as they go (#2807).
             let unpeeks =
                 old?.peeking == true && !spec.peeking && !spec.risen
-            let land: @MainActor () -> Void = { [weak self] in
-                guard self?.specs[spec.display]?.frame == spec.frame
-                else { return }
-                Self.place(shown, at: spec.frame)
-            }
             shown.view.pocket.wear(markHex: spec.markHex)
             let held = shown.view.handle.wear(
                 spec.shelf,
                 markHex: spec.markHex,
                 edge: spec.handle ?? .bottom,
                 kiwisOut: spec.risen,
-                peeking: spec.peeking,
-                landed: unpeeks ? land : nil
+                peeking: spec.peeking
             )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
             paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
-            if !(unpeeks && held) { Self.place(shown, at: spec.frame) }
+            hold(shown, at: spec, until: unpeeks && held)
         }
         orderIn(shown)
         // Sized and ordered in first: under One window the handle is
@@ -206,7 +205,8 @@ final class PocketPlateOverlay {
                 risen: spec.risen,
                 side: spec.risenSide,
                 outer: spec.outer,
-                whole: spec.whole
+                whole: spec.whole,
+                peek: risePeek
             )
         }
         if enters, let edge = spec.handle {
@@ -217,13 +217,6 @@ final class PocketPlateOverlay {
                 entering: true
             )
         }
-    }
-
-    /// Sizes a handle's panel, and its view, to `frame`.
-    private static func place(_ shown: Shown, at frame: CGRect) {
-        guard let panel = shown.panel else { return }
-        if panel.frame != frame { panel.setFrame(frame, display: false) }
-        shown.view.frame = CGRect(origin: .zero, size: frame.size)
     }
 
     private func orderIn(_ shown: Shown) {

@@ -47,16 +47,14 @@ final class PocketHandleView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
-    /// Wears `shelf`; true where the kiwis move and `landed` will
-    /// run once they stand.
+    /// Wears `shelf`; true where the kiwis move.
     @discardableResult
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
         kiwisOut: Bool,
-        peeking: Bool = false,
-        landed: (@MainActor () -> Void)? = nil
+        peeking: Bool = false
     ) -> Bool {
         self.shelf = shelf
         self.hex = hex
@@ -65,8 +63,7 @@ final class PocketHandleView: NSView {
         needsDisplay = true
         return BarMotion.playPocketPeek(
             self,
-            peeking: peeking && !kiwisOut,
-            landed: landed
+            peeking: peeking && !kiwisOut
         )
     }
 

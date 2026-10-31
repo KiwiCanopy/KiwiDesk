@@ -85,13 +85,14 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     func listOpenChanged() { onListChanged() }
 
     /// Stands as a section, or as a handle on `edge` `outer` in from
-    /// it, risen to `side` where `risen`.
+    /// it, risen to `side` where `risen` — out of kiwis peeking `peek`.
     func stand(
         handle edge: AppBarEdge?,
         risen: Bool,
         side: CGFloat,
         outer: CGFloat = 0,
-        whole: Bool = false
+        whole: Bool = false,
+        peek: CGFloat = 0
     ) {
         let rising = risen && !self.risen && edge != nil
         handleEdge = edge
@@ -106,8 +107,7 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
                 pocket,
                 edge: edge,
                 side: side,
-                // From where the kiwis stand now, mid-peek or not.
-                peek: handle.peek
+                peek: peek
             )
         }
     }

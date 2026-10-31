@@ -135,6 +135,8 @@ struct PocketHandleDwellTests {
         // Under Reduce Motion nothing peeks, so nothing is held.
         guard !BarMotion.isReduced else { return }
         let core = try makeCore()
+        var landings: [@MainActor () -> Void] = []
+        core.pocketPlate.afterLeave = { _, body in landings.append(body) }
         let rest = try #require(spec(core))
         core.pocketHovered(rest.display, true)
         let panel = try #require(
@@ -142,8 +144,33 @@ struct PocketHandleDwellTests {
         )
         let peeked = panel.frame
         core.pocketHovered(rest.display, false)
+        let resting = try #require(core.pocketPlate.specs[rest.display])
         #expect(panel.frame == peeked)
-        #expect(panel.frame != core.pocketPlate.specs[rest.display]?.frame)
+        #expect(panel.frame.size != resting.frame.size)
+        #expect(landings.count == 1)
+        // Once the kiwis are in, the panel takes the resting frame.
+        landings.forEach { $0() }
+        // AppKit rounds the panel's origin; the depth is what moves.
+        #expect(panel.frame.size == resting.frame.size)
+    }
+
+    @Test("a later show drops a held peek's landing")
+    func reHoverDropsTheLanding() throws {
+        guard !BarMotion.isReduced else { return }
+        let core = try makeCore()
+        var landings: [@MainActor () -> Void] = []
+        core.pocketPlate.afterLeave = { _, body in landings.append(body) }
+        let rest = try #require(spec(core))
+        core.pocketHovered(rest.display, true)
+        core.pocketHovered(rest.display, false)
+        core.pocketHovered(rest.display, true)
+        let panel = try #require(
+            core.pocketPlate.panelForTesting(on: rest.display)
+        )
+        let peeked = panel.frame
+        // The first leave's landing finds a newer show and stands down.
+        landings.forEach { $0() }
+        #expect(panel.frame == peeked)
     }
 
     @Test("the peek is the stated depth, and none under Reduce Motion")
