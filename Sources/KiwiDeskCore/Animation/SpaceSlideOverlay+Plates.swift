@@ -56,8 +56,8 @@ extension SpaceSlideOverlay {
     /// nearest the shortcuts panel's `.regularMaterial` (owner,
     /// device, #1956), dark where the Appearance pick is — with the
     /// app icon centred
-    /// on the part of the window the page shows, on a pile's front
-    /// face only.
+    /// on the part of the window the page shows, wherever it fits
+    /// (#2837).
     private func plateView(
         _ plate: SpaceSlidePlan.Plate,
         in current: Play
@@ -65,17 +65,10 @@ extension SpaceSlideOverlay {
         let rect = local(plate.frame, in: current)
         let content = NSView(frame: CGRect(origin: .zero, size: rect.size))
         if let pid = plate.iconPid,
-            let side = SpaceSlidePlan.iconSide(on: rect),
+            let spot = SpaceSlidePlan.iconRect(on: content.bounds),
             let image = icon(pid)
         {
-            let view = NSImageView(
-                frame: CGRect(
-                    x: (rect.width - side) / 2,
-                    y: (rect.height - side) / 2,
-                    width: side,
-                    height: side
-                )
-            )
+            let view = NSImageView(frame: spot)
             view.image = image
             view.imageScaling = .scaleProportionallyUpOrDown
             content.addSubview(view)
