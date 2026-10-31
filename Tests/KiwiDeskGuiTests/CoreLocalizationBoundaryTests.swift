@@ -145,9 +145,9 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+SpaceChipLifecycle.swift": 9,
         // The window actions' refusal pills (#1518), which Core
         // draws on the window, as the resize pills are — and Jump
-        // to window's Bring here refusal (#1875) and move_here's
-        // two (#1513).
-        "Commands/WindowActionRefusal.swift": 6,
+        // to window's Bring here refusal (#1875), move_here's
+        // two (#1513) and a move into the window's own Space.
+        "Commands/WindowActionRefusal.swift": 7,
         // KiwiVision's out-of-reach pill (#2103 ruling 16).
         "App/KiwiCore+VisionReach.swift": 1,
         // A bar shortcut's refusal pill (#761), drawn beside the
