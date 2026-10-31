@@ -100,10 +100,10 @@ extension KiwiCore {
         raiseFloatsAndSticky(thenFocus: id)
     }
 
-    /// The float-layer targets the raise can reach — those with an
+    /// The float-layer targets the raise can reach — drawn, with an
     /// element — read by the raise and by the landing's gate alike.
     private func floatRaisePairs() -> [(WindowID, AXUIElement)] {
-        floatLayerTargets().compactMap { id in
+        drawnFloatTargets().compactMap { id in
             eventLoop.element(for: id).map { (id, $0) }
         }
     }
@@ -139,7 +139,7 @@ extension KiwiCore {
         // z-order thrash the coalescing removes is the worse failure.
         guard
             !isEffectiveFloatOnActiveSpace(id),
-            !floatLayerTargets().isEmpty
+            !drawnFloatTargets().isEmpty
         else { return }
         // This focus supersedes a raise owed to an earlier one.
         floatRaiseDebt.owed = nil

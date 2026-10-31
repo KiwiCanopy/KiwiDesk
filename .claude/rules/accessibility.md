@@ -855,3 +855,8 @@ editing AX code:
 - **Boot's and the wake replay's layout passes wait for the
   hand to rest (#804)**: their state lands at once, the pass is
   owed — state-and-layout.md ▸ Window motion says whose it is.
+- **#309's invisible-helper refusal stays a raised-layer rule.**
+  A layer-0 window drawn at no visible size is adopted and left out
+  of the float raise instead (state-and-layout.md, #2840); widening
+  the adoption gate to layer 0 is a ruling, since KiwiDesk parks
+  windows off-screen there.

@@ -1047,6 +1047,17 @@ editing here:
   `FloatRaiseLandingWiringTests` ▸ `debtIsPaidAtRest`); the float
   raise's own drain is no tiled restore, so a newer focus still
   supersedes it at once (`CommandedFocusFloatRaiseTests`).
+  **The raise lifts only floats the WindowServer draws (#2840).**
+  A float drawn with a side of 1 pt or less — BetterDisplay's
+  invisible helper was every BSP focus step's one target, three
+  whole-list reads each — is left out through the one
+  `drawnFloatTargets`, which the raise and the per-focus gate read
+  and `floatLayerTargets` never does, so the target set stays a
+  pure state filter. The verdict is read live per raise through
+  the `floatDrawsVisibly` seam, wired once in `armMachineSeams`,
+  never a fact cached at adoption, so a float that grows is lifted
+  on its next focus; a read with no answer keeps the window
+  (`FloatRaiseVisibilityTests`, `FloatRaiseVisibilitySeamTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**

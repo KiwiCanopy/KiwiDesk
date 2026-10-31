@@ -50,6 +50,16 @@ extension KiwiCore {
         stackingOrderProvider = {
             AXHelper.onScreenStackingOrder()
         }
+        // The float raise skips a window drawn at no visible size
+        // (#2840): SkyLight's per-window read, else the public one.
+        floatDrawsVisibly = { id in
+            let wid = CGWindowID(id.raw)
+            let bounds =
+                SkyLight.getWindowBounds == nil
+                ? FloatDetection.serverSnapshot(of: id).bounds
+                : SkyLight.windowBounds(wid)
+            return KiwiCore.drawsVisibly(bounds: bounds)
+        }
         // Yields key focus to the desktop when a move empties the
         // focused display's space (#446) — Finder owns the
         // desktop, gated so it never teleports the user to
