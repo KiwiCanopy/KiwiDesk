@@ -33,7 +33,10 @@ suite a change runs locally:
   `.claude/rules/**`, `.claude/agents/**` and this skill tree are
   instructions every session reasons from, and a prose-only edit
   to them has already shipped a dangling citation; code, tests and
-  `site/` need it besides.
+  `site/` need it besides. For a diff confined to `.claude/` and
+  `AGENTS.md`, the suites that read them are
+  `scripts/ci-instruction-filter`'s, which CI's instruction lane
+  runs (#2712).
 - **A change that lands through a PR runs the full suite locally
   once, alongside its first push** (owner, 2026-10-25, amending
   the 2026-10-24 rule that held the push until the run was
