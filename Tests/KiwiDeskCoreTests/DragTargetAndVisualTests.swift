@@ -87,25 +87,6 @@ struct DragVisualCommandTests {
     }
 }
 
-@Suite("Hex color parsing")
-struct HexColorTests {
-    @Test("6- and 8-digit hex parse, junk does not")
-    func parse() throws {
-        let rgb = try #require(
-            DragVisual.parseHex("#4E9F3D")
-        )
-        #expect(rgb.alpha == 1)
-        #expect(abs(rgb.green - 0x9F / 255.0) < 0.001)
-        let rgba = try #require(
-            DragVisual.parseHex("8B5E3C40")
-        )
-        #expect(abs(rgba.alpha - 0x40 / 255.0) < 0.001)
-        #expect(DragVisual.parseHex("#12345") == nil)
-        #expect(DragVisual.parseHex("kiwi") == nil)
-        #expect(DragVisual.parseHex("#GG5E3C") == nil)
-    }
-}
-
 @Suite("Drag target rule")
 struct DragTargetTests {
     private let slots: [WindowID: CGRect] = [

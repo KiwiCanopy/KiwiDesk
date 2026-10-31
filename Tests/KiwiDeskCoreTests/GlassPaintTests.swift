@@ -95,7 +95,7 @@ struct GlassPaintTests {
             var shelf = settings.kiwishelf
             shelf.fillFade = 100
             let fill = shelf.panelGlassFill(increaseContrast: false)
-            let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
+            let rgba = try #require(HexColor.parse(shelf.fillColor))
             let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
             let share = max(GlassTint.farShare(fade: 100), fill.minShare)
             let ground = shelf.fill(cappedAt: anchor * share)

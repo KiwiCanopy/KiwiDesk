@@ -94,7 +94,7 @@ extension KiwiCore {
         _ write: (String) -> Void
     ) -> CommandResponse {
         guard let hex = args.first?.stringValue,
-            DragVisual.parseHex(hex) != nil
+            HexColor.parse(hex) != nil
         else {
             return .fail("expected hex color (#RRGGBB[AA])")
         }

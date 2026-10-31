@@ -22,7 +22,7 @@ struct BorderGlowColorTests {
     @Test("Hue is preserved — a blue ring blooms blue")
     func huePreserved() {
         let glow = BorderStyle.glowColor(from: "#0A84FF")
-        let c = DragVisual.parseHex(glow)
+        let c = HexColor.parse(glow)
         #expect(c != nil)
         guard let c else { return }
         // Still blue-dominant (no drift toward green), and lighter
@@ -38,7 +38,7 @@ struct BorderGlowColorTests {
         // stay grey, not pick up a pink tint from the saturation
         // floor landing on hue 0.
         for ring in ["#FFFFFF", "#000000", "#808080"] {
-            let c = DragVisual.parseHex(
+            let c = HexColor.parse(
                 BorderStyle.glowColor(from: ring)
             )
             #expect(c != nil)

@@ -110,7 +110,7 @@ struct BorderRingSeparationTests {
     }
 
     /// The focused ring is the reference the unfocused one
-    /// recedes from, so it has to be opaque — `parseHex` accepts
+    /// recedes from, so it has to be opaque — `HexColor.parse` accepts
     /// `#RRGGBBAA`, and a translucent focused ring would clear
     /// every composited check below on its RGB alone.
     @Test("Every bundled focused ring is opaque")
@@ -122,7 +122,7 @@ struct BorderRingSeparationTests {
                 palette.colors["border.focused_color"],
                 Comment(rawValue: "\(palette.name) omits the ring")
             )
-            let rgb = try #require(DragVisual.parseHex(focused))
+            let rgb = try #require(HexColor.parse(focused))
             #expect(
                 rgb.alpha == 1,
                 Comment(rawValue: "\(palette.name) \(focused)")
@@ -141,7 +141,7 @@ struct BorderRingSeparationTests {
                 palette.colors["border.unfocused_color"],
                 Comment(rawValue: "\(palette.name) omits the ring")
             )
-            let rgb = try #require(DragVisual.parseHex(hex))
+            let rgb = try #require(HexColor.parse(hex))
             #expect(
                 rgb.alpha >= Self.alphaFloor && rgb.alpha < 1,
                 Comment(rawValue: "\(palette.name) \(hex)")
