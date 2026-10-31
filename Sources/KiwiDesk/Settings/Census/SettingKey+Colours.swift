@@ -262,7 +262,7 @@ extension ColoursKey {
         case .lookKeepPreviousColors:
             return .text("looks.keep_previous_colors")
         case .lookAppliesTo:
-            return .text("app_rules.reach")
+            return .text("looks.reach.choice")
         case .lookSave:
             return .text("looks.save_current")
         case .lookBrowse:

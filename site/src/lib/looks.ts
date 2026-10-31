@@ -83,6 +83,9 @@ export interface Look {
   version: string | null;
   needsFonts: string[];
   fontUrl: string | null;
+  /** The wallpaper the submitter named, and the https page it comes
+   * from; the gallery links it and never hosts it (#2838). */
+  wallpaper: { name: string; url: string | null } | null;
   /** Remote image the build downloads, how it was made, and its
    * pixel size (read from the PNG the build fetched). */
   image: {
@@ -184,6 +187,7 @@ function toLook(row: any): { look: Look; file: string } | null {
     | "screenshot"
     | "preview"
     | undefined;
+  const wallpaper = text(row?.wallpaper);
   const fonts = strings(row?.needs_fonts).filter(
     (f) => !Object.hasOwn(SYSTEM_FONTS, f),
   );
@@ -200,6 +204,9 @@ function toLook(row: any): { look: Look; file: string } | null {
     version: text(row?.kiwidesk_version),
     needsFonts: fonts,
     fontUrl: https(row?.font_url),
+    wallpaper: wallpaper
+      ? { name: wallpaper, url: https(row?.wallpaper_url) }
+      : null,
     image:
       path && imageKind
         ? {

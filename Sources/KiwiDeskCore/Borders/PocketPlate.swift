@@ -39,6 +39,9 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     let handle = PocketHandleView(frame: .zero)
     /// The pointer came onto the pocket or left it.
     var onHover: @MainActor (Bool) -> Void = { _ in }
+    /// The pointer pushed against the screen edge on a resting
+    /// handle, which raises the pocket at once (#2807).
+    var onPush: @MainActor () -> Void = {}
     /// The edge a handle stands on; nil for a section on a bar.
     private(set) var handleEdge: AppBarEdge?
     /// Whether the pocket is out of its handle, and at what side.
@@ -82,13 +85,14 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     func listOpenChanged() { onListChanged() }
 
     /// Stands as a section, or as a handle on `edge` `outer` in from
-    /// it, risen to `side` where `risen`.
+    /// it, risen to `side` where `risen` — out of kiwis peeking `peek`.
     func stand(
         handle edge: AppBarEdge?,
         risen: Bool,
         side: CGFloat,
         outer: CGFloat = 0,
-        whole: Bool = false
+        whole: Bool = false,
+        peek: CGFloat = 0
     ) {
         let rising = risen && !self.risen && edge != nil
         handleEdge = edge
@@ -99,7 +103,12 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         needsLayout = true
         if rising, let edge {
             layoutSubtreeIfNeeded()
-            BarMotion.playPocketRise(pocket, edge: edge, side: side)
+            BarMotion.playPocketRise(
+                pocket,
+                edge: edge,
+                side: side,
+                peek: peek
+            )
         }
     }
 
@@ -181,14 +190,40 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         if let tracking { removeTrackingArea(tracking) }
         let area = NSTrackingArea(
             rect: bounds,
-            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            options: [
+                .mouseEnteredAndExited, .mouseMoved, .activeAlways,
+                .inVisibleRect,
+            ],
             owner: self
         )
         addTrackingArea(area)
         tracking = area
     }
 
-    override func mouseEntered(with event: NSEvent) { setHovered(true) }
+    override func mouseEntered(with event: NSEvent) {
+        setHovered(true)
+        reportPush(event)
+    }
+
+    override func mouseMoved(with event: NSEvent) {
+        reportPush(event)
+    }
+
+    /// Tells `onPush` where a resting handle's pointer stands against
+    /// the screen edge, as a bar's band hears a push.
+    private func reportPush(_ event: NSEvent) {
+        guard let edge = handleEdge, !risen, !whole,
+            let window, let screen = window.screen,
+            ShelfReveal.pushes(
+                window.convertPoint(toScreen: event.locationInWindow),
+                band: window.frame,
+                strip: window.frame,
+                edge: edge,
+                screen: screen.frame
+            )
+        else { return }
+        onPush()
+    }
 
     override func mouseExited(with event: NSEvent) { setHovered(false) }
 

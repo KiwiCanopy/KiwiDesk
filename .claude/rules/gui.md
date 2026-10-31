@@ -126,7 +126,9 @@ restated `20...80` satisfies on the day it is written.
   through the closures its row hands it (#2324 ruling 14), and
   the sync sheet at Save,
   whose one Save runs through the closure the shell hands it
-  (#2450; a further one is a ruling too). A read-only sheet also
+  (#2450), and the switch-to-Shared prompt, whose answer runs
+  through the closure the Shared look card hands it (#2820; a
+  further one is a ruling too). A read-only sheet also
   answers the keyboard both ways:
   Return on its one dismissal, and Escape, which a
   `Button` cannot carry beside `.defaultAction` so the content
@@ -1851,7 +1853,9 @@ Obligations:
   `TilingSettings.panelsWearFill(glassDrawn:)` holds (#2569), drawn
   through the one `panelGlassChrome`, which picks the Fill, the
   variant, the inks and KiwiHub's paint from `PanelGlass` as drawn
-  under the live Reduce transparency (`PanelGlassTests`); otherwise
+  under the live Reduce transparency (`PanelGlassTests`), each
+  plate on an `ActiveGlassPanel` whose rim follows that same
+  answer (#2569; input-and-animation.md for Core's plates); otherwise
   they hand `tint` nil,
   as does every surface no ruling names. Never reach for
   `Glass.tint(_:)`: it is a **dimmer** — measured 2026-09-07, a
