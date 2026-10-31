@@ -6262,6 +6262,19 @@ object at one size. The floor is the handle's 20 pt kiwis, which a
 rise must never shrink; the ceiling, 1.6x, is as far as a growth
 still reads as the pocket coming out rather than a jump.
 
+:::unreleased
+**The handle answers the pointer in two steps, as the bars'
+handles do** (#2807). On the approach the kiwis look 3 pt further
+out over the hover growth's 0.15 s, and the pocket rises only
+after the bars' 0.15 s reveal delay; a push against the edge or a
+window drag still rises at once. A rise on entry raised the whole
+pocket under a pointer crossing the edge for a window's title bar
+(owner, device 2026-10-30). No click step: the bars ask none. The
+peek never moves the reserved strip, which reads the resting
+depth, and under Reduce Motion it is dropped while the delay
+stands, a delay not being motion.
+:::
+
 **The pocket is the mark alone: faded while empty, in full colour
 while anything is inside, and edged in black and white while lit
 or as a window goes in or out** (owner, prototype 2026-10-30,

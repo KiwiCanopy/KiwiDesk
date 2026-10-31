@@ -17,8 +17,22 @@ final class PocketHandleView: NSView {
     static let markSide: CGFloat = 20
     /// The handle's whole depth at rest, `PocketMarkGeometry`'s.
     static var restDepth: CGFloat { PocketMarkGeometry.handleDepth }
-    /// How far the kiwis' image reaches past the tab.
+    /// How far the kiwis' image reaches past the tab at rest.
     static var lookOut: CGFloat { restDepth - tabDepth }
+    /// How much further they look out while the pointer is on the
+    /// handle and the pocket has not risen (#2807).
+    static let peekDepth: CGFloat = 3
+
+    /// How far the kiwis look out past their rest, animated by
+    /// `BarMotion.playPocketPeek` through the view's animator.
+    @objc dynamic var peek: CGFloat = 0 {
+        didSet { needsDisplay = true }
+    }
+    /// The peek `peek` is headed for.
+    var peekTarget: CGFloat = 0
+    /// The peek the kiwis stood at when the pocket last rose out of
+    /// them, where the rise starts.
+    private(set) var risePeek: CGFloat = 0
 
     private var edge = AppBarEdge.bottom
     private var shelf = KiwiShelf()
@@ -40,13 +54,24 @@ final class PocketHandleView: NSView {
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
-        kiwisOut: Bool
+        kiwisOut: Bool,
+        peeking: Bool = false
     ) {
+        if kiwisOut, !self.kiwisOut { risePeek = peekTarget }
         self.shelf = shelf
         self.hex = hex
         self.edge = edge
         self.kiwisOut = kiwisOut
         needsDisplay = true
+        BarMotion.playPocketPeek(self, peeking: peeking && !kiwisOut)
+    }
+
+    override static func defaultAnimation(
+        forKey key: NSAnimatablePropertyKey
+    ) -> Any? {
+        key == "peek"
+            ? BarMotion.pocketPeekAnimation()
+            : super.defaultAnimation(forKey: key)
     }
 
     override func hitTest(_ point: NSPoint) -> NSView? { nil }
@@ -68,7 +93,7 @@ final class PocketHandleView: NSView {
         )
         let markRect = CGRect(
             x: (along - Self.markSide) / 2,
-            y: across - Self.restDepth,
+            y: across - Self.restDepth - peek,
             width: Self.markSide,
             height: Self.markSide
         )

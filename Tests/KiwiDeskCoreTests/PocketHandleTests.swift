@@ -6,7 +6,8 @@ import Testing
 
 /// The pocket's handle on an edge no bar shows (#2678, 2026-10-29
 /// ruling): a fixed mark at Position, out of which the pocket rises
-/// on hover and during a drag, to the bar's size kept in 20...32 pt.
+/// after a dwell or a push and during a drag, to the bar's size kept
+/// in 20...32 pt.
 @Suite(
     "Pocket handle",
     .serialized,
@@ -93,11 +94,12 @@ struct PocketHandleTests {
         #expect(depth == PocketHandleView.restDepth + 8)
     }
 
-    @Test("a hover raises the pocket out of its handle, and leaving sinks it")
-    func hoverRises() throws {
+    @Test("a push raises the pocket out of its handle, and leaving sinks it")
+    func pushRises() throws {
         let core = try makeCore()
         let shown = try #require(spec(core))
         core.pocketHovered(shown.display, true)
+        core.pocketPushed(shown.display)
         let risen = try #require(core.pocketPlate.specs[shown.display])
         #expect(risen.risen)
         #expect(risen.frame.height > shown.frame.height)

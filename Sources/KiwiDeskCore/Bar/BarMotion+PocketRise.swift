@@ -9,23 +9,27 @@ import QuartzCore
 /// its edge instead (#2793).
 extension BarMotion {
     /// How far below its risen place the pocket starts, past the
-    /// tab, so the kiwis are what first shows.
-    @MainActor static var pocketRiseTravel: CGFloat {
+    /// tab, so the kiwis are what first shows — `peek` points
+    /// further out where they were peeking (#2807).
+    @MainActor static func pocketRiseTravel(peek: CGFloat = 0) -> CGFloat {
         PocketHandleView.tabDepth + PocketPlateView.lift
-            + PocketHandleView.markSide - PocketHandleView.lookOut
+            + PocketHandleView.markSide - PocketHandleView.lookOut - peek
     }
 
-    /// Plays the rise on `pocket`, `side` points risen on `edge`.
+    /// Plays the rise on `pocket`, `side` points risen on `edge`, out
+    /// of kiwis peeking `peek` points.
     @MainActor
     static func playPocketRise(
         _ pocket: BriefPocketView,
         edge: AppBarEdge,
-        side: CGFloat
+        side: CGFloat,
+        peek: CGFloat = 0
     ) {
         guard
             let rise = pocketRise(
                 edge: edge,
                 side: side,
+                peek: peek,
                 reduceMotion: isReduced
             ),
             let layer = pocket.layer
@@ -38,12 +42,13 @@ extension BarMotion {
     static func pocketRise(
         edge: AppBarEdge,
         side: CGFloat,
+        peek: CGFloat = 0,
         reduceMotion: Bool
     ) -> CASpringAnimation? {
         guard !reduceMotion, side > 0 else { return nil }
         let animation = CASpringAnimation(keyPath: "transform")
         animation.fromValue = NSValue(
-            caTransform3D: pocketRiseStart(edge: edge, side: side)
+            caTransform3D: pocketRiseStart(edge: edge, side: side, peek: peek)
         )
         animation.toValue = NSValue(caTransform3D: CATransform3DIdentity)
         // Critically damped: no overshoot to read as a throb.
@@ -60,9 +65,10 @@ extension BarMotion {
     @MainActor
     static func pocketRiseStart(
         edge: AppBarEdge,
-        side: CGFloat
+        side: CGFloat,
+        peek: CGFloat = 0
     ) -> CATransform3D {
-        let travel = pocketRiseTravel
+        let travel = pocketRiseTravel(peek: peek)
         let pivot: CGPoint
         let drop: CGPoint
         switch edge {
@@ -88,6 +94,36 @@ extension BarMotion {
         t = CATransform3DRotate(t, PocketHandleView.turn(for: edge), 0, 0, 1)
         t = CATransform3DScale(t, scale, scale, 1)
         return CATransform3DTranslate(t, -pivot.x, -pivot.y, 0)
+    }
+
+    /// Moves the handle's kiwis out by `PocketHandleView.peekDepth`
+    /// while `peeking`, or back, over `hoverGrow` (#2807). Under
+    /// Reduce Motion they never peek.
+    @MainActor
+    static func playPocketPeek(_ handle: PocketHandleView, peeking: Bool) {
+        let target = pocketPeek(peeking: peeking, reduceMotion: isReduced)
+        guard handle.peekTarget != target else { return }
+        handle.peekTarget = target
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = hoverGrow
+            context.timingFunction = CAMediaTimingFunction(name: .easeOut)
+            handle.animator().peek = target
+        }
+    }
+
+    /// The animation the handle's animator runs its `peek` on,
+    /// `hoverGrow` long.
+    static func pocketPeekAnimation() -> CABasicAnimation {
+        let animation = CABasicAnimation()
+        animation.duration = hoverGrow
+        return animation
+    }
+
+    /// The kiwis' peek: `PocketHandleView.peekDepth` while
+    /// `peeking`, none under `reduceMotion`.
+    @MainActor
+    static func pocketPeek(peeking: Bool, reduceMotion: Bool) -> CGFloat {
+        peeking && !reduceMotion ? PocketHandleView.peekDepth : 0
     }
 
     /// The One-window pocket's leave out of its edge (#2793), a little

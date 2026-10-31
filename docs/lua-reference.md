@@ -5891,6 +5891,14 @@ and with no count, except where KiwiShelf stands down for a native
 full-screen window or a presentation. Where it rests as a handle
 ([`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says
 where), pointing at the handle brings the pocket up out of it.
+
+:::unreleased
+The kiwis peek out as the pointer reaches the handle, and the
+pocket comes up once the pointer rests there for 0.15 s, at once
+on a push against the edge or a window drag. Under Reduce Motion
+the kiwis do not peek.
+:::
+
 Windows keep clear of the resting handle or pocket unless
 `reserve` is off for every bar on that edge, or on an edge no bar
 sits on, for both bars. A click on the pocket lists the windows

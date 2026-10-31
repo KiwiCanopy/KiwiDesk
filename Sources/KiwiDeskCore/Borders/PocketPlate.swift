@@ -39,6 +39,9 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
     let handle = PocketHandleView(frame: .zero)
     /// The pointer came onto the pocket or left it.
     var onHover: @MainActor (Bool) -> Void = { _ in }
+    /// The pointer pushed against the screen edge on a resting
+    /// handle, which raises the pocket at once (#2807).
+    var onPush: @MainActor () -> Void = {}
     /// The edge a handle stands on; nil for a section on a bar.
     private(set) var handleEdge: AppBarEdge?
     /// Whether the pocket is out of its handle, and at what side.
@@ -99,7 +102,12 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         needsLayout = true
         if rising, let edge {
             layoutSubtreeIfNeeded()
-            BarMotion.playPocketRise(pocket, edge: edge, side: side)
+            BarMotion.playPocketRise(
+                pocket,
+                edge: edge,
+                side: side,
+                peek: handle.risePeek
+            )
         }
     }
 
@@ -181,14 +189,38 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
         if let tracking { removeTrackingArea(tracking) }
         let area = NSTrackingArea(
             rect: bounds,
-            options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect],
+            options: [
+                .mouseEnteredAndExited, .mouseMoved, .activeAlways,
+                .inVisibleRect,
+            ],
             owner: self
         )
         addTrackingArea(area)
         tracking = area
     }
 
-    override func mouseEntered(with event: NSEvent) { setHovered(true) }
+    override func mouseEntered(with event: NSEvent) {
+        setHovered(true)
+        reportPush()
+    }
+
+    override func mouseMoved(with event: NSEvent) { reportPush() }
+
+    /// Tells `onPush` where a resting handle's pointer stands against
+    /// the screen edge, as a bar's band hears a push.
+    private func reportPush() {
+        guard let edge = handleEdge, !risen, !whole,
+            let window, let screen = window.screen,
+            ShelfReveal.pushes(
+                NSEvent.mouseLocation,
+                band: window.frame,
+                strip: window.frame,
+                edge: edge,
+                screen: screen.frame
+            )
+        else { return }
+        onPush()
+    }
 
     override func mouseExited(with event: NSEvent) { setHovered(false) }
 
