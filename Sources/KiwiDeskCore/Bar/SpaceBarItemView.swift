@@ -27,8 +27,8 @@ final class SpaceBarItemView: NSView {
         let count: Int
         var sticky = false
         var floating = false
-        /// Out of the pocket: its badge replaces the float one
-        /// (#2446).
+        /// A pocket window among them: its badge owns its own
+        /// corner (#2446, #2831 part 3).
         var pocket = false
         var stickyScope: StickyScope = .none
         /// The windows this glyph stands for, in row order (#1528).
@@ -50,6 +50,7 @@ final class SpaceBarItemView: NSView {
     /// One per glyph, nil where that app wears no such mark (#1942).
     var stickyBadgeViews: [StateBadgeView?] = []
     var floatingBadgeViews: [StateBadgeView?] = []
+    var pocketBadgeViews: [StateBadgeView?] = []
     let overflowBadge = SpaceBarItemView.makeBadge()
     /// The leading `+n` disc, before the glyphs (#1528 item 17).
     let leadingBadge = SpaceBarItemView.makeBadge()

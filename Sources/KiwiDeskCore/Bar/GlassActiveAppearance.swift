@@ -3,7 +3,8 @@ import ObjectiveC
 
 /// Liquid Glass drawn as a key window's (owner, #2569): macOS gives
 /// glass in the key window its bright rim, and the bars, the overflow
-/// marks, the peek and the plates never hold the keyboard. AppKit
+/// marks, the peek, the plates and the window mark (#2831) never hold
+/// the keyboard. AppKit
 /// asks a window's private `_hasActiveAppearance` how to draw; the
 /// panels listed here answer YES without taking the keyboard
 /// (measured, macOS 27: a non-key panel then draws exactly as a key
@@ -16,7 +17,8 @@ enum GlassActiveAppearance {
     static let privateSelector = "_hasActiveAppearance"
 
     /// The panels whose glass draws active: the shelf, the overflow
-    /// mark, the peek and the plates' `ActiveGlassPanel`. Never
+    /// mark, the peek, and the `ActiveGlassPanel` of the plates and
+    /// the window mark. Never
     /// `NSPanel` itself, which every other panel KiwiDesk opens shares.
     static var classes: [NSPanel.Type] {
         [
@@ -82,11 +84,13 @@ enum GlassActiveAppearance {
     }
 }
 
-/// A plate's panel, whose glass wears the key-window look while
-/// `wearsActiveLook` holds (#2569 ▸ the toggle). The one panel
-/// class outside Core's own list that answers; never `NSPanel`.
+/// A plate's or the window mark's panel, whose glass wears the
+/// key-window look while `wearsActiveLook` holds (#2569 ▸ the
+/// toggle, #2831). The one panel class outside Core's own list that
+/// answers; never `NSPanel`.
 public final class ActiveGlassPanel: NSPanel {
-    /// Read by AppKit on each ask; the owner sets it from the toggle.
+    /// Read by AppKit on each ask; a plate's owner sets it from the
+    /// toggle, and the window mark leaves it on.
     public var wearsActiveLook = true
 
     override public init(

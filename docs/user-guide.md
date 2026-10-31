@@ -717,6 +717,12 @@ sticky and floating marks, and its glyph wears the **pocket badge**
 on the bottom-left, in place of the floating badge; that glyph
 comes last in its row too.
 
+:::unreleased
+The pocket mark sits inside the window's top-right corner, as the
+sticky and floating marks do, and the pocket badge takes the
+glyph's bottom-right corner, beside the floating badge.
+:::
+
 **Drag a window onto a Space** to move it there:
 
 - **Flick and drop** — release before the ring fills; the window

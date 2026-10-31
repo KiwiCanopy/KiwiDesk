@@ -23,10 +23,9 @@ struct OverlayGlassTests {
         return false
     }
 
-    /// Downward: the anchor at the top of the unit square.
-    private static let top = CGPoint(x: 0.5, y: 1)
-
-    @Test("The sticky mark turns tinted glass and back")
+    /// The colour is the symbol's on glass and off it (#2831): the
+    /// glass stays clear, and no disc comes back on the flat finish.
+    @Test("The sticky mark turns untinted glass and back")
     func stickyMarkTogglesGlass() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let plate = StickyMarkPlate()
@@ -39,19 +38,22 @@ struct OverlayGlassTests {
             plate.content.isDescendant(of: glass),
             "glyphs not in glass"
         )
-        #expect(plate.roundel.isHidden, "the disc stayed on glass")
-        #expect(!plate.tint.isHiddenOrHasHiddenAncestor)
-        #expect(plate.tint.gradient?.startPoint == Self.top)
+        #expect(
+            plate.tint.gradient?.colors == nil,
+            "the colour tinted the glass"
+        )
+        let ink = try #require(plate.symbol.contentTintColor)
+        #expect(ink == NSColor(kiwiHex: "#E0892BB3"))
         plate.setGlass(false)
         #expect(!plate.hud.isHidden)
         #expect(glass.isHidden)
         #expect(plate.tint.isHiddenOrHasHiddenAncestor)
         #expect(plate.content.superview === plate)
-        #expect(!plate.roundel.isHidden, "the disc did not come back")
+        #expect(plate.symbol.contentTintColor == ink)
     }
 
     /// No colour is clear glass, not a tint of the empty string.
-    @Test("A sticky mark with no colour is clear glass")
+    @Test("A sticky mark with no colour is untinted glass")
     func uncolouredMarkIsClearGlass() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let plate = StickyMarkPlate()

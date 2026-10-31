@@ -14658,6 +14658,31 @@ outline, in the fill's ink, read as a dark ring above the pocket
 wherever the kiwis show alone, as on the pocket's handle.
 :::
 
+:::unreleased
+**Amended: a state's colour is its symbol's** (#2831, owner,
+2026-10-31). `sticky.color`, `floating.color` and `pocket.color`
+paint the glyph itself, on the window mark and on the Space Bar
+badge alike, so the badge and the mark still read as one sign in
+one colour, now on the symbol. The mark's glass is untinted,
+frosted and wears the key-window rim (owner, device check
+2026-10-31): clear glass with the rim framed a small two-glyph pill
+over window text like a sticker, and clear glass without it read as
+a grey film, while frosted glass with the rim reads as one light
+object over any window. With the finish off it is a neutral plate,
+no disc. Every Space Bar state badge
+keeps the count badge's own disc, as the pocket's already did,
+and each takes its own corner of the glyph — sticky top left,
+floating bottom left, pocket bottom right — so position tells
+them apart at seven points, where neither a symbol nor a colour
+can, and a glyph grouping a pocket window and a floating one
+shows both. The pocket window's mark sits at the same inset
+corner as the others: one mark in two places read as a mistake,
+and the half outside the window was covered by its neighbours.
+A palette's pocket colour on the neutral disc falls under 3:1 in
+most bundled palettes, as it did since #2671; the pocket's
+dashed stitch carries its inner contrast.
+:::
+
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
 The old reading — a float overlaps a tiled plane, so the window
@@ -18408,6 +18433,15 @@ whose off state is today's look. The panels that answer are
 ghost and drop zone, the hidden shelf's handle and the boot
 notice keep the inactive look: a surface joins only with its own
 argument here.
+
+:::unreleased
+The window mark joins, frosted, always (#2831, owner device check
+2026-10-31): untinted clear glass without the rim read as a grey
+film and with it framed the small pill like a sticker, while
+frosted glass with the rim reads as one light object over any
+window. Its flat badge is pinned active already, so the answer
+never changes at runtime.
+:::
 
 **On glass the Fill FADES: its capped alpha at the shelf's screen
 edge, an eighth of that toward the windows.** (#1622, owner

@@ -34,25 +34,22 @@ final class StickyMarkPlate: NSView {
     let tint = GlassBackdrop()
     /// Whether the mark draws as glass (`setGlass`).
     var isGlass = false
-    /// The stored colour, kept for the glass tint.
+    /// The outermost glyph's stored colour (#2831: its symbol's).
     var markHex = ""
 
-    /// The outermost glyph and its disc (#429).
+    /// The outermost glyph (#429).
     let symbol = NSImageView()
-    let roundel = NSView()
-    /// The inner glyph, its disc and colour (#1799); drawn only
-    /// while `slotCount` is 2.
+    /// The inner glyph and its colour (#1799); drawn only while
+    /// `slotCount` is 2.
     let innerSymbol = NSImageView()
-    let innerRoundel = NSView()
     var innerHex = ""
     /// Glyph squares drawn: 1, or 2 with the inner one.
     var slotCount = 1
     let name = NSTextField(labelWithString: "")
-    /// Diameter of background roundel.
-    static let roundelSize: CGFloat = 15
 
-    /// Resolved tint color (#429).
-    var markColor: NSColor = .labelColor
+    /// The pill's ink: the label ink, since a state's colour is
+    /// its symbol's alone (#2831).
+    let markColor: NSColor = .labelColor
 
     init() {
         super.init(
@@ -93,16 +90,10 @@ final class StickyMarkPlate: NSView {
         name.usesSingleLineMode = true
         name.alphaValue = 0
 
-        for disc in [roundel, innerRoundel] {
-            disc.wantsLayer = true
-            disc.layer?.cornerRadius = Self.roundelSize / 2
-            disc.isHidden = true
-        }
-
         addSubview(hud)
         addSubview(content)
         content.addSubview(name)
-        for view in [roundel, symbol, innerRoundel, innerSymbol] {
+        for view in [symbol, innerSymbol] {
             content.addSubview(view)
         }
     }
@@ -110,20 +101,16 @@ final class StickyMarkPlate: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    /// Sets the outermost glyph's hex color — the glass tint and
-    /// the pill's ink — and its roundel (#429).
+    /// Sets the outermost glyph's colour, which paints its symbol
+    /// on glass and on the flat finish alike (#2831).
     func setMarkColor(_ hex: String) {
         markHex = hex
         guard !isGlass else {
             applyGlass()
             return
         }
-        markColor = Self.paint(symbol, roundel, hex: hex)
-        Self.paint(
-            innerSymbol,
-            innerRoundel,
-            hex: slotCount > 1 ? innerHex : ""
-        )
+        Self.paint(symbol, hex: hex)
+        Self.paint(innerSymbol, hex: slotCount > 1 ? innerHex : "")
         name.textColor = markColor
     }
 
@@ -137,24 +124,13 @@ final class StickyMarkPlate: NSView {
         setMarkColor(markHex)
     }
 
-    /// Paints one glyph on the flat finish: a filled disc under a
-    /// contrasting glyph, or the bare label ink on Automatic.
-    @discardableResult
-    private static func paint(
-        _ glyph: NSImageView,
-        _ disc: NSView,
-        hex: String
-    ) -> NSColor {
-        guard !hex.isEmpty else {
-            disc.isHidden = true
-            glyph.contentTintColor = .labelColor
-            return .labelColor
-        }
-        let fill = NSColor(kiwiHex: hex)
-        disc.isHidden = false
-        disc.layer?.backgroundColor = fill.cgColor
-        glyph.contentTintColor = fill.contrastingGlyph
-        return fill
+    /// Paints one glyph in its colour, or the label ink on
+    /// Automatic (#2831).
+    static func paint(_ glyph: NSImageView, hex: String) {
+        glyph.contentTintColor = NSColor.mark(
+            hex: hex,
+            fallback: .labelColor
+        )
     }
 
     /// Glyph squares that fit a window `width` points wide beside
@@ -173,22 +149,12 @@ final class StickyMarkPlate: NSView {
     override func layout() {
         super.layout()
         let w = bounds.width
-        let inset = (Self.size - Self.roundelSize) / 2
-        for (slot, pair) in [(symbol, roundel), (innerSymbol, innerRoundel)]
-            .enumerated()
-        {
-            let x = w - Self.size * CGFloat(slot + 1)
-            pair.0.frame = CGRect(
-                x: x,
+        for (slot, glyph) in [symbol, innerSymbol].enumerated() {
+            glyph.frame = CGRect(
+                x: w - Self.size * CGFloat(slot + 1),
                 y: 0,
                 width: Self.size,
                 height: Self.size
-            )
-            pair.1.frame = CGRect(
-                x: x + inset,
-                y: inset,
-                width: Self.roundelSize,
-                height: Self.roundelSize
             )
         }
         let textHeight = ceil(name.intrinsicContentSize.height)
