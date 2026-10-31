@@ -214,9 +214,13 @@ struct BriefPocketTests {
                 durationMS: core.tiler.settings.animations.durationMS
             )
         )
-        // Only the hand-off waits for the landing; the pocket's own
-        // hold waits for the play's end.
-        #expect(waits.all.contains(.seconds(timeline.flightEnd)))
+        // The sleep seam is shared by every deferred key, so the
+        // hand-off is told apart by count: it alone waits for the
+        // landing, the pocket's hold for the play's end. A second
+        // key sleeping exactly `handOff` would blind this.
+        let all = waits.all
+        #expect(all.filter { $0 == .seconds(timeline.handOff) }.count == 1)
+        #expect(all.filter { $0 == .seconds(timeline.end) }.count == 1)
         #expect(raised(core, one))
     }
 

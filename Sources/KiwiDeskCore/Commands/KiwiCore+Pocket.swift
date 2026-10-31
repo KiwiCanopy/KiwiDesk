@@ -105,7 +105,7 @@ extension KiwiCore {
             holdingFor: (play?.end ?? 0) - MoveIntentLatch.window
         )
         guard heldFocus else { return handPocketFocus(after: nil, nil) }
-        handPocketFocus(after: play?.end) { [weak self] in
+        handPocketFocus(after: play?.handOff) { [weak self] in
             guard let self else { return }
             guard let next else {
                 self.desktopFocusYield?()
@@ -174,9 +174,10 @@ extension KiwiCore {
         }
         refreshStickyReach()
         retile(stateChange: id)
-        // Raised as it lands, under the plate's fade, so it never
-        // shows behind the window it came out over.
-        handPocketFocus(after: play?.flightEnd, leaving: cameFrom) {
+        // Raised as it lands, under the plate's fade (#2845). The
+        // held write and the raise share that deadline unordered: a
+        // slow app may front its park corner until the write lands.
+        handPocketFocus(after: play?.handOff, leaving: cameFrom) {
             [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
             else { return }

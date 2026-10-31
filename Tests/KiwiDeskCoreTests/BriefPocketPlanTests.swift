@@ -17,6 +17,7 @@ struct BriefPocketPlanTests {
         #expect(line.flightBegin == 0)
         #expect(line.nodBegin == line.flightEnd)
         #expect(line.liftBegin > line.nodBegin)
+        #expect(line.handOff == line.end)
     }
 
     @Test("out of the pocket: the pocket nods, then the plate grows out")
@@ -25,6 +26,8 @@ struct BriefPocketPlanTests {
         #expect(line.nodBegin == line.flightBegin)
         #expect(line.flightBegin == BriefPocketPlan.fadeIn)
         #expect(line.end >= line.flightEnd)
+        #expect(line.handOff == line.flightEnd)
+        #expect(line.handOff < line.end)
     }
 
     @Test("the plate leaves the window and ends at the mark's size")
