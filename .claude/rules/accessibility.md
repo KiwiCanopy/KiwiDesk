@@ -402,9 +402,14 @@ editing AX code:
   `reconcileOnScreenArrivals` refuses for the same reason — and
   it leaves the heal's own cadence alone. A destroy re-reads only
   the app still tracking that window (`WindowServerWakeUpTests`).
-  Neither path reads WindowServer on the main actor: the notify
+  Neither path reads WindowServer inside the drain: the notify
   callback runs inside the event-port drain the border pump's
-  flush waits on. The symbol and payload facts are
+  flush waits on. **One ruled exception: a destroy of an AWAY id
+  may prune that away-ledger entry (#2660)** — never a tracked
+  window — only on the per-window `readWindowSpace` answering
+  `.gone`, read on the main actor after the wake grace through the
+  one `.awayDestroyCheck` slot (`AwayDestroyPruneTests`). The
+  symbol and payload facts are
   [os-private-apis.md](os-private-apis.md)'s. Residue: a window
   created hidden and ordered in later (Electron's `show: false`)
   is not on the census when the sweep runs, so it waits for the
