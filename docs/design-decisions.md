@@ -3904,15 +3904,17 @@ already on screen in the Space it goes to, travels with the user
 uncovered.
 
 :::unreleased
-**Amended: an icon shows unless a plate in front covers it**
-(#2837, owner, 2026-10-31). A pile is any chain of plates
-overlapping by more than a point, so a float grazing several tiles
-joined them into one pile and its one face stripped every tile's
-icon. A plate now carries its app's icon unless a plate drawn in
-front of it covers the icon's centred square. A real pile still
-shows one icon, since its back plates' centres sit under the plate
-in front, and a tiled focus under a float's plate gives its icon to
-the float. The pile stays the glass container.
+**Amended: every plate carries its icon** (#2837, owner,
+2026-10-31). A pile is any chain of plates overlapping by more than
+a point, so a float grazing several tiles joined them into one pile
+and its one face stripped every tile's icon. Every plate with room
+for an icon now draws it. A plate in front is glass, so a covered
+icon shows through it softened; with glass off the plate in front
+is opaque and hides it. Every layout scrolls its overflow, so a
+real pile is now only the fallback for a region too small for one
+window, where a few staggered icons are accepted. A plate wholly
+behind another is still dropped, and the pile stays the glass
+container.
 :::
 
 *Its own pace (#1931).* `space.slide_duration` is the strip's

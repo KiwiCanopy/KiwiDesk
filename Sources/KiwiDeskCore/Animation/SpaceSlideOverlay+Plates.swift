@@ -56,8 +56,8 @@ extension SpaceSlideOverlay {
     /// nearest the shortcuts panel's `.regularMaterial` (owner,
     /// device, #1956), dark where the Appearance pick is — with the
     /// app icon centred
-    /// on the part of the window the page shows, unless a plate in
-    /// front covers it (#2837).
+    /// on the part of the window the page shows, wherever it fits
+    /// (#2837).
     private func plateView(
         _ plate: SpaceSlidePlan.Plate,
         in current: Play

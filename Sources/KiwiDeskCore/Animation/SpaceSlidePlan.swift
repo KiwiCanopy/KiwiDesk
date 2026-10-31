@@ -85,8 +85,7 @@ enum SpaceSlidePlan {
     }
 
     /// One plate: the part of its window the page shows, and the
-    /// app whose icon it draws, nil where no icon fits or a plate
-    /// in front covers its spot.
+    /// app whose icon it draws, nil where no icon fits.
     struct Plate: Equatable {
         let id: WindowID
         let frame: CGRect
@@ -123,16 +122,13 @@ enum SpaceSlidePlan {
             }
         }.map(\.element)
         let piles = pileIndices(shown.map(\.1))
+        // Every plate with room for one draws its icon (#2837): a
+        // plate in front is glass, or opaque and hides it itself.
         return shown.enumerated().map { index, entry in
-            // An icon shows unless a plate drawn in front covers
-            // its spot (#2837); a pile's back plates lose theirs.
-            let drawn = iconRect(on: entry.1).map { spot in
-                !shown[(index + 1)...].contains { $0.1.intersects(spot) }
-            }
-            return Plate(
+            Plate(
                 id: entry.0.id,
                 frame: entry.1,
-                iconPid: drawn == true ? entry.0.pid : nil,
+                iconPid: iconRect(on: entry.1) == nil ? nil : entry.0.pid,
                 pile: piles[index]
             )
         }
