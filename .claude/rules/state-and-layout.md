@@ -758,8 +758,22 @@ editing here:
     at its hand-off, swallows the pocketing's own echo
     (`PocketCommandTests` ▸ `activationTakesOut`).
   - **A pocket press moves state focus at once where a window can
-    take it, and raises when its brief pocket ends (#2703)**, so for
-    one play the key window is not the state's. The one
+    take it, and raises at its brief pocket's
+    `BriefPocketPlan.Timeline.handOff`, never before the flight
+    ends (#2703)**, so for one play the key window is not the
+    state's. A raise activates an app on the thread the plate's
+    frames tick on, where KiwiDesk's own Settings window redraws
+    whole. A put-in hands off once the play is over; a take-out
+    as its window lands, so it rises under the plate's fade
+    rather than showing behind the window it came out over — at
+    the cost of an activation inside the last 0.2 s of that play,
+    the plate's fade and the pocket's lift (#2845). A take-out's
+    raise and its held write share `handOff` unordered, so a slow
+    app may front its park corner until the write lands; a change
+    that orders or separates them keeps the write first
+    (`BriefPocketPlanTests`, `BriefPocketTests` ▸
+    `putInRaiseWaits`, `takeOutRaiseWaits`,
+    `takeOutRaisesAtLanding`). The one
     `handPocketFocus` pays the raise, through `focusWindow` handed
     as `leaving` the anchor the press read before its write, so its
     changed-focus arms decide as an immediate hand-off would; a new
