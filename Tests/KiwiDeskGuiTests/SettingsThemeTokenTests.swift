@@ -87,6 +87,26 @@ struct SettingsThemeTokenTests {
             0xEA_F3_EE,
             SettingsTheme.plateInk
         ),
+        // A look's picture (#1740): fixed in both modes, since
+        // the picture is a desk, as `previewPlate`'s.
+        Pin(
+            "lookGround",
+            0x0D_0D_12,
+            0x0D_0D_12,
+            SettingsTheme.lookGround
+        ),
+        Pin(
+            "lookWindow",
+            0xE8_E6_EE,
+            0xE8_E6_EE,
+            SettingsTheme.lookWindow
+        ),
+        Pin(
+            "lookWindowLine",
+            0xC9_C7_D0,
+            0xC9_C7_D0,
+            SettingsTheme.lookWindowLine
+        ),
         // KiwiVision's veil (#2103): black in both modes, since
         // the plate it pictures always dims with black.
         Pin(

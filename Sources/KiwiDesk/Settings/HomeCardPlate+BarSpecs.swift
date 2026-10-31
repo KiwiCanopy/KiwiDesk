@@ -43,7 +43,7 @@ extension HomeCardBarsTile {
         let cross = crossSize(style.thickness)
         let widths = indicatorWidths(style.shelf)
         let share = contentShare(style.shelf)
-        return BarSpec(
+        var spec = BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
             items: appItems(style, vertical: vertical),
@@ -69,6 +69,14 @@ extension HomeCardBarsTile {
             sheen: style.sheen,
             titleCap: style.resolvedTitleCap
         )
+        // An art item measures what `BarStripView.pipBody` draws
+        // along the bar: the art and its padding; the end insets
+        // are `pipEndInsets`'.
+        let pad = vertical ? Self.pipPad.vertical : Self.pipPad.horizontal
+        for index in spec.items.indices where spec.items[index].art != nil {
+            spec.items[index].length = spec.artSide + 2 * pad * scale
+        }
+        return spec
     }
 
     /// Idle Spaces draw the shelf's idle ink, as the live bar does.
@@ -116,6 +124,20 @@ extension HomeCardBarsTile {
                 L("bars_scene.title_files", "Downloads")
             ),
         ]
+        if let appArt {
+            return appArt.enumerated().map { index, art in
+                // `appSpec` sets the length once the font is known.
+                var item = BarItem(
+                    color: index == 0
+                        ? style.activeItemColor
+                        : style.idleItemColor,
+                    length: 0
+                )
+                item.art = art
+                item.active = index == 0
+                return item
+            }
+        }
         var items: [BarItem] = []
         for (index, mock) in mocks.enumerated() {
             let active = index == 0

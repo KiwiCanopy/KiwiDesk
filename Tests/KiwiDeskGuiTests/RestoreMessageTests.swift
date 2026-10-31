@@ -4,8 +4,8 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The restore confirm says what each offered button does with
-/// init.lua, picked from Core's reason rather than guessed (#2517).
+/// The restore confirm says what the restore does with init.lua,
+/// picked from Core's reason rather than guessed (#2517, #2730).
 @Suite("Restore confirm message (#2517)")
 @MainActor
 struct RestoreMessageTests {
@@ -25,18 +25,18 @@ struct RestoreMessageTests {
             message(nil, withInitLua: false)
                 .hasSuffix("init.lua isn't touched.")
         )
-        #expect(
-            message(nil, withInitLua: true)
-                .contains("The backup also includes an init.lua.")
-        )
-        #expect(
-            message(.luaOwnsThisMac, withInitLua: true)
-                .contains("Your settings here come from init.lua")
-        )
+        let choose = message(nil, withInitLua: true)
+        #expect(choose.contains("The backup also includes an init.lua."))
+        // Names the checkbox by its own label (#2730).
+        #expect(choose.contains("“\(BackupInitLuaOption.label)” off"))
+        let owned = message(.luaOwnsThisMac, withInitLua: true)
+        #expect(owned.contains("Your settings here come from init.lua"))
+        #expect(owned.contains("“\(BackupInitLuaOption.label)”"))
         // The lead names everything replaced, here with none.
         let only = message(.empty, withInitLua: true)
         #expect(only.contains("every profile"))
         #expect(only.hasSuffix("and KiwiDesk runs it."))
         #expect(only.contains("This backup holds only an init.lua."))
+        #expect(only.contains("“\(BackupInitLuaOption.label)”"))
     }
 }

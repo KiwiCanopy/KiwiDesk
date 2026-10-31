@@ -34,13 +34,10 @@ extension AppDelegate {
         }
         let delete = alert.addButton(withTitle: SpaceDeleteWording.delete)
         delete.hasDestructiveAction = true
-        let cancel = alert.addButton(withTitle: SpaceDeleteWording.cancel)
-        // Irreversible: Cancel is the default (Return / Escape),
-        // Delete needs a deliberate click, as `ConfigIssuesWindow`.
-        delete.keyEquivalent = ""
-        cancel.keyEquivalent = "\r"
+        alert.addButton(withTitle: SpaceDeleteWording.cancel)
+        // Irreversible: Cancel is the default, as `ConfigIssuesWindow`.
         NSApp.activate()
-        return alert.runModal() == .alertFirstButtonReturn
+        return CancelDefault.runModal(alert) == .alertFirstButtonReturn
     }
 
     /// Keep, from a Space chip's Layout menu or KiwiHub's View side:

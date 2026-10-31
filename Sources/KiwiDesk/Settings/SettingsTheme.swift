@@ -37,6 +37,16 @@ enum SettingsTheme {
         dark: 0x12_25_1A
     )
 
+    /// A look's picture (#1740): the night beneath its shelf
+    /// colour, its windows' paper and their placeholder lines —
+    /// fixed in both modes, since the picture is a desk.
+    static let lookGround = token(light: 0x0D_0D_12, dark: 0x0D_0D_12)
+    static let lookWindow = token(light: 0xE8_E6_EE, dark: 0xE8_E6_EE)
+    static let lookWindowLine = token(
+        light: 0xC9_C7_D0,
+        dark: 0xC9_C7_D0
+    )
+
     /// KiwiVision's veil in its picture (#2103): black in both
     /// appearances, since the plate's dim is always black.
     static let visionVeil = token(light: 0x00_00_00, dark: 0x00_00_00)

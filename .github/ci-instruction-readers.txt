@@ -1,0 +1,20 @@
+# The suites that read `.claude/` or `AGENTS.md` (#2712). A change
+# confined to those paths runs lint and these suites alone, instead
+# of the whole suite and the release build; ci.yml's `changes` job
+# picks that lane and `scripts/ci-instruction-filter` turns this
+# list into the `swift test --filter` it runs.
+#
+# Never edited by hand alone: `CiInstructionLaneTests` derives the
+# readers from `Tests/` and reds when this list and the tree
+# disagree in either direction. A change to this file is outside
+# the lane it defines, so it always runs the full suite.
+#
+# One suite type name per line.
+
+CiPathFilterTests
+InstructionPinTests
+RuleCitationTests
+SubsystemMapParityTests
+VerifyGateParityTests
+WarningGateTests
+WarningRatchetWorkflowTests

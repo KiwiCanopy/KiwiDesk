@@ -31,7 +31,20 @@ struct HomeCardBarsTile: View {
     /// shelf on any edge and scales with the frame (a look card's
     /// focused window, #1739).
     var wellContent: AnyView?
+    /// The App Bar's items drawn as real app art, one per item and
+    /// no title (a look's picture, #1740); nil draws the mocks.
+    var appArt: [BarArt]?
+    /// Whether the frame and the well draw their schematic chrome;
+    /// a look's picture draws its own ground beneath (#1740).
+    var drawsChrome = true
     @Environment(\.schematicPalette) private var palette
+
+    /// An App Bar item's art (#1740): an app's own icon, or its
+    /// App Font ligature in the item's ink.
+    enum BarArt {
+        case icon(NSImage)
+        case appFont(String)
+    }
 
     struct BarItem {
         var color: String
@@ -42,6 +55,7 @@ struct HomeCardBarsTile: View {
         /// Bar's icon steps down by Core's slot ratio, a Space's
         /// symbol identifier draws at the identifier size.
         var glyphRatio: CGFloat = AppBarStyle.glyphSlotRatio
+        var art: BarArt?
         var active = false
     }
 
@@ -92,6 +106,11 @@ struct HomeCardBarsTile: View {
             / shelf.thickness
     }
 
+    /// A labelled pip's padding along a horizontal and a vertical
+    /// bar, at one `scale`: `BarStripView.pipBody` draws it and an
+    /// art item's length reads it.
+    static let pipPad = (horizontal: CGFloat(2.5), vertical: CGFloat(1.5))
+
     /// Schematic points per live point of an indicator: the
     /// frame draws the shipped 2 pt ring at one `scale`.
     static let indicatorPerPoint: CGFloat = 0.5
@@ -118,8 +137,16 @@ struct HomeCardBarsTile: View {
     /// The App Bar the preview draws: the first layout whose bar
     /// is not hidden (#761), or nil when none is.
     private var appBarLook: AppBarLook? {
-        settings.appBarHosts.first { $0.visibility.showsUnprompted }.map {
-            settings.appBarLook(for: $0)
+        Self.appBarMode(settings).flatMap { settings.appBarHost(for: $0) }
+            .map { settings.appBarLook(for: $0.appBar) }
+    }
+
+    /// The layout whose App Bar the preview draws: the first whose
+    /// bar is not hidden (#761), or nil when none is.
+    static func appBarMode(_ settings: TilingSettings) -> LayoutMode? {
+        LayoutMode.allCases.first {
+            settings.appBarHost(for: $0)?.appBar.visibility
+                .showsUnprompted == true
         }
     }
 
@@ -134,6 +161,7 @@ struct HomeCardBarsTile: View {
                     palette?.frame
                         ?? SettingsTheme.ink2.opacity(0.3)
                 )
+                .opacity(drawsChrome ? 1 : 0)
         )
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
@@ -186,6 +214,7 @@ struct HomeCardBarsTile: View {
                             ?? SettingsTheme.ink2.opacity(0.3)
                     )
             )
+            .opacity(drawsChrome ? 1 : 0)
             .overlay { wellContent }
             .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
@@ -225,7 +254,8 @@ struct HomeCardBarsTile: View {
                 edge: edge,
                 vertical: vertical,
                 scale: scale,
-                pocket: pocketStands && settings.kiwishelf.pocketEdge == edge
+                pocket: pocketStands && settings.kiwishelf.pocketEdge == edge,
+                pocketHex: settings.pocketStyle.color
             )
         }
     }

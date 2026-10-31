@@ -11,7 +11,7 @@ import CoreText
 /// badge cell `lineTop`; the App Bar's slot keeps its own
 /// font-scaling and snug rulings (`AppBarItemView+GlyphSlot`) and
 /// anchors through `Metrics`.
-enum BarTextGlyph {
+public enum BarTextGlyph {
     /// A string as the text system lays it: the advance the
     /// cell's alignment centres, and the ink relative to the line
     /// origin — a ligature carries its slack on the trailing
@@ -57,6 +57,20 @@ enum BarTextGlyph {
             let lead = frame.minX + inkLead(inFrameOfWidth: frame.width)
             return lead...(lead + ink.width)
         }
+    }
+
+    /// How far to move `text` drawn at its advance so its ink
+    /// centres where the advance's middle was: the one ink
+    /// placement a SwiftUI picture of a bar glyph reads (#1740).
+    public static func inkCentringShift(
+        _ text: String,
+        font: NSFont
+    ) -> CGFloat {
+        let metrics = metrics(text, font: font)
+        return metrics.originX(
+            centringInkOn: metrics.advance / 2,
+            frameWidth: metrics.advance
+        )
     }
 
     /// Total: an ink-less string reads as ink the width of its
