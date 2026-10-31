@@ -13,7 +13,7 @@ extension SpaceBarItemView {
             {
                 applyStateBadge(
                     badge,
-                    markHex: stateMarkColors.sticky,
+                    hex: stateMarkColors.sticky,
                     appFocused: app.focused
                 )
             }
@@ -22,39 +22,32 @@ extension SpaceBarItemView {
             {
                 applyStateBadge(
                     badge,
-                    markHex: stateMarkColors.floating,
+                    hex: stateMarkColors.floating,
                     appFocused: app.focused
                 )
             }
             if index < pocketBadgeViews.count,
                 let badge = pocketBadgeViews[index]
             {
-                // Its own colour on its pocket (#2671).
                 applyStateBadge(
                     badge,
-                    markHex: "",
-                    pocketHex: stateMarkColors.pocket,
+                    hex: stateMarkColors.pocket,
                     appFocused: app.focused
                 )
             }
         }
     }
 
-    /// State badge fill and contrast glyph (#429), its symbol on
-    /// the dim ladder (`BarBadgeFace`). A pocket badge
-    /// keeps the count badge's own disc and fills its pocket in
-    /// `pocketHex`, the window mark's split (#2671); empty takes
-    /// the disc's contrasting ink.
+    /// A state badge: the count badge's own disc for every state,
+    /// the state's colour on its symbol, its contrasting ink on
+    /// Automatic (#2831), the symbol on the dim ladder
+    /// (`BarBadgeFace`).
     private func applyStateBadge(
         _ badge: StateBadgeView,
-        markHex: String,
-        pocketHex: String? = nil,
+        hex: String,
         appFocused: Bool
     ) {
-        let fill = NSColor.mark(
-            hex: pocketHex == nil ? markHex : "",
-            fallback: NSColor(kiwiHex: style.groupBadgeColor)
-        )
+        let fill = NSColor(kiwiHex: style.groupBadgeColor)
         let tier = untintedAppAlpha(focused: appFocused)
         BarBadgeFace.disc(
             badge,
@@ -62,11 +55,9 @@ extension SpaceBarItemView {
             shelf: style.shelf,
             tier: tier
         )
-        badge.symbol.contentTintColor = fill.contrastingGlyph
-        badge.ink = NSColor.mark(
-            hex: pocketHex ?? "",
-            fallback: fill.contrastingGlyph
-        )
+        let ink = NSColor.mark(hex: hex, fallback: fill.contrastingGlyph)
+        badge.symbol.contentTintColor = ink
+        badge.ink = ink
         badge.symbol.alphaValue = tier
     }
 }

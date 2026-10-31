@@ -129,7 +129,7 @@ struct PocketMarkColorTests {
             .first { $0.window == WindowID(1) }?.glyphs
         #expect(glyphs == [.pocket(color: amber)])
         // The pocket fills itself; its plate stays untinted.
-        #expect(glyphs?.first?.plateHex == "")
+        #expect(glyphs?.first?.symbolHex == "")
     }
 
     /// A mark wearing `glyphs` on a window wide enough for two
@@ -147,17 +147,24 @@ struct PocketMarkColorTests {
         return overlay.plate
     }
 
-    @Test("the pocket's plate takes no tint, outer slot or inner")
-    func plateStaysUntinted() {
+    /// No glyph draws a disc, outer slot or inner (#2831): a
+    /// floating glyph's colour goes on its symbol, the pocket's into
+    /// its own image.
+    @Test("no glyph draws a disc; a colour goes on its symbol")
+    func noDiscColourOnSymbol() throws {
         #expect(plate([.pocket(color: amber)]).roundel.isHidden)
         let inner = plate([.sticky(), .pocket(color: amber)])
         #expect(inner.slotCount == 2)
         #expect(inner.innerRoundel.isHidden)
-        // Control: a floating glyph's colour does tint its disc.
-        #expect(!plate([.floating(color: amber)]).roundel.isHidden)
+        let outer = plate([.floating(color: amber)])
+        #expect(outer.roundel.isHidden)
+        let tint = try #require(outer.symbol.contentTintColor)
+        #expect(try hex(tint) == amber)
         let floating = plate([.sticky(), .floating(color: amber)])
         #expect(floating.slotCount == 2)
-        #expect(!floating.innerRoundel.isHidden)
+        #expect(floating.innerRoundel.isHidden)
+        let innerTint = try #require(floating.innerSymbol.contentTintColor)
+        #expect(try hex(innerTint) == amber)
     }
 
     @Test("the window mark draws its pocket opaque in the colour")

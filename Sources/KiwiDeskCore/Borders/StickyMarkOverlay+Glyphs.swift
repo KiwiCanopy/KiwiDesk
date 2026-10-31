@@ -1,10 +1,9 @@
 import AppKit
 
 /// The plate's glyph images — the pocket's drawn by `PocketMark`
-/// (#2446, #2671) — and the pocket mark's place half over the
-/// window's corner, split from `StickyMarkOverlay` at the §2.1
-/// ceiling. A plate's tint is a glyph's `plateHex`, never its
-/// `color`.
+/// in its own colour (#2446, #2671) — split from
+/// `StickyMarkOverlay` at the §2.1 ceiling. A symbol's tint is a
+/// glyph's `symbolHex`, never its `color` (#2831).
 extension StickyMarkOverlay {
     /// The image `glyph` draws on the plate.
     static func image(_ glyph: StickyMarkManager.Glyph) -> NSImage? {

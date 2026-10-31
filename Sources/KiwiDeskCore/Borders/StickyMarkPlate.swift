@@ -34,7 +34,7 @@ final class StickyMarkPlate: NSView {
     let tint = GlassBackdrop()
     /// Whether the mark draws as glass (`setGlass`).
     var isGlass = false
-    /// The stored colour, kept for the glass tint.
+    /// The outermost glyph's stored colour (#2831: its symbol's).
     var markHex = ""
 
     /// The outermost glyph and its disc (#429).
@@ -51,7 +51,8 @@ final class StickyMarkPlate: NSView {
     /// Diameter of background roundel.
     static let roundelSize: CGFloat = 15
 
-    /// Resolved tint color (#429).
+    /// The pill's ink: the label ink, since a state's colour is
+    /// its symbol's alone (#2831).
     var markColor: NSColor = .labelColor
 
     init() {
@@ -110,15 +111,15 @@ final class StickyMarkPlate: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { fatalError() }
 
-    /// Sets the outermost glyph's hex color — the glass tint and
-    /// the pill's ink — and its roundel (#429).
+    /// Sets the outermost glyph's colour, which paints its symbol
+    /// on glass and on the flat finish alike (#2831).
     func setMarkColor(_ hex: String) {
         markHex = hex
         guard !isGlass else {
             applyGlass()
             return
         }
-        markColor = Self.paint(symbol, roundel, hex: hex)
+        Self.paint(symbol, roundel, hex: hex)
         Self.paint(
             innerSymbol,
             innerRoundel,
@@ -137,24 +138,14 @@ final class StickyMarkPlate: NSView {
         setMarkColor(markHex)
     }
 
-    /// Paints one glyph on the flat finish: a filled disc under a
-    /// contrasting glyph, or the bare label ink on Automatic.
-    @discardableResult
-    private static func paint(
-        _ glyph: NSImageView,
-        _ disc: NSView,
-        hex: String
-    ) -> NSColor {
-        guard !hex.isEmpty else {
-            disc.isHidden = true
-            glyph.contentTintColor = .labelColor
-            return .labelColor
-        }
-        let fill = NSColor(kiwiHex: hex)
-        disc.isHidden = false
-        disc.layer?.backgroundColor = fill.cgColor
-        glyph.contentTintColor = fill.contrastingGlyph
-        return fill
+    /// Paints one glyph: no disc, the symbol in its colour, or the
+    /// label ink on Automatic (#2831).
+    static func paint(_ glyph: NSImageView, _ disc: NSView, hex: String) {
+        disc.isHidden = true
+        glyph.contentTintColor = NSColor.mark(
+            hex: hex,
+            fallback: .labelColor
+        )
     }
 
     /// Glyph squares that fit a window `width` points wide beside

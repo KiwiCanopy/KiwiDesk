@@ -103,7 +103,7 @@ final class StickyMarkOverlay {
         let changed = wanted != glyphs
         glyphs = wanted
         if changed, panel != nil { applyGlyphs() }
-        plate.setMarkColor(wanted[0].plateHex)
+        plate.setMarkColor(wanted[0].symbolHex)
     }
 
     /// Draws as many glyphs as `frame` fits (#1799).
@@ -126,7 +126,7 @@ final class StickyMarkOverlay {
         let inner = count > 1 && glyphs.count > 1 ? glyphs[1] : nil
         plate.setInner(
             inner.flatMap(Self.image),
-            hex: inner?.plateHex ?? ""
+            hex: inner?.symbolHex ?? ""
         )
     }
 
