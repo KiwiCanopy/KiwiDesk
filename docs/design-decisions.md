@@ -18434,6 +18434,15 @@ ghost and drop zone, the hidden shelf's handle and the boot
 notice keep the inactive look: a surface joins only with its own
 argument here.
 
+:::unreleased
+The window mark joins, frosted, always (#2831, owner device check
+2026-10-31): untinted clear glass without the rim read as a grey
+film and with it framed the small pill like a sticker, while
+frosted glass with the rim reads as one light object over any
+window. Its flat badge is pinned active already, so the answer
+never changes at runtime.
+:::
+
 **On glass the Fill FADES: its capped alpha at the shelf's screen
 edge, an eighth of that toward the windows.** (#1622, owner
 rulings 2026-09-24/25.) A flat tint at `GlassTint.maxAlpha` is

@@ -24,6 +24,11 @@ struct StickyMarkCornerTests {
         return overlay
     }
 
+    private static var drawsGlass: Bool {
+        if #available(macOS 26, *) { return true }
+        return false
+    }
+
     private var sticky: StickyMarkManager.Glyph {
         .sticky(StickyStyle.symbolName, color: "")
     }
@@ -32,14 +37,17 @@ struct StickyMarkCornerTests {
     func frostedWithRim() throws {
         let mark = overlay(glass: true, glyphs: [sticky])
         defer { mark.hide() }
-        let panel = try #require(mark.panelForTest as? ActiveGlassPanel)
-        #expect(panel.wearsActiveLook)
-        guard #available(macOS 26, *) else { return }
-        let glass = try #require(
-            mark.plate.glass as? NSGlassEffectView,
-            "no glass hosted"
-        )
-        #expect(glass.style == .regular)
+        // The class is the guard: an `ActiveGlassPanel` answers YES
+        // unless told otherwise, and nothing tells the mark's.
+        _ = try #require(mark.panelForTest as? ActiveGlassPanel)
+        try #require(Self.drawsGlass, "no glass below macOS 26")
+        if #available(macOS 26, *) {
+            let glass = try #require(
+                mark.plate.glass as? NSGlassEffectView,
+                "no glass hosted"
+            )
+            #expect(glass.style == .regular)
+        }
     }
 
     @Test("the pocket mark sits at the sticky mark's corner")

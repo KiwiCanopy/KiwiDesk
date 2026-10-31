@@ -25,7 +25,7 @@ struct OverlayGlassTests {
 
     /// The colour is the symbol's on glass and off it (#2831): the
     /// glass stays clear, and no disc comes back on the flat finish.
-    @Test("The sticky mark turns clear glass and back")
+    @Test("The sticky mark turns untinted glass and back")
     func stickyMarkTogglesGlass() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let plate = StickyMarkPlate()
@@ -53,7 +53,7 @@ struct OverlayGlassTests {
     }
 
     /// No colour is clear glass, not a tint of the empty string.
-    @Test("A sticky mark with no colour is clear glass")
+    @Test("A sticky mark with no colour is untinted glass")
     func uncolouredMarkIsClearGlass() throws {
         try #require(Self.drawsGlass, "no glass below macOS 26")
         let plate = StickyMarkPlate()

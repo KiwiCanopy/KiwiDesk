@@ -902,7 +902,7 @@ never `Glyph.color`** (#2671, #2831): the pocket mark's colour is
 drawn into its own image, opaque, so it takes no tint, while a
 sticky or floating colour inks its symbol through
 `StickyMarkPlate.paint`, which draws no disc. The mark's glass
-stays clear (`OverlayGlassTests` ▸ `stickyMarkTogglesGlass`), and
+stays untinted (`OverlayGlassTests` ▸ `stickyMarkTogglesGlass`), and
 every Space Bar state badge keeps the count badge's own disc, its
 symbol in the state colour or the disc's `contrastingGlyph` on
 Automatic, in `applyStateBadge` (`PocketMarkColorTests`,
