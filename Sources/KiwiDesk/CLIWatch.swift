@@ -39,8 +39,8 @@ enum CLIWatch {
             FileHandle.standardError.write(Data("\(usage)\n".utf8))
             return 1
         }
-        // A command that exits without reading its stdin must end
-        // the write with an error, never the watcher with a signal.
+        // A closed stderr must drop `writeNote`'s line, never end
+        // the watcher; `launch` guards the child's stdin (#2852).
         signal(SIGPIPE, SIG_IGN)
         return watch(
             invocation,
@@ -159,6 +159,13 @@ struct CLIWatchRunner {
         } catch {
             return 127
         }
+        // A child gone before the write must cost EPIPE, not the
+        // caller: only `run` ignores SIGPIPE process-wide (#2852).
+        _ = fcntl(
+            input.fileHandleForWriting.fileDescriptor,
+            F_SETNOSIGPIPE,
+            1
+        )
         try? input.fileHandleForWriting.write(
             contentsOf: Data("\(line)\n".utf8)
         )
