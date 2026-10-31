@@ -664,7 +664,10 @@ editing here:
   entry ENDS on the return (the create fold), on a census that
   no longer hosts the id (`refreshAwayWindows`, which emits the
   corrective `closed` — at the Desktop settle and on the 5 s
-  `awayCensus` task while the ledger is non-empty), on the app's
+  `awayCensus` task while the ledger is non-empty — a 60 s
+  backstop while WindowServer's destroys are live, since a destroy
+  of an away id prunes it on `readWindowSpace`'s `.gone`, checked
+  outside the port's drain, `AwayDestroyPruneTests`), on the app's
   exit, on the #634 reset with `rememberedSpaces`, and moves on
   a re-key (`WindowRekeyParityTests`' fixture populates it, so the
   reflection scan discovers the container; `AwayLedgerTests` ▸

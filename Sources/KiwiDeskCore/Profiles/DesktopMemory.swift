@@ -116,6 +116,10 @@ final class DesktopMemory {
     /// drained by its one reap (#1510).
     var gatherReapPIDs: Set<pid_t> = []
 
+    /// Away windows WindowServer reported destroyed, awaiting the
+    /// compositor's per-window check (#2660).
+    var awayDestroyed: Set<WindowID> = []
+
     /// Last observed native Space ID per display (`KiwiCore+BootSeams`,
     /// docs/cli.md).
     var lastDisplaySpaces: [String: SkyLight.SpaceID] = [:]

@@ -9,8 +9,49 @@ import Foundation
 /// Desktop in front of the user (#1228). The argument is
 /// state-and-layout.md's.
 extension KiwiCore {
-    /// The cadence the ledger is re-read at while non-empty.
+    /// The cadence the ledger is re-read at while non-empty: a
+    /// backstop while WindowServer's destroys reach
+    /// `noteAwayDestroyed` (#2660), the whole job otherwise.
     static let awayCensusInterval: Duration = .seconds(5)
+    static let awayBackstopInterval: Duration = .seconds(60)
+
+    var awayCensusCadence: Duration {
+        windowCreates.isLive
+            ? Self.awayBackstopInterval : Self.awayCensusInterval
+    }
+
+    /// A WindowServer destroy of an away window (#2660) owes it a
+    /// per-window check, run after the wake grace and never inside
+    /// the event port's drain, which the border pump waits on.
+    func noteAwayDestroyed(_ id: WindowID) {
+        guard state.awayWindows[id] != nil else { return }
+        onLog("away: w\(id.raw) destroyed by WindowServer")
+        desktopMemory.awayDestroyed.insert(id)
+        deferred.schedule(
+            .awayDestroyCheck,
+            after: Self.wakeUpGrace
+        ) { [weak self] in
+            self?.pruneDestroyedAway()
+        }
+    }
+
+    /// Prunes each reported away window the compositor hosts on
+    /// no Space; one still hosted waits for the census.
+    func pruneDestroyedAway() {
+        let ids = desktopMemory.awayDestroyed
+        desktopMemory.awayDestroyed = []
+        for id in ids.sorted(by: { $0.raw < $1.raw }) {
+            guard let entry = state.awayWindows[id] else { continue }
+            let reading = desktopMemory.readWindowSpace(id)
+            guard reading == .gone else {
+                onLog(
+                    "away: w\(id.raw) still \(reading), left to the census"
+                )
+                continue
+            }
+            pruneAwayWindow(entry)
+        }
+    }
 
     /// Files `id` as away, from the facts the fold erased.
     func recordAwayWindow(
@@ -119,7 +160,7 @@ extension KiwiCore {
         guard !state.awayWindows.isEmpty else { return }
         deferred.schedule(
             .awayCensus,
-            after: Self.awayCensusInterval
+            after: awayCensusCadence
         ) { [weak self] in
             guard let self, self.eventLoop.isRunning else { return }
             if self.refreshAwayWindows() {
