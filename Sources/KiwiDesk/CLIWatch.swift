@@ -159,6 +159,13 @@ struct CLIWatchRunner {
         } catch {
             return 127
         }
+        // A child gone before the write must cost EPIPE, not the
+        // caller: only `run` ignores SIGPIPE process-wide (#2852).
+        _ = fcntl(
+            input.fileHandleForWriting.fileDescriptor,
+            F_SETNOSIGPIPE,
+            1
+        )
         try? input.fileHandleForWriting.write(
             contentsOf: Data("\(line)\n".utf8)
         )

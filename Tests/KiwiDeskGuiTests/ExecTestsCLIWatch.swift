@@ -26,4 +26,16 @@ struct ExecTestsCLIWatch {
         )
         #expect(missing != 0)
     }
+
+    @Test("a child that never reads costs the launcher no SIGPIPE")
+    func childGoneBeforeWrite() {
+        // Past the pipe buffer, so the write is still pending when
+        // `true` exits and closes the read end (#2852).
+        let status = CLIWatchRunner.launch(
+            ["true"],
+            ProcessInfo.processInfo.environment,
+            String(repeating: "x", count: 1 << 20)
+        )
+        #expect(status == 0)
+    }
 }
