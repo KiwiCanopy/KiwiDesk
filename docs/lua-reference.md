@@ -5908,6 +5908,11 @@ at the position, just inside the bar on an edge where one sits,
 moving no bar, and otherwise one outer margin in from the screen
 edge.
 
+On a handle the kiwis peek out as the pointer reaches it, and the
+pocket comes up once the pointer rests there for 0.15 s, at once
+on a push against the edge or a window drag. Under Reduce Motion
+the kiwis do not peek.
+
 While you drag a window, under either capacity, the pocket comes
 up on every screen as a drop target, and a drop on it pockets that
 window as [`pocket`](#pocket) naming it would; where the pocket
