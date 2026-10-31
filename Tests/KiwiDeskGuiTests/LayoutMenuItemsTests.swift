@@ -51,20 +51,19 @@ struct LayoutMenuItemsTests {
         #expect(sites == allowed)
     }
 
-    /// Floating's single window reads as an empty screen on a card,
-    /// so its picture draws the whole scatter.
-    @Test("Floating's picture draws its scatter")
-    func floatingDrawsItsScatter() {
-        // From a count below the scatter, so the floor is what
-        // answers, not the default count.
-        #expect(SimpleSpacePicture.windows(for: .floating, base: 1) >= 3)
-        #expect(SimpleSpacePicture.windows(for: .floating) >= 3)
+    /// Simple's menu takes its face as a parameter of Advanced's own
+    /// component, so the card draws no layout menu of its own (gui.md
+    /// ▸ Config presence expands the surface).
+    @Test("the card hands the menu its face")
+    func cardHandsTheFace() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let card = try SourceScan.swiftSources(under: root)
+            .first { $0.lastPathComponent == "SimpleSpaceCard.swift" }
+        let source = try SourceScan.strippedSource(at: try #require(card))
+            .filter { !$0.isWhitespace }
         #expect(
-            SimpleSpacePicture.windows(for: .bsp)
-                == LayoutSchematic.windowCount(
-                    LayoutSchematic.defaultWindowCount,
-                    for: .bsp
-                )
+            source.contains("SpaceModeMenu(model:model,space:space){face}")
         )
     }
 }

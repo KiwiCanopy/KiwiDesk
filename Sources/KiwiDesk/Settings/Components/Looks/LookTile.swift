@@ -34,7 +34,8 @@ struct LookTile: View {
                 appliedSpoken: other ? otherColorsSpoken : nil,
                 // Simple's line draws the name alone (#2737 ruling
                 // 3), so it reserves no caption room.
-                captionLines: captionLines ?? (caption == nil ? 0 : 2)
+                captionLines: captionLines
+                    ?? (caption == nil ? 0 : Self.captionRoom)
             ) {
                 LookPlate(settings: preview, spaceLabels: spaceLabels)
             }
@@ -46,6 +47,10 @@ struct LookTile: View {
         .accessibilityHint(help ?? "")
         .help(other ? restoreColorsHelp : (help ?? ""))
     }
+
+    /// The lines a captioned tile reserves: a description or a
+    /// byline, so a line of them ends level.
+    static let captionRoom = 2
 
     /// An imported look's caption, its author (#1740).
     @MainActor static func byline(_ author: String) -> String {

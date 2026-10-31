@@ -128,7 +128,8 @@ struct LooksShelf: View {
     /// My looks' one caption reservation: a byline's two lines
     /// while any look carries one, so the line ends level.
     private var userCaptionLines: Int {
-        model.userLooks.contains { $0.author != nil } ? 2 : 0
+        model.userLooks.contains { $0.author != nil }
+            ? LookTile.captionRoom : 0
     }
 
     private func card(

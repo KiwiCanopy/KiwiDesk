@@ -901,7 +901,7 @@ chip's menu — shares its choices and its one write
 `placementHasOneDoor`), and a control Simple draws with another
 face takes that face as a parameter of Advanced's own component,
 as the Space card hands `SpaceModeMenu` its picture
-(`LayoutMenuItemsTests` ▸ `oneItemList`). `SimpleSectionsTests` ▸ `noLookAlikes`
+(`LayoutMenuItemsTests` ▸ `cardHandsTheFace`). `SimpleSectionsTests` ▸ `noLookAlikes`
 holds Simple's directory to no look tile, recorder, layout menu or
 Screen vocabulary of its own; the rest is review's. Keep every
 page Advanced's and store the root
