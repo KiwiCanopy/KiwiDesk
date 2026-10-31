@@ -7,13 +7,15 @@ import Testing
 /// its panel wears the key-window rim while the plate wears the
 /// Fill, as the slide's does (#2569). Asserts the panel a real play
 /// presents, so a play that stops setting the switch reds here.
-@Suite("Brief pocket plate wears the active look (#2569)")
+@Suite(
+    "Brief pocket plate wears the active look (#2569)",
+    .enabled(if: !NSScreen.screens.isEmpty)
+)
 @MainActor
 struct BriefPocketPanelGlassTests {
-    private func presentedPanel(tint: GlassFill?) -> NSPanel? {
-        guard let screen = NSScreen.screens.first,
-            let display = screen.kiwiDisplayID
-        else { return nil }
+    private func presentedPanel(tint: GlassFill?) throws -> NSPanel {
+        let screen = try #require(NSScreen.screens.first)
+        let display = try #require(screen.kiwiDisplayID)
         let overlay = BriefPocketOverlay()
         var presented: NSPanel?
         overlay.present = { presented = $0 }
@@ -34,16 +36,14 @@ struct BriefPocketPanelGlassTests {
                 flight: 0.3
             )
         )
-        return presented
+        return try #require(presented, "the play presents its panel")
     }
 
     @Test("a tinted plate's panel wears the rim", arguments: [true, false])
-    func panelFollowsTheTint(tinted: Bool) {
-        guard
-            let panel = presentedPanel(
-                tint: tinted ? GlassFill(hex: "#14201CB3") : nil
-            )
-        else { return }
+    func panelFollowsTheTint(tinted: Bool) throws {
+        let panel = try presentedPanel(
+            tint: tinted ? GlassFill(hex: "#14201CB3") : nil
+        )
         let active = panel as? ActiveGlassPanel
         #expect(active != nil, "the plate's panel answers the question")
         #expect(active?.wearsActiveLook == tinted)

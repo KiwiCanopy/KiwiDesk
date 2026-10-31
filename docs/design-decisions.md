@@ -13324,6 +13324,13 @@ three reasons are answered one by one:
    may equal the highlight. A hovered row takes the hover fill
    and the Hover item colour (`PanelHighlightTests`).
 
+:::unreleased
+**The brief pocket's flying plate is one of these plates.** It
+wears the Fill under the toggle, so its panel wears the key-window
+rim too, decided from the same tint the slide's plates read
+(`BriefPocketPanelGlassTests`).
+:::
+
 **`.clear`, not `.regular`.** `.regular` is frosted, and it hides
 the rim. That, not the missing active state, is why KiwiHub and
 the plates read as "normal plates" beside the bars. `.clear` here
