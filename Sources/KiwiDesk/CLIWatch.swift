@@ -39,8 +39,8 @@ enum CLIWatch {
             FileHandle.standardError.write(Data("\(usage)\n".utf8))
             return 1
         }
-        // A command that exits without reading its stdin must end
-        // the write with an error, never the watcher with a signal.
+        // A closed stderr must drop `writeNote`'s line, never end
+        // the watcher; `launch` guards the child's stdin (#2852).
         signal(SIGPIPE, SIG_IGN)
         return watch(
             invocation,
