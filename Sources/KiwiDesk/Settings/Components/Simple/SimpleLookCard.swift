@@ -9,6 +9,7 @@ import SwiftUI
 /// Browse tile. No palette editing, no saving.
 struct SimpleLookCard: View {
     @ObservedObject var model: SettingsModel
+    @FocusState private var focusedTile: String?
 
     var body: some View {
         SimpleCard(title: Self.title) {
@@ -32,13 +33,18 @@ struct SimpleLookCard: View {
 
     private var line: some View {
         HStack(alignment: .top, spacing: 10) {
-            // The gallery's look is the user's to delete; a hairline
-            // sets it apart from the bundled ones (#2860).
-            if let linked = Self.linked(in: model) {
-                tile(linked).rowActions { menu(linked) }
-                Divider().frame(height: PaletteTile<EmptyView>.plateHeight)
+            let linked = Self.linked(in: model)?.name
+            ForEach(Self.looks(in: model), id: \.name) { look in
+                if look.name == linked {
+                    // The gallery's look is the user's to delete; a
+                    // hairline sets it apart from the bundled (#2860).
+                    tile(look).rowActions { menu(look) }
+                    Divider()
+                        .frame(height: PaletteTile<EmptyView>.plateHeight)
+                } else {
+                    tile(look)
+                }
             }
-            ForEach(model.core.bundledLooks, id: \.name) { tile($0) }
             browseTile
         }
         .padding(.vertical, 2)
@@ -82,13 +88,19 @@ struct SimpleLookCard: View {
             model.applyLook(look)
         }
         .frame(width: Self.tileWidth)
+        .focused($focusedTile, equals: look.name)
     }
 
     /// The gallery look's menu (#2860): Delete alone; renaming and
     /// sharing are Advanced's, and a bundled look has no menu.
     private func menu(_ look: ShelfLook) -> some View {
         Button(L("looks.delete", "Delete"), role: .destructive) {
+            let neighbour = DeletionFocus.neighbour(
+                after: look.name,
+                in: Self.looks(in: model).map(\.name)
+            )
             model.deleteUserLook(look.name)
+            focusedTile = neighbour
         }
     }
 

@@ -54,14 +54,16 @@ extension SettingsModel {
     func renameUserLook(from old: String, to typed: String) {
         let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canRenameUserLook(name, from: old) else { return }
-        try? lookStore.rename(from: old, to: name)
-        if linkedLook == old { linkedLook = name }
+        do {
+            try core.renameLook(from: old, to: name)
+            if linkedLook == old { linkedLook = name }
+        } catch {}
         refreshLooks()
     }
 
     /// Deletes a user look; a gallery link on it goes with it.
     func deleteUserLook(_ name: String) {
-        try? lookStore.delete(name)
+        try? core.deleteLook(name)
         refreshLooks()
     }
 

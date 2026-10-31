@@ -20,6 +20,16 @@ struct LookLibraryDoorTests {
         #expect(core.lookLibrary.userLooks() == [look])
     }
 
+    @Test("a look is renamed and deleted through the door")
+    func renameAndDelete() throws {
+        let core = makeTestCore()
+        _ = try core.saveLook(named: "Mine", from: TilingSettings())
+        try core.renameLook(from: "Mine", to: "Ours")
+        #expect(core.lookLibrary.userLooks().map(\.name) == ["Ours"])
+        try core.deleteLook("Ours")
+        #expect(core.lookLibrary.userLooks().isEmpty)
+    }
+
     @Test("a palette rename reaches no look")
     func renameLeavesLooks() throws {
         let core = makeTestCore()

@@ -110,8 +110,23 @@ struct LookLinkWearTests {
         let source = try SourceScan.strippedSource(at: try #require(card))
             .filter { !$0.isWhitespace }
         #expect(source.occurrences(of: ".rowActions{") == 1)
-        #expect(source.contains("tile(linked).rowActions{menu(linked)}"))
+        #expect(
+            source.contains(
+                "iflook.name==linked{tile(look).rowActions{menu(look)}"
+            )
+        )
         #expect(source.contains("L(\"looks.delete\""))
         #expect(!source.contains("L(\"looks.rename\""))
+        // Delete alone: no Export or Share row beside it.
+        #expect(!source.contains("L(\"looks.export"))
+        #expect(!source.contains("L(\"looks.share"))
+        // One write for both roots (gui.md ▸ shares its one write).
+        #expect(source.contains("model.deleteUserLook(look.name)"))
+        let shelf = try SourceScan.swiftSources(under: root)
+            .first { $0.lastPathComponent == "LooksShelf+Actions.swift" }
+        let shelfSource = try SourceScan.strippedSource(
+            at: try #require(shelf)
+        )
+        #expect(shelfSource.contains("model.deleteUserLook(name)"))
     }
 }
