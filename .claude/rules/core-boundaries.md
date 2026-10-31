@@ -48,8 +48,9 @@ below, so it corrects itself when a seventh is added.
   redacts every NSLog line's content to `<private>` in
   `log show` (observed 2026-08-23, macOS 26.6.2), so the lines
   fire and the documented capture reads nothing.
-  `LogSeamSinkTests` pins Core's sink both ways; a GUI-side
-  logger owes the same shape with no guard, so its doc comment
+  `NSLogSeamTests` reds an `NSLog` in either source tree (#2835);
+  `LogSeamSinkTests` pins Core's sink both ways; that a GUI-side
+  logger interpolates `.public` has no guard, so its doc comment
   carries the danger (`JumpPanelController`'s `jumpLog`
   is the worked example). Four guards, reading
   different things — `LogSeamWiringTests` scans source for the

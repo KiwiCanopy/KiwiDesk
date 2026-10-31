@@ -1,6 +1,13 @@
 import AppKit
 import KiwiDeskCore
 @preconcurrency import UserNotifications
+import os
+
+/// The bare-binary fallback's line; `NSLog` is redacted (#2835).
+private let notificationLog = Logger(
+    subsystem: KiwiLog.subsystem,
+    category: "notifications"
+)
 
 extension AppDelegate {
     /// Posts a system notification about revoked permission.
@@ -8,9 +15,11 @@ extension AppDelegate {
     /// bare SwiftPM executables fall back to logging only.
     func notifyPermissionLost() {
         guard Bundle.main.bundleIdentifier != nil else {
-            NSLog(
-                "KiwiDesk: Accessibility permission revoked; "
-                    + "window management paused."
+            notificationLog.log(
+                """
+                KiwiDesk: Accessibility permission revoked; \
+                window management paused.
+                """
             )
             return
         }
