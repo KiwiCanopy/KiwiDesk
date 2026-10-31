@@ -20,6 +20,9 @@ enum WindowActionRefusal: Equatable {
     case allHere(app: String)
     /// `move_here`'s title text matched no window of the app.
     case noTitleMatch(app: String, text: String)
+    /// `move_to_space(_and_follow)` named the Space the window
+    /// is already in.
+    case alreadyIn(space: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -66,6 +69,12 @@ enum WindowActionRefusal: Equatable {
                 app,
                 text
             )
+        case .alreadyIn(let space):
+            L(
+                "window_action.refusal.already_in",
+                "Already in Space %1$@",
+                space
+            )
         }
     }
 
@@ -78,6 +87,7 @@ enum WindowActionRefusal: Equatable {
         case .cannotMoveHere: "cannot move the window here"
         case .allHere: "every matching window is already here"
         case .noTitleMatch: "no window title matches"
+        case .alreadyIn: "the window is already in that Space"
         }
     }
 }

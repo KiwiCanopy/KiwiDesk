@@ -2445,6 +2445,7 @@
   "whatsnew.trail.from": "Dalle Novità",
   "whatsnew.trail.next": "Avanti: %1$@",
   "window_action.refusal.all_here": "Tutte le finestre di %1$@ sono qui",
+  "window_action.refusal.already_in": "Già nello spazio %1$@",
   "window_action.refusal.cannot_move_here": "«%1$@» non può essere spostato qui",
   "window_action.refusal.no_close_button": "«%1$@» non ha il pulsante di chiusura",
   "window_action.refusal.no_new_window": "%1$@ non ha il comando «Nuova finestra»",

@@ -19,7 +19,17 @@ extension KiwiCore {
             guard !state.isPocketed(window) else {
                 return .fail("window \(window.raw) is in the pocket")
             }
-            moveWindow(window, to: SpaceID(raw), follow: follow)
+            let target = SpaceID(raw)
+            // A move into the window's own Space refuses rather
+            // than re-filing it at the row's end.
+            if state.workspaces.space(of: window) == target {
+                cueWindowAction(
+                    .alreadyIn(space: target.raw),
+                    on: window
+                )
+                return .fail("window \(window.raw) is already in \(raw)")
+            }
+            moveWindow(window, to: target, follow: follow)
             return .ok()
         }
     }
