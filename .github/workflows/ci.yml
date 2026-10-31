@@ -65,6 +65,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       run: ${{ steps.filter.outputs.run }}
+      light: ${{ steps.filter.outputs.light }}
     steps:
       - uses: actions/checkout@v7
         with:
@@ -140,6 +141,11 @@ jobs:
             exit 0
           fi
           run=false
+          # A change confined to `.claude/` and AGENTS.md takes the
+          # light lane (#2712): lint and the suites that read them,
+          # listed in .github/ci-instruction-readers.txt. Any other
+          # path runs everything.
+          light=false
           while IFS= read -r file; do
             [ -n "$file" ] || continue
             ignored=false
@@ -157,22 +163,32 @@ jobs:
               esac
               [ "$ignored" = true ] && break
             done < .github/ci-ignore.txt
-            if [ "$ignored" = false ]; then
-              echo "not ignored: $file"
-              run=true
-              break
-            fi
+            [ "$ignored" = true ] && continue
+            case "$file" in
+              .claude/*|AGENTS.md)
+                echo "instruction file: $file"
+                light=true
+                continue
+                ;;
+            esac
+            echo "not ignored: $file"
+            run=true
+            light=false
+            break
           done <<< "$changed"
           echo "run=$run" >> "$GITHUB_OUTPUT"
+          echo "light=$light" >> "$GITHUB_OUTPUT"
 
   build-lint-test:
     needs: changes
     # A failed or timed-out filter runs everything: a bare `if:`
     # implies success(), and the skip it makes passes a required
-    # check with nothing run (#1984).
+    # check with nothing run (#1984). The light lane (#2712) runs
+    # this job too, its test steps swapped for the readers'.
     if: >-
       ${{ !cancelled() && (needs.changes.result != 'success'
-      || needs.changes.outputs.run == 'true') }}
+      || needs.changes.outputs.run == 'true'
+      || needs.changes.outputs.light == 'true') }}
     name: Build, Lint & Test
     # xcode-27 (macOS 27, Xcode 27 GA — a preview image, #1500):
     # the toolchain the tree is developed on. The tree needs at
@@ -225,15 +241,29 @@ jobs:
       # suite TYPE names, so exec-child suites carry the
       # ExecTests prefix (.claude/rules/tests.md, pinned by
       # MachineTouchTests).
+      # `!= 'true'`, never `== 'false'`: a filter that failed
+      # leaves `light` empty, and the full suite must run.
       - name: Test
+        if: needs.changes.outputs.light != 'true'
         run: >-
           scripts/warning-gate swift test --skip ExecTests
           -Xswiftc -warnings-as-errors
           -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
       - name: Test (ExecTests)
+        if: needs.changes.outputs.light != 'true'
         run: >-
           scripts/warning-gate swift test --filter ExecTests
+          -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
+
+      # The light lane's suites: those reading `.claude/` or
+      # AGENTS.md, held to the tree by CiInstructionLaneTests.
+      - name: Instruction readers
+        if: needs.changes.outputs.light == 'true'
+        run: >-
+          scripts/warning-gate swift test
+          --filter "$(scripts/ci-instruction-filter)"
           -Xswiftc -warnings-as-errors
           -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 

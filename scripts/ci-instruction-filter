@@ -1,0 +1,24 @@
+#!/bin/bash
+# Prints the `swift test --filter` pattern for CI's instruction lane
+# (#2712): the suites `.github/ci-instruction-readers.txt` names.
+#
+# Usage: scripts/ci-instruction-filter
+#   Run from the repo root. Exits non-zero on an empty list or on a
+#   name no `struct` under Tests/ declares, since a filter matching
+#   nothing passes green with nothing run.
+set -euo pipefail
+
+LIST=".github/ci-instruction-readers.txt"
+
+names="$(grep -v '^[[:space:]]*#' "$LIST" | grep -v '^[[:space:]]*$' || true)"
+if [ -z "$names" ]; then
+    echo "ci-instruction-filter: $LIST names no suite" >&2
+    exit 1
+fi
+while IFS= read -r name; do
+    if ! grep -rqE "^struct ${name}[[:space:]{]" Tests; then
+        echo "ci-instruction-filter: no suite named $name" >&2
+        exit 1
+    fi
+done <<< "$names"
+echo "\\.($(paste -sd'|' - <<< "$names"))/"

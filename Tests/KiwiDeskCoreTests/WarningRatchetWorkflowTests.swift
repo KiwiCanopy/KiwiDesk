@@ -179,7 +179,7 @@ struct WarningRatchetWorkflowTests {
         let yaml = try ci()
         let build = Self.ratchetFlags(in: try debugBuildStep())
         try #require(build.contains("-warnings-as-errors"))
-        for name in ["Test", "Test (ExecTests)"] {
+        for name in ["Test", "Test (ExecTests)", "Instruction readers"] {
             let step = try workflowStep(name, in: yaml)
             let first = step.split(separator: "\n").first
                 .map { $0.trimmingCharacters(in: .whitespaces) }
