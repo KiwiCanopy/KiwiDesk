@@ -73,17 +73,17 @@ extension KiwiCore {
 
     /// The targets the float raise lifts: `floatLayerTargets` less
     /// a window the WindowServer draws at no visible size (#2840).
-    /// `floatLayerTargets` stays a pure state filter; visibility is
-    /// a live read here, per raise, never a fact kept at adoption.
+    /// `floatLayerTargets` stays a pure state filter and owns no
+    /// visibility; this reads it live, per raise, through the
+    /// watch's one bounds seam, never a fact kept at adoption.
     func drawnFloatTargets() -> [WindowID] {
-        floatLayerTargets().filter(floatDrawsVisibly)
+        floatLayerTargets().filter(floatIsDrawn)
     }
 
-    /// Whether `bounds` is a size a window can show: either side
-    /// 1 pt or less is not, as BetterDisplay's 1×1 helper (#2840).
-    /// No answer keeps the window.
-    static func drawsVisibly(bounds: CGRect?) -> Bool {
-        guard let bounds else { return true }
-        return bounds.width > 1 && bounds.height > 1
+    /// Whether the WindowServer draws `id` at a visible size.
+    func floatIsDrawn(_ id: WindowID) -> Bool {
+        FloatDetection.drawsVisibly(
+            bounds: windowServer.readWindowBounds(id)
+        )
     }
 }

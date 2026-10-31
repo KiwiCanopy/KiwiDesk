@@ -139,7 +139,7 @@ extension KiwiCore {
         // z-order thrash the coalescing removes is the worse failure.
         guard
             !isEffectiveFloatOnActiveSpace(id),
-            !drawnFloatTargets().isEmpty
+            floatLayerTargets().contains(where: floatIsDrawn)
         else { return }
         // This focus supersedes a raise owed to an earlier one.
         floatRaiseDebt.owed = nil

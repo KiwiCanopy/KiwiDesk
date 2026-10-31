@@ -66,13 +66,11 @@ public final class KiwiCore {
     var defersEventRetiles = false
     /// A Desktop switch's re-sync, folded alike (`+SwitchResync`).
     var switchResync: SwitchResyncBatch?
-    /// A restore awaiting the animations (`runPendingZOrderRestore`).
+    /// A z-order restore is waiting for the current animations
+    /// to settle (`runPendingZOrderRestore`).
     var pendingZOrderRestore = false
     /// The float raise owed behind the tiled plane (#2284).
     let floatRaiseDebt = FloatRaiseDebt()
-    /// Whether the WindowServer draws a float the raise can show
-    /// (#2840): visible until `armMachineSeams` wires the read.
-    var floatDrawsVisibly: @MainActor (WindowID) -> Bool = { _ in true }
 
     /// A command reordered windows but its paired retile is the
     /// dispatcher's trailing `retile(pass: .apply)` (#153), so
@@ -158,6 +156,7 @@ public final class KiwiCore {
     /// The wake heal arm's timestamp (#1130) —
     /// `KiwiCore+WakeFocus.swift` is the one machine mutating it.
     var wakeFocusHealArmedAt: Date?
+
     /// Hands key focus to Finder when a no-follow move empties
     /// the focused display's space (#446) — the moved, now-stashed
     /// window would otherwise keep key focus. nil by default so
@@ -176,6 +175,7 @@ public final class KiwiCore {
     /// `KiwiCore+IgnoredPanel.swift`.
     var ignoredPanel = IgnoredPanelDistrust()
     var splitFloorCues: [SpaceID: Set<SplitFloorCue>] = [:]
+
     /// When each sticky window was last put IN FLIGHT — a carry
     /// or our own switch (#1145/#1213); `KiwiCore+StickyReach` owns it.
     var stickyReachInFlightAt: [WindowID: Date] = [:]
