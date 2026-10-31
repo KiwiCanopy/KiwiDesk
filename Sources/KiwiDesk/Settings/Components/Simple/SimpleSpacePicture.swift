@@ -36,6 +36,17 @@ struct SimpleSpacePicture: View {
         .accessibilityHidden(true)
     }
 
+    /// How many windows the picture draws: the schematic's default,
+    /// and Floating's whole scatter, which one window would read as
+    /// an empty screen.
+    nonisolated static func windows(
+        for mode: LayoutMode,
+        base: Int = LayoutSchematic.defaultWindowCount
+    ) -> Int {
+        let count = LayoutSchematic.windowCount(base, for: mode)
+        return mode == .floating ? max(count, 3) : count
+    }
+
     /// The plate's padding around the bars tile.
     static let padding: CGFloat = 6
 
@@ -54,7 +65,7 @@ struct SimpleSpacePicture: View {
         LayoutSchematicView(
             mode: mode,
             settings: settings.resolved(for: space, activeMode: mode),
-            windows: LayoutMenuPictures.windows(for: mode),
+            windows: Self.windows(for: mode),
             scale: .tile
         )
         // The well is the screen: no frame or caption of the

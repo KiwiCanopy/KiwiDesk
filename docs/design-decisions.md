@@ -10499,8 +10499,9 @@ reach: a sticky, pocket or floating mark promises a setting the
 page does not hold, and a frozen drag reads as a broken window.
 The picture and its layout name are one Layout menu, since every
 layout on a card repeated per Space is the crowding #291 gives to
-a menu; the menu's items carry each layout's picture, so the
-drawing stays the label. Cards wrap rather than scroll sideways:
+a menu; the menu's items carry each layout's symbol, the one the
+Space Bar and the card's own face draw, so the card's picture is
+the one drawing and the menu stays a list to read. Cards wrap rather than scroll sideways:
 every Space stays in view, and the page already grows with Open
 applications. KiwiHub's keys are shown with no "change these"
 line — the switch is the door for a user who wants to change

@@ -2,7 +2,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A Space's layout menu, every layout (#123), each item drawn with
-/// its layout's picture (#2777): the Spaces page's pop-up, or —
+/// its layout's symbol (#2777): the Spaces page's pop-up, or —
 /// handed a `face` — a menu whose face is that face, as Simple's
 /// Space cards draw it. One item list, one write, one name.
 struct SpaceModeMenu<Face: View>: View {
@@ -55,15 +55,12 @@ struct SpaceModeMenu<Face: View>: View {
         }
     }
 
-    /// Every layout, each with its picture beside its name.
+    /// Every layout, each with its symbol beside its name — the
+    /// one the Space Bar and Simple's card face draw.
     private var items: some View {
         ForEach(LayoutMode.allCases, id: \.self) { mode in
-            Label {
-                Text(mode.displayName)
-            } icon: {
-                Image(nsImage: LayoutMenuPictures.image(mode))
-            }
-            .tag(mode)
+            Label(mode.displayName, systemImage: mode.symbol)
+                .tag(mode)
         }
     }
 
