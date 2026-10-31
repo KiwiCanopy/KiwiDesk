@@ -708,6 +708,15 @@ every lens with why it cannot turn on.
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
+:::unreleased
+`stack.toggle_stack_position [space]` moves a space's stack zone
+to the opposite side (left ↔ right, top ↔ bottom), the focused
+space when no id is given. The change is live and unsaved;
+`revert_settings` with its leaf id
+([below](#raw-ipc-protocol)) undoes it
+([Lua reference](lua-reference.md#stacktoggle_stack_position)).
+:::
+
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
 for every other.
