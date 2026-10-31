@@ -74,6 +74,17 @@ struct FloatRaiseVisibilityTests {
         core.deferred.cancel(.floatRaise)
     }
 
+    /// The helper sits beside every real float on the desks #2840
+    /// measured, so a gate that asked ALL floats to be drawn would
+    /// stop every raise there.
+    @Test("One drawn float beside an undrawn one still raises")
+    func mixedLayerRaises() {
+        let core = makeCore(undrawn: [50])
+        core.raiseFloatsAbove(afterFocusing: WindowID(1))
+        #expect(core.deferred.isScheduled(.floatRaise))
+        core.deferred.cancel(.floatRaise)
+    }
+
     @Test("Only the undrawn float leaves the raise's targets")
     func filterIsPerWindow() {
         let core = makeCore(undrawn: [50])
