@@ -20,18 +20,36 @@ extension KiwiCore {
                 return .fail("window \(window.raw) is in the pocket")
             }
             let target = SpaceID(raw)
-            // A move into the window's own Space refuses rather
-            // than re-filing it at the row's end.
-            if state.workspaces.space(of: window) == target {
-                cueWindowAction(
-                    .alreadyIn(space: target.raw),
-                    on: window
-                )
-                return .fail("window \(window.raw) is already in \(raw)")
+            if state.workspaces.space(of: window) == target,
+                stickyMoveBlock(window, to: target) == nil
+            {
+                return moveIntoOwnSpace(window, target, follow: follow)
             }
             moveWindow(window, to: target, follow: follow)
             return .ok()
         }
+    }
+
+    /// A move into the window's own Space re-files nothing: a
+    /// follow into an unshown one switches there, anything else
+    /// refuses with a pill naming the window.
+    private func moveIntoOwnSpace(
+        _ window: WindowID,
+        _ target: SpaceID,
+        follow: Bool
+    ) -> CommandResponse {
+        if follow, target != state.workspaces.activeSpace {
+            followSwitch(to: target, focusing: window)
+            return .ok()
+        }
+        let name = state.windows[window].map {
+            $0.title.isEmpty ? $0.appName : $0.title
+        }
+        cueWindowAction(
+            .alreadyIn(window: name ?? "", space: target.raw),
+            on: window
+        )
+        return .fail("window \(window.raw) is already in \(target.raw)")
     }
 
     /// Relocates an explicit `window` into `target`. `follow`

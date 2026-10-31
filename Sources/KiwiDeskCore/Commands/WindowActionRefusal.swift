@@ -1,9 +1,8 @@
 import Foundation
 
-/// Why `new_window` or `close_window` did nothing, found only once
-/// the AX walk ran (#1518): the menu offers the rows from state
-/// alone, so they refuse at perform time instead of greying.
-/// Core draws the cue itself — nothing crosses into the GUI (#96).
+/// Why a window action did nothing, found at perform time — from
+/// state or the AX walk (#1518). Core draws the cue itself —
+/// nothing crosses into the GUI (#96).
 enum WindowActionRefusal: Equatable {
     /// The app has no enabled File ▸ New Window.
     case noNewWindow(app: String)
@@ -22,7 +21,7 @@ enum WindowActionRefusal: Equatable {
     case noTitleMatch(app: String, text: String)
     /// `move_to_space(_and_follow)` named the Space the window
     /// is already in.
-    case alreadyIn(space: String)
+    case alreadyIn(window: String, space: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -69,10 +68,11 @@ enum WindowActionRefusal: Equatable {
                 app,
                 text
             )
-        case .alreadyIn(let space):
+        case .alreadyIn(let window, let space):
             L(
                 "window_action.refusal.already_in",
-                "Already in Space %1$@",
+                "“%1$@” is already in Space %2$@",
+                window,
                 space
             )
         }

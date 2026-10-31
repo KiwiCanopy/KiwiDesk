@@ -89,6 +89,10 @@ editing here:
   return rank goes with the move, so a redirect that changes
   nothing spends the slot and the window comes back last after
   any switch (`AwayProfileSpaceTests`).
+- **`moveWindow` re-files a window into its own Space, so a door
+  that must not re-file asks the window's Space first** — after the
+  sticky gate, which answers a sticky window's own Space with its
+  pill — as `move_to_space` does (`MoveToOwnSpaceTests`).
 - It follows that **a new per-`Space` field is keyed by
   `WindowID` or it is SHARED across Desktops** — the Desktop
   partition is emergent from window residence, and a per-window

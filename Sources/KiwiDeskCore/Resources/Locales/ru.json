@@ -2445,7 +2445,7 @@
   "whatsnew.trail.from": "Из «Что нового»",
   "whatsnew.trail.next": "Далее: %1$@",
   "window_action.refusal.all_here": "Все окна %1$@ уже здесь",
-  "window_action.refusal.already_in": "Уже в пространстве %1$@",
+  "window_action.refusal.already_in": "Окно «%1$@» уже в пространстве %2$@",
   "window_action.refusal.cannot_move_here": "Окно «%1$@» нельзя переместить сюда",
   "window_action.refusal.no_close_button": "У окна «%1$@» нет кнопки закрытия",
   "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»",

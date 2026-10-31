@@ -9,6 +9,11 @@ import Testing
 @MainActor
 @Suite("A move into the window's own Space refuses", .serialized)
 struct MoveToOwnSpaceTests {
+    private static let reason = WindowActionRefusal.alreadyIn(
+        window: "",
+        space: ""
+    ).logReason
+
     /// Three windows in Space 1, the first focused, Space 2 empty.
     private func makeCore() -> (KiwiCore, () -> [String]) {
         let core = makeTestCore()
@@ -52,8 +57,7 @@ struct MoveToOwnSpaceTests {
         )
         #expect(!response.isSuccess)
         #expect(row(core, "1") == before)
-        let reason = WindowActionRefusal.alreadyIn(space: "1").logReason
-        #expect(logs().contains("\(reason): w1"))
+        #expect(logs().contains("\(Self.reason): w1"))
     }
 
     @Test("another Space still takes the window")
@@ -65,7 +69,57 @@ struct MoveToOwnSpaceTests {
         )
         #expect(response.isSuccess)
         #expect(row(core, "2") == [WindowID(1)])
-        let reason = WindowActionRefusal.alreadyIn(space: "2").logReason
-        #expect(!logs().contains { $0.hasPrefix(reason) })
+        #expect(!logs().contains { $0.hasPrefix(Self.reason) })
+    }
+
+    @Test("a hidden Space's window refuses; its follow switches there")
+    func hiddenOwnSpace() {
+        let (core, logs) = makeCore()
+        core.state.workspaces.activate("2")
+        let before = row(core, "1")
+        let stay = core.execute(
+            "move_to_space",
+            args: [.string("1"), .number(1)]
+        )
+        #expect(!stay.isSuccess)
+        #expect(logs().contains("\(Self.reason): w1"))
+        let follow = core.execute(
+            "move_to_space_and_follow",
+            args: [.string("1"), .number(1)]
+        )
+        #expect(follow.isSuccess)
+        #expect(core.state.workspaces.activeSpace == "1")
+        #expect(row(core, "1") == before)
+    }
+
+    /// The pill may draw on the focused window rather than the
+    /// target, so its sentence names the target.
+    @Test("the sentence names the window it is about")
+    func sentenceNamesTheWindow() {
+        LocalizationManager.shared.select("en")
+        let pill = WindowActionRefusal.alreadyIn(
+            window: "App1",
+            space: "1"
+        )
+        #expect(pill.sentence == "“App1” is already in Space 1")
+    }
+
+    @Test("a sticky window keeps the sticky gate's answer")
+    func stickyKeepsItsGate() {
+        let (core, logs) = makeCore()
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: WindowID(1),
+                pid: 900_001,
+                appName: "App1",
+                stickyScope: .global
+            )
+        )
+        core.state.workspaces.activate("2")
+        _ = core.execute(
+            "move_to_space",
+            args: [.string("1"), .number(1)]
+        )
+        #expect(!logs().contains { $0.hasPrefix(Self.reason) })
     }
 }
