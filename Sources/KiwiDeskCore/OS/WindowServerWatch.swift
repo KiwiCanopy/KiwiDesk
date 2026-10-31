@@ -37,7 +37,9 @@ public final class WindowServerWatch {
     var trackingDisabled = false
     /// True while our own animation drives a window (#594).
     var isAnimating: @MainActor (WindowID) -> Bool = { _ in false }
-    /// WindowServer bounds query seam; a test core pins it.
+    /// WindowServer bounds query seam; a test core pins it. Two
+    /// readers: the watch skips a frame on nil, and the float
+    /// raise's `floatIsDrawn` (#2840) keeps the window on nil.
     var readWindowBounds: @MainActor (WindowID) -> CGRect? = {
         SkyLight.windowBounds($0.raw)
     }
