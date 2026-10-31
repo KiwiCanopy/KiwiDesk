@@ -50,7 +50,7 @@ struct PocketHandleDwellTests {
         let peeked = try #require(core.pocketPlate.specs[rest.display])
         #expect(peeked.peeking)
         #expect(!peeked.risen)
-        // Room for the peek, which leaves the reservation alone.
+        // The handle's panel makes room for the peek.
         #expect(depth(peeked) == depth(rest) + PocketHandleView.peekDepth)
         let dwell = core.deferred.task(for: .pocketDwell)
         #expect(dwell != nil)
@@ -87,6 +87,63 @@ struct PocketHandleDwellTests {
         core.pocketHovered(rest.display, true)
         core.pocketPushed(rest.display)
         #expect(core.pocketPlate.specs[rest.display]?.risen == true)
+    }
+
+    @Test("a dwell ends with its hover, an order-out's included")
+    func dwellEndsWithTheHover() async throws {
+        let core = try makeCore()
+        let rest = try #require(spec(core))
+        core.pocketHovered(rest.display, true)
+        await core.deferred.task(for: .pocketDwell)?.value
+        #expect(core.pocketPlate.dwelled == [rest.display])
+        // An ordered-out handle hears no exit; its hover goes alone.
+        core.pocketPlate.hovered.remove(rest.display)
+        #expect(core.pocketPlate.dwelled.isEmpty)
+        core.updatePocketPlate(slots: [:])
+        #expect(core.pocketPlate.specs[rest.display]?.risen == false)
+    }
+
+    @Test("a section's hover arms no dwell")
+    func sectionArmsNoDwell() throws {
+        let core = try makeCore()
+        let display = try #require(spec(core)?.display)
+        let slot = CGRect(x: 1000, y: 860, width: 40, height: 40)
+        core.updatePocketPlate(slots: [display: slot])
+        core.deferred.cancel(.pocketDwell)
+        core.pocketHovered(display, true)
+        #expect(!core.deferred.isScheduled(.pocketDwell))
+    }
+
+    @Test("the handle's view reports its hover and push to the core")
+    func viewIsWired() throws {
+        let core = try makeCore()
+        let rest = try #require(spec(core))
+        let view = try #require(core.pocketPlate.view(on: rest.display))
+        view.updateTrackingAreas()
+        // A push is heard on a move, not only on the way in.
+        #expect(
+            view.trackingAreas.contains { $0.options.contains(.mouseMoved) }
+        )
+        view.setHovered(true)
+        #expect(core.pocketPlate.specs[rest.display]?.peeking == true)
+        view.onPush()
+        #expect(core.pocketPlate.specs[rest.display]?.risen == true)
+    }
+
+    @Test("a peek taken back keeps its room until the kiwis are in")
+    func unpeekHoldsTheRoom() throws {
+        // Under Reduce Motion nothing peeks, so nothing is held.
+        guard !BarMotion.isReduced else { return }
+        let core = try makeCore()
+        let rest = try #require(spec(core))
+        core.pocketHovered(rest.display, true)
+        let panel = try #require(
+            core.pocketPlate.panelForTesting(on: rest.display)
+        )
+        let peeked = panel.frame
+        core.pocketHovered(rest.display, false)
+        #expect(panel.frame == peeked)
+        #expect(panel.frame != core.pocketPlate.specs[rest.display]?.frame)
     }
 
     @Test("the peek is the stated depth, and none under Reduce Motion")

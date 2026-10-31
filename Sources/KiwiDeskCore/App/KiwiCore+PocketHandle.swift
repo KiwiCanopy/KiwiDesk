@@ -225,6 +225,11 @@ extension KiwiCore {
         guard was != on else { return }
         if on {
             pocketPlate.hovered.insert(display)
+        } else {
+            pocketPlate.hovered.remove(display)
+        }
+        // Only a handle rises; a section's hover lights it alone.
+        if on, pocketPlace(on: display) == .handle {
             deferred.schedule(
                 .pocketDwell,
                 after: .seconds(ShelfReveal.revealDelay)
@@ -234,9 +239,6 @@ extension KiwiCore {
                 self.pocketPlate.dwelled.insert(display)
                 self.updatePocketPlate()
             }
-        } else {
-            pocketPlate.hovered.remove(display)
-            pocketPlate.dwelled.remove(display)
         }
         updatePocketPlate()
     }

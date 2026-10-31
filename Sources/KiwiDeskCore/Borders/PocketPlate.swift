@@ -106,7 +106,8 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
                 pocket,
                 edge: edge,
                 side: side,
-                peek: handle.risePeek
+                // From where the kiwis stand now, mid-peek or not.
+                peek: handle.peek
             )
         }
     }

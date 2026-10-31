@@ -30,9 +30,6 @@ final class PocketHandleView: NSView {
     }
     /// The peek `peek` is headed for.
     var peekTarget: CGFloat = 0
-    /// The peek the kiwis stood at when the pocket last rose out of
-    /// them, where the rise starts.
-    private(set) var risePeek: CGFloat = 0
 
     private var edge = AppBarEdge.bottom
     private var shelf = KiwiShelf()
@@ -50,20 +47,27 @@ final class PocketHandleView: NSView {
     @available(*, unavailable)
     required init?(coder: NSCoder) { nil }
 
+    /// Wears `shelf`; true where the kiwis move and `landed` will
+    /// run once they stand.
+    @discardableResult
     func wear(
         _ shelf: KiwiShelf,
         markHex hex: String,
         edge: AppBarEdge,
         kiwisOut: Bool,
-        peeking: Bool = false
-    ) {
-        if kiwisOut, !self.kiwisOut { risePeek = peekTarget }
+        peeking: Bool = false,
+        landed: (@MainActor () -> Void)? = nil
+    ) -> Bool {
         self.shelf = shelf
         self.hex = hex
         self.edge = edge
         self.kiwisOut = kiwisOut
         needsDisplay = true
-        BarMotion.playPocketPeek(self, peeking: peeking && !kiwisOut)
+        return BarMotion.playPocketPeek(
+            self,
+            peeking: peeking && !kiwisOut,
+            landed: landed
+        )
     }
 
     override static func defaultAnimation(

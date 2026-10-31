@@ -22,9 +22,12 @@ final class PocketPlateOverlay {
     private(set) var specs: [DisplayID: Spec] = [:]
     /// The displays whose pocket the pointer is on, handle or
     /// section.
-    var hovered: Set<DisplayID> = []
-    /// The displays whose handle the pointer has dwelt on or pushed
-    /// against: the pocket rises out of it (#2807).
+    var hovered: Set<DisplayID> = [] {
+        // Every hover dropped drops its dwell with it (#2807).
+        didSet { dwelled.formIntersection(hovered) }
+    }
+    /// The hovered displays whose handle the pointer has dwelt on or
+    /// pushed against: the pocket rises out of it (#2807).
     var dwelled: Set<DisplayID> = []
     /// The displays a put-in or take-out plays on, each with the
     /// play that holds it out; the pocket stands out of its handle
@@ -169,27 +172,29 @@ final class PocketPlateOverlay {
         // A form change reconfigures the other form's view.
         let changed = spec != old || old?.handle != spec.handle
         if changed {
+            // A peek taken back keeps its room until the kiwis are in,
+            // or the panel cuts them as they go (#2807).
+            let unpeeks =
+                old?.peeking == true && !spec.peeking && !spec.risen
+            let land: @MainActor () -> Void = { [weak self] in
+                guard self?.specs[spec.display]?.frame == spec.frame
+                else { return }
+                Self.place(shown, at: spec.frame)
+            }
             shown.view.pocket.wear(markHex: spec.markHex)
-            shown.view.handle.wear(
+            let held = shown.view.handle.wear(
                 spec.shelf,
                 markHex: spec.markHex,
                 edge: spec.handle ?? .bottom,
                 kiwisOut: spec.risen,
-                peeking: spec.peeking
+                peeking: spec.peeking,
+                landed: unpeeks ? land : nil
             )
             shown.view.dropHovered = spec.dropHovered
             shown.view.paintLit()
             paintFade(shown, spec)
             shown.view.setAccessibilityLabel(spec.name)
-            if let panel = shown.panel, panel.frame != spec.frame {
-                panel.setFrame(spec.frame, display: false)
-            }
-            if shown.panel != nil {
-                shown.view.frame = CGRect(
-                    origin: .zero,
-                    size: spec.frame.size
-                )
-            }
+            if !(unpeeks && held) { Self.place(shown, at: spec.frame) }
         }
         orderIn(shown)
         // Sized and ordered in first: under One window the handle is
@@ -214,6 +219,13 @@ final class PocketPlateOverlay {
         }
     }
 
+    /// Sizes a handle's panel, and its view, to `frame`.
+    private static func place(_ shown: Shown, at frame: CGRect) {
+        guard let panel = shown.panel else { return }
+        if panel.frame != frame { panel.setFrame(frame, display: false) }
+        shown.view.frame = CGRect(origin: .zero, size: frame.size)
+    }
+
     private func orderIn(_ shown: Shown) {
         guard let panel = shown.panel else { return }
         #if DEBUG
@@ -236,7 +248,6 @@ final class PocketPlateOverlay {
             sectionViews[display] = nil
         }
         hovered.formIntersection(live)
-        dwelled.formIntersection(live)
         specs = specs.filter { live.contains($0.key) }
     }
 

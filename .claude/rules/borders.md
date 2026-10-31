@@ -456,6 +456,14 @@ through the one `orderOut(_:on:)` (`PocketPlaceTests` ▸
 `leaveLandsOrReturns`). On a bar edge under Several it is a shelf
 section, its rules [bars.md](bars.md)'s ▸ The pocket is a shelf
 section.
+**A handle rises after `ShelfReveal.revealDelay` or at once on
+`ShelfReveal.pushes`, never on a delay or push rule of its own**
+(#2807): its panel takes the mouse, so it is no `ShelfRevealer`
+target, whose monitors are blind over KiwiDesk's panels. Whether it
+stands risen is the one derivation in `pocketPlateSpecs`, every
+hover dropped drops its dwell (`PocketPlateOverlay.hovered`'s
+`didSet`), and its peek grows the handle's panel alone, never the
+reservation (`PocketHandleDwellTests`).
 **What it counts, shows for and lists is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
 is the bars' click-held peek, its panel answering `shelfBeyondBars`
