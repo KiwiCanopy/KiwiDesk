@@ -2150,6 +2150,14 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   chained subviews into private computed properties / funcs and
   hoist concatenated strings into constants. Bit
   `KeyRecorderField`.
+- **An `NSAlert` whose Cancel is the default runs through
+  `CancelDefault`** (#2826), never a hand-moved Return: NSAlert
+  gives Escape to Cancel through that button's key equivalent, so
+  `cancel.keyEquivalent = "\r"` silently takes Escape away
+  (measured 2026-10-31). The door moves Return and watches Escape
+  for the alert's life, as a sheet or app-modal
+  (`CancelDefaultTests` ▸ `noHandSpelledDefault`,
+  `sitesTakeTheDoor`).
 - A view `.disabled()` on a `.menu` `Picker` is **unreliable** —
   it blocks selection but won't grey. Never make it the sole gate
   on a side effect; guard the setter too, and grey the picker
