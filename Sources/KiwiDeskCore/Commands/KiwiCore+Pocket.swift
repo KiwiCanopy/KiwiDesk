@@ -105,7 +105,7 @@ extension KiwiCore {
             holdingFor: (play?.end ?? 0) - MoveIntentLatch.window
         )
         guard heldFocus else { return handPocketFocus(after: nil, nil) }
-        handPocketFocus(after: play?.end) { [weak self] in
+        handPocketFocus(after: play?.handOff) { [weak self] in
             guard let self else { return }
             guard let next else {
                 self.desktopFocusYield?()
@@ -174,7 +174,9 @@ extension KiwiCore {
         }
         refreshStickyReach()
         retile(stateChange: id)
-        handPocketFocus(after: play?.end, leaving: cameFrom) {
+        // Raised as it lands, under the plate's fade, sharing the
+        // held write's deadline unordered (#2845).
+        handPocketFocus(after: play?.handOff, leaving: cameFrom) {
             [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
             else { return }

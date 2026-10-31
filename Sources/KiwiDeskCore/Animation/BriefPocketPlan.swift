@@ -55,6 +55,14 @@ enum BriefPocketPlan {
         let nodBegin: TimeInterval
         /// When the pocket starts to fade out.
         let liftBegin: TimeInterval
+        /// Whether the press's focus hand-off raises as the plate
+        /// lands rather than once the play is over.
+        let handsOffAtLanding: Bool
+
+        /// When the press's focus hand-off may raise, never before
+        /// the flight ends (#2703): out of the pocket as the window
+        /// lands, under the plate's fade (#2845).
+        var handOff: TimeInterval { handsOffAtLanding ? flightEnd : end }
 
         /// When the play is over and its panel may go dormant.
         var end: TimeInterval {
@@ -77,14 +85,16 @@ enum BriefPocketPlan {
                 flightBegin: 0,
                 flightEnd: flight,
                 nodBegin: flight,
-                liftBegin: flight + nod
+                liftBegin: flight + nod,
+                handsOffAtLanding: false
             )
         case .outOf:
             return Timeline(
                 flightBegin: fadeIn,
                 flightEnd: fadeIn + flight,
                 nodBegin: fadeIn,
-                liftBegin: fadeIn + flight
+                liftBegin: fadeIn + flight,
+                handsOffAtLanding: true
             )
         }
     }
