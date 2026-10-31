@@ -194,7 +194,9 @@ public enum FloatDetection {
     /// windows are never helpers — KiwiDesk itself parks
     /// inactive-space windows off-screen, and those must stay
     /// managed. An overlay caught mid fade-in self-heals on the
-    /// next reconcile.
+    /// next reconcile. A layer-0 window drawn at no visible size
+    /// is adopted and left out of the float raise instead
+    /// (`drawsVisibly`, #2840).
     public static func isInvisibleHelper(
         layer: Int?,
         alpha: Double?,
@@ -207,6 +209,14 @@ public enum FloatDetection {
             return false
         }
         return !displays.contains { $0.intersects(bounds) }
+    }
+
+    /// Whether `bounds` is a size a window can show: a side of
+    /// 1 pt or less is not (#2840). The float raise's verdict, not
+    /// adoption's (`isInvisibleHelper`); no answer keeps the window.
+    static func drawsVisibly(bounds: CGRect?) -> Bool {
+        guard let bounds else { return true }
+        return bounds.width > 1 && bounds.height > 1
     }
 
     /// CG global bounds of all active displays.

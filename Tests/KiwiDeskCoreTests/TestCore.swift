@@ -95,7 +95,7 @@ func makeTestCore(
     // under test, so `isActive` is already false — but neutralized
     // so it stays that way if the lever gains a second effect.
     core.windowServer.trackingDisabled = false
-    // An event reads no live bounds and restacks at once (#2659).
+    // No live bounds, so floats stay drawn (#2840); restack at once (#2659).
     core.windowServer.readWindowBounds = { _ in nil }
     core.windowServer.atTurnEnd = { $0() }
     // A front-order ring reads its target's level from WindowServer
