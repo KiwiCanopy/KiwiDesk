@@ -42,7 +42,7 @@ struct PanelDividerContrastTests {
             let fill = shelf.panelGlassFill(
                 increaseContrast: increaseContrast
             )
-            let rgba = try #require(DragVisual.parseHex(shelf.fillColor))
+            let rgba = try #require(HexColor.parse(shelf.fillColor))
             let anchor = min(CGFloat(rgba.alpha), GlassTint.maxAlpha)
             let far = max(GlassTint.farShare(fade: 100), fill.minShare)
             for share in [1, far] {

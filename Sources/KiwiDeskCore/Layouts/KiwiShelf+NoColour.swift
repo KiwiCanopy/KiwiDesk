@@ -7,7 +7,7 @@ import Foundation
 extension KiwiShelf {
     /// Whether `hex` is a colour at all: parseable, above zero alpha.
     public static func hasColour(_ hex: String) -> Bool {
-        (DragVisual.parseHex(hex)?.alpha ?? 0) > 0
+        (HexColor.parse(hex)?.alpha ?? 0) > 0
     }
 
     /// Whether the Fill has a colour.
@@ -16,7 +16,7 @@ extension KiwiShelf {
     /// `hex` with no colour, its hue kept so raising the opacity
     /// brings it back: Settings' "No Color".
     public static func cleared(_ hex: String) -> String {
-        guard let rgba = DragVisual.parseHex(hex) else { return "#00000000" }
+        guard let rgba = HexColor.parse(hex) else { return "#00000000" }
         let bytes = [rgba.red, rgba.green, rgba.blue].map {
             String(format: "%02X", Int(($0 * 255).rounded()))
         }

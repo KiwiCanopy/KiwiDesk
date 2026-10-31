@@ -1,3 +1,4 @@
+import KiwiDeskCore
 import SwiftUI
 
 /// Palette fold legibility floor calculations (`HomeCardChromeTests`, #786).
@@ -13,35 +14,15 @@ extension HomeCardPlate {
     /// the plate's own, in EITHER direction — a near-plate dark
     /// and a translucent wisp both fail.
     static func plateLegible(_ hex: String) -> Bool {
-        guard let c = rgba(hex) else { return false }
-        let lum =
-            0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
-        let effective =
-            c.a * lum + (1 - c.a) * plateLuminance
-        return abs(effective - plateLuminance) >= 0.15
-    }
-
-    private static func rgba(
-        _ hex: String
-    ) -> (r: Double, g: Double, b: Double, a: Double)? {
-        var s = hex.trimmingCharacters(in: .whitespaces)
-        if s.hasPrefix("#") { s.removeFirst() }
-        guard s.count == 6 || s.count == 8,
-            let v = UInt64(s, radix: 16)
-        else { return nil }
-        if s.count == 6 {
-            return (
-                Double((v >> 16) & 0xFF) / 255,
-                Double((v >> 8) & 0xFF) / 255,
-                Double(v & 0xFF) / 255,
-                1
+        guard
+            let c = HexColor.parse(
+                hex.trimmingCharacters(in: .whitespaces)
             )
-        }
-        return (
-            Double((v >> 24) & 0xFF) / 255,
-            Double((v >> 16) & 0xFF) / 255,
-            Double((v >> 8) & 0xFF) / 255,
-            Double(v & 0xFF) / 255
-        )
+        else { return false }
+        let lum =
+            0.2126 * c.red + 0.7152 * c.green + 0.0722 * c.blue
+        let effective =
+            c.alpha * lum + (1 - c.alpha) * plateLuminance
+        return abs(effective - plateLuminance) >= 0.15
     }
 }
