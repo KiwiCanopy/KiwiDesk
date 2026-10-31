@@ -4,7 +4,8 @@ import SwiftUI
 /// KiwiHub's three keys on Simple (#2777 rulings 3–5), shown and
 /// not edited: each side's glyph — the one its Shortcuts row
 /// wears — and name over its chord as keycaps, in three equal
-/// columns. KiwiHub is the way to every other shortcut, so its keys
+/// columns, unframed on the section's plate like Look's tiles.
+/// KiwiHub is the way to every other shortcut, so its keys
 /// stay what the tour taught; changing them is Advanced's, which
 /// the hover names.
 struct SimpleKiwiHubKeys: View {
@@ -16,15 +17,13 @@ struct SimpleKiwiHubKeys: View {
             caption: L(
                 "simple.kiwihub.caption",
                 "Every other shortcut starts here"
-            ),
-            plated: false
+            )
         ) {
             // A long translation stacks the sides.
             ViewThatFits(in: .horizontal) {
                 HStack(alignment: .top, spacing: 16) { tiles }
                 VStack(alignment: .leading, spacing: 14) { tiles }
             }
-            .padding(.top, 4)
         }
     }
 

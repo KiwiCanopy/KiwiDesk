@@ -7,8 +7,8 @@ import SwiftUI
 struct SimpleCard<Content: View>: View {
     let title: String
     var caption: String?
-    /// False for a section whose parts are their own cards or need
-    /// none (KiwiHub, the Space grid, #2777).
+    /// False for a section whose parts are their own cards (the
+    /// Space grid, #2777).
     var plated = true
     @ViewBuilder let content: Content
 
