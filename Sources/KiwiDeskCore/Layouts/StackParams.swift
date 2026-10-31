@@ -26,6 +26,17 @@ public struct StackParams: Sendable, Equatable, Codable {
         public var stackOrientation: Orientation {
             splitsHorizontally ? .vertical : .horizontal
         }
+
+        /// The side across the master zone, on the same axis
+        /// (#2771).
+        public var opposite: StackPosition {
+            switch self {
+            case .top: .bottom
+            case .right: .left
+            case .bottom: .top
+            case .left: .right
+            }
+        }
     }
 
     /// Number of windows in the master zone.

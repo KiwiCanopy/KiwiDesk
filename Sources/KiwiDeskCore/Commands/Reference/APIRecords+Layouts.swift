@@ -100,6 +100,11 @@ extension APIReference {
                 + "occupies.",
             .choice("position", StackParams.StackPosition.self)
         ),
+        "toggle_stack_position": APIRecord(
+            "Moves a Space's stack zone to the opposite side, "
+                + "unsaved: the focused Space, or one by id.",
+            .space("space", optional: true)
+        ),
         "set_new_window_placement": APIRecord(
             "Sets where a new window lands in the stack order.",
             .choice("placement", SpawnPlacement.self)
