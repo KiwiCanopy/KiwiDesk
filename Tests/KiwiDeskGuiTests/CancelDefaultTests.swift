@@ -63,7 +63,18 @@ struct CancelDefaultTests {
         #expect(source.occurrences(of: "NSEvent.removeMonitor(") == 2)
         #expect(source.contains("let cancel = alert.buttons[1]"))
         #expect(source.contains("cancel.performClick(nil)"))
-        #expect(source.contains("isEscape(event)"))
+        // Only the alert's own Escape, and the app-modal watch
+        // lives until `runModal` returns, not before it starts.
+        #expect(
+            source.contains(
+                "guard event.window === alert.window, isEscape(event)"
+            )
+        )
+        #expect(
+            source.occurrences(
+                of: "defer { if let escape { NSEvent.removeMonitor(escape) } }"
+            ) == 1
+        )
     }
 
     /// Clearing an alert button's Return is the tell of a
