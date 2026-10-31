@@ -58,8 +58,8 @@ public enum ColorVision {
     static func components(_ hex: String) -> (
         r: Double, g: Double, b: Double
     )? {
-        guard let rgb = DragVisual.parseHex(hex) else { return nil }
-        // `parseHex` already normalizes each channel to 0...1.
+        guard let rgb = HexColor.parse(hex) else { return nil }
+        // `HexColor.parse` already normalizes each channel to 0...1.
         return (rgb.red, rgb.green, rgb.blue)
     }
 
@@ -168,7 +168,7 @@ public enum ColorVision {
         _ top: String,
         over bottom: String
     ) -> String? {
-        guard let over = DragVisual.parseHex(top),
+        guard let over = HexColor.parse(top),
             let under = components(bottom)
         else { return nil }
         let a = over.alpha

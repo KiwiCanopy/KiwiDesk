@@ -50,7 +50,7 @@ enum KiwiShelfCommandSetting {
         }
         if let path = colorFields[field] {
             guard let hex = args.first?.stringValue,
-                DragVisual.parseHex(hex) != nil
+                HexColor.parse(hex) != nil
             else { return .failure("expected #RRGGBB or #RRGGBBAA") }
             return .success(.color(path, hex))
         }

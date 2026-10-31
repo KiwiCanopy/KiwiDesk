@@ -22,7 +22,7 @@ extension ColorPalette {
         if hex.isEmpty {
             return ColorPaletteKeys.allowsAutomatic(path)
         }
-        return DragVisual.parseHex(hex) != nil
+        return HexColor.parse(hex) != nil
     }
 
     private func apply(

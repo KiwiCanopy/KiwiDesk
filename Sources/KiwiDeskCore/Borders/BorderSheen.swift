@@ -27,7 +27,7 @@ public enum BorderSheen {
         strength: CGFloat
     ) -> [NSColor] {
         let base = NSColor(kiwiHex: hex)
-        guard let c = DragVisual.parseHex(hex) else {
+        guard let c = HexColor.parse(hex) else {
             return Array(repeating: base, count: locations.count)
         }
         let (h, s, l) = BorderStyle.rgbToHSL(

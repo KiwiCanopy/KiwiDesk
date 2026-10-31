@@ -28,7 +28,7 @@ struct PaletteBarFillTests {
     private static let fillPaths = ["kiwishelf.fill_color"]
 
     private func alpha(_ hex: String) -> Double? {
-        DragVisual.parseHex(hex)?.alpha
+        HexColor.parse(hex)?.alpha
     }
 
     /// The shipped default is the source of the number every
