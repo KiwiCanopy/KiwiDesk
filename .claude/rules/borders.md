@@ -463,7 +463,7 @@ target, whose monitors are blind over KiwiDesk's panels. Whether it
 stands risen is the one derivation in `pocketPlateSpecs`, every
 hover dropped drops its dwell (`PocketPlateOverlay.hovered`'s
 `didSet`, `PocketHandleDwellTests` ▸ `dwellEndsWithTheHover`), and
-its peek grows the handle's panel alone
+its peek grows the handle's panel
 (`PocketHandleDwellTests` ▸ `hoverPeeksThenRises`).
 **What it counts, shows for and lists is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
