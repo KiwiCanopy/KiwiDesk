@@ -90,6 +90,10 @@ final class BriefPocketOverlay {
         end()
         generation += 1
         let panel = panel(for: request)
+        // A tinted plate wears the key-window rim, as the Space
+        // switch's plates do (#2569).
+        (panel as? ActiveGlassPanel)?.wearsActiveLook =
+            request.plateTint != nil
         let bounds = CGRect(origin: .zero, size: request.screen.frame.size)
         let root = AppBarOverlay.FlippedView(frame: bounds)
         root.wantsLayer = true
@@ -218,7 +222,7 @@ final class BriefPocketOverlay {
 
     private static func makePanel() -> NSPanel {
         let panel = BarPanel.configure(
-            NSPanel(
+            ActiveGlassPanel(
                 contentRect: .zero,
                 styleMask: BarPanel.styleMask,
                 backing: .buffered,

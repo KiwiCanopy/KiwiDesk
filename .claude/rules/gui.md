@@ -1853,7 +1853,9 @@ Obligations:
   `TilingSettings.panelsWearFill(glassDrawn:)` holds (#2569), drawn
   through the one `panelGlassChrome`, which picks the Fill, the
   variant, the inks and KiwiHub's paint from `PanelGlass` as drawn
-  under the live Reduce transparency (`PanelGlassTests`); otherwise
+  under the live Reduce transparency (`PanelGlassTests`), each
+  plate on an `ActiveGlassPanel` whose rim follows that same
+  answer (#2569; input-and-animation.md for Core's plates); otherwise
   they hand `tint` nil,
   as does every surface no ruling names. Never reach for
   `Glass.tint(_:)`: it is a **dimmer** — measured 2026-09-07, a

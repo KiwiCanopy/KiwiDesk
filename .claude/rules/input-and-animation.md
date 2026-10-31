@@ -826,6 +826,15 @@ editing here:
   activates an app on the thread the plate's frames tick on, and
   KiwiDesk's own Settings window redraws whole on it
   (`BriefPocketTests` ▸ `putInRaiseWaits`, `takeOutRaiseWaits`).
+  **A panel whose plate wears the Fill under *Tint KiwiHub and
+  plates* is an `ActiveGlassPanel`, its `wearsActiveLook` set from
+  that tint on every play** — the slide's and the flying plate's
+  alike, never a plain `NSPanel`, which draws the plate without the
+  key-window rim (#2569, `SpaceSlidePlateAppearanceTests`,
+  `BriefPocketPanelGlassTests`; the mechanism is
+  [os-private-apis.md](os-private-apis.md)'s). The switch follows
+  the plate: glass added to anything else in that panel argues its
+  own look.
   Its Reduce Motion read is pinned on in both `makeTestCore` twins
   (`SpaceSlideSeamTests` ▸ `bothTwinsPinTheReads`), so no other
   suite plays; a suite that unpins it pins the panel and frame
