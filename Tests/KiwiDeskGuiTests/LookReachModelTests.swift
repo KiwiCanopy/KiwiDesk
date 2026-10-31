@@ -4,10 +4,10 @@ import Testing
 @testable import KiwiDesk
 @testable import KiwiDeskCore
 
-/// The "Look applies to" checklist's draft half (#1752): a tick is
-/// staged, marks the draft dirty with one save-pill row per
-/// profile, a tick back drops it, and a Save writes it through
-/// Core's one door.
+/// The Shared look switch (#1752, #2820): the page's switch writes
+/// at once over a clean draft and refuses a dirty one; a staged
+/// switch marks the draft dirty with one save-pill row per profile,
+/// a switch back drops it, and a Save writes it through Core's door.
 @Suite("Look reach model (#1752)", .serialized)
 @MainActor
 struct LookReachModelTests {
@@ -54,12 +54,76 @@ struct LookReachModelTests {
         #expect(!model.isDirty)
     }
 
-    @Test("All profiles ticks every profile")
-    func allProfiles() throws {
+    /// A stored own Home with a fill of its own, beside the shared
+    /// look Work follows.
+    private func ownHome(_ model: SettingsModel) throws {
+        var home = try model.core.profiles.read(name: "Home")
+        home.settings.kiwishelf.fillColor = "#0A0B0C"
+        home.look = .own
+        try model.core.profiles.write(home)
+        model.core.crossWith(LookBody(of: TilingSettings()))
+        model.resetLookReach()
+        model.recomputeDirty()
+    }
+
+    @Test("Use writes at once and takes the shared look")
+    func useWritesAtOnce() throws {
         let model = try model()
-        model.lookReachStored = ["Work": false, "Home": false]
-        model.setLookFollowsAll()
-        #expect(model.lookFollows == ["Work": true, "Home": true])
+        try ownHome(model)
+        let shared = try #require(model.core.sharedLook)
+        #expect(model.applyLookSwitch("Home", .use))
+        let home = try model.core.profiles.read(name: "Home")
+        #expect(home.look == nil)
+        #expect(shared.isWorn(by: home.settings))
+        #expect(model.core.sharedLook == shared)
+        #expect(model.lookReachStored["Home"] == true)
+    }
+
+    @Test("Make lands the look the page shows as the shared one")
+    func makeLandsTheShownLook() throws {
+        let model = try model()
+        try ownHome(model)
+        model.config.settings.kiwishelf.fillColor = "#0A0B0D"
+        model.cleanConfig = model.config
+        model.recomputeDirty()
+        #expect(model.applyLookSwitch("Home", .make))
+        #expect(
+            model.core.sharedLook?.colors["kiwishelf.fill_color"]
+                == "#0A0B0D"
+        )
+        #expect(try model.core.profiles.read(name: "Home").look == nil)
+    }
+
+    @Test("This profile only writes at once")
+    func ownWritesAtOnce() throws {
+        let model = try model()
+        #expect(model.applyLookSwitch("Home", .own))
+        #expect(try model.core.profiles.read(name: "Home").look == .own)
+    }
+
+    @Test("an unkept live change refuses the switch")
+    func unkeptLiveRefuses() throws {
+        let model = try model()
+        var live = TilingSettings()
+        live.kiwishelf.fillColor = "#0A0B0F"
+        model.unsavedLive = UnsavedLiveSettings(
+            saved: TilingSettings(),
+            live: live,
+            leaves: ["kiwishelf.fill_color": live]
+        )
+        #expect(!model.isDirty)
+        #expect(!model.applyLookSwitch("Home", .own))
+        #expect(try model.core.profiles.read(name: "Home").look == nil)
+    }
+
+    @Test("a dirty draft refuses the switch and writes nothing")
+    func dirtyRefuses() throws {
+        let model = try model()
+        model.config.settings.kiwishelf.fillColor = "#0A0B0E"
+        model.recomputeDirty()
+        #expect(model.isDirty)
+        #expect(!model.applyLookSwitch("Home", .own))
+        #expect(try model.core.profiles.read(name: "Home").look == nil)
     }
 
     @Test("a Save writes the ticks and clears them")

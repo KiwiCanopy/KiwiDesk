@@ -293,7 +293,8 @@ is set from Lua (`quit.set_layout`).
 **`look`** holds the shared look: every color, the bars' styling,
 Liquid Glass, the focus border's shape and the global gaps, worn
 by every profile without its own. Settings writes it; choose
-which profiles use it in **Looks & Animations ▸ Shared look**.
+whether each profile uses it in **Looks & Animations ▸ Shared
+look**.
 
 A `profile_bindings` entry names its profiles as a list,
 `profiles`, one per screen count, each for all screen setups — a
@@ -346,14 +347,18 @@ a profile never changes them.
 
 The look is shared unless a profile keeps its own. The shared
 look sits in `gui.json`; a profile with its own carries
-`"look": "own"` and keeps it in its JSON. **Looks & Animations ▸
-Shared look ▸ Applies to** ticks the profiles using the shared
-look. The profile you are editing cannot change its own box, so
-to give a profile its own look or share one, open a profile that
-uses the shared look and untick or tick it there; on a profile
-with its own look the list is greyed. A new profile shares the
+`"look": "own"` and keeps it in its JSON. A new profile shares the
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
+
+:::unreleased
+**Looks & Animations ▸ Shared look ▸ Look** sets the profile you
+are editing to **Shared** or **This profile only**, at once rather
+than with **Save**, and only while nothing else is unsaved. A look
+the switch replaces — the profile's own look, or the shared look
+that **Make This the Shared Look** replaces — is gone unless it is
+in **My looks**.
+:::
 
 The animations are part of the look too: a profile using the
 shared look takes its animations, and a look you save keeps them.

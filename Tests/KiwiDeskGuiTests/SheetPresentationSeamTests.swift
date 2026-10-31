@@ -43,6 +43,10 @@ struct SheetPresentationSeamTests {
         // button that opens it, and its commit runs through the
         // closures the row hands it, so the content takes no model.
         "SyncAcrossMacsRow.swift": ["$request"],
+        // The switch-to-Shared prompt (#2820) is the card's: the
+        // segmented choice that opens it outlives it, and its
+        // answer runs through the closure the card hands it.
+        "SharedLookSection.swift": ["$shareRequest"],
     ]
 
     private var trees: [URL] {

@@ -119,11 +119,11 @@ struct SharedLookSeamTests {
         #expect(prepare.lowerBound < settle.lowerBound)
     }
 
-    /// The checklist's writes come first in every Save door: a
-    /// profile it unticks keeps the look from before the Save's
+    /// The look switch's writes come first in every Save door: a
+    /// profile going own keeps the look from before the Save's
     /// edits, and they precede the Save's `gui.json` write.
-    @Test("every Save door writes the checklist first")
-    func checklistFirst() throws {
+    @Test("every Save door writes the look switch first")
+    func switchFirst() throws {
         let doors = [
             (
                 "KiwiDesk/Settings/SettingsModel+Profiles.swift",
