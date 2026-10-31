@@ -8,14 +8,22 @@ import SwiftUI
 extension LookPlate {
     /// How the pocket rests on the picture; nil on a tile.
     var pocketRest: PocketRest? {
-        size.drawsPocket ? settings.pocketRest(in: .bsp, on: nil) : nil
+        size.drawsPocket ? settings.pocketRest(in: mode, on: nil) : nil
+    }
+
+    /// The layout the picture's App Bar is drawn from, the first that
+    /// shows one, as `HomeCardBarsTile` picks it (`appBarHosts`).
+    var mode: LayoutMode {
+        LayoutMode.allCases.first {
+            settings.appBarVisibility(in: $0)?.showsUnprompted == true
+        } ?? .bsp
     }
 
     /// The edge the whole mark reserves its strip on, where Core's
     /// reservation keeps one.
     var pocketReserve: AppBarEdge? {
         guard pocketRest == .mark,
-            let reserved = settings.pocketReservation(in: .bsp, on: nil)
+            let reserved = settings.pocketReservation(in: mode, on: nil)
         else { return nil }
         return reserved.edge
     }

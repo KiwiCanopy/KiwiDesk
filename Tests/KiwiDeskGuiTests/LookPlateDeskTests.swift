@@ -1,6 +1,7 @@
 import AppKit
 import Foundation
 import Testing
+import UniformTypeIdentifiers
 
 @testable import KiwiDesk
 @testable import KiwiDeskCore
@@ -29,12 +30,13 @@ struct LookPlateDeskTests {
         }
     }
 
-    /// Each id names an installed app — an unknown id would draw
-    /// the generic icon and still be an icon — and draws one.
+    /// Each id names an installed app and draws its own icon, never
+    /// the generic one an unknown id or a lazy first draw gives.
     @Test("a look drawing icons takes each app's own icon")
     @MainActor
     func iconsAreTheApps() {
         let art = LookPlate.appArt(.appImage)
+        let generic = NSWorkspace.shared.icon(for: .applicationBundle)
         #expect(art.count == LookPlate.apps.count)
         for (drawn, app) in zip(art, LookPlate.apps) {
             #expect(
@@ -47,7 +49,7 @@ struct LookPlateDeskTests {
                 Issue.record("\(app.bundleID) drew no icon")
                 continue
             }
-            #expect(image.isValid)
+            #expect(Self.pixels(image) != Self.pixels(generic))
         }
     }
 
@@ -151,5 +153,50 @@ struct LookPlateDeskTests {
         #expect(
             LookPlate(settings: settings, spaceLabels: []).pocketRest == nil
         )
+    }
+
+    /// The gallery's pocket asks Core in the layout whose App Bar
+    /// the picture draws, so on that bar's edge it is a section.
+    @Test("a pocket on the App Bar's edge stands on its strip")
+    @MainActor
+    func pocketOnTheAppBarIsASection() {
+        var settings = TilingSettings()
+        settings.spaceBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(.bottom)
+        settings.kiwishelf.pocketEdge = .bottom
+        let picture = LookPlate(
+            settings: settings,
+            spaceLabels: [],
+            size: .gallery
+        )
+        #expect(picture.pocketRest == .section)
+        #expect(picture.pocketReserve == nil)
+    }
+
+    /// `pipBody` pads with the one `pipPad` an art item's length
+    /// reads, so the two cannot drift apart.
+    @Test("pipBody pads with the shared pipPad")
+    func pipBodyReadsThePad() throws {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("HomeCardPlate+BarStrip.swift")
+        let source = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        #expect(!source.isEmpty)
+        #expect(source.contains("HomeCardBarsTile.pipPad.horizontal*scale"))
+        #expect(source.contains("HomeCardBarsTile.pipPad.vertical*scale"))
+    }
+
+    /// An image's pixels at a fixed 64 px square.
+    private static func pixels(_ image: NSImage) -> Data? {
+        var rect = CGRect(x: 0, y: 0, width: 64, height: 64)
+        guard
+            let cg = image.cgImage(
+                forProposedRect: &rect,
+                context: nil,
+                hints: nil
+            )
+        else { return nil }
+        return NSBitmapImageRep(cgImage: cg).tiffRepresentation
     }
 }
