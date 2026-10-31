@@ -16,8 +16,7 @@ enum GlassActiveAppearance {
     static let privateSelector = "_hasActiveAppearance"
 
     /// The panels whose glass draws active: the shelf, the overflow
-    /// mark, the peek, and the `ActiveGlassPanel` of the plates and
-    /// the window mark. Never
+    /// mark, the peek and the plates' `ActiveGlassPanel`. Never
     /// `NSPanel` itself, which every other panel KiwiDesk opens shares.
     static var classes: [NSPanel.Type] {
         [
@@ -83,8 +82,8 @@ enum GlassActiveAppearance {
     }
 }
 
-/// A plate's or the window mark's panel, whose glass wears the
-/// key-window look while `wearsActiveLook` holds (#2569, #2831). The one panel
+/// A plate's panel, whose glass wears the key-window look while
+/// `wearsActiveLook` holds (#2569 ▸ the toggle). The one panel
 /// class outside Core's own list that answers; never `NSPanel`.
 public final class ActiveGlassPanel: NSPanel {
     /// Read by AppKit on each ask; the owner sets it from the toggle.

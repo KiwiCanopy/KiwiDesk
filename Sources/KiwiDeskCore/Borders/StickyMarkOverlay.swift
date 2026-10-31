@@ -88,12 +88,10 @@ final class StickyMarkOverlay {
         glyphs.contains { $0.kind == .sticky }
     }
 
-    /// Draws the mark as tinted glass or the `.hudWindow` badge
-    /// (#1621).
+    /// Draws the mark as clear glass or the `.hudWindow` badge
+    /// (#1621, #2831).
     func setGlass(_ on: Bool) {
         plate.setGlass(on)
-        // Its glass wears the key-window rim, always (#2831).
-        (panel as? ActiveGlassPanel)?.wearsActiveLook = plate.isGlass
     }
 
     /// Sets the glyphs, outermost first, with their colours (#445,
@@ -276,9 +274,6 @@ final class StickyMarkOverlay {
 
         /// Test-only: the panel's content view.
         var panelContentForTest: NSView? { panel?.contentView }
-
-        /// Test-only: the panel itself.
-        var panelForTest: NSPanel? { panel }
     #endif
 
     private func markRect(
@@ -300,7 +295,7 @@ final class StickyMarkOverlay {
     }
 
     private func makePanel() -> NSPanel {
-        let panel = ActiveGlassPanel(
+        let panel = NSPanel(
             contentRect: CGRect(
                 x: 0,
                 y: 0,
@@ -311,7 +306,6 @@ final class StickyMarkOverlay {
             backing: .buffered,
             defer: true
         )
-        panel.wearsActiveLook = plate.isGlass
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = false

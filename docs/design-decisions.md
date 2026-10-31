@@ -14664,8 +14664,10 @@ wherever the kiwis show alone, as on the pocket's handle.
 paint the glyph itself, on the window mark and on the Space Bar
 badge alike, so the badge and the mark still read as one sign in
 one colour, now on the symbol. The mark's glass stays clear and
-wears the key-window look the bars wear, always; with the finish
-off it is a neutral plate, no disc. Every Space Bar state badge
+keeps the inactive look: a device check (owner, 2026-10-31) showed
+the key-window rim on a small two-glyph pill over window text
+framing it like a sticker. With the finish off it is a neutral
+plate, no disc. Every Space Bar state badge
 keeps the count badge's own disc, as the pocket's already did,
 and each takes its own corner of the glyph — sticky top left,
 floating bottom left, pocket bottom right — so position tells
@@ -18429,15 +18431,6 @@ whose off state is today's look. The panels that answer are
 ghost and drop zone, the hidden shelf's handle and the boot
 notice keep the inactive look: a surface joins only with its own
 argument here.
-
-:::unreleased
-The window mark joins, always while it draws glass (#2831): it
-read as a flat grey disc beside the bars, and on device the rim
-was clearly visible at its smallest size and read better over
-dark and light windows. That a key-window rim on a background
-window's mark says something macOS reserves for the key window
-was weighed and set aside by the owner.
-:::
 
 **On glass the Fill FADES: its capped alpha at the shelf's screen
 edge, an eighth of that toward the windows.** (#1622, owner
