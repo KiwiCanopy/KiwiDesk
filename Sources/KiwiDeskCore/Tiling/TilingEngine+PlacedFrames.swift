@@ -61,7 +61,7 @@ extension TilingEngine {
             if recordingCovers { runCovers[input.space.id] = cover }
             var computed = laidOut(input, placed: placed, cover: cover)
             if placed {
-                computed = fillingMaximized(
+                computed = issued(
                     computed,
                     input: input,
                     on: placement.screen,
@@ -123,6 +123,28 @@ extension TilingEngine {
         return issued
     }
 
+    /// The issued set's post-passes over a placed layout, the one
+    /// copy both `placedFrames` doors take: a bottom-left park at
+    /// its drawn width (#2759), then a maximized window filling its
+    /// screen (#2448).
+    private func issued(
+        _ laid: [WindowID: CGRect],
+        input: (space: Space, tiled: [WindowID], context: LayoutContext),
+        on screen: NSScreen,
+        state: StateCoordinator
+    ) -> [WindowID: CGRect] {
+        fillingMaximized(
+            parkingAtDrawnWidth(
+                laid,
+                state: state,
+                in: input.context.parkBounds ?? input.context.bounds
+            ),
+            input: input,
+            on: screen,
+            state: state
+        )
+    }
+
     /// One space's issued frames on `screen`, the window its layout
     /// put in front and the area it fills, read without recording like
     /// `placedFrames(state:recording: false)` — the App Bar's
@@ -137,7 +159,7 @@ extension TilingEngine {
         defer { monocleShownMembers = held }
         let input = layoutInput(state: state, space: space, screen: screen)
         return (
-            fillingMaximized(
+            issued(
                 laidOut(input, placed: true, cover: Self.cover(of: input)),
                 input: input,
                 on: screen,

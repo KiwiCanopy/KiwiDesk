@@ -75,8 +75,10 @@ extension TilingEngine {
     /// Where a hidden window parks: a bottom corner of its
     /// screen, `stashPeekX × stashPeekY` remaining visible, the
     /// body spilling off the parked side and the bottom. Size
-    /// unchanged. `.bottomLeft` anchors the window's right edge
-    /// so the visible remnant is its top-right corner; its x is
+    /// unchanged; the issued set hands a layout's bottom-left park
+    /// the drawn width first (`parkingAtDrawnWidth`, #2759).
+    /// `.bottomLeft` anchors the window's right edge so the
+    /// visible remnant is its top-right corner; its x is
     /// whole, leaving at least `stashPeekX` whatever whole width
     /// the app draws (#2753). Every park frame comes from here.
     nonisolated static func stashFrame(
