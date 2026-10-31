@@ -93,8 +93,11 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 4
+            readers.count == 5
                 && files == [
+                    // An away window WindowServer reported
+                    // destroyed (#2660).
+                    "KiwiCore+AwayWindows.swift",
                     "KiwiCore+GoneReason.swift",
                     "KiwiCore+DesktopFocusMemory.swift",
                     // Boot's judge of a restored hold (#1646).
@@ -105,7 +108,8 @@ struct DesktopCensusSeamTests {
                 ],
             .init(
                 rawValue: "expected the classifier, the focus "
-                    + "memory, the held judge and the self-test, "
+                    + "memory, the held judge, the away destroy "
+                    + "check and the self-test, "
                     + "found "
                     + readers.map(\.site).joined(separator: ", ")
             )

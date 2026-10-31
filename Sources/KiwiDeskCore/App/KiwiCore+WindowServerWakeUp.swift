@@ -50,6 +50,7 @@ extension KiwiCore {
         case .destroyed:
             windowCreates.noteDestroyed(id)
             eventLoop.windowServerDestroyed(id)
+            noteAwayDestroyed(id)
         }
     }
 

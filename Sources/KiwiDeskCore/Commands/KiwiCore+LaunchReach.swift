@@ -13,6 +13,9 @@ extension KiwiCore {
     struct AwayReach {
         let windows: [(window: AwayWindow, desktop: Int)]
         let snapshot: DesktopSnapshot
+        /// Whether the census lists any of the app's away entries,
+        /// up or parked — the reopen's question (#1840).
+        let listsAny: Bool
     }
 
     /// Nil when the app has no away entry or no census can be
@@ -36,7 +39,13 @@ extension KiwiCore {
             else { return nil }
             return (entry, number)
         }
-        return AwayReach(windows: windows, snapshot: snapshot)
+        return AwayReach(
+            windows: windows,
+            snapshot: snapshot,
+            listsAny: awayWindows(bundleID: bundleID).contains {
+                census.hosts[$0.id] != nil
+            }
+        )
     }
 
     /// Switches to `desktop` for `window` and owes it the focus.
