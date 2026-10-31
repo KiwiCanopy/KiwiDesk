@@ -32,7 +32,8 @@ extension SettingsValueReadout {
     /// moved under an unchanged name still owes its row.
     ///
     /// Diffed by KEY and NARRATED by the number each record was
-    /// last seen at (#1147) — a key is not a name any reader has.
+    /// last seen at (#1147), counted across every screen as a
+    /// dormant row's is (#2792) — a key is not a name any reader has.
     /// The census INSTANCE is the key, not the number: a dormant
     /// record and a live Desktop can both project one number, and
     /// two rows sharing an instance would collapse in the diff.

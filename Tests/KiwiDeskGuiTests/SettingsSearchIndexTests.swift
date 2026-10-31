@@ -218,7 +218,8 @@ struct SettingsSearchIndexTests {
                 // Sheen row sits in the shut Colors & glass
                 // section, so it carries an anchor. 16 since
                 // #2593: the Sheen and the Fill at rest again.
-                .looks: 16,
+                // 18 since #1740: the gallery's two header doors.
+                .looks: 18,
                 // 6: `(action) presets.layouts` joined anchor-less
                 // in #859 — the preset card's preview opener. This
                 // count RISING is the unusual direction the

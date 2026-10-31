@@ -92,6 +92,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 |---|---|
 | [`stack.promote`](lua-reference.md#stackpromote) | Moves the focused window to the master zone. |
 | [`stack.demote`](lua-reference.md#stackdemote) | Moves the focused window out of the master zone. |
+| [`stack.toggle_stack_position`](lua-reference.md#stacktoggle_stack_position) | Moves a Space's stack zone to the opposite side, unsaved: the focused Space, or one by id. |
 
 ## track
 

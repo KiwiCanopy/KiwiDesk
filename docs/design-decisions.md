@@ -6176,10 +6176,29 @@ focusing that screen first. A click grows the list of the windows
 inside out of it, by app, each row taking its window out — the
 bars' own click-held list, so it closes and keys as theirs do.
 Under One window it stands only while a window drag
-runs or a window goes in or out under its animation, and on a
-bar's edge its slot then
-opens, the bars gliding aside for it, so a drop and a put-in land on
-the one pocket at its one place (owner, 2026-10-29). Edge and
+runs or a window goes in or out under its animation (owner,
+2026-10-29). On a bar's edge it then stands at Position just
+inside the bars' strip, one inner margin past it on the window
+side, and opens no slot (owner, 2026-10-30, #2793): a slot opening
+glided the bars aside for a second, so the Space Bar read as
+jumping, and a Space a drag was aimed at slid out from under the
+pointer. Standing over the bar's end instead would cover the last
+item, since during a drag the pocket stands above the bars' level.
+A pocket that never joins the shelf has no reason to take its end,
+so it takes Position as on an edge no bar shows; the trade is that
+moving from One window to Several moves it to the shelf's end. A
+transient drop target over content is how macOS shows one, and the
+mark's two-tone edge (#2776) reads over any window. One window
+draws no handle on any edge: the handle and its rise are for a
+pocket that rests, so under One window an edge no bar shows takes
+the bare mark one outer margin in from the edge, as the whole mark
+under Always does. Whichever spot it takes, it slides out of what
+stands on its edge, the bar or the screen edge, on the shelf's
+own reveal slide, a little faster going back, and at once under
+Reduce Motion, so
+it says where it came from. A drag that starts on its spot, a title
+bar under it, arms the drop only once the pointer has left it, under either
+capacity, so a nudge never pockets the window. Edge and
 Position therefore act whatever the animation switch says and do not
 grey. No "show the pocket" choice sits beside Holds,
 which already decides when the pocket stays.
@@ -7553,6 +7572,26 @@ Control draws and the number `focus_desktop` and the Shortcuts
 rows take; a per-screen position would give one Desktop two
 numbers in one app. The dots carry the position on that screen,
 and shape alone marks the current one, so colour carries nothing.
+
+**Amended with #2792: the number is the screen's own** (owner
+ruling 2026-10-30). The premise above was wrong under "Displays
+have separate Spaces": there Mission Control draws each screen's
+strip from 1, so the global number was the label it draws on one
+screen only. Every label KiwiDesk draws — the plate, KiwiHub's
+rows, the Settings Desktop rows — now counts per screen, and a
+KiwiHub row on another screen than KiwiHub's names that screen
+first (`Work · DELL U2723 · Desktop 1`, as Mission Control groups
+its strips), last when spoken, its name the one part a narrow row
+shortens. What a command takes stays global — `focus_desktop`,
+`bind_profile_to_desktop`, the Go to Desktop N titles — since a
+key's title must say what it does and macOS's own "Switch to
+Desktop N" counts that way; a shortcut row states where its
+number lands now instead. The two agree on one screen and on the
+screen Mission Control lists first, and a binding fires on the
+main screen only (#888). The "one Desktop, two numbers" cost this
+entry refused is the one taken: a label and a command count
+differently on a second screen, and `docs/spaces-and-desktops.md`
+says so once.
 
 **The profile line shows only when the switch changed the live
 profile.** A Desktop with no binding loads nothing, and naming the
@@ -13435,10 +13474,13 @@ lights ↩ Apply, or its digits under ⌘. Navigation (⇥, ← →) and
 bridges (⌘, Edit) never light, the Shortcuts side lights nothing
 since ↩ runs nothing there, and an empty list lights nothing. Ink
 alone carries it, with no tint or weight, and it swaps without
-motion. The way here follows the chord's reach: ⇧ alone moves the
-selected row, so only it shows its "Space n → Space m"; under ⇧⌘
-every numbered row is a target through its digit, so each shows
-its own.
+motion. The way here follows the chord's reach: ⇧ alone moves one
+row — the hovered row where its ⇧-click moves a window, else the
+selected row ⇧↩ moves (#2808) — so only that row shows its
+"Space n → Space m"; under ⇧⌘ every numbered row is a target
+through its digit, so each shows its own. Lighting every row under
+⇧ would answer no "what does pressing now do", and repaint the
+whole list on the lighter chord.
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
@@ -17694,6 +17736,24 @@ Glass alone names itself KiwiDesk's own look instead, since the
 default has no reference to borrow (owner, 2026-09-29).
 A look has one description, shared by the Settings card and the
 tour, Glass's included (`LookDescriptionsTests`).
+
+:::unreleased
+**[Principle] A look's picture is a desk in the look, on the
+look's own ground (#1740, owner 2026-10-30).** The look tile,
+Simple's Look line, the tour and the gallery's `preview.png` draw
+one picture, `LookPlate`. Its ground is the look's own shelf colour
+darkened, with a faint haze of its focus colour, not the fixed
+plate a profile card or a Simple Space card sits on: a look is
+chosen by its mood, which a neutral plate hides, and the ground is
+the look's own colour, so it teaches nothing the look does not set
+(#702). Two things on it no look sets: the windows carry
+placeholder lines, and the App Bar shows Finder, Safari and Mail —
+their own icons, or their App Font glyphs for a look drawing
+symbols — because a desk of blank boxes reads as nobody's Mac. The
+icons are the drawing Mac's, so a gallery PNG can differ with its
+macOS version. Only the gallery picture stands the pocket; a tile
+has no room for it.
+:::
 
 **[Principle] Profiles share one look unless one keeps its own
 (#1752).** Keeping several profiles on the same look meant

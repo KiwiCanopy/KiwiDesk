@@ -19,8 +19,9 @@ public struct JumpEntry: Sendable, Equatable {
         /// app's row, which `isHiddenApp` tells apart.
         case shown
         /// Up on a Desktop no screen shows; `desktop` is its
-        /// Mission Control number, a label only (profiles.md),
-        /// nil where no reading named it.
+        /// number on its own screen, as Mission Control labels it
+        /// (#2792) — a label only (profiles.md), nil where no
+        /// reading named it.
         case away(desktop: Int?)
         case minimized
         case fullscreen
@@ -49,6 +50,10 @@ public struct JumpEntry: Sendable, Equatable {
     /// the row sits under "Other apps", after every member's (#2103
     /// ruling 36). False for every row while no lens is on.
     public let isOtherApp: Bool
+    /// The screen a shown or away window is on where that is not
+    /// the screen KiwiHub opened on (#2792); nil there, with one
+    /// screen, and for every other status.
+    public let screen: ScreenLabel?
 
     public init(
         target: Target,
@@ -59,9 +64,11 @@ public struct JumpEntry: Sendable, Equatable {
         spaceIcon: SpaceGlyph?,
         status: Status,
         movesHere: Bool = false,
-        isOtherApp: Bool = false
+        isOtherApp: Bool = false,
+        screen: ScreenLabel? = nil
     ) {
         self.isOtherApp = isOtherApp
+        self.screen = screen
         self.target = target
         self.pid = pid
         self.app = app

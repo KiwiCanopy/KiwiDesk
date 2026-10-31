@@ -28,6 +28,9 @@ struct ShortcutRow: Identifiable {
     /// fires and recreates its Space; only Mission Control makes
     /// a Desktop (`NavCommand.unavailable`).
     var unavailable: Bool = false
+    /// Where the row acts right now, drawn after its name
+    /// (`NavCommand.detail`, #2792).
+    var detail: String? = nil
     /// What the overview's fold reads off a row that may join
     /// others (#2312); nil for one that never folds.
     var fold: ShortcutFold.Tag? = nil

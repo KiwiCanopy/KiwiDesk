@@ -3,7 +3,7 @@ import KiwiDeskCore
 import SwiftUI
 
 /// Browse looks… (#1740 ▸ Browse): the gallery's site page in the
-/// browser. Drawn only while `LookGallery.isLive`.
+/// browser.
 extension LooksShelf {
     var browseButton: some View {
         Button {

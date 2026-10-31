@@ -172,6 +172,7 @@ public enum APIReference {
             "set_master_count", "set_master_ratio",
             "set_master_orientation",
             "set_stack_position",
+            "toggle_stack_position",
             "set_new_window_placement",
             "set_fill_when_alone",
             "set_master_count_override",

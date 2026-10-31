@@ -1317,8 +1317,13 @@ editing here:
   spelled beside it: every parked judge rebuilds its target
   through that function, so a hand-spelled x reads as parked
   while it drops the left corner's whole-x rounding
-  (`StashLeftPeekTests`, #2753); a window already at its park is
-  skipped on a re-issuing pass too (▸ `liftedParkIsKept`). A
+  (`StashLeftPeekTests`, #2753); a bottom-left park in the issued
+  set is laid at the width the window draws where that is wider
+  than the ask, through the one `parkingAtDrawnWidth` in
+  `placedFrames`, never at the issue door, so every reader of where
+  a window is agrees with what is sent (`ParkDrawnWidthTests`,
+  #2759); a window already at its park is skipped on a re-issuing
+  pass too (`RunParkSnapTests` ▸ `liftedParkIsKept`). A
   z-order restore or gate that judges frames computed now leaves
   out what `parkedByRun` names, and a classifier of the last
   pass's slots takes `shownSlots()` (`RunRestWiringTests`); a
@@ -1864,7 +1869,14 @@ editing here:
   since the global floor is the render clamp's (#383) — written
   through the capped writers with NO focus, so the write clamps
   like a press and cues nothing, over the LOCAL members and the
-  render's own `layoutInput`. A floor the yield cannot fit is
+  render's own `layoutInput`. The heal stands down on an apply's
+  probe, so an explicit apply owes one ordinary pass once every
+  window has answered its asks: `retile` arms it for every probing
+  pass that runs through the one `oweApplyHealPass`, the body
+  re-arms only through it until two looks a delay apart find no
+  tracked window moving, and an apply door arms nothing of its
+  own, or a Save with every bound learned keeps the reseeded ratio
+  until an unrelated event (#2785, `ApplyHealPassTests`). A floor the yield cannot fit is
   the `unfit` verdict: cued ONCE per (space, axis, window)
   episode with the neighbour-minimum pill on the overhanging
   window, the memo in `KiwiCore.splitFloorCues` re-armed when

@@ -184,10 +184,16 @@ struct CiPathFilterTests {
             // shape: `&&` would skip every normal PR. `!cancelled()`
             // reaches the failure arm; `always()` would also start
             // a run `cancel-in-progress` superseded.
+            // build-lint-test also runs on the instruction lane
+            // (#2712, `CiInstructionLaneTests`).
+            let lane =
+                job == "build-lint-test"
+                ? " || needs.changes.outputs.light == 'true'" : ""
             #expect(
                 gate
                     == "!cancelled() && (needs.changes.result != "
-                    + "'success' || needs.changes.outputs.run == 'true')",
+                    + "'success' || needs.changes.outputs.run == 'true'"
+                    + lane + ")",
                 "\(job) is skipped, not run, when the filter fails"
             )
         }

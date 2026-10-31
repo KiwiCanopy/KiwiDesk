@@ -141,7 +141,7 @@ struct BarStripView: View {
     private func pipBody(
         _ item: HomeCardBarsTile.BarItem
     ) -> some View {
-        if item.label != nil || item.glyph != nil {
+        if item.label != nil || item.glyph != nil || item.art != nil {
             // Icon and name together when the item carries
             // both — a horizontal App Bar's item; truncation
             // only ever eats the name, the real bar's rule.
@@ -158,8 +158,11 @@ struct BarStripView: View {
                 iconAndTitle(item, slotHolder: false)
             }
             .foregroundStyle(Color(kiwiHex: item.color))
-            .padding(.horizontal, 2.5 * scale)
-            .padding(.vertical, 1.5 * scale)
+            .padding(
+                .horizontal,
+                HomeCardBarsTile.pipPad.horizontal * scale
+            )
+            .padding(.vertical, HomeCardBarsTile.pipPad.vertical * scale)
             // Rounded ends pad the axis, as the live item (#1763).
             .padding(
                 vertical ? .vertical : .horizontal,
@@ -186,6 +189,9 @@ struct BarStripView: View {
         slotHolder: Bool
     ) -> some View {
         HStack(spacing: 2 * scale) {
+            if let art = item.art {
+                artView(art)
+            }
             if let glyph = item.glyph {
                 Image(systemName: glyph)
                     .font(
@@ -267,9 +273,11 @@ extension HomeCardBarsTile.BarSpec {
     }
 
     /// What a run's pips add along the axis for their rounded
-    /// ends: each pip drawing a label or a glyph, both ends.
+    /// ends: each pip drawing a label, a glyph or art, both ends.
     func pipEndInsets(scale: CGFloat) -> CGFloat {
-        let labelled = items.filter { $0.label != nil || $0.glyph != nil }
+        let labelled = items.filter {
+            $0.label != nil || $0.glyph != nil || $0.art != nil
+        }
         return CGFloat(labelled.count) * 2 * pipEndInset(scale: scale)
     }
 }

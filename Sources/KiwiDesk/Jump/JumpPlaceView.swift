@@ -2,7 +2,8 @@ import KiwiDeskCore
 import SwiftUI
 
 /// A Space's glyph, in the system font, then its words (#1875):
-/// the glyph is what matches the bar chip.
+/// the glyph is what matches the bar chip. Only a screen's name
+/// shortens on a narrow row (#2792); the rest keeps its width.
 struct JumpPlaceView: View {
     let place: JumpRowText.Place
 
@@ -18,7 +19,17 @@ struct JumpPlaceView: View {
             case nil:
                 EmptyView()
             }
-            Text(place.text)
+            if let run = place.screen {
+                HStack(spacing: 0) {
+                    Text(run.lead).fixedSize()
+                    Text(run.name)
+                        .lineLimit(1)
+                        .truncationMode(.tail)
+                    Text(run.trail).fixedSize()
+                }
+            } else {
+                Text(place.text).fixedSize()
+            }
         }
     }
 }
@@ -43,7 +54,7 @@ struct JumpWayHereView: View {
                     if let source { JumpPlaceView(place: source) }
                 case .text(let literal):
                     if expanded {
-                        Text(literal).transition(.opacity)
+                        Text(literal).fixedSize().transition(.opacity)
                     }
                 case .argument(2):
                     if expanded {

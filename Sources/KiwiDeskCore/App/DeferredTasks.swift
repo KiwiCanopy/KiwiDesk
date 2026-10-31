@@ -110,6 +110,10 @@ final class DeferredTasks {
         /// Lights the standing pocket as a play's window lands in
         /// it or leaves it (#2776).
         case pocketLight
+        /// The ordinary pass an explicit apply owes, once its
+        /// asks are answered (#2785). Ambient: it coalesces every
+        /// apply, whoever made it.
+        case applyHealPass
 
         /// Whether a body in this slot runs as its scheduler's
         /// motion, late (#804 ▸ Ruling 2), or always as ambient
@@ -130,7 +134,8 @@ final class DeferredTasks {
                 .awayCensus, .menuBarRemeasure, .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
-                .visionHold, .pocketHold, .pocketLight:
+                .visionHold, .pocketHold, .pocketLight,
+                .applyHealPass:
                 return false
             }
         }

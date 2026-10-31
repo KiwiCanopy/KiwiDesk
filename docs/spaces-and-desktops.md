@@ -204,9 +204,37 @@ exactly those screens connected, that set's profile loads; any
 other setup of the count loads the one for all setups. Either
 loads over a profile saved for exactly those screens.
 
+:::unreleased
+## A Desktop has two numbers
+
+With "Displays have separate Spaces" on and more than one screen,
+Mission Control numbers each screen's Desktops from 1. KiwiDesk
+uses two counts:
+
+- **What KiwiDesk shows** counts per screen, as Mission Control
+  does: KiwiHub's window switcher, the Desktop switch plate and
+  the Desktop rows in Settings. A KiwiHub row for a window on
+  another screen names that screen too — `Work · DELL U2723 ·
+  Desktop 1`.
+- **What a command or binding takes** counts across every screen,
+  the screen Mission Control lists first counted first:
+  [`focus_desktop`](lua-reference.md#focus_desktop),
+  `move_to_desktop`, `bind_profile_to_desktop`, and the
+  **Go to Desktop N** shortcuts, as macOS's own "Switch to
+  Desktop N" does.
+
+On one screen, and on the screen Mission Control lists first,
+the two agree. A Settings row for a Desktop that is not present
+keeps the number it was last seen at, counted across every
+screen. On another screen they differ: the second screen's
+first Desktop may be **Go to Desktop 7**, and Settings ▸
+Shortcuts and KiwiHub's Shortcuts side show which screen and
+Desktop each such row reaches right now.
+:::
+
 ## A binding follows its Desktop, not its number
 
-Mission Control numbers Desktops by **position**: add a Desktop
+Desktops are numbered by **position**: add a Desktop
 before a bound one, delete one, drag them around in Mission
 Control, plug a screen in or unplug it, and everything after the
 change is renumbered.
@@ -231,7 +259,7 @@ The merged one goes quiet; plugging the screen back in restores
 it, identifier and all, and its binding comes back with it.
 
 On a Mac where KiwiDesk cannot write the identifier, bindings
-key by the Mission Control number — the behaviour above minus
+key by the Desktop's number — the behaviour above minus
 the protection.
 
 A binding follows its **profile** the same way: it names the

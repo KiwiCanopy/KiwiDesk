@@ -1,88 +1,127 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A look card's picture (#1684): the shelf preview drawn over the
-/// draft with the look applied — the user's own Spaces and bars —
-/// and a focused window wearing the ring the look's palette
-/// colours, its sheen included: the owner ruled the card draws it
-/// (2026-09-28), unlike the palette thumbnail, which leaves it undrawn
-/// at tile scale (gui.md ▸ #753) — so the ring is drawn wide enough
-/// for the ramp to read.
+/// A look's picture (#1740): a desk in the look — its bars with
+/// Finder, Safari and Mail, three windows at its gaps, the focused
+/// one in its ring — on its own shelf colour. The look tile,
+/// Simple's Look line, onboarding and `kiwidesk preview` draw it;
+/// headless, per gui.md ▸ The CLI's local verbs.
 struct LookPlate: View {
     /// The draft with the look painted on.
     let settings: TilingSettings
     let spaceLabels: [SpaceGlyph]
+    /// Where the picture is shown: a tile, or the gallery's PNG.
+    var size = Size.tile
+
+    /// The gallery draws on a taller canvas, so its bars take a
+    /// desk's share at their font's own size, and alone stands the
+    /// pocket, which a tile has no room for.
+    enum Size {
+        case tile, gallery
+
+        @MainActor var height: CGFloat {
+            PaletteSceneThumbnail.baseHeight * desk
+        }
+        /// The desk's own geometry — gaps, the ring, the pocket —
+        /// grows with the canvas; the bars keep their font's size.
+        var desk: CGFloat { self == .tile ? 1 : 2 }
+        var drawsPocket: Bool { self == .gallery }
+    }
 
     var body: some View {
         ZStack {
-            RoundedRectangle(
-                cornerRadius: PaletteSceneThumbnail.plateRadius
-            )
-            .fill(SettingsTheme.sunken)
+            ground
             HomeCardBarsTile(
                 settings: settings,
-                // A look's card pictures the look; the pocket is no
-                // part of it (#2678).
-                pocketStands: false,
+                pocketStands: pocketRest == .section,
                 spaceCount: spaceLabels.count,
+                scale: Self.barScale,
                 spaceLabels: spaceLabels,
-                wellContent: AnyView(focusedWindow)
+                wellContent: AnyView(LookDesk(plate: self)),
+                appArt: Self.appArt(settings.kiwishelf.iconSource),
+                drawsChrome: false
             )
-            .padding(4)
+            .padding(2)
             .environment(
                 \.schematicPalette,
                 HomeCardPlate.palette(settings)
             )
+            if pocketRest == .mark {
+                lonePocket
+            }
         }
-        .frame(height: PaletteSceneThumbnail.baseHeight)
+        .clipShape(
+            RoundedRectangle(
+                cornerRadius: PaletteSceneThumbnail.plateRadius
+                    * size.height / PaletteSceneThumbnail.baseHeight
+            )
+        )
+        .frame(height: size.height)
         .frame(maxWidth: .infinity)
         // Hidden from VoiceOver, never from the pointer: the plate is
         // most of a card's Button label, so a click on it is the click.
         .accessibilityHidden(true)
     }
 
-    /// A window in the desktop's well, ringed in the focus colour
-    /// at the look's width and corners (#1739). Sized off the well,
-    /// never the plate, so a narrow card's window never covers the
-    /// shelf.
-    private var focusedWindow: some View {
-        GeometryReader { well in
-            let width = well.size.width * Self.windowShare
-            let unit = width / Self.referenceWidth
-            let shape = RoundedRectangle(cornerRadius: ringRadius * unit)
-            shape
-                .fill(SettingsTheme.hairline)
-                .overlay(
-                    shape.stroke(
-                        SheenPaint.style(
-                            settings.borderStyle.focusedColor,
-                            sheen: settings.borderStyle.sheen
-                        ),
-                        lineWidth: max(1, ringWidth * unit)
-                    )
-                )
-                .frame(
-                    width: width,
-                    height: well.size.height * Self.windowShare
-                )
-                .position(x: well.size.width / 2, y: well.size.height / 2)
+    /// The bars' scale on the picture: smaller than the Bars
+    /// card's, so both bars and the pocket fit a tile's width.
+    static let barScale: CGFloat = 0.62
+
+    /// The look's own shelf colour over a night, darkened a step,
+    /// a faint haze of the focus colour from the top.
+    private var ground: some View {
+        ZStack {
+            SettingsTheme.lookGround
+            Color(kiwiHex: settings.kiwishelf.fillColor)
+            SettingsTheme.lookGround.opacity(0.15)
+            RadialGradient(
+                colors: [
+                    Color(kiwiHex: settings.borderStyle.focusedColor)
+                        .opacity(0.3),
+                    .clear,
+                ],
+                center: .top,
+                startRadius: 0,
+                endRadius: size.height * 0.9
+            )
         }
     }
 
-    /// The window's share of the well on each axis.
-    private static let windowShare: CGFloat = 0.6
-
-    /// The window width the ring and corner below are tuned at.
-    private static let referenceWidth: CGFloat = 40
-
-    /// The ring's width at the reference window, floored so a thin
-    /// ring still reads and capped so the widest leaves the window
-    /// visible; the default 5 pt draws 3.
-    private var ringWidth: CGFloat {
-        min(4, max(1, settings.borderStyle.clampedWidth * 0.6))
+    /// The focused window's ring: the look's colour and sheen at
+    /// its width through the shared remap (#786) and its corners;
+    /// nothing while the draft draws no ring.
+    func focusRing(_ shape: RoundedRectangle) -> some View {
+        let border = settings.borderStyle
+        return
+            shape
+            .strokeBorder(
+                SheenPaint.style(
+                    settings.borderStyle.focusedColor,
+                    sheen: settings.borderStyle.sheen
+                ),
+                lineWidth: ringWidth
+            )
+            .opacity(border.enabled ? 1 : 0)
     }
 
-    private var ringRadius: CGFloat {
-        settings.borderStyle.cornerStyle == .square ? 0 : 4
+    /// The ring's glow, drawn beneath the window so the paper
+    /// covers what it casts inside.
+    func focusGlow(_ shape: RoundedRectangle) -> some View {
+        let border = settings.borderStyle
+        return shape.fill(Color(kiwiHex: border.focusedColor))
+            .shadow(
+                color: Color(kiwiHex: border.focusedColor),
+                radius: ringWidth * 1.5
+            )
+            .opacity(border.enabled && border.glow ? 1 : 0)
+    }
+
+    /// The ring's width on the picture, read through the one
+    /// border remap.
+    var ringWidth: CGFloat {
+        BorderPreviewScale.width(
+            settings.borderStyle.clampedWidth,
+            to: 0.75...3
+        ) * size.desk
     }
 }

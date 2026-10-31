@@ -400,8 +400,9 @@ Space's focus where it is.
 
 ### focus_desktop
 
-**Expects:** a macOS Desktop number — the number Mission Control
-shows, the same one `bind_profile_to_desktop` keys on.
+**Expects:** a macOS Desktop number, counted across every screen
+— the same one `bind_profile_to_desktop` keys on ([which
+count](spaces-and-desktops.md#a-desktop-has-two-numbers)).
 
 **Does:** switches to that Desktop — the *macOS* Desktop, not a
 KiwiDesk Space — as a swipe would: the screen that Desktop
@@ -1106,8 +1107,9 @@ KiwiDesk.set_focus_wrap("this_screen")
 [`focus_desktop`](#focus_desktop) or
 [`move_to_desktop_and_follow`](#move_to_desktop_and_follow) —
 shows a plate in the middle of the screen that switched: the
-Desktop's Mission Control number, a dot for each Desktop on that
-screen with the current one filled, and the profile a
+Desktop's number on that screen ([which
+count](spaces-and-desktops.md#a-desktop-has-two-numbers)), a dot
+for each Desktop on that screen with the current one filled, and the profile a
 [Desktop binding](#bind_profile_to_desktop) loaded, if one did
 (#2142). It takes no focus or click, fades after about a
 second, and stays away from a screen showing a full-screen app
@@ -1681,6 +1683,33 @@ stack.set_master_ratio_override("3", 0.7)
 ```lua
 stack.set_stack_position_override("3", "bottom")
 ```
+
+### stack.toggle_stack_position
+
+:::unreleased
+**Expects:** an optional space identifier; without one, the
+focused space.
+
+**Does:** moves that space's stack zone to the opposite side —
+`"left"` ↔ `"right"`, `"top"` ↔ `"bottom"` — starting from the
+side it shows now, its
+[override](#stackset_stack_position_override) or else the
+[global value](#stackset_stack_position). It writes the override
+for that space as a live change: Settings lists it under **Live,
+not saved**, and its Revert puts it back, as does
+[`revert_settings`](cli.md#raw-ipc-protocol) with the leaf id a
+change report names. A flip back onto the global side clears the
+override. The master ratio and every other size stay as they
+are.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("hyper+f", function()
+  stack.toggle_stack_position()
+end)
+```
+:::
 
 ### stack.set_master_orientation_override
 
@@ -3075,14 +3104,16 @@ Issue naming this verb; a saved profile keeps its edge.
 `"bottom"`; the starter setup seeds `"top"`).
 
 **Does:** sets the screen edge the [pocket](#pocket) sits on, on
-every screen. Where a bar shows on that edge the pocket is a
-section of KiwiShelf, and where the bars there rest `"auto"` or
-`"hidden"` it is a handle. On an edge no bar sits on it follows
-the more present of the two bars' visibilities (the App Bar's in
-monocle and scrolling only): whole under `"always"`, a handle
-otherwise
-([`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
-places all three). When it is on screen is
+every screen. Under
+[`pocket.set_capacity("several")`](#pocketset_capacity), where a
+bar shows on that edge the pocket is a section of KiwiShelf, and
+where the bars there rest `"auto"` or `"hidden"` it is a handle.
+On an edge no bar sits on it follows the more present of the two
+bars' visibilities (the App Bar's in monocle and scrolling only):
+whole under `"always"`, a handle otherwise. Under `"one"` it is
+the whole mark on every edge, with no handle.
+[`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
+places it. When it is on screen is
 [`pocket.set_capacity`](#pocketset_capacity)'s. A look carries
 it.
 
@@ -3102,14 +3133,17 @@ that range it is clamped.
 
 **Does:** sets where along its edge the [pocket](#pocket) sits, in
 percent: `0` is the left or top end, `100` the right or bottom
-end. On an edge where a bar shows, the pocket takes the shelf's
+end. Under `"one"` ([`pocket.set_capacity`](#pocketset_capacity))
+the pocket stands at the position on every edge. Under
+`"several"`, on an edge where a bar shows, it takes the shelf's
 nearer end instead — its start below `50`, its end from `50` —
-outside the bars' items, so it stays put while they scroll. On an
+outside the bars' items, so it stays put while they scroll; on an
 edge where an `"auto"` bar rests hidden, its handle stands where
 the pocket shows once the bar comes in, joining the bars' handles
-in one row where it would meet them. On any other edge no bar
+in one row where it would meet them; on any other edge no bar
 shows, the handle, or the pocket where it rests whole, stands at
-the position, kept on screen at either end. A look carries it.
+the position. It is kept on screen at either end. A look carries
+it.
 
 **Example:**
 
@@ -5863,14 +5897,17 @@ sits on, for both bars. A click on the pocket lists the windows
 inside by app; a row takes its window out. Under `"one"` nothing
 stays: the pocket stands only while a window goes in or out
 ([`animations.set_on_state_change`](#animationsset_on_state_change))
-or while you drag one, and on an edge where a bar shows its slot
-then opens, the bars gliding aside for it.
+or while you drag one. It has no handle: it slides out of its edge
+at the position, just inside the bar on an edge where one sits,
+moving no bar, and otherwise one outer margin in from the screen
+edge.
 
 While you drag a window, under either capacity, the pocket comes
 up on every screen as a drop target, and a drop on it pockets that
 window as [`pocket`](#pocket) naming it would; where the pocket
 would refuse it, the pocket does not light and the window goes
-back. Switching back to `"one"` keeps the windows already marked.
+back. A drag that starts with the pointer over the pocket takes
+no drop there until the pointer has left it. Switching back to `"one"` keeps the windows already marked.
 
 **Example:**
 
@@ -6752,9 +6789,9 @@ end)
 | `layout_change` | `space_id`, `mode` |
 | `focus_change` | `window_id`, `app`, `bundle_id` |
 | `monitor_change` | `monitor_count` |
-| `desktop_change` | `desktop` (Desktop number now current on the screen that switched), `monitor` (that screen's positional number; 1 is the main screen) |
+| `desktop_change` | `desktop` (Desktop number now current on the screen that switched, counted across every screen), `monitor` (that screen's positional number; 1 is the main screen) |
 | `window_created` | `window_id`, `app`, `space`, `reason`, `bundle_id` |
-| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, else `nil`) |
+| `window_destroyed` | `window_id`, `app`, `space`, `reason`, `bundle_id`, `desktop` (the Desktop number holding a `vanished` window, counted across every screen, else `nil`) |
 | `window_moved_to_space` | `window_id`, `app`, `from`, `to`, `bundle_id` |
 | `layer_change` | `from`, `to` (layer names, `default` included; fires only when the layer actually changed) |
 
@@ -7093,8 +7130,9 @@ KiwiDesk.set_space_icon("chat", "")  -- clear
 
 **Expects:**
 
-- A Desktop number, as Mission Control counts them (1-based;
-  fullscreen apps don't count).
+- A Desktop number, counted across every screen (1-based;
+  fullscreen apps don't count) — [which
+  count](spaces-and-desktops.md#a-desktop-has-two-numbers).
 - A profile name.
 - Optionally, the fingerprint of every screen in one screen
   setup, as `list_monitors` prints them.
@@ -7629,12 +7667,12 @@ float rules make floating, follow
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
 place the pocket the plate flies to, under either
-[`pocket.set_capacity`](#pocketset_capacity): on an edge where a
-bar shows, the pocket's slot opens on KiwiShelf, the bars gliding
-aside for it; on an edge no bar shows, the pocket comes up out of
-its handle, or stands whole where
+[`pocket.set_capacity`](#pocketset_capacity): under `"several"`
+the pocket that stays, which on an edge no bar shows comes up out
+of its handle, or stands whole where
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) says it
-does. That pocket lights as the window goes in or out, and nods
+does; under `"one"` a pocket that slides out of its edge and moves
+no bar. That pocket lights as the window goes in or out, and nods
 as one lands in it.
 :::
 
