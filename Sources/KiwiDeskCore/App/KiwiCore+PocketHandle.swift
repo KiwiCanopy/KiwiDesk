@@ -99,14 +99,13 @@ extension KiwiCore {
         position: CGFloat,
         depth: CGFloat
     ) -> CGRect {
-        let share = max(0, min(position, 100)) / 100
         let horizontal = edge.isHorizontal
-        let low = horizontal ? visible.minX : visible.minY
-        let high = horizontal ? visible.maxX : visible.maxY
         let length = ShelfMarkPlacement.bandLength
-        let start = min(
-            max(low + (high - low) * share - length / 2, low),
-            max(high - length, low)
+        let start = ShelfMarkPlacement.bandStart(
+            position: position,
+            low: horizontal ? visible.minX : visible.minY,
+            high: horizontal ? visible.maxX : visible.maxY,
+            length: length
         )
         return pocketHandleFrame(
             visible: visible,

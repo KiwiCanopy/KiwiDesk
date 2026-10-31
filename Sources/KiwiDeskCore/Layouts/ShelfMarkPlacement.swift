@@ -11,6 +11,22 @@ public enum ShelfMarkPlacement {
     /// margin a sideways flick lands in.
     public static let bandLength: CGFloat = 64
 
+    /// Where a band `length` long starts at `position` percent along
+    /// an edge running `low...high`, kept whole on the edge: the
+    /// pocket's handle and a look's picture of its mark (#1740).
+    public static func bandStart(
+        position: CGFloat,
+        low: CGFloat,
+        high: CGFloat,
+        length: CGFloat
+    ) -> CGFloat {
+        let share = max(0, min(position, 100)) / 100
+        return min(
+            max(low + (high - low) * share - length / 2, low),
+            max(high - length, low)
+        )
+    }
+
     /// One edge's row: each bar's band and the pocket's, offsets
     /// from the edge's start.
     public struct Row: Equatable, Sendable {
