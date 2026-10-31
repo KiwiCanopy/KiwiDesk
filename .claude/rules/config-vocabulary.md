@@ -96,9 +96,9 @@ synonym:
   the code's name alone (`LuaMark.symbol`), since *mark* is the
   window glyph's word.
 - **badge** — a small disc on a bar item's corner: the group
-  count badge, and the Space Bar's sticky / floating state
-  badges (`group_badge_*`, `space_bar.sticky_badge`). One family;
-  the three on an app glyph take three different corners. In
+  count badge, and the Space Bar's sticky / floating / pocket
+  state badges (`group_badge_*`, `space_bar.sticky_badge`). One
+  family; each on an app glyph takes its own corner (#2831). In
   Settings, the override count on a Space row's Customize button
   is a badge too (#2674): it counts, so it takes the word.
 - **Space marker** — a glyph drawn after a Space's identifier, in

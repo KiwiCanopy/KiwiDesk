@@ -16,8 +16,8 @@ struct DesktopMemoryStoreParityTests {
     /// Every stored property whose type names `WindowID`, closures
     /// (the compositor seams) aside.
     private static let register: Set<String> = [
-        "honoredFocus", "lastHonoredOn", "stickyLeft", "stickyReturn",
-        "switchDepartures",
+        "awayDestroyed", "honoredFocus", "lastHonoredOn", "stickyLeft",
+        "stickyReturn", "switchDepartures",
     ]
 
     private let old = WindowID(7)
@@ -46,6 +46,7 @@ struct DesktopMemoryStoreParityTests {
         memory.stickyLeft = [10: old]
         memory.stickyReturn = (old, .now)
         memory.switchDepartures = [old: Date()]
+        memory.awayDestroyed = [old]
         memory.returnFocus.record(old)
         return core
     }
@@ -64,6 +65,9 @@ struct DesktopMemoryStoreParityTests {
         if memory.stickyReturn?.window == id { found.append("stickyReturn") }
         if memory.switchDepartures[id] != nil {
             found.append("switchDepartures")
+        }
+        if memory.awayDestroyed.contains(id) {
+            found.append("awayDestroyed")
         }
         if memory.returnFocus.owed() == id { found.append("returnFocus") }
         return found

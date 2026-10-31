@@ -2456,6 +2456,7 @@
   "whatsnew.trail.from": "Aus „Neu in KiwiDesk“",
   "whatsnew.trail.next": "Weiter: %1$@",
   "window_action.refusal.all_here": "Alle Fenster von %1$@ sind hier",
+  "window_action.refusal.already_in": "„%1$@“ ist bereits in Space %2$@",
   "window_action.refusal.cannot_move_here": "„%1$@“ kann nicht hierher verschoben werden",
   "window_action.refusal.no_close_button": "„%1$@“ hat keine Schließen-Taste",
   "window_action.refusal.no_new_window": "%1$@ hat keinen Befehl „Neues Fenster“",

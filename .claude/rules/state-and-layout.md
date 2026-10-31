@@ -89,6 +89,10 @@ editing here:
   return rank goes with the move, so a redirect that changes
   nothing spends the slot and the window comes back last after
   any switch (`AwayProfileSpaceTests`).
+- **`moveWindow` re-files a window into its own Space, so a door
+  that must not re-file asks the window's Space first** — after the
+  sticky gate, which answers a sticky window's own Space with its
+  pill — as `move_to_space` does (`MoveToOwnSpaceTests`).
 - It follows that **a new per-`Space` field is keyed by
   `WindowID` or it is SHARED across Desktops** — the Desktop
   partition is emergent from window residence, and a per-window
@@ -664,7 +668,11 @@ editing here:
   entry ENDS on the return (the create fold), on a census that
   no longer hosts the id (`refreshAwayWindows`, which emits the
   corrective `closed` — at the Desktop settle and on the 5 s
-  `awayCensus` task while the ledger is non-empty), on the app's
+  `awayCensus` task while the ledger is non-empty — at
+  `awayBackstopInterval` while WindowServer's destroys are live and
+  the per-window read resolves, since a destroy of an away id then
+  prunes it on `readWindowSpace`'s `.gone`, accessibility.md's ruled
+  exception (`AwayDestroyPruneTests`) — on the app's
   exit, on the #634 reset with `rememberedSpaces`, and moves on
   a re-key (`WindowRekeyParityTests`' fixture populates it, so the
   reflection scan discovers the container; `AwayLedgerTests` ▸
@@ -754,8 +762,22 @@ editing here:
     at its hand-off, swallows the pocketing's own echo
     (`PocketCommandTests` ▸ `activationTakesOut`).
   - **A pocket press moves state focus at once where a window can
-    take it, and raises when its brief pocket ends (#2703)**, so for
-    one play the key window is not the state's. The one
+    take it, and raises at its brief pocket's
+    `BriefPocketPlan.Timeline.handOff`, never before the flight
+    ends (#2703)**, so for one play the key window is not the
+    state's. A raise activates an app on the thread the plate's
+    frames tick on, where KiwiDesk's own Settings window redraws
+    whole. A put-in hands off once the play is over; a take-out
+    as its window lands, so it rises under the plate's fade
+    rather than showing behind the window it came out over — at
+    the cost of an activation inside the last 0.2 s of that play,
+    the plate's fade and the pocket's lift (#2845). A take-out's
+    raise and its held write share `handOff` unordered, so a slow
+    app may front its park corner until the write lands; a change
+    that orders or separates them keeps the write first
+    (`BriefPocketPlanTests`, `BriefPocketTests` ▸
+    `putInRaiseWaits`, `takeOutRaiseWaits`,
+    `takeOutRaisesAtLanding`). The one
     `handPocketFocus` pays the raise, through `focusWindow` handed
     as `leaving` the anchor the press read before its write, so its
     changed-focus arms decide as an immediate hand-off would; a new
@@ -1029,6 +1051,16 @@ editing here:
   `FloatRaiseLandingWiringTests` ▸ `debtIsPaidAtRest`); the float
   raise's own drain is no tiled restore, so a newer focus still
   supersedes it at once (`CommandedFocusFloatRaiseTests`).
+  **The raise lifts only floats the WindowServer draws (#2840).**
+  A float drawn with a side of 1 pt or less is left out through
+  the one `floatIsDrawn` verdict, which the raise reads through
+  `drawnFloatTargets` and the per-focus gate directly;
+  `floatLayerTargets` never asks it, so the target set stays a
+  pure state filter. The verdict is read live per raise through
+  the watch's `readWindowBounds` seam, never a fact cached at
+  adoption, so a float that grows is lifted on its next focus; a
+  read with no answer keeps the window
+  (`FloatRaiseVisibilityTests`, `FloatRaiseVisibilitySeamTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**

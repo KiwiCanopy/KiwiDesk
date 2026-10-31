@@ -282,7 +282,7 @@ struct ColorSwatch: View {
     /// Falls back to `.clear` (an empty dot) when the stored
     /// string is not parseable.
     private var color: Color {
-        guard let rgba = DragVisual.parseHex(hex) else {
+        guard let rgba = HexColor.parse(hex) else {
             return .clear
         }
         return Color(

@@ -5,8 +5,7 @@ import Testing
 
 /// What one page of the plate slide shows (#1956): a plate per
 /// window clipped to the screen, back to front, and an icon on
-/// each pile's front face only — the focus where it is in the
-/// pile, else the WindowServer's front-most member.
+/// every plate with room for one, overlapped or not (#2837).
 @Suite("Plate slide plan (#1956)")
 struct SpaceSlidePlanTests {
     private let page = CGRect(x: 0, y: 0, width: 1000, height: 800)
@@ -65,8 +64,10 @@ struct SpaceSlidePlanTests {
         #expect(plates.compactMap(\.iconPid).sorted() == [1, 2])
     }
 
-    @Test("a pile's face is the focus where it is in the pile")
-    func focusIsTheFace() {
+    /// Overlapping plates share a pile, draw the focus last, and
+    /// each keeps its icon: the plate in front is glass (#2837).
+    @Test("overlapping plates each carry their icon")
+    func overlappingPlatesKeepIcons() {
         let a = CGRect(x: 0, y: 0, width: 600, height: 600)
         let b = CGRect(x: 100, y: 100, width: 600, height: 600)
         let plates = SpaceSlidePlan.plates(
@@ -77,13 +78,12 @@ struct SpaceSlidePlanTests {
             in: page
         )
         #expect(plates.map(\.pile) == [0, 0])
-        // The focus draws last in its tier, and alone carries one.
         #expect(plates.last?.id == WindowID(1))
-        #expect(plates.compactMap(\.iconPid) == [1])
+        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2])
     }
 
-    @Test("without the focus, the server's front-most member is the face")
-    func frontMostIsTheFace() {
+    @Test("without the focus, the server's front-most draws last")
+    func frontMostDrawsLast() {
         let a = CGRect(x: 0, y: 0, width: 600, height: 600)
         let b = CGRect(x: 100, y: 100, width: 600, height: 600)
         let plates = SpaceSlidePlan.plates(
@@ -93,13 +93,12 @@ struct SpaceSlidePlanTests {
             in: page
         )
         #expect(plates.map(\.id) == [WindowID(2), WindowID(1)])
-        #expect(plates.compactMap(\.iconPid) == [1])
     }
 
-    /// A float in front of the tiled focus in one pile: the draw
-    /// order puts the float last, yet the face is the focus.
-    @Test("the focus is the face even under a float")
-    func focusOutranksAFloatInFront() {
+    /// A float over the tiled focus's centre: both icons draw, the
+    /// focus's showing through the float's glass.
+    @Test("a float over the focus's icon leaves both icons")
+    func floatOverTheFocusIcon() {
         let tiled = CGRect(x: 0, y: 0, width: 600, height: 600)
         let float = CGRect(x: 100, y: 100, width: 300, height: 300)
         let plates = SpaceSlidePlan.plates(
@@ -112,7 +111,41 @@ struct SpaceSlidePlanTests {
             in: page
         )
         #expect(plates.last?.id == WindowID(2))
-        #expect(plates.compactMap(\.iconPid) == [1])
+        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2])
+    }
+
+    /// A float grazing the edges of two tiles chains them into one
+    /// pile for the glass; every plate keeps its own icon (#2837).
+    @Test("a float grazing tiles leaves their icons")
+    func grazingFloatKeepsTileIcons() {
+        let left = CGRect(x: 0, y: 0, width: 495, height: 800)
+        let right = CGRect(x: 505, y: 0, width: 495, height: 800)
+        let float = CGRect(x: 450, y: 600, width: 100, height: 120)
+        let plates = SpaceSlidePlan.plates(
+            [
+                entry(1, left, pid: 1),
+                entry(2, right, pid: 2),
+                entry(3, float, pid: 3, floating: true),
+            ],
+            focus: WindowID(3),
+            stack: [:],
+            in: page
+        )
+        #expect(Set(plates.map(\.pile)).count == 1)
+        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2, 3])
+    }
+
+    /// A plate too small for an icon carries no pid (#2837).
+    @Test("a plate with no room for an icon carries none")
+    func noRoomNoIcon() {
+        let plates = SpaceSlidePlan.plates(
+            [entry(1, CGRect(x: 0, y: 0, width: 60, height: 60))],
+            focus: nil,
+            stack: [:],
+            in: page
+        )
+        #expect(plates.count == 1)
+        #expect(plates.first?.iconPid == nil)
     }
 
     @Test("a window thin on one axis draws no plate")

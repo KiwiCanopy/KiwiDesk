@@ -135,12 +135,14 @@ extension KiwiCore {
         desktopMemory.stickyLeft = [:]
         desktopMemory.stickyReturn = nil
         desktopMemory.switchDepartures = [:]
+        desktopMemory.awayDestroyed = []
     }
 
     /// A window closed while away (#1146) leaves the memory too,
     /// or the next return owes a debt to a window that is gone.
     func retireDesktopFocus(of id: WindowID) {
         desktopMemory.switchDepartures[id] = nil
+        desktopMemory.awayDestroyed.remove(id)
         desktopMemory.lastHonoredOn = desktopMemory.lastHonoredOn.filter {
             $0.value != id
         }
@@ -165,6 +167,9 @@ extension KiwiCore {
             .removeValue(forKey: old)
         {
             desktopMemory.switchDepartures[new] = filed
+        }
+        if desktopMemory.awayDestroyed.remove(old) != nil {
+            desktopMemory.awayDestroyed.insert(new)
         }
         desktopMemory.lastHonoredOn = desktopMemory.lastHonoredOn
             .mapValues { $0 == old ? new : $0 }

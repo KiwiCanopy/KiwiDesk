@@ -69,6 +69,9 @@ final class DeferredTasks {
         /// Re-reads the away ledger against one per-Desktop
         /// census while it is non-empty (#1146).
         case awayCensus
+        /// Checks the away windows WindowServer reported destroyed
+        /// (#2660), outside the event port's drain.
+        case awayDestroyCheck
         /// Adopts the window an Open-or-Focus reach switched to
         /// (#1146). Its own slot for `desktopFollowReap`'s reason:
         /// a follow and a reach are one keystroke apart, and
@@ -134,7 +137,8 @@ final class DeferredTasks {
                 .adoptionHealWake, .lateSpawnFollow,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .barVisibilityRefresh,
-                .awayCensus, .menuBarRemeasure, .stripRecentre,
+                .awayCensus, .awayDestroyCheck, .menuBarRemeasure,
+                .stripRecentre,
                 .monitorSettle, .crossSessionSettle, .crossSessionClose,
                 .menuBarRevealReturn, .hyperRemap, .visionMask,
                 .visionHold, .pocketHold, .pocketLight, .pocketDwell,

@@ -218,7 +218,7 @@ struct ColorPaletteTests {
                 // is legal only there — the derived default
                 // palette carries both of them empty.
                 #expect(
-                    DragVisual.parseHex(hex) != nil
+                    HexColor.parse(hex) != nil
                         || (hex.isEmpty
                             && ColorPaletteKeys.allowsAutomatic(
                                 path

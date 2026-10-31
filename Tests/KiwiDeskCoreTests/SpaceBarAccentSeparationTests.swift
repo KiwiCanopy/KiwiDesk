@@ -42,14 +42,14 @@ struct SpaceBarAccentSeparationTests {
     private var style: SpaceBarLook { SpaceBarLook() }
 
     /// Both accents must be opaque for any of this to mean
-    /// anything: `parseHex` accepts `#RRGGBBAA`, and the Lua
+    /// anything: `HexColor.parse` accepts `#RRGGBBAA`, and the Lua
     /// setters route through it — so `"#C2790A11"` is a legal,
     /// effectively invisible value that would sail past every
     /// separation check below on its RGB alone.
     @Test("Both default accents are opaque")
     func defaultAccentsAreOpaque() throws {
         for hex in [style.activeItemColor, style.focusedItemColor] {
-            let rgb = try #require(DragVisual.parseHex(hex))
+            let rgb = try #require(HexColor.parse(hex))
             #expect(rgb.alpha == 1, Comment(rawValue: hex))
         }
     }
@@ -107,7 +107,7 @@ struct SpaceBarAccentSeparationTests {
     /// were previously only conventions: a bundled palette
     /// **defines both accent keys** (the inequality guard skips a
     /// palette that omits either, so an absent focused accent read
-    /// as compliance), and both are **opaque** — `parseHex`
+    /// as compliance), and both are **opaque** — `HexColor.parse`
     /// accepts `#RRGGBBAA`, and the catalog does use alpha for the
     /// muted item tier, so a translucent accent is a plausible
     /// slip that would clear the distance check on its RGB alone.
@@ -135,7 +135,7 @@ struct SpaceBarAccentSeparationTests {
                 continue
             }
             for hex in [active, focused] {
-                let rgb = DragVisual.parseHex(hex)
+                let rgb = HexColor.parse(hex)
                 #expect(
                     rgb?.alpha == 1,
                     Comment(rawValue: "\(name) \(hex) is not opaque")

@@ -11,9 +11,9 @@ extension Color {
     }
 
     /// Initializes SwiftUI Color from Kiwi hex string
-    /// (`DragVisual.parseHex`, #125).
+    /// (`HexColor.parse`, #125).
     init(kiwiHex hex: String) {
-        guard let c = DragVisual.parseHex(hex) else {
+        guard let c = HexColor.parse(hex) else {
             self = .clear
             return
         }

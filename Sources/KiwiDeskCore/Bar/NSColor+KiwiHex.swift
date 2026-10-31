@@ -48,9 +48,9 @@ extension NSColor {
     }
 
     /// Parses hex color string with fallback to controlAccentColor
-    /// (`DragVisual.parseHex`).
+    /// (`HexColor.parse`).
     convenience init(kiwiHex hex: String) {
-        guard let c = DragVisual.parseHex(hex) else {
+        guard let c = HexColor.parse(hex) else {
             self.init(
                 cgColor: NSColor.controlAccentColor.cgColor
             )!

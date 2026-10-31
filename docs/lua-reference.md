@@ -356,6 +356,12 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
+:::unreleased
+A window already in that space stays where it is: the call fails
+and a pill on the window says it is already there. The same holds
+for `move_to_space_and_follow`.
+:::
+
 If the target space is shown on **another screen**, a floating
 window is re-anchored onto that screen: it keeps its
 *proportional* position (a bottom-right float stays
@@ -5661,6 +5667,13 @@ badge where the floating badge goes and no sticky badge;
 [`space_bar.set_sticky_badge(false)`](#space_barset_sticky_badge)
 hides it with the others.
 
+:::unreleased
+Out of the pocket the mark sits inside the window's top-right
+corner, as the sticky and floating marks do, and the Space Bar's
+pocket badge takes the glyph's bottom-right corner, beside the
+floating badge.
+:::
+
 macOS focusing a pocketed window — `⌘-Tab` to its app, a Dock
 click, a notification — takes it out as a call would, and so do
 [`focus_window`](#focus_window) with its id and picking it with
@@ -5787,6 +5800,13 @@ sticky.set_color("#3D6FE8")  -- a blue sticky mark
 sticky.set_color("")          -- back to Automatic
 ```
 
+:::unreleased
+The color paints the sticky glyph itself, on the mark and on the
+Space Bar badge: the mark stays clear glass, or a neutral plate
+with Liquid Glass off, and the badge keeps the count-badge disc.
+`""` keeps the label ink.
+:::
+
 ### sticky.set_desktop_reach
 
 **Expects:** boolean (default `true`).
@@ -5824,6 +5844,12 @@ through the one **Liquid Glass** switch
 The floating mark draws the same way, tinted by
 [`floating.set_color`](#floatingset_color) where no sticky glyph
 shares its plate.
+
+:::unreleased
+The glass is frosted and untinted: a color goes on the glyph,
+never the glass, and the mark wears the same key-window rim as the
+bars.
+:::
 
 **Example:**
 
@@ -5870,6 +5896,11 @@ is Automatic; any non-empty value must parse as a hex color.
 ```lua
 floating.set_color("#8E5DE0")
 ```
+
+:::unreleased
+As for sticky, the color paints the floating glyph, on the mark
+and on the badge, beside a sticky glyph too.
+:::
 
 :::unreleased
 ### pocket.set_capacity

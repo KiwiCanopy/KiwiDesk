@@ -65,7 +65,8 @@ struct FloatingMarkOverlayTests {
         #expect(spec.glyphs.map(\.kind) == [.sticky, .floating])
     }
 
-    @Test("Each slot paints its own disc on the flat finish")
+    /// Each slot inks its own symbol on the flat finish (#2831).
+    @Test("Each slot paints its own symbol on the flat finish")
     func flatSlotColours() {
         let plate = StickyMarkPlate()
         let image = NSImage(
@@ -74,21 +75,20 @@ struct FloatingMarkOverlayTests {
         )
         plate.setMarkColor("#FF0000")
         plate.setInner(image, hex: "#00FF00")
-        #expect(!plate.roundel.isHidden)
-        #expect(!plate.innerRoundel.isHidden)
+        #expect(plate.symbol.contentTintColor == NSColor(kiwiHex: "#FF0000"))
         #expect(
-            plate.innerRoundel.layer?.backgroundColor
-                == NSColor(kiwiHex: "#00FF00").cgColor
+            plate.innerSymbol.contentTintColor
+                == NSColor(kiwiHex: "#00FF00")
         )
         plate.setInner(image, hex: "")
-        #expect(plate.innerRoundel.isHidden)
-        #expect(!plate.roundel.isHidden)
-        plate.setInner(nil, hex: "#00FF00")
-        #expect(plate.innerRoundel.isHidden)
+        #expect(plate.innerSymbol.contentTintColor == .labelColor)
+        #expect(plate.symbol.contentTintColor == NSColor(kiwiHex: "#FF0000"))
     }
 
-    @Test("Glass drops both discs and tints with the outer colour")
-    func glassTintsWithTheOuterColour() throws {
+    /// On glass each slot keeps its own symbol colour, and the
+    /// glass takes none (#2831).
+    @Test("Glass stays clear and each slot keeps its colour")
+    func glassKeepsSlotColours() throws {
         let plate = StickyMarkPlate()
         plate.setInner(
             NSImage(
@@ -100,10 +100,13 @@ struct FloatingMarkOverlayTests {
         plate.setMarkColor("#FF0000")
         plate.setGlass(true)
         try #require(plate.glass != nil, "no glass hosted")
-        #expect(plate.roundel.isHidden)
-        #expect(plate.innerRoundel.isHidden)
         #expect(plate.markHex == "#FF0000")
-        #expect(!plate.tint.isHidden)
+        #expect(plate.tint.gradient?.colors == nil)
+        #expect(plate.symbol.contentTintColor == NSColor(kiwiHex: "#FF0000"))
+        #expect(
+            plate.innerSymbol.contentTintColor
+                == NSColor(kiwiHex: "#00FF00")
+        )
     }
 
     @Test("A floating-only mark joins the watch set with no ring")

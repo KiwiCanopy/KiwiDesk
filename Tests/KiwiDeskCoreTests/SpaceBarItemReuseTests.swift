@@ -17,6 +17,7 @@ struct SpaceBarItemReuseTests {
         glyph: String? = nil,
         sticky: Bool = false,
         floating: Bool = false,
+        pocket: Bool = false,
         scope: StickyScope = .none
     ) -> SpaceBarItemView.App {
         var app = SpaceBarItemView.App(
@@ -29,6 +30,7 @@ struct SpaceBarItemReuseTests {
         )
         app.sticky = sticky
         app.floating = floating
+        app.pocket = pocket
         app.stickyScope = scope
         return app
     }
@@ -74,7 +76,7 @@ struct SpaceBarItemReuseTests {
         let view = Self.view()
         let apps = [
             Self.app(1), Self.app(2, glyph: "a"),
-            Self.app(3, sticky: true, floating: true),
+            Self.app(3, sticky: true, floating: true, pocket: true),
         ]
         Self.configure(view, apps: apps, active: true)
         // Minted badges ride above the outline (#2595).
@@ -83,6 +85,7 @@ struct SpaceBarItemReuseTests {
         let badges = view.badgeViews
         let sticky = view.stickyBadgeViews
         let floating = view.floatingBadgeViews
+        let pocket = view.pocketBadgeViews
         Self.configure(view, apps: apps, active: false)
         let keepsSubviews = Self.same(
             view.subviews + view.aboveOutline.subviews,
@@ -92,11 +95,14 @@ struct SpaceBarItemReuseTests {
         let keepsBadges = Self.same(view.badgeViews, badges)
         let keepsSticky = Self.same(view.stickyBadgeViews, sticky)
         let keepsFloating = Self.same(view.floatingBadgeViews, floating)
+        let keepsPocket = Self.same(view.pocketBadgeViews, pocket)
+        #expect(pocket.contains { $0 != nil })
         #expect(keepsSubviews)
         #expect(keepsGlyphs)
         #expect(keepsBadges)
         #expect(keepsSticky)
         #expect(keepsFloating)
+        #expect(keepsPocket)
     }
 
     @Test("A state badge stands only on an app wearing that state")
