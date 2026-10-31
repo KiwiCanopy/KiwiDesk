@@ -29,16 +29,25 @@ struct LookPlateDeskTests {
         }
     }
 
+    /// Each id names an installed app — an unknown id would draw
+    /// the generic icon and still be an icon — and draws one.
     @Test("a look drawing icons takes each app's own icon")
     @MainActor
     func iconsAreTheApps() {
         let art = LookPlate.appArt(.appImage)
-        #expect(art.count == 3)
-        for drawn in art {
-            guard case .icon = drawn else {
-                Issue.record("an app drew no icon")
+        #expect(art.count == LookPlate.apps.count)
+        for (drawn, app) in zip(art, LookPlate.apps) {
+            #expect(
+                NSWorkspace.shared.urlForApplication(
+                    withBundleIdentifier: app.bundleID
+                ) != nil,
+                "\(app.bundleID)"
+            )
+            guard case .icon(let image) = drawn else {
+                Issue.record("\(app.bundleID) drew no icon")
                 continue
             }
+            #expect(image.isValid)
         }
     }
 
@@ -64,7 +73,9 @@ struct LookPlateDeskTests {
     }
 
     /// The gallery's PNG is the one picture drawn at gallery size,
-    /// the one standing the pocket; every card takes the tile.
+    /// the one standing the pocket; every card takes the tile. It
+    /// matches a `size:` argument ending in `.gallery`, qualified or
+    /// not; a size held in a variable is review's.
     @Test("only the gallery's picture is drawn at gallery size")
     func onlyThePreviewIsTheGallery() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -73,10 +84,72 @@ struct LookPlateDeskTests {
         for file in try SourceScan.swiftSources(under: root) {
             let source = try SourceScan.strippedSource(at: file)
                 .filter { !$0.isWhitespace }
-            if source.contains("size:.gallery") {
+            let galleries = try NSRegularExpression(
+                pattern: #"size:[A-Za-z.]*\.gallery"#
+            ).numberOfMatches(
+                in: source,
+                range: NSRange(source.startIndex..., in: source)
+            )
+            if galleries > 0 {
                 standing.append(file.lastPathComponent)
             }
         }
         #expect(standing == ["CLIPreview.swift"])
+    }
+
+    /// An art item measures what `pipBody` draws along the bar —
+    /// the art and its padding — so the shelf's plan holds it
+    /// (bars.md ▸ the end inset its layout adds).
+    @Test("an art item's length is its art and padding")
+    @MainActor
+    func artLengthIsDrawn() throws {
+        let settings = TilingSettings()
+        let tile = HomeCardBarsTile(
+            settings: settings,
+            pocketStands: false,
+            scale: 0.62,
+            appArt: LookPlate.appArt(.appImage)
+        )
+        let host = try #require(settings.appBarHosts.first)
+        let spec = tile.appSpec(
+            settings.appBarLook(for: host),
+            vertical: false
+        )
+        let pad = HomeCardBarsTile.pipPad.horizontal * 0.62
+        #expect(
+            spec.items.allSatisfy {
+                abs($0.length - (spec.artSide + 2 * pad)) < 0.001
+            }
+        )
+    }
+
+    /// On an edge no bar shows, the gallery's pocket rests whole,
+    /// kept on the plate at either end of its Position, as Core's
+    /// handle band is (`ShelfMarkPlacement.bandStart`).
+    @Test("the whole pocket stays on the plate at Position 0 and 100")
+    @MainActor
+    func wholePocketStaysOnThePlate() {
+        var settings = TilingSettings()
+        settings.kiwishelf.pocketEdge = .bottom
+        settings.spaceBarStyle.setEdge(.top)
+        settings.appBarStyle.setEdge(.top)
+        let plate = CGSize(width: 230, height: 144)
+        for position: CGFloat in [0, 100] {
+            settings.kiwishelf.pocketPosition = position
+            let picture = LookPlate(
+                settings: settings,
+                spaceLabels: [],
+                size: .gallery
+            )
+            #expect(picture.pocketRest == .mark)
+            let side = PocketMarkGeometry.markSide(
+                depth: picture.lonePocketDepth
+            )
+            let x = picture.lonePocketCentre(in: plate).x
+            #expect(x >= side / 2 && x <= plate.width - side / 2)
+        }
+        #expect(
+            LookPlate(settings: settings, spaceLabels: []).pocketRest == nil
+        )
     }
 }

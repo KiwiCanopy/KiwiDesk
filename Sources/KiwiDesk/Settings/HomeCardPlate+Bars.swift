@@ -106,6 +106,11 @@ struct HomeCardBarsTile: View {
             / shelf.thickness
     }
 
+    /// A labelled pip's padding along a horizontal and a vertical
+    /// bar, at one `scale`: `BarStripView.pipBody` draws it and an
+    /// art item's length reads it.
+    static let pipPad = (horizontal: CGFloat(2.5), vertical: CGFloat(1.5))
+
     /// Schematic points per live point of an indicator: the
     /// frame draws the shipped 2 pt ring at one `scale`.
     static let indicatorPerPoint: CGFloat = 0.5

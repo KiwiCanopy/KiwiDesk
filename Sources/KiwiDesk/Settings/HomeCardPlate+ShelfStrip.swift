@@ -289,7 +289,9 @@ extension ShelfStripPreview {
     @ViewBuilder
     func pocketPiece(_ slot: ShelfArrangement.Slot?) -> some View {
         if let slot {
-            let side = min(slot.length, thickness) * 0.82
+            let side = PocketMarkGeometry.markSide(
+                depth: min(slot.length, thickness)
+            )
             Image(
                 nsImage: PocketMark.mark.image(size: side, hex: pocketHex)
             )

@@ -1,14 +1,11 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// A look's picture (#1740): a desk in the look — its bars on
-/// their edges with Finder, Safari and Mail in the App Bar, three
-/// windows at its gaps, the focused one ringed in its colour,
-/// sheen and glow — over a ground of its own shelf colour (owner,
-/// 2026-10-30, overturning the neutral plate for this picture).
-/// The shelf tile, Simple's Look line, onboarding and
-/// `kiwidesk preview` draw it; it reads no `NSApp`, environment
-/// object or live model, so `preview` renders it headless.
+/// A look's picture (#1740): a desk in the look — its bars with
+/// Finder, Safari and Mail, three windows at its gaps, the focused
+/// one in its ring — on its own shelf colour. The look tile,
+/// Simple's Look line, onboarding and `kiwidesk preview` draw it;
+/// headless, per gui.md ▸ The CLI's local verbs.
 struct LookPlate: View {
     /// The draft with the look painted on.
     let settings: TilingSettings
@@ -16,11 +13,9 @@ struct LookPlate: View {
     /// Where the picture is shown: a tile, or the gallery's PNG.
     var size = Size.tile
 
-    /// A tile keeps its bars large enough to read at 72 pt; the
-    /// gallery's taller canvas gives them a desk's share at their
-    /// font's own size, which has a floor no scale goes under, and
-    /// alone stands the pocket, which a tile has no room for (owner,
-    /// 2026-10-30; #2678 keeps it off the card).
+    /// The gallery draws on a taller canvas, so its bars take a
+    /// desk's share at their font's own size, and alone stands the
+    /// pocket, which a tile has no room for.
     enum Size {
         case tile, gallery
 
@@ -33,14 +28,12 @@ struct LookPlate: View {
         var drawsPocket: Bool { self == .gallery }
     }
 
-    private var drawsPocket: Bool { size.drawsPocket }
-
     var body: some View {
         ZStack {
             ground
             HomeCardBarsTile(
                 settings: settings,
-                pocketStands: drawsPocket,
+                pocketStands: pocketRest == .section,
                 spaceCount: spaceLabels.count,
                 scale: Self.barScale,
                 spaceLabels: spaceLabels,
@@ -53,7 +46,7 @@ struct LookPlate: View {
                 \.schematicPalette,
                 HomeCardPlate.palette(settings)
             )
-            if drawsPocket && !pocketOnABar {
+            if pocketRest == .mark {
                 lonePocket
             }
         }
@@ -70,56 +63,9 @@ struct LookPlate: View {
         .accessibilityHidden(true)
     }
 
-    /// Whether a bar sits on the pocket's edge, where the shelf's
-    /// strip stands it; elsewhere it rests whole on its own edge.
-    var pocketOnABar: Bool {
-        settings.barEdges(space: .always, app: .always).contains {
-            $0.edge == settings.kiwishelf.pocketEdge
-        }
-    }
-
-    /// The pocket resting whole on an edge no bar sits on, at its
-    /// Position along it, as the live pocket rests (#2784).
-    private var lonePocket: some View {
-        GeometryReader { plate in
-            let shelf = settings.kiwishelf
-            let side = Self.lonePocketSide * size.desk
-            let along = shelf.pocketPosition / 100
-            let inset = side / 2 + 2
-            let x: CGFloat =
-                switch shelf.pocketEdge {
-                case .left: inset
-                case .right: plate.size.width - inset
-                case .top, .bottom: plate.size.width * along
-                }
-            let y: CGFloat =
-                switch shelf.pocketEdge {
-                case .top: inset
-                case .bottom: plate.size.height - inset
-                case .left, .right: plate.size.height * along
-                }
-            Image(
-                nsImage: PocketMark.mark.image(
-                    size: side,
-                    hex: settings.pocketStyle.color
-                )
-            )
-            .position(x: x, y: y)
-        }
-    }
-
-    /// The lone pocket's side on the plate.
-    static let lonePocketSide = PaletteSceneThumbnail.baseHeight * 0.13
-
     /// The bars' scale on the picture: smaller than the Bars
     /// card's, so both bars and the pocket fit a tile's width.
     static let barScale: CGFloat = 0.62
-
-    /// The edge a lone pocket reserves its strip on, as the live
-    /// one does (#2801); nil where it stands on a bar or not at all.
-    var pocketReserve: AppBarEdge? {
-        drawsPocket && !pocketOnABar ? settings.kiwishelf.pocketEdge : nil
-    }
 
     /// The look's own shelf colour over a night, darkened a step,
     /// a faint haze of the focus colour from the top.

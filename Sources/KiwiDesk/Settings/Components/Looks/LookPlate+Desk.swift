@@ -29,7 +29,7 @@ struct LookDesk: View {
 
     /// The strip a lone pocket keeps clear on its edge.
     private var reserve: (edges: Edge.Set, depth: CGFloat) {
-        let depth = LookPlate.lonePocketSide * plate.size.desk
+        let depth = plate.lonePocketDepth
         switch plate.pocketReserve {
         case .top: return (.top, depth)
         case .bottom: return (.bottom, depth)
@@ -120,7 +120,26 @@ extension LookPlate {
         apps.map { app in
             source == .appFont && AppFont.font(size: 12) != nil
                 ? .appFont(app.ligature)
-                : .icon(AppIconCache.shared.icon(forBundleID: app.bundleID))
+                : .icon(icon(app.bundleID))
         }
     }
+
+    /// An app's icon as fixed pixels, made once: the system icon
+    /// draws lazily and can change between two renders in one
+    /// process, and a gallery PNG must draw the same bytes.
+    @MainActor private static func icon(_ bundleID: String) -> NSImage {
+        if let hit = icons[bundleID] { return hit }
+        let source = AppIconCache.shared.icon(forBundleID: bundleID)
+        var rect = CGRect(x: 0, y: 0, width: iconPixels, height: iconPixels)
+        let image =
+            source.cgImage(forProposedRect: &rect, context: nil, hints: nil)
+            .map { NSImage(cgImage: $0, size: source.size) } ?? source
+        icons[bundleID] = image
+        return image
+    }
+
+    @MainActor private static var icons: [String: NSImage] = [:]
+
+    /// The pixels an icon is fixed at: past the gallery's largest.
+    private static let iconPixels: CGFloat = 256
 }

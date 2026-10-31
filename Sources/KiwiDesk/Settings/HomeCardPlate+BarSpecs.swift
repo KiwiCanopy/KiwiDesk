@@ -69,10 +69,12 @@ extension HomeCardBarsTile {
             sheen: style.sheen,
             titleCap: style.resolvedTitleCap
         )
-        // An art item measures what it draws: the art and its
-        // padding, as `BarStripView.pipBody` lays it out.
+        // An art item measures what `BarStripView.pipBody` draws
+        // along the bar: the art and its padding; the end insets
+        // are `pipEndInsets`'.
+        let pad = vertical ? Self.pipPad.vertical : Self.pipPad.horizontal
         for index in spec.items.indices where spec.items[index].art != nil {
-            spec.items[index].length = spec.artSide + 8 * scale
+            spec.items[index].length = spec.artSide + 2 * pad * scale
         }
         return spec
     }
@@ -124,11 +126,12 @@ extension HomeCardBarsTile {
         ]
         if let appArt {
             return appArt.enumerated().map { index, art in
+                // `appSpec` sets the length once the font is known.
                 var item = BarItem(
                     color: index == 0
                         ? style.activeItemColor
                         : style.idleItemColor,
-                    length: 12 * scale
+                    length: 0
                 )
                 item.art = art
                 item.active = index == 0

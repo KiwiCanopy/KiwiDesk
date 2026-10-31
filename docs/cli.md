@@ -317,12 +317,13 @@ Then add a connector in ChatGPT whose connection is that tunnel.
 :::unreleased
 `kiwidesk preview <look.json> <out.png>` draws an exported look
 file as a 768 × 480 PNG: the picture its tile in Looks &
-Animations shows, painted over the default settings on four Spaces
-in dark mode, with the pocket on the Space Bar's edge unless the
-look sets its own. It reads the file as Import… does and needs no
-running app. The App Bar's Finder, Safari and Mail icons are this
-Mac's own. A font family the Mac lacks draws as `"System"`, as on
-the bars
+Animations shows, drawn larger and with the pocket standing on the
+Space Bar's edge unless the look sets its own, over the default
+settings on four Spaces in dark mode. It reads the file as Import…
+does and needs no running app. Finder, Safari and Mail in the App
+Bar take this Mac's own icons, unless the look draws App Font
+symbols, so the PNG can differ between macOS versions. A font
+family the Mac lacks draws as `"System"`, as on the bars
 ([`kiwishelf.set_font_family`](lua-reference.md#kiwishelfset_font_family)).
 
 ```sh

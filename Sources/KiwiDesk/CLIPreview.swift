@@ -80,7 +80,7 @@ enum CLIPreview {
     static func desk(_ look: ShelfLook) -> GuiConfig {
         var config = GuiConfig()
         var base = TilingSettings()
-        base.kiwishelf.pocketEdge = base.spaceBarStyle.edge
+        base.restPocketWithTheSpaceBar()
         config.settings = look.painted(over: base)
         config.spaces = (1...4).map { SpaceID($0) }
         return config

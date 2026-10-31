@@ -158,8 +158,11 @@ struct BarStripView: View {
                 iconAndTitle(item, slotHolder: false)
             }
             .foregroundStyle(Color(kiwiHex: item.color))
-            .padding(.horizontal, 2.5 * scale)
-            .padding(.vertical, 1.5 * scale)
+            .padding(
+                .horizontal,
+                HomeCardBarsTile.pipPad.horizontal * scale
+            )
+            .padding(.vertical, HomeCardBarsTile.pipPad.vertical * scale)
             // Rounded ends pad the axis, as the live item (#1763).
             .padding(
                 vertical ? .vertical : .horizontal,
@@ -270,7 +273,7 @@ extension HomeCardBarsTile.BarSpec {
     }
 
     /// What a run's pips add along the axis for their rounded
-    /// ends: each pip drawing a label or a glyph, both ends.
+    /// ends: each pip drawing a label, a glyph or art, both ends.
     func pipEndInsets(scale: CGFloat) -> CGFloat {
         let labelled = items.filter {
             $0.label != nil || $0.glyph != nil || $0.art != nil

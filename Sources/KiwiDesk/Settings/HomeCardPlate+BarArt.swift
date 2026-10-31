@@ -1,4 +1,3 @@
-import CoreText
 import KiwiDeskCore
 import SwiftUI
 
@@ -19,22 +18,12 @@ extension BarStripView {
             if let font = AppFont.font(size: side * 0.85) {
                 Text(ligature).font(Font(font))
                     .fixedSize()
-                    .offset(x: Self.inkShift(ligature, font))
+                    .offset(
+                        x: BarTextGlyph.inkCentringShift(ligature, font: font)
+                    )
                     .frame(width: side, height: side)
             }
         }
-    }
-
-    /// How far to move a ligature so its INK centres on its frame,
-    /// as the live bar's `BarTextGlyph` places it: an App Font
-    /// glyph's slack sits on its trailing side (#1529).
-    static func inkShift(_ ligature: String, _ font: NSFont) -> CGFloat {
-        let line = CTLineCreateWithAttributedString(
-            NSAttributedString(string: ligature, attributes: [.font: font])
-        )
-        let advance = CTLineGetTypographicBounds(line, nil, nil, nil)
-        let ink = CTLineGetBoundsWithOptions(line, .useGlyphPathBounds)
-        return advance / 2 - ink.midX
     }
 }
 

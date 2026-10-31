@@ -4,7 +4,7 @@ import CoreGraphics
 /// of the side it stands in, and the room its lit edge and lift
 /// spill past it. The shelf's placement, the risen size and the
 /// view read it.
-enum PocketMarkGeometry {
+public enum PocketMarkGeometry {
     /// The mark's side as a share of the side it stands in.
     static let markShare = BriefPocketPlan.markSide / BriefPocketPlan.side
     /// The lit edge's two blurs, as shares of the mark's side: a
@@ -18,7 +18,9 @@ enum PocketMarkGeometry {
     static var handleDepth: CGFloat { KiwiShelf.hiddenDepth }
 
     /// The mark's side in a slot `depth` deep.
-    static func markSide(depth: CGFloat) -> CGFloat { depth * markShare }
+    public static func markSide(depth: CGFloat) -> CGFloat {
+        depth * markShare
+    }
 
     /// How far a lit, lifted mark `side` long reaches past it on
     /// each side.
