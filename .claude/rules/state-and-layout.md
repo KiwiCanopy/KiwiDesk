@@ -754,8 +754,9 @@ editing here:
     at its hand-off, swallows the pocketing's own echo
     (`PocketCommandTests` ▸ `activationTakesOut`).
   - **A pocket press moves state focus at once where a window can
-    take it, and raises when its brief pocket ends (#2703)**, so for
-    one play the key window is not the state's. The one
+    take it, and raises once its brief pocket's plate has flown
+    (#2703) — a put-in at the play's end, a take-out as its window
+    lands**, so for one play the key window is not the state's. The one
     `handPocketFocus` pays the raise, through `focusWindow` handed
     as `leaving` the anchor the press read before its write, so its
     changed-focus arms decide as an immediate hand-off would; a new

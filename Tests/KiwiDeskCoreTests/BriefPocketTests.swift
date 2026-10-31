@@ -179,7 +179,7 @@ struct BriefPocketTests {
         #expect(next.map { raised(core, $0) } == true)
     }
 
-    @Test("taking out raises the window once the play ends")
+    @Test("taking out raises the window once the plate flies")
     func takeOutRaiseWaits() async {
         guard NSScreen.main != nil else { return }
         let core = raisingCore()
@@ -190,6 +190,33 @@ struct BriefPocketTests {
         #expect(core.execute("pocket").isSuccess)
         #expect(!raised(core, one))
         await core.deferred.task(for: .pocketFocus)?.value
+        #expect(raised(core, one))
+    }
+
+    /// A take-out raises as its window lands, under the plate's
+    /// fade, never after the plate is gone, when it would show
+    /// behind the window it came out over.
+    @Test("taking out raises as the window lands, not at the play's end")
+    func takeOutRaisesAtLanding() async {
+        guard NSScreen.main != nil else { return }
+        let core = raisingCore()
+        core.deferred.sleep = { _ in }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        core.briefPocket.end()
+        let waits = Waits()
+        core.deferred.sleep = { waits.append($0) }
+        #expect(core.execute("pocket").isSuccess)
+        await core.deferred.task(for: .pocketFocus)?.value
+        let timeline = BriefPocketPlan.timeline(
+            .outOf,
+            flight: BriefPocketPlan.flight(
+                durationMS: core.tiler.settings.animations.durationMS
+            )
+        )
+        // Only the hand-off waits for the landing; the pocket's own
+        // hold waits for the play's end.
+        #expect(waits.all.contains(.seconds(timeline.flightEnd)))
         #expect(raised(core, one))
     }
 
@@ -301,5 +328,14 @@ struct BriefPocketTests {
 
     private final class Flight: @unchecked Sendable {
         var landed = false
+    }
+
+    private final class Waits: @unchecked Sendable {
+        private let lock = NSLock()
+        private var waits: [Duration] = []
+        var all: [Duration] { lock.withLock { waits } }
+        func append(_ wait: Duration) {
+            lock.withLock { waits.append(wait) }
+        }
     }
 }

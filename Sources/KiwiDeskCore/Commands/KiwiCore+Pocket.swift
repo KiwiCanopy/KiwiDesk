@@ -174,7 +174,9 @@ extension KiwiCore {
         }
         refreshStickyReach()
         retile(stateChange: id)
-        handPocketFocus(after: play?.end, leaving: cameFrom) {
+        // Raised as it lands, under the plate's fade, so it never
+        // shows behind the window it came out over.
+        handPocketFocus(after: play?.flightEnd, leaving: cameFrom) {
             [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
             else { return }

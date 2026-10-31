@@ -74,9 +74,9 @@ extension KiwiCore {
         return timeline
     }
 
-    /// Pays a pocket press's focus hand-off `hand` once the play
-    /// `ends` seconds on is over, so no app activates while the
-    /// plate draws (#2703); at once where nothing plays. A later
+    /// Pays a pocket press's focus hand-off `hand` `ends` seconds
+    /// on, so no app activates while the plate flies (#2703); at
+    /// once where nothing plays. A later
     /// press replaces it, a nil `hand` only cancels, and it is
     /// dropped where the state focus or the Space moved meanwhile —
     /// save a move back onto `left`, the window a take-out left,
