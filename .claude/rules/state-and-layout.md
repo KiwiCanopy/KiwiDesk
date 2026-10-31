@@ -763,7 +763,10 @@ editing here:
     as its window lands, so it rises under the plate's fade
     rather than showing behind the window it came out over — at
     the cost of an activation inside the last 0.2 s of that play,
-    the plate's fade and the pocket's lift (#2845)
+    the plate's fade and the pocket's lift (#2845). A take-out's
+    raise and its held write share `handOff` unordered, so a slow
+    app may front its park corner until the write lands; a change
+    that orders or separates them keeps the write first
     (`BriefPocketPlanTests`, `BriefPocketTests` ▸
     `putInRaiseWaits`, `takeOutRaiseWaits`,
     `takeOutRaisesAtLanding`). The one

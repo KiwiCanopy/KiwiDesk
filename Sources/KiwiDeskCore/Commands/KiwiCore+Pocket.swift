@@ -174,9 +174,8 @@ extension KiwiCore {
         }
         refreshStickyReach()
         retile(stateChange: id)
-        // Raised as it lands, under the plate's fade (#2845). The
-        // held write and the raise share that deadline unordered: a
-        // slow app may front its park corner until the write lands.
+        // Raised as it lands, under the plate's fade, sharing the
+        // held write's deadline unordered (#2845).
         handPocketFocus(after: play?.handOff, leaving: cameFrom) {
             [weak self] in
             guard let self, self.state.pocketPhase(of: id) == .out
