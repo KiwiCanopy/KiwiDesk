@@ -80,7 +80,7 @@ extension GeneralSection {
             ) {
                 switch model.readBackupToRestore() {
                 case .success(let bundle):
-                    pendingRestore = bundle
+                    confirmRestore(bundle)
                 case .failure(let error):
                     backupError = error
                 case nil:
@@ -97,61 +97,20 @@ extension GeneralSection {
             SettingsCatalog.general.generalAdvanced.children
                 .restoreBackup
         )
-        // Built from the bundle it will apply, handed over by
-        // `presenting:` (#843's shape). Its own dialog rather than
-        // the shared `discardingEdits` gate: that gate fires only
-        // while `isDirty`, and this must confirm every time — the
-        // message names BOTH consequences, saved data replaced and
-        // unsaved draft dropped.
-        .confirmationDialog(
-            L(
-                "general.advanced.backup.restore.confirm.title",
-                "Restore from this backup?"
-            ),
-            isPresented: restoreConfirmBinding,
-            titleVisibility: .visible,
-            presenting: pendingRestore
-        ) { bundle in
-            let choices = model.core.restoreChoices(for: bundle)
-            if choices.plain {
-                Button(SetupBackupText.restoreLabel, role: .destructive) {
-                    backupError = model.restoreBackup(
-                        bundle,
-                        replacingInitLua: false
-                    )
-                    pendingRestore = nil
-                }
-            }
-            if choices.withInitLua {
-                Button(
-                    SetupBackupText.restoreWithInitLuaLabel,
-                    role: .destructive
-                ) {
-                    backupError = model.restoreBackup(
-                        bundle,
-                        replacingInitLua: true
-                    )
-                    pendingRestore = nil
-                }
-            }
-            Button(
-                L("spaces.delete_confirm.cancel", "Cancel"),
-                role: .cancel
-            ) { pendingRestore = nil }
-        } message: { bundle in
-            Text(
-                SetupBackupText.restoreMessage(
-                    model.core.restoreChoices(for: bundle)
-                )
-            )
-        }
     }
 
-    /// Presents confirmation dialog while pending restore bundle exists.
-    private var restoreConfirmBinding: Binding<Bool> {
-        Binding(
-            get: { pendingRestore != nil },
-            set: { if !$0 { pendingRestore = nil } }
-        )
+    /// Asks every time, never through `discardingEdits`, which
+    /// fires only while dirty: the message names both
+    /// consequences, saved data replaced and the draft dropped.
+    private func confirmRestore(_ bundle: SetupBundle) {
+        RestoreConfirm.ask(
+            model.core.restoreChoices(for: bundle),
+            over: NSApp.keyWindow
+        ) { replacingInitLua in
+            backupError = model.restoreBackup(
+                bundle,
+                replacingInitLua: replacingInitLua
+            )
+        }
     }
 }

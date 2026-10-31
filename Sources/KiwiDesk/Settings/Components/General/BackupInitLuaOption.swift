@@ -1,10 +1,11 @@
 import AppKit
 import KiwiDeskCore
 
-/// The export panel's "Include init.lua" checkbox (#2517): off
-/// every time, greyed with its reason where this Mac has no
-/// init.lua, and captioned where init.lua owns the settings, since
-/// a backup without it then leaves them out. A stock checkbox, so
+/// The "Include init.lua" checkbox of the export panel (#2517)
+/// and the restore confirm (#2730): off every time, greyed with
+/// its reason where this Mac has no init.lua, and captioned where
+/// init.lua owns the settings, since a backup without it then
+/// leaves them out. A stock checkbox, so
 /// focus, keyboard and VoiceOver are AppKit's.
 @MainActor
 final class BackupInitLuaOption {
@@ -15,10 +16,7 @@ final class BackupInitLuaOption {
 
     init(hasInitLua: Bool, luaOwned: Bool) {
         checkbox = NSButton(
-            checkboxWithTitle: L(
-                "general.advanced.backup.export.include_init_lua",
-                "Include init.lua"
-            ),
+            checkboxWithTitle: Self.label,
             target: nil,
             action: nil
         )
@@ -45,6 +43,15 @@ final class BackupInitLuaOption {
             right: 16
         )
         view = stack
+    }
+
+    /// The checkbox's title, which the restore confirm's message
+    /// names (#2730).
+    static var label: String {
+        L(
+            "general.advanced.backup.export.include_init_lua",
+            "Include init.lua"
+        )
     }
 
     /// Why the box is greyed, or what leaving it off costs.
