@@ -1056,11 +1056,15 @@ editing here:
   the one `floatIsDrawn` verdict, which the raise reads through
   `drawnFloatTargets` and the per-focus gate directly;
   `floatLayerTargets` never asks it, so the target set stays a
-  pure state filter. The verdict is read live per raise through
-  the watch's `readWindowBounds` seam, never a fact cached at
+  pure state filter. The verdict is read live through the
+  watch's `readWindowBounds` seam, never a fact cached at
   adoption, so a float that grows is lifted on its next focus; a
   read with no answer keeps the window
   (`FloatRaiseVisibilityTests`, `FloatRaiseVisibilitySeamTests`).
+  **The empty-switch Finder yield stands down for exactly the
+  floats the raise lifts**, read through `drawnFloatTargets`,
+  never a filter beside it: an undrawn float takes no raise and
+  is no focus recipient (#2850, `EmptySwitchYieldVisibilityTests`).
 - A mutation that can change **which windows overlap** — a
   reorder, a swap, a focus move that crosses more than one slot —
   **arms the matching z-order restore after its own retile**
