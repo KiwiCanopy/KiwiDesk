@@ -52,6 +52,7 @@ extension SpaceBarItemView {
             )
             let badges: [[NSView?]] = [
                 badgeViews, stickyBadgeViews, floatingBadgeViews,
+                pocketBadgeViews,
             ]
             let parts =
                 [glyph]

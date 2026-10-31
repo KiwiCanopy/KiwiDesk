@@ -31,6 +31,8 @@ extension SpaceBarItemView {
             stickyBadgeViews = []
             floatingBadgeViews.forEach { $0?.removeFromSuperview() }
             floatingBadgeViews = []
+            pocketBadgeViews.forEach { $0?.removeFromSuperview() }
+            pocketBadgeViews = []
         }
         syncGlyphs()
         syncCountBadges()
@@ -41,9 +43,12 @@ extension SpaceBarItemView {
                 : nil
         }
         floatingBadgeViews = syncStateBadges(floatingBadgeViews) {
-            guard style.stickyBadge else { return nil }
-            if $0.pocket { return StateBadgeView.pocketName }
-            return $0.floating ? Self.floatingSymbol : nil
+            style.stickyBadge && $0.floating ? Self.floatingSymbol : nil
+        }
+        // The pocket owns its corner, beside floating (#2831 part 3).
+        pocketBadgeViews = syncStateBadges(pocketBadgeViews) {
+            style.stickyBadge && $0.pocket
+                ? StateBadgeView.pocketName : nil
         }
     }
 

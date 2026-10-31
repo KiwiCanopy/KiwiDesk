@@ -242,7 +242,7 @@ struct PocketMarkColorTests {
             )
         )
         view.layout()
-        let badge = try #require(view.floatingBadgeViews.first ?? nil)
+        let badge = try #require(view.pocketBadgeViews.first ?? nil)
         #expect(badge.symbolName == StateBadgeView.pocketName)
         // The pocket takes the colour; the disc stays the count
         // badge's own, as the window mark's plate stays untinted.

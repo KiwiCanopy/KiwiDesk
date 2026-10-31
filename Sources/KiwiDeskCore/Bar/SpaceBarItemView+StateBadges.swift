@@ -20,12 +20,20 @@ extension SpaceBarItemView {
             if index < floatingBadgeViews.count,
                 let badge = floatingBadgeViews[index]
             {
-                // The pocket badge takes the float badge's slot and
-                // its own colour (#2446, #2671).
                 applyStateBadge(
                     badge,
                     markHex: stateMarkColors.floating,
-                    pocketHex: app.pocket ? stateMarkColors.pocket : nil,
+                    appFocused: app.focused
+                )
+            }
+            if index < pocketBadgeViews.count,
+                let badge = pocketBadgeViews[index]
+            {
+                // Its own colour on its pocket (#2671).
+                applyStateBadge(
+                    badge,
+                    markHex: "",
+                    pocketHex: stateMarkColors.pocket,
                     appFocused: app.focused
                 )
             }

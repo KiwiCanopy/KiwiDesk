@@ -92,6 +92,8 @@ final class StickyMarkOverlay {
     /// (#1621).
     func setGlass(_ on: Bool) {
         plate.setGlass(on)
+        // Its glass wears the key-window rim, always (#2831).
+        (panel as? ActiveGlassPanel)?.wearsActiveLook = plate.isGlass
     }
 
     /// Sets the glyphs, outermost first, with their colours (#445,
@@ -274,21 +276,23 @@ final class StickyMarkOverlay {
 
         /// Test-only: the panel's content view.
         var panelContentForTest: NSView? { panel?.contentView }
+
+        /// Test-only: the panel itself.
+        var panelForTest: NSPanel? { panel }
     #endif
 
     private func markRect(
         for frame: CGRect,
         width: CGFloat
     ) -> CGRect {
-        var mark = CGRect(
+        // Every mark, the pocket's included, at the inset corner
+        // (#2831 part 4).
+        let mark = CGRect(
             x: frame.maxX - width - Self.inset,
             y: frame.minY + Self.inset,
             width: width,
             height: Self.size
         )
-        if glyphs.first?.kind == .pocket {
-            mark = Self.overCorner(of: frame, width: width)
-        }
         return GeometryUtils.flip(
             mark,
             primaryHeight: GeometryUtils.primaryHeight
@@ -296,7 +300,7 @@ final class StickyMarkOverlay {
     }
 
     private func makePanel() -> NSPanel {
-        let panel = NSPanel(
+        let panel = ActiveGlassPanel(
             contentRect: CGRect(
                 x: 0,
                 y: 0,
@@ -307,6 +311,7 @@ final class StickyMarkOverlay {
             backing: .buffered,
             defer: true
         )
+        panel.wearsActiveLook = plate.isGlass
         panel.isOpaque = false
         panel.backgroundColor = .clear
         panel.hasShadow = false
