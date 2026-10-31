@@ -9806,6 +9806,12 @@ reading the desktop picture raised a macOS folder-access prompt
 (measured 2026-10-05, #1685 ▸ Ruling 6b). A wallpaper-colour verb
 reopens this only with a read that raises no prompt.
 
+The looks gallery names and links a look's wallpaper, never hosts
+it (#2838, owner 2026-10-31). A look is shared under CC BY 4.0, and
+a wallpaper is rarely the submitter's to license, often a personal
+photo, and larger than the repo should carry; the link goes to the
+page it comes from, the way a look's font link does.
+
 ### Open at login
 
 **[Principle]**
