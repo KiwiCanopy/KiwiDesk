@@ -45,4 +45,30 @@ extension PocketPlateOverlay {
         shown.panel?.orderOut(nil)
         if shown.view.dropHover() { hovered.remove(display) }
     }
+
+    /// Sizes `shown` to `spec`'s frame, or once a peek taken back has
+    /// had its `hoverGrow` where `peekLands`; a later show drops that
+    /// landing (#2807).
+    func hold(_ shown: Shown, at spec: Spec, until peekLands: Bool) {
+        let token = UUID()
+        peekHolds[spec.display] = peekLands ? token : nil
+        guard peekLands else {
+            Self.place(shown, at: spec.frame)
+            return
+        }
+        afterLeave(BarMotion.hoverGrow) { [weak self] in
+            guard let self, self.peekHolds[spec.display] == token else {
+                return
+            }
+            self.peekHolds[spec.display] = nil
+            Self.place(shown, at: spec.frame)
+        }
+    }
+
+    /// Sizes a handle's panel, and its view, to `frame`.
+    static func place(_ shown: Shown, at frame: CGRect) {
+        guard let panel = shown.panel else { return }
+        if panel.frame != frame { panel.setFrame(frame, display: false) }
+        shown.view.frame = CGRect(origin: .zero, size: frame.size)
+    }
 }

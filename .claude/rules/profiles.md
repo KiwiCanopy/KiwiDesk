@@ -1811,13 +1811,17 @@ clean draft re-reads, a dirty one takes each rule the keep changed
 on its page on both sides of its diff (`AppRuleKeepTests`,
 `RuleKeepDraftTests`).
 
-**The look checklist is that door's sibling, with the same
-obligations (#1752).** "Look applies to" reaches every profile it
-names, so a Save writes each switch through the one
-`KiwiCore.saveLookReach`: only a switch that changed is written,
-a profile going own freezes the look it wears into its file, the
-writes are non-adopting, and it runs before any `gui.json` write
-of the same Save (`LookReachTests`). A follower's look itself is
+**The look switch is that door's sibling, with the same
+obligations (#1752, #2820).** The page's Shared or own switch
+writes at once through the one `KiwiCore.saveLookReach`, and only
+while nothing is unsaved — no draft edit and no live change left
+unkept (`SettingsModel.lookSwitchHeld`, `LookReachModelTests`):
+only a switch that changed is written, a profile going own freezes
+the look it wears into its file, a profile made the shared look's
+source lands the look the page shows through `landSharedLook` (its
+`sharing` argument), and the writes are non-adopting. A switch
+staged in the draft is written by the Save doors before any
+`gui.json` write of that Save (`LookReachTests`). A follower's look itself is
 the shared one, so a write of it lands in `gui.json` through the
 one `recordLookWrite` door (`SharedLookWriteTests`), and a
 reader of a stored profile's settings for use takes

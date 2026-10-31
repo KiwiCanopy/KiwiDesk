@@ -20,8 +20,13 @@ extension KiwiCore {
     /// The risen mark's largest side.
     static let pocketRiseMarkCap: CGFloat = 32
 
-    /// The handle's frame on `display` (AX), risen or at rest.
-    func pocketHandleFrame(on display: DisplayID, risen: Bool) -> CGRect? {
+    /// The handle's frame on `display` (AX), risen or at rest, a
+    /// peek deeper while `peeking`.
+    func pocketHandleFrame(
+        on display: DisplayID,
+        risen: Bool,
+        peeking: Bool = false
+    ) -> CGRect? {
         let shelf = tiler.settings.kiwishelf
         // Reaching the edge across the outer margin, as the bars'
         // hover bands do; the handle draws past it (#2678).
@@ -31,7 +36,8 @@ extension KiwiCore {
                 + (risen
                     ? PocketHandleView.tabDepth + PocketPlateView.lift
                         + Self.pocketRiseSide(thickness: shelf.thickness)
-                    : PocketHandleView.restDepth)
+                    : PocketHandleView.restDepth
+                        + (peeking ? PocketHandleView.peekDepth : 0))
         )
     }
 
@@ -211,7 +217,8 @@ extension KiwiCore {
         }
     }
 
-    /// The pointer came onto `display`'s handle or left it.
+    /// The pointer came onto `display`'s handle or left it. On it,
+    /// the pocket rises after the bars' reveal delay (#2807).
     func pocketHovered(_ display: DisplayID, _ on: Bool) {
         let was = pocketPlate.hovered.contains(display)
         guard was != on else { return }
@@ -220,6 +227,27 @@ extension KiwiCore {
         } else {
             pocketPlate.hovered.remove(display)
         }
+        // Only a handle rises; a section's hover lights it alone.
+        if on, pocketPlace(on: display) == .handle {
+            deferred.schedule(
+                .pocketDwell,
+                after: .seconds(ShelfReveal.revealDelay)
+            ) { [weak self] in
+                guard let self, self.pocketPlate.hovered.contains(display)
+                else { return }
+                self.pocketPlate.dwelled.insert(display)
+                self.updatePocketPlate()
+            }
+        }
+        updatePocketPlate()
+    }
+
+    /// The pointer pushed against the edge on `display`'s handle: the
+    /// pocket rises at once, as a push opens a bar.
+    func pocketPushed(_ display: DisplayID) {
+        guard pocketPlate.hovered.contains(display),
+            pocketPlate.dwelled.insert(display).inserted
+        else { return }
         updatePocketPlate()
     }
 }

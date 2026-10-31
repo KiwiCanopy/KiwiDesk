@@ -82,8 +82,7 @@ enum GlassActiveAppearance {
     }
 }
 
-/// A plate's panel — the cue plates' and the Space-switch slide
-/// plates' — whose glass wears the key-window look while
+/// A plate's panel, whose glass wears the key-window look while
 /// `wearsActiveLook` holds (#2569 ▸ the toggle). The one panel
 /// class outside Core's own list that answers; never `NSPanel`.
 public final class ActiveGlassPanel: NSPanel {

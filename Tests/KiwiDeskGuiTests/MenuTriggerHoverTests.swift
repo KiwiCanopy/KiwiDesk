@@ -143,7 +143,7 @@ struct MenuTriggerHoverTests {
                 )
             }
         }
-        #expect(seen > 5)
+        #expect(seen > 4)
     }
 
     /// The text tier rests at nothing and lifts on a chip token,

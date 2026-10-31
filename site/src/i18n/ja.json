@@ -568,6 +568,7 @@
   "looks_added_on": "{date} に追加",
   "looks_updated_on": "{date} に更新 · バージョン {n}",
   "looks_font": "フォント: {font}",
+  "looks_wallpaper": "壁紙: {name}",
   "looks_font_system": "システム",
   "looks_font_system_mono": "システム等幅",
   "looks_inspired_by": "{palette} から着想",

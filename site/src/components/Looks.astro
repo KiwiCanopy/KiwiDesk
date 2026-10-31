@@ -114,6 +114,7 @@ const haystack = (l: Look): string =>
       l.sketch?.font ?? "",
       ...l.needsFonts,
       l.inspiredBy ?? "",
+      l.wallpaper?.name ?? "",
     ].join(" "),
   );
 
@@ -140,6 +141,12 @@ const needsFontHtml = (l: Look, font: string): string => {
   return l.fontUrl
     ? `${line} · ${link(l.fontUrl, esc(t("looks_get_font")))}`
     : line;
+};
+const wallpaperHtml = (l: Look): string | null => {
+  const w = l.wallpaper;
+  if (!w) return null;
+  const name = w.url ? link(w.url, esc(w.name)) : esc(w.name);
+  return h("looks_wallpaper", { name });
 };
 const likeAria = (l: Look): string =>
   l.likes > 0
@@ -338,6 +345,7 @@ const MAX_CARD_TAGS = 4;
       const credit = creditHtml(look);
       const action = mainAction(look);
       const font = fontOf(look);
+      const wallpaper = wallpaperHtml(look);
       const derived = look.builtOn
         .map((id) => byId.get(id))
         .filter((l): l is Look => !!l);
@@ -401,6 +409,7 @@ const MAX_CARD_TAGS = 4;
             )}
             <li>{dateLine(look)}</li>
             {font && <li>{f("looks_font", { font })}</li>}
+            {wallpaper && <li set:html={wallpaper} />}
           </ul>
           {look.needsFonts.map((name) => (
             <p class="needs" set:html={needsFontHtml(look, name)} />

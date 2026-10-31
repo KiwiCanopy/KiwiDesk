@@ -98,24 +98,30 @@ extension KiwiCore {
             display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
             let place = pocketPlace(on: display.id)
-            // A handle's pocket rises out of it on hover, during a drag
-            // or a play, and while its list is open (#2678).
+            // A handle's pocket rises out of it after a dwell or a push,
+            // during a drag or a play, and while its list is open
+            // (#2678); the pointer on it alone peeks its kiwis (#2807).
+            let hovered = pocketPlate.hovered.contains(display.id)
             let risen =
                 place == .handle
-                && (dragging || pocketPlate.hovered.contains(display.id)
+                && (dragging || pocketPlate.dwelled.contains(display.id)
                     || pocketPlate.playing[display.id] != nil
                     || listed == display.id)
+            let peeking = place == .handle && hovered && !risen
             let found: CGRect? =
                 switch place {
                 case .section(let frame), .inside(let frame): frame
                 case .whole: pocketMarkFrame(on: display.id)
-                case .handle: pocketHandleFrame(on: display.id, risen: risen)
+                case .handle:
+                    pocketHandleFrame(
+                        on: display.id,
+                        risen: risen,
+                        peeking: peeking
+                    )
                 }
             guard let frame = found else { return nil }
             // A lit pocket shows full, empty or not (#2776).
-            let lit =
-                pocketPlate.dropHovered == display.id
-                || pocketPlate.hovered.contains(display.id)
+            let lit = pocketPlate.dropHovered == display.id || hovered
             return PocketPlateOverlay.Spec(
                 display: display.id,
                 windows: inside,
@@ -132,6 +138,7 @@ extension KiwiCore {
                 // handle on, with none drawn.
                 handle: place.isSection ? nil : edge,
                 risen: risen,
+                peeking: peeking,
                 risenSide: rise,
                 // Inside the strip the mark stands at its frame's edge.
                 outer: Self.pocketOuter(place, shelf: shelf),
@@ -167,6 +174,9 @@ extension KiwiCore {
         }
         pocketPlate.onHover = { [weak self] display, on in
             self?.pocketHovered(display, on)
+        }
+        pocketPlate.onPush = { [weak self] display in
+            self?.pocketPushed(display)
         }
         pocketPlate.onListChanged = { [weak self] in
             self?.updatePocketPlate()
