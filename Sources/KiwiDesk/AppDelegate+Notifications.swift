@@ -3,7 +3,8 @@ import KiwiDeskCore
 @preconcurrency import UserNotifications
 import os
 
-/// The bare-binary fallback's line; `NSLog` is redacted (#2835).
+/// The bare-binary fallback's line. Interpolate `privacy: .public`,
+/// or macOS redacts the value, as it does all of `NSLog` (#2835).
 private let notificationLog = Logger(
     subsystem: KiwiLog.subsystem,
     category: "notifications"

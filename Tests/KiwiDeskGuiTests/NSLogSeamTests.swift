@@ -6,8 +6,9 @@ import Testing
 /// diagnostic fires and a capture reads nothing. A line writes
 /// through an `os.Logger` with a `privacy: .public` interpolation
 /// (core-boundaries.md ▸ the log seam). Scans every target under
-/// `Sources/`, comments and literals stripped. The needle is the
-/// bare identifier, so `NSLogv` and a spaced `NSLog (` red too.
+/// `Sources/` with comments stripped; a string literal spelling
+/// the name reds too, the safe side. The needle is the bare
+/// identifier, so `NSLogv` and a spaced `NSLog (` red too.
 @Suite("No NSLog in the sources (#2835)")
 struct NSLogSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -21,11 +22,14 @@ struct NSLogSeamTests {
         let sites = try trees.flatMap {
             try SourceScan.identifierSites(of: "NSLog", under: $0)
         }
-        // The walk reaches real code: the loggers that replaced it.
-        let loggers = try trees.flatMap {
-            try SourceScan.identifierSites(of: "Logger(", under: $0)
+        // Each tree's walk reaches real code: its own loggers.
+        for tree in trees {
+            let loggers = try SourceScan.identifierSites(
+                of: "Logger(",
+                under: tree
+            )
+            #expect(!loggers.isEmpty, "\(tree.lastPathComponent)")
         }
-        #expect(!loggers.isEmpty)
         #expect(
             sites.isEmpty,
             .init(rawValue: sites.map(\.site).joined(separator: ", "))

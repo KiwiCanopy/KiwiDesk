@@ -5,7 +5,8 @@ import os
 /// Replaces `Bundle.module` to prevent signing failures and launch crashes.
 public enum ResourceBundle {
     /// Its own `Logger`: this runs before any core exists, so no
-    /// `onLog` seam can carry it, and `NSLog` is redacted (#2835).
+    /// `onLog` seam can carry it. Interpolate `privacy: .public`,
+    /// or macOS redacts the value, as it does all of `NSLog` (#2835).
     private static let logger = Logger(
         subsystem: KiwiLog.subsystem,
         category: "resources"
