@@ -2,7 +2,7 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Share this look… (#1740 ▸ Share): a name popover, then the
+/// Share current look… (#1740 ▸ Share): a name popover, then the
 /// gallery's submission form in the browser with the current look
 /// prefilled.
 extension LooksShelf {
@@ -11,7 +11,7 @@ extension LooksShelf {
             shareRequest = NameEditRequest(seed: shareSeed)
         } label: {
             Label(
-                L("looks.share", "Share this look…"),
+                L("looks.share", "Share current look…"),
                 systemImage: "square.and.arrow.up"
             )
         }
@@ -26,7 +26,7 @@ extension LooksShelf {
     private func sharePopover(_ request: NameEditRequest) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(L("looks.share.title", "Share this look"))
+                Text(L("looks.share.title", "Share current look"))
                     .font(.headline)
                     .accessibilityAddTraits(.isHeader)
                 Spacer()
@@ -34,13 +34,14 @@ extension LooksShelf {
                     explanation: L(
                         "looks.share.help",
                         "Opens the gallery's submission form in your "
-                            + "browser with this look filled in. While at "
+                            + "browser with your current look filled in. "
+                            + "While at "
                             + "least half of a look you imported is "
                             + "unchanged, sharing credits its author. A "
                             + "look you started from a bundled one "
                             + "credits no one."
                     ),
-                    subject: L("looks.share.title", "Share this look")
+                    subject: L("looks.share.title", "Share current look")
                 )
             }
             .padding([.horizontal, .top], 12)

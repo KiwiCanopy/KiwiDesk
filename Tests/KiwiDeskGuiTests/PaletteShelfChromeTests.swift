@@ -137,7 +137,7 @@ struct PaletteShelfChromeTests {
         // the space inside `" "`.
         #expect(shelf.contains("DashedActionTile(systemImage:"))
         let dashed = try squashed("DashedActionTile.swift")
-        #expect(dashed.contains("dashed:true)"))
+        #expect(dashed.contains("dashed:true,"))
         #expect(dashed.components(separatedBy: "PaletteTile(").count == 2)
         // Exactly the one inline: a second tile shape drawn in the
         // shelf is what this suite exists to stop.

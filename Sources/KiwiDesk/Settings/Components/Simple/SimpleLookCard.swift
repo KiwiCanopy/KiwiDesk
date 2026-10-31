@@ -76,12 +76,14 @@ struct SimpleLookCard: View {
     }
 
     /// The gallery's tile at the line's end (#1740 ▸ Browse): its
-    /// site page in the browser; Simple never gets a Share door. It
-    /// is Advanced's Browse looks… setting, one census row for both.
+    /// site page in the browser; Simple never gets a Share door. One
+    /// census row for both, named by Advanced's Browse looks…, since
+    /// Simple has no search to find "More looks…" by.
     private var browseTile: some View {
         DashedActionTile(
             systemImage: "square.grid.2x2",
-            label: Self.browseLabel
+            label: Self.browseLabel,
+            captionLines: 0
         ) {
             NSWorkspace.shared.open(SupportLinks.looks)
         }
@@ -90,7 +92,7 @@ struct SimpleLookCard: View {
 
     /// The Browse tile's label.
     @MainActor static var browseLabel: String {
-        L("simple.look.browse", "Browse looks")
+        L("simple.look.browse", "More looks…")
     }
 
     /// The way to the rest of the looks, its link at the slot.
