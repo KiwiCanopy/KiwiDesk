@@ -212,8 +212,9 @@ public enum FloatDetection {
     }
 
     /// Whether `bounds` is a size a window can show: a side of
-    /// 1 pt or less is not (#2840). The float raise's verdict, not
-    /// adoption's (`isInvisibleHelper`); no answer keeps the window.
+    /// 1 pt or less is not (#2840). The float raise's and the
+    /// empty-switch yield's verdict (#2850), not adoption's
+    /// (`isInvisibleHelper`); no answer keeps the window.
     static func drawsVisibly(bounds: CGRect?) -> Bool {
         guard let bounds else { return true }
         return bounds.width > 1 && bounds.height > 1

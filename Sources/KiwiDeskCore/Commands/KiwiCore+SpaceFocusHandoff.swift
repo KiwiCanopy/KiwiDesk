@@ -48,11 +48,11 @@ extension KiwiCore {
     /// the WindowServer draws at no size is no recipient (#2850).
     func yieldFocusAfterEmptySwitch() {
         guard
-            drawnFloatTargets().isEmpty,
             let last = state.workspaces.lastFocused,
             let lastSpace = state.workspaces.space(of: last),
             !state.workspaces.visibleSpaces.contains(lastSpace),
-            state.windows[last]?.isSticky != true
+            state.windows[last]?.isSticky != true,
+            drawnFloatTargets().isEmpty
         else { return }
         if let frontmost = frontmostPIDProvider?(),
             frontmost != state.windows[last]?.pid
