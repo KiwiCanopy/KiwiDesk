@@ -356,6 +356,12 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
+:::unreleased
+A window already in that space stays where it is: the call fails
+and a pill on the window says it is already there. The same holds
+for `move_to_space_and_follow`.
+:::
+
 If the target space is shown on **another screen**, a floating
 window is re-anchored onto that screen: it keeps its
 *proportional* position (a bottom-right float stays

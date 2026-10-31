@@ -115,7 +115,7 @@ struct MoveToSpaceDesktopYieldTests {
         #expect(core.state.workspaces.activeSpace == SpaceID(2))
     }
 
-    @Test("Moving to the current space re-stamps focus safely")
+    @Test("Moving to the current space refuses and keeps focus")
     func moveToSameSpaceIsSafe() {
         let core = makeCore()
         addWindow(core, 1)
@@ -126,8 +126,9 @@ struct MoveToSpaceDesktopYieldTests {
             "move_to_space",
             args: [.string("1")]
         )
-        #expect(response.isSuccess)
-        // Both windows survive (nothing dropped) and 2 stays focus.
+        // Refused, so nothing is re-filed (`MoveToOwnSpaceTests`):
+        // both windows stay where they were and 2 stays focus.
+        #expect(!response.isSuccess)
         #expect(
             core.state.workspaces[SpaceID(1)]?.windows
                 == [WindowID(1), WindowID(2)]
