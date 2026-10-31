@@ -147,22 +147,15 @@ struct PocketMarkColorTests {
         return overlay.plate
     }
 
-    /// No glyph draws a disc, outer slot or inner (#2831): a
-    /// floating glyph's colour goes on its symbol, the pocket's into
-    /// its own image.
-    @Test("no glyph draws a disc; a colour goes on its symbol")
-    func noDiscColourOnSymbol() throws {
-        #expect(plate([.pocket(color: amber)]).roundel.isHidden)
-        let inner = plate([.sticky(), .pocket(color: amber)])
-        #expect(inner.slotCount == 2)
-        #expect(inner.innerRoundel.isHidden)
+    /// A floating glyph's colour goes on its symbol, outer slot or
+    /// inner (#2831); the pocket's is drawn into its own image.
+    @Test("a colour goes on its glyph's symbol")
+    func colourOnSymbol() throws {
         let outer = plate([.floating(color: amber)])
-        #expect(outer.roundel.isHidden)
         let tint = try #require(outer.symbol.contentTintColor)
         #expect(try hex(tint) == amber)
         let floating = plate([.sticky(), .floating(color: amber)])
         #expect(floating.slotCount == 2)
-        #expect(floating.innerRoundel.isHidden)
         let innerTint = try #require(floating.innerSymbol.contentTintColor)
         #expect(try hex(innerTint) == amber)
     }

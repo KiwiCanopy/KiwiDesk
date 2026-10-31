@@ -38,7 +38,6 @@ struct OverlayGlassTests {
             plate.content.isDescendant(of: glass),
             "glyphs not in glass"
         )
-        #expect(plate.roundel.isHidden, "the disc stayed on glass")
         #expect(
             plate.tint.gradient?.colors == nil,
             "the colour tinted the glass"
@@ -50,7 +49,6 @@ struct OverlayGlassTests {
         #expect(glass.isHidden)
         #expect(plate.tint.isHiddenOrHasHiddenAncestor)
         #expect(plate.content.superview === plate)
-        #expect(plate.roundel.isHidden, "a disc came back")
         #expect(plate.symbol.contentTintColor == ink)
     }
 

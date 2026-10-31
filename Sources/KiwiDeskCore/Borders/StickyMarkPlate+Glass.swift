@@ -32,12 +32,8 @@ extension StickyMarkPlate {
     /// a state's colour is its symbol's, never the glass's.
     func applyGlass() {
         guard let glass else { return }
-        Self.paint(symbol, roundel, hex: markHex)
-        Self.paint(
-            innerSymbol,
-            innerRoundel,
-            hex: slotCount > 1 ? innerHex : ""
-        )
+        Self.paint(symbol, hex: markHex)
+        Self.paint(innerSymbol, hex: slotCount > 1 ? innerHex : "")
         name.textColor = markColor
         GlassPlate.update(glass, frame: bounds, cornerRadius: 0)
         GlassTint.apply(
