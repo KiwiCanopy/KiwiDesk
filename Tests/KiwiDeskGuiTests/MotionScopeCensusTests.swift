@@ -82,6 +82,8 @@ struct MotionScopeCensusTests {
         "KiwiDesk/Settings/SettingsModel+AppWide.swift": 1,
         // The lens page's Save writing its lenses (#2103).
         "KiwiDesk/Settings/SettingsModel+Lenses.swift": 1,
+        // A look switch picked on a profile's page.
+        "KiwiDesk/Settings/SettingsModel+LookReach.swift": 1,
         // A Desktop binding edit's write, which loads a rebound
         // Desktop's profile (#2324).
         "KiwiDesk/Settings/SettingsModel+Refresh.swift": 1,

@@ -558,6 +558,7 @@
   "looks_added_on": "Hinzugefügt am {date}",
   "looks_updated_on": "Aktualisiert am {date} · Version {n}",
   "looks_font": "Schrift: {font}",
+  "looks_wallpaper": "Hintergrundbild: {name}",
   "looks_font_system": "System",
   "looks_font_system_mono": "System Monospace",
   "looks_inspired_by": "Inspiriert von {palette}",

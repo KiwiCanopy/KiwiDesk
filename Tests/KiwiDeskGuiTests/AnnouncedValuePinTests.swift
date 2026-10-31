@@ -152,6 +152,8 @@ struct AnnouncedValuePinTests {
         "LuaBindingEditor.swift": 1,
         // Simple's title, the edited profile's name (#2737).
         "SettingsHeaderBar+Simple.swift": 1,
+        // The switch-to-Shared prompt's question (#2820).
+        "LookShareSheet.swift": 1,
     ]
 
     @Test("title components are rotor headings")

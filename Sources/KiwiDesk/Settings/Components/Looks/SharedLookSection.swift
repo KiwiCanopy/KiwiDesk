@@ -2,12 +2,13 @@ import KiwiDeskCore
 import SwiftUI
 
 /// "Shared look" (#1752): the card at the top of Looks & Animations
-/// saying which profiles wear the one shared look, through the App
-/// Rules "Applies to" control with the look's own tick rules
-/// (`LookReachChecklist`). It gates the Looks, palette and Glass
-/// cards below it; Animations stays per profile.
+/// choosing whether this page's profile wears the one shared look or
+/// keeps its own (#2820), and naming who else wears it. It gates the
+/// Looks, palette and Glass cards below it; Animations stays per
+/// profile.
 struct SharedLookSection: View {
     @ObservedObject var model: SettingsModel
+    @State var shareRequest: LookShareRequest?
 
     /// The profile whose page this is: the stored one being edited,
     /// else the loaded one; nil while a built-in layout is live.
@@ -26,10 +27,10 @@ struct SharedLookSection: View {
             )
         ) {
             SettingsRowShape(controlTrails: true) {
-                SettingsRowLabel(label: appliesTo)
+                SettingsRowLabel(label: choiceLabel)
             } control: {
-                LookReachControl(model: model, edited: edited ?? "")
-                    .disabled(greyReason != nil)
+                choice
+                    .disabled(greyReason != nil || model.lookSwitchHeld)
             }
             if let greyReason {
                 Text(greyReason)
@@ -37,15 +38,27 @@ struct SharedLookSection: View {
                     .foregroundStyle(SettingsTheme.ink3)
                     .fixedSize(horizontal: false, vertical: true)
             } else if let edited {
-                Text(note(edited))
+                notes(edited)
+                if model.lookSwitchHeld {
+                    Text(
+                        L(
+                            "looks.reach.unsaved",
+                            "Save or revert your changes first."
+                        )
+                    )
                     .font(.caption)
-                    .foregroundStyle(SettingsTheme.ink2)
-                    .fixedSize(horizontal: false, vertical: true)
+                    .foregroundStyle(SettingsTheme.ink3)
+                }
+            }
+        }
+        .sheet(item: $shareRequest) { request in
+            LookShareSheet(request: request) { choice, saveFirst in
+                answer(request, choice, saveFirst: saveFirst)
             }
         }
     }
 
-    private var appliesTo: String { L("app_rules.reach", "Applies to") }
+    private var choiceLabel: String { L("looks.reach.choice", "Look") }
 
     /// Why the control greys: a Lua-owned config sets its own look,
     /// and a built-in layout has no file to own one in.
@@ -65,16 +78,37 @@ struct SharedLookSection: View {
         )
     }
 
-    private func note(_ profile: String) -> String {
-        model.lookFollows[profile] == false
-            ? L(
-                "looks.shared.own",
-                "This profile has its own look — changing it reaches "
-                    + "no other profile."
+    @ViewBuilder
+    private func notes(_ profile: String) -> some View {
+        let follows = model.lookFollows[profile] == true
+        let users = model.sharedLookUsers(besides: profile)
+        VStack(alignment: .leading, spacing: 2) {
+            Text(
+                follows
+                    ? L(
+                        "looks.shared.follows",
+                        "Changing the look reaches every profile that "
+                            + "uses it."
+                    )
+                    : L(
+                        "looks.shared.own",
+                        "This profile has its own look — changing it "
+                            + "reaches no other profile."
+                    )
             )
-            : L(
-                "looks.shared.follows",
-                "Changing the look reaches every profile that uses it."
-            )
+            .foregroundStyle(SettingsTheme.ink2)
+            if follows, !users.isEmpty {
+                Text(
+                    L(
+                        "looks.shared.also_used_by",
+                        "Also used by %1$@.",
+                        LocalizedList.join(users)
+                    )
+                )
+                .foregroundStyle(SettingsTheme.ink3)
+            }
+        }
+        .font(.caption)
+        .fixedSize(horizontal: false, vertical: true)
     }
 }
