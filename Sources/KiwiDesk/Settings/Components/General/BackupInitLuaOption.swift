@@ -65,6 +65,11 @@ final class BackupInitLuaOption: NSObject {
 
     @objc private func toggled() { onToggle?(isOn) }
 
+    #if DEBUG
+        /// A user's click on the box, for the suites.
+        func clickForTesting() { checkbox.performClick(nil) }
+    #endif
+
     /// The checkbox's title, which the restore confirm's message
     /// names (#2730).
     static var label: String {

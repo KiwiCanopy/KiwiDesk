@@ -16,11 +16,13 @@ enum RestoreConfirm {
         restore: @escaping (_ replacingInitLua: Bool) -> Void
     ) {
         let (alert, option) = alert(for: choices)
-        let escape = cancelsOnEscape(alert)
-        alert.beginSheetModal(for: window) { response in
-            if let escape { NSEvent.removeMonitor(escape) }
-            let ticked = option?.isOn ?? false
-            guard let replacing = answer(response, choices, ticked: ticked)
+        CancelDefault.beginSheet(alert, over: window) { response in
+            guard
+                let replacing = answer(
+                    response,
+                    choices,
+                    ticked: option?.isOn
+                )
             else { return }
             restore(replacing)
         }
@@ -41,13 +43,11 @@ enum RestoreConfirm {
             withTitle: SetupBackupText.restoreLabel
         )
         confirm.hasDestructiveAction = true
-        let cancel = alert.addButton(
+        alert.addButton(
             withTitle: L("spaces.delete_confirm.cancel", "Cancel")
         )
-        // Replaces saved data: Return and Escape cancel, Restore
-        // takes a click.
-        confirm.keyEquivalent = ""
-        cancel.keyEquivalent = "\r"
+        // Replaces saved data: Cancel is the default.
+        CancelDefault.prepare(alert)
         confirm.isEnabled = canRestore(choices, ticked: false)
         guard choices.withInitLua else { return (alert, nil) }
         let option = BackupInitLuaOption()
@@ -59,22 +59,6 @@ enum RestoreConfirm {
         return (alert, option)
     }
 
-    /// Escape presses Cancel. NSAlert gives Escape to the button
-    /// titled Cancel through its key equivalent, which Return takes
-    /// here (measured 2026-10-31: the sheet then ignores Escape).
-    private static func cancelsOnEscape(_ alert: NSAlert) -> Any? {
-        let cancel = alert.buttons[1]
-        return NSEvent.addLocalMonitorForEvents(matching: .keyDown) {
-            event in
-            guard event.window === alert.window, event.keyCode == 53,
-                event.modifierFlags
-                    .intersection(.deviceIndependentFlagsMask).isEmpty
-            else { return event }
-            cancel.performClick(nil)
-            return nil
-        }
-    }
-
     /// Restore needs the box ticked where the backup restores only
     /// with its init.lua, so running it is never a default (#2517).
     static func canRestore(_ choices: RestoreChoices, ticked: Bool) -> Bool {
@@ -82,12 +66,13 @@ enum RestoreConfirm {
     }
 
     /// Whether init.lua comes too for `response`, nil on anything
-    /// but Restore.
+    /// but Restore; `ticked` is the box's state, nil where none shows.
     static func answer(
         _ response: NSApplication.ModalResponse,
         _ choices: RestoreChoices,
-        ticked: Bool
+        ticked: Bool?
     ) -> Bool? {
+        let ticked = ticked ?? false
         guard response == .alertFirstButtonReturn,
             canRestore(choices, ticked: ticked)
         else { return nil }

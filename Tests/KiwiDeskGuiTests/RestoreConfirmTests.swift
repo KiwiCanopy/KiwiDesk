@@ -79,7 +79,8 @@ struct RestoreConfirmTests {
         let owned = choices(.luaOwnsThisMac, withInitLua: true)
         #expect(RestoreConfirm.answer(first, both, ticked: false) == false)
         #expect(RestoreConfirm.answer(first, both, ticked: true) == true)
-        #expect(RestoreConfirm.answer(first, plain, ticked: false) == false)
+        #expect(RestoreConfirm.answer(first, plain, ticked: nil) == false)
+        #expect(RestoreConfirm.answer(first, owned, ticked: nil) == nil)
         #expect(RestoreConfirm.answer(first, owned, ticked: true) == true)
         #expect(RestoreConfirm.answer(first, owned, ticked: false) == nil)
         for shape in [both, plain, owned] {
@@ -88,6 +89,20 @@ struct RestoreConfirmTests {
                 RestoreConfirm.answer(.cancel, shape, ticked: true) == nil
             )
         }
+    }
+
+    @Test("ticking the box frees a restore that needs it")
+    func tickEnablesRestore() throws {
+        let (alert, option) = RestoreConfirm.alert(
+            for: choices(.luaOwnsThisMac, withInitLua: true)
+        )
+        let box = try #require(option)
+        #expect(!alert.buttons[0].isEnabled)
+        box.clickForTesting()
+        #expect(box.isOn)
+        #expect(alert.buttons[0].isEnabled)
+        box.clickForTesting()
+        #expect(!alert.buttons[0].isEnabled)
     }
 
     @Test("Settings asks through the alert, not a SwiftUI dialog")
@@ -114,10 +129,13 @@ struct RestoreConfirmTests {
                         + "RestoreConfirm.swift"
                 )
         )
-        #expect(confirm.contains("answer(response, choices, ticked:"))
+        // The box's own state, never a constant, reaches the answer.
+        #expect(
+            confirm.filter { !$0.isWhitespace }.contains(
+                "answer(response,choices,ticked:option?.isOn)"
+            )
+        )
         #expect(confirm.contains("restore(replacing)"))
-        // Return took Cancel's Escape, so the sheet hands it back.
-        #expect(confirm.contains("let escape = cancelsOnEscape(alert)"))
-        #expect(confirm.contains("NSEvent.removeMonitor(escape)"))
+        #expect(confirm.contains("CancelDefault.beginSheet(alert"))
     }
 }
