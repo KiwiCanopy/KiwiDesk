@@ -44,7 +44,7 @@ extension TilingSettings {
     /// section takes the bars' strip, and a bar's `reserve` off on
     /// that edge — on an edge no bar shows, both bars' — reserves
     /// nothing (#1524).
-    func pocketReservation(
+    public func pocketReservation(
         in mode: LayoutMode,
         on screen: String?
     ) -> (edge: AppBarEdge, depth: CGFloat)? {
@@ -64,5 +64,14 @@ extension TilingSettings {
         case .handle: return (pocketEdge, kiwishelf.hiddenReservation)
         case .mark: return (pocketEdge, kiwishelf.reservation)
         }
+    }
+}
+
+extension TilingSettings {
+    /// Rests the pocket on the Space Bar's edge, the menu bar's, as
+    /// the starter and every bundled look do (owner, 2026-10-30);
+    /// the type default stays bottom.
+    public mutating func restPocketWithTheSpaceBar() {
+        kiwishelf.pocketEdge = spaceBarStyle.edge
     }
 }

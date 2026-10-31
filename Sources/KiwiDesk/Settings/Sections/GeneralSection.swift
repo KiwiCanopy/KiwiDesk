@@ -10,10 +10,6 @@ struct GeneralSection: View {
     /// The Reset All confirmation (#634); internal because the row
     /// and dialog live in `GeneralSection+Reset`.
     @State var confirmingReset = false
-    /// The backup waiting on its confirm (#606) — the dialog
-    /// derives from this, never a second Bool, so the two cannot
-    /// disagree.
-    @State var pendingRestore: SetupBundle?
     /// Core names the condition, `SetupBackupText` writes the
     /// sentence (#96).
     @State var backupError: SetupBundleError?

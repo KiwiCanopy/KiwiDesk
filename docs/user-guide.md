@@ -159,11 +159,17 @@ one carrying settings when this Mac's settings come from
 restore that skips a profile or a palette says so.
 
 `init.lua` travels only when asked, off by default: tick
-**Include init.lua** when you export, and pick **Restore with
-init.lua** when you restore, which runs it at once and is the one
-restore of settings a Mac whose settings come from `init.lua`
-accepts. The same backup is one command away with `kiwidesk
-export_setup` and `kiwidesk restore_setup` ([CLI](cli.md#commands)).
+**Include init.lua** when you export. The same backup is one
+command away with `kiwidesk export_setup` and `kiwidesk
+restore_setup` ([CLI](cli.md#commands)).
+
+:::unreleased
+When you restore a backup that carries one, the confirm offers
+the same **Include init.lua** checkbox, off each time: ticked, the
+backup's `init.lua` replaces yours and runs at once. A Mac whose
+settings come from `init.lua` restores settings only with the box
+ticked.
+:::
 
 Saved looks travel in a backup beside the palettes, and restore
 wherever they do; **All settings ▸ Reset…** keeps them too. The

@@ -25,6 +25,59 @@ final class AppIconCache {
         return image
     }
 
+    /// A bundle id's icon as fixed pixels, made once (#1740): the
+    /// system icon draws lazily and can change between two renders
+    /// in one process, and a gallery PNG must draw the same bytes.
+    func fixedIcon(forBundleID id: String) -> NSImage {
+        let key = "fixed:" + id.lowercased()
+        if let hit = memo[key] { return hit }
+        let source =
+            NSWorkspace.shared.urlForApplication(
+                withBundleIdentifier: id
+            ).map { Self.fileIcon(atPath: $0.path) }
+            ?? NSWorkspace.shared.icon(for: .applicationBundle)
+        let image = Self.rasterized(source) ?? source
+        memo[key] = image
+        return image
+    }
+
+    /// The pixels a fixed icon is drawn at.
+    private static let fixedPixels = 256
+
+    /// `image` drawn once into a bitmap of its own, inside a saved
+    /// graphics state, so a render in progress keeps its context.
+    private static func rasterized(_ image: NSImage) -> NSImage? {
+        guard
+            let rep = NSBitmapImageRep(
+                bitmapDataPlanes: nil,
+                pixelsWide: fixedPixels,
+                pixelsHigh: fixedPixels,
+                bitsPerSample: 8,
+                samplesPerPixel: 4,
+                hasAlpha: true,
+                isPlanar: false,
+                colorSpaceName: .deviceRGB,
+                bytesPerRow: 0,
+                bitsPerPixel: 0
+            ),
+            let context = NSGraphicsContext(bitmapImageRep: rep)
+        else { return nil }
+        NSGraphicsContext.saveGraphicsState()
+        defer { NSGraphicsContext.restoreGraphicsState() }
+        NSGraphicsContext.current = context
+        let side = CGFloat(fixedPixels)
+        image.draw(
+            in: CGRect(x: 0, y: 0, width: side, height: side),
+            from: .zero,
+            operation: .copy,
+            fraction: 1
+        )
+        context.flushGraphics()
+        let fixed = NSImage(size: image.size)
+        fixed.addRepresentation(rep)
+        return fixed
+    }
+
     /// The icon for a list entry (#2103 ruling 27): the app's where
     /// the entry is a bundle id an app answers to, else the generic
     /// program icon a process without a bundle id shows.

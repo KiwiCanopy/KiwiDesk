@@ -2152,6 +2152,14 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   chained subviews into private computed properties / funcs and
   hoist concatenated strings into constants. Bit
   `KeyRecorderField`.
+- **An `NSAlert` whose Cancel is the default runs through
+  `CancelDefault`** (#2826), never a hand-moved Return: NSAlert
+  gives Escape to Cancel through that button's key equivalent, so
+  `cancel.keyEquivalent = "\r"` silently takes Escape away
+  (measured 2026-10-31). The door moves Return and watches Escape
+  for the alert's life, as a sheet or app-modal
+  (`CancelDefaultTests` ▸ `noHandSpelledDefault`,
+  `sitesTakeTheDoor`).
 - A view `.disabled()` on a `.menu` `Picker` is **unreliable** —
   it blocks selection but won't grey. Never make it the sole gate
   on a side effect; guard the setter too, and grey the picker
@@ -2199,10 +2207,11 @@ route and shell completion reads it, so a local verb is never an
 command has, save the ruled `help` (`CLIRouteTests`,
 `CLIHelpSeamTests`).
 
-**`preview` renders the shelf card's `LookPlate` headless**
+**`preview` renders the look tile's `LookPlate` headless**
 (#1740): keep that view and what it draws free of `NSApp`, an
 environment object and a live model, or the gallery's previews
-stop (`CLIPreviewTests`). Its verb, usage line and PNG size are
+stop (`CLIPreviewTests`). Its App Bar art reads `AppIconCache`
+and `AppFont`, which therefore stay free of the same. Its verb, usage line and PNG size are
 read by the KiwiDesk-Looks CI, so a change there moves that repo
 in step (`CLIPreviewContractTests`).
 

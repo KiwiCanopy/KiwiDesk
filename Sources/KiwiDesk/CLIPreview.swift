@@ -3,11 +3,11 @@ import KiwiDeskCore
 import SwiftUI
 
 /// `kiwidesk preview <look.json> <out.png>`: a look file's gallery
-/// preview (#1740 ▸ Preview) — the shelf card's `LookPlate` at its
-/// own size, painted over default settings on a fixed four-Space
-/// desk in dark mode, scaled to a fixed pixel size. Reads the file
-/// like Import… does; needs no running app. The verb, `usage` and
-/// `pixels` are the KiwiDesk-Looks CI's contract
+/// preview (#1740 ▸ Preview) — the shelf card's `LookPlate` at
+/// gallery size, painted over default settings on a fixed
+/// four-Space desk in dark mode, scaled to a fixed pixel size.
+/// Reads the file like Import… does; needs no running app. The
+/// verb, `usage` and `pixels` are the KiwiDesk-Looks CI's contract
 /// (`CLIPreviewContractTests`).
 enum CLIPreview {
     static let verb = "preview"
@@ -17,10 +17,10 @@ enum CLIPreview {
     /// The PNG's size, the site card's 16:10 at its 720 px slot.
     static let pixels = CGSize(width: 768, height: 480)
 
-    /// The card's plate, 16:10 at its own height.
+    /// The gallery's plate, 16:10 at its own height.
     @MainActor static let points = CGSize(
-        width: PaletteSceneThumbnail.baseHeight * 1.6,
-        height: PaletteSceneThumbnail.baseHeight
+        width: LookPlate.Size.gallery.height * 1.6,
+        height: LookPlate.Size.gallery.height
     )
 
     static func run(_ arguments: [String]) -> Int32 {
@@ -51,32 +51,65 @@ enum CLIPreview {
         return 0
     }
 
+    /// Pixels per point of the gallery's plate.
+    @MainActor static var scale: CGFloat { pixels.height / points.height }
+
     /// The PNG bytes of `look`'s plate on the fixed desk.
     @MainActor static func render(_ look: ShelfLook) -> Data? {
         let config = desk(look)
         let plate = LookPlate(
             settings: config.settings,
-            spaceLabels: BarsPanelPreview.spaceLabels(of: config)
+            spaceLabels: BarsPanelPreview.spaceLabels(of: config),
+            size: .gallery
         )
         .frame(width: points.width)
         .environment(\.colorScheme, .dark)
         let renderer = ImageRenderer(content: plate)
-        renderer.scale = pixels.height / points.height
+        renderer.scale = scale
         var image: CGImage?
         // The theme's tokens resolve through the drawing appearance,
         // which a headless process takes from the host.
         NSAppearance(named: .darkAqua)?.performAsCurrentDrawingAppearance {
-            image = renderer.cgImage
+            renderer.render(rasterizationScale: scale) { _, draw in
+                image = drawn(draw)
+            }
         }
         guard let image else { return nil }
         return NSBitmapImageRep(cgImage: image)
             .representation(using: .png, properties: [:])
     }
 
-    /// Spaces 1–4 in BSP, wearing `look` over default settings.
+    /// The plate drawn into a bitmap of our own (#1740): under load
+    /// `cgImage` draws gradients and shadows a level apart from one
+    /// render to the next, and a gallery PNG must keep its bytes.
+    @MainActor private static func drawn(
+        _ draw: (CGContext) -> Void
+    ) -> CGImage? {
+        guard
+            let space = CGColorSpace(name: CGColorSpace.sRGB),
+            let context = CGContext(
+                data: nil,
+                width: Int(pixels.width),
+                height: Int(pixels.height),
+                bitsPerComponent: 8,
+                bytesPerRow: 0,
+                space: space,
+                bitmapInfo: CGImageAlphaInfo.premultipliedLast.rawValue
+            )
+        else { return nil }
+        context.scaleBy(x: scale, y: scale)
+        draw(context)
+        return context.makeImage()
+    }
+
+    /// Spaces 1–4 in BSP, wearing `look` over default settings with
+    /// the pocket on the Space Bar's edge, where the starter and
+    /// every bundled look put it; a look carrying its own edge wins.
     static func desk(_ look: ShelfLook) -> GuiConfig {
         var config = GuiConfig()
-        config.settings = look.painted(over: TilingSettings())
+        var base = TilingSettings()
+        base.restPocketWithTheSpaceBar()
+        config.settings = look.painted(over: base)
         config.spaces = (1...4).map { SpaceID($0) }
         return config
     }

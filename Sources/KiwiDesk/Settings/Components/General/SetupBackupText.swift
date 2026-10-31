@@ -118,22 +118,13 @@ enum SetupBackupText {
         return parts.joined(separator: "\n")
     }
 
-    /// The confirm's plain Restore, leaving this Mac's init.lua.
+    /// The confirm's one Restore (#2730).
     static var restoreLabel: String {
         L("general.advanced.backup.restore.confirm", "Restore")
     }
 
-    /// The confirm's Restore that takes the backup's init.lua too
-    /// (#2517).
-    static var restoreWithInitLuaLabel: String {
-        L(
-            "general.advanced.backup.restore.confirm.with_init_lua",
-            "Restore with init.lua"
-        )
-    }
-
     /// The confirm's message: what every restore replaces, then
-    /// what each offered button does with init.lua (#2517).
+    /// what the restore does with init.lua (#2517, #2730).
     static func restoreMessage(_ choices: RestoreChoices) -> String {
         let lead = L(
             "general.advanced.backup.restore.confirm.lead",
@@ -148,9 +139,11 @@ enum SetupBackupText {
             // Everything the lead names is replaced with none.
             tail = L(
                 "general.advanced.backup.restore.confirm.init_lua_only",
-                "This backup holds only an init.lua. Restoring it puts "
-                    + "the backup's in place of yours, which goes to "
-                    + "the Trash, and KiwiDesk runs it."
+                "This backup holds only an init.lua. With “%1$@” "
+                    + "turned on, restoring puts the backup's in place "
+                    + "of yours, which goes to the Trash, and KiwiDesk "
+                    + "runs it.",
+                BackupInitLuaOption.label
             )
         } else if !choices.withInitLua {
             tail = L(
@@ -160,18 +153,20 @@ enum SetupBackupText {
         } else if choices.plain {
             tail = L(
                 "general.advanced.backup.restore.confirm.choose_init_lua",
-                "The backup also includes an init.lua. “%1$@” leaves "
-                    + "yours as it is; “%2$@” puts the backup's in "
-                    + "its place and KiwiDesk runs it.",
-                restoreLabel,
-                restoreWithInitLuaLabel
+                "The backup also includes an init.lua. With "
+                    + "“%1$@” off, yours stays as it is; turned on, "
+                    + "the backup's takes its place and KiwiDesk "
+                    + "runs it.",
+                BackupInitLuaOption.label
             )
         } else {
             tail = L(
                 "general.advanced.backup.restore.confirm.lua_owned",
                 "Your settings here come from init.lua, so this "
-                    + "backup can only be restored together with its "
-                    + "own init.lua, which KiwiDesk then runs."
+                    + "backup restores only together with its own "
+                    + "init.lua: turn on “%1$@” to restore it, and "
+                    + "KiwiDesk then runs it.",
+                BackupInitLuaOption.label
             )
         }
         return lead + " " + tail
