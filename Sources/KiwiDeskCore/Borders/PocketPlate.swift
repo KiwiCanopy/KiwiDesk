@@ -202,18 +202,20 @@ final class PocketPlateView: NSView, BarPeekListAnchor {
 
     override func mouseEntered(with event: NSEvent) {
         setHovered(true)
-        reportPush()
+        reportPush(event)
     }
 
-    override func mouseMoved(with event: NSEvent) { reportPush() }
+    override func mouseMoved(with event: NSEvent) {
+        reportPush(event)
+    }
 
     /// Tells `onPush` where a resting handle's pointer stands against
     /// the screen edge, as a bar's band hears a push.
-    private func reportPush() {
+    private func reportPush(_ event: NSEvent) {
         guard let edge = handleEdge, !risen, !whole,
             let window, let screen = window.screen,
             ShelfReveal.pushes(
-                NSEvent.mouseLocation,
+                window.convertPoint(toScreen: event.locationInWindow),
                 band: window.frame,
                 strip: window.frame,
                 edge: edge,
