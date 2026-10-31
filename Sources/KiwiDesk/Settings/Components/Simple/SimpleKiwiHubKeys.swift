@@ -16,7 +16,7 @@ struct SimpleKiwiHubKeys: View {
             title: L("kiwihub.name", "KiwiHub"),
             caption: L(
                 "simple.kiwihub.caption",
-                "Every other shortcut starts here"
+                "Three keys to find your way around"
             )
         ) {
             // A long translation stacks the sides.

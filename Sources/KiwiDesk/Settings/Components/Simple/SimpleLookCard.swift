@@ -91,7 +91,7 @@ struct SimpleLookCard: View {
 
     /// The Browse tile's label.
     @MainActor static var browseLabel: String {
-        L("simple.look.browse", "Browse looks")
+        L("simple.look.browse", "More looks…")
     }
 
     /// The way to the rest of the looks, its link at the slot.
