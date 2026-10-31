@@ -35,7 +35,7 @@ struct SharedLookPointer: View {
         L(
             "looks.shared.pointer",
             "These settings are part of the shared look — choose "
-                + "which profiles use it in %1$@.",
+                + "whether this profile uses it in %1$@.",
             CrossReferenceRow.linkSlot
         )
     }

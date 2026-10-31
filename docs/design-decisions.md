@@ -17870,22 +17870,39 @@ profile it is saved from; a "Save copy" of a follower whose draft
 changed the look keeps it as its own, since a copy touches no
 global file.
 
-**The switch is the App Rules "Applies to" checklist, read the
-way App Rules' is: on a following profile's page, the profiles
-wearing the look the page shows.** The edited profile's own box
-is locked (owner, 2026-09-29): flipping it would change the
-checklist's subject, the look this page shows, so a profile is
-moved from a page whose look it should wear. On a following
-profile's page the other boxes follow or keep their own; on an
-own profile's page they grey, since an own look is nobody else's
-to join. A profile
-unticked keeps the look it wore before the Save's edits, which is
-why every Save door writes the checklist before the profile or
-`gui.json` write it guards (`SharedLookSeamTests` ▸
-`checklistFirst`), and its save-pill row says so. An own look
-carries no ⚠, since it is a choice rather than a divergence; the
-ticks are staged in the draft and written through
-`saveLookReach` (`LookReachTests`).
+**The switch is one choice on the profile's own page: Shared or
+This profile only** (owner, 2026-10-30, #2820). It replaced the
+App Rules "Applies to" checklist and overturns its 2026-09-29
+clause, which locked the edited profile's own box because flipping
+it changed what the page showed: changing what a page shows is
+what picking a look already does, and the checklist borrowed a
+control that means "who gets this value" for a question about one
+profile. Another profile is moved from its own page; a page
+wearing the shared look names who else wears it, read-only.
+
+**Switching an own look to Shared asks, because both readings are
+plausible and one reaches every follower.** **Use the Shared Look**
+takes the shared look over the own one; **Make This the Shared
+Look** lands the look the page shows as the shared one
+(`saveLookReach`'s `sharing`), and the prompt names the profiles
+that change. Neither keeps a hidden copy of what it replaces: a
+kept last-own copy would be stored state no surface shows, so an
+own look survives only through the library, which the prompt
+offers to write first. The prompt is a sheet with commits by this
+ruling (gui.md ▸ A picture whose object is NOT the draft): it
+shows both looks, which a dialog cannot.
+
+**The switch writes at once, and only over a clean draft** (owner,
+2026-10-30). Staged in the draft, a Use had to paint the shared
+look into it to show what the Save keeps, and every way the
+painted leaves could part from the switch — one taken back alone,
+an edit after it, a sync arriving under it — could land an own
+value as an edit of the shared look. Written at once, the page
+reloads to what was written and nothing is in between. While the draft has unsaved edits the
+choice greys with its reason, since a write under them would
+leave a draft built on the look it replaced (`LookReachModelTests`,
+`LookReachTests`). An own look carries no ⚠, since it is a choice
+rather than a divergence.
 
 **The App Bar is the dock; the Space Bar is the menu bar**
 (owner, 2026-09-28, #1528). The starter splits them — Space Bar
