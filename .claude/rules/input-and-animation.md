@@ -821,11 +821,9 @@ editing here:
   the plate lands (`BriefPocketTests` ▸ `pocketingPlays`,
   `takeOutPlaysAndHolds`), and its ring waits with it through the
   state-change hold. Never bring back a slide of the real window to
-  its park. A pocket press's raise waits for the play to end,
-  through the one `handPocketFocus` (#2703): a raise mid-play
-  activates an app on the thread the plate's frames tick on, and
-  KiwiDesk's own Settings window redraws whole on it
-  (`BriefPocketTests` ▸ `putInRaiseWaits`, `takeOutRaiseWaits`).
+  its park. When a pocket press raises is the timeline's
+  `handOff`, and its obligations are
+  [state-and-layout.md](state-and-layout.md)'s (#2703, #2845).
   **A panel whose plate wears the Fill under *Tint KiwiHub and
   plates* is an `ActiveGlassPanel`, its `wearsActiveLook` set from
   that tint on every play** — the slide's and the flying plate's
