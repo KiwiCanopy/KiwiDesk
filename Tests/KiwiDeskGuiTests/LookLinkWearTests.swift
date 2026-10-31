@@ -80,4 +80,38 @@ struct LookLinkWearTests {
                 == model.core.bundledLooks.map(\.name)
         )
     }
+
+    @Test("a rename keeps the look linked, so Simple keeps it")
+    func renameKeepsTheLink() throws {
+        let model = makeTestModel()
+        model.wearLinkedLook(try linked(model))
+        model.renameUserLook(from: "Dusk", to: "Dawn")
+        #expect(model.linkedLook == "Dawn")
+        #expect(SimpleLookCard.linked(in: model)?.name == "Dawn")
+    }
+
+    @Test("a delete drops the linked look from Simple's line")
+    func deleteDropsTheLink() throws {
+        let model = makeTestModel()
+        model.wearLinkedLook(try linked(model))
+        model.deleteUserLook("Dusk")
+        #expect(model.linkedLook == nil)
+        #expect(SimpleLookCard.linked(in: model) == nil)
+    }
+
+    /// Simple offers Delete on the gallery look alone (#2860): the
+    /// one menu sits on the linked tile and holds no Rename.
+    @Test("Simple's look menu is Delete on the linked tile alone")
+    func simpleMenuIsDeleteOnly() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let card = try SourceScan.swiftSources(under: root)
+            .first { $0.lastPathComponent == "SimpleLookCard.swift" }
+        let source = try SourceScan.strippedSource(at: try #require(card))
+            .filter { !$0.isWhitespace }
+        #expect(source.occurrences(of: ".rowActions{") == 1)
+        #expect(source.contains("tile(linked).rowActions{menu(linked)}"))
+        #expect(source.contains("L(\"looks.delete\""))
+        #expect(!source.contains("L(\"looks.rename\""))
+    }
 }

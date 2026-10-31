@@ -75,11 +75,7 @@ extension LooksShelf {
     // MARK: - Rename / delete
 
     func canRename(_ typed: String, from oldName: String) -> Bool {
-        let name = trimmed(typed)
-        guard !name.isEmpty, !store.isBuiltinName(name) else {
-            return false
-        }
-        return name == oldName || !store.hasUserLook(name)
+        model.canRenameUserLook(typed, from: oldName)
     }
 
     func renameBinding(_ name: String) -> Binding<NameEditRequest?> {
@@ -90,9 +86,8 @@ extension LooksShelf {
     }
 
     func renameLook(_ typed: String, from oldName: String) {
-        let name = trimmed(typed)
-        guard canRename(name, from: oldName) else { return }
-        try? store.rename(from: oldName, to: name)
+        guard canRename(typed, from: oldName) else { return }
+        model.renameUserLook(from: oldName, to: typed)
         renameRequest = nil
         reload()
     }
@@ -103,7 +98,7 @@ extension LooksShelf {
             after: name,
             in: model.userLooks.map(\.name)
         )
-        try? store.delete(name)
+        model.deleteUserLook(name)
         reload()
         returningTile = neighbour
     }

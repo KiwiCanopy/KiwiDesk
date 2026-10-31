@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Look application for SettingsModel (#1684).
@@ -36,6 +37,32 @@ extension SettingsModel {
     func paintColors(_ colors: [String: String]) -> Bool {
         ColorPalette(name: "", colors: colors).apply(to: &config.settings)
         return !isDirty
+    }
+
+    /// Whether `typed` may rename the user look `old`: not blank,
+    /// no bundled look's name, and no other user look's.
+    func canRenameUserLook(_ typed: String, from old: String) -> Bool {
+        let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, !lookStore.isBuiltinName(name) else {
+            return false
+        }
+        return name == old || !lookStore.hasUserLook(name)
+    }
+
+    /// Renames a user look; a gallery link on it follows the name,
+    /// so Simple's line keeps the look (#2860).
+    func renameUserLook(from old: String, to typed: String) {
+        let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard canRenameUserLook(name, from: old) else { return }
+        try? lookStore.rename(from: old, to: name)
+        if linkedLook == old { linkedLook = name }
+        refreshLooks()
+    }
+
+    /// Deletes a user look; a gallery link on it goes with it.
+    func deleteUserLook(_ name: String) {
+        try? lookStore.delete(name)
+        refreshLooks()
     }
 
     /// Re-reads the user looks from the store, forgetting a linked
