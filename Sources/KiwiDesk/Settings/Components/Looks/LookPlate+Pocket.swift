@@ -11,12 +11,9 @@ extension LookPlate {
         size.drawsPocket ? settings.pocketRest(in: mode, on: nil) : nil
     }
 
-    /// The layout the picture's App Bar is drawn from, the first that
-    /// shows one, as `HomeCardBarsTile` picks it (`appBarHosts`).
+    /// The layout the picture's App Bar is drawn from.
     var mode: LayoutMode {
-        LayoutMode.allCases.first {
-            settings.appBarVisibility(in: $0)?.showsUnprompted == true
-        } ?? .bsp
+        HomeCardBarsTile.appBarMode(settings) ?? .bsp
     }
 
     /// The edge the whole mark reserves its strip on, where Core's
@@ -41,15 +38,19 @@ extension LookPlate {
     func lonePocketCentre(in plate: CGSize) -> CGPoint {
         let shelf = settings.kiwishelf
         let depth = lonePocketDepth
-        let side = PocketMarkGeometry.markSide(depth: depth)
+        // The live band, in the picture's units: the bars' depth
+        // over the shelf's own thickness.
+        let band =
+            ShelfMarkPlacement.bandLength * depth
+            / max(shelf.thickness, 1)
         let along = shelf.pocketEdge.isHorizontal ? plate.width : plate.height
         let start = ShelfMarkPlacement.bandStart(
             position: shelf.pocketPosition,
             low: 0,
             high: along,
-            length: side
+            length: band
         )
-        let middle = start + side / 2
+        let middle = start + band / 2
         switch shelf.pocketEdge {
         case .top: return CGPoint(x: middle, y: depth / 2)
         case .bottom: return CGPoint(x: middle, y: plate.height - depth / 2)

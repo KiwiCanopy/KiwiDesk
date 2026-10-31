@@ -137,8 +137,16 @@ struct HomeCardBarsTile: View {
     /// The App Bar the preview draws: the first layout whose bar
     /// is not hidden (#761), or nil when none is.
     private var appBarLook: AppBarLook? {
-        settings.appBarHosts.first { $0.visibility.showsUnprompted }.map {
-            settings.appBarLook(for: $0)
+        Self.appBarMode(settings).flatMap { settings.appBarHost(for: $0) }
+            .map { settings.appBarLook(for: $0.appBar) }
+    }
+
+    /// The layout whose App Bar the preview draws: the first whose
+    /// bar is not hidden (#761), or nil when none is.
+    static func appBarMode(_ settings: TilingSettings) -> LayoutMode? {
+        LayoutMode.allCases.first {
+            settings.appBarHost(for: $0)?.appBar.visibility
+                .showsUnprompted == true
         }
     }
 

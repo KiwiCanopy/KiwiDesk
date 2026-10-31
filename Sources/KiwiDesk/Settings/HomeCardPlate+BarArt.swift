@@ -15,6 +15,7 @@ extension BarStripView {
                 .interpolation(.high)
                 .frame(width: side, height: side)
         case .appFont(let ligature):
+            // The picture's own glyph size, not the live slot's.
             if let font = AppFont.font(size: side * 0.85) {
                 Text(ligature).font(Font(font))
                     .fixedSize()
