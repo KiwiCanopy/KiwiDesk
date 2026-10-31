@@ -85,7 +85,8 @@ enum SpaceSlidePlan {
     }
 
     /// One plate: the part of its window the page shows, and the
-    /// app whose icon it carries — only a pile's front face does.
+    /// app whose icon it carries, nil where a plate in front covers
+    /// the icon's spot.
     struct Plate: Equatable {
         let id: WindowID
         let frame: CGRect
@@ -122,24 +123,30 @@ enum SpaceSlidePlan {
             }
         }.map(\.element)
         let piles = pileIndices(shown.map(\.1))
-        var faces: [Int: Int] = [:]
-        for (index, entry) in shown.enumerated() {
-            let pile = piles[index]
-            if entry.0.id == focus {
-                faces[pile] = index
-            } else if faces[pile].map({ shown[$0].0.id != focus })
-                ?? true
-            {
-                faces[pile] = index  // front-most so far
-            }
-        }
         return shown.enumerated().map { index, entry in
-            Plate(
+            // An icon shows unless a plate drawn in front covers
+            // its spot (#2837); a pile's back plates lose theirs.
+            let spot = iconRect(on: entry.1)
+            let covered = shown[(index + 1)...].contains {
+                spot.map($0.1.intersects) ?? true
+            }
+            return Plate(
                 id: entry.0.id,
                 frame: entry.1,
-                iconPid: faces[piles[index]] == index
-                    ? entry.0.pid : nil,
+                iconPid: covered ? nil : entry.0.pid,
                 pile: piles[index]
+            )
+        }
+    }
+
+    /// The icon's centred square on `plate`, nil where no icon fits.
+    static func iconRect(on plate: CGRect) -> CGRect? {
+        iconSide(on: plate).map {
+            CGRect(
+                x: plate.midX - $0 / 2,
+                y: plate.midY - $0 / 2,
+                width: $0,
+                height: $0
             )
         }
     }

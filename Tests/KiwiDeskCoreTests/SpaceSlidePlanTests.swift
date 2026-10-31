@@ -5,8 +5,8 @@ import Testing
 
 /// What one page of the plate slide shows (#1956): a plate per
 /// window clipped to the screen, back to front, and an icon on
-/// each pile's front face only — the focus where it is in the
-/// pile, else the WindowServer's front-most member.
+/// every plate whose centred icon no plate in front covers
+/// (#2837) — so a pile shows its front face's alone.
 @Suite("Plate slide plan (#1956)")
 struct SpaceSlidePlanTests {
     private let page = CGRect(x: 0, y: 0, width: 1000, height: 800)
@@ -96,10 +96,10 @@ struct SpaceSlidePlanTests {
         #expect(plates.compactMap(\.iconPid) == [1])
     }
 
-    /// A float in front of the tiled focus in one pile: the draw
-    /// order puts the float last, yet the face is the focus.
-    @Test("the focus is the face even under a float")
-    func focusOutranksAFloatInFront() {
+    /// A float over the tiled focus's centre: the float draws in
+    /// front and covers the focus's icon, so the float carries it.
+    @Test("a float over the focus's icon takes the icon")
+    func floatOverTheFocusIcon() {
         let tiled = CGRect(x: 0, y: 0, width: 600, height: 600)
         let float = CGRect(x: 100, y: 100, width: 300, height: 300)
         let plates = SpaceSlidePlan.plates(
@@ -112,7 +112,29 @@ struct SpaceSlidePlanTests {
             in: page
         )
         #expect(plates.last?.id == WindowID(2))
-        #expect(plates.compactMap(\.iconPid) == [1])
+        #expect(plates.compactMap(\.iconPid) == [2])
+    }
+
+    /// A float grazing the edges of two tiles chains them into one
+    /// pile for the glass, yet covers neither icon, so every plate
+    /// keeps its own (#2837).
+    @Test("a float grazing tiles leaves their icons")
+    func grazingFloatKeepsTileIcons() {
+        let left = CGRect(x: 0, y: 0, width: 495, height: 800)
+        let right = CGRect(x: 505, y: 0, width: 495, height: 800)
+        let float = CGRect(x: 480, y: 600, width: 40, height: 120)
+        let plates = SpaceSlidePlan.plates(
+            [
+                entry(1, left, pid: 1),
+                entry(2, right, pid: 2),
+                entry(3, float, pid: 3, floating: true),
+            ],
+            focus: WindowID(3),
+            stack: [:],
+            in: page
+        )
+        #expect(Set(plates.map(\.pile)).count == 1)
+        #expect(plates.compactMap(\.iconPid).sorted() == [1, 2, 3])
     }
 
     @Test("a window thin on one axis draws no plate")
