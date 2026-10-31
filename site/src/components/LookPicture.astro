@@ -1,33 +1,36 @@
 ---
-// One look's picture on the gallery (#1740): its screenshot, or the
-// preview KiwiDesk drew for the gallery, downloaded at build time
-// and served from the site through astro:assets, or — without
-// either — a CSS sketch of the desk drawn from the look file's own
-// colors and shapes. The preview and the sketch are labelled
-// "Preview".
-// The sketch's colors arrive as inline custom properties
-// (`sketchStyle` in `src/lib/looks.ts`): look data, not brand
-// colors, so no hex of them is written under `site/src`.
-// An image astro:assets cannot process drops to the sketch too, so
-// a bad image never fails the deploy (`src/lib/looks.ts`).
+// One look's picture on the gallery (#1740): its screenshot,
+// downloaded at build time and served from the site through
+// astro:assets, or — without one — a CSS sketch of the desk drawn
+// from the look file itself, labelled "Preview". The looks repo's
+// own `preview.png` is not shown: the sketch pictures the same file
+// and the owner prefers it (2026-10-30).
+//
+// The sketch draws only what the file encodes (`Sketch` in
+// `src/lib/looks.ts`): the Space Bar as tiles 1–4 in the look's
+// font, the App Bar's items, each bar's active indicator, boxed or
+// plain items, roundness, border, order, edges, and the focused
+// window's ring. The side windows, the centred window and the
+// background are the scene, not look data. Its values arrive as
+// inline custom properties: look data, not brand colors, so no hex
+// of them is written under `site/src`. An image astro:assets
+// cannot process drops to the sketch too, so a bad image never
+// fails the deploy.
 import { getImage } from "astro:assets";
-import { sketchStyle, type Look } from "../lib/looks";
+import { sketchStyle, type Edge, type Look } from "../lib/looks";
 
 interface Props {
   look: Look;
   size: "card" | "detail";
   badgeScreenshot: string;
+  /** The sketch's label. */
   badgePreview: string;
-  /** Alt text for a screenshot and for any other picture. */
   altScreenshot: string;
-  altPreview: string;
 }
-const { look, size, badgeScreenshot, badgePreview, altScreenshot, altPreview } =
+const { look, size, badgeScreenshot, badgePreview, altScreenshot } =
   Astro.props;
 
 const s = look.sketch;
-const edges = s?.edges ?? ["top"];
-const shared = edges.length === 1;
 const sizes =
   size === "card"
     ? "(max-width: 720px) 100vw, 360px"
@@ -52,22 +55,42 @@ if (look.image) {
     console.warn(`[looks] image of ${look.id} not processed: ${error}`);
   }
 }
-const kind = picture ? look.image!.kind : null;
+
+// The bars: one per edge, the Space Bar's first. Sharing an edge,
+// both sections sit on one bar in the file's order.
+type Section = "spaces" | "apps";
+const edges: Edge[] = s?.edges ?? ["top"];
+const bars: { edge: Edge; sections: Section[] }[] =
+  edges.length === 1
+    ? [{
+        edge: edges[0],
+        sections: s?.spacesFirst === false
+          ? ["apps", "spaces"]
+          : ["spaces", "apps"],
+      }]
+    : [
+        { edge: edges[0], sections: ["spaces"] },
+        { edge: edges[1], sections: ["apps"] },
+      ];
 const classes = [
   "plate",
   s?.glass && "plate--glass",
   s?.square && "plate--square",
   s?.glow && "plate--glow",
-  s?.boxed && s?.hug && "plate--hug",
+  s?.boxed ? "plate--boxed" : "plate--plain",
+  s?.hug && "plate--hug",
+  s?.border && "plate--border",
   s && !s.centered && "plate--start",
 ]
   .filter(Boolean)
   .join(" ");
+const markOf = (section: Section) =>
+  section === "spaces" ? s?.spaceMark ?? "outline" : s?.appMark ?? "edge_mark";
 ---
 
 <div class:list={["pic", `pic--${size}`]}>
   <span class="pic__badge">
-    {kind === "screenshot" ? badgeScreenshot : badgePreview}
+    {picture ? badgeScreenshot : badgePreview}
   </span>
   {
     picture ? (
@@ -78,29 +101,26 @@ const classes = [
         sizes={sizes}
         width={look.image!.width}
         height={look.image!.height}
-        alt={kind === "screenshot" ? altScreenshot : altPreview}
+        alt={altScreenshot}
         loading="lazy"
         decoding="async"
       />
     ) : (
       <div class={classes} style={sketchStyle(s)} aria-hidden="true">
-        {edges.map((edge, index) => (
-          <div class={`plate__bar plate__bar--${edge}`}>
-            {(shared || index === 0) && (
-              <span class="plate__group">
-                <i class="sq on" />
-                <i class="sq" />
-                <i class="sq" />
-                <i class="sq" />
+        {bars.map((bar) => (
+          <div class={`plate__bar plate__bar--${bar.edge}`}>
+            {bar.sections.map((section) => (
+              <span class={`plate__group plate__group--${section}`}
+                data-mark={markOf(section)}>
+                {section === "spaces"
+                  ? [1, 2, 3, 4].map((n) => (
+                      <b class={n === 1 ? "item tile on" : "item tile"}>{n}</b>
+                    ))
+                  : [0, 1].map((n) => (
+                      <b class={n === 0 ? "item app on" : "item app"}><i /></b>
+                    ))}
               </span>
-            )}
-            {(shared || index === 1) && (
-              <span class="plate__group">
-                <i class="dot on" />
-                <i class="dot" />
-                <i class="dot" />
-              </span>
-            )}
+            ))}
           </div>
         ))}
         <div class="plate__well">
@@ -117,10 +137,11 @@ const classes = [
   .pic {
     position: relative;
   }
+  /* Bottom right: a top bar, the common case, runs across the top. */
   .pic__badge {
     position: absolute;
     right: 8px;
-    top: 8px;
+    bottom: 8px;
     z-index: 3;
     font-size: 0.68rem;
     font-weight: 650;
@@ -132,7 +153,7 @@ const classes = [
   }
   .pic--detail .pic__badge {
     right: 12px;
-    top: 12px;
+    bottom: 12px;
   }
   .pic__img {
     width: 100%;
@@ -147,8 +168,8 @@ const classes = [
   }
 
   /* The sketch: a desk in the look's own colors. Every length is in
-     container units, so the card and the detail draw one picture
-     at two sizes. */
+     container units (the bars at `BAR_PT` cqi per point), so the card and
+     the detail draw one picture at two sizes. */
   .plate {
     container-type: inline-size;
     position: relative;
@@ -168,15 +189,17 @@ const classes = [
       color-mix(in srgb, var(--lk-ring, var(--accent)) 38%, rgb(24 26 32)),
       color-mix(in srgb, var(--lk-active, var(--accent)) 22%, rgb(86 90 102))
     );
+    --lk-tile-size: min(var(--lk-tile, 8.4cqi), 13cqi);
+    --lk-r: calc(var(--lk-round, 0.5) * var(--lk-tile-size) / 2);
   }
+
+  /* ---- Bars ---- */
   .plate__bar {
     display: flex;
     align-items: center;
     justify-content: center;
-    gap: 2.6cqi;
-    background: var(--lk-fill, rgba(20, 24, 22, 0.8));
-    border-radius: calc(var(--lk-round, 0.5) * 3.5cqi);
-    padding: 1.6cqi 2.4cqi;
+    gap: calc(var(--lk-gap, 1.2cqi) * 2);
+    border-radius: calc(var(--lk-r) + 1cqi);
   }
   .plate__bar--top {
     grid-area: top;
@@ -187,7 +210,6 @@ const classes = [
   .plate__bar--left,
   .plate__bar--right {
     flex-direction: column;
-    padding: 2.4cqi 1.6cqi;
   }
   .plate__bar--left {
     grid-area: left;
@@ -195,46 +217,114 @@ const classes = [
   .plate__bar--right {
     grid-area: right;
   }
+  .plate--start .plate__bar {
+    justify-content: flex-start;
+  }
+  /* Plain: one plate behind the items, full width or hugging them. */
+  .plate--plain .plate__bar {
+    background: var(--lk-fill, rgba(20, 24, 22, 0.8));
+    padding: 1cqi 1.6cqi;
+  }
+  .plate--plain.plate--border .plate__bar {
+    box-shadow: inset 0 0 0 var(--lk-border-w) var(--lk-border);
+  }
   .plate--hug .plate__bar {
     justify-self: center;
     align-self: center;
-  }
-  .plate--start .plate__bar {
-    justify-content: flex-start;
   }
   .plate--hug.plate--start .plate__bar {
     justify-self: start;
     align-self: start;
   }
-  .plate--glass .plate__bar {
-    backdrop-filter: blur(10px) saturate(160%);
-    -webkit-backdrop-filter: blur(10px) saturate(160%);
-    box-shadow:
-      inset 0 1px 0 rgba(255, 255, 255, 0.28),
-      inset 0 0 0 1px rgba(255, 255, 255, 0.1);
-  }
   .plate__group {
     display: flex;
     flex-direction: inherit;
     align-items: center;
-    gap: 1.2cqi;
+    gap: var(--lk-gap, 1.2cqi);
   }
-  .plate i {
+
+  /* ---- Items: Space tiles 1–4 and App Bar items ---- */
+  .item {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: var(--lk-tile-size);
+    height: var(--lk-tile-size);
+    border-radius: var(--lk-r);
+    color: var(--lk-item, rgba(255, 255, 255, 0.8));
+  }
+  .tile {
+    font-family: var(--lk-font, system-ui, sans-serif);
+    font-weight: var(--lk-weight, 400);
+    font-size: calc(var(--lk-tile-size) * 0.58);
+    line-height: 1;
+  }
+  .item.on {
+    color: var(--lk-active, var(--accent));
+  }
+  /* An app: its icon as a block in the item colours. */
+  .app i {
     display: block;
-    width: 3.4cqi;
-    height: 3.4cqi;
-    background: var(--lk-item, rgba(255, 255, 255, 0.8));
-    opacity: 0.55;
+    width: 62%;
+    height: 62%;
+    border-radius: calc(var(--lk-r) * 0.6);
+    background: currentColor;
   }
-  .plate i.sq {
-    border-radius: calc(var(--lk-round, 0.5) * 1.2cqi);
+  /* Boxed: a box per item, bordered when the look draws a border. */
+  .plate--boxed .item {
+    background: var(--lk-fill, rgba(20, 24, 22, 0.8));
   }
-  .plate i.dot {
-    border-radius: 50%;
+  .plate--boxed.plate--border .item {
+    box-shadow: inset 0 0 0 var(--lk-border-w) var(--lk-border);
   }
-  .plate i.on {
-    opacity: 1;
-    background: var(--lk-active, var(--accent));
+  .plate--glass.plate--plain .plate__bar,
+  .plate--glass.plate--boxed .item {
+    backdrop-filter: blur(10px) saturate(160%);
+    -webkit-backdrop-filter: blur(10px) saturate(160%);
+    box-shadow:
+      inset 0 1px 0 rgba(255, 255, 255, 0.28),
+      inset 0 0 0 var(--lk-border-w, 1px)
+        var(--lk-border, rgba(255, 255, 255, 0.1));
+  }
+
+  /* The active indicator, in the highlight colour: an outline
+     replaces the active box's border; an edge mark sits on the
+     item's side away from the screen edge, as the app's own preview
+     draws it, half as thick again as the outline. */
+  [data-mark="outline"] .item.on {
+    box-shadow: inset 0 0 0 var(--lk-hl-w, 0.5cqi)
+      var(--lk-hl, var(--lk-active, var(--accent)));
+  }
+  [data-mark="edge_mark"] .item.on::after {
+    content: "";
+    position: absolute;
+    background: var(--lk-hl, var(--lk-active, var(--accent)));
+    border-radius: 0.3cqi;
+    --mark: calc(var(--lk-hl-w, 0.5cqi) * 1.5);
+  }
+  .plate__bar--top [data-mark="edge_mark"] .item.on::after {
+    left: 8%;
+    right: 8%;
+    bottom: 0;
+    height: var(--mark);
+  }
+  .plate__bar--bottom [data-mark="edge_mark"] .item.on::after {
+    left: 8%;
+    right: 8%;
+    top: 0;
+    height: var(--mark);
+  }
+  .plate__bar--left [data-mark="edge_mark"] .item.on::after {
+    top: 8%;
+    bottom: 8%;
+    right: 0;
+    width: var(--mark);
+  }
+  .plate__bar--right [data-mark="edge_mark"] .item.on::after {
+    top: 8%;
+    bottom: 8%;
+    left: 0;
+    width: var(--mark);
   }
   .plate__well {
     grid-area: well;

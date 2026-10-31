@@ -22,14 +22,12 @@ import {
 // 2026-08-26 mode split — a separate PATH entry, so its hreflang
 // cluster stays within the mode and never cross-links a Simple
 // page); "guide" is the guide page; "changelog" is the release
-// notes (#873). Every entry here is emitted for ALL THREE locales
-// with hreflang alternates, so a path may only join this list
-// once its /de/ and /ja/ routes genuinely exist — otherwise the
-// alternates advertise URLs that 404.
-const paths = ["", "nerd", "guide", "changelog", "compare"];
-// "looks" (the gallery, #1740) is deliberately absent: it ships
-// noindex and unlinked until the owner calls it live, and joins
-// this list in the same change that drops its noindex.
+// notes (#873); "looks" is the gallery (#1740). Every entry here
+// is emitted for ALL THREE locales with hreflang alternates, so a
+// path may only join this list once its /de/ and /ja/ routes
+// genuinely exist — otherwise the alternates advertise URLs that
+// 404.
+const paths = ["", "nerd", "guide", "changelog", "compare", "looks"];
 
 // The trailer plays in the #demo section of the landing page in
 // both modes. A <video:video> entry per landing URL is what lets

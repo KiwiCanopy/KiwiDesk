@@ -389,8 +389,9 @@
 :root[data-mode="dev"] #layouts.dev-reveal          { animation-delay: 0.10s; }
 :root[data-mode="dev"] #config.dev-reveal           { animation-delay: 0.18s; }
 :root[data-mode="dev"] #cli.dev-reveal              { animation-delay: 0.26s; }
-:root[data-mode="dev"] #maker-quote-dev.dev-reveal  { animation-delay: 0.34s; }
-:root[data-mode="dev"] #start.dev-reveal            { animation-delay: 0.42s; }
+:root[data-mode="dev"] #looks.dev-reveal            { animation-delay: 0.34s; }
+:root[data-mode="dev"] #maker-quote-dev.dev-reveal  { animation-delay: 0.42s; }
+:root[data-mode="dev"] #start.dev-reveal            { animation-delay: 0.50s; }
 
 @keyframes dev-rise {
   from {
