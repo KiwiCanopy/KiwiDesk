@@ -81,7 +81,8 @@ struct SimpleLookCard: View {
     private var browseTile: some View {
         DashedActionTile(
             systemImage: "square.grid.2x2",
-            label: Self.browseLabel
+            label: Self.browseLabel,
+            captionLines: 0
         ) {
             NSWorkspace.shared.open(SupportLinks.looks)
         }

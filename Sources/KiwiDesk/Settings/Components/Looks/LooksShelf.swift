@@ -91,9 +91,13 @@ struct LooksShelf: View {
             }
             LazyVGrid(columns: columns, alignment: .leading, spacing: 12) {
                 ForEach(model.userLooks, id: \.name) { look in
-                    card(look, caption: look.author.map(LookTile.byline))
-                        .focused($returningTile, equals: look.name)
-                        .rowActions { userMenu(look) }
+                    card(
+                        look,
+                        caption: look.author.map(LookTile.byline),
+                        captionLines: userCaptionLines
+                    )
+                    .focused($returningTile, equals: look.name)
+                    .rowActions { userMenu(look) }
                 }
                 addTile
             }
@@ -121,8 +125,23 @@ struct LooksShelf: View {
         Text(text).font(.subheadline.weight(.semibold))
     }
 
-    private func card(_ look: ShelfLook, caption: String?) -> some View {
-        LookTile(model: model, look: look, caption: caption) {
+    /// My looks' one caption reservation: a byline's two lines
+    /// while any look carries one, so the line ends level.
+    private var userCaptionLines: Int {
+        model.userLooks.contains { $0.author != nil } ? 2 : 0
+    }
+
+    private func card(
+        _ look: ShelfLook,
+        caption: String?,
+        captionLines: Int? = nil
+    ) -> some View {
+        LookTile(
+            model: model,
+            look: look,
+            caption: caption,
+            captionLines: captionLines
+        ) {
             apply(look)
         }
         .popover(item: renameBinding(look.name)) { request in
@@ -176,7 +195,11 @@ struct LooksShelf: View {
 
     /// Trailing "+" tile saving the current look.
     private var addTile: some View {
-        DashedActionTile(systemImage: "plus", label: saveCurrentLabel) {
+        DashedActionTile(
+            systemImage: "plus",
+            label: saveCurrentLabel,
+            captionLines: userCaptionLines
+        ) {
             saveRequest = NameEditRequest(seed: nextUserName())
         }
         .popover(item: $saveRequest) { request in

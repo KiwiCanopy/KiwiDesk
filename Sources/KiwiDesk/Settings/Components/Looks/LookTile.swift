@@ -11,6 +11,9 @@ struct LookTile: View {
     let look: ShelfLook
     /// Drawn under the name; nil draws the name alone.
     let caption: String?
+    /// Caption room reserved, so a line of tiles ends level; nil
+    /// reserves two lines under a caption and none without one.
+    var captionLines: Int?
     /// Hover help and VoiceOver hint where the caption is not drawn.
     var help: String?
     /// Told when the pointer enters and leaves, for a surface that
@@ -31,7 +34,7 @@ struct LookTile: View {
                 appliedSpoken: other ? otherColorsSpoken : nil,
                 // Simple's line draws the name alone (#2737 ruling
                 // 3), so it reserves no caption room.
-                captionLines: caption == nil ? 0 : 2
+                captionLines: captionLines ?? (caption == nil ? 0 : 2)
             ) {
                 LookPlate(settings: preview, spaceLabels: spaceLabels)
             }
