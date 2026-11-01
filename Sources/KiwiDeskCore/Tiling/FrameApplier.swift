@@ -33,6 +33,10 @@ final class FrameApplier {
     /// The AX writes the queues perform; a test counts them.
     var writer = FrameWriter.live
 
+    /// Every screen's whole AX frame, for the bottom-band write
+    /// (#2894); wired by `TilingEngine`, empty (no band) unwired.
+    var screenFrames: @MainActor () -> [CGRect] = { [] }
+
     /// Whether the app's EUI is on at rest — the event loop's
     /// warmed baseline, wired at bootstrap. Off by default: an
     /// unwired applier never toggles the flag.
@@ -122,7 +126,8 @@ final class FrameApplier {
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
-        if stageHeld(id, frame, setSize: setSize) { return }
+        let band = bandScreen(frame, setSize: setSize)
+        if stageHeld(id, frame, setSize: setSize, band: band) { return }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -133,7 +138,8 @@ final class FrameApplier {
             PendingFrames.Entry(
                 element: target,
                 frame: frame,
-                setSize: setSize
+                setSize: setSize,
+                band: band
             )
         )
         guard !alreadyScheduled else {
@@ -149,7 +155,12 @@ final class FrameApplier {
             waited()
             guard let entry = store.take(id) else { return }
             if entry.setSize {
-                writer.setFrame(entry.frame, entry.element)
+                BottomBandWrite.write(
+                    entry.frame,
+                    entry.element,
+                    nearBottomOf: entry.band,
+                    writer: writer
+                )
             } else {
                 writer.setPosition(
                     entry.frame.origin,
@@ -184,9 +195,10 @@ final class FrameApplier {
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
+        let band = bandScreen(frame, setSize: setSize)
         // A held write owes no resend: it lands once, at the
         // slide's landing, on the screen it was sent to (#2524).
-        if stageHeld(id, frame, setSize: setSize) {
+        if stageHeld(id, frame, setSize: setSize, band: band) {
             pendingResends[id] = nil
             return
         }
@@ -215,7 +227,12 @@ final class FrameApplier {
             waited()
             holds.beginInstant(pid, writer)
             if setSize {
-                writer.setFrame(frame, target)
+                BottomBandWrite.write(
+                    frame,
+                    target,
+                    nearBottomOf: band,
+                    writer: writer
+                )
             } else {
                 writer.setPosition(frame.origin, target)
             }

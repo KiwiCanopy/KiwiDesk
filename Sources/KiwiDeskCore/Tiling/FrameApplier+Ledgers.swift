@@ -76,6 +76,9 @@ final class PendingFrames: @unchecked Sendable {
         let element: AXUIElement
         var frame: CGRect
         var setSize: Bool
+        /// The screen whose bottom band the size write clears
+        /// (#2894).
+        var band: CGRect? = nil
     }
 
     private let lock = NSLock()
@@ -89,6 +92,14 @@ final class PendingFrames: @unchecked Sendable {
         defer { lock.unlock() }
         if let existing = entries.removeValue(forKey: id) {
             var merged = entry
+            // The newer frame's band, else the waiting write's
+            // where the newer frame still ends in it: the waiting
+            // shrink never ran, so the window may still need it.
+            merged.band = BottomBandWrite.mergedBand(
+                newer: entry.band,
+                waiting: existing.band,
+                frame: entry.frame
+            )
             merged.setSize = entry.setSize || existing.setSize
             entries[id] = merged
             return true

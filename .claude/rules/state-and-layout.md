@@ -1656,6 +1656,26 @@ editing here:
   Space slide's hold stages owes none either: it lands once, at the
   slide's landing (#2524, `FrameApplierHeldTests` ▸
   `heldSetOwesNoResend`).
+- **Route an applier write with a size through
+  `BottomBandWrite.write`, never `writer.setFrame` (#2894).** It
+  lifts a window ending near a screen's bottom edge before sizing
+  it, which macOS would otherwise refuse; its docstring carries
+  the measurement. The screens it reads come from
+  `TilingEngine.allScreenFrames`, never a live read in the applier.
+  Whether a write shrinks the window is the window's own frame,
+  read on its queue for every sized write ending near a bottom
+  edge — never a record of what was asked or echoed, which an
+  app's own resize or a spring's overshoot leaves behind. A merge
+  over a waiting write keeps its band through the one
+  `BottomBandWrite.mergedBand`, held and queued alike
+  (`BottomBandWriteSeamTests` ▸ `mergesTakeTheOneRule`).
+  `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
+  three doors, `unaskedGrowIsLifted` the window's answer, and
+  `BottomBandWriteSeamTests` ▸
+  `appliersTakeTheBand` reds a `FrameApplier` file spelling the
+  writer's frame call. The quit gather's direct
+  `WindowControl.setFrame` is the one ruled exception: nothing
+  learns from a frame written at quit.
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
   row, so anything that changes it — a resize, a window opening
