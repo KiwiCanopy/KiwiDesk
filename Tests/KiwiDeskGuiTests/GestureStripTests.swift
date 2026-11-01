@@ -98,7 +98,7 @@ struct GestureStripTests {
     func plateIsPointerOnly() throws {
         let strip = try Self.squashed(Self.gestures + "GestureStrip.swift")
         #expect(strip.contains(".accessibilityHidden(true)"))
-        #expect(strip.contains(".mask(GestureStripFade(fades:fades))"))
+        #expect(strip.contains(".mask(StripFade(fades:fades))"))
         // The offset reads the run's leading edge in the scroller's
         // own space, negated: a dropped sign never fades the lead.
         #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
