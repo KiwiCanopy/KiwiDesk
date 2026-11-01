@@ -201,6 +201,25 @@ struct PlateGroundTests {
         }
     }
 
+    /// A schematic on the light plate strokes the paint's own ring,
+    /// even one the dark plate's floor would refuse.
+    @Test("the light plate's schematic ring is the paint's")
+    func lightRingIsThePaints() {
+        let ring = "#1A1A1A"
+        var settings = TilingSettings()
+        settings.borderStyle.enabled = true
+        settings.borderStyle.focusedColor = ring
+        #expect(HomeCardPlate.holdsLightPlate(settings))
+        #expect(
+            !HomeCardPlate.plateLegible(ring, on: HomeCardPlate.darkGround)
+        )
+        let paint = HomeCardPlate.palette(settings, in: .light)
+        #expect(
+            LayoutSchematicView.focusStroke(settings, on: paint)
+                == Color(kiwiHex: ring)
+        )
+    }
+
     /// With borders off no ring draws, so the plate's focus mark
     /// and the verdict both take the active item colour.
     @Test("borders off judge and paint the active item colour")
