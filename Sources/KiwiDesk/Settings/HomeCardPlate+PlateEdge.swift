@@ -39,8 +39,7 @@ struct PreviewPlateEdge: View {
         } else {
             RoundedRectangle(cornerRadius: corner)
                 .strokeBorder(
-                    palette?.frame
-                        ?? SettingsTheme.plateInk.opacity(0.3)
+                    (palette ?? .unresolved).frame
                 )
         }
     }

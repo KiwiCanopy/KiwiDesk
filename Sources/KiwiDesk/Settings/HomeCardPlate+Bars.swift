@@ -158,8 +158,7 @@ struct HomeCardBarsTile: View {
         .overlay(
             RoundedRectangle(cornerRadius: 5)
                 .strokeBorder(
-                    palette?.frame
-                        ?? SettingsTheme.ink2.opacity(0.3)
+                    (palette ?? .unresolved).frame
                 )
                 .opacity(drawsChrome ? 1 : 0)
         )
@@ -204,14 +203,12 @@ struct HomeCardBarsTile: View {
     private var well: some View {
         RoundedRectangle(cornerRadius: 5)
             .fill(
-                palette?.well
-                    ?? SettingsTheme.ink2.opacity(0.08)
+                (palette ?? .unresolved).well
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 5)
                     .strokeBorder(
-                        palette?.frame
-                            ?? SettingsTheme.ink2.opacity(0.3)
+                        (palette ?? .unresolved).frame
                     )
             )
             .opacity(drawsChrome ? 1 : 0)

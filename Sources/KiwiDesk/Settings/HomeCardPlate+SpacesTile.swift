@@ -22,7 +22,7 @@ struct HomeCardSpacesTile: View {
                     )
                     .monospacedDigit()
                     .foregroundStyle(
-                        palette?.ink ?? SettingsTheme.plateInk
+                        (palette ?? .unresolved).ink
                     )
             }
         }
@@ -52,14 +52,12 @@ struct HomeCardSpacesTile: View {
             (palette ?? .unresolved).base
         let fill: Color =
             active
-            ? palette?.fill ?? LayoutSchematic.fill
-            : palette?.ghostFill
-                ?? SettingsTheme.ink2.opacity(0.15)
+            ? (palette ?? .unresolved).fill
+            : (palette ?? .unresolved).ghostFill
         let stroke: Color =
             active
-            ? palette?.focusMark ?? SettingsTheme.accent
-            : palette?.ghostStroke
-                ?? SettingsTheme.ink2.opacity(0.5)
+            ? (palette ?? .unresolved).focusMark
+            : (palette ?? .unresolved).ghostStroke
         // Opaque base layer to prevent compounding transparency (#712).
         return RoundedRectangle(cornerRadius: 5)
             .fill(base)

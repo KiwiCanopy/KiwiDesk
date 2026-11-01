@@ -66,8 +66,7 @@ public enum ColorVision {
     /// Relative luminance, WCAG's definition.
     public static func luminance(_ hex: String) -> Double? {
         guard let c = components(hex) else { return nil }
-        return 0.2126 * linear(c.r) + 0.7152 * linear(c.g)
-            + 0.0722 * linear(c.b)
+        return luma(linear(c.r), linear(c.g), linear(c.b))
     }
 
     /// Rec. 709 luma over the ENCODED channels, 0...1, alpha
@@ -78,7 +77,8 @@ public enum ColorVision {
         return luma(c.r, c.g, c.b)
     }
 
-    /// The one copy of the Rec. 709 weights `luma` applies.
+    /// The one copy of the Rec. 709 weights: over encoded channels
+    /// for `luma`, over linear ones for `luminance`.
     static func luma(_ r: Double, _ g: Double, _ b: Double) -> Double {
         0.2126 * r + 0.7152 * g + 0.0722 * b
     }

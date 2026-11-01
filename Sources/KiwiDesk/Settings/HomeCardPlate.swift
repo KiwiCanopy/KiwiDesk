@@ -113,7 +113,7 @@ struct HomeCardSchematicBand: View {
                         )
                     )
                     .foregroundStyle(
-                        palette?.accent ?? SettingsTheme.accent
+                        (palette ?? .unresolved).accent
                     )
             }
         }

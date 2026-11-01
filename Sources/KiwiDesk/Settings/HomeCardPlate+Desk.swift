@@ -61,16 +61,14 @@ struct HomeCardScreensTile: View {
         let cardHeight = max(rect.height - Self.standBand, 6)
         let stroke =
             main
-            ? palette?.focusMark ?? SettingsTheme.accent
-            : palette?.ghostStroke
-                ?? SettingsTheme.ink2.opacity(0.6)
+            ? (palette ?? .unresolved).focusMark
+            : (palette ?? .unresolved).ghostStroke
         VStack(spacing: 0) {
             RoundedRectangle(cornerRadius: 3)
                 .fill(
                     main
-                        ? palette?.fill ?? LayoutSchematic.fill
-                        : palette?.ghostFill
-                            ?? Color.primary.opacity(0.05)
+                        ? (palette ?? .unresolved).fill
+                        : (palette ?? .unresolved).ghostFill
                 )
                 .overlay(
                     RoundedRectangle(cornerRadius: 3)
@@ -97,8 +95,7 @@ struct HomeCardScreensTile: View {
         return VStack(spacing: 0) {
             Rectangle()
                 .fill(
-                    palette?.ghostStroke
-                        ?? SettingsTheme.ink2.opacity(0.4)
+                    (palette ?? .unresolved).ghostStroke
                 )
                 .frame(
                     width: foot * SettingsTheme.screenNeckScale,
@@ -106,8 +103,7 @@ struct HomeCardScreensTile: View {
                 )
             Capsule()
                 .fill(
-                    palette?.ghostStroke
-                        ?? SettingsTheme.ink2.opacity(0.4)
+                    (palette ?? .unresolved).ghostStroke
                 )
                 .frame(width: foot, height: 3)
         }
@@ -116,12 +112,11 @@ struct HomeCardScreensTile: View {
     private var pips: some View {
         HStack(spacing: 3) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(palette?.focusMark ?? SettingsTheme.accent)
+                .fill((palette ?? .unresolved).focusMark)
                 .frame(width: 8, height: 8)
             RoundedRectangle(cornerRadius: 2)
                 .fill(
-                    palette?.ghostStroke
-                        ?? SettingsTheme.ink2.opacity(0.4)
+                    (palette ?? .unresolved).ghostStroke
                 )
                 .frame(width: 8, height: 8)
         }

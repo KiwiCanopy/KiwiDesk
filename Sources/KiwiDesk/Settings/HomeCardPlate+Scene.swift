@@ -12,8 +12,7 @@ struct HomeCardGapsTile: View {
         ZStack {
             RoundedRectangle(cornerRadius: 4)
                 .strokeBorder(
-                    palette?.frame
-                        ?? SettingsTheme.ink2.opacity(0.3)
+                    (palette ?? .unresolved).frame
                 )
             VStack(spacing: mini(inner.vertical)) {
                 HStack(spacing: mini(inner.horizontal)) {
@@ -52,8 +51,7 @@ struct HomeCardGapsTile: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .fill(
-                        palette?.ghostFill
-                            ?? SettingsTheme.ink2.opacity(0.15)
+                        (palette ?? .unresolved).ghostFill
                     )
             )
             .overlay {
@@ -61,11 +59,8 @@ struct HomeCardGapsTile: View {
                     RoundedRectangle(cornerRadius: 4)
                         .strokeBorder(
                             focused
-                                ? palette?.focusMark
-                                    ?? SettingsTheme.accent
-                                : palette?.ghostStroke
-                                    ?? SettingsTheme.ink2
-                                    .opacity(0.5),
+                                ? (palette ?? .unresolved).focusMark
+                                : (palette ?? .unresolved).ghostStroke,
                             lineWidth: strokeWidth
                         )
                 }
