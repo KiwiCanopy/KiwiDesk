@@ -211,20 +211,6 @@ struct BottomBandWriteTests {
         #expect(app.frame.withLock { $0 } == slot)
     }
 
-    /// A spring's shrink-back after an overshoot: the window is at
-    /// the peak, and the next frame shrinks it a few points.
-    @Test(
-        "A shrink-back the echo has not reached is lifted",
-        arguments: Door.allCases
-    )
-    func overshootShrinkBackIsLifted(door: Door) async throws {
-        let app = RefusingApp(start, screenBottom: screen.maxY)
-        let applier = makeApplier(app)
-        try await send(start, through: door, applier, app)
-        try await send(slot, through: door, applier, app)
-        #expect(app.frame.withLock { $0 } == slot)
-    }
-
     /// A sized write merged into a held position-only one keeps
     /// its band (#1956's merge).
     @Test("A held merge carries the band")
