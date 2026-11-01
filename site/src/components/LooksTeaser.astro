@@ -1,0 +1,211 @@
+---
+// The looks gallery's teaser on the landing (#1740), mounted once
+// per mode: Simple shows three cards from today's Discover order,
+// Nerd quotes one real look file beside its card. Every card links
+// to its detail on /looks/, never to kiwidesk://, and carries no
+// like or download count. A failed looks read draws no section, as
+// the voices do; `check-site-tokens.py` ▸ `check_looks_teaser`
+// reds the site gate when a landing page draws none.
+import LookPicture from "./LookPicture.astro";
+import type { Lang } from "./PageShell.astro";
+import { localePath } from "../lib/locales";
+import {
+  looks,
+  discoverOrder,
+  needsNewerApp,
+  lookAnchor,
+  LOOKS_REPO_URL,
+  SUBMIT_URL,
+  type Look,
+} from "../lib/looks";
+
+interface Props {
+  t: Record<string, string>;
+  lang: Lang;
+  mode: "simple" | "dev";
+}
+const { t, lang, mode } = Astro.props;
+const isDev = mode === "dev";
+
+const offered = discoverOrder(looks).filter((l) => !needsNewerApp(l));
+const featured = offered.find((l) => l.excerpt);
+const cards = isDev ? (featured ? [featured] : []) : offered.slice(0, 3);
+
+const looksHref = localePath(lang, "/looks/");
+const detailHref = (l: Look): string => `${looksHref}#${lookAnchor(l.id)}`;
+const by = (l: Look): string => t.looks_by.replace("{author}", l.author);
+
+// The excerpt as JSON lines, each a list of [class, text] runs;
+// the remaining keys of the file are elided with "…".
+type Run = [string | null, string];
+const json = (v: string | number | boolean): Run =>
+  typeof v === "string" ? ["str", JSON.stringify(v)] : ["num", String(v)];
+const entries = (pairs: [string, string | number | boolean][]): Run[][] =>
+  pairs.map(([k, v]) => [
+    [null, "      "], ["str", JSON.stringify(k)], [null, ": "], json(v),
+    [null, ","],
+  ]);
+const ex = featured?.excerpt;
+const lines: Run[][] = ex
+  ? [
+      [[null, "{"]],
+      [[null, "  "], ["str", '"format"'], [null, ": "], json(ex.format),
+        [null, ","]],
+      [[null, "  "], ["str", '"look"'], [null, ": {"]],
+      [[null, "    "], ["str", '"name"'], [null, ": "], json(ex.name),
+        [null, ","]],
+      [[null, "    "], ["str", '"colors"'], [null, ": {"]],
+      ...entries(ex.colors),
+      [[null, "      "], ["cmt", "…"]],
+      [[null, "    },"]],
+      [[null, "    "], ["str", '"style"'], [null, ": {"]],
+      ...entries(ex.style),
+      [[null, "      "], ["cmt", "…"]],
+      [[null, "    }"]],
+      [[null, "  }"]],
+      [[null, "}"]],
+    ]
+  : [];
+const fileName = featured ? `${featured.id}.json` : "";
+const pictureName = featured ? `${featured.id}.png` : "";
+---
+
+{cards.length > 0 && !isDev && (
+  <section class="simple-only lt" id="looks" aria-labelledby="looksTitle">
+    <div class="wrap">
+      <div class="section-head reveal">
+        <span class="eyebrow">{t.looks_eyebrow}</span>
+        <h2 id="looksTitle">{t.looks_teaser_title_simple}</h2>
+        <p>{t.looks_teaser_lead_simple}</p>
+      </div>
+      <ul class="lt__cards reveal" aria-label={t.looks_eyebrow}>
+        {cards.map((look) => (
+          <li>
+            <a class="lt-card" href={detailHref(look)} data-look={look.id}>
+              <LookPicture look={look} size="card"
+                badgeScreenshot={t.looks_badge_screenshot}
+                badgePreview={t.looks_badge_preview}
+                altScreenshot="" />
+              <span class="lt-card__name">{look.name}</span>
+              <span class="lt-card__by">{by(look)}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <div class="lt__actions reveal">
+        <a class="btn btn--primary" href={looksHref}>
+          {t.looks_teaser_browse}
+        </a>
+        <a class="btn btn--ghost" href={SUBMIT_URL} target="_blank"
+          rel="noopener">
+          {t.looks_share}<span aria-hidden="true"> ↗</span>
+        </a>
+      </div>
+    </div>
+  </section>
+)}
+
+{featured && isDev && (
+  <section class="split dev-only dev-reveal lt" id="looks"
+    aria-labelledby="looksTitle">
+    <div class="wrap">
+      <div class="split__copy">
+        <span class="eyebrow">{t.looks_eyebrow}</span>
+        <h2 id="looksTitle">{t.looks_teaser_title_dev}</h2>
+        <p set:html={t.looks_teaser_lead_dev} />
+        <div class="lt__actions lt__actions--start">
+          <a class="btn btn--primary" href={looksHref}>
+            {t.looks_teaser_browse}
+          </a>
+          <a class="btn btn--ghost" href={LOOKS_REPO_URL} target="_blank"
+            rel="noopener">
+            {t.looks_teaser_repo}<span aria-hidden="true"> ↗</span>
+          </a>
+        </div>
+        <a class="lt-card lt-card--solo" href={detailHref(featured)}
+          data-look={featured.id}>
+          <LookPicture look={featured} size="card"
+            badgeScreenshot={t.looks_badge_screenshot}
+            badgePreview={t.looks_badge_preview}
+            altScreenshot="" />
+          <span class="lt-card__name">{featured.name}</span>
+          <span class="lt-card__by">{by(featured)}</span>
+        </a>
+      </div>
+      <div class="code" role="group" aria-label={t.looks_teaser_code_aria}>
+        <div class="code__bar">
+          <span class="code__dot" aria-hidden="true"></span>
+          <span class="code__dot" aria-hidden="true"></span>
+          <span class="code__dot" aria-hidden="true"></span>
+          <span class="code__title">{fileName}</span>
+        </div>
+        <pre data-look-excerpt><code>{lines.map((line) => (<>{line.map(([c, s]) => c ? <span class={c}>{s}</span> : s)}{"\n"}</>))}{"\n"}<span class="prompt">$</span> kiwidesk preview {fileName} {pictureName}</code></pre>
+      </div>
+    </div>
+  </section>
+)}
+
+<style>
+  .lt__cards {
+    display: grid;
+    gap: 1.25rem;
+    margin: 0 auto;
+    padding: 0;
+    list-style: none;
+    max-width: 1080px;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+  }
+  .lt-card {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    padding: 0.6rem 0.6rem 0.85rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--card-bg);
+    box-shadow: var(--shadow-sm);
+    color: inherit;
+    text-decoration: none;
+    transition: border-color 0.2s ease, transform 0.2s ease;
+  }
+  .lt-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+  }
+  .lt-card__name {
+    margin-top: 0.55rem;
+    padding-inline: 0.2rem;
+    font-weight: 650;
+  }
+  .lt-card__by {
+    padding-inline: 0.2rem;
+    font-size: 0.88rem;
+    color: var(--text-dim);
+  }
+  .lt-card--solo {
+    margin-top: 1.75rem;
+    max-width: 320px;
+  }
+  .lt__actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.75rem;
+    margin-top: clamp(1.75rem, 4vw, 2.5rem);
+  }
+  .lt__actions--start {
+    justify-content: flex-start;
+    margin-top: 1.5rem;
+  }
+  .lt .split__copy :global(code) {
+    font-family: var(--mono);
+    font-size: 0.92em;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .lt-card,
+    .lt-card:hover {
+      transition: none;
+      transform: none;
+    }
+  }
+</style>
