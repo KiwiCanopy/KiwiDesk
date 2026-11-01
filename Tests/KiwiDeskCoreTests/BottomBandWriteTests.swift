@@ -182,8 +182,6 @@ struct BottomBandWriteTests {
         applier.elementProvider = { _ in element }
         applier.writer = app.writer
         applier.screenFrames = { [screen] in [screen] }
-        // The echo-fed height: what the window reports of itself.
-        applier.trackedHeight = { _ in app.frame.withLock { $0.height } }
         return applier
     }
 
@@ -213,23 +211,8 @@ struct BottomBandWriteTests {
         #expect(app.frame.withLock { $0 } == slot)
     }
 
-    @Test(
-        "A write no shorter than the tracked height reads nothing",
-        arguments: Door.allCases
-    )
-    func sameHeightReadsNothing(door: Door) async throws {
-        let app = RefusingApp(slot, screenBottom: screen.maxY)
-        let applier = makeApplier(app)
-        // The first sized write has no sent height to compare.
-        try await send(slot, through: door, applier, app)
-        app.calls.withLock { $0.removeAll() }
-        try await send(slot, through: door, applier, app)
-        #expect(app.calls.withLock { $0 } == ["frame"])
-    }
-
-    /// A spring's shrink-back after an overshoot: the echo still
-    /// reports a height from before the peak, the frame sent last
-    /// was the peak, and the window is at the peak.
+    /// A spring's shrink-back after an overshoot: the window is at
+    /// the peak, and the next frame shrinks it a few points.
     @Test(
         "A shrink-back the echo has not reached is lifted",
         arguments: Door.allCases
@@ -237,7 +220,6 @@ struct BottomBandWriteTests {
     func overshootShrinkBackIsLifted(door: Door) async throws {
         let app = RefusingApp(start, screenBottom: screen.maxY)
         let applier = makeApplier(app)
-        applier.trackedHeight = { _ in 480 }
         try await send(start, through: door, applier, app)
         try await send(slot, through: door, applier, app)
         #expect(app.frame.withLock { $0 } == slot)
@@ -291,6 +273,22 @@ struct BottomBandWriteTests {
             .init(element: element, frame: taller, setSize: true)
         )
         #expect(pending.take(id)?.band == screen)
+    }
+
+    @Test("A taller sized frame merged into a held shrink keeps its band")
+    func heldSizedMergeKeepsTheBand() {
+        let held = HeldWrites()
+        let id = WindowID(1)
+        let taller = slot.insetBy(dx: 0, dy: -1)
+        held.hold([id], until: .now() + 60)
+        _ = held.stage(id, slot, setSize: true, band: screen)
+        _ = held.stage(id, taller, setSize: true)
+        guard case .write(let entry) = held.release(id, now: .now() + 120)
+        else {
+            Issue.record("the staged write was not released")
+            return
+        }
+        #expect(entry.band == screen)
     }
 
     @Test("A write far from any bottom edge reads nothing")

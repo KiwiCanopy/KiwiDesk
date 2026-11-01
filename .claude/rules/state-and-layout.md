@@ -1662,11 +1662,13 @@ editing here:
   it, which macOS would otherwise refuse; its docstring carries
   the measurement. The screens it reads come from
   `TilingEngine.allScreenFrames`, never a live read in the applier.
-  Whether a write shrinks the window is judged against BOTH its
-  echo-fed height (`FrameApplier.trackedHeight`), which an app's
-  own resize reaches, and the height last sent (`SentHeights`),
-  which a spring's shrink-back beats its echo to — never either
-  alone (`BottomBandWriteTests` ▸ `overshootShrinkBackIsLifted`).
+  Whether a write shrinks the window is the window's own frame,
+  read on its queue for every sized write ending near a bottom
+  edge — never a record of what was asked or echoed, which an
+  app's own resize or a spring's overshoot leaves behind. A merge
+  over a waiting write keeps its band through the one
+  `BottomBandWrite.mergedBand`, held and queued alike
+  (`BottomBandWriteSeamTests` ▸ `mergesTakeTheOneRule`).
   `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
   three doors, `unaskedGrowIsLifted` the window's answer, and
   `BottomBandWriteSeamTests` ▸

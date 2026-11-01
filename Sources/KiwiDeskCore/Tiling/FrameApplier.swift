@@ -36,10 +36,6 @@ final class FrameApplier {
     /// Every screen's whole AX frame, for the bottom-band write
     /// (#2894); wired by `TilingEngine`, empty (no band) unwired.
     var screenFrames: @MainActor () -> [CGRect] = { [] }
-    /// A window's echo-fed height, wired by `KiwiCore`; nil
-    /// (unknown) reads the window, as unwired.
-    var trackedHeight: @MainActor (WindowID) -> CGFloat? = { _ in nil }
-    let sentHeights = SentHeights()
 
     /// Whether the app's EUI is on at rest — the event loop's
     /// warmed baseline, wired at bootstrap. Off by default: an
@@ -130,7 +126,7 @@ final class FrameApplier {
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
-        let band = bandScreen(id, frame, setSize: setSize)
+        let band = bandScreen(frame, setSize: setSize)
         if stageHeld(id, frame, setSize: setSize, band: band) { return }
         guard let element = elementProvider(id) else { return }
         guard
@@ -199,7 +195,7 @@ final class FrameApplier {
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
-        let band = bandScreen(id, frame, setSize: setSize)
+        let band = bandScreen(frame, setSize: setSize)
         // A held write owes no resend: it lands once, at the
         // slide's landing, on the screen it was sent to (#2524).
         if stageHeld(id, frame, setSize: setSize, band: band) {

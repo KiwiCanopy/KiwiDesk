@@ -49,6 +49,17 @@ enum BottomBandWrite {
         return min(clear, target.minY)
     }
 
+    /// The band a write merged over a waiting one carries: the
+    /// newer frame's, else the waiting one's where the newer frame
+    /// still ends in it, since the waiting write never ran.
+    static func mergedBand(
+        newer: CGRect?,
+        waiting: CGRect?,
+        frame: CGRect
+    ) -> CGRect? {
+        newer ?? waiting.flatMap { screen(for: frame, among: [$0]) }
+    }
+
     /// Writes `frame` through `writer`, lifted first where the
     /// band of `screen` would refuse its size; runs on the app's
     /// frame queue. A nil `screen` is the plain write.
@@ -65,41 +76,5 @@ enum BottomBandWrite {
             writer.setPosition(CGPoint(x: frame.minX, y: y), element)
         }
         writer.setFrame(frame, element)
-    }
-}
-
-extension FrameApplier {
-    /// The screen whose bottom band a sized write must clear
-    /// (#2894): a write ending near a bottom edge and shorter than
-    /// the window's echo-fed height — which an app's own resize and
-    /// a refused write reach — or than the height last sent, which a
-    /// spring's shrink-back after an overshoot beats its echo to.
-    /// A write no shorter than either reads nothing.
-    func bandScreen(
-        _ id: WindowID,
-        _ frame: CGRect,
-        setSize: Bool
-    ) -> CGRect? {
-        guard setSize else { return nil }
-        let sent = sentHeights.swap(id, frame.height)
-        let known = [trackedHeight(id), sent].compactMap { $0 }
-        if known.count == 2, let tallest = known.max(),
-            frame.height >= tallest
-        {
-            return nil
-        }
-        return BottomBandWrite.screen(for: frame, among: screenFrames())
-    }
-}
-
-/// The height each window was last sent with a size (#2894).
-@MainActor
-final class SentHeights {
-    private var heights: [WindowID: CGFloat] = [:]
-
-    /// Records `height` for `id`; returns the one it replaces.
-    func swap(_ id: WindowID, _ height: CGFloat) -> CGFloat? {
-        defer { heights[id] = height }
-        return heights[id]
     }
 }

@@ -95,11 +95,11 @@ final class PendingFrames: @unchecked Sendable {
             // The newer frame's band, else the waiting write's
             // where the newer frame still ends in it: the waiting
             // shrink never ran, so the window may still need it.
-            merged.band =
-                entry.band
-                ?? existing.band.flatMap {
-                    BottomBandWrite.screen(for: entry.frame, among: [$0])
-                }
+            merged.band = BottomBandWrite.mergedBand(
+                newer: entry.band,
+                waiting: existing.band,
+                frame: entry.frame
+            )
             merged.setSize = entry.setSize || existing.setSize
             entries[id] = merged
             return true

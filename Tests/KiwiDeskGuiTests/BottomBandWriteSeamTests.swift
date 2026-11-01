@@ -35,22 +35,21 @@ struct BottomBandWriteSeamTests {
         #expect(routed == 3)
     }
 
-    /// Unwired, the tracked height reads every bottom-edge write
-    /// (#2894): nothing reds but the AX count, so the wiring is
-    /// pinned here.
-    @Test("the core wires the tracked height once")
-    func trackedHeightIsWired() throws {
-        let source = try SourceScan.strippedSource(
-            at: Self.root.appendingPathComponent(
-                "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+    /// The two waiting-write stores merge a band by one rule, so
+    /// a held write and a queued one cannot drift apart.
+    @Test("both waiting-write merges take the one rule")
+    func mergesTakeTheOneRule() throws {
+        let tiling = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/Tiling"
+        )
+        for file in ["FrameApplier+Ledgers.swift", "FrameApplier+Hold.swift"] {
+            let source = try SourceScan.strippedSource(
+                at: tiling.appendingPathComponent(file)
             )
-        )
-        #expect(
-            source.occurrences(of: "tiler.applier.trackedHeight =") == 1
-        )
-        // The window's echo-fed frame, never a frame we asked for.
-        #expect(
-            source.occurrences(of: "state.windows[id]?.frame.height") == 1
-        )
+            #expect(
+                source.occurrences(of: "BottomBandWrite.mergedBand(") == 1,
+                "\(file) merges a band past BottomBandWrite.mergedBand"
+            )
+        }
     }
 }

@@ -80,7 +80,11 @@ final class HeldWrites: @unchecked Sendable {
         defer { lock.unlock() }
         if var entry = staged[id] {
             entry.frame = frame
-            if setSize { entry.band = band }
+            entry.band = BottomBandWrite.mergedBand(
+                newer: band,
+                waiting: entry.band,
+                frame: frame
+            )
             entry.setSize = entry.setSize || setSize
             staged[id] = entry
             return .merged
