@@ -27,26 +27,32 @@ enum BottomBandWrite {
         }
     }
 
-    /// The origin y to write the size from, with the window's
-    /// `current` frame clear of the band; nil where nothing would
-    /// be refused or no lift clears it: no height shrink, a bottom
-    /// already clear on this screen, or a window too tall to clear.
-    /// A window arriving from another screen is lifted whatever its
-    /// bottom there, since its size lands on this one.
-    static func liftedY(
+    /// Where to move the window before its size is written, with
+    /// its `current` frame clear of the band and on `screen`; nil
+    /// where the size write would not be refused or no lift clears
+    /// it. A size write lands from the window's current top, so it
+    /// is refused only when that write ends in the band — a later
+    /// frame of a long shrink, never its first — or when the window
+    /// arrives from another screen. The lift keeps the current
+    /// width on `screen`: a window hanging over onto a neighbouring
+    /// screen takes no size write at all.
+    static func liftedOrigin(
         target: CGRect,
         current: CGRect,
         screen: CGRect
-    ) -> CGFloat? {
+    ) -> CGPoint? {
         let arriving = !screen.contains(
             CGPoint(x: current.midX, y: current.midY)
         )
-        guard target.height < current.height,
-            arriving || current.maxY > screen.maxY - band
+        let edge = screen.maxY - band
+        let refused =
+            current.maxY > edge && current.minY + target.height > edge
+        guard target.height < current.height, arriving || refused
         else { return nil }
-        let clear = screen.maxY - band - current.height
+        let clear = edge - current.height
         guard clear >= screen.minY else { return nil }
-        return min(clear, target.minY)
+        let x = max(screen.minX, min(target.minX, screen.maxX - current.width))
+        return CGPoint(x: x, y: min(clear, target.minY))
     }
 
     /// The band a write merged over a waiting one carries: the
@@ -71,9 +77,13 @@ enum BottomBandWrite {
     ) {
         if let screen,
             let current = writer.frame(element),
-            let y = liftedY(target: frame, current: current, screen: screen)
+            let origin = liftedOrigin(
+                target: frame,
+                current: current,
+                screen: screen
+            )
         {
-            writer.setPosition(CGPoint(x: frame.minX, y: y), element)
+            writer.setPosition(origin, element)
         }
         writer.setFrame(frame, element)
     }

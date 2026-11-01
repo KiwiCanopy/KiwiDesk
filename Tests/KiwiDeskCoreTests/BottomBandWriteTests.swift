@@ -69,7 +69,14 @@ struct BottomBandWriteTests {
     }
 
     private func lift(_ target: CGRect, from current: CGRect) -> CGFloat? {
-        BottomBandWrite.liftedY(
+        origin(target, from: current)?.y
+    }
+
+    private func origin(
+        _ target: CGRect,
+        from current: CGRect
+    ) -> CGPoint? {
+        BottomBandWrite.liftedOrigin(
             target: target,
             current: current,
             screen: screen
@@ -94,8 +101,25 @@ struct BottomBandWriteTests {
     @Test("A lift never puts the window lower than its target")
     func liftStopsAtTheTarget() {
         let target = CGRect(x: 16, y: 500, width: 840, height: 300)
-        let current = CGRect(x: 16, y: 701, width: 840, height: 400)
+        let current = CGRect(x: 16, y: 790, width: 840, height: 320)
         #expect(lift(target, from: current) == 500)
+    }
+
+    /// The un-maximize that hung a full-width window over the
+    /// neighbouring screen on the device (#2894).
+    @Test("A lift keeps the current width on the screen")
+    func liftStaysOnTheScreen() {
+        let wide = CGRect(x: 0, y: 600, width: 1728, height: 501)
+        let lifted = origin(slot.offsetBy(dx: 856, dy: 0), from: wide)
+        #expect(lifted?.x == 0)
+        #expect(lifted?.y == 1117 - BottomBandWrite.band - 501)
+    }
+
+    @Test("A size write ending clear of the band is not lifted")
+    func earlyFrameIsNotLifted() {
+        let maximized = CGRect(x: 0, y: 32, width: 1728, height: 1085)
+        let first = CGRect(x: 1, y: 68, width: 1673, height: 1048)
+        #expect(lift(first, from: maximized) == nil)
     }
 
     @Test("A window arriving from another screen is lifted")
