@@ -7,7 +7,7 @@ import KiwiDeskCore
 /// so every chord is testable without a panel. A press this
 /// answers nil for goes to the search field as typing.
 enum JumpKey: Equatable {
-    /// ↑ / ↓: one row, never wrapping.
+    /// ↑ / ↓: one row; a fresh press wraps past an end (#2897).
     case step(Int)
     /// Page Up / Page Down: one page.
     case page(Int)
@@ -20,7 +20,7 @@ enum JumpKey: Equatable {
     /// ⇥ (forward) or ⇧⇥ (back): the next side, wrapping, with
     /// the query cleared.
     case stepScope(forward: Bool)
-    /// ← / → in Layouts: one tile, never wrapping.
+    /// ← / → in Layouts: one tile; a fresh press wraps (#2897).
     case side(Int)
     /// ⌘S in Layouts: Keep in Profile.
     case keep

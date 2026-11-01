@@ -2,7 +2,7 @@ import KiwiDeskCore
 
 /// The panel's list state over one opening's snapshot (#1875):
 /// the query, the ranked results and the selection. Pure, so the
-/// keys' rulings — preselection, no wrap, the result numbering —
+/// keys' rulings — preselection, the wrap, the result numbering —
 /// are held without a panel.
 struct JumpList {
     let snapshot: JumpSnapshot
@@ -30,13 +30,31 @@ struct JumpList {
         selection = results.isEmpty ? nil : 0
     }
 
-    /// Moves the selection by `delta` rows, clamped at both ends.
-    mutating func step(_ delta: Int) {
+    /// Moves the selection by `delta` rows, clamped at both ends;
+    /// with `wrap`, one row past an end lands on the other (#2897).
+    mutating func step(_ delta: Int, wrap: Bool = false) {
         guard let selection, !results.isEmpty else { return }
-        self.selection = min(
-            max(selection + delta, 0),
-            results.count - 1
+        self.selection = Self.stepped(
+            selection,
+            by: delta,
+            count: results.count,
+            wrap: wrap
         )
+    }
+
+    /// `index` moved by `delta` within `count`, clamped; with `wrap`
+    /// a single step past an end lands on the other, a page never.
+    static func stepped(
+        _ index: Int,
+        by delta: Int,
+        count: Int,
+        wrap: Bool
+    ) -> Int {
+        let next = index + delta
+        if wrap, abs(delta) == 1, !(0..<count).contains(next) {
+            return delta < 0 ? count - 1 : 0
+        }
+        return min(max(next, 0), count - 1)
     }
 
     /// Selects row `index` where one exists.

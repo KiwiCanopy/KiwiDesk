@@ -100,7 +100,7 @@ struct ViewPickListTests {
         #expect(list.selected?.pick == .layout(.grid))
     }
 
-    @Test("← → walk a line's matches and never wrap")
+    @Test("without the wrap, ← → stop at a line's ends")
     func stepping() {
         var list = list(live: .bsp)
         list.step(-1)
@@ -117,7 +117,8 @@ struct ViewPickListTests {
     }
 
     /// Ruling 11: ↑ ↓ keep the position along the line, clamped to
-    /// a shorter one, and never leave the first or last line.
+    /// a shorter one; without the wrap they stop at the first and
+    /// last line.
     @Test("↑ ↓ keep the position, clamped")
     func movingLines() {
         var list = list(live: .bsp)
@@ -134,6 +135,29 @@ struct ViewPickListTests {
         list.moveLine(-1)
         list.moveLine(-1)
         #expect(list.selected?.pick == .layout(LayoutMode.allCases[1]))
+    }
+
+    @Test("← → wrap along a line's matches (#2897)")
+    func steppingWraps() {
+        var list = list(live: .bsp)
+        list.step(-1, wrap: true)
+        #expect(list.selected?.pick == .layout(LayoutMode.allCases.last!))
+        list.step(1, wrap: true)
+        #expect(list.selected?.pick == .layout(.bsp))
+        list.setQuery("ck")
+        list.step(1, wrap: true)
+        list.step(1, wrap: true)
+        // Stack and Track match; the wrap stays among them.
+        #expect(list.selected?.pick == .layout(.stack))
+    }
+
+    @Test("↑ ↓ wrap across the lines, keeping the position (#2897)")
+    func movingLinesWraps() {
+        var list = list(live: .bsp)
+        list.moveLine(-1, wrap: true)
+        #expect(list.selection?.line == .vision)
+        list.moveLine(1, wrap: true)
+        #expect(list.selected?.pick == .layout(.bsp))
     }
 
     @Test("↑ ↓ pass over a line the query empties")

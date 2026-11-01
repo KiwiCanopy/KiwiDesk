@@ -158,7 +158,9 @@ final class JumpModel: ObservableObject {
         }
     }
 
-    func handle(_ key: JumpKey) {
+    /// `repeated` is a key held down: a step then stops at an end
+    /// rather than wrapping past it (#2897).
+    func handle(_ key: JumpKey, repeated: Bool = false) {
         guard !leaving else { return }
         restPointer()
         if case .stepScope(let forward) = key {
@@ -175,12 +177,12 @@ final class JumpModel: ObservableObject {
             handleShortcuts(key)
             return
         case .view:
-            handleView(key)
+            handleView(key, repeated: repeated)
             return
         }
         switch key {
         case .step(let delta):
-            move(by: delta)
+            move(by: delta, wrap: !repeated)
         case .page(let direction):
             move(by: direction * rowCap)
         case .pick(let moveHere):
@@ -272,9 +274,9 @@ final class JumpModel: ObservableObject {
             : L("jump.empty.no_match", "No open windows match")
     }
 
-    private func move(by delta: Int) {
+    private func move(by delta: Int, wrap: Bool = false) {
         let before = list.selection
-        list.step(delta)
+        list.step(delta, wrap: wrap)
         if list.selection != before, let match = list.selected {
             onAnnounce(JumpRowText.spoken(match.entry))
         }

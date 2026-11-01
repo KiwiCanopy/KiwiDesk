@@ -87,8 +87,8 @@ struct JumpModelTests {
         model.onAnnounce = { heard.append($0) }
         model.handle(.step(1))
         model.handle(.step(1))
-        // At the end: nothing moved, nothing said.
-        model.handle(.step(1))
+        // Held at the end: nothing moved, nothing said.
+        model.handle(.step(1), repeated: true)
         model.query = "zzz"
         model.query = "no"
         #expect(
@@ -99,6 +99,17 @@ struct JumpModelTests {
                 "Results: 1",
             ]
         )
+    }
+
+    @Test("a fresh press wraps; a held key stops at the end (#2897)")
+    func wrapsOnAFreshPress() {
+        let model = model()
+        model.handle(.step(-1))
+        #expect(model.list.selection == 2)
+        model.handle(.step(1), repeated: true)
+        #expect(model.list.selection == 2)
+        model.handle(.step(1))
+        #expect(model.list.selection == 0)
     }
 
     @Test("⌘ and ⇧ are read from the held modifiers")

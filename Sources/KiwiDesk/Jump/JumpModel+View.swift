@@ -21,13 +21,13 @@ extension JumpModel {
         onAnnounce(viewSpoken)
     }
 
-    func handleView(_ key: JumpKey) {
+    func handleView(_ key: JumpKey, repeated: Bool = false) {
         guard let view else { return }
         switch key {
         case .side(let delta):
-            moveViewSelection { $0.step(delta) }
+            moveViewSelection { $0.step(delta, wrap: !repeated) }
         case .step(let delta):
-            moveViewSelection { $0.moveLine(delta) }
+            moveViewSelection { $0.moveLine(delta, wrap: !repeated) }
         case .pick(moveHere: false):
             if let item = view.selected { applyView(item) }
         // ⇧⌘+digit does nothing on this side (#2309 ruling 4).
