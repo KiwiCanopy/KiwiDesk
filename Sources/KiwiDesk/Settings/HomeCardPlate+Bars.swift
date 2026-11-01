@@ -177,7 +177,7 @@ struct HomeCardBarsTile: View {
     /// edge `barEdges` lists first (`ShelfGeometry.strips`, #1731).
     var rowsRunFullWidth: Bool {
         settings.barEdges(
-            space: spaceSpecIfShown != nil ? .always : nil,
+            space: spaceBarShown ? .always : nil,
             app: showsAppBar && appBarLook != nil ? .always : nil
         ).first?.edge.isHorizontal ?? false
     }
@@ -263,8 +263,12 @@ struct HomeCardBarsTile: View {
         }
     }
 
-    private func spaceSpecIfShown(vertical: Bool) -> BarSpec? {
+    private var spaceBarShown: Bool {
         settings.spaceBarStyle.visibility.showsUnprompted
+    }
+
+    private func spaceSpecIfShown(vertical: Bool) -> BarSpec? {
+        spaceBarShown
             ? spaceSpec(settings.spaceBarLook, vertical: vertical) : nil
     }
 
