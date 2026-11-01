@@ -35,8 +35,9 @@ struct SettingsOpenFocusSeamTests {
         "SettingsWindowController.swift": 1
     ]
 
-    /// Pinned to the RAISE branch of `show()` — the balanced body
-    /// that follows `if let window {` — so the first-open path,
+    /// Pinned to the RAISE branch of `show(beforeFront:)`, the
+    /// balanced body that follows `if let window {` — so the
+    /// first-open path,
     /// where no id exists yet, is not what satisfies it.
     @Test("show()'s raise branch tells Core before forceFront")
     func raiseBranchTellsCoreFirst() throws {
@@ -45,7 +46,7 @@ struct SettingsOpenFocusSeamTests {
         )
         let show = try #require(
             SourceScan.declarationBody(
-                after: "func show() {",
+                after: "func show(beforeFront: () -> Void) {",
                 in: source
             )
         )
