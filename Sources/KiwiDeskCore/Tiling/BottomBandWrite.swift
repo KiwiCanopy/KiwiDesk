@@ -30,14 +30,19 @@ enum BottomBandWrite {
     /// The origin y to write the size from, with the window's
     /// `current` frame clear of the band; nil where nothing would
     /// be refused or no lift clears it: no height shrink, a bottom
-    /// already clear, or a window too tall to clear.
+    /// already clear on this screen, or a window too tall to clear.
+    /// A window arriving from another screen is lifted whatever its
+    /// bottom there, since its size lands on this one.
     static func liftedY(
         target: CGRect,
         current: CGRect,
         screen: CGRect
     ) -> CGFloat? {
+        let arriving =
+            current.midX < screen.minX
+            || current.midX >= screen.maxX
         guard target.height < current.height,
-            current.maxY > screen.maxY - band
+            arriving || current.maxY > screen.maxY - band
         else { return nil }
         let clear = screen.maxY - band - current.height
         guard clear >= screen.minY else { return nil }
@@ -65,10 +70,18 @@ enum BottomBandWrite {
 
 extension FrameApplier {
     /// The screen whose bottom band a sized write must clear
-    /// (#2894), judged on the frame alone: only the window's own
-    /// answer says whether the write shrinks it.
-    func bandScreen(_ frame: CGRect, setSize: Bool) -> CGRect? {
+    /// (#2894): a write ending near a bottom edge and shorter than
+    /// the window's echo-fed height, which an app's own resize and
+    /// a refused write both reach. A write no shorter reads nothing.
+    func bandScreen(
+        _ id: WindowID,
+        _ frame: CGRect,
+        setSize: Bool
+    ) -> CGRect? {
         guard setSize else { return nil }
+        if let height = trackedHeight(id), frame.height >= height {
+            return nil
+        }
         return BottomBandWrite.screen(for: frame, among: screenFrames())
     }
 }

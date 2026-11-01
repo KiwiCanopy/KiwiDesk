@@ -98,6 +98,14 @@ struct BottomBandWriteTests {
         #expect(lift(target, from: current) == 500)
     }
 
+    @Test("A window arriving from another screen is lifted")
+    func arrivalIsLifted() {
+        let other = CGRect(x: -1080, y: 0, width: 1080, height: 1920)
+        let current = CGRect(x: -1000, y: 300, width: 840, height: 499)
+        #expect(other.contains(current))
+        #expect(lift(slot, from: current) == 1117 - BottomBandWrite.band - 499)
+    }
+
     @Test("Nothing refused, nothing lifted")
     func nothingRefusedIsNotLifted() {
         // A grow, an unchanged height, a bottom already clear of
@@ -172,6 +180,8 @@ struct BottomBandWriteTests {
         applier.elementProvider = { _ in element }
         applier.writer = app.writer
         applier.screenFrames = { [screen] in [screen] }
+        // The echo-fed height: what the window reports of itself.
+        applier.trackedHeight = { _ in app.frame.withLock { $0.height } }
         return applier
     }
 
@@ -199,6 +209,16 @@ struct BottomBandWriteTests {
         app.frame.withLock { $0 = start }
         try await send(slot, through: door, applier, app)
         #expect(app.frame.withLock { $0 } == slot)
+    }
+
+    @Test(
+        "A write no shorter than the tracked height reads nothing",
+        arguments: Door.allCases
+    )
+    func sameHeightReadsNothing(door: Door) async throws {
+        let app = RefusingApp(slot, screenBottom: screen.maxY)
+        try await send(slot, through: door, makeApplier(app), app)
+        #expect(app.calls.withLock { $0 } == ["frame"])
     }
 
     @Test("A write far from any bottom edge reads nothing")

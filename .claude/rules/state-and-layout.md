@@ -1662,9 +1662,9 @@ editing here:
   it, which macOS would otherwise refuse; its docstring carries
   the measurement. The screens it reads come from
   `TilingEngine.allScreenFrames`, never a live read in the applier.
-  Whether a write shrinks the window is the window's own answer,
-  read per sized write ending near a bottom edge — never a record
-  of what was asked, which an app's own resize leaves behind.
+  Whether a write shrinks the window is judged against its
+  echo-fed height (`FrameApplier.trackedHeight`), never a record of
+  what was asked, which an app's own resize leaves behind.
   `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
   three doors, `unaskedGrowIsLifted` the window's answer, and
   `BottomBandWriteSeamTests` ▸

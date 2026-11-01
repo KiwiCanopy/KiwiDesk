@@ -34,4 +34,19 @@ struct BottomBandWriteSeamTests {
         // apply, applyInstant and the hold's release.
         #expect(routed == 3)
     }
+
+    /// Unwired, the tracked height reads every bottom-edge write
+    /// (#2894): nothing reds but the AX count, so the wiring is
+    /// pinned here.
+    @Test("the core wires the tracked height once")
+    func trackedHeightIsWired() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+            )
+        )
+        #expect(
+            source.occurrences(of: "tiler.applier.trackedHeight =") == 1
+        )
+    }
 }

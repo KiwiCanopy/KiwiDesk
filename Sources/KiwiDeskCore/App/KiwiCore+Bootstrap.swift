@@ -239,6 +239,10 @@ extension KiwiCore {
         tiler.applier.enhancedUIAtRest = { [weak self] pid in
             self?.eventLoop.enhancedUIBaselines[pid] != nil
         }
+        // The echo-fed height gates the bottom band's read (#2894).
+        tiler.applier.trackedHeight = { [weak self] id in
+            self?.state.windows[id]?.frame.height
+        }
         eventLoop.onEnhancedUIRetired = { [weak self] pid, on in
             self?.tiler.applier.retireApp(pid, leftOn: on)
         }
