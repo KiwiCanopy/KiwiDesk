@@ -1693,17 +1693,30 @@ stack.set_stack_position_override("3", "bottom")
 **Expects:** an optional space identifier; without one, the
 focused space.
 
+:::unreleased
 **Does:** moves that space's stack zone to the opposite side —
-`"left"` ↔ `"right"`, `"top"` ↔ `"bottom"` — starting from the
-side it shows now, its
-[override](#stackset_stack_position_override) or else the
-[global value](#stackset_stack_position). It writes the override
-for that space as a live change: Settings lists it under **Live,
-not saved**, and its Revert puts it back, as does
-[`revert_settings`](cli.md#raw-ipc-protocol) with the leaf id a
-change report names. A flip back onto the global side clears the
-override. The master ratio and every other size stay as they
-are.
+`"left"` ↔ `"right"`, `"top"` ↔ `"bottom"` — on the macOS Desktop
+its screen shows now, and on no other Desktop. It starts from the
+side the space draws there: its flip on that Desktop, else its
+[override](#stackset_stack_position_override), else the
+[global value](#stackset_stack_position). The flip lasts for the
+session and is never a setting: Settings shows no row for it,
+[`revert_settings`](cli.md#raw-ipc-protocol) leaves it, and
+[`get_settings`](#get_settings) reports the authored side, while
+[`get_state`](#get_state) reports the side drawn. A flip back
+onto the authored side removes it. The master ratio and every
+other size stay as they are. A screen showing a full-screen app
+refuses the flip.
+
+It survives a Desktop switch and a profile a Desktop binding
+loads. It ends for every space on `load_profile`, a config reload,
+a Settings save of the active profile and
+[`stack.set_stack_position`](#stackset_stack_position), and for one
+space, on every Desktop, on
+[`stack.set_stack_position_override`](#stackset_stack_position_override).
+A restart forgets it. To keep a side per Desktop, bind a profile
+to that Desktop.
+:::
 
 **Example:**
 
@@ -8086,6 +8099,12 @@ column carries an uneven `resize("y")` split — `stack_weights`
 carry `track_breaks` (ids of the windows that start a track,
 #128) and, while a track holds an uneven cross-axis split,
 `track_weights` (head window id → session weight).
+
+:::unreleased
+A Stack space object also has `stack_position`: the side its stack
+zone draws on the Desktop its screen shows now, a
+[flip](#stacktoggle_stack_position) included.
+:::
 
 Each window object has: `id`, `app`, `bundle_id`, `title`,
 `floating` (boolean).

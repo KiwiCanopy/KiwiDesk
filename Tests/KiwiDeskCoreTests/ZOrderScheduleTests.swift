@@ -263,7 +263,8 @@ struct ZOrderScheduleTests {
         let manyCtx = settings.context(
             bounds: bounds,
             space: many,
-            sticky: []
+            sticky: [],
+            stackFlip: nil
         )
         #expect(
             ScrollingLayout.rowOverflows(for: many.windows, in: manyCtx)
@@ -278,7 +279,8 @@ struct ZOrderScheduleTests {
         let fewCtx = settings.context(
             bounds: bounds,
             space: few,
-            sticky: []
+            sticky: [],
+            stackFlip: nil
         )
         #expect(
             !ScrollingLayout.rowOverflows(for: few.windows, in: fewCtx)

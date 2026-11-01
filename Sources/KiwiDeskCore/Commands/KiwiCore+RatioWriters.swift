@@ -70,7 +70,10 @@ extension KiwiCore {
         focused: WindowID?,
         deltaSign: Double
     ) {
-        let stack = tiler.settings.resolvedStack(for: space)
+        let stack = tiler.settings.resolvedStack(
+            for: space,
+            flip: stackFlip(of: space.id)
+        )
         let tiled = state.effectiveTiledMembers(of: space)
         let (master, stackZone) = StackLayout.partition(
             tiled,

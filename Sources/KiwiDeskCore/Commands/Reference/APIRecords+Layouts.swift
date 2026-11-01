@@ -101,8 +101,8 @@ extension APIReference {
             .choice("position", StackParams.StackPosition.self)
         ),
         "toggle_stack_position": APIRecord(
-            "Moves a Space's stack zone to the opposite side, "
-                + "unsaved: the focused Space, or one by id.",
+            "Flips a Space's stack zone to the other side on the "
+                + "Desktop shown now, for the session.",
             .space("space", optional: true)
         ),
         "set_new_window_placement": APIRecord(

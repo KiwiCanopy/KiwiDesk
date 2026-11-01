@@ -71,7 +71,7 @@ struct PerSpaceResizeTests {
         #expect(over?.masterRatio == 0.7)
         let space = try #require(core.state.workspaces[SpaceID("1")])
         #expect(
-            core.tiler.settings.resolvedStack(for: space)
+            core.tiler.settings.resolvedStack(for: space, flip: nil)
                 .masterRatio > 0.7
         )
         #expect(core.tiler.settings.stack.masterRatio == globalBefore)
@@ -93,7 +93,7 @@ struct PerSpaceResizeTests {
         #expect(space?.sessionRatios.masterRatio != nil)
         if let space {
             #expect(
-                core.tiler.settings.resolvedStack(for: space)
+                core.tiler.settings.resolvedStack(for: space, flip: nil)
                     .masterRatio != before
             )
         }
@@ -117,7 +117,7 @@ struct PerSpaceResizeTests {
         core.execute("resize", args: [.string("x"), .number(10)])
         let space = core.state.workspaces[SpaceID("1")]
         let value = space.map {
-            core.tiler.settings.resolvedStack(for: $0).masterRatio
+            core.tiler.settings.resolvedStack(for: $0, flip: nil).masterRatio
         }
         #expect(value == 0.9)
     }

@@ -121,7 +121,8 @@ struct MouseResizeApplyTests {
             bounds: bounds
         )
         let stack = core.tiler.settings.resolvedStack(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            flip: nil
         )
         #expect(abs(stack.masterRatio - 0.5) < 1e-9)
     }
@@ -140,7 +141,8 @@ struct MouseResizeApplyTests {
             bounds: bounds
         )
         let stack = core.tiler.settings.resolvedStack(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            flip: nil
         )
         #expect(abs(stack.masterRatio - 0.7) < 1e-9)
     }
