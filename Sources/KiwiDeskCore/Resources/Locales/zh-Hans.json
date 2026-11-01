@@ -2173,6 +2173,7 @@
   "simple.header.screens": "%1$d 台显示器",
   "simple.header.screens_one": "1 台显示器",
   "simple.kiwihub.caption": "三个按键，助你轻松找到方向",
+  "simple.kiwihub.change_help": "可在“%2$@”的“%1$@”中更改这些按键",
   "simple.kiwihub.unbound": "未设置按键",
   "simple.look.browse": "更多造型…",
   "simple.look.hint": "想用自己的颜色或保存造型？前往“%2$@”中的%1$@。",

@@ -2173,6 +2173,7 @@
   "simple.header.screens": "%1$d pantallas",
   "simple.header.screens_one": "1 pantalla",
   "simple.kiwihub.caption": "Tres teclas para orientarte",
+  "simple.kiwihub.change_help": "Cambia estas teclas en %1$@, en «%2$@»",
   "simple.kiwihub.unbound": "Sin tecla",
   "simple.look.browse": "Más looks…",
   "simple.look.hint": "¿Quieres colores propios o guardar un look? %1$@ en «%2$@».",

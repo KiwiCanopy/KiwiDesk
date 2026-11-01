@@ -2173,6 +2173,7 @@
   "simple.header.screens": "Экранов: %1$d",
   "simple.header.screens_one": "1 экран",
   "simple.kiwihub.caption": "Три клавиши, чтобы легко ориентироваться",
+  "simple.kiwihub.change_help": "Эти клавиши можно изменить: «%1$@» в разделе «%2$@»",
   "simple.kiwihub.unbound": "Клавиша не задана",
   "simple.look.browse": "Ещё облики…",
   "simple.look.hint": "Хочешь свои цвета или сохранить облик? %1$@ — в разделе «%2$@».",

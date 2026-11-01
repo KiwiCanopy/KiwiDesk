@@ -2173,6 +2173,7 @@
   "simple.header.screens": "%1$d écrans",
   "simple.header.screens_one": "1 écran",
   "simple.kiwihub.caption": "Trois touches pour vous repérer",
+  "simple.kiwihub.change_help": "Modifiez ces touches dans %1$@, dans « %2$@ »",
   "simple.kiwihub.unbound": "Aucune touche",
   "simple.look.browse": "Plus de looks…",
   "simple.look.hint": "Envie de vos propres couleurs ou d'enregistrer un look ? %1$@ dans « %2$@ ».",

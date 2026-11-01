@@ -2173,6 +2173,7 @@
   "simple.header.screens": "画面%1$d台",
   "simple.header.screens_one": "画面1台",
   "simple.kiwihub.caption": "3つのキーで迷わず操作",
+  "simple.kiwihub.change_help": "これらのキーは「%2$@」の「%1$@」で変更できます",
   "simple.kiwihub.unbound": "キー未設定",
   "simple.look.browse": "その他のデザイン…",
   "simple.look.hint": "独自のカラーを使いたいときやデザインを保存したいときは、「%2$@」の%1$@をご覧ください。",
