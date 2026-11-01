@@ -9,6 +9,20 @@ enum PocketRefusal {
         L("pocket.refusal.sticky", "Pocket windows are always sticky")
     }
 
+    /// A general-list verb on a window its app's key owns (#2612
+    /// ▸ 1), naming that key as the GUI renders it live; nil where
+    /// no GUI reads one.
+    @MainActor
+    static func keyedSentence(chord: String?) -> String {
+        guard let chord else {
+            return L(
+                "pocket.refusal.keyed_unnamed",
+                "This window has a Pocket key of its own"
+            )
+        }
+        return L("pocket.refusal.keyed", "Its Pocket key is %1$@", chord)
+    }
+
     /// `toggle_pocket_window` on a second window (#2675), drawn
     /// beside `PocketMark.takenName`.
     @MainActor

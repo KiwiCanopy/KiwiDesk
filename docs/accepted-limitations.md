@@ -226,6 +226,22 @@ WindowServer's create notification; where that route is
 unavailable, only opening the app takes you along. Use
 `focus_space` to reach the window when you are left behind.
 
+:::unreleased
+The [`window_created`](lua-reference.md#events) event reads the
+same notification to tell `new` from `existing`
+([#2630](https://github.com/KiwiCanopy/KiwiDesk/issues/2630)). An
+app whose new windows WindowServer never reports opening has
+each of them reported `existing`, half a second late. A window
+you open with ⌘N may also have its `window_created` arrive up to
+half a second after its `focus_change` (measured 8–10 ms for
+TextEdit): KiwiDesk places and focuses the window at once, and only
+the event waits for macOS to report the window opening. Listen to
+`focus_change` when timing matters. An app too slow to finish
+loading when KiwiDesk starts is read a few seconds later; a window
+it opens in that time that macOS does not report through
+Accessibility is reported `existing` and does not take you along.
+:::
+
 Open or Focus asks a running app with **no window at all** for a new one, the way a Dock click does, and it judges "no window" from what it can see ([#1840](https://github.com/KiwiCanopy/KiwiDesk/issues/1840)). A window on another Desktop counts only once KiwiDesk has seen it: on a Mac where the per-Desktop window list cannot be read none does, and anywhere else a window the app opened on a Desktop nobody has shown since does not, so the shortcut sends that reopen anyway. Whether the app then opens a second window beside the one on the other Desktop is the app's own reopen handling. Not observed; reasoned from the mechanism. Switch to the Desktop that holds the window to reach it instead.
 
 With the **Space Bar off**, switching a Space between a layout that shows an App Bar (Monocle, Scrolling) and one that does not moves its windows by the bar strip's depth: [KiwiShelf](lua-reference.md#kiwishelf) reserves its edge only in a layout where a bar draws ([#1517](https://github.com/KiwiCanopy/KiwiDesk/issues/1517); the ruling is in [design decisions](design-decisions.md)). Reserving it in every layout instead would leave an empty strip on screen in every layout that draws nothing there. With the Space Bar on, the strip is reserved in every layout and no switch moves a window.
@@ -361,3 +377,21 @@ parked window instead of taking it out
 For that second KiwiDesk reads a focus report for the pocketed
 window as the echo of pocketing it, which an app can still send,
 and swallows it. Press `⌃⌥P` to take the window out.
+
+:::unreleased
+An app's own Pocket key ([`pocket_app`](lua-reference.md#pocket_app))
+forgets its window when KiwiDesk quits
+([#2612](https://github.com/KiwiCanopy/KiwiDesk/issues/2612)): the
+quit files the window as the [pocket](lua-reference.md#pocket) files
+every pocket window, and the next press of the key opens a fresh
+window of the app. Which window a key owns is kept only for a
+restart that comes straight back — an update, or `kiwidesk service
+restart` — and never written to a profile, so nothing else can hand
+it back.
+
+An app whose File menu has no New Window, with its windows all on
+another macOS Desktop, opens nothing on its Pocket key: the key
+reopens the app, which only brings one of those windows forward, and
+for about ten seconds a second press waits for a window that never
+comes. The window count KiwiDesk reads sees only the Desktop shown.
+:::

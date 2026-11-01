@@ -1,15 +1,23 @@
 import Foundation
 
-/// `toggle_pocket_window` (#2675): marks the focused window the
-/// pocket window, or unmarks it, tiling it. Marking floats it at the float
-/// size as a Float does and leaves it out; `pocket` then pockets
-/// and takes out that window alone, marking the focus first where
-/// none is marked.
+/// `toggle_pocket_window` (#2675): marks the focused window — or
+/// the one an id names (#2612 ▸ 4) — the pocket window, or unmarks
+/// it, tiling it. Marking floats it at the float size as a Float
+/// does and leaves it out; `pocket` then pockets and takes out that
+/// window alone, marking the focus first where none is marked.
 extension KiwiCore {
-    func togglePocketWindowCommand() -> CommandResponse {
+    func togglePocketWindowCommand(_ args: [JSONValue]) -> CommandResponse {
         _ = emptyPocketIfGone()
-        guard let id = focusedWindowID, let window = state.windows[id]
-        else { return .fail("no focused window") }
+        let id: WindowID
+        switch commandTarget("toggle_pocket_window", args) {
+        case .refused(let response): return response
+        case .window(let target): id = target
+        }
+        guard let window = state.windows[id]
+        else { return .fail("unknown window: \(id.raw)") }
+        if let app = state.pocketKeyOwner(of: id) {
+            return refuseKeyedPocketWindow(id, app: app)
+        }
         if state.pocketPhase(of: id) != nil {
             unmarkPocketWindow(id)
             return .ok()
@@ -20,7 +28,7 @@ extension KiwiCore {
         }
         guard !window.isFullscreen, !window.isTransientOverlay
         else { return .fail("this window cannot be pocketed") }
-        markPocketWindow(id)
+        markAsPocketWindow(id)
         return .ok()
     }
 
@@ -30,19 +38,25 @@ extension KiwiCore {
     /// a take-out keeps its frame. Out, it is placed where it shows;
     /// the `pocket` fallback files the same frame through
     /// `becomePocketWindow` instead.
-    private func markPocketWindow(_ id: WindowID) {
+    /// `owner` ties it to its app's Pocket key (#2612); an arrival
+    /// passes `retiling: false`, its event retile being the pass.
+    func markAsPocketWindow(
+        _ id: WindowID,
+        owner: String? = nil,
+        retiling: Bool = true
+    ) {
         let wasFloating = isEffectiveFloatForPlacement(id)
-        guard state.markPocketWindow(id) else { return }
+        guard state.markPocketWindow(id, owner: owner) else { return }
         onLog("pocket: w\(id.raw) marked")
         refreshStickyReach()
-        retile()
+        if retiling { retile() }
         if !wasFloating { placeFloating(id) }
     }
 
     /// Empties `id`'s slot and tiles it on the active Space, as a
     /// Tile does (owner, #2680); a window detection floats stays a
     /// float. Only an out window holds the focus the verb reads.
-    private func unmarkPocketWindow(_ id: WindowID) {
+    func unmarkPocketWindow(_ id: WindowID) {
         state.releasePocketWindow(id)
         // Out, it drew on every Space; it stays on the one shown.
         let home = state.workspaces.space(of: id)

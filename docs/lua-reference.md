@@ -5581,7 +5581,7 @@ end)
 
 ### pocket
 
-**Expects:** nothing.
+**Expects:** nothing, or a window id.
 
 **Does:** keeps one window, the pocket window, one key away. Mark
 it with [`toggle_pocket_window`](#toggle_pocket_window); each
@@ -5702,6 +5702,13 @@ native full screen and on a transient panel or popup. Bound to
 Under [`pocket.set_capacity("several")`](#pocketset_capacity) a
 call on another window marks it too, beside the others.
 
+:::unreleased
+`toggle_pocket_window` also takes a window id, as the bar menus'
+Remove from Pocket does: it marks or unmarks that window instead of
+the focused one, and unmarks a pocketed window without taking it
+out first.
+:::
+
 **Example:**
 
 ```lua
@@ -5709,6 +5716,53 @@ KiwiDesk.bind("ctrl+alt+shift+p", function()
     KiwiDesk.toggle_pocket_window()
 end)
 ```
+
+:::unreleased
+### pocket_app
+
+**Expects:** an app's bundle id.
+
+**Does:** an app's own Pocket key. The first call opens a new
+window of the app, launching it if it is not running, and that
+window arrives out of the [pocket](#pocket): floating, on every
+Space, focused. A running app gets its File ▸ New Window, also
+when its windows are all on another Desktop; one with no window on
+this Desktop, minimized ones included, and no New Window is
+reopened, and one showing a window without a New Window fails with
+a pill. Each later call puts it away or takes it out,
+as `pocket` does for the other pocket windows. Its app rule's
+"Open in a Space" does not apply to it.
+
+The window is tied to the app while a shortcut's whole body is
+the one call `KiwiDesk.pocket_app("<bundle id>")`, its argument in
+double quotes, and it goes in and out by that shortcut alone:
+`pocket` steps past it, and `pocket` naming it or
+[`toggle_pocket_window`](#toggle_pocket_window) on it fails with
+a pill naming its key. It does not count against
+[`pocket.set_capacity`](#pocketset_capacity). Remove the shortcut
+and the window becomes an ordinary window again, on the Space you
+are on; a profile that leaves the shortcut out keeps the tie, and
+the key works again when you switch back. Closing the window or
+quitting the app frees the key, and the next call opens a fresh
+window. If the app is hidden, the call shows it again. Settings ▸
+Shortcuts & Gestures ▸ Pocket writes this shortcut: one row per
+app, added with **Add an app to your Pocket…**.
+
+Called with no such shortcut — from the CLI, say — the window it
+opens is an ordinary pocket window, counted like any other: under
+`"one"`, with another pocket window marked, the call fails with
+`another window is the pocket window` (and the pill "Pocket is
+already taken" on the focused window) and opens nothing. Fails
+with `app not found: <id>` for an app macOS cannot find.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+t", function()
+    KiwiDesk.pocket_app("com.mitchellh.ghostty")
+end)
+```
+:::
 
 ### override_sticky_reach
 
@@ -5873,8 +5927,8 @@ and on the badge, beside a sticky glyph too.
 every profile alike — the running value, which Settings ▸ Shortcuts
 & Gestures ▸ Pocket stores:
 `"one"` refuses a mark while any window is marked
-([`toggle_pocket_window`](#toggle_pocket_window)), and `"several"`
-marks any number.
+([`toggle_pocket_window`](#toggle_pocket_window)), save an app's
+own pocket window, and `"several"` marks any number.
 
 Under `"several"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
@@ -6849,6 +6903,22 @@ return. The `reason` argument says which kind of change fired:
   no screen is showing; it comes back as `"returned"`, and the
   sixth argument, `desktop`, names the Desktop holding it where
   the Desktop can be read — `nil` on a Mac without SkyLight).
+
+:::unreleased
+`window_created` also reports `"existing"`: a window that was
+already open when KiwiDesk began managing it — every window found
+when KiwiDesk starts, and, where macOS reports windows opening, a
+window it adopts later that macOS never reported opening, such as
+one it lost track of and finds again.
+`"restored"` wins over `"returned"`, which wins over `"existing"`;
+`"new"` is everything else, KiwiDesk's own windows included. A
+pocketed window that comes back after its app was hidden, or after
+KiwiDesk restarted, is `"returned"`. Where KiwiDesk has to wait for
+macOS to report the window opening, the event can follow the
+window's `focus_change` by up to half a second; it always comes
+before that window's `window_destroyed`. More reasons may be added,
+so match the ones your callback handles.
+:::
 
 A bar callback that only cares about real lifecycle filters in
 one line:

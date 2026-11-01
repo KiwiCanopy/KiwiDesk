@@ -32,6 +32,8 @@ extension EventLoop {
         }
         switch note {
         case kAXWindowCreatedNotification:
+            arrivingFromAXCreate = true
+            defer { arrivingFromAXCreate = false }
             // A new window's overlay and float verdicts read the
             // policy, which an app flips without activating (#1936).
             refreshPolicy(of: pid)

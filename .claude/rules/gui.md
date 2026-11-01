@@ -2097,6 +2097,10 @@ wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
 the key rows' ink, never a topic glyph of its own**
 (`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
 
+**An app's Pocket key row is read through
+`PocketAppLuaArg.bundleID(of:)` alone** — profiles.md ▸ *A verb
+the GUI writes into a stored binding* owns the obligation.
+
 ## A KiwiHub list wraps on a fresh press only (#2897)
 
 **A KiwiHub list's one-row or one-item step goes through

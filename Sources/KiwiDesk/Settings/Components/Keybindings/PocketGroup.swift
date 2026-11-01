@@ -21,6 +21,11 @@ struct PocketGroup: View {
                     expander: expander
                 )
             }
+            // Aligns the key rows with the per-app rows' trash, as
+            // Open applications does.
+            .environment(\.keybindingReservesTrashSlot, true)
+            // Each app's own key (#2612).
+            PocketAppRows(model: model, bindings: $bindings)
         }
     }
 

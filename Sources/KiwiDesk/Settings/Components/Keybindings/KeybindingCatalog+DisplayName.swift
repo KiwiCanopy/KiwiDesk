@@ -113,6 +113,7 @@ extension KeybindingCatalog {
         // name whatever the live list holds.
         commands += bindings.compactMap { lensTarget(of: $0.lua) }
             .map(toggleLens)
+        commands += pocketApps(in: bindings).map(pocketApp)
         return commands
     }
 

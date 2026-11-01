@@ -470,6 +470,25 @@ editing here:
   `placedByAppRule` alone, so a door that must not follow keeps it
   unset rather than adding a check at the claim
   (`LaunchFollowSpawnTests`, `LaunchFollowSeamTests`).
+  **Every reader of "was this arrival created" goes through ONE
+  door with ONE late-create resolution (#2630)** — the follow,
+  the `window_created` reason, and any pocket claim (#2629, #2612)
+  take the provenance `handle` reads once ahead of the fold
+  (`KiwiCore.arrivalProvenance` over `ArrivalProvenanceDoor`, the
+  one reader of `WindowCreateLedger.createdAt`), and a consumer
+  that must wait for a create waits through the door's hold,
+  settled once in `settleArrival` by the create (off the
+  WindowServer drain), by `lateCreateBound`, or by its window's
+  destroy, re-key or app exit — never by a consumer's own timer
+  or ledger read. A boot step's adoption answers existing on every
+  host (`EventLoop.adoptsAsBootStep`). Only what a consumer owes
+  waits; placement, focus and the retile never do. A new consumer
+  adds its arm to `settleArrival` — an arm that changes state
+  ahead of the owed event, so the event reports where the window
+  landed, and the follow last — and stands down on `departing`. A
+  consumer inside the fold takes the value `handle` read, never a
+  read of its own (`ArrivalProvenanceSeamTests`,
+  `LifecycleArrivalReasonTests`).
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves
   `Space.focused` down the departing windows to nil — or onto a
@@ -810,8 +829,18 @@ editing here:
     `severalTakesSecondMark`). A reader of "the
     pocket holds something" states whether it means any slot or
     the windows `pocket` works, since a per-app key's slot (#2612)
-    is the one but not the other. "Focused last" among out
-    windows is `focusRecencyRank`, stamped at an honored focus
+    is the one but not the other. **Which slot an app's key owns is
+    answered by the one `PocketSlot.keyedApp`**, whether its row
+    exists by the one `KiwiCore.pocketAppRow(for:)`, which the GUI
+    reads for the chord too, and the list `pocket` steps and the
+    capacity counts is `generalPocket`, never a filter beside it;
+    a general-list verb on a keyed window refuses through
+    `refuseKeyedPocketWindow`, and a removed row unties its window
+    only at `reconcilePocketKeys`, run after each install of the
+    bindings that is no profile apply, judged against every saved
+    profile's resolution, and after a restart's restore (#2612,
+    `PocketAppTests`, `PocketAppKeyTests`). "Focused last" among
+    out windows is `focusRecencyRank`, stamped at an honored focus
     alone, never a pocket record of its own. Marking is the one
     placement at the float size, and a window already floating
     skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,

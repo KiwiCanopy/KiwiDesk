@@ -12,7 +12,7 @@ extension KiwiCore {
         // passed the #292 preflight, so it never acts on the focus.
         if emptyPocketIfGone() {
             updatePocketPlate()
-            if state.pocket.isEmpty { return .ok() }
+            if state.generalPocket.isEmpty { return .ok() }
         }
         // Away first: the out window used last (#2678).
         if let id = state.pocketPutBackNext(focused: focusedWindowID) {
@@ -25,11 +25,14 @@ extension KiwiCore {
         }
         // Out with its app hidden: the unhide brings it back. Only
         // an empty pocket marks the focus here.
-        guard state.pocket.isEmpty else {
+        guard state.generalPocket.isEmpty else {
             return .fail("pocket is unreachable")
         }
         guard let id = focusedWindowID else {
             return .fail("no focused window")
+        }
+        if let app = state.pocketKeyOwner(of: id) {
+            return refuseKeyedPocketWindow(id, app: app)
         }
         return markAndPocket(id)
     }

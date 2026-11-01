@@ -150,7 +150,13 @@ synonym:
   Choosing the window is **Toggle Pocket** in copy (owner,
   #2675) and `toggle_pocket_window` in Lua and CLI, neither
   spending *mark*, which stays the on-window glyph's — the
-  pocket *mark*; docs prose may say a window is *marked*.
+  pocket *mark*; docs prose may say a window is *marked*. The
+  bar menus' unmark is **Remove from Pocket** (#2612): it takes
+  the window off the pocket's list, never the *out* state.
+  The window an app's own key keeps (`pocket_app` in Lua and CLI,
+  #2612) is **the app's pocket window** in copy and prose; never
+  an *app pocket*, since there is one pocket, nor a *pinned*
+  window, the Screen pin's word.
 - **pin** — two relations, and only ONE of them still spends the
   word (#1022). A **Screen pin** binds a Space to a screen and
   takes the word in its labels (`diff.label.space_pin`,

@@ -217,7 +217,7 @@ public final class KiwiCore {
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
     let launchFollow = LaunchFollowIntent()
-    let windowCreates = WindowCreateLedger()
+    let arrivals = ArrivalProvenanceDoor()
     let jump = JumpState()
 
     /// The MAIN display's current native Desktop (#888): the binding

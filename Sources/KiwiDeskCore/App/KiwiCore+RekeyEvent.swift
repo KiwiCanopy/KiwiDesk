@@ -15,6 +15,7 @@ extension KiwiCore {
         old: WindowID,
         new: WindowID
     ) {
+        flushHeldArrival(old)  // #2630
         if let stamp = selfRaiseStamps.removeValue(
             forKey: old
         ) {

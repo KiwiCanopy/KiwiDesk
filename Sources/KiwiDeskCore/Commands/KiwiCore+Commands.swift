@@ -83,7 +83,9 @@ extension KiwiCore {
         case "pocket":
             return pocketCommand(args)
         case "toggle_pocket_window":
-            return togglePocketWindowCommand()
+            return togglePocketWindowCommand(args)
+        case "pocket_app":
+            return namingBundleID(pocketAppCommand(args), args)
         case "override_sticky_reach":
             return setFocusedStickyReach(args)
         case "resize":

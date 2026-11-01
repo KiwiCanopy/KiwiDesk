@@ -14,6 +14,11 @@ extension AppDelegate {
         core.barMenuHooks.confirmSpaceDelete = { question, confirmed in
             if Self.confirmsSpaceDelete(question) { confirmed() }
         }
+        core.barMenuHooks.pocketKeyChord = { [weak core] app in
+            core.flatMap {
+                ShortcutsOpenBinding.pocketAppChord(core: $0, app: app)
+            }
+        }
     }
 
     /// A Space chip's Delete of a profile Space (#1790), in Settings'

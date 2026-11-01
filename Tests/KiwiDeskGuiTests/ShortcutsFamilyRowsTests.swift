@@ -57,6 +57,7 @@ struct ShortcutsFamilyRowsTests {
             .shortcuts(.layersIcon),
             .shortcuts(.layersReach),
             .shortcuts(.openApplications),
+            .shortcuts(.pocketApps),
             .shortcuts(.advanced),
             .shortcuts(.import),
             .shortcuts(.restoreDefaults),

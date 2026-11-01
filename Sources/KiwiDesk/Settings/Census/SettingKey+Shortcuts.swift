@@ -77,6 +77,8 @@ enum ShortcutsKey: String, CaseIterable, Hashable {
     /// What the pocket holds (#2678); where it stands is
     /// KiwiShelf's (`SettingKey+KiwiShelf`).
     case pocketCapacity = "appWide.pocketCapacity"
+    /// Each app's own Pocket key, a row per app (#2612).
+    case pocketApps = "(rows) shortcuts.pocket_apps"
     case showShortcuts = "keybinding.show_shortcuts"
     case openSettings = "keybinding.open_settings"
     case switchToLayer = "keybinding.switch_to_layer (x N-1)"
@@ -176,7 +178,7 @@ extension ShortcutsKey {
             return .row(.shortcuts, .sizeAndFloat, .atRest)
         // Its own card (#2680): what it holds, then its two keys;
         // where it sits is KiwiShelf's (#2678).
-        case .pocket, .pocketWindow, .pocketCapacity:
+        case .pocket, .pocketWindow, .pocketCapacity, .pocketApps:
             return .row(.shortcuts, .pocket, .atRest)
         case .openApplications:
             return .row(.shortcuts, .openApplications, .atRest)
@@ -217,7 +219,8 @@ extension ShortcutsKey {
         switch self {
         case .kiwiHubNavigationKeys:
             return .none
-        case .layers, .openApplications, .advanced, .focusDir,
+        case .layers, .openApplications, .pocketApps, .advanced,
+            .focusDir,
             .screenLast, .spaceStep, .spaceHistoryStep, .goToSpace,
             .swapDir,
             .moveWindowToTrack, .swapWithTrack,

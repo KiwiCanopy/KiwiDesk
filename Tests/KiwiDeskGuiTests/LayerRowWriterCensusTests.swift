@@ -187,6 +187,12 @@ struct LayerRowWriterCensusTests {
             (1, "a section: hands the holder to its rows"),
         "KiwiDesk/Settings/Components/Keybindings/PocketGroup.swift":
             (1, "the Pocket card (#2680): hands the holder to its rows"),
+        "KiwiDesk/Settings/Components/Keybindings/PocketAppRows.swift":
+            (
+                1,
+                "the per-app Pocket keys (#2612): adds an app's one "
+                    + "row, records and removes it"
+            ),
         "KiwiDesk/Settings/Components/Keybindings/"
             + "TrackShortcutsOffer.swift":
             (1, "an offer: hands the holder to its rows"),

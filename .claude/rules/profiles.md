@@ -645,6 +645,11 @@ holds the secondary-switch decision including its nil case.
   stays loud through `APIReference.retired`. The instance is
   `FocusOrSpawnMigrationTests`, scoped by
   `FocusOrSpawnMigrationRoutingTests`.
+  An app's Pocket key row (#2612) is written and read only
+  through `PocketAppLuaArg` — `call` and `bundleID(of:)` — by Core
+  and by every GUI reader, the Settings rows, the import
+  classifier, the naming door and KiwiHub alike; no other file
+  spells the call (`PocketAppMatcherSeamTests` ▸ `oneSpelling`).
 - **A stored value's ABSENCE is a value too: a default flip on a
   sparsely-encoded leaf owes the same crossing.** Under the old
   build an absent key meant the old default, so a file below the

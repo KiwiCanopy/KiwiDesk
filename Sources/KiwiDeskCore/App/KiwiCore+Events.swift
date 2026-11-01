@@ -62,6 +62,9 @@ extension KiwiCore {
             prepareAppExit(pid)
         }
         let detectedFlip = detectedFlip(event)
+        let provenance = arrivalProvenance(of: event)  // #2630
+        let pocketClaim = claimPocketArrival(event, provenance: provenance)
+        state.pocketClaimed = pocketClaim  // #2612
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
@@ -98,18 +101,25 @@ extension KiwiCore {
             // re-add tiles straight to the learned answer
             // instead of re-running the whole dance.
             tiler.reviveSizeBound(window.id, pid: window.pid)
-            let reason = WindowAppearReason.classify(
-                wasMinimized: effects.appearedWasMinimized,
-                hadRememberedSpace: effects.hadRememberedSpace
-            )
-            if reason == .returned { recentReturns[window.id] = wallClock() }
             if effects.closedReturnPlacedAsNew {
                 onLog(
                     "close return: w\(window.id.raw) re-shown — "
                         + "placed as new, focus taken (#1414/#1561)"
                 )
             }
-            emitWindowCreated(window, reason: reason)
+            guard let provenance else {
+                assertionFailure("an arrival's provenance is read first")
+                break
+            }
+            // The Pocket key's window, ahead of its event (#2612).
+            if pocketClaim == .claimed(window.id) {
+                takePocketClaim(window.id, retiling: false)
+            }
+            announceArrival(
+                window,
+                provenance: provenance,
+                effects: effects
+            )
             // #1010: narrate the cross-screen arrival, the
             // one resolution a device trace cannot read off
             // the membership alone.
@@ -137,6 +147,7 @@ extension KiwiCore {
             // the arrival retile below has filed the window.
             launchFollow = claimLaunchFollow(
                 arrived: window,
+                provenance: provenance,
                 effects: effects
             ).map { (window.id, $0) }
             // #1362: the snapshot frame the restore could not set

@@ -141,8 +141,12 @@ struct SnapshotStoreCensusTests {
             (.behind, "an age-bounded intent ledger (#1861)"),
         "drawnSpaceModes":
             (.behind, "settled by the replay itself (#1177)"),
-        "windowCreates.created":
+        "arrivals.ledger.created":
             (.behind, "a restart's adoptions are no new windows (#2478)"),
+        "arrivals.waiting":
+            (.behind, "a stop drops a held arrival's event (#2630)"),
+        "arrivals.landed":
+            (.behind, "a stop drops a held arrival's event (#2630)"),
         "tiler.placements.entries":
             (.behind, "an age-bounded echo ledger (#1161)"),
         "tiler.motionGate.owedWrites":
@@ -205,6 +209,22 @@ struct SnapshotStoreCensusTests {
         core.state.stickyReachOverrides[WindowID(2)] = true
         core.state.floatFrames[WindowID(1)] = .init(pid: 7, frame: .zero)
         core.windowCreates.noteCreated(WindowID(1), at: core.wallClock())
+        for raw: UInt32 in [2, 3] {
+            core.arrivals.hold(
+                .init(
+                    window: ManagedWindow(
+                        id: WindowID(raw),
+                        pid: 7,
+                        appName: "App"
+                    ),
+                    space: nil,
+                    eventOwed: true,
+                    axCreate: false,
+                    at: core.wallClock()
+                )
+            )
+        }
+        _ = core.arrivals.land(WindowID(3), at: core.wallClock())
         core.state.remember(WindowID(9), in: shown)
         core.state.restoredFrames[WindowID(9)] = .init(
             frame: .zero,

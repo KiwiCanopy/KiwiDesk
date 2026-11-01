@@ -110,13 +110,18 @@ struct LaunchFollowSeamTests {
             "windowCreates.noteDestroyed(id)",
             "KiwiCore+WindowServerWakeUp.swift", 1
         ),
-        ("payLateSpawnFollow(id)", "KiwiCore+WindowServerWakeUp.swift", 1),
+        // A late create resolves through the arrival door (#2630).
         (
-            "deferred.schedule(.lateSpawnFollow",
+            "resolveArrivalCreated(id)",
             "KiwiCore+WindowServerWakeUp.swift", 1
         ),
+        ("payLateSpawnFollow(id)", "KiwiCore+ArrivalProvenance.swift", 1),
+        (
+            "deferred.schedule(.arrivalCreated",
+            "KiwiCore+ArrivalProvenance.swift", 1
+        ),
         ("launchFollow.dropSpawn()", "KiwiCore+Lifecycle.swift", 1),
-        ("spawnVerdict(window)", followFile, 1),
+        ("spawnVerdict(window, provenance: provenance)", followFile, 1),
         ("launchFollow.noteSpawn(", followFile, 1),
         ("launchFollow.takeSpawn(", followFile, 1),
         ("followSwitch(to: spawn.space, focusing: id)", followFile, 1),
@@ -164,25 +169,33 @@ struct LaunchFollowSeamTests {
     @Test("a late create pays outside the event-port drain")
     func latePaymentLeavesTheDrain() throws {
         let body = try SourceScan.functionBody(
-            of: "windowServerChanged",
-            in: "KiwiCore+WindowServerWakeUp.swift",
+            of: "resolveArrivalCreated",
+            in: "KiwiCore+ArrivalProvenance.swift",
             under: "App"
         )
         let hop = try #require(
-            body.range(of: "deferred.schedule(.lateSpawnFollow")
+            body.range(of: "deferred.schedule(.arrivalCreated")
         )
-        let pay = try #require(body.range(of: "payLateSpawnFollow("))
-        #expect(hop.lowerBound < pay.lowerBound)
-        #expect(body.components(separatedBy: "payLateSpawnFollow(").count == 2)
+        let settle = try #require(body.range(of: "settleArrival("))
+        let expire = try #require(
+            body.range(of: "resolveExpiredArrivals(")
+        )
+        #expect(hop.lowerBound < settle.lowerBound)
+        #expect(hop.lowerBound < expire.lowerBound)
+        // Nothing settles inside the drain, ahead of the hop.
+        #expect(body.components(separatedBy: "settleArrival(").count == 2)
+        #expect(!body.contains("emitWindowCreated("))
     }
 
-    /// Three retires, each load-bearing: another app's activation
+    /// Four retires, each load-bearing: another app's activation
     /// (the user moved on), the Desktop switch (the windows it
-    /// reveals are not a launch's) and a refused New Window, which
-    /// opened nothing (#1518). A fourth would be a new moment
-    /// ruled "not a launch", which is the judgement this rests on.
-    @Test("the debt is retired by an activation, a switch, a refusal")
-    func twoRetires() throws {
+    /// reveals are not a launch's), a refused New Window, which
+    /// opened nothing (#1518), and a Pocket key's claim, whose
+    /// window stays where the user is (#2612). A fifth would be a
+    /// new moment ruled "not a launch", which is the judgement this
+    /// rests on.
+    @Test("the debt is retired by an activation, a switch, a refusal, a claim")
+    func fourRetires() throws {
         let sites = try SourceScan.identifierSites(
             of: "launchFollow.forget(",
             under: Self.core
@@ -192,8 +205,9 @@ struct LaunchFollowSeamTests {
                 == [
                     Self.followFile, "KiwiCore+Desktops.swift",
                     "KiwiCore+WindowActions.swift",
+                    "KiwiCore+PocketClaim.swift",
                 ]
-                && sites.count == 3,
+                && sites.count == 4,
             "found: \(sites.map(\.site))"
         )
     }

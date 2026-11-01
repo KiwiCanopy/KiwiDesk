@@ -112,6 +112,7 @@ extension KiwiCore {
             layers: captured.layers,
             unread: captured.unread
         )
+        reconcilePocketKeys()  // #2612
         syncDerivedIssues()
     }
 

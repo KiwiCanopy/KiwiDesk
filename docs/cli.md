@@ -606,7 +606,7 @@ every lens with why it cannot turn on.
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
 | | `toggle_maximized` | — the focused tiled window fills its screen, bars hidden, until called again |
-| | `pocket` | — pockets the pocket window, takes it out onto this screen, or puts it back; with none marked, marks and pockets the focused window ([`pocket`](lua-reference.md#pocket)) |
+| | `pocket` | `[window]` — pockets the pocket window, takes it out onto this screen, or puts it back; with none marked, marks and pockets the focused window ([`pocket`](lua-reference.md#pocket)) |
 | | `toggle_pocket_window` | — marks the focused window as the pocket window, floating it, or unmarks it, tiling it ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window)) |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
@@ -703,6 +703,14 @@ every lens with why it cannot turn on.
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`pocket_app` takes an app bundle id: the app's own pocket window
+out or away, or a new window of the app opened there
+([`pocket_app`](lua-reference.md#pocket_app)).
+`toggle_pocket_window` takes an optional window id, marking or
+unmarking that window instead of the focused one.
+:::
 
 `stack.toggle_stack_position [space]` moves a space's stack zone
 to the opposite side (left ↔ right, top ↔ bottom), the focused
@@ -1056,6 +1064,33 @@ lifecycle; the `reason` field says why the set changed:
   the number of the Desktop holding the window, counted across
   every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)), where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
+
+:::unreleased
+`window_created` also reports `existing`: a window that was
+already open when KiwiDesk began managing it — every window found
+when KiwiDesk starts, and, where macOS reports windows opening, a
+window it adopts later that macOS never reported opening, such as
+one it lost track of and finds again:
+
+```json
+{"event": "window_created",
+ "data": {"window_id": 4702, "app": "Ghostty",
+          "space_id": "2", "reason": "existing",
+          "bundle_id": "com.mitchellh.ghostty"}}
+```
+
+`restored` wins over `returned`, which wins over `existing`; `new`
+is everything else, KiwiDesk's own windows included. A pocketed
+window that comes back after its app was hidden, or after KiwiDesk
+restarted, is `returned`. Where KiwiDesk has to wait for macOS to
+report the window opening, the event can follow the window's
+`focus_change` by up to half a second; it always comes before that
+window's `window_destroyed`. Where macOS reports windows opening,
+a window re-shown after a `closed` destroy with no new window
+behind it is `existing`, and so is a window a Desktop switch
+reveals that KiwiDesk never placed. More reasons may be added, so
+match the ones your consumer handles.
+:::
 
 A window re-shown after a `closed` destroy — an app whose close
 hides the window and shows the same one again — comes back as

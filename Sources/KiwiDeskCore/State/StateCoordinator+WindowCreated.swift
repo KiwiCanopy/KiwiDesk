@@ -20,6 +20,7 @@ extension StateCoordinator {
         }
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
+        effects.returnedToPocket = pocketPhase(of: window.id) != nil
         // Once: the restore's debt is the FIRST arrival's (#1362).
         let restored = restoredFrames.removeValue(forKey: window.id)
         effects.restoredFrame = restored?.frame
@@ -43,6 +44,9 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
+        let claim = pocketClaimed
+        pocketClaimed = nil
+        let claimed = claim == .claimed(window.id)
         // A pocketed window comes back to the slot, filed nowhere.
         if readoptPocketWindow(window.id) { return }
         let remembered = rememberedSpaces[window.id]
@@ -53,15 +57,19 @@ extension StateCoordinator {
         )
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
-        // A popup skips the rule (#1602, #2475).
+        // A popup skips the rule (#1602, #2475), and so does the
+        // window a Pocket key claims (#2612 ▸ 7).
         let popup = windows[window.id]?.isPopup ?? false
         let ruled =
-            held == nil && !popup
+            held == nil && !popup && !claimed
             ? window.appBundleID.flatMap { appRules[$0] }
             : nil
         // Only the rule's own verdict may earn the launch follow
         // (#1599), and only into a Space the user is not in.
-        if let ruled, ruled != workspaces.activeSpace {
+        // A Pocket key's candidate keeps its rule but follows none.
+        if let ruled, ruled != workspaces.activeSpace,
+            claim != .awaited(window.id)
+        {
             effects.placedByAppRule = ruled
         }
         let target = held ?? ruled ?? workspaces.activeSpace

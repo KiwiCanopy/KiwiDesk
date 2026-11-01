@@ -30,6 +30,11 @@ struct BindingNameDoorTests {
             "SidedChordWords.label, a chord's spoken words — no "
                 + "binding's label is read (#2737)"
         ),
+        "ShortcutsOpenBinding.swift": (
+            1,
+            "SidedChordWords.label, a Pocket key's spoken chord — "
+                + "no binding's label is read (#2612)"
+        ),
         "KeybindingAppGroup+Row.swift": (
             2,
             "an application row's label IS the added app's name: "
@@ -41,9 +46,18 @@ struct BindingNameDoorTests {
             "application rows sort by their app-name label"
         ),
         "ShortcutsReference+Bands.swift": (
-            3,
+            1,
             "an application row's app-name label when no bundle id "
                 + "names it, and the rows' sort by that name"
+        ),
+        "ShortcutsReference+PocketApps.swift": (
+            1,
+            "the Apps band's sort by each launch row's app name"
+        ),
+        "KeybindingCatalog+PocketApps.swift": (
+            1,
+            "a NavCommand's label written into the Pocket key row it "
+                + "creates (#2612)"
         ),
         "KeybindingImportClassifier.swift": (
             5,

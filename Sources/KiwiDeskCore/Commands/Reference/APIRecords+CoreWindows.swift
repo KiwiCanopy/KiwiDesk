@@ -164,8 +164,14 @@ extension APIReference {
             .window("window", optional: true)
         ),
         "toggle_pocket_window": APIRecord(
-            "Marks the focused window as the pocket window, floating "
-                + "it, or unmarks it, tiling it."
+            "Marks the focused or named window as the pocket window, "
+                + "floating it, or unmarks it, tiling it.",
+            .window("window", optional: true)
+        ),
+        "pocket_app": APIRecord(
+            "Takes an app's own pocket window out or puts it away, "
+                + "or opens a new window of the app there.",
+            .text("bundle_id")
         ),
         "override_sticky_reach": APIRecord(
             "Overrides Desktop reach for the focused sticky "

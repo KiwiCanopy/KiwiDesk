@@ -71,11 +71,14 @@ extension KiwiCore {
             && (was.frame == now.frame || was.risen != now.risen)
     }
 
-    /// The windows the pocket counts, shows for and lists: those
-    /// inside that are tracked, so a hidden app's window, which no
-    /// row can name, counts for nothing.
+    /// The windows the pocket counts, shows for and lists: the
+    /// general list's inside that are tracked, so a hidden app's
+    /// window, which no row can name, counts for nothing, and an
+    /// app's own pocket window is its key's alone (#2612 ▸ 11).
     var pocketPlateWindows: [WindowID] {
-        state.pocketedWindows.filter { state.windows[$0] != nil }
+        state.generalPocket.filter {
+            $0.phase == .pocketed && state.windows[$0.window] != nil
+        }.map(\.window)
     }
 
     /// What each display's pocket draws; empty while none is on

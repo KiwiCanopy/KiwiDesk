@@ -99,9 +99,10 @@ struct CoreLocalizationBoundaryTests {
         // them (#2446), drawn on the same pill and on the bar
         // menu's greyed row, both Core's.
         "Commands/AutoFloatReason+Rendering.swift": 6,
-        // The pocket's sticky refusal (#2446) and its second-window
-        // refusal (#2675), on the same pill.
-        "Commands/PocketRefusal.swift": 2,
+        // The pocket's sticky refusal (#2446), its second-window
+        // refusal (#2675) and its keyed one, two spellings (#2612),
+        // on the same pill.
+        "Commands/PocketRefusal.swift": 4,
         // The three marks' VoiceOver names (#1799, #2446), with
         // the plate's glyph images since #2671.
         "Borders/StickyMarkOverlay+Glyphs.swift": 3,
@@ -139,7 +140,7 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+BarMenus.swift": 8,
         // The window rows of the same menus (#1518): Core draws
         // them, and no word crosses into the GUI.
-        "App/KiwiCore+BarWindowMenus.swift": 9,
+        "App/KiwiCore+BarWindowMenus.swift": 14,
         // A Space chip's New Space and Delete Space rows and why a
         // Delete is greyed (#1790), on the same Core-drawn menu.
         "App/KiwiCore+SpaceChipLifecycle.swift": 9,

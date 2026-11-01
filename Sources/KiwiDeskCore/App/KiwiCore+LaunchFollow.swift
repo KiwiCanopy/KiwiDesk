@@ -33,6 +33,13 @@ extension KiwiCore {
         guard let bundleID = activation.bundleID,
             let press = openingPress(of: activation, now: now)
         else { return }
+        // A Pocket key's open keeps its window where you are (#2612).
+        guard
+            arrivals.livePocketClaim(
+                for: bundleID.lowercased(),
+                at: now
+            ) == nil
+        else { return }
         guard
             now.timeIntervalSince(lastDesktopSwitch)
                 > LaunchFollowIntent.desktopSwitchGrace
@@ -114,6 +121,7 @@ extension KiwiCore {
     /// `payLaunchFollow` after the arrival retile.
     func claimLaunchFollow(
         arrived window: ManagedWindow,
+        provenance: ArrivalProvenance,
         effects: AppliedEffects,
         now: Date = Date()
     ) -> SpaceID? {
@@ -124,7 +132,7 @@ extension KiwiCore {
             state.windows[window.id]?.isTransientOverlay == false
         else { return nil }
         guard launchFollow.claim(bundleID, at: now) else {
-            switch spawnVerdict(window) {
+            switch spawnVerdict(window, provenance: provenance) {
             case .follows:
                 onLog(
                     "launch follow: w\(window.id.raw), a new window "
@@ -137,8 +145,7 @@ extension KiwiCore {
                         window: window.id,
                         bundleID: bundleID,
                         space: space,
-                        from: state.workspaces.activeSpace,
-                        at: wallClock()
+                        from: state.workspaces.activeSpace
                     )
                 )
             case .stays:
@@ -164,13 +171,19 @@ extension KiwiCore {
     /// `wallClock`, for every reading.
     enum SpawnVerdict { case follows, awaitsCreate, stays }
 
-    func spawnVerdict(_ window: ManagedWindow) -> SpawnVerdict {
+    func spawnVerdict(
+        _ window: ManagedWindow,
+        provenance: ArrivalProvenance
+    ) -> SpawnVerdict {
         let now = wallClock()
         guard spawnStandsClear(at: now),
             launchFollow.spawnFollows(pid: window.pid)
         else { return .stays }
-        let created = windowCreates.createdAt(window.id, now: now)
-        return created == nil ? .awaitsCreate : .follows
+        switch provenance {
+        case .created: return .follows
+        case .awaitingCreate: return .awaitsCreate
+        case .own, .unreported, .existing: return .stays
+        }
     }
 
     /// The unowed arm's stand-downs, asked at the claim and again
@@ -186,11 +199,12 @@ extension KiwiCore {
     }
 
     /// Pays the unowed follow when `id`'s create lands after its
-    /// arrival (#2478): the arrival retile has parked the window in
-    /// its unshown Space, so this is a whole `followSwitch`.
+    /// arrival (#2478), within the bound the arrival door resolved
+    /// (#2630): the arrival retile has parked the window in its
+    /// unshown Space, so this is a whole `followSwitch`.
     func payLateSpawnFollow(_ id: WindowID) {
         let now = wallClock()
-        guard let spawn = launchFollow.takeSpawn(id, at: now),
+        guard let spawn = launchFollow.takeSpawn(id),
             spawnStandsClear(at: now),
             state.workspaces.activeSpace == spawn.from,
             state.workspaces.space(of: id) == spawn.space,

@@ -85,6 +85,17 @@ extension EventLoop {
         )
     }
 
+    /// Whether an arrival of `pid` now is the boot's own adoption
+    /// (#2630): a queued boot or sweep step running, or `pid`'s
+    /// budget-cut attach still completing outside the AX create
+    /// arm. Trade: a heal adopting a genuinely new window of that
+    /// app before its drain lands reads as existing too.
+    func adoptsAsBootStep(pid: pid_t) -> Bool {
+        bootScan.stepBudget != nil
+            || (bootScan.pendingDrain.first?.0 == pid
+                && !arrivingFromAXCreate)
+    }
+
     /// The deferred apps, and the ledger cleared — taken by the
     /// epilogue of whichever pass deferred them. BOTH passes
     /// budget, so both drain: a sweep-deferred app taken only by

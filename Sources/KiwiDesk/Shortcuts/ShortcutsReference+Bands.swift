@@ -127,8 +127,7 @@ extension ShortcutsReferenceBuilder {
         )
     }
 
-    /// Builds application launch shortcut rows (#334, `recomputeOrder`).
-    static func buildApps(
+    static func buildLaunchRows(
         _ layer: KeyLayer,
         consumed: inout Set<UUID>
     ) -> [ShortcutRow] {
@@ -159,12 +158,6 @@ extension ShortcutsReferenceBuilder {
                     accessoryIcon: badge?.icon,
                     accessoryHelp: badge?.help ?? ""
                 )
-            }
-            .sorted { lhs, rhs in
-                let order = lhs.label
-                    .localizedCaseInsensitiveCompare(rhs.label)
-                if order == .orderedSame { return lhs.id < rhs.id }
-                return order == .orderedAscending
             }
     }
 

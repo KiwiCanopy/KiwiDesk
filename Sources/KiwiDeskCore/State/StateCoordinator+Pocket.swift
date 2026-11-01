@@ -24,6 +24,23 @@ extension StateCoordinator {
         workspaces.activeSpace.flatMap { workspaces.display(of: $0) }
     }
 
+    /// The app whose Pocket key owns `id`'s slot (#2612), nil for
+    /// a window of the general list or none.
+    public func pocketKeyOwner(of id: WindowID) -> String? {
+        pocketSlot(of: id)?.keyedApp
+    }
+
+    /// The general list `pocket` steps through and the capacity
+    /// counts: every slot no app's key owns (#2612 ▸ 5).
+    var generalPocket: [PocketSlot] {
+        pocket.filter { $0.keyedApp == nil }
+    }
+
+    /// The slot `bundleID`'s Pocket key owns.
+    func pocketSlot(ownedBy bundleID: String) -> PocketSlot? {
+        pocket.first { $0.keyedApp == bundleID }
+    }
+
     /// Whether `id` is in the pocket (not out of it).
     public func isPocketed(_ id: WindowID) -> Bool {
         pocketPhase(of: id) == .pocketed
@@ -34,9 +51,10 @@ extension StateCoordinator {
         pocket.filter { $0.phase == .pocketed }.map(\.window)
     }
 
-    /// The window `pocket` takes out next: the one put in last.
+    /// The window `pocket` takes out next: the general list's
+    /// one put in last.
     public var pocketTakeOutNext: WindowID? {
-        pocket.last { $0.phase == .pocketed }?.window
+        generalPocket.last { $0.phase == .pocketed }?.window
     }
 
     /// The out window `pocket` puts back next (#2678): `focused`
@@ -45,7 +63,7 @@ extension StateCoordinator {
     /// stamps. Only a tracked window qualifies; a hidden app's
     /// comes back by its unhide.
     func pocketPutBackNext(focused: WindowID?) -> WindowID? {
-        let out = pocket.filter {
+        let out = generalPocket.filter {
             $0.phase == .out && windows[$0.window] != nil
         }.map(\.window)
         if let focused, out.contains(focused) { return focused }
@@ -56,10 +74,11 @@ extension StateCoordinator {
 
     /// Whether `toggle_pocket_window` may mark another window under
     /// `capacity` (#2678): One window takes a mark only while the
-    /// pocket is empty, Several always. `pocket`'s own mark asks for
-    /// an empty pocket.
+    /// general list is empty, Several always; a keyed slot never
+    /// counts (#2612 ▸ 5). `pocket`'s own mark asks for an empty
+    /// general list.
     func pocketAcceptsMark(_ capacity: PocketCapacity) -> Bool {
-        capacity == .several || pocket.isEmpty
+        capacity == .several || generalPocket.isEmpty
     }
 
     /// Puts the out window `id` in the pocket: floating, no sticky
@@ -85,12 +104,20 @@ extension StateCoordinator {
     /// or already marked window; the caller asks
     /// `pocketAcceptsMark` first.
     @discardableResult
-    mutating func markPocketWindow(_ id: WindowID) -> Bool {
+    mutating func markPocketWindow(
+        _ id: WindowID,
+        owner: String? = nil
+    ) -> Bool {
         guard pocketIndex(of: id) == nil, windows[id] != nil
         else { return false }
         userFloated.remove(id)
         pocket.append(
-            PocketSlot(window: id, pid: windows[id]?.pid, phase: .out)
+            PocketSlot(
+                window: id,
+                pid: windows[id]?.pid,
+                phase: .out,
+                owner: owner
+            )
         )
         markPocketOut(id, cameFrom: nil)
         return true
