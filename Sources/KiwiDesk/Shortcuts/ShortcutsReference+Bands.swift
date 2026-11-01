@@ -127,8 +127,29 @@ extension ShortcutsReferenceBuilder {
         )
     }
 
-    /// Builds application launch shortcut rows (#334, `recomputeOrder`).
+    /// Builds application launch shortcut rows (#334, `recomputeOrder`),
+    /// each app's Pocket key directly after its own (#2612).
     static func buildApps(
+        _ layer: KeyLayer,
+        consumed: inout Set<UUID>
+    ) -> [ShortcutRow] {
+        let launch = buildLaunchRows(layer, consumed: &consumed)
+            .map { (name: $0.label, pocket: false, row: $0) }
+        let pocket = buildPocketAppRows(layer, consumed: &consumed)
+        return (launch + pocket)
+            .sorted { lhs, rhs in
+                let order = lhs.name
+                    .localizedCaseInsensitiveCompare(rhs.name)
+                if order != .orderedSame {
+                    return order == .orderedAscending
+                }
+                if lhs.pocket != rhs.pocket { return rhs.pocket }
+                return lhs.row.id < rhs.row.id
+            }
+            .map(\.row)
+    }
+
+    private static func buildLaunchRows(
         _ layer: KeyLayer,
         consumed: inout Set<UUID>
     ) -> [ShortcutRow] {
@@ -159,12 +180,6 @@ extension ShortcutsReferenceBuilder {
                     accessoryIcon: badge?.icon,
                     accessoryHelp: badge?.help ?? ""
                 )
-            }
-            .sorted { lhs, rhs in
-                let order = lhs.label
-                    .localizedCaseInsensitiveCompare(rhs.label)
-                if order == .orderedSame { return lhs.id < rhs.id }
-                return order == .orderedAscending
             }
     }
 

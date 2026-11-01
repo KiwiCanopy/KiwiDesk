@@ -708,6 +708,8 @@ every lens with why it cannot turn on.
 `pocket_app` takes an app bundle id: the app's own pocket window
 out or away, or a new window of the app opened there
 ([`pocket_app`](lua-reference.md#pocket_app)).
+`toggle_pocket_window` takes an optional window id, marking or
+unmarking that window instead of the focused one.
 :::
 
 `stack.toggle_stack_position [space]` moves a space's stack zone

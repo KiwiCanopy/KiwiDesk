@@ -54,8 +54,11 @@ extension KiwiCore {
     }
 
     /// Opens a window of `bundleID` whose arrival the claim takes:
-    /// a launch, a reopen where the app shows no window, else its
-    /// New Window row.
+    /// a launch, else its New Window row. A running app showing no
+    /// window here may have its windows on another Desktop, where a
+    /// reopen only brings one forward, so it gets the row too and
+    /// is reopened only where it has none; it is not activated
+    /// first, which would switch to that Desktop.
     private func openPocketAppWindow(
         _ bundleID: String,
         keyed: Bool
@@ -65,19 +68,17 @@ extension KiwiCore {
             keyed: keyed,
             at: wallClock()
         )
-        guard let pid = openOrFocus.runningAppPID(bundleID),
-            showsAnyWindow(openOrFocus.census(pid))
-        else {
-            guard openOrFocus.openApp(bundleID, false) else {
-                arrivals.pocketClaims[bundleID] = nil
-                return .fail("app not found: \(bundleID)")
-            }
-            onLog("pocket: opening \(bundleID) for its Pocket key")
-            return .ok()
+        guard let pid = openOrFocus.runningAppPID(bundleID) else {
+            return reopenPocketApp(bundleID)
         }
-        openOrFocus.activate(pid)
+        let shows = showsAnyWindow(openOrFocus.census(pid))
+        if shows { openOrFocus.activate(pid) }
         windowActions.newWindow(pid) { [weak self] pressed in
             guard !pressed, let self else { return }
+            guard shows else {
+                _ = self.reopenPocketApp(bundleID)
+                return
+            }
             // Nothing opened, so nothing is claimed.
             self.arrivals.pocketClaims[bundleID] = nil
             guard let window = self.state.windows.windows(pid: pid).first
@@ -87,6 +88,17 @@ extension KiwiCore {
                 on: window.id
             )
         }
+        return .ok()
+    }
+
+    /// Launches or reopens `bundleID`, dropping the claim where no
+    /// such app exists.
+    private func reopenPocketApp(_ bundleID: String) -> CommandResponse {
+        guard openOrFocus.openApp(bundleID, false) else {
+            arrivals.pocketClaims[bundleID] = nil
+            return .fail("app not found: \(bundleID)")
+        }
+        onLog("pocket: opening \(bundleID) for its Pocket key")
         return .ok()
     }
 

@@ -5701,6 +5701,13 @@ native full screen and on a transient panel or popup. Bound to
 Under [`pocket.set_capacity("several")`](#pocketset_capacity) a
 call on another window marks it too, beside the others.
 
+:::unreleased
+`toggle_pocket_window` also takes a window id, as the bar menus'
+Remove from Pocket does: it marks or unmarks that window instead of
+the focused one. A window an app's own key keeps
+([`pocket_app`](#pocket_app)) is refused with a pill naming its key.
+:::
+
 **Example:**
 
 ```lua
@@ -5732,15 +5739,19 @@ and the window becomes an ordinary window again, on the Space you
 are on; a profile that leaves the shortcut out keeps the tie, and
 the key works again when you switch back. Closing the window or quitting the app frees the key, and
 the next call opens a fresh window. If the app is hidden, the
-call shows it again.
+call shows it again. Settings ▸ Shortcuts ▸ Pocket writes this
+shortcut: one row per app, added with **Add an app to your
+Pocket…**.
 
 Called with no such shortcut — from the CLI, say — the window it
 opens is an ordinary pocket window, counted like any other: under
 `"one"`, with another pocket window marked, the call fails with
 `another window is the pocket window` (and the pill "Pocket is
-already taken" on the focused window) and opens nothing. Fails
+already taken" on the focused window) and opens nothing. A running app gets its File ▸ New
+Window, also when its windows are all on another Desktop; one that
+shows no window here and has no New Window is reopened. Fails
 with `app not found: <id>` for an app macOS cannot find, and with
-a pill when a running app's File menu has no New Window.
+a pill when a running app showing a window has no New Window.
 
 **Example:**
 

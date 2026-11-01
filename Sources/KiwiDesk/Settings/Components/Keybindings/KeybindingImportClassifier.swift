@@ -75,10 +75,13 @@ enum KeybindingImportClassifier {
             return shape.step
         }
         // A lens toggle is matched by shape, as a Desktop row is:
-        // the config records no lens a session defined.
+        // the config records no lens a session defined; so is an
+        // app's Pocket key (#2612 ▸ 6).
         let lens = KeybindingCatalog.lensTarget(of: binding.lua)
             .map(KeybindingCatalog.toggleLens)
-        if let command = lens
+        let pocketApp = PocketAppLuaArg.bundleID(of: binding.lua)
+            .map(KeybindingCatalog.pocketApp)
+        if let command = lens ?? pocketApp
             ?? KeybindingCatalog.desktopCommand(
                 from: binding.lua
             )

@@ -6352,6 +6352,13 @@ the nod take no setting, since they shape how softly the pocket
 appears, not how fast anything travels (#1931's *own pace* ruling
 the other way round).
 
+:::unreleased
+While a window is the pocket's, the float row's slot reads Remove
+from Pocket in place of a Tile Window no click could act on, Pocket
+Window kept below it; both grey for a window its app's own key
+keeps, the subtitle naming where that key lives (#2612 ▸ 4, ▸ 11).
+:::
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**

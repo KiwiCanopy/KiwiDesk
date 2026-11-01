@@ -111,6 +111,9 @@ extension KiwiCore {
     private func floatRow(_ windows: [WindowID]) -> BarMenuRow {
         guard windows.count > 1 else {
             let id = windows[0]
+            if state.pocketPhase(of: id) != nil {
+                return removeFromPocketRow(id)
+            }
             let floats = state.windows[id]?.isFloating == true
             let refusal = floats ? tileRefusal(of: id) : nil
             return .action(
@@ -148,13 +151,40 @@ extension KiwiCore {
         )
     }
 
+    /// The float row's slot while the window is the pocket's
+    /// (#2612 ▸ 4): unmarks it through `toggle_pocket_window`
+    /// naming it, as ⌃⌥⇧P does. Greyed for a window its app's
+    /// Pocket key keeps, the subtitle saying where that key lives.
+    private func removeFromPocketRow(_ id: WindowID) -> BarMenuRow {
+        let keyed = state.pocketKeyOwner(of: id) != nil
+        return .action(
+            L("bar.menu.remove_from_pocket", "Remove from Pocket"),
+            enabled: !keyed,
+            subtitle: keyed ? Self.pocketKeyKeepsIt : nil
+        ) { [weak self] in
+            _ = self?.execute(
+                "toggle_pocket_window",
+                args: [.number(Double(id.raw))]
+            )
+        }
+    }
+
+    static var pocketKeyKeepsIt: String {
+        L(
+            "bar.menu.pocket_keyed",
+            "Its Pocket key keeps it — Settings ▸ Shortcuts ▸ Pocket"
+        )
+    }
+
     /// Puts the window in the pocket through `pocket` naming it
     /// (#2678), greyed where the pocket would refuse it — taken
-    /// under One window, or a window no pocket takes.
+    /// under One window, a window no pocket takes, or one its
+    /// app's Pocket key keeps (#2612 ▸ 11).
     private func pocketRow(_ windows: [WindowID]) -> BarMenuRow {
         let title = L("bar.menu.pocket_window", "Pocket Window")
         let takes = { (id: WindowID) in
-            self.pocketNamedRefusal(id) == nil
+            self.state.pocketKeyOwner(of: id) == nil
+                && self.pocketNamedRefusal(id) == nil
         }
         let pocket = { [weak self] (id: WindowID) in
             _ = self?.execute("pocket", args: [.number(Double(id.raw))])

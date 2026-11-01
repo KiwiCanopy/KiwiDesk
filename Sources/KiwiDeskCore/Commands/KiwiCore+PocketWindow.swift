@@ -1,14 +1,19 @@
 import Foundation
 
-/// `toggle_pocket_window` (#2675): marks the focused window the
-/// pocket window, or unmarks it, tiling it. Marking floats it at the float
-/// size as a Float does and leaves it out; `pocket` then pockets
-/// and takes out that window alone, marking the focus first where
-/// none is marked.
+/// `toggle_pocket_window` (#2675): marks the focused window — or
+/// the one an id names (#2612 ▸ 4) — the pocket window, or unmarks
+/// it, tiling it. Marking floats it at the float size as a Float
+/// does and leaves it out; `pocket` then pockets and takes out that
+/// window alone, marking the focus first where none is marked.
 extension KiwiCore {
-    func togglePocketWindowCommand() -> CommandResponse {
+    func togglePocketWindowCommand(_ args: [JSONValue]) -> CommandResponse {
         _ = emptyPocketIfGone()
-        guard let id = focusedWindowID, let window = state.windows[id]
+        let id: WindowID
+        switch commandTarget("toggle_pocket_window", args) {
+        case .refused(let response): return response
+        case .window(let target): id = target
+        }
+        guard let window = state.windows[id]
         else { return .fail("no focused window") }
         if let app = state.pocketKeyOwner(of: id) {
             return refuseKeyedPocketWindow(id, app: app)
