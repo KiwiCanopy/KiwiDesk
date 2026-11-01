@@ -169,6 +169,7 @@ extension FrameApplier {
         nonisolated(unsafe) let target = element
         let held = held
         let writer = writer
+        let screens = screenFrames()
         let holds = enhancedUI
         let recent = recentStamp
         let move = ownWindowMove
@@ -192,7 +193,7 @@ extension FrameApplier {
                 if own {
                     MainActor.assumeIsolated {
                         if !move(id, entry.frame, entry.setSize) {
-                            Self.write(entry, target, writer)
+                            Self.write(entry, target, writer, screens)
                         }
                     }
                 } else if holds.noteQueued(
@@ -201,10 +202,10 @@ extension FrameApplier {
                     ifGeneration: generation
                 ) {
                     holds.beginInstant(pid, writer)
-                    Self.write(entry, target, writer)
+                    Self.write(entry, target, writer, screens)
                     holds.endInstant(pid, writer)
                 } else {
-                    Self.write(entry, target, writer)
+                    Self.write(entry, target, writer, screens)
                 }
                 recent(id)  // as `apply`, #1254
             case .later(let later):
@@ -218,10 +219,16 @@ extension FrameApplier {
     nonisolated private static func write(
         _ entry: HeldWrites.Entry,
         _ target: AXUIElement,
-        _ writer: FrameWriter
+        _ writer: FrameWriter,
+        _ screens: [CGRect]
     ) {
         if entry.setSize {
-            writer.setFrame(entry.frame, target)
+            BottomBandWrite.write(
+                entry.frame,
+                target,
+                screens: screens,
+                writer: writer
+            )
         } else {
             writer.setPosition(entry.frame.origin, target)
         }

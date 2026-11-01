@@ -8,12 +8,19 @@ struct FrameWriter: Sendable {
     var setFrame: @Sendable (CGRect, AXUIElement) -> Void
     var setPosition: @Sendable (CGPoint, AXUIElement) -> Void
     var writeEUI: @Sendable (pid_t, Bool) -> Void
+    /// The window's current size, read only for a write ending
+    /// near a screen's bottom (#2894); nil leaves the write as is.
+    var size: @Sendable (AXUIElement) -> CGSize? = { _ in nil }
 
     static let live = FrameWriter(
         setFrame: { WindowControl.setFrame($0, of: $1) },
         setPosition: { WindowControl.setPosition($0, of: $1) },
         writeEUI: {
             AXHelper.setEnhancedUserInterface(pid: $0, enabled: $1)
+        },
+        size: { element in
+            let size = AXHelper.frame(of: element).size
+            return size == .zero ? nil : size
         }
     )
 }
