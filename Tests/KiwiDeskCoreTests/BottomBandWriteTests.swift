@@ -103,6 +103,8 @@ struct BottomBandWriteTests {
         let other = CGRect(x: -1080, y: 0, width: 1080, height: 1920)
         let current = CGRect(x: -1000, y: 300, width: 840, height: 499)
         #expect(other.contains(current))
+        let above = CGRect(x: 16, y: -800, width: 840, height: 499)
+        #expect(lift(slot, from: above) == 1117 - BottomBandWrite.band - 499)
         #expect(lift(slot, from: current) == 1117 - BottomBandWrite.band - 499)
     }
 
@@ -217,8 +219,62 @@ struct BottomBandWriteTests {
     )
     func sameHeightReadsNothing(door: Door) async throws {
         let app = RefusingApp(slot, screenBottom: screen.maxY)
-        try await send(slot, through: door, makeApplier(app), app)
+        let applier = makeApplier(app)
+        // The first sized write has no sent height to compare.
+        try await send(slot, through: door, applier, app)
+        app.calls.withLock { $0.removeAll() }
+        try await send(slot, through: door, applier, app)
         #expect(app.calls.withLock { $0 } == ["frame"])
+    }
+
+    /// A spring's shrink-back after an overshoot: the echo still
+    /// reports a height from before the peak, the frame sent last
+    /// was the peak, and the window is at the peak.
+    @Test(
+        "A shrink-back the echo has not reached is lifted",
+        arguments: Door.allCases
+    )
+    func overshootShrinkBackIsLifted(door: Door) async throws {
+        let app = RefusingApp(start, screenBottom: screen.maxY)
+        let applier = makeApplier(app)
+        applier.trackedHeight = { _ in 480 }
+        try await send(start, through: door, applier, app)
+        try await send(slot, through: door, applier, app)
+        #expect(app.frame.withLock { $0 } == slot)
+    }
+
+    /// A sized write merged into a held position-only one keeps
+    /// its band (#1956's merge).
+    @Test("A held merge carries the band")
+    func heldMergeCarriesTheBand() async throws {
+        let app = RefusingApp(start, screenBottom: screen.maxY)
+        let applier = makeApplier(app)
+        let id = WindowID(1)
+        applier.holdWrites([id], until: .now() + 0.05)
+        applier.applyInstant(id, slot, setSize: false)
+        applier.applyInstant(id, slot, setSize: true)
+        // A generous guard, never a tight deadline (#344).
+        for _ in 0..<500 where app.calls.withLock({ $0.isEmpty }) {
+            try await Task.sleep(for: .milliseconds(10))
+        }
+        #expect(app.frame.withLock { $0 } == slot)
+    }
+
+    @Test("A position-only frame merged into a sized one keeps its band")
+    func pendingMergeKeepsTheBand() {
+        let pending = PendingFrames()
+        let id = WindowID(1)
+        _ = pending.put(
+            id,
+            .init(element: element, frame: slot, setSize: true, band: screen)
+        )
+        _ = pending.put(
+            id,
+            .init(element: element, frame: slot, setSize: false)
+        )
+        let entry = pending.take(id)
+        #expect(entry?.setSize == true)
+        #expect(entry?.band == screen)
     }
 
     @Test("A write far from any bottom edge reads nothing")

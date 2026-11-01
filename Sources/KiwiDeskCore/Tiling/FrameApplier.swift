@@ -39,6 +39,7 @@ final class FrameApplier {
     /// A window's echo-fed height, wired by `KiwiCore`; nil
     /// (unknown) reads the window, as unwired.
     var trackedHeight: @MainActor (WindowID) -> CGFloat? = { _ in nil }
+    let sentHeights = SentHeights()
 
     /// Whether the app's EUI is on at rest — the event loop's
     /// warmed baseline, wired at bootstrap. Off by default: an

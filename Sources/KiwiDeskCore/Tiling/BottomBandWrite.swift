@@ -38,9 +38,9 @@ enum BottomBandWrite {
         current: CGRect,
         screen: CGRect
     ) -> CGFloat? {
-        let arriving =
-            current.midX < screen.minX
-            || current.midX >= screen.maxX
+        let arriving = !screen.contains(
+            CGPoint(x: current.midX, y: current.midY)
+        )
         guard target.height < current.height,
             arriving || current.maxY > screen.maxY - band
         else { return nil }
@@ -71,17 +71,35 @@ enum BottomBandWrite {
 extension FrameApplier {
     /// The screen whose bottom band a sized write must clear
     /// (#2894): a write ending near a bottom edge and shorter than
-    /// the window's echo-fed height, which an app's own resize and
-    /// a refused write both reach. A write no shorter reads nothing.
+    /// the window's echo-fed height — which an app's own resize and
+    /// a refused write reach — or than the height last sent, which a
+    /// spring's shrink-back after an overshoot beats its echo to.
+    /// A write no shorter than either reads nothing.
     func bandScreen(
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool
     ) -> CGRect? {
         guard setSize else { return nil }
-        if let height = trackedHeight(id), frame.height >= height {
+        let sent = sentHeights.swap(id, frame.height)
+        let known = [trackedHeight(id), sent].compactMap { $0 }
+        if known.count == 2, let tallest = known.max(),
+            frame.height >= tallest
+        {
             return nil
         }
         return BottomBandWrite.screen(for: frame, among: screenFrames())
+    }
+}
+
+/// The height each window was last sent with a size (#2894).
+@MainActor
+final class SentHeights {
+    private var heights: [WindowID: CGFloat] = [:]
+
+    /// Records `height` for `id`; returns the one it replaces.
+    func swap(_ id: WindowID, _ height: CGFloat) -> CGFloat? {
+        defer { heights[id] = height }
+        return heights[id]
     }
 }

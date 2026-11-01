@@ -48,5 +48,9 @@ struct BottomBandWriteSeamTests {
         #expect(
             source.occurrences(of: "tiler.applier.trackedHeight =") == 1
         )
+        // The window's echo-fed frame, never a frame we asked for.
+        #expect(
+            source.occurrences(of: "state.windows[id]?.frame.height") == 1
+        )
     }
 }
