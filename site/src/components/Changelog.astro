@@ -40,9 +40,7 @@ import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
 import changelog from "../data/changelog.json";
 import { downloadHref, downloadVersion } from "../lib/download";
-import ogBannerEn from "../assets/brand/og-banner.jpg";
-import ogBannerDe from "../assets/brand/og-banner.de.jpg";
-import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
+import { ogCard } from "../lib/ogCard";
 
 interface Props {
   lang: Lang;
@@ -95,11 +93,7 @@ const readable = (iso: string): string =>
 const slug = "/changelog/";
 const pageTitle = t("changelog_meta_title");
 const pageDesc = t("changelog_meta_desc");
-// One banner per locale — the card carries the tagline, so it
-// speaks the language of the title beside it (as Guide does).
-const ogBanner =
-  lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBannerEn;
-const ogImage = new URL(ogBanner.src, Astro.site).href;
+const og = ogCard("banner", lang, Astro.site);
 ---
 
 <PageShell
@@ -107,7 +101,7 @@ const ogImage = new URL(ogBanner.src, Astro.site).href;
   slug={slug}
   title={pageTitle}
   desc={pageDesc}
-  ogImage={ogImage}
+  og={og}
   mainClass="clog"
 >
   <h1>{t("changelog_title")}</h1>

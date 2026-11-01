@@ -30,6 +30,7 @@ import {
   localePath,
   type Lang,
 } from "../lib/locales";
+import type { OgCard } from "../lib/ogCard";
 export type { Lang };
 
 interface Props {
@@ -44,7 +45,9 @@ interface Props {
       (site review, 2026-08-30). Optional — a page that passes
       nothing emits nothing. */
   jsonLd?: unknown;
-  ogImage?: string;
+  /** The link-preview card (`ogCard`); a page passing none, such
+      as a noindex legal page, emits no share image. */
+  og?: OgCard;
   mainClass?: string;
 }
 
@@ -55,7 +58,7 @@ const {
   desc,
   noindex = false,
   jsonLd,
-  ogImage,
+  og,
   mainClass,
 } = Astro.props;
 
@@ -97,11 +100,19 @@ const makerProfile = "https://github.com/hajiboy95";
     {ogLocaleAlternates(lang).map((l) => (
       <meta property="og:locale:alternate" content={l} />
     ))}
-    {ogImage && <meta property="og:image" content={ogImage} />}
-    {ogImage && <meta name="twitter:card" content="summary_large_image" />}
-    {ogImage && <meta name="twitter:title" content={title} />}
-    {ogImage && <meta name="twitter:description" content={desc} />}
-    {ogImage && <meta name="twitter:image" content={ogImage} />}
+    {og && (
+      <>
+        <meta property="og:image" content={og.url} />
+        <meta property="og:image:width" content={String(og.width)} />
+        <meta property="og:image:height" content={String(og.height)} />
+        <meta property="og:image:alt" content={og.alt} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={desc} />
+        <meta name="twitter:image" content={og.url} />
+        <meta name="twitter:image:alt" content={og.alt} />
+      </>
+    )}
     {jsonLd && (
       <script type="application/ld+json"
         set:html={JSON.stringify(jsonLd)}></script>

@@ -584,5 +584,8 @@
   "looks_teaser_lead_dev": "Every look is a JSON file in a public GitHub repo, shared under CC BY 4.0. A <code>kiwidesk://</code> link adds one to the app, and <code>kiwidesk preview</code> renders yours as a card before you share it.",
   "looks_teaser_browse": "Browse looks",
   "looks_teaser_repo": "View the repo",
-  "looks_teaser_code_aria": "Part of a look file"
+  "looks_teaser_code_aria": "Part of a look file",
+  "og_alt_banner": "KiwiDesk: the headline “Tiling that feels like it shipped with macOS.” above a drawing of a Mac desktop with three tiled windows.",
+  "og_alt_looks": "KiwiDesk Looks: the headline “Find a look. Wear it.” above three looks from the gallery — Purple Neon, Gruvbox Retro and Black & White Tiler.",
+  "og_alt_compare": "KiwiDesk: the headline “How KiwiDesk compares to other window managers.” above a sketch of a comparison table with KiwiDesk’s column highlighted."
 }

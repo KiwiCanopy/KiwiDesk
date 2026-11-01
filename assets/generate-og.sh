@@ -8,6 +8,12 @@
 #   og-banner.svg     →  og-banner.jpg      (1200×630 banner, en)
 #   og-banner.de.svg  →  og-banner.de.jpg   (same banner, German copy)
 #   og-banner.ja.svg  →  og-banner.ja.jpg   (same banner, Japanese copy)
+#   og-looks*.svg     →  og-looks*.jpg      (the /looks/ gallery's card)
+#   og-compare*.svg   →  og-compare*.jpg    (the /compare/ page's card)
+#
+# Which page wears which card is site/src/lib/ogCard.ts's; the
+# looks card reads its three tiles from og/ by relative href, the
+# way every master reads logo.svg.
 #
 # Per-locale because /de/ and /ja/ serve localized titles and descriptions;
 # en keeps the bare og-banner.jpg name so shared links stay valid. Keep the
@@ -28,8 +34,13 @@
 set -eu
 
 asset_dir=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
-# "<svg basename>:<jpg basename>" — en is the bare og-banner.jpg, per above.
-banners="og-banner.svg:og-banner.jpg og-banner.de.svg:og-banner.de.jpg og-banner.ja.svg:og-banner.ja.jpg"
+# "<svg basename>:<jpg basename>" — en is the bare <family>.jpg, per above.
+banners=""
+for family in og-banner og-looks og-compare; do
+  for suffix in "" .de .ja; do
+    banners="$banners $family$suffix.svg:$family$suffix.jpg"
+  done
+done
 temp_dir=$(mktemp -d "${TMPDIR:-/tmp}/kiwidesk-og.XXXXXX")
 
 cleanup() {
@@ -65,4 +76,4 @@ for pair in $banners; do
   made="$made $jpg"
 done
 
-echo "Regenerated KiwiDesk banners (1200×630):$made"
+echo "Regenerated KiwiDesk cards (1200×630):$made"

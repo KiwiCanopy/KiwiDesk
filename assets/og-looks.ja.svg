@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">KiwiDesk デザインギャラリー social preview</title>
+  <desc id="desc">The Japanese Looks card: &quot;KiwiDesk デザインギャラリー&quot;, the headline &quot;デザインを見つけて、すぐ使う。&quot;, a subline, the KiwiCanopy endorsement, and three looks from the gallery.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1512"/>
+      <stop offset="1" stop-color="#12251a"/>
+    </linearGradient>
+    <clipPath id="t0"><rect x="72" y="302" width="400" height="250" rx="16"/></clipPath>
+    <clipPath id="t1"><rect x="496" y="302" width="400" height="250" rx="16"/></clipPath>
+    <clipPath id="t2"><rect x="920" y="302" width="400" height="250" rx="16"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <image href="logo.svg" x="72" y="58" width="60" height="60" preserveAspectRatio="xMidYMid meet"/>
+  <text x="146" y="103" fill="#eaf3ee" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="700" letter-spacing="-1">KiwiDesk デザインギャラリー</text>
+  <text x="1128" y="98" text-anchor="end" fill="#aacb5d" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500">KiwiCanopy より</text>
+
+  <text x="70" y="210" fill="#eaf3ee" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="66" font-weight="800" letter-spacing="-1.5">デザインを見つけて、すぐ使う。</text>
+  <text x="72" y="262" fill="#aacb5d" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="25" font-weight="600">みんなが作ったデザイン  ·  ワンクリックで追加  ·  自分のデザインも共有</text>
+
+  <!-- three gallery looks, the third bleeding off the right edge; depth is an offset plate because qlmanage drops SVG filters -->
+  <rect x="72" y="312" width="400" height="250" rx="16" fill="#000000" fill-opacity=".45"/>
+  <image href="og/purple-neon.png" x="72" y="302" width="400" height="250" preserveAspectRatio="xMidYMid slice" clip-path="url(#t0)"/>
+  <rect x="72.5" y="302.5" width="399" height="249" rx="15.5" fill="none" stroke="#eaf3ee" stroke-opacity=".12"/>
+  <rect x="496" y="312" width="400" height="250" rx="16" fill="#000000" fill-opacity=".45"/>
+  <image href="og/gruvbox-retro.png" x="496" y="302" width="400" height="250" preserveAspectRatio="xMidYMid slice" clip-path="url(#t1)"/>
+  <rect x="496.5" y="302.5" width="399" height="249" rx="15.5" fill="none" stroke="#eaf3ee" stroke-opacity=".12"/>
+  <rect x="920" y="312" width="400" height="250" rx="16" fill="#000000" fill-opacity=".45"/>
+  <image href="og/black-and-white-tiler.png" x="920" y="302" width="400" height="250" preserveAspectRatio="xMidYMid slice" clip-path="url(#t2)"/>
+  <rect x="920.5" y="302.5" width="399" height="249" rx="15.5" fill="none" stroke="#eaf3ee" stroke-opacity=".12"/>
+</svg>

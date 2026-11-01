@@ -64,10 +64,8 @@ import { downloadHref } from "../lib/download";
 import en from "../i18n/en.json";
 import de from "../i18n/de.json";
 import ja from "../i18n/ja.json";
-import ogBannerEn from "../assets/brand/og-banner.jpg";
 import { publisher } from "../lib/publisher";
-import ogBannerDe from "../assets/brand/og-banner.de.jpg";
-import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
+import { ogCard } from "../lib/ogCard";
 
 interface Props {
   lang: Lang;
@@ -84,14 +82,7 @@ const dict = { ...en, ...{ en, de, ja }[lang] } as Record<
 const t = (k: string): string =>
   dict[k] ?? (en as Record<string, string>)[k] ?? k;
 
-const ogImage = new URL(
-  (lang === "de"
-    ? ogBannerDe
-    : lang === "ja"
-      ? ogBannerJa
-      : ogBannerEn).src,
-  Astro.site,
-).href;
+const og = ogCard("compare", lang, Astro.site);
 
 // Source links. Named here rather than inline so a URL that moves
 // is fixed in one place, and so the prose below reads as prose.
@@ -223,7 +214,7 @@ const jsonLd = [
     description: t("compare_meta_desc"),
     url: canonical,
     inLanguage: lang,
-    image: ogImage,
+    image: og.url,
     author: publisher,
   },
   {
@@ -252,7 +243,7 @@ const jsonLd = [
   slug="/compare/"
   title={t("compare_meta_title")}
   desc={t("compare_meta_desc")}
-  ogImage={ogImage}
+  og={og}
   jsonLd={jsonLd}
   mainClass="cmp"
 >

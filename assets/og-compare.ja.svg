@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 630" role="img" aria-labelledby="title desc">
+  <title id="title">KiwiDesk comparison social preview</title>
+  <desc id="desc">The Japanese comparison card: the headline &quot;KiwiDesk を、ほかのウインドウマネージャーと比べる。&quot;, the compared rows, the KiwiCanopy endorsement, and a schematic comparison table with the KiwiDesk column highlighted.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0d1512"/>
+      <stop offset="1" stop-color="#12251a"/>
+    </linearGradient>
+    <clipPath id="panel"><rect x="72" y="398" width="1056" height="330" rx="20"/></clipPath>
+  </defs>
+
+  <rect width="1200" height="630" fill="url(#bg)"/>
+
+  <image href="logo.svg" x="72" y="58" width="60" height="60" preserveAspectRatio="xMidYMid meet"/>
+  <text x="146" y="103" fill="#eaf3ee" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="40" font-weight="700" letter-spacing="-1">KiwiDesk</text>
+  <text x="1128" y="98" text-anchor="end" fill="#aacb5d" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="22" font-weight="500">KiwiCanopy より</text>
+
+  <text fill="#eaf3ee" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="60" font-weight="700" letter-spacing="-1.5">
+    <tspan x="70" y="214">KiwiDesk を、ほかの</tspan>
+    <tspan x="70" y="294">ウインドウマネージャーと比べる。</tspan>
+  </text>
+  <text x="72" y="346" fill="#aacb5d" font-family="-apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif" font-size="26" font-weight="500">レイアウト  ·  必要な権限  ·  SIP  ·  設定方法  ·  見た目</text>
+
+  <!-- a schematic comparison table with no names on it; bleeds off the bottom edge like the banner's desktop -->
+  <rect x="72" y="406" width="1056" height="330" rx="20" fill="#000000" fill-opacity=".45"/>
+  <rect x="72" y="398" width="1056" height="330" rx="20" fill="#16241c"/>
+  <rect x="72.5" y="398.5" width="1055" height="329" rx="19.5" fill="none" stroke="#aacb5d" stroke-opacity=".25"/>
+  <g clip-path="url(#panel)">
+    <rect x="72" y="398" width="1056" height="52" fill="#243629"/>
+    <rect x="100" y="418" width="120" height="12" rx="6" fill="#eaf3ee" fill-opacity=".3"/>
+    <image href="logo.svg" x="403" y="409" width="30" height="30" preserveAspectRatio="xMidYMid meet"/>
+    <rect x="568" y="418" width="100" height="12" rx="6" fill="#eaf3ee" fill-opacity=".3"/>
+    <rect x="768" y="418" width="100" height="12" rx="6" fill="#eaf3ee" fill-opacity=".3"/>
+    <rect x="968" y="418" width="100" height="12" rx="6" fill="#eaf3ee" fill-opacity=".3"/>
+    <rect x="100" y="480" width="150" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="358" y="480" width="120" height="12" rx="6" fill="#eaf3ee" fill-opacity=".55"/>
+    <rect x="558" y="480" width="90" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="758" y="480" width="110" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="958" y="480" width="80" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <line x1="72" y1="513" x2="1128" y2="513" stroke="#eaf3ee" stroke-opacity=".08"/>
+    <rect x="100" y="534" width="110" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="358" y="534" width="100" height="12" rx="6" fill="#eaf3ee" fill-opacity=".55"/>
+    <rect x="558" y="534" width="120" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="758" y="534" width="76" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="958" y="534" width="104" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <line x1="72" y1="567" x2="1128" y2="567" stroke="#eaf3ee" stroke-opacity=".08"/>
+    <rect x="100" y="588" width="170" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="358" y="588" width="132" height="12" rx="6" fill="#eaf3ee" fill-opacity=".55"/>
+    <rect x="558" y="588" width="70" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="758" y="588" width="120" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="958" y="588" width="96" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <line x1="72" y1="621" x2="1128" y2="621" stroke="#eaf3ee" stroke-opacity=".08"/>
+    <rect x="100" y="642" width="130" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="358" y="642" width="108" height="12" rx="6" fill="#eaf3ee" fill-opacity=".55"/>
+    <rect x="558" y="642" width="110" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="758" y="642" width="90" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="958" y="642" width="120" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <line x1="72" y1="675" x2="1128" y2="675" stroke="#eaf3ee" stroke-opacity=".08"/>
+    <rect x="100" y="696" width="150" height="12" rx="6" fill="#eaf3ee" fill-opacity=".45"/>
+    <rect x="358" y="696" width="124" height="12" rx="6" fill="#eaf3ee" fill-opacity=".55"/>
+    <rect x="558" y="696" width="84" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="758" y="696" width="100" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="958" y="696" width="70" height="12" rx="6" fill="#eaf3ee" fill-opacity=".18"/>
+    <rect x="330" y="404" width="176" height="360" rx="14" fill="none" stroke="#aacb5d" stroke-width="4"/>
+  </g>
+</svg>
