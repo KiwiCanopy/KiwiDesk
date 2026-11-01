@@ -8,8 +8,10 @@ struct FrameWriter: Sendable {
     var setFrame: @Sendable (CGRect, AXUIElement) -> Void
     var setPosition: @Sendable (CGPoint, AXUIElement) -> Void
     var writeEUI: @Sendable (pid_t, Bool) -> Void
-    /// The window's current frame, read only for a shrink ending
-    /// near a screen's bottom (#2894); nil leaves the write as is.
+    /// The window's current frame, read for every sized write
+    /// ending near a screen's bottom (#2894) — one AX message on
+    /// the app's queue, so a Space switch pays one per bottom-row
+    /// window it shows; nil leaves the write as is.
     var frame: @Sendable (AXUIElement) -> CGRect? = { _ in nil }
 
     static let live = FrameWriter(

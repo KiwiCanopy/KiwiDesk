@@ -1662,10 +1662,11 @@ editing here:
   it, which macOS would otherwise refuse; its docstring carries
   the measurement. The screens it reads come from
   `TilingEngine.allScreenFrames`, never a live read in the applier.
-  Only a shrink of the height last asked reads the window's frame
-  (`AskedHeights`), so a Space switch's unpark adds no AX message.
+  Whether a write shrinks the window is the window's own answer,
+  read per sized write ending near a bottom edge — never a record
+  of what was asked, which an app's own resize leaves behind.
   `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
-  three doors, `onlyAShrinkReads` the read's gate, and
+  three doors, `unaskedGrowIsLifted` the window's answer, and
   `BottomBandWriteSeamTests` ▸
   `appliersTakeTheBand` reds a `FrameApplier` file spelling the
   writer's frame call. The quit gather's direct

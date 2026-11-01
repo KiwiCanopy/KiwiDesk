@@ -92,6 +92,8 @@ final class PendingFrames: @unchecked Sendable {
         defer { lock.unlock() }
         if let existing = entries.removeValue(forKey: id) {
             var merged = entry
+            // The newer frame's band; a position-only frame
+            // keeps the size write's.
             if !entry.setSize { merged.band = existing.band }
             merged.setSize = entry.setSize || existing.setSize
             entries[id] = merged

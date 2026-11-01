@@ -63,32 +63,12 @@ enum BottomBandWrite {
     }
 }
 
-/// The height the applier last asked of each window, so only a
-/// shrink pays the band's frame read (#2894): a Space switch's
-/// unpark asks the size it parked with and reads nothing.
-@MainActor
-final class AskedHeights {
-    private var heights: [WindowID: CGFloat] = [:]
-
-    /// Records `height` as `id`'s ask; true when it is shorter than
-    /// the last one, or the first.
-    func shrinks(_ id: WindowID, to height: CGFloat) -> Bool {
-        defer { heights[id] = height }
-        return heights[id].map { height < $0 } ?? true
-    }
-}
-
 extension FrameApplier {
-    /// The screen whose bottom band a sized write must clear: only
-    /// a shrink of the height last asked ends refused (#2894).
-    func bandScreen(
-        _ id: WindowID,
-        _ frame: CGRect,
-        setSize: Bool
-    ) -> CGRect? {
-        guard setSize,
-            askedHeights.shrinks(id, to: frame.height)
-        else { return nil }
+    /// The screen whose bottom band a sized write must clear
+    /// (#2894), judged on the frame alone: only the window's own
+    /// answer says whether the write shrinks it.
+    func bandScreen(_ frame: CGRect, setSize: Bool) -> CGRect? {
+        guard setSize else { return nil }
         return BottomBandWrite.screen(for: frame, among: screenFrames())
     }
 }

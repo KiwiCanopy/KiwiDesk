@@ -185,17 +185,31 @@ struct BottomBandWriteTests {
         #expect(app.frame.withLock { $0 } == slot)
     }
 
+    /// The app grew its own window back after a landed ask, and
+    /// the layout asks the same height again: the window's answer,
+    /// not the last ask, says it shrinks.
     @Test(
-        "Only a shrink of the last ask pays the frame read",
+        "A shrink the app made necessary is lifted too",
         arguments: Door.allCases
     )
-    func onlyAShrinkReads(door: Door) async throws {
+    func unaskedGrowIsLifted(door: Door) async throws {
         let app = RefusingApp(start, screenBottom: screen.maxY)
         let applier = makeApplier(app)
         try await send(slot, through: door, applier, app)
-        app.calls.withLock { $0.removeAll() }
+        app.frame.withLock { $0 = start }
         try await send(slot, through: door, applier, app)
-        #expect(!app.calls.withLock { $0 }.contains("read"))
+        #expect(app.frame.withLock { $0 } == slot)
+    }
+
+    @Test("A write far from any bottom edge reads nothing")
+    func farWriteReadsNothing() async throws {
+        let high = slot.offsetBy(dx: 0, dy: -300)
+        let app = RefusingApp(
+            start.offsetBy(dx: 0, dy: -300),
+            screenBottom: screen.maxY
+        )
+        try await send(high, through: .instant, makeApplier(app), app)
+        #expect(app.calls.withLock { $0 } == ["frame"])
     }
 
     @Test("The engine hands the applier its screen frames")
