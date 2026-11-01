@@ -1486,7 +1486,6 @@
   "menu.open_kiwihub": "打开 %1$@…",
   "menu.quit": "退出 KiwiDesk",
   "menu.settings": "设置…",
-  "menu.starting": "正在启动 — App：%1$d / %2$d",
   "menu.status.a11y": "KiwiDesk",
   "menu.status.config_error.a11y": "KiwiDesk（配置问题）",
   "menu.status.config_error.tooltip": "部分配置无法载入 — 请打开“%1$@”查看详情。",

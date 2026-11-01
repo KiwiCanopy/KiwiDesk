@@ -1486,7 +1486,6 @@
   "menu.open_kiwihub": "%1$@を開く…",
   "menu.quit": "KiwiDeskを終了",
   "menu.settings": "設定…",
-  "menu.starting": "起動中 — アプリ: %2$d個中%1$d個",
   "menu.status.a11y": "KiwiDesk",
   "menu.status.config_error.a11y": "KiwiDesk（設定の問題）",
   "menu.status.config_error.tooltip": "設定の一部を読み込めませんでした。詳細は「%1$@」を開いてください。",

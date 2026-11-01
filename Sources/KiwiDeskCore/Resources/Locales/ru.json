@@ -1486,7 +1486,6 @@
   "menu.open_kiwihub": "Открыть %1$@…",
   "menu.quit": "Завершить KiwiDesk",
   "menu.settings": "Настройки…",
-  "menu.starting": "Запуск — приложения: %1$d из %2$d",
   "menu.status.a11y": "KiwiDesk",
   "menu.status.config_error.a11y": "KiwiDesk (проблемы с конфигурацией)",
   "menu.status.config_error.tooltip": "Часть конфигурации не удалось загрузить — открой «%1$@», чтобы узнать подробности.",
