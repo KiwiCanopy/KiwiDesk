@@ -99,7 +99,7 @@ struct KiwiHubKeyParityTests {
         let core = makeTestCore()
         let panel = JumpPanelController(core: core).makePanel()
         var keys: [JumpKey] = []
-        panel.onKey = { keys.append($0) }
+        panel.onKey = { key, _ in keys.append(key) }
         #expect(
             core.execute(
                 "kiwihub.set_key",
@@ -130,7 +130,7 @@ struct KiwiHubKeyParityTests {
         let panel = JumpPanelController(core: core).makePanel()
         panel.keyedForTesting = true
         var keys: [JumpKey] = []
-        panel.onKey = { keys.append($0) }
+        panel.onKey = { key, _ in keys.append(key) }
         #expect(
             core.execute(
                 "kiwihub.set_key",

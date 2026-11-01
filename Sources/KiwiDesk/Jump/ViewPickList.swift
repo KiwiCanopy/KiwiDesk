@@ -183,27 +183,39 @@ struct ViewPickList: Equatable {
         } ?? found.first
     }
 
-    /// ← / →: the next matching item on the line, never wrapping.
-    mutating func step(_ delta: Int) {
+    /// ← / →: the next matching item on the line; with `wrap`, past
+    /// an end to the other (#2897).
+    mutating func step(_ delta: Int, wrap: Bool = false) {
         guard let current = selection else { return }
         let order = matches(current.line)
         guard let at = order.firstIndex(of: current.index) else {
             return
         }
-        let next = min(max(at + delta, 0), order.count - 1)
+        let next = JumpList.stepped(
+            at,
+            by: delta,
+            count: order.count,
+            wrap: wrap
+        )
         selection = Position(line: current.line, index: order[next])
     }
 
     /// ↑ / ↓: the next line with a match, keeping the position
-    /// along the line, clamped to a shorter one (#2309 ruling 11).
-    mutating func moveLine(_ delta: Int) {
+    /// along the line, clamped to a shorter one (#2309 ruling 11);
+    /// with `wrap`, past the last line to the first (#2897).
+    mutating func moveLine(_ delta: Int, wrap: Bool = false) {
         guard let current = selection else { return }
         let reachable = lines.filter { !matches($0).isEmpty }
         guard let at = reachable.firstIndex(of: current.line) else {
             return
         }
-        let next = at + delta
-        guard reachable.indices.contains(next) else { return }
+        let next = JumpList.stepped(
+            at,
+            by: delta,
+            count: reachable.count,
+            wrap: wrap
+        )
+        guard next != at else { return }
         let column = matches(current.line).firstIndex(of: current.index)
         // Never onto a create chip, unless nothing else matches
         // (#2359 ruling 1).

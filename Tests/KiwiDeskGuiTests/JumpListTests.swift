@@ -67,7 +67,20 @@ struct JumpListTests {
         #expect(list.selected == nil)
     }
 
-    @Test("the selection clamps at both ends, never wrapping")
+    @Test("a step one past an end wraps; a page never does")
+    func wrapsAtTheEnds() {
+        var list = list(three)
+        list.step(-1, wrap: true)
+        #expect(list.selection == 2)
+        list.step(1, wrap: true)
+        #expect(list.selection == 0)
+        list.step(-6, wrap: true)
+        #expect(list.selection == 0)
+        list.step(6, wrap: true)
+        #expect(list.selection == 2)
+    }
+
+    @Test("without the wrap the selection clamps at both ends")
     func noWrap() {
         var list = list(three)
         list.step(-1)
