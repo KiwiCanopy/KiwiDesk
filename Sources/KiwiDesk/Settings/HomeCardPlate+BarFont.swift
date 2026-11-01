@@ -1,3 +1,4 @@
+import AppKit
 import CoreText
 import KiwiDeskCore
 import SwiftUI
@@ -20,4 +21,33 @@ extension HomeCardBarsTile.BarSpec {
             )
         }
     }
+
+    /// The along-axis length of the glyph `BarStripView.iconAndTitle`
+    /// draws for an icon item, padding excluded.
+    @MainActor func glyphLength(
+        _ item: HomeCardBarsTile.BarItem,
+        vertical: Bool
+    ) -> CGFloat {
+        guard let glyph = item.glyph else { return item.length }
+        let size = Self.glyphSize(glyph, size: fontSize * item.glyphRatio)
+        return vertical ? size.height : size.width
+    }
+
+    /// A symbol's size as SwiftUI draws it at `size`, measured
+    /// once per pair: AppKit's own symbol size differs by a point.
+    @MainActor private static func glyphSize(
+        _ name: String,
+        size: CGFloat
+    ) -> CGSize {
+        let key = "\(name)@\(size)"
+        if let measured = glyphSizes[key] { return measured }
+        let measured =
+            ImageRenderer(
+                content: Image(systemName: name).font(.system(size: size))
+            ).nsImage?.size ?? .zero
+        glyphSizes[key] = measured
+        return measured
+    }
+
+    @MainActor private static var glyphSizes: [String: CGSize] = [:]
 }

@@ -53,36 +53,56 @@ public struct OverflowMark: Sendable, Equatable {
     /// One mark per run end that hides windows.
     public static func marks(of cover: RunCover) -> [OverflowMark] {
         cover.runs.flatMap { run -> [OverflowMark] in
-            guard let first = run.shown.first, let last = run.shown.last
-            else { return [] }
-            let vertical = run.zone.vertical
-            var out: [OverflowMark] = []
-            if !run.hiddenBefore.isEmpty {
-                out.append(
-                    OverflowMark(
-                        space: cover.space,
-                        anchor: first,
-                        end: vertical ? .top : .left,
-                        windows: Array(run.hiddenBefore.reversed()),
-                        bounds: run.bounds,
-                        zoneOrigin: run.zone.region.origin
-                    )
+            ends(of: run.run, vertical: run.zone.vertical).map { end in
+                OverflowMark(
+                    space: cover.space,
+                    anchor: run.zone.members[end.anchor],
+                    end: end.end,
+                    windows: end.end == .top || end.end == .left
+                        ? Array(run.zone.members[end.hidden].reversed())
+                        : Array(run.zone.members[end.hidden]),
+                    bounds: run.bounds,
+                    zoneOrigin: run.zone.region.origin
                 )
             }
-            if !run.hiddenAfter.isEmpty {
-                out.append(
-                    OverflowMark(
-                        space: cover.space,
-                        anchor: last,
-                        end: vertical ? .bottom : .right,
-                        windows: Array(run.hiddenAfter),
-                        bounds: run.bounds,
-                        zoneOrigin: run.zone.region.origin
-                    )
-                )
-            }
-            return out
         }
+    }
+
+    /// One end of a run that hides windows, by index into the
+    /// run's members: the shown member the mark rides and the
+    /// members it counts.
+    public struct RunEnd: Sendable, Equatable {
+        public let end: End
+        public let anchor: Int
+        public let hidden: Range<Int>
+    }
+
+    /// The ends of `run` that hide windows — the rule `marks(of:)`
+    /// draws on the desk and the Settings previews draw too
+    /// (#2864).
+    public static func ends(of run: ZoneRun, vertical: Bool) -> [RunEnd] {
+        let shown = run.visible
+        guard !shown.isEmpty else { return [] }
+        var out: [RunEnd] = []
+        if shown.lowerBound > 0 {
+            out.append(
+                RunEnd(
+                    end: vertical ? .top : .left,
+                    anchor: shown.lowerBound,
+                    hidden: 0..<shown.lowerBound
+                )
+            )
+        }
+        if shown.upperBound < run.count {
+            out.append(
+                RunEnd(
+                    end: vertical ? .bottom : .right,
+                    anchor: shown.upperBound - 1,
+                    hidden: shown.upperBound..<run.count
+                )
+            )
+        }
+        return out
     }
 
     /// The mark's depth across its edge, and a pill's height.

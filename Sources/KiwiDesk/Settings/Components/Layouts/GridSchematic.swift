@@ -126,6 +126,12 @@ struct GridSchematic: View {
                 rows: rows,
                 ids: ids
             )
+            let laid = gridRun(
+                cells: cells,
+                cols: cols,
+                rows: rows,
+                ids: ids
+            )
             ZStack(alignment: .topLeading) {
                 ForEach(cells.indices, id: \.self) { k in
                     cellView(cells[k].kind)
@@ -137,6 +143,12 @@ struct GridSchematic: View {
                             x: cells[k].rect.midX,
                             y: cells[k].rect.midY
                         )
+                }
+                if let laid {
+                    SchematicOverflowMarks(
+                        laid: laid,
+                        bounds: CGRect(origin: .zero, size: geo.size)
+                    )
                 }
             }
         }
@@ -159,13 +171,9 @@ struct GridSchematic: View {
         switch kind {
         case .gap: SchematicGap()
         case .window(let tile): tileView(tile)
-        case .scrolled(let tile, let hidden):
-            ZStack(alignment: .bottomTrailing) {
-                tileView(tile)
-                if hidden > 0 {
-                    SchematicMoreChip(hidden: hidden).padding(2)
-                }
-            }
+        case .scrolled(let tile, _):
+            // Its count is drawn by the run's overflow marks.
+            tileView(tile)
         }
     }
 

@@ -64,7 +64,7 @@ struct QuickMenuBootRowTests {
 
     private func startingRow(_ menu: NSMenu) -> NSMenuItem? {
         menu.items.first {
-            $0.title.hasPrefix("Starting up")
+            $0.title.hasPrefix("Going through your open apps")
         }
     }
 
@@ -78,7 +78,12 @@ struct QuickMenuBootRowTests {
 
         // A determinate count in words — the count is what makes
         // the wait read as working rather than broken.
-        #expect(row?.title == "Starting up — apps: 51 of 109")
+        #expect(
+            row?.title
+                == BootCountText.line(
+                    for: .scanning(scanned: 51, total: 109)
+                )
+        )
         // Context only, never an action.
         #expect(row?.isEnabled == false)
     }
@@ -92,7 +97,9 @@ struct QuickMenuBootRowTests {
         controller.menuNeedsUpdate(menu)
         #expect(
             startingRow(menu)?.title
-                == "Starting up — apps: 2 of 109"
+                == BootCountText.line(
+                    for: .scanning(scanned: 2, total: 109)
+                )
         )
 
         controller.setBootPhase(.scanning(scanned: 40, total: 109))
@@ -103,7 +110,9 @@ struct QuickMenuBootRowTests {
         // held it (owner, on device, 2026-08-12).
         #expect(
             startingRow(menu)?.title
-                == "Starting up — apps: 40 of 109"
+                == BootCountText.line(
+                    for: .scanning(scanned: 40, total: 109)
+                )
         )
 
         // Ready ends the row's life rather than retitling it: the
@@ -160,7 +169,7 @@ struct QuickMenuBootRowTests {
             $0.hasPrefix("Window Management Paused")
         }
         let starting = titles.firstIndex {
-            $0.hasPrefix("Starting up")
+            $0.hasPrefix("Going through your open apps")
         }
         let issues = titles.firstIndex {
             $0.hasPrefix("Config Issues")

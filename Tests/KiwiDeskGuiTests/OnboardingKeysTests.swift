@@ -62,9 +62,17 @@ struct OnboardingKeysTests {
             layer: layer(mixed),
             spaces: []
         )
-        let glyphs = families.first { $0.id == "focus" }?.glyphs
+        let focus = families.first { $0.id == "focus" }
+        let glyphs = focus?.glyphs
         #expect(glyphs?.contains("⌃⌘↑") == true)
         #expect(glyphs != "⌃⌥ ← ↓ ↑ →")
+        // Each chord on its own keycap (#2877).
+        guard case .mixed(let chords) = focus?.chord else {
+            Issue.record("a rebound family is listed chord by chord")
+            return
+        }
+        #expect(chords.count == 4)
+        #expect(chords.contains("⌃⌘↑"))
     }
 
     @Test("a space family renders as a range of its own digits")

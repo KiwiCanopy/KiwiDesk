@@ -136,7 +136,8 @@ struct WhatsNewRelaunchTests {
         #expect(first.hasPrefix("if let narration { return narration }"))
     }
 
-    /// The grant screen and the header read the one sentence.
+    /// The grant screen, the header and the menu-bar menu read the
+    /// one sentence.
     @Test("the grant screen reads the one author of the count")
     func grantReadsTheOneAuthor() throws {
         let root = SourceScan.repoRoot(from: #filePath)
@@ -153,6 +154,14 @@ struct WhatsNewRelaunchTests {
         )
         #expect(narration.contains("BootCountText.line(for: phase)"))
         #expect(!grant.contains("onboarding.grant.arranging.count"))
+        // The menu-bar menu's count row reads it too (#2874).
+        let menu = try SourceScan.strippedSource(
+            at: root.appendingPathComponent(
+                "Sources/KiwiDesk/StatusItemController+Menu.swift"
+            )
+        )
+        #expect(menu.contains("BootCountText.line(for: phase)"))
+        #expect(!menu.contains("menu.starting"))
         let chrome = try SourceScan.strippedSource(
             at: root.appendingPathComponent(
                 "Sources/KiwiDesk/Updates/WhatsNewWindowController.swift"

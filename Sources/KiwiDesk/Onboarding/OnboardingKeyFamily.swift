@@ -11,7 +11,8 @@ struct OnboardingKeyFamily: Identifiable, Equatable {
     /// string (#1016).
     let chord: OnboardingChord
     /// Whether this row opens KiwiHub, the way to every
-    /// shortcut the step leaves out (#828, #2515).
+    /// shortcut the step leaves out (#828, #2515); a divider sets
+    /// it apart (#2877).
     var isGateway = false
     /// Which seeded modifier tier this family belongs to, if any.
     var tier: OnboardingKeyTier?
@@ -43,8 +44,9 @@ enum OnboardingChord: Equatable {
     /// `1–5`.
     case shared(HotkeyModifiers, keys: String)
     /// A family edited apart, sharing no prefix: each chord
-    /// written in full, and no modifier to name in words.
-    case mixed(String)
+    /// written in full, drawn on its own keycap (#2877), and no
+    /// modifier to name in words.
+    case mixed([String])
 
     @MainActor var glyphs: String {
         switch self {
@@ -54,8 +56,8 @@ enum OnboardingChord: Equatable {
             guard !keys.isEmpty else { return symbols }
             // Space separator between modifier symbols and keys.
             return symbols + " " + keys
-        case .mixed(let text):
-            return text
+        case .mixed(let chords):
+            return chords.joined(separator: "  ")
         }
     }
 }

@@ -27,6 +27,8 @@ struct HomeCardBarsTile: View {
     /// Whether this frame draws the App Bar — false for the
     /// layouts that host none, where the Space Bar is alone.
     var showsAppBar = true
+    /// How many mock App Bar items the frame draws.
+    var mockApps = 3
     /// Drawn inside the desktop's well, so it sits clear of the
     /// shelf on any edge and scales with the frame (a look card's
     /// focused window, #1739).
@@ -150,11 +152,15 @@ struct HomeCardBarsTile: View {
         }
     }
 
+    /// The schematic screen's shape and the inset its strips sit in.
+    static let screenAspect: CGFloat = 16.0 / 10.0
+    static let screenInset: CGFloat = 3
+
     var body: some View {
         Group {
             if rowsRunFullWidth { rowsOuter } else { columnsOuter }
         }
-        .padding(3)
+        .padding(Self.screenInset)
         .overlay(
             RoundedRectangle(cornerRadius: 5)
                 .strokeBorder(
@@ -162,7 +168,7 @@ struct HomeCardBarsTile: View {
                 )
                 .opacity(drawsChrome ? 1 : 0)
         )
-        .aspectRatio(16.0 / 10.0, contentMode: .fit)
+        .aspectRatio(Self.screenAspect, contentMode: .fit)
         .frame(maxWidth: .infinity, maxHeight: .infinity)
     }
 

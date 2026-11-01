@@ -79,13 +79,7 @@ extension GridSchematic {
             (rect: cell($0.offset), kind: CellKind.window(kind($0.element)))
         }
         let members = Array(ids[start...])
-        let run = ZoneRun.resolve(
-            floors: Array(repeating: 1, count: members.count),
-            span: CGFloat(line),
-            gap: 0,
-            head: nil,
-            focus: members.firstIndex(of: newID)
-        )
+        let run = lastTrackRun(members, line: line)
         let before = run.visible.lowerBound
         let after = members.count - run.visible.upperBound
         for (k, index) in run.visible.enumerated() {
@@ -100,5 +94,51 @@ extension GridSchematic {
             )
         }
         return cells
+    }
+
+    /// The last track's run over its members: one unit floor per
+    /// cell over a span of `line` cells, the incoming window taking
+    /// the focus.
+    func lastTrackRun(_ members: [Int], line: Int) -> ZoneRun {
+        ZoneRun.resolve(
+            floors: Array(repeating: 1, count: members.count),
+            span: CGFloat(line),
+            gap: 0,
+            head: nil,
+            focus: members.firstIndex(of: newID)
+        )
+    }
+
+    /// A full grid's last-track run as the overflow marks read it
+    /// (#2864): every member's rect — a hidden one its edge cell's —
+    /// and the track's axis; nil while the grid holds every window.
+    func gridRun(
+        cells: [(rect: CGRect, kind: CellKind)],
+        cols: Int,
+        rows: Int,
+        ids: [Int]
+    ) -> SchematicLaidRun? {
+        guard ids.count > max(1, cols * rows) else { return nil }
+        let start = GridLayout.runStart(
+            columns: cols,
+            rows: rows,
+            rowMajor: columnsFirst
+        )
+        let line = columnsFirst ? cols : rows
+        let run = lastTrackRun(Array(ids[start...]), line: line)
+        let shown = Array(cells[start...].map(\.rect))
+        guard let first = shown.first, let last = shown.last else {
+            return nil
+        }
+        let rects = (0..<run.count).map { index -> CGRect in
+            if index < run.visible.lowerBound { return first }
+            if index >= run.visible.upperBound { return last }
+            return shown[index - run.visible.lowerBound]
+        }
+        return SchematicLaidRun(
+            run: run,
+            rects: rects,
+            vertical: !columnsFirst
+        )
     }
 }

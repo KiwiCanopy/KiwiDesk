@@ -46,7 +46,7 @@ extension HomeCardBarsTile {
         var spec = BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
-            items: appItems(style, vertical: vertical),
+            items: appItems(style),
             alignment: style.alignment,
             spans: style.plateSpans,
             boxed: !style.shelf.drawsPlate,
@@ -75,6 +75,14 @@ extension HomeCardBarsTile {
         let pad = vertical ? Self.pipPad.vertical : Self.pipPad.horizontal
         for index in spec.items.indices where spec.items[index].art != nil {
             spec.items[index].length = spec.artSide + 2 * pad * scale
+        }
+        // An icon item measures the glyph `iconAndTitle` draws, as
+        // drawn, and its padding (#2781).
+        for index in spec.items.indices
+        where spec.items[index].glyph != nil {
+            spec.items[index].length =
+                spec.glyphLength(spec.items[index], vertical: vertical)
+                + 2 * pad * scale
         }
         return spec
     }
@@ -112,18 +120,8 @@ extension HomeCardBarsTile {
     }
 
     /// Mock window items at panel scale (owner 2026-08-10).
-    func appItems(
-        _ style: AppBarLook,
-        vertical: Bool
-    ) -> [BarItem] {
-        let mocks: [(glyph: String, title: String)] = [
-            ("envelope", L("bars_scene.title_mail", "Inbox")),
-            ("globe", L("bars_scene.title_web", "News")),
-            (
-                "folder",
-                L("bars_scene.title_files", "Downloads")
-            ),
-        ]
+    func appItems(_ style: AppBarLook) -> [BarItem] {
+        let mocks = ["envelope", "globe", "folder"].prefix(mockApps)
         if let appArt {
             return appArt.enumerated().map { index, art in
                 // `appSpec` sets the length once the font is known.
@@ -148,9 +146,9 @@ extension HomeCardBarsTile {
                 length: 20 * scale
             )
             if scale > 1 {
-                // Icon and title; a vertical bar the icon alone.
-                item.glyph = mock.glyph
-                item.label = vertical ? nil : mock.title
+                // The icon alone: a preview strip has no room for
+                // titles beside the Space Bar (owner, #2781).
+                item.glyph = mock
             }
             item.active = active
             items.append(item)

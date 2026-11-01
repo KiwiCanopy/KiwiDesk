@@ -2248,12 +2248,13 @@ in step (`CLIPreviewContractTests`).
   alone.
 - **A surface narrating the boot count reads
   `BootCountText.line(for:)`**, the one author of that sentence
-  (#1715). The grant screen, the relaunched "What's new" and the
-  slow-boot notice all say it word for word, so a reader of two
-  never meets two numbers; a surface writing its own "N of M"
-  is the drift the owner's wording pick closed. The quick menu's
-  count row predates the rule and is its known residue. No guard
-  sees a new surface; review does.
+  (#1715). Every surface naming the count says it word for word,
+  the quick menu's count row included (#2874), so a reader of
+  two never meets two numbers; a surface writing its own "N of
+  M" is the drift the owner's wording pick closed.
+  `WhatsNewRelaunchTests` ▸ `grantReadsTheOneAuthor` holds the
+  grant screen, the narration and the quick menu; a new surface
+  is review's.
 
 Nearly every `L()` call site in the repo is in this tree, so the
 authoring rules apply here even though the catalogs live in Core:

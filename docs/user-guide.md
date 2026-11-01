@@ -536,8 +536,8 @@ A **sticky** window stays visible on every space. Two scopes
 
 - **Toggle sticky everywhere** — every space of every screen
   (∞ mark).
-- **Toggle sticky on this screen** — every space of the one
-  screen it lives on (📌 mark). Moving it to a space on another
+- **Toggle sticky on this screen** — every space of its home
+  screen, the one its home space is on (📌 mark). Moving it to a space on another
   screen re-homes it there.
 
 **Toggle sticky everywhere** is a shortcut under Size & float.
@@ -690,7 +690,7 @@ a 📌 window under the current Space of its own screen.
 | Mark | Where it sits | Means |
 | --- | --- | --- |
 | ∞ mark | On the window, top-right corner | **Global sticky** — every Space of every screen |
-| 📌 mark | On the window, top-right corner | **Screen sticky** — every Space of the one screen it lives on |
+| 📌 mark | On the window, top-right corner | **Screen sticky** — every Space of its home screen |
 | Floating mark | On the window, top-right corner — left of a sticky mark | A **floating** window |
 | Badge, glyph's **top-left** | Space Bar | That window (or one in the group) is **sticky** |
 | Badge, glyph's **bottom-left** | Space Bar | That window is **floating** |
