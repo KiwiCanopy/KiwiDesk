@@ -19,6 +19,11 @@ struct PocketAppSeamTests {
             "soundIfDrawn(",
             "Sources/KiwiDeskCore", "KiwiCore+PocketApp.swift", 1
         ),
+        // A profile apply keeps every tie (#2612 ▸ 12).
+        (
+            "reconcilingPocketKeys: false",
+            "Sources/KiwiDeskCore", "KiwiCore+StructuredConfig.swift", 1
+        ),
         // A row gone since the capture unties at the restore.
         (
             "reconcilePocketKeys()",

@@ -120,6 +120,24 @@ struct PocketAppKeyTests {
         #expect(fixture.core.launchFollow.owed() == nil)
     }
 
+    @Test("the app's activation after the spend owes no follow")
+    func activationAfterTheSpend() {
+        let fixture = Fixture()
+        fixture.core.launchFollow.pressAge = { 0.2 }
+        fixture.press()
+        fixture.arrive(9)
+        let now = fixture.core.wallClock()
+        fixture.core.noteAppActivation(
+            AppActivation(
+                pid: Fixture.pid,
+                bundleID: Fixture.app,
+                launchedAt: now.addingTimeInterval(-0.3)
+            ),
+            now: now
+        )
+        #expect(fixture.core.launchFollow.owed(at: now) == nil)
+    }
+
     @Test("removing the row makes the window an ordinary one")
     func rowRemovalUnties() {
         let fixture = Fixture()

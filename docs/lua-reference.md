@@ -5729,7 +5729,8 @@ double quotes, and it goes in and out by that shortcut alone:
 a pill naming its key. It does not count against
 [`pocket.set_capacity`](#pocketset_capacity). Remove the shortcut
 and the window becomes an ordinary window again, on the Space you
-are on. Closing the window or quitting the app frees the key, and
+are on; a profile that leaves the shortcut out keeps the tie, and
+the key works again when you switch back. Closing the window or quitting the app frees the key, and
 the next call opens a fresh window. If the app is hidden, the
 call shows it again.
 

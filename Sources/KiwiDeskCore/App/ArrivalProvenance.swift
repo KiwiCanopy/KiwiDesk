@@ -143,6 +143,9 @@ final class ArrivalProvenanceDoor {
         let keyed: Bool
         let at: Date
         var candidate: WindowID?
+        /// Spent on its window, kept to the bound so the app's
+        /// activation owes that open no follow.
+        var spent = false
     }
     var pocketClaims: [String: PocketClaim] = [:]
 

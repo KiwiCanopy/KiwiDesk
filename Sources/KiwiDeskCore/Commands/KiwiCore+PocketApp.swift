@@ -17,7 +17,10 @@ extension KiwiCore {
             return stepKeyedPocket(slot)
         }
         // A window this press's twin already asked for is on its way.
-        if arrivals.livePocketClaim(for: bundleID, at: wallClock()) != nil {
+        if let claim = arrivals.livePocketClaim(
+            for: bundleID,
+            at: wallClock()
+        ), !claim.spent {
             onLog("pocket: \(bundleID)'s window is still on its way")
             return .ok()
         }

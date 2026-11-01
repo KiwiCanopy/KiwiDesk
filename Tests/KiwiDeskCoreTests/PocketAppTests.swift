@@ -31,7 +31,7 @@ struct PocketAppTests {
         #expect(state.pocketPhase(of: mine) == .out)
         #expect(state.pocketKeyOwner(of: mine) == Fixture.app)
         #expect(state.windows[mine]?.isFloating == true)
-        #expect(fixture.core.arrivals.pocketClaims.isEmpty)
+        #expect(fixture.claim?.spent == true)
     }
 
     @Test("later presses put it away and take it out")

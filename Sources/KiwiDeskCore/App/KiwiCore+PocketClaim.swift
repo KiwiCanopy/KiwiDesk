@@ -13,7 +13,8 @@ extension KiwiCore {
     /// `StateCoordinator.pocketClaimed`. One whose create is still
     /// due becomes the claim's candidate, filed by its rules but
     /// followed nowhere meanwhile, so an adoption keeps its App
-    /// Rule.
+    /// Rule — and a new window whose create trails it comes out of
+    /// its rule's Space only as the create lands.
     func claimPocketArrival(
         _ event: KiwiEvent,
         provenance: ArrivalProvenance?
@@ -25,7 +26,7 @@ extension KiwiCore {
                 for: bundle,
                 at: wallClock()
             ),
-            !window.isTransientOverlay, !window.isFullscreen,
+            !claim.spent, !window.isTransientOverlay, !window.isFullscreen,
             state.pocketPhase(of: window.id) == nil
         else { return nil }
         switch provenance {
@@ -51,8 +52,9 @@ extension KiwiCore {
     func takePocketClaim(_ id: WindowID, retiling: Bool = true) {
         guard
             let bundle = state.windows[id]?.appBundleID?.lowercased(),
-            let claim = arrivals.pocketClaims.removeValue(forKey: bundle)
+            let claim = arrivals.pocketClaims[bundle], !claim.spent
         else { return }
+        arrivals.pocketClaims[bundle]?.spent = true
         // Its activation's launch debt is no open to follow (#1599).
         launchFollow.forget(pending: claim.bundleID)
         let keyed = claim.keyed && pocketAppRows().contains(claim.bundleID)
@@ -106,6 +108,27 @@ extension KiwiCore {
         )
     }
 
+    /// The installed rows, and those the stored base resolves to
+    /// under any saved profile. It reads files, so it runs only off
+    /// the switch path (#1245).
+    private func pocketAppRowsInAnyProfile() -> Set<String> {
+        var rows = pocketAppRows()
+        guard isGuiManaged, let base = loadStructuredConfig()?.layers
+        else { return rows }
+        for profile in [nil] + profiles.allProfiles().map(Optional.some) {
+            let layers = ConfigResolver.resolvedLayers(
+                base: base,
+                profile: profile?.layers
+            )
+            rows.formUnion(
+                layers.flatMap(\.bindings).compactMap {
+                    PocketAppLuaArg.bundleID(of: $0.lua)
+                }
+            )
+        }
+        return rows
+    }
+
     private var installedLayers: [KeyLayer] {
         switch installedKeybindings {
         case .structured(let installed, _, _): installed
@@ -114,14 +137,15 @@ extension KiwiCore {
         }
     }
 
-    /// Unties every window whose app's row is gone (#2612 ▸ 2): it
-    /// becomes an ordinary window on the active Space, tiling or
-    /// floating as its rules say, never parked off-screen. Run after
-    /// each install of the bindings and after a restart's restore
-    /// brings the slots back.
+    /// Unties every window whose app's row is gone from every
+    /// arrangement (#2612 ▸ 2, 12): it becomes an ordinary window on
+    /// the active Space, tiling or floating as its rules say, never
+    /// parked off-screen. Run after an install that is no profile
+    /// apply — a row a switch leaves out keeps its tie — and after a
+    /// restart's restore brings the slots back.
     func reconcilePocketKeys() {
         guard installedKeybindings != nil else { return }
-        let rows = pocketAppRows()
+        let rows = pocketAppRowsInAnyProfile()
         for slot in state.pocket {
             guard let app = slot.keyedApp, !rows.contains(app)
             else { continue }

@@ -22,7 +22,8 @@ extension KiwiCore {
         layers base: [KeyLayer],
         profile: Profile?,
         lua: LuaInterpreter,
-        preferredLayer: String = KeybindingManager.defaultLayer
+        preferredLayer: String = KeybindingManager.defaultLayer,
+        reconcilingPocketKeys: Bool = true
     ) {
         let resolved = ConfigResolver.resolvedLayers(
             base: base,
@@ -44,7 +45,8 @@ extension KiwiCore {
             },
             skipped: prepared.skipped
         )
-        reconcilePocketKeys()  // #2612
+        // A profile apply keeps every tie (#2612 ▸ 12).
+        if reconcilingPocketKeys { reconcilePocketKeys() }
         syncDerivedIssues()
     }
 

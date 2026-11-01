@@ -837,7 +837,8 @@ editing here:
     a general-list verb on a keyed window refuses through
     `refuseKeyedPocketWindow`, and a removed row unties its window
     only at `reconcilePocketKeys`, run after each install of the
-    bindings and after a restart's restore (#2612,
+    bindings that is no profile apply, judged against every saved
+    profile's resolution, and after a restart's restore (#2612,
     `PocketAppTests`, `PocketAppKeyTests`). "Focused last" among
     out windows is `focusRecencyRank`, stamped at an honored focus
     alone, never a pocket record of its own. Marking is the one

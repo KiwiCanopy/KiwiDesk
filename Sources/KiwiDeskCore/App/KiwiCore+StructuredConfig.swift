@@ -66,7 +66,8 @@ extension KiwiCore {
         applyStructuredKeybindings(
             layers: config.layers,
             profile: profile,
-            lua: lua
+            lua: lua,
+            reconcilingPocketKeys: false
         )
     }
 

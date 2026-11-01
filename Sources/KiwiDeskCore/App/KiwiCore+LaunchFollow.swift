@@ -33,6 +33,13 @@ extension KiwiCore {
         guard let bundleID = activation.bundleID,
             let press = openingPress(of: activation, now: now)
         else { return }
+        // A Pocket key's open keeps its window where you are (#2612).
+        guard
+            arrivals.livePocketClaim(
+                for: bundleID.lowercased(),
+                at: now
+            ) == nil
+        else { return }
         guard
             now.timeIntervalSince(lastDesktopSwitch)
                 > LaunchFollowIntent.desktopSwitchGrace
