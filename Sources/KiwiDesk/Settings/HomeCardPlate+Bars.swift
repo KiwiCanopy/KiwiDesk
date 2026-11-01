@@ -244,7 +244,7 @@ struct HomeCardBarsTile: View {
     ) -> some View {
         let space =
             settings.spaceBarStyle.edge == edge
-            ? spaceSpecIfShown : nil
+            ? spaceSpecIfShown(vertical: vertical) : nil
         let app =
             showsAppBar && settings.appBarStyle.edge == edge
             ? appBarLook.map { appSpec($0, vertical: vertical) }
@@ -263,9 +263,9 @@ struct HomeCardBarsTile: View {
         }
     }
 
-    private var spaceSpecIfShown: BarSpec? {
+    private func spaceSpecIfShown(vertical: Bool) -> BarSpec? {
         settings.spaceBarStyle.visibility.showsUnprompted
-            ? spaceSpec(settings.spaceBarLook) : nil
+            ? spaceSpec(settings.spaceBarLook, vertical: vertical) : nil
     }
 
 }
