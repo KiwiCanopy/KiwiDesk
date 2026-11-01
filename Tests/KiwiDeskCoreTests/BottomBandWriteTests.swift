@@ -245,6 +245,17 @@ struct BottomBandWriteTests {
         #expect(entry?.band == screen)
     }
 
+    @Test("A merge drops a waiting band its newer frame left")
+    func mergeDropsALeftBand() {
+        let high = slot.offsetBy(dx: 0, dy: -300)
+        let merged = BottomBandWrite.mergedBand(
+            newer: nil,
+            waiting: screen,
+            frame: high
+        )
+        #expect(merged == nil)
+    }
+
     @Test("A taller sized frame merged into a waiting shrink keeps its band")
     func pendingSizedMergeKeepsTheBand() {
         let pending = PendingFrames()
