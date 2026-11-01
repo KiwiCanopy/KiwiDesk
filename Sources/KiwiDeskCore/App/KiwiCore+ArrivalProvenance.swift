@@ -1,11 +1,11 @@
 import Foundation
 
-/// The arrival's provenance and its late-create resolution
-/// (#2630): `window_created` is sent at the arrival when its
-/// reason is known, else once the create lands (`new`) or
-/// `LaunchFollowIntent.lateCreateBound` passes (`existing`).
-/// Only the emission waits; placement, focus and the retile never
-/// do. The #2478 follow's late payment resolves here too.
+/// The arrival's provenance and its one late-create resolution
+/// (#2630): every arrival whose create is still due is held in
+/// the door until the create lands, `lateCreateBound` passes, or
+/// the window goes, and `settleArrival` then pays each consumer.
+/// Only what a consumer owes waits; placement, focus and the
+/// retile never do.
 extension KiwiCore {
     /// The door's create ledger (#2478).
     var windowCreates: WindowCreateLedger { arrivals.ledger }
@@ -20,13 +20,21 @@ extension KiwiCore {
         )
     }
 
-    /// Sends `window_created` for an arrival, or holds it for its
-    /// create.
+    /// An arrival's provenance, read once ahead of the fold.
+    func arrivalProvenance(of event: KiwiEvent) -> ArrivalProvenance? {
+        guard case .windowCreated(let window) = event else { return nil }
+        return arrivalProvenance(window)
+    }
+
+    /// Sends `window_created` for an arrival whose reason is known,
+    /// and holds one whose create is still due.
     func announceArrival(
         _ window: ManagedWindow,
+        provenance: ArrivalProvenance,
         effects: AppliedEffects
     ) {
-        let provenance = arrivalProvenance(window)
+        // An arrival held earlier under this id is sent first.
+        flushHeldArrival(window.id)
         let reason = WindowAppearReason.classify(
             wasMinimized: effects.appearedWasMinimized,
             hadRememberedSpace: effects.hadRememberedSpace
@@ -34,73 +42,86 @@ extension KiwiCore {
             isNew: provenance.isNew
         )
         if reason == .returned { recentReturns[window.id] = wallClock() }
-        guard let reason else {
-            arrivals.hold(
-                .init(
-                    window: window,
-                    space: state.workspaces.space(of: window.id),
-                    axCreate: eventLoop.arrivingFromAXCreate,
-                    at: wallClock()
-                )
+        if let reason { emitWindowCreated(window, reason: reason) }
+        guard provenance == .awaitingCreate else { return }
+        arrivals.hold(
+            .init(
+                window: window,
+                space: state.workspaces.space(of: window.id),
+                eventOwed: reason == nil,
+                axCreate: eventLoop.arrivingFromAXCreate,
+                at: wallClock()
             )
-            scheduleArrivalBound()
-            return
-        }
-        emitWindowCreated(window, reason: reason)
+        )
+        scheduleArrivalBound()
     }
 
-    /// A create landed: a held arrival within the bound resolves
-    /// `new`, and the follow's spawn slot pays, off the port's
-    /// drain, since a follow raises and retiles.
+    /// A create landed: a held arrival within the bound settles as
+    /// created on a later turn, off the WindowServer port's drain,
+    /// which the border pump waits on — a follow and a script's
+    /// callback raise and retile.
     func resolveArrivalCreated(_ id: WindowID) {
         resolveExpiredArrivals()
-        guard let held = arrivals.release(id) else { return }
-        sendHeldArrival(held, reason: .new)
-        if launchFollow.spawn?.window == id {
-            deferred.schedule(.lateSpawnFollow, after: .zero) {
-                [weak self] in self?.payLateSpawnFollow(id)
+        guard arrivals.land(id) else { return }
+        deferred.schedule(.arrivalCreated, after: .zero) {
+            [weak self] in
+            guard let self else { return }
+            for held in self.arrivals.takeLanded() {
+                self.settleArrival(held, created: true)
             }
         }
     }
 
-    /// A destroy or re-key of a held arrival sends its event
-    /// first, so a script sees a create before the window goes.
+    /// A destroy or re-key of a held arrival settles it first, so
+    /// a script sees a create before the window goes.
     func flushHeldArrival(_ id: WindowID) {
         guard let held = arrivals.release(id) else { return }
-        launchFollow.dropSpawn(of: id)
-        sendHeldArrival(held, reason: .existing)
+        settleArrival(held.waiting, created: held.landed)
     }
 
-    /// Resolves every held arrival past the bound as `existing`,
+    /// An exiting app's held arrivals, ahead of the fold that drops
+    /// its windows with no destroy of their own.
+    func flushHeldArrivals(ofExitedApp pid: pid_t) {
+        for held in arrivals.held(pid: pid) { flushHeldArrival(held) }
+    }
+
+    /// Settles every held arrival past the bound as not created,
     /// logging each (#2867).
     func resolveExpiredArrivals() {
         for held in arrivals.releaseExpired(at: wallClock()) {
-            let id = held.window.id
             onLog(
-                "arrival: w\(id.raw) "
+                "arrival: w\(held.window.id.raw) "
                     + "\(held.window.appBundleID ?? "unknown") — "
                     + "no WindowServer create within "
                     + "\(LaunchFollowIntent.lateCreateBound)s, "
                     + "reported existing (AX create: "
                     + "\(held.axCreate ? "yes" : "no"))"
             )
-            launchFollow.dropSpawn(of: id)
-            sendHeldArrival(held, reason: .existing)
+            settleArrival(held, created: false)
         }
         scheduleArrivalBound()
     }
 
-    private func sendHeldArrival(
+    /// Pays each consumer of a held arrival, in this order: the
+    /// owed event, then the #2478 follow.
+    private func settleArrival(
         _ held: ArrivalProvenanceDoor.Waiting,
-        reason: WindowAppearReason
+        created: Bool
     ) {
         let id = held.window.id
-        emitWindowCreated(
-            state.windows[id] ?? held.window,
-            reason: reason,
-            space: state.windows[id] == nil
-                ? held.space : state.workspaces.space(of: id)
-        )
+        if held.eventOwed {
+            emitWindowCreated(
+                state.windows[id] ?? held.window,
+                reason: created ? .new : .existing,
+                space: state.windows[id] == nil
+                    ? held.space : state.workspaces.space(of: id)
+            )
+        }
+        if created {
+            payLateSpawnFollow(id)
+        } else {
+            launchFollow.dropSpawn(of: id)
+        }
     }
 
     /// Arms the one timer at the earliest held arrival's bound.

@@ -1060,8 +1060,9 @@ lifecycle; the `reason` field says why the set changed:
 :::unreleased
 `window_created` also reports `existing`: a window that was
 already open when KiwiDesk began managing it — every window found
-when KiwiDesk starts, and a window it adopts later that macOS never
-reported opening, such as one it lost track of and finds again:
+when KiwiDesk starts, and, where macOS reports windows opening, a
+window it adopts later that macOS never reported opening, such as
+one it lost track of and finds again:
 
 ```json
 {"event": "window_created",
@@ -1076,8 +1077,11 @@ window that comes back after its app was hidden, or after KiwiDesk
 restarted, is `returned`. Where KiwiDesk has to wait for macOS to
 report the window opening, the event can follow the window's
 `focus_change` by up to half a second; it always comes before that
-window's `window_destroyed`. More reasons may be added, so match
-the ones your consumer handles.
+window's `window_destroyed`. Where macOS reports windows opening,
+a window re-shown after a `closed` destroy with no new window
+behind it is `existing`, and so is a window a Desktop switch
+reveals that KiwiDesk never placed. More reasons may be added, so
+match the ones your consumer handles.
 :::
 
 A window re-shown after a `closed` destroy — an app whose close

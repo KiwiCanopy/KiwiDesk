@@ -98,16 +98,37 @@ struct LifecycleArrivalReasonTests {
     }
 
     @Test("a create after the adoption is held, then new")
-    func lateCreateIsHeldThenNew() {
+    func lateCreateIsHeldThenNew() async {
         let (core, events, _) = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(4)))
         // Placed and focused now; only the event waits.
         #expect(reasons(events()).isEmpty)
         #expect(core.state.workspaces.space(of: WindowID(4)) != nil)
-        #expect(core.deferred.task(for: .arrivalBound) != nil)
+        #expect(core.deferred.task(for: .arrivalCreated) == nil)
         core.windowServerChanged(.created, id: WindowID(4))
+        // Not inside the WindowServer drain: sent on its hop.
+        #expect(reasons(events()).isEmpty)
+        let hop = core.deferred.task(for: .arrivalCreated)
+        #expect(hop != nil)
+        await hop?.value
         #expect(reasons(events()) == [.string("new")])
         #expect(core.arrivals.waiting.isEmpty)
+        #expect(core.arrivals.landed.isEmpty)
+    }
+
+    @Test("a destroy between the create and its hop sends new first")
+    func destroyBeforeTheHopIsNew() {
+        let (core, events, _) = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.windowServerChanged(.created, id: WindowID(4))
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(4), wasMinimized: false)
+        )
+        #expect(reasons(events()) == [.string("new")])
+        #expect(
+            events().map(\.0).filter { $0 != .focusChange }
+                .prefix(2) == [.windowCreated, .windowDestroyed]
+        )
     }
 
     @Test("no create within the bound is existing, logged once")
@@ -203,8 +224,49 @@ struct LifecycleArrivalReasonTests {
         core.eventLoop.onEvent(
             .windowRekeyed(WindowID(4), WindowID(5))
         )
+        // The re-key emits nothing of its own; the old id's create
+        // is sent at it, never later at the bound.
         #expect(reasons(events()) == [.string("existing")])
         #expect(core.arrivals.waiting.isEmpty)
+    }
+
+    @Test("an app's exit sends its held creates before the fold")
+    func appExitFlushesTheHeldCreate() {
+        let (core, events, _) = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.eventLoop.onEvent(.appTerminated(pid: 900_007))
+        #expect(reasons(events()) == [.string("existing")])
+        guard case .object(let created)? = events().first?.1 else {
+            Issue.record("expected window_created")
+            return
+        }
+        #expect(created["space_id"] != .null)
+        #expect(core.arrivals.waiting.isEmpty)
+    }
+
+    @Test("a second arrival under a held id sends the first")
+    func reArrivalFlushesTheFirst() {
+        let (core, events, _) = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.eventLoop.bootScan.stepBudget = .seconds(1)
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        #expect(
+            reasons(events())
+                == [.string("existing"), .string("existing")]
+        )
+        #expect(core.arrivals.waiting.isEmpty)
+    }
+
+    @Test("an AX create during a deferred boot app's drain is not boot")
+    func axCreateDuringDrainIsNotBoot() {
+        let (core, events, _) = makeCore(live: false)
+        core.eventLoop.bootScan.pendingDrain = [
+            (900_007, AppRef(pid: 900_007))
+        ]
+        core.eventLoop.arrivingFromAXCreate = true
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.eventLoop.arrivingFromAXCreate = false
+        #expect(reasons(events()) == [.string("new")])
     }
 
     @Test("a stop drops a held create")

@@ -21,15 +21,15 @@ struct ArrivalProvenanceSeamTests {
         // The door's one asker, then its consumers: the event
         // reason and the #2478 follow.
         ("arrivals.provenance(", wiring, 1),
-        ("provenance = arrivalProvenance(window)", wiring, 1),
+        ("return arrivalProvenance(window)", wiring, 1),
+        // Read ONCE per arrival, ahead of the fold, and handed to
+        // each consumer.
         (
-            "switch arrivalProvenance(window)",
-            "KiwiCore+LaunchFollow.swift", 1
-        ),
-        (
-            "announceArrival(window, effects: effects)",
+            "let provenance = arrivalProvenance(of: event)",
             "KiwiCore+Events.swift", 1
         ),
+        ("provenance: provenance ?? .unreported", "KiwiCore+Events.swift", 2),
+        ("switch provenance {", "KiwiCore+LaunchFollow.swift", 1),
         // The resolutions: a create, the bound, a destroy, a re-key.
         (
             "resolveArrivalCreated(id)",
@@ -38,6 +38,10 @@ struct ArrivalProvenanceSeamTests {
         ("self?.resolveExpiredArrivals()", wiring, 1),
         ("flushHeldArrival(id)", "KiwiCore+Emitters.swift", 1),
         ("flushHeldArrival(old)", "KiwiCore+RekeyEvent.swift", 1),
+        (
+            "flushHeldArrivals(ofExitedApp: pid)",
+            "KiwiCore+PreFold.swift", 1
+        ),
         ("arrivals.reset()", "KiwiCore+Lifecycle.swift", 1),
         // The two adoption facts the event loop hands the door.
         (
@@ -78,6 +82,22 @@ struct ArrivalProvenanceSeamTests {
         #expect(
             Set(sites.map(\.file.lastPathComponent))
                 == [Self.door, "WindowCreateLedger.swift"],
+            "found: \(sites.map(\.site))"
+        )
+    }
+
+    /// The door is asked from the one site ahead of the fold: the
+    /// two definitions and the forward between them, and `handle`.
+    @Test("an arrival's provenance is read at one site")
+    func readOnce() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "arrivalProvenance(",
+            under: Self.core
+        )
+        #expect(
+            Set(sites.map(\.file.lastPathComponent))
+                == [Self.wiring, "KiwiCore+Events.swift"]
+                && sites.count == 4,
             "found: \(sites.map(\.site))"
         )
     }

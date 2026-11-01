@@ -6838,8 +6838,9 @@ return. The `reason` argument says which kind of change fired:
 :::unreleased
 `window_created` also reports `"existing"`: a window that was
 already open when KiwiDesk began managing it — every window found
-when KiwiDesk starts, and a window it adopts later that macOS never
-reported opening, such as one it lost track of and finds again.
+when KiwiDesk starts, and, where macOS reports windows opening, a
+window it adopts later that macOS never reported opening, such as
+one it lost track of and finds again.
 `"restored"` wins over `"returned"`, which wins over `"existing"`;
 `"new"` is everything else, KiwiDesk's own windows included. A
 pocketed window that comes back after its app was hidden, or after

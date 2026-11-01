@@ -472,19 +472,20 @@ editing here:
   (`LaunchFollowSpawnTests`, `LaunchFollowSeamTests`).
   **Every reader of "was this arrival created" goes through ONE
   door with ONE late-create resolution (#2630)** — the follow,
-  the pocket's claim (#2629, #2612) and the `window_created`
-  reason ask `KiwiCore.arrivalProvenance` over
-  `ArrivalProvenanceDoor`, the one reader of
-  `WindowCreateLedger.createdAt`, and an arrival whose create is
-  still due waits in that door, resolved by the create, by
-  `lateCreateBound` or by its window's destroy or re-key, never
-  by a timer or a ledger read of its own. A boot step's adoption
-  answers there as existing on every host
-  (`EventLoop.adoptsAsBootStep`). Only what a consumer owes the
-  window waits — an event, a follow, a pocket claim; placement,
-  focus and the retile never do. A new consumer takes the door's
-  answer and adds its arm to the door's resolution
-  (`ArrivalProvenanceSeamTests`, `LifecycleArrivalReasonTests`).
+  the `window_created` reason, and any pocket claim (#2629, #2612)
+  take the provenance `handle` reads once ahead of the fold
+  (`KiwiCore.arrivalProvenance` over `ArrivalProvenanceDoor`, the
+  one reader of `WindowCreateLedger.createdAt`), and a consumer
+  that must wait for a create waits through the door's hold,
+  settled once in `settleArrival` by the create (off the
+  WindowServer drain), by `lateCreateBound`, or by its window's
+  destroy, re-key or app exit — never by a consumer's own timer
+  or ledger read. A boot step's adoption answers existing on every
+  host (`EventLoop.adoptsAsBootStep`). Only what a consumer owes
+  waits; placement, focus and the retile never do. A new consumer
+  adds its arm to `settleArrival` in the order its docstring
+  states (`ArrivalProvenanceSeamTests`,
+  `LifecycleArrivalReasonTests`).
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves
   `Space.focused` down the departing windows to nil — or onto a

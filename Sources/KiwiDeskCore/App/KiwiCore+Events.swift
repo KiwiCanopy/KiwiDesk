@@ -62,6 +62,7 @@ extension KiwiCore {
             prepareAppExit(pid)
         }
         let detectedFlip = detectedFlip(event)
+        let provenance = arrivalProvenance(of: event)  // #2630
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
@@ -104,7 +105,11 @@ extension KiwiCore {
                         + "placed as new, focus taken (#1414/#1561)"
                 )
             }
-            announceArrival(window, effects: effects)
+            announceArrival(
+                window,
+                provenance: provenance ?? .unreported,
+                effects: effects
+            )
             // #1010: narrate the cross-screen arrival, the
             // one resolution a device trace cannot read off
             // the membership alone.
@@ -132,6 +137,7 @@ extension KiwiCore {
             // the arrival retile below has filed the window.
             launchFollow = claimLaunchFollow(
                 arrived: window,
+                provenance: provenance ?? .unreported,
                 effects: effects
             ).map { (window.id, $0) }
             // #1362: the snapshot frame the restore could not set

@@ -20,7 +20,7 @@ struct LaunchFollowLateCreateTests {
     /// since the payment's own run clears it (tests.md).
     static func lateCreate(_ id: UInt32, on core: KiwiCore) async {
         core.windowServerChanged(.created, id: WindowID(id))
-        await core.deferred.task(for: .lateSpawnFollow)?.value
+        await core.deferred.task(for: .arrivalCreated)?.value
     }
 
     @Test("A create landing after the arrival pays the follow then")
@@ -32,7 +32,7 @@ struct LaunchFollowLateCreateTests {
         core.windowServerChanged(.created, id: WindowID(9))
         // Not inside the drain: the payment waits for its hop.
         Base.expectStayed(core)
-        let hop = core.deferred.task(for: .lateSpawnFollow)
+        let hop = core.deferred.task(for: .arrivalCreated)
         #expect(hop != nil)
         await hop?.value
         Spawn.expectFollowed(core)

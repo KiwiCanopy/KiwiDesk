@@ -43,10 +43,10 @@ final class DeferredTasks {
         /// A WindowServer create's wake sweep and its census read
         /// (#1877).
         case adoptionHealWake
-        /// A rule-filed new window's follow, paid once its
-        /// trailing create lands, outside the event-port drain
-        /// (#2478).
-        case lateSpawnFollow
+        /// A held arrival settled once its trailing create lands,
+        /// outside the event-port drain: its event and its follow
+        /// (#2478, #2630).
+        case arrivalCreated
         /// The late-create bound of a held `window_created`
         /// (#2630).
         case arrivalBound
@@ -137,7 +137,7 @@ final class DeferredTasks {
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
-                .adoptionHealWake, .lateSpawnFollow, .arrivalBound,
+                .adoptionHealWake, .arrivalCreated, .arrivalBound,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .barVisibilityRefresh,
                 .awayCensus, .awayDestroyCheck, .menuBarRemeasure,

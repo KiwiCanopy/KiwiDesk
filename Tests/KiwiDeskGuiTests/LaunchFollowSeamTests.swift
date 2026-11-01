@@ -117,11 +117,11 @@ struct LaunchFollowSeamTests {
         ),
         ("payLateSpawnFollow(id)", "KiwiCore+ArrivalProvenance.swift", 1),
         (
-            "deferred.schedule(.lateSpawnFollow",
+            "deferred.schedule(.arrivalCreated",
             "KiwiCore+ArrivalProvenance.swift", 1
         ),
         ("launchFollow.dropSpawn()", "KiwiCore+Lifecycle.swift", 1),
-        ("spawnVerdict(window)", followFile, 1),
+        ("spawnVerdict(window, provenance: provenance)", followFile, 1),
         ("launchFollow.noteSpawn(", followFile, 1),
         ("launchFollow.takeSpawn(", followFile, 1),
         ("followSwitch(to: spawn.space, focusing: id)", followFile, 1),
@@ -174,11 +174,13 @@ struct LaunchFollowSeamTests {
             under: "App"
         )
         let hop = try #require(
-            body.range(of: "deferred.schedule(.lateSpawnFollow")
+            body.range(of: "deferred.schedule(.arrivalCreated")
         )
-        let pay = try #require(body.range(of: "payLateSpawnFollow("))
-        #expect(hop.lowerBound < pay.lowerBound)
-        #expect(body.components(separatedBy: "payLateSpawnFollow(").count == 2)
+        let settle = try #require(body.range(of: "settleArrival("))
+        #expect(hop.lowerBound < settle.lowerBound)
+        // Nothing settles inside the drain, ahead of the hop.
+        #expect(body.components(separatedBy: "settleArrival(").count == 2)
+        #expect(!body.contains("emitWindowCreated("))
     }
 
     /// Three retires, each load-bearing: another app's activation

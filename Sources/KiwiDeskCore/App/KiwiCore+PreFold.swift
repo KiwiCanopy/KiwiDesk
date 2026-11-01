@@ -38,6 +38,7 @@ extension KiwiCore {
     /// it took is a close on the logout rollback's ledger (#1385)
     /// — an exit is no hide and no Desktop departure.
     func prepareAppExit(_ pid: pid_t) {
+        flushHeldArrivals(ofExitedApp: pid)  // #2630
         retireAwayDebts(ofExitedApp: pid)
         BarIconCache.forget(pid: pid)
         for _ in state.windows.windows(pid: pid) {

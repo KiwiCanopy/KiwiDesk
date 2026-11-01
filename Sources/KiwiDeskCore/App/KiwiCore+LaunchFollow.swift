@@ -114,6 +114,7 @@ extension KiwiCore {
     /// `payLaunchFollow` after the arrival retile.
     func claimLaunchFollow(
         arrived window: ManagedWindow,
+        provenance: ArrivalProvenance,
         effects: AppliedEffects,
         now: Date = Date()
     ) -> SpaceID? {
@@ -124,7 +125,7 @@ extension KiwiCore {
             state.windows[window.id]?.isTransientOverlay == false
         else { return nil }
         guard launchFollow.claim(bundleID, at: now) else {
-            switch spawnVerdict(window) {
+            switch spawnVerdict(window, provenance: provenance) {
             case .follows:
                 onLog(
                     "launch follow: w\(window.id.raw), a new window "
@@ -163,12 +164,15 @@ extension KiwiCore {
     /// `wallClock`, for every reading.
     enum SpawnVerdict { case follows, awaitsCreate, stays }
 
-    func spawnVerdict(_ window: ManagedWindow) -> SpawnVerdict {
+    func spawnVerdict(
+        _ window: ManagedWindow,
+        provenance: ArrivalProvenance
+    ) -> SpawnVerdict {
         let now = wallClock()
         guard spawnStandsClear(at: now),
             launchFollow.spawnFollows(pid: window.pid)
         else { return .stays }
-        switch arrivalProvenance(window) {
+        switch provenance {
         case .created: return .follows
         case .awaitingCreate: return .awaitsCreate
         case .own, .unreported, .existing: return .stays
