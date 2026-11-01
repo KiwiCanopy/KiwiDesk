@@ -220,9 +220,7 @@ const makerProfile = "https://github.com/hajiboy95";
         <a href={localePath(lang)}>{t("guide_footer_home")}</a>
         <a href={localePath(lang, "/compare/")}>{t("nav_compare")}</a>
         <a href={localePath(lang, "/changelog/")}>{t("footer_changelog")}</a>
-        {/* The looks gallery (/looks/, #1740) is not linked here
-            yet: it stays noindex and out of the sitemap until the
-            owner calls it live, and gains its link then. */}
+        <a href={localePath(lang, "/looks/")}>{t("footer_looks")}</a>
         <a href={localePath(lang, "/imprint/")}>{t("footer_impressum")}</a>
         <a href={localePath(lang, "/privacy/")}>{t("footer_privacy")}</a>
         <a href={localePath(lang, "/terms/")}>{t("footer_terms")}</a>
