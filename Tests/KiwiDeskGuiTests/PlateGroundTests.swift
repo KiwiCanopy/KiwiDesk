@@ -31,16 +31,13 @@ struct PlateGroundTests {
         #expect(
             Set(palettes.map(\.name)).isSuperset(of: Self.darkPalettes)
         )
-        var light = 0
         for palette in palettes {
             let holds = HomeCardPlate.holdsLightPlate(painted(palette))
             #expect(
                 holds != Self.darkPalettes.contains(palette.name),
                 Comment(rawValue: "\(palette.name) holds: \(holds)")
             )
-            if holds { light += 1 }
         }
-        #expect(light == palettes.count - Self.darkPalettes.count)
     }
 
     /// The looks carry their palettes' colours, so only the one

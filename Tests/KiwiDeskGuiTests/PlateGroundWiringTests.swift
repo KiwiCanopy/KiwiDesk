@@ -72,11 +72,15 @@ struct PlateGroundWiringTests {
             // forcing its own would pick the plate for it. The
             // KiwiVision scene's windows take the appearance the
             // mode will show, below the writer, and are the one
-            // spelling allowed.
-            let forced = source.replacingOccurrences(
-                of: ".environment(\\.colorScheme,darkWindows?.dark:.light)",
-                with: ""
-            )
+            // spelling allowed, in that file alone.
+            let forced =
+                file == "KiwiVisionScene.swift"
+                ? source.replacingOccurrences(
+                    of: ".environment(\\.colorScheme,"
+                        + "darkWindows?.dark:.light)",
+                    with: ""
+                )
+                : source
             #expect(
                 !forced.contains("\\.colorScheme")
                     && !forced.contains("preferredColorScheme("),
@@ -84,17 +88,24 @@ struct PlateGroundWiringTests {
             )
         }
         // One fallback: a plate view with no writer reads the
-        // resolver's unresolved paint, never a plate it picks. The
-        // schematic kit's own `card` fallbacks are its brand mode,
-        // drawn with no plate at all.
-        for (file, source) in all
-        where !file.hasPrefix("LayoutSchematic")
-            && source.contains("palette?.base??")
-        {
+        // resolver's unresolved paint, never a value it picks. The
+        // schematic kit's own fallbacks are its brand mode, drawn
+        // with no plate at all.
+        let picked = try Regex("palette\\?\\.\\w+\\?\\?")
+        func brandMode(_ file: String) -> Bool {
+            file.hasPrefix("LayoutSchematic")
+                || file.hasSuffix("Schematic.swift")
+                || file == "SchematicCardColors.swift"
+        }
+        var scanned = 0
+        for (file, source) in all where !brandMode(file) {
+            scanned += 1
+            guard source.contains(picked) else { continue }
             Issue.record(
-                Comment(rawValue: "\(file) picks its own plate")
+                Comment(rawValue: "\(file) picks its own fallback")
             )
         }
+        #expect(scanned > 50)
     }
 
     @Test("only the resolver names the dark plate or writes paint")
