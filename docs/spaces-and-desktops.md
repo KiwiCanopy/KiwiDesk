@@ -204,7 +204,6 @@ exactly those screens connected, that set's profile loads; any
 other setup of the count loads the one for all setups. Either
 loads over a profile saved for exactly those screens.
 
-:::unreleased
 ## A Desktop has two numbers
 
 With "Displays have separate Spaces" on and more than one screen,
@@ -230,7 +229,6 @@ screen. On another screen they differ: the second screen's
 first Desktop may be **Go to Desktop 7**, and Settings ▸
 Shortcuts and KiwiHub's Shortcuts side show which screen and
 Desktop each such row reaches right now.
-:::
 
 ## A binding follows its Desktop, not its number
 

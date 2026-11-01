@@ -36,10 +36,8 @@ takes no focus, as anywhere on macOS. Shift-Tab reaches the
 **← Home** chip; **⌘[** or Escape goes back. **⌘K** puts the
 cursor in the search field from anywhere in the window.
 
-:::unreleased
 The search field and **⌘K** belong to **Advanced**; the Simple
 page has neither.
-:::
 
 With keyboard navigation off, a control that cannot hold focus
 hands it to the search field instead. VoiceOver is unaffected,
@@ -163,13 +161,11 @@ restore that skips a profile or a palette says so.
 command away with `kiwidesk export_setup` and `kiwidesk
 restore_setup` ([CLI](cli.md#commands)).
 
-:::unreleased
 When you restore a backup that carries one, the confirm offers
 the same **Include init.lua** checkbox, off each time: ticked, the
 backup's `init.lua` replaces yours and runs at once. A Mac whose
 settings come from `init.lua` restores settings only with the box
 ticked.
-:::
 
 Saved looks travel in a backup beside the palettes, and restore
 wherever they do; **All settings ▸ Reset…** keeps them too. The
@@ -351,14 +347,12 @@ look sits in `gui.json`; a profile with its own carries
 look if the profile it was saved from does. With a Lua-owned
 `init.lua` there is no shared look.
 
-:::unreleased
 **Looks & Animations ▸ Shared look ▸ Look** sets the profile you
 are editing to **Shared** or **This profile only**, at once rather
 than with **Save**, and only while nothing else is unsaved. A look
 the switch replaces — the profile's own look, or the shared look
 that **Make This the Shared Look** replaces — is gone unless it is
 in **My looks**.
-:::
 
 The animations are part of the look too: a profile using the
 shared look takes its animations, and a look you save keeps them.
@@ -473,11 +467,9 @@ A new window of a running app follows its app rule the same way.
 
 ### Shared by all borders
 
-:::unreleased
 **Width** and **Corners** at the top set the focus ring; the drag
 markers take the corners too. Keep gaps at least twice the width
 so two neighbouring rings do not touch.
-:::
 
 ### Focus Border
 
@@ -620,12 +612,10 @@ Floating windows come last, past a thin line and the floating
 symbol. They cannot be dragged; **Tile Window** on the item's
 right-click menu tiles one.
 
-:::unreleased
 **Liquid Glass** is one switch for both bars, the shortcuts
 panel, the drag drop zone, and the sticky mark
 (its own card in Settings); on macOS before 26 each draws its
 flat look instead, the drop zone a blur.
-:::
 
 It covers the floating mark too.
 
@@ -717,11 +707,9 @@ sticky and floating marks, and its glyph wears the **pocket badge**
 on the bottom-left, in place of the floating badge; that glyph
 comes last in its row too.
 
-:::unreleased
 The pocket mark sits inside the window's top-right corner, as the
 sticky and floating marks do, and the pocket badge takes the
 glyph's bottom-right corner, beside the floating badge.
-:::
 
 **Drag a window onto a Space** to move it there:
 

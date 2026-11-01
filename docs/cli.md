@@ -314,7 +314,6 @@ Then add a connector in ChatGPT whose connection is that tunnel.
 
 ## Drawing a Look's Preview
 
-:::unreleased
 `kiwidesk preview <look.json> <out.png>` draws an exported look
 file as a 768 × 480 PNG: the picture its tile in Looks &
 Animations shows, drawn larger and with the pocket standing on the
@@ -329,7 +328,6 @@ family the Mac lacks draws as `"System"`, as on the bars
 ```sh
 kiwidesk preview ~/Desktop/Dusk.json ~/Desktop/Dusk.png
 ```
-:::
 
 ## Service Control
 
@@ -484,7 +482,6 @@ maximizing or going into the Pocket and out, the last as a brief
 pocket
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 
-:::unreleased
 `kiwishelf.set_pocket_edge top|bottom|left|right` (default
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
 place the pocket
@@ -492,14 +489,11 @@ place the pocket
 `pocket.set_capacity one|several` (default `one`) lets it hold
 several windows, kept on every screen
 ([`pocket.set_capacity`](lua-reference.md#pocketset_capacity)).
-:::
 
-:::unreleased
 `kiwishelf.set_reading_contrast 1–4.5` (default `2.2`) sets the
 contrast text keeps where the fill fades on KiwiHub, the plates
 and the peek; `1` leaves the full fade
 ([`kiwishelf.set_reading_contrast`](lua-reference.md#kiwishelfset_reading_contrast)).
-:::
 
 `set_mode_cue` turns off the plate `cycle_mode` shows
 ([`set_mode_cue`](lua-reference.md#set_mode_cue)).
@@ -531,7 +525,6 @@ cannot call them.
 folder's status
 ([`get_config_status`](lua-reference.md#get_config_status)).
 
-:::unreleased
 `get_settings [pointer] [space]` reads the live settings back, by
 the same ids `keep_settings` takes
 ([`get_settings`](lua-reference.md#get_settings)):
@@ -540,7 +533,6 @@ the same ids `keep_settings` takes
 kiwidesk get_settings /settings/layout/stack/stack_position
 kiwidesk get_settings /settings/layout/stack/stack_position 3
 ```
-:::
 
 `look.list`, `look.current`, `look.apply <name>`, `look.save
 <name>` and `look.delete <name>` reach the look library
@@ -712,14 +704,12 @@ every lens with why it cannot turn on.
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
 
-:::unreleased
 `stack.toggle_stack_position [space]` moves a space's stack zone
 to the opposite side (left ↔ right, top ↔ bottom), the focused
 space when no id is given. The change is live and unsaved;
 `revert_settings` with its leaf id
 ([below](#raw-ipc-protocol)) undoes it
 ([Lua reference](lua-reference.md#stacktoggle_stack_position)).
-:::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`
@@ -840,13 +830,11 @@ that had the nudge off becomes `keep`, and a call to
 
 `drag.set_corner_radius` fails naming `border.set_corner_style`.
 
-:::unreleased
 The drag markers' look is fixed: for the ghost and the drop zone
 alike, `_border`, `_border_color`, `_border_alignment`,
 `_border_width`, `_fill` and `_fill_color` fail with a message
 starting `<verb> was retired: the drag markers' look is fixed`,
 and the ghost is off for a fresh setup.
-:::
 
 `bind_profile_to_desktop` files one profile per screen count on a
 Desktop, for all screen setups: a second profile of another count

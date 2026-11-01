@@ -2,6 +2,96 @@
   "generated_by": "scripts/changelog-sync",
   "releases": [
     {
+      "version": "4.1.0",
+      "tag": "v4.1.0",
+      "date": "2026-11-01",
+      "prerelease": false,
+      "url": "https://github.com/KiwiCanopy/KiwiDesk/releases/tag/v4.1.0",
+      "download": "https://github.com/KiwiCanopy/KiwiDesk/releases/download/v4.1.0/KiwiDesk-4.1.0.dmg",
+      "summary": "KiwiDesk 4.1.0 is all about looks: find one in the new gallery, share your own, and wear it from the new Simple page in Settings.",
+      "spotlight": [
+        {
+          "title": "Find your look",
+          "line": "Browse the new looks gallery and add a look in one click.",
+          "setting": "(action) look.browse",
+          "symbol": "photo.on.rectangle.angled"
+        },
+        {
+          "title": "Show off yours",
+          "line": "Share current look… sends your look to the gallery, credit included.",
+          "setting": "(action) look.share",
+          "symbol": "paintpalette"
+        },
+        {
+          "title": "A new way in",
+          "line": "The old front door to Settings had to go; I rebuilt it as one page for your look, your Spaces and your apps.",
+          "symbol": "gearshape"
+        },
+        {
+          "title": "Your look, your call",
+          "line": "Each profile wears the shared look or keeps its own.",
+          "setting": "(action) look.applies_to",
+          "symbol": "rectangle.on.rectangle"
+        },
+        {
+          "title": "Room for more in your pocket",
+          "line": "The pocket now holds several windows; drag one onto it.",
+          "setting": "appWide.pocketCapacity",
+          "symbol": "tray.full"
+        }
+      ],
+      "sections": [
+        {
+          "title": "New",
+          "items": [
+            "**New: a looks gallery on the KiwiDesk website, where people share their looks.** Click Add to KiwiDesk on one and Settings opens wearing it, unsaved until you Save, with its author named on its tile; Browse looks… in Looks & Animations ▸ My looks, and the tile at the end of Simple's Look line, take you there.",
+            "**New: Share current look… in Looks & Animations ▸ My looks** opens the gallery's submission form in your browser with your look filled in, and credits the look yours started from while you've kept at least half of it.",
+            "**New: Settings now opens on a Simple page** with your KiwiHub keys, your looks, your Spaces as cards you can rename, reorder and give a layout, and the apps you open by key; hovering a look previews it on every Space card. A look added from the gallery leads its Look line, and right-click deletes it.",
+            "**New: the pocket can now hold several windows.** Set Holds to Several windows in Shortcuts & Gestures ▸ Pocket and the pocket stays on screen, listing what's inside when you click it; under either setting, dragging a window onto the pocket puts it away, and the bars' window menus now offer Pocket Window."
+          ],
+          "type": "new"
+        },
+        {
+          "title": "Improved",
+          "items": [
+            "**Each profile's Looks & Animations page now asks one thing, Look: Shared or This profile only, and names the profiles also wearing the shared look**; switching to Shared asks whether to use the shared look or make this one the shared look, and offers to save yours to My looks first.",
+            "**A look's tile now shows a small desk drawn in that look**: its bars, font, colours, gaps and focus ring.",
+            "**In light mode, the pictures of your desk in Settings now sit on a light plate**, from Simple's Space cards to Advanced's layout sketches; a look whose colours need a dark background keeps the dark one.",
+            "**The pocket now belongs to KiwiShelf**: it slides out of your bar's edge as a window goes in or out, without moving the bar, and Pocket edge and Pocket position have moved to the KiwiShelf page.",
+            "**The sticky, floating and pocket marks on a window are now frosted glass, and their colour paints the symbol**; a Space Bar icon holding a pocket window and a floating one now shows both badges.",
+            "**Dragging a window onto another now shows an untinted frosted drop zone, and pushing the drag against an Auto Space Bar's edge opens it so you can drop the window on a Space.** The drop zone's and the ghost's colour, fill and border settings are gone; Gaps & Borders ▸ Drag & drop keeps Show drop zone and Mark where the window came from.",
+            "**KiwiHub and the Desktop switch now number macOS Desktops per screen, as Mission Control does**, and KiwiHub names the screen a window is on when it isn't the one KiwiHub opened on.",
+            "**Restore… now asks with one Restore button and an Include init.lua box that starts off**, so a backup's init.lua replaces yours only when you tick it.",
+            "**Text on KiwiHub, the hover labels and the Space plates now stays easier to read where the Fill fades**, a hovered KiwiHub layout tile included, and Colors & glass now points to macOS's own Liquid Glass slider, which sets how see-through the glass is."
+          ],
+          "type": "improved"
+        },
+        {
+          "title": "Fixed",
+          "items": [
+            "**Windows in a Stack that fit side by side no longer overlap after a relaunch or a Settings Save.**",
+            "**A window KiwiDesk hides in a screen's bottom-left corner no longer leaves a strip showing.**",
+            "**KiwiHub's Move here now brings the window to the screen KiwiHub opened on, from another screen's macOS Desktop too**, and holding ⇧ shows the way here on the row under the pointer.",
+            "**Moving a window to the Space it's already in now leaves it where it is** and says so, instead of sending it to the end of the row.",
+            "**Typing in Settings ▸ Shortcuts & Gestures no longer lags, and the Lua editor's cursor no longer jumps while you type.**",
+            "**On a Space switch's slide, a floating window no longer takes the app icons off the tiles it overlaps.**",
+            "**Taking a window out of the pocket no longer leaves a blank moment before it appears.**",
+            "**Settings no longer draws Safari's icon with an alias arrow.**"
+          ],
+          "type": "fixed"
+        },
+        {
+          "title": "Lua & CLI",
+          "items": [
+            "**If you write your own Lua config:** `pocket.set_edge` and `pocket.set_position` are now `kiwishelf.set_pocket_edge` and `kiwishelf.set_pocket_position`, and the `drag.` verbs for the markers' colour, fill, border and alignment are retired, since their look is fixed. Saved configs move over on their own, and each old name is refused, naming its replacement or why it went.",
+            "**New verbs:** `get_settings` reads the live settings back, whole or one value, as a Space uses them; `stack.toggle_stack_position` moves a Space's stack zone to the other side; `pocket.set_capacity` sets how many windows the pocket holds; `kiwishelf.set_reading_contrast` sets how much contrast text keeps where the Fill fades; and `pocket` takes a window id.",
+            "**From the command line:** `kiwidesk preview <look file> <image>` draws a look file's picture without the app running."
+          ],
+          "type": "scripting"
+        }
+      ]
+    },
+    {
       "version": "4.0.0",
       "tag": "v4.0.0",
       "date": "2026-10-28",

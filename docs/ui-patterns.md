@@ -445,12 +445,10 @@ are equal-width across the track (full-bleed, like a native
 window-toolbar switcher), a deliberate trade against
 content-sized segments. One control, one look.
 
-:::unreleased
 One switch takes a neutral pill: `SegmentedPicker(neutral: true)`
 fills the selection with the chip-hover fill and keeps the rest
 ink, for the `Simple | Advanced` switch, a choice no hue may mark
 (#2777).
-:::
 
 **Sliders follow the system slider.** Every value adjuster
 (ratios, gaps, sizes) is a `SettingsSlider`: a thin capsule

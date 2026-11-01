@@ -356,11 +356,9 @@ following** it — you stay on the current space. The moved
 window becomes the target space's focused window, so the first
 time you switch there it is the window you land on.
 
-:::unreleased
 A window already in that space stays where it is: the call fails
 and a pill on the window says it is already there. The same holds
 for `move_to_space_and_follow`.
-:::
 
 If the target space is shown on **another screen**, a floating
 window is re-anchored onto that screen: it keeps its
@@ -1692,7 +1690,6 @@ stack.set_stack_position_override("3", "bottom")
 
 ### stack.toggle_stack_position
 
-:::unreleased
 **Expects:** an optional space identifier; without one, the
 focused space.
 
@@ -1715,7 +1712,6 @@ KiwiDesk.bind("hyper+f", function()
   stack.toggle_stack_position()
 end)
 ```
-:::
 
 ### stack.set_master_orientation_override
 
@@ -2770,10 +2766,8 @@ reading, at a higher floor while macOS's Increase contrast is on.
 No effect while the glass is off or the fill has no color.
 Stored as `kiwishelf.fill_fade`.
 
-:::unreleased
 Where that fade stops is
 [`set_reading_contrast`](#kiwishelfset_reading_contrast).
-:::
 
 The GUI twin is **Fill fade** under the **Liquid Glass** switch
 on Looks &amp; Animations, reading **Off** at `0`; it is hidden
@@ -2822,7 +2816,6 @@ fill has no color.
 kiwishelf.set_tint_hub_and_plates(false)
 ```
 
-:::unreleased
 ### kiwishelf.set_reading_contrast
 
 **Expects:** a contrast ratio from `1` to `4.5` (default `2.2`);
@@ -2849,7 +2842,6 @@ Settings has no row for it. A look carries it beside the fill.
 ```lua
 kiwishelf.set_reading_contrast(3)
 ```
-:::
 
 ### kiwishelf.set_background_fit
 
@@ -3100,7 +3092,6 @@ On a `"boxed"` shelf `"grow"` plays as `"unfold"`.
 kiwishelf.set_reveal_style("grow")
 ```
 
-:::unreleased
 ### kiwishelf.set_pocket_edge
 
 Replaces `pocket.set_edge`, which is now refused with a Config
@@ -3156,7 +3147,6 @@ it.
 ```lua
 kiwishelf.set_pocket_position(50)  -- mid-edge, or a bar's end
 ```
-:::
 
 ### KiwiShelf colours
 
@@ -3392,10 +3382,8 @@ layout carries no App Bar, or where its App Bar is `"always"`.
 It fails with a pill too where the Space holds no window, so the
 App Bar has nothing to show.
 
-:::unreleased
 It fails with a pill first while a window fills the screen, as
 the Space Bar's call does.
-:::
 
 **Example:**
 
@@ -3591,19 +3579,15 @@ App Bar in monocle and scrolling.
   in the same reveal style. The menu bar then shows the Space each
   screen is on.
 
-:::unreleased
 On the pocket's edge, under
 [`pocket.set_capacity("several")`](#pocketset_capacity), an
 `"auto"` or `"hidden"` bar's edge also keeps clear of the
 pocket's resting handle.
-:::
 
-:::unreleased
 A window drag opens an `"auto"` Space Bar as the pointer does
 above, so the window can be dropped on a Space
 ([`move_to_space`](#move_to_space)); a drag never opens the App
 Bar, and a left drag that moves no window opens neither.
-:::
 
 A shown `auto` or `hidden` bar draws over the windows, so a
 reveal moves no window; setting the value moves the windows at
@@ -3643,11 +3627,9 @@ seconds where that is above 0. Fails, with a pill beside the bar,
 where the Space Bar is `"always"`. VoiceOver's press on the Space
 dots runs it too.
 
-:::unreleased
 It fails with a pill first while a window fills the screen, whether
 maximized, full screen or a presentation, since the bars stay
 hidden there.
-:::
 
 **Example:**
 
@@ -4015,7 +3997,6 @@ placement override does not apply to track spaces.
 Dragging a tiled window over another window's slot and releasing
 swaps the two; dropping anywhere else snaps the window back.
 
-:::unreleased
 While you drag, KiwiDesk can draw two markers, each just below the
 window you are holding:
 
@@ -4074,7 +4055,6 @@ Glass** switch
 ```lua
 drag.set_liquid_glass(false)
 ```
-:::
 
 ### Retired drag verbs
 
@@ -4088,7 +4068,6 @@ with `<verb> was retired — use <replacement>`.
 A saved profile's `drag.corner_radius` and each visual's
 `border_width` are no longer read.
 
-:::unreleased
 The markers' own look is retired with nothing to replace it, for
 the ghost and the drop zone alike: `drag.set_ghost_border`,
 `drag.set_ghost_border_color`, `drag.set_ghost_border_alignment`,
@@ -4099,7 +4078,6 @@ markers' look is fixed`. A saved
 setup's values for them, and a palette's or a look's
 `drag.ghost.*` and `drag.drop_zone.*` colours, are dropped when
 KiwiDesk next reads the file.
-:::
 
 ## Focus Border
 
@@ -4137,10 +4115,8 @@ touch: each border reaches its width into the gap, so with
 unfocused borders on, 5 pt is the widest width at which two of
 them fill the 10 pt gap without overlapping.
 
-:::unreleased
 The drag markers draw lines of a fixed width, and take only the
 corner style from the border.
-:::
 
 **Example:**
 
@@ -5633,20 +5609,16 @@ app that quit while hidden empties the pocket at the next call. A
 `move_to_space` or `swap` naming the pocketed window's id is
 refused.
 
-:::unreleased
 `pocket` also takes a window id, as the bar menus' Pocket Window
 does: that window goes in, marked first, as
 [`toggle_pocket_window`](#toggle_pocket_window) would mark it, and
 refused the same way while the pocket is taken.
-:::
 
-:::unreleased
 Under [`pocket.set_capacity("several")`](#pocketset_capacity) the
 pocket holds every marked window, in the order each last went in, and a
 call puts away before it takes out: while a marked window is out,
 it puts back the focused one, else the one focused last. Only with
 every marked window in does it take one out, the one put in last.
-:::
 
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another
@@ -5667,12 +5639,10 @@ badge where the floating badge goes and no sticky badge;
 [`space_bar.set_sticky_badge(false)`](#space_barset_sticky_badge)
 hides it with the others.
 
-:::unreleased
 Out of the pocket the mark sits inside the window's top-right
 corner, as the sticky and floating marks do, and the Space Bar's
 pocket badge takes the glyph's bottom-right corner, beside the
 floating badge.
-:::
 
 macOS focusing a pocketed window — `⌘-Tab` to its app, a Dock
 click, a notification — takes it out as a call would, and so do
@@ -5728,10 +5698,8 @@ native full screen and on a transient panel or popup. Bound to
 `⌃⌥⇧P` by default
 ([#2675](https://github.com/KiwiCanopy/KiwiDesk/issues/2675)).
 
-:::unreleased
 Under [`pocket.set_capacity("several")`](#pocketset_capacity) a
 call on another window marks it too, beside the others.
-:::
 
 **Example:**
 
@@ -5800,12 +5768,10 @@ sticky.set_color("#3D6FE8")  -- a blue sticky mark
 sticky.set_color("")          -- back to Automatic
 ```
 
-:::unreleased
 The color paints the sticky glyph itself, on the mark and on the
 Space Bar badge: the mark stays clear glass, or a neutral plate
 with Liquid Glass off, and the badge keeps the count-badge disc.
 `""` keeps the label ink.
-:::
 
 ### sticky.set_desktop_reach
 
@@ -5845,11 +5811,9 @@ The floating mark draws the same way, tinted by
 [`floating.set_color`](#floatingset_color) where no sticky glyph
 shares its plate.
 
-:::unreleased
 The glass is frosted and untinted: a color goes on the glyph,
 never the glass, and the mark wears the same key-window rim as the
 bars.
-:::
 
 **Example:**
 
@@ -5897,12 +5861,9 @@ is Automatic; any non-empty value must parse as a hex color.
 floating.set_color("#8E5DE0")
 ```
 
-:::unreleased
 As for sticky, the color paints the floating glyph, on the mark
 and on the badge, beside a sticky glyph too.
-:::
 
-:::unreleased
 ### pocket.set_capacity
 
 **Expects:** `"one"` or `"several"` (default `"one"`).
@@ -5950,7 +5911,6 @@ no drop there until the pointer has left it. Switching back to `"one"` keeps the
 ```lua
 pocket.set_capacity("several")
 ```
-:::
 
 ### pocket.set_color
 
@@ -5969,9 +5929,7 @@ its outline take the label color, black in light mode and white in
 dark, and the badge's pocket the disc's auto-contrast ink. Any
 non-empty value must parse as a hex color.
 
-:::unreleased
 Under Automatic too, the kiwis draw no outline.
-:::
 
 **Example:**
 
@@ -7699,7 +7657,6 @@ Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
 
-:::unreleased
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)
 place the pocket the plate flies to, under either
@@ -7710,7 +7667,6 @@ of its handle, or stands whole where
 does; under `"one"` a pocket that slides out of its edge and moves
 no bar. That pocket lights as the window goes in or out, and nods
 as one lands in it.
-:::
 
 **Example:**
 
@@ -8141,7 +8097,6 @@ nothing, is `dead_shortcut`, with its `layer`, `chord` and a
 `newer_on_another_mac` / `newer_here` with the `file` a newer
 KiwiDesk wrote.
 
-:::unreleased
 ### get_settings
 
 **Expects:** optionally a JSON Pointer, and optionally a Space id
@@ -8178,7 +8133,6 @@ KiwiDesk.bind("hyper+f", function()
     "2", side == "left" and "right" or "left")
 end)
 ```
-:::
 
 ### list_windows
 
