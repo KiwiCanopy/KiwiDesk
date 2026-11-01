@@ -88,6 +88,7 @@ struct KeyboardPreviewPanel: View {
                 conflictDetail: conflictDetail,
                 hyperKey: model.appWide.hyperKey
             )
+            .platePaint(model.config.settings)
             VStack(alignment: .leading, spacing: 12) {
                 statusSlot
                 fillLegend.accessibilityHidden(true)

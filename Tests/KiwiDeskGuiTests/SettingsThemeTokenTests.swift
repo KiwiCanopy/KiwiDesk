@@ -71,10 +71,9 @@ struct SettingsThemeTokenTests {
             0x23_2B_26,
             SettingsTheme.sunken
         ),
-        // Identical in both modes on purpose (#786): the Home
-        // plate is a picture of the user's desktop, and what
-        // the picture shows must not change with the window's
-        // appearance (4g).
+        // Identical in both modes on purpose (#786): the token
+        // never repaints with the window's appearance; which
+        // plate a picture takes is the look's verdict (#2859).
         Pin(
             "previewPlate",
             0x12_25_1A,
@@ -241,7 +240,9 @@ struct SettingsThemeTokenTests {
         ),
     ]
 
-    private var allPins: [Pin] { pins + Self.chipPins }
+    private var allPins: [Pin] {
+        pins + Self.chipPins + Self.lightPlatePins
+    }
 
     @Test("every token resolves to its pinned light/dark pair")
     func tokensResolveUnderBothAppearances() throws {

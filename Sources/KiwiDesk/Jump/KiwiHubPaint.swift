@@ -123,14 +123,16 @@ extension KiwiHubPaint {
             return SchematicPalette(
                 accent: selectionInk,
                 ink: selectionInk,
-                base: selection
+                base: selection,
+                ground: .dark
             )
         }
         guard tinted, lifted, let hoverInk else { return nil }
         return SchematicPalette(
             accent: hoverInk,
             ink: hoverInk,
-            base: rowHover
+            base: rowHover,
+            ground: .dark
         )
     }
 }

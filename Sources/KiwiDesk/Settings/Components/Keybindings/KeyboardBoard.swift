@@ -14,6 +14,8 @@ struct KeyboardBoard: View {
     /// The Hyper key, whose cap wears ✦ in place of its legend
     /// (#1870).
     var hyperKey: HyperSourceKey?
+    /// The plate's paint, `KeyboardPreviewPanel`'s (#2859).
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         GeometryReader { geometry in
@@ -38,12 +40,12 @@ struct KeyboardBoard: View {
             .padding(Self.padding)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(SettingsTheme.previewPlate)
+                    .fill((palette ?? .unresolved).base)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
-                        SettingsTheme.planeRing,
+                        (palette ?? .unresolved).edge,
                         lineWidth: 1
                     )
             )
@@ -135,6 +137,9 @@ struct KeyCap: View {
     let legend: String?
     /// A modifier cap the shown chip holds down (#2601).
     var held = false
+    /// The board's paint: a bound key's edge on the light plate,
+    /// where the accent fill alone sits under 3:1 (#2859).
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         RoundedRectangle(cornerRadius: 4)
@@ -172,6 +177,12 @@ struct KeyCap: View {
                     SettingsTheme.keyReserved,
                     style: StrokeStyle(lineWidth: 1.5, dash: [3, 2])
                 )
+        } else if state == .bound {
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(
+                    (palette ?? .unresolved).boundKeyEdge,
+                    lineWidth: 1
+                )
         }
     }
 
@@ -183,7 +194,7 @@ struct KeyCap: View {
 
     private var ink: Color {
         state == .bound
-            ? SettingsTheme.previewPlate
+            ? SettingsTheme.keyGlyph
             : SettingsTheme.plateInk.opacity(0.75)
     }
 

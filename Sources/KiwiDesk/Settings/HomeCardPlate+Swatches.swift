@@ -43,7 +43,7 @@ struct HomeCardColorsTile: View {
             .fill(Color(kiwiHex: hex))
             .overlay(
                 Circle().strokeBorder(
-                    (palette?.ink ?? SettingsTheme.plateInk)
+                    (palette ?? .unresolved).ink
                         .opacity(0.2)
                 )
             )

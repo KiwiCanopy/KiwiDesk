@@ -28,9 +28,7 @@ struct SimpleSpacePicture: View {
         }
         .padding(Self.padding)
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
-        .background(shape.fill(SettingsTheme.previewPlate))
-        .overlay(shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1))
-        .environment(\.schematicPalette, HomeCardPlate.palette(settings))
+        .deskPlate(settings, in: shape)
         // The menu around it names the layout; the bar strip's own
         // labels are never read.
         .accessibilityHidden(true)

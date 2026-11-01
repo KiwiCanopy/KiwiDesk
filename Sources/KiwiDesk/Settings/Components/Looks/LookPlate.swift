@@ -44,7 +44,7 @@ struct LookPlate: View {
             .padding(2)
             .environment(
                 \.schematicPalette,
-                HomeCardPlate.palette(settings)
+                HomeCardPlate.darkPalette(settings)
             )
             if pocketRest == .mark {
                 lonePocket

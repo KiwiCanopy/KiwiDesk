@@ -72,10 +72,7 @@ struct GesturesDrawer: View {
                 )
                 GesturesShelfEntries(model: model, playing: $playing)
             }
-            .environment(
-                \.schematicPalette,
-                HomeCardPlate.palette(settings)
-            )
+            .platePaint(settings)
         }
     }
 
@@ -102,10 +99,7 @@ struct GesturesDrawer: View {
                 anchor: item.anchor
             )
         }
-        .environment(
-            \.schematicPalette,
-            HomeCardPlate.palette(settings)
-        )
+        .platePaint(settings)
     }
 
     @ViewBuilder private var windowEntries: some View {

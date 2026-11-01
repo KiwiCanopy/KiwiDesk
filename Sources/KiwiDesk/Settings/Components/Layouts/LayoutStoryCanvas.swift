@@ -32,10 +32,7 @@ struct LayoutStoryCanvas: View {
         }
         .environment(
             \.schematicFocusStroke,
-            LayoutSchematicView.focusStroke(
-                settings,
-                onPlate: palette != nil
-            )
+            LayoutSchematicView.focusStroke(settings, on: palette)
         )
     }
 

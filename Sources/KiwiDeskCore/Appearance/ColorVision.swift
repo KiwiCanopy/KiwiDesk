@@ -66,8 +66,36 @@ public enum ColorVision {
     /// Relative luminance, WCAG's definition.
     public static func luminance(_ hex: String) -> Double? {
         guard let c = components(hex) else { return nil }
-        return 0.2126 * linear(c.r) + 0.7152 * linear(c.g)
-            + 0.0722 * linear(c.b)
+        return luma(linear(c.r), linear(c.g), linear(c.b))
+    }
+
+    /// Rec. 709 luma over the ENCODED channels, 0...1, alpha
+    /// ignored: the Settings plates' legibility measure (#786,
+    /// #2859), not WCAG's linear `luminance`.
+    public static func luma(_ hex: String) -> Double? {
+        guard let c = components(hex) else { return nil }
+        return luma(c.r, c.g, c.b)
+    }
+
+    /// The one copy of the Rec. 709 weights: over encoded channels
+    /// for `luma`, over linear ones for `luminance`.
+    static func luma(_ r: Double, _ g: Double, _ b: Double) -> Double {
+        0.2126 * r + 0.7152 * g + 0.0722 * b
+    }
+
+    /// How far `top`, laid at its own alpha over the opaque
+    /// `ground`, sits from `ground` in `luma` — in either
+    /// direction, so a near-ground colour and a translucent
+    /// wisp both measure small.
+    public static func lumaDistance(
+        _ top: String,
+        over ground: String
+    ) -> Double? {
+        guard let c = HexColor.parse(top), let floor = luma(ground)
+        else { return nil }
+        let lum = luma(c.red, c.green, c.blue)
+        let effective = c.alpha * lum + (1 - c.alpha) * floor
+        return abs(effective - floor)
     }
 
     /// WCAG contrast ratio, 1...21.
