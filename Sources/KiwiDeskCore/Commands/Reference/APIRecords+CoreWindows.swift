@@ -141,8 +141,7 @@ extension APIReference {
                 + "screens."
         ),
         "make_display_sticky": APIRecord(
-            "Marks the focused window sticky to its current "
-                + "screen."
+            "Marks the focused window sticky to its home screen."
         ),
         "make_unsticky": APIRecord(
             "Clears the focused window's sticky state."
