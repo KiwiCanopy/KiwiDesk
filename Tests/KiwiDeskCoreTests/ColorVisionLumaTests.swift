@@ -22,6 +22,11 @@ struct ColorVisionLumaTests {
             ColorVision.lumaDistance("#FFFFFF", over: "#000000")
         )
         #expect(abs(opaque - 1) < 1e-9)
+        // Either direction: a top darker than its ground.
+        let darker = try #require(
+            ColorVision.lumaDistance("#000000", over: "#FFFFFF")
+        )
+        #expect(abs(darker - 1) < 1e-9)
         let half = try #require(
             ColorVision.lumaDistance("#FFFFFF80", over: "#000000")
         )
