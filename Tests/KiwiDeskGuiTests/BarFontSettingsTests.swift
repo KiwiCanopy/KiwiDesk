@@ -28,7 +28,7 @@ struct BarFontSettingsTests {
             scale: 1.8
         )
         let specs = [
-            tile.spaceSpec(settings.spaceBarLook),
+            tile.spaceSpec(settings.spaceBarLook, vertical: false),
             tile.appSpec(
                 settings.appBarLook(for: settings.appBarHosts[0]),
                 vertical: false

@@ -5,11 +5,14 @@ import SwiftUI
 /// The Bars tile's bar specs and items (#1517), scaled from the
 /// draft.
 extension HomeCardBarsTile {
-    func spaceSpec(_ style: SpaceBarLook) -> BarSpec {
+    func spaceSpec(
+        _ style: SpaceBarLook,
+        vertical: Bool
+    ) -> BarSpec {
         let cross = crossSize(style.thickness)
         let widths = indicatorWidths(style.shelf)
         let share = contentShare(style.shelf)
-        return BarSpec(
+        var spec = BarSpec(
             fill: style.fillColor,
             highlight: style.highlightColor,
             items: spaceItems(style.shelf),
@@ -34,6 +37,18 @@ extension HomeCardBarsTile {
             shelf: style.shelf,
             sheen: style.sheen
         )
+        // A labelled item measures what `BarStripView.pipBody` draws
+        // along the bar, as the App Bar's mocks do (#2890).
+        let pad = vertical ? Self.pipPad.vertical : Self.pipPad.horizontal
+        for index in spec.items.indices
+        where spec.items[index].glyph != nil
+            || spec.items[index].label != nil
+        {
+            spec.items[index].length =
+                spec.labelledLength(spec.items[index], vertical: vertical)
+                + 2 * pad * scale
+        }
+        return spec
     }
 
     func appSpec(

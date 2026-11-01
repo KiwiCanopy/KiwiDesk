@@ -77,7 +77,10 @@ synonym:
   and code name it in full and never a bare *mark*, which stays the
   state glyph's. Retired as its name: *bubble*, the issue's working
   name; never a *badge*, which sits on a bar item, nor an
-  *indicator*.
+  *indicator*. A layout preview's "+n" chip is the overflow mark
+  alone, built only by `SchematicOverflowMarks` — a preview that
+  cannot fit what the desk draws drops or shrinks it, never counts
+  it with a "+n" (#2891, `StackMasterZoneTests`).
 - **peek** — the label or list a bar item shows beside itself — a
   label on hover, a list on a click, grown out of its item — and
   the overflow mark's list, the same peek grown out of its mark

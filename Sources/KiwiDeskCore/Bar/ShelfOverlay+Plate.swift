@@ -94,12 +94,17 @@ extension ShelfOverlay {
         paintDivider()
     }
 
+    /// Boxed sets its sections apart by the gap alone (#2893): the
+    /// line draws only on a plate, while the grip still answers
+    /// the pointer in its hover ink.
     private func paintDivider() {
         guard let shelf = dividerShelf else { return }
         divider.layer?.backgroundColor =
             (dividerHovered
             ? BarDivider.sectionHoverColor(hoverColor: shelf.hoverItemColor)
-            : BarDivider.sectionColor(textColor: shelf.itemColor)).cgColor
+            : shelf.drawsPlate
+                ? BarDivider.sectionColor(textColor: shelf.itemColor)
+                : .clear).cgColor
     }
 
     /// The divider's frame in strip coordinates: centred in the

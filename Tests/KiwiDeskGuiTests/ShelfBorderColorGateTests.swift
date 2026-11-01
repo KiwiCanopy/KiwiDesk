@@ -131,7 +131,7 @@ struct ShelfBorderPreviewTests {
         _ tile: HomeCardBarsTile
     ) -> [HomeCardBarsTile.BarSpec] {
         [
-            tile.spaceSpec(tile.settings.spaceBarLook),
+            tile.spaceSpec(tile.settings.spaceBarLook, vertical: false),
             tile.appSpec(
                 tile.settings.appBarLook(
                     for: tile.settings.appBarHosts[0]

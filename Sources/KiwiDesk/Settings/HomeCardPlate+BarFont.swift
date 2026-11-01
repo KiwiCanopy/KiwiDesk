@@ -33,6 +33,24 @@ extension HomeCardBarsTile.BarSpec {
         return vertical ? size.height : size.width
     }
 
+    /// The along-axis length of a Space item's glyph or text as
+    /// `BarStripView.iconAndTitle` draws it, padding excluded; a
+    /// text label in the bar's own face (#2890). Assumes one of
+    /// label or glyph and no title slot, as a `SpaceGlyph` gives.
+    @MainActor func labelledLength(
+        _ item: HomeCardBarsTile.BarItem,
+        vertical: Bool
+    ) -> CGFloat {
+        guard let text = item.label else {
+            return glyphLength(item, vertical: vertical)
+        }
+        let size = NSAttributedString(
+            string: text,
+            attributes: [.font: shelf.textFont(ofSize: fontSize)]
+        ).size()
+        return ceil(vertical ? size.height : size.width)
+    }
+
     /// A symbol's size as SwiftUI draws it at `size`, measured
     /// once per pair: AppKit's own symbol size differs by a point.
     @MainActor private static func glyphSize(
