@@ -264,10 +264,10 @@ struct ShelfStripPreview: View {
     }
 
     /// The section divider: Core's geometry and colour, centred
-    /// in the gutter between two bars.
+    /// in the gutter between two bars; Boxed draws none (#2893).
     @ViewBuilder
     private func divider(_ placed: ShelfArrangement) -> some View {
-        if let middle = placed.dividerMiddle {
+        if shelf.drawsPlate, let middle = placed.dividerMiddle {
             let frame = BarDivider.sectionFrame(
                 at: middle,
                 depth: thickness,

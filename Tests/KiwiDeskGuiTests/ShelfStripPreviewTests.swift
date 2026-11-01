@@ -196,4 +196,22 @@ struct ShelfStripPreviewTests {
             ).count - 1
         #expect(draws == 1)
     }
+
+    /// Boxed sets the two sections apart by the gap alone, as the
+    /// live shelf does (#2893): the preview's divider asks the
+    /// plate verdict first.
+    @Test("A boxed preview draws no section divider")
+    func boxedDrawsNoDivider() throws {
+        let url = SourceScan.repoRoot(from: "\(#filePath)")
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/HomeCardPlate+ShelfStrip.swift"
+            )
+        let source = try SourceScan.strippedSource(at: url)
+        #expect(!source.isEmpty)
+        #expect(
+            source.contains(
+                "if shelf.drawsPlate, let middle = placed.dividerMiddle"
+            )
+        )
+    }
 }
