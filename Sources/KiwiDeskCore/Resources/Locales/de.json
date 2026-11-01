@@ -926,7 +926,7 @@
   "keybinding.toggle_app_bar": "App Bar ein- oder ausblenden",
   "keybinding.toggle_app_bar.inert_link": "Wirkt, wenn die App Bar in %5$@ für %3$@ oder %4$@ auf „%1$@“ oder „%2$@“ steht.",
   "keybinding.toggle_display_sticky": "Sticky auf diesem Bildschirm umschalten",
-  "keybinding.toggle_display_sticky.help": "Hält dieses Fenster auf jedem Space des Bildschirms sichtbar, auf dem es sich befindet. Wird es auf einen Space eines anderen Bildschirms verschoben, wird es dort verankert. Mit „%1$@“ machst du ein Sticky-Fenster vollständig global.",
+  "keybinding.toggle_display_sticky.help": "Hält dieses Fenster auf jedem Space seines Heimat-Bildschirms sichtbar, also des Bildschirms, auf dem sein eigener Space liegt. Wird es auf einen Space eines anderen Bildschirms verschoben, wird dieser zu seinem Heimat-Bildschirm. Mit „%1$@“ machst du ein Sticky-Fenster vollständig global.",
   "keybinding.toggle_floating": "Schweben umschalten",
   "keybinding.toggle_kiwivision": "KiwiVision umschalten",
   "keybinding.toggle_lens": "Linse „%1$@“ umschalten",

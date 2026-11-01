@@ -464,7 +464,8 @@ twice, was a question the user answered twice. The argument is
   `plateItemsPadOnlyTheRunEnds` hold the Space item,
   `RoundedItemEndPadChipTests` the chip and the App Bar, and
   `ShelfStripPreviewTests` ▸ `needCarriesPipClearance` the
-  preview; a new item type owes one of them a clause. The
+  preview, `SpaceItemLengthTests` its labelled Space items
+  (#2890); a new item type owes one of them a clause. The
   vertical App Bar takes no inset, by the owner's ruling on #1763.
 - **Collapse a Space item once, in
   `SpaceBarOverlay.Item.collapsed(to:)`, applied by the item
@@ -609,7 +610,12 @@ twice, was a question the user answered twice. The argument is
   Boxed the break draws no rule, keeping its room, and the mark
   takes full item ink and a Fill-coloured halo** (owner ruling,
   2026-10-21; `AppBarFloatOverlayTests` ▸
-  `boxedBreakHaloesTheMark`).
+  `boxedBreakHaloesTheMark`). **Under Boxed the section divider
+  draws no line at rest, asked of `KiwiShelf.drawsPlate`**; its
+  grip keeps its view and its hover ink, and the Settings
+  preview draws none (owner, 2026-11-01, #2893;
+  `ShelfBoxedDividerTests`, `ShelfStripPreviewTests` ▸
+  `boxedDrawsNoDivider`).
 
 ## One shelf panel per display and edge draws the plate; the bars draw sections
 

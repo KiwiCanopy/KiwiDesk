@@ -926,7 +926,7 @@
   "keybinding.toggle_app_bar": "App Barを表示/非表示",
   "keybinding.toggle_app_bar.inert_link": "%5$@で%3$@または%4$@のApp Barが「%1$@」または「%2$@」のときに機能します。",
   "keybinding.toggle_display_sticky": "この画面で Sticky を切り替える",
-  "keybinding.toggle_display_sticky.help": "このウインドウが配置されている画面のすべてのスペースで表示し続けます。別の画面のスペースに移動すると、その画面が新しい定位置になります。Sticky ウインドウを完全にグローバルにするには「%1$@」を使ってください。",
+  "keybinding.toggle_display_sticky.help": "このウインドウを、元の画面（自身のスペースがある画面）のすべてのスペースで表示し続けます。別の画面のスペースに移動すると、元の画面がその画面に変わります。Sticky ウインドウを完全にグローバルにするには「%1$@」を使ってください。",
   "keybinding.toggle_floating": "フローティングを切り替える",
   "keybinding.toggle_kiwivision": "KiwiVision を切り替える",
   "keybinding.toggle_lens": "レンズ「%1$@」を切り替える",

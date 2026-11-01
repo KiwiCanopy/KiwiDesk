@@ -200,8 +200,9 @@ extension KeybindingCatalog {
         help: {
             L(
                 "keybinding.toggle_display_sticky.help",
-                "Keeps this window visible on every Space of the "
-                    + "screen it lives on. Moving it to a Space on "
+                "Keeps this window visible on every Space of its "
+                    + "home screen, the screen its own Space is on. "
+                    + "Moving it to a Space on "
                     + "another screen re-homes it there. Turn a "
                     + "sticky window fully global with “%1$@”.",
                 L(

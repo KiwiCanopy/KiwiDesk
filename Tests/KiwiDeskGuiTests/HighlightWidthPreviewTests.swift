@@ -28,7 +28,7 @@ struct HighlightWidthPreviewTests {
         let unit = HomeCardBarsTile.indicatorPerPoint * Self.scale
         let shelf = tile.settings.kiwishelf
         let specs = [
-            tile.spaceSpec(tile.settings.spaceBarLook),
+            tile.spaceSpec(tile.settings.spaceBarLook, vertical: false),
             tile.appSpec(
                 tile.settings.appBarLook(
                     for: tile.settings.appBarHosts[0]
@@ -46,8 +46,8 @@ struct HighlightWidthPreviewTests {
     func widerIsWider() {
         let thin = Self.tile(width: 2)
         let wide = Self.tile(width: 5)
-        let a = thin.spaceSpec(thin.settings.spaceBarLook)
-        let b = wide.spaceSpec(wide.settings.spaceBarLook)
+        let a = thin.spaceSpec(thin.settings.spaceBarLook, vertical: false)
+        let b = wide.spaceSpec(wide.settings.spaceBarLook, vertical: false)
         #expect(b.outlineWidth > a.outlineWidth)
         #expect(b.edgeMarkWidth > a.edgeMarkWidth)
     }
