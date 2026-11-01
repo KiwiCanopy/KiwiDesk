@@ -4,9 +4,11 @@ import SwiftUI
 /// Overflow track layout and slot geometry for TrackSchematic.
 extension TrackSchematic {
     /// Renders the far-edge track's shown run, its hidden windows
-    /// behind the edge slot they wait at (#2235).
+    /// behind the edge slot they wait at under its overflow mark
+    /// (#2235, #2864).
     var overflowTrack: some View {
         GeometryReader { geo in
+            let laid = overflowRun(geo.size)
             let slots = overflowSlots(geo.size)
             ZStack(alignment: .topLeading) {
                 ForEach(slots.indices, id: \.self) { i in
@@ -25,6 +27,12 @@ extension TrackSchematic {
                         y: slots[i].rect.midY
                     )
                     .zIndex(slots[i].hidden ? -1 : 0)
+                }
+                if let laid {
+                    SchematicOverflowMarks(
+                        laid: laid,
+                        bounds: CGRect(origin: .zero, size: geo.size)
+                    )
                 }
             }
         }
@@ -45,8 +53,20 @@ extension TrackSchematic {
     /// the run ends at it and the earlier windows wait behind the
     /// first slot. Only reached with at least one window to draw.
     func overflowSlots(_ size: CGSize) -> [OverflowSlot] {
+        guard let laid = overflowRun(size) else { return [] }
+        return laid.rects.enumerated().map { index, rect in
+            OverflowSlot(
+                rect: rect,
+                hidden: !laid.run.visible.contains(index)
+            )
+        }
+    }
+
+    /// The overflow track's run and every member's rect in it; nil
+    /// with no window to draw.
+    func overflowRun(_ size: CGSize) -> SchematicLaidRun? {
         let n = overflowWindows
-        guard n > 0 else { return [] }
+        guard n > 0 else { return nil }
         let shown = min(LayoutSchematic.trackSpillCapacity, n)
         let g: CGFloat = 3
         let rowH = max(
@@ -71,8 +91,6 @@ extension TrackSchematic {
             vertical: true,
             gap: g
         )
-        return rects.enumerated().map { index, rect in
-            OverflowSlot(rect: rect, hidden: !run.visible.contains(index))
-        }
+        return SchematicLaidRun(run: run, rects: rects, vertical: true)
     }
 }
