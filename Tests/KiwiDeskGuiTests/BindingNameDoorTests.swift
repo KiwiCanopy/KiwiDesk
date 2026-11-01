@@ -46,9 +46,13 @@ struct BindingNameDoorTests {
             "application rows sort by their app-name label"
         ),
         "ShortcutsReference+Bands.swift": (
-            2,
+            1,
             "an application row's app-name label when no bundle id "
                 + "names it, and the rows' sort by that name"
+        ),
+        "ShortcutsReference+PocketApps.swift": (
+            1,
+            "the Apps band's sort by each launch row's app name"
         ),
         "KeybindingCatalog+PocketApps.swift": (
             1,

@@ -14,7 +14,7 @@ extension KiwiCore {
         case .window(let target): id = target
         }
         guard let window = state.windows[id]
-        else { return .fail("no focused window") }
+        else { return .fail("unknown window: \(id.raw)") }
         if let app = state.pocketKeyOwner(of: id) {
             return refuseKeyedPocketWindow(id, app: app)
         }

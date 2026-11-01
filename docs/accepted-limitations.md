@@ -380,4 +380,10 @@ window of the app. Which window a key owns is kept only for a
 restart that comes straight back — an update, or `kiwidesk service
 restart` — and never written to a profile, so nothing else can hand
 it back.
+
+An app whose File menu has no New Window, with its windows all on
+another macOS Desktop, opens nothing on its Pocket key: the key
+reopens the app, which only brings one of those windows forward, and
+for about ten seconds a second press waits for a window that never
+comes. The window count KiwiDesk reads sees only the Desktop shown.
 :::

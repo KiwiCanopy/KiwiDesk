@@ -25,6 +25,7 @@ extension SettingsValueReadout {
             .toggleSticky, .pocket, .pocketWindow,
             .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
+            .pocketApps,
             .advanced, .`import`, .restoreDefaults:
             return []
         // App-wide, written at once, never in the draft (#1741).

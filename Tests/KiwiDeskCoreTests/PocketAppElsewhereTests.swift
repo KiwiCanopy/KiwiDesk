@@ -3,11 +3,10 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// A running app showing no window here (#2612, device QA
-/// 2026-11-01): its windows may sit on another Desktop, where a
-/// reopen only brings one forward and opens nothing, so the key
-/// presses its New Window row without activating it, and reopens
-/// only where the app has no such row.
+/// A running app showing no window here (#2612): the key presses
+/// its New Window row without activating it, since its windows may
+/// sit on another Desktop, and reopens it only where the app has no
+/// such row.
 @Suite("Pocket ▸ app with no window here", .serialized)
 @MainActor
 struct PocketAppElsewhereTests {

@@ -56,9 +56,10 @@ extension KiwiCore {
     /// Opens a window of `bundleID` whose arrival the claim takes:
     /// a launch, else its New Window row. A running app showing no
     /// window here may have its windows on another Desktop, where a
-    /// reopen only brings one forward, so it gets the row too and
-    /// is reopened only where it has none; it is not activated
-    /// first, which would switch to that Desktop.
+    /// reopen only brings one forward, so it gets the row too, not
+    /// activated first, which would switch to that Desktop; without
+    /// the row it is reopened, and where its windows are elsewhere
+    /// the claim waits out its bound (accepted-limitations.md).
     private func openPocketAppWindow(
         _ bundleID: String,
         keyed: Bool

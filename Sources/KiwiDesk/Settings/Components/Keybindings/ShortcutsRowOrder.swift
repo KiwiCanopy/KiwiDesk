@@ -171,6 +171,12 @@ enum ShortcutsRowOrder {
         .shortcuts(.pocketCapacity)
     ]
 
+    /// The Pocket card's per-app keys, drawn by their own view
+    /// after its two keys (#2612).
+    static let pocketApps: [SettingKey] = [
+        .shortcuts(.pocketApps)
+    ]
+
     /// Size & float's `.showMore` tier, empty since #1255 took
     /// its one row to Behaviour. Kept rather than deleted: a
     /// census key authored at this tier reds

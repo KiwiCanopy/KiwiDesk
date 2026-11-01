@@ -2097,6 +2097,13 @@ wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
 the key rows' ink, never a topic glyph of its own**
 (`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
 
+**An app's Pocket key row is read through
+`PocketAppLuaArg.bundleID(of:)` and named through
+`KeybindingCatalog.pocketApp`, the one shape Core reads (#2612)** —
+the Settings rows, the import classifier, the naming door and
+KiwiHub alike; a reader never spells the call itself
+(`PocketAppMatcherSeamTests` ▸ `oneSpelling`).
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord takes it from `ChordGlyphs`**, which

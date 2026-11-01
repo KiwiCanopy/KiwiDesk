@@ -52,6 +52,24 @@ struct ShortcutsPocketAppTests {
         )
     }
 
+    @Test("the naming door names an unlabelled row by its shape")
+    func doorNamesAnUnlabelledRow() {
+        LocalizationManager.shared.select("en")
+        let row = KeyBinding(
+            combo: "control+option+t",
+            lua: PocketAppLuaArg.call(app),
+            kind: .navigation
+        )
+        var config = GuiConfig()
+        config.layers = [
+            KeyLayer(name: KeyLayer.defaultName, bindings: [row])
+        ]
+        #expect(
+            KeybindingCatalog.localizedName(of: row, config: config)
+                == "Pocket \(app)"
+        )
+    }
+
     @Test("pocketApps reads each app once, in binding order")
     func pocketAppsOrder() {
         let bindings = [
@@ -63,10 +81,15 @@ struct ShortcutsPocketAppTests {
             ),
             KeybindingCatalog.pocketAppBinding("a.app"),
             KeybindingCatalog.pocketAppBinding("B.App"),
+            KeyBinding(
+                combo: "",
+                lua: "KiwiDesk.pocket_app(\"C.App\")",
+                kind: .custom
+            ),
         ]
         #expect(
             KeybindingCatalog.pocketApps(in: bindings)
-                == ["b.app", "a.app"]
+                == ["b.app", "a.app", "c.app"]
         )
     }
 

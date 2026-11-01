@@ -85,6 +85,10 @@ struct ShortcutsBespokeContainerTests {
                 ShortcutsRowOrder.pocketList
             ),
             (
+                "pocketApps", .pocket,
+                ShortcutsRowOrder.pocketApps
+            ),
+            (
                 "openApplicationsAtRest", .openApplications,
                 ShortcutsRowOrder.openApplicationsAtRest
             ),

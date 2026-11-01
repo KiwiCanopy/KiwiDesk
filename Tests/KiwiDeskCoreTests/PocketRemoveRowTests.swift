@@ -68,8 +68,11 @@ struct PocketRemoveRowTests {
     @Test("a marked window's menu offers Remove, then Pocket Window")
     func markedWindowRows() {
         LocalizationManager.shared.select("en")
-        let core = Fixture(row: false).core
+        let fixture = keyedFixture()
+        let core = fixture.core
         core.execute("toggle_pocket_window", args: [.number(1)])
+        // The row names its window: the focus is another one.
+        core.state.apply(.windowFocused(mine))
         let titles = core.barMenuRows(.appItem([other])).map(\.title)
         let remove = titles.firstIndex(of: "Remove from Pocket")
         let pocket = titles.firstIndex(of: "Pocket Window")
@@ -80,6 +83,25 @@ struct PocketRemoveRowTests {
         #expect(row?.subtitle == nil)
         perform(row)
         #expect(core.state.pocketPhase(of: other) == nil)
+        #expect(fixture.owner(of: mine) == Fixture.app)
+    }
+
+    @Test("a group gives its pocket window a Remove submenu")
+    func groupSplitsTheRows() {
+        LocalizationManager.shared.select("en")
+        let fixture = keyedFixture()
+        let core = fixture.core
+        core.execute("toggle_pocket_window", args: [.number(1)])
+        let rows = core.barMenuRows(.appItem([other, mine]))
+        #expect(!rows.contains { $0.title == "Float Window" })
+        let remove = rows.first { $0.title == "Remove from Pocket" }
+        guard case .submenu(let items)? = remove?.kind else {
+            Issue.record("Remove from Pocket is no submenu")
+            return
+        }
+        #expect(items.count == 2)
+        #expect(items.map(\.enabled) == [true, false])
+        #expect(items[1].subtitle == KiwiCore.pocketKeyKeepsIt)
     }
 
     @Test("an unmarked window keeps its float row")

@@ -80,8 +80,10 @@ extension KiwiCore {
         let lit = over && pocketPlate.dropHovered != nil
         guard lit else {
             endPocketDrag()
-            if over, pocketNamedRefusal(id) == .taken {
-                _ = refuseSecondPocketWindow(id)
+            switch over ? pocketNamedRefusal(id) : nil {
+            case .taken?: _ = refuseSecondPocketWindow(id)
+            case .keyed(let app)?: _ = refuseKeyedPocketWindow(id, app: app)
+            default: break
             }
             return false
         }

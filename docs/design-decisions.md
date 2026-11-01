@@ -6308,6 +6308,18 @@ edge standing on the screen read as a border. A hover ring in the
 highlight colour was weighed and set aside, since it reads like the
 focused-window ring; a coloured glow is the focused ring's alone.
 
+:::unreleased
+**Remove from Pocket takes the float row's slot (#2612 ▸ 4).** A
+pocket window always floats, so the Tile Window the slot would hold
+could only ever be refused; the slot carries instead the one act
+that ends the window's time in the pocket, through
+`toggle_pocket_window` naming it, with Pocket Window kept below. A
+window its app's own key keeps greys both rather than hiding them,
+as Tile Window greys for a float rule (▸ *A window is tiled or
+floating*), and only Remove names where that key lives, since
+removing the app's row is the way out.
+:::
+
 ### A window changing state animates under its own switch (#2676)
 
 **[Rationale]**
@@ -6351,13 +6363,6 @@ pocket's list is where one comes out. The plate's flight follows
 the nod take no setting, since they shape how softly the pocket
 appears, not how fast anything travels (#1931's *own pace* ruling
 the other way round).
-
-:::unreleased
-While a window is the pocket's, the float row's slot reads Remove
-from Pocket in place of a Tile Window no click could act on, Pocket
-Window kept below it; both grey for a window its app's own key
-keeps, the subtitle naming where that key lives (#2612 ▸ 4, ▸ 11).
-:::
 
 ### Spaces, profiles & config ownership
 

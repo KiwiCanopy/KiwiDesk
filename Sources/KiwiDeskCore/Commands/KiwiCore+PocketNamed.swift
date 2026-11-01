@@ -8,6 +8,8 @@ extension KiwiCore {
     /// Why `pocket` naming `id` would refuse it, nil where it is
     /// taken in.
     enum PocketNamedRefusal: Equatable {
+        /// A window its app's own Pocket key keeps (#2612 ▸ 11).
+        case keyed(app: String)
         /// One window, another already marked.
         case taken
         /// Untracked, in native full screen, or a transient panel.
@@ -15,6 +17,7 @@ extension KiwiCore {
     }
 
     func pocketNamedRefusal(_ id: WindowID) -> PocketNamedRefusal? {
+        if let app = state.pocketKeyOwner(of: id) { return .keyed(app: app) }
         guard let window = state.windows[id], !window.isFullscreen,
             !window.isTransientOverlay
         else { return .cannot }
@@ -31,10 +34,8 @@ extension KiwiCore {
         case .refused(let response):
             return response
         case .window(let id):
-            if let app = state.pocketKeyOwner(of: id) {
-                return refuseKeyedPocketWindow(id, app: app)
-            }
             switch pocketNamedRefusal(id) {
+            case .keyed(let app): return refuseKeyedPocketWindow(id, app: app)
             case .taken: return refuseSecondPocketWindow(id)
             case .cannot: return .fail("this window cannot be pocketed")
             case nil: break

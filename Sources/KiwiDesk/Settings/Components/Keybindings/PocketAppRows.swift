@@ -12,6 +12,9 @@ struct PocketAppRows: View {
     var disabledSystemShortcuts
     @Environment(\.keybindingLayerName)
     var layerName
+    /// The app the last pick named that already has a key: WHICH
+    /// app, never the sentence, which `takenNotice` derives live.
+    @State private var refusal: String?
 
     var body: some View {
         ForEach(rowIDs, id: \.self) { id in
@@ -100,21 +103,55 @@ struct PocketAppRows: View {
             .accessibilityValue(
                 L("shortcuts.choose_app", "Choose app…")
             )
-            Text(Self.help)
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
+            // It explains the rows' trash, so it waits for a row.
+            ForEach(captions, id: \.self) { caption in
+                Text(caption)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
+    private var captions: [String] {
+        var lines: [String] = []
+        if let takenNotice { lines.append(takenNotice) }
+        if !rowIDs.isEmpty { lines.append(Self.help) }
+        return lines
+    }
+
+    /// Why the last pick added nothing, asked of live state (#1235).
+    private var takenNotice: String? {
+        guard let refusal,
+            KeybindingCatalog.pocketApps(in: bindings).contains(refusal)
+        else { return nil }
+        return Self.takenNotice(
+            KeybindingCatalog.displayName(forBundleID: refusal)
+        )
+    }
+
     /// The "Other…" panel can name an app the list left out: it
-    /// adds nothing a second time.
+    /// adds nothing a second time, and says so.
     private func add(_ bundleID: String) {
         let id = bundleID.lowercased()
         guard !KeybindingCatalog.pocketApps(in: bindings).contains(id)
-        else { return }
+        else {
+            refusal = id
+            let app = KeybindingCatalog.displayName(forBundleID: id)
+            _ = DelayedAnnouncement.schedule(Self.takenNotice(app))
+            return
+        }
+        refusal = nil
         bindings.append(KeybindingCatalog.pocketAppBinding(id))
+    }
+
+    static func takenNotice(_ app: String) -> String {
+        L(
+            "shortcuts.pocket_app.taken",
+            "\u{201C}%1$@\u{201D} already has a Pocket key.",
+            app
+        )
     }
 
     private func record(_ combo: String, id: UUID) {

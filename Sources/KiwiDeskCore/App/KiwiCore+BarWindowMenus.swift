@@ -19,7 +19,15 @@ extension KiwiCore {
         // The app's name heads its rows on every surface (#2024).
         var rows: [BarMenuRow] = [.header(app.appName), newWindowRow(app)]
         if movable { rows.append(moveRow(live)) }
-        rows.append(floatRow(live))
+        // A pocket window's float slot is Remove from Pocket (#2612
+        // ▸ 4); a group keeps a submenu per kind.
+        let pocketed = live.filter { state.pocketPhase(of: $0) != nil }
+        let plain = live.filter { !pocketed.contains($0) }
+        let grouped = live.count > 1
+        if !plain.isEmpty { rows.append(floatRow(plain, grouped: grouped)) }
+        if !pocketed.isEmpty {
+            rows.append(removeFromPocketRow(pocketed, grouped: grouped))
+        }
         rows.append(pocketRow(live))
         rows.append(appRulesRow(app))
         rows += [.separator, closeRow(live), quitRow(app)]
@@ -108,12 +116,12 @@ extension KiwiCore {
     /// `toggle_floating` flips; a group's submenu ticks each window
     /// that floats. A Tile that detection would refuse is greyed,
     /// its reason the subtitle — the pill's own sentence (#1810).
-    private func floatRow(_ windows: [WindowID]) -> BarMenuRow {
-        guard windows.count > 1 else {
+    private func floatRow(
+        _ windows: [WindowID],
+        grouped: Bool
+    ) -> BarMenuRow {
+        guard grouped else {
             let id = windows[0]
-            if state.pocketPhase(of: id) != nil {
-                return removeFromPocketRow(id)
-            }
             let floats = state.windows[id]?.isFloating == true
             let refusal = floats ? tileRefusal(of: id) : nil
             return .action(
@@ -151,28 +159,40 @@ extension KiwiCore {
         )
     }
 
-    /// The float row's slot while the window is the pocket's
-    /// (#2612 ▸ 4): unmarks it through `toggle_pocket_window`
-    /// naming it, as ⌃⌥⇧P does. Greyed for a window its app's
-    /// Pocket key keeps, the subtitle saying where that key lives.
-    private func removeFromPocketRow(_ id: WindowID) -> BarMenuRow {
-        let keyed = state.pocketKeyOwner(of: id) != nil
-        return .action(
-            L("bar.menu.remove_from_pocket", "Remove from Pocket"),
-            enabled: !keyed,
-            subtitle: keyed ? Self.pocketKeyKeepsIt : nil
-        ) { [weak self] in
-            _ = self?.execute(
-                "toggle_pocket_window",
-                args: [.number(Double(id.raw))]
-            )
+    /// The float row's slot while a window is the pocket's (#2612
+    /// ▸ 4): unmarks it through `toggle_pocket_window` naming it, as
+    /// ⌃⌥⇧P does. Greyed for a window its app's Pocket key keeps,
+    /// the subtitle saying where that key lives.
+    private func removeFromPocketRow(
+        _ windows: [WindowID],
+        grouped: Bool
+    ) -> BarMenuRow {
+        let title = L("bar.menu.remove_from_pocket", "Remove from Pocket")
+        let row = { [weak self] (id: WindowID, title: String) in
+            let keyed = self?.state.pocketKeyOwner(of: id) != nil
+            return BarMenuRow.action(
+                title,
+                enabled: !keyed,
+                subtitle: keyed ? Self.pocketKeyKeepsIt : nil
+            ) { [weak self] in
+                _ = self?.execute(
+                    "toggle_pocket_window",
+                    args: [.number(Double(id.raw))]
+                )
+            }
         }
+        guard grouped else { return row(windows[0], title) }
+        let rows = windows.map { row($0, windowRowName($0)) }
+        return .submenu(title, enabled: rows.contains { $0.enabled }, rows)
     }
 
     static var pocketKeyKeepsIt: String {
         L(
             "bar.menu.pocket_keyed",
-            "Its Pocket key keeps it — Settings ▸ Shortcuts ▸ Pocket"
+            "Its Pocket key keeps it — %1$@ ▸ %2$@ ▸ %3$@",
+            L("home.title", "Settings"),
+            L("destination.shortcuts", "Shortcuts & Gestures"),
+            L("shortcuts.section.pocket", "Pocket")
         )
     }
 
@@ -183,8 +203,7 @@ extension KiwiCore {
     private func pocketRow(_ windows: [WindowID]) -> BarMenuRow {
         let title = L("bar.menu.pocket_window", "Pocket Window")
         let takes = { (id: WindowID) in
-            self.state.pocketKeyOwner(of: id) == nil
-                && self.pocketNamedRefusal(id) == nil
+            self.pocketNamedRefusal(id) == nil
         }
         let pocket = { [weak self] (id: WindowID) in
             _ = self?.execute("pocket", args: [.number(Double(id.raw))])

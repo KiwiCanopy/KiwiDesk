@@ -5580,7 +5580,7 @@ end)
 
 ### pocket
 
-**Expects:** nothing.
+**Expects:** nothing, or a window id.
 
 **Does:** keeps one window, the pocket window, one key away. Mark
 it with [`toggle_pocket_window`](#toggle_pocket_window); each
@@ -5704,8 +5704,8 @@ call on another window marks it too, beside the others.
 :::unreleased
 `toggle_pocket_window` also takes a window id, as the bar menus'
 Remove from Pocket does: it marks or unmarks that window instead of
-the focused one. A window an app's own key keeps
-([`pocket_app`](#pocket_app)) is refused with a pill naming its key.
+the focused one, and unmarks a pocketed window without taking it
+out first.
 :::
 
 **Example:**
@@ -5724,7 +5724,11 @@ end)
 **Does:** an app's own Pocket key. The first call opens a new
 window of the app, launching it if it is not running, and that
 window arrives out of the [pocket](#pocket): floating, on every
-Space, focused. Each later call puts it away or takes it out,
+Space, focused. A running app gets its File ▸ New Window, also
+when its windows are all on another Desktop; one with no window on
+this Desktop, minimized ones included, and no New Window is
+reopened, and one showing a window without a New Window fails with
+a pill. Each later call puts it away or takes it out,
 as `pocket` does for the other pocket windows. Its app rule's
 "Open in a Space" does not apply to it.
 
@@ -5737,21 +5741,18 @@ a pill naming its key. It does not count against
 [`pocket.set_capacity`](#pocketset_capacity). Remove the shortcut
 and the window becomes an ordinary window again, on the Space you
 are on; a profile that leaves the shortcut out keeps the tie, and
-the key works again when you switch back. Closing the window or quitting the app frees the key, and
-the next call opens a fresh window. If the app is hidden, the
-call shows it again. Settings ▸ Shortcuts ▸ Pocket writes this
-shortcut: one row per app, added with **Add an app to your
-Pocket…**.
+the key works again when you switch back. Closing the window or
+quitting the app frees the key, and the next call opens a fresh
+window. If the app is hidden, the call shows it again. Settings ▸
+Shortcuts & Gestures ▸ Pocket writes this shortcut: one row per
+app, added with **Add an app to your Pocket…**.
 
 Called with no such shortcut — from the CLI, say — the window it
 opens is an ordinary pocket window, counted like any other: under
 `"one"`, with another pocket window marked, the call fails with
 `another window is the pocket window` (and the pill "Pocket is
-already taken" on the focused window) and opens nothing. A running app gets its File ▸ New
-Window, also when its windows are all on another Desktop; one that
-shows no window here and has no New Window is reopened. Fails
-with `app not found: <id>` for an app macOS cannot find, and with
-a pill when a running app showing a window has no New Window.
+already taken" on the focused window) and opens nothing. Fails
+with `app not found: <id>` for an app macOS cannot find.
 
 **Example:**
 
