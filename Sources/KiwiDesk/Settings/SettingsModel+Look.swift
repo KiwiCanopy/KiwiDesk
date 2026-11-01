@@ -20,8 +20,9 @@ extension SettingsModel {
 
     /// Wears a look a gallery link added as an unsaved change, its
     /// tile marked (#1740 ▸ Step 3 decisions): on Simple's Look line
-    /// while Simple shows, else on the Looks page. Call after the
-    /// window is shown, whose fresh open reloads the draft.
+    /// while Simple shows, else on the Looks page. Call after
+    /// `prepareToShow`'s reload and before the window fronts
+    /// (`SettingsWindowController.show(beforeFront:)`, #2863).
     func wearLinkedLook(_ look: ShelfLook) {
         refreshLooks()
         linkedLook = look.name
