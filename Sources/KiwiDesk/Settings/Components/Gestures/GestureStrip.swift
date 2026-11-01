@@ -44,7 +44,7 @@ struct GestureStrip: View {
         } action: {
             viewport = $0
         }
-        .mask(GestureStripFade(fades: fades))
+        .mask(StripFade(fades: fades))
         .accessibilityHidden(true)
     }
 
@@ -87,30 +87,5 @@ struct GestureStrip: View {
             viewport: viewport,
             depth: GesturePlate<EmptyView>.size.height
         )
-    }
-}
-
-/// The strip's mask: opaque, fading out over each end's length.
-/// Instant, never animated, like the bars' (`ShelfFadeMask`). A
-/// mask reads only alpha, so any opaque token serves as its ink.
-struct GestureStripFade: View {
-    let fades: ShelfOverflow.Fades
-
-    var body: some View {
-        HStack(spacing: 0) {
-            LinearGradient(
-                colors: [.clear, SettingsTheme.ink],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-            .frame(width: fades.leading)
-            Rectangle().fill(SettingsTheme.ink)
-            LinearGradient(
-                colors: [SettingsTheme.ink, .clear],
-                startPoint: .leading,
-                endPoint: .trailing
-            )
-            .frame(width: fades.trailing)
-        }
     }
 }
