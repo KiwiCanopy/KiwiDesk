@@ -191,7 +191,7 @@ struct GesturePlate<Content: View>: View {
             height: Self.size.height,
             alignment: .topLeading
         )
-        .background(palette?.base ?? SettingsTheme.card)
+        .background((palette ?? .unresolved).base)
         .clipShape(
             RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
         )
@@ -199,7 +199,7 @@ struct GesturePlate<Content: View>: View {
         .overlay(
             RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
                 .strokeBorder(
-                    palette?.edge ?? SettingsTheme.planeRing,
+                    (palette ?? .unresolved).edge,
                     lineWidth: 1
                 )
         )

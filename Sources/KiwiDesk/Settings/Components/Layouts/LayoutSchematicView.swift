@@ -18,16 +18,17 @@ struct LayoutSchematicView: View {
 
     /// The focus ring's colour on a schematic: the configured
     /// focused colour, or none where borders are off or the
-    /// colour sinks into the dark plate — the light plate's
-    /// verdict already holds it (#2859). Shared with the story
-    /// canvas.
+    /// colour sinks into the dark plate. On the light plate it is
+    /// the paint's own `focus`, which its verdict holds (#2859).
+    /// Shared with the story canvas.
     static func focusStroke(
         _ settings: TilingSettings,
         on palette: SchematicPalette?
     ) -> Color? {
         let style = settings.borderStyle
         guard style.enabled else { return nil }
-        if palette?.ground == .dark,
+        if let ring = palette?.focus { return ring }
+        if palette != nil,
             !HomeCardPlate.plateLegible(
                 style.focusedColor,
                 on: HomeCardPlate.darkGround

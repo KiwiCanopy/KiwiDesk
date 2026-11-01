@@ -11,8 +11,9 @@ struct SchematicPalette: Equatable {
     var accent: Color
     var ink: Color
     var base: Color
-    var ground: PlateGround = .dark
-    /// The look's focus ring, set where the light plate drew.
+    var ground: PlateGround
+    /// The look's focus colour, set where the light plate drew:
+    /// its ring, or its active item colour while borders are off.
     var focus: Color? = nil
 
     private var light: Bool { ground == .light }
@@ -48,6 +49,22 @@ struct SchematicPalette: Equatable {
     }
     /// What marks the focused or active thing on the plate.
     var focusMark: Color { focus ?? accent }
+    /// A gesture picture's window at rest.
+    var windowFill: Color {
+        light ? SettingsTheme.lightWindow : ink.opacity(0.10)
+    }
+    var windowEdge: Color {
+        light ? SettingsTheme.lightOutline : ink.opacity(0.35)
+    }
+    /// Ink for plate chrome no look paints (the tour's menu bar).
+    var chromeInk: Color { light ? ink : SettingsTheme.plateInk }
+    /// A brand mark on the plate — a hover ring, the tour's icon
+    /// ring — at 3:1 or more against it.
+    var accentMark: Color {
+        light ? SettingsTheme.lightAccent : SettingsTheme.accent
+    }
+    /// A bound key's edge against the board; none on the dark one.
+    var boundKeyEdge: Color { light ? SettingsTheme.lightAccent : .clear }
 }
 
 /// Which plate a picture draws on (#2859): the dark plate, or the

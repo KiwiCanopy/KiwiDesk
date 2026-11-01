@@ -49,7 +49,7 @@ struct HomeCardSpacesTile: View {
 
     private func pane(active: Bool) -> some View {
         let base: Color =
-            palette?.base ?? SettingsTheme.card
+            (palette ?? .unresolved).base
         let fill: Color =
             active
             ? palette?.fill ?? LayoutSchematic.fill

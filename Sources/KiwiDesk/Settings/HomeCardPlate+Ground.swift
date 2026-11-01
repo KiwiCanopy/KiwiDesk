@@ -18,13 +18,13 @@ extension HomeCardPlate {
             ink: SettingsTheme.lightInk,
             base: SettingsTheme.lightPlate,
             ground: .light,
-            focus: Color(kiwiHex: settings.borderStyle.focusedColor)
+            focus: Color(kiwiHex: focusHex(settings))
         )
     }
 
     /// The dark plate's paint, the user's colours folded against
     /// it (ui-designer 2026-08-09). The look tiles (`LookPlate`,
-    /// #1740) and KiwiVision's scene keep it in both modes.
+    /// #1740) keep it in both modes.
     static func darkPalette(
         _ settings: TilingSettings
     ) -> SchematicPalette {
@@ -37,9 +37,22 @@ extension HomeCardPlate {
             ink: plateLegible(ink, on: darkGround)
                 ? Color(kiwiHex: ink)
                 : SettingsTheme.plateInk,
-            base: SettingsTheme.previewPlate
+            base: SettingsTheme.previewPlate,
+            ground: .dark
         )
     }
+}
+
+extension SchematicPalette {
+    /// The paint a plate view reads where no writer resolved one:
+    /// the dark plate's, in the theme's own inks. The one fallback
+    /// every plate consumer takes (`PlateGroundWiringTests`).
+    static let unresolved = SchematicPalette(
+        accent: SettingsTheme.accent,
+        ink: SettingsTheme.plateInk,
+        base: SettingsTheme.previewPlate,
+        ground: .dark
+    )
 }
 
 /// Writes a picture's plate paint into `schematicPalette`: the
@@ -62,17 +75,14 @@ private struct DeskPlateGround<Plate: InsettableShape>: ViewModifier {
     let edged: Bool
     @Environment(\.schematicPalette) private var palette
 
+    private var paint: SchematicPalette { palette ?? .unresolved }
+
     func body(content: Content) -> some View {
         content
-            .background(
-                shape.fill(palette?.base ?? SettingsTheme.previewPlate)
-            )
+            .background(shape.fill(paint.base))
             .overlay {
                 if edged {
-                    shape.strokeBorder(
-                        palette?.edge ?? SettingsTheme.planeRing,
-                        lineWidth: 1
-                    )
+                    shape.strokeBorder(paint.edge, lineWidth: 1)
                 }
             }
     }

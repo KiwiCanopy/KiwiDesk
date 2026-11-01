@@ -50,6 +50,7 @@ struct SettingsThemeWiringTests {
         "lightGap": "SchematicPalette.swift",
         "lightFrame": "SchematicPalette.swift",
         "lightMark": "SchematicPalette.swift",
+        "lightAccent": "SchematicPalette.swift",
         "keyGlyph": "KeyboardBoard.swift",
         "visionVeil": "KiwiVisionScene.swift",
         "lookGround": "LookPlate.swift",

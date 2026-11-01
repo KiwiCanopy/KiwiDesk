@@ -7,26 +7,20 @@ import SwiftUI
 struct GestureInk {
     let palette: SchematicPalette?
 
-    var accent: Color { palette?.focusMark ?? SettingsTheme.accent }
-    var ink: Color { palette?.ink ?? SettingsTheme.plateInk }
+    private var paint: SchematicPalette { palette ?? .unresolved }
+
+    var accent: Color { paint.focusMark }
+    var ink: Color { paint.ink }
     /// The plate itself, for a mark cut into a filled shape.
-    var plate: Color { palette?.base ?? SettingsTheme.card }
+    var plate: Color { paint.base }
 
-    private var onLight: Bool { palette?.ground == .light }
-
-    /// A window at rest: the light plate's window paint, else the
-    /// ink's wash.
+    /// A window at rest.
     func window(_ rect: CGRect) -> some View {
         RoundedRectangle(cornerRadius: 3)
-            .fill(onLight ? SettingsTheme.lightWindow : ink.opacity(0.10))
+            .fill(paint.windowFill)
             .overlay(
                 RoundedRectangle(cornerRadius: 3)
-                    .strokeBorder(
-                        onLight
-                            ? SettingsTheme.lightOutline
-                            : ink.opacity(0.35),
-                        lineWidth: 1
-                    )
+                    .strokeBorder(paint.windowEdge, lineWidth: 1)
             )
             .frame(width: rect.width, height: rect.height)
             .offset(x: rect.minX, y: rect.minY)

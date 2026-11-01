@@ -40,12 +40,12 @@ struct KeyboardBoard: View {
             .padding(Self.padding)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(palette?.base ?? SettingsTheme.card)
+                    .fill((palette ?? .unresolved).base)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
-                        palette?.edge ?? SettingsTheme.planeRing,
+                        (palette ?? .unresolved).edge,
                         lineWidth: 1
                     )
             )
@@ -137,6 +137,9 @@ struct KeyCap: View {
     let legend: String?
     /// A modifier cap the shown chip holds down (#2601).
     var held = false
+    /// The board's paint: a bound key's edge on the light plate,
+    /// where the accent fill alone sits under 3:1 (#2859).
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         RoundedRectangle(cornerRadius: 4)
@@ -173,6 +176,12 @@ struct KeyCap: View {
                 .strokeBorder(
                     SettingsTheme.keyReserved,
                     style: StrokeStyle(lineWidth: 1.5, dash: [3, 2])
+                )
+        } else if state == .bound {
+            RoundedRectangle(cornerRadius: 4)
+                .strokeBorder(
+                    (palette ?? .unresolved).boundKeyEdge,
+                    lineWidth: 1
                 )
         }
     }

@@ -23,10 +23,12 @@ struct SchematicFocusStrokeTests {
             // …from the draft's border style, only while
             // borders are enabled…
             "guardstyle.enabledelse{returnnil}",
+            // …takes the light paint's own ring, the one its
+            // verdict holds (#2859)…
+            "ifletring=palette?.focus{returnring}",
             // …and floors a dark plate mount's colour against
-            // that plate before showing it there; the light
-            // plate's verdict already holds the ring (#2859).
-            "ifpalette?.ground==.dark,"
+            // that plate before showing it there.
+            "ifpalette!=nil,"
                 + "!HomeCardPlate.plateLegible(style.focusedColor,"
                 + "on:HomeCardPlate.darkGround)",
         ],

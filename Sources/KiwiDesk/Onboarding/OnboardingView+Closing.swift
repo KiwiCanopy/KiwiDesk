@@ -152,16 +152,12 @@ struct OnboardingLoginCheckbox: View {
 }
 
 /// The closing card's menu bar, drawn on the plate the look earns
-/// (#2859): the plate's ink on the light one, the fixed light ink
-/// on the dark.
+/// (#2859), in the paint's chrome ink and brand mark.
 private struct OnboardingMenuBarStrip: View {
     @Environment(\.schematicPalette) private var palette
 
-    private var ink: Color {
-        palette?.ground == .light
-            ? palette?.ink ?? SettingsTheme.plateInk
-            : SettingsTheme.plateInk
-    }
+    private var paint: SchematicPalette { palette ?? .unresolved }
+    private var ink: Color { paint.chromeInk }
 
     var body: some View {
         HStack(spacing: 11) {
@@ -186,7 +182,7 @@ private struct OnboardingMenuBarStrip: View {
             .padding(4)
             .overlay(
                 RoundedRectangle(cornerRadius: 6)
-                    .stroke(SettingsTheme.accent, lineWidth: 2)
+                    .stroke(paint.accentMark, lineWidth: 2)
             )
             Text(clock)
                 .font(.system(size: 10).monospaced())

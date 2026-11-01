@@ -5,9 +5,11 @@ import Testing
 
 /// Every desk picture draws the plate its look earned (#2859):
 /// each in-scope surface reads the resolved paint through
-/// `deskPlate`/`platePaint` or the palette they write, and none
-/// names the dark plate token itself — a direct read draws the
-/// dark plate in light mode with every other suite green.
+/// `deskPlate`/`platePaint` or the palette they write, a plate
+/// view with no writer takes `SchematicPalette.unresolved`, and
+/// two sets close it: only the resolver names the dark plate
+/// token, and only the resolver, `LookPlate` (#1740) and KiwiHub's
+/// `JumpLayoutTile` write the palette environment.
 @Suite("Plate ground wiring")
 struct PlateGroundWiringTests {
     /// Surface file → the squashed consult it must carry.
@@ -19,9 +21,12 @@ struct PlateGroundWiringTests {
         "PaletteScenePanel.swift":
             ".deskPlate(settings,in:RoundedRectangle(cornerRadius:12))",
         "KeyboardPreviewPanel.swift": ".platePaint(model.config.settings)",
-        "KeyboardBoard.swift": ".fill(palette?.base??SettingsTheme.card)",
+        "KeyboardBoard.swift": ".fill((palette??.unresolved).base)",
         "GesturesDrawer.swift": ".platePaint(settings)",
-        "GestureEntry.swift": ".background(palette?.base??SettingsTheme.card)",
+        "GestureEntry.swift": ".background((palette??.unresolved).base)",
+        "KiwiVisionPanelPreview.swift":
+            ".platePaint(model.config.settings)",
+        "KiwiVisionScene.swift": "resolved??.unresolved",
         "OnboardingSpaceRow.swift": ".deskPlate(settings,",
         "OnboardingView+Closing.swift": ".deskPlate(model.tilingSettings(),",
         "LayoutStrip.swift": ".deskPlate(model.config.settings,",
@@ -29,9 +34,7 @@ struct PlateGroundWiringTests {
         "SpacesPanelPreview.swift": ".deskPlate(settings,",
     ]
 
-    /// The files that may name the dark plate token or write the
-    /// palette environment: the resolver, and the two pictures
-    /// ruled onto their own ground (`LookPlate` #1740, KiwiHub).
+    /// The one file that names the dark plate token.
     private let resolver = "HomeCardPlate+Ground.swift"
 
     private func sources() throws -> [(String, String)] {
@@ -65,6 +68,32 @@ struct PlateGroundWiringTests {
                 !source.contains("SettingsTheme.previewPlate"),
                 Comment(rawValue: "\(file) names the dark plate")
             )
+            // The verdict reads the window's appearance; a picture
+            // forcing its own would pick the plate for it. The
+            // KiwiVision scene's windows take the appearance the
+            // mode will show, below the writer, and are the one
+            // spelling allowed.
+            let forced = source.replacingOccurrences(
+                of: ".environment(\\.colorScheme,darkWindows?.dark:.light)",
+                with: ""
+            )
+            #expect(
+                !forced.contains("\\.colorScheme")
+                    && !forced.contains("preferredColorScheme("),
+                Comment(rawValue: "\(file) forces an appearance")
+            )
+        }
+        // One fallback: a plate view with no writer reads the
+        // resolver's unresolved paint, never a plate it picks. The
+        // schematic kit's own `card` fallbacks are its brand mode,
+        // drawn with no plate at all.
+        for (file, source) in all
+        where !file.hasPrefix("LayoutSchematic")
+            && source.contains("palette?.base??")
+        {
+            Issue.record(
+                Comment(rawValue: "\(file) picks its own plate")
+            )
         }
     }
 
@@ -79,9 +108,13 @@ struct PlateGroundWiringTests {
             if source.contains("SettingsTheme.previewPlate") {
                 named.insert(file)
             }
-            if source.contains("\\.schematicPalette,") {
-                wrote.insert(file)
-            }
+            // Any mention that is not an `@Environment` read is a
+            // write, whatever the modifier spelling it.
+            let mentions = source.occurrences(of: "\\.schematicPalette")
+            let reads = source.occurrences(
+                of: "@Environment(\\.schematicPalette)"
+            )
+            if mentions > reads { wrote.insert(file) }
         }
         #expect(named == [resolver])
         #expect(wrote == writers)

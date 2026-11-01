@@ -48,7 +48,7 @@ struct HomeCardGapsTile: View {
             border.enabled
             && (focused || border.unfocusedEnabled)
         RoundedRectangle(cornerRadius: 4)
-            .fill(palette?.base ?? SettingsTheme.card)
+            .fill((palette ?? .unresolved).base)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .fill(

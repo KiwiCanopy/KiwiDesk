@@ -75,6 +75,8 @@ enum SettingsTheme {
     static let lightMark = token(light: 0x6E_7C_71, dark: 0x6E_7C_71)
     /// Captions, readouts and fallback ink on the light plate.
     static let lightInk = token(light: 0x2B_3B_31, dark: 0x2B_3B_31)
+    /// The brand's marks on the light plate, 3:1 or more on it.
+    static let lightAccent = token(light: 0x4F_7A_2B, dark: 0x4F_7A_2B)
 
     // MARK: - Keyboard preview (#678)
 
@@ -84,8 +86,8 @@ enum SettingsTheme {
         dark: 0x37_46_3B
     )
 
-    /// A bound key's glyph on the accent fill: its own token,
-    /// since the plate beneath it now changes (#2859).
+    /// A bound key's glyph on the accent fill, fixed whatever
+    /// plate the board takes (#2859).
     static let keyGlyph = token(light: 0x12_25_1A, dark: 0x12_25_1A)
 
     /// Dashed warning ring on free key macOS owns under shown modifier

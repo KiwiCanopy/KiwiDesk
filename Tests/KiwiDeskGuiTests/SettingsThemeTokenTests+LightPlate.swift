@@ -34,8 +34,14 @@ extension SettingsThemeTokenTests {
         Pin("lightFrame", 0xA6_B0_A6, 0xA6_B0_A6, SettingsTheme.lightFrame),
         Pin("lightMark", 0x6E_7C_71, 0x6E_7C_71, SettingsTheme.lightMark),
         Pin("lightInk", 0x2B_3B_31, 0x2B_3B_31, SettingsTheme.lightInk),
-        // The bound key's glyph on the accent: its own token now
-        // the plate beneath the board can change.
+        Pin(
+            "lightAccent",
+            0x4F_7A_2B,
+            0x4F_7A_2B,
+            SettingsTheme.lightAccent
+        ),
+        // A bound key's glyph on the accent fill, fixed whatever
+        // plate the board takes.
         Pin("keyGlyph", 0x12_25_1A, 0x12_25_1A, SettingsTheme.keyGlyph),
     ]
 }

@@ -75,7 +75,12 @@ public enum ColorVision {
     /// #2859), not WCAG's linear `luminance`.
     public static func luma(_ hex: String) -> Double? {
         guard let c = components(hex) else { return nil }
-        return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+        return luma(c.r, c.g, c.b)
+    }
+
+    /// The one copy of the Rec. 709 weights `luma` applies.
+    static func luma(_ r: Double, _ g: Double, _ b: Double) -> Double {
+        0.2126 * r + 0.7152 * g + 0.0722 * b
     }
 
     /// How far `top`, laid at its own alpha over the opaque
@@ -88,7 +93,7 @@ public enum ColorVision {
     ) -> Double? {
         guard let c = HexColor.parse(top), let floor = luma(ground)
         else { return nil }
-        let lum = 0.2126 * c.red + 0.7152 * c.green + 0.0722 * c.blue
+        let lum = luma(c.red, c.green, c.blue)
         let effective = c.alpha * lum + (1 - c.alpha) * floor
         return abs(effective - floor)
     }

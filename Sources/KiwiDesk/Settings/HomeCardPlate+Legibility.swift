@@ -33,6 +33,14 @@ extension HomeCardPlate {
         return distance >= legibilityFloor
     }
 
+    /// The colour that marks focus on the plate: the ring, or the
+    /// active item colour while borders are off and no ring draws.
+    static func focusHex(_ settings: TilingSettings) -> String {
+        settings.borderStyle.enabled
+            ? settings.borderStyle.focusedColor
+            : settings.kiwishelf.activeItemColor
+    }
+
     /// Whether a look holds the light plate (#2859 ruling 1): its
     /// item ink clears the floor on its own bar fill over the
     /// plate, and its focus ring clears the floor, out-contrasts
@@ -41,7 +49,7 @@ extension HomeCardPlate {
     /// never swapped.
     static func holdsLightPlate(_ settings: TilingSettings) -> Bool {
         let shelf = settings.kiwishelf
-        let ring = settings.borderStyle.focusedColor
+        let ring = focusHex(settings)
             .trimmingCharacters(in: .whitespaces)
         guard
             let bar = ColorVision.composite(
