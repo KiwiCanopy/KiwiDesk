@@ -50,7 +50,14 @@ extension OnboardingView {
             .fixedSize(horizontal: false, vertical: true)
         } else {
             VStack(alignment: .leading, spacing: 4) {
-                ForEach(rows) { row(for: $0) }
+                ForEach(rows) { family in
+                    // KiwiHub's row is set apart by a plain rule,
+                    // never a colour (#2877).
+                    if family.isGateway {
+                        Divider().padding(.vertical, 4)
+                    }
+                    row(for: family)
+                }
             }
         }
     }

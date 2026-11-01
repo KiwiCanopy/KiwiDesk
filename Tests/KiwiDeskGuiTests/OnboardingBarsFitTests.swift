@@ -64,6 +64,7 @@ struct OnboardingBarsFitTests {
         defer { LocalizationManager.shared.select("en") }
         let locales = ["en"] + LocalizationManager.shared.available
         #expect(locales.count > 5, "too few catalogs measured")
+        var tallest: (height: CGFloat, at: String) = (0, "")
         for base in ShortcutBase.allCases {
             for locale in locales {
                 LocalizationManager.shared.select(locale)
@@ -73,8 +74,17 @@ struct OnboardingBarsFitTests {
                 #expect(bars <= Self.budget, "bars page, \(at): \(bars)")
                 let keys = height(KeysPage(model: model))
                 #expect(keys <= Self.budget, "keys page, \(at): \(keys)")
+                for (page, h) in [("bars", bars), ("keys", keys)]
+                where h > tallest.height {
+                    tallest = (h, "\(page) page, \(at)")
+                }
             }
         }
+        // The slack the window's height is retuned from (#2877).
+        print(
+            "OnboardingBarsFitTests: tallest \(tallest.at) "
+                + "\(tallest.height) of \(Self.budget)"
+        )
     }
 
     /// The keys step alone, outside the root view's fixed frame.
