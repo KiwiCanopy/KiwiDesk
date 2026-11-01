@@ -18,6 +18,7 @@ extension KiwiCore {
         }
         // A window this press's twin already asked for is on its way.
         if arrivals.livePocketClaim(for: bundleID, at: wallClock()) != nil {
+            onLog("pocket: \(bundleID)'s window is still on its way")
             return .ok()
         }
         let keyed = pocketAppRows().contains(bundleID)

@@ -192,10 +192,11 @@ extension KiwiCore {
         // Placed ahead of the activation below, which reads it.
         placeUnplacedSpaces()
         restore(holds.snapshot)
-        reconcilePocketKeys()  // #2612: a row gone since the capture
         settleHeldSpacesAtBoot(holds)
         adoptCarriedPartitioning(from: session)
         activateSpaceOfFocusedWindow()
+        // A row gone since the capture unties onto that Space (#2612).
+        reconcilePocketKeys()
         seedStartupFocus()
         spaceSwitchRetile(asSwitch: false)
         emitSpaceChange()

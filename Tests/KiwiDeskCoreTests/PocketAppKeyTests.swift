@@ -34,17 +34,24 @@ struct PocketAppKeyTests {
         #expect(fixture.owner(of: mine) == Fixture.app)
     }
 
-    @Test("a candidate keeps its rule and earns no follow")
-    func candidateKeepsItsRule() {
+    @Test("a candidate keeps its rule, earns no follow, and comes out")
+    func candidateKeepsItsRule() async throws {
         let fixture = Fixture(appRule: SpaceID("2"))
         fixture.core.state.workspaces.ensureSpace(SpaceID("2"))
         fixture.core.windowCreates.isLive = true
         fixture.press()
         fixture.core.oweLaunchFollow(Fixture.app)
         fixture.arrive(9)
-        let workspaces = fixture.core.state.workspaces
-        #expect(workspaces.space(of: mine) == SpaceID("2"))
-        #expect(workspaces.activeSpace != SpaceID("2"))
+        let active = fixture.core.state.workspaces.activeSpace
+        #expect(fixture.core.state.workspaces.space(of: mine) == SpaceID("2"))
+        #expect(active != SpaceID("2"))
+        // Its create lands: it comes out where the user is.
+        fixture.core.windowServerChanged(.created, id: mine)
+        await fixture.core.deferred.task(for: .arrivalCreated)?.value
+        let window = try #require(fixture.core.state.windows[mine])
+        #expect(fixture.core.state.renderSpace(of: window) == active)
+        #expect(window.isFloating)
+        #expect(fixture.core.state.workspaces.activeSpace == active)
     }
 
     @Test("a window the boot adopts is never claimed")

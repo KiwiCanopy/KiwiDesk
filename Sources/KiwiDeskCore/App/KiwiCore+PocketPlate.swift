@@ -76,9 +76,9 @@ extension KiwiCore {
     /// window, which no row can name, counts for nothing, and an
     /// app's own pocket window is its key's alone (#2612 ▸ 11).
     var pocketPlateWindows: [WindowID] {
-        state.pocketedWindows.filter {
-            state.windows[$0] != nil && state.pocketKeyOwner(of: $0) == nil
-        }
+        state.generalPocket.filter {
+            $0.phase == .pocketed && state.windows[$0.window] != nil
+        }.map(\.window)
     }
 
     /// What each display's pocket draws; empty while none is on

@@ -18,6 +18,7 @@ final class PocketAppFixture {
     var visible = 0
     var minimized: [WindowID] = []
     var pressAnswers = true
+    var activated: [pid_t] = []
 
     init(row: Bool = true, appRule: SpaceID? = nil) {
         core = makeTestCore(
@@ -50,7 +51,9 @@ final class PocketAppFixture {
         core.openOrFocus.census = { [unowned self] _ in
             .init(visible: visible, minimized: minimized)
         }
-        core.openOrFocus.activate = { _ in }
+        core.openOrFocus.activate = { [unowned self] in
+            activated.append($0)
+        }
         core.windowActions.newWindow = { [unowned self] pid, done in
             pressed.append(pid)
             done(pressAnswers)
@@ -94,18 +97,17 @@ final class PocketAppFixture {
         core.execute("pocket_app", args: [.string(bundleID)])
     }
 
-    /// The app's window arriving.
-    func arrive(_ id: UInt32) {
-        core.eventLoop.onEvent(
-            .windowCreated(
-                ManagedWindow(
-                    id: WindowID(id),
-                    pid: Self.pid,
-                    appName: "App",
-                    appBundleID: Self.app,
-                    frame: CGRect(x: 200, y: 200, width: 500, height: 300)
-                )
-            )
+    /// The app's window arriving, in native full screen where
+    /// `fullscreen` says.
+    func arrive(_ id: UInt32, fullscreen: Bool = false) {
+        var window = ManagedWindow(
+            id: WindowID(id),
+            pid: Self.pid,
+            appName: "App",
+            appBundleID: Self.app,
+            frame: CGRect(x: 200, y: 200, width: 500, height: 300)
         )
+        window.isFullscreen = fullscreen
+        core.eventLoop.onEvent(.windowCreated(window))
     }
 }

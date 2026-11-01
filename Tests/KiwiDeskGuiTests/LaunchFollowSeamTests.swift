@@ -191,10 +191,11 @@ struct LaunchFollowSeamTests {
     /// (the user moved on), the Desktop switch (the windows it
     /// reveals are not a launch's), a refused New Window, which
     /// opened nothing (#1518), and a Pocket key's claim, whose
-    /// window stays where the user is (#2612). A fourth would be a new moment
-    /// ruled "not a launch", which is the judgement this rests on.
-    @Test("the debt is retired by an activation, a switch, a refusal")
-    func twoRetires() throws {
+    /// window stays where the user is (#2612). A fifth would be a
+    /// new moment ruled "not a launch", which is the judgement this
+    /// rests on.
+    @Test("the debt is retired by an activation, a switch, a refusal, a claim")
+    func fourRetires() throws {
         let sites = try SourceScan.identifierSites(
             of: "launchFollow.forget(",
             under: Self.core
