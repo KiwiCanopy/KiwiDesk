@@ -14,22 +14,25 @@ import Testing
 /// was red-proved against, 2026-08-02).
 extension SourceScan {
     /// The body of `function` in `file` under
-    /// `Sources/KiwiDeskCore/<directory>`, or "" with a
-    /// recorded issue — so a needle asserting on the result
-    /// fails loudly rather than passing on an empty scan.
+    /// `<root>/<directory>`, or "" with a recorded issue — so a
+    /// needle asserting on the result fails loudly rather than
+    /// passing on an empty scan. `label` picks an overload by its
+    /// first argument label (`show(beforeFront:)`).
     static func functionBody(
         of function: String,
+        labeled label: String = "",
         in file: String,
         under directory: String,
+        root: String = "Sources/KiwiDeskCore",
         _ path: StaticString = #filePath
     ) throws -> String {
         let url = SourceScan.repoRoot(from: "\(path)")
-            .appendingPathComponent("Sources/KiwiDeskCore")
+            .appendingPathComponent(root)
             .appendingPathComponent(directory)
             .appendingPathComponent(file)
         let source = try SourceScan.strippedSource(at: url)
         let characters = Array(source)
-        let marker = Array("func \(function)(")
+        let marker = Array("func \(function)(\(label)")
         guard
             let start = (0...(characters.count - marker.count))
                 .first(where: { index in
@@ -46,7 +49,7 @@ extension SourceScan {
         // opener, and a signature carrying a brace (a defaulted
         // closure parameter) would otherwise be captured as the
         // body.
-        var cursor = start + marker.count - 1
+        var cursor = start + "func \(function)".count
         guard
             SourceScan.balanced(
                 characters,

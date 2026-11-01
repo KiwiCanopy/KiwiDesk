@@ -254,10 +254,13 @@ final class SettingsWindowController: NSObject, NSWindowDelegate {
 
     /// Shows the dashboard window: a fresh open on the stored
     /// root's top, an open one where it is
-    /// (`SettingsModel.prepareToShow`, #1970). `beforeFront` edits
-    /// the draft after that reload and before the window draws, so
-    /// its first frame already shows the edit (#2863).
-    func show(beforeFront: () -> Void = {}) {
+    /// (`SettingsModel.prepareToShow`, #1970).
+    func show() { show(beforeFront: {}) }
+
+    /// `show()`, `beforeFront` editing the draft after that reload
+    /// and before the window draws, so its first frame already
+    /// shows the edit (#2863).
+    func show(beforeFront: () -> Void) {
         model.prepareToShow(windowShown: isShown)
         beforeFront()
         if let window {
