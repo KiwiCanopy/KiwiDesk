@@ -58,6 +58,9 @@ count in this sentence for the next author to falsify.
    custom properties, so rule 1's scan of `site/src` never meets
    them and needs no exemption; a look color written into source
    would be a brand-layer question like any other hex.
+10. Every indexable page carries a link-preview card that exists,
+   is the size its tags state, and is its page family's card in
+   the page's own language, with that card's catalog alt text.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -1765,6 +1768,140 @@ def check_looks_teaser(dist: pathlib.Path) -> None:
           f"{3 * len(LANDINGS)} landing page(s)")
 
 
+# The page families that wear their own link-preview card, by the
+# route under each locale's root; every other page wears the
+# banner. `site/src/lib/ogCard.ts` is the page side of this map.
+OG_FAMILY_ROUTES = {"/looks/": "looks", "/compare/": "compare"}
+OG_DEFAULT_FAMILY = "banner"
+OG_SINGLE_TAGS = (
+    "og:image", "og:image:width", "og:image:height", "og:image:alt",
+    "twitter:card", "twitter:image", "twitter:image:alt",
+)
+
+
+def jpeg_size(path: pathlib.Path) -> tuple[int, int] | None:
+    """(width, height) read off a JPEG's SOF marker, or None."""
+    data = path.read_bytes()
+    if data[:2] != b"\xff\xd8":
+        return None
+    i = 2
+    while i + 9 < len(data):
+        if data[i] != 0xFF:
+            return None
+        marker = data[i + 1]
+        length = int.from_bytes(data[i + 2:i + 4], "big")
+        if marker in (0xC0, 0xC1, 0xC2):
+            height = int.from_bytes(data[i + 5:i + 7], "big")
+            width = int.from_bytes(data[i + 7:i + 9], "big")
+            return width, height
+        i += 2 + length
+    return None
+
+
+def check_og_images(dist: pathlib.Path) -> None:
+    """Every indexable page carries its own link-preview card.
+
+    A share card fails silently: a page with no `og:image`, or one
+    pointing at another family's or another language's card, still
+    builds green and only looks wrong in someone else's chat. So
+    each built page without a robots noindex owes exactly one each
+    of `OG_SINGLE_TAGS`; the image is on the published host, exists
+    in `dist`, and is as large as its width/height tags say; the
+    twitter tags repeat the og ones; the file is its family's card
+    in the page's own `<html lang>` (`og-looks.de.*.jpg` on
+    /de/looks/); and the alt is that card's catalog string. The
+    families are read off `ogCard.ts`, so a family the helper gains
+    without a route here reds instead of being skipped.
+    """
+    lib = source_without_comments(REPO / "site/src/lib/ogCard.ts")
+    block = re.search(r"const cards[^=]*=\s*\{(.*?)\n\};", lib, re.S)
+    if block is None:
+        fail("could not read the card map in site/src/lib/ogCard.ts")
+    families = set(re.findall(r"^\s*(\w+):\s*\{", block.group(1), re.M))
+    routed = set(OG_FAMILY_ROUTES.values()) | {OG_DEFAULT_FAMILY}
+    if families != routed:
+        fail(f"ogCard.ts names card families {sorted(families)}, but "
+             f"check_og_images routes {sorted(routed)}; give a new "
+             "family its route in OG_FAMILY_ROUTES")
+    locales = sorted(p.stem for p in (REPO / "site/src/i18n").glob("*.json"))
+    catalogs = {
+        lang: json.loads(
+            (REPO / f"site/src/i18n/{lang}.json").read_text("utf-8"))
+        for lang in locales
+    }
+    host = canonical_host()
+
+    class Head(html.parser.HTMLParser):
+        def __init__(self) -> None:
+            super().__init__(convert_charrefs=True)
+            self.lang = ""
+            self.meta: dict[str, list[str]] = {}
+
+        def handle_starttag(self, tag, attrs):
+            a = {k.lower(): v or "" for k, v in attrs}
+            if tag == "html":
+                self.lang = a.get("lang", "")
+            elif tag == "meta":
+                key = a.get("property") or a.get("name") or ""
+                self.meta.setdefault(key, []).append(a.get("content", ""))
+
+    seen: set[tuple[str, str]] = set()
+    checked = 0
+    for page in sorted(dist.rglob("*.html")):
+        head = Head()
+        head.feed(page.read_text(encoding="utf-8"))
+        where = str(page.relative_to(dist))
+        if any("noindex" in c for c in head.meta.get("robots", [])):
+            continue
+        checked += 1
+        for name in OG_SINGLE_TAGS:
+            count = len(head.meta.get(name, []))
+            if count != 1:
+                fail(f"{where}: carries {count} {name} tag(s), not one")
+        tag = {name: head.meta[name][0] for name in OG_SINGLE_TAGS}
+        if tag["twitter:card"] != "summary_large_image":
+            fail(f"{where}: twitter:card is {tag['twitter:card']!r}")
+        if tag["twitter:image"] != tag["og:image"]:
+            fail(f"{where}: twitter:image {tag['twitter:image']} is not "
+                 f"og:image {tag['og:image']}")
+        if tag["twitter:image:alt"] != tag["og:image:alt"]:
+            fail(f"{where}: twitter:image:alt differs from og:image:alt")
+        lang = head.lang
+        if lang not in catalogs:
+            fail(f"{where}: <html lang={lang!r}> is not a site locale")
+        sub = "/" + where.removesuffix("index.html")
+        if lang != "en" and sub.startswith(f"/{lang}/"):
+            sub = sub[len(lang) + 1:]
+        family = OG_FAMILY_ROUTES.get(sub, OG_DEFAULT_FAMILY)
+        url = urllib.parse.urlparse(tag["og:image"])
+        if url.scheme != "https" or url.netloc != host:
+            fail(f"{where}: og:image {tag['og:image']} is not an "
+                 f"absolute URL on {host}")
+        image = dist / urllib.parse.unquote(url.path).lstrip("/")
+        if not image.is_file():
+            fail(f"{where}: og:image {url.path} is not in the build")
+        stem = f"og-{family}" + ("" if lang == "en" else f".{lang}")
+        if not re.fullmatch(re.escape(stem) + r"\.[\w-]+\.jpg", image.name):
+            fail(f"{where}: wears {image.name}, not the {family} card "
+                 f"in {lang} ({stem}.jpg)")
+        size = jpeg_size(image)
+        stated = (tag["og:image:width"], tag["og:image:height"])
+        if size is None or tuple(map(str, size)) != stated:
+            fail(f"{where}: og:image:width/height say {'x'.join(stated)} "
+                 f"but {image.name} is {size}")
+        want_alt = catalogs[lang].get(f"og_alt_{family}", "")
+        if not want_alt or tag["og:image:alt"] != want_alt:
+            fail(f"{where}: og:image:alt is not the og_alt_{family} "
+                 f"string of the {lang} catalog")
+        seen.add((family, lang))
+    # Docs are English-only, so only the banner owes every locale.
+    owed = {(f, lang) for f in families for lang in locales}
+    if not owed <= seen:
+        fail(f"no built page wears {sorted(owed - seen)}")
+    print(f"og images: {checked} indexable page(s) wear their family's "
+          f"card in their own language, {len(owed)} card(s) in use")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1794,6 +1931,7 @@ def main() -> None:
     check_voices_rendered(dist)
     check_looks_rendered(dist)
     check_looks_teaser(dist)
+    check_og_images(dist)
 
 
 if __name__ == "__main__":
