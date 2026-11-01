@@ -9,7 +9,8 @@ import KiwiDeskCore
 /// method composes, when every key is the composition's.
 final class JumpPanel: NSPanel {
     var onCancel: () -> Void = {}
-    var onKey: (JumpKey) -> Void = { _ in }
+    /// A key press, and whether it is the key held down (#2897).
+    var onKey: (JumpKey, _ repeated: Bool) -> Void = { _, _ in }
     var onModifiers: (NSEvent.ModifierFlags) -> Void = { _ in }
     /// The scope the keys are read for (#2229).
     var scope: () -> JumpScope = { .windows }
@@ -55,7 +56,7 @@ final class JumpPanel: NSPanel {
                 keys: keys()
             )
         {
-            onKey(key)
+            onKey(key, event.isARepeat)
             return true
         }
         return super.performKeyEquivalent(with: event)
@@ -64,7 +65,7 @@ final class JumpPanel: NSPanel {
     }
 
     override func cancelOperation(_ sender: Any?) {
-        onKey(.escape)
+        onKey(.escape, false)
     }
 
     /// ⌘W closes like Esc on an empty field.
@@ -95,7 +96,7 @@ final class JumpPanel: NSPanel {
                     keys: keys()
                 )
             {
-                onKey(key)
+                onKey(key, event.isARepeat)
                 return
             }
         default:

@@ -6181,6 +6181,13 @@ under **Pocket**.
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
 
+:::unreleased
+**↑** on the first row selects the last, and **↓** on the last
+selects the first. Holding the key down stops at the end instead,
+so the list never runs past it; press again to go round. **Page
+Up** and **Page Down** stop at the ends.
+:::
+
 A window in native full screen is listed, and Return activates its
 app rather than switching to its full-screen Space.
 
@@ -6214,6 +6221,7 @@ Keys on this side:
   line; **↑** and **↓** move between lines and keep the position,
   clamped to a shorter line. A line longer than the panel scrolls
   sideways.
+
 - Typing narrows all three lines, dimming the rest, and selects
   the first match.
 - **Return** applies the selected item and closes KiwiHub.
@@ -6223,6 +6231,12 @@ Keys on this side:
 - **⌘,** opens the Settings page of the line the selection is on;
   **⌘S** keeps the layouts in the profile, as Keep in a Space's
   Layout menu does.
+
+:::unreleased
+Past the end of a line, **←** and **→** go round to its other end,
+and past the last line **↓** comes back to the first, **↑** the
+other way. Holding the key down stops at the end instead.
+:::
 
 On every side:
 

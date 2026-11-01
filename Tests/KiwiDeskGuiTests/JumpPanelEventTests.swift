@@ -10,7 +10,11 @@ import Testing
 @Suite("Jump to window panel events")
 @MainActor
 struct JumpPanelEventTests {
-    private func keyDown(_ code: UInt16, _ characters: String) -> NSEvent {
+    private func keyDown(
+        _ code: UInt16,
+        _ characters: String,
+        repeated: Bool = false
+    ) -> NSEvent {
         NSEvent.keyEvent(
             with: .keyDown,
             location: .zero,
@@ -20,7 +24,7 @@ struct JumpPanelEventTests {
             context: nil,
             characters: characters,
             charactersIgnoringModifiers: characters,
-            isARepeat: false,
+            isARepeat: repeated,
             keyCode: code
         )!
     }
@@ -44,17 +48,66 @@ struct JumpPanelEventTests {
     func panelReadsItsKeys() {
         let (panel, _) = panel()
         var keys: [JumpKey] = []
-        panel.onKey = { keys.append($0) }
+        panel.onKey = { key, _ in keys.append(key) }
         panel.sendEvent(keyDown(36, "\r"))
         panel.sendEvent(keyDown(125, ""))
         #expect(keys == [.pick(moveHere: false), .step(1)])
+    }
+
+    @Test("a held key reaches the model as held (#2897)")
+    func repeatIsCarried() {
+        let (panel, _) = panel()
+        var held: [Bool] = []
+        panel.onKey = { _, repeated in held.append(repeated) }
+        panel.sendEvent(keyDown(125, ""))
+        panel.sendEvent(keyDown(125, "", repeated: true))
+        #expect(held == [false, true])
+    }
+
+    @Test("a held ⌘ arrow reaches the model as held (#2897)")
+    func commandRepeatIsCarried() {
+        let (panel, _) = panel()
+        panel.keyedForTesting = true
+        var held: [Bool] = []
+        panel.onKey = { _, repeated in held.append(repeated) }
+        for repeated in [false, true] {
+            let down = NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: .command,
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                characters: "",
+                charactersIgnoringModifiers: "",
+                isARepeat: repeated,
+                keyCode: 125
+            )!
+            #expect(panel.performKeyEquivalent(with: down))
+        }
+        #expect(held == [false, true])
+    }
+
+    /// The controller is the one wiring from panel to model; a
+    /// panel test replaces `onKey`, so only this sees it (#2897).
+    @Test("the controller hands the held flag to the model")
+    func controllerPassesTheRepeat() throws {
+        let body = try SourceScan.functionBody(
+            of: "wire",
+            in: "JumpPanelController.swift",
+            under: "Jump",
+            root: "Sources/KiwiDesk"
+        )
+        #expect(body.contains("handle($0, repeated: $1)"))
+        // A second assignment would replace the first one.
+        #expect(body.components(separatedBy: "onKey =").count == 2)
     }
 
     @Test("while an input method composes, every key is the field's")
     func compositionKeepsItsKeys() {
         let (panel, field) = panel()
         var keys: [JumpKey] = []
-        panel.onKey = { keys.append($0) }
+        panel.onKey = { key, _ in keys.append(key) }
         field.setMarkedText(
             "にほ",
             selectedRange: NSRange(location: 2, length: 0),
@@ -94,7 +147,7 @@ struct JumpPanelEventTests {
         let (panel, _) = panel()
         panel.keyedForTesting = true
         var keys: [JumpKey] = []
-        panel.onKey = { keys.append($0) }
+        panel.onKey = { key, _ in keys.append(key) }
         let comma = NSEvent.keyEvent(
             with: .keyDown,
             location: .zero,
@@ -158,7 +211,7 @@ struct JumpPanelEventTests {
         panel.keyedForTesting = true
         panel.scope = { .windows }
         var keys: [JumpKey] = []
-        panel.onKey = { keys.append($0) }
+        panel.onKey = { key, _ in keys.append(key) }
         let old = NSApplication.shared.mainMenu
         NSApplication.shared.mainMenu = bar
         defer { NSApplication.shared.mainMenu = old }

@@ -260,7 +260,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
     }
 
     private func wire(_ model: JumpModel, _ panel: JumpPanel) {
-        panel.onKey = { [weak model] in model?.handle($0) }
+        panel.onKey = { [weak model] in
+            model?.handle($0, repeated: $1)
+        }
         panel.onModifiers = { [weak model] in
             model?.noteModifiers($0)
         }

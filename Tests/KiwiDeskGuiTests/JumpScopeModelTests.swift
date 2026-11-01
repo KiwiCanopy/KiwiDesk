@@ -59,23 +59,44 @@ struct JumpScopeModelTests {
         return model
     }
 
+    @Test("View wraps a line and the lines on a fresh press (#2897)")
+    func viewWrapsOnAFreshPress() {
+        let model = model()
+        model.setScope(.view)
+        for _ in 0..<12 { model.handle(.side(-1), repeated: true) }
+        let first = model.view?.selected?.pick
+        // Held at the line's start: a further held press stays.
+        model.handle(.side(-1), repeated: true)
+        #expect(model.view?.selected?.pick == first)
+        model.handle(.side(-1), repeated: false)
+        #expect(model.view?.selected?.pick != first)
+        model.handle(.side(1), repeated: false)
+        #expect(model.view?.selected?.pick == first)
+        model.handle(.step(-1), repeated: true)
+        #expect(model.view?.selection?.line == .layout)
+        model.handle(.step(-1), repeated: false)
+        #expect(model.view?.selection?.line != .layout)
+        model.handle(.step(1), repeated: false)
+        #expect(model.view?.selection?.line == .layout)
+    }
+
     @Test("⇥ steps the sides J K L, wrapping, and clears each query")
     func tabClearsTheQuery() {
         let model = model()
         model.query = "mai"
-        model.handle(.stepScope(forward: true))
+        model.handle(.stepScope(forward: true), repeated: false)
         #expect(model.scope == .shortcuts)
         #expect(model.query == "")
         #expect(model.list.query == "")
         model.query = "flo"
-        model.handle(.stepScope(forward: true))
+        model.handle(.stepScope(forward: true), repeated: false)
         #expect(model.scope == .view)
         #expect(model.shortcuts?.query == "")
         model.query = "mon"
-        model.handle(.stepScope(forward: true))
+        model.handle(.stepScope(forward: true), repeated: false)
         #expect(model.scope == .windows)
         #expect(model.view?.query == "")
-        model.handle(.stepScope(forward: false))
+        model.handle(.stepScope(forward: false), repeated: false)
         #expect(model.scope == .view)
     }
 
@@ -89,11 +110,11 @@ struct JumpScopeModelTests {
         model.setScope(.view)
         #expect(model.scope == .view)
         #expect(model.view?.selection?.line == .layout)
-        model.handle(.pick(moveHere: false))
-        model.handle(.quick(0, moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
+        model.handle(.quick(0, moveHere: false), repeated: false)
         #expect(applied.isEmpty)
-        model.handle(.step(1))
-        model.handle(.pick(moveHere: false))
+        model.handle(.step(1), repeated: false)
+        model.handle(.pick(moveHere: false), repeated: false)
         #expect(applied == [.profile("Dual")])
     }
 
@@ -105,16 +126,16 @@ struct JumpScopeModelTests {
         model.onApplyView = { applied.append($0) }
         model.onClose = { closed += 1 }
         model.setScope(.view)
-        model.handle(.pick(moveHere: false))
-        model.handle(.quick(0, moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
+        model.handle(.quick(0, moveHere: false), repeated: false)
         // ⇧⌘ digits do nothing on this side (ruling 4).
-        model.handle(.quick(1, moveHere: true))
+        model.handle(.quick(1, moveHere: true), repeated: false)
         #expect(applied == [.layout(.grid), .layout(LayoutMode.allCases[0])])
         model.query = "mon"
-        model.handle(.escape)
+        model.handle(.escape, repeated: false)
         #expect(model.query == "")
         #expect(closed == 0)
-        model.handle(.escape)
+        model.handle(.escape, repeated: false)
         #expect(closed == 1)
     }
 
@@ -124,10 +145,10 @@ struct JumpScopeModelTests {
         var applied: [ViewPickList.Pick] = []
         model.onApplyView = { applied.append($0) }
         model.setScope(.view)
-        model.handle(.step(1))
-        model.handle(.quick(1, moveHere: false))
-        model.handle(.step(1))
-        model.handle(.pick(moveHere: false))
+        model.handle(.step(1), repeated: false)
+        model.handle(.quick(1, moveHere: false), repeated: false)
+        model.handle(.step(1), repeated: false)
+        model.handle(.pick(moveHere: false), repeated: false)
         // ↓ keeps the column, clamped (#2309 ruling 11) to the
         // last chip a digit reaches, never New Lens… (#2359).
         #expect(applied == [.profile("Studio"), .vision(lens: nil)])
@@ -139,18 +160,18 @@ struct JumpScopeModelTests {
         let armed = model(keepArmed: true)
         armed.onKeep = { kept += 1 }
         armed.setScope(.view)
-        armed.handle(.keep)
+        armed.handle(.keep, repeated: false)
         #expect(kept == 1)
         let saved = model(keepArmed: false)
         saved.onKeep = { kept += 1 }
         saved.setScope(.view)
-        saved.handle(.keep)
+        saved.handle(.keep, repeated: false)
         #expect(kept == 1)
         // No profile, no Keep, whatever the drift.
         let unprofiled = model(keepArmed: true, profile: nil)
         unprofiled.onKeep = { kept += 1 }
         unprofiled.setScope(.view)
-        unprofiled.handle(.keep)
+        unprofiled.handle(.keep, repeated: false)
         #expect(kept == 1)
     }
 
@@ -164,12 +185,12 @@ struct JumpScopeModelTests {
             )
         }
         model.setScope(.view)
-        model.handle(.side(1))
-        model.handle(.settings)
-        model.handle(.step(1))
-        model.handle(.settings)
-        model.handle(.step(1))
-        model.handle(.settings)
+        model.handle(.side(1), repeated: false)
+        model.handle(.settings, repeated: false)
+        model.handle(.step(1), repeated: false)
+        model.handle(.settings, repeated: false)
+        model.handle(.step(1), repeated: false)
+        model.handle(.settings, repeated: false)
         let grid = LayoutMode.allCases.firstIndex(of: .grid)!
         #expect(
             landed == [

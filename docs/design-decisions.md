@@ -13698,6 +13698,21 @@ lines need no Space.
 `ViewPickListTests`, `ViewPickItemsTests` and
 `JumpScopeModelTests` hold it.
 
+**A KiwiHub list wraps on a fresh press and stops on a held key
+(#2897, owner ruling 2026-11-01).** This reverses #1875's
+"↑/↓ move the selection without wrapping". Spotlight and Finder
+lists clamp, but menus, ⌘Tab and the launchers KiwiHub sits
+closest to go round, and a user reaching for the last window
+from the first should not have to walk the list. What clamping
+protected is a held key: auto-repeat would run past the end and
+round again before the user saw it. So a key held down stops at
+the end, and a fresh press there wraps. Page Up and Page Down
+stay clamped, since a page is a jump, not a step. The View side
+takes the same rule along a line and across its lines, keeping
+the position (#2309 ruling 11). `JumpListTests`,
+`ViewPickListTests`, `JumpModelTests`, `JumpScopeModelTests` and
+`JumpPanelEventTests` hold it.
+
 **KiwiHub's KiwiVision line has no Off chip: the item already on
 turns KiwiVision off (#2103 rulings 55–57, owner 2026-10-16).**
 Every other chip on the line turns something on, and
