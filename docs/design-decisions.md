@@ -3903,7 +3903,6 @@ and the strip is cut around it, and a follow's moved window,
 already on screen in the Space it goes to, travels with the user
 uncovered.
 
-:::unreleased
 **Amended: every plate carries its icon** (#2837, owner,
 2026-10-31). A pile is any chain of plates overlapping by more than
 a point, so a float grazing several tiles joined them into one pile
@@ -3915,7 +3914,6 @@ real pile is now only the fallback for a region too small for one
 window, where a few staggered icons are accepted. A plate wholly
 behind another is still dropped, and the pile stays the glass
 container.
-:::
 
 *Its own pace (#1931).* `space.slide_duration` is the strip's
 spring response, and only the strip's travel follows it; its
@@ -6149,7 +6147,6 @@ that no key can bring back. An update's in-place relaunch carries
 the slot (`StateSnapshot.pocket`), since that restart is meant to
 be invisible.
 
-:::unreleased
 ### The pocket belongs to KiwiShelf (#2678)
 
 **[Rationale]**
@@ -6310,7 +6307,6 @@ drop target by size the same way. At rest the edge goes, since an
 edge standing on the screen read as a border. A hover ring in the
 highlight colour was weighed and set aside, since it reads like the
 focused-window ring; a coloured glow is the focused ring's alone.
-:::
 
 ### A window changing state animates under its own switch (#2676)
 
@@ -8099,7 +8095,6 @@ the improvements the redesign exists for, or — the inverse failure
 which is the half that stays bound. (Owner ruling 2026-08-02, in
 chat.)
 
-:::unreleased
 ### A value menu stays the platform's; KiwiDesk draws the controls around it (#2724, #2726)
 
 **[Principle]**
@@ -8152,7 +8147,6 @@ What stays KiwiDesk's around the menu:
 Owner rulings 2026-10-28: the design round on a `ui-designer`
 critique and a static preview, then the pilot's outcome on the
 device.
-:::
 
 ### Wide controls share the label axis; compact ones trail (#2439)
 
@@ -10362,7 +10356,6 @@ rulings, both 2026-08-09:
   fallback rather than drawing dark-on-dark, guarded by
   `HomeCardChromeTests`.
 
-:::unreleased
 **The light plate is earned per look (#2859, owner 2026-10-31,
 replacing #786's "identical in both appearances", and amending
 its "draws in the USER's palette" and "the fold floors against
@@ -10401,7 +10394,6 @@ both modes with their focused tile in the look's focus colour;
 KiwiVision's veil stays black over either plate. Only the look
 tiles keep their own ground (`LookPlate`, #1740), since a look
 is chosen by its mood.
-:::
 
 **Settings is one surface: depth grows in place, never by a
 mode.** (#2654, owner ruling 2026-10-26, superseding #678's
@@ -10457,7 +10449,6 @@ config or profile value, so the stored-value guardrail owes it
 no `ConfigMigration`; a stray key in the app's own defaults
 domain is inert.
 
-:::unreleased
 **Simple is a second root, built from Advanced's own parts.**
 (#2737, owner ruling 2026-10-28, superseding *Settings is one
 surface* above as far as it refuses a stripped Simple; the rest
@@ -10585,7 +10576,6 @@ alone, since a landing the user followed is not the pick ruling
 modes. "Advanced" names the root alone: General's drawer
 that held the config file, backup and resets is *Files & Reset*,
 for what it holds.
-:::
 
 **A persistent statement and a transient one never share a
 property.** (#1173.) Hover shipped on the full-strength accent of
@@ -13386,12 +13376,10 @@ three reasons are answered one by one:
    may equal the highlight. A hovered row takes the hover fill
    and the Hover item colour (`PanelHighlightTests`).
 
-:::unreleased
 **The brief pocket's flying plate is one of these plates.** It
 wears the Fill under the toggle, so its panel wears the key-window
 rim too, decided from the same tint the slide's plates read
 (`BriefPocketPanelGlassTests`).
-:::
 
 **`.clear`, not `.regular`.** `.regular` is frosted, and it hides
 the rim. That, not the missing active state, is why KiwiHub and
@@ -14694,13 +14682,10 @@ border around the mark, so the stitch alone carries the inner
 contrast. No gap is cut out of the pocket around the slices: the
 owner judged it unnecessary for a pocket colour near the kiwi green.
 
-:::unreleased
 Automatic draws the slices bare too (owner, 2026-10-29, #2776): its
 outline, in the fill's ink, read as a dark ring above the pocket
 wherever the kiwis show alone, as on the pocket's handle.
-:::
 
-:::unreleased
 **Amended: a state's colour is its symbol's** (#2831, owner,
 2026-10-31). `sticky.color`, `floating.color` and `pocket.color`
 paint the glyph itself, on the window mark and on the Space Bar
@@ -14723,7 +14708,6 @@ and the half outside the window was covered by its neighbours.
 A palette's pocket colour on the neutral disc falls under 3:1 in
 most bundled palettes, as it did since #2671; the pocket's
 dashed stitch carries its inner contrast.
-:::
 
 **Floating is not self-evident, so a floating window wears an
 on-window mark** ([#1799](https://github.com/KiwiCanopy/KiwiDesk/issues/1799)).
@@ -15305,14 +15289,12 @@ broken: at the contrast-mandated lightness the 84° hue had no
 non-mossy option left, so hue moved where lightness could not. The
 bars keep 84°; only the ring leaves it.
 
-:::unreleased
 **The drag pair needs no colour-vision floor (#2797).** Origin
 and target were once the only two overlays on screen at once
 that had to separate by hue, and #511 held them to the accents'
 floor. They now separate by material and lightness (▸ Drag
 markers separate by material, not hue), which every viewer
 reads, so the floor and its guard retired with the hues.
-:::
 
 The optional **glow** inverts this trade for the
 bloom only: a halo is a fill, not a stroke, so it brightens the ring
@@ -15471,7 +15453,6 @@ list from the Home grid's card order, pinned set-equal to it by
 page above Bars would answer "App Bar" with a grid of swatches
 instead of with the App Bar's own card.
 
-:::unreleased
 **Drag & drop explains itself in plain words.** The group
 opens with one sentence on what dragging does (swap a
 window's position with another), and its two toggles say what
@@ -15479,7 +15460,6 @@ each one marks ("Show drop zone", "Mark where the window came
 from") instead of naming the marker. Section captions are a
 `SettingsSection` affordance, so other groups can adopt the same
 pattern.
-:::
 
 **[Principle] The drop target follows the cursor; a
 cross-display drop MOVES, a same-display drop swaps.** (#492.)
@@ -15621,7 +15601,6 @@ the user's choice" from the old #444/#493 record and revert this.
 
 **[Principle]**
 
-:::unreleased
 **Drag markers separate by material, not hue (#2797).** A drag
 answers one question — where will this window land — so the
 target is the marker on by default: an untinted frosted plate
@@ -15668,7 +15647,6 @@ over a bar or the pocket — a flat drop zone at the bars' level
 covered the pocket's handle (2026-10-29). Over the pocket the
 drop zone stands down and only the pocket lights, since the drop
 goes there.
-:::
 
 **[Trade-off]**
 
@@ -15755,7 +15733,6 @@ ghost and the drop zone store no width or radius of their own
 question once, in a card above the sections that draw the
 strokes.
 
-:::unreleased
 **The drag markers keep the corner style alone (#2797).** Their
 lines are part of a fixed design — the ghost's two-tone outline,
 the drop zone's 1 pt hairline rim — that no setting reaches, so no second answer
@@ -15763,7 +15740,6 @@ exists to disagree with the ring's, and the width question is the
 ring's alone. The corner style still reaches them, because a
 marker traces the slot a window will fill and the window's corners
 are the border's.
-:::
 
 The rejected shape is a **Use one width for all borders** toggle
 over two masters, with the per-stroke sliders left on screen and
@@ -15825,7 +15801,6 @@ decided, so a stored value reads as it did.
 
 **[Rationale]**
 
-:::unreleased
 **Both drag markers are drawn inside their slot, with no
 alignment to set** (#754, #2797). The markers exist to answer
 one question — where will this window land. Inside, the marker's
@@ -15837,7 +15812,6 @@ the markers do not share — it surrounds a real window whose
 pixels must not be covered — so "match the ring" copies its
 result without its reason. Inside also survives every gap:
 adjacent markers sit flush and both stay wholly visible.
-:::
 
 ### App Bar
 
@@ -16262,7 +16236,6 @@ information and keep paying the area). An update changes nothing
 a user sees: a bar stored on becomes `always`, one stored off
 `hidden`.
 
-:::unreleased
 *Amended* (owner, 2026-10-29, #2784): an edge where the pocket's
 handle rests keeps the handle's strip by the same rule — the
 outer margin, the handle's depth and the inner margin — so "a
@@ -16278,7 +16251,6 @@ stands
 only for a drag or a put-in or take-out reserves nothing, so
 pocketing never retiles the Space, and the bars' `reserve` switch
 on that edge still turns the strip off.
-:::
 
 A fresh install's starter takes `auto` (#2515), and only beside
 the welcome tour's bars step, which shows what Auto does and
@@ -16424,7 +16396,6 @@ own, one value for every bar. No reveal on a Space switch: the
 dots already show the new Space. A look never carries the mode,
 which is functionality, not styling.
 
-:::unreleased
 A window drag opens an Auto Space Bar by the same push or dwell, so
 a mouse user has its Spaces as drop targets (#2795, owner ruling,
 2026-10-30). Never at the drag's start: that would slide the Space
@@ -16438,7 +16409,6 @@ aims at. A drag-born reveal
 retracts as a hover reveal does, once the pointer leaves the bar,
 rather than at the drop: a bar held for the rest of the drag would
 sit over the windows the user drags back to.
-:::
 
 *One placement rule, asked by every picture of it.* Where each
 section sits along the edge is decided in ONE pure function,
@@ -17842,7 +17812,6 @@ default has no reference to borrow (owner, 2026-09-29).
 A look has one description, shared by the Settings card and the
 tour, Glass's included (`LookDescriptionsTests`).
 
-:::unreleased
 **[Principle] A look's picture is a desk in the look, on the
 look's own ground (#1740, owner 2026-10-30).** The look tile,
 Simple's Look line, the tour and the gallery's `preview.png` draw
@@ -17858,7 +17827,6 @@ symbols — because a desk of blank boxes reads as nobody's Mac. The
 icons are the drawing Mac's, so a gallery PNG can differ with its
 macOS version. Only the gallery picture stands the pocket; a tile
 has no room for it.
-:::
 
 **[Principle] Profiles share one look unless one keeps its own
 (#1752).** Keeping several profiles on the same look meant
@@ -18181,7 +18149,6 @@ only WHETHER, never WHICH.
 the Fill too, and with it off the rule above stands (▸ the
 shortcuts panel entry).
 
-:::unreleased
 **How see-through the glass is belongs to macOS.** (Owner and
 ui-designer, 2026-10-30.) From macOS 27, System Settings ▸
 Appearance ▸ Liquid Glass sets how clear every glass surface is —
@@ -18194,7 +18161,6 @@ would stop governing every app. A user who wants an opaque hub
 picks a look without glass. What KiwiDesk owes at the slider's
 clear end is the reading floor of its own Fill (▸ Reading
 surfaces fade above a floor), never an override of the slider.
-:::
 
 **Reduce transparency stands every glass surface down, live, and
 moves no stored value.** (#1374, owner ruling 2026-09-13.) The
@@ -18257,7 +18223,6 @@ above, and a row reading On over glass the machine is not
 drawing leaves a flip that changes nothing on screen with no
 in-app word why.
 
-:::unreleased
 **The drag markers and the sticky mark stay see-through under it,
 never made opaque** (#1620, #1621, #2797). A marker exists to be
 seen through: an opaque drop zone would hide the window a drop
@@ -18266,7 +18231,6 @@ about 22 % with its rim in place of the frosted plate, the
 ghost's outline draws as always, and the mark draws its
 `.hudWindow` badge — a disc in the colour, or the bare glyph on
 Automatic.
-:::
 
 **The panel's key did not merge with the bars'**: separate
 leaves, one row, through `SettingKey.masterWrites`. The bars
@@ -18346,15 +18310,12 @@ took nearly all the lift from the default green ring, which is
 the one most people see; it traded the look the owner approved
 at the sitting for a guarantee the band already gives.
 
-:::unreleased
 **The drop zone's glass is thinned (owner, device 2026-09-25).**
 It lies over the window a drop would swap with, which should stay
 readable through it; `.clear` is already the material's lightest
 style, so the view's own opacity is the one public strength left,
 and the blur material takes the same opacity where glass is off.
-:::
 
-:::unreleased
 **Every drag marker sits at the normal level, ordered directly
 beneath the window being dragged and re-ordered there on every
 move** (#1620, #2797). At the floating level a glass marker would
@@ -18362,7 +18323,6 @@ blur the window in hand whenever it crossed its home slot or
 hovered the target, and a flat one covered the bars and the
 pocket's handle. Beneath it, the markers still sit above the
 windows below, and the home slot is empty for the drag.
-:::
 
 **The Settings drag preview hosts Core's marker, glass and
 all.** (#1645.) It draws the engine's own `DragMarkerView`,
@@ -18476,14 +18436,12 @@ ghost and drop zone, the hidden shelf's handle and the boot
 notice keep the inactive look: a surface joins only with its own
 argument here.
 
-:::unreleased
 The window mark joins, frosted, always (#2831, owner device check
 2026-10-31): untinted clear glass without the rim read as a grey
 film and with it framed the small pill like a sticker, while
 frosted glass with the rim reads as one light object over any
 window. Its flat badge is pinned active already, so the answer
 never changes at runtime.
-:::
 
 **On glass the Fill FADES: its capped alpha at the shelf's screen
 edge, an eighth of that toward the windows.** (#1622, owner
@@ -18639,7 +18597,6 @@ the cap's job above. A Fill with no colour leaves nothing to
 floor: the peek and the list then draw on plain `.clear` glass
 (▸ Reduce transparency, *A Fill with no colour is one state*).
 
-:::unreleased
 **Amended: the floor is 2.2:1, and 3.0:1 under Increase
 Contrast** (#2569, owner and `ui-designer`, 2026-10-30). The
 owner checked the tinted default look on device with macOS's
@@ -18669,7 +18626,6 @@ plates*) are measured against the default floor: it now holds the tertiary
 ink at 2.2:1, so the 1.15:1 and 1.5:1 divider floors hold with
 room to spare, and a user floor below the default is outside that
 guard (`PanelDividerContrastTests`).
-:::
 
 The finish is ON by default on every surface (owner ruling
 2026-09-10: the bars are the app's face, and a fresh install or a
