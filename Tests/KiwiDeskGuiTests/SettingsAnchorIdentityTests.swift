@@ -119,6 +119,10 @@ struct SettingsAnchorIdentityTests {
         // to its end, past the floating save pill (#2688). Not a
         // reveal target — the mark is the page's padded edge.
         "ShortcutsSection.swift": 1,
+        // Scroll identity: a Tab onto a layout tile scrolls it clear
+        // of the strip's fade (#2901). Not a reveal target — the
+        // strip's tiles are a picker, and search lands on its card.
+        "LayoutStrip.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")

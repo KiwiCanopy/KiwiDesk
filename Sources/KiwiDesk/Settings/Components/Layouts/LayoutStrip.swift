@@ -1,31 +1,83 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Layout selection strip with live schematic thumbnails
-/// (`SchematicScale.tile`).
+/// Layout selection strip with live schematic thumbnails, drawn
+/// below `SchematicScale.tile` so the six fit a full-width pane
+/// (#2901). Narrower, it scrolls sideways with the gesture strip's
+/// overflow fade, and a Tab onto a tile scrolls it into view.
 struct LayoutStrip: View {
     @ObservedObject var model: SettingsModel
     @Binding var selection: LayoutMode
     @State private var hovered: LayoutMode?
+    @State private var offset: CGFloat = 0
+    @State private var viewport: CGFloat = 0
+    @FocusState private var focused: LayoutMode?
     @Environment(\.isEnabled) private var isEnabled
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             SettingsGroupHeader(chooseTitle)
-            ScrollView(.horizontal, showsIndicators: false) {
-                HStack(alignment: .top, spacing: 10) {
-                    ForEach(
-                        LayoutMode.placementTabs,
-                        id: \.self
-                    ) { mode in
-                        tile(mode)
-                    }
+            ScrollViewReader { proxy in
+                ScrollView(.horizontal, showsIndicators: false) {
+                    row
                 }
-                .padding(.bottom, 4)
+                .coordinateSpace(.named(Self.space))
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.width
+                } action: {
+                    viewport = $0
+                }
+                .mask(StripFade(fades: fades))
+                // The ring inset stays inside the clip; the row
+                // still lines up with the header.
+                .padding(.horizontal, -Self.ringRoom)
+                .onChange(of: focused) { _, mode in
+                    follow(mode, with: proxy)
+                }
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(chooseTitle)
+    }
+
+    private var fades: ShelfOverflow.Fades {
+        Self.fades(offset: offset, viewport: viewport)
+    }
+
+    /// Scrolls a Tab-focused tile clear of the fade, as the bars
+    /// follow their active item (`ShelfOverflow.offset`).
+    private func follow(_ mode: LayoutMode?, with proxy: ScrollViewProxy) {
+        guard let mode,
+            let index = LayoutMode.placementTabs.firstIndex(of: mode),
+            let anchor = Self.followAnchor(
+                index: index,
+                offset: offset,
+                viewport: viewport
+            )
+        else { return }
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+            proxy.scrollTo(mode, anchor: anchor)
+        }
+    }
+
+    private var row: some View {
+        HStack(alignment: .top, spacing: Self.gap) {
+            ForEach(
+                LayoutMode.placementTabs,
+                id: \.self
+            ) { mode in
+                tile(mode)
+                    .focused($focused, equals: mode)
+                    .id(mode)
+            }
+        }
+        .padding(Self.ringRoom)
+        .onGeometryChange(for: CGFloat.self) {
+            -$0.frame(in: .named(Self.space)).minX
+        } action: {
+            offset = $0
+        }
     }
 
     private var chooseTitle: String {
@@ -38,25 +90,23 @@ struct LayoutStrip: View {
             selection = mode
         } label: {
             VStack(spacing: 4) {
-                LayoutSchematicView(
-                    mode: mode,
-                    settings: model.config.settings,
-                    windows: LayoutSchematic.defaultWindowCount,
-                    scale: .tile
-                )
-                .padding(4)
-                .deskPlate(
-                    model.config.settings,
-                    in: RoundedRectangle(cornerRadius: 6)
-                )
+                schematic(mode)
+                    .padding(Self.platePadding)
+                    .deskPlate(
+                        model.config.settings,
+                        in: RoundedRectangle(cornerRadius: 6)
+                    )
                 Label(mode.displayName, systemImage: mode.symbol)
                     .font(.subheadline)
                     .labelStyle(.titleAndIcon)
+                    .lineLimit(1)
+                    .minimumScaleFactor(0.8)
                 Text(usageText(mode))
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
             }
-            .padding(6)
+            .padding(Self.chromePadding)
+            .frame(width: Self.tileWidth)
             .background(selectionChrome(mode, selected: selected))
         }
         .buttonStyle(.plain)
