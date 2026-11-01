@@ -23,15 +23,15 @@ public struct StateCoordinator: Sendable {
 
     /// Track layout params (#128) governing new tiled track allocations.
     public var trackParams = TrackParams()
-
     /// Per-space fill-then-spill track capacity (#437), geometry-derived.
     public var trackCapacities: [SpaceID: Int] = [:]
 
     /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
+    /// The arrival a `pocket_app` press claims (#2612), likewise.
+    public var pocketClaimed: WindowID?
 
-    /// The window a Desktop return still owes its focus (#1207),
-    /// mirrored in before each create like `arrivalDisplay`.
+    /// A Desktop return's owed focus (#1207), mirrored likewise.
     public var returningFocus: WindowID?
 
     /// Last known space per window for native-Space restores.

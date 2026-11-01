@@ -31,6 +31,9 @@ extension KiwiCore {
         case .refused(let response):
             return response
         case .window(let id):
+            if let app = state.pocketKeyOwner(of: id) {
+                return refuseKeyedPocketWindow(id, app: app)
+            }
             switch pocketNamedRefusal(id) {
             case .taken: return refuseSecondPocketWindow(id)
             case .cannot: return .fail("this window cannot be pocketed")

@@ -1694,6 +1694,8 @@
   "pocket.position.spoken.horizontal": "%1$@ from the left",
   "pocket.position.spoken.vertical": "%1$@ from the top",
   "pocket.refusal.float": "Pocket windows always float",
+  "pocket.refusal.keyed": "Its Pocket key is %1$@",
+  "pocket.refusal.keyed_unnamed": "This window has a Pocket key of its own",
   "pocket.refusal.marked_elsewhere": "Pocket is already taken",
   "pocket.refusal.sticky": "Pocket windows are always sticky",
   "presets.apply": "Apply",

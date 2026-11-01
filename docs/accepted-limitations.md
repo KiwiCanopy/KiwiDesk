@@ -369,3 +369,12 @@ parked window instead of taking it out
 For that second KiwiDesk reads a focus report for the pocketed
 window as the echo of pocketing it, which an app can still send,
 and swallows it. Press `⌃⌥P` to take the window out.
+
+:::unreleased
+An app's own Pocket key ([`pocket_app`](lua-reference.md#pocket_app))
+keeps its window only while KiwiDesk runs
+([#2612](https://github.com/KiwiCanopy/KiwiDesk/issues/2612)). Quit
+KiwiDesk and the window is left floating where it is; the next press
+of the key opens a fresh window of the app, and the old one stays an
+ordinary window. An update's restart keeps it.
+:::

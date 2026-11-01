@@ -5709,6 +5709,45 @@ KiwiDesk.bind("ctrl+alt+shift+p", function()
 end)
 ```
 
+:::unreleased
+### pocket_app
+
+**Expects:** an app's bundle id.
+
+**Does:** an app's own Pocket key. The first call opens a new
+window of the app, launching it if it is not running, and that
+window arrives out of the [pocket](#pocket): floating, on every
+Space, focused. Each later call puts it away or takes it out,
+as `pocket` does for the other pocket windows. Its app rule's
+"Open in a Space" does not apply to it.
+
+The window is tied to the app while a shortcut runs exactly
+`KiwiDesk.pocket_app("<bundle id>")` — Settings writes the bundle
+id lowercased — and it goes in and out by that shortcut alone:
+`pocket` steps past it, and
+[`toggle_pocket_window`](#toggle_pocket_window) on it fails with
+a pill naming its key. It does not count against
+[`pocket.set_capacity`](#pocketset_capacity). Remove the shortcut
+and the window becomes an ordinary window again, on the Space you
+are on. Closing the window or quitting the app frees the key, and
+the next call opens a fresh window.
+
+Called with no such shortcut — from the CLI, say — the window it
+opens is an ordinary pocket window, counted like any other: under
+`one` with a window already in the pocket, the call fails with the
+pill "Pocket is already taken" and opens nothing. Fails with
+`app not found: <id>` for an app macOS cannot find, and with a
+pill when a running app's File menu has no New Window.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+t", function()
+    KiwiDesk.pocket_app("com.mitchellh.ghostty")
+end)
+```
+:::
+
 ### override_sticky_reach
 
 **Expects:** one of `on`, `off`, `auto`.

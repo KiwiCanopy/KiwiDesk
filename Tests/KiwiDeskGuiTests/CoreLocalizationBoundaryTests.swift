@@ -99,9 +99,10 @@ struct CoreLocalizationBoundaryTests {
         // them (#2446), drawn on the same pill and on the bar
         // menu's greyed row, both Core's.
         "Commands/AutoFloatReason+Rendering.swift": 6,
-        // The pocket's sticky refusal (#2446) and its second-window
-        // refusal (#2675), on the same pill.
-        "Commands/PocketRefusal.swift": 2,
+        // The pocket's sticky refusal (#2446), its second-window
+        // refusal (#2675) and its keyed one, two spellings (#2612),
+        // on the same pill.
+        "Commands/PocketRefusal.swift": 4,
         // The three marks' VoiceOver names (#1799, #2446), with
         // the plate's glyph images since #2671.
         "Borders/StickyMarkOverlay+Glyphs.swift": 3,

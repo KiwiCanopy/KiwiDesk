@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "왼쪽 끝에서 %1$@",
   "pocket.position.spoken.vertical": "위쪽 끝에서 %1$@",
   "pocket.refusal.float": "Pocket 윈도우는 항상 플로팅됨",
+  "pocket.refusal.keyed": "이 윈도우의 Pocket 단축키는 %1$@입니다",
+  "pocket.refusal.keyed_unnamed": "이 윈도우에는 전용 Pocket 단축키가 있습니다",
   "pocket.refusal.marked_elsewhere": "Pocket이 이미 사용 중입니다",
   "pocket.refusal.sticky": "Pocket 윈도우는 항상 Sticky임",
   "presets.apply": "적용",

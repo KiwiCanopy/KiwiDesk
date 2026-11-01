@@ -43,6 +43,11 @@ public struct BarMenuHooks {
     public var confirmSpaceDelete:
         @MainActor (SpaceDeleteQuestion, @escaping @MainActor () -> Void)
             -> Void = { _, _ in }
+    /// The chord of `bundleID`'s Pocket key row as the GUI draws
+    /// it (#2612 ▸ 1): Core names the app, the GUI renders the key.
+    public var pocketKeyChord: @MainActor (String) -> String? = { _ in
+        nil
+    }
 
     public init() {}
 }

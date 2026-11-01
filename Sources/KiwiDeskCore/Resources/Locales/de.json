@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "%1$@ von links",
   "pocket.position.spoken.vertical": "%1$@ von oben",
   "pocket.refusal.float": "Pocket-Fenster schweben immer",
+  "pocket.refusal.keyed": "Sein Pocket-Tastenkürzel ist %1$@",
+  "pocket.refusal.keyed_unnamed": "Dieses Fenster hat ein eigenes Pocket-Tastenkürzel",
   "pocket.refusal.marked_elsewhere": "Die Pocket ist schon belegt",
   "pocket.refusal.sticky": "Pocket-Fenster sind immer Sticky",
   "presets.apply": "Anwenden",

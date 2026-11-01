@@ -110,9 +110,9 @@ extension KiwiCore {
     }
 
     /// Pays each consumer of a held arrival. Order: an arm that
-    /// changes state first (a pocket claim, which drops the spawn
-    /// slot it beats), then the owed event, so it reports where the
-    /// window landed, then the #2478 follow. `departing` — a
+    /// changes state first (the #2612 pocket claim, which drops the
+    /// spawn slot it beats), then the owed event, so it reports
+    /// where the window landed, then the #2478 follow. `departing` — a
     /// destroy, re-key, exit or re-arrival — sends the report and
     /// every acting arm stands down.
     private func settleArrival(
@@ -121,6 +121,7 @@ extension KiwiCore {
         departing: Bool = false
     ) {
         let id = held.window.id
+        settlePocketClaim(id, created: created, departing: departing)
         if held.eventOwed {
             emitWindowCreated(
                 state.windows[id] ?? held.window,

@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "%1$@ depuis la gauche",
   "pocket.position.spoken.vertical": "%1$@ depuis le haut",
   "pocket.refusal.float": "Les fenêtres Pocket flottent toujours",
+  "pocket.refusal.keyed": "Son raccourci Pocket est %1$@",
+  "pocket.refusal.keyed_unnamed": "Cette fenêtre a son propre raccourci Pocket",
   "pocket.refusal.marked_elsewhere": "La Pocket est déjà prise",
   "pocket.refusal.sticky": "Les fenêtres Pocket sont toujours Sticky",
   "presets.apply": "Appliquer",

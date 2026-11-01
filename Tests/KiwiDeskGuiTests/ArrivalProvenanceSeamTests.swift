@@ -29,7 +29,16 @@ struct ArrivalProvenanceSeamTests {
             "KiwiCore+Events.swift", 1
         ),
         ("provenance: provenance,", "KiwiCore+Events.swift", 2),
-        ("switch provenance {", "KiwiCore+LaunchFollow.swift", 1),
+        // The value's consumers: the #2478 follow and the #2612
+        // pocket claim.
+        (
+            "spawnVerdict(window, provenance: provenance)",
+            "KiwiCore+LaunchFollow.swift", 1
+        ),
+        (
+            "claimPocketArrival(event, provenance: provenance)",
+            "KiwiCore+Events.swift", 1
+        ),
         // The resolutions: a create, the bound, a destroy, a re-key.
         (
             "resolveArrivalCreated(id)",

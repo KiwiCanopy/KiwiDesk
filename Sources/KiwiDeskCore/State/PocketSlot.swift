@@ -26,19 +26,28 @@ public struct PocketSlot: Sendable, Equatable, Codable {
     /// and KiwiVision's second clear window. Nil while pocketed and
     /// before its first take-out.
     public var cameFrom: WindowID?
+    /// The app whose Pocket key owns the slot (#2612), lowercased;
+    /// nil for the general list `pocket` works. Read through
+    /// `keyedApp`, the one answer to "has a key of its own".
+    public var owner: String?
+
+    /// The owning app of a keyed slot, nil for a general one.
+    public var keyedApp: String? { owner }
 
     public init(
         window: WindowID,
         pid: pid_t? = nil,
         phase: Phase,
         frames: [String: CGRect] = [:],
-        cameFrom: WindowID? = nil
+        cameFrom: WindowID? = nil,
+        owner: String? = nil
     ) {
         self.window = window
         self.pid = pid
         self.phase = phase
         self.frames = frames
         self.cameFrom = cameFrom
+        self.owner = owner
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -47,5 +56,6 @@ public struct PocketSlot: Sendable, Equatable, Codable {
         case phase
         case frames
         case cameFrom = "came_from"
+        case owner
     }
 }

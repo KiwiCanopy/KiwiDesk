@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "左端から %1$@",
   "pocket.position.spoken.vertical": "上端から %1$@",
   "pocket.refusal.float": "Pocket ウインドウは常にフローティング",
+  "pocket.refusal.keyed": "このウインドウの Pocket のショートカットは %1$@ です",
+  "pocket.refusal.keyed_unnamed": "このウインドウには専用の Pocket のショートカットがあります",
   "pocket.refusal.marked_elsewhere": "Pocket はすでに使用中です",
   "pocket.refusal.sticky": "Pocket ウインドウは常に Sticky",
   "presets.apply": "適用",

@@ -44,6 +44,7 @@ extension KiwiCore {
             },
             skipped: prepared.skipped
         )
+        reconcilePocketKeys()  // #2612
         syncDerivedIssues()
     }
 

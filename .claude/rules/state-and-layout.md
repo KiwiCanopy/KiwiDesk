@@ -829,8 +829,15 @@ editing here:
     `severalTakesSecondMark`). A reader of "the
     pocket holds something" states whether it means any slot or
     the windows `pocket` works, since a per-app key's slot (#2612)
-    is the one but not the other. "Focused last" among out
-    windows is `focusRecencyRank`, stamped at an honored focus
+    is the one but not the other. **Which slot an app's key owns is
+    answered by the one `PocketSlot.keyedApp`** (read through
+    `pocketKeyOwner(of:)`), and the list `pocket` steps and the
+    capacity counts is `generalPocket`, never a filter beside it;
+    a general-list verb on a keyed window refuses through
+    `refuseKeyedPocketWindow`, and a tie ends only at
+    `reconcilePocketKeys`, run after each install of the bindings
+    (#2612, `PocketAppTests`, `PocketAppKeyTests`). "Focused
+    last" among out windows is `focusRecencyRank`, stamped at an honored focus
     alone, never a pocket record of its own. Marking is the one
     placement at the float size, and a window already floating
     skips it (`PocketWindowTests` ▸ `floatKeepsItsFrame`,

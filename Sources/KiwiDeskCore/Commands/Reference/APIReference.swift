@@ -47,6 +47,7 @@ public enum APIReference {
             ("toggle_maximized", "toggle_maximized"),
             ("pocket", "pocket"),
             ("toggle_pocket_window", "toggle_pocket_window"),
+            ("pocket_app", "pocket_app"),
             ("override_sticky_reach", "override_sticky_reach"),
             ("resize", "resize"),
             ("move_to_track", "move_to_track"),

@@ -63,6 +63,8 @@ extension KiwiCore {
         }
         let detectedFlip = detectedFlip(event)
         let provenance = arrivalProvenance(of: event)  // #2630
+        let pocketClaim = claimPocketArrival(event, provenance: provenance)
+        state.pocketClaimed = pocketClaim  // #2612
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
@@ -108,6 +110,10 @@ extension KiwiCore {
             guard let provenance else {
                 assertionFailure("an arrival's provenance is read first")
                 break
+            }
+            // The Pocket key's window, ahead of its event (#2612).
+            if pocketClaim == window.id, provenance != .awaitingCreate {
+                takePocketClaim(window.id)
             }
             announceArrival(
                 window,

@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "%1$@ desde la izquierda",
   "pocket.position.spoken.vertical": "%1$@ desde arriba",
   "pocket.refusal.float": "Las ventanas Pocket siempre flotan",
+  "pocket.refusal.keyed": "Su atajo de Pocket es %1$@",
+  "pocket.refusal.keyed_unnamed": "Esta ventana tiene su propio atajo de Pocket",
   "pocket.refusal.marked_elsewhere": "El Pocket ya está ocupado",
   "pocket.refusal.sticky": "Las ventanas Pocket siempre son sticky",
   "presets.apply": "Aplicar",

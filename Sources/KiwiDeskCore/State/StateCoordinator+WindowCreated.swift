@@ -44,6 +44,8 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
+        let claimed = pocketClaimed == window.id
+        pocketClaimed = nil
         // A pocketed window comes back to the slot, filed nowhere.
         if readoptPocketWindow(window.id) { return }
         let remembered = rememberedSpaces[window.id]
@@ -54,10 +56,11 @@ extension StateCoordinator {
         )
         effects.rehomedToScreenSpace = preferred
         let held = preferred ?? livingRememberedSpace(remembered)
-        // A popup skips the rule (#1602, #2475).
+        // A popup skips the rule (#1602, #2475), and so does the
+        // window a Pocket key claims (#2612 ▸ 7).
         let popup = windows[window.id]?.isPopup ?? false
         let ruled =
-            held == nil && !popup
+            held == nil && !popup && !claimed
             ? window.appBundleID.flatMap { appRules[$0] }
             : nil
         // Only the rule's own verdict may earn the launch follow

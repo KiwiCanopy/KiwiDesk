@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "%1$@ от левого конца",
   "pocket.position.spoken.vertical": "%1$@ от верхнего конца",
   "pocket.refusal.float": "Окна Pocket всегда плавающие",
+  "pocket.refusal.keyed": "Его сочетание клавиш Pocket — %1$@",
+  "pocket.refusal.keyed_unnamed": "У этого окна своё сочетание клавиш Pocket",
   "pocket.refusal.marked_elsewhere": "Pocket уже занят",
   "pocket.refusal.sticky": "Окна Pocket всегда в режиме Sticky",
   "presets.apply": "Применить",

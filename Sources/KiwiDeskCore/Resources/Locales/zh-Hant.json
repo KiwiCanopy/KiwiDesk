@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "距左端 %1$@",
   "pocket.position.spoken.vertical": "距頂端 %1$@",
   "pocket.refusal.float": "Pocket 視窗一律浮動",
+  "pocket.refusal.keyed": "它的 Pocket 快速鍵是 %1$@",
+  "pocket.refusal.keyed_unnamed": "此視窗有自己的 Pocket 快速鍵",
   "pocket.refusal.marked_elsewhere": "Pocket 已被佔用",
   "pocket.refusal.sticky": "Pocket 視窗一律為 Sticky",
   "presets.apply": "套用",

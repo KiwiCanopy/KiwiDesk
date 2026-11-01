@@ -1691,6 +1691,8 @@
   "pocket.position.spoken.horizontal": "%1$@ da sinistra",
   "pocket.position.spoken.vertical": "%1$@ dall'alto",
   "pocket.refusal.float": "Le finestre Pocket fluttuano sempre",
+  "pocket.refusal.keyed": "La sua scorciatoia Pocket è %1$@",
+  "pocket.refusal.keyed_unnamed": "Questa finestra ha una sua scorciatoia Pocket",
   "pocket.refusal.marked_elsewhere": "La Pocket è già occupata",
   "pocket.refusal.sticky": "Le finestre Pocket sono sempre Sticky",
   "presets.apply": "Applica",
