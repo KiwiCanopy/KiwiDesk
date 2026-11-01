@@ -154,10 +154,11 @@ struct ViewPickListTests {
     @Test("↑ ↓ wrap across the lines, keeping the position (#2897)")
     func movingLinesWraps() {
         var list = list(live: .bsp)
+        list.step(1)
         list.moveLine(-1, wrap: true)
-        #expect(list.selection?.line == .vision)
+        #expect(list.selected?.pick == .vision(lens: nil))
         list.moveLine(1, wrap: true)
-        #expect(list.selected?.pick == .layout(.bsp))
+        #expect(list.selected?.pick == .layout(LayoutMode.allCases[1]))
     }
 
     @Test("↑ ↓ pass over a line the query empties")

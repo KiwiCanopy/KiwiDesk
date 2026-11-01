@@ -160,7 +160,7 @@ final class JumpModel: ObservableObject {
 
     /// `repeated` is a key held down: a step then stops at an end
     /// rather than wrapping past it (#2897).
-    func handle(_ key: JumpKey, repeated: Bool = false) {
+    func handle(_ key: JumpKey, repeated: Bool) {
         guard !leaving else { return }
         restPointer()
         if case .stepScope(let forward) = key {

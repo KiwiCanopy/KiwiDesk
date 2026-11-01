@@ -21,7 +21,7 @@ extension JumpModel {
         onAnnounce(viewSpoken)
     }
 
-    func handleView(_ key: JumpKey, repeated: Bool = false) {
+    func handleView(_ key: JumpKey, repeated: Bool) {
         guard let view else { return }
         switch key {
         case .side(let delta):

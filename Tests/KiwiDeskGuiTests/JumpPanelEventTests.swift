@@ -64,6 +64,43 @@ struct JumpPanelEventTests {
         #expect(held == [false, true])
     }
 
+    @Test("a held ⌘ arrow reaches the model as held (#2897)")
+    func commandRepeatIsCarried() {
+        let (panel, _) = panel()
+        panel.keyedForTesting = true
+        var held: [Bool] = []
+        panel.onKey = { _, repeated in held.append(repeated) }
+        for repeated in [false, true] {
+            let down = NSEvent.keyEvent(
+                with: .keyDown,
+                location: .zero,
+                modifierFlags: .command,
+                timestamp: 0,
+                windowNumber: 0,
+                context: nil,
+                characters: "",
+                charactersIgnoringModifiers: "",
+                isARepeat: repeated,
+                keyCode: 125
+            )!
+            #expect(panel.performKeyEquivalent(with: down))
+        }
+        #expect(held == [false, true])
+    }
+
+    /// The controller is the one wiring from panel to model; a
+    /// panel test replaces `onKey`, so only this sees it (#2897).
+    @Test("the controller hands the held flag to the model")
+    func controllerPassesTheRepeat() throws {
+        let body = try SourceScan.functionBody(
+            of: "wire",
+            in: "JumpPanelController.swift",
+            under: "Jump",
+            root: "Sources/KiwiDesk"
+        )
+        #expect(body.contains("handle($0, repeated: $1)"))
+    }
+
     @Test("while an input method composes, every key is the field's")
     func compositionKeepsItsKeys() {
         let (panel, field) = panel()

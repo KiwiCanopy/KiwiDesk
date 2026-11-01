@@ -65,7 +65,7 @@ extension JumpPanelView {
                 chord: "⌘,",
                 symbol: ViewPickText.destination(line).symbol,
                 reserves: ViewPickText.settingsLabels
-            ) { model.handle(.settings) }
+            ) { model.handle(.settings, repeated: false) }
         }
     }
 
@@ -80,7 +80,7 @@ extension JumpPanelView {
                     "Edit in Settings…"
                 ),
                 chord: "⌘,"
-            ) { model.handle(.settings) }
+            ) { model.handle(.settings, repeated: false) }
         case .view:
             if let layout = model.view?.layout,
                 let profile = layout.profile
@@ -92,7 +92,7 @@ extension JumpPanelView {
                         ? LayoutPickText.keepHint(profile)
                         : LayoutPickText.keepSaved,
                     help: LayoutPickText.keepHint(profile)
-                ) { model.handle(.keep) }
+                ) { model.handle(.keep, repeated: false) }
                 .disabled(!layout.keepArmed)
             }
         }

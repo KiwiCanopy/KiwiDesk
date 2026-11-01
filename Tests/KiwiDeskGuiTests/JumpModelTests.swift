@@ -36,10 +36,10 @@ struct JumpModelTests {
         var closed = 0
         model.onClose = { closed += 1 }
         model.query = "mail"
-        model.handle(.escape)
+        model.handle(.escape, repeated: false)
         #expect(model.query == "")
         #expect(closed == 0)
-        model.handle(.escape)
+        model.handle(.escape, repeated: false)
         #expect(closed == 1)
     }
 
@@ -48,9 +48,9 @@ struct JumpModelTests {
         let model = model()
         var picked: [(String, Bool)] = []
         model.onPick = { picked.append(($0.app, $1)) }
-        model.handle(.pick(moveHere: false))
-        model.handle(.quick(2, moveHere: true))
-        model.handle(.quick(5, moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
+        model.handle(.quick(2, moveHere: true), repeated: false)
+        model.handle(.quick(5, moveHere: false), repeated: false)
         #expect(picked.map(\.0) == ["Ghostty", "Notes"])
         #expect(picked.map(\.1) == [false, true])
     }
@@ -71,11 +71,11 @@ struct JumpModelTests {
             pointer: .zero
         )
         #expect(model.list.selection == 0)
-        model.handle(.page(1))
+        model.handle(.page(1), repeated: false)
         #expect(model.list.selection == 6)
-        model.handle(.page(1))
+        model.handle(.page(1), repeated: false)
         #expect(model.list.selection == 12)
-        model.handle(.page(-1))
+        model.handle(.page(-1), repeated: false)
         #expect(model.list.selection == 6)
     }
 
@@ -85,8 +85,8 @@ struct JumpModelTests {
         let model = model()
         var heard: [String] = []
         model.onAnnounce = { heard.append($0) }
-        model.handle(.step(1))
-        model.handle(.step(1))
+        model.handle(.step(1), repeated: false)
+        model.handle(.step(1), repeated: false)
         // Held at the end: nothing moved, nothing said.
         model.handle(.step(1), repeated: true)
         model.query = "zzz"
@@ -104,11 +104,11 @@ struct JumpModelTests {
     @Test("a fresh press wraps; a held key stops at the end (#2897)")
     func wrapsOnAFreshPress() {
         let model = model()
-        model.handle(.step(-1))
+        model.handle(.step(-1), repeated: false)
         #expect(model.list.selection == 2)
         model.handle(.step(1), repeated: true)
         #expect(model.list.selection == 2)
-        model.handle(.step(1))
+        model.handle(.step(1), repeated: false)
         #expect(model.list.selection == 0)
     }
 

@@ -6168,12 +6168,6 @@ Keys on this side:
   clamped to a shorter line. A line longer than the panel scrolls
   sideways.
 
-:::unreleased
-Past the end of a line, **←** and **→** go round to its other end,
-and past the last line **↓** comes back to the first, **↑** the
-other way. Holding the key down stops at the end instead.
-:::
-
 - Typing narrows all three lines, dimming the rest, and selects
   the first match.
 - **Return** applies the selected item and closes KiwiHub.
@@ -6183,6 +6177,12 @@ other way. Holding the key down stops at the end instead.
 - **⌘,** opens the Settings page of the line the selection is on;
   **⌘S** keeps the layouts in the profile, as Keep in a Space's
   Layout menu does.
+
+:::unreleased
+Past the end of a line, **←** and **→** go round to its other end,
+and past the last line **↓** comes back to the first, **↑** the
+other way. Holding the key down stops at the end instead.
+:::
 
 On every side:
 

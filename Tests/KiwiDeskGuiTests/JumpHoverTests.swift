@@ -68,7 +68,7 @@ struct JumpHoverTests {
         model.currentPointer = { CGPoint(x: 10, y: 30) }
         model.hoverRow(1, pointer: CGPoint(x: 10, y: 30))
         #expect(model.hover == .row(1))
-        model.handle(.step(1))
+        model.handle(.step(1), repeated: false)
         #expect(model.hover == nil)
         #expect(model.list.selection == 1)
         model.hoverRow(0, pointer: CGPoint(x: 10, y: 30))
@@ -86,7 +86,7 @@ struct JumpHoverTests {
         var pointer = CGPoint(x: 10, y: 10)
         model.currentPointer = { pointer }
         pointer = CGPoint(x: 10, y: 70)
-        model.handle(.step(1))
+        model.handle(.step(1), repeated: false)
         model.hoverRow(0, pointer: pointer)
         #expect(model.hover == nil)
     }

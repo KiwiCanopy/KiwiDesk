@@ -77,8 +77,8 @@ struct ViewPickVisionLineTests {
         model.loadView = { self.list(vision: .plain) }
         model.setScope(.view)
         model.view?.select(.vision(lens: nil))
-        model.handle(.pick(moveHere: false))
-        model.handle(.quick(0, moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
+        model.handle(.quick(0, moveHere: false), repeated: false)
         #expect(applied == [.visionOff, .visionOff])
     }
 

@@ -60,7 +60,7 @@ struct JumpProfileNamingTests {
     private func startNaming(_ model: JumpModel) {
         model.setScope(.view)
         model.view?.select(.newProfile)
-        model.handle(.pick(moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
     }
 
     @Test("↩ on the chip names a profile, applying nothing")
@@ -93,9 +93,9 @@ struct JumpProfileNamingTests {
         model.query = "Studio"
         // A taken name saves beside it, never over it.
         #expect(model.namingTarget == "Studio_1")
-        model.handle(.pick(moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
         #expect(saved == ["Studio_1"])
-        model.handle(.escape)
+        model.handle(.escape, repeated: false)
         #expect(model.naming == nil)
         #expect(model.view != nil)
     }
@@ -113,7 +113,7 @@ struct JumpProfileNamingTests {
         // Trimmed before it is judged: " .x" is a dot-file.
         model.query = " .hidden"
         #expect(model.namingTarget == nil)
-        model.handle(.pick(moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
         #expect(saved.isEmpty)
         #expect(spoken.lines.last == ViewPickText.invalidName)
     }
@@ -124,14 +124,14 @@ struct JumpProfileNamingTests {
         let (model, spoken) = model()
         model.onSaveProfile = { _ in false }
         startNaming(model)
-        model.handle(.pick(moveHere: false))
+        model.handle(.pick(moveHere: false), repeated: false)
         #expect(model.naming?.failed == true)
         #expect(spoken.lines.last == ViewPickText.saveFailed)
         // Typing clears the failure; so does a fresh naming.
         model.query = "Home"
         #expect(model.naming?.failed == false)
-        model.handle(.pick(moveHere: false))
-        model.handle(.escape)
+        model.handle(.pick(moveHere: false), repeated: false)
+        model.handle(.escape, repeated: false)
         startNaming(model)
         #expect(model.naming?.failed == false)
     }
@@ -140,7 +140,7 @@ struct JumpProfileNamingTests {
     func scopeEndsNaming() {
         let (model, _) = model()
         startNaming(model)
-        model.handle(.stepScope(forward: true))
+        model.handle(.stepScope(forward: true), repeated: false)
         #expect(model.naming == nil)
         #expect(!model.isNaming)
     }

@@ -2097,6 +2097,21 @@ wears the one setting glyph, `ShortcutSettingRow.settingGlyph`, in
 the key rows' ink, never a topic glyph of its own**
 (`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
 
+## A KiwiHub list wraps on a fresh press only (#2897)
+
+**A KiwiHub list's one-row or one-item step goes through
+`JumpList.stepped` with `wrap: !repeated`, and Page Up / Page
+Down never wrap.** The held flag comes from the panel's
+`onKey`, which carries `NSEvent.isARepeat`, never from a re-read
+of `NSApp.currentEvent`; keep `JumpModel.handle(_:repeated:)`
+free of a default, so a new key path must state it. A new list — the
+Desktop list included — takes the same door
+(`JumpListTests`, `JumpScopeModelTests` ▸
+`viewWrapsOnAFreshPress`, `JumpPanelEventTests` ▸
+`controllerPassesTheRepeat`); the argument is
+`docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
+press and stops on a held key*.
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord takes it from `ChordGlyphs`**, which
