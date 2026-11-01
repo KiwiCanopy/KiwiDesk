@@ -32,6 +32,17 @@ extension KiwiCore {
         try paletteLibrary.rename(from: old, to: new)
     }
 
+    /// Renames a saved look; the store refuses a bundled or taken
+    /// name and an unreadable library (#2860).
+    public func renameLook(from old: String, to new: String) throws {
+        try lookLibrary.rename(from: old, to: new)
+    }
+
+    /// Deletes a saved look (#2860).
+    public func deleteLook(_ name: String) throws {
+        try lookLibrary.delete(name)
+    }
+
     /// Saves `settings`' styling and colours as look `name`, with
     /// the credit its origin still earns (#1740).
     @discardableResult
