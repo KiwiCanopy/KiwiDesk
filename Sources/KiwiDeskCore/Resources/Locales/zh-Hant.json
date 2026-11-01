@@ -926,7 +926,7 @@
   "keybinding.toggle_app_bar": "顯示或隱藏 App Bar",
   "keybinding.toggle_app_bar.inert_link": "在 %5$@ 中將%3$@或%4$@的 App Bar 設為「%1$@」或「%2$@」時有效。",
   "keybinding.toggle_display_sticky": "在此螢幕上切換 Sticky",
-  "keybinding.toggle_display_sticky.help": "讓此視窗在其所在螢幕的每個空間中保持可見。將其移動到其他螢幕的空間會重新將其歸屬於該處。使用「%1$@」可將 Sticky 視窗設為完全全域。",
+  "keybinding.toggle_display_sticky.help": "讓此視窗在其歸屬螢幕（即它自己的空間所在的螢幕）的每個空間中保持可見。將其移動到其他螢幕的空間後，該螢幕即成為它的歸屬螢幕。使用「%1$@」可將 Sticky 視窗設為完全全域。",
   "keybinding.toggle_floating": "切換浮動",
   "keybinding.toggle_kiwivision": "切換 KiwiVision",
   "keybinding.toggle_lens": "切換「%1$@」鏡頭",

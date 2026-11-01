@@ -926,7 +926,7 @@
   "keybinding.toggle_app_bar": "Mostra o nascondi la App Bar",
   "keybinding.toggle_app_bar.inert_link": "Funziona quando la App Bar è impostata su «%1$@» o «%2$@» per %3$@ o %4$@ in %5$@.",
   "keybinding.toggle_display_sticky": "Attiva/disattiva Sticky su questo schermo",
-  "keybinding.toggle_display_sticky.help": "Mantiene questa finestra visibile in tutti gli spazi dello schermo in cui si trova. Spostandola in uno spazio su un altro schermo, verrà riassegnata a quest'ultimo. Rendi una finestra Sticky completamente globale con «%1$@».",
+  "keybinding.toggle_display_sticky.help": "Mantiene questa finestra visibile in tutti gli spazi del suo schermo d'origine, lo schermo in cui si trova il suo spazio. Spostandola in uno spazio di un altro schermo, quello diventa il suo nuovo schermo d'origine. Rendi una finestra Sticky completamente globale con «%1$@».",
   "keybinding.toggle_floating": "Attiva/disattiva fluttuazione",
   "keybinding.toggle_kiwivision": "Attiva/disattiva KiwiVision",
   "keybinding.toggle_lens": "Attiva/disattiva lente %1$@",
