@@ -99,6 +99,8 @@ struct JumpPanelEventTests {
             root: "Sources/KiwiDesk"
         )
         #expect(body.contains("handle($0, repeated: $1)"))
+        // A second assignment would replace the first one.
+        #expect(body.components(separatedBy: "onKey =").count == 2)
     }
 
     @Test("while an input method composes, every key is the field's")

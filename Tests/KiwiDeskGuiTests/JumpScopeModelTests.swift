@@ -65,6 +65,9 @@ struct JumpScopeModelTests {
         model.setScope(.view)
         for _ in 0..<12 { model.handle(.side(-1), repeated: true) }
         let first = model.view?.selected?.pick
+        // Held at the line's start: a further held press stays.
+        model.handle(.side(-1), repeated: true)
+        #expect(model.view?.selected?.pick == first)
         model.handle(.side(-1), repeated: false)
         #expect(model.view?.selected?.pick != first)
         model.handle(.side(1), repeated: false)
