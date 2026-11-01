@@ -50,6 +50,21 @@ struct LayoutStripTests {
         #expect(end.leading > 0 && end.trailing == 0)
     }
 
+    /// An edge in the gap cuts no tile, yet the next one is wholly
+    /// hidden: the fade still shows, at either end.
+    @Test("an edge in a gap still fades the hidden tile")
+    func edgeInAGapFades() {
+        let first = LayoutStrip.ringRoom + LayoutStrip.tileWidth
+        let viewport = first + LayoutStrip.gap / 2
+        let rest = LayoutStrip.fades(offset: 0, viewport: viewport)
+        #expect(rest.trailing > 0)
+        let end = LayoutStrip.fades(
+            offset: LayoutStrip.rowWidth - viewport,
+            viewport: viewport
+        )
+        #expect(end.leading > 0)
+    }
+
     @Test("the strip is masked, measured and follows Tab focus")
     func wiring() throws {
         let strip = try Self.squashed(
