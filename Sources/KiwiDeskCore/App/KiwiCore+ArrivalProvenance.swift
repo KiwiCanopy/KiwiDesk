@@ -61,11 +61,11 @@ extension KiwiCore {
     /// which the border pump waits on — a follow and a script's
     /// callback raise and retile.
     func resolveArrivalCreated(_ id: WindowID) {
-        resolveExpiredArrivals()
-        guard arrivals.land(id) else { return }
+        guard arrivals.land(id, at: wallClock()) else { return }
         deferred.schedule(.arrivalCreated, after: .zero) {
             [weak self] in
             guard let self else { return }
+            self.resolveExpiredArrivals()
             for held in self.arrivals.takeLanded() {
                 self.settleArrival(held, created: true)
             }
@@ -73,11 +73,14 @@ extension KiwiCore {
     }
 
     /// A destroy or re-key of a held arrival settles it first, so
-    /// a script sees a create before the window goes; only the hop
-    /// pays a follow.
+    /// a script sees a create before the window goes.
     func flushHeldArrival(_ id: WindowID) {
         guard let held = arrivals.release(id) else { return }
-        settleArrival(held.waiting, created: held.landed, follows: false)
+        settleArrival(
+            held.waiting,
+            created: held.landed,
+            departing: true
+        )
     }
 
     /// An exiting app's held arrivals, ahead of the fold that drops
@@ -106,12 +109,16 @@ extension KiwiCore {
         scheduleArrivalBound()
     }
 
-    /// Pays each consumer of a held arrival, in this order: the
-    /// owed event, then the #2478 follow.
+    /// Pays each consumer of a held arrival. Order: an arm that
+    /// changes state first (a pocket claim, which drops the spawn
+    /// slot it beats), then the owed event, so it reports where the
+    /// window landed, then the #2478 follow. `departing` — a
+    /// destroy, re-key, exit or re-arrival — sends the report and
+    /// every acting arm stands down.
     private func settleArrival(
         _ held: ArrivalProvenanceDoor.Waiting,
         created: Bool,
-        follows: Bool = true
+        departing: Bool = false
     ) {
         let id = held.window.id
         if held.eventOwed {
@@ -122,7 +129,7 @@ extension KiwiCore {
                     ? held.space : state.workspaces.space(of: id)
             )
         }
-        if created, follows {
+        if created, !departing {
             payLateSpawnFollow(id)
         } else {
             launchFollow.dropSpawn(of: id)

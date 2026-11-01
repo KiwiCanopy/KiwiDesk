@@ -157,7 +157,7 @@ struct LifecycleArrivalReasonTests {
     }
 
     @Test("a create past the bound, before the timer, is existing")
-    func lateCreatePastTheBound() {
+    func lateCreatePastTheBound() async {
         let (core, events, lines) = makeCore()
         core.eventLoop.onEvent(.windowCreated(window(4)))
         let arrived = core.wallClock()
@@ -167,6 +167,9 @@ struct LifecycleArrivalReasonTests {
             )
         }
         core.windowServerChanged(.created, id: WindowID(4))
+        // Settled on the hop, off the WindowServer drain.
+        #expect(reasons(events()).isEmpty)
+        await core.deferred.task(for: .arrivalCreated)?.value
         #expect(reasons(events()) == [.string("existing")])
         #expect(lines().contains { $0.contains("AX create: no") })
     }

@@ -483,8 +483,11 @@ editing here:
   or ledger read. A boot step's adoption answers existing on every
   host (`EventLoop.adoptsAsBootStep`). Only what a consumer owes
   waits; placement, focus and the retile never do. A new consumer
-  adds its arm to `settleArrival` in the order its docstring
-  states (`ArrivalProvenanceSeamTests`,
+  adds its arm to `settleArrival` — an arm that changes state
+  ahead of the owed event, so the event reports where the window
+  landed, and the follow last — and stands down on `departing`. A
+  consumer inside the fold takes the value `handle` read, never a
+  read of its own (`ArrivalProvenanceSeamTests`,
   `LifecycleArrivalReasonTests`).
 - **A Desktop switch is not a close (#1207).** Leaving a Desktop
   folds its windows as destroys, and the close-return walk moves

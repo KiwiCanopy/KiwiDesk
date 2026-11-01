@@ -177,7 +177,11 @@ struct LaunchFollowSeamTests {
             body.range(of: "deferred.schedule(.arrivalCreated")
         )
         let settle = try #require(body.range(of: "settleArrival("))
+        let expire = try #require(
+            body.range(of: "resolveExpiredArrivals(")
+        )
         #expect(hop.lowerBound < settle.lowerBound)
+        #expect(hop.lowerBound < expire.lowerBound)
         // Nothing settles inside the drain, ahead of the hop.
         #expect(body.components(separatedBy: "settleArrival(").count == 2)
         #expect(!body.contains("emitWindowCreated("))

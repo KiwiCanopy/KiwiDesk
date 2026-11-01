@@ -28,7 +28,7 @@ struct ArrivalProvenanceSeamTests {
             "let provenance = arrivalProvenance(of: event)",
             "KiwiCore+Events.swift", 1
         ),
-        ("provenance: provenance ?? .unreported", "KiwiCore+Events.swift", 2),
+        ("provenance: provenance,", "KiwiCore+Events.swift", 2),
         ("switch provenance {", "KiwiCore+LaunchFollow.swift", 1),
         // The resolutions: a create, the bound, a destroy, a re-key.
         (

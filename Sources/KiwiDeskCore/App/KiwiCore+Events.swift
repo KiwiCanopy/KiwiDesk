@@ -105,9 +105,13 @@ extension KiwiCore {
                         + "placed as new, focus taken (#1414/#1561)"
                 )
             }
+            guard let provenance else {
+                assertionFailure("an arrival's provenance is read first")
+                break
+            }
             announceArrival(
                 window,
-                provenance: provenance ?? .unreported,
+                provenance: provenance,
                 effects: effects
             )
             // #1010: narrate the cross-screen arrival, the
@@ -137,7 +141,7 @@ extension KiwiCore {
             // the arrival retile below has filed the window.
             launchFollow = claimLaunchFollow(
                 arrived: window,
-                provenance: provenance ?? .unreported,
+                provenance: provenance,
                 effects: effects
             ).map { (window.id, $0) }
             // #1362: the snapshot frame the restore could not set

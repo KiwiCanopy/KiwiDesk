@@ -78,13 +78,17 @@ final class ArrivalProvenanceDoor {
         self.waiting[waiting.window.id] = waiting
     }
 
-    /// Moves `id` to the landed list on its create; false when it
-    /// was not held.
-    func land(_ id: WindowID) -> Bool {
-        guard let entry = waiting.removeValue(forKey: id) else {
-            return false
+    /// Moves `id` to the landed list on its create within the
+    /// bound; false when it was not held. One past the bound stays
+    /// for `releaseExpired`.
+    func land(_ id: WindowID, at now: Date) -> Bool {
+        guard let entry = waiting[id] else { return false }
+        if now.timeIntervalSince(entry.at)
+            < LaunchFollowIntent.lateCreateBound
+        {
+            waiting[id] = nil
+            landed[id] = entry
         }
-        landed[id] = entry
         return true
     }
 
