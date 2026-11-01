@@ -63,6 +63,21 @@ struct PocketAppEdgeTests {
         #expect(fixture.activated.contains(Fixture.pid))
     }
 
+    @Test("a spent claim takes no second window, nor its rule")
+    func spentClaimTakesNoSecondWindow() {
+        let fixture = Fixture(appRule: SpaceID("2"))
+        fixture.core.state.workspaces.ensureSpace(SpaceID("2"))
+        fixture.press()
+        fixture.arrive(9)
+        fixture.arrive(10)
+        let next = WindowID(10)
+        #expect(fixture.owner(of: mine) == Fixture.app)
+        #expect(fixture.core.state.pocketPhase(of: next) == nil)
+        #expect(
+            fixture.core.state.workspaces.space(of: next) == SpaceID("2")
+        )
+    }
+
     @Test("the row is found whatever the bundle id's case")
     func rowLookupIgnoresCase() {
         let fixture = Fixture()
