@@ -13,7 +13,7 @@ import SwiftUI
 struct ShelfStripPreview: View {
     let shelf: KiwiShelf
     let space: HomeCardBarsTile.BarSpec?
-    let app: HomeCardBarsTile.BarSpec?
+    var app: HomeCardBarsTile.BarSpec?
     let edge: AppBarEdge
     let vertical: Bool
     let scale: CGFloat
@@ -28,19 +28,24 @@ struct ShelfStripPreview: View {
         GeometryReader { geometry in
             let length =
                 vertical ? geometry.size.height : geometry.size.width
-            let placed = arrangement(length: length)
-            ZStack(alignment: .topLeading) {
-                plate(placed, length: length)
-                segment(space, placed.space)
-                segment(app, placed.app)
-                pocketPiece(placed.pocket)
-                divider(placed)
-            }
+            fitted(length: length).drawn(length: length)
         }
         .frame(
             width: vertical ? thickness : nil,
             height: vertical ? nil : thickness
         )
+    }
+
+    /// The strip at `length`, each bar in the slot Core places it.
+    private func drawn(length: CGFloat) -> some View {
+        let placed = arrangement(length: length)
+        return ZStack(alignment: .topLeading) {
+            plate(placed, length: length)
+            segment(space, placed.space)
+            segment(app, placed.app)
+            pocketPiece(placed.pocket)
+            divider(placed)
+        }
     }
 
     var thickness: CGFloat {

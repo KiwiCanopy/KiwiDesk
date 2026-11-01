@@ -33,15 +33,13 @@ struct PaletteScenePanel: View {
 
     /// The shelf preview the Bars page draws, over the draft.
     private var shelfShape: some View {
-        HomeCardBarsTile(
-            settings: settings,
-            pocketStands: model.pocketStandsAtRest,
-            spaceCount: model.config.spaces.count,
-            scale: 1.8,
-            spaceLabels: BarsPanelPreview.spaceLabels(of: model.config)
+        BarsPanelPreview.tile(
+            settings,
+            config: model.config,
+            pocketStands: model.pocketStandsAtRest
         )
-        .padding(12)
-        .frame(height: 150)
+        .padding(BarsPanelPreview.framePad)
+        .frame(height: BarsPanelPreview.shortFrame)
         .frame(maxWidth: .infinity)
         .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
         .accessibilityHidden(true)

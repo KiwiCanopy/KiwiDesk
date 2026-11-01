@@ -58,16 +58,14 @@ struct BarsPanelPreview: View {
         caption: String?
     ) -> some View {
         VStack(alignment: .leading, spacing: 6) {
-            HomeCardBarsTile(
-                settings: settings,
+            Self.tile(
+                settings,
+                config: model.config,
                 pocketStands: model.pocketStandsAtRest,
-                spaceCount: model.config.spaces.count,
-                scale: 1.8,
-                spaceLabels: spaceLabels,
                 showsAppBar: showsAppBar
             )
-            .padding(12)
-            .frame(height: caption == nil ? 210 : 150)
+            .padding(Self.framePad)
+            .frame(height: caption == nil ? 210 : Self.shortFrame)
             .frame(maxWidth: .infinity)
             .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
             .accessibilityHidden(true)
@@ -84,8 +82,34 @@ struct BarsPanelPreview: View {
         }
     }
 
-    private var spaceLabels: [SpaceGlyph] {
-        Self.spaceLabels(of: model.config)
+    /// What a 1.8× panel frame draws: three Spaces at most and two
+    /// mock App Bar items, the most its shortest strip holds whole,
+    /// Boxed included (owner, #2781).
+    static let spaces = 3
+    static let mockApps = 2
+    /// The shortest panel frame's height and every frame's pad,
+    /// which `MockAppItemLengthTests` derives the strip from.
+    static let shortFrame: CGFloat = 150
+    static let framePad: CGFloat = 12
+
+    /// The 1.8× shelf picture a panel frame draws — the Bars panel
+    /// and the Colors & glass scene alike, so one place holds what
+    /// the frame fits.
+    static func tile(
+        _ settings: TilingSettings,
+        config: GuiConfig,
+        pocketStands: Bool,
+        showsAppBar: Bool = true
+    ) -> HomeCardBarsTile {
+        HomeCardBarsTile(
+            settings: settings,
+            pocketStands: pocketStands,
+            spaceCount: min(config.spaces.count, spaces),
+            scale: 1.8,
+            spaceLabels: spaceLabels(of: config),
+            showsAppBar: showsAppBar,
+            mockApps: mockApps
+        )
     }
 
     /// Each Space's label as the bar draws it — Core's own
