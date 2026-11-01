@@ -135,6 +135,34 @@ struct LaunchFollowLateCreateTests {
         #expect(core.launchFollow.spawn == nil)
     }
 
+    @Test("An app exit between the create and its hop pays nothing")
+    func exitBeforeTheHopStays() async {
+        // The flush settles the event and drops the slot; only the
+        // hop may follow (#2630).
+        let core = Spawn.makeCore()
+        Base.arrive(9, on: core)
+        core.windowServerChanged(.created, id: WindowID(9))
+        core.eventLoop.onEvent(.appTerminated(pid: 7))
+        await core.deferred.task(for: .arrivalCreated)?.value
+        #expect(core.state.workspaces.activeSpace == Base.home)
+        #expect(core.launchFollow.spawn == nil)
+    }
+
+    @Test("No create within the bound drops the slot")
+    func boundDropsTheSpawn() {
+        let core = Spawn.makeCore()
+        Base.arrive(9, on: core)
+        #expect(core.launchFollow.spawn != nil)
+        let arrived = core.wallClock()
+        core.wallClock = {
+            arrived.addingTimeInterval(
+                LaunchFollowIntent.lateCreateBound
+            )
+        }
+        core.resolveExpiredArrivals()
+        #expect(core.launchFollow.spawn == nil)
+    }
+
     @Test("A route lost before the create pays nothing")
     func routeLostBeforeTheCreateStays() async {
         let core = Spawn.makeCore()
