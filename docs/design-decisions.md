@@ -10337,12 +10337,13 @@ maths still draws its readout — on the plate (#786), for a This
 Profile card.
 
 That tile is the **desktop plate**: a profile card's picture
-is a picture of the user's desktop, so it sits on a plate no
-token repaints with the window's appearance — which plate is
-the look's verdict below (#2859) — and draws in the USER's
-colours read from the draft, not the brand accent: brand
-describes the app, profile colours describe the desktop. Two
-follow-on rulings, both 2026-08-09:
+is a picture of the user's desktop, so it sits on a fixed
+desktop-dark ground (`SettingsTheme.previewPlate`, identical
+in both appearances — what the picture shows must not change
+with the window's appearance) and draws in the USER's palette
+read from the draft, not the brand accent: brand describes the
+app, profile colours describe the desktop. Two follow-on
+rulings, both 2026-08-09:
 
 - **Two card heights, derived from the one group partition.**
   Profile cards hold the plate band; whole-app cards sit
@@ -10353,17 +10354,19 @@ follow-on rulings, both 2026-08-09:
   off `HomeCardOrder.thisProfile`, never a second hand-kept
   list. `HomeCardChromeTests` pins the heights pair and the
   plate's geometry.
-- **The palette fold floors against the dark plate.** The
-  plate is KiwiDesk's ground while the palette is the user's,
+- **The palette fold floors against the plate.** The plate is
+  KiwiDesk's fixed ground while the palette is the user's,
   and a legal palette (Lua is open) can carry a colour
-  legible on its own bar yet invisible on this ground — so on
-  the dark plate a user colour that sinks into it swaps for a
-  theme fallback rather than drawing dark-on-dark, guarded by
-  `HomeCardPaletteWiringTests`.
+  legible on its own bar yet invisible on this ground — so a
+  user colour that sinks into the plate swaps for a theme
+  fallback rather than drawing dark-on-dark, guarded by
+  `HomeCardChromeTests`.
 
 :::unreleased
 **The light plate is earned per look (#2859, owner 2026-10-31,
-replacing #786's "identical in both appearances").** A fixed
+replacing #786's "identical in both appearances", and amending
+its "draws in the USER's palette" and "the fold floors against
+the plate").** A fixed
 dark block in every picture of a light window reads as a hole in
 the page, not as a desk; but a light plate under every look would
 sink a pale ink or ring, and swapping that colour for a fallback
@@ -10378,19 +10381,26 @@ out-contrasts the unfocused outline there and separates from it
 by `ColorVision.separationFloor` under protan simulation
 (`HomeCardPlate.holdsLightPlate`, `PlateGroundTests`). Of the
 bundled palettes True Dark and Monochrome fail and keep the
-dark plate; Sunset's ring is the tightest that passes, at 73.
+dark plate; Sunset's ring is the tightest that passes, at 72.9.
+With borders off no ring draws, and the look's active item
+colour stands in for it in both the verdict and the picture.
 
 On the light plate the look paints only what it paints on a real
 desk: its bars, on their own fill over the plate with their ink
-unchanged, and its focus ring. The plate owns the rest — its
+unchanged, and its focus colour. The plate owns the rest — its
 edge, well, neutral window interiors, outlines, ghosts, frame and
-captions — so there the ink floors against its bar composite,
-and a failing look swaps the ground, never the ink. One paint is
+captions, and the brand's own marks in a darker green that holds
+3:1 on it — so there the user's colours are the bars and the
+focus ring, the ink floors against its bar composite rather than
+the plate, and a failing look swaps the ground, never the ink.
+On the dark plate the fold above stands unchanged. One paint is
 resolved per picture and carried in `schematicPalette`
 (`deskPlate`, `PlateGroundWiringTests`). Advanced's Layouts
-sketches join the plate in both modes, their focused tile in the
-look's focus colour. The look tiles keep their own ground
-(`LookPlate`, #1740), since a look is chosen by its mood.
+sketches and KiwiVision's scene join the plate, the sketches in
+both modes with their focused tile in the look's focus colour;
+KiwiVision's veil stays black over either plate. Only the look
+tiles keep their own ground (`LookPlate`, #1740), since a look
+is chosen by its mood.
 :::
 
 **Settings is one surface: depth grows in place, never by a

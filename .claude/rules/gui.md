@@ -1156,9 +1156,16 @@ must keep:
   look earns (#2859): **a desk picture takes its plate through
   `deskPlate` / `platePaint`, the picture's one palette
   writer, and never names `SettingsTheme.previewPlate` itself**
-  (`PlateGroundWiringTests`); on the dark plate the fold floors
-  against it, on the light one the ink floors against its bar
-  composite and a failing look keeps the dark plate. The two
+  (`PlateGroundWiringTests`). **A picture reads the paint's
+  values, never branches on its ground or picks its own
+  fallback**: a plate view with no writer reads
+  `SchematicPalette.unresolved`, and a value the light plate
+  needs is an accessor on the paint. Every desk picture takes
+  it, KiwiVision's scene included; only the look tiles
+  (`LookPlate`, #1740) keep their own ground. On the dark
+  plate the fold floors against it, on the light one the ink
+  floors against its bar composite and a failing look keeps
+  the dark plate. The two
   card heights derive from the group partition.
   `HomeCardChromeTests` pins the heights pair, the plate's
   shape, silence and group parity and the stroke-above-clip
