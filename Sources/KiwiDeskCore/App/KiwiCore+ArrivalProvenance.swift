@@ -73,10 +73,11 @@ extension KiwiCore {
     }
 
     /// A destroy or re-key of a held arrival settles it first, so
-    /// a script sees a create before the window goes.
+    /// a script sees a create before the window goes; only the hop
+    /// pays a follow.
     func flushHeldArrival(_ id: WindowID) {
         guard let held = arrivals.release(id) else { return }
-        settleArrival(held.waiting, created: held.landed)
+        settleArrival(held.waiting, created: held.landed, follows: false)
     }
 
     /// An exiting app's held arrivals, ahead of the fold that drops
@@ -86,17 +87,20 @@ extension KiwiCore {
     }
 
     /// Settles every held arrival past the bound as not created,
-    /// logging each (#2867).
+    /// logging each whose event waited (#2867): a returned or
+    /// restored window never gets a create.
     func resolveExpiredArrivals() {
         for held in arrivals.releaseExpired(at: wallClock()) {
-            onLog(
-                "arrival: w\(held.window.id.raw) "
-                    + "\(held.window.appBundleID ?? "unknown") — "
-                    + "no WindowServer create within "
-                    + "\(LaunchFollowIntent.lateCreateBound)s, "
-                    + "reported existing (AX create: "
-                    + "\(held.axCreate ? "yes" : "no"))"
-            )
+            if held.eventOwed {
+                onLog(
+                    "arrival: w\(held.window.id.raw) "
+                        + "\(held.window.appBundleID ?? "unknown") — "
+                        + "no WindowServer create within "
+                        + "\(LaunchFollowIntent.lateCreateBound)s, "
+                        + "reported existing (AX create: "
+                        + "\(held.axCreate ? "yes" : "no"))"
+                )
+            }
             settleArrival(held, created: false)
         }
         scheduleArrivalBound()
@@ -106,7 +110,8 @@ extension KiwiCore {
     /// owed event, then the #2478 follow.
     private func settleArrival(
         _ held: ArrivalProvenanceDoor.Waiting,
-        created: Bool
+        created: Bool,
+        follows: Bool = true
     ) {
         let id = held.window.id
         if held.eventOwed {
@@ -117,7 +122,7 @@ extension KiwiCore {
                     ? held.space : state.workspaces.space(of: id)
             )
         }
-        if created {
+        if created, follows {
             payLateSpawnFollow(id)
         } else {
             launchFollow.dropSpawn(of: id)

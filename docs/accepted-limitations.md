@@ -236,7 +236,10 @@ you open with ⌘N may also have its `window_created` arrive up to
 half a second after its `focus_change` (measured 8–10 ms for
 TextEdit): KiwiDesk places and focuses the window at once, and only
 the event waits for macOS to report the window opening. Listen to
-`focus_change` when timing matters.
+`focus_change` when timing matters. An app too slow to finish
+loading when KiwiDesk starts is read a few seconds later; a window
+it opens in that time that macOS does not report through
+Accessibility is reported `existing` and does not take you along.
 :::
 
 Open or Focus asks a running app with **no window at all** for a new one, the way a Dock click does, and it judges "no window" from what it can see ([#1840](https://github.com/KiwiCanopy/KiwiDesk/issues/1840)). A window on another Desktop counts only once KiwiDesk has seen it: on a Mac where the per-Desktop window list cannot be read none does, and anywhere else a window the app opened on a Desktop nobody has shown since does not, so the shortcut sends that reopen anyway. Whether the app then opens a second window beside the one on the other Desktop is the app's own reopen handling. Not observed; reasoned from the mechanism. Switch to the Desktop that holds the window to reach it instead.

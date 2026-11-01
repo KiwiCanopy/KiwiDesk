@@ -171,6 +171,28 @@ struct LifecycleArrivalReasonTests {
         #expect(lines().contains { $0.contains("AX create: no") })
     }
 
+    @Test("a returned window is sent once, and its bound logs nothing")
+    func knownReasonLogsNoTimeout() {
+        let (core, events, lines) = makeCore()
+        core.windowServerChanged(.created, id: WindowID(4))
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.eventLoop.onEvent(
+            .windowDestroyed(WindowID(4), wasMinimized: true)
+        )
+        // Long after its create: the un-minimize has none.
+        let later = core.wallClock().addingTimeInterval(60)
+        core.wallClock = { later }
+        core.eventLoop.onEvent(.windowCreated(window(4)))
+        core.wallClock = {
+            later.addingTimeInterval(LaunchFollowIntent.lateCreateBound)
+        }
+        core.resolveExpiredArrivals()
+        #expect(
+            reasons(events()) == [.string("new"), .string("restored")]
+        )
+        #expect(!lines().contains { $0.contains("no WindowServer") })
+    }
+
     @Test("KiwiDesk's own window is new, never held")
     func ownWindowIsNew() {
         let (core, events, _) = makeCore()
