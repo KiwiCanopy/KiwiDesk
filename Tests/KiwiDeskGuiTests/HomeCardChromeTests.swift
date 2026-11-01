@@ -78,7 +78,7 @@ struct HomeCardChromeTests {
         )
         #expect(
             plate.contains(
-                ".background(SettingsTheme.previewPlate)"
+                ".deskPlate(settings,in:Rectangle())"
             )
         )
         #expect(plate.contains(".accessibilityHidden(true)"))

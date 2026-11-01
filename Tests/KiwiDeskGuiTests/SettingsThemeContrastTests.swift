@@ -272,13 +272,19 @@ struct SettingsThemeContrastTests {
             on: SettingsTheme.keyFree,
             inkAlpha: 0.75
         ),
-        // The bound key's glyph — `KeyCap.ink` draws
-        // previewPlate on the accent fill; the same pair holds the
-        // gesture strip's accent hover border on its plate (#2537).
+        // The bound key's glyph — `KeyCap.ink` draws keyGlyph
+        // on the accent fill (#2859).
         Pairing(
-            "previewPlate glyph on accent",
-            SettingsTheme.previewPlate,
+            "keyGlyph on accent",
+            SettingsTheme.keyGlyph,
             on: SettingsTheme.accent
+        ),
+        // The gesture strip's accent hover border on the dark
+        // plate (#2537).
+        Pairing(
+            "accent hover cue on previewPlate",
+            SettingsTheme.accent,
+            on: SettingsTheme.previewPlate
         ),
         // The narrow-window "Show preview" chip (17a): ordinary
         // ink on a card plane the render washes with the accent
@@ -302,6 +308,7 @@ struct SettingsThemeContrastTests {
         for pairing
             in pairings + Self.updateWindow + Self.jumpChips
             + Self.chips + Self.jumpPanel + Self.dropdownCursor
+            + Self.lightPlate
         {
             for dark in [false, true] {
                 let ratio = try ThemeContrast.contrast(

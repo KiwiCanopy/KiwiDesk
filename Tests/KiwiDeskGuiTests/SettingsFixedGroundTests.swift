@@ -6,7 +6,9 @@ import Testing
 /// The raw-colour lens's fixed-ground arm, split from
 /// `SettingsRawColorTests` at the §2.1 ceiling.
 ///
-/// Chrome that is dark in BOTH modes: the ambient-derived
+/// Chrome whose ground the window's appearance does not pick —
+/// dark in both modes, or a plate the look's verdict picks
+/// (#2859): the ambient-derived
 /// hierarchical greys land near-white or near-black by the
 /// WINDOW's appearance while the ground never moves, so on
 /// these families they are banned outright — on mode-varying
@@ -28,7 +30,7 @@ import Testing
 /// green here is not read as more than it is: a family qualifies
 /// when its GROUND is fixed-dark, and a file that merely draws a
 /// fixed-dark plate as one element on a mode-varying ground is
-/// outside it — the tour's two `previewPlate` panels and
+/// outside it — the tour's two plate panels and
 /// `BarsPanelPreview` are the shipped cases. Widening the stems
 /// to reach them would ban an ambient ink across whole files
 /// whose ground does move with the appearance, which the
@@ -41,7 +43,7 @@ struct SettingsFixedGroundTests {
 
     /// `ChromeScanRoots`, not `Settings` alone — the same root
     /// `SettingsThemeWiringTests` was moved onto in this change:
-    /// the tour draws `previewPlate` too, so a Settings-only
+    /// the tour draws the plate too, so a Settings-only
     /// walk could not see a fixed-dark family landing there.
     private func chromeSources() throws -> [URL] {
         try ChromeScanRoots.sources(from: #filePath)
@@ -53,6 +55,10 @@ struct SettingsFixedGroundTests {
         // The Mouse & trackpad pictures, drawn wholly on the
         // plate (#1726); `GestureEntry`'s sentence is not.
         "GestureInk", "GesturePictures",
+        // Advanced's Layouts sketches, moved onto the plate
+        // (#2859): the plate's ground is the look's verdict, not
+        // the window's, so no ambient ink rides beside it.
+        "LayoutStrip", "LayoutPreviewPanel", "SpacesPanelPreview",
     ]
 
     @Test("no hierarchical grey on a fixed-dark ground")

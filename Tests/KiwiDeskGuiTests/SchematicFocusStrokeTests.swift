@@ -23,9 +23,12 @@ struct SchematicFocusStrokeTests {
             // …from the draft's border style, only while
             // borders are enabled…
             "guardstyle.enabledelse{returnnil}",
-            // …and floors a plate mount's colour against the
-            // plate before showing it there.
-            "!HomeCardPlate.plateLegible(style.focusedColor)",
+            // …and floors a dark plate mount's colour against
+            // that plate before showing it there; the light
+            // plate's verdict already holds the ring (#2859).
+            "ifpalette?.ground==.dark,"
+                + "!HomeCardPlate.plateLegible(style.focusedColor,"
+                + "on:HomeCardPlate.darkGround)",
         ],
         "Components/Layouts/LayoutSchematicKit.swift": [
             // Both tile shapes CONSULT it on their active arm.
