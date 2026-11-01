@@ -154,31 +154,33 @@ struct StackSchematic: View {
 
     // MARK: - Master zone
 
-    /// The master zone lined up along its staged orientation,
-    /// capped for legibility with a "+N" chip when the master
-    /// count outgrows the mini-canvas.
-    @ViewBuilder
+    /// The master zone lined up along its staged orientation, every
+    /// master drawn: the desk never hides one, so the zone carries no
+    /// "+N" (#2891).
     private var masterZone: some View {
-        if masterOrientation == .vertical {
-            VStack(spacing: 3) { masterTiles }
-        } else {
-            HStack(spacing: 3) { masterTiles }
+        GeometryReader { geo in
+            let vertical = masterOrientation == .vertical
+            let gap = Self.masterGap(
+                along: vertical ? geo.size.height : geo.size.width,
+                count: masterDisplay.count
+            )
+            if vertical {
+                VStack(spacing: gap) { masterTiles }
+            } else {
+                HStack(spacing: gap) { masterTiles }
+            }
         }
     }
 
+    /// The gap between masters: the canvas's inner gap, shrunk when
+    /// the zone is crowded so no tile collapses (#2891).
+    static func masterGap(along span: CGFloat, count: Int) -> CGFloat {
+        guard count > 1 else { return zoneGap }
+        return min(zoneGap, span / CGFloat(4 * count))
+    }
+
     private var masterTiles: some View {
-        let wins = masterDisplay
-        let visible = min(wins.count, 4)
-        let hidden = wins.count - visible
-        return ForEach(0..<visible, id: \.self) { i in
-            ZStack(alignment: .bottomTrailing) {
-                tile(for: wins[i])
-                if i == visible - 1, hidden > 0 {
-                    SchematicMoreChip(hidden: hidden)
-                        .padding(2)
-                }
-            }
-        }
+        ForEach(masterDisplay, id: \.self) { tile(for: $0) }
     }
 
     /// Slot geometry per stack window; a hidden one sits behind
