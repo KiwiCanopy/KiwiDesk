@@ -36,9 +36,10 @@ struct SpaceSlideSeamTests {
 
     /// Every applier member that writes a frame stages a held
     /// window's write first — found by what it cannot avoid, the
-    /// writer's frame call, so a new write path is caught by its
-    /// write rather than by a list. The hold's own release, which
-    /// performs the staged write, is the one member exempt.
+    /// writer's frame call or the bottom-band write that wraps it
+    /// (#2894), so a new write path is caught by its write rather
+    /// than by a list. The hold's own release, which performs the
+    /// staged write, is the one member exempt.
     @Test("every applier write path reaches the hold")
     func writePathsReachTheHold() throws {
         let tiling = Self.root.appendingPathComponent(
@@ -55,6 +56,7 @@ struct SpaceSlideSeamTests {
             for (name, body) in SourceScan.memberBodies(in: source)
             where body.contains("writer.setFrame(")
                 || body.contains("writer.setPosition(")
+                || body.contains("BottomBandWrite.write(")
             {
                 writers.append(name)
                 guard !Self.releases.contains(name) else { continue }

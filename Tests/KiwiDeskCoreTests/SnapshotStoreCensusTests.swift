@@ -155,6 +155,8 @@ struct SnapshotStoreCensusTests {
             (.behind, "an age-bounded echo ledger (#881)"),
         "tiler.applier.recent.stamps":
             (.behind, "an age-bounded echo ledger (#1254)"),
+        "tiler.applier.askedHeights.heights":
+            (.behind, "a restart's first ask reads the frame (#2894)"),
         "tiler.animation.animations[]":
             (.behind, "an animation in flight"),
         "tiler.animation.ticks.heldSize":

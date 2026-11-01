@@ -1656,18 +1656,21 @@ editing here:
   Space slide's hold stages owes none either: it lands once, at the
   slide's landing (#2524, `FrameApplierHeldTests` ▸
   `heldSetOwesNoResend`).
-- **A frame write with a size reaches the app through
-  `BottomBandWrite.write`, from every applier path (#2894).**
-  macOS refused a small height shrink of a window ending near
-  its screen's bottom while its app's EUI was off and another
-  screen reached lower (macOS 27, measured 2026-11-01), so a
-  spring's last frames left the window on an earlier one and the
-  #677 learner confirmed a false bound. The write lifts the
-  window's current height clear of `BottomBandWrite.band` first;
-  a new applier write path takes that door rather than
-  `writer.setFrame`, and the screens it reads come from
-  `TilingEngine.allScreenFrames`, never a live read in the
-  applier (`BottomBandWriteTests`).
+- **Route an applier write with a size through
+  `BottomBandWrite.write`, never `writer.setFrame` (#2894).** It
+  lifts a window ending near a screen's bottom edge before sizing
+  it, which macOS would otherwise refuse; its docstring carries
+  the measurement. The screens it reads come from
+  `TilingEngine.allScreenFrames`, never a live read in the applier.
+  Only a shrink of the height last asked reads the window's frame
+  (`AskedHeights`), so a Space switch's unpark adds no AX message.
+  `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
+  three doors, `onlyAShrinkReads` the read's gate, and
+  `BottomBandWriteSeamTests` ▸
+  `appliersTakeTheBand` reds a `FrameApplier` file spelling the
+  writer's frame call. The quit gather's direct
+  `WindowControl.setFrame` is the one ruled exception: nothing
+  learns from a frame written at quit.
 - **A scrolling viewport offset travels with the slot it was
   measured against (#966).** One slot size serves the whole
   row, so anything that changes it — a resize, a window opening

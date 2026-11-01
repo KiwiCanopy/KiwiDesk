@@ -16,6 +16,9 @@ final class HeldWrites: @unchecked Sendable {
     struct Entry: Equatable {
         var frame: CGRect
         var setSize: Bool
+        /// The screen whose bottom band the size write clears
+        /// (#2894).
+        var band: CGRect? = nil
     }
 
     enum Staging: Equatable {
@@ -70,12 +73,14 @@ final class HeldWrites: @unchecked Sendable {
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool,
+        band: CGRect? = nil,
         now: DispatchTime = .now()
     ) -> Staging {
         lock.lock()
         defer { lock.unlock() }
         if var entry = staged[id] {
             entry.frame = frame
+            if setSize { entry.band = band }
             entry.setSize = entry.setSize || setSize
             staged[id] = entry
             return .merged
@@ -84,7 +89,7 @@ final class HeldWrites: @unchecked Sendable {
             deadlines[id] = nil
             return .pass
         }
-        staged[id] = Entry(frame: frame, setSize: setSize)
+        staged[id] = Entry(frame: frame, setSize: setSize, band: band)
         return .staged(deadline)
     }
 
@@ -146,8 +151,13 @@ extension FrameApplier {
 
     /// Stages `frame` for a held window; true when it was held, so
     /// the caller sends nothing now.
-    func stageHeld(_ id: WindowID, _ frame: CGRect, setSize: Bool) -> Bool {
-        switch held.stage(id, frame, setSize: setSize) {
+    func stageHeld(
+        _ id: WindowID,
+        _ frame: CGRect,
+        setSize: Bool,
+        band: CGRect? = nil
+    ) -> Bool {
+        switch held.stage(id, frame, setSize: setSize, band: band) {
         case .pass: return false
         case .merged: return true
         case .staged(let deadline):
@@ -169,7 +179,6 @@ extension FrameApplier {
         nonisolated(unsafe) let target = element
         let held = held
         let writer = writer
-        let screens = screenFrames()
         let holds = enhancedUI
         let recent = recentStamp
         let move = ownWindowMove
@@ -193,7 +202,7 @@ extension FrameApplier {
                 if own {
                     MainActor.assumeIsolated {
                         if !move(id, entry.frame, entry.setSize) {
-                            Self.write(entry, target, writer, screens)
+                            Self.write(entry, target, writer)
                         }
                     }
                 } else if holds.noteQueued(
@@ -202,10 +211,10 @@ extension FrameApplier {
                     ifGeneration: generation
                 ) {
                     holds.beginInstant(pid, writer)
-                    Self.write(entry, target, writer, screens)
+                    Self.write(entry, target, writer)
                     holds.endInstant(pid, writer)
                 } else {
-                    Self.write(entry, target, writer, screens)
+                    Self.write(entry, target, writer)
                 }
                 recent(id)  // as `apply`, #1254
             case .later(let later):
@@ -219,14 +228,13 @@ extension FrameApplier {
     nonisolated private static func write(
         _ entry: HeldWrites.Entry,
         _ target: AXUIElement,
-        _ writer: FrameWriter,
-        _ screens: [CGRect]
+        _ writer: FrameWriter
     ) {
         if entry.setSize {
             BottomBandWrite.write(
                 entry.frame,
                 target,
-                screens: screens,
+                nearBottomOf: entry.band,
                 writer: writer
             )
         } else {
