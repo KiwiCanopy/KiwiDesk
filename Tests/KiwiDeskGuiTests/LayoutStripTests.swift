@@ -111,6 +111,15 @@ struct LayoutStripTests {
                 + "LayoutStrip.swift"
         )
         #expect(strip.contains(".mask(StripFade(fades:fades))"))
+        // The live offset and viewport feed the fade and the follow.
+        #expect(strip.contains("Self.fades(offset:offset,viewport:viewport)"))
+        #expect(
+            strip.contains(
+                "Self.followAnchor(index:index,offset:offset,"
+                    + "viewport:viewport)"
+            )
+        )
+        #expect(strip.contains("action:{offset=$0}"))
         #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
         #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
         #expect(strip.contains(".focused($focused,equals:mode)"))
@@ -148,6 +157,9 @@ struct LayoutStripTests {
                     + "height:Self.depth)"
             )
         )
-        #expect(metrics.contains("depth:depth"))
+        // The fades call itself, not followMargin's twin.
+        #expect(
+            metrics.contains("offset:offset,viewport:viewport,depth:depth)")
+        )
     }
 }
