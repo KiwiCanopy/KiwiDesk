@@ -277,6 +277,22 @@ struct BottomBandWriteTests {
         #expect(entry?.band == screen)
     }
 
+    @Test("A taller sized frame merged into a waiting shrink keeps its band")
+    func pendingSizedMergeKeepsTheBand() {
+        let pending = PendingFrames()
+        let id = WindowID(1)
+        let taller = slot.insetBy(dx: 0, dy: -1)
+        _ = pending.put(
+            id,
+            .init(element: element, frame: slot, setSize: true, band: screen)
+        )
+        _ = pending.put(
+            id,
+            .init(element: element, frame: taller, setSize: true)
+        )
+        #expect(pending.take(id)?.band == screen)
+    }
+
     @Test("A write far from any bottom edge reads nothing")
     func farWriteReadsNothing() async throws {
         let high = slot.offsetBy(dx: 0, dy: -300)

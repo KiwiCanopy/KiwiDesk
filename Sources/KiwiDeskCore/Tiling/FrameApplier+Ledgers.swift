@@ -92,9 +92,14 @@ final class PendingFrames: @unchecked Sendable {
         defer { lock.unlock() }
         if let existing = entries.removeValue(forKey: id) {
             var merged = entry
-            // The newer frame's band; a position-only frame
-            // keeps the size write's.
-            if !entry.setSize { merged.band = existing.band }
+            // The newer frame's band, else the waiting write's
+            // where the newer frame still ends in it: the waiting
+            // shrink never ran, so the window may still need it.
+            merged.band =
+                entry.band
+                ?? existing.band.flatMap {
+                    BottomBandWrite.screen(for: entry.frame, among: [$0])
+                }
             merged.setSize = entry.setSize || existing.setSize
             entries[id] = merged
             return true

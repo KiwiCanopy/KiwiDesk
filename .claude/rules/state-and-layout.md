@@ -1666,7 +1666,7 @@ editing here:
   echo-fed height (`FrameApplier.trackedHeight`), which an app's
   own resize reaches, and the height last sent (`SentHeights`),
   which a spring's shrink-back beats its echo to — never either
-  alone (`overshootShrinkBackIsLifted`).
+  alone (`BottomBandWriteTests` ▸ `overshootShrinkBackIsLifted`).
   `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
   three doors, `unaskedGrowIsLifted` the window's answer, and
   `BottomBandWriteSeamTests` ▸
