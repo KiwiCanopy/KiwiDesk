@@ -22,8 +22,11 @@ extension AppDelegate {
                 from: link,
                 fallbackName: L("looks.default_name", "My Look")
             )
-            dashboard.show()
-            dashboard.model.wearLinkedLook(look)
+            // Worn before the window fronts, or its first frame
+            // draws the look it had and its plates flash (#2863).
+            dashboard.show {
+                self.dashboard.model.wearLinkedLook(look)
+            }
         } catch {
             Self.refuseLinkedLook(Self.linkFailure(error))
         }
