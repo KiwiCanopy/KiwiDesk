@@ -2,16 +2,16 @@ import Foundation
 import Testing
 
 /// An app's Pocket key row has one spelling and one reader (#2612
-/// ▸ 6): `PocketAppLuaArg` writes and reads `KiwiDesk.pocket_app(`,
+/// ▸ 6): `PocketAppLuaArg` writes and reads `KiwiDesk.pocket_app`,
 /// and every other file in both trees goes through it, so the GUI's
-/// rows, KiwiHub and Core can never read the row two ways.
-///
-/// Disclosed limit: `SourceScan.stripComments` cuts each line at its
-/// first `//`, so a `//`-bearing literal ahead of a needle on the
-/// same line erases that hit — fail-open, as the sibling seam guards.
+/// rows, KiwiHub and Core can never read the row two ways. The
+/// needle is the call's prefix without its paren, so a matcher
+/// reading the prefix alone reds too; the bare verb `pocket_app`,
+/// which dispatch and the API records spell, it leaves alone.
+/// Disclosed limit: a needle split by concatenation passes.
 @Suite("Pocket key row matcher seam")
 struct PocketAppMatcherSeamTests {
-    private let needle = "pocket_app("
+    private let needle = "KiwiDesk.pocket_app"
 
     /// Repo-relative path -> how many times it may spell the call.
     private let allowed = [

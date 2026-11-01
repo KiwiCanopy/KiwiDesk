@@ -33,6 +33,30 @@ struct PocketGroupTests {
         )
     }
 
+    /// Every key the census places in the card sits in exactly one
+    /// of its three lists, and the card mounts the per-app rows
+    /// (#2612).
+    @Test("the card's lists partition its census keys")
+    func listsPartitionTheCard() throws {
+        let lists =
+            ShortcutsRowOrder.pocketAtRest + ShortcutsRowOrder.pocketList
+            + ShortcutsRowOrder.pocketApps
+        let placed = SettingKey.allCases.filter {
+            $0.placement.area == .shortcuts
+                && $0.placement.container == .pocket
+        }
+        #expect(Set(lists) == Set(placed))
+        #expect(lists.count == Set(lists).count)
+        #expect(ShortcutsRowOrder.pocketApps.contains(.shortcuts(.pocketApps)))
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Components/Keybindings/"
+                    + "PocketGroup.swift"
+            )
+        )
+        #expect(source.contains("PocketAppRows(model: model"))
+    }
+
     @Test("each capacity reads as its segment says it")
     func capacityNames() {
         LocalizationManager.shared.select("en")

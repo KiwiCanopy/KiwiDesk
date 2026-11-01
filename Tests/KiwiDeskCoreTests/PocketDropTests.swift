@@ -159,6 +159,26 @@ struct PocketDropTests {
         #expect(core.pocketPlate.dragging == nil)
     }
 
+    @Test("a keyed window lights not and is refused with its key")
+    func keyedRefuses() throws {
+        let core = try makeCore()
+        var asked: [String] = []
+        core.barMenuHooks.pocketKeyChord = {
+            asked.append($0)
+            return nil
+        }
+        let marked = core.state.markPocketWindow(two, owner: "app.two")
+        #expect(marked)
+        point(core, onPlate: false)
+        move(core, two)
+        point(core, onPlate: true)
+        move(core, two)
+        #expect(core.pocketPlate.specs.values.first?.dropHovered == false)
+        end(core, two)
+        #expect(core.state.pocketPhase(of: two) == .out)
+        #expect(asked == ["app.two"])
+    }
+
     @Test("a resize latches off the plate it began as a move")
     func resizeLatches() throws {
         let core = try makeCore()

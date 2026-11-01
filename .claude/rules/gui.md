@@ -2098,11 +2098,8 @@ the key rows' ink, never a topic glyph of its own**
 (`ShortcutSettingRowSeamTests` ▸ `settingRowWearsTheGlyph`).
 
 **An app's Pocket key row is read through
-`PocketAppLuaArg.bundleID(of:)` and named through
-`KeybindingCatalog.pocketApp`, the one shape Core reads (#2612)** —
-the Settings rows, the import classifier, the naming door and
-KiwiHub alike; a reader never spells the call itself
-(`PocketAppMatcherSeamTests` ▸ `oneSpelling`).
+`PocketAppLuaArg.bundleID(of:)` alone** — profiles.md ▸ *A verb
+the GUI writes into a stored binding* owns the obligation.
 
 ## A sided chord is drawn once and spoken in words (#2601)
 
