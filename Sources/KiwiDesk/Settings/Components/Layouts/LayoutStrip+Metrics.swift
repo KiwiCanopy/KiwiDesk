@@ -1,11 +1,15 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The strip's sizes and overflow fades (#2901).
+/// The strip's sizes, overflow fades and focus follow (#2901).
 extension LayoutStrip {
     /// The thumbnail's width: six tiles fit the pane at
     /// `SettingsTheme.contentMaxWidth` (`LayoutStripTests`).
     nonisolated static let schematicWidth: CGFloat = 112
+    /// Around the thumbnail inside its plate, and around the tile's
+    /// content inside its chrome.
+    nonisolated static let platePadding: CGFloat = 4
+    nonisolated static let chromePadding: CGFloat = 6
     nonisolated static let gap: CGFloat = 10
     /// Room around the row for a tile's focus ring, inside the clip.
     nonisolated static let ringRoom: CGFloat = 4
@@ -16,16 +20,27 @@ extension LayoutStrip {
         schematicWidth / (SchematicScale.tile.width ?? schematicWidth)
     }
 
-    /// A tile's outer width: the thumbnail, its plate padding (4)
-    /// and the chrome padding (6), each on both sides.
     nonisolated static var tileWidth: CGFloat {
-        schematicWidth + 2 * 4 + 2 * 6
+        schematicWidth + 2 * platePadding + 2 * chromePadding
     }
 
-    /// The whole row, ring room included.
+    /// Each tile's run along the row, the ring room riding on the
+    /// end tiles.
+    nonisolated static var lengths: [CGFloat] {
+        let count = LayoutMode.placementTabs.count
+        return (0..<count).map { index in
+            tileWidth + (index == 0 ? ringRoom : 0)
+                + (index == count - 1 ? ringRoom : 0)
+        }
+    }
+
     nonisolated static var rowWidth: CGFloat {
-        let count = CGFloat(LayoutMode.placementTabs.count)
-        return count * tileWidth + (count - 1) * gap + 2 * ringRoom
+        lengths.reduce(0, +) + gap * CGFloat(max(lengths.count - 1, 0))
+    }
+
+    /// The fade's depth: the drawn thumbnail's height.
+    nonisolated static var depth: CGFloat {
+        SchematicScale.tile.height * schematicFactor
     }
 
     /// The thumbnail at the tile scale, scaled down as KiwiHub's
@@ -41,35 +56,64 @@ extension LayoutStrip {
         )
         .frame(width: tile.width, height: tile.height)
         .scaleEffect(factor)
-        .frame(
-            width: Self.schematicWidth,
-            height: tile.height * factor
-        )
-    }
-
-    var fades: ShelfOverflow.Fades {
-        Self.fades(offset: offset, viewport: viewport)
+        .frame(width: Self.schematicWidth, height: Self.depth)
     }
 
     /// Core's overflow fades (`ShelfOverflow.fades`), as the gesture
-    /// strip's; the ring room rides on the end tiles.
+    /// strip's.
     nonisolated static func fades(offset: CGFloat, viewport: CGFloat)
         -> ShelfOverflow.Fades
     {
-        let count = LayoutMode.placementTabs.count
-        let lengths = (0..<count).map { index -> CGFloat in
-            let ends =
-                (index == 0 ? ringRoom : 0)
-                + (index == count - 1 ? ringRoom : 0)
-            return tileWidth + ends
-        }
-        return ShelfOverflow.fades(
+        ShelfOverflow.fades(
             lengths: lengths,
             gap: gap,
             total: rowWidth,
             offset: offset,
             viewport: viewport,
-            depth: SchematicScale.tile.height * schematicFactor
+            depth: depth
         )
+    }
+
+    /// Where Core's follow (`ShelfOverflow.offset`) puts the strip
+    /// for the tile at `index`, clear of the fade.
+    nonisolated static func followOffset(
+        index: Int,
+        offset: CGFloat,
+        viewport: CGFloat
+    ) -> CGFloat {
+        ShelfOverflow.offset(
+            current: offset,
+            lengths: lengths,
+            gap: gap,
+            total: rowWidth,
+            activeIndex: index,
+            viewport: viewport,
+            margin: ShelfOverflow.followMargin(
+                gap: gap,
+                depth: depth,
+                viewport: viewport
+            )
+        )
+    }
+
+    /// `followOffset` as a `scrollTo` anchor on the tile, or nil
+    /// where the strip need not move: an anchor's x places the
+    /// tile's leading edge at x · (viewport − tile) in view.
+    nonisolated static func followAnchor(
+        index: Int,
+        offset: CGFloat,
+        viewport: CGFloat
+    ) -> UnitPoint? {
+        let target = followOffset(
+            index: index,
+            offset: offset,
+            viewport: viewport
+        )
+        guard abs(target - offset) > 0.5, viewport > tileWidth else {
+            return nil
+        }
+        let start = ringRoom + CGFloat(index) * (tileWidth + gap)
+        let share = (start - target) / (viewport - tileWidth)
+        return UnitPoint(x: min(max(share, 0), 1), y: 0.5)
     }
 }

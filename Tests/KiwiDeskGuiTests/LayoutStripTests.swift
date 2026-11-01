@@ -65,6 +65,45 @@ struct LayoutStripTests {
         #expect(end.leading > 0)
     }
 
+    /// A Tab onto the first hidden tile lands it clear of the
+    /// trailing fade, and one back onto the first clear of the
+    /// leading fade.
+    @Test("Tab focus lands a tile clear of the fade")
+    func followClearsTheFade() throws {
+        let viewport: CGFloat = 460
+        let tile = LayoutStrip.tileWidth
+        let margin = ShelfOverflow.followMargin(
+            gap: LayoutStrip.gap,
+            depth: LayoutStrip.depth,
+            viewport: viewport
+        )
+        let ahead = try #require(
+            LayoutStrip.followAnchor(
+                index: 3,
+                offset: 0,
+                viewport: viewport
+            )
+        )
+        let lead = ahead.x * (viewport - tile)
+        #expect(lead + tile <= viewport - margin + 0.5)
+        let end = LayoutStrip.rowWidth - viewport
+        let back = try #require(
+            LayoutStrip.followAnchor(
+                index: 1,
+                offset: end,
+                viewport: viewport
+            )
+        )
+        #expect(back.x * (viewport - tile) >= margin - 0.5)
+        // A tile already clear asks for no scroll.
+        let clear = LayoutStrip.followAnchor(
+            index: 0,
+            offset: 0,
+            viewport: viewport
+        )
+        #expect(clear == nil)
+    }
+
     @Test("the strip is masked, measured and follows Tab focus")
     func wiring() throws {
         let strip = try Self.squashed(
@@ -76,10 +115,39 @@ struct LayoutStripTests {
         #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
         #expect(strip.contains(".focused($focused,equals:mode)"))
         #expect(strip.contains(".id(mode)"))
-        #expect(strip.contains("proxy.scrollTo(mode)"))
+        #expect(
+            strip.contains(
+                ".onChange(of:focused){_,modein"
+                    + "follow(mode,with:proxy)}"
+            )
+        )
+        #expect(strip.contains("proxy.scrollTo(mode,anchor:anchor)"))
+        #expect(
+            strip.contains("schematic(mode).padding(Self.platePadding)")
+        )
+        #expect(
+            strip.contains(
+                ".padding(Self.chromePadding)"
+                    + ".frame(width:Self.tileWidth)"
+            )
+        )
         // The ring room sits inside the clip, given back outside.
         #expect(strip.contains(".padding(Self.ringRoom)"))
         #expect(strip.contains(".padding(.horizontal,-Self.ringRoom)"))
-        #expect(strip.contains(".frame(width:Self.tileWidth)"))
+    }
+
+    @Test("the thumbnail is drawn at the strip's scale")
+    func schematicIsScaled() throws {
+        let metrics = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/Layouts/"
+                + "LayoutStrip+Metrics.swift"
+        )
+        #expect(
+            metrics.contains(
+                ".scaleEffect(factor).frame(width:Self.schematicWidth,"
+                    + "height:Self.depth)"
+            )
+        )
+        #expect(metrics.contains("depth:depth"))
     }
 }

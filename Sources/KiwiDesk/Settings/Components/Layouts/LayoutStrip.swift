@@ -9,8 +9,8 @@ struct LayoutStrip: View {
     @ObservedObject var model: SettingsModel
     @Binding var selection: LayoutMode
     @State private var hovered: LayoutMode?
-    @State var offset: CGFloat = 0
-    @State var viewport: CGFloat = 0
+    @State private var offset: CGFloat = 0
+    @State private var viewport: CGFloat = 0
     @FocusState private var focused: LayoutMode?
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -33,17 +33,32 @@ struct LayoutStrip: View {
                 // still lines up with the header.
                 .padding(.horizontal, -Self.ringRoom)
                 .onChange(of: focused) { _, mode in
-                    guard let mode else { return }
-                    withAnimation(
-                        reduceMotion ? nil : .easeOut(duration: 0.2)
-                    ) {
-                        proxy.scrollTo(mode)
-                    }
+                    follow(mode, with: proxy)
                 }
             }
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(chooseTitle)
+    }
+
+    private var fades: ShelfOverflow.Fades {
+        Self.fades(offset: offset, viewport: viewport)
+    }
+
+    /// Scrolls a Tab-focused tile clear of the fade, as the bars
+    /// follow their active item (`ShelfOverflow.offset`).
+    private func follow(_ mode: LayoutMode?, with proxy: ScrollViewProxy) {
+        guard let mode,
+            let index = LayoutMode.placementTabs.firstIndex(of: mode),
+            let anchor = Self.followAnchor(
+                index: index,
+                offset: offset,
+                viewport: viewport
+            )
+        else { return }
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+            proxy.scrollTo(mode, anchor: anchor)
+        }
     }
 
     private var row: some View {
@@ -76,7 +91,7 @@ struct LayoutStrip: View {
         } label: {
             VStack(spacing: 4) {
                 schematic(mode)
-                    .padding(4)
+                    .padding(Self.platePadding)
                     .deskPlate(
                         model.config.settings,
                         in: RoundedRectangle(cornerRadius: 6)
@@ -90,7 +105,7 @@ struct LayoutStrip: View {
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
             }
-            .padding(6)
+            .padding(Self.chromePadding)
             .frame(width: Self.tileWidth)
             .background(selectionChrome(mode, selected: selected))
         }
