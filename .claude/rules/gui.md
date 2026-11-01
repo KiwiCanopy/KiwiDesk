@@ -2116,6 +2116,17 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
+## A sideways strip fades and follows through Core (#2901)
+
+**A Settings strip that scrolls sideways fades through
+`StripFade` over `ShelfOverflow.fades`, and one that takes
+keyboard focus scrolls the focused item clear of that fade
+through `ShelfOverflow.offset` with `followMargin`** — the
+bars' own arithmetic, never a fade or a follow of its own
+(`GestureStripTests`, `LayoutStripTests`). A bare `scrollTo`
+stops the item at the viewport's edge, which is where the fade
+draws.
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord takes it from `ChordGlyphs`**, which
