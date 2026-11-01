@@ -33,13 +33,18 @@ extension KiwiCore {
     /// a take-out keeps its frame. Out, it is placed where it shows;
     /// the `pocket` fallback files the same frame through
     /// `becomePocketWindow` instead.
-    /// `owner` ties it to its app's Pocket key (#2612).
-    func markAsPocketWindow(_ id: WindowID, owner: String? = nil) {
+    /// `owner` ties it to its app's Pocket key (#2612); an arrival
+    /// passes `retiling: false`, its event retile being the pass.
+    func markAsPocketWindow(
+        _ id: WindowID,
+        owner: String? = nil,
+        retiling: Bool = true
+    ) {
         let wasFloating = isEffectiveFloatForPlacement(id)
         guard state.markPocketWindow(id, owner: owner) else { return }
         onLog("pocket: w\(id.raw) marked")
         refreshStickyReach()
-        retile()
+        if retiling { retile() }
         if !wasFloating { placeFloating(id) }
     }
 

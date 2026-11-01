@@ -29,7 +29,7 @@ public struct StateCoordinator: Sendable {
     /// Physical display of an arriving window (#1010), consumed on create.
     public var arrivalDisplay: DisplayID?
     /// The arrival a `pocket_app` press claims (#2612), likewise.
-    public var pocketClaimed: WindowID?
+    public var pocketClaimed: PocketArrivalClaim?
 
     /// A Desktop return's owed focus (#1207), mirrored likewise.
     public var returningFocus: WindowID?

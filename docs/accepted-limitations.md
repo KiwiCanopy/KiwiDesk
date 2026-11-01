@@ -372,9 +372,12 @@ and swallows it. Press `⌃⌥P` to take the window out.
 
 :::unreleased
 An app's own Pocket key ([`pocket_app`](lua-reference.md#pocket_app))
-keeps its window only while KiwiDesk runs
-([#2612](https://github.com/KiwiCanopy/KiwiDesk/issues/2612)). Quit
-KiwiDesk and the window is left floating where it is; the next press
-of the key opens a fresh window of the app, and the old one stays an
-ordinary window. An update's restart keeps it.
+forgets its window when KiwiDesk quits
+([#2612](https://github.com/KiwiCanopy/KiwiDesk/issues/2612)): the
+quit files the window as the [pocket](lua-reference.md#pocket) files
+every pocket window, and the next press of the key opens a fresh
+window of the app. Which window a key owns is kept only for a
+restart that comes straight back — an update, or `kiwidesk service
+restart` — and never written to a profile, so nothing else can hand
+it back.
 :::

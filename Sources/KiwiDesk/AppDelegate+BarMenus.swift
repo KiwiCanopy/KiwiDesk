@@ -16,7 +16,7 @@ extension AppDelegate {
         }
         core.barMenuHooks.pocketKeyChord = { [weak core] app in
             core.flatMap {
-                ShortcutsOpenBinding.pocketAppGlyphs(core: $0, app: app)
+                ShortcutsOpenBinding.pocketAppChord(core: $0, app: app)
             }
         }
     }

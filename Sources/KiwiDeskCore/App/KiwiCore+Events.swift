@@ -112,8 +112,8 @@ extension KiwiCore {
                 break
             }
             // The Pocket key's window, ahead of its event (#2612).
-            if pocketClaim == window.id, provenance != .awaitingCreate {
-                takePocketClaim(window.id)
+            if pocketClaim == .claimed(window.id) {
+                takePocketClaim(window.id, retiling: false)
             }
             announceArrival(
                 window,

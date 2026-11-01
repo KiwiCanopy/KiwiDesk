@@ -5721,23 +5721,25 @@ Space, focused. Each later call puts it away or takes it out,
 as `pocket` does for the other pocket windows. Its app rule's
 "Open in a Space" does not apply to it.
 
-The window is tied to the app while a shortcut runs exactly
-`KiwiDesk.pocket_app("<bundle id>")` — Settings writes the bundle
-id lowercased — and it goes in and out by that shortcut alone:
-`pocket` steps past it, and
+The window is tied to the app while a shortcut's whole body is
+the one call `KiwiDesk.pocket_app("<bundle id>")`, its argument in
+double quotes, and it goes in and out by that shortcut alone:
+`pocket` steps past it, and `pocket` naming it or
 [`toggle_pocket_window`](#toggle_pocket_window) on it fails with
 a pill naming its key. It does not count against
 [`pocket.set_capacity`](#pocketset_capacity). Remove the shortcut
 and the window becomes an ordinary window again, on the Space you
 are on. Closing the window or quitting the app frees the key, and
-the next call opens a fresh window.
+the next call opens a fresh window. If the app is hidden, the
+call shows it again.
 
 Called with no such shortcut — from the CLI, say — the window it
 opens is an ordinary pocket window, counted like any other: under
-`one` with a window already in the pocket, the call fails with the
-pill "Pocket is already taken" and opens nothing. Fails with
-`app not found: <id>` for an app macOS cannot find, and with a
-pill when a running app's File menu has no New Window.
+`"one"`, with another pocket window marked, the call fails with
+`another window is the pocket window` (and the pill "Pocket is
+already taken" on the focused window) and opens nothing. Fails
+with `app not found: <id>` for an app macOS cannot find, and with
+a pill when a running app's File menu has no New Window.
 
 **Example:**
 
@@ -5911,8 +5913,8 @@ and on the badge, beside a sticky glyph too.
 every profile alike — the running value, which Settings ▸ Shortcuts
 & Gestures ▸ Pocket stores:
 `"one"` refuses a mark while any window is marked
-([`toggle_pocket_window`](#toggle_pocket_window)), and `"several"`
-marks any number.
+([`toggle_pocket_window`](#toggle_pocket_window)), save an app's
+own pocket window, and `"several"` marks any number.
 
 Under `"several"` the pocket stays on every screen at
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and

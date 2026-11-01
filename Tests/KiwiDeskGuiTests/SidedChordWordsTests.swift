@@ -164,6 +164,12 @@ struct SidedChordWordsTests {
                 ".accessibilityValue(SidedChordWords.label(label))"
             )
         )
+        // A Pocket key's refusal pill speaks it (#2612).
+        #expect(
+            try read("Shortcuts/ShortcutsOpenBinding.swift").contains(
+                "spoken: SidedChordWords.label(drawn)"
+            )
+        )
         // Simple's KiwiHub keycaps speak the chord too (#2777).
         #expect(
             try read(

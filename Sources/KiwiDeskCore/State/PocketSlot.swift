@@ -27,12 +27,9 @@ public struct PocketSlot: Sendable, Equatable, Codable {
     /// before its first take-out.
     public var cameFrom: WindowID?
     /// The app whose Pocket key owns the slot (#2612), lowercased;
-    /// nil for the general list `pocket` works. Read through
-    /// `keyedApp`, the one answer to "has a key of its own".
-    public var owner: String?
-
-    /// The owning app of a keyed slot, nil for a general one.
-    public var keyedApp: String? { owner }
+    /// nil for the general list `pocket` works — the one answer to
+    /// "has a key of its own". Stored as `owner`.
+    public var keyedApp: String?
 
     public init(
         window: WindowID,
@@ -47,7 +44,7 @@ public struct PocketSlot: Sendable, Equatable, Codable {
         self.phase = phase
         self.frames = frames
         self.cameFrom = cameFrom
-        self.owner = owner
+        self.keyedApp = owner
     }
 
     private enum CodingKeys: String, CodingKey {
@@ -56,6 +53,15 @@ public struct PocketSlot: Sendable, Equatable, Codable {
         case phase
         case frames
         case cameFrom = "came_from"
-        case owner
+        case keyedApp = "owner"
     }
+}
+
+/// What a `pocket_app` claim makes of an arriving window (#2612
+/// ▸ 7), mirrored into the create fold: `claimed` skips its App
+/// Rule; `awaited`, whose create is still due, keeps the rule but
+/// earns no follow.
+public enum PocketArrivalClaim: Sendable, Equatable {
+    case claimed(WindowID)
+    case awaited(WindowID)
 }

@@ -18,7 +18,7 @@ struct PocketAppTests {
         let fixture = Fixture()
         let response = fixture.press("app.nope")
         #expect(response.error == "app not found: app.nope")
-        #expect(fixture.core.arrivals.pocketClaim == nil)
+        #expect(fixture.core.arrivals.pocketClaims.isEmpty)
     }
 
     @Test("the first press launches the app; its window arrives out")
@@ -31,7 +31,7 @@ struct PocketAppTests {
         #expect(state.pocketPhase(of: mine) == .out)
         #expect(state.pocketKeyOwner(of: mine) == Fixture.app)
         #expect(state.windows[mine]?.isFloating == true)
-        #expect(fixture.core.arrivals.pocketClaim == nil)
+        #expect(fixture.core.arrivals.pocketClaims.isEmpty)
     }
 
     @Test("later presses put it away and take it out")
@@ -54,7 +54,35 @@ struct PocketAppTests {
         fixture.press()
         #expect(fixture.pressed == [Fixture.pid])
         #expect(fixture.opened.isEmpty)
-        #expect(fixture.core.arrivals.pocketClaim != nil)
+        #expect(fixture.claim != nil)
+    }
+
+    @Test("only minimized windows still get New Window pressed")
+    func minimizedAppPressesNewWindow() {
+        let fixture = Fixture()
+        fixture.running = Fixture.pid
+        fixture.minimized = [WindowID(30)]
+        fixture.press()
+        #expect(fixture.pressed == [Fixture.pid])
+        #expect(fixture.opened.isEmpty)
+    }
+
+    @Test("a second press while the window is on its way opens none")
+    func pendingPressOpensNothing() {
+        let fixture = Fixture()
+        fixture.press()
+        #expect(fixture.press().isSuccess)
+        #expect(fixture.opened.count == 1)
+    }
+
+    @Test("pocket with the keyed window focused is refused")
+    func pocketOnKeyedFocus() {
+        let fixture = Fixture()
+        fixture.press()
+        fixture.arrive(9)
+        fixture.core.state.apply(.windowFocused(mine))
+        let response = fixture.core.execute("pocket")
+        #expect(response.error == "this window has a Pocket key of its own")
     }
 
     @Test("a press that opened nothing drops the claim")
@@ -64,7 +92,7 @@ struct PocketAppTests {
         fixture.visible = 1
         fixture.pressAnswers = false
         fixture.press()
-        #expect(fixture.core.arrivals.pocketClaim == nil)
+        #expect(fixture.core.arrivals.pocketClaims.isEmpty)
     }
 
     @Test("with no row the window joins the general list")
@@ -106,6 +134,32 @@ struct PocketAppTests {
         let named = fixture.core.execute("pocket", args: [.number(9)])
         #expect(named.error == "this window has a Pocket key of its own")
         #expect(fixture.core.state.pocketPhase(of: mine) == .out)
+    }
+
+    @Test("the keyed refusal draws the chord and speaks its words")
+    func refusalSpeaksTheChord() {
+        LocalizationManager.shared.select("en")
+        let fixture = Fixture()
+        var spoken: [String] = []
+        fixture.core.borders.announceRefusal = { spoken.append($0) }
+        fixture.core.barMenuHooks.pocketKeyChord = { _ in
+            RenderedChord(drawn: "⌃⌥T", spoken: "Control Option T")
+        }
+        fixture.press()
+        fixture.arrive(9)
+        fixture.core.state.apply(.windowFocused(mine))
+        fixture.core.execute("toggle_pocket_window")
+        #expect(spoken == ["Its Pocket key is Control Option T"])
+    }
+
+    @Test("the pocket plate lists the general list alone")
+    func plateSkipsTheKeyedWindow() {
+        let fixture = Fixture()
+        fixture.press()
+        fixture.arrive(9)
+        fixture.press()
+        #expect(fixture.core.state.isPocketed(mine))
+        #expect(fixture.core.pocketPlateWindows.isEmpty)
     }
 
     @Test("pocket steps past the keyed window")

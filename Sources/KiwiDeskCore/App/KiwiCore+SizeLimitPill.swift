@@ -36,9 +36,10 @@ extension KiwiCore {
         _ window: WindowID,
         text: String,
         symbol: String,
-        announce: Bool
+        announce: Bool,
+        spoken: String? = nil
     ) -> Bool {
-        if announce { borders.announceRefusal(text) }
+        if announce { borders.announceRefusal(spoken ?? text) }
         guard let frame = refusalPillFrame(window) else { return false }
         return borders.flashSizeLimitPill(
             window: window,

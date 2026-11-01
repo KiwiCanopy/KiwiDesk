@@ -60,15 +60,21 @@ enum ShortcutsOpenBinding {
             .flatMap { KeyCombo.parse($0.combo) }
     }
 
-    /// An app's Pocket key chord (#2612 ▸ 1): its row, matched by
-    /// the stored shape, whatever spelling the bundle id took.
-    @MainActor static func pocketAppGlyphs(
+    /// An app's Pocket key chord (#2612 ▸ 1), drawn and spoken, from
+    /// Core's one reading of its row.
+    @MainActor static func pocketAppChord(
         core: KiwiCore,
         app bundleID: String
-    ) -> String? {
-        combo(core: core) {
-            PocketAppLuaArg.bundleID(of: $0.lua) == bundleID
-        }.map { ChordGlyphs.render($0, layoutChar: LayoutKeyGlyph.char) }
+    ) -> RenderedChord? {
+        guard
+            let combo = core.pocketAppRow(for: bundleID)
+                .flatMap({ KeyCombo.parse($0.combo) })
+        else { return nil }
+        let drawn = ChordGlyphs.render(combo, layoutChar: LayoutKeyGlyph.char)
+        return RenderedChord(
+            drawn: drawn,
+            spoken: SidedChordWords.label(drawn)
+        )
     }
 
     @MainActor private static func combo(

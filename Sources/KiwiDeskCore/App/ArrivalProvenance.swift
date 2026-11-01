@@ -134,8 +134,9 @@ final class ArrivalProvenanceDoor {
 
     /// A `pocket_app` press's one-shot claim on its app's next
     /// created window (#2612 ▸ 7), beating the App Rule and the
-    /// #2478 follow. `candidate` is an arrival the claim waits on:
-    /// its create still due, the claim unspent until it lands.
+    /// #2478 follow; one per app, held here beside the arrivals it
+    /// waits on. `candidate` is an arrival whose create is still
+    /// due, the claim unspent until it lands.
     struct PocketClaim: Equatable {
         let bundleID: String
         /// Whether the app's Shortcuts row ties the window to it.
@@ -143,26 +144,34 @@ final class ArrivalProvenanceDoor {
         let at: Date
         var candidate: WindowID?
     }
-    var pocketClaim: PocketClaim?
+    var pocketClaims: [String: PocketClaim] = [:]
 
-    /// The live claim at `now`, dropped once past
+    /// `bundleID`'s live claim at `now`, dropped once past
     /// `LaunchFollowIntent.drainWindow`, a launch's own bound.
-    func livePocketClaim(at now: Date) -> PocketClaim? {
-        guard let claim = pocketClaim else { return nil }
+    func livePocketClaim(
+        for bundleID: String,
+        at now: Date
+    ) -> PocketClaim? {
+        guard let claim = pocketClaims[bundleID] else { return nil }
         guard
             now.timeIntervalSince(claim.at)
                 < LaunchFollowIntent.drainWindow
         else {
-            pocketClaim = nil
+            pocketClaims[bundleID] = nil
             return nil
         }
         return claim
+    }
+
+    /// The claim waiting on `id` as its candidate.
+    func pocketClaim(awaiting id: WindowID) -> PocketClaim? {
+        pocketClaims.values.first { $0.candidate == id }
     }
 
     /// Drops every held arrival and the claim: the core stopped.
     func reset() {
         waiting = [:]
         landed = [:]
-        pocketClaim = nil
+        pocketClaims = [:]
     }
 }

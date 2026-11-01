@@ -16,6 +16,7 @@ final class PocketAppFixture {
     var pressed: [pid_t] = []
     var running: pid_t?
     var visible = 0
+    var minimized: [WindowID] = []
     var pressAnswers = true
 
     init(row: Bool = true, appRule: SpaceID? = nil) {
@@ -47,7 +48,7 @@ final class PocketAppFixture {
             id == Self.app ? running : nil
         }
         core.openOrFocus.census = { [unowned self] _ in
-            .init(visible: visible, minimized: [])
+            .init(visible: visible, minimized: minimized)
         }
         core.openOrFocus.activate = { _ in }
         core.windowActions.newWindow = { [unowned self] pid, done in
@@ -75,6 +76,16 @@ final class PocketAppFixture {
             skipped: []
         )
         core.reconcilePocketKeys()
+    }
+
+    /// The app's live claim.
+    var claim: ArrivalProvenanceDoor.PocketClaim? {
+        core.arrivals.pocketClaims[Self.app]
+    }
+
+    /// The app whose key owns `id`'s slot.
+    func owner(of id: WindowID) -> String? {
+        core.state.pocketKeyOwner(of: id)
     }
 
     /// The app's Pocket key pressed, or `bundleID`'s.

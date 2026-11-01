@@ -14,7 +14,11 @@ extension KiwiCore {
         let bundleID = raw.lowercased()
         if emptyPocketIfGone() { updatePocketPlate() }
         if let slot = state.pocketSlot(ownedBy: bundleID) {
-            return stepKeyedPocket(slot.window)
+            return stepKeyedPocket(slot)
+        }
+        // A window this press's twin already asked for is on its way.
+        if arrivals.livePocketClaim(for: bundleID, at: wallClock()) != nil {
+            return .ok()
         }
         let keyed = pocketAppRows().contains(bundleID)
         guard keyed || state.pocketAcceptsMark(appWide.pocketCapacity)
@@ -27,14 +31,19 @@ extension KiwiCore {
         return openPocketAppWindow(bundleID, keyed: keyed)
     }
 
-    /// The app's own window in or out.
-    private func stepKeyedPocket(_ id: WindowID) -> CommandResponse {
+    /// The app's own window in or out; a hidden app is shown, its
+    /// window coming back to the slot.
+    private func stepKeyedPocket(_ slot: PocketSlot) -> CommandResponse {
+        let id = slot.window
+        guard state.windows[id] != nil else {
+            guard let pid = slot.pid, eventLoop.processIdentity.runs(pid)
+            else { return .fail("pocket is unreachable") }
+            openOrFocus.activate(pid)
+            return .ok()
+        }
         if state.isPocketed(id) {
             return takePocketOut(id)
                 ? .ok() : .fail("pocket is unreachable")
-        }
-        guard state.windows[id] != nil else {
-            return .fail("pocket is unreachable")
         }
         putInPocket(id)
         return .ok()
@@ -47,16 +56,16 @@ extension KiwiCore {
         _ bundleID: String,
         keyed: Bool
     ) -> CommandResponse {
-        arrivals.pocketClaim = .init(
+        arrivals.pocketClaims[bundleID] = .init(
             bundleID: bundleID,
             keyed: keyed,
             at: wallClock()
         )
         guard let pid = openOrFocus.runningAppPID(bundleID),
-            openOrFocus.census(pid).visible > 0
+            showsAnyWindow(openOrFocus.census(pid))
         else {
             guard openOrFocus.openApp(bundleID, false) else {
-                arrivals.pocketClaim = nil
+                arrivals.pocketClaims[bundleID] = nil
                 return .fail("app not found: \(bundleID)")
             }
             onLog("pocket: opening \(bundleID) for its Pocket key")
@@ -66,9 +75,7 @@ extension KiwiCore {
         windowActions.newWindow(pid) { [weak self] pressed in
             guard !pressed, let self else { return }
             // Nothing opened, so nothing is claimed.
-            if self.arrivals.pocketClaim?.bundleID == bundleID {
-                self.arrivals.pocketClaim = nil
-            }
+            self.arrivals.pocketClaims[bundleID] = nil
             guard let window = self.state.windows.windows(pid: pid).first
             else { return }
             self.cueWindowAction(
@@ -79,20 +86,27 @@ extension KiwiCore {
         return .ok()
     }
 
+    /// A reopen with only minimized windows brings one back rather
+    /// than opening a new one, so they count.
+    private func showsAnyWindow(_ census: AppWindowCensus) -> Bool {
+        census.visible + census.minimized.count > 0
+    }
+
     /// A general-list verb on a window its app's key owns (#2612
-    /// ▸ 1): refused on it, naming the key the GUI reads live.
+    /// ▸ 1): refused on it, naming the key the GUI reads live —
+    /// drawn as its glyphs, spoken in words (#2601).
     func refuseKeyedPocketWindow(
         _ id: WindowID,
         app: String
     ) -> CommandResponse {
+        let chord = barMenuHooks.pocketKeyChord(app)
         soundIfDrawn(
             flashRefusalPill(
                 id,
-                text: PocketRefusal.keyedSentence(
-                    chord: barMenuHooks.pocketKeyChord(app)
-                ),
+                text: PocketRefusal.keyedSentence(chord: chord?.drawn),
                 symbol: AutoFloatReason.pocket.pillSymbol,
-                announce: true
+                announce: true,
+                spoken: PocketRefusal.keyedSentence(chord: chord?.spoken)
             )
         )
         return .fail("this window has a Pocket key of its own")

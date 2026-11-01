@@ -608,7 +608,6 @@ every lens with why it cannot turn on.
 | | `toggle_maximized` | — the focused tiled window fills its screen, bars hidden, until called again |
 | | `pocket` | — pockets the pocket window, takes it out onto this screen, or puts it back; with none marked, marks and pockets the focused window ([`pocket`](lua-reference.md#pocket)) |
 | | `toggle_pocket_window` | — marks the focused window as the pocket window, floating it, or unmarks it, tiling it ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window)) |
-| | `pocket_app` | app bundle id — the app's own pocket window out or away, or a new window of the app opened there ([`pocket_app`](lua-reference.md#pocket_app)) |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
@@ -704,6 +703,12 @@ every lens with why it cannot turn on.
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`pocket_app` takes an app bundle id: the app's own pocket window
+out or away, or a new window of the app opened there
+([`pocket_app`](lua-reference.md#pocket_app)).
+:::
 
 `stack.toggle_stack_position [space]` moves a space's stack zone
 to the opposite side (left ↔ right, top ↔ bottom), the focused

@@ -31,6 +31,9 @@ extension KiwiCore {
         guard let id = focusedWindowID else {
             return .fail("no focused window")
         }
+        if let app = state.pocketKeyOwner(of: id) {
+            return refuseKeyedPocketWindow(id, app: app)
+        }
         return markAndPocket(id)
     }
 

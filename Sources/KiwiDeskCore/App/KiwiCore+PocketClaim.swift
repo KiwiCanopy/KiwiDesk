@@ -8,28 +8,36 @@ import Foundation
 /// waits through `settleArrival`. The rows that tie a window to its
 /// app are the installed bindings of `PocketAppLuaArg`'s shape.
 extension KiwiCore {
-    /// The arrival the live claim takes, from the provenance
+    /// The arrival the live claim takes now, from the provenance
     /// `handle` read ahead of the fold; mirrored into the fold as
-    /// `StateCoordinator.pocketClaimed`.
+    /// `StateCoordinator.pocketClaimed`. One whose create is still
+    /// due becomes the claim's candidate, filed by its rules but
+    /// followed nowhere meanwhile, so an adoption keeps its App
+    /// Rule.
     func claimPocketArrival(
         _ event: KiwiEvent,
         provenance: ArrivalProvenance?
-    ) -> WindowID? {
+    ) -> PocketArrivalClaim? {
         guard case .windowCreated(let window) = event,
             let provenance,
             let bundle = window.appBundleID?.lowercased(),
-            var claim = arrivals.livePocketClaim(at: wallClock()),
-            claim.bundleID == bundle, claim.candidate == nil,
-            !window.isTransientOverlay,
+            var claim = arrivals.livePocketClaim(
+                for: bundle,
+                at: wallClock()
+            ),
+            !window.isTransientOverlay, !window.isFullscreen,
             state.pocketPhase(of: window.id) == nil
         else { return nil }
         switch provenance {
         case .created, .unreported:
-            return window.id
+            // A created window outranks a candidate still waiting,
+            // which stays where the fold filed it.
+            return .claimed(window.id)
         case .awaitingCreate:
+            guard claim.candidate == nil else { return nil }
             claim.candidate = window.id
-            arrivals.pocketClaim = claim
-            return window.id
+            arrivals.pocketClaims[bundle] = claim
+            return .awaited(window.id)
         case .existing, .own:
             return nil
         }
@@ -38,15 +46,24 @@ extension KiwiCore {
     /// Spends the claim on `id`: marked out, tied to its app where
     /// the row still exists, else in the general list while the
     /// capacity takes it, else left an ordinary window.
-    func takePocketClaim(_ id: WindowID) {
-        guard let claim = arrivals.pocketClaim else { return }
-        arrivals.pocketClaim = nil
-        guard state.windows[id] != nil else { return }
+    /// `retiling` is false on the arrival path, whose event retile
+    /// places it.
+    func takePocketClaim(_ id: WindowID, retiling: Bool = true) {
+        guard
+            let bundle = state.windows[id]?.appBundleID?.lowercased(),
+            let claim = arrivals.pocketClaims.removeValue(forKey: bundle)
+        else { return }
+        // Its activation's launch debt is no open to follow (#1599).
+        launchFollow.forget(pending: claim.bundleID)
         let keyed = claim.keyed && pocketAppRows().contains(claim.bundleID)
         guard keyed || state.pocketAcceptsMark(appWide.pocketCapacity)
         else { return }
         onLog("pocket: w\(id.raw) claimed for \(claim.bundleID)")
-        markAsPocketWindow(id, owner: keyed ? claim.bundleID : nil)
+        markAsPocketWindow(
+            id,
+            owner: keyed ? claim.bundleID : nil,
+            retiling: retiling
+        )
     }
 
     /// The claim's arm of `settleArrival`, ahead of the event: a
@@ -58,36 +75,50 @@ extension KiwiCore {
         created: Bool,
         departing: Bool
     ) {
-        guard arrivals.pocketClaim?.candidate == id else { return }
+        guard let claim = arrivals.pocketClaim(awaiting: id) else {
+            return
+        }
         guard created, !departing else {
-            arrivals.pocketClaim?.candidate = nil
+            arrivals.pocketClaims[claim.bundleID]?.candidate = nil
             return
         }
         takePocketClaim(id)
         launchFollow.dropSpawn(of: id)
     }
 
-    /// The bundle ids whose Pocket key row the installed bindings
-    /// carry (#2612 ▸ 6): a row whose chord installs, so one left
-    /// without a key ties nothing.
-    func pocketAppRows() -> Set<String> {
-        let layers: [KeyLayer]
-        switch installedKeybindings {
-        case .structured(let installed, _, _): layers = installed
-        case .lua(let installed, _): layers = installed
-        case nil: return []
+    /// `bundleID`'s Pocket key row among the installed bindings of
+    /// every layer (#2612 ▸ 6) — the one answer to "the app's row
+    /// exists", which the GUI reads for its chord too. An install
+    /// keeps only rows whose chord registers, so a row left without
+    /// a key ties nothing.
+    public func pocketAppRow(for bundleID: String) -> KeyBinding? {
+        installedLayers.flatMap(\.bindings).first {
+            PocketAppLuaArg.bundleID(of: $0.lua) == bundleID.lowercased()
         }
-        return Set(
-            layers.flatMap(\.bindings).compactMap {
+    }
+
+    /// The bundle ids whose Pocket key row is installed.
+    func pocketAppRows() -> Set<String> {
+        Set(
+            installedLayers.flatMap(\.bindings).compactMap {
                 PocketAppLuaArg.bundleID(of: $0.lua)
             }
         )
     }
 
+    private var installedLayers: [KeyLayer] {
+        switch installedKeybindings {
+        case .structured(let installed, _, _): installed
+        case .lua(let installed, _): installed
+        case nil: []
+        }
+    }
+
     /// Unties every window whose app's row is gone (#2612 ▸ 2): it
     /// becomes an ordinary window on the active Space, tiling or
     /// floating as its rules say, never parked off-screen. Run after
-    /// each install of the bindings.
+    /// each install of the bindings and after a restart's restore
+    /// brings the slots back.
     func reconcilePocketKeys() {
         guard installedKeybindings != nil else { return }
         let rows = pocketAppRows()

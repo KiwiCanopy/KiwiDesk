@@ -44,8 +44,9 @@ extension StateCoordinator {
         arrivalDisplay = nil
         let owed = returningFocus
         returningFocus = nil
-        let claimed = pocketClaimed == window.id
+        let claim = pocketClaimed
         pocketClaimed = nil
+        let claimed = claim == .claimed(window.id)
         // A pocketed window comes back to the slot, filed nowhere.
         if readoptPocketWindow(window.id) { return }
         let remembered = rememberedSpaces[window.id]
@@ -65,7 +66,10 @@ extension StateCoordinator {
             : nil
         // Only the rule's own verdict may earn the launch follow
         // (#1599), and only into a Space the user is not in.
-        if let ruled, ruled != workspaces.activeSpace {
+        // A Pocket key's candidate keeps its rule but follows none.
+        if let ruled, ruled != workspaces.activeSpace,
+            claim != .awaited(window.id)
+        {
             effects.placedByAppRule = ruled
         }
         let target = held ?? ruled ?? workspaces.activeSpace

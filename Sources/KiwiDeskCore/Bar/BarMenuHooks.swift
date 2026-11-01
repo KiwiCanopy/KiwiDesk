@@ -25,7 +25,8 @@ public enum SettingsLanding: Equatable, Sendable {
     case newLens
 }
 
-/// What a bar menu asks of the GUI (#1518) — set at the GUI's
+/// What a bar menu, or a Core pill naming a key, asks of the GUI
+/// (#1518, #2612) — set at the GUI's
 /// bootstrap, beside `uiBridge`. KiwiHub's View side (#2229, #2309)
 /// is a GUI caller of the same doors, so a Settings landing has
 /// one route.
@@ -43,13 +44,24 @@ public struct BarMenuHooks {
     public var confirmSpaceDelete:
         @MainActor (SpaceDeleteQuestion, @escaping @MainActor () -> Void)
             -> Void = { _, _ in }
-    /// The chord of `bundleID`'s Pocket key row as the GUI draws
-    /// it (#2612 ▸ 1): Core names the app, the GUI renders the key.
-    public var pocketKeyChord: @MainActor (String) -> String? = { _ in
-        nil
+    /// The chord of `bundleID`'s Pocket key row (#2612 ▸ 1): Core
+    /// names the app, the GUI renders the key, drawn and spoken.
+    public var pocketKeyChord: @MainActor (String) -> RenderedChord? = {
+        _ in nil
     }
 
     public init() {}
+}
+
+/// A chord as the GUI draws it and as VoiceOver says it (#2601).
+public struct RenderedChord: Equatable, Sendable {
+    public let drawn: String
+    public let spoken: String
+
+    public init(drawn: String, spoken: String) {
+        self.drawn = drawn
+        self.spoken = spoken
+    }
 }
 
 /// What a profile Space's Delete asks (#1790): whether to remove

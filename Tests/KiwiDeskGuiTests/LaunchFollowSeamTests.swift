@@ -187,10 +187,11 @@ struct LaunchFollowSeamTests {
         #expect(!body.contains("emitWindowCreated("))
     }
 
-    /// Three retires, each load-bearing: another app's activation
+    /// Four retires, each load-bearing: another app's activation
     /// (the user moved on), the Desktop switch (the windows it
-    /// reveals are not a launch's) and a refused New Window, which
-    /// opened nothing (#1518). A fourth would be a new moment
+    /// reveals are not a launch's), a refused New Window, which
+    /// opened nothing (#1518), and a Pocket key's claim, whose
+    /// window stays where the user is (#2612). A fourth would be a new moment
     /// ruled "not a launch", which is the judgement this rests on.
     @Test("the debt is retired by an activation, a switch, a refusal")
     func twoRetires() throws {
@@ -203,8 +204,9 @@ struct LaunchFollowSeamTests {
                 == [
                     Self.followFile, "KiwiCore+Desktops.swift",
                     "KiwiCore+WindowActions.swift",
+                    "KiwiCore+PocketClaim.swift",
                 ]
-                && sites.count == 3,
+                && sites.count == 4,
             "found: \(sites.map(\.site))"
         )
     }

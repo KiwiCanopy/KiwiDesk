@@ -21,7 +21,30 @@ struct PocketAppKeyTests {
         fixture.arrive(9)
         let workspaces = fixture.core.state.workspaces
         #expect(workspaces.space(of: mine) == workspaces.activeSpace)
-        #expect(fixture.core.state.pocketKeyOwner(of: mine) == Fixture.app)
+        #expect(fixture.owner(of: mine) == Fixture.app)
+    }
+
+    @Test("a window WindowServer reported created is claimed at once")
+    func createdIsClaimed() {
+        let fixture = Fixture()
+        fixture.core.windowCreates.isLive = true
+        fixture.press()
+        fixture.core.windowServerChanged(.created, id: mine)
+        fixture.arrive(9)
+        #expect(fixture.owner(of: mine) == Fixture.app)
+    }
+
+    @Test("a candidate keeps its rule and earns no follow")
+    func candidateKeepsItsRule() {
+        let fixture = Fixture(appRule: SpaceID("2"))
+        fixture.core.state.workspaces.ensureSpace(SpaceID("2"))
+        fixture.core.windowCreates.isLive = true
+        fixture.press()
+        fixture.core.oweLaunchFollow(Fixture.app)
+        fixture.arrive(9)
+        let workspaces = fixture.core.state.workspaces
+        #expect(workspaces.space(of: mine) == SpaceID("2"))
+        #expect(workspaces.activeSpace != SpaceID("2"))
     }
 
     @Test("a window the boot adopts is never claimed")
@@ -32,7 +55,7 @@ struct PocketAppKeyTests {
         fixture.arrive(9)
         fixture.core.eventLoop.bootScan.stepBudget = nil
         #expect(fixture.core.state.pocketPhase(of: mine) == nil)
-        #expect(fixture.core.arrivals.pocketClaim != nil)
+        #expect(fixture.claim != nil)
     }
 
     @Test("a create still due is claimed when it lands")
@@ -42,12 +65,12 @@ struct PocketAppKeyTests {
         fixture.press()
         fixture.arrive(9)
         #expect(fixture.core.state.pocketPhase(of: mine) == nil)
-        #expect(fixture.core.arrivals.pocketClaim?.candidate == mine)
+        #expect(fixture.claim?.candidate == mine)
         fixture.core.windowServerChanged(.created, id: mine)
         let hop = fixture.core.deferred.task(for: .arrivalCreated)
         #expect(hop != nil)
         await hop?.value
-        #expect(fixture.core.state.pocketKeyOwner(of: mine) == Fixture.app)
+        #expect(fixture.owner(of: mine) == Fixture.app)
     }
 
     @Test("no create in the bound frees the claim for the real window")
@@ -58,12 +81,36 @@ struct PocketAppKeyTests {
         fixture.arrive(9)
         let arrived = fixture.core.wallClock()
         fixture.core.wallClock = {
-            arrived.addingTimeInterval(LaunchFollowIntent.lateCreateBound)
+            arrived.addingTimeInterval(
+                LaunchFollowIntent.lateCreateBound
+            )
         }
         fixture.core.resolveExpiredArrivals()
         #expect(fixture.core.state.pocketPhase(of: mine) == nil)
-        #expect(fixture.core.arrivals.pocketClaim != nil)
-        #expect(fixture.core.arrivals.pocketClaim?.candidate == nil)
+        #expect(fixture.claim != nil)
+        #expect(fixture.claim?.candidate == nil)
+    }
+
+    @Test("a created window outranks a candidate still waiting")
+    func createdWindowTakesOver() {
+        let fixture = Fixture()
+        fixture.core.windowCreates.isLive = true
+        fixture.press()
+        fixture.arrive(9)
+        #expect(fixture.claim?.candidate == mine)
+        fixture.core.windowServerChanged(.created, id: WindowID(10))
+        fixture.arrive(10)
+        #expect(fixture.owner(of: WindowID(10)) == Fixture.app)
+        #expect(fixture.core.state.pocketPhase(of: mine) == nil)
+    }
+
+    @Test("spending the claim retires its app's launch debt")
+    func claimRetiresTheLaunchDebt() {
+        let fixture = Fixture()
+        fixture.press()
+        fixture.core.oweLaunchFollow(Fixture.app)
+        fixture.arrive(9)
+        #expect(fixture.core.launchFollow.owed() == nil)
     }
 
     @Test("removing the row makes the window an ordinary one")
