@@ -936,7 +936,8 @@ destination (#229).
 
 Stack's and Track's overflow are drawn the way the engine places
 them (`ZoneRun`): the windows that do not fit sit behind the
-edge tile.
+edge tile, which carries the overflow mark ("+n") the desk draws
+at that end of the run, placed as the desk places it (#2864).
 
 ## Labels & wire names
 

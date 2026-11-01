@@ -132,24 +132,11 @@ extension StatusItemController {
         menu.addItem(quit)
     }
 
-    /// The count row's title. One authoring site, because the
-    /// row is built on menu open and retitled per chunk while the
-    /// menu is up — two spellings of it would drift the moment
-    /// either changed.
-    ///
-    /// The number is last and behind a label
-    /// (localization.md ▸ a frame interpolating a COUNT), and the
-    /// unit is APPS, matching the tooltip one hover away.
+    /// The count row's title, built on menu open and retitled per
+    /// chunk while the menu is up: the boot count's one sentence
+    /// (`BootCountText`, #2874), empty once boot is past the scan.
     static func startingTitle(for phase: BootPhase) -> String {
-        guard case .scanning(let scanned, let total) = phase else {
-            return ""
-        }
-        return L(
-            "menu.starting",
-            "Starting up — apps: %1$d of %2$d",
-            scanned,
-            total
-        )
+        BootCountText.line(for: phase) ?? ""
     }
 
     static func applyMenuEquivalent(

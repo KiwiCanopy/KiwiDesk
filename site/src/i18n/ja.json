@@ -584,5 +584,8 @@
   "looks_teaser_lead_dev": "どのデザインも、公開 GitHub リポジトリにある JSON ファイルで、CC BY 4.0 で共有されています。<code>kiwidesk://</code> リンクで App に追加でき、<code>kiwidesk preview</code> を使えば、共有する前に自分のデザインをカードとして描画できます。",
   "looks_teaser_browse": "デザインを探す",
   "looks_teaser_repo": "リポジトリを見る",
-  "looks_teaser_code_aria": "デザインファイルの一部"
+  "looks_teaser_code_aria": "デザインファイルの一部",
+  "og_alt_banner": "KiwiDesk：「macOS に最初から入っていたかのようなタイリング。」という見出しと、3 つのウインドウがタイル状に並んだ Mac のデスクトップのイラスト。",
+  "og_alt_looks": "KiwiDesk デザインギャラリー：「デザインを見つけて、すぐ使う。」という見出しと、ギャラリーの 3 つのデザイン（Purple Neon、Gruvbox Retro、Black & White Tiler）。",
+  "og_alt_compare": "KiwiDesk：「KiwiDesk を、ほかのウインドウマネージャーと比べる。」という見出しと、KiwiDesk の列が強調された比較表のイラスト。"
 }

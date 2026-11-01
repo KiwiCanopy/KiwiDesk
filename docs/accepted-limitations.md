@@ -322,6 +322,14 @@ swipe let go before Mission Control opens leaves the ring drawn
 until the swipe ends
 ([#1921](https://github.com/KiwiCanopy/KiwiDesk/issues/1921)).
 
+:::unreleased
+That is accepted for now: until Mission Control opens, the swipe
+gives KiwiDesk no signal but the raw finger contacts on the
+trackpad, which KiwiDesk does not read yet — the reader
+[#1873](https://github.com/KiwiCanopy/KiwiDesk/issues/1873)
+needs too.
+:::
+
 With KiwiVision on, the window you move the focus away from stays clear for a split second — about 40–60 ms — after you click or switch, until KiwiDesk hears that the focus moved ([#2103](https://github.com/KiwiCanopy/KiwiDesk/issues/2103)). A floating window shows it most, since it sits on top. macOS reports a focus change through Accessibility only after the window has come forward.
 
 When `init.lua` owns the shortcuts, the shortcuts panel (`⌃⌥K`) lists every chord it registered, but names each one only as well as its source spells it ([#2482](https://github.com/KiwiCanopy/KiwiDesk/issues/2482)). An inline action KiwiDesk knows is listed by name, any other inline body as its raw Lua, and a binding to a named handler or a C function as **Lua function**. A body that reads a variable shows its value only where that value is a string, number or true/false the panel can spell exactly and the file never assigns the name; otherwise the row shows its raw Lua, since the value could not be shown as fact. The panel reads the bindings back once per load, right after `init.lua` runs, so a `bind` or `define_layer` that runs later, from an event hook, is not listed, and while a layer defined that way is active the panel shows the first layer it knows. The chords KiwiHub and the menus print beside an action read the same list, so they now show an `init.lua` chord too. Spelling the action inline — `function() KiwiDesk.focus("left") end` — names the row; Settings ▸ Shortcuts ▸ **Import from init.lua…** moves the shortcuts into the visual editor.

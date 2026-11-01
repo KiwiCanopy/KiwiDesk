@@ -116,7 +116,7 @@ struct BarStripView: View {
             // colour — the shared plate the style refuses is
             // paid back per item (owner 2026-08-10).
             pipBody(item)
-                .padding(1.5 * scale)
+                .padding(spec.boxPad(scale: scale))
                 .background(
                     RoundedRectangle(
                         cornerRadius: spec.itemCorner
@@ -272,12 +272,20 @@ extension HomeCardBarsTile.BarSpec {
         )
     }
 
-    /// What a run's pips add along the axis for their rounded
-    /// ends: each pip drawing a label, a glyph or art, both ends.
+    /// The padding a boxed pip's box adds around its body on
+    /// every side; no box, none.
+    func boxPad(scale: CGFloat) -> CGFloat {
+        boxed ? 1.5 * scale : 0
+    }
+
+    /// What a run's pips add along the axis beyond their lengths:
+    /// each pip drawing a label, a glyph or art its rounded ends,
+    /// and every boxed pip its box's padding at both ends (#2781).
     func pipEndInsets(scale: CGFloat) -> CGFloat {
         let labelled = items.filter {
             $0.label != nil || $0.glyph != nil || $0.art != nil
         }
         return CGFloat(labelled.count) * 2 * pipEndInset(scale: scale)
+            + CGFloat(items.count) * 2 * boxPad(scale: scale)
     }
 }

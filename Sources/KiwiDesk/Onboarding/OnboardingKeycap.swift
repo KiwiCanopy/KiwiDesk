@@ -18,8 +18,12 @@ struct OnboardingKeycap: View {
                     plus
                 }
                 chip(keys)
-            case .mixed(let text):
-                chip(text)
+            case .mixed(let chords):
+                // One cap per chord, so a side word or modifier
+                // reads as its own chord's alone (#2877).
+                ForEach(Array(chords.enumerated()), id: \.offset) {
+                    chip($0.element)
+                }
             }
         }
         .accessibilityElement(children: .ignore)
@@ -48,8 +52,8 @@ struct OnboardingKeycap: View {
             .padding(.vertical, 4)
     }
 
-    /// Visual keycap chip; gateway chords draw accent ink on accent fill.
+    /// Visual keycap chip, plain on every row (#2877).
     private func chip(_ text: String) -> some View {
-        ChordKeycap(text: text, accent: family.isGateway)
+        ChordKeycap(text: text)
     }
 }

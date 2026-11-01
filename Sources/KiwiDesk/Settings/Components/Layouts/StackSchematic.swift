@@ -190,6 +190,7 @@ struct StackSchematic: View {
 
     private var stackZone: some View {
         GeometryReader { geo in
+            let laid = stackRun(in: geo.size)
             let slots = stackSlots(in: geo.size)
             ZStack(alignment: .topLeading) {
                 ForEach(slots.indices, id: \.self) { i in
@@ -203,6 +204,12 @@ struct StackSchematic: View {
                             x: slots[i].rect.midX,
                             y: slots[i].rect.midY
                         )
+                }
+                if let laid {
+                    SchematicOverflowMarks(
+                        laid: laid,
+                        bounds: CGRect(origin: .zero, size: geo.size)
+                    )
                 }
             }
             .frame(width: geo.size.width, height: geo.size.height)

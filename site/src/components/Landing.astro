@@ -34,7 +34,6 @@ import kiwiMark from "../assets/brand/kiwi-mark.svg";
 import kofiIcon from "../assets/brand/kofi_symbol.svg";
 import wordmark from "../assets/brand/logo_wordmark.svg";
 import wordmarkDark from "../assets/brand/logo_wordmark_dark.svg";
-import ogBannerEn from "../assets/brand/og-banner.jpg";
 import {
   locales,
   ogLocales,
@@ -43,8 +42,7 @@ import {
   type Lang,
 } from "../lib/locales";
 import { publisher } from "../lib/publisher";
-import ogBannerDe from "../assets/brand/og-banner.de.jpg";
-import ogBannerJa from "../assets/brand/og-banner.ja.jpg";
+import { ogCard } from "../lib/ogCard";
 import kiwiCanopy from "../assets/brand/kiwi-canopy.png";
 import { layoutDiagram } from "../lib/layoutDiagram";
 import {
@@ -66,9 +64,7 @@ const { t: locale, lang, mode = "simple" } = Astro.props;
 const isDev = mode === "dev";
 const isSimple = !isDev;
 
-// One banner per locale — the card carries the tagline, so it has to speak
-// the same language as the title and description beside it.
-const ogImage = lang === "de" ? ogBannerDe : lang === "ja" ? ogBannerJa : ogBannerEn;
+const og = ogCard("banner", lang, Astro.site);
 
 // Per-key English fallback: an untranslated locale key degrades to
 // English rather than rendering blank (mirrors Guide.astro).
@@ -214,7 +210,6 @@ const canonical = new URL(pageHref, Astro.site).href;
 const altURL = (l: Lang): string => new URL(langHref(l), Astro.site).href;
 const metaTitle = isDev ? t.meta_title_nerd : t.meta_title;
 const metaDesc = isDev ? t.meta_desc_nerd : t.meta_desc;
-const ogImageURL = new URL(ogImage.src, Astro.site).href;
 const ogLocale = ogLocales[lang];
 const ogLocaleAlts = ogLocaleAlternates(lang);
 
@@ -247,7 +242,7 @@ const jsonLd = [
     operatingSystem: "macOS",
     description: metaDesc,
     url: canonical,
-    image: ogImageURL,
+    image: og.url,
     inLanguage: lang,
     license: `${repo}/blob/main/LICENSE`,
     offers: { "@type": "Offer", price: "0", priceCurrency: "USD" },
@@ -311,11 +306,15 @@ const jsonLd = [
     {ogLocaleAlts.map((l) => (
       <meta property="og:locale:alternate" content={l} />
     ))}
-    <meta property="og:image" content={ogImageURL} />
+    <meta property="og:image" content={og.url} />
+    <meta property="og:image:width" content={String(og.width)} />
+    <meta property="og:image:height" content={String(og.height)} />
+    <meta property="og:image:alt" content={og.alt} />
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content={metaTitle} />
     <meta name="twitter:description" content={metaDesc} />
-    <meta name="twitter:image" content={ogImageURL} />
+    <meta name="twitter:image" content={og.url} />
+    <meta name="twitter:image:alt" content={og.alt} />
     <ThemeHead />
     <FaviconLinks />
     {locales.map((l) => (

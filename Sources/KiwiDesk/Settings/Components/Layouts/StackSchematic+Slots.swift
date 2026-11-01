@@ -9,8 +9,17 @@ extension StackSchematic {
     /// rests at the zone's head, and every other window waits
     /// exactly behind the edge slot.
     func stackSlots(in size: CGSize) -> [Slot] {
+        guard let laid = stackRun(in: size) else { return [] }
+        return laid.rects.enumerated().map { index, rect in
+            Slot(rect: rect, hidden: !laid.run.visible.contains(index))
+        }
+    }
+
+    /// The stack zone's run and every member's rect in it; nil for
+    /// an empty zone.
+    func stackRun(in size: CGSize) -> SchematicLaidRun? {
         let n = stackWins.count
-        guard n > 0 else { return [] }
+        guard n > 0 else { return nil }
         let g: CGFloat = 3
         let vertical = stackOrientation == .vertical
         let along = vertical ? size.height : size.width
@@ -36,8 +45,6 @@ extension StackSchematic {
             vertical: vertical,
             gap: g
         )
-        return rects.enumerated().map { index, rect in
-            Slot(rect: rect, hidden: !run.visible.contains(index))
-        }
+        return SchematicLaidRun(run: run, rects: rects, vertical: vertical)
     }
 }

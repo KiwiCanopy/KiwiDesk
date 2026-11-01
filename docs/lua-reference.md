@@ -5486,9 +5486,10 @@ KiwiDesk.make_sticky()
 
 **Expects:** nothing.
 
-**Does:** marks the focused window sticky to its **current
-screen** — visible on every space of that one screen, not on
-other screens. Moving it to a space on another screen re-homes
+**Does:** marks the focused window sticky to its **home
+screen** — the screen its home space lives on, even while it
+shows on another — visible on every space of that one screen,
+not on other screens. Moving it to a space on another screen re-homes
 it there. Overrides global sticky if the window already had it.
 
 **Example:**
@@ -5532,7 +5533,7 @@ end)
 **Expects:** nothing.
 
 **Does:** flips the focused window between **screen** sticky
-(its current screen only) and off. Toggling screen sticky on a
+(its home screen only) and off. Toggling screen sticky on a
 global-sticky window switches it to screen sticky.
 
 It has no default shortcut and no row in Settings ▸ Shortcuts &

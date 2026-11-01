@@ -65,10 +65,7 @@ struct LookPlateDeskTests {
             appArt: LookPlate.appArt(.appFont)
         )
         let host = try #require(settings.appBarHosts.first)
-        let items = tile.appItems(
-            settings.appBarLook(for: host),
-            vertical: false
-        )
+        let items = tile.appItems(settings.appBarLook(for: host))
         #expect(items.count == 3)
         #expect(items.allSatisfy { $0.art != nil && $0.label == nil })
         #expect(items.map(\.active) == [true, false, false])

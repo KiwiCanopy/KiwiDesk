@@ -107,7 +107,7 @@ extension OnboardingKeys {
     ) -> OnboardingChord? {
         let each = combos.compactMap { rendered(combo: $0) }
         return each.isEmpty
-            ? nil : .mixed(each.joined(separator: "  "))
+            ? nil : .mixed(each)
     }
 
     static func sameModifiers(
@@ -143,7 +143,7 @@ extension OnboardingKeys {
             guard let full = rendered(combo: combo) else {
                 return nil
             }
-            return .mixed(full)
+            return .mixed([full])
         }
         return .shared(parsed.modifiers, keys: key)
     }

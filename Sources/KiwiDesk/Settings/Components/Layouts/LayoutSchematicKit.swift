@@ -1,3 +1,4 @@
+import AppKit
 import KiwiDeskCore
 import SwiftUI
 
@@ -108,16 +109,38 @@ struct SchematicTile: View {
 /// Overflow indicator chip displaying count of hidden windows.
 struct SchematicMoreChip: View {
     let hidden: Int
+    /// A pill along a top or bottom edge, a circle on a side, as
+    /// the desk's mark (`OverflowMark.End.isPill`).
+    var pill = true
     @Environment(\.schematicPalette) private var palette
 
+    static let font = NSFont.monospacedDigitSystemFont(
+        ofSize: 9,
+        weight: .semibold
+    )
+
+    /// The chip's drawn size for `hidden`: its count's width in its
+    /// font plus the 3 pt pads, as tall as its line; a circle as
+    /// wide as it is tall at least.
+    static func size(hidden: Int, pill: Bool = true) -> CGSize {
+        let text = ("+\(hidden)" as NSString).size(
+            withAttributes: [.font: font]
+        )
+        let width = ceil(text.width) + 6
+        let height = ceil(text.height)
+        return pill
+            ? CGSize(width: width, height: height)
+            : CGSize(width: max(width, height), height: max(width, height))
+    }
+
     var body: some View {
+        let size = Self.size(hidden: hidden, pill: pill)
         Text("+\(hidden)")
-            .font(.system(size: 9, weight: .semibold))
-            .monospacedDigit()
+            .font(Font(Self.font))
             .foregroundStyle(
                 palette?.ink ?? SettingsTheme.ink2
             )
-            .padding(.horizontal, 3)
+            .frame(width: size.width, height: size.height)
             .background(
                 Capsule().fill(
                     palette?.base ?? SettingsTheme.card

@@ -36,7 +36,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`new_window`](lua-reference.md#new_window) | Asks the focused or named window's app for a new window; success means asked. |
 | [`close_window`](lua-reference.md#close_window) | Presses the focused or named window's close button; success means asked. |
 | [`make_sticky`](lua-reference.md#make_sticky) | Marks the focused window globally sticky across all screens. |
-| [`make_display_sticky`](lua-reference.md#make_display_sticky) | Marks the focused window sticky to its current screen. |
+| [`make_display_sticky`](lua-reference.md#make_display_sticky) | Marks the focused window sticky to its home screen. |
 | [`make_unsticky`](lua-reference.md#make_unsticky) | Clears the focused window's sticky state. |
 | [`toggle_sticky`](lua-reference.md#toggle_sticky) | Flips the focused window between globally sticky and off. |
 | [`toggle_display_sticky`](lua-reference.md#toggle_display_sticky) | Flips the focused window between screen-sticky and off. |

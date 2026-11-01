@@ -601,7 +601,7 @@ every lens with why it cannot turn on.
 | | `make_tiled` | — |
 | | `toggle_floating` | — |
 | | `make_sticky` | — (sticky on every screen) |
-| | `make_display_sticky` | — (sticky on this screen only) |
+| | `make_display_sticky` | — (sticky on its home screen only) |
 | | `make_unsticky` | — |
 | | `toggle_sticky` | — |
 | | `toggle_display_sticky` | — |
