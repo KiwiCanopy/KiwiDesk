@@ -103,7 +103,7 @@ struct MockAppItemLengthTests {
             scale: scale,
             mockApps: BarsPanelPreview.mockApps
         )
-        let space = tile.spaceSpec(tile.settings.spaceBarLook)
+        let space = tile.spaceSpec(tile.settings.spaceBarLook, vertical: false)
         let app = tile.appSpec(
             tile.settings.appBarLook(for: tile.settings.appBarHosts[0]),
             vertical: false
@@ -141,7 +141,7 @@ struct MockAppItemLengthTests {
             scale: scale,
             mockApps: BarsPanelPreview.mockApps
         )
-        let space = tile.spaceSpec(tile.settings.spaceBarLook)
+        let space = tile.spaceSpec(tile.settings.spaceBarLook, vertical: false)
         let app = tile.appSpec(
             tile.settings.appBarLook(for: tile.settings.appBarHosts[0]),
             vertical: false

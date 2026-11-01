@@ -7,7 +7,7 @@ import SwiftUI
 extension HomeCardBarsTile {
     func spaceSpec(
         _ style: SpaceBarLook,
-        vertical: Bool = false
+        vertical: Bool
     ) -> BarSpec {
         let cross = crossSize(style.thickness)
         let widths = indicatorWidths(style.shelf)

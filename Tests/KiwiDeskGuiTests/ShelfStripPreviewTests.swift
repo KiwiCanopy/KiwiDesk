@@ -202,16 +202,13 @@ struct ShelfStripPreviewTests {
     /// plate verdict first.
     @Test("A boxed preview draws no section divider")
     func boxedDrawsNoDivider() throws {
-        let url = SourceScan.repoRoot(from: "\(#filePath)")
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/HomeCardPlate+ShelfStrip.swift"
-            )
-        let source = try SourceScan.strippedSource(at: url)
-        #expect(!source.isEmpty)
-        #expect(
-            source.contains(
-                "if shelf.drawsPlate, let middle = placed.dividerMiddle"
-            )
+        let body = try SourceScan.functionBody(
+            of: "divider",
+            in: "HomeCardPlate+ShelfStrip.swift",
+            under: "Settings",
+            root: "Sources/KiwiDesk"
         )
+        #expect(body.contains("placed.dividerMiddle"))
+        #expect(body.contains("shelf.drawsPlate"))
     }
 }

@@ -6,7 +6,8 @@ import Testing
 
 /// The Stack preview draws every master and no "+N" on the master
 /// zone (#2891): the desk never hides a master, and the chip is the
-/// overflow mark's glyph alone.
+/// overflow mark's glyph alone. Main-actor spend: building a few
+/// `StackSchematic` values, no rendering.
 @Suite("Stack preview master zone")
 @MainActor
 struct StackMasterZoneTests {
@@ -25,7 +26,7 @@ struct StackMasterZoneTests {
     func everyMasterDraws() {
         for masters in [1, 4, 5, 10] {
             let zone = stack(masters: masters, windows: 12)
-            #expect(zone.masterDisplay.count == masters)
+            #expect(zone.drawnMasters.count == masters)
         }
     }
 
@@ -42,7 +43,12 @@ struct StackMasterZoneTests {
             }
         }
     }
+}
 
+/// The chip's one builder, scanned off the main actor: a walk of
+/// the whole `Sources/KiwiDesk` tree.
+@Suite("Stack preview chip builder")
+struct SchematicChipBuilderTests {
     @Test("Only the overflow marks build the +N chip")
     func chipHasOneBuilder() throws {
         let root = SourceScan.repoRoot(from: #filePath)

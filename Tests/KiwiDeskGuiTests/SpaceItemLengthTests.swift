@@ -8,7 +8,8 @@ import Testing
 /// A labelled Space Bar preview item measures what the strip draws
 /// (#2890): a text name or a symbol, in the bar's own face and on
 /// the bar's own axis, so `ShelfStripPreview.need` counts a long
-/// name's whole width.
+/// name's whole width. Main-actor spend: one hosted `BarStripView`
+/// sized per case.
 @Suite("Preview Space item length")
 @MainActor
 struct SpaceItemLengthTests {

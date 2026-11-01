@@ -49,7 +49,11 @@ struct TitleSlotPreviewTests {
             pocketStands: false,
             scale: 1.8
         )
-        #expect(tile.spaceSpec(tile.settings.spaceBarLook).titleSlot == nil)
+        let space = tile.spaceSpec(
+            tile.settings.spaceBarLook,
+            vertical: false
+        )
+        #expect(space.titleSlot == nil)
     }
 
     /// The strip's title sizes to itself up to the slot, never

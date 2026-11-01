@@ -180,8 +180,11 @@ struct StackSchematic: View {
     }
 
     private var masterTiles: some View {
-        ForEach(masterDisplay, id: \.self) { tile(for: $0) }
+        ForEach(drawnMasters, id: \.self) { tile(for: $0) }
     }
+
+    /// The masters the zone draws: every one (#2891).
+    var drawnMasters: [WindowID] { masterDisplay }
 
     /// Slot geometry per stack window; a hidden one sits behind
     /// the last shown slot.

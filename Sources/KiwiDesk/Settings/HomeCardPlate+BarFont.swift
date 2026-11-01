@@ -33,9 +33,10 @@ extension HomeCardBarsTile.BarSpec {
         return vertical ? size.height : size.width
     }
 
-    /// The along-axis length of a labelled item's glyph or text as
+    /// The along-axis length of a Space item's glyph or text as
     /// `BarStripView.iconAndTitle` draws it, padding excluded; a
-    /// text label in the bar's own face (#2890).
+    /// text label in the bar's own face (#2890). Assumes one of
+    /// label or glyph and no title slot, as a `SpaceGlyph` gives.
     @MainActor func labelledLength(
         _ item: HomeCardBarsTile.BarItem,
         vertical: Bool
