@@ -1057,6 +1057,29 @@ lifecycle; the `reason` field says why the set changed:
   every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)), where the Desktop can be read; every other reason —
   and a Mac without SkyLight — sends `null`.
 
+:::unreleased
+`window_created` also reports `existing`: a window that was
+already open when KiwiDesk began managing it — every window found
+when KiwiDesk starts, and a window it adopts later that macOS never
+reported opening, such as one it lost track of and finds again:
+
+```json
+{"event": "window_created",
+ "data": {"window_id": 4702, "app": "Ghostty",
+          "space_id": "2", "reason": "existing",
+          "bundle_id": "com.mitchellh.ghostty"}}
+```
+
+`restored` wins over `returned`, which wins over `existing`; `new`
+is everything else, KiwiDesk's own windows included. A pocketed
+window that comes back after its app was hidden, or after KiwiDesk
+restarted, is `returned`. Where KiwiDesk has to wait for macOS to
+report the window opening, the event can follow the window's
+`focus_change` by up to half a second; it always comes before that
+window's `window_destroyed`. More reasons may be added, so match
+the ones your consumer handles.
+:::
+
 A window re-shown after a `closed` destroy — an app whose close
 hides the window and shows the same one again — comes back as
 `new` and is placed like one; `returned` is a Desktop return, an

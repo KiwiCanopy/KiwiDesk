@@ -6835,6 +6835,21 @@ return. The `reason` argument says which kind of change fired:
   sixth argument, `desktop`, names the Desktop holding it where
   the Desktop can be read — `nil` on a Mac without SkyLight).
 
+:::unreleased
+`window_created` also reports `"existing"`: a window that was
+already open when KiwiDesk began managing it — every window found
+when KiwiDesk starts, and a window it adopts later that macOS never
+reported opening, such as one it lost track of and finds again.
+`"restored"` wins over `"returned"`, which wins over `"existing"`;
+`"new"` is everything else, KiwiDesk's own windows included. A
+pocketed window that comes back after its app was hidden, or after
+KiwiDesk restarted, is `"returned"`. Where KiwiDesk has to wait for
+macOS to report the window opening, the event can follow the
+window's `focus_change` by up to half a second; it always comes
+before that window's `window_destroyed`. More reasons may be added,
+so match the ones your callback handles.
+:::
+
 A bar callback that only cares about real lifecycle filters in
 one line:
 

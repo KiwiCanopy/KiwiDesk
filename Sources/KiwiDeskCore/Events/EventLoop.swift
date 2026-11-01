@@ -194,6 +194,8 @@ public final class EventLoop {
     /// (#801/#803) — every field is argued on `BootScanState`, in
     /// `EventLoop+BootScan.swift`.
     var bootScan = BootScanState()
+    /// Inside the AX create arm (#2867): `adoptsAsBootStep`'s pair.
+    var arrivingFromAXCreate = false
 
     /// The monotonic clock every boot budget and chunk deadline
     /// reads. A seam because a budget is otherwise unobservable

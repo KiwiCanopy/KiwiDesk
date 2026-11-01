@@ -80,7 +80,8 @@ struct LifecycleReasonTests {
         #expect(
             WindowAppearReason.classify(
                 wasMinimized: true,
-                hadRememberedSpace: true
+                hadRememberedSpace: true,
+                isNew: nil
             ) == .restored
         )
     }
@@ -90,18 +91,35 @@ struct LifecycleReasonTests {
         #expect(
             WindowAppearReason.classify(
                 wasMinimized: false,
-                hadRememberedSpace: true
+                hadRememberedSpace: true,
+                isNew: nil
             ) == .returned
         )
     }
 
-    @Test("Nothing remembered is new")
+    @Test("Nothing remembered is the arrival door's answer")
     func fresh() {
         #expect(
             WindowAppearReason.classify(
                 wasMinimized: false,
-                hadRememberedSpace: false
+                hadRememberedSpace: false,
+                isNew: true
             ) == .new
+        )
+        #expect(
+            WindowAppearReason.classify(
+                wasMinimized: false,
+                hadRememberedSpace: false,
+                isNew: false
+            ) == .existing
+        )
+        // A create still due defers the reason (#2630).
+        #expect(
+            WindowAppearReason.classify(
+                wasMinimized: false,
+                hadRememberedSpace: false,
+                isNew: nil
+            ) == nil
         )
     }
 }

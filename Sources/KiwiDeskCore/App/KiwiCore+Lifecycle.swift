@@ -245,6 +245,7 @@ extension KiwiCore {
         SkyLightWindowLifecycle.stop()
         windowCreates.isLive = false
         launchFollow.dropSpawn()
+        arrivals.reset()
         deferred.cancelAll()
         // Its close task just went; an open match would claim the
         // next start's arrivals (#1385).

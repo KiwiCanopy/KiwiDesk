@@ -47,6 +47,9 @@ final class DeferredTasks {
         /// trailing create lands, outside the event-port drain
         /// (#2478).
         case lateSpawnFollow
+        /// The late-create bound of a held `window_created`
+        /// (#2630).
+        case arrivalBound
         /// Re-tracks windows dropped mid-launch (#675).
         case transientRetrack
         /// Re-reads an app whose sweep removal was distrusted
@@ -134,7 +137,7 @@ final class DeferredTasks {
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,
-                .adoptionHealWake, .lateSpawnFollow,
+                .adoptionHealWake, .lateSpawnFollow, .arrivalBound,
                 .transientRetrack, .removalRecheck, .barTitleRefresh,
                 .barVisibilityRefresh,
                 .awayCensus, .awayDestroyCheck, .menuBarRemeasure,

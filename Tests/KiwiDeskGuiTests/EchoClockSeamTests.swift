@@ -157,9 +157,9 @@ struct EchoClockSeamTests {
     /// The files whose ledgers stamp and age on `wallClock`.
     private static let wallClockHomes = [
         "App/KiwiCore+AccessibilityReturn.swift",
+        "App/KiwiCore+ArrivalProvenance.swift",
         "App/KiwiCore+BorderSettle.swift",
         "App/KiwiCore+ClickProvenance.swift",
-        "App/KiwiCore+Events.swift",
         "App/KiwiCore+FocusEvents.swift",
         "App/KiwiCore+MouseWarp.swift",
         "Commands/KiwiCore+FocusRaise.swift",

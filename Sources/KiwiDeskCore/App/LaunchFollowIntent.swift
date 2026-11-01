@@ -137,7 +137,6 @@ final class LaunchFollowIntent {
         /// The Space the user was in, which a payment requires
         /// they still are.
         let from: SpaceID?
-        let at: Date
     }
     private(set) var spawn: Spawn?
 
@@ -151,12 +150,17 @@ final class LaunchFollowIntent {
         spawn = nil
     }
 
-    /// Takes the slot for `window` while within `lateCreateBound`.
-    func takeSpawn(_ window: WindowID, at now: Date) -> Spawn? {
+    /// Drops the slot if it waits on `window`: the arrival door
+    /// resolved it with no create in the bound (#2630).
+    func dropSpawn(of window: WindowID) {
+        if spawn?.window == window { spawn = nil }
+    }
+
+    /// Takes the slot for `window`. The arrival door drops it once
+    /// `lateCreateBound` passes (#2630).
+    func takeSpawn(_ window: WindowID) -> Spawn? {
         guard let spawn, spawn.window == window else { return nil }
         self.spawn = nil
-        guard now.timeIntervalSince(spawn.at) < Self.lateCreateBound
-        else { return nil }
         return spawn
     }
 

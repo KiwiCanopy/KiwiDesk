@@ -49,17 +49,26 @@ public enum WindowGoneReason: String, Sendable {
     }
 }
 
-/// Reason classification for window entrance into visible set (#40).
+/// Reason classification for window entrance into visible set
+/// (#40, #2630). More values may be added; a script matches the
+/// ones it handles.
 public enum WindowAppearReason: String, Sendable {
     case new
     case returned
     case restored
+    /// Already open when KiwiDesk began managing it (#2630).
+    case existing
 
+    /// Restored, then returned (a remembered Space or a pocket
+    /// slot), then `isNew` — the arrival door's answer, nil while
+    /// it waits for a create, which defers the reason too.
     public static func classify(
         wasMinimized: Bool,
-        hadRememberedSpace: Bool
-    ) -> WindowAppearReason {
+        hadRememberedSpace: Bool,
+        isNew: Bool?
+    ) -> WindowAppearReason? {
         if wasMinimized { return .restored }
-        return hadRememberedSpace ? .returned : .new
+        if hadRememberedSpace { return .returned }
+        return isNew.map { $0 ? .new : .existing }
     }
 }

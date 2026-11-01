@@ -137,8 +137,7 @@ extension KiwiCore {
                         window: window.id,
                         bundleID: bundleID,
                         space: space,
-                        from: state.workspaces.activeSpace,
-                        at: wallClock()
+                        from: state.workspaces.activeSpace
                     )
                 )
             case .stays:
@@ -169,8 +168,11 @@ extension KiwiCore {
         guard spawnStandsClear(at: now),
             launchFollow.spawnFollows(pid: window.pid)
         else { return .stays }
-        let created = windowCreates.createdAt(window.id, now: now)
-        return created == nil ? .awaitsCreate : .follows
+        switch arrivalProvenance(window) {
+        case .created: return .follows
+        case .awaitingCreate: return .awaitsCreate
+        case .own, .unreported, .existing: return .stays
+        }
     }
 
     /// The unowed arm's stand-downs, asked at the claim and again
@@ -186,11 +188,12 @@ extension KiwiCore {
     }
 
     /// Pays the unowed follow when `id`'s create lands after its
-    /// arrival (#2478): the arrival retile has parked the window in
-    /// its unshown Space, so this is a whole `followSwitch`.
+    /// arrival (#2478), within the bound the arrival door resolved
+    /// (#2630): the arrival retile has parked the window in its
+    /// unshown Space, so this is a whole `followSwitch`.
     func payLateSpawnFollow(_ id: WindowID) {
         let now = wallClock()
-        guard let spawn = launchFollow.takeSpawn(id, at: now),
+        guard let spawn = launchFollow.takeSpawn(id),
             spawnStandsClear(at: now),
             state.workspaces.activeSpace == spawn.from,
             state.workspaces.space(of: id) == spawn.space,

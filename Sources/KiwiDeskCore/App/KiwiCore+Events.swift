@@ -98,18 +98,13 @@ extension KiwiCore {
             // re-add tiles straight to the learned answer
             // instead of re-running the whole dance.
             tiler.reviveSizeBound(window.id, pid: window.pid)
-            let reason = WindowAppearReason.classify(
-                wasMinimized: effects.appearedWasMinimized,
-                hadRememberedSpace: effects.hadRememberedSpace
-            )
-            if reason == .returned { recentReturns[window.id] = wallClock() }
             if effects.closedReturnPlacedAsNew {
                 onLog(
                     "close return: w\(window.id.raw) re-shown — "
                         + "placed as new, focus taken (#1414/#1561)"
                 )
             }
-            emitWindowCreated(window, reason: reason)
+            announceArrival(window, effects: effects)
             // #1010: narrate the cross-screen arrival, the
             // one resolution a device trace cannot read off
             // the membership alone.

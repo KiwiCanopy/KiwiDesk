@@ -19,6 +19,11 @@ public struct AppliedEffects: Sendable {
     /// Whether window returned to a remembered space assignment.
     var hadRememberedSpace = false
 
+    /// Whether the window holds a pocket slot, re-adopted after a
+    /// hide or a restart: its `window_created` says `returned`
+    /// (#2630).
+    var returnedToPocket = false
+
     /// The snapshot frame a late-restored window is owed (#1362),
     /// consumed from `restoredFrames` by this create.
     var restoredFrame: CGRect?

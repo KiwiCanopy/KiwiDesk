@@ -20,6 +20,7 @@ extension StateCoordinator {
         }
         effects.hadRememberedSpace =
             rememberedSpaces[window.id] != nil
+        effects.returnedToPocket = pocketPhase(of: window.id) != nil
         // Once: the restore's debt is the FIRST arrival's (#1362).
         let restored = restoredFrames.removeValue(forKey: window.id)
         effects.restoredFrame = restored?.frame

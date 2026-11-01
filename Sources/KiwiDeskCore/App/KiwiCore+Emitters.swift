@@ -91,13 +91,15 @@ extension KiwiCore {
     // MARK: - Window lifecycle (issue #20)
 
     /// Fires after state placed the new window, so `space`
-    /// reflects app_rules / spawn placement. `reason` is
-    /// classified by handle() before state.apply (#40).
+    /// reflects app_rules / spawn placement; a held arrival
+    /// passes the Space it had (#2630). `reason` is classified
+    /// by `announceArrival` (#40).
     func emitWindowCreated(
         _ window: ManagedWindow,
-        reason: WindowAppearReason
+        reason: WindowAppearReason,
+        space: SpaceID?? = nil
     ) {
-        let space = state.workspaces.space(of: window.id)
+        let space = space ?? state.workspaces.space(of: window.id)
         bus.emit(
             .windowCreated,
             data: .object([
@@ -165,6 +167,7 @@ extension KiwiCore {
         reason: WindowGoneReason,
         desktop: Int? = nil
     ) {
+        flushHeldArrival(id)  // #2630: the create goes first.
         // `desktop` names the Mission Control Desktop a
         // `vanished` window went to (#1146); nil otherwise.
         let desktopValue: JSONValue =

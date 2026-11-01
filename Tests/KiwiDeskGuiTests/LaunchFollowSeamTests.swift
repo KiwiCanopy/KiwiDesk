@@ -110,10 +110,15 @@ struct LaunchFollowSeamTests {
             "windowCreates.noteDestroyed(id)",
             "KiwiCore+WindowServerWakeUp.swift", 1
         ),
-        ("payLateSpawnFollow(id)", "KiwiCore+WindowServerWakeUp.swift", 1),
+        // A late create resolves through the arrival door (#2630).
+        (
+            "resolveArrivalCreated(id)",
+            "KiwiCore+WindowServerWakeUp.swift", 1
+        ),
+        ("payLateSpawnFollow(id)", "KiwiCore+ArrivalProvenance.swift", 1),
         (
             "deferred.schedule(.lateSpawnFollow",
-            "KiwiCore+WindowServerWakeUp.swift", 1
+            "KiwiCore+ArrivalProvenance.swift", 1
         ),
         ("launchFollow.dropSpawn()", "KiwiCore+Lifecycle.swift", 1),
         ("spawnVerdict(window)", followFile, 1),
@@ -164,8 +169,8 @@ struct LaunchFollowSeamTests {
     @Test("a late create pays outside the event-port drain")
     func latePaymentLeavesTheDrain() throws {
         let body = try SourceScan.functionBody(
-            of: "windowServerChanged",
-            in: "KiwiCore+WindowServerWakeUp.swift",
+            of: "resolveArrivalCreated",
+            in: "KiwiCore+ArrivalProvenance.swift",
             under: "App"
         )
         let hop = try #require(
