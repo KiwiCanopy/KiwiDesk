@@ -1,22 +1,32 @@
 import SwiftUI
 
 /// The shapes every gesture picture is drawn from (#1726), in the
-/// user's palette on the plate (`HomeCardPlate.palette`). A moved
+/// plate's paint (`HomeCardPlate.palette(_:in:)`, #2859). A moved
 /// or dropped-on thing is told apart by outline and weight, never
 /// by hue alone.
 struct GestureInk {
     let palette: SchematicPalette?
 
-    var accent: Color { palette?.accent ?? SettingsTheme.accent }
+    var accent: Color { palette?.focusMark ?? SettingsTheme.accent }
     var ink: Color { palette?.ink ?? SettingsTheme.plateInk }
+    /// The plate itself, for a mark cut into a filled shape.
+    var plate: Color { palette?.base ?? SettingsTheme.card }
 
-    /// A window at rest.
+    private var onLight: Bool { palette?.ground == .light }
+
+    /// A window at rest: the light plate's window paint, else the
+    /// ink's wash.
     func window(_ rect: CGRect) -> some View {
         RoundedRectangle(cornerRadius: 3)
-            .fill(ink.opacity(0.10))
+            .fill(onLight ? SettingsTheme.lightWindow : ink.opacity(0.10))
             .overlay(
                 RoundedRectangle(cornerRadius: 3)
-                    .strokeBorder(ink.opacity(0.35), lineWidth: 1)
+                    .strokeBorder(
+                        onLight
+                            ? SettingsTheme.lightOutline
+                            : ink.opacity(0.35),
+                        lineWidth: 1
+                    )
             )
             .frame(width: rect.width, height: rect.height)
             .offset(x: rect.minX, y: rect.minY)

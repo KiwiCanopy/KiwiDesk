@@ -44,12 +44,17 @@ struct LayoutStrip: View {
                     windows: LayoutSchematic.defaultWindowCount,
                     scale: .tile
                 )
+                .padding(4)
+                .deskPlate(
+                    model.config.settings,
+                    in: RoundedRectangle(cornerRadius: 6)
+                )
                 Label(mode.displayName, systemImage: mode.symbol)
                     .font(.subheadline)
                     .labelStyle(.titleAndIcon)
                 Text(usageText(mode))
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(SettingsTheme.ink2)
             }
             .padding(6)
             .background(selectionChrome(mode, selected: selected))

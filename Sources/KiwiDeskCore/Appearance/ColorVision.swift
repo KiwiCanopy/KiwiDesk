@@ -70,6 +70,29 @@ public enum ColorVision {
             + 0.0722 * linear(c.b)
     }
 
+    /// Rec. 709 luma over the ENCODED channels, 0...1, alpha
+    /// ignored: the Settings plates' legibility measure (#786,
+    /// #2859), not WCAG's linear `luminance`.
+    public static func luma(_ hex: String) -> Double? {
+        guard let c = components(hex) else { return nil }
+        return 0.2126 * c.r + 0.7152 * c.g + 0.0722 * c.b
+    }
+
+    /// How far `top`, laid at its own alpha over the opaque
+    /// `ground`, sits from `ground` in `luma` — in either
+    /// direction, so a near-ground colour and a translucent
+    /// wisp both measure small.
+    public static func lumaDistance(
+        _ top: String,
+        over ground: String
+    ) -> Double? {
+        guard let c = HexColor.parse(top), let floor = luma(ground)
+        else { return nil }
+        let lum = 0.2126 * c.red + 0.7152 * c.green + 0.0722 * c.blue
+        let effective = c.alpha * lum + (1 - c.alpha) * floor
+        return abs(effective - floor)
+    }
+
     /// WCAG contrast ratio, 1...21.
     public static func contrast(
         _ a: String,

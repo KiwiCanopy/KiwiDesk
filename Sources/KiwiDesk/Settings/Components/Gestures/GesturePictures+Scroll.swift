@@ -156,7 +156,7 @@ extension GestureInk {
                 Rectangle().fill(accent)
                 ForEach(0..<5, id: \.self) { ridge in
                     Rectangle()
-                        .fill(SettingsTheme.previewPlate.opacity(0.55))
+                        .fill(plate.opacity(0.55))
                         .frame(width: wheel.width, height: 0.5)
                         .offset(y: 0.2 + 1.3 * CGFloat(ridge) + roll)
                 }

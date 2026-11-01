@@ -49,7 +49,7 @@ struct HomeCardSpacesTile: View {
 
     private func pane(active: Bool) -> some View {
         let base: Color =
-            palette?.base ?? SettingsTheme.previewPlate
+            palette?.base ?? SettingsTheme.card
         let fill: Color =
             active
             ? palette?.fill ?? LayoutSchematic.fill
@@ -57,7 +57,7 @@ struct HomeCardSpacesTile: View {
                 ?? SettingsTheme.ink2.opacity(0.15)
         let stroke: Color =
             active
-            ? palette?.accent ?? SettingsTheme.accent
+            ? palette?.focusMark ?? SettingsTheme.accent
             : palette?.ghostStroke
                 ?? SettingsTheme.ink2.opacity(0.5)
         // Opaque base layer to prevent compounding transparency (#712).

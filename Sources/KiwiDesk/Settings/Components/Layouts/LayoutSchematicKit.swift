@@ -164,7 +164,7 @@ struct SchematicNewWindow: View {
             Image(systemName: "plus")
                 .font(.system(size: 7, weight: .bold))
                 .foregroundStyle(
-                    palette?.ink ?? SettingsTheme.accentInk
+                    palette?.mark ?? SettingsTheme.accentInk
                 )
                 .padding(2)
         }
@@ -204,7 +204,7 @@ struct SchematicPileTile: View {
                 Image(systemName: "plus")
                     .font(.system(size: 7, weight: .bold))
                     .foregroundStyle(
-                        palette?.ink ?? SettingsTheme.accentInk
+                        palette?.mark ?? SettingsTheme.accentInk
                     )
                     .padding(2)
             }

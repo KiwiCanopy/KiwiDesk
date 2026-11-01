@@ -204,7 +204,7 @@ struct HomeCardBarsTile: View {
     private var well: some View {
         RoundedRectangle(cornerRadius: 5)
             .fill(
-                palette?.ghostFill
+                palette?.well
                     ?? SettingsTheme.ink2.opacity(0.08)
             )
             .overlay(

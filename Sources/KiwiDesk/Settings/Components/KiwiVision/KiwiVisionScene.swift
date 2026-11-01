@@ -27,7 +27,7 @@ struct KiwiVisionScene: View {
     private static let menuBar: CGFloat = 6
 
     private var palette: SchematicPalette {
-        HomeCardPlate.palette(settings)
+        HomeCardPlate.darkPalette(settings)
     }
 
     private var veil: Double {

@@ -61,7 +61,7 @@ struct HomeCardScreensTile: View {
         let cardHeight = max(rect.height - Self.standBand, 6)
         let stroke =
             main
-            ? palette?.accent ?? SettingsTheme.accent
+            ? palette?.focusMark ?? SettingsTheme.accent
             : palette?.ghostStroke
                 ?? SettingsTheme.ink2.opacity(0.6)
         VStack(spacing: 0) {
@@ -116,7 +116,7 @@ struct HomeCardScreensTile: View {
     private var pips: some View {
         HStack(spacing: 3) {
             RoundedRectangle(cornerRadius: 2)
-                .fill(palette?.accent ?? SettingsTheme.accent)
+                .fill(palette?.focusMark ?? SettingsTheme.accent)
                 .frame(width: 8, height: 8)
             RoundedRectangle(cornerRadius: 2)
                 .fill(

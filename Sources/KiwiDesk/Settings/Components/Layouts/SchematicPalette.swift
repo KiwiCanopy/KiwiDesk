@@ -5,19 +5,56 @@ import SwiftUI
 /// an init parameter on the schematics would red
 /// `LayoutSchematicCountTests` at every construction site. On the
 /// plate, interiors are NEUTRAL (owner ruled 2026-08-09): the
-/// accent lives on strokes and marks alone.
+/// accent lives on strokes and marks alone. On the light plate
+/// (#2859) the plate owns every value but the focus ring.
 struct SchematicPalette: Equatable {
     var accent: Color
     var ink: Color
     var base: Color
+    var ground: PlateGround = .dark
+    /// The look's focus ring, set where the light plate drew.
+    var focus: Color? = nil
 
-    var fill: Color { ink.opacity(0.08) }
-    var stroke: Color { accent.opacity(0.6) }
-    var newFill: Color { ink.opacity(0.08) }
-    var gapStroke: Color { ink.opacity(0.4) }
-    var ghostFill: Color { ink.opacity(0.08) }
-    var ghostStroke: Color { ink.opacity(0.5) }
-    var frame: Color { ink.opacity(0.3) }
+    private var light: Bool { ground == .light }
+
+    var fill: Color {
+        light ? SettingsTheme.lightWindow : ink.opacity(0.08)
+    }
+    var stroke: Color {
+        light ? SettingsTheme.lightOutline : accent.opacity(0.6)
+    }
+    var newFill: Color {
+        light ? SettingsTheme.lightWindow : ink.opacity(0.08)
+    }
+    var gapStroke: Color {
+        light ? SettingsTheme.lightGap : ink.opacity(0.4)
+    }
+    var ghostFill: Color {
+        light ? SettingsTheme.lightGhost : ink.opacity(0.08)
+    }
+    var ghostStroke: Color {
+        light ? SettingsTheme.lightGhostEdge : ink.opacity(0.5)
+    }
+    var frame: Color {
+        light ? SettingsTheme.lightFrame : ink.opacity(0.3)
+    }
+    /// A bars tile's screen well.
+    var well: Color { light ? SettingsTheme.lightWell : ghostFill }
+    /// The "+" of an incoming window.
+    var mark: Color { light ? SettingsTheme.lightMark : ink }
+    /// The plate's inset edge; `planeRing` stays the dark seam.
+    var edge: Color {
+        light ? SettingsTheme.lightEdge : SettingsTheme.planeRing
+    }
+    /// What marks the focused or active thing on the plate.
+    var focusMark: Color { focus ?? accent }
+}
+
+/// Which plate a picture draws on (#2859): the dark plate, or the
+/// light one a look earns in light mode.
+enum PlateGround: Equatable {
+    case dark
+    case light
 }
 
 private struct SchematicPaletteKey: EnvironmentKey {
@@ -36,7 +73,7 @@ extension EnvironmentValues {
     }
 
     /// Focus stroke color for active schematic tile
-    /// (`HomeCardPlate.plateLegible`, `border.focused_color`).
+    /// (`LayoutSchematicView.focusStroke`, `border.focused_color`).
     var schematicFocusStroke: Color? {
         get { self[SchematicFocusStrokeKey.self] }
         set { self[SchematicFocusStrokeKey.self] = newValue }

@@ -48,7 +48,7 @@ struct HomeCardGapsTile: View {
             border.enabled
             && (focused || border.unfocusedEnabled)
         RoundedRectangle(cornerRadius: 4)
-            .fill(palette?.base ?? SettingsTheme.previewPlate)
+            .fill(palette?.base ?? SettingsTheme.card)
             .overlay(
                 RoundedRectangle(cornerRadius: 4)
                     .fill(
@@ -61,7 +61,7 @@ struct HomeCardGapsTile: View {
                     RoundedRectangle(cornerRadius: 4)
                         .strokeBorder(
                             focused
-                                ? palette?.accent
+                                ? palette?.focusMark
                                     ?? SettingsTheme.accent
                                 : palette?.ghostStroke
                                     ?? SettingsTheme.ink2

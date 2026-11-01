@@ -14,6 +14,8 @@ struct KeyboardBoard: View {
     /// The Hyper key, whose cap wears ✦ in place of its legend
     /// (#1870).
     var hyperKey: HyperSourceKey?
+    /// The plate's paint, `KeyboardPreviewPanel`'s (#2859).
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         GeometryReader { geometry in
@@ -38,12 +40,12 @@ struct KeyboardBoard: View {
             .padding(Self.padding)
             .background(
                 RoundedRectangle(cornerRadius: 10)
-                    .fill(SettingsTheme.previewPlate)
+                    .fill(palette?.base ?? SettingsTheme.card)
             )
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
-                        SettingsTheme.planeRing,
+                        palette?.edge ?? SettingsTheme.planeRing,
                         lineWidth: 1
                     )
             )
@@ -183,7 +185,7 @@ struct KeyCap: View {
 
     private var ink: Color {
         state == .bound
-            ? SettingsTheme.previewPlate
+            ? SettingsTheme.keyGlyph
             : SettingsTheme.plateInk.opacity(0.75)
     }
 

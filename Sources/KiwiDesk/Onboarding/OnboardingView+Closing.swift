@@ -81,44 +81,12 @@ extension OnboardingView {
     }
 
     private var menuBarStrip: some View {
-        HStack(spacing: 11) {
-            Spacer(minLength: 0)
-            ForEach(0..<2, id: \.self) { _ in
-                RoundedRectangle(cornerRadius: 2)
-                    .fill(SettingsTheme.plateInk.opacity(0.28))
-                    .frame(width: 9, height: 9)
-            }
-            Group {
-                if let icon = BrandAssets.menuBarIcon {
-                    Image(nsImage: icon)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 14, height: 14)
-                } else {
-                    Image(systemName: "square.grid.2x2")
-                        .font(.system(size: 11))
-                }
-            }
-            .foregroundStyle(SettingsTheme.plateInk)
-            .padding(4)
-            .overlay(
-                RoundedRectangle(cornerRadius: 6)
-                    .stroke(SettingsTheme.accent, lineWidth: 2)
+        OnboardingMenuBarStrip()
+            .deskPlate(
+                model.tilingSettings(),
+                in: Rectangle(),
+                edged: false
             )
-            Text(menuBarClock)
-                .font(.system(size: 10).monospaced())
-                .foregroundStyle(
-                    SettingsTheme.plateInk.opacity(0.45)
-                )
-                .accessibilityHidden(true)
-        }
-        .padding(.horizontal, 11)
-        .frame(height: 30)
-        .background(SettingsTheme.previewPlate)
-    }
-
-    private var menuBarClock: String {
-        Date.now.formatted(date: .omitted, time: .shortened)
     }
 
     private var menuBarBody: String {
@@ -180,5 +148,56 @@ struct OnboardingLoginCheckbox: View {
                     .fixedSize(horizontal: false, vertical: true)
             }
         }
+    }
+}
+
+/// The closing card's menu bar, drawn on the plate the look earns
+/// (#2859): the plate's ink on the light one, the fixed light ink
+/// on the dark.
+private struct OnboardingMenuBarStrip: View {
+    @Environment(\.schematicPalette) private var palette
+
+    private var ink: Color {
+        palette?.ground == .light
+            ? palette?.ink ?? SettingsTheme.plateInk
+            : SettingsTheme.plateInk
+    }
+
+    var body: some View {
+        HStack(spacing: 11) {
+            Spacer(minLength: 0)
+            ForEach(0..<2, id: \.self) { _ in
+                RoundedRectangle(cornerRadius: 2)
+                    .fill(ink.opacity(0.28))
+                    .frame(width: 9, height: 9)
+            }
+            Group {
+                if let icon = BrandAssets.menuBarIcon {
+                    Image(nsImage: icon)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(width: 14, height: 14)
+                } else {
+                    Image(systemName: "square.grid.2x2")
+                        .font(.system(size: 11))
+                }
+            }
+            .foregroundStyle(ink)
+            .padding(4)
+            .overlay(
+                RoundedRectangle(cornerRadius: 6)
+                    .stroke(SettingsTheme.accent, lineWidth: 2)
+            )
+            Text(clock)
+                .font(.system(size: 10).monospaced())
+                .foregroundStyle(ink.opacity(0.45))
+                .accessibilityHidden(true)
+        }
+        .padding(.horizontal, 11)
+        .frame(height: 30)
+    }
+
+    private var clock: String {
+        Date.now.formatted(date: .omitted, time: .shortened)
     }
 }

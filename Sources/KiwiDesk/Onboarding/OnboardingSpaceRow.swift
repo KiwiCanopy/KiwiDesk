@@ -67,13 +67,10 @@ struct OnboardingSpaceRow: View {
         .scaleEffect(Self.thumbFactor)
         .frame(width: Self.thumbWidth, height: Self.thumbHeight)
         .padding(5)
-        .background(
-            RoundedRectangle(cornerRadius: 7)
-                .fill(SettingsTheme.previewPlate)
-        )
-        .environment(
-            \.schematicPalette,
-            HomeCardPlate.palette(settings)
+        .deskPlate(
+            settings,
+            in: RoundedRectangle(cornerRadius: 7),
+            edged: false
         )
     }
 
