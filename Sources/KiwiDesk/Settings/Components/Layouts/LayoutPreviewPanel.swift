@@ -18,6 +18,11 @@ struct LayoutPreviewPanel: View {
                     windows: shownWindows,
                     scale: .panel
                 )
+                .padding(10)
+                .deskPlate(
+                    model.config.settings,
+                    in: RoundedRectangle(cornerRadius: 12)
+                )
                 countRow
             }
             SpacesUsingLayout(model: model, mode: mode)

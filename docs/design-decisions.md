@@ -10362,6 +10362,47 @@ rulings, both 2026-08-09:
   fallback rather than drawing dark-on-dark, guarded by
   `HomeCardChromeTests`.
 
+:::unreleased
+**The light plate is earned per look (#2859, owner 2026-10-31,
+replacing #786's "identical in both appearances", and amending
+its "draws in the USER's palette" and "the fold floors against
+the plate").** A fixed
+dark block in every picture of a light window reads as a hole in
+the page, not as a desk; but a light plate under every look would
+sink a pale ink or ring, and swapping that colour for a fallback
+would draw a desk the look does not paint. So in light mode a
+picture takes the light plate (`SettingsTheme.lightPlate`) only
+when its look holds it, and otherwise keeps the dark plate; the
+window's appearance alone never decides it, and dark mode is
+unchanged. A look holds it when its item ink clears the 0.15
+luma floor on its own bar fill composited over the plate, and
+its `border.focused_color` clears the floor on the plate,
+out-contrasts the unfocused outline there and separates from it
+by `ColorVision.separationFloor` under protan simulation
+(`HomeCardPlate.holdsLightPlate`, `PlateGroundTests`). Of the
+bundled palettes True Dark and Monochrome fail and keep the
+dark plate; Sunset's ring is the tightest that passes, at 72.9.
+With borders off no ring draws, and the look's active item
+colour stands in for it in both the verdict and the picture.
+
+On the light plate the look paints only what it paints on a real
+desk: its bars, on their own fill over the plate with their ink
+unchanged, and its focus colour. The plate owns the rest — its
+edge, well, neutral window interiors, outlines, ghosts, frame and
+captions, and the brand's own marks in a darker green that holds
+3:1 on it — so there the user's colours are the bars and the
+focus ring, the ink floors against its bar composite rather than
+the plate, and a failing look swaps the ground, never the ink.
+On the dark plate the fold above stands unchanged. One paint is
+resolved per picture and carried in `schematicPalette`
+(`deskPlate`, `PlateGroundWiringTests`). Advanced's Layouts
+sketches and KiwiVision's scene join the plate, the sketches in
+both modes with their focused tile in the look's focus colour;
+KiwiVision's veil stays black over either plate. Only the look
+tiles keep their own ground (`LookPlate`, #1740), since a look
+is chosen by its mood.
+:::
+
 **Settings is one surface: depth grows in place, never by a
 mode.** (#2654, owner ruling 2026-10-26, superseding #678's
 Simple / Power User segment and #760's reveal wash and
@@ -10499,10 +10540,11 @@ reach: a sticky, pocket or floating mark promises a setting the
 page does not hold, and a frozen drag reads as a broken window.
 The picture and its layout name are one Layout menu, since every
 layout on a card repeated per Space is the crowding #291 gives to
-a menu; the menu's items carry each layout's picture, so the
-drawing stays the label. Cards wrap rather than scroll sideways:
-every Space stays in view, and the page already grows with Open
-applications. KiwiHub's keys are shown with no "change these"
+a menu; the menu's items carry each layout's symbol, the one the
+Space Bar and the card's own face draw, so the card's picture is
+the one drawing and the menu stays a list to read. Cards wrap
+rather than scroll sideways: every Space stays in view, and the
+page already grows with Open applications. KiwiHub's keys are shown with no "change these"
 line — the switch is the door for a user who wants to change
 them, and the hover says where.
 

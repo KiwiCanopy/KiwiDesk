@@ -28,12 +28,21 @@ struct SimpleSpacePicture: View {
         }
         .padding(Self.padding)
         .aspectRatio(16.0 / 10.0, contentMode: .fit)
-        .background(shape.fill(SettingsTheme.previewPlate))
-        .overlay(shape.strokeBorder(SettingsTheme.planeRing, lineWidth: 1))
-        .environment(\.schematicPalette, HomeCardPlate.palette(settings))
+        .deskPlate(settings, in: shape)
         // The menu around it names the layout; the bar strip's own
         // labels are never read.
         .accessibilityHidden(true)
+    }
+
+    /// How many windows the picture draws: the schematic's default,
+    /// and Floating's whole scatter, which one window would read as
+    /// an empty screen.
+    nonisolated static func windows(
+        for mode: LayoutMode,
+        base: Int = LayoutSchematic.defaultWindowCount
+    ) -> Int {
+        let count = LayoutSchematic.windowCount(base, for: mode)
+        return mode == .floating ? max(count, 3) : count
     }
 
     /// The plate's padding around the bars tile.
@@ -54,7 +63,7 @@ struct SimpleSpacePicture: View {
         LayoutSchematicView(
             mode: mode,
             settings: settings.resolved(for: space, activeMode: mode),
-            windows: LayoutMenuPictures.windows(for: mode),
+            windows: Self.windows(for: mode),
             scale: .tile
         )
         // The well is the screen: no frame or caption of the

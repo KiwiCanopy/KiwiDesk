@@ -1,3 +1,4 @@
+import Foundation
 import KiwiDeskCore
 
 /// Look application for SettingsModel (#1684).
@@ -19,8 +20,9 @@ extension SettingsModel {
 
     /// Wears a look a gallery link added as an unsaved change, its
     /// tile marked (#1740 ▸ Step 3 decisions): on Simple's Look line
-    /// while Simple shows, else on the Looks page. Call after the
-    /// window is shown, whose fresh open reloads the draft.
+    /// while Simple shows, else on the Looks page. Call after
+    /// `prepareToShow`'s reload and before the window fronts
+    /// (`SettingsWindowController.show(beforeFront:)`, #2863).
     func wearLinkedLook(_ look: ShelfLook) {
         refreshLooks()
         linkedLook = look.name
@@ -36,6 +38,34 @@ extension SettingsModel {
     func paintColors(_ colors: [String: String]) -> Bool {
         ColorPalette(name: "", colors: colors).apply(to: &config.settings)
         return !isDirty
+    }
+
+    /// Whether `typed` may rename the user look `old`: not blank,
+    /// no bundled look's name, and no other user look's.
+    func canRenameUserLook(_ typed: String, from old: String) -> Bool {
+        let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !name.isEmpty, !lookStore.isBuiltinName(name) else {
+            return false
+        }
+        return name == old || !lookStore.hasUserLook(name)
+    }
+
+    /// Renames a user look; a gallery link on it follows the name,
+    /// so Simple's line keeps the look (#2860).
+    func renameUserLook(from old: String, to typed: String) {
+        let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard canRenameUserLook(name, from: old) else { return }
+        do {
+            try core.renameLook(from: old, to: name)
+            if linkedLook == old { linkedLook = name }
+        } catch {}
+        refreshLooks()
+    }
+
+    /// Deletes a user look; a gallery link on it goes with it.
+    func deleteUserLook(_ name: String) {
+        try? core.deleteLook(name)
+        refreshLooks()
     }
 
     /// Re-reads the user looks from the store, forgetting a linked

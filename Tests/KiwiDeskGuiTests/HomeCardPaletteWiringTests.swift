@@ -28,8 +28,14 @@ struct HomeCardPaletteWiringTests {
     func paletteIsWired() throws {
         #expect(
             try squashed("HomeCardPlate.swift").contains(
-                ".environment(\\.schematicPalette,"
-                    + "palette(settings))"
+                ".deskPlate(settings,in:Rectangle())"
+            )
+        )
+        // The one writer behind every plate, from the verdict.
+        #expect(
+            try squashed("HomeCardPlate+Ground.swift").contains(
+                "content.environment(\\.schematicPalette,"
+                    + "HomeCardPlate.palette(settings,in:scheme))"
             )
         )
         let kit = try squashed(
@@ -123,24 +129,32 @@ struct HomeCardPaletteWiringTests {
         #expect(members >= 6)
     }
 
-    /// The floor's ground derives from the shipped plate token,
-    /// not from a dated copy of its hex: retune `previewPlate`
-    /// and this reds until the arithmetic follows (architect +
-    /// code review, 2026-08-09).
-    @Test("the floor's ground matches the plate token")
+    /// Each floor's ground derives from the shipped plate token,
+    /// not from a dated copy of its hex: retune `previewPlate`,
+    /// `lightPlate` or `lightOutline` and this reds until the
+    /// verdict's hex follows (architect + code review,
+    /// 2026-08-09; #2859).
+    @Test("the floors' grounds match the plate tokens")
     @MainActor
     func floorGroundMatchesTheToken() throws {
-        let resolved = try #require(
-            NSColor(SettingsTheme.previewPlate)
-                .usingColorSpace(.sRGB)
-        )
-        let lum =
-            0.2126 * Double(resolved.redComponent)
-            + 0.7152 * Double(resolved.greenComponent)
-            + 0.0722 * Double(resolved.blueComponent)
-        #expect(
-            abs(lum - HomeCardPlate.plateLuminance) < 0.002
-        )
+        let grounds: [(Color, String)] = [
+            (SettingsTheme.previewPlate, HomeCardPlate.darkGround),
+            (SettingsTheme.lightPlate, HomeCardPlate.lightGround),
+            (SettingsTheme.lightOutline, HomeCardPlate.lightOutline),
+        ]
+        for (token, hex) in grounds {
+            let resolved = try #require(
+                NSColor(token).usingColorSpace(.sRGB)
+            )
+            let lum =
+                0.2126 * Double(resolved.redComponent)
+                + 0.7152 * Double(resolved.greenComponent)
+                + 0.0722 * Double(resolved.blueComponent)
+            #expect(
+                abs(lum - HomeCardPlate.plateLuminance(hex)) < 0.002,
+                Comment(rawValue: "\(hex) drifted from its token")
+            )
+        }
     }
 
     /// The fold's legibility floor (#786 ui-designer): the
@@ -152,25 +166,31 @@ struct HomeCardPaletteWiringTests {
     @Test("the palette fold floors against the plate")
     @MainActor
     func paletteFoldFloors() throws {
-        #expect(HomeCardPlate.plateLegible("#8DB354"))
-        #expect(HomeCardPlate.plateLegible("#EAF3EE"))
-        #expect(!HomeCardPlate.plateLegible("#12251A"))
-        #expect(!HomeCardPlate.plateLegible("#000000"))
-        #expect(!HomeCardPlate.plateLegible("#14201CB3"))
-        #expect(!HomeCardPlate.plateLegible("not-a-hex"))
+        let dark = HomeCardPlate.darkGround
+        #expect(HomeCardPlate.plateLegible("#8DB354", on: dark))
+        #expect(HomeCardPlate.plateLegible("#EAF3EE", on: dark))
+        #expect(!HomeCardPlate.plateLegible("#12251A", on: dark))
+        #expect(!HomeCardPlate.plateLegible("#000000", on: dark))
+        #expect(!HomeCardPlate.plateLegible("#14201CB3", on: dark))
+        #expect(!HomeCardPlate.plateLegible("not-a-hex", on: dark))
+        // The ground is a parameter: the same hex sinks into the
+        // light plate it stands out from on the dark one.
+        let light = HomeCardPlate.lightGround
+        #expect(!HomeCardPlate.plateLegible("#EAF3EE", on: light))
+        #expect(HomeCardPlate.plateLegible("#12251A", on: light))
         // And the fold consults it on both colours — a floor
         // nothing reads is the dead-resolver trap.
-        let plate = try squashed("HomeCardPlate.swift")
+        let plate = try squashed("HomeCardPlate+Ground.swift")
         #expect(
             plate.contains(
-                "plateLegible(accent)?Color(kiwiHex:accent)"
-                    + ":SettingsTheme.accent"
+                "plateLegible(accent,on:darkGround)"
+                    + "?Color(kiwiHex:accent):SettingsTheme.accent"
             )
         )
         #expect(
             plate.contains(
-                "plateLegible(ink)?Color(kiwiHex:ink)"
-                    + ":SettingsTheme.plateInk"
+                "plateLegible(ink,on:darkGround)"
+                    + "?Color(kiwiHex:ink):SettingsTheme.plateInk"
             )
         )
     }

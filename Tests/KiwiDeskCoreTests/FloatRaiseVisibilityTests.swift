@@ -8,7 +8,8 @@ import Testing
 /// at no visible size (#2840): BetterDisplay's 1×1 helper was the
 /// one target of every focus step's raise in a BSP Space, three
 /// whole-list reads each. `floatLayerTargets` keeps it — the
-/// filter is the raise's alone (`drawnFloatTargets`). Bounds come
+/// filter is `drawnFloatTargets`, which the raise and the
+/// empty-switch yield read (#2850). Bounds come
 /// through the watch's `readWindowBounds` seam, so the real
 /// verdict runs through the real consumer.
 @Suite("Float raise skips undrawn floats (#2840)", .serialized)

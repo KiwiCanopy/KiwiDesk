@@ -128,7 +128,7 @@ struct AnnouncedValuePinTests {
         "SettingsGroupHeading.swift": 1,
         // The tour looks step's two row headers (#1720).
         "OnboardingLooksRows.swift": 1,
-        // Share this look's popover title (#1740).
+        // Share current look's popover title (#1740).
         "LooksShelf+Share.swift": 1,
         // KiwiHub's View lines (#2309).
         "JumpViewSide.swift": 1,

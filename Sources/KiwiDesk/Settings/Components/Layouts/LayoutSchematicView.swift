@@ -13,19 +13,27 @@ struct LayoutSchematicView: View {
 
     /// Resolved focus ring highlight color for schematic preview.
     private var focusStroke: Color? {
-        Self.focusStroke(settings, onPlate: palette != nil)
+        Self.focusStroke(settings, on: palette)
     }
 
     /// The focus ring's colour on a schematic: the configured
     /// focused colour, or none where borders are off or the
-    /// colour sinks into the plate. Shared with the story canvas.
+    /// colour sinks into the dark plate. On the light plate it is
+    /// the paint's own `focus`, which its verdict holds (#2859).
+    /// Shared with the story canvas.
     static func focusStroke(
         _ settings: TilingSettings,
-        onPlate: Bool
+        on palette: SchematicPalette?
     ) -> Color? {
         let style = settings.borderStyle
         guard style.enabled else { return nil }
-        if onPlate, !HomeCardPlate.plateLegible(style.focusedColor) {
+        if let ring = palette?.focus { return ring }
+        if palette != nil,
+            !HomeCardPlate.plateLegible(
+                style.focusedColor,
+                on: HomeCardPlate.darkGround
+            )
+        {
             return nil
         }
         return Color(kiwiHex: style.focusedColor)

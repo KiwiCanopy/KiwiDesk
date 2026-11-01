@@ -43,6 +43,7 @@ struct KiwiVisionPanelPreview: View {
                 darkWindows: darkWindows,
                 settings: model.config.settings
             )
+            .platePaint(model.config.settings)
             .accessibilityElement()
             .accessibilityLabel(effect.spoken(dimPercent: dim))
             Text(caption(effect))

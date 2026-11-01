@@ -26,9 +26,11 @@ struct KiwiVisionScene: View {
     static let size = CGSize(width: 348, height: 218)
     private static let menuBar: CGFloat = 6
 
-    private var palette: SchematicPalette {
-        HomeCardPlate.palette(settings)
-    }
+    /// The plate's paint, `KiwiVisionPanelPreview`'s (#2859); the
+    /// veil stays black over either plate.
+    @Environment(\.schematicPalette) private var resolved
+
+    private var palette: SchematicPalette { resolved ?? .unresolved }
 
     private var veil: Double {
         VisionPlateDim.opacity(forDim: dimPercent / 100)
@@ -89,7 +91,7 @@ struct KiwiVisionScene: View {
         let window = KiwiVisionWindow(
             kind: kind,
             soft: hazed && blurs,
-            accent: palette.accent
+            accent: palette.focusMark
         )
         .environment(\.colorScheme, darkWindows ? .dark : .light)
         if hazed != layer {
@@ -100,7 +102,7 @@ struct KiwiVisionScene: View {
                 }
                 if focused, settings.borderStyle.enabled {
                     RoundedRectangle(cornerRadius: 4).strokeBorder(
-                        palette.accent,
+                        palette.focusMark,
                         lineWidth: BorderPreviewScale.width(
                             settings.borderStyle.clampedWidth,
                             to: 1...4

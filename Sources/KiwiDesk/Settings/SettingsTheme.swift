@@ -57,6 +57,27 @@ enum SettingsTheme {
         dark: 0xEA_F3_EE
     )
 
+    // MARK: - Light plate (#2859)
+
+    /// The light plate a look that holds it draws on in light
+    /// mode, and the plate's own paint. Fixed in both modes: the
+    /// verdict picks the plate (`HomeCardPlate.holdsLightPlate`),
+    /// the window's appearance never repaints it.
+    static let lightPlate = token(light: 0xDF_E6_DC, dark: 0xDF_E6_DC)
+    static let lightEdge = token(light: 0xC6_CF_C4, dark: 0xC6_CF_C4)
+    static let lightWell = token(light: 0xEC_F0_EA, dark: 0xEC_F0_EA)
+    static let lightWindow = token(light: 0xF8_FA_F6, dark: 0xF8_FA_F6)
+    static let lightOutline = token(light: 0xBC_C5_BA, dark: 0xBC_C5_BA)
+    static let lightGhost = token(light: 0xD5_DC_D2, dark: 0xD5_DC_D2)
+    static let lightGhostEdge = token(light: 0xA1_AC_A1, dark: 0xA1_AC_A1)
+    static let lightGap = token(light: 0xB6_BF_B5, dark: 0xB6_BF_B5)
+    static let lightFrame = token(light: 0xA6_B0_A6, dark: 0xA6_B0_A6)
+    static let lightMark = token(light: 0x6E_7C_71, dark: 0x6E_7C_71)
+    /// Captions, readouts and fallback ink on the light plate.
+    static let lightInk = token(light: 0x2B_3B_31, dark: 0x2B_3B_31)
+    /// The brand's marks on the light plate, 3:1 or more on it.
+    static let lightAccent = token(light: 0x4F_7A_2B, dark: 0x4F_7A_2B)
+
     // MARK: - Keyboard preview (#678)
 
     /// Unbound key fill on keyboard preview.
@@ -64,6 +85,10 @@ enum SettingsTheme {
         light: 0x37_46_3B,
         dark: 0x37_46_3B
     )
+
+    /// A bound key's glyph on the accent fill, fixed whatever
+    /// plate the board takes (#2859).
+    static let keyGlyph = token(light: 0x12_25_1A, dark: 0x12_25_1A)
 
     /// Dashed warning ring on free key macOS owns under shown modifier
     /// (`KeyboardRingSeparationTests`).

@@ -34,7 +34,7 @@ struct SchematicCanvas<Content: View>: View {
             if showsCaption {
                 Text(caption)
                     .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .foregroundStyle(captionInk)
                     .multilineTextAlignment(.center)
                     // `axLabel` is the spoken form of this
                     // drawing; the caption read as well was the
@@ -43,6 +43,12 @@ struct SchematicCanvas<Content: View>: View {
             }
         }
         .frame(maxWidth: .infinity)
+    }
+
+    /// The caption's ink: the plate's where one is drawn beneath
+    /// (#2859), never an ambient grey on it.
+    private var captionInk: AnyShapeStyle {
+        palette.map { AnyShapeStyle($0.ink) } ?? AnyShapeStyle(.secondary)
     }
 
     /// Bordered mini-screen frame. THE CLIP DOES NOT CROP WHERE A

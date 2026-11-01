@@ -78,37 +78,9 @@ enum HomeCardPlate {
                 .padding(.top, Self.topAir)
                 .frame(height: SettingsTheme.plateHeight)
                 .frame(maxWidth: .infinity)
-                .background(SettingsTheme.previewPlate)
-                .overlay(
-                    Rectangle().strokeBorder(
-                        SettingsTheme.planeRing,
-                        lineWidth: 1
-                    )
-                )
-                .environment(
-                    \.schematicPalette,
-                    palette(settings)
-                )
+                .deskPlate(settings, in: Rectangle())
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
-        )
-    }
-
-    /// Resolves three-color palette from active profile settings (ui-designer
-    /// 2026-08-09).
-    static func palette(
-        _ settings: TilingSettings
-    ) -> SchematicPalette {
-        let accent = settings.kiwishelf.activeItemColor
-        let ink = settings.kiwishelf.itemColor
-        return SchematicPalette(
-            accent: plateLegible(accent)
-                ? Color(kiwiHex: accent)
-                : SettingsTheme.accent,
-            ink: plateLegible(ink)
-                ? Color(kiwiHex: ink)
-                : SettingsTheme.plateInk,
-            base: SettingsTheme.previewPlate
         )
     }
 }
@@ -141,7 +113,7 @@ struct HomeCardSchematicBand: View {
                         )
                     )
                     .foregroundStyle(
-                        palette?.accent ?? SettingsTheme.accent
+                        (palette ?? .unresolved).accent
                     )
             }
         }

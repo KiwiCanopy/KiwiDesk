@@ -3,7 +3,7 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// Share this look's form address (#1740 ▸ Share): the gallery's
+/// Share current look's form address (#1740 ▸ Share): the gallery's
 /// "Submit a look" form, the look file prefilled under the form's
 /// own field ids, the credit in its `based_on` field.
 @Suite("Look share")

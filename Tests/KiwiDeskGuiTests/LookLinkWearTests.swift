@@ -80,4 +80,53 @@ struct LookLinkWearTests {
                 == model.core.bundledLooks.map(\.name)
         )
     }
+
+    @Test("a rename keeps the look linked, so Simple keeps it")
+    func renameKeepsTheLink() throws {
+        let model = makeTestModel()
+        model.wearLinkedLook(try linked(model))
+        model.renameUserLook(from: "Dusk", to: "Dawn")
+        #expect(model.linkedLook == "Dawn")
+        #expect(SimpleLookCard.linked(in: model)?.name == "Dawn")
+    }
+
+    @Test("a delete drops the linked look from Simple's line")
+    func deleteDropsTheLink() throws {
+        let model = makeTestModel()
+        model.wearLinkedLook(try linked(model))
+        model.deleteUserLook("Dusk")
+        #expect(model.linkedLook == nil)
+        #expect(SimpleLookCard.linked(in: model) == nil)
+    }
+
+    /// Simple offers Delete on the gallery look alone (#2860): the
+    /// one menu sits on the linked tile and holds no Rename.
+    @Test("Simple's look menu is Delete on the linked tile alone")
+    func simpleMenuIsDeleteOnly() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let card = try SourceScan.swiftSources(under: root)
+            .first { $0.lastPathComponent == "SimpleLookCard.swift" }
+        let source = try SourceScan.strippedSource(at: try #require(card))
+            .filter { !$0.isWhitespace }
+        #expect(source.occurrences(of: ".rowActions{") == 1)
+        #expect(
+            source.contains(
+                "iflook.name==linked{tile(look).rowActions{menu(look)}"
+            )
+        )
+        #expect(source.contains("L(\"looks.delete\""))
+        #expect(!source.contains("L(\"looks.rename\""))
+        // Delete alone: no Export or Share row beside it.
+        #expect(!source.contains("L(\"looks.export"))
+        #expect(!source.contains("L(\"looks.share"))
+        // One write for both roots (gui.md ▸ shares its one write).
+        #expect(source.contains("model.deleteUserLook(look.name)"))
+        let shelf = try SourceScan.swiftSources(under: root)
+            .first { $0.lastPathComponent == "LooksShelf+Actions.swift" }
+        let shelfSource = try SourceScan.strippedSource(
+            at: try #require(shelf)
+        )
+        #expect(shelfSource.contains("model.deleteUserLook(name)"))
+    }
 }

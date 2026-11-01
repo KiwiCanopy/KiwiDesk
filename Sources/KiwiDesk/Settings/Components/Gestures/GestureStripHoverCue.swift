@@ -9,13 +9,16 @@ struct GestureStripHoverCue: View {
     let onTap: () -> Void
     @State private var hovering = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    /// The plate's paint, whose brand mark the border takes (#2859).
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
             // The ink fades, never the view: a view at opacity 0
             // stops taking the hover and the click.
             .strokeBorder(
-                SettingsTheme.accent.opacity(hovering ? 1 : 0),
+                (palette ?? .unresolved).accentMark
+                    .opacity(hovering ? 1 : 0),
                 lineWidth: 3
             )
             .contentShape(Rectangle())

@@ -91,15 +91,18 @@ struct SpacesPanelPreview: View {
     private func scene(for space: SpaceID) -> some View {
         let mode = mode(of: space)
         if drawsSchematic(for: space) {
+            let settings = model.config.settings.resolved(
+                for: space,
+                activeMode: mode
+            )
             LayoutSchematicView(
                 mode: mode,
-                settings: model.config.settings.resolved(
-                    for: space,
-                    activeMode: mode
-                ),
+                settings: settings,
                 windows: shownWindows,
                 scale: .panel
             )
+            .padding(10)
+            .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
         } else {
             Text(
                 L(
@@ -177,7 +180,7 @@ struct SpacesPanelPreview: View {
                 L("layout_defaults.preview_windows", "Window count")
             )
             .font(.caption)
-            .foregroundStyle(.secondary)
+            .foregroundStyle(SettingsTheme.ink2)
             .accessibilityHidden(true)
             SettingsSlider(
                 value: Binding(
@@ -200,7 +203,7 @@ struct SpacesPanelPreview: View {
             )
             Text("\(shownWindows)")
                 .frame(width: 24, alignment: .trailing)
-                .foregroundStyle(.secondary)
+                .foregroundStyle(SettingsTheme.ink2)
                 .font(.caption.monospacedDigit())
                 .settingsReadout()
         }

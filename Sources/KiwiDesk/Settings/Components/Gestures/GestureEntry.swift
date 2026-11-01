@@ -172,13 +172,15 @@ enum GesturePace {
     }
 }
 
-/// The desktop-dark ground every gesture picture sits on, the
-/// Home cards' plate (`SettingsTheme.previewPlate`), sized once.
+/// The ground every gesture picture sits on, the Home cards'
+/// plate in the paint `GesturesDrawer` resolves (#2859), sized
+/// once.
 struct GesturePlate<Content: View>: View {
     nonisolated static var size: CGSize {
         CGSize(width: 120, height: 72)
     }
     @ViewBuilder let content: () -> Content
+    @Environment(\.schematicPalette) private var palette
 
     var body: some View {
         ZStack(alignment: .topLeading) {
@@ -189,14 +191,17 @@ struct GesturePlate<Content: View>: View {
             height: Self.size.height,
             alignment: .topLeading
         )
-        .background(SettingsTheme.previewPlate)
+        .background((palette ?? .unresolved).base)
         .clipShape(
             RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
         )
-        // A dark plate on a dark card needs the inset edge.
+        // The plate's inset edge, over the clip.
         .overlay(
             RoundedRectangle(cornerRadius: SettingsTheme.disclosureRadius)
-                .strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
+                .strokeBorder(
+                    (palette ?? .unresolved).edge,
+                    lineWidth: 1
+                )
         )
     }
 }

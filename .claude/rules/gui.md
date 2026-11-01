@@ -901,7 +901,7 @@ chip's menu — shares its choices and its one write
 `placementHasOneDoor`), and a control Simple draws with another
 face takes that face as a parameter of Advanced's own component,
 as the Space card hands `SpaceModeMenu` its picture
-(`LayoutMenuItemsTests` ▸ `oneItemList`). `SimpleSectionsTests` ▸ `noLookAlikes`
+(`LayoutMenuItemsTests` ▸ `cardHandsTheFace`). `SimpleSectionsTests` ▸ `noLookAlikes`
 holds Simple's directory to no look tile, recorder, layout menu or
 Screen vocabulary of its own; the rest is review's. Keep every
 page Advanced's and store the root
@@ -1151,14 +1151,27 @@ must keep:
   come only from renderers that already ask the real data, and
   only the Shortcuts conflict may shout — glyph + text, never
   hue alone. A profile card's picture rides the desktop plate
-  (#786), drawn from the draft in the user's palette through
-  the `schematicPalette` environment — never an init
-  parameter — with the fold floored against the plate; the
-  two card heights derive from the group partition.
+  (#786), drawn from the draft through the `schematicPalette`
+  environment — never an init parameter — on the plate its
+  look earns (#2859): **a desk picture takes its plate through
+  `deskPlate` / `platePaint`, the picture's one palette
+  writer, and never names `SettingsTheme.previewPlate` itself**
+  (`PlateGroundWiringTests`). **A picture reads the paint's
+  values, never branches on its ground or picks its own
+  fallback**: a plate view with no writer reads
+  `SchematicPalette.unresolved`, and a value the light plate
+  needs is an accessor on the paint. Every desk picture takes
+  it, KiwiVision's scene included; only the look tiles
+  (`LookPlate`, #1740) keep their own ground. On the dark
+  plate the fold floors against it, on the light one the ink
+  floors against its bar composite and a failing look keeps
+  the dark plate. The two
+  card heights derive from the group partition.
   `HomeCardChromeTests` pins the heights pair, the plate's
   shape, silence and group parity and the stroke-above-clip
   order; `HomeCardPaletteWiringTests` the per-struct palette
-  consults, the floor and the shared border-width remap.
+  consults, the floor and the shared border-width remap;
+  `PlateGroundTests` the verdict over the bundled looks.
 - **A per-row surface explains; an aggregate surface counts only
   what the user should act on (#1094, live-read #1105).** A ⚠️
   on one row and a ring on one key show everything
@@ -1647,7 +1660,10 @@ Every surface, border and ink in the Settings tree comes from
   search panel, a drag lift whose black shadow dies in dark —
   the inset light line is the edge, drawn OVER any hairline,
   transparent in light by the token itself, never by a
-  `colorScheme` branch.
+  `colorScheme` branch. The light plate (#2859) is not a dark
+  plane: its edge is its own token, `lightEdge`, carried in the
+  resolved paint (`SchematicPalette.edge`), and `planeRing`
+  stays the dark seam unchanged.
 - **`Color.accentColor` is not the accent.** It reads the user's
   *system* accent and is unaffected by `.tint`, so in this
   window it renders the app's own decoration in a hue the app did
@@ -1769,7 +1785,11 @@ Every surface, border and ink in the Settings tree comes from
   file whose own ground does move. **Whatever such a file draws
   ON that plate still states a fixed ink**, and only review can
   see it; `SettingsFixedGroundTests`' docstring names the
-  shipped cases.
+  shipped cases. A plate whose ground the look's verdict picks
+  (#2859) counts as fixed here — the window's appearance does
+  not move it — so its ink is the resolved paint's, never an
+  ambient grey, and Advanced's Layouts sketch files sit in the
+  stems for it.
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from

@@ -43,15 +43,7 @@ struct PaletteScenePanel: View {
         .padding(12)
         .frame(height: 150)
         .frame(maxWidth: .infinity)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(SettingsTheme.previewPlate)
-        )
-        .overlay(
-            RoundedRectangle(cornerRadius: 12)
-                .strokeBorder(SettingsTheme.planeRing, lineWidth: 1)
-        )
-        .environment(\.schematicPalette, HomeCardPlate.palette(settings))
+        .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
         .accessibilityHidden(true)
         .allowsHitTesting(false)
     }
