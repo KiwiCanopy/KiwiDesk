@@ -7420,8 +7420,8 @@ own windows already and stay on the Space. The owner's rulings
   sized yet falls through to the override, then the global value.
 - **An explicit choice ends them on every Desktop.** An override
   setter or a mode change clears that Space's sizes everywhere; a
-  config reload, an explicit profile apply and a Settings save
-  clear every Space's. Unlike the flip, a mode change ends them,
+  config reload, an explicit profile apply, any apply that changes
+  the profile and a Settings save clear every Space's. Unlike the flip, a mode change ends them,
   since a size means nothing under another layout.
 :::
 

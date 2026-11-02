@@ -121,6 +121,28 @@ struct SessionRatioCarryTests {
         #expect(b.sessionRatios(of: space).masterRatio == 0.58)
     }
 
+    /// A current capture holding only the shared entry still writes
+    /// its per-Desktop list, empty, so it never reads back as an
+    /// older one-entry record and moves onto the Desktop shown.
+    @Test("a shared-only capture stays a current record")
+    func sharedOnlyStaysCurrent() throws {
+        let a = processA()
+        a.desktopMemory.sessionRatios[desktop] = nil
+        let data = try captured(a)
+        let read = try JSONDecoder().decode(StateSnapshot.self, from: data)
+        let session = try #require(
+            read.spaces.first { $0.id == space.raw }?.session
+        )
+        #expect(session.desktopRatios == [])
+        #expect(!session.isOneEntry)
+        let b = try processB(data, shown: 30)
+        #expect(
+            b.desktopMemory.sessionRatios[nil]?[space]?.masterRatio
+                == 0.58
+        )
+        #expect(b.desktopMemory.sessionRatios[30] == nil)
+    }
+
     @Test("a plain capture carries no sizes")
     func plainCaptureCarriesNone() throws {
         let b = try processB(
