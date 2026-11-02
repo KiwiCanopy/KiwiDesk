@@ -224,4 +224,17 @@ struct SessionRatioProfileTests {
         #expect(core.desktopMemory.sessionRatios[10]?[work]?["3"] != nil)
         #expect(core.desktopMemory.sessionRatios[10]?[work]?[held] == nil)
     }
+
+    @Test("a switch to another layout keeps each profile's sizes")
+    func switchAcrossModesKeeps() throws {
+        let (core, _) = try core()
+        var stacked = KeepFixture.profile("Stacked")
+        stacked.spaceModes = ["1": .stack]
+        _ = try core.profiles.write(stacked)
+        show(core, 10)
+        core.writeSplitRatioH(0.7, for: space)
+        core.apply(profile: stacked, cause: .event)
+        try #require(core.state.workspaces[space]?.mode == .stack)
+        #expect(stored(core, 10, work) == 0.7)
+    }
 }
