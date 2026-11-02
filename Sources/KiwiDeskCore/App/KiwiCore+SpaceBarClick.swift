@@ -65,8 +65,8 @@ extension KiwiCore {
         keyed: Bool
     ) {
         var rows = spaceBarMenuRows(windows, on: space)
-        // The pocket's menu lists apps' own windows last, each with
-        // its key (#2923), as its peek does.
+        // The pocket's menu keys apps' own windows, which its list
+        // already holds last (#2923), as its peek does.
         if keyed {
             let owners = pocketRowOwners(windows)
             for index in rows.indices {
@@ -74,8 +74,6 @@ extension KiwiCore {
                     barMenuHooks.pocketKeyChord($0)
                 }
             }
-            let general = rows.filter { $0.key == nil }
-            rows = general + rows.filter { $0.key != nil }
         }
         guard !rows.isEmpty else { return }
         let menu = SpaceBarWindowMenu.make(rows, kind: kind) {

@@ -54,6 +54,27 @@ struct BarPeekPocketKeysTests {
         #expect(key.frame.minY == ghostty.frame.minY)
     }
 
+    /// Short rows leave the header the widest line: it keeps one.
+    @Test("the header sets the width where it is the widest line")
+    func headerFitsUnwrapped() throws {
+        LocalizationManager.shared.select("en")
+        let short = BarWindowRow(
+            window: WindowID(9),
+            pid: 9,
+            app: "A",
+            title: "W",
+            icon: nil
+        )
+        let body = BarPeekBody()
+        _ = body.layout(
+            BarPeekContent(rows: [], checks: true, keyed: [short]),
+            shelf: KiwiShelf(),
+            hidden: 0
+        )
+        let header = try #require(body.sectionHeader)
+        #expect(header.frame.width >= BarPeekBody.natural(header))
+    }
+
     @Test("a list with no keyed window draws no section")
     func noSectionWithoutKeys() {
         let body = BarPeekBody()
