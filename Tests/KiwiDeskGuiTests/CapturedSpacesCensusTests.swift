@@ -26,7 +26,9 @@ struct CapturedSpacesCensusTests {
         "KiwiDeskCore/Profiles/KiwiCore+SpacePrune.swift":
             (1, "the prune; its callers keep held and temporary"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaces.swift":
-            (5, "the held machinery itself"),
+            (4, "the held machinery itself"),
+        "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceFocus.swift":
+            (1, "the focus trackers a held move keeps; no capture"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceReads.swift":
             (1, "`capturedSpaces` itself, the filtered view"),
         "KiwiDeskCore/Profiles/KiwiCore+HeldSpaceOrder.swift":

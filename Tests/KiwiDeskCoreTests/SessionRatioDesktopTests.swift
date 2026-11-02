@@ -129,7 +129,7 @@ struct SessionRatioDesktopTests {
         let core = try core()
         show(core, ["Main": 10])
         core.writeSplitRatioH(0.7, for: space)
-        core.rekeySessionRatios(space, to: "9")
+        core.rekeySessionRatios(space, to: "9", under: core.liveArrangement)
         #expect(stored(core, 10, "9") != nil)
         #expect(stored(core, 10) == nil)
         core.forgetSessionRatios(of: "9")

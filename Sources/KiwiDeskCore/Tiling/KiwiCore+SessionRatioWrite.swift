@@ -11,17 +11,24 @@ import Foundation
 /// alone, which every resolver overlay takes as a required argument
 /// (`SessionRatioSeamTests`).
 extension KiwiCore {
+    /// The arrangement `space`'s sizes are filed under — the one
+    /// rule every read, write and drop takes: a held Space's
+    /// origin, else the arrangement an apply in flight installs,
+    /// else the live one.
+    func sizingOwner(of space: SpaceID) -> HeldOrigin.Arrangement? {
+        if let held = state.heldSpaces[space] { return held.arrangement }
+        return desktopMemory.installing?.arrangement ?? liveArrangement
+    }
+
     /// The store key for `space` now: the Desktop its screen
     /// shows — else the one shared entry (no SkyLight, a screen no
-    /// switch has filed yet, ruling 3) — and the arrangement live,
-    /// or the one an apply in flight installs.
+    /// switch has filed yet, ruling 3) — and its `sizingOwner`.
     private func sizingKey(of space: SpaceID) -> SessionSizingKey {
-        let arrangement =
-            desktopMemory.installing?.arrangement ?? liveArrangement
+        let owner = sizingOwner(of: space)
         guard case .shown(let desktop) = shownDesktop(of: space) else {
-            return SessionSizingKey(desktop: nil, arrangement: arrangement)
+            return SessionSizingKey(desktop: nil, arrangement: owner)
         }
-        return SessionSizingKey(desktop: desktop, arrangement: arrangement)
+        return SessionSizingKey(desktop: desktop, arrangement: owner)
     }
 
     /// The sizes a resize wrote for `space` on the Desktop shown
@@ -167,24 +174,27 @@ extension KiwiCore {
     }
 
     /// A dropped Space (`forwardWindows(of:to:)`, #1655) forgets its
-    /// sizes under the arrangement it belongs to — a held Space's
-    /// origin, else the live one — since a same-named Space of
-    /// another arrangement is another Space (#1230). Inside an
-    /// apply the drop is a switch's prune and forgets nothing: the
-    /// Space returns with its arrangement (ruling 5).
+    /// sizes under its `sizingOwner` alone, since a same-named Space
+    /// of another arrangement is another Space (#1230). A switch's
+    /// prune forgets nothing: the Space returns with its arrangement
+    /// (ruling 5).
     func forgetDroppedSessionRatios(of space: SpaceID) {
-        guard profiles.arrangementInFlight == 0 else { return }
-        let owner = state.heldSpaces[space]?.arrangement ?? liveArrangement
+        guard desktopMemory.installing?.switching != true else { return }
+        let owner = sizingOwner(of: space)
         mapSessionRatios { arrangement, id, ratios in
             if id == space, arrangement == owner { ratios = SessionRatios() }
         }
     }
 
-    /// A renumbered Space keeps its sizes under the arrangement it
-    /// belongs to — a held Space's origin, else the live one
-    /// (`moveMembers`, #1655).
-    func rekeySessionRatios(_ old: SpaceID, to new: SpaceID) {
-        let owner = state.heldSpaces[old]?.arrangement ?? liveArrangement
+    /// A renumbered Space keeps its sizes under `owner`, the
+    /// arrangement the hold records (`moveMembers`, #1655) — at a
+    /// hold the live one, which `sizingOwner` no longer names once
+    /// an apply installs another.
+    func rekeySessionRatios(
+        _ old: SpaceID,
+        to new: SpaceID,
+        under owner: HeldOrigin.Arrangement?
+    ) {
         desktopMemory.sessionRatios = desktopMemory.sessionRatios
             .mapValues { byArrangement in
                 var out = byArrangement

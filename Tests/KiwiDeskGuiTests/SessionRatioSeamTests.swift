@@ -164,7 +164,10 @@ struct SessionRatioSeamTests {
             try body(
                 "Profiles/KiwiCore+HeldSpaces.swift",
                 after: "private func moveMembers("
-            ).contains("rekeySessionRatios(source, to: target)")
+            ).contains(
+                "rekeySessionRatios(source, to: target, "
+                    + "under: origin.arrangement)"
+            )
         )
         #expect(
             try body(

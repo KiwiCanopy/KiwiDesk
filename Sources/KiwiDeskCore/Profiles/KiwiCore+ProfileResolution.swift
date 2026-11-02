@@ -40,6 +40,7 @@ extension KiwiCore {
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
+        desktopMemory.installing?.switching = switching
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
         let outgoingIcons = tiler.settings.spaceIcons
@@ -119,7 +120,8 @@ extension KiwiCore {
         {
             setSpaceMode(
                 space.id,
-                profile.spaceModes[space.id] ?? .bsp
+                profile.spaceModes[space.id] ?? .bsp,
+                keepingSizes: true
             )
         }
         // Adopt the pins of the set covering the live monitors
@@ -144,7 +146,11 @@ extension KiwiCore {
             declared: declared,
             into: .profile(profile.name)
         ) {
-            setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
+            setSpaceMode(
+                id,
+                profile.spaceModes[id] ?? .bsp,
+                keepingSizes: true
+            )
         }
         // THIS profile's override tiers (#55, #109), passed
         // explicitly: callers adopt after apply, so
@@ -195,12 +201,12 @@ extension KiwiCore {
         // profile — file the outgoing one, restore its own.
         let standard = HeldOrigin.Arrangement.standard(composed.sourceName)
         let switching = recordOutgoingPartitioning(before: standard)
+        desktopMemory.installing?.switching = switching
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
-        // A Standard's forced apply is a load (#2921 ruling 6); the
-        // post-reload re-apply runs it too, after the reload has
-        // already cleared every size.
+        // A forced Standard apply is a load (#2921 ruling 6); after
+        // a reload it finds nothing left to clear.
         if forceRetile {
             forgetSessionRatiosOnShownDesktops()
             forgetStackFlips()  // #2771
@@ -209,7 +215,8 @@ extension KiwiCore {
             state.workspaces.ensureSpace(space)
             setSpaceMode(
                 space,
-                composed.spaceModes[space] ?? .bsp
+                composed.spaceModes[space] ?? .bsp,
+                keepingSizes: true
             )
         }
         // Held while the outgoing pins still stand (#1507, #1790).

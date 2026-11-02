@@ -67,7 +67,12 @@ final class DesktopMemory {
     /// `KiwiCore.liveArrangement` keeps that, and moves last
     /// (#1249). Set and cleared by the two apply doors alone.
     var installing: Installing?
-    struct Installing { let arrangement: HeldOrigin.Arrangement }
+    struct Installing {
+        let arrangement: HeldOrigin.Arrangement
+        /// Whether the apply changes the arrangement: a switch's
+        /// prune forgets no sizes, a load's does.
+        var switching = false
+    }
     typealias SpaceRatios = [SpaceID: SessionRatios]
 
     /// The last honored focus per native Desktop, any Space (#1564)

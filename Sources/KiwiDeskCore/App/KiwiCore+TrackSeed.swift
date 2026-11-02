@@ -15,7 +15,14 @@ extension KiwiCore {
     /// live `tiler.settings` for the rule and capacity, so a
     /// config-apply caller must assign `tiler.settings` BEFORE its
     /// `setSpaceMode` loop (both bulk-apply callers already do).
-    func setSpaceMode(_ id: SpaceID, _ mode: LayoutMode) {
+    /// `keepingSizes` is an apply's own write of its arrangement's
+    /// mode, which keeps that arrangement's sizes (#2921); every
+    /// other mode change clears them.
+    func setSpaceMode(
+        _ id: SpaceID,
+        _ mode: LayoutMode,
+        keepingSizes: Bool = false
+    ) {
         // Compute the seed BEFORE the mutating `setMode` — reading
         // `state.workspaces` inside it would overlap the exclusive
         // access. Only on a genuine entry, so dense profile / config
@@ -25,9 +32,8 @@ extension KiwiCore {
             && state.workspaces[id]?.mode != .track
         let seed = entering ? trackEntrySeed(for: id) : nil
         // A mode change drops the sizes on every Desktop (#458,
-        // #2921 ruling 4), as `setMode` drops the Space's own; an
-        // apply's mode is its arrangement's, whose sizes it keeps.
-        if profiles.arrangementInFlight == 0,
+        // #2921 ruling 4), as `setMode` drops the Space's own.
+        if !keepingSizes,
             state.workspaces[id].map({ $0.mode != mode }) == true
         {
             forgetSessionRatios(of: id)

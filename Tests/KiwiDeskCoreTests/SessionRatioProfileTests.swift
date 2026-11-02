@@ -118,9 +118,7 @@ struct SessionRatioProfileTests {
         let (core, _) = try core()
         show(core, 10)
         core.writeSplitRatioH(0.7, for: space)
-        core.profiles.arrangementInFlight += 1
-        core.setSpaceMode(space, .stack)
-        core.profiles.arrangementInFlight -= 1
+        core.setSpaceMode(space, .stack, keepingSizes: true)
         #expect(stored(core, 10, work) == 0.7)
         core.setSpaceMode(space, .bsp)
         #expect(stored(core, 10, work) == nil)
@@ -134,19 +132,45 @@ struct SessionRatioProfileTests {
         core.desktopMemory.sessionRatios = [
             10: [work: [space: ratios], play: [space: ratios]]
         ]
-        core.rekeySessionRatios(space, to: "9")
+        core.rekeySessionRatios(space, to: "9", under: work)
         #expect(core.desktopMemory.sessionRatios[10]?[work]?["9"] != nil)
         #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
         core.forgetDroppedSessionRatios(of: "9")
         #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
         #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
-        // Inside an apply a drop is a switch's prune and keeps the
-        // live profile's own Space too.
+        // A switch's prune keeps the live profile's own Space too;
+        // a load's forgets it.
         core.desktopMemory.sessionRatios[10]?[work] = [space: ratios]
-        core.profiles.arrangementInFlight += 1
+        core.desktopMemory.installing = .init(
+            arrangement: work,
+            switching: true
+        )
         core.forgetDroppedSessionRatios(of: space)
-        core.profiles.arrangementInFlight -= 1
         #expect(core.desktopMemory.sessionRatios[10]?[work]?[space] != nil)
+        core.desktopMemory.installing?.switching = false
+        core.forgetDroppedSessionRatios(of: space)
+        core.desktopMemory.installing = nil
+        #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
+    }
+
+    @Test("a held Space's sizes are its origin's, through the retire")
+    func heldSpaceIsItsOrigins() throws {
+        let (core, _) = try core()
+        show(core, 10)
+        let held = SpaceID("7")
+        core.state.workspaces.ensureSpace(held)
+        core.state.heldSpaces[held] = HeldOrigin(
+            name: held,
+            screen: "gone",
+            icon: nil,
+            arrangement: play
+        )
+        core.writeSplitRatioH(0.7, for: held)
+        #expect(core.desktopMemory.sessionRatios[10]?[play]?[held] != nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
+        // Emptied, it retires and takes its origin's sizes with it.
+        #expect(core.retireEmptiedHeldSpaces())
+        #expect(core.desktopMemory.sessionRatios.isEmpty)
     }
 
     @Test("a renamed profile keeps its sizes; a deleted one forgets")

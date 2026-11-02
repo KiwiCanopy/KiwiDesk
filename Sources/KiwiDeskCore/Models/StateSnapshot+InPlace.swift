@@ -33,11 +33,11 @@ extension StateSnapshot {
 
         public init(
             space: Space,
-            ratios sizing: SessionSizing,
+            ratios sizes: SessionSizing,
             monocleShown: WindowID?
         ) {
-            ratios = sizing.drawn
-            desktopRatios = sizing.entries
+            ratios = sizes.drawn
+            desktopRatios = sizes.entries
                 .map {
                     DesktopRatios(
                         desktop: $0.key.desktop,

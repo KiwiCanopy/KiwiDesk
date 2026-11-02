@@ -1297,7 +1297,8 @@ incoming arrangement does not name*. The obligations:
   files — `KiwiCore+HeldSpaceOrder.swift` holds the naming walk
   and the batch's placement, `KiwiCore+HeldSpaceReads.swift` the
   read-only predicates and captured views, and
-  `KiwiCore+HeldSpaceBoot.swift` the restart's plan (#1646), and
+  `KiwiCore+HeldSpaceBoot.swift` the restart's plan (#1646),
+  `KiwiCore+HeldSpaceFocus.swift` the focus trackers a move keeps, and
   none of them writes a hold; write
   `StateCoordinator.heldSpaces` in `KiwiCore+HeldSpaces.swift`
   alone, and add a new way into or out of a hold there — a caller
