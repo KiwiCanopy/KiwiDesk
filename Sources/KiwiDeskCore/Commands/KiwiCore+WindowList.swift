@@ -5,7 +5,7 @@ import Foundation
 /// in AX coordinates (top-left origin, y grows down), from the one
 /// placement read the App Bar's verdict takes — a tile's placed
 /// frame, a float's target in flight or its last report. No app is
-/// asked. Joins `get_state` by `id`, which keeps the title.
+/// asked. Each entry carries the title `get_state` has (#2895).
 extension KiwiCore {
     /// Where one listed window is drawn, or nil parts where it is
     /// not.
@@ -148,6 +148,7 @@ extension KiwiCore {
         return .object([
             "id": .number(Double(id.raw)),
             "app": .string(window.appName),
+            "title": .string(window.title),
             "pid": .number(Double(window.pid)),
             "space_id": site.home.map { .string($0.raw) } ?? .null,
             "index": index.map { .number(Double($0 + 1)) } ?? .null,

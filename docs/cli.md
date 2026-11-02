@@ -567,6 +567,15 @@ with `jq`:
 kiwidesk list_windows | jq '.[] | select(.focused)'
 ```
 
+:::unreleased
+Each `list_windows` entry and the `explain_window` answer carry the
+window's `title`, as `get_state` has it:
+
+```bash
+kiwidesk list_windows | jq -r '.[] | "\(.id) \(.title)"'
+```
+:::
+
 `swap <window> [window]` swaps the focused window with the one an
 id names, or two named windows, across Spaces and screens too, and
 `swap <direction> <window>` swaps a named window with its neighbour

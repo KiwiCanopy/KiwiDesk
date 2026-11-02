@@ -44,6 +44,7 @@ struct ListWindowsTests {
             id: WindowID(id),
             pid: Int32(910_000 + id),
             appName: "App\(id)",
+            title: "Title \(id)",
             frame: CGRect(x: 40, y: 40, width: 300, height: 200),
             isFloating: floating
         )
@@ -85,6 +86,7 @@ struct ListWindowsTests {
             #expect(hasRect(entry["frame"]))
             #expect(entry["space_id"] == .string("1"))
             #expect(entry["floats"] == .bool(false))
+            #expect(entry["title"] == .string("Title \(id)"))
         }
         #expect(seen[1]?["focused"] == .bool(true))
         #expect(seen[2]?["focused"] == .bool(false))
