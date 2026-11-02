@@ -1700,6 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Cor da marca Pocket",
   "pocket.list.keyed": "Atalhos do Pocket",
+  "pocket.list.keyed_row.ax": "%1$@, atalho do Pocket %2$@",
   "pocket.mark.ax": "Janela Pocket",
   "pocket.plate.ax": "Pocket, janelas dentro: %1$d",
   "pocket.position.spoken.horizontal": "%1$@ a partir da esquerda",

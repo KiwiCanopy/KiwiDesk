@@ -257,11 +257,14 @@ final class BarPeekBody: NSView {
             if let chord {
                 placeChord(chord, at: y, end: lead + indent + rowWidth)
             }
+            // The key is part of its row's button (#2923).
+            let keyed = chord.map { [row, $0] } ?? [row]
+            let span = chord.map { row.frame.union($0.frame) } ?? row.frame
             guard built.group.rows[index].focused, column > 0 else {
                 addTarget(
                     .window(built.group.rows[index].window),
-                    around: row.frame,
-                    inks: [row]
+                    around: span,
+                    inks: keyed
                 )
                 y += height
                 continue
@@ -271,8 +274,8 @@ final class BarPeekBody: NSView {
             let mark = addCheck(beside: row, columnEnd: lead + width + column)
             addTarget(
                 .window(built.group.rows[index].window),
-                around: row.frame.union(mark.frame),
-                inks: [row, mark]
+                around: span.union(mark.frame),
+                inks: keyed + [mark]
             )
             y += height
         }

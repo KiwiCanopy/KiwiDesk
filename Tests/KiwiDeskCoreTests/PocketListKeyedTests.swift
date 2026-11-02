@@ -65,14 +65,17 @@ struct PocketListKeyedTests {
         #expect(keyedGroups.isEmpty)
     }
 
-    @Test("a keyed window alone lifts the fade and counts")
+    @Test(
+        "a keyed window alone lifts the fade and counts",
+        .enabled(if: NSScreen.main != nil)
+    )
     func keyedAloneCounts() throws {
         let fixture = fixture(general: false)
         let core = fixture.core
         // A real screen, so the fallback square resolves (#531).
-        guard let screen = NSScreen.main, let id = screen.kiwiDisplayID,
-            let space = core.state.workspaces.activeSpace
-        else { return }
+        let screen = try #require(NSScreen.main)
+        let id = try #require(screen.kiwiDisplayID)
+        let space = try #require(core.state.workspaces.activeSpace)
         core.state.workspaces.upsertDisplay(
             Display(id: id, name: "Main", frame: screen.frame)
         )
@@ -84,6 +87,45 @@ struct PocketListKeyedTests {
         let spec = try #require(fixture.core.pocketPlate.specs.values.first)
         #expect(!spec.faded)
         #expect(spec.windows == [mine])
+    }
+
+    /// "Nothing changes under One window" (▸ 2): a drag or a play
+    /// stands the pocket there, and it counts the general list.
+    @Test("under One window the plate counts the general list alone")
+    func oneWindowCountsGeneral() {
+        let fixture = fixture()
+        fixture.core.execute("pocket.set_capacity", args: [.string("one")])
+        #expect(fixture.core.pocketPlateWindows == [general])
+    }
+
+    /// The pocket's VoiceOver menu: the keyed window last, keyed.
+    @Test("the pocket's menu sets the keyed window apart with its key")
+    func menuKeysTheRow() throws {
+        let fixture = fixture()
+        let core = fixture.core
+        core.barMenuHooks.pocketKeyChord = { _ in
+            RenderedChord(drawn: "⌃⌥T", spoken: "Control Option T")
+        }
+        var shown: NSMenu?
+        core.spaceBars.glyphActions.present = { menu, _ in shown = menu }
+        core.presentBarWindowMenu(
+            core.pocketPlateWindows,
+            kind: .overflow,
+            space: nil,
+            at: NSView(),
+            keyed: true
+        )
+        let menu = try #require(shown)
+        LocalizationManager.shared.select("en")
+        let header = try #require(menu.items.first(where: \.isSectionHeader))
+        #expect(menu.index(of: header) == 1)
+        let last = try #require(menu.items.last)
+        #expect(last.subtitle == "⌃⌥T")
+        #expect(
+            last.accessibilityLabel()?.hasSuffix("Pocket key Control Option T")
+                == true
+        )
+        #expect(menu.items.first?.subtitle == nil)
     }
 
     /// A pick elsewhere takes it out and the key keeps its tie (▸ 11).

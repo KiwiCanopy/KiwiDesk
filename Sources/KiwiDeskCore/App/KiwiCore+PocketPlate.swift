@@ -75,15 +75,15 @@ extension KiwiCore {
     /// inside that are tracked, so a hidden app's window, which no
     /// row can name, counts for nothing — the general list in
     /// put-in order, then the apps' own pocket windows, listed
-    /// apart (#2923, amending #2612 ▸ 11). Capacity counts the
+    /// apart (#2923, amending #2612 ▸ 11) and only where the pocket
+    /// stands at rest, under Several windows. Capacity counts the
     /// general list alone (`pocketAcceptsMark`).
     var pocketPlateWindows: [WindowID] {
-        let inside = state.pocket.filter {
-            $0.phase == .pocketed && state.windows[$0.window] != nil
+        let inside = { (slot: PocketSlot) in
+            slot.phase == .pocketed && state.windows[slot.window] != nil
         }
-        let general = inside.filter { $0.keyedApp == nil }
-        let keyed = inside.filter { $0.keyedApp != nil }
-        return (general + keyed).map(\.window)
+        let keyed = pocketHoldsSeveral ? state.keyedPocket : []
+        return (state.generalPocket + keyed).filter(inside).map(\.window)
     }
 
     /// What each display's pocket draws; empty while none is on

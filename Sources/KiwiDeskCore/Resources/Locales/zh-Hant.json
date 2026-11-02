@@ -1700,6 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Pocket 標記顏色",
   "pocket.list.keyed": "Pocket 快速鍵",
+  "pocket.list.keyed_row.ax": "%1$@，Pocket 快速鍵 %2$@",
   "pocket.mark.ax": "Pocket 視窗",
   "pocket.plate.ax": "Pocket，內含視窗：%1$d",
   "pocket.position.spoken.horizontal": "距左端 %1$@",

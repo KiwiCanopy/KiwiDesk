@@ -60,9 +60,22 @@ extension KiwiCore {
         _ windows: [WindowID],
         kind: SpaceBarGlyphPick.Kind,
         space: SpaceID?,
-        at anchor: NSView
+        at anchor: NSView,
+        keyed: Bool = false
     ) {
-        let rows = spaceBarMenuRows(windows, on: space)
+        var rows = spaceBarMenuRows(windows, on: space)
+        // The pocket's menu lists apps' own windows last, each with
+        // its key (#2923), as its peek does.
+        if keyed {
+            for index in rows.indices {
+                let id = rows[index].row.window
+                rows[index].key = state.pocketKeyOwner(of: id).map {
+                    barMenuHooks.pocketKeyChord($0)
+                }
+            }
+            let general = rows.filter { $0.key == nil }
+            rows = general + rows.filter { $0.key != nil }
+        }
         guard !rows.isEmpty else { return }
         let menu = SpaceBarWindowMenu.make(rows, kind: kind) {
             [weak self] id in

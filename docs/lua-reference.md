@@ -5761,7 +5761,7 @@ as `pocket` does for the other pocket windows. Its app rule's
 
 The window is tied to the app while a shortcut's whole body is
 the one call `KiwiDesk.pocket_app("<bundle id>")`, its argument in
-double quotes, and it goes in and out by that shortcut alone:
+double quotes, and no Pocket verb but that shortcut moves it:
 `pocket` steps past it, and `pocket` naming it or
 [`toggle_pocket_window`](#toggle_pocket_window) on it fails with
 a pill naming its key. It does not count against
@@ -5955,7 +5955,8 @@ inside by app; a row takes its window out.
 
 :::unreleased
 Below them, under **Pocket Keys**, the list shows each app's own
-pocket window ([`pocket_app`](#pocket_app)) with its shortcut.
+pocket window ([`pocket_app`](#pocket_app)); its row takes it out
+too, and its shortcut still puts it away.
 :::
 
 Under `"one"` nothing

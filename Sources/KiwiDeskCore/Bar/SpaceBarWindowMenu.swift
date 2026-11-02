@@ -16,6 +16,10 @@ enum SpaceBarWindowMenu {
         let row: BarWindowRow
         let enabled: Bool
         var focused = false
+        /// An app's own pocket window's key (#2923): `.some` puts
+        /// the row under the Pocket Keys header, the inner nil a
+        /// key the GUI could not name.
+        var key: RenderedChord??
     }
 
     /// A row's title past this many characters is cut, the whole
@@ -60,8 +64,11 @@ enum SpaceBarWindowMenu {
         if oneApp, let app = rows.first?.row.app {
             menu.addItem(.sectionHeader(title: app))
         }
-        for entry in rows {
+        for (index, entry) in rows.enumerated() {
             let row = entry.row
+            if entry.key != nil, index == 0 || rows[index - 1].key == nil {
+                menu.addItem(.sectionHeader(title: BarPeekBody.keyedSection))
+            }
             let item = NSMenuItem(
                 title: oneApp ? titleText(row) : text(row),
                 action: #selector(Handler.pick(_:)),
@@ -77,6 +84,17 @@ enum SpaceBarWindowMenu {
             if !oneApp {
                 item.image = row.icon.map(scaled)
                 showImage(item)
+            }
+            if case .some(.some(let key)) = entry.key {
+                item.subtitle = key.drawn
+                item.setAccessibilityLabel(
+                    L(
+                        "pocket.list.keyed_row.ax",
+                        "%1$@, Pocket key %2$@",
+                        item.title,
+                        key.spoken
+                    )
+                )
             }
             menu.addItem(item)
         }

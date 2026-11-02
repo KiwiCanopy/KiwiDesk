@@ -6415,9 +6415,10 @@ appears, not how fast anything travels (#1931's *own pace* ruling
 the other way round).
 
 :::unreleased
-An app's own pocket window comes out there too (#2923): listed
-apart, under a *Pocket Keys* header with its key, since mixed into
-the general groups it would break the put-in order ⌃⌥P steps.
+The pocket's list is where an app's own pocket window comes out
+too (#2923): listed apart, under a *Pocket Keys* header with its
+key, since mixed into the general groups it would break the put-in
+order ⌃⌥P steps.
 :::
 
 ### Spaces, profiles & config ownership

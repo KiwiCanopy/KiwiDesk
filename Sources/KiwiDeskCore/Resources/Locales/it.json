@@ -1700,6 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Colore del marcatore Pocket",
   "pocket.list.keyed": "Scorciatoie Pocket",
+  "pocket.list.keyed_row.ax": "%1$@, scorciatoia Pocket %2$@",
   "pocket.mark.ax": "Finestra Pocket",
   "pocket.plate.ax": "Pocket, finestre all'interno: %1$d",
   "pocket.position.spoken.horizontal": "%1$@ da sinistra",

@@ -1700,6 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Pocket マークのカラー",
   "pocket.list.keyed": "Pocket のショートカット",
+  "pocket.list.keyed_row.ax": "%1$@、Pocket のショートカット %2$@",
   "pocket.mark.ax": "Pocket ウインドウ",
   "pocket.plate.ax": "Pocket、中のウインドウ: %1$d",
   "pocket.position.spoken.horizontal": "左端から %1$@",

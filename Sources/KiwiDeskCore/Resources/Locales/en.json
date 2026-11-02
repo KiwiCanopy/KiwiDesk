@@ -1703,6 +1703,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Pocket mark color",
   "pocket.list.keyed": "Pocket Keys",
+  "pocket.list.keyed_row.ax": "%1$@, Pocket key %2$@",
   "pocket.mark.ax": "Pocket window",
   "pocket.plate.ax": "Pocket, windows inside: %1$d",
   "pocket.position.spoken.horizontal": "%1$@ from the left",

@@ -27,6 +27,14 @@ enum BarPeekSource: Equatable {
         }
     }
 
+    /// Whether its list sets apps' own pocket windows apart under
+    /// the Pocket Keys header, each with its key (#2923): the
+    /// pocket's alone, the peek and its menu alike.
+    var keysPocketWindows: Bool {
+        if case .pocket = self { return true }
+        return false
+    }
+
     /// Whether this is a LIST — an overflow disc or a collapsed
     /// Space, which stand for windows the chip did not draw however
     /// few, or more than one window — the one predicate a glyph's

@@ -28,7 +28,8 @@ extension KiwiCore {
                 source.windows,
                 kind: source.menuKind,
                 space: space,
-                at: anchor
+                at: anchor,
+                keyed: source.keysPocketWindows
             )
         }
     }
@@ -44,7 +45,7 @@ extension KiwiCore {
         let rows = barWindowRows(source.windows)
         guard !rows.isEmpty else { return nil }
         let focus = barFocus(on: space)
-        guard case .pocket = source else {
+        guard source.keysPocketWindows else {
             return BarPeekContent(
                 rows: rows,
                 checks: source.isList,

@@ -1700,6 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Цвет метки Pocket",
   "pocket.list.keyed": "Сочетания клавиш Pocket",
+  "pocket.list.keyed_row.ax": "%1$@, сочетание клавиш Pocket %2$@",
   "pocket.mark.ax": "Окно Pocket",
   "pocket.plate.ax": "Pocket, окна внутри: %1$d",
   "pocket.position.spoken.horizontal": "%1$@ от левого конца",
