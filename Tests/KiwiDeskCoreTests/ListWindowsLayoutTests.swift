@@ -47,6 +47,7 @@ struct ListWindowsLayoutTests {
             id: WindowID(id),
             pid: Int32(930_000 + id),
             appName: "App\(id)",
+            title: "Title \(id)",
             frame: frame,
             isFullscreen: fullscreen
         )
@@ -159,7 +160,9 @@ struct ListWindowsLayoutTests {
                 Issue.record("explain_window answered \(explained)")
                 continue
             }
-            for key in ["id", "space_id", "focused", "fullscreen"] {
+            for key in [
+                "id", "app", "title", "space_id", "focused", "fullscreen",
+            ] {
                 #expect(listed[id]?[key] == explain[key], "\(key)")
             }
             #expect(listed[id]?["floats"] == float["floats"])

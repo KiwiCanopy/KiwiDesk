@@ -8188,9 +8188,13 @@ a Tile rule only Settings, Lua or a profile writes). `app_rule`
 holds the app's Space rule (`space`), its float rules (`floats`),
 whether it has a Tile rule (`tile_rule`) and
 `float_automatically`. `space_id`, `mode` and `app_rule` are `nil`
-where the window has none. No window title is returned. Any other
-id is refused, an away window's included; ask `explain_app`
-instead.
+where the window has none. Any other id is refused, an away
+window's included; ask `explain_app` instead.
+
+:::unreleased
+The answer also carries `title`, the window's title as `get_state`
+has it. `explain_app` still returns no titles.
+:::
 
 `detection.reason` can also read `raised_layer`: a standard
 window that floats because it opened above the normal window
@@ -8288,11 +8292,11 @@ end)
 An unknown Space is refused.
 
 **Does:** returns where each window sits, one entry per window, in
-Space order: `id` (as `get_state` has it, which keeps the app and
-title), `space_id`, `display` (the `list_monitors` id of the screen
-it draws on), `shown`, `frame` (`x`, `y`, `width`, `height`),
-`visibility`, `floats`, `focused` and `fullscreen`. `visibility` is
-`visible`, `hidden`, `partly` (another window covers part of it), or
+Space order: `id` (as `get_state` has it), `space_id`, `display`
+(the `list_monitors` id of the screen it draws on), `shown`,
+`frame` (`x`, `y`, `width`, `height`), `visibility`, `floats`,
+`focused` and `fullscreen`. `visibility` is `visible`, `hidden`,
+`partly` (another window covers part of it), or
 `partly_left`, `_right`, `_top` or `_bottom` (the screen's edge cuts
 it, and that side is still in view). A tile's frame is where its
 layout places it; a float's is where KiwiDesk is moving it, else
@@ -8315,6 +8319,12 @@ parked out of sight or minimized — has `z` `null`. The list's own
 order is the Spaces' rows, not the stacking order: sort by `z` for
 that. A window KiwiDesk does not track, such as a menu, counts
 toward no rank, though it may cover a window.
+
+:::unreleased
+Each entry also carries `title`, the window's title as `get_state`
+has it, so a list reads without a second call. Titles need not be
+unique; `id` names the window.
+:::
 
 `z` and `visibility` can disagree. `visibility` follows the order
 KiwiDesk arranged, as the App Bar does, while `z` is the order
