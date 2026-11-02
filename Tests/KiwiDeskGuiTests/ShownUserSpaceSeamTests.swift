@@ -86,13 +86,15 @@ struct ShownUserSpaceSeamTests {
         #expect(body.occurrences(of: "filed: filed") == 1)
     }
 
-    @Test("the stand-down and the stack flip read the filed verdict")
+    @Test("the stand-down and the shown-Desktop resolver read the verdict")
     func standDownReads() throws {
         #expect(
             try sites(of: "filed: desktopMemory.shownUserSpaces") == [
                 "KiwiCore+ScreenCovering.swift": 1,
-                // A full-screen screen refuses the flip (#2771).
-                "KiwiCore+StackFlip.swift": 1,
+                // A full-screen screen names no Desktop: the flip
+                // refuses and the sizes take the shared entry
+                // (#2771, #2921).
+                "KiwiCore+ShownDesktop.swift": 1,
             ]
         )
     }
