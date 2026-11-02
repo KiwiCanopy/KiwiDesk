@@ -2259,6 +2259,20 @@ route and shell completion reads it, so a local verb is never an
 command has, save the ruled `help` (`CLIRouteTests`,
 `CLIHelpSeamTests`).
 
+**A CLI path that outlives its reader ignores SIGPIPE at an
+entry no test calls, and writes only with a throwing write**
+(#2852, #2870). The disposition is process-wide and the test
+targets share one process, so an ignore in a function a suite
+drives — `runCLI`, `CLIEventStream.subscribe` — would hold for the
+rest of the run and blind every guard that needs a real SIGPIPE;
+the ignores sit in `CLIWatch.run`, `MCPServer.run` and
+`runSocketCommand`'s subscribe branch (`CLIBrokenPipeTests`). Once
+SIGPIPE is ignored a non-throwing `FileHandle.write(_:)` to a
+closed pipe raises an exception instead, so such a path writes
+with `write(contentsOf:)`. A socket the CLI opens fails a send to
+a gone app through `SocketClient`'s `SO_NOSIGPIPE`
+(`SocketClientBrokenPipeTests`).
+
 **`preview` renders the look tile's `LookPlate` headless**
 (#1740): keep that view and what it draws free of `NSApp`, an
 environment object and a live model, or the gallery's previews

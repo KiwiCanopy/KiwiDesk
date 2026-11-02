@@ -90,16 +90,18 @@ struct CLIEventStream {
         return 0
     }
 
-    /// `kiwidesk subscribe [--reconnect] [events…]`.
+    /// `kiwidesk subscribe [--reconnect] [events…]`, its lines to
+    /// `output`.
     static func subscribe(
         _ rest: [String],
-        stream: CLIEventStream = CLIEventStream()
+        stream: CLIEventStream = CLIEventStream(),
+        output: FileHandle = .standardOutput
     ) -> Int32 {
         let parsed = parse(rest)
         return stream.run(
             events: parsed.events,
             reconnect: parsed.reconnect,
-            deliver: { try writeLine($0) }
+            deliver: { try writeLine($0, to: output) }
         )
     }
 
