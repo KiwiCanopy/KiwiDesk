@@ -801,7 +801,8 @@ The obligations below bind this directory:
 - **An apply in flight names what it installs in one scope, never
   a mirror.** `DesktopMemory.installing` is set by the two apply
   doors alone, once their switch verdict is in, cleared on their
-  exit, and read by `sizingOwner(of:)` alone, so the apply's own
+  exit, and read in `KiwiCore+SessionRatioWrite.swift` alone
+  (`sizingOwner(of:)` and the drop's switch check), so the apply's own
   pass draws the incoming arrangement's session sizes while the
   name still moves last (#2921, `SessionRatioSeamTests` ▸
   `installingScopeHasItsHomes`). A new apply door that installs an

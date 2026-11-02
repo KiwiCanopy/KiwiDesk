@@ -198,12 +198,10 @@ extension KiwiCore {
         desktopMemory.sessionRatios = desktopMemory.sessionRatios
             .mapValues { byArrangement in
                 var out = byArrangement
-                if var sizes = out[owner],
-                    let ratios = sizes.removeValue(forKey: old)
-                {
-                    sizes[new] = ratios
-                    out[owner] = sizes
-                }
+                guard var sizes = out[owner] else { return out }
+                // A move replaces the target, never merges into it.
+                sizes[new] = sizes.removeValue(forKey: old)
+                out[owner] = sizes.isEmpty ? nil : sizes
                 return out
             }
     }

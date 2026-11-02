@@ -199,8 +199,9 @@ struct SessionRatioSeamTests {
     }
 
     /// The in-flight scope (#2921) is set by the two apply doors
-    /// alone and read by `sizingOwner` alone, so it never becomes a
-    /// second answer to whose arrangement is live.
+    /// alone and read in the session door alone (`sizingOwner` and
+    /// the drop's switch check), so it never becomes a second
+    /// answer to whose arrangement is live.
     @Test("the installing scope has two writers and one reader")
     func installingScopeHasItsHomes() throws {
         var writes: [String: Int] = [:]

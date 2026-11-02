@@ -65,7 +65,8 @@ final class DesktopMemory {
     /// apply's own pass draws and heals under (#2921); nil outside
     /// one. Never a second answer to whose arrangement is live —
     /// `KiwiCore.liveArrangement` keeps that, and moves last
-    /// (#1249). Set and cleared by the two apply doors alone.
+    /// (#1249). Set and cleared by the two apply doors alone, read
+    /// by `sizingOwner` and the drop's switch check.
     var installing: Installing?
     struct Installing {
         let arrangement: HeldOrigin.Arrangement

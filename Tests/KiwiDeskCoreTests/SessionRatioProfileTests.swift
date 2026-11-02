@@ -134,6 +134,9 @@ struct SessionRatioProfileTests {
         ]
         core.rekeySessionRatios(space, to: "9", under: work)
         #expect(core.desktopMemory.sessionRatios[10]?[work]?["9"] != nil)
+        // A move of an unsized Space replaces a stale target.
+        core.rekeySessionRatios("4", to: "9", under: work)
+        #expect(core.desktopMemory.sessionRatios[10]?[work]?["9"] == nil)
         #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
         core.forgetDroppedSessionRatios(of: "9")
         #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
