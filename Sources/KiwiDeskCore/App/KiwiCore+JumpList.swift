@@ -27,14 +27,13 @@ extension KiwiCore {
         hub: DisplayID? = nil
     ) -> [JumpEntry] {
         let here = here ?? state.workspaces.activeSpace
+        let partner = jumpSwapPartner(in: here)
+        // Your full-screen window refuses every trade first (#2930).
+        let yours = yoursSwapBlock(partner)
         let windows =
-            trackedJumpEntries(
-                here: here,
-                hub: hub,
-                partner: jumpSwapPartner(in: here)
-            )
-            + awayJumpEntries(here: here, hub: hub)
-            + minimizedJumpEntries(here: here)
+            trackedJumpEntries(here: here, hub: hub, partner: partner)
+            + awayJumpEntries(here: here, hub: hub, yours: yours)
+            + minimizedJumpEntries(here: here, yours: yours)
         let ordered = windows.enumerated().sorted { lhs, rhs in
             if lhs.element.tier != rhs.element.tier {
                 return lhs.element.tier < rhs.element.tier
@@ -51,7 +50,8 @@ extension KiwiCore {
         }
         // The pocket after Hidden (#2446).
         let rows =
-            listed.filter { !$0.isPocketed } + hiddenAppJumpEntries()
+            listed.filter { !$0.isPocketed }
+            + hiddenAppJumpEntries(yours: yours)
             + listed.filter(\.isPocketed)
         return lensOrdered(rows)
     }
@@ -130,7 +130,8 @@ extension KiwiCore {
     /// topology reading, taken only when there is an entry.
     private func awayJumpEntries(
         here: SpaceID?,
-        hub: DisplayID?
+        hub: DisplayID?,
+        yours: JumpSwapBlock?
     ) -> [JumpEntry] {
         let away = state.awayWindows.values
             .filter(\.isUp)
@@ -141,6 +142,10 @@ extension KiwiCore {
             let space = state.rememberedSpace(of: entry.id)
             let host = snapshot.spaces.first { $0.id == entry.nativeSpace }
             let fullScreen = awayIsFullScreen(entry, in: snapshot)
+            let block: JumpSwapBlock =
+                fullScreen
+                ? .fullScreen
+                : .otherDesktop(snapshot.screenNumber(of: entry.nativeSpace))
             return JumpEntry(
                 target: .window(entry.id),
                 pid: entry.pid,
@@ -155,11 +160,7 @@ extension KiwiCore {
                     ),
                 movesHere: !fullScreen && canDriveDesktops
                     && entry.appBundleID != nil && here != nil,
-                swapBlock: fullScreen
-                    ? .fullScreen
-                    : .otherDesktop(
-                        snapshot.screenNumber(of: entry.nativeSpace)
-                    ),
+                swapBlock: yours ?? block,
                 moveBlock: fullScreen ? .fullScreen : nil,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: entry.appBundleID, name: entry.appName)
@@ -184,7 +185,10 @@ extension KiwiCore {
     /// The minimize record is advisory: a window closed while
     /// minimized fires no event, so a record the WindowServer no
     /// longer lists is left out. No reading keeps every record.
-    private func minimizedJumpEntries(here: SpaceID?) -> [JumpEntry] {
+    private func minimizedJumpEntries(
+        here: SpaceID?,
+        yours: JumpSwapBlock?
+    ) -> [JumpEntry] {
         let known = jump.knownWindows()
         return state.minimizeOrder.reversed().filter { record in
             known.map { $0.contains(record.id) } ?? true
@@ -198,7 +202,7 @@ extension KiwiCore {
                 spaceIcon: nil,
                 status: .minimized,
                 movesHere: here != nil,
-                swapBlock: .minimized,
+                swapBlock: yours ?? .minimized,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: record.bundleID, name: record.app)
                 )
@@ -210,7 +214,9 @@ extension KiwiCore {
     /// hidden app's windows (#913), so it knows no titles to list.
     /// No window owners handed in: a hidden app is always on
     /// LaunchServices' list, so the census read would buy nothing.
-    private func hiddenAppJumpEntries() -> [JumpEntry] {
+    private func hiddenAppJumpEntries(
+        yours: JumpSwapBlock?
+    ) -> [JumpEntry] {
         eventLoop.liveApps(owners: [])
             .filter { app in
                 app.isHidden && !EventLoop.isOwnProcess(app.pid)
@@ -229,7 +235,7 @@ extension KiwiCore {
                     space: nil,
                     spaceIcon: nil,
                     status: .shown,
-                    swapBlock: .hiddenApp,
+                    swapBlock: yours ?? .hiddenApp,
                     isOtherApp: jumpIsOtherApp(app.ref)
                 )
             }

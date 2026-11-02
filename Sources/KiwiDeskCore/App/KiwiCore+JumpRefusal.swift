@@ -12,6 +12,8 @@ extension KiwiCore {
         _ target: JumpEntry.Target,
         on display: DisplayID? = nil
     ) -> JumpSwapBlock? {
+        let partner = jumpSwapPartner(in: moveHereSpace(on: display))
+        if let yours = yoursSwapBlock(partner) { return yours }
         guard case .window(let id) = target else { return .hiddenApp }
         if let away = state.awayWindows[id] {
             let desktops = NativeSpaces.desktopSnapshot()
@@ -22,7 +24,6 @@ extension KiwiCore {
             return .minimized
         }
         guard state.windows[id] != nil else { return nil }
-        let partner = jumpSwapPartner(in: moveHereSpace(on: display))
         return jumpSwapBlock(id, partner: partner)
     }
 
@@ -40,6 +41,15 @@ extension KiwiCore {
             let here = moveHereSpace(on: display)
         else { return nil }
         return jumpMoveBlock(window, into: here)
+    }
+
+    /// Your side's own block, read before the row's: a full-screen
+    /// window of yours trades with nothing, wherever the row is
+    /// (#2930) — what the row's own place would only obscure.
+    func yoursSwapBlock(_ partner: WindowID?) -> JumpSwapBlock? {
+        guard let partner, state.windows[partner]?.isFullscreen == true
+        else { return nil }
+        return .yoursFullScreen
     }
 
     /// Whether away `window` sits on a native full-screen Space,

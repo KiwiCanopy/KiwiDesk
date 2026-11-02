@@ -111,4 +111,30 @@ struct AwayFullScreenTests {
         #expect(desk?.movesHere == true)
         #expect(core.moveHereRefusal(.window(WindowID(7))) == nil)
     }
+
+    /// The owner's eyeball: from your full-screen window, a row on
+    /// Desktop 1 said "Desktop 1"; yours is the reason.
+    @Test("your full-screen window refuses every row's swap first")
+    func yoursFullScreenRefusesFirst() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        var mine = ManagedWindow(
+            id: WindowID(5),
+            pid: 200,
+            appName: "Claude",
+            appBundleID: "com.anthropic.claudefordesktop"
+        )
+        mine.isFullscreen = true
+        core.eventLoop.onEvent(.windowCreated(mine))
+        _ = core.focusWindow(WindowID(5), warp: false)
+        #expect(core.jumpSwapPartner(in: "1") == WindowID(5))
+        let away = core.jumpEntries().first {
+            $0.target == .window(WindowID(7))
+        }
+        #expect(away?.swapBlock == .yoursFullScreen)
+        #expect(core.swapRefusal(.window(WindowID(7))) == .yoursFullScreen)
+        // Not yours: the row's own place again.
+        core.state.windows.setFullscreen(WindowID(5), false)
+        #expect(core.swapRefusal(.window(WindowID(7))) == .otherDesktop(2))
+    }
 }
