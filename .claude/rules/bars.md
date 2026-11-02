@@ -1353,7 +1353,9 @@ rather than the row it names makes the user search again. So:
   Close Window, Quit, a Space chip's rows or the KiwiShelf
   section. A new row joins `BarMenuVerb` only once its key, on
   the focused window, is the row's own act. A greyed row keeps its
-  chord, as a native menu does: its key refuses as the row would.
+  chord, as a native menu does: its key refuses as the row would;
+  so does the key while a KiwiDesk window is in front, the #292
+  preflight's refusal, where the row's named window still acts.
   A firing by the drawn chord's own keyDown is dropped, so
   Carbon's hotkey is the one action, and every other keyboard
   firing — Return on a picked row — stands (`BarMenuChordTests`,

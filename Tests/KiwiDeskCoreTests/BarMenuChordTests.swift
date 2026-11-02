@@ -136,6 +136,13 @@ struct BarMenuChordTests {
         let core = seededCore()
         core.execute("toggle_pocket_window", args: [.number(1)])
         core.state.apply(.windowFocused(WindowID(1)))
+        #expect(
+            core.barMenuChord(
+                .togglePocketWindow,
+                for: WindowID(1),
+                in: [WindowID(1)]
+            ) != nil
+        )
         let menu = rows(core, [1, 2])
         #expect(menu.contains { $0.title == "Remove from Pocket" })
         #expect(chords(menu).isEmpty)
@@ -149,6 +156,19 @@ struct BarMenuChordTests {
         core.state.workspaces.activate(two)
         #expect(core.barFocus(on: nil) == WindowID(3))
         #expect(core.focusedWindowID == nil)
+        #expect(chords(rows(core, [3])).isEmpty)
+    }
+
+    /// The key's target with the bars' focus elsewhere: the
+    /// system focus last stood on another Space's window, which the
+    /// bars show focused, so the active Space's slot gets no chord.
+    @Test("a slot the bars do not show focused shows no chord")
+    func barFocusElsewhereShowsNone() {
+        let core = seededCore()
+        core.execute("move_to_space", args: [.string("2"), .number(1)])
+        core.state.workspaces.focus(WindowID(1), in: two)
+        #expect(core.barFocus(on: nil) == WindowID(1))
+        #expect(core.focusedWindowID == WindowID(3))
         #expect(chords(rows(core, [3])).isEmpty)
     }
 
@@ -239,6 +259,8 @@ struct BarMenuChordTests {
             keyDown: { nil }
         )
         #expect(menu.items.map(\.keyEquivalent) == ["", "f"])
+        let event = try #require(press(3, [.control, .option]))
+        #expect(!sided.isPressed(by: event))
     }
 
     /// The menu speaks the key equivalent natively (#2869 ▸ 7).

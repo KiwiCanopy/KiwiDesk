@@ -32,8 +32,10 @@ extension KeyCombo {
     }
 
     /// Whether `event` is this chord's key with exactly its
-    /// modifiers.
+    /// modifiers, either side. False for a sided chord, which no
+    /// either-side flag can tell apart (#2601).
     public func isPressed(by event: NSEvent) -> Bool {
+        guard !modifiers.isSided else { return false }
         let held = event.modifierFlags.intersection([
             .control, .option, .shift, .command,
         ])
