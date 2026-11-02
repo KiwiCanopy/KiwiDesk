@@ -37,7 +37,7 @@ extension KiwiCore {
             else {
                 continue
             }
-            setSpaceMode(space, record.mode)
+            setSpaceMode(space, record.mode, keepingSizes: false)
         }
         // A replay is not an entry (#1177): the frames it puts
         // back are the user's, and the entry it re-states was

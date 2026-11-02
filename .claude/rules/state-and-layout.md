@@ -74,10 +74,12 @@ editing here:
   `moveMembers` and forgotten at `forwardWindows(of:to:)` like any
   per-Space session store; `stackFlips` and the session sizes
   (#2921) are the instances — a store also keyed by arrangement
-  files under `liveArrangement` read at the write, never a stored
-  copy, its clears each name the axis they reach (Desktop,
-  arrangement or Space), and a renumber or drop of a Space reaches
-  only the arrangement whose Space it is (#1230)
+  files under the one `sizingOwner(of:)` (a held Space's origin,
+  else the arrangement an apply in flight installs, else
+  `liveArrangement`), its clears each name the axis they reach
+  (Desktop, arrangement or Space), and a renumber or drop of a
+  Space reaches only the arrangement whose Space it is, read while
+  the hold that names it still stands (#1230)
   (`StackFlipSeamTests`, `SessionRatioSeamTests`) — a reader names
   the Desktop through `shownDesktop(of:)`, never a resolver of its
   own, which is review's since nothing scans for a second — and a

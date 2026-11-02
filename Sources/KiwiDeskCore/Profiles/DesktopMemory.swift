@@ -71,7 +71,7 @@ final class DesktopMemory {
         let arrangement: HeldOrigin.Arrangement
         /// Whether the apply changes the arrangement: a switch's
         /// prune forgets no sizes, a load's does.
-        var switching = false
+        let switching: Bool
     }
     typealias SpaceRatios = [SpaceID: SessionRatios]
 

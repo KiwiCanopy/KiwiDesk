@@ -50,7 +50,7 @@ struct InPlaceRestartNoMotionTests {
         guard let core = F.processA(windows) else { return nil }
         // Floated by hand: a manual override the scan cannot see.
         core.state.setFloating(WindowID(13), true)
-        core.setSpaceMode(F.shown, mode)
+        core.setSpaceMode(F.shown, mode, keepingSizes: false)
         core.withSessionRatios(of: F.shown) { ratios in
             switch mode {
             case .bsp:
@@ -152,7 +152,7 @@ struct InPlaceRestartNoMotionTests {
         let a = try #require(F.processA(windows, configure: park))
         a.state.setFloating(float, true)
         a.state.setFloating(WindowID(13), true)
-        a.setSpaceMode(F.shown, .monocle)
+        a.setSpaceMode(F.shown, .monocle, keepingSizes: false)
         a.state.workspaces.focus(WindowID(3), in: F.shown)
         _ = F.settle(a)
         a.state.workspaces.focus(float, in: F.shown)

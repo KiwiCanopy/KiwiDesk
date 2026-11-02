@@ -28,6 +28,12 @@ struct SessionRatioSeamTests {
         pattern: #"session: sessionRatios\((of: )?space\.id\),\s*stackFlip:"#
     )
 
+    /// An assignment to the scope, the formatter free to break
+    /// after `=`.
+    private static let installingWrite = try! NSRegularExpression(
+        pattern: #"desktopMemory\.installing\s*=[^=]"#
+    )
+
     private func sources() throws -> [(name: String, text: String)] {
         var out: [(String, String)] = []
         for tree in Self.trees {
@@ -190,5 +196,25 @@ struct SessionRatioSeamTests {
             if hits > 0 { callers[file.lastPathComponent] = hits }
         }
         #expect(callers == ["KiwiCore+TrackSeed.swift": 1])
+    }
+
+    /// The in-flight scope (#2921) is set by the two apply doors
+    /// alone and read by `sizingOwner` alone, so it never becomes a
+    /// second answer to whose arrangement is live.
+    @Test("the installing scope has two writers and one reader")
+    func installingScopeHasItsHomes() throws {
+        var writes: [String: Int] = [:]
+        var reads: [String: Int] = [:]
+        for (name, text) in try sources() {
+            let w = Self.installingWrite.numberOfMatches(
+                in: text,
+                range: NSRange(text.startIndex..., in: text)
+            )
+            let all = text.occurrences(of: "desktopMemory.installing")
+            if w > 0 { writes[name] = w }
+            if all - w > 0 { reads[name] = all - w }
+        }
+        #expect(writes == ["KiwiCore+ProfileResolution.swift": 4])
+        #expect(reads == ["KiwiCore+SessionRatioWrite.swift": 2])
     }
 }

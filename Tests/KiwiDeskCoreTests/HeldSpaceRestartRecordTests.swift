@@ -179,7 +179,7 @@ struct HeldSpaceRestartRecordTests {
     @Test("an unreadable arrangement stamp costs only itself")
     func unreadableArrangementCostsOnlyItself() throws {
         let a = try t.unplugged()
-        a.setSpaceMode(SpaceID(1), .monocle)
+        a.setSpaceMode(SpaceID(1), .monocle, keepingSizes: false)
         let snapshot = a.sessionSnapshot()
         var json = try #require(
             try JSONSerialization.jsonObject(

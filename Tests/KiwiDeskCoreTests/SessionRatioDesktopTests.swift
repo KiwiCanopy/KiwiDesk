@@ -17,7 +17,7 @@ struct SessionRatioDesktopTests {
 
     private func core() throws -> KiwiCore {
         let core = try KeepFixture.core()
-        core.setSpaceMode(space, .bsp)
+        core.setSpaceMode(space, .bsp, keepingSizes: false)
         return core
     }
 
@@ -120,7 +120,7 @@ struct SessionRatioDesktopTests {
             #expect(ratios?.splitRatioH == nil)
             #expect(ratios?.masterRatio == 0.6)
         }
-        core.setSpaceMode(space, .stack)
+        core.setSpaceMode(space, .stack, keepingSizes: false)
         #expect(core.desktopMemory.sessionRatios.isEmpty)
     }
 

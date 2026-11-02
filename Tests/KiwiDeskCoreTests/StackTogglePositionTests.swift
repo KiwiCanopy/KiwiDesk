@@ -129,7 +129,7 @@ struct StackTogglePositionTests {
     func getStateReportsTheDrawnSide() throws {
         let core = try KeepFixture.core()
         core.state.workspaces.ensureSpace("1", mode: .stack)
-        core.setSpaceMode("1", .stack)
+        core.setSpaceMode("1", .stack, keepingSizes: false)
         func reported() -> String? {
             guard case .object(let root) = core.stateJSON(),
                 case .array(let spaces)? = root["spaces"]

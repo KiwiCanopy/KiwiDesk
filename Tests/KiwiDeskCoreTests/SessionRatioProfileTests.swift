@@ -120,7 +120,7 @@ struct SessionRatioProfileTests {
         core.writeSplitRatioH(0.7, for: space)
         core.setSpaceMode(space, .stack, keepingSizes: true)
         #expect(stored(core, 10, work) == 0.7)
-        core.setSpaceMode(space, .bsp)
+        core.setSpaceMode(space, .bsp, keepingSizes: false)
         #expect(stored(core, 10, work) == nil)
     }
 
@@ -147,7 +147,10 @@ struct SessionRatioProfileTests {
         )
         core.forgetDroppedSessionRatios(of: space)
         #expect(core.desktopMemory.sessionRatios[10]?[work]?[space] != nil)
-        core.desktopMemory.installing?.switching = false
+        core.desktopMemory.installing = .init(
+            arrangement: work,
+            switching: false
+        )
         core.forgetDroppedSessionRatios(of: space)
         core.desktopMemory.installing = nil
         #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
@@ -200,5 +203,25 @@ struct SessionRatioProfileTests {
         try #require(core.state.workspaces[extra] == nil)
         #expect(core.desktopMemory.sessionRatios[10]?[work]?[extra] != nil)
         #expect(core.desktopMemory.sessionRatios[10]?[play]?[extra] != nil)
+    }
+
+    @Test("a held Space going home under its own name takes its sizes")
+    func returnHomeCarries() throws {
+        let (core, _) = try core()
+        show(core, 10)
+        let screen = try #require(core.liveFingerprints.first)
+        let held = SpaceID("9")
+        core.state.workspaces.ensureSpace(held)
+        core.state.heldSpaces[held] = HeldOrigin(
+            name: "3",
+            screen: screen,
+            icon: nil,
+            arrangement: work
+        )
+        core.writeSplitRatioH(0.7, for: held)
+        core.refileHeldSpaces(declared: ["3"], into: work)
+        try #require(core.state.heldSpaces[held] == nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[work]?["3"] != nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[work]?[held] == nil)
     }
 }

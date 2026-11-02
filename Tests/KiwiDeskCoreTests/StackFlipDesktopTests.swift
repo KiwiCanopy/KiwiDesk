@@ -14,7 +14,7 @@ struct StackFlipDesktopTests {
 
     private func core() throws -> KiwiCore {
         let core = try KeepFixture.core()
-        core.setSpaceMode("1", .stack)
+        core.setSpaceMode("1", .stack, keepingSizes: false)
         return core
     }
 

@@ -208,6 +208,12 @@ extension KiwiCore {
                     state.refileAway(of: window, to: origin.name)
                 }
                 oweShortcutDrop(id)  // its hold ended (#1827)
+                // Its sizes go home with it (#2921).
+                rekeySessionRatios(
+                    id,
+                    to: origin.name,
+                    under: origin.arrangement
+                )
                 forwardWindows(of: id, to: origin.name)
                 tiler.settings.removeSpace(id)
             }
@@ -279,17 +285,19 @@ extension KiwiCore {
         for id in state.heldSpaces.keys {
             let space = state.workspaces[id]
             guard spaceHoldsNothing(id) else { continue }
-            // While its origin still names the owner (#2921).
-            forgetDroppedSessionRatios(of: id)
-            endHold(of: id)
             guard space != nil,
                 let other = state.workspaces.allSpaces.first(where: {
                     $0.id != id
                 })?.id
-            else { continue }
+            else {
+                endHold(of: id)
+                continue
+            }
             tiler.settings.removeSpace(id)
             spacePins[id] = nil
+            // Still held, so its sizes' owner is its origin (#2921).
             forwardWindows(of: id, to: other)
+            endHold(of: id)
             retired = true
         }
         return retired

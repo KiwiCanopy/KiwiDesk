@@ -95,7 +95,7 @@ struct FloatGatherEntryTests {
     func entryGathersOutsideMembers() throws {
         let core = try #require(makeCore(mode: .scrolling))
         core.settleDrawnSpaceModes()
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let expected = Self.expected(core)
         #expect(expected.count == 3)
@@ -131,7 +131,7 @@ struct FloatGatherEntryTests {
         for id in members {
             core.state.windows.updateFrame(id, frame: full)
         }
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let grid = FloatGather.targets(
             members: members,
@@ -171,7 +171,7 @@ struct FloatGatherEntryTests {
         for id in members {
             core.state.windows.updateFrame(id, frame: parked)
         }
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let grid = FloatGather.targets(
             members: members,
@@ -222,8 +222,8 @@ struct FloatGatherEntryTests {
     func resetAndRedeclareIsNoEntry() throws {
         let core = try #require(makeCore(mode: .floating))
         core.retile()
-        core.setSpaceMode(Self.space, .bsp)
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .bsp, keepingSizes: false)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
     }
@@ -288,7 +288,7 @@ struct FloatGatherEntryTests {
             core.state.windows.updateFrame(id, frame: parked)
             core.tiler.seedStash(id, frame: capture)
         }
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         for (id, capture) in captures {
             #expect(core.tiler.stashOriginal(id) == capture)
@@ -303,7 +303,7 @@ struct FloatGatherEntryTests {
         let core = try #require(makeCore(mode: .scrolling))
         core.settleDrawnSpaceModes()
         core.state.windows.setFullscreen(Self.scrolledOut, true)
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.scrolledOut) == nil)
         #expect(core.tiler.stashOriginal(Self.partly) != nil)
@@ -332,7 +332,7 @@ struct FloatGatherEntryTests {
         for id in [Self.inside, Self.scrolledOut, Self.partly] {
             core.state.windows.updateFrame(id, frame: parked)
         }
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let seeded = core.tiler.stashOriginal(Self.inside)
         let target = try #require(seeded)

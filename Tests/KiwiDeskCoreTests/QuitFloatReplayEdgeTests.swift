@@ -115,7 +115,7 @@ struct QuitFloatReplayEdgeTests: CrossSessionFixture {
     func floatingModeMemberReplaysAsAFloat() throws {
         let a = try #require(F.processA(Self.windows))
         a.onLog = { _ in }
-        a.setSpaceMode(F.hidden, .floating)
+        a.setSpaceMode(F.hidden, .floating, keepingSizes: false)
         _ = F.settle(a)
         #expect(a.state.windows[Self.hiddenTile]?.isFloating == false)
         let capture = try #require(a.tiler.stashOriginal(Self.hiddenTile))

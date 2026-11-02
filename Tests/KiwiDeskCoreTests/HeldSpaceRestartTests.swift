@@ -241,7 +241,7 @@ struct HeldSpaceRestartTests {
     @Test("a boot under the same arrangement replays its modes")
     func sameArrangementReplaysModes() throws {
         let a = try unplugged()
-        a.setSpaceMode(SpaceID(1), .monocle)
+        a.setSpaceMode(SpaceID(1), .monocle, keepingSizes: false)
         let b = boot(
             from: a,
             screens: [desk.builtIn],

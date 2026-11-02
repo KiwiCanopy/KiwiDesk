@@ -15,13 +15,14 @@ extension KiwiCore {
     /// live `tiler.settings` for the rule and capacity, so a
     /// config-apply caller must assign `tiler.settings` BEFORE its
     /// `setSpaceMode` loop (both bulk-apply callers already do).
-    /// `keepingSizes` is an apply's own write of its arrangement's
-    /// mode, which keeps that arrangement's sizes (#2921); every
-    /// other mode change clears them.
+    /// `keepingSizes` is a switching apply's own write of the
+    /// incoming arrangement's mode, or a held Space going home, which
+    /// keep that arrangement's sizes (#2921); every other mode change
+    /// clears them. Required, so every writer classifies itself.
     func setSpaceMode(
         _ id: SpaceID,
         _ mode: LayoutMode,
-        keepingSizes: Bool = false
+        keepingSizes: Bool
     ) {
         // Compute the seed BEFORE the mutating `setMode` — reading
         // `state.workspaces` inside it would overlap the exclusive

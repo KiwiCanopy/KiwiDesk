@@ -208,7 +208,7 @@ struct SnapshotStoreCensusTests {
             ),
         ]
         let core = try #require(F.processA(windows))
-        core.setSpaceMode(shown, .stack)
+        core.setSpaceMode(shown, .stack, keepingSizes: false)
         core.state.workspaces.withSpace(shown) {
             $0.stackWeights = [WindowID(2): 1.5]
         }

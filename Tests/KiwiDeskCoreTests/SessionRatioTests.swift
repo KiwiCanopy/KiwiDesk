@@ -60,11 +60,11 @@ struct SessionRatioTests {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(500)])
         // Dense same-mode applies (profile/GUI) must not wipe.
-        core.setSpaceMode(SpaceID("1"), .bsp)
+        core.setSpaceMode(SpaceID("1"), .bsp, keepingSizes: false)
         #expect(
             core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
-        core.setSpaceMode(SpaceID("1"), .stack)
+        core.setSpaceMode(SpaceID("1"), .stack, keepingSizes: false)
         #expect(
             core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )

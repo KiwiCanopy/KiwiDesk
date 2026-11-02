@@ -19,8 +19,6 @@ extension KiwiCore {
         // Owed #1741 and #1752 crossings end at the first apply.
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
-        // Its own pass draws the incoming sizes (#2921).
-        desktopMemory.installing = .init(arrangement: .profile(profile.name))
         defer { desktopMemory.installing = nil }
         adoptAppWide(from: profile)
         adoptSharedLook(from: profile)
@@ -40,7 +38,11 @@ extension KiwiCore {
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
-        desktopMemory.installing?.switching = switching
+        // Its own pass draws the incoming sizes (#2921).
+        desktopMemory.installing = .init(
+            arrangement: .profile(profile.name),
+            switching: switching
+        )
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
         let outgoingIcons = tiler.settings.spaceIcons
@@ -121,7 +123,7 @@ extension KiwiCore {
             setSpaceMode(
                 space.id,
                 profile.spaceModes[space.id] ?? .bsp,
-                keepingSizes: true
+                keepingSizes: switching
             )
         }
         // Adopt the pins of the set covering the live monitors
@@ -149,7 +151,7 @@ extension KiwiCore {
             setSpaceMode(
                 id,
                 profile.spaceModes[id] ?? .bsp,
-                keepingSizes: true
+                keepingSizes: switching
             )
         }
         // THIS profile's override tiers (#55, #109), passed
@@ -186,9 +188,6 @@ extension KiwiCore {
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
-        desktopMemory.installing = .init(
-            arrangement: .standard(composed.sourceName)
-        )
         defer { desktopMemory.installing = nil }
         let temporaries = Set(liveTemporarySpaces)
         let heldBefore = Set(state.heldSpaces.keys)
@@ -201,7 +200,8 @@ extension KiwiCore {
         // profile — file the outgoing one, restore its own.
         let standard = HeldOrigin.Arrangement.standard(composed.sourceName)
         let switching = recordOutgoingPartitioning(before: standard)
-        desktopMemory.installing?.switching = switching
+        desktopMemory.installing =
+            .init(arrangement: standard, switching: switching)
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
@@ -216,7 +216,7 @@ extension KiwiCore {
             setSpaceMode(
                 space,
                 composed.spaceModes[space] ?? .bsp,
-                keepingSizes: true
+                keepingSizes: switching
             )
         }
         // Held while the outgoing pins still stand (#1507, #1790).
