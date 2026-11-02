@@ -194,6 +194,7 @@ struct EchoClockSeamTests {
         "KiwiCore+DesktopSwitch.swift": 1,  // debt: lastDesktopSwitch
         "KiwiCore+Desktops.swift": 1,  // debt: lastDesktopSwitch
         "KiwiCore+DisplayFocus.swift": 1,  // debt: lastDesktopSwitch
+        "KiwiCore+HealStandDown.swift": 1,  // debt: lastDesktopSwitch
         "KiwiCore+SpaceCommands.swift": 1,  // debt: lastDesktopSwitch
         "KiwiCore+SpaceFocusHandoff.swift": 2,  // debt
         "KiwiCore+StickyReach.swift": 3,  // debt
