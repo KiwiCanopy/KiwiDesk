@@ -8,16 +8,19 @@ extension KiwiCore {
     /// departing apps' destroys land, some several switches late,
     /// and a heal over that mix wrote the shared ratio for a
     /// layout no Desktop shows, ratcheting it (device,
-    /// 2026-11-02). A nil read counts as shown. One SkyLight host
-    /// read per member, outside the grace. It never decides
+    /// 2026-11-02). A stand-down inside the grace owes the
+    /// ordinary pass after it, through the apply heal's slot, so a
+    /// quiet switch still heals. Outside the grace, one topology
+    /// read and one host read per member. It never decides
     /// membership, the away ledger or a sweep.
     func healStandsDown(for members: [WindowID]) -> Bool {
         let sinceSwitch = Date().timeIntervalSince(lastDesktopSwitch)
         if sinceSwitch >= 0,
             sinceSwitch < EventLoop.spaceSwitchCoalesceGrace
         {
+            oweApplyHealPass()
             return true
         }
-        return members.contains { windowIsOnShownDesktop($0) == false }
+        return desktopMemory.readOffShown(members)
     }
 }

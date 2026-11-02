@@ -11,7 +11,11 @@ import Testing
 /// stand down; once the Space holds only shown windows, they heal
 /// as they always did. Display and `min_window_size` pinned
 /// (#531, #660).
-@Suite("Heals stand down over a mixed membership (#2907)", .serialized)
+@Suite(
+    "Heals stand down over a mixed membership (#2907)",
+    .serialized,
+    .enabled(if: NSScreen.main != nil)
+)
 @MainActor
 struct HealStandDownTests {
     private let away = WindowID(2)
@@ -81,15 +85,16 @@ struct HealStandDownTests {
         ).splitRatioH
     }
 
-    /// The bsp ratio one retile leaves, with `shown` answering the
-    /// shown-Desktop read and `sinceSwitch` the last switch's age.
+    /// The bsp ratio one retile leaves, with `offShown` the windows
+    /// the shown-Desktop read places off every shown Desktop and
+    /// `sinceSwitch` the last switch's age.
     private func healedRatio(
-        shown: @escaping (WindowID) -> Bool?,
+        offShown: Set<WindowID>,
         sinceSwitch: TimeInterval = 60
     ) -> (ratio: Double, healed: Bool) {
         let (core, space) = makeCore(windows: 2, mode: "bsp")
         seedFloor(core, window: away)
-        core.windowIsOnShownDesktop = shown
+        core.desktopMemory.readOffShown = { !offShown.isDisjoint(with: $0) }
         core.lastDesktopSwitch = Date(timeIntervalSinceNow: -sinceSwitch)
         var log: [String] = []
         core.onLog = { log.append($0) }
@@ -102,28 +107,23 @@ struct HealStandDownTests {
 
     @Test("A member on a Desktop nobody shows stands the split heal down")
     func awayMemberStandsSplitDown() {
-        guard NSScreen.main != nil else { return }
-        let result = healedRatio { $0 == self.away ? false : true }
+        let result = healedRatio(offShown: [away])
         #expect(!result.healed)
         #expect(result.ratio == 0.5)
     }
 
-    @Test("Shown members heal, and so does a read that cannot answer")
-    func shownAndUnansweredHeal() {
-        guard NSScreen.main != nil else { return }
-        let shown = healedRatio { _ in true }
-        let unanswered = healedRatio { _ in nil }
-        #expect(shown.healed && unanswered.healed)
+    @Test("Members on shown Desktops heal")
+    func shownMembersHeal() {
+        let shown = healedRatio(offShown: [])
+        #expect(shown.healed)
         #expect(shown.ratio < 0.5)
-        #expect(unanswered.ratio == shown.ratio)
     }
 
     @Test("The switch's grace stands the heal down, and only it")
     func graceStandsDown() {
-        guard NSScreen.main != nil else { return }
-        let inside = healedRatio(shown: { _ in true }, sinceSwitch: 0.1)
+        let inside = healedRatio(offShown: [], sinceSwitch: 0.1)
         let past = healedRatio(
-            shown: { _ in true },
+            offShown: [],
             sinceSwitch: EventLoop.spaceSwitchCoalesceGrace + 0.1
         )
         #expect(!inside.healed)
@@ -131,37 +131,47 @@ struct HealStandDownTests {
         #expect(past.healed)
     }
 
+    /// A quiet switch makes no event after its grace, so the stand-
+    /// down owes the pass that heals (#2907 review).
+    @Test("A stand-down in the grace owes the pass after it")
+    func graceOwesTheHeal() {
+        let (core, space) = makeCore(windows: 2, mode: "bsp")
+        seedFloor(core, window: away)
+        core.lastDesktopSwitch = Date()
+        core.retile()
+        #expect(ratio(core, space) == 0.5)
+        #expect(core.deferred.isScheduled(.applyHealPass))
+        core.lastDesktopSwitch = .distantPast
+        core.payApplyHealPass(until: .now, restedAtLastLook: true)
+        #expect(ratio(core, space) == healedRatio(offShown: []).ratio)
+    }
+
     /// The device ratchet (2026-11-02): mixed passes wrote the
     /// shared ratio one way, then the other. A mixed pass now
     /// leaves the pure heal exactly where it alone would land.
     @Test("A mixed pass then a pure one lands where the pure heal does")
     func mixedThenPureIsPure() {
-        guard NSScreen.main != nil else { return }
         let (core, space) = makeCore(windows: 2, mode: "bsp")
         seedFloor(core, window: away)
         core.lastDesktopSwitch = .distantPast
-        var mixed = true
-        core.windowIsOnShownDesktop = { id in
-            mixed && id == self.away ? false : true
-        }
+        core.desktopMemory.readOffShown = { $0.contains(self.away) }
         core.retile()
         #expect(ratio(core, space) == 0.5)
-        mixed = false
+        core.desktopMemory.readOffShown = { _ in false }
         core.retile()
-        #expect(ratio(core, space) == healedRatio { _ in true }.ratio)
+        #expect(ratio(core, space) == healedRatio(offShown: []).ratio)
     }
 
     @Test("A member on a Desktop nobody shows stands the track heal down")
     func awayMemberStandsTrackDown() {
-        guard NSScreen.main != nil else { return }
         func weight(away awayRead: Bool) -> Double? {
             let (core, space) = makeCore(windows: 3, mode: "track")
             core.state.workspaces.withSpace(space) {
                 $0.trackWeights[WindowID(1)] = 10
             }
             core.lastDesktopSwitch = .distantPast
-            core.windowIsOnShownDesktop = { id in
-                awayRead && id == self.away ? false : true
+            core.desktopMemory.readOffShown = {
+                awayRead && $0.contains(self.away)
             }
             core.retile()
             return core.state.workspaces[space]?

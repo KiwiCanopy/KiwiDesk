@@ -35,10 +35,14 @@ extension StateCoordinator {
                 return !unjudgedFilings.contains($0.key)
             }
             return true
-        }.keys.sorted {
-            (departedSlots[$0]?.rank ?? .max, $0.raw)
-                < (departedSlots[$1]?.rank ?? .max, $1.raw)
-        }
+        }.keys.sorted(by: slotOrder)
+    }
+
+    /// The row order `departedSlots` gives, unranked windows last by
+    /// id: the capture's and the away preview's one rule (#2907).
+    func slotOrder(_ a: WindowID, _ b: WindowID) -> Bool {
+        (departedSlots[a]?.rank ?? .max, a.raw)
+            < (departedSlots[b]?.rank ?? .max, b.raw)
     }
 
     /// What those windows are owed at arrival (#1362, #1864), as

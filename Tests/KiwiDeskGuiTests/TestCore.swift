@@ -189,12 +189,12 @@ func makeTestCore(
     armForeignAppTripwires(core)
     armStartTripwire(core)
     // Same class, sixth time (#1146): the compositor reads behind
-    // the gone classifier and the away ledger default LIVE, and
-    // a fixture id can be a real CGWindowID on the host — one
-    // hosted on an unshown Desktop would read `vanished`, file
-    // the ledger and arm a live census. Pin "no compositor"; a
-    // suite that wants a verdict states it on `desktopMemory`.
+    // the gone classifier, the away ledger and the heal stand-down
+    // default LIVE, and a fixture id can be a real CGWindowID on an
+    // unshown Desktop — reading `vanished`, filing the ledger, arming
+    // a live census. Pin "no compositor" on `desktopMemory`.
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
+    core.desktopMemory.readOffShown = { _ in false }
     core.windowIsOnScreen = { _ in nil }
     core.windowIsOnShownDesktop = { _ in nil }
     core.vision.listWindows = { [] }

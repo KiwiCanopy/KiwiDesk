@@ -179,17 +179,26 @@ struct AwayBootSeedTests {
     }
 
     /// The carried filing resumes as the departure it was, so its
-    /// return takes its slot (#2907); a plain filing stays one.
+    /// return takes its slot (#2907) — an app not yet observed
+    /// included, whose window the ledger does not take; a plain
+    /// filing and a parked window stay filings.
     @Test("a carried filing on an away Desktop resumes its departure")
     func carriedFilingResumes() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
-        core.state.refilePending([WindowID(7)], in: "2")
+        let carried = [WindowID(7), WindowID(8), WindowID(6)]
+        core.state.refilePending(carried, in: "2")
         core.state.remember(WindowID(9), in: "2")
         core.desktopMemory.readCensus = { _ in
             DesktopCensus(
                 hosts: [
                     WindowID(7): self.host(4, pid: self.observed),
+                    WindowID(8): self.host(4, pid: self.stranger),
+                    WindowID(6): DesktopCensus.Host(
+                        space: 4,
+                        pid: self.observed,
+                        isUp: false
+                    ),
                     WindowID(9): self.host(4, pid: self.observed),
                 ],
                 shown: [1]
@@ -197,6 +206,8 @@ struct AwayBootSeedTests {
         }
         core.seedAwayWindows()
         #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        #expect(core.state.rememberedSpaces[WindowID(8)] == .departed("2"))
+        #expect(core.state.rememberedSpaces[WindowID(6)] == .restored("2"))
         #expect(core.state.rememberedSpaces[WindowID(9)] == .restored("2"))
     }
 
