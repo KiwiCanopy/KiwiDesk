@@ -59,33 +59,19 @@ extension PaletteShelf {
     func saveCurrent(_ typed: String) {
         let name = trimmed(typed)
         guard canSave(name) else { return }
-        let palette = ColorPalette(
-            name: name,
-            colors: ColorPaletteKeys.extract(
-                from: model.config.settings
-            )
+        _ = try? model.core.savePalette(
+            named: name,
+            from: model.config.settings
         )
-        try? store.save(palette)
         saveRequest = nil
         reload()
     }
 
     /// The next free "My Palette N" for the save field's default.
     func nextUserName() -> String {
-        uniqueName(base: L("palettes.default_name", "My Palette"))
-    }
-
-    /// `base`, then `base 2`, `base 3`, … skipping every built-in
-    /// and existing user name.
-    func uniqueName(base: String) -> String {
-        guard taken(base) else { return base }
-        var n = 2
-        while taken("\(base) \(n)") { n += 1 }
-        return "\(base) \(n)"
-    }
-
-    private func taken(_ name: String) -> Bool {
-        store.isBuiltinName(name) || store.hasUserPalette(name)
+        KiwiCore.uniqueName(
+            base: L("palettes.default_name", "My Palette")
+        ) { store.isBuiltinName($0) || store.hasUserPalette($0) }
     }
 
     // MARK: - Rename / delete
@@ -129,7 +115,7 @@ extension PaletteShelf {
     /// Deletes a palette and directs focus to the neighbouring tile (#816).
     func deletePalette(_ name: String) {
         let neighbour = neighbourAfterDeleting(name)
-        try? store.delete(name)
+        try? model.core.deletePalette(name)
         reload()
         returningTile = neighbour
     }
@@ -149,7 +135,7 @@ extension PaletteShelf {
         panel.nameFieldStringValue = "\(palette.name).json"
         guard panel.runModal() == .OK, let url = panel.url
         else { return }
-        try? store.export(palette, to: url)
+        try? model.core.exportPalette(palette, to: url)
     }
 
     func importPalette() {
@@ -158,15 +144,8 @@ extension PaletteShelf {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url,
-            let imported = try? store.importPalette(from: url)
+            (try? model.core.importPalette(from: url)) != nil
         else { return }
-        // Never shadow a built-in or an existing user palette on
-        // import — settle on the next free name.
-        let named = ColorPalette(
-            name: uniqueName(base: imported.name),
-            colors: imported.colors
-        )
-        try? store.save(named)
         reload()
     }
 }

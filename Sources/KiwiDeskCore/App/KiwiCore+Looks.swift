@@ -22,16 +22,6 @@ extension KiwiCore {
         LookCatalog.bundled(sizes: starterSizes())
     }
 
-    /// Every palette, bundled first.
-    public var allPalettes: [ColorPalette] {
-        paletteLibrary.builtins() + paletteLibrary.userPalettes()
-    }
-
-    /// Renames a user palette; no look names one (#1752).
-    public func renamePalette(from old: String, to new: String) throws {
-        try paletteLibrary.rename(from: old, to: new)
-    }
-
     /// Renames a saved look; the store refuses a bundled or taken
     /// name and an unreadable library (#2860).
     public func renameLook(from old: String, to new: String) throws {
