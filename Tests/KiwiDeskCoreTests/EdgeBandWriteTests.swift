@@ -12,7 +12,7 @@ import os
 /// its bottom, a spring's last frame shrinking 499 → 494.5.
 @Suite("A shrink near the bottom edge is written from clear of it (#2894)")
 @MainActor
-struct BottomBandWriteTests {
+struct EdgeBandWriteTests {
     private let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
     private let slot = CGRect(x: 16, y: 606.5, width: 840, height: 494.5)
     private let start = CGRect(x: 16, y: 602, width: 847, height: 499)
@@ -76,7 +76,7 @@ struct BottomBandWriteTests {
         _ target: CGRect,
         from current: CGRect
     ) -> CGPoint? {
-        BottomBandWrite.liftedOrigin(
+        EdgeBandWrite.liftedOrigin(
             target: target,
             current: current,
             screen: screen
@@ -85,17 +85,17 @@ struct BottomBandWriteTests {
 
     @Test("A frame ending near a screen's bottom names that screen")
     func screenNearTheBottom() {
-        let near = { BottomBandWrite.screen(for: $0, among: [self.screen]) }
+        let near = { EdgeBandWrite.screen(for: $0, among: [self.screen]) }
         #expect(near(slot) == screen)
         #expect(near(slot.offsetBy(dx: 0, dy: -200)) == nil)
         #expect(near(slot.offsetBy(dx: 0, dy: 100)) == nil)
         let beside = screen.offsetBy(dx: screen.width, dy: 0)
-        #expect(BottomBandWrite.screen(for: slot, among: [beside]) == nil)
+        #expect(EdgeBandWrite.screen(for: slot, among: [beside]) == nil)
     }
 
     @Test("A shrink lifts the current frame clear of the band")
     func shrinkLifts() {
-        #expect(lift(slot, from: start) == 1117 - BottomBandWrite.band - 499)
+        #expect(lift(slot, from: start) == 1117 - EdgeBandWrite.band - 499)
     }
 
     @Test("A lift never puts the window lower than its target")
@@ -112,7 +112,7 @@ struct BottomBandWriteTests {
         let wide = CGRect(x: 0, y: 600, width: 1728, height: 501)
         let lifted = origin(slot.offsetBy(dx: 856, dy: 0), from: wide)
         #expect(lifted?.x == 0)
-        #expect(lifted?.y == 1117 - BottomBandWrite.band - 501)
+        #expect(lifted?.y == 1117 - EdgeBandWrite.band - 501)
     }
 
     @Test("A size write ending clear of the band is not lifted")
@@ -128,8 +128,8 @@ struct BottomBandWriteTests {
         let current = CGRect(x: -1000, y: 300, width: 840, height: 499)
         #expect(other.contains(current))
         let above = CGRect(x: 16, y: -800, width: 840, height: 499)
-        #expect(lift(slot, from: above) == 1117 - BottomBandWrite.band - 499)
-        #expect(lift(slot, from: current) == 1117 - BottomBandWrite.band - 499)
+        #expect(lift(slot, from: above) == 1117 - EdgeBandWrite.band - 499)
+        #expect(lift(slot, from: current) == 1117 - EdgeBandWrite.band - 499)
     }
 
     @Test("Nothing refused, nothing lifted")
@@ -148,10 +148,10 @@ struct BottomBandWriteTests {
     @Test("The refusing app keeps the old height without the lift")
     func unliftedWriteIsRefused() {
         let app = RefusingApp(start, screenBottom: screen.maxY)
-        BottomBandWrite.write(
+        EdgeBandWrite.write(
             slot,
             element,
-            nearBottomOf: nil,
+            nearEdgeOf: nil,
             writer: app.writer
         )
         #expect(app.frame.withLock { $0.height } == 499)
@@ -160,10 +160,10 @@ struct BottomBandWriteTests {
     @Test("The lifted write lands the asked frame")
     func liftedWriteLands() {
         let app = RefusingApp(start, screenBottom: screen.maxY)
-        BottomBandWrite.write(
+        EdgeBandWrite.write(
             slot,
             element,
-            nearBottomOf: screen,
+            nearEdgeOf: screen,
             writer: app.writer
         )
         #expect(app.frame.withLock { $0 } == slot)
@@ -272,7 +272,7 @@ struct BottomBandWriteTests {
     @Test("A merge drops a waiting band its newer frame left")
     func mergeDropsALeftBand() {
         let high = slot.offsetBy(dx: 0, dy: -300)
-        let merged = BottomBandWrite.mergedBand(
+        let merged = EdgeBandWrite.mergedBand(
             newer: nil,
             waiting: screen,
             frame: high

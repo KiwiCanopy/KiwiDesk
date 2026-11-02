@@ -76,7 +76,7 @@ final class PendingFrames: @unchecked Sendable {
         let element: AXUIElement
         var frame: CGRect
         var setSize: Bool
-        /// The screen whose bottom band the size write clears
+        /// The screen whose edge band the size write clears
         /// (#2894).
         var band: CGRect? = nil
     }
@@ -95,7 +95,7 @@ final class PendingFrames: @unchecked Sendable {
             // The newer frame's band, else the waiting write's
             // where the newer frame still ends in it: the waiting
             // shrink never ran, so the window may still need it.
-            merged.band = BottomBandWrite.mergedBand(
+            merged.band = EdgeBandWrite.mergedBand(
                 newer: entry.band,
                 waiting: existing.band,
                 frame: entry.frame

@@ -33,7 +33,7 @@ final class FrameApplier {
     /// The AX writes the queues perform; a test counts them.
     var writer = FrameWriter.live
 
-    /// Every screen's whole AX frame, for the bottom-band write
+    /// Every screen's whole AX frame, for the edge-band write
     /// (#2894); wired by `TilingEngine`, empty (no band) unwired.
     var screenFrames: @MainActor () -> [CGRect] = { [] }
 
@@ -155,10 +155,10 @@ final class FrameApplier {
             waited()
             guard let entry = store.take(id) else { return }
             if entry.setSize {
-                BottomBandWrite.write(
+                EdgeBandWrite.write(
                     entry.frame,
                     entry.element,
-                    nearBottomOf: entry.band,
+                    nearEdgeOf: entry.band,
                     writer: writer
                 )
             } else {
@@ -227,10 +227,10 @@ final class FrameApplier {
             waited()
             holds.beginInstant(pid, writer)
             if setSize {
-                BottomBandWrite.write(
+                EdgeBandWrite.write(
                     frame,
                     target,
-                    nearBottomOf: band,
+                    nearEdgeOf: band,
                     writer: writer
                 )
             } else {

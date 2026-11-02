@@ -1657,21 +1657,24 @@ editing here:
   slide's landing (#2524, `FrameApplierHeldTests` ▸
   `heldSetOwesNoResend`).
 - **Route an applier write with a size through
-  `BottomBandWrite.write`, never `writer.setFrame` (#2894).** It
-  lifts a window ending near a screen's bottom edge before sizing
-  it, which macOS would otherwise refuse; its docstring carries
+  `EdgeBandWrite.write`, never `writer.setFrame` (#2894).** It
+  moves a window ending near a screen's bottom or right edge
+  clear of it before sizing it, which macOS would otherwise
+  refuse; its docstring carries
   the measurement. The screens it reads come from
   `TilingEngine.allScreenFrames`, never a live read in the applier.
   Whether a write shrinks the window is the window's own frame,
-  read on its queue for every sized write ending near a bottom
+  read on its queue for every sized write ending near either
   edge — never a record of what was asked or echoed, which an
   app's own resize or a spring's overshoot leaves behind. A merge
   over a waiting write keeps its band through the one
-  `BottomBandWrite.mergedBand`, held and queued alike
-  (`BottomBandWriteSeamTests` ▸ `mergesTakeTheOneRule`).
-  `BottomBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
-  three doors, `unaskedGrowIsLifted` the window's answer, and
-  `BottomBandWriteSeamTests` ▸
+  `EdgeBandWrite.mergedBand`, held and queued alike
+  (`EdgeBandWriteSeamTests` ▸ `mergesTakeTheOneRule`).
+  `EdgeBandWriteTests` ▸ `applierWritesThroughTheBand` drives the
+  three doors, `unaskedGrowIsLifted` the window's answer,
+  `EdgeBandRightEdgeTests` ▸ `rightEdgeShrinkLands` the right
+  edge, and
+  `EdgeBandWriteSeamTests` ▸
   `appliersTakeTheBand` reds a `FrameApplier` file spelling the
   writer's frame call. The quit gather's direct
   `WindowControl.setFrame` is the one ruled exception: nothing

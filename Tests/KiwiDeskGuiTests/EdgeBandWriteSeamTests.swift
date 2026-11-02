@@ -1,13 +1,13 @@
 import Foundation
 import Testing
 
-/// Every sized write the applier sends goes through the bottom-band
+/// Every sized write the applier sends goes through the edge-band
 /// write (#2894): no `FrameApplier` file spells the writer's frame
-/// call, which `BottomBandWrite.write` makes for them. A new write
+/// call, which `EdgeBandWrite.write` makes for them. A new write
 /// path spelling it directly would skip the lift and bring back
-/// the refused shrink near a screen's bottom.
-@Suite("Sized applier writes take the bottom-band write (#2894)")
-struct BottomBandWriteSeamTests {
+/// the refused shrink near a screen's bottom or right edge.
+@Suite("Sized applier writes take the edge-band write (#2894)")
+struct EdgeBandWriteSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
 
     @Test("no applier file writes a frame past the band")
@@ -27,9 +27,9 @@ struct BottomBandWriteSeamTests {
             )
             #expect(
                 source.occurrences(of: "writer.setFrame(") == 0,
-                "\(file) writes a frame past BottomBandWrite.write"
+                "\(file) writes a frame past EdgeBandWrite.write"
             )
-            routed += source.occurrences(of: "BottomBandWrite.write(")
+            routed += source.occurrences(of: "EdgeBandWrite.write(")
         }
         // apply, applyInstant and the hold's release.
         #expect(routed == 3)
@@ -47,8 +47,8 @@ struct BottomBandWriteSeamTests {
                 at: tiling.appendingPathComponent(file)
             )
             #expect(
-                source.occurrences(of: "BottomBandWrite.mergedBand(") == 1,
-                "\(file) merges a band past BottomBandWrite.mergedBand"
+                source.occurrences(of: "EdgeBandWrite.mergedBand(") == 1,
+                "\(file) merges a band past EdgeBandWrite.mergedBand"
             )
         }
     }

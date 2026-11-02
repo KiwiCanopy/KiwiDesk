@@ -16,7 +16,7 @@ final class HeldWrites: @unchecked Sendable {
     struct Entry: Equatable {
         var frame: CGRect
         var setSize: Bool
-        /// The screen whose bottom band the size write clears
+        /// The screen whose edge band the size write clears
         /// (#2894).
         var band: CGRect? = nil
     }
@@ -80,7 +80,7 @@ final class HeldWrites: @unchecked Sendable {
         defer { lock.unlock() }
         if var entry = staged[id] {
             entry.frame = frame
-            entry.band = BottomBandWrite.mergedBand(
+            entry.band = EdgeBandWrite.mergedBand(
                 newer: band,
                 waiting: entry.band,
                 frame: frame
@@ -235,10 +235,10 @@ extension FrameApplier {
         _ writer: FrameWriter
     ) {
         if entry.setSize {
-            BottomBandWrite.write(
+            EdgeBandWrite.write(
                 entry.frame,
                 target,
-                nearBottomOf: entry.band,
+                nearEdgeOf: entry.band,
                 writer: writer
             )
         } else {
