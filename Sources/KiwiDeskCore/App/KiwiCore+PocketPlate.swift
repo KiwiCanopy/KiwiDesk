@@ -80,7 +80,7 @@ extension KiwiCore {
     /// general list alone (`pocketAcceptsMark`).
     var pocketPlateWindows: [WindowID] {
         let inside = { (slot: PocketSlot) in
-            slot.phase == .pocketed && state.windows[slot.window] != nil
+            slot.phase == .pocketed && self.state.windows[slot.window] != nil
         }
         let keyed = pocketHoldsSeveral ? state.keyedPocket : []
         return (state.generalPocket + keyed).filter(inside).map(\.window)

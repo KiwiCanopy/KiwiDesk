@@ -86,7 +86,7 @@ enum SpaceBarWindowMenu {
                 showImage(item)
             }
             if case .some(.some(let key)) = entry.key {
-                item.subtitle = key.drawn
+                if #available(macOS 14.4, *) { item.subtitle = key.drawn }
                 item.setAccessibilityLabel(
                     L(
                         "pocket.list.keyed_row.ax",

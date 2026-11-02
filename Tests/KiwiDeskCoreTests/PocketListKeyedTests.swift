@@ -117,15 +117,19 @@ struct PocketListKeyedTests {
         )
         let menu = try #require(shown)
         LocalizationManager.shared.select("en")
-        let header = try #require(menu.items.first(where: \.isSectionHeader))
+        let header = try #require(
+            menu.items.first { $0.isSectionHeader }
+        )
         #expect(menu.index(of: header) == 1)
         let last = try #require(menu.items.last)
-        #expect(last.subtitle == "⌃⌥T")
+        if #available(macOS 14.4, *) {
+            #expect(last.subtitle == "⌃⌥T")
+            #expect(menu.items.first?.subtitle == nil)
+        }
         #expect(
             last.accessibilityLabel()?.hasSuffix("Pocket key Control Option T")
                 == true
         )
-        #expect(menu.items.first?.subtitle == nil)
     }
 
     /// A pick elsewhere takes it out and the key keeps its tie (▸ 11).
