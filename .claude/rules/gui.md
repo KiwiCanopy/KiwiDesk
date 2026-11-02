@@ -2129,7 +2129,11 @@ reason from the snapshot's `JumpEntry` blocks, which Core derives
 from the verbs' own verdicts (`SwapBlock`, `moveHereVerdict`) —
 never a gate re-spelled in the GUI (`JumpRefusalRowTests` ▸
 `controllerWiring`, `pressAsksCore`; `RefusalCueSeamTests` ▸
-`noSoundOnlyCue`).
+`noSoundOnlyCue`). **Which pick a Windows chord makes — ↩, a row
+click, a ⌘ digit — is read from `JumpPick.of` alone (#2931)**, never
+a modifier test beside it; a ↩ chord it answers nil for is
+`JumpKey.dead`, the system beep wired in the controller, and never
+a refusal (`JumpChordTableTests`).
 
 ## A sideways strip fades and follows through Core (#2901)
 

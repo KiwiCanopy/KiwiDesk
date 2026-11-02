@@ -38,8 +38,9 @@ struct JumpKeyTests {
         #expect(key(36) == .pick(moveHere: false))
         #expect(key(76) == .pick(moveHere: false))
         #expect(key(36, .shift) == .pick(moveHere: true))
-        #expect(key(36, .command) == nil)
-        #expect(key(36, .control) == nil)
+        // ⌘ never changes the pick; ⌃ picks nothing (#2931).
+        #expect(key(36, .command) == .pick(moveHere: false))
+        #expect(key(36, .control) == .dead)
     }
 
     /// ⌥↩ and ⇧⌥↩ are one pick, so ⇧ never means "there"; ⌥ with
@@ -49,8 +50,8 @@ struct JumpKeyTests {
         #expect(key(36, .option) == .swapHere)
         #expect(key(76, .option) == .swapHere)
         #expect(key(36, [.shift, .option]) == .swapHere)
-        #expect(key(36, [.option, .command]) == nil)
-        #expect(key(36, [.option, .control]) == nil)
+        #expect(key(36, [.option, .command]) == .swapHere)
+        #expect(key(36, [.option, .control]) == .dead)
         #expect(key(18, .option) == nil)
         // ⌥⌘ and ⇧⌥⌘ digits swap that result (#2885).
         #expect(key(18, [.option, .command]) == .quickSwap(0))
@@ -71,7 +72,7 @@ struct JumpKeyTests {
         #expect(JumpPick.of(.shift) == .moveHere)
         #expect(JumpPick.of([]) == .jump)
         #expect(JumpPick.of([.option, .control]) == nil)
-        #expect(JumpPick.of([.option, .command]) == nil)
+        #expect(JumpPick.of([.option, .command]) == .swapHere)
     }
 
     @Test("⌘1–9 pick by result, ⇧⌘ moves here, a keypad digit too")
