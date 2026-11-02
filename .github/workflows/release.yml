@@ -45,7 +45,7 @@ env:
   # Xcode bump that edited one job and not the other would leave
   # both green while the artifact is built by a compiler Verify
   # never ran.
-  XCODE: /Applications/Xcode_27.app
+  XCODE: /Applications/Xcode_27.2.app
 
 jobs:
   # The gate scripts/release.sh runs before it will tag, re-run

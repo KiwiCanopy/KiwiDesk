@@ -114,7 +114,7 @@ jobs:
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_27.app \
+          sudo xcode-select -s /Applications/Xcode_27.2.app \
             || sudo xcode-select -s /Applications/Xcode.app
           swift --version
 

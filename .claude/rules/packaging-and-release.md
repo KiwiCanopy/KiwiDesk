@@ -76,7 +76,9 @@ build failure (the owner read it as one during the #1436 eyeball
 before the stamps were compared). `build-app.sh` therefore passes
 `-platform_version macos <target> <sdk>` on its `swift build`,
 the target DERIVED from `Package.swift` (the one enforced copy of
-the three above) and the SDK from `xcrun --show-sdk-version`, and
+the three above) and the SDK from `xcrun --sdk macosx --show-sdk-version` — named,
+since a bare `xcrun` answers the CommandLineTools SDK once those
+tools are newer than Xcode (2026-11-02) — and
 then reads the stamp back with `otool -l` and refuses a
 major.minor mismatch — on the reused binary of `--skip-build`
 too, since a stale build is exactly what a packaging run picks

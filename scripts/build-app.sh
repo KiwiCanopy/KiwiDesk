@@ -174,10 +174,11 @@ BUILT="$ROOT/.build/release"
 # as the SDK (`sdk 14.0`), and AppKit draws the macOS 26 control
 # design only for a binary linked against SDK >= 26 (#1499).
 # Both numbers have one home — the deployment target is read off
-# Package.swift, the SDK off the selected toolchain.
+# Package.swift, the SDK off the selected toolchain — named, since a
+# bare xcrun can answer the CommandLineTools SDK.
 MIN_OS=$(sed -n 's/.*\.macOS(\.v\([0-9][0-9]*\)).*/\1.0/p' \
     "$ROOT/Package.swift" | head -1)
-SDK_VERSION=$(xcrun --show-sdk-version)
+SDK_VERSION=$(xcrun --sdk macosx --show-sdk-version)
 if [ -z "$MIN_OS" ] || [ -z "$SDK_VERSION" ]; then
     echo "error: could not read the deployment target" \
          "(Package.swift) or the SDK version (xcrun)" >&2

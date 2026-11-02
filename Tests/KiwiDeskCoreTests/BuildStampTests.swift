@@ -58,7 +58,9 @@ struct BuildStampTests {
             "the deployment target is read off Package.swift"
         )
         #expect(
-            text.contains("SDK_VERSION=$(xcrun --show-sdk-version)"),
+            text.contains(
+                "SDK_VERSION=$(xcrun --sdk macosx --show-sdk-version)"
+            ),
             "the SDK version is read off the toolchain"
         )
         // The SCRIPT's own sed, cut out of its text, over the real
