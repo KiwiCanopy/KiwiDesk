@@ -156,6 +156,17 @@ public enum BarFont {
         ) && !glyphs.contains(0)
     }
 
+    /// A key chord's face whatever the bar's family: the system
+    /// face at regular weight, since a chord is key notation a
+    /// bar font often lacks glyphs for (#2923 ▸ Ruling 4).
+    public static func chordFont(ofSize size: CGFloat) -> NSFont {
+        systemFace(
+            monospaced: false,
+            weight: BarFontWeight.regular.value,
+            size: size
+        )
+    }
+
     /// A system face: at a named weight inside its axis the
     /// system's own call — today's look at 400 — and the `wght`
     /// axis, clamped, anywhere else.

@@ -92,9 +92,9 @@ extension BarPeekBody {
     }
 
     /// The room a row's Pocket key takes past its title: the chord
-    /// and a gap before it.
+    /// and its column's gap before it.
     static func chordRoom(_ chord: NSTextField) -> CGFloat {
-        natural(chord) + Metrics.iconGap * 2
+        natural(chord) + Metrics.chordGap
     }
 
     /// Places a row's Pocket key on its first line, ending at `end`.

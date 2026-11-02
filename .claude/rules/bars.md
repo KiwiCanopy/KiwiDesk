@@ -1945,6 +1945,11 @@ reaches.
   the one copy of who is exempt — and `BarFontSiteTests` builds
   each site and holds its face to the shelf's; a new site owes
   the latter a clause, since it reads no site list.
+- **A key chord a bar surface draws takes `BarFont.chordFont(ofSize:)`,
+  never the bar font** (#2923 ▸ Ruling 4): key notation the bar's
+  family often lacks glyphs for, so a chord in it splits across two
+  faces. It is the one exception to the face rule above, and the
+  peek's Pocket key column is its one site (`BarPeekPocketKeysTests`).
 - **Resolve the weight in `BarFont` at render time, never on
   write**: the stored weight is the user's number whatever the
   family, and a missing family is kept by name and reported

@@ -27,6 +27,9 @@ final class BarPeekBody: NSView {
         static let groupGap: CGFloat = 8
         static let iconSide: CGFloat = 16
         static let iconGap: CGFloat = 5
+        /// The least room between a title and its Pocket key, the
+        /// key's own column (#2923 ▸ Ruling 5).
+        static let chordGap: CGFloat = 24
         /// The "more" line's chevron.
         static let chevronSide: CGFloat = 12
         static let cornerRadius: CGFloat = 11
@@ -112,6 +115,7 @@ final class BarPeekBody: NSView {
         let ink = NSColor(kiwiHex: shelf.itemColor)
         let headerInk = NSColor(kiwiHex: shelf.peekHeaderColor)
         let textFont = shelf.textFont(ofSize: Metrics.textSize)
+        let chordFont = BarFont.chordFont(ofSize: Metrics.textSize)
         let headerFont = shelf.textFont(
             ofSize: Metrics.headerSize,
             emphasis: .semibold
@@ -126,7 +130,7 @@ final class BarPeekBody: NSView {
                     ? nil : Self.label(group.app, headerFont, headerInk),
                 rows: group.titles.map { Self.label($0, textFont, ink) },
                 chords: group.rows.map { row in
-                    row.chord.map { Self.label($0, textFont, headerInk) }
+                    row.chord.map { Self.label($0, chordFont, headerInk) }
                 }
             )
         }

@@ -75,6 +75,59 @@ struct BarPeekPocketKeysTests {
         #expect(header.frame.width >= BarPeekBody.natural(header))
     }
 
+    /// Ruling 4 and 5: the key in the system face whatever the bar
+    /// font, in its own column at least `chordGap` past every title,
+    /// every key ending on one trailing edge.
+    @Test("keys stand in their own column, in the system face")
+    func keyColumn() throws {
+        LocalizationManager.shared.select("en")
+        var shelf = KiwiShelf()
+        shelf.fontFamily = KiwiShelf.systemMonospacedFontFamily
+        let long = BarWindowRow(
+            window: WindowID(8),
+            pid: 8,
+            app: "Notes",
+            title: "Shopping list",
+            icon: nil
+        )
+        let short = BarWindowRow(
+            window: WindowID(9),
+            pid: 9,
+            app: "Code",
+            title: "W",
+            icon: nil
+        )
+        let body = BarPeekBody()
+        _ = body.layout(
+            BarPeekContent(
+                rows: [],
+                checks: true,
+                keyed: [long, short],
+                chord: { $0 == WindowID(9) ? "⌥A" : "⌃⌥N" }
+            ),
+            shelf: shelf,
+            hidden: 0
+        )
+        #expect(body.chords.count == 2)
+        let titles = body.labels.filter {
+            ["Shopping list", "W"].contains($0.stringValue)
+        }
+        let first = try #require(titles.first)
+        // The key's face is the system's, the title's the bar's.
+        let system = BarFont.chordFont(ofSize: 13)
+        #expect(body.chords.allSatisfy { $0.font == system })
+        #expect(first.font != system)
+        // One trailing edge, clear of the longest title by the gap.
+        let ends = Set(body.chords.map(\.frame.maxX))
+        #expect(ends.count == 1)
+        let longest =
+            titles.map {
+                $0.frame.minX + BarPeekBody.natural($0)
+            }.max() ?? 0
+        let lead = body.chords.map(\.frame.minX).min() ?? 0
+        #expect(lead - longest >= BarPeekBody.Metrics.chordGap)
+    }
+
     @Test("a list with no keyed window draws no section")
     func noSectionWithoutKeys() {
         let body = BarPeekBody()
