@@ -73,7 +73,9 @@ editing here:
   every reader takes as a required argument, rekeyed at
   `moveMembers` and forgotten at `forwardWindows(of:to:)` like any
   per-Space session store; `stackFlips` and the session sizes
-  (#2921) are the instances (`StackFlipSeamTests`,
+  (#2921, filed under the arrangement live too, read through
+  `liveArrangement`, so a profile switch clears nothing) are the
+  instances (`StackFlipSeamTests`,
   `SessionRatioSeamTests`) — a reader names the Desktop through
   `shownDesktop(of:)`, never a resolver of its own, which is
   review's since nothing scans for a second — and a new native-id-keyed map joins

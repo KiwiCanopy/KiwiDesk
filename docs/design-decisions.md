@@ -7401,8 +7401,10 @@ session state behind one door — or is a profile binding.
 
 **The session sizes took that shape (#2921).** What a resize writes
 — the BSP split ratios, the stack master ratio, the scrolling slot
-size and the Grid weights — is kept per Space and per Desktop, in
-one `DesktopMemory` store beside the flip, read through one door
+size and the Grid weights — is kept per Space, per Desktop and per
+arrangement live on that Desktop (a saved profile or the composed
+Standard), in one `DesktopMemory` store beside the flip, read
+through one door
 that every resolver overlay takes as a required argument. Config
 stays shared: a layout-wide setting, a per-Space override and a
 profile apply to every Desktop that shows the Space. The stack and
@@ -7418,11 +7420,31 @@ own windows already and stay on the Space. The owner's rulings
   since the last switch, no SkyLight reading — writes one shared
   entry, which every unnamed Desktop reads. A named Desktop not
   sized yet falls through to the override, then the global value.
-- **An explicit choice ends them on every Desktop.** An override
-  setter or a mode change clears that Space's sizes everywhere; a
-  config reload, an explicit profile apply, any apply that changes
-  the profile and a Settings save clear every Space's. Unlike the flip, a mode change ends them,
-  since a size means nothing under another layout.
+- **A profile switch keeps them.** A size is filed under the
+  arrangement it was made under, so a bound Desktop gets its sizes
+  back on every swipe, and a Desktop now showing another profile
+  starts fresh until its own profile returns. Filing by arrangement
+  is what lets the switch keep them: a size never outranks another
+  profile's authored values.
+- **An explicit choice ends them as far as it reaches.** A load
+  starts the Desktops shown fresh — every arrangement's sizes on
+  them, the outgoing one's included, so a swipe back cannot return
+  what the load discarded — and leaves other Desktops alone. A
+  Settings save of a stored profile ends that profile's sizes on
+  every Desktop, by the key and never by which Desktops show it now, or a size on a
+  Desktop not shown would hide the saved value at the next swipe
+  (#383's trap, one swipe late). A config reload, which every
+  `gui.json` save runs, and a Settings save of the live setup end
+  them all: it changes what every
+  profile builds on. An override setter and a mode change end that
+  Space's everywhere; unlike the flip, a mode change ends them,
+  since a size means nothing under another layout. Clearing only
+  the Spaces or fields a save changed was refused: it is the
+  register of authored-to-session links #764 refused, and a missed
+  path leaves a size shadowing a saved value with nothing red.
+- **A Space with no screen** — held, or not yet placed — resets on
+  every Desktop when `reset_layout_sizing` names it; it has no
+  Desktop of its own to name.
 :::
 
 ### A Desktop switch is not a close (#1207)
