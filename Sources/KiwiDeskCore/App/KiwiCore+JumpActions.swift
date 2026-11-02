@@ -191,7 +191,12 @@ extension KiwiCore {
         _ away: AwayWindow,
         into active: SpaceID
     ) -> Bool {
-        guard let bundleID = away.appBundleID?.lowercased(),
+        // The row's own verdict: a full-screen window stays (#2930).
+        let fullScreen = awayIsFullScreen(
+            away,
+            in: NativeSpaces.desktopSnapshot()
+        )
+        guard !fullScreen, let bundleID = away.appBundleID?.lowercased(),
             let hopped = hopAwayWindows(
                 bundleID: bundleID,
                 into: active,

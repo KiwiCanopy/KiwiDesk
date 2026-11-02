@@ -109,12 +109,31 @@ extension KiwiCore {
             $0.id.raw < $1.id.raw
         }) {
             guard let host = census.hosts[entry.id] else {
-                if pruning { pruneAwayWindow(entry) }
+                if pruning, !hostedOnFullScreen(entry, in: census) {
+                    pruneAwayWindow(entry)
+                }
                 continue
             }
             state.awayWindows[entry.id]?.nativeSpace = host.space
             state.awayWindows[entry.id]?.isUp = host.isUp
         }
+    }
+
+    /// Whether the compositor still hosts `entry` on one of the
+    /// census's full-screen Spaces, which its `hosts` never lists
+    /// (#2930): that absence is no close. Files the Space.
+    private func hostedOnFullScreen(
+        _ entry: AwayWindow,
+        in census: DesktopCensus
+    ) -> Bool {
+        guard
+            case .hosted(let space) = desktopMemory.readWindowSpace(
+                entry.id
+            ),
+            census.fullScreen.contains(space)
+        else { return false }
+        state.awayWindows[entry.id]?.nativeSpace = space
+        return true
     }
 
     /// Retires what still names a window that is gone for good:

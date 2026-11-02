@@ -23,10 +23,18 @@ public struct DesktopCensus: Sendable, Equatable {
     public let hosts: [WindowID: Host]
     /// The user Desktops some display currently shows.
     public let shown: Set<SkyLight.SpaceID>
+    /// The topology's native full-screen Spaces, whose windows
+    /// `hosts` never lists (#2930).
+    public let fullScreen: Set<SkyLight.SpaceID>
 
-    public init(hosts: [WindowID: Host], shown: Set<SkyLight.SpaceID>) {
+    public init(
+        hosts: [WindowID: Host],
+        shown: Set<SkyLight.SpaceID>,
+        fullScreen: Set<SkyLight.SpaceID> = []
+    ) {
         self.hosts = hosts
         self.shown = shown
+        self.fullScreen = fullScreen
     }
 
     /// Hosted on a user Desktop nobody shows.
@@ -71,7 +79,11 @@ public struct DesktopCensus: Sendable, Equatable {
                 )
             }
         }
-        return DesktopCensus(hosts: hosts, shown: shown)
+        return DesktopCensus(
+            hosts: hosts,
+            shown: shown,
+            fullScreen: Set(spaces.filter { !$0.isUser }.map(\.id))
+        )
     }
 }
 

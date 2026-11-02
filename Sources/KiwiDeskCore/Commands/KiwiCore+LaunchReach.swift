@@ -42,8 +42,11 @@ extension KiwiCore {
         return AwayReach(
             windows: windows,
             snapshot: snapshot,
+            // A window kept on its full-screen Space is listed
+            // too (#2930): its app is activated, never reopened.
             listsAny: awayWindows(bundleID: bundleID).contains {
                 census.hosts[$0.id] != nil
+                    || census.fullScreen.contains($0.nativeSpace)
             }
         )
     }
