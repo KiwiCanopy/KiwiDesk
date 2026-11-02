@@ -12,16 +12,23 @@ extension KiwiCore {
         _ target: JumpEntry.Target,
         on display: DisplayID? = nil
     ) -> JumpSwapBlock? {
-        guard case .window(let id) = target else { return .hiddenApp }
+        let partner = jumpSwapPartner(in: moveHereSpace(on: display))
+        // A row the verb cannot see answers yours first; a tracked
+        // row takes the verb's one verdict, as its row does.
+        let yours = yoursSwapBlock(partner)
+        guard case .window(let id) = target else {
+            return yours ?? .hiddenApp
+        }
         if let away = state.awayWindows[id] {
             let desktops = NativeSpaces.desktopSnapshot()
+            if let yours { return yours }
+            if awayIsFullScreen(away, in: desktops) { return .fullScreen }
             return .otherDesktop(desktops.screenNumber(of: away.nativeSpace))
         }
         if state.minimizeOrder.contains(where: { $0.id == id }) {
-            return .minimized
+            return yours ?? .minimized
         }
         guard state.windows[id] != nil else { return nil }
-        let partner = jumpSwapPartner(in: moveHereSpace(on: display))
         return jumpSwapBlock(id, partner: partner)
     }
 
@@ -30,11 +37,33 @@ extension KiwiCore {
         _ target: JumpEntry.Target,
         on display: DisplayID? = nil
     ) -> JumpMoveBlock? {
-        guard case .window(let id) = target,
-            let window = state.windows[id],
+        guard case .window(let id) = target else { return nil }
+        if let away = state.awayWindows[id] {
+            let desktops = NativeSpaces.desktopSnapshot()
+            return awayIsFullScreen(away, in: desktops) ? .fullScreen : nil
+        }
+        guard let window = state.windows[id],
             let here = moveHereSpace(on: display)
         else { return nil }
         return jumpMoveBlock(window, into: here)
+    }
+
+    /// Your side's block for a row the verb cannot see — away,
+    /// minimized or a hidden app — read before the row's own: a
+    /// full-screen window of yours trades with nothing (#2930).
+    func yoursSwapBlock(_ partner: WindowID?) -> JumpSwapBlock? {
+        guard let partner, state.windows[partner]?.isFullscreen == true
+        else { return nil }
+        return .yoursFullScreen
+    }
+
+    /// Whether away `window` sits on a native full-screen Space,
+    /// its own macOS Space (#670, #2930), rather than a Desktop.
+    func awayIsFullScreen(
+        _ window: AwayWindow,
+        in desktops: DesktopSnapshot
+    ) -> Bool {
+        !NativeSpaces.isUserSpace(window.nativeSpace, in: desktops.spaces)
     }
 
     /// Why a Swap here would not trade tracked `window` with

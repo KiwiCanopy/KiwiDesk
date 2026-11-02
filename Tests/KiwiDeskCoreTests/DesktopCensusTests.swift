@@ -40,6 +40,9 @@ struct DesktopCensusTests {
         #expect(!census.isAway(WindowID(8)))
         #expect(census.hosts[WindowID(7)]?.space == 4)
         #expect(census.shown == [1, 20])
+        // The non-user Spaces, whose windows `hosts` never lists
+        // (#2930).
+        #expect(census.fullScreen == [9, 30])
     }
 
     @Test("parked is hosted but not up")

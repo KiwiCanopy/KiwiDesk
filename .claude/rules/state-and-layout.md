@@ -727,6 +727,12 @@ editing here:
   reflection scan discovers the container; `AwayLedgerTests` ▸
   `rekeyFollows` holds the move). A prune retires all three
   records through the one `StateCoordinator.forgetAway`.
+  **A reader that takes a census absence as gone first asks
+  whether the window is hosted on one of the census's
+  `fullScreen` Spaces** (#2930): the census lists user Desktops
+  alone, so a window left on its native full-screen Space is
+  absent but alive — the prune keeps it and the Open or Focus
+  reach lists it (`AwayFullScreenTests` ▸ `fullScreenHostIsKept`).
   **The ledger is reach and bookkeeping, never a bar row**
   (#1228): the Space Bar draws the Desktop in front of the user,
   so `spaceBarApps` reads `state.effectiveMembers` alone and a
