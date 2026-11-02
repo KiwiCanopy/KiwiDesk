@@ -93,7 +93,7 @@ final class JumpModel: ObservableObject {
     var onRefuse: (String) -> Void = { _ in }
     /// A ↩ chord that picks nothing: the system beep, never the
     /// refusal sound (#2931 ▸ Ruling 4).
-    var onDeadKey: () -> Void = { NSSound.beep() }
+    var onDeadKey: () -> Void = {}
     /// Core's refusals read at the press, so a row the snapshot
     /// refused that now goes ahead reaches the verb; the controller
     /// wires Core's, a test keeps the snapshot's.

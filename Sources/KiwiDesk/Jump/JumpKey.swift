@@ -201,16 +201,13 @@ enum JumpKey: Equatable {
         guard let index = digitRows.firstIndex(of: row) else {
             return nil
         }
-        // ⌥ swaps, as on ↩: the one chord table (`JumpPick.of`).
-        if held.contains(.option) {
-            let pick = JumpPick.of(held)
-            return scope == .windows && pick == .swapHere
-                ? .quickSwap(index) : nil
+        // The digits pick as ↩ does: the one chord table.
+        switch JumpPick.of(held) {
+        case .jump: return .quick(index, moveHere: false)
+        case .moveHere: return .quick(index, moveHere: true)
+        case .swapHere: return scope == .windows ? .quickSwap(index) : nil
+        case nil: return nil
         }
-        guard held.subtracting([.command, .shift]).isEmpty else {
-            return nil
-        }
-        return .quick(index, moveHere: held.contains(.shift))
     }
 }
 

@@ -97,19 +97,29 @@ extension JumpFooter {
     /// the digits on View.
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
+        // ⌃ is left out: the chord that opened the panel may still
+        // be held when it draws.
         let held = modifiers.intersection([.shift, .option, .command])
-        // ⌘ lights the digits, though ↩ under it picks as without
-        // it (#2931 ▸ Ruling 5).
-        let lit =
-            held.contains(.command)
-            ? nil
-            : JumpKey.of(
-                keyCode: JumpKey.returnKey,
-                modifiers: held,
-                scope: scope,
-                naming: naming
-            )
-        switch lit {
+        let one = UInt16(JumpKey.digitRows[0])
+        let digit = JumpKey.of(
+            keyCode: one,
+            modifiers: held,
+            scope: scope,
+            naming: naming
+        )
+        // A held chord the digits answer lights them first, though
+        // ↩ under it picks as well (#2931 ▸ Ruling 5).
+        if case .quickSwap = digit { return 2 }
+        if case .quick(_, let moveHere) = digit {
+            if scope == .windows { return 2 }
+            return moveHere ? nil : 1
+        }
+        switch JumpKey.of(
+            keyCode: JumpKey.returnKey,
+            modifiers: held,
+            scope: scope,
+            naming: naming
+        ) {
         // Windows: ↩ Jump, ⇧↩ Move here; View: ↩ Apply.
         case .pick(let moveHere):
             guard scope == .windows else { return moveHere ? nil : 0 }
@@ -118,19 +128,8 @@ extension JumpFooter {
         case .swapHere:
             return selectionSwaps ? 1 : nil
         default:
-            break
+            return nil
         }
-        let one = UInt16(JumpKey.digitRows[0])
-        let digit = JumpKey.of(
-            keyCode: one,
-            modifiers: held,
-            scope: scope,
-            naming: naming
-        )
-        if case .quickSwap = digit { return 2 }
-        guard case .quick(_, let moveHere) = digit else { return nil }
-        if scope == .windows { return 2 }
-        return moveHere ? nil : 1
     }
 
     private var shiftHeld: Bool { modifiers.contains(.shift) }
