@@ -177,7 +177,9 @@ extension KiwiCore {
     /// the ledger, filed under the session snapshot's space
     /// where the id is in it (`.restored`, #1010), else the
     /// Desktop's remembered Space, else UNFILED — known to the
-    /// classifier and Open-or-Focus, filed at its reveal.
+    /// classifier and Open-or-Focus, filed at its reveal. A carried
+    /// filing it finds up there, observed app or not, resumes as
+    /// the departure it was (`resumeCarriedDeparture`, #2907).
     ///
     /// **A PARKED window is not seeded (#1234)**, which applies
     /// at boot the rule the runtime already applies: every
@@ -201,6 +203,11 @@ extension KiwiCore {
         for (id, host) in census.hosts.sorted(by: {
             $0.key.raw < $1.key.raw
         }) {
+            // A carried filing up on an away Desktop is the departure
+            // it was, whether or not its app is observed yet (#2907).
+            if census.isAway(id), host.isUp, state.windows[id] == nil {
+                state.resumeCarriedDeparture(id)
+            }
             guard census.isAway(id),
                 host.isUp,
                 state.windows[id] == nil,
@@ -239,10 +246,7 @@ extension KiwiCore {
         state.awayWindows.values
             .filter { $0.isUp && state.rememberedSpace(of: $0.id) == space }
             .map(\.id)
-            .sorted {
-                (state.departedSlots[$0]?.rank ?? .max, $0.raw)
-                    < (state.departedSlots[$1]?.rank ?? .max, $1.raw)
-            }
+            .sorted(by: state.slotOrder)
     }
 
     /// An app's away windows, spaces in canonical order and by

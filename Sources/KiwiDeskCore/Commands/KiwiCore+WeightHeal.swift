@@ -67,7 +67,7 @@ extension KiwiCore {
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.localTiledMembers(of: space)
-        guard !tiled.isEmpty else { return }
+        guard !tiled.isEmpty, !healStandsDown(for: tiled) else { return }
         // The render's own input (#1355) — the learned bounds and
         // the pass's probe verdict — folded over the LOCAL list
         // like the shave below: a traveler's floor must not

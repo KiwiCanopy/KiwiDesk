@@ -147,6 +147,12 @@ final class DesktopMemory {
     var readWindowSpace: @MainActor (WindowID) -> WindowSpaceReading =
         NativeSpaces.windowSpaceReading(of:)
 
+    /// Whether any of a Space's members sits off every shown
+    /// Desktop — the heal stand-down's read (#2907), live by
+    /// default and pinned to false by `makeTestCore`.
+    var readOffShown: @MainActor ([WindowID]) -> Bool =
+        NativeSpaces.anyOffShownDesktop
+
     /// The native Space each screen shows, filed at the HEAD of
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).
