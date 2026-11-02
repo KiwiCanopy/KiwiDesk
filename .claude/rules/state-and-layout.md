@@ -2429,7 +2429,7 @@ editing here:
   `SnapshotCarryCensusTests` round-trips every field of `Space`
   and `ManagedWindow` — `ScrollRest` leaf by leaf — and
   `SessionRatioCarryTests` every Desktop's `SessionRatios`, the
-  older one-entry record crossing into the shared entry included; `SnapshotStoreCensusTests` classifies every
+  older one-entry record adopted on the Desktop shown included; `SnapshotStoreCensusTests` classifies every
   id-keyed store the shared `idContainers` walker reaches,
   `floatFrames` (#1675) and the size-bound learner's ledgers
   named as left behind. A Space's session is adopted AFTER its
