@@ -66,7 +66,7 @@ extension KiwiCore {
             window: jumpRowName(target)
         )
         guard let focused = focusedWindowID else {
-            onLog("\(refusal.logReason): \(refusal)")
+            onLog("\(refusal.logReason): \(target)")
             return
         }
         cueWindowAction(refusal, on: focused)

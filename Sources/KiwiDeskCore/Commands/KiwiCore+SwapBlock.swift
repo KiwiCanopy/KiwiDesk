@@ -11,8 +11,9 @@ enum SwapBlock: Equatable {
     case fullScreen(WindowID)
     /// An effective float holds no slot.
     case floating(WindowID)
-    /// The sticky gate keeps the window out of `space` (#445).
-    case sticky(WindowID, into: SpaceID)
+    /// The sticky gate keeps the window out of a Space (#445);
+    /// `scope` is the one its pill names.
+    case sticky(WindowID, scope: StickyScope)
 }
 
 extension KiwiCore {
@@ -27,22 +28,22 @@ extension KiwiCore {
             let away = state.workspaces.space(of: partner),
             home != away
         else { return nil }
-        for (id, into) in [(lead, away), (partner, home)]
-        where stickyMoveBlock(
-            id,
-            to: into,
-            landingOn: landingDisplay(of: into)
-        ) != nil {
-            return .sticky(id, into: into)
+        for (id, into) in [(lead, away), (partner, home)] {
+            if let scope = stickyMoveBlock(
+                id,
+                to: into,
+                landingOn: landingDisplay(of: into)
+            ) {
+                return .sticky(id, scope: scope)
+            }
         }
         return nil
     }
 
     /// Why `id` holds no slot to swap, nil where it does.
     func slotBlock(_ id: WindowID) -> SwapBlock? {
-        if state.isPocketed(id) || state.workspaces.space(of: id) == nil {
-            return .unfiled(id)
-        }
+        // A pocketed window is a member of no Space (#2446).
+        if state.workspaces.space(of: id) == nil { return .unfiled(id) }
         if state.windows[id]?.isFullscreen == true { return .fullScreen(id) }
         if isEffectiveFloatForPlacement(id) { return .floating(id) }
         return nil
@@ -67,13 +68,9 @@ extension KiwiCore {
         case .floating(let id):
             cueWindowAction(.cannotSwapFloating, on: id)
             return .fail("window \(id.raw) is floating")
-        case .sticky(let id, let into):
+        case .sticky(let id, let scope):
             // The sticky gate's own pill.
-            _ = stickyMoveRefused(
-                id,
-                to: into,
-                landingOn: landingDisplay(of: into)
-            )
+            flashStickyMoveBlocked(id, scope: scope)
             return .fail("a sticky window cannot change Space")
         }
     }

@@ -103,6 +103,7 @@ extension KiwiCore {
         if let block = swapBlock(lead, partner) {
             return refuseSwap(block)
         }
+        // A construction net: `swapBlock` refused an unfiled side.
         guard let home = state.workspaces.space(of: lead),
             let away = state.workspaces.space(of: partner)
         else {
