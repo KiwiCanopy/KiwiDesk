@@ -140,11 +140,13 @@ struct SessionRatioProfileTests {
         core.forgetDroppedSessionRatios(of: "9")
         #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
         #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
-        // Inside an apply a drop is a switch's prune and keeps them.
+        // Inside an apply a drop is a switch's prune and keeps the
+        // live profile's own Space too.
+        core.desktopMemory.sessionRatios[10]?[work] = [space: ratios]
         core.profiles.arrangementInFlight += 1
         core.forgetDroppedSessionRatios(of: space)
         core.profiles.arrangementInFlight -= 1
-        #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[work]?[space] != nil)
     }
 
     @Test("a renamed profile keeps its sizes; a deleted one forgets")
