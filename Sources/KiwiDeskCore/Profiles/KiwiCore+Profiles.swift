@@ -35,6 +35,7 @@ extension KiwiCore {
         case "delete_profile":
             return namedProfileCommand(args) { name in
                 try self.profiles.delete(name: name)
+                self.forgetSessionRatios(under: .profile(name))  // #2921
                 // #1230: a deleted profile's partitioning has
                 // nothing left to describe. Before the monitor
                 // change, which may apply another profile.

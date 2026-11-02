@@ -13,12 +13,15 @@ import Foundation
 extension KiwiCore {
     /// The store key for `space` now: the Desktop its screen
     /// shows — else the one shared entry (no SkyLight, a screen no
-    /// switch has filed yet, ruling 3) — and the arrangement live.
+    /// switch has filed yet, ruling 3) — and the arrangement live,
+    /// or the one an apply in flight installs.
     private func sizingKey(of space: SpaceID) -> SessionSizingKey {
+        let arrangement =
+            desktopMemory.installing?.arrangement ?? liveArrangement
         guard case .shown(let desktop) = shownDesktop(of: space) else {
-            return SessionSizingKey(desktop: nil, arrangement: liveArrangement)
+            return SessionSizingKey(desktop: nil, arrangement: arrangement)
         }
-        return SessionSizingKey(desktop: desktop, arrangement: liveArrangement)
+        return SessionSizingKey(desktop: desktop, arrangement: arrangement)
     }
 
     /// The sizes a resize wrote for `space` on the Desktop shown
@@ -123,13 +126,17 @@ extension KiwiCore {
         }
     }
 
-    /// A load starts the Desktops shown now fresh — each screen's,
-    /// as the last switch filed them, and the shared entry — every
-    /// arrangement's sizes on them; other Desktops keep theirs.
+    /// A load starts the Desktops shown now fresh — each live
+    /// screen's, read through the one resolver, and the shared entry
+    /// — every arrangement's sizes on them; other Desktops keep
+    /// theirs.
     func forgetSessionRatiosOnShownDesktops() {
         desktopMemory.sessionRatios[nil] = nil
-        for desktop in Set(desktopMemory.shownSpaces.values) {
-            desktopMemory.sessionRatios[desktop] = nil
+        for display in state.workspaces.allDisplays {
+            let uuid = NativeSpaces.displayUUID(for: display.id) ?? ""
+            if let desktop = shownDesktop(onScreen: uuid) {
+                desktopMemory.sessionRatios[desktop] = nil
+            }
         }
     }
 
@@ -152,23 +159,58 @@ extension KiwiCore {
         withSessionRatios(of: space) { $0 = SessionRatios() }
     }
 
-    /// A dropped Space forgets its sizes everywhere
-    /// (`forwardWindows(of:to:)`, #1655).
+    /// Forgets `space` on every Desktop and arrangement — the
+    /// explicit doors (an override setter, a mode change, a
+    /// screenless reset).
     func forgetSessionRatios(of space: SpaceID) {
         clearSessionRatios(for: space) { $0 = SessionRatios() }
     }
 
-    /// A renumbered Space keeps its sizes (`moveMembers`, #1655).
+    /// A dropped Space (`forwardWindows(of:to:)`, #1655) forgets its
+    /// sizes under the arrangement it belongs to — a held Space's
+    /// origin, else the live one — since a same-named Space of
+    /// another arrangement is another Space (#1230). Inside an
+    /// apply the drop is a switch's prune and forgets nothing: the
+    /// Space returns with its arrangement (ruling 5).
+    func forgetDroppedSessionRatios(of space: SpaceID) {
+        guard profiles.arrangementInFlight == 0 else { return }
+        let owner = state.heldSpaces[space]?.arrangement ?? liveArrangement
+        mapSessionRatios { arrangement, id, ratios in
+            if id == space, arrangement == owner { ratios = SessionRatios() }
+        }
+    }
+
+    /// A renumbered Space keeps its sizes under the arrangement it
+    /// belongs to — a held Space's origin, else the live one
+    /// (`moveMembers`, #1655).
     func rekeySessionRatios(_ old: SpaceID, to new: SpaceID) {
+        let owner = state.heldSpaces[old]?.arrangement ?? liveArrangement
         desktopMemory.sessionRatios = desktopMemory.sessionRatios
-            .mapValues {
-                $0.mapValues {
-                    var sizes = $0
-                    if let ratios = sizes.removeValue(forKey: old) {
-                        sizes[new] = ratios
-                    }
-                    return sizes
+            .mapValues { byArrangement in
+                var out = byArrangement
+                if var sizes = out[owner],
+                    let ratios = sizes.removeValue(forKey: old)
+                {
+                    sizes[new] = ratios
+                    out[owner] = sizes
                 }
+                return out
+            }
+    }
+
+    /// A renamed profile keeps its sizes; a deleted one forgets them.
+    func rekeySessionRatios(
+        profile old: String,
+        to new: String
+    ) {
+        let from = HeldOrigin.Arrangement.profile(old)
+        desktopMemory.sessionRatios = desktopMemory.sessionRatios
+            .mapValues { byArrangement in
+                var out = byArrangement
+                if let sizes = out.removeValue(forKey: from) {
+                    out[.profile(new)] = sizes
+                }
+                return out
             }
     }
 

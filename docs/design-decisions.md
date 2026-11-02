@@ -7436,8 +7436,10 @@ own windows already and stay on the Space. The owner's rulings
   (#383's trap, one swipe late). A config reload, which every
   `gui.json` save runs, and a Settings save of the live setup end
   them all: it changes what every
-  profile builds on. An override setter and a mode change end that
-  Space's everywhere; unlike the flip, a mode change ends them,
+  profile builds on. A global setter ends its field everywhere, as
+  since #458. An override setter and a mode change end that
+  Space's everywhere — a mode an apply installs is its
+  arrangement's and ends nothing; unlike the flip, a mode change ends them,
   since a size means nothing under another layout. Clearing only
   the Spaces or fields a save changed was refused: it is the
   register of authored-to-session links #764 refused, and a missed

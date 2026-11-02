@@ -34,6 +34,7 @@ extension KiwiCore {
         // #1230: the partitioning is keyed by profile NAME, so it
         // follows the rename or the profile loses its own Spaces.
         state.profilePartitioning.rename(old, to: new)
+        rekeySessionRatios(profile: old, to: new)  // #2921
         renameAppWideCapture(old, to: new)
         renameInstalledProfile(old, to: new)
         // A binding naming the id needs nothing here: the write

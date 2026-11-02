@@ -80,6 +80,15 @@ struct StackFlipLifetimeTests {
         #expect(flips(core) == 0)
     }
 
+    /// An in-effect edit's re-apply forces like a load (#2921's
+    /// `.edit` cause) and ends every flip.
+    @Test("an in-effect edit's re-apply ends every flip")
+    func editCauseForces() throws {
+        let core = try flipped()
+        core.reapplyIfInEffect("Work")
+        #expect(flips(core) == 0)
+    }
+
     @Test("a forced Standard apply ends every flip; an unforced keeps")
     func composedApply() throws {
         let core = try flipped()

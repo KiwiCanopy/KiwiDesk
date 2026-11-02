@@ -48,8 +48,19 @@ struct SessionRatioProfileTests {
         #expect(core.liveArrangement == play)
         #expect(core.sessionRatios(of: space) == SessionRatios())
         core.writeSplitRatioH(0.3, for: space)
+        // The apply's own pass draws the incoming sizes, ahead of
+        // the name moving (#1249).
+        let door = core.tiler.sessionRatios
+        var drawn: [Double?] = []
+        core.tiler.sessionRatios = { id in
+            let ratios = door(id)
+            if id == space { drawn.append(ratios.splitRatioH) }
+            return ratios
+        }
         let back = try core.profiles.read(name: "Work")
         core.apply(profile: back, cause: .event)
+        #expect(!drawn.isEmpty)
+        #expect(drawn.allSatisfy { $0 == 0.7 })
         #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
         #expect(stored(core, 10, play) == 0.3)
     }
@@ -99,6 +110,52 @@ struct SessionRatioProfileTests {
             core.execute("reset_layout_sizing", args: [.string("7")])
                 .isSuccess
         )
+        #expect(core.desktopMemory.sessionRatios.isEmpty)
+    }
+
+    @Test("an apply's mode keeps its arrangement's sizes")
+    func applyModeKeeps() throws {
+        let (core, _) = try core()
+        show(core, 10)
+        core.writeSplitRatioH(0.7, for: space)
+        core.profiles.arrangementInFlight += 1
+        core.setSpaceMode(space, .stack)
+        core.profiles.arrangementInFlight -= 1
+        #expect(stored(core, 10, work) == 0.7)
+        core.setSpaceMode(space, .bsp)
+        #expect(stored(core, 10, work) == nil)
+    }
+
+    @Test("a renumber and a drop reach only the Space's own profile")
+    func lifecycleIsScoped() throws {
+        let (core, _) = try core()
+        var ratios = SessionRatios()
+        ratios.splitRatioH = 0.7
+        core.desktopMemory.sessionRatios = [
+            10: [work: [space: ratios], play: [space: ratios]]
+        ]
+        core.rekeySessionRatios(space, to: "9")
+        #expect(core.desktopMemory.sessionRatios[10]?[work]?["9"] != nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
+        core.forgetDroppedSessionRatios(of: "9")
+        #expect(core.desktopMemory.sessionRatios[10]?[work] == nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
+        // Inside an apply a drop is a switch's prune and keeps them.
+        core.profiles.arrangementInFlight += 1
+        core.forgetDroppedSessionRatios(of: space)
+        core.profiles.arrangementInFlight -= 1
+        #expect(core.desktopMemory.sessionRatios[10]?[play]?[space] != nil)
+    }
+
+    @Test("a renamed profile keeps its sizes; a deleted one forgets")
+    func renameAndDeleteFollow() throws {
+        let (core, _) = try core()
+        show(core, 10)
+        core.writeSplitRatioH(0.7, for: space)
+        try core.renameProfile(from: "Work", to: "Desk")
+        #expect(stored(core, 10, .profile("Desk")) == 0.7)
+        #expect(stored(core, 10, work) == nil)
+        _ = core.execute("delete_profile", args: [.string("Desk")])
         #expect(core.desktopMemory.sessionRatios.isEmpty)
     }
 }

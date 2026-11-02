@@ -61,6 +61,13 @@ final class DesktopMemory {
     /// `KiwiCore.sessionRatios(of:)`.
     var sessionRatios: [SkyLight.SpaceID?: ArrangementRatios] = [:]
     typealias ArrangementRatios = [HeldOrigin.Arrangement?: SpaceRatios]
+    /// The arrangement an apply in flight is installing, which that
+    /// apply's own pass draws and heals under (#2921); nil outside
+    /// one. Never a second answer to whose arrangement is live —
+    /// `KiwiCore.liveArrangement` keeps that, and moves last
+    /// (#1249). Set and cleared by the two apply doors alone.
+    var installing: Installing?
+    struct Installing { let arrangement: HeldOrigin.Arrangement }
     typealias SpaceRatios = [SpaceID: SessionRatios]
 
     /// The last honored focus per native Desktop, any Space (#1564)

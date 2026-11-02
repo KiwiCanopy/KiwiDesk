@@ -19,6 +19,9 @@ extension KiwiCore {
         // Owed #1741 and #1752 crossings end at the first apply.
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
+        // Its own pass draws the incoming sizes (#2921).
+        desktopMemory.installing = .init(arrangement: .profile(profile.name))
+        defer { desktopMemory.installing = nil }
         adoptAppWide(from: profile)
         adoptSharedLook(from: profile)
         let pruneStaleSpaces = cause.prunesStale
@@ -27,8 +30,7 @@ extension KiwiCore {
         // #1230: file the OUTGOING profile's partitioning before
         // anything rebuilds the space set, and learn in one
         // answer whether this apply is a profile CHANGE — which
-        // gates the session clear, the prune below and the
-        // restore after it.
+        // gates the prune below and the restore after it.
         let heldBefore = Set(state.heldSpaces.keys)
         // A held number this profile claims moves off it first.
         reclaimHeldNames(
@@ -178,6 +180,10 @@ extension KiwiCore {
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
+        desktopMemory.installing = .init(
+            arrangement: .standard(composed.sourceName)
+        )
+        defer { desktopMemory.installing = nil }
         let temporaries = Set(liveTemporarySpaces)
         let heldBefore = Set(state.heldSpaces.keys)
         let outgoingIcons = tiler.settings.spaceIcons
@@ -192,7 +198,9 @@ extension KiwiCore {
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
-        // A Standard's forced apply is a load (#2921 ruling 6).
+        // A Standard's forced apply is a load (#2921 ruling 6); the
+        // post-reload re-apply runs it too, after the reload has
+        // already cleared every size.
         if forceRetile {
             forgetSessionRatiosOnShownDesktops()
             forgetStackFlips()  // #2771

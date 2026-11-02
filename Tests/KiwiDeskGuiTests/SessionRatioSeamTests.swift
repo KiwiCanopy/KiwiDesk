@@ -170,7 +170,7 @@ struct SessionRatioSeamTests {
             try body(
                 "Profiles/KiwiCore+ProfileSpaces.swift",
                 after: "func forwardWindows(of space: SpaceID,"
-            ).contains("forgetSessionRatios(of: space)")
+            ).contains("forgetDroppedSessionRatios(of: space)")
         )
         #expect(
             try body(

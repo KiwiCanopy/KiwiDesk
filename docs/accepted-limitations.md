@@ -426,9 +426,8 @@ one Desktop, bind a profile with that side to it
 The sizes a [resize](lua-reference.md#resize) writes are filed
 under the same Desktop id and the profile live there
 ([#2921](https://github.com/KiwiCanopy/KiwiDesk/issues/2921)): a
-screen replug that makes macOS give a Desktop a new id, or renaming
-the profile, returns those Spaces to the override, then the global
-value. On a
+screen replug that makes macOS give a Desktop a new id returns that
+Desktop's Spaces to the override, then the global value. On a
 screen plugged in since the last Desktop switch, a resize writes one
 set of sizes that every Desktop KiwiDesk cannot name shares; the
 first Desktop switch on that screen leaves them behind, and the

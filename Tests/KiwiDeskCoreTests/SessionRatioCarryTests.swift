@@ -153,4 +153,52 @@ struct SessionRatioCarryTests {
         )
         #expect(b.desktopMemory.sessionRatios.isEmpty)
     }
+
+    /// The per-entry keys are a stored cross-version shape (#930):
+    /// pinned, and a nil Desktop or arrangement is an absent key.
+    @Test("a per-Desktop entry's stored keys are pinned")
+    func storedKeysArePinned() throws {
+        var ratios = SessionRatios()
+        ratios.masterRatio = 0.5
+        let named = StateSnapshot.DesktopRatios(
+            desktop: 20,
+            arrangement: work,
+            ratios: ratios
+        )
+        let shared = StateSnapshot.DesktopRatios(
+            desktop: nil,
+            arrangement: nil,
+            ratios: ratios
+        )
+        func keys(_ entry: StateSnapshot.DesktopRatios) throws -> Set<String> {
+            let object = try JSONSerialization.jsonObject(
+                with: JSONEncoder().encode(entry)
+            )
+            return Set(try #require(object as? [String: Any]).keys)
+        }
+        #expect(
+            try keys(named) == ["desktop", "arrangement", "session_ratios"]
+        )
+        #expect(try keys(shared) == ["session_ratios"])
+    }
+
+    /// `session_ratios` holds what the Space draws, for an older
+    /// build — here a named Desktop's entry, not the shared one.
+    @Test("an older build reads the sizes the Space draws")
+    func drawnSetIsWritten() throws {
+        let a = processA()
+        a.desktopMemory.shownSpaces = ["Main": desktop]
+        a.desktopMemory.shownUserSpaces = ["Main": true]
+        var drawn = SessionRatios()
+        drawn.masterRatio = 0.33
+        a.desktopMemory.sessionRatios[desktop]?[nil] = [space: drawn]
+        let read = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: try captured(a)
+        )
+        let session = try #require(
+            read.spaces.first { $0.id == space.raw }?.session
+        )
+        #expect(session.ratios.masterRatio == 0.33)
+    }
 }

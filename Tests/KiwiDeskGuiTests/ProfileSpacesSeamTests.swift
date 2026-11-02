@@ -245,6 +245,10 @@ struct ProfileSpacesSeamTests {
             ),
             "Profiles/KiwiCore+DesktopIdentity.swift":
                 (1, "a mint's accumulator, held nowhere"),
+            "Tiling/KiwiCore+SessionRatioWrite.swift":
+                (1, "the in-place capture's #2921 accumulator"),
+            "Models/StateSnapshot+InPlace.swift":
+                (3, "the #2921 sizes in transit to the capture"),
         ]
         let root = coreRoot
         let prefix = root.path + "/"
@@ -255,8 +259,10 @@ struct ProfileSpacesSeamTests {
             )
             let hits = source.split(separator: "\n")
                 .filter { line in
+                    // `SessionSizingKey` wraps a native id (#2921).
                     (line.contains("[SkyLight.SpaceID:")
-                        || line.contains("[SkyLight.SpaceID?:"))
+                        || line.contains("[SkyLight.SpaceID?:")
+                        || line.contains("[SessionSizingKey:"))
                         && (line.contains("var ")
                             || line.contains("let "))
                 }

@@ -6672,6 +6672,7 @@ flowchart LR
     S -->|"Settings: saving a<br/>stored profile"| B["that profile's,<br/>cleared on every Desktop"]
     S -->|"reload_config,<br/>a Settings save of Live"| C["all cleared"]
     S -->|"_override setter,<br/>set_mode"| D["that Space's,<br/>cleared everywhere"]
+    S -->|"a global setter,<br/>e.g. bsp.set_ratio_h"| F["that field,<br/>cleared everywhere"]
     S -->|"reset_layout_sizing"| E["this Space here;<br/>all: everything"]
 ```
 
