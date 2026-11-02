@@ -70,7 +70,9 @@ extension KiwiCore {
             screen: screen
         )
         let context = input.context
-        guard !context.probesBeyondBounds else { return }
+        guard !context.probesBeyondBounds,
+            !healStandsDown(for: tiled)
+        else { return }
         let bounds = tiler.layoutBounds(on: screen, for: space)
         let slots = LayoutEngine.calculate(
             mode: input.space.mode,

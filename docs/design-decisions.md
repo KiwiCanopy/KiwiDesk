@@ -5230,6 +5230,14 @@ written. What the heal reaches is what a resize reaches:
 the first split of each orientation in bsp, the master/stack
 split in stack. A floor inside a deeper bsp split is the
 flat-array trade's residue and stays in the limitations row.
+The heal moves the ratio only for a membership a Desktop shows:
+through a Desktop switch a Space briefly holds both Desktops'
+windows, and a heal over that mix wrote the one ratio both
+Desktops share for a layout neither shows, ratcheting it a step
+each way on every swipe (#2907). So it stands down inside the
+switch's grace and while a member sits on a Desktop nobody shows;
+a real floor waits for the next pass that shows only its own
+Desktop.
 (`SplitFloorHealTests`, `SplitOverflowTests`,
 `SplitFloorHealWiringTests`, `SplitFloorCueTests`,
 `SplitFloorHealNeedleTests`)

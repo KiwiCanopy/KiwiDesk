@@ -222,6 +222,8 @@ extension KiwiCore {
                 state.workspaces[space] != nil
             {
                 state.remember(id, in: space)
+            } else {
+                state.resumeCarriedDeparture(id)
             }
             seeded += 1
         }

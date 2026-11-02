@@ -1974,7 +1974,13 @@ editing here:
   re-arms only through it until two looks a delay apart find no
   tracked window moving, and an apply door arms nothing of its
   own, or a Save with every bound learned keeps the reseeded ratio
-  until an unrelated event (#2785, `ApplyHealPassTests`). A floor the yield cannot fit is
+  until an unrelated event (#2785, `ApplyHealPassTests`). A
+  session-store heal never writes from a membership a Desktop
+  switch mixed: inside the switch grace, or while a member is a
+  window no shown Desktop hosts, it stands down through the one
+  `healStandsDown`, which a new per-Space heal asks too and which
+  never decides membership (#2907, `HealStandDownTests`,
+  `HealStandDownSeamTests`). A floor the yield cannot fit is
   the `unfit` verdict: cued ONCE per (space, axis, window)
   episode with the neighbour-minimum pill on the overhanging
   window, the memo in `KiwiCore.splitFloorCues` re-armed when
@@ -2442,7 +2448,13 @@ editing here:
   the windows that Space filed and that have not arrived —
   `pending`, or a held Space's `held.remembered` — through the
   one `StateCoordinator.spaceRecord(of:session:)`, quit and
-  in-place stop alike (#2008, `PendingFilingCarryTests`). Each
+  in-place stop alike (#2008, `PendingFilingCarryTests`), listed
+  in slot order, which the start gives back as each window's
+  slot; the boot census resumes a carried filing it finds on an
+  away Desktop as the departure it was, through the one
+  `resumeCarriedDeparture`, so its return is ranked (#2907,
+  `PendingSlotCarryTests`, `AwayBootSeedTests` ▸
+  `carriedFilingResumes`). Each
   record decodes its
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores
