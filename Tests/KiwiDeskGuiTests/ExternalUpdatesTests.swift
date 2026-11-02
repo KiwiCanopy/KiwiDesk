@@ -117,7 +117,11 @@ struct ExternalUpdatesTests {
 
     @Test("a managed copy carries the manager into both readers")
     func managedUpdaterSaysWho() {
-        let updater = NoUpdater(managedBy: "Home Manager")
+        let updater = ManagedUpdater(
+            manager: "Home Manager",
+            host: .main,
+            record: WhatsNewRecord(makeScratchDefaults().defaults)
+        )
         #expect(!updater.canCheckForUpdates)
         #expect(updater.updates.state == .managed(by: "Home Manager"))
         #expect(
