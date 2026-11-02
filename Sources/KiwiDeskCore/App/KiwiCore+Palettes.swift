@@ -1,13 +1,43 @@
 import Foundation
 
 /// The palette library's Core doors (#2875), beside the look
-/// library's (#2860): a write goes through here, never a store
-/// call at a GUI site, and the store refuses while its own file
-/// is unreadable.
+/// library's (#2860): the GUI reads and writes palettes through
+/// here and never holds the store (`PaletteDoorSeamTests`), and
+/// the store refuses a write while its own file is unreadable.
 extension KiwiCore {
+    /// The bundled palettes.
+    public var bundledPalettes: [ColorPalette] {
+        paletteLibrary.builtins()
+    }
+
+    /// The saved user palettes, read from disk.
+    public var userPalettes: [ColorPalette] {
+        paletteLibrary.userPalettes()
+    }
+
     /// Every palette, bundled first.
     public var allPalettes: [ColorPalette] {
-        paletteLibrary.builtins() + paletteLibrary.userPalettes()
+        bundledPalettes + userPalettes
+    }
+
+    /// Whether `name` is a bundled palette's, which no user
+    /// palette may take.
+    public func isBundledPaletteName(_ name: String) -> Bool {
+        paletteLibrary.isBuiltinName(name)
+    }
+
+    /// Whether a user palette is saved under `name`.
+    public func hasUserPalette(_ name: String) -> Bool {
+        paletteLibrary.hasUserPalette(name)
+    }
+
+    /// `base`, or the first `base N` no bundled or user palette
+    /// holds.
+    public func freePaletteName(base: String) -> String {
+        let library = paletteLibrary
+        return Self.uniqueName(base: base) {
+            library.isBuiltinName($0) || library.hasUserPalette($0)
+        }
     }
 
     /// Saves `settings`' colours as palette `name`.
@@ -46,15 +76,12 @@ extension KiwiCore {
     /// shadows a bundled or an existing user palette.
     @discardableResult
     public func importPalette(from url: URL) throws -> ColorPalette {
-        let library = paletteLibrary
-        let imported = try library.importPalette(from: url)
+        let imported = try paletteLibrary.importPalette(from: url)
         let palette = ColorPalette(
-            name: Self.uniqueName(base: imported.name) {
-                library.isBuiltinName($0) || library.hasUserPalette($0)
-            },
+            name: freePaletteName(base: imported.name),
             colors: imported.colors
         )
-        try library.save(palette)
+        try paletteLibrary.save(palette)
         return palette
     }
 }

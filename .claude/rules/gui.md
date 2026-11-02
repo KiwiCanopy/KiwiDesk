@@ -568,6 +568,14 @@ answer do not (#1542's rank; `WhatsNewHandoffTests`,
 destination, so `stateTrailFocus` records the input source
 itself before the shell states focus (#991, #996).
 
+## The palette library is Core's (#2875)
+
+**A Settings surface reads and writes palettes through
+`KiwiCore`'s palette doors (`KiwiCore+Palettes.swift`) and never
+holds `PaletteStore` or `paletteLibrary`**, so an alias cannot
+write past a door; a read the shelf needs joins those doors
+(`PaletteDoorSeamTests`).
+
 ## Window management starts through one door (#2050)
 
 **Every path that starts window management calls

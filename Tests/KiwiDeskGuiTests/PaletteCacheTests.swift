@@ -32,7 +32,7 @@ struct PaletteCacheTests {
         defer { reset() }
         let model = makeTestModel()
         #expect(model.userPalettes.isEmpty)
-        try model.paletteStore.save(
+        try model.core.paletteLibrary.save(
             ColorPalette(name: "Sunset Desk", colors: [:])
         )
         model.refreshPalettes()
@@ -67,7 +67,7 @@ struct PaletteCacheTests {
         pinEnglish()
         defer { reset() }
         let model = makeTestModel()
-        try model.paletteStore.save(
+        try model.core.paletteLibrary.save(
             ColorPalette(name: "Night Shift", colors: [:])
         )
         #expect(
@@ -105,12 +105,12 @@ struct PaletteCacheTests {
         pinEnglish()
         defer { reset() }
         let model = makeTestModel()
-        try model.paletteStore.save(
+        try model.core.paletteLibrary.save(
             ColorPalette(name: "Night Shift", colors: [:])
         )
         model.reload()
         #expect(model.userPalettes.map(\.name) == ["Night Shift"])
-        try model.paletteStore.delete("Night Shift")
+        try model.core.paletteLibrary.delete("Night Shift")
         model.reload()
         #expect(model.userPalettes.isEmpty)
 

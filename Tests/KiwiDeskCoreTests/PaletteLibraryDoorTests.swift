@@ -22,6 +22,23 @@ struct PaletteLibraryDoorTests {
         #expect(core.lookLibrary.userLooks().isEmpty)
     }
 
+    @Test("a free name skips bundled and user palettes")
+    func freeName() throws {
+        let core = makeTestCore()
+        let builtin = try #require(core.bundledPalettes.first)
+        #expect(core.isBundledPaletteName(builtin.name))
+        #expect(
+            core.freePaletteName(base: builtin.name)
+                == "\(builtin.name) 2"
+        )
+        _ = try core.savePalette(named: "Mine", from: TilingSettings())
+        #expect(core.hasUserPalette("Mine"))
+        #expect(!core.isBundledPaletteName("Mine"))
+        #expect(core.freePaletteName(base: "Mine") == "Mine 2")
+        #expect(core.freePaletteName(base: "Free") == "Free")
+        #expect(core.userPalettes.map(\.name) == ["Mine"])
+    }
+
     @Test("a palette is deleted through the door")
     func delete() throws {
         let core = makeTestCore()
