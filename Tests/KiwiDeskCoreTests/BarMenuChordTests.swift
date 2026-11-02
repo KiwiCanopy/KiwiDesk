@@ -12,6 +12,7 @@ import Testing
 @MainActor
 struct BarMenuChordTests {
     private let one = SpaceID("1")
+    private let two = SpaceID("2")
     private let floatChord = KeyCombo.parse("ctrl+alt+f")!
     private let pocketChord = KeyCombo.parse("ctrl+alt+shift+p")!
 
@@ -33,6 +34,7 @@ struct BarMenuChordTests {
             )
         )
         core.state.workspaces.assign(one, to: display)
+        core.state.workspaces.assign(two, to: display)
         core.state.workspaces.activate(one)
         for (raw, pid, app) in [
             (UInt32(1), pid_t(41), "Safari"), (2, 41, "Safari"),
@@ -59,7 +61,26 @@ struct BarMenuChordTests {
         return core
     }
 
-    private final class Flag { var on = true }
+    private final class Press { var event: NSEvent? }
+
+    /// A keyDown of `keyCode` with `modifiers` held.
+    private func press(
+        _ keyCode: UInt16,
+        _ modifiers: NSEvent.ModifierFlags
+    ) -> NSEvent? {
+        NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: modifiers,
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: "",
+            charactersIgnoringModifiers: "",
+            isARepeat: false,
+            keyCode: keyCode
+        )
+    }
 
     private func rows(_ core: KiwiCore, _ ids: [UInt32]) -> [BarMenuRow] {
         core.barMenuRows(.appItem(ids.map(WindowID.init)))
@@ -108,6 +129,44 @@ struct BarMenuChordTests {
         #expect(chords(menu) == ["Remove from Pocket": pocketChord])
     }
 
+    /// The pocket window of a mixed group, focused: its Remove
+    /// child names the window the key acts on, and still shows none.
+    @Test("a mixed group's focused pocket child shows no chord")
+    func mixedGroupShowsNone() {
+        let core = seededCore()
+        core.execute("toggle_pocket_window", args: [.number(1)])
+        core.state.apply(.windowFocused(WindowID(1)))
+        let menu = rows(core, [1, 2])
+        #expect(menu.contains { $0.title == "Remove from Pocket" })
+        #expect(chords(menu).isEmpty)
+    }
+
+    /// The bars' last focus outlives a switch to an empty Space,
+    /// where the key acts on no window (#2869 ▸ 3).
+    @Test("a focus the key no longer acts on shows no chord")
+    func leftFocusShowsNone() {
+        let core = seededCore()
+        core.state.workspaces.activate(two)
+        #expect(core.barFocus(on: nil) == WindowID(3))
+        #expect(core.focusedWindowID == nil)
+        #expect(chords(rows(core, [3])).isEmpty)
+    }
+
+    /// The gate itself: a row's window inside a wider menu set.
+    @Test("the gate refuses a window inside a group's set")
+    func gateReadsTheMenuSet() {
+        let core = seededCore()
+        let id = WindowID(3)
+        #expect(core.barMenuChord(.toggleFloating, for: id, in: [id]) != nil)
+        #expect(
+            core.barMenuChord(
+                .toggleFloating,
+                for: id,
+                in: [id, WindowID(1)]
+            ) == nil
+        )
+    }
+
     @Test("an unbound verb shows nothing")
     func unboundShowsNone() {
         let core = seededCore()
@@ -116,36 +175,49 @@ struct BarMenuChordTests {
     }
 
     /// Carbon's hotkey is the action; AppKit's matching keyDown is
-    /// dropped, or Float toggles twice (#2869 ▸ 5).
-    @Test("the drawn chord's keyDown firing is dropped")
+    /// dropped, or Float toggles twice (#2869 ▸ 5). Return on the
+    /// row the arrow keys picked is the row's own firing.
+    @Test("only the drawn chord's own keyDown is dropped")
     func keyDownDropped() throws {
         let core = seededCore()
-        let keyDown = Flag()
-        core.shelves.contextMenus.actionIsKeyDown = { keyDown.on }
+        let current = Press()
+        core.shelves.contextMenus.keyDown = { current.event }
         core.barMenuHooks.layoutChar = { $0 == 3 ? "f" : nil }
-        let menu = try #require(
-            core.shelves.contextMenus.menu(for: .appItem([WindowID(3)]))
-        )
-        let item = try #require(
-            menu.items.first { $0.title == "Float Window" }
-        )
-        #expect(item.keyEquivalent == "f")
-        #expect(item.keyEquivalentModifierMask == [.control, .option])
-        let target = try #require(item.target as? NSObject)
-        let action = try #require(item.action)
-        target.perform(action, with: item)
-        #expect(core.state.windows[WindowID(3)]?.isFloating == false)
-        keyDown.on = false
-        target.perform(action, with: item)
-        #expect(core.state.windows[WindowID(3)]?.isFloating == true)
+        // Fires the Float / Tile row of a menu opened now.
+        let fire = { (event: NSEvent?) throws in
+            let menu = try #require(
+                core.shelves.contextMenus.menu(for: .appItem([WindowID(3)]))
+            )
+            let item = try #require(
+                menu.items.first { !$0.keyEquivalent.isEmpty }
+            )
+            #expect(item.keyEquivalent == "f")
+            #expect(item.keyEquivalentModifierMask == [.control, .option])
+            let target = try #require(item.target as? NSObject)
+            let action = try #require(item.action)
+            current.event = event
+            target.perform(action, with: item)
+        }
+        let floats = { core.state.windows[WindowID(3)]?.isFloating }
+        try fire(press(3, [.control, .option]))
+        #expect(floats() == false)
+        try fire(press(3, [.control, .option, .shift]))
+        #expect(floats() == true)
+        try fire(press(36, []))
+        #expect(floats() == false)
+        try fire(nil)
+        #expect(floats() == true)
     }
 
-    @Test("a row without a chord still fires on keyDown")
-    func plainRowFiresOnKeyDown() throws {
+    /// A chord the column could not draw drops nothing: Carbon
+    /// answers no press the row did not promise.
+    @Test("an undrawn chord's row fires on its keyDown")
+    func undrawnChordFires() throws {
         var fired = 0
         let menu = BarMenu.make(
-            [.action("Plain") { fired += 1 }],
-            isKeyDown: { true }
+            [.action("Float Window", chord: floatChord) { fired += 1 }],
+            layoutChar: { _ in nil },
+            keyDown: { [self] in press(3, [.control, .option]) }
         )
         let item = try #require(menu.items.first)
         #expect(item.keyEquivalent.isEmpty)
@@ -155,14 +227,18 @@ struct BarMenuChordTests {
         #expect(fired == 1)
     }
 
-    @Test("a sided chord draws nothing")
+    @Test("a sided chord draws nothing, its unsided twin draws")
     func sidedDrawsNothing() throws {
         let sided = try #require(KeyCombo.parse("rctrl+alt+f"))
         let menu = BarMenu.make(
-            [.action("Float Window", chord: sided) {}],
-            layoutChar: { _ in "f" }
+            [
+                .action("Sided", chord: sided) {},
+                .action("Plain", chord: floatChord) {},
+            ],
+            layoutChar: { _ in "f" },
+            keyDown: { nil }
         )
-        #expect(menu.items.first?.keyEquivalent.isEmpty == true)
+        #expect(menu.items.map(\.keyEquivalent) == ["", "f"])
     }
 
     /// The menu speaks the key equivalent natively (#2869 ▸ 7).

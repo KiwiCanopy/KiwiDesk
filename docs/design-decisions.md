@@ -20165,23 +20165,6 @@ two ways to do one thing, learned twice, and the menu's copy was
 the poorer one — no pictures of the layouts, no search, and
 submenus that are slow to steer with a pointer.
 
-:::unreleased
-**A bar menu row shows its chord only where the chord IS the row
-(#2869).** The bars' right-click menus teach the same way, in the
-native key-equivalent column, but a chord there is a promise that
-pressing it does what clicking does. So it shows on Float / Tile
-Window and Remove from Pocket, and only in the focused window's
-own menu: the key acts on the focus, so beside any other window,
-or in a group's menu, it would act on a window the row does not
-name. Pocket Window shows none, because its key steps — it puts
-back or takes out before it pockets — and matches the row only
-while the pocket is empty. A user's own Lua spelling, or a chord
-with a left- or right-only modifier, shows nothing rather than a
-key that might not be the row's. The column is display only: the
-row drops AppKit's matching keyDown, since Carbon's hotkey has
-already acted, or Float would toggle twice.
-:::
-
 What else the menu holds is either a warning or app chrome.
 **Settings…** sits low, next to Quit, where every native
 menu-bar extra keeps Preferences, with What's New and Update
@@ -20209,6 +20192,23 @@ the fix path); a **View Shortcuts…** row (the shortcuts are
 KiwiHub's middle side, one ⇧⇥ from where the row lands); and a
 **Support** row (it lives in Settings as a discreet link — a menu
 opened daily is no place for a recurring support ask).
+
+:::unreleased
+**A bar menu row shows its chord only where the chord IS the row
+(#2869).** The bars' right-click menus teach the same way, in the
+native key-equivalent column, but a chord there is a promise that
+pressing it does what clicking does. So it shows on Float / Tile
+Window and Remove from Pocket, and only in the focused window's
+own menu: the key acts on the focus, so beside any other window
+it would act on a window the row does not name, and a group's
+menu, parent or child, shows none (#2869 ▸ 4). Pocket Window shows none, because its key steps — it puts
+back or takes out before it pockets — and matches the row only
+while the pocket is empty. A user's own Lua spelling, or a chord
+with a left- or right-only modifier, shows nothing rather than a
+key that might not be the row's. The column is display only: the
+row drops AppKit's matching keyDown, since Carbon's hotkey has
+already acted, or Float would toggle twice.
+:::
 
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain

@@ -17,13 +17,27 @@ extension KeyCombo {
         guard !modifiers.isSided else { return }
         guard let key = Self.menuKey(for: keyCode, layoutChar: layoutChar)
         else { return }
+        item.keyEquivalent = key
+        item.keyEquivalentModifierMask = menuModifiers
+    }
+
+    /// The chord's modifiers as AppKit's either-side flags.
+    public var menuModifiers: NSEvent.ModifierFlags {
         var mask: NSEvent.ModifierFlags = []
         if modifiers.contains(.control) { mask.insert(.control) }
         if modifiers.contains(.option) { mask.insert(.option) }
         if modifiers.contains(.shift) { mask.insert(.shift) }
         if modifiers.contains(.command) { mask.insert(.command) }
-        item.keyEquivalent = key
-        item.keyEquivalentModifierMask = mask
+        return mask
+    }
+
+    /// Whether `event` is this chord's key with exactly its
+    /// modifiers.
+    public func isPressed(by event: NSEvent) -> Bool {
+        let held = event.modifierFlags.intersection([
+            .control, .option, .shift, .command,
+        ])
+        return UInt32(event.keyCode) == keyCode && held == menuModifiers
     }
 
     private static func menuKey(

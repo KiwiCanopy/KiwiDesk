@@ -39,11 +39,11 @@ final class BarContextMenus {
     /// Pinned in both `makeTestCore` twins.
     var pointer: @MainActor () -> NSPoint = { NSEvent.mouseLocation }
 
-    /// Whether a row's firing is AppKit's keyDown for a chord
-    /// Carbon already answered (#2869 ▸ 5); injected so a test can
-    /// hold it either way.
-    var actionIsKeyDown: @MainActor () -> Bool = {
-        NSApp.currentEvent?.type == .keyDown
+    /// The keyDown firing a row now, if a key fires it: one whose
+    /// drawn chord Carbon already answered is dropped (#2869 ▸ 5).
+    /// Injected so a test can hand either.
+    var keyDown: @MainActor () -> NSEvent? = {
+        NSApp.currentEvent.flatMap { $0.type == .keyDown ? $0 : nil }
     }
 
     func menu(for hit: BarHit) -> NSMenu? {
@@ -52,7 +52,7 @@ final class BarContextMenus {
         return BarMenu.make(
             rows,
             layoutChar: hooks.layoutChar,
-            isKeyDown: actionIsKeyDown
+            keyDown: keyDown
         )
     }
 

@@ -24,9 +24,13 @@ extension KiwiCore {
         let pocketed = live.filter { state.pocketPhase(of: $0) != nil }
         let plain = live.filter { !pocketed.contains($0) }
         let grouped = live.count > 1
-        if !plain.isEmpty { rows.append(floatRow(plain, grouped: grouped)) }
+        if !plain.isEmpty {
+            rows.append(floatRow(plain, grouped: grouped, menu: live))
+        }
         if !pocketed.isEmpty {
-            rows.append(removeFromPocketRow(pocketed, grouped: grouped))
+            rows.append(
+                removeFromPocketRow(pocketed, grouped: grouped, menu: live)
+            )
         }
         rows.append(pocketRow(live))
         rows.append(appRulesRow(app))
@@ -116,9 +120,12 @@ extension KiwiCore {
     /// `toggle_floating` flips; a group's submenu ticks each window
     /// that floats. A Tile that detection would refuse is greyed,
     /// its reason the subtitle — the pill's own sentence (#1810).
+    /// `menu` is every window the menu stands for, which the chord
+    /// gate reads (#2869 ▸ 3–4).
     private func floatRow(
         _ windows: [WindowID],
-        grouped: Bool
+        grouped: Bool,
+        menu: [WindowID]
     ) -> BarMenuRow {
         guard grouped else {
             let id = windows[0]
@@ -130,7 +137,7 @@ extension KiwiCore {
                     : L("bar.menu.float_window", "Float Window"),
                 enabled: refusal == nil,
                 subtitle: refusal?.sentence,
-                chord: barMenuChord(.toggleFloating, for: windows)
+                chord: barMenuChord(.toggleFloating, for: id, in: menu)
             ) { [weak self] in
                 _ = self?.execute(
                     floats ? "make_tiled" : "make_floating",
@@ -166,7 +173,8 @@ extension KiwiCore {
     /// the subtitle saying where that key lives.
     private func removeFromPocketRow(
         _ windows: [WindowID],
-        grouped: Bool
+        grouped: Bool,
+        menu: [WindowID]
     ) -> BarMenuRow {
         let title = L("bar.menu.remove_from_pocket", "Remove from Pocket")
         let row = { [weak self] (id: WindowID, title: String) in
@@ -175,9 +183,11 @@ extension KiwiCore {
                 title,
                 enabled: !keyed,
                 subtitle: keyed ? Self.pocketKeyKeepsIt : nil,
-                chord: grouped
-                    ? nil
-                    : self?.barMenuChord(.togglePocketWindow, for: [id])
+                chord: self?.barMenuChord(
+                    .togglePocketWindow,
+                    for: id,
+                    in: menu
+                )
             ) { [weak self] in
                 _ = self?.execute(
                     "toggle_pocket_window",

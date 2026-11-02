@@ -1342,17 +1342,21 @@ rather than the row it names makes the user search again. So:
   `BarMenuRow.chord` into the native key-equivalent column alone —
   never the title, the subtitle or a tooltip — drawn through the
   one `KeyCombo.applyMenuEquivalent`, which refuses a sided chord
-  (#2601). It is read through `barMenuChord(_:for:)`: a
-  `BarMenuVerb` the GUI maps to its catalog Lua body, matched
-  exactly on the resolved active layer, and only in a
-  single-window menu whose window is `barFocus` — never in a
-  group menu, parent or child. Float / Tile and Remove from
-  Pocket carry it; Pocket Window does not, since `pocket` steps,
-  and neither do New Window, Move, App Rules…, Close, Quit, the
-  Space chip's rows or the shelf section. A new row joins
-  `BarMenuVerb` only once its key, on the focused window, is the
-  row's own act. A row with a chord drops its keyDown firing, so
-  Carbon's hotkey is the one action (`BarMenuChordTests`,
+  (#2601). It is read through `barMenuChord(_:for:in:)`, handed the
+  whole set the menu stands for: a `BarMenuVerb` the GUI maps to
+  its catalog Lua body, matched exactly on the resolved active
+  layer, and only in a single-window menu whose window is both
+  `barFocus` and `focusedWindowID`, the window the key acts on —
+  never in a group menu, parent or child. The rows that carry it
+  are `BarMenuVerb`'s cases; never Pocket Window while `pocket`
+  steps, and never New Window, Move to Current Space, App Rules…,
+  Close Window, Quit, a Space chip's rows or the KiwiShelf
+  section. A new row joins `BarMenuVerb` only once its key, on
+  the focused window, is the row's own act. A greyed row keeps its
+  chord, as a native menu does: its key refuses as the row would.
+  A firing by the drawn chord's own keyDown is dropped, so
+  Carbon's hotkey is the one action, and every other keyboard
+  firing — Return on a picked row — stands (`BarMenuChordTests`,
   `BarMenuWiringTests` ▸ `verbsReadTheirRows`).
 
 ## A Space wears one marker, drawn after its identifier (#1790)
