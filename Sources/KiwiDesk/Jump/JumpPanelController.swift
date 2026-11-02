@@ -277,6 +277,13 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             self?.core.soundPanelRefusal()
             model?.onAnnounce(spoken)
         }
+        // Core answers at the press, from the panel's screen.
+        model.swapRefusal = { [weak self] entry in
+            self?.core.swapRefusal(entry.target, on: self?.hubDisplay)
+        }
+        model.moveRefusal = { [weak self] entry in
+            self?.core.moveHereRefusal(entry.target, on: self?.hubDisplay)
+        }
         model.onClose = { [weak self] in
             self?.close()
         }

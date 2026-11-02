@@ -834,6 +834,7 @@
   "jump.place.swap_block.nothing_here": "Nessuna finestra qui",
   "jump.place.swap_block.other_desktop": "Altra scrivania",
   "jump.place.swap_block.sticky": "Sticky",
+  "jump.place.swap_block.unfiled": "In nessuno spazio",
   "jump.place.swap_block.yours": "La tua finestra",
   "jump.place.swap_block.yours_floating": "La tua è fluttuante",
   "jump.place.swap_block.yours_full_screen": "La tua è a schermo intero",

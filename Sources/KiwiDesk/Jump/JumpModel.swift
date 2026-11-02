@@ -88,11 +88,19 @@ final class JumpModel: ObservableObject {
     let sheetCap: CGFloat
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
-    /// A pick the snapshot already refuses: what VoiceOver hears.
-    /// The controller sounds it and announces it (#2885).
+    /// A pick Core refuses at the press: what VoiceOver hears. The
+    /// controller sounds it and announces it (#2885).
     var onRefuse: (String) -> Void = { _ in }
+    /// Core's refusals read at the press, so a row the snapshot
+    /// refused that now goes ahead reaches the verb; the controller
+    /// wires Core's, a test keeps the snapshot's.
+    var swapRefusal: (JumpEntry) -> JumpSwapBlock? = { $0.swapBlock }
+    var moveRefusal: (JumpEntry) -> JumpMoveBlock? = { $0.moveBlock }
     /// The row whose refused press swells its reason, for a beat.
     @Published var refusedRow: Int?
+    /// The row a refused press showed its reason on, until the
+    /// modifier that named the pick is let go.
+    @Published var revealedRow: Int?
     var onClose: () -> Void = {}
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
@@ -238,8 +246,9 @@ final class JumpModel: ObservableObject {
     /// (#2365).
     func clickRow(_ index: Int, pick: JumpPick) {
         guard scope == .windows else { return }
+        guard list.results.indices.contains(index) else { return }
         list.select(index)
-        if list.selected != nil { self.pick(index, pick) }
+        self.pick(index, pick)
     }
     /// ⇧, ⌥ and ⌘ as held now, for the footer's one lit hint.
     var heldModifiers: NSEvent.ModifierFlags {
@@ -266,6 +275,7 @@ final class JumpModel: ObservableObject {
         if command != commandHeld { commandHeld = command }
         if shift != shiftHeld { shiftHeld = shift }
         if option != optionHeld { optionHeld = option }
+        if !shift, !option, revealedRow != nil { revealedRow = nil }
     }
 
     /// What VoiceOver hears when the results change.

@@ -834,6 +834,7 @@
   "jump.place.swap_block.nothing_here": "Aucune fenêtre ici",
   "jump.place.swap_block.other_desktop": "Autre bureau",
   "jump.place.swap_block.sticky": "Sticky",
+  "jump.place.swap_block.unfiled": "Dans aucun espace",
   "jump.place.swap_block.yours": "Votre fenêtre",
   "jump.place.swap_block.yours_floating": "La vôtre flotte",
   "jump.place.swap_block.yours_full_screen": "La vôtre est en plein écran",

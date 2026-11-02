@@ -242,6 +242,7 @@ struct JumpPanelView: View {
             waySwap: trades ? here : nil,
             refusal: JumpRowRefusal(entry: entry),
             pulsing: model.refusedRow == index,
+            revealed: model.revealedRow == index,
             onActivate: { pick in
                 model.clickRow(index, pick: pick)
             },

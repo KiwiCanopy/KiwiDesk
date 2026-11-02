@@ -16,6 +16,8 @@ extension JumpRowText {
             L("jump.place.swap_block.sticky", "Sticky")
         case .pocketed:
             L("jump.status.pocketed", "In your pocket")
+        case .unfiled:
+            L("jump.place.swap_block.unfiled", "In no Space")
         case .minimized:
             L("jump.status.minimized", "Minimized")
         case .hiddenApp:

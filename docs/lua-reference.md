@@ -6186,13 +6186,13 @@ under **Pocket**.
 :::unreleased
 **⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
 window with yours, as [swap_here](#swap_here) does, and **⌥⌘1** …
-**⌥⌘9** swap one of the first nine. Yours is the window focused on
+**⌥⌘9** (or **⇧⌥⌘1** …) swap one of the first nine. Yours is
+the window focused on
 the screen KiwiHub opened on, else the focused window. A hidden app
 and a pocketed window are refused, and so, until #2884, are a
-minimized window and one on another macOS Desktop. While ⌥ or ⇧ is
-held, a row the swap or Move here would refuse says why where its
-Space would show; pressing it there keeps KiwiHub open, with the
-refusal sound where that is on.
+minimized window and one on another macOS Desktop. A refused swap
+or Move here keeps KiwiHub open, with the refusal sound where that
+is on.
 :::
 
 :::unreleased

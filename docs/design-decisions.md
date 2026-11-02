@@ -13665,14 +13665,21 @@ being the focus of the Space shown on the screen KiwiHub opened on,
 as for Move here, else the global focus. Holding ⇧ and then adding
 ⌥ so lands on the action the eye expects, and a swap that follows
 the window has no KiwiHub key (⌃⌥↩ if it is ever wanted, which is
-why ⌥ beside ⌃ or ⌘ picks nothing). The pick runs after the panel
-dismisses, through the public swap verbs, so a refusal and its cue
-are the verb's own: `swap_here` under the #292 preflight, or, where
-your window is on a Space another screen shows, `swap` naming both
-windows — `swap_here`'s implied window is the active Space's focus,
-and switching there first would meet a preflight whose frontmost
-app has not followed — with the switch to that Space after the
-trade.
+why ⌥ beside ⌃ picks nothing); ⌥⌘1–9 swaps a numbered result, as
+⇧⌘1–9 moves one. A pick Core refuses at the press stays in the
+panel: the row has already said why, so closing it and drawing a
+pill on another window would throw away the user's place for news
+they had — the reason swells once (none under Reduce Motion), the
+refusal sound plays where it is on, and VoiceOver hears "Can't swap:
+…"; refusal and dead-end feedback stay apart (#435/#436), so the
+panel never shakes. A pick Core lets through runs after the panel
+dismisses, through the public swap verbs, which stay the authority
+— their pill answers what changed since the press was asked:
+`swap_here` under the #292 preflight, or, where your window is on a
+Space another screen shows, `swap` naming both windows —
+`swap_here`'s implied window is the active Space's focus, and
+switching there first would meet a preflight whose frontmost app
+has not followed — with the switch to that Space after the trade.
 :::
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu

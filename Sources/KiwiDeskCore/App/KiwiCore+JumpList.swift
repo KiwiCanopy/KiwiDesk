@@ -115,7 +115,9 @@ extension KiwiCore {
                     status: status,
                     movesHere: jumpMovesHere(window, from: space, into: here),
                     swapBlock: jumpSwapBlock(window.id, partner: partner),
-                    moveBlock: jumpMoveBlock(window, from: space, into: here),
+                    moveBlock: here.flatMap {
+                        jumpMoveBlock(window, into: $0)
+                    },
                     isOtherApp: jumpIsOtherApp(window.appRef),
                     screen: status == .shown
                         ? jumpScreen(shownOn, hub: hub) : nil
@@ -238,9 +240,8 @@ extension KiwiCore {
         from space: SpaceID?,
         into here: SpaceID?
     ) -> Bool {
-        guard let here, !window.isFullscreen, space != here
-        else { return false }
-        return stickyMoveBlock(window.id, to: here) == nil
+        guard let here, space != here else { return false }
+        return moveHereVerdict(window, into: here) == nil
     }
 
     /// The Space's own icon, the bar chip's reading, nil without

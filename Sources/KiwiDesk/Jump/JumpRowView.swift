@@ -10,7 +10,7 @@ struct JumpRowView: View {
     let isSelected: Bool
     /// The pointer lifts this row, grey (#2365).
     var isLifted = false
-    /// The row ⇧ alone acts on (`JumpHover.shiftRow`, #2808).
+    /// The row ⇧ acts on (`JumpHover.actedRow`, #2808).
     let ownsShift: Bool
     /// The row ⌥ acts on, by the same rule (#2885).
     var ownsOption = false
@@ -30,6 +30,9 @@ struct JumpRowView: View {
     var refusal = JumpRowRefusal()
     /// A refused press on this row: its reason swells once.
     var pulsing = false
+    /// A refused press showed this row's reason, which stays while
+    /// the modifier is held, whichever row the pointer lifts.
+    var revealed = false
     let onActivate: (JumpPick) -> Void
     /// The pointer moved over this row.
     var onHover: () -> Void = {}
@@ -88,8 +91,9 @@ struct JumpRowView: View {
     var shownRefusal: String? {
         // ⌥⌘ and ⇧⌘ reach every numbered row through its digit.
         let digit = commandHeld && number != nil
-        if optionHeld { return ownsOption || digit ? refusal.swap : nil }
-        guard shiftHeld, ownsShift || digit else { return nil }
+        let speaks = digit || revealed
+        if optionHeld { return ownsOption || speaks ? refusal.swap : nil }
+        guard shiftHeld, ownsShift || speaks else { return nil }
         return refusal.move
     }
     /// The route ⌥ draws where it has one, else ⇧'s.

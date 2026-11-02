@@ -147,19 +147,21 @@ extension KiwiCore {
         into active: SpaceID
     ) -> Bool {
         let name = window.title.isEmpty ? window.appName : window.title
-        guard !window.isFullscreen else {
+        // The one verdict KiwiHub's rows are drawn by (#2885).
+        switch moveHereVerdict(window, into: active) {
+        case .fullScreen:
             cueWindowAction(.cannotMoveHere(window: name), on: window.id)
             return false
-        }
-        // A ∞ window already renders here, so it is only focused;
-        // any other block is the sticky gate's own refusal, cued.
-        if let block = stickyMoveBlock(window.id, to: active) {
-            guard block == .global, window.stickyScope == .global else {
-                return !stickyMoveRefused(window.id, to: active)
-            }
+        case .sticky(let scope):
+            // The sticky gate's own refusal, cued.
+            flashStickyMoveBlocked(window.id, scope: scope)
+            return false
+        case .focusOnly:
             enterMoveHereSpace(active)
             pickBarRow(window.id, on: nil)
             return true
+        case nil:
+            break
         }
         enterMoveHereSpace(active)
         if state.workspaces.space(of: window.id) != active {

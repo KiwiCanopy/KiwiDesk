@@ -136,6 +136,8 @@ public enum JumpSwapBlock: Sendable, Equatable {
     case fullScreen
     case sticky
     case pocketed
+    /// Tracked in no Space, so it holds no slot to trade.
+    case unfiled
     case minimized
     case hiddenApp
     /// Up on another macOS Desktop, numbered on its own screen.

@@ -2116,6 +2116,21 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
+## A KiwiHub pick asks Core at the press (#2885)
+
+**Every Windows-side pick — a key, a click, a digit, a VoiceOver
+action — goes through `JumpModel.pick`, never `onPick` beside it**,
+so a pick Core refuses at the press stays in the panel with its
+reason, its sound through Core's one `soundPanelRefusal` door and
+its words, and one Core lets through reaches the verb, whose pill
+answers a change since. The press reads Core's `swapRefusal` /
+`moveHereRefusal`, never the snapshot's block, and a row draws its
+reason from the snapshot's `JumpEntry` blocks, which Core derives
+from the verbs' own verdicts (`SwapBlock`, `moveHereVerdict`) —
+never a gate re-spelled in the GUI (`JumpRefusalRowTests` ▸
+`controllerWiring`, `pressAsksCore`; `RefusalCueSeamTests` ▸
+`noSoundOnlyCue`).
+
 ## A sideways strip fades and follows through Core (#2901)
 
 **A Settings strip that scrolls sideways fades through

@@ -834,6 +834,7 @@
   "jump.place.swap_block.nothing_here": "Nenhuma janela aqui",
   "jump.place.swap_block.other_desktop": "Outra mesa",
   "jump.place.swap_block.sticky": "Sticky",
+  "jump.place.swap_block.unfiled": "Em nenhum espaço",
   "jump.place.swap_block.yours": "Sua janela",
   "jump.place.swap_block.yours_floating": "A sua está flutuando",
   "jump.place.swap_block.yours_full_screen": "A sua está em tela cheia",

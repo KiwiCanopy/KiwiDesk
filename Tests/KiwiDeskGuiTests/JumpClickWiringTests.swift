@@ -52,6 +52,7 @@ struct JumpClickWiringTests {
         #expect(
             panel.contains(
                 "letacted=JumpHover.actedRow(hover:model.hover,"
+                    + "selection:list.selection)"
             )
         )
         #expect(panel.contains("ownsShift:index==acted,"))

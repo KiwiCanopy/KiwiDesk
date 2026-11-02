@@ -51,48 +51,6 @@ extension KiwiCore {
         jumpHereFocus(in: here) ?? focusedWindowID
     }
 
-    /// Why a Swap here would not trade tracked `window` with
-    /// `partner`, by the verb's own verdict, named for the side
-    /// that blocks; nil where it trades. The panel words it.
-    func jumpSwapBlock(
-        _ window: WindowID,
-        partner: WindowID?
-    ) -> JumpSwapBlock? {
-        guard let partner else { return .nothingHere }
-        guard let block = swapBlock(window, partner) else { return nil }
-        switch block {
-        case .sameWindow:
-            return .yours
-        case .unfiled(let id):
-            return id == window && state.isPocketed(id)
-                ? .pocketed : .nothingHere
-        case .fullScreen(let id):
-            return id == window ? .fullScreen : .yoursFullScreen
-        case .floating(let id):
-            return id == window ? .floating : .yoursFloating
-        case .sticky(let id, _):
-            return id == window ? .sticky : .yoursSticky
-        }
-    }
-
-    /// Why Move here would refuse `window`, as `moveHere(_:)`
-    /// refuses it; nil where it moves or is already here.
-    func jumpMoveBlock(
-        _ window: ManagedWindow,
-        from space: SpaceID?,
-        into here: SpaceID?
-    ) -> JumpMoveBlock? {
-        // A pocketed window comes out instead (#2446).
-        guard let here, space != here, !state.isPocketed(window.id)
-        else { return nil }
-        if window.isFullscreen { return .fullScreen }
-        // A ∞ window is only focused, which no refusal names.
-        guard let block = stickyMoveBlock(window.id, to: here),
-            block != .global || window.stickyScope != .global
-        else { return nil }
-        return .sticky
-    }
-
     /// A row no verb can see in this slice — a hidden app, or a
     /// window minimized or on a Desktop no screen shows — cued on
     /// the focused window, where the user is looking.
