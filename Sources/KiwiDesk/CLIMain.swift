@@ -109,6 +109,10 @@ private func runSocketCommand(
         rest = []
     }
     if command == APIReference.socketOnlyCommand {
+        // A closed stdout or stderr must cost a write error, never
+        // the process (#2870). Here, not in `subscribe`, which tests
+        // call: the ignore is process-wide (gui.md, the CLI's verbs).
+        signal(SIGPIPE, SIG_IGN)
         return CLIEventStream.subscribe(rest)
     }
     rest = CLIPathArguments.resolved(rest, command: command)
