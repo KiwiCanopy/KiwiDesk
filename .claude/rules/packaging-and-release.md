@@ -76,8 +76,9 @@ build failure (the owner read it as one during the #1436 eyeball
 before the stamps were compared). `build-app.sh` therefore passes
 `-platform_version macos <target> <sdk>` on its `swift build`,
 the target DERIVED from `Package.swift` (the one enforced copy of
-the three above) and the SDK from `xcrun --show-sdk-version`, and
-then reads the stamp back with `otool -l` and refuses a
+the three above) and the SDK from
+`xcrun --sdk macosx --show-sdk-version`, and then reads the stamp
+back with `otool -l` and refuses a
 major.minor mismatch — on the reused binary of `--skip-build`
 too, since a stale build is exactly what a packaging run picks
 up. The re-read is the point, not the flag: passing an override
@@ -93,6 +94,23 @@ nothing ships, so they take no override (an override with no
 re-read behind it guards nothing). CI and the release job build
 with Xcode 27 since #1500 — the toolchain whose SwiftPM stamp this
 guard exists for, so a runner-image bump reaches it here first.
+
+**An `xcrun` read of the SDK in the build path names it
+(`--sdk macosx`).** A bare `xcrun` answers the CommandLineTools
+SDK once those tools are newer than the selected Xcode, and
+`xcodebuild` then refuses that SDK (observed 2026-11-02, CLT 27.2
+beside Xcode 27.1). A tool lookup (`xcrun -f actool`,
+`notarytool`, `stapler`) reads no SDK and takes no flag.
+
+**Every workflow selects the one Xcode `release.yml`'s `XCODE`
+names** (`XcodePinParityTests`). The release pin follows the
+toolchain the tree is developed on and may name a pre-GA build
+only while the tree is developed on it; it moves to the GA build
+once the runner image ships one. CI's jobs may fall back to the
+image's default, and say so with a `::warning::`; `release.yml`
+never falls back. The pin holds a major.minor: the build behind
+the image's symlink is recorded only by `xcodebuild -version` in
+the job log.
 
 **The plist must declare `CFBundleLocalizations`, derived from
 `Sources/KiwiDeskCore/Resources/Locales`.** A bundle that names
