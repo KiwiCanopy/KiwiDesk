@@ -192,8 +192,13 @@ struct SessionRatioProfileTests {
         let extra = SpaceID("5")
         core.state.workspaces.ensureSpace(extra)
         core.writeSplitRatioH(0.7, for: extra)
+        // Play's own Space 5 from before, which the prune must not
+        // reach either.
+        let sized = core.sessionRatios(of: extra)
+        core.desktopMemory.sessionRatios[10]?[play] = [extra: sized]
         core.apply(profile: other, cause: .event)
         try #require(core.state.workspaces[extra] == nil)
         #expect(core.desktopMemory.sessionRatios[10]?[work]?[extra] != nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[play]?[extra] != nil)
     }
 }
