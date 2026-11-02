@@ -16,7 +16,7 @@ enum BarPeekSource: Equatable {
     /// hides, nearest the edge first.
     case run([WindowID])
     /// The pocket plate (#2678): the windows inside, in put-in
-    /// order.
+    /// order, then the apps' own pocket windows (#2923).
     case pocket([WindowID])
 
     var windows: [WindowID] {
@@ -95,6 +95,9 @@ struct BarPeekContent: Equatable {
         let window: WindowID
         let title: String
         var focused = false
+        /// The app's Pocket key, drawn after the title, on a row
+        /// of the Pocket Keys section (#2923).
+        var chord: String?
     }
 
     /// What a group's header draws (#2649).
@@ -116,6 +119,9 @@ struct BarPeekContent: Equatable {
         let rows: [Row]
         /// Every window the group stands for, shown or not.
         let windowCount: Int
+        /// Whether it lists apps' own pocket windows, under the
+        /// Pocket Keys header (#2923).
+        var keyed = false
 
         var titles: [String] { rows.map(\.title) }
 
@@ -157,7 +163,8 @@ struct BarPeekContent: Equatable {
                     app: group.app,
                     icon: group.icon,
                     rows: rows,
-                    windowCount: group.windowCount
+                    windowCount: group.windowCount,
+                    keyed: group.keyed
                 )
             )
         }
@@ -175,36 +182,44 @@ struct BarPeekContent: Equatable {
     /// `header` sets what each group's header draws: a list's wears
     /// its app's icon, a one-app list's too (#2571); a label's drops
     /// what its item shows (#2649). A list (`checks`) checks the row
-    /// of `focus` (#2063).
+    /// of `focus` (#2063). `keyed` rows group the same way after
+    /// every other group, each wearing its `chord` (#2923).
     @MainActor
     init(
         rows: [BarWindowRow],
         checks: Bool = false,
         focus: WindowID? = nil,
-        header: Header = .full
+        header: Header = .full,
+        keyed: [BarWindowRow] = [],
+        chord: (WindowID) -> String? = { _ in nil }
     ) {
         self.checks = checks
         self.header = header
-        var order: [BarWindowRow] = []
-        var grouped: [String: [Row]] = [:]
-        for row in rows {
-            if grouped[row.app] == nil { order.append(row) }
-            grouped[row.app, default: []].append(
-                Row(
-                    window: row.window,
-                    title: SpaceBarWindowMenu.windowName(row.title),
-                    focused: checks && row.window == focus
+        func grouped(_ rows: [BarWindowRow], keyed: Bool) -> [Group] {
+            var order: [BarWindowRow] = []
+            var byApp: [String: [Row]] = [:]
+            for row in rows {
+                if byApp[row.app] == nil { order.append(row) }
+                byApp[row.app, default: []].append(
+                    Row(
+                        window: row.window,
+                        title: SpaceBarWindowMenu.windowName(row.title),
+                        focused: checks && row.window == focus,
+                        chord: keyed ? chord(row.window) : nil
+                    )
                 )
-            )
+            }
+            return order.map { first in
+                let all = byApp[first.app] ?? []
+                return Group(
+                    app: first.app,
+                    icon: first.icon,
+                    rows: all,
+                    windowCount: all.count,
+                    keyed: keyed
+                )
+            }
         }
-        groups = order.map { first in
-            let all = grouped[first.app] ?? []
-            return Group(
-                app: first.app,
-                icon: first.icon,
-                rows: all,
-                windowCount: all.count
-            )
-        }
+        groups = grouped(rows, keyed: false) + grouped(keyed, keyed: true)
     }
 }

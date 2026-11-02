@@ -5951,7 +5951,14 @@ where), pointing at the handle brings the pocket up out of it.
 Windows keep clear of the resting handle or pocket unless
 `reserve` is off for every bar on that edge, or on an edge no bar
 sits on, for both bars. A click on the pocket lists the windows
-inside by app; a row takes its window out. Under `"one"` nothing
+inside by app; a row takes its window out.
+
+:::unreleased
+Below them, under **Pocket Keys**, the list shows each app's own
+pocket window ([`pocket_app`](#pocket_app)) with its shortcut.
+:::
+
+Under `"one"` nothing
 stays: the pocket stands only while a window goes in or out
 ([`animations.set_on_state_change`](#animationsset_on_state_change))
 or while you drag one. It has no handle: it slides out of its edge

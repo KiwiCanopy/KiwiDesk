@@ -1699,6 +1699,7 @@
   "pocket.capacity.several": "多个窗口",
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Pocket 标记颜色",
+  "pocket.list.keyed": "Pocket 快捷键",
   "pocket.mark.ax": "Pocket 窗口",
   "pocket.plate.ax": "Pocket，内含窗口：%1$d",
   "pocket.position.spoken.horizontal": "距左端 %1$@",

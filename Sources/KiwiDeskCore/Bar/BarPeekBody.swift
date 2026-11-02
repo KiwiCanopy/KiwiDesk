@@ -66,6 +66,10 @@ final class BarPeekBody: NSView {
     var moreChevron: NSImageView?
     /// The focused row's check, where a list's last build drew one.
     var check: NSImageView?
+    /// The Pocket Keys header and the rows' keys the last build
+    /// drew (#2923).
+    var sectionHeader: NSTextField?
+    var chords: [NSTextField] = []
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
     /// The buttons the last build laid out, top to bottom, and the
@@ -100,6 +104,8 @@ final class BarPeekBody: NSView {
         moreLabel = nil
         moreChevron = nil
         check = nil
+        sectionHeader = nil
+        chords = []
         resetTargets(shelf)
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
@@ -118,7 +124,10 @@ final class BarPeekBody: NSView {
                 // the palette cannot hold it (owner ruling, #1946).
                 header: content.header == .none
                     ? nil : Self.label(group.app, headerFont, headerInk),
-                rows: group.titles.map { Self.label($0, textFont, ink) }
+                rows: group.titles.map { Self.label($0, textFont, ink) },
+                chords: group.rows.map { row in
+                    row.chord.map { Self.label($0, textFont, headerInk) }
+                }
             )
         }
         // Icons mark mixed apps (`+n`); their rows sit under the
@@ -156,6 +165,14 @@ final class BarPeekBody: NSView {
                 )
                 y += 2 * Metrics.groupGap + BarDivider.ruleThickness
             }
+            let opens = index == 0 || !groups[index - 1].group.keyed
+            if built.group.keyed, opens {
+                y = placeSection(
+                    Self.label(Self.keyedSection, headerFont, headerInk),
+                    at: y,
+                    width: width + column
+                )
+            }
             y = place(
                 built,
                 at: y,
@@ -173,25 +190,6 @@ final class BarPeekBody: NSView {
         )
         frame.size = size
         return size
-    }
-
-    /// One group's views before placement.
-    private struct Built {
-        let group: BarPeekContent.Group
-        /// The icon the header draws: the app's on a full header.
-        let icon: NSImage?
-        /// Nil where the group draws no header (#2649).
-        let header: NSTextField?
-        let rows: [NSTextField]
-
-        /// The width it reads at on one line each.
-        @MainActor
-        func need(indent: CGFloat) -> CGFloat {
-            let iconPart = icon == nil ? 0 : indent
-            let name = header.map { BarPeekBody.natural($0) } ?? 0
-            let row = rows.map { BarPeekBody.natural($0) }.max() ?? 0
-            return max(iconPart + name, indent + row)
-        }
     }
 
     /// Places `built` from `top`, `column` the check's past
@@ -222,45 +220,6 @@ final class BarPeekBody: NSView {
         )
     }
 
-    /// Places a group's header and its icon from `top`; returns
-    /// where its rows start.
-    private func placeHeader(
-        _ header: NSTextField,
-        of built: Built,
-        at top: CGFloat,
-        width: CGFloat,
-        indent: CGFloat
-    ) -> CGFloat {
-        let lead = Metrics.padH
-        let iconPart = built.icon == nil ? 0 : indent
-        let nameWidth = max(width - iconPart, 1)
-        let nameHeight = Self.height(of: header, width: nameWidth)
-        header.frame = CGRect(
-            x: lead + iconPart,
-            y: top,
-            width: nameWidth,
-            height: nameHeight
-        )
-        add(header)
-        // The icon sits on the header's first line.
-        let line = Self.lineHeight(header.font)
-        if let image = built.icon {
-            let icon = NSImageView(image: image)
-            icon.imageScaling = .scaleProportionallyUpOrDown
-            icon.setAccessibilityElement(false)
-            icon.frame = CGRect(
-                x: lead,
-                y: top + (line - Metrics.iconSide) / 2,
-                width: Metrics.iconSide,
-                height: Metrics.iconSide
-            )
-            addSubview(icon)
-            icons.append(icon)
-        }
-        let gap = built.rows.isEmpty ? 0 : Metrics.headerGap
-        return top + max(nameHeight, line) + gap
-    }
-
     /// Places a group's rows from `top`, `column` the check's past
     /// `width`; returns where they end.
     private func placeRows(
@@ -282,14 +241,22 @@ final class BarPeekBody: NSView {
                 )
                 y += 2 * Metrics.rowGap + BarDivider.ruleThickness
             }
-            let height = Self.height(of: row, width: rowWidth)
+            // A Pocket key stands at the row's trailing end, before
+            // the check column, as a menu's key equivalent (#2923).
+            let chord = built.chords[index]
+            let room = chord.map(Self.chordRoom) ?? 0
+            let titleWidth = max(rowWidth - room, 1)
+            let height = Self.height(of: row, width: titleWidth)
             row.frame = CGRect(
                 x: lead + indent,
                 y: y,
-                width: rowWidth,
+                width: titleWidth,
                 height: height
             )
             add(row)
+            if let chord {
+                placeChord(chord, at: y, end: lead + indent + rowWidth)
+            }
             guard built.group.rows[index].focused, column > 0 else {
                 addTarget(
                     .window(built.group.rows[index].window),
@@ -312,8 +279,13 @@ final class BarPeekBody: NSView {
         return y
     }
 
-    private func add(_ label: NSTextField) {
+    func add(_ label: NSTextField) {
         addSubview(label)
         labels.append(label)
+    }
+
+    func add(icon: NSImageView) {
+        addSubview(icon)
+        icons.append(icon)
     }
 }

@@ -85,6 +85,50 @@ extension BarPeekBody {
         return mark
     }
 
+    /// The pocket list's header above the apps' own pocket windows
+    /// (#2923 ▸ Ruling 1), the peek's menu section header.
+    static var keyedSection: String {
+        L("pocket.list.keyed", "Pocket Keys")
+    }
+
+    /// The room a row's Pocket key takes past its title: the chord
+    /// and a gap before it.
+    static func chordRoom(_ chord: NSTextField) -> CGFloat {
+        natural(chord) + Metrics.iconGap * 2
+    }
+
+    /// Places a row's Pocket key on its first line, ending at `end`.
+    func placeChord(_ chord: NSTextField, at top: CGFloat, end: CGFloat) {
+        let width = Self.natural(chord)
+        chord.frame = CGRect(
+            x: end - width,
+            y: top,
+            width: width,
+            height: Self.lineHeight(chord.font)
+        )
+        addSubview(chord)
+        chords.append(chord)
+    }
+
+    /// Places the Pocket Keys header from `top` across `width`;
+    /// returns where the section's first group starts.
+    func placeSection(
+        _ header: NSTextField,
+        at top: CGFloat,
+        width: CGFloat
+    ) -> CGFloat {
+        let height = Self.height(of: header, width: width)
+        header.frame = CGRect(
+            x: Metrics.padH,
+            y: top,
+            width: width,
+            height: height
+        )
+        addSubview(header)
+        sectionHeader = header
+        return top + height + Metrics.groupGap
+    }
+
     /// A hairline at `y`, `x` in from the text's lead.
     func addRule(at y: CGFloat, x: CGFloat, width: CGFloat) {
         let rule = NSView(

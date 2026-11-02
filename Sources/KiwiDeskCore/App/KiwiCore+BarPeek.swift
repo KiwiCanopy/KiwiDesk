@@ -43,11 +43,31 @@ extension KiwiCore {
     ) -> BarPeekContent? {
         let rows = barWindowRows(source.windows)
         guard !rows.isEmpty else { return nil }
+        let focus = barFocus(on: space)
+        guard case .pocket = source else {
+            return BarPeekContent(
+                rows: rows,
+                checks: source.isList,
+                focus: focus,
+                header: source.header
+            )
+        }
+        // The pocket lists an app's own window apart, with its key
+        // (#2923); the GUI renders the chord (#2612 ▸ 1).
+        let owners = Dictionary(
+            uniqueKeysWithValues: rows.compactMap { row in
+                state.pocketKeyOwner(of: row.window).map { (row.window, $0) }
+            }
+        )
         return BarPeekContent(
-            rows: rows,
+            rows: rows.filter { owners[$0.window] == nil },
             checks: source.isList,
-            focus: barFocus(on: space),
-            header: source.header
+            focus: focus,
+            header: source.header,
+            keyed: rows.filter { owners[$0.window] != nil },
+            chord: { [barMenuHooks] id in
+                owners[id].flatMap { barMenuHooks.pocketKeyChord($0)?.drawn }
+            }
         )
     }
 
