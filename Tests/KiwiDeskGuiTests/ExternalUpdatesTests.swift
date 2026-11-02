@@ -2,6 +2,7 @@ import Foundation
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A copy a package manager installs keeps Sparkle off and says
 /// who updates it (#2909).
@@ -14,33 +15,77 @@ struct ExternalUpdatesTests {
     private static let copied =
         "/Users/me/Applications/Home Manager Apps/KiwiDesk.app"
 
+    private static let folder =
+        "/Users/me/Applications/Home Manager Apps"
+
     @Test("an ordinary install leaves updates to Sparkle")
     func ordinaryInstall() {
         #expect(
             ExternalUpdates.manager(
                 declared: nil,
+                folder: nil,
                 bundlePath: Self.applications
             ) == nil
         )
     }
 
-    /// Home Manager's copy sits outside the store, so only the key
-    /// the module writes can name it.
-    @Test("the declared manager names a copy outside the store")
+    /// Home Manager's copy sits outside the store, so only the
+    /// keys the module writes can name it.
+    @Test("the declared manager names a copy in its folder")
     func declaredNamesTheCopy() {
         #expect(
             ExternalUpdates.manager(
                 declared: "Home Manager",
+                folder: Self.folder,
                 bundlePath: Self.copied
             ) == "Home Manager"
         )
     }
 
-    @Test("a store-path bundle is Nix's without the key")
+    /// The keys outlive the module: a user who left Nix for the
+    /// cask must get Sparkle back, not a channel that never runs.
+    @Test("a stale declaration leaves another copy to Sparkle")
+    func staleKeyIgnored() {
+        #expect(
+            ExternalUpdates.manager(
+                declared: "Home Manager",
+                folder: Self.folder,
+                bundlePath: Self.applications
+            ) == nil
+        )
+    }
+
+    /// A folder that merely shares a prefix is another folder.
+    @Test("a sibling folder with the same prefix is not inside")
+    func siblingFolderIsOutside() {
+        #expect(
+            ExternalUpdates.manager(
+                declared: "Home Manager",
+                folder: Self.folder,
+                bundlePath: Self.folder + " Old/KiwiDesk.app"
+            ) == nil
+        )
+    }
+
+    @Test("a declaration without its folder names nothing")
+    func nameNeedsItsFolder() {
+        #expect(
+            ExternalUpdates.manager(
+                declared: "Home Manager",
+                folder: nil,
+                bundlePath: Self.copied
+            ) == nil
+        )
+    }
+
+    @Test("a store-path bundle is Nix's without the keys")
     func storePathIsNix() {
         #expect(
-            ExternalUpdates.manager(declared: nil, bundlePath: Self.store)
-                == "Nix"
+            ExternalUpdates.manager(
+                declared: nil,
+                folder: nil,
+                bundlePath: Self.store
+            ) == "Nix"
         )
     }
 
@@ -51,7 +96,8 @@ struct ExternalUpdatesTests {
         #expect(
             ExternalUpdates.manager(
                 declared: "  \n",
-                bundlePath: Self.applications
+                folder: Self.folder,
+                bundlePath: Self.copied
             ) == nil
         )
     }
@@ -74,12 +120,58 @@ struct ExternalUpdatesTests {
         #expect(updater.autoInstall.unavailable == .noChannel)
     }
 
+    /// The two key spellings are a contract with the Home Manager
+    /// module in KiwiCanopy/nix, which writes them; a rename here
+    /// moves that module in step.
+    @Test("the running copy reads the keys the module writes")
+    func currentReadsTheModulesKeys() {
+        let (defaults, name) = makeScratchDefaults()
+        defer { defaults.removePersistentDomain(forName: name) }
+        defaults.set("Home Manager", forKey: "KiwiDeskUpdatesManagedBy")
+        defaults.set(
+            Self.folder,
+            forKey: "KiwiDeskUpdatesManagedFolder"
+        )
+        #expect(
+            ExternalUpdates.current(
+                defaults: defaults,
+                bundlePath: Self.copied
+            ) == "Home Manager"
+        )
+        // A Bool would read as "1" through `string(forKey:)`.
+        defaults.set(true, forKey: "KiwiDeskUpdatesManagedBy")
+        #expect(
+            ExternalUpdates.current(
+                defaults: defaults,
+                bundlePath: Self.copied
+            ) == nil
+        )
+    }
+
     @Test("the automatic-install reason is the footer's sentence")
     func gateReadsTheFooterSentence() {
-        #expect(
-            GeneralGateHelp.sentence(
-                for: .automaticInstall(.managed(by: "Nix"))
-            ) == UpdateStateRow.managedSentence("Nix")
+        LocalizationManager.shared.select("en")
+        let sentence = GeneralGateHelp.sentence(
+            for: .automaticInstall(.managed(by: "Home Manager"))
         )
+        #expect(sentence == UpdateStateRow.managedSentence("Home Manager"))
+        #expect(sentence.contains("Home Manager"))
+    }
+
+    /// The footer's branch draws the managed sentence, not the
+    /// unbundled one (`UpdateStateRow`).
+    @Test("the footer draws the managed sentence")
+    func footerDrawsTheManagedSentence() throws {
+        let file = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(
+                "Sources/KiwiDesk/Settings/Home/UpdateStateRow.swift"
+            )
+        let source = SourceScan.stripComments(
+            try String(contentsOf: file, encoding: .utf8)
+        ).filter { !$0.isWhitespace }
+        let branch =
+            "case.managed(letmanager):"
+            + "sentence(Self.managedSentence(manager)"
+        #expect(source.contains(branch))
     }
 }

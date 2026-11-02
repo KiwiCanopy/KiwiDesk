@@ -443,9 +443,13 @@ work. So under Nix the configuration owns the version, and the app
 gets out of its way. Switching off only the
 scheduled checks is not enough, because *Check for Updates* would
 still offer an update that cannot hold. So the app decides in
-`AppUpdaterFactory.make()`: a bundle under `/nix/store`, or a
-`KiwiDeskUpdatesManagedBy` default naming its manager, gets the
-inert updater. Settings then says where its updates come from
+`AppUpdaterFactory.make()`: a bundle under `/nix/store` gets the
+inert updater, and so does a bundle inside the folder that the
+`KiwiDeskUpdatesManagedFolder` default names, beside a
+`KiwiDeskUpdatesManagedBy` default naming its manager. The folder
+is part of the test because Home Manager writes defaults and never
+removes them: a name alone would keep Sparkle off forever on the
+cask copy of someone who left Nix. Settings then says where its updates come from
 instead of calling update checks off. The check is the store path
 or the key, never "the bundle is not writable", since a standard
 user's admin-owned `/Applications` is not writable either and

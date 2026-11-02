@@ -3,30 +3,43 @@ import Foundation
 /// Whether something outside KiwiDesk installs its updates — a
 /// package manager whose copy Sparkle must not replace (#2909).
 enum ExternalUpdates {
-    /// Defaults key a package manager writes into KiwiDesk's
+    /// String default a package manager writes into KiwiDesk's
     /// domain, naming itself; the Home Manager module sets it.
     static let managerKey = "KiwiDeskUpdatesManagedBy"
 
+    /// String default: the folder holding that manager's copy.
+    /// Defaults outlive the module that wrote them (#2909).
+    static let folderKey = "KiwiDeskUpdatesManagedFolder"
+
     /// The manager's name to show, or nil when Sparkle owns
-    /// updates. A store-path bundle is Nix's even without the
-    /// key; a Home Manager COPY is outside the store, so only the
-    /// key can name it.
+    /// updates: "Nix" for a store-path bundle, else `declared`
+    /// for a bundle inside `folder`.
     static func manager(
         declared: String?,
+        folder: String?,
         bundlePath: String
     ) -> String? {
+        if bundlePath.hasPrefix("/nix/store/") { return "Nix" }
         let named = declared?.trimmingCharacters(
             in: .whitespacesAndNewlines
         )
-        if let named, !named.isEmpty { return named }
-        return bundlePath.hasPrefix("/nix/store/") ? "Nix" : nil
+        guard let named, !named.isEmpty, let folder, !folder.isEmpty
+        else { return nil }
+        let inside = URL(fileURLWithPath: folder).standardized.path
+        let bundle = URL(fileURLWithPath: bundlePath).standardized.path
+        return bundle.hasPrefix(inside + "/") ? named : nil
     }
 
-    /// `manager(declared:bundlePath:)` for the running copy.
-    static func current() -> String? {
+    /// `manager(declared:folder:bundlePath:)` for the running copy.
+    static func current(
+        defaults: UserDefaults = .standard,
+        bundlePath: String = Bundle.main.bundlePath
+    ) -> String? {
         manager(
-            declared: UserDefaults.standard.string(forKey: managerKey),
-            bundlePath: Bundle.main.bundlePath
+            // `string(forKey:)` would read a Bool as "1".
+            declared: defaults.object(forKey: managerKey) as? String,
+            folder: defaults.object(forKey: folderKey) as? String,
+            bundlePath: bundlePath
         )
     }
 }
