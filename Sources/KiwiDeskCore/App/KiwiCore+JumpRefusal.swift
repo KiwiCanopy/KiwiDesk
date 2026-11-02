@@ -48,9 +48,7 @@ extension KiwiCore {
         _ window: AwayWindow,
         in desktops: DesktopSnapshot
     ) -> Bool {
-        desktops.spaces.contains {
-            $0.id == window.nativeSpace && !$0.isUser
-        }
+        !NativeSpaces.isUserSpace(window.nativeSpace, in: desktops.spaces)
     }
 
     /// Why a Swap here would not trade tracked `window` with

@@ -148,9 +148,11 @@ extension KiwiCore {
                 title: entry.title,
                 space: space,
                 spaceIcon: space.flatMap(jumpSpaceIcon),
-                status: .away(
-                    desktop: snapshot.screenNumber(of: entry.nativeSpace)
-                ),
+                status: fullScreen
+                    ? .fullscreen
+                    : .away(
+                        desktop: snapshot.screenNumber(of: entry.nativeSpace)
+                    ),
                 movesHere: !fullScreen && canDriveDesktops
                     && entry.appBundleID != nil && here != nil,
                 swapBlock: fullScreen

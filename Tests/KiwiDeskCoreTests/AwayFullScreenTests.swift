@@ -6,9 +6,9 @@ import Testing
 /// A window left on its native full-screen Space stays known
 /// (#2930): the away census reads user Desktops alone, so a census
 /// absence is no close while the compositor still hosts the window
-/// on a full-screen Space, and its KiwiHub row refuses Swap here
-/// and Move here as full screen. Process-global overrides, so
-/// serialized.
+/// on one of the census's full-screen Spaces, and its KiwiHub row
+/// reads Full Screen and refuses Swap here and Move here.
+/// Process-global overrides, so serialized.
 @MainActor
 @Suite("An away window on a full-screen Space", .serialized)
 struct AwayFullScreenTests {
@@ -36,7 +36,12 @@ struct AwayFullScreenTests {
         return core
     }
 
-    private let emptyCensus = DesktopCensus(hosts: [:], shown: [1])
+    /// No user Desktop hosts the window; Space 9 is full screen.
+    private let emptyCensus = DesktopCensus(
+        hosts: [:],
+        shown: [1],
+        fullScreen: [9]
+    )
 
     private func destroyed(_ core: KiwiCore) -> () -> Int {
         var count = 0
@@ -57,12 +62,18 @@ struct AwayFullScreenTests {
         core.refreshAwayWindows()
         #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 9)
         #expect(count() == 0)
+        // Open or Focus finds it listed, so it activates, never
+        // opens a fresh window.
+        #expect(core.awayReach(bundleID: "com.apple.finder")?.listsAny == true)
     }
 
-    @Test("a user Desktop host or no Space at all still prunes")
+    @Test("a user Desktop, an unlisted Space or no Space still prunes")
     func otherReadingsPrune() {
         defer { resetAuthorityOverrides() }
-        for reading in [WindowSpaceReading.hosted(4), .gone, .unavailable] {
+        let readings: [WindowSpaceReading] = [
+            .hosted(4), .hosted(99), .gone, .unavailable,
+        ]
+        for reading in readings {
             let core = makeCore()
             let count = destroyed(core)
             core.desktopMemory.readWindowSpace = { _ in reading }
@@ -75,20 +86,29 @@ struct AwayFullScreenTests {
 
     @Test("its row and its press refuse both picks as full screen")
     func rowRefusesAsFullScreen() {
-        defer { resetAuthorityOverrides() }
+        DesktopVerbBridge.reset()
+        WMBridge.classResolverOverride = { desktopVerbBridgeClasses[$0] }
+        defer {
+            WMBridge.classResolverOverride = nil
+            resetAuthorityOverrides()
+        }
         let core = makeCore()
         core.state.awayWindows[WindowID(7)]?.nativeSpace = 9
         let row = core.jumpEntries().first
+        #expect(row?.status == .fullscreen)
         #expect(row?.swapBlock == .fullScreen)
         #expect(row?.moveBlock == .fullScreen)
         #expect(row?.movesHere == false)
         #expect(core.swapRefusal(.window(WindowID(7))) == .fullScreen)
         #expect(core.moveHereRefusal(.window(WindowID(7))) == .fullScreen)
+        #expect(core.moveHere(.window(WindowID(7))) == false)
         // On a user Desktop it is the other-Desktop row it was.
         core.state.awayWindows[WindowID(7)]?.nativeSpace = 4
         let desk = core.jumpEntries().first
-        #expect(desk?.swapBlock != .fullScreen)
+        #expect(desk?.status == .away(desktop: 2))
+        #expect(desk?.swapBlock == .otherDesktop(2))
         #expect(desk?.moveBlock == nil)
+        #expect(desk?.movesHere == true)
         #expect(core.moveHereRefusal(.window(WindowID(7))) == nil)
     }
 }

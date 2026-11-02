@@ -715,10 +715,7 @@ editing here:
   call. The departure's space and rank stay in #1207's two
   records, and the three are read together. An
   entry ENDS on the return (the create fold), on a census that
-  no longer hosts the id — save one the per-window read still
-  hosts on a native full-screen Space, which the user-Desktop
-  census never lists, so a prune asks it first (#2930,
-  `AwayFullScreenTests`) — (`refreshAwayWindows`, which emits the
+  no longer hosts the id (`refreshAwayWindows`, which emits the
   corrective `closed` — at the Desktop settle and on the 5 s
   `awayCensus` task while the ledger is non-empty — at
   `awayBackstopInterval` while WindowServer's destroys are live and
@@ -730,6 +727,12 @@ editing here:
   reflection scan discovers the container; `AwayLedgerTests` ▸
   `rekeyFollows` holds the move). A prune retires all three
   records through the one `StateCoordinator.forgetAway`.
+  **A reader that takes a census absence as gone first asks
+  whether the window is hosted on one of the census's
+  `fullScreen` Spaces** (#2930): the census lists user Desktops
+  alone, so a window left on its native full-screen Space is
+  absent but alive — the prune keeps it and the Open or Focus
+  reach lists it (`AwayFullScreenTests` ▸ `fullScreenHostIsKept`).
   **The ledger is reach and bookkeeping, never a bar row**
   (#1228): the Space Bar draws the Desktop in front of the user,
   so `spaceBarApps` reads `state.effectiveMembers` alone and a
