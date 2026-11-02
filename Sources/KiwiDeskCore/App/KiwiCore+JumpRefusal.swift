@@ -15,6 +15,7 @@ extension KiwiCore {
         guard case .window(let id) = target else { return .hiddenApp }
         if let away = state.awayWindows[id] {
             let desktops = NativeSpaces.desktopSnapshot()
+            if awayIsFullScreen(away, in: desktops) { return .fullScreen }
             return .otherDesktop(desktops.screenNumber(of: away.nativeSpace))
         }
         if state.minimizeOrder.contains(where: { $0.id == id }) {
@@ -30,11 +31,26 @@ extension KiwiCore {
         _ target: JumpEntry.Target,
         on display: DisplayID? = nil
     ) -> JumpMoveBlock? {
-        guard case .window(let id) = target,
-            let window = state.windows[id],
+        guard case .window(let id) = target else { return nil }
+        if let away = state.awayWindows[id] {
+            let desktops = NativeSpaces.desktopSnapshot()
+            return awayIsFullScreen(away, in: desktops) ? .fullScreen : nil
+        }
+        guard let window = state.windows[id],
             let here = moveHereSpace(on: display)
         else { return nil }
         return jumpMoveBlock(window, into: here)
+    }
+
+    /// Whether away `window` sits on a native full-screen Space,
+    /// its own macOS Space (#670, #2930), rather than a Desktop.
+    func awayIsFullScreen(
+        _ window: AwayWindow,
+        in desktops: DesktopSnapshot
+    ) -> Bool {
+        desktops.spaces.contains {
+            $0.id == window.nativeSpace && !$0.isUser
+        }
     }
 
     /// Why a Swap here would not trade tracked `window` with

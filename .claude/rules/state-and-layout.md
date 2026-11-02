@@ -715,7 +715,10 @@ editing here:
   call. The departure's space and rank stay in #1207's two
   records, and the three are read together. An
   entry ENDS on the return (the create fold), on a census that
-  no longer hosts the id (`refreshAwayWindows`, which emits the
+  no longer hosts the id — save one the per-window read still
+  hosts on a native full-screen Space, which the user-Desktop
+  census never lists, so a prune asks it first (#2930,
+  `AwayFullScreenTests`) — (`refreshAwayWindows`, which emits the
   corrective `closed` — at the Desktop settle and on the 5 s
   `awayCensus` task while the ledger is non-empty — at
   `awayBackstopInterval` while WindowServer's destroys are live and

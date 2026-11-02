@@ -140,6 +140,7 @@ extension KiwiCore {
         return away.map { entry in
             let space = state.rememberedSpace(of: entry.id)
             let host = snapshot.spaces.first { $0.id == entry.nativeSpace }
+            let fullScreen = awayIsFullScreen(entry, in: snapshot)
             return JumpEntry(
                 target: .window(entry.id),
                 pid: entry.pid,
@@ -150,11 +151,14 @@ extension KiwiCore {
                 status: .away(
                     desktop: snapshot.screenNumber(of: entry.nativeSpace)
                 ),
-                movesHere: canDriveDesktops && entry.appBundleID != nil
-                    && here != nil,
-                swapBlock: .otherDesktop(
-                    snapshot.screenNumber(of: entry.nativeSpace)
-                ),
+                movesHere: !fullScreen && canDriveDesktops
+                    && entry.appBundleID != nil && here != nil,
+                swapBlock: fullScreen
+                    ? .fullScreen
+                    : .otherDesktop(
+                        snapshot.screenNumber(of: entry.nativeSpace)
+                    ),
+                moveBlock: fullScreen ? .fullScreen : nil,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: entry.appBundleID, name: entry.appName)
                 ),

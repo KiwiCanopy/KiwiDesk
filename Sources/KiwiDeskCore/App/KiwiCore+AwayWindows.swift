@@ -89,7 +89,7 @@ extension KiwiCore {
         guard let census = desktopMemory.readCensus(spaces) else {
             return false
         }
-        fold(census, pruning: true)
+        fold(census, pruning: true, spaces: spaces)
         return true
     }
 
@@ -103,18 +103,42 @@ extension KiwiCore {
     /// `execute` back in) — the settle and the task prune.
     /// Nothing here redraws: no bar reads the ledger (#1228),
     /// and a prune's own `window_destroyed` is what a consumer
-    /// hears.
-    func fold(_ census: DesktopCensus, pruning: Bool) {
+    /// hears. `spaces` is the topology the census was read
+    /// against, which a prune asks for full-screen Spaces.
+    func fold(
+        _ census: DesktopCensus,
+        pruning: Bool,
+        spaces: [NativeSpace] = []
+    ) {
         for entry in state.awayWindows.values.sorted(by: {
             $0.id.raw < $1.id.raw
         }) {
             guard let host = census.hosts[entry.id] else {
-                if pruning { pruneAwayWindow(entry) }
+                if pruning, !hostedOnFullScreen(entry, in: spaces) {
+                    pruneAwayWindow(entry)
+                }
                 continue
             }
             state.awayWindows[entry.id]?.nativeSpace = host.space
             state.awayWindows[entry.id]?.isUp = host.isUp
         }
+    }
+
+    /// Whether the compositor still hosts `entry` on a native
+    /// full-screen Space, which the user-Desktop census never
+    /// lists (#2930): that absence is no close. Files the Space.
+    private func hostedOnFullScreen(
+        _ entry: AwayWindow,
+        in spaces: [NativeSpace]
+    ) -> Bool {
+        guard
+            case .hosted(let space) = desktopMemory.readWindowSpace(
+                entry.id
+            ),
+            spaces.contains(where: { $0.id == space && !$0.isUser })
+        else { return false }
+        state.awayWindows[entry.id]?.nativeSpace = space
+        return true
     }
 
     /// Retires what still names a window that is gone for good:
