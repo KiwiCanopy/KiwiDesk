@@ -238,12 +238,17 @@ struct ProfileSpacesSeamTests {
     func noNativeDesktopKeyedContentsStore() throws {
         let allowed: [String: (Int, String)] = [
             "Profiles/DesktopMemory.swift": (
-                4,
-                "the #1207 focus debts, the #1564 sticky left and "
-                    + "the #2771 stack flip — session state"
+                5,
+                "the #1207 focus debts, the #1564 sticky left, "
+                    + "the #2771 stack flip and the #2921 session "
+                    + "sizes — session state"
             ),
             "Profiles/KiwiCore+DesktopIdentity.swift":
                 (1, "a mint's accumulator, held nowhere"),
+            "Tiling/KiwiCore+SessionRatioWrite.swift":
+                (1, "the in-place capture's #2921 accumulator"),
+            "Models/StateSnapshot+InPlace.swift":
+                (3, "the #2921 sizes in transit to the capture"),
         ]
         let root = coreRoot
         let prefix = root.path + "/"
@@ -254,8 +259,10 @@ struct ProfileSpacesSeamTests {
             )
             let hits = source.split(separator: "\n")
                 .filter { line in
+                    // `SessionSizingKey` wraps a native id (#2921).
                     (line.contains("[SkyLight.SpaceID:")
-                        || line.contains("[SkyLight.SpaceID?:"))
+                        || line.contains("[SkyLight.SpaceID?:")
+                        || line.contains("[SessionSizingKey:"))
                         && (line.contains("var ")
                             || line.contains("let "))
                 }

@@ -89,7 +89,9 @@ struct StackFlipSeamTests {
                 )
                 // `context`'s own required parameter.
                 || (call.file == "TilingSettings+Resolution.swift"
-                    && call.args.hasSuffix("flip: stackFlip"))
+                    && call.args
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                        .hasSuffix("flip: stackFlip"))
             #expect(door, "\(call.file): \(call.args)")
         }
     }

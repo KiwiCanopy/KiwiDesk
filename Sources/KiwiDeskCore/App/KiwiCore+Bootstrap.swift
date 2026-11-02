@@ -238,6 +238,10 @@ extension KiwiCore {
         tiler.stackFlip = { [weak self] space in
             self?.stackFlip(of: space)
         }
+        // The drawn sizes read the one session door (#2921).
+        tiler.sessionRatios = { [weak self] space in
+            self?.sessionRatios(of: space) ?? SessionRatios()
+        }
         // The loop owns whether an app's EUI is on at rest; the
         // applier's holds only borrow it (#1508).
         tiler.applier.enhancedUIAtRest = { [weak self] pid in

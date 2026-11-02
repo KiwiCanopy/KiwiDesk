@@ -35,6 +35,7 @@ extension KiwiCore {
         case "delete_profile":
             return namedProfileCommand(args) { name in
                 try self.profiles.delete(name: name)
+                self.forgetSessionRatios(under: .profile(name))  // #2921
                 // #1230: a deleted profile's partitioning has
                 // nothing left to describe. Before the monitor
                 // change, which may apply another profile.
@@ -300,6 +301,9 @@ extension KiwiCore {
     /// shared monitor-change path so the binding picks up that
     /// JSON (#18).
     public func reapplyIfInEffect(_ name: String) {
+        // A saved profile's sizes end on every Desktop, by its key
+        // (#2921 ruling 6), whether or not it is in effect.
+        forgetSessionRatios(under: .profile(name))
         guard isProfileInEffect(name) else { return }
         if profiles.currentName == name,
             let fresh = try? profiles.read(name: name)
@@ -310,7 +314,7 @@ extension KiwiCore {
             // monitor-change's no-prune-on-reconnect rule.
             apply(
                 profile: fresh,
-                cause: .explicit
+                cause: .edit
             )
         } else {
             handleMonitorChange()

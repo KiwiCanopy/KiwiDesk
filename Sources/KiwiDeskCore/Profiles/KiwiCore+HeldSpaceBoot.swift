@@ -92,7 +92,11 @@ extension KiwiCore {
                 declared: home.declared,
                 into: home.arrangement
             ) {
-                setSpaceMode(id, plan.homeModes[id] ?? .bsp)
+                setSpaceMode(
+                    id,
+                    plan.homeModes[id] ?? .bsp,
+                    keepingSizes: true
+                )
             }
         }
         if plan.renumbered { topUpDigitShortcuts() }

@@ -37,16 +37,24 @@ extension KiwiCore {
             else {
                 continue
             }
-            setSpaceMode(space, record.mode)
+            setSpaceMode(space, record.mode, keepingSizes: false)
         }
         // A replay is not an entry (#1177): the frames it puts
         // back are the user's, and the entry it re-states was
         // gathered when it happened.
         settleDrawnSpaceModes()
         state.adopt(snapshot)
-        // The Monocle hold an in-place restart carried (#930);
+        // The Monocle hold and the per-Desktop sizes an in-place
+        // restart carried (#930, #2921), after the modes above;
         // the read validates membership.
         for record in snapshot.spaces {
+            if let session = record.session {
+                adoptSessionRatios(
+                    session.ratioEntries,
+                    oneEntry: session.oneEntry,
+                    of: SpaceID(record.id)
+                )
+            }
             if let held = record.session?.monocleShown {
                 tiler.monocleShownMembers[SpaceID(record.id)] =
                     WindowID(held)

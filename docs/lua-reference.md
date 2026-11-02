@@ -888,6 +888,14 @@ return to the weights `grid.set_column_weight` and
 sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
 `"all"` has no default key.
 
+:::unreleased
+The session layer is kept per macOS Desktop and profile
+([resize](#resize)): a space id, or nothing, resets that Space on
+the Desktop its screen shows under the profile live there — a Space
+with no screen, on every Desktop; `"all"` resets every Space on
+every Desktop.
+:::
+
 **Example:**
 
 ```lua
@@ -6642,6 +6650,33 @@ twin on that space — so an explicit write always shows. This
 covers the BSP split ratios, the stack master ratio, and the
 scrolling slot size — the three interactive-resize knobs —
 consistently.
+
+:::unreleased
+The session layer is kept per macOS Desktop and per profile live
+on it: a Space shown on two Desktops keeps its own sizes on each,
+switching profile keeps each profile's sizes for when it returns,
+and a Desktop where you have not resized it under the live profile
+uses the override, then the global. A screen connected since the
+last Desktop switch, or a Mac where KiwiDesk cannot read which
+Desktop is shown, shares one set of sizes across those Desktops
+([accepted limitations](accepted-limitations.md)). An in-place
+restart keeps every Desktop's sizes.
+
+What ends them:
+
+```mermaid
+flowchart LR
+    R["resize"] --> S[("sizes for this Space,<br/>this Desktop, this profile")]
+    S -->|"Desktop switch,<br/>profile switch"| K["kept"]
+    S -->|"load_profile"| A["cleared on the Desktops<br/>shown now"]
+    S -->|"Settings: saving a<br/>stored profile"| B["that profile's,<br/>cleared on every Desktop"]
+    S -->|"reload_config,<br/>a Settings save of Live"| C["all cleared"]
+    S -->|"_override setter,<br/>set_mode"| D["that Space's,<br/>cleared everywhere"]
+    S -->|"a global setter,<br/>e.g. bsp.set_ratio_h"| F["that field,<br/>cleared everywhere"]
+    S -->|"reset_layout_sizing"| E["this Space here;<br/>all: everything"]
+```
+
+:::
 
 **Example:**
 

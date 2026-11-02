@@ -81,7 +81,8 @@ struct SplitFloorHealWiringTests {
 
     private func ratioH(_ core: KiwiCore, _ space: SpaceID) -> Double {
         core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space)
         ).splitRatioH
     }
 
@@ -137,7 +138,8 @@ struct SplitFloorHealWiringTests {
         #expect(span == 730)
         core.retile()
         let bsp = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space)
         )
         // The bottom draws 400.25; the horizontal ratio, which
         // no floor binds, stays.
@@ -158,6 +160,7 @@ struct SplitFloorHealWiringTests {
         core.retile()
         let ratio = core.tiler.settings.resolvedStack(
             for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space),
             flip: nil
         ).masterRatio
         // 1170 pt split: the stack zone draws 700.25.

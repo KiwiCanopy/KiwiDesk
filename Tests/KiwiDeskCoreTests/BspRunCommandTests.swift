@@ -122,8 +122,11 @@ struct BspRunCommandTests {
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(run.extra > 0)
         let before = try #require(core.state.workspaces[id])
-        let ratio = core.tiler.settings.resolvedBsp(for: before)
-            .splitRatioV
+        let ratio = core.tiler.settings.resolvedBsp(
+            for: before,
+            session: core.sessionRatios(of: before.id)
+        )
+        .splitRatioV
         #expect(
             core.execute(
                 "resize",
@@ -133,7 +136,10 @@ struct BspRunCommandTests {
         let space = try #require(core.state.workspaces[id])
         #expect(space.stackWeights[WindowID(2)] != nil)
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioV
                 == ratio
         )
     }
@@ -151,7 +157,10 @@ struct BspRunCommandTests {
         #expect(run.hiddenAfter.contains(w4))
         let space = try #require(core.state.workspaces[id])
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioV
                 == 0.5
         )
     }
@@ -163,8 +172,11 @@ struct BspRunCommandTests {
         let (core, id) = makeCore(focus: 2, height: 1100)
         #expect(core.tiler.runCovers[id]?.runs.isEmpty == true)
         let before = try #require(core.state.workspaces[id])
-        let ratio = core.tiler.settings.resolvedBsp(for: before)
-            .splitRatioV
+        let ratio = core.tiler.settings.resolvedBsp(
+            for: before,
+            session: core.sessionRatios(of: before.id)
+        )
+        .splitRatioV
         #expect(
             core.execute(
                 "resize",
@@ -174,7 +186,10 @@ struct BspRunCommandTests {
         let space = try #require(core.state.workspaces[id])
         #expect((space.stackWeights[WindowID(2)] ?? 1) > 1)
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioV
                 == ratio
         )
     }
@@ -189,15 +204,21 @@ struct BspRunCommandTests {
             core.tiler.calculatedFrames(state: core.state)[window]
         )
         let before = try #require(core.state.workspaces[id])
-        let ratio = core.tiler.settings.resolvedBsp(for: before)
-            .splitRatioV
+        let ratio = core.tiler.settings.resolvedBsp(
+            for: before,
+            session: core.sessionRatios(of: before.id)
+        )
+        .splitRatioV
         var grown = slot
         grown.size.height += 40
         core.handleResizeEnd(window, slot: slot, frame: grown, in: before)
         let space = try #require(core.state.workspaces[id])
         #expect((space.stackWeights[window] ?? 1) > 1)
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioV
                 == ratio
         )
     }
@@ -212,8 +233,11 @@ struct BspRunCommandTests {
         core.retile(animated: false)
         #expect(core.tiler.runCovers[id]?.runs.isEmpty == true)
         let before = try #require(core.state.workspaces[id])
-        let ratio = core.tiler.settings.resolvedBsp(for: before)
-            .splitRatioV
+        let ratio = core.tiler.settings.resolvedBsp(
+            for: before,
+            session: core.sessionRatios(of: before.id)
+        )
+        .splitRatioV
         #expect(
             core.execute(
                 "resize",
@@ -223,7 +247,10 @@ struct BspRunCommandTests {
         let space = try #require(core.state.workspaces[id])
         #expect(space.stackWeights[WindowID(2)] != nil)
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioV
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioV
                 == ratio
         )
     }
@@ -241,7 +268,10 @@ struct BspRunCommandTests {
         #expect(!run.shown.contains(w4))
         let space = try #require(core.state.workspaces[id])
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioH
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioH
                 < 0.5
         )
     }

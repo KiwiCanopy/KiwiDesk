@@ -5,45 +5,14 @@ import Foundation
 /// shows now, and on no other. Session state in
 /// `DesktopMemory.stackFlips`; every reader of the side a Space
 /// draws takes `stackFlip(of:)`, the one door, which the resolver
-/// `TilingSettings.resolvedStack(for:flip:)` requires.
+/// `TilingSettings.resolvedStack(for:flip:)` requires; which Desktop
+/// is `shownDesktop(of:)`'s.
 extension KiwiCore {
-    /// Which Desktop a Space's flip is filed under now.
-    enum StackFlipDesktop: Equatable {
-        /// The Desktop its screen shows — nil with no SkyLight
-        /// reading, where the flip keeps one Desktop-less entry.
-        case shown(SkyLight.SpaceID?)
-        /// Its screen shows no user Desktop (full screen), or the
-        /// reading names none for its screen.
-        case none
-    }
-
-    /// The Desktop `space`'s screen shows, from the map the head
-    /// of each switch files (`DesktopMemory.shownSpaces`) — never
-    /// a WindowServer read. Shared mode's one synthetic key
-    /// answers for every screen. An empty map reads as no SkyLight;
-    /// a screen the last switch did not file (plugged in since)
-    /// answers `.none` until its first switch — accepted residue.
-    func stackFlipDesktop(of space: SpaceID) -> StackFlipDesktop {
-        guard !desktopMemory.shownSpaces.isEmpty else { return .shown(nil) }
-        let uuid =
-            state.workspaces.display(of: space)
-            .flatMap { NativeSpaces.displayUUID(for: $0) } ?? ""
-        guard let native = shownDesktop(onScreen: uuid) else {
-            return .none
-        }
-        let isUser = NativeSpaces.spaceIsUser(
-            on: uuid,
-            filed: desktopMemory.shownUserSpaces,
-            live: { _ in true }
-        )
-        return isUser ? .shown(native) : .none
-    }
-
     /// The side `space` draws on the Desktop shown now where it
     /// was flipped there, else nil — the ONE door
     /// (`StackFlipSeamTests`).
     func stackFlip(of space: SpaceID) -> StackParams.StackPosition? {
-        guard case .shown(let desktop) = stackFlipDesktop(of: space)
+        guard case .shown(let desktop) = shownDesktop(of: space)
         else { return nil }
         return desktopMemory.stackFlips[desktop]?[space]
     }
@@ -75,7 +44,7 @@ extension KiwiCore {
             }
             space = active
         }
-        guard case .shown(let desktop) = stackFlipDesktop(of: space)
+        guard case .shown(let desktop) = shownDesktop(of: space)
         else {
             return .fail("no desktop shown for space: \(space.raw)")
         }

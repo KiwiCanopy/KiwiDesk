@@ -51,52 +51,65 @@ extension TilingSettings {
     }
 
     /// BSP parameters under the session layer, which outranks the
-    /// authored override (#458, #764).
-    public func resolvedBsp(for space: Space) -> BspParams {
+    /// authored override (#458, #764). `session` is
+    /// `KiwiCore.sessionRatios(of:)`'s answer for the Desktop shown
+    /// now (#2921), required so every reader takes the one door.
+    public func resolvedBsp(
+        for space: Space,
+        session: SessionRatios
+    ) -> BspParams {
         var params = resolvedBsp(for: space.id)
-        if let value = space.sessionRatios.splitRatioH {
+        if let value = session.splitRatioH {
             params.splitRatioH = value
         }
-        if let value = space.sessionRatios.splitRatioV {
+        if let value = session.splitRatioV {
             params.splitRatioV = value
         }
         return params
     }
 
-    /// Stack parameters under the session layer (#458, #764) and
-    /// the side the Space draws on the Desktop shown now (#2771):
-    /// `flip` is `KiwiCore.stackFlip(of:)`'s answer, required so
-    /// every reader of the drawn side takes the one door.
+    /// Stack parameters under the session layer (#458, #764,
+    /// #2921) and the side the Space draws on the Desktop shown
+    /// now (#2771): `flip` is `KiwiCore.stackFlip(of:)`'s answer,
+    /// required so every reader of the drawn side takes the one
+    /// door.
     public func resolvedStack(
         for space: Space,
+        session: SessionRatios,
         flip: StackParams.StackPosition?
     ) -> StackParams {
         var params = resolvedStack(for: space.id)
-        if let value = space.sessionRatios.masterRatio {
+        if let value = session.masterRatio {
             params.masterRatio = value
         }
         if let flip { params.stackPosition = flip }
         return params
     }
 
-    /// Scrolling parameters under the session layer (#458, #764).
+    /// Scrolling parameters under the session layer (#458, #764,
+    /// #2921).
     public func resolvedScrolling(
-        for space: Space
+        for space: Space,
+        session: SessionRatios
     ) -> ScrollingParams {
         var params = resolvedScrolling(for: space.id)
-        if let value = space.sessionRatios.slotSize {
+        if let value = session.slotSize {
             params.slotSize = value
         }
         return params
     }
 
-    /// Grid parameters under the session layer (#763, #764).
-    public func resolvedGrid(for space: Space) -> GridParams {
+    /// Grid parameters under the session layer (#763, #764,
+    /// #2921).
+    public func resolvedGrid(
+        for space: Space,
+        session: SessionRatios
+    ) -> GridParams {
         var params = resolvedGrid(for: space.id)
-        if let value = space.sessionRatios.gridColumnWeights {
+        if let value = session.gridColumnWeights {
             params.columnWeights = value
         }
-        if let value = space.sessionRatios.gridRowWeights {
+        if let value = session.gridRowWeights {
             params.rowWeights = value
         }
         return params
@@ -206,8 +219,9 @@ extension TilingSettings {
     /// frame-producing build that silently omitted it would
     /// diverge only when a sticky is piled — the hardest drift to
     /// spot; strip-geometry builds pass `[]` explicitly.
-    /// `stackFlip` (#2771) is required for the same reason: the
-    /// side a stack Space draws on the Desktop shown now.
+    /// `session` (#2921) and `stackFlip` (#2771) are required for
+    /// the same reason: the sizes and the side a Space draws on the
+    /// Desktop shown now.
     /// `focusedOverride` (#431), `screenNeighbors` (#878, #881),
     /// `sizeBounds` (#677) and `parkBounds` (#2235) follow the
     /// same choose-or-omit shape.
@@ -215,6 +229,7 @@ extension TilingSettings {
         bounds: CGRect,
         space: Space,
         sticky: Set<WindowID>,
+        session: SessionRatios,
         stackFlip: StackParams.StackPosition?,
         focusedOverride: WindowID? = nil,
         screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
@@ -235,10 +250,14 @@ extension TilingSettings {
             sticky: sticky,
             screenNeighbors: screenNeighbors,
             sizeBounds: sizeBounds,
-            bsp: resolvedBsp(for: space),
-            stack: resolvedStack(for: space, flip: stackFlip),
-            scrolling: resolvedScrolling(for: space),
-            grid: resolvedGrid(for: space),
+            bsp: resolvedBsp(for: space, session: session),
+            stack: resolvedStack(
+                for: space,
+                session: session,
+                flip: stackFlip
+            ),
+            scrolling: resolvedScrolling(for: space, session: session),
+            grid: resolvedGrid(for: space, session: session),
             monocle: resolvedMonocle(for: space.id),
             track: resolvedTrack(for: space.id)
         )

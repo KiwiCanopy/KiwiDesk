@@ -191,7 +191,7 @@ struct HeldSpaceTests {
     func reloadKeepsHeldMode() throws {
         let core = try docked()
         core.handle(.displaysChanged([builtIn]))
-        core.setSpaceMode(SpaceID(5), .monocle)
+        core.setSpaceMode(SpaceID(5), .monocle, keepingSizes: false)
         core.execute("reload_config")
         #expect(core.state.workspaces[SpaceID(5)]?.mode == .monocle)
     }
@@ -225,7 +225,7 @@ struct HeldSpaceTests {
     func settingsSaveKeepsHeld() throws {
         let core = try docked()
         core.handle(.displaysChanged([builtIn]))
-        core.setSpaceMode(SpaceID(5), .monocle)
+        core.setSpaceMode(SpaceID(5), .monocle, keepingSizes: false)
         // The draft lists the captured Spaces only (ruling 5).
         var config = GuiConfig()
         config.spaces = core.capturedSpaces.map(\.id)

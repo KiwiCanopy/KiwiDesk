@@ -71,8 +71,12 @@ struct PerSpaceResizeTests {
         #expect(over?.masterRatio == 0.7)
         let space = try #require(core.state.workspaces[SpaceID("1")])
         #expect(
-            core.tiler.settings.resolvedStack(for: space, flip: nil)
-                .masterRatio > 0.7
+            core.tiler.settings.resolvedStack(
+                for: space,
+                session: core.sessionRatios(of: space.id),
+                flip: nil
+            )
+            .masterRatio > 0.7
         )
         #expect(core.tiler.settings.stack.masterRatio == globalBefore)
     }
@@ -90,11 +94,15 @@ struct PerSpaceResizeTests {
         #expect(core.tiler.settings.stack.masterRatio == before)
         #expect(core.tiler.settings.stack.override.isEmpty)
         let space = core.state.workspaces[SpaceID("1")]
-        #expect(space?.sessionRatios.masterRatio != nil)
+        #expect(core.sessionRatios(of: SpaceID("1")).masterRatio != nil)
         if let space {
             #expect(
-                core.tiler.settings.resolvedStack(for: space, flip: nil)
-                    .masterRatio != before
+                core.tiler.settings.resolvedStack(
+                    for: space,
+                    session: core.sessionRatios(of: space.id),
+                    flip: nil
+                )
+                .masterRatio != before
             )
         }
     }
@@ -117,7 +125,11 @@ struct PerSpaceResizeTests {
         core.execute("resize", args: [.string("x"), .number(10)])
         let space = core.state.workspaces[SpaceID("1")]
         let value = space.map {
-            core.tiler.settings.resolvedStack(for: $0, flip: nil).masterRatio
+            core.tiler.settings.resolvedStack(
+                for: $0,
+                session: core.sessionRatios(of: $0.id),
+                flip: nil
+            ).masterRatio
         }
         #expect(value == 0.9)
     }
@@ -139,8 +151,11 @@ struct PerSpaceResizeTests {
         #expect(over?.splitRatioH == 0.7)
         let space = try #require(core.state.workspaces[SpaceID("1")])
         #expect(
-            core.tiler.settings.resolvedBsp(for: space)
-                .splitRatioH > 0.7
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            )
+            .splitRatioH > 0.7
         )
         #expect(
             core.tiler.settings.bsp.splitRatioH == globalBefore
@@ -158,9 +173,9 @@ struct PerSpaceResizeTests {
         // The V ratio moved (in the session layer, #458); the H
         // ratio is untouched on every layer.
         let session =
-            core.state.workspaces[SpaceID("1")]?.sessionRatios
-        #expect(session?.splitRatioV != nil)
-        #expect(session?.splitRatioH == nil)
+            core.sessionRatios(of: SpaceID("1"))
+        #expect(session.splitRatioV != nil)
+        #expect(session.splitRatioH == nil)
         #expect(core.tiler.settings.bsp.splitRatioV == 0.5)
         #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
     }

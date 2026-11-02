@@ -80,12 +80,12 @@ struct PresentationGatherTests {
         // cover, the same entry DOES grid it, so the assertion
         // below cannot pass on a gather that never ran.
         let control = try #require(makeCore(pinsScreen: false))
-        control.setSpaceMode(Self.space, .floating)
+        control.setSpaceMode(Self.space, .floating, keepingSizes: false)
         control.retile(pass: .apply)
         _ = try #require(control.tiler.stashOriginal(Self.show))
 
         let core = try #require(makeCore(pinsScreen: true))
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
 
         #expect(core.tiler.stashOriginal(Self.scrolledOut) != nil)
@@ -102,7 +102,7 @@ struct PresentationGatherTests {
         let core = try #require(
             makeCore(pinsScreen: true, subrole: "AXStandardWindow")
         )
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(Self.show) != nil)
     }

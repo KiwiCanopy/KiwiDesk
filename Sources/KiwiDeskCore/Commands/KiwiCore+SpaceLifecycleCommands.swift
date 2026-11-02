@@ -38,7 +38,7 @@ extension KiwiCore {
             return .fail(refusal.description)
         }
         state.workspaces.ensureSpace(space)
-        if let mode { setSpaceMode(space, mode) }
+        if let mode { setSpaceMode(space, mode, keepingSizes: false) }
         var refusal: ProfileScopeRefusal?
         if scope == .profile, case .failure(let failed) = addToProfile(space) {
             refusal = failed

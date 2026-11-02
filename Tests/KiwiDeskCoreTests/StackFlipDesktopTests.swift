@@ -14,7 +14,7 @@ struct StackFlipDesktopTests {
 
     private func core() throws -> KiwiCore {
         let core = try KeepFixture.core()
-        core.setSpaceMode("1", .stack)
+        core.setSpaceMode("1", .stack, keepingSizes: false)
         return core
     }
 
@@ -64,7 +64,7 @@ struct StackFlipDesktopTests {
         NativeSpaces.displayUUIDOverride = { $0 == display ? "UUID-A" : nil }
         defer { NativeSpaces.displayUUIDOverride = nil }
         show(core, ["UUID-A": 20, "UUID-B": 30])
-        #expect(core.stackFlipDesktop(of: "1") == .shown(20))
+        #expect(core.shownDesktop(of: "1") == .shown(20))
         #expect(core.execute(verb).isSuccess)
         #expect(core.desktopMemory.stackFlips[20]?["1"] == .left)
         show(core, ["UUID-A": 21, "UUID-B": 30])
@@ -85,7 +85,7 @@ struct StackFlipDesktopTests {
     func noReadingIsOneEntry() throws {
         let core = try core()
         show(core, [:])
-        #expect(core.stackFlipDesktop(of: "1") == .shown(nil))
+        #expect(core.shownDesktop(of: "1") == .shown(nil))
         #expect(core.execute(verb).isSuccess)
         #expect(core.desktopMemory.stackFlips[nil]?["1"] == .left)
     }
@@ -101,6 +101,7 @@ struct StackFlipDesktopTests {
             bounds: CGRect(x: 0, y: 0, width: 100, height: 100),
             space: space,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: core.tiler.stackFlip("1")
         )
         #expect(context.stack.stackPosition == .left)

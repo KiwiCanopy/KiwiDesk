@@ -52,6 +52,30 @@ final class DesktopMemory {
     var stackFlips: [SkyLight.SpaceID?: SpaceSides] = [:]
     typealias SpaceSides = [SpaceID: StackParams.StackPosition]
 
+    /// The sizes a resize wrote for each Space on each Desktop
+    /// under the arrangement live there (#2921), keyed like
+    /// `stackFlips`, then by arrangement; the nil Desktop key is the
+    /// one shared entry for a Desktop no reading names. Session state
+    /// an in-place restart carries (#930): written and read in
+    /// `KiwiCore+SessionRatioWrite.swift` alone, through
+    /// `KiwiCore.sessionRatios(of:)`.
+    var sessionRatios: [SkyLight.SpaceID?: ArrangementRatios] = [:]
+    typealias ArrangementRatios = [HeldOrigin.Arrangement?: SpaceRatios]
+    /// The arrangement an apply in flight is installing, which that
+    /// apply's own pass draws and heals under (#2921); nil outside
+    /// one. Never a second answer to whose arrangement is live —
+    /// `KiwiCore.liveArrangement` keeps that, and moves last
+    /// (#1249). Set and cleared by the two apply doors alone, read
+    /// by `sizingOwner` and the drop's switch check.
+    var installing: Installing?
+    struct Installing {
+        let arrangement: HeldOrigin.Arrangement
+        /// Whether the apply changes the arrangement: a switch's
+        /// prune forgets no sizes, a load's does.
+        let switching: Bool
+    }
+    typealias SpaceRatios = [SpaceID: SessionRatios]
+
     /// The last honored focus per native Desktop, any Space (#1564)
     /// — filed beside `honoredFocus`, read at the departure.
     var lastHonoredOn: [SkyLight.SpaceID: WindowID] = [:]

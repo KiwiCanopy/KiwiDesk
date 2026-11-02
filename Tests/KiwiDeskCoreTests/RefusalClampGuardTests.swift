@@ -98,6 +98,7 @@ struct RefusalClampGuardTests {
         let ratio = {
             core.tiler.settings.resolvedStack(
                 for: core.state.workspaces[space]!,
+                session: core.sessionRatios(of: space),
                 flip: nil
             ).masterRatio
         }
@@ -122,7 +123,10 @@ struct RefusalClampGuardTests {
         core.execute("resize", args: [.string("x"), .number(-200)])
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
-            .resolvedScrolling(for: live)
+            .resolvedScrolling(
+                for: live,
+                session: core.sessionRatios(of: live.id)
+            )
             .slotSize
             .editablePoints(along: 1200, gap: 0, horizontal: true)
         #expect(stored >= 399.5)

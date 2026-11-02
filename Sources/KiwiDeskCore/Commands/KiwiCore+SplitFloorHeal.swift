@@ -103,7 +103,10 @@ extension KiwiCore {
                     context: context,
                     cues: &cues,
                     current: {
-                        let bsp = self.tiler.settings.resolvedBsp(for: $0)
+                        let bsp = self.tiler.settings.resolvedBsp(
+                            for: $0,
+                            session: self.sessionRatios(of: $0.id)
+                        )
                         return horizontal
                             ? bsp.splitRatioH : bsp.splitRatioV
                     },
@@ -121,6 +124,7 @@ extension KiwiCore {
         case .stack:
             let stack = tiler.settings.resolvedStack(
                 for: space,
+                session: sessionRatios(of: space.id),
                 flip: stackFlip(of: space.id)
             )
             let (master, stackZone) = StackLayout.partition(
@@ -142,6 +146,7 @@ extension KiwiCore {
                 current: {
                     self.tiler.settings.resolvedStack(
                         for: $0,
+                        session: self.sessionRatios(of: $0.id),
                         flip: self.stackFlip(of: $0.id)
                     ).masterRatio
                 },

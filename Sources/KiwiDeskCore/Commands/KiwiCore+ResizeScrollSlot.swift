@@ -53,7 +53,10 @@ extension KiwiCore {
         bounds: CGRect
     ) {
         let scrolling =
-            tiler.settings.resolvedScrolling(for: space)
+            tiler.settings.resolvedScrolling(
+                for: space,
+                session: sessionRatios(of: space.id)
+            )
         let horizontal = scrolling.axisIsHorizontal
         let along = horizontal ? bounds.width : bounds.height
         // Built through the same resolver `layoutInput` uses,
@@ -68,6 +71,7 @@ extension KiwiCore {
             bounds: bounds,
             space: space,
             sticky: [],
+            session: sessionRatios(of: space.id),
             stackFlip: stackFlip(of: space.id)
         )
         let inner = context.gaps.inner

@@ -29,7 +29,10 @@ extension KiwiCore {
         {
             return response
         }
-        let bsp = tiler.settings.resolvedBsp(for: space)
+        let bsp = tiler.settings.resolvedBsp(
+            for: space,
+            session: sessionRatios(of: space.id)
+        )
         let signed =
             bspFocusSign(axis: axis, space: space)
             * delta

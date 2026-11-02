@@ -4,8 +4,10 @@ import Foundation
 /// — what `resize` accumulates — so it lands on what its profile
 /// authored, structure kept: the active Space by default, one
 /// named by id, or every Space for `all` (owner ruling
-/// 2026-09-21). What counts as sizing is `Space.resetSizing`'s,
-/// never stated here.
+/// 2026-09-21). What counts as sizing is `Space.resetSizing`'s
+/// and the session ratios', never stated here; a named Space
+/// resets on the Desktop shown now, `all` on every Desktop
+/// (#2921 ruling 2).
 extension KiwiCore {
     /// The spelling that names every Space.
     static let everySpace = "all"
@@ -14,9 +16,11 @@ extension KiwiCore {
     /// `.apply` retile in `layoutCommand` shows the reset.
     func resetLayoutSizing(_ args: [JSONValue]) -> CommandResponse {
         let targets: [SpaceID]
+        var everyDesktop = false
         if let raw = args.first?.stringValue, !raw.isEmpty {
             if raw == Self.everySpace {
                 targets = state.workspaces.allSpaces.map(\.id)
+                everyDesktop = true
             } else {
                 let space = SpaceID(raw)
                 guard state.workspaces[space] != nil else {
@@ -30,7 +34,11 @@ extension KiwiCore {
             }
             targets = [active]
         }
+        if everyDesktop {
+            clearSessionRatios { $0 = SessionRatios() }
+        }
         for space in targets {
+            if !everyDesktop { resetSessionRatios(of: space) }
             state.workspaces.withSpace(space) {
                 $0.resetSizing()
                 // The slots it re-divides are hidden under a

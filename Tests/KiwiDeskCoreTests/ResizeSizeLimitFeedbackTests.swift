@@ -91,7 +91,11 @@ struct ResizeSizeLimitFeedbackTests {
         )
         #expect(res.isSuccess)
         let spaceObj = core.state.workspaces[space]!
-        let stack = core.tiler.settings.resolvedStack(for: spaceObj, flip: nil)
+        let stack = core.tiler.settings.resolvedStack(
+            for: spaceObj,
+            session: core.sessionRatios(of: spaceObj.id),
+            flip: nil
+        )
         let ratio = stack.masterRatio
         // At 1200 width, 500 min size means masterRatio is at least ~0.416
         #expect(ratio >= 0.40)
@@ -208,7 +212,8 @@ struct ResizeSizeLimitFeedbackTests {
         )
         #expect(res.isSuccess)
         let bsp = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space)
         )
         #expect(bsp.splitRatioH >= 0.40)
     }

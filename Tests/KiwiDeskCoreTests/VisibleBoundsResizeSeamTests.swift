@@ -63,7 +63,8 @@ struct VisibleBoundsResizeSeamTests {
 
     private func ratioH(_ core: KiwiCore) -> Double {
         core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1"))
         ).splitRatioH
     }
 

@@ -44,7 +44,7 @@ extension KiwiCore {
                 continue
             case .reusable(let earlier):
                 seed = earlier
-                setSpaceMode(seed, lead)
+                setSpaceMode(seed, lead, keepingSizes: false)
             case .absent:
                 seed = mintedSpaceNumber()
                 state.workspaces.ensureSpace(seed, mode: lead)

@@ -63,7 +63,8 @@ public struct WorkspaceManager: Sendable {
     }
 
     /// Sets layout mode; an actual mode CHANGE clears the viewport
-    /// offset and stint state (#66, #458, #128, #437). A same-mode
+    /// offset and stint state (#66, #128, #437); the session sizes
+    /// are `KiwiCore.setSpaceMode`'s to clear (#2921). A same-mode
     /// set must NOT clear: profile/GUI applies call this densely
     /// over all live spaces, and an unconditional clear would snap
     /// every scrolling viewport home on any unrelated edit.
@@ -78,7 +79,6 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.scrollRest = nil
         spaces[id]?.runHeads = []
         spaces[id]?.runTails = []
-        spaces[id]?.sessionRatios = SessionRatios()
         spaces[id]?.trackWeights = [:]
         // Every run weighs by `stackWeights` (#2541): one layout's
         // run weights must not reshape another's.

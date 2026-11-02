@@ -50,20 +50,25 @@ struct InPlaceRestartNoMotionTests {
         guard let core = F.processA(windows) else { return nil }
         // Floated by hand: a manual override the scan cannot see.
         core.state.setFloating(WindowID(13), true)
-        core.setSpaceMode(F.shown, mode)
-        core.state.workspaces.withSpace(F.shown) { space in
+        core.setSpaceMode(F.shown, mode, keepingSizes: false)
+        core.withSessionRatios(of: F.shown) { ratios in
             switch mode {
             case .bsp:
-                space.sessionRatios.splitRatioH = 0.31
-                space.sessionRatios.splitRatioV = 0.58
+                ratios.splitRatioH = 0.31
+                ratios.splitRatioV = 0.58
+            case .stack: ratios.masterRatio = 0.62
+            case .scrolling: ratios.slotSize = .fraction(0.63)
+            default: break
+            }
+        }
+        core.state.workspaces.withSpace(F.shown) { space in
+            switch mode {
             case .stack:
-                space.sessionRatios.masterRatio = 0.62
                 space.stackWeights = [WindowID(3): 1.7]
             case .track:
                 space.trackBreaks = [WindowID(1), WindowID(3)]
                 space.trackWeights = [WindowID(1): 1.4]
             case .scrolling:
-                space.sessionRatios.slotSize = .fraction(0.63)
                 space.focused = WindowID(3)
             case .monocle:
                 space.focused = WindowID(2)
@@ -147,7 +152,7 @@ struct InPlaceRestartNoMotionTests {
         let a = try #require(F.processA(windows, configure: park))
         a.state.setFloating(float, true)
         a.state.setFloating(WindowID(13), true)
-        a.setSpaceMode(F.shown, .monocle)
+        a.setSpaceMode(F.shown, .monocle, keepingSizes: false)
         a.state.workspaces.focus(WindowID(3), in: F.shown)
         _ = F.settle(a)
         a.state.workspaces.focus(float, in: F.shown)

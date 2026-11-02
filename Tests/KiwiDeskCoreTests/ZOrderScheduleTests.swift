@@ -264,6 +264,7 @@ struct ZOrderScheduleTests {
             bounds: bounds,
             space: many,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil
         )
         #expect(
@@ -280,6 +281,7 @@ struct ZOrderScheduleTests {
             bounds: bounds,
             space: few,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil
         )
         #expect(

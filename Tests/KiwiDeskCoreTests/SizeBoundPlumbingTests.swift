@@ -30,6 +30,7 @@ struct SizeBoundPlumbingTests {
             bounds: bounds,
             space: Space(id: "1", mode: .scrolling),
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil
         )
         #expect(context.sizeBounds.isEmpty)
@@ -45,6 +46,7 @@ struct SizeBoundPlumbingTests {
             bounds: bounds,
             space: Space(id: "1", mode: .scrolling),
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil,
             sizeBounds: [WindowID(1): bound]
         )
