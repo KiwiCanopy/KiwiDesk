@@ -84,6 +84,34 @@ struct EdgeBandRightEdgeTests {
         #expect(origin == CGPoint(x: 1728 - EdgeBandWrite.band - 846, y: 16))
     }
 
+    /// A window arriving from the screen to the right: it lands
+    /// on this screen clear of the right band, at the target's top.
+    @Test("An arrival from the right lands on the screen")
+    func arrivalLandsOnTheScreen() {
+        let other = CGRect(x: 1800, y: 16, width: 846, height: 566)
+        let origin = EdgeBandWrite.liftedOrigin(
+            target: upper,
+            current: other,
+            screen: screen
+        )
+        #expect(origin == CGPoint(x: 1728 - EdgeBandWrite.band - 846, y: 16))
+    }
+
+    /// A full-width window hanging past the left edge: the lift
+    /// brings its whole width back onto the screen, or the size
+    /// write after it is refused for the overhang.
+    @Test("A lift pulls a hanging window back onto the screen")
+    func liftPullsTheOverhangBack() {
+        let hanging = CGRect(x: 100, y: 600, width: 1728, height: 501)
+        let lifted = EdgeBandWrite.liftedOrigin(
+            target: CGRect(x: 872, y: 606.5, width: 840, height: 494.5),
+            current: hanging,
+            screen: screen
+        )
+        #expect(lifted?.x == 0)
+        #expect(lifted?.y == 1117 - EdgeBandWrite.band - 501)
+    }
+
     @Test("The refusing app keeps the old width without the move")
     func unmovedWriteIsRefused() {
         let app = RefusingApp(wide, screen: screen)

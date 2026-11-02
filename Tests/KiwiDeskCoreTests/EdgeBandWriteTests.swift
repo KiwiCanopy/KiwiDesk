@@ -130,6 +130,8 @@ struct EdgeBandWriteTests {
         let above = CGRect(x: 16, y: -800, width: 840, height: 499)
         #expect(lift(slot, from: above) == 1117 - EdgeBandWrite.band - 499)
         #expect(lift(slot, from: current) == 1117 - EdgeBandWrite.band - 499)
+        // On the target's screen, not left at the other one's x.
+        #expect(origin(slot, from: current)?.x == slot.minX)
     }
 
     @Test("Nothing refused, nothing lifted")

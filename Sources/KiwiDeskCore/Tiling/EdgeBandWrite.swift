@@ -45,7 +45,9 @@ enum EdgeBandWrite {
     /// later frame of a long shrink, never its first — or when the
     /// window arrives from another screen. An axis that needs no
     /// move keeps its coordinate, or on an arrival takes the
-    /// target's with the current length on `screen`.
+    /// target's, either clamped so the current length is on
+    /// `screen`: a window hanging over onto a neighbouring screen
+    /// takes no size write at all.
     static func liftedOrigin(
         target: CGRect,
         current: CGRect,
@@ -80,7 +82,7 @@ enum EdgeBandWrite {
             _ low: CGFloat,
             _ high: CGFloat
         ) -> CGFloat {
-            arriving ? max(low, min(asked, high - length)) : now
+            max(low, min(arriving ? asked : now, high - length))
         }
         return CGPoint(
             x: x
