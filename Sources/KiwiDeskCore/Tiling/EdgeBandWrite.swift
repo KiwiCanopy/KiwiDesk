@@ -9,7 +9,9 @@ import CoreGraphics
 /// holds it while writing, and another screen reaches past that
 /// edge (macOS 27, Firefox and Finder, measured 2026-11-01/02).
 /// A resize keeps the top-left corner, so only these two edges
-/// move. AX frames: y grows down.
+/// move. The band applies whatever the neighbours: where along an
+/// edge macOS refuses depends on their extent, which no gate here
+/// models. AX frames: y grows down.
 enum EdgeBandWrite {
     /// How far inside a screen's bottom or right edge a shrink is
     /// refused: measured ~19 pt, escaped from ~25 pt, set wider so
