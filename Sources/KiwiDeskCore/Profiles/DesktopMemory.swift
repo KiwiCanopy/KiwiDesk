@@ -43,6 +43,15 @@ final class DesktopMemory {
     /// a fold or the switch handler.
     var honoredFocus: [SpaceID: [SkyLight.SpaceID: WindowID]] = [:]
 
+    /// The stack side each Space draws on a Desktop where it was
+    /// flipped (#2771), keyed by the Desktop's native Space id —
+    /// nil where no SkyLight reading names one — then by Space.
+    /// Session state, never a setting: written by the toggle and
+    /// the clearing doors in `KiwiCore+StackFlip.swift`, read
+    /// through `KiwiCore.stackFlip(of:)` alone.
+    var stackFlips: [SkyLight.SpaceID?: SpaceSides] = [:]
+    typealias SpaceSides = [SpaceID: StackParams.StackPosition]
+
     /// The last honored focus per native Desktop, any Space (#1564)
     /// — filed beside `honoredFocus`, read at the departure.
     var lastHonoredOn: [SkyLight.SpaceID: WindowID] = [:]

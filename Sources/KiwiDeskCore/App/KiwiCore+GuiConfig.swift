@@ -153,6 +153,7 @@ extension KiwiCore {
         // session resize layer so an edited Layout Defaults
         // ratio visibly applies on every space (#458).
         clearSessionRatios { $0 = SessionRatios() }
+        forgetStackFlips()  // #2771: a Settings save ends every flip
         // Ensure spaces in display order first (config.spaces
         // is the authoritative list, so insertion order matches
         // the user's chosen Spaces ordering). Any extras that

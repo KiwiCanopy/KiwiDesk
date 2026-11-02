@@ -18,6 +18,7 @@ extension KiwiCore {
         closeCrossSession()
         state.forgetRememberedSpaces()
         forgetDesktopFocus()
+        forgetStackFlips()  // #2771
         // #1230: both of this lane's records are saved
         // arrangements. The Desktop→Space map became DURABLE in
         // the same lane (`GuiConfig.desktopSpaces`), so without

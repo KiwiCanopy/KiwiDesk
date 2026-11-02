@@ -294,7 +294,7 @@ struct NothingToDivideCueTests {
             )
         )
         let live = core.state.workspaces[sp.id]!
-        let stack = core.tiler.settings.resolvedStack(for: live)
+        let stack = core.tiler.settings.resolvedStack(for: live, flip: nil)
         let seen = refusals(core) {
             core.writeCappedMasterRatio(
                 proposed: stack.masterRatio - 600 / 1200,

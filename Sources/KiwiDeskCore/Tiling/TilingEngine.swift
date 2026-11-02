@@ -255,6 +255,12 @@ public final class TilingEngine {
     /// its edge reserves its strip (#2784); `bootstrapCoreServices`
     /// wires it to `KiwiCore.pocketHoldsSeveral`.
     var pocketAtRest: @MainActor () -> Bool = { false }
+    /// The side a Space draws on the Desktop shown now, where it
+    /// was flipped there (#2771); `bootstrapCoreServices` wires it
+    /// to `KiwiCore.stackFlip(of:)`, the one door.
+    var stackFlip: @MainActor (SpaceID) -> StackParams.StackPosition? = {
+        _ in nil
+    }
 
     /// The fingerprint `screen`'s bar edges resolve under in
     /// `settings` (the live ones unless a draft is handed in) —

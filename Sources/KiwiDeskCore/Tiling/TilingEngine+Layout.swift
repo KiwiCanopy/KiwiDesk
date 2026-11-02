@@ -45,6 +45,7 @@ extension TilingEngine {
                     .filter(\.isSticky)
                     .map(\.id)
             ),
+            stackFlip: stackFlip(space.id),
             // Surface a tiled-sticky traveler when it is the
             // frontmost window (#431): it has a slot in `tiled`
             // but can never be the membership-guarded `focused`
@@ -166,14 +167,14 @@ extension TilingEngine {
         for space: Space,
         state: StateCoordinator
     ) -> Int {
-        // No display at all → unbounded (never spill), a safe
-        // fall back to join-and-pile.
+        // No display → unbounded: never spill, join and pile.
         guard let screen = Self.screen(for: space.id, in: state)
         else { return .max }
         let context = settings.context(
             bounds: layoutBounds(on: screen, for: space),
             space: space,
-            sticky: []
+            sticky: [],
+            stackFlip: stackFlip(space.id)
         )
         return TrackLayout.trackCapacity(for: context)
     }

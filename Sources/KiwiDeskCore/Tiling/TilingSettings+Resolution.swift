@@ -63,12 +63,19 @@ extension TilingSettings {
         return params
     }
 
-    /// Stack parameters under the session layer (#458, #764).
-    public func resolvedStack(for space: Space) -> StackParams {
+    /// Stack parameters under the session layer (#458, #764) and
+    /// the side the Space draws on the Desktop shown now (#2771):
+    /// `flip` is `KiwiCore.stackFlip(of:)`'s answer, required so
+    /// every reader of the drawn side takes the one door.
+    public func resolvedStack(
+        for space: Space,
+        flip: StackParams.StackPosition?
+    ) -> StackParams {
         var params = resolvedStack(for: space.id)
         if let value = space.sessionRatios.masterRatio {
             params.masterRatio = value
         }
+        if let flip { params.stackPosition = flip }
         return params
     }
 
@@ -199,6 +206,8 @@ extension TilingSettings {
     /// frame-producing build that silently omitted it would
     /// diverge only when a sticky is piled — the hardest drift to
     /// spot; strip-geometry builds pass `[]` explicitly.
+    /// `stackFlip` (#2771) is required for the same reason: the
+    /// side a stack Space draws on the Desktop shown now.
     /// `focusedOverride` (#431), `screenNeighbors` (#878, #881),
     /// `sizeBounds` (#677) and `parkBounds` (#2235) follow the
     /// same choose-or-omit shape.
@@ -206,6 +215,7 @@ extension TilingSettings {
         bounds: CGRect,
         space: Space,
         sticky: Set<WindowID>,
+        stackFlip: StackParams.StackPosition?,
         focusedOverride: WindowID? = nil,
         screenNeighbors: ScreenNeighbors = ScreenNeighbors(),
         sizeBounds: [WindowID: EffectiveSizeBound] = [:],
@@ -226,7 +236,7 @@ extension TilingSettings {
             screenNeighbors: screenNeighbors,
             sizeBounds: sizeBounds,
             bsp: resolvedBsp(for: space),
-            stack: resolvedStack(for: space),
+            stack: resolvedStack(for: space, flip: stackFlip),
             scrolling: resolvedScrolling(for: space),
             grid: resolvedGrid(for: space),
             monocle: resolvedMonocle(for: space.id),

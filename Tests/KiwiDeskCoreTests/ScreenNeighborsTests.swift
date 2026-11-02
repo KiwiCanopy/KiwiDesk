@@ -199,7 +199,8 @@ struct ScreenNeighborsPlumbingTests {
         let context = settings.context(
             bounds: screenA,
             space: Space(id: "1", mode: .scrolling),
-            sticky: []
+            sticky: [],
+            stackFlip: nil
         )
         #expect(context.screenNeighbors == ScreenNeighbors())
     }
@@ -211,6 +212,7 @@ struct ScreenNeighborsPlumbingTests {
             bounds: screenA,
             space: Space(id: "1", mode: .scrolling),
             sticky: [],
+            stackFlip: nil,
             screenNeighbors: ScreenNeighbors(left: true)
         )
         #expect(

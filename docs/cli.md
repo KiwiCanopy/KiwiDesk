@@ -712,12 +712,14 @@ out or away, or a new window of the app opened there
 unmarking that window instead of the focused one.
 :::
 
+:::unreleased
 `stack.toggle_stack_position [space]` moves a space's stack zone
-to the opposite side (left ↔ right, top ↔ bottom), the focused
-space when no id is given. The change is live and unsaved;
-`revert_settings` with its leaf id
-([below](#raw-ipc-protocol)) undoes it
-([Lua reference](lua-reference.md#stacktoggle_stack_position)).
+to the opposite side (left ↔ right, top ↔ bottom) on the macOS
+Desktop its screen shows now, the focused space when no id is
+given. The flip lasts for the session and is no setting; what ends
+it, and the `stack_position` that `get_state` reports, are in the
+[Lua reference](lua-reference.md#stacktoggle_stack_position).
+:::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
 `"out"` for the [pocket](lua-reference.md#pocket)'s window, `null`

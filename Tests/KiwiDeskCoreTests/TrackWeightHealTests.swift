@@ -84,7 +84,8 @@ struct TrackWeightHealTests {
         let context = core.tiler.settings.context(
             bounds: bounds,
             space: space,
-            sticky: []
+            sticky: [],
+            stackFlip: nil
         )
         let ranges = TrackLayout.ranges(
             of: TrackLayout.foldedPartition(
