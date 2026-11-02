@@ -124,6 +124,15 @@ const buildCmd =
 // `brew install --cask kiwidesk` — a one-line edit here.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
+// The Home Manager rung (#2909): the flake input, the module and
+// the switch that turns it on. The module requires
+// targets.darwin.copyApps, the default from stateVersion 25.11.
+const nixSnippet = [
+  'inputs.kiwicanopy.url = "github:KiwiCanopy/nix";',
+  "imports = [ inputs.kiwicanopy.homeModules.kiwidesk ];",
+  "programs.kiwidesk.enable = true;",
+].join("\n");
+
 
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
 // core, a ring of seed dots) for the mode toggle — drawn rather
@@ -1300,6 +1309,38 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
             )}
           </p>
 
+
+          {/* Rung 3 (#2909): Nix and Home Manager, collapsed like
+               the source build below it. Homebrew and the disk
+               image update through the app; this copy updates
+               through home-manager switch, which its comment says. */}
+          <details class="quickstart__alt">
+            <summary>
+              <Icon name="lucide:chevron-right"
+                class="quickstart__alt-chevron" width={15}
+                height={15} aria-hidden="true" />
+              {t.nix_summary}
+            </summary>
+            <div class="code" aria-label={t.nix_code_aria}>
+              <div class="code__bar">
+                <span class="code__dot" aria-hidden="true"></span>
+                <span class="code__dot" aria-hidden="true"></span>
+                <span class="code__dot" aria-hidden="true"></span>
+                <span class="code__title">{t.nix_title_bar}</span>
+                <button class="code__copy" type="button"
+                  data-copy={nixSnippet}
+                  data-label-copy={t.build_copy}
+                  data-label-done={t.build_copy_done}
+                  aria-label={t.nix_copy_aria}>
+                  <Icon name="lucide:copy" class="code__copy-icon"
+                    width={15} height={15} aria-hidden="true" />
+                  <span class="code__copy-label">{t.build_copy}</span>
+                </button>
+              </div>
+              <pre><code>{nixSnippet}
+<span class="cmt">{t.nix_cmt}</span></code></pre>
+            </div>
+          </details>
 
           <details class="quickstart__alt">
             <summary>
