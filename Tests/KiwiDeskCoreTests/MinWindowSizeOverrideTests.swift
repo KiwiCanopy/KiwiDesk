@@ -82,6 +82,22 @@ struct MinWindowSizeOverrideTests {
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes())
     }
 
+    @Test("a CLI call's string width and height are read (#2918)")
+    func cliStringsRead() {
+        let core = makeTestCore()
+        #expect(
+            core.execute(
+                "set_min_window_size_override",
+                args: [.string("monitoring"), .string("220"), .string("160")]
+            ).isSuccess
+        )
+        #expect(
+            core.tiler.settings.minWindowSizeOverride == [
+                mine: MinSize(width: 220, height: 160)
+            ]
+        )
+    }
+
     @Test("an argument it cannot read is refused and writes nothing")
     func verbRefuses() {
         let core = makeTestCore()
