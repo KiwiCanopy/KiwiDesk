@@ -55,11 +55,7 @@ extension KiwiCore {
         }
         // The pocket lists an app's own window apart, with its key
         // (#2923); the GUI renders the chord (#2612 ▸ 1).
-        let owners = Dictionary(
-            uniqueKeysWithValues: rows.compactMap { row in
-                state.pocketKeyOwner(of: row.window).map { (row.window, $0) }
-            }
-        )
+        let owners = pocketRowOwners(rows.map(\.window))
         return BarPeekContent(
             rows: rows.filter { owners[$0.window] == nil },
             checks: source.isList,
@@ -68,6 +64,17 @@ extension KiwiCore {
             keyed: rows.filter { owners[$0.window] != nil },
             chord: { [barMenuHooks] id in
                 owners[id].flatMap { barMenuHooks.pocketKeyChord($0)?.drawn }
+            }
+        )
+    }
+
+    /// Each of `windows` an app's own Pocket key keeps, by that
+    /// app's bundle id: the one split the pocket's peek and its
+    /// VoiceOver menu read (#2923).
+    func pocketRowOwners(_ windows: [WindowID]) -> [WindowID: String] {
+        Dictionary(
+            uniqueKeysWithValues: windows.compactMap { id in
+                state.pocketKeyOwner(of: id).map { (id, $0) }
             }
         )
     }

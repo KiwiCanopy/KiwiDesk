@@ -1012,7 +1012,11 @@ Obligations:
   one-window label drops what its item shows, an App Bar label
   drawing no header and a Space Bar glyph's the name alone
   (#2649, `BarPeekLabelHeaderTests` ▸ `sourcesStateTheirHeader`,
-  `coreWiresTheHeader`). No bar view registers
+  `coreWiresTheHeader`). **Whether a list sets an app's own pocket
+  windows apart is asked of the one `BarPeekSource.keysPocketWindows`**,
+  which the peek and its VoiceOver menu both read, splitting through
+  the one `pocketRowOwners` (#2923, borders.md ▸ The pocket rides
+  the bar pass; `PocketListKeyedTests`). No bar view registers
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one

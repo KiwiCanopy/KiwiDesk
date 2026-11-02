@@ -37,7 +37,7 @@ struct PocketListKeyedTests {
     func plateListsBoth() {
         let fixture = fixture()
         #expect(fixture.core.pocketPlateWindows == [general, mine])
-        // Capacity still counts the general list alone (▸ 5).
+        // The general list leaves the keyed window out.
         #expect(fixture.core.state.generalPocket.map(\.window) == [general])
     }
 
@@ -109,12 +109,11 @@ struct PocketListKeyedTests {
         }
         var shown: NSMenu?
         core.spaceBars.glyphActions.present = { menu, _ in shown = menu }
-        core.presentBarWindowMenu(
-            core.pocketPlateWindows,
-            kind: .overflow,
-            space: nil,
-            at: NSView(),
-            keyed: true
+        // Through the wired door, so the source's flag reaches it.
+        core.shelves.peek.openMenu(
+            .pocket(core.pocketPlateWindows),
+            nil,
+            NSView()
         )
         let menu = try #require(shown)
         let header = try #require(

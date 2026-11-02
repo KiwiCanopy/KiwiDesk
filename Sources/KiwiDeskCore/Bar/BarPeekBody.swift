@@ -138,16 +138,23 @@ final class BarPeekBody: NSView {
         let more =
             hidden > 0
             ? moreLine(hidden, shelf: shelf, up: cutAtTop) : nil
+        // A list's check column sits past the wrap width, so titles
+        // wrap where they would without it (#2063).
+        let column = content.checks ? Metrics.checkColumn : 0
+        // The Pocket Keys header spans the column too, unwrapped.
+        let section =
+            groups.contains { $0.group.keyed }
+            ? Self.natural(
+                Self.label(Self.keyedSection, headerFont, headerInk)
+            ) - column : 0
         let fitted = min(
             Metrics.maxWidth - 2 * Metrics.padH,
             max(
                 groups.map { $0.need(indent: indent) }.max() ?? 0,
-                more?.width ?? 0
+                more?.width ?? 0,
+                section
             )
         )
-        // A list's check column sits past the wrap width, so titles
-        // wrap where they would without it (#2063).
-        let column = content.checks ? Metrics.checkColumn : 0
         let width = max(
             fitted,
             reserve.minWidth - column - 2 * Metrics.padH
