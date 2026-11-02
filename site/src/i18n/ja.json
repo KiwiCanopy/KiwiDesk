@@ -552,6 +552,7 @@
   "nix_cmt": "# アップデートは home-manager switch で届きます",
   "nix_code_aria": "Home Manager で KiwiDesk をインストールする",
   "nix_copy_aria": "Home Manager の設定をコピー",
+  "nix_setup_link": "flake の input とモジュールの import は KiwiCanopy/nix の README にあります",
   "nix_summary": "Nix と Home Manager で入れる場合",
   "nix_title_bar": "home.nix",
   "notfound_home": "KiwiDesk のホームへ",
