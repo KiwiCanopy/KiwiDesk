@@ -7,6 +7,8 @@ paths:
   - "scripts/release.sh"
   - "scripts/bump-version.sh"
   - "scripts/install-hooks.sh"
+  - "scripts/update-homebrew-cask.py"
+  - "scripts/update-nix-source.py"
   - "scripts/pre-commit"
   - "Package.swift"
   - ".github/workflows/**"
@@ -302,9 +304,10 @@ relax. `AppcastParserTests` holds both halves: the refusal it
 must keep, and the image-beside-the-archive case it must never
 fire on. The feed is also not the only reader of a release's
 asset list, so an artifact added to a release answers to every
-one of them — `.github/workflows/homebrew.yml` selects the
-cask's archive by exact name (`HomebrewCaskUpdateTests`), which
-is what makes a third asset harmless there.
+one of them — `.github/workflows/homebrew.yml` and
+`.github/workflows/nix.yml` select the archive by exact name
+(`HomebrewCaskUpdateTests`, `NixSourceUpdateTests`), which is what
+makes a third asset harmless there.
 
 No version cutoff is written anywhere and none should be — the
 releases

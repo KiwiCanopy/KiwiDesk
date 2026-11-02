@@ -455,7 +455,8 @@ or the key, never "the bundle is not writable", since a standard
 user's admin-owned `/Applications` is not writable either and
 Sparkle's authorization prompt is right there. A Nix user has no
 Sparkle to fall back on, so the release's hash bump is their only
-update path, and a release is not complete until it lands.
+update path, and a release is not complete until the `Update Nix
+flake` workflow is green.
 :::
 
 Trade-off: the first release reaches fewer people. Accepted, and

@@ -114,7 +114,8 @@ jobs:
             exit 1
           fi
 
-      - uses: actions/checkout@v7
+      - name: Check out KiwiCanopy/nix
+        uses: actions/checkout@v7
         with:
           repository: KiwiCanopy/nix
           ref: main

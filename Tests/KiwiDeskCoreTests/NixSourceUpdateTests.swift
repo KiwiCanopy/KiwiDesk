@@ -79,9 +79,32 @@ struct NixSourceUpdateTests {
         defer { fixture.cleanup() }
         let original = try fixture.source()
 
-        #expect(try fixture.update("4.1.0-rc1", Self.digest).status != 0)
-        #expect(try fixture.update("4.1.0", "not-a-digest").status != 0)
+        let version = try fixture.update("4.1.0-rc1", Self.digest)
+        #expect(version.status != 0)
+        #expect(version.stderr.contains("MAJOR.MINOR.PATCH"))
+        let digest = try fixture.update("4.1.0", "not-a-digest")
+        #expect(digest.status != 0)
+        #expect(digest.stderr.contains("64 lowercase hex"))
         #expect(try fixture.source() == original)
+    }
+
+    @Test("a pin with an invalid version or hash is refused")
+    func invalidPinFailsClosed() throws {
+        for (field, bad, message) in [
+            ("version", "4.0", "pinned version is invalid"),
+            ("hash", "sha256-short", "pinned hash is invalid"),
+        ] {
+            let fixture = try SourceFixture(version: "4.0.0")
+            defer { fixture.cleanup() }
+            try fixture.set(field, to: bad)
+            let original = try fixture.source()
+
+            let run = try fixture.update("4.1.0", Self.digest)
+
+            #expect(run.status != 0, Comment(rawValue: field))
+            #expect(run.stderr.contains(message), Comment(rawValue: field))
+            #expect(try fixture.source() == original)
+        }
     }
 
     /// A pin that grew or lost a key is a shape the updater does not
@@ -101,62 +124,86 @@ struct NixSourceUpdateTests {
 
     @Test("workflow advances only published verified releases")
     func workflowGuardsDistributionBoundary() throws {
-        let workflow = try String(
-            contentsOf: SourceFixture.repoRoot
-                .appendingPathComponent(".github")
-                .appendingPathComponent("workflows")
-                .appendingPathComponent("nix.yml"),
-            encoding: .utf8
-        )
+        let yaml = try workflowSource("nix.yml")
+        for needle in [
+            "types: [published]", "workflow_dispatch:", "queue: max",
+            "cancel-in-progress: false",
+        ] {
+            #expect(yaml.contains(needle), Comment(rawValue: needle))
+        }
+        #expect(!yaml.contains("HOMEBREW_TAP_DEPLOY_KEY"))
 
-        #expect(workflow.contains("types: [published]"))
-        #expect(workflow.contains("workflow_dispatch:"))
-        #expect(workflow.contains("queue: max"))
-        #expect(workflow.contains("cancel-in-progress: false"))
-        #expect(workflow.contains("secrets.NIX_REPO_DEPLOY_KEY"))
-        #expect(workflow.contains("repository: KiwiCanopy/nix"))
-        #expect(
-            workflow.contains("select(.name == $want)"),
-            "the archive must be picked by name"
+        let pick = try workflowStep(
+            "Verify the published release asset",
+            in: yaml
         )
-        #expect(!workflow.contains("jq -r '.assets[0]"))
-        #expect(workflow.contains("sha256sum"))
-        #expect(workflow.contains("scripts/update-nix-source.py"))
-        #expect(!workflow.contains("HOMEBREW_TAP_DEPLOY_KEY"))
+        #expect(pick.contains("select(.name == $want)"))
+        #expect(!pick.contains(".assets[0]"))
+        let bytes = try workflowStep(
+            "Download and verify the archive bytes",
+            in: yaml
+        )
+        #expect(bytes.contains("sha256sum"))
+        let checkout = try workflowStep(
+            "Check out KiwiCanopy/nix",
+            in: yaml
+        )
+        #expect(checkout.contains("repository: KiwiCanopy/nix"))
+        #expect(
+            checkout.contains("ssh-key: ${{ secrets.NIX_REPO_DEPLOY_KEY }}")
+        )
+        let update = try workflowStep(
+            "Update and validate the source pin",
+            in: yaml
+        )
+        #expect(update.contains("scripts/update-nix-source.py"))
+        let push = try workflowStep(
+            "Commit and push the source pin",
+            in: yaml
+        )
+        #expect(push.contains("git -C kiwicanopy-nix push origin HEAD:main"))
     }
 
     /// The two channels verify a release the same way: a check
     /// tightened in one workflow and not the other leaves a channel
-    /// shipping bytes the other would refuse.
+    /// shipping bytes the other would refuse. Compared: the trigger,
+    /// the tag, the permissions, the updater checkout and both
+    /// verification steps. Not compared, since they must differ: the
+    /// concurrency group, the target repository and its deploy key.
     @Test("both workflows verify the release identically")
     func verificationMatchesHomebrew() throws {
-        let nix = try Self.verification(in: "nix.yml")
-        let brew = try Self.verification(in: "homebrew.yml")
-        #expect(nix.count > 20, "verification steps not found")
-        #expect(nix == brew)
+        let nix = try workflowSource("nix.yml")
+        let brew = try workflowSource("homebrew.yml")
+        for step in [
+            "Verify the published release asset",
+            "Download and verify the archive bytes",
+        ] {
+            #expect(
+                try Self.lines(of: step, in: nix)
+                    == Self.lines(of: step, in: brew),
+                Comment(rawValue: step)
+            )
+        }
+        for shared in [
+            "types: [published]",
+            "TAG: ${{ github.event.release.tag_name || inputs.tag }}",
+            "contents: read",
+            "ref: ${{ github.event.repository.default_branch }}",
+        ] {
+            #expect(nix.contains(shared), Comment(rawValue: shared))
+            #expect(brew.contains(shared), Comment(rawValue: shared))
+        }
     }
 
-    /// The steps from the release check to the deploy-key check,
-    /// without comment lines, which may differ.
-    private static func verification(in name: String) throws -> [String] {
-        let source = try String(
-            contentsOf: SourceFixture.repoRoot
-                .appendingPathComponent(".github/workflows/\(name)"),
-            encoding: .utf8
-        )
-        guard
-            let start = source.range(
-                of: "- name: Verify the published release asset"
-            ),
-            let end = source.range(
-                of: "- name: Require the",
-                range: start.upperBound..<source.endIndex
-            )
-        else { return [] }
-        return source[start.lowerBound..<end.lowerBound]
+    /// A step's non-blank lines: stripping a comment block leaves
+    /// blank lines whose count differs between the twins.
+    private static func lines(
+        of step: String,
+        in yaml: String
+    ) throws -> [Substring] {
+        try workflowStep(step, in: yaml)
             .split(separator: "\n")
-            .map { $0.trimmingCharacters(in: .whitespaces) }
-            .filter { !$0.isEmpty && !$0.hasPrefix("#") }
+            .filter { !$0.allSatisfy(\.isWhitespace) }
     }
 }
 
@@ -208,6 +255,13 @@ private struct SourceFixture {
     func pin() throws -> [String: String] {
         let data = try Data(contentsOf: file)
         return try JSONDecoder().decode([String: String].self, from: data)
+    }
+
+    func set(_ field: String, to value: String) throws {
+        var pin = try pin()
+        pin[field] = value
+        let data = try JSONEncoder().encode(pin)
+        try data.write(to: file)
     }
 
     func update(_ version: String, _ digest: String) throws -> ScriptRun {
