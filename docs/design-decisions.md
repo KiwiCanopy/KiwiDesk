@@ -443,8 +443,10 @@ work. So under Nix the configuration owns the version, and the app
 gets out of its way. Switching off only the
 scheduled checks is not enough, because *Check for Updates* would
 still offer an update that cannot hold. So the app decides in
-`AppUpdaterFactory.make()`: a bundle under `/nix/store` gets the
-inert updater, and so does a bundle inside the folder that the
+`AppUpdaterFactory.make()`: a bundle under `/nix/store` gets an
+updater without Sparkle, which still owes What's new after a
+switch to a newer version (#2911), and so does a bundle inside the
+folder that the
 `KiwiDeskUpdatesManagedFolder` default names, beside a
 `KiwiDeskUpdatesManagedBy` default naming its manager. The folder
 is part of the test because Home Manager writes defaults and never

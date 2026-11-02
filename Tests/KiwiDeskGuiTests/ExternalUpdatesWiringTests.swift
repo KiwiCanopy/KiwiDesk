@@ -57,7 +57,7 @@ struct ExternalUpdatesWiringTests {
         for arm in [
             "switchchoice(bundled:bundled,manager:manager){",
             "case.inert:returnNoUpdater()",
-            "case.managed(letmanager):returnNoUpdater(managedBy:manager)",
+            "case.managed(letmanager):returnManagedUpdater(manager:manager)",
             "case.sparkle:returnSparkleUpdater()",
             "ExternalUpdates.current(defaults:.standard,"
                 + "bundlePath:main.bundlePath)",

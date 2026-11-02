@@ -195,19 +195,10 @@ final class NoUpdater: AppUpdating {
     func checkForUpdates() {}
     var updatePending: Bool { false }
     var onUpdatePendingChanged: () -> Void = {}
-    let updates: UpdateStateStore
+    let updates = UpdateStateStore()
     var whatsNew: WhatsNewCoordinator? { nil }
-    let autoInstall: AutoInstallSetting
+    let autoInstall = AutoInstallSetting.inert()
     var onWillRelaunch: () -> Void = {}
-
-    /// `managedBy` names the package manager that installs this
-    /// copy's updates (#2909); nil for an unbundled run.
-    init(managedBy manager: String? = nil) {
-        updates = UpdateStateStore(
-            manager.map { .managed(by: $0) } ?? .unavailable
-        )
-        autoInstall = .inert(manager.map { .managed(by: $0) })
-    }
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).
@@ -242,7 +233,7 @@ enum AppUpdaterFactory {
         )
         switch choice(bundled: bundled, manager: manager) {
         case .inert: return NoUpdater()
-        case .managed(let manager): return NoUpdater(managedBy: manager)
+        case .managed(let manager): return ManagedUpdater(manager: manager)
         case .sparkle: return SparkleUpdater()
         }
     }
