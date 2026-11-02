@@ -11,7 +11,13 @@ import Foundation
 extension StateSnapshot {
     /// One Space's session sizing and its Monocle hold.
     public struct SpaceSession: Codable, Sendable, Equatable {
+        /// The sizes the Space draws at the capture. A build before
+        /// 4.2.0 kept this one set per Space and reads it back; this
+        /// build reads it only from such a record (`oneEntry`).
         public var ratios: SessionRatios
+        /// Every Desktop's and arrangement's sizes (#2921); every
+        /// capture writes the list, an empty one included.
+        public var desktopRatios: [DesktopRatios]?
         public var stackWeights: [UInt32: Double]
         public var scrollRest: ScrollRest?
         /// `TilingEngine.monocleShownMembers` (#881): the member
@@ -25,8 +31,21 @@ extension StateSnapshot {
         public var runHeads: [UInt32]?
         public var runTails: [UInt32]?
 
-        public init(space: Space, monocleShown: WindowID?) {
-            ratios = space.sessionRatios
+        public init(
+            space: Space,
+            ratios sizes: SessionSizing,
+            monocleShown: WindowID?
+        ) {
+            ratios = sizes.drawn
+            desktopRatios = sizes.entries
+                .map {
+                    DesktopRatios(
+                        desktop: $0.key.desktop,
+                        arrangement: $0.key.arrangement,
+                        ratios: $0.value
+                    )
+                }
+                .sorted { $0.order < $1.order }
             stackWeights = Dictionary(
                 uniqueKeysWithValues: space.stackWeights.map {
                     ($0.key.raw, $0.value)
@@ -43,14 +62,80 @@ extension StateSnapshot {
                 ? nil : space.runTails.map(\.raw).sorted()
         }
 
+        /// A record a build before #2921 wrote: its one set per
+        /// Space, else nil.
+        public var oneEntry: SessionRatios? {
+            desktopRatios == nil ? ratios : nil
+        }
+
+        /// Every entry the list carries.
+        public var ratioEntries: [SessionSizingKey: SessionRatios] {
+            var out: [SessionSizingKey: SessionRatios] = [:]
+            for entry in desktopRatios ?? [] {
+                out[
+                    SessionSizingKey(
+                        desktop: entry.desktop,
+                        arrangement: entry.arrangement
+                    )
+                ] = entry.ratios
+            }
+            return out
+        }
+
         private enum CodingKeys: String, CodingKey {
             case ratios = "session_ratios"
+            case desktopRatios = "desktop_ratios"
             case stackWeights = "stack_weights"
             case scrollRest = "scroll_rest"
             case monocleShown = "monocle_shown"
             case maximized
             case runHeads = "run_heads"
             case runTails = "run_tails"
+        }
+    }
+
+    /// A Space's sizes as the in-place capture reads them (#2921):
+    /// every entry, and the set it draws now.
+    public struct SessionSizing: Sendable {
+        public var entries: [SessionSizingKey: SessionRatios]
+        public var drawn: SessionRatios
+
+        public init(
+            entries: [SessionSizingKey: SessionRatios],
+            drawn: SessionRatios
+        ) {
+            self.entries = entries
+            self.drawn = drawn
+        }
+    }
+
+    /// One Desktop's sizes for a Space under one arrangement
+    /// (#2921); a nil `desktop` is the shared entry.
+    public struct DesktopRatios: Codable, Sendable, Equatable {
+        public var desktop: SkyLight.SpaceID?
+        public var arrangement: HeldOrigin.Arrangement?
+        public var ratios: SessionRatios
+
+        public init(
+            desktop: SkyLight.SpaceID?,
+            arrangement: HeldOrigin.Arrangement?,
+            ratios: SessionRatios
+        ) {
+            self.desktop = desktop
+            self.arrangement = arrangement
+            self.ratios = ratios
+        }
+
+        /// A stable order for the capture's list.
+        var order: String {
+            "\(desktop.map(String.init) ?? "")|"
+                + (arrangement.map { String(describing: $0) } ?? "")
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case desktop
+            case arrangement
+            case ratios = "session_ratios"
         }
     }
 
@@ -97,9 +182,11 @@ extension StateSnapshot {
 extension StateCoordinator {
     /// The in-place stop's capture (#930): `snapshot()` plus each
     /// Space's and each window's session memory. `monocleShown`
-    /// is the engine's hold, which state does not own.
+    /// is the engine's hold and `ratios` each Space's per-Desktop
+    /// sizes (#2921), which state does not own.
     public func inPlaceSnapshot(
-        monocleShown: [SpaceID: WindowID]
+        monocleShown: [SpaceID: WindowID],
+        ratios: (SpaceID) -> StateSnapshot.SessionSizing
     ) -> StateSnapshot {
         var snapshot = snapshot()
         snapshot.spaces = workspaces.allSpaces.map {
@@ -107,6 +194,7 @@ extension StateCoordinator {
                 of: $0,
                 session: StateSnapshot.SpaceSession(
                     space: $0,
+                    ratios: ratios($0.id),
                     monocleShown: monocleShown[$0.id]
                 )
             )
@@ -127,14 +215,14 @@ extension StateCoordinator {
 
     /// Re-applies what `inPlaceSnapshot` added. Space sizing is
     /// written AFTER the record's membership: re-filing a window
-    /// drops its stack weight and releases the scroll slot.
+    /// drops its stack weight and releases the scroll slot. The
+    /// per-Desktop ratios are `KiwiCore.restore`'s to adopt.
     mutating func adoptSession(
         _ record: StateSnapshot.SpaceRecord,
         in space: SpaceID
     ) {
         guard let session = record.session else { return }
         workspaces.withSpace(space) {
-            $0.sessionRatios = session.ratios
             $0.stackWeights = Dictionary(
                 uniqueKeysWithValues: session.stackWeights.map {
                     (WindowID($0.key), $0.value)

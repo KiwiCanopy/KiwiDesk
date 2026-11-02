@@ -10,8 +10,8 @@ extension KiwiCore {
     /// no default so every caller classifies itself (AGENTS.md
     /// §5) — `ProfileApplyCause` states what each one implies.
     /// The prune has two independent causes (`cause.prunesStale
-    /// || switching`), and the session ratio-layer clear rides
-    /// both an explicit apply and a profile change (#458, #764).
+    /// || switching`); a load starts the shown Desktops' session
+    /// sizes fresh, and a switch keeps them (#2921).
     func apply(
         profile: Profile,
         cause: ProfileApplyCause
@@ -19,6 +19,7 @@ extension KiwiCore {
         // Owed #1741 and #1752 crossings end at the first apply.
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
+        defer { desktopMemory.installing = nil }
         adoptAppWide(from: profile)
         adoptSharedLook(from: profile)
         let pruneStaleSpaces = cause.prunesStale
@@ -27,8 +28,7 @@ extension KiwiCore {
         // #1230: file the OUTGOING profile's partitioning before
         // anything rebuilds the space set, and learn in one
         // answer whether this apply is a profile CHANGE — which
-        // gates the session clear, the prune below and the
-        // restore after it.
+        // gates the prune below and the restore after it.
         let heldBefore = Set(state.heldSpaces.keys)
         // A held number this profile claims moves off it first.
         reclaimHeldNames(
@@ -38,19 +38,21 @@ extension KiwiCore {
         // Read before anything moves what is live or declared (#1790).
         let temporaries = Set(liveTemporarySpaces)
         let switching = recordOutgoingPartitioning(before: profile)
+        // Its own pass draws the incoming sizes (#2921).
+        desktopMemory.installing = .init(
+            arrangement: .profile(profile.name),
+            switching: switching
+        )
         // A held Space keeps the icon it had where it lived (#1507),
         // read before the incoming settings replace them.
         let outgoingIcons = tiler.settings.spaceIcons
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = resolvedSettings(of: profile)
-        // The session layer reseeds on an explicit apply, and on
-        // any apply that CHANGES the profile — it outranks the
-        // incoming authored overrides (#458, #764). A same-
-        // profile event apply keeps it.
-        if forceRetile || switching {
-            clearSessionRatios { $0 = SessionRatios() }
-        }
+        // A load starts the shown Desktops' sizes fresh; a switch
+        // keeps them, filed under the arrangement they were made
+        // under (#2921 rulings 5 and 6).
+        if cause == .explicit { forgetSessionRatiosOnShownDesktops() }
         // An explicit apply ends every stack flip; an event or
         // monitor apply keeps them (#2771).
         if forceRetile { forgetStackFlips() }
@@ -120,7 +122,8 @@ extension KiwiCore {
         {
             setSpaceMode(
                 space.id,
-                profile.spaceModes[space.id] ?? .bsp
+                profile.spaceModes[space.id] ?? .bsp,
+                keepingSizes: switching
             )
         }
         // Adopt the pins of the set covering the live monitors
@@ -145,7 +148,11 @@ extension KiwiCore {
             declared: declared,
             into: .profile(profile.name)
         ) {
-            setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
+            setSpaceMode(
+                id,
+                profile.spaceModes[id] ?? .bsp,
+                keepingSizes: switching
+            )
         }
         // THIS profile's override tiers (#55, #109), passed
         // explicitly: callers adopt after apply, so
@@ -181,6 +188,7 @@ extension KiwiCore {
         supersedeMonitorSettle()
         profiles.arrangementInFlight += 1  // #1790: no retire mid-apply
         defer { profiles.arrangementInFlight -= 1 }
+        defer { desktopMemory.installing = nil }
         let temporaries = Set(liveTemporarySpaces)
         let heldBefore = Set(state.heldSpaces.keys)
         let outgoingIcons = tiler.settings.spaceIcons
@@ -192,19 +200,23 @@ extension KiwiCore {
         // profile — file the outgoing one, restore its own.
         let standard = HeldOrigin.Arrangement.standard(composed.sourceName)
         let switching = recordOutgoingPartitioning(before: standard)
+        desktopMemory.installing =
+            .init(arrangement: standard, switching: switching)
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
-        // Same explicit-apply reseed as `apply(profile:)`.
+        // A forced Standard apply is a load (#2921 ruling 6); after
+        // a reload it finds nothing left to clear.
         if forceRetile {
-            clearSessionRatios { $0 = SessionRatios() }
+            forgetSessionRatiosOnShownDesktops()
             forgetStackFlips()  // #2771
         }
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
             setSpaceMode(
                 space,
-                composed.spaceModes[space] ?? .bsp
+                composed.spaceModes[space] ?? .bsp,
+                keepingSizes: switching
             )
         }
         // Held while the outgoing pins still stand (#1507, #1790).

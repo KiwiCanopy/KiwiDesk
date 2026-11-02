@@ -4,11 +4,15 @@ import Foundation
 /// pass, folded from two Bools when a third cause arrived
 /// (#1507).
 enum ProfileApplyCause {
-    /// An explicit user load or an in-effect edit: the profile's
-    /// Spaces become authoritative (stale ones pruned, the
-    /// sidecar synced) and the retile forces past the ±2 pt
-    /// tolerance so a small edit is not swallowed.
+    /// An explicit user load: the profile's Spaces become
+    /// authoritative (stale ones pruned, the sidecar synced) and
+    /// the retile forces past the ±2 pt tolerance so a small edit
+    /// is not swallowed.
     case explicit
+    /// An in-effect edit's re-apply: `explicit`'s prune and force,
+    /// without a load's fresh start of the shown Desktops' sizes
+    /// (#2921 ruling 6).
+    case edit
     /// The post-reload re-apply: forced, prunes nothing.
     case reapply
     /// A Desktop binding switch: un-forced, so AX-echo lag
@@ -19,6 +23,8 @@ enum ProfileApplyCause {
     /// forwarded (#1507).
     case monitorChange
 
-    var prunesStale: Bool { self == .explicit }
-    var forcesRetile: Bool { self == .explicit || self == .reapply }
+    var prunesStale: Bool { self == .explicit || self == .edit }
+    var forcesRetile: Bool {
+        self == .explicit || self == .edit || self == .reapply
+    }
 }

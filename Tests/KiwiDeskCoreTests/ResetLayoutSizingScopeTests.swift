@@ -30,8 +30,8 @@ struct ResetLayoutSizingScopeTests {
         core.state.workspaces.ensureSpace(one)
         core.state.workspaces.ensureSpace(two)
         for space in [one, two] {
+            core.withSessionRatios(of: space) { $0.splitRatioH = 0.7 }
             core.state.workspaces.withSpace(space) {
-                $0.sessionRatios.splitRatioH = 0.7
                 $0.stackWeights[WindowID(9)] = 2
             }
         }
@@ -39,11 +39,11 @@ struct ResetLayoutSizingScopeTests {
         return core
     }
 
-    private func isReset(_ space: SpaceID, on core: KiwiCore) -> Bool {
-        guard let space = core.state.workspaces[space] else {
+    private func isReset(_ id: SpaceID, on core: KiwiCore) -> Bool {
+        guard let space = core.state.workspaces[id] else {
             return false
         }
-        return space.sessionRatios == SessionRatios()
+        return core.sessionRatios(of: id) == SessionRatios()
             && space.stackWeights.isEmpty
     }
 

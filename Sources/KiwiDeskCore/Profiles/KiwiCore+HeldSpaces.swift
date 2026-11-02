@@ -71,7 +71,7 @@ extension KiwiCore {
                 if state.workspaces[id] != nil {
                     forwardWindows(of: id, to: space.id)
                 }
-                moveMembers(of: space.id, to: id, mode: space.mode)
+                moveMembers(of: space.id, to: id, for: origin)
                 focus.spaceFocus[id] = space.focused
             }
             state.heldSpaces[id] = origin
@@ -146,9 +146,8 @@ extension KiwiCore {
         var focus = heldFocusTrackers()
         for (id, fresh) in zip(held, names) where fresh != id {
             guard let origin = state.heldSpaces[id] else { continue }
-            let mode = state.workspaces[id]?.mode ?? .bsp
             focus.spaceFocus[fresh] = focus.spaceFocus[id]
-            moveMembers(of: id, to: fresh, mode: mode)
+            moveMembers(of: id, to: fresh, for: origin)
             state.heldSpaces[id] = nil
             state.heldSpaces[fresh] = origin
             onLog(
@@ -209,6 +208,12 @@ extension KiwiCore {
                     state.refileAway(of: window, to: origin.name)
                 }
                 oweShortcutDrop(id)  // its hold ended (#1827)
+                // Its sizes go home with it (#2921).
+                rekeySessionRatios(
+                    id,
+                    to: origin.name,
+                    under: origin.arrangement
+                )
                 forwardWindows(of: id, to: origin.name)
                 tiler.settings.removeSpace(id)
             }
@@ -234,7 +239,8 @@ extension KiwiCore {
             declared: profile.declaredSpaces,
             into: arrangement
         ) {
-            setSpaceMode(id, profile.spaceModes[id] ?? .bsp)
+            let mode = profile.spaceModes[id] ?? .bsp
+            setSpaceMode(id, mode, keepingSizes: true)
         }
     }
 
@@ -279,33 +285,37 @@ extension KiwiCore {
         for id in state.heldSpaces.keys {
             let space = state.workspaces[id]
             guard spaceHoldsNothing(id) else { continue }
-            endHold(of: id)
             guard space != nil,
                 let other = state.workspaces.allSpaces.first(where: {
                     $0.id != id
                 })?.id
-            else { continue }
+            else {
+                endHold(of: id)
+                continue
+            }
             tiler.settings.removeSpace(id)
             spacePins[id] = nil
+            // Still held, so its sizes' owner is its origin (#2921).
             forwardWindows(of: id, to: other)
+            endHold(of: id)
             retired = true
         }
         return retired
     }
 
-    /// Ends every held Space's record without touching the Space —
-    /// resetting every setting, which makes nothing a hold's to
-    /// keep.
+    /// Ends every held Space's record, the Space untouched (a reset).
     func forgetHeldSpaces() {
         state.heldSpaces = [:]
     }
 
-    /// Moves a Space's members, live and remembered, into a new one.
+    /// Moves a Space's members, live and remembered, into a new one,
+    /// in its own mode; its sizes stay `origin`'s (#2921).
     private func moveMembers(
         of source: SpaceID,
         to target: SpaceID,
-        mode: LayoutMode
+        for origin: HeldOrigin
     ) {
+        let mode = state.workspaces[source]?.mode ?? .bsp
         state.workspaces.ensureSpace(target, mode: mode)
         for window in state.workspaces[source]?.windows ?? [] {
             state.workspaces.add(window, to: target)
@@ -317,34 +327,6 @@ extension KiwiCore {
         state.renameRememberedSpace(source, to: target)
         spaceHistory.trails.rekey(source, to: target)  // #1655
         rekeyStackFlips(source, to: target)  // #2771
-    }
-
-    /// `WorkspaceManager.add` nils the focus trackers of a window
-    /// it moves; the hold is not a focus change.
-    private func heldFocusTrackers() -> HeldFocus {
-        var spaceFocus: [SpaceID: WindowID] = [:]
-        for space in state.workspaces.allSpaces {
-            spaceFocus[space.id] = space.focused
-        }
-        return HeldFocus(
-            lastFocused: state.workspaces.lastFocused,
-            candidate: state.workspaces.focusReturnCandidate,
-            spaceFocus: spaceFocus
-        )
-    }
-}
-
-/// The focus trackers a membership move must not cost.
-private struct HeldFocus {
-    let lastFocused: WindowID?
-    let candidate: WindowID?
-    var spaceFocus: [SpaceID: WindowID]
-
-    func restore(into workspaces: inout WorkspaceManager) {
-        workspaces.restoreFocusTrackers(
-            lastFocused: lastFocused,
-            candidate: candidate,
-            spaceFocus: spaceFocus
-        )
+        rekeySessionRatios(source, to: target, under: origin.arrangement)
     }
 }

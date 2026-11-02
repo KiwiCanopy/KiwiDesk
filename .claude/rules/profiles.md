@@ -798,6 +798,15 @@ The obligations below bind this directory:
   `KiwiCore.saveProfile`; `ProfileManager.save` makes its argument
   current, so a site that spells `profiles.save(` itself has
   already lost the name it needed.
+- **An apply in flight names what it installs in one scope, never
+  a mirror.** `DesktopMemory.installing` is set by the two apply
+  doors alone, once their switch verdict is in, cleared on their
+  exit, and read in `KiwiCore+SessionRatioWrite.swift` alone
+  (`sizingOwner(of:)` and the drop's switch check), so the apply's own
+  pass draws the incoming arrangement's session sizes while the
+  name still moves last (#2921, `SessionRatioSeamTests` ▸
+  `installingScopeHasItsHomes`). A new apply door that installs an
+  arrangement sets it; a new reader is a ruling here.
 - **Move the name only where the Spaces move with it.** The two
   apply doors do (`becameLive`, `standardIsLive`), each at the
   end of its own body. This is not a claim that nothing else
@@ -1297,7 +1306,8 @@ incoming arrangement does not name*. The obligations:
   files — `KiwiCore+HeldSpaceOrder.swift` holds the naming walk
   and the batch's placement, `KiwiCore+HeldSpaceReads.swift` the
   read-only predicates and captured views, and
-  `KiwiCore+HeldSpaceBoot.swift` the restart's plan (#1646), and
+  `KiwiCore+HeldSpaceBoot.swift` the restart's plan (#1646),
+  `KiwiCore+HeldSpaceFocus.swift` the focus trackers a move keeps, and
   none of them writes a hold; write
   `StateCoordinator.heldSpaces` in `KiwiCore+HeldSpaces.swift`
   alone, and add a new way into or out of a hold there — a caller

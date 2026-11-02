@@ -93,7 +93,8 @@ struct SplitFloorCueTests {
             ]
         )
         let ratio = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space)
         ).splitRatioH
         #expect(ratio == 0.5)
         // Once per episode: a retile storm says nothing more.
@@ -107,7 +108,8 @@ struct SplitFloorCueTests {
         core.retile()
         #expect(refusals.count == 1)
         let healed = core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space)
         ).splitRatioH
         #expect(abs(healed * 1170 - 700.25) < 0.01)
         // Re-learned at the old ratio: the SAME episode key
@@ -197,6 +199,7 @@ struct SplitFloorCueTests {
         #expect(
             core.tiler.settings.resolvedStack(
                 for: core.state.workspaces[space]!,
+                session: core.sessionRatios(of: space),
                 flip: nil
             ).masterRatio == 0.6
         )

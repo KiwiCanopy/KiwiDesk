@@ -320,7 +320,7 @@ extension KiwiCore {
             return .fail("expected [space,] mode")
         }
         state.workspaces.ensureSpace(spaceID)
-        setSpaceMode(spaceID, mode)
+        setSpaceMode(spaceID, mode, keepingSizes: false)
         // Forced: an explicit config apply (AGENTS.md §5),
         // like the layoutCommand dispatch.
         retile(pass: .apply)

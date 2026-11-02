@@ -79,7 +79,8 @@ struct BspFocusResizeTests {
     /// stored globals must stay untouched.
     private func resolvedBsp(_ core: KiwiCore) -> BspParams {
         core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1"))
         )
     }
 

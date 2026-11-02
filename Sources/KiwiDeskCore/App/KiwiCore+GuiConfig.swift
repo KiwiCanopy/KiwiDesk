@@ -205,7 +205,8 @@ extension KiwiCore {
         {
             setSpaceMode(
                 space.id,
-                config.spaceModes[space.id] ?? .bsp
+                config.spaceModes[space.id] ?? .bsp,
+                keepingSizes: false
             )
         }
         spacePins = keepingPins(

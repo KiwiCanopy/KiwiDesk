@@ -256,7 +256,7 @@ extension KiwiCore {
         where space.mode != .bsp && state.heldSpaces[space.id] == nil
             && !temporaries.contains(space.id)
         {
-            setSpaceMode(space.id, .bsp)
+            setSpaceMode(space.id, .bsp, keepingSizes: false)
         }
     }
 

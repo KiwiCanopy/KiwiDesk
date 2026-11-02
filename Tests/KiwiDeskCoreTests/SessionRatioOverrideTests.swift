@@ -30,19 +30,21 @@ struct SessionRatioOverrideTests {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         core.execute(
             "bsp.set_ratio_h_override",
             args: [.string("1"), .number(0.3)]
         )
         let space = core.state.workspaces[SpaceID("1")]
-        #expect(space?.sessionRatios.splitRatioH == nil)
+        #expect(core.sessionRatios(of: SpaceID("1")).splitRatioH == nil)
         if let space {
             #expect(
-                core.tiler.settings.resolvedBsp(for: space)
-                    .splitRatioH == 0.3
+                core.tiler.settings.resolvedBsp(
+                    for: space,
+                    session: core.sessionRatios(of: space.id)
+                )
+                .splitRatioH == 0.3
             )
         }
     }
@@ -64,12 +66,15 @@ struct SessionRatioOverrideTests {
                 .splitRatioH == 0.3
         )
         let space = core.state.workspaces[SpaceID("1")]
-        let session = space?.sessionRatios.splitRatioH
+        let session = core.sessionRatios(of: SpaceID("1")).splitRatioH
         #expect(session != nil && session != 0.3)
         if let space, let session {
             #expect(
-                core.tiler.settings.resolvedBsp(for: space)
-                    .splitRatioH == session
+                core.tiler.settings.resolvedBsp(
+                    for: space,
+                    session: core.sessionRatios(of: space.id)
+                )
+                .splitRatioH == session
             )
         }
     }
@@ -95,14 +100,16 @@ struct SessionRatioOverrideTests {
         session.splitRatioV = 0.7
         session.masterRatio = 0.6
         session.slotSize = .points(500)
-        let space = Space(id: SpaceID("1"), sessionRatios: session)
-        #expect(over.resolvedBsp(for: space).splitRatioH == 0.8)
-        #expect(over.resolvedBsp(for: space).splitRatioV == 0.7)
+        let space = Space(id: SpaceID("1"))
+        let resolved = over.resolvedBsp(for: space, session: session)
+        #expect(resolved.splitRatioH == 0.8)
+        #expect(resolved.splitRatioV == 0.7)
         #expect(
-            over.resolvedStack(for: space, flip: nil).masterRatio == 0.6
+            over.resolvedStack(for: space, session: session, flip: nil)
+                .masterRatio == 0.6
         )
         #expect(
-            over.resolvedScrolling(for: space).slotSize
+            over.resolvedScrolling(for: space, session: session).slotSize
                 == .points(500)
         )
     }
@@ -118,8 +125,7 @@ struct SessionRatioOverrideTests {
             ).isSuccess
         )
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioV == nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioV == nil
         )
         core.execute(
             "set_mode",
@@ -127,8 +133,7 @@ struct SessionRatioOverrideTests {
         )
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.masterRatio != nil
+            core.sessionRatios(of: SpaceID("1")).masterRatio != nil
         )
         #expect(
             core.execute(
@@ -137,8 +142,7 @@ struct SessionRatioOverrideTests {
             ).isSuccess
         )
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.masterRatio == nil
+            core.sessionRatios(of: SpaceID("1")).masterRatio == nil
         )
         core.execute(
             "set_mode",
@@ -146,8 +150,7 @@ struct SessionRatioOverrideTests {
         )
         core.execute("resize", args: [.string("x"), .number(50)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.slotSize != nil
+            core.sessionRatios(of: SpaceID("1")).slotSize != nil
         )
         #expect(
             core.execute(
@@ -156,8 +159,7 @@ struct SessionRatioOverrideTests {
             ).isSuccess
         )
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.slotSize == nil
+            core.sessionRatios(of: SpaceID("1")).slotSize == nil
         )
     }
 
@@ -174,8 +176,7 @@ struct SessionRatioOverrideTests {
         )
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         let other = Profile(
             name: "B",
@@ -185,8 +186,7 @@ struct SessionRatioOverrideTests {
         )
         core.apply(profile: other, cause: .event)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios == SessionRatios()
+            core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
     }
 }

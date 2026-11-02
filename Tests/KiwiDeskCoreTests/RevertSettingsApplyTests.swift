@@ -36,9 +36,9 @@ struct RevertSettingsApplyTests {
         let core = try ownLookCore()
         let space = SpaceID("1")
         _ = core.execute("bsp.set_ratio_h", args: [.number(0.7)])
-        core.state.workspaces.withSpace(space) {
-            $0.sessionRatios.splitRatioH = 0.3
-            $0.sessionRatios.splitRatioV = 0.4
+        core.withSessionRatios(of: space) {
+            $0.splitRatioH = 0.3
+            $0.splitRatioV = 0.4
         }
         let ids = try #require(core.unsavedLiveSettings()).leaves.keys
         #expect(ids.count == 1)
@@ -46,8 +46,7 @@ struct RevertSettingsApplyTests {
         let outcome = core.revertUnsavedLive(Array(ids))
         #expect(outcome.refused.isEmpty)
         #expect(outcome.reverted.count == 1)
-        let ratios = try #require(core.state.workspaces[space])
-            .sessionRatios
+        let ratios = core.sessionRatios(of: space)
         #expect(ratios.splitRatioH == nil)
         #expect(ratios.splitRatioV == 0.4)
     }

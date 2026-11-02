@@ -87,13 +87,12 @@ extension KiwiCore {
     /// first, files nothing and restores nothing — neither a
     /// monitor reconnect nor boot may revert what is on screen.
     ///
-    /// `apply(profile:)` gates the session-ratio clear, the hold,
-    /// the prune and the restore on the answer; `apply(composed:)`
-    /// gates the hold, its prune and the restore, and keeps the
-    /// session layer (#53). A step that must follow an arrangement
-    /// change on both doors — #1790's hold of what the incoming
-    /// arrangement does not name — gates on this same answer,
-    /// never a test of its own.
+    /// `apply(profile:)` and `apply(composed:)` gate the hold, the
+    /// prune and the restore on the answer; the session sizes keep
+    /// across it, filed by arrangement (#53, #2921). A step that
+    /// must follow an arrangement change on both doors — #1790's
+    /// hold of what the incoming arrangement does not name — gates
+    /// on this same answer, never a test of its own.
     func recordOutgoingPartitioning(
         before incoming: HeldOrigin.Arrangement
     ) -> Bool {
@@ -156,6 +155,7 @@ extension KiwiCore {
         state.temporaryArmed.remove(space)
         spaceHistory.trails.forget(space)  // #1655
         forgetStackFlips(of: space)  // #2771
+        forgetDroppedSessionRatios(of: space)  // #2921
     }
 
     /// Puts the incoming profile's own windows back in its own

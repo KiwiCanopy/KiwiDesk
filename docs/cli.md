@@ -864,6 +864,11 @@ stays; the global only where nothing was authored), and leaves
 structure alone
 ([Lua reference](lua-reference.md#reset_layout_sizing)).
 
+:::unreleased
+A named space, or the active one, resets on the Desktop its screen
+shows; `all` resets every Desktop.
+:::
+
 Every layout global has a per-space `_override` twin (e.g.
 `bsp.set_ratio_h_override`, `scroll.set_slot_size_override`) that
 takes a leading `space id, value` and shadows the global for that

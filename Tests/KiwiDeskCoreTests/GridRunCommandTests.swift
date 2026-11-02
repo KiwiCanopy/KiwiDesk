@@ -102,7 +102,7 @@ struct GridRunCommandTests {
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(run.shown.contains(WindowID(4)))
         #expect(run.extra > 0)
-        let columns = core.state.workspaces[id]?.sessionRatios
+        let columns = core.sessionRatios(of: id)
         #expect(
             core.execute(
                 "resize",
@@ -112,7 +112,7 @@ struct GridRunCommandTests {
         let space = try #require(core.state.workspaces[id])
         #expect(space.stackWeights[WindowID(4)] != nil)
         // The grid's own column weights stay where they were.
-        #expect(space.sessionRatios == columns)
+        #expect(core.sessionRatios(of: id) == columns)
     }
 
     @Test("A mode change drops the run weights")

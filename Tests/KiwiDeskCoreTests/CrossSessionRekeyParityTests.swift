@@ -68,7 +68,11 @@ struct CrossSessionRekeyParityTests {
                 trackBreaks: [w],
                 trackWeights: [w: 1.5]
             ),
-            session: .init(space: Space(id: "3"), monocleShown: w),
+            session: .init(
+                space: Space(id: "3"),
+                ratios: .init(entries: [:], drawn: SessionRatios()),
+                monocleShown: w
+            ),
             held: .init(
                 origin: HeldOrigin(
                     name: "3",

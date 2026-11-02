@@ -165,7 +165,10 @@ struct ResizeRefusalAppBoundTests {
         core.execute("resize", args: [.string("x"), .number(-40)])
         let live = try #require(core.state.workspaces[space])
         let stored = core.tiler.settings
-            .resolvedScrolling(for: live)
+            .resolvedScrolling(
+                for: live,
+                session: core.sessionRatios(of: live.id)
+            )
             .slotSize
             // A points store: the pitch gap is inert (#1382).
             .editablePoints(along: 1200, gap: 0, horizontal: true)

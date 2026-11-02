@@ -139,9 +139,6 @@ public struct Space: Sendable, Equatable {
     /// The last shown window of each such run that hides windows
     /// after it (#2235), the run's other end.
     public var runTails: Set<WindowID>
-    /// Session-only interactive resize ratio overrides
-    /// (#458, `SessionRatios`).
-    public var sessionRatios: SessionRatios
     /// The member filling its screen until focus moves to another
     /// tiled member or it leaves the tiled set (#2448); read
     /// through `StateCoordinator.maximizedWindow(of:)`. Session-only.
@@ -159,7 +156,6 @@ public struct Space: Sendable, Equatable {
         trackWeights: [WindowID: Double] = [:],
         runHeads: Set<WindowID> = [],
         runTails: Set<WindowID> = [],
-        sessionRatios: SessionRatios = SessionRatios(),
         maximized: WindowID? = nil
     ) {
         self.id = id
@@ -173,18 +169,18 @@ public struct Space: Sendable, Equatable {
         self.trackWeights = trackWeights
         self.runHeads = runHeads
         self.runTails = runTails
-        self.sessionRatios = sessionRatios
         self.maximized = maximized
     }
 
-    /// Clears this Space's SIZING — what `resize` accumulates:
-    /// the session ratios and the stack and track weights — and
-    /// nothing structural (#764). The one statement of which
-    /// stored properties are sizes: `SpaceSizingCensusTests`
-    /// classifies every property as cleared here or named
-    /// structure, so a new store cannot join unclassified.
+    /// Clears this Space's SIZING — what `resize` accumulates in
+    /// the Space: the stack and track weights — and nothing
+    /// structural (#764). The one statement of which stored
+    /// properties are sizes: `SpaceSizingCensusTests` classifies
+    /// every property as cleared here or named structure, so a
+    /// new store cannot join unclassified. The per-Desktop
+    /// session ratios live outside the Space (#2921) and are
+    /// cleared beside this by `reset_layout_sizing`.
     public mutating func resetSizing() {
-        sessionRatios = SessionRatios()
         stackWeights = [:]
         trackWeights = [:]
     }

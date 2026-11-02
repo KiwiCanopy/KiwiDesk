@@ -38,6 +38,7 @@ struct ScrollRestPlumbingTests {
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             space: space,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil
         )
         #expect(
@@ -87,6 +88,7 @@ struct ScrollRestPlumbingTests {
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
             space: space,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil
         )
         #expect(

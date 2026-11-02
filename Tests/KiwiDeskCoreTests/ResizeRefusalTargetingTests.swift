@@ -222,8 +222,7 @@ struct ResizeRefusalTargetingTests {
         // what the user set here (#383/#44/#458 — the empty and
         // single-window cases `SessionRatioTests` drives).
         #expect(
-            core.state.workspaces[space.id]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: space.id).splitRatioH != nil
         )
     }
 
@@ -280,7 +279,11 @@ struct ResizeRefusalTargetingTests {
         // is truncated — a shrink the range still admits cues
         // nothing at all, in stack as anywhere else.
         let live = core.state.workspaces[space]!
-        let stack = core.tiler.settings.resolvedStack(for: live, flip: nil)
+        let stack = core.tiler.settings.resolvedStack(
+            for: live,
+            session: core.sessionRatios(of: live.id),
+            flip: nil
+        )
         core.writeCappedMasterRatio(
             proposed: stack.masterRatio - 600 / 1200,
             span: 1200,

@@ -56,7 +56,7 @@ struct DelayedCloseReturnTests {
     func scrollingRetilesOnce() {
         let (core, log) = fx.makeCore()
         defer { fx.tearDown() }
-        core.setSpaceMode("1", .scrolling)
+        core.setSpaceMode("1", .scrolling, keepingSizes: false)
         fx.refuse(core)
         fx.keySuccessor(core)
         let meter = WorkMeter()

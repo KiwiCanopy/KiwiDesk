@@ -24,6 +24,7 @@ extension KiwiCore {
     ) -> CommandResponse {
         let stack = tiler.settings.resolvedStack(
             for: space,
+            session: sessionRatios(of: space.id),
             flip: stackFlip(of: space.id)
         )
         let tiled = state.effectiveTiledMembers(of: space)
@@ -85,6 +86,7 @@ extension KiwiCore {
     ) -> CommandResponse {
         let stack = tiler.settings.resolvedStack(
             for: space,
+            session: sessionRatios(of: space.id),
             flip: stackFlip(of: space.id)
         )
         let tiled = state.effectiveTiledMembers(of: space)

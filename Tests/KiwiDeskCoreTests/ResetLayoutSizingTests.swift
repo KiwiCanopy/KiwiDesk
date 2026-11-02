@@ -104,12 +104,14 @@ struct ResetLayoutSizingTests {
         )
         core.state.workspaces.withSpace(SpaceID("2")) {
             $0.stackWeights[w1] = 2
-            $0.sessionRatios.masterRatio = 0.6
         }
+        core.withSessionRatios(of: SpaceID("2")) { $0.masterRatio = 0.6 }
         core.state.workspaces.withSpace(SpaceID("4")) {
             $0.trackWeights[w1] = 2
             $0.trackBreaks = [w1]
-            $0.sessionRatios.slotSize = .points(500)
+        }
+        core.withSessionRatios(of: SpaceID("4")) {
+            $0.slotSize = .points(500)
         }
     }
 
@@ -120,15 +122,14 @@ struct ResetLayoutSizingTests {
         // An interactive resize lands in Space 1's session layer.
         core.execute("resize", args: [.string("x"), .number(200)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         #expect(
             core.execute("reset_layout_sizing", args: [.string("all")])
                 .isSuccess
         )
         for space in core.state.workspaces.allSpaces {
-            #expect(space.sessionRatios == SessionRatios())
+            #expect(core.sessionRatios(of: space.id) == SessionRatios())
             #expect(space.stackWeights.isEmpty)
             #expect(space.trackWeights.isEmpty)
         }
@@ -189,7 +190,10 @@ struct ResetLayoutSizingTests {
         )
         let space = try #require(core.state.workspaces[SpaceID("1")])
         #expect(
-            core.tiler.settings.resolvedBsp(for: space).splitRatioH
+            core.tiler.settings.resolvedBsp(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            ).splitRatioH
                 == 0.3
         )
         let reset = core.tiler.calculatedFrames(state: core.state)

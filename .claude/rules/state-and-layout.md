@@ -72,11 +72,25 @@ editing here:
   compositor — but only as session state, read through one door
   every reader takes as a required argument, rekeyed at
   `moveMembers` and forgotten at `forwardWindows(of:to:)` like any
-  per-Space session store; `stackFlips` is the instance
-  (`StackFlipSeamTests`), and a new native-id-keyed map joins
-  `ProfileSpacesSeamTests`' register with what it holds. A
+  per-Space session store; `stackFlips` and the session sizes
+  (#2921) are the instances — a store also keyed by arrangement
+  files under the one `sizingOwner(of:)` (a held Space's origin,
+  else the arrangement an apply in flight installs, else
+  `liveArrangement`), its clears each name the axis they reach
+  (Desktop, arrangement or Space), and a renumber or drop of a
+  Space reaches only the arrangement whose Space it is, read while
+  the hold that names it still stands (#1230)
+  (`StackFlipSeamTests`, `SessionRatioSeamTests`) — a reader names
+  the Desktop through `shownDesktop(of:)`, never a resolver of its
+  own, which is review's since nothing scans for a second — and a
+  new native-id-keyed map joins `ProfileSpacesSeamTests`' register
+  with what it holds. A
   per-Desktop choice that must outlast the session is a profile
-  bound to that Desktop, never a durable map.
+  bound to that Desktop, never a durable map. A native id names a
+  Desktop within one login only, so such a store may ride the
+  in-place capture alone, never `snapshot()` or a profile — the
+  session sizes are the instance (#2921,
+  `SessionRatioCarryTests` ▸ `plainCaptureCarriesNone`).
 - **Ask the adoption state, through `KiwiCore.liveArrangement`,
   which arrangement that store is filing FOR** — a saved profile
   or a composed Standard (#1829) — rather than reading or adding
@@ -1865,11 +1879,18 @@ editing here:
   maximum nobody wrote.
 - **What counts as SIZING is stated where the store lives, and
   a resize never writes the authored override (#764).**
-  `Space.resetSizing` clears the per-Space sizes (the session
-  ratios, the stack and track weights); `reset_layout_sizing`
-  is a loop over it — the active Space, one by id, or `all`
-  (`ResetLayoutSizingScopeTests`) — lists nothing itself, and
-  touches
+  `Space.resetSizing` clears the sizes the Space holds (the
+  stack and track weights) and the session ratios' clearing doors
+  in `KiwiCore+SessionRatioWrite` clear the per-Desktop layer
+  (#2921); `reset_layout_sizing` is a loop over both — the active
+  Space or one by id on the Desktop shown, or `all` on every
+  Desktop (`ResetLayoutSizingScopeTests` the Space scope,
+  `SessionRatioDesktopTests` ▸ `resetScopes` the Desktop scope) —
+  names no size field itself, and a resize store kept outside
+  `Space` is cleared through a `KiwiCore+SessionRatioWrite`
+  clearing door, which the verb calls, since
+  `SpaceSizingCensusTests` sees `Space`'s properties alone —
+  and touches
   `TilingSettings` not at all. A resize path writes through
   `KiwiCore+SessionRatioWrite`'s `write*` and never an
   override's size field, and the overlay in
@@ -1887,8 +1908,9 @@ editing here:
   layer down): `SessionRatioOverrideTests` ▸
   `overrideSetterClearsShadow` and
   `allOverrideSettersClearTheirField` hold the four setters,
-  and `SessionRatioSeamTests` holds every `sessionRatios` write
-  outside the seam file to the model's own reseeds. A stored
+  and `SessionRatioSeamTests` holds the store and its writer to
+  the seam file and every overlay read to the one
+  `sessionRatios(of:)` door, which each resolver requires. A stored
   property added to `Space` is classified by
   `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
   structure with its reason — or it reds; a new resize knob
@@ -2412,8 +2434,9 @@ editing here:
   after the capture drops it. A store that changes what a layout
   draws rides it, or is named with its reason in a register:
   `SnapshotCarryCensusTests` round-trips every field of `Space`
-  and `ManagedWindow` — `SessionRatios` and `ScrollRest` leaf by
-  leaf — and `SnapshotStoreCensusTests` classifies every
+  and `ManagedWindow` — `ScrollRest` leaf by leaf — and
+  `SessionRatioCarryTests` every Desktop's `SessionRatios`, the
+  older one-entry record adopted on the Desktop shown included; `SnapshotStoreCensusTests` classifies every
   id-keyed store the shared `idContainers` walker reaches,
   `floatFrames` (#1675) and the size-bound learner's ledgers
   named as left behind. A Space's session is adopted AFTER its
@@ -2435,7 +2458,10 @@ editing here:
 - **The in-place payload is a stored cross-version shape
   (#930).** Build N writes the session file and build N+1 reads
   it, so `SpaceSession`, `WindowSession`, `SessionRatios`'
-  coding, `ScrollRest`'s and `StickyScope`'s raw values are
+  coding, the per-Desktop `DesktopRatios` record with
+  `SpaceSession`'s `desktop_ratios` (#2921,
+  `SessionRatioCarryTests`), `ScrollRest`'s and `StickyScope`'s
+  raw values are
   stored values in AGENTS.md §5's sense — and so are the held
   record's `StateSnapshot.HeldRecord`, `HeldOrigin` and
   `HeldOrigin.Arrangement` keys, the pocket's `PocketSlot` keys and

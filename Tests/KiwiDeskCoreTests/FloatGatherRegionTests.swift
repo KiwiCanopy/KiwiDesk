@@ -90,7 +90,7 @@ struct FloatGatherRegionTests {
             core.spaceBars.shownStrips.first?.1,
             "no bar painted — the clause would pass vacuously"
         )
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let seeded = try #require(
             core.tiler.stashOriginal(Self.scrolledOut)
@@ -157,7 +157,7 @@ struct FloatGatherRegionTests {
             )
             core.state.windows.updateFrame(id, frame: flush)
         }
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         for id in [Self.inside, Self.scrolledOut, Self.partly] {
             #expect(core.tiler.stashOriginal(id) == nil)
@@ -177,7 +177,7 @@ struct FloatGatherRegionTests {
         core.state.apply(.windowFocused(Self.inside))
         let space = try #require(core.state.workspaces[Self.space])
         #expect(space.focused == Self.inside)
-        core.setSpaceMode(Self.space, .floating)
+        core.setSpaceMode(Self.space, .floating, keepingSizes: false)
         core.retile(pass: .apply)
         let seeded = try #require(core.tiler.stashOriginal(Self.inside))
         let others = [Self.scrolledOut, Self.partly].compactMap {

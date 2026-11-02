@@ -4034,6 +4034,13 @@ so a display reconnect never eats an interactive resize. Covers
 the BSP split ratios, stack master ratio, and scrolling slot
 size — the same shape for all three, per the #458 scope note.
 
+:::unreleased
+The layer is now kept per macOS Desktop (#2921, *A stack flip
+belongs to one Desktop*), so a reconnect that makes macOS give a
+Desktop a new id does drop that Desktop's sizes (the accepted
+limitation).
+:::
+
 **The session layer outranks the authored override, and a
 resize never writes an override (#458 as amended by #764).**
 Read precedence is session > authored override > global, and
@@ -5271,7 +5278,10 @@ both Desktops share for a layout neither shows, ratcheting it a
 step each way on every swipe. So it stands down inside the
 switch's grace, owing the pass after it, and while a member sits
 on a Desktop nobody shows; a real floor waits for the first pass
-over its own Desktop alone. (`HealStandDownTests`)
+over its own Desktop alone. (`HealStandDownTests`) The ratio is
+now each Desktop's own (#2921); the stand-down stays, since a heal
+over the mixed membership still writes the Desktop shown for a
+layout it does not draw.
 :::
 
 **Session weights are healed at retile, not validated forever
@@ -7388,6 +7398,55 @@ may be keyed by the Desktop, and it lives for the session. A side
 that must last per Desktop is already expressible: a profile bound
 to that Desktop. A further per-Desktop ask takes the same shape —
 session state behind one door — or is a profile binding.
+
+**The session sizes took that shape (#2921).** What a resize writes
+— the BSP split ratios, the stack master ratio, the scrolling slot
+size and the Grid weights — is kept per Space, per Desktop and per
+arrangement live on that Desktop (a saved profile or the composed
+Standard), in one `DesktopMemory` store beside the flip, read
+through one door
+that every resolver overlay takes as a required argument. Config
+stays shared: a layout-wide setting, a per-Space override and a
+profile apply to every Desktop that shows the Space. The stack and
+track weights are keyed per window, so they follow each Desktop's
+own windows already and stay on the Space. The owner's rulings
+(2026-11-02) where the sizes differ from the flip:
+
+- **An in-place restart carries them**, as sizing survived one
+  before (#930); the flip stays session-only.
+- **`reset_layout_sizing` resets one Space on the Desktop its
+  screen shows**; `all` resets every Space on every Desktop.
+- **A resize where no Desktop can be named** — a screen plugged in
+  since the last switch, no SkyLight reading — writes one shared
+  entry, which every unnamed Desktop reads. A named Desktop not
+  sized yet falls through to the override, then the global value.
+- **A profile switch keeps them.** A size is filed under the
+  arrangement it was made under, so a bound Desktop gets its sizes
+  back on every swipe, and a Desktop now showing another profile
+  starts fresh until its own profile returns. Filing by arrangement
+  is what lets the switch keep them: a size never outranks another
+  profile's authored values.
+- **An explicit choice ends them as far as it reaches.** A load
+  starts the Desktops shown fresh — every arrangement's sizes on
+  them, the outgoing one's included, so a swipe back cannot return
+  what the load discarded — and leaves other Desktops alone. A
+  Settings save of a stored profile ends that profile's sizes on
+  every Desktop, by the key and never by which Desktops show it now, or a size on a
+  Desktop not shown would hide the saved value at the next swipe
+  (#383's trap, one swipe late). A config reload, which every
+  `gui.json` save runs, and a Settings save of the live setup end
+  them all: it changes what every
+  profile builds on. A global setter ends its field everywhere, as
+  since #458. An override setter and a mode change end that
+  Space's everywhere — a mode an apply installs is its
+  arrangement's and ends nothing; unlike the flip, a mode change ends them,
+  since a size means nothing under another layout. Clearing only
+  the Spaces or fields a save changed was refused: it is the
+  register of authored-to-session links #764 refused, and a missed
+  path leaves a size shadowing a saved value with nothing red.
+- **A Space with no screen** — held, or not yet placed — resets on
+  every Desktop when `reset_layout_sizing` names it; it has no
+  Desktop of its own to name.
 :::
 
 ### A Desktop switch is not a close (#1207)

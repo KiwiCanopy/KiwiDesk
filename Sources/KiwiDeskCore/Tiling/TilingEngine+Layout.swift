@@ -40,11 +40,8 @@ extension TilingEngine {
         var context = settings.context(
             bounds: bounds,
             space: space,
-            sticky: Set(
-                state.windows.all
-                    .filter(\.isSticky)
-                    .map(\.id)
-            ),
+            sticky: Set(state.windows.all.filter(\.isSticky).map(\.id)),
+            session: sessionRatios(space.id),
             stackFlip: stackFlip(space.id),
             // Surface a tiled-sticky traveler when it is the
             // frontmost window (#431): it has a slot in `tiled`
@@ -174,6 +171,7 @@ extension TilingEngine {
             bounds: layoutBounds(on: screen, for: space),
             space: space,
             sticky: [],
+            session: sessionRatios(space.id),
             stackFlip: stackFlip(space.id)
         )
         return TrackLayout.trackCapacity(for: context)

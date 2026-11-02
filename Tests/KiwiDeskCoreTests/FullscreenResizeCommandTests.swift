@@ -153,8 +153,7 @@ struct FullscreenResizeCommandTests {
         #expect(frames.isEmpty)
         #expect(cues == [.windowIsFullscreen(WindowID(2))])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH == nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH == nil
         )
     }
 

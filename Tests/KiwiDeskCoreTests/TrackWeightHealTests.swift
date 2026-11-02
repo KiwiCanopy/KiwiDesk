@@ -85,6 +85,7 @@ struct TrackWeightHealTests {
             bounds: bounds,
             space: space,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: nil
         )
         let ranges = TrackLayout.ranges(
