@@ -84,7 +84,8 @@ extension KiwiCore {
                 mark.windows,
                 kind: .overflow,
                 space: mark.space,
-                at: anchor
+                at: anchor,
+                keyed: false
             )
         }
     }

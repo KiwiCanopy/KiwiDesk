@@ -123,9 +123,13 @@ struct CoreLocalizationBoundaryTests {
         // A glyph target's VoiceOver name and each side's `+n`
         // target's (#1528).
         "Bar/SpaceBarItemView+Targets.swift": 3,
-        "Bar/SpaceBarWindowMenu.swift": 2,
+        // and the pocket menu's keyed row (#2923).
+        "Bar/SpaceBarWindowMenu.swift": 3,
         // The hover peek's "N more" line, which Core draws (#1946).
         "Bar/BarPeekBody+More.swift": 1,
+        // The pocket list's Pocket Keys header, which Core draws
+        // (#2923).
+        "Bar/BarPeekBody+Parts.swift": 1,
         // The shelf's overflow counts, a button each for VoiceOver
         // (#1517): before and after.
         "Bar/ShelfCountView.swift": 2,

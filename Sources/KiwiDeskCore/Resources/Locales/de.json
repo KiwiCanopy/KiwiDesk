@@ -1699,6 +1699,8 @@
   "pocket.capacity.several": "Mehrere Fenster",
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Farbe der Pocket-Markierung",
+  "pocket.list.keyed": "Pocket-Tastenkürzel",
+  "pocket.list.keyed_row.ax": "%1$@, Pocket-Tastenkürzel %2$@",
   "pocket.mark.ax": "Pocket-Fenster",
   "pocket.plate.ax": "Pocket, Fenster darin: %1$d",
   "pocket.position.spoken.horizontal": "%1$@ von links",

@@ -466,9 +466,16 @@ hover dropped drops its dwell (`PocketPlateOverlay.hovered`'s
 its peek grows the handle's panel
 (`PocketHandleDwellTests` ▸ `hoverPeeksThenRises`).
 **What it counts, shows for and lists is the one
-`pocketPlateWindows`**, never `pocketedWindows` beside it. Its list
-is the bars' click-held peek, its panel answering `shelfBeyondBars`
-(`PocketPlateTests`). **As a drop target it acts through `pocket`
+`pocketPlateWindows`**, never `pocketedWindows` beside it: the
+general list, then under Several windows the apps' own pocket
+windows, built from `generalPocket` and `keyedPocket` and never a
+filter beside them, while the capacity stays `pocketAcceptsMark`'s
+(#2923). A reader that means the general list alone takes
+`generalPocket`. Its list is the bars' click-held peek, its panel
+answering `shelfBeyondBars` (`PocketPlateTests`); the peek and its
+VoiceOver menu set the keyed windows last, under the Pocket Keys
+header, through `BarPeekSource.keysPocketWindows`
+(`PocketListKeyedTests`). **As a drop target it acts through `pocket`
 naming the window and lights on the one `pocketNamedRefusal`**, the
 bar menus' Pocket Window door, so the light and the drop never
 disagree, and it takes a drop only where it is lit — a refused

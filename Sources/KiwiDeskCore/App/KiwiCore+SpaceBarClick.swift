@@ -49,7 +49,8 @@ extension KiwiCore {
             pick.windows,
             kind: pick.kind,
             space: pick.space,
-            at: pick.anchor
+            at: pick.anchor,
+            keyed: pick.peekSource.keysPocketWindows
         )
     }
 
@@ -60,9 +61,20 @@ extension KiwiCore {
         _ windows: [WindowID],
         kind: SpaceBarGlyphPick.Kind,
         space: SpaceID?,
-        at anchor: NSView
+        at anchor: NSView,
+        keyed: Bool
     ) {
-        let rows = spaceBarMenuRows(windows, on: space)
+        var rows = spaceBarMenuRows(windows, on: space)
+        // The pocket's menu keys apps' own windows, which its list
+        // already holds last (#2923), as its peek does.
+        if keyed {
+            let owners = pocketRowOwners(windows)
+            for index in rows.indices {
+                rows[index].key = owners[rows[index].row.window].map {
+                    barMenuHooks.pocketKeyChord($0)
+                }
+            }
+        }
         guard !rows.isEmpty else { return }
         let menu = SpaceBarWindowMenu.make(rows, kind: kind) {
             [weak self] id in

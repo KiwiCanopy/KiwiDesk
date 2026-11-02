@@ -5761,7 +5761,7 @@ as `pocket` does for the other pocket windows. Its app rule's
 
 The window is tied to the app while a shortcut's whole body is
 the one call `KiwiDesk.pocket_app("<bundle id>")`, its argument in
-double quotes, and it goes in and out by that shortcut alone:
+double quotes, and no Pocket verb but that shortcut moves it:
 `pocket` steps past it, and `pocket` naming it or
 [`toggle_pocket_window`](#toggle_pocket_window) on it fails with
 a pill naming its key. It does not count against
@@ -5951,7 +5951,15 @@ where), pointing at the handle brings the pocket up out of it.
 Windows keep clear of the resting handle or pocket unless
 `reserve` is off for every bar on that edge, or on an edge no bar
 sits on, for both bars. A click on the pocket lists the windows
-inside by app; a row takes its window out. Under `"one"` nothing
+inside by app; a row takes its window out.
+
+:::unreleased
+Below them, under **Pocket Keys**, the list shows each app's own
+pocket window ([`pocket_app`](#pocket_app)); its row takes it out
+too, and its shortcut still puts it away.
+:::
+
+Under `"one"` nothing
 stays: the pocket stands only while a window goes in or out
 ([`animations.set_on_state_change`](#animationsset_on_state_change))
 or while you drag one. It has no handle: it slides out of its edge

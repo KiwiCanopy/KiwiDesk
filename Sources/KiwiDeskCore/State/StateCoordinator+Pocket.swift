@@ -36,6 +36,12 @@ extension StateCoordinator {
         pocket.filter { $0.keyedApp == nil }
     }
 
+    /// The slots apps' own Pocket keys own, the general list's
+    /// complement (#2612, #2923).
+    var keyedPocket: [PocketSlot] {
+        pocket.filter { $0.keyedApp != nil }
+    }
+
     /// The slot `bundleID`'s Pocket key owns.
     func pocketSlot(ownedBy bundleID: String) -> PocketSlot? {
         pocket.first { $0.keyedApp == bundleID }

@@ -1012,7 +1012,11 @@ Obligations:
   one-window label drops what its item shows, an App Bar label
   drawing no header and a Space Bar glyph's the name alone
   (#2649, `BarPeekLabelHeaderTests` ▸ `sourcesStateTheirHeader`,
-  `coreWiresTheHeader`). No bar view registers
+  `coreWiresTheHeader`). **Whether a list sets an app's own pocket
+  windows apart is asked of the one `BarPeekSource.keysPocketWindows`**,
+  which the peek and its VoiceOver menu both read, splitting through
+  the one `pocketRowOwners` (#2923, borders.md ▸ The pocket rides
+  the bar pass; `PocketListKeyedTests`). No bar view registers
   the system tooltip the peek replaced
   (`BarPeekSeamTests` ▸ `noBarTooltip`).
 - **Report every hover reading to the peek from the item's one
@@ -1941,6 +1945,13 @@ reaches.
   the one copy of who is exempt — and `BarFontSiteTests` builds
   each site and holds its face to the shelf's; a new site owes
   the latter a clause, since it reads no site list.
+- **A key chord a bar surface draws takes `BarFont.chordFont(ofSize:)`,
+  never the bar font** (#2923 ▸ Ruling 4): key notation the bar's
+  family often lacks glyphs for, so a chord in it splits across two
+  faces. It is the one exception to the face rule above; a new chord
+  site asks `chordFont` and owes `BarPeekPocketKeysTests` a clause, as
+  the peek's Pocket key column has (`BarPeekPocketKeysTests` ▸
+  `keyColumn`).
 - **Resolve the weight in `BarFont` at render time, never on
   write**: the stored weight is the user's number whatever the
   family, and a missing family is kept by name and reported

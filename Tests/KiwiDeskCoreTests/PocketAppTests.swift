@@ -152,16 +152,6 @@ struct PocketAppTests {
         #expect(spoken == ["Its Pocket key is Control Option T"])
     }
 
-    @Test("the pocket plate lists the general list alone")
-    func plateSkipsTheKeyedWindow() {
-        let fixture = Fixture()
-        fixture.press()
-        fixture.arrive(9)
-        fixture.press()
-        #expect(fixture.core.state.isPocketed(mine))
-        #expect(fixture.core.pocketPlateWindows.isEmpty)
-    }
-
     @Test("pocket steps past the keyed window")
     func pocketStepsPast() {
         let fixture = Fixture()
