@@ -46,6 +46,20 @@ struct MinWindowSizeCommandTests {
         #expect(core.tiler.settings.minWindowSizes.stack == 300)
     }
 
+    @Test("a CLI call's string height and layout are read (#2918)")
+    func cliStringsRead() {
+        let core = makeTestCore()
+        #expect(
+            core.execute(
+                "set_min_window_size",
+                args: [.string("220"), .string("160"), .string("grid")]
+            ).isSuccess
+        )
+        var expected = MinWindowSizes()
+        expected.grid = MinSize(width: 220, height: 160)
+        #expect(core.tiler.settings.minWindowSizes == expected)
+    }
+
     @Test("an unknown layout is refused and writes nothing")
     func unknownLayoutRefused() {
         let core = makeTestCore()
