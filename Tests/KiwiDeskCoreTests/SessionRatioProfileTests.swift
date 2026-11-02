@@ -184,4 +184,16 @@ struct SessionRatioProfileTests {
         _ = core.execute("delete_profile", args: [.string("Desk")])
         #expect(core.desktopMemory.sessionRatios.isEmpty)
     }
+
+    @Test("a switch's prune keeps the dropped Space's sizes")
+    func switchPruneKeeps() throws {
+        let (core, other) = try core()
+        show(core, 10)
+        let extra = SpaceID("5")
+        core.state.workspaces.ensureSpace(extra)
+        core.writeSplitRatioH(0.7, for: extra)
+        core.apply(profile: other, cause: .event)
+        try #require(core.state.workspaces[extra] == nil)
+        #expect(core.desktopMemory.sessionRatios[10]?[work]?[extra] != nil)
+    }
 }
