@@ -67,12 +67,14 @@ struct ExternalUpdatesTests {
         )
     }
 
-    @Test("a folder spelled with a trailing slash still holds the copy")
+    /// Only `.standardized` folds a `.` segment; a bare `.path`
+    /// already drops a trailing slash.
+    @Test("a folder spelled with a dot segment still holds the copy")
     func folderIsStandardized() {
         #expect(
             ExternalUpdates.manager(
                 declared: "Home Manager",
-                folder: Self.folder + "/",
+                folder: "/Users/me/Applications/./Home Manager Apps",
                 bundlePath: Self.copied
             ) == "Home Manager"
         )
