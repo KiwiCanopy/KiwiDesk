@@ -101,6 +101,7 @@ struct PocketListKeyedTests {
     /// The pocket's VoiceOver menu: the keyed window last, keyed.
     @Test("the pocket's menu sets the keyed window apart with its key")
     func menuKeysTheRow() throws {
+        LocalizationManager.shared.select("en")
         let fixture = fixture()
         let core = fixture.core
         core.barMenuHooks.pocketKeyChord = { _ in
@@ -116,7 +117,6 @@ struct PocketListKeyedTests {
             keyed: true
         )
         let menu = try #require(shown)
-        LocalizationManager.shared.select("en")
         let header = try #require(
             menu.items.first { $0.isSectionHeader }
         )
