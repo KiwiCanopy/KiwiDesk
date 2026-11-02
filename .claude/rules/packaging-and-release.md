@@ -644,6 +644,17 @@ write credential stays scoped to `KiwiCanopy/homebrew-tap`. A
 manual dispatch is a retry of that same published asset, not an
 alternate way to build or publish one.
 
+**Advance the Nix flake the same way (#2909).**
+`.github/workflows/nix.yml` is the Homebrew workflow's twin: the
+same `release.published` boundary, the same by-name asset pick and
+digest check, and a write credential scoped to `KiwiCanopy/nix`
+(`NIX_REPO_DEPLOY_KEY`). It rewrites only
+`pkgs/kiwidesk/source.json`, through `scripts/update-nix-source.py`,
+which refuses a downgrade and a new hash for a published version
+(`NixSourceUpdateTests`). A change to the verification steps in one
+workflow lands in both (`NixSourceUpdateTests` ▸
+`verificationMatchesHomebrew`).
+
 **Advance the Claude Code plugin only after publication, and only
 from `plugins/` (#2258).** `.github/workflows/claude-plugin.yml`
 copies the PUBLISHED tag's `plugins/` folder — never `main`'s, and
