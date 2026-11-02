@@ -31,8 +31,9 @@ import Foundation
 /// keyed by `WindowID` and name no Desktop at all, and a window
 /// lives on exactly one Desktop, so a per-window record
 /// partitions by Desktop for free. `honoredFocus` is a per-Space
-/// per-native-Desktop debt, and `virtualSpaces` a one-`SpaceID`
-/// cursor. Four records, three subjects, no duplication.
+/// per-native-Desktop debt, `virtualSpaces` a one-`SpaceID`
+/// cursor, and `stackFlips` (#2771) a choice the user made on one
+/// Desktop. Five records, four subjects, no duplication.
 ///
 /// **The obligation that falls out:** a new per-`Space` field is
 /// keyed by `WindowID` or it is SHARED across Desktops — read
@@ -42,8 +43,10 @@ import Foundation
 /// unobservable: the #1207 refocus re-anchors the viewport before
 /// it is drawn. Should a shared field ever bite, the fix is a
 /// staleness rule at the one context build — never a
-/// Desktop-keyed map, which is the refused store by the back
-/// door.
+/// Desktop-keyed map of Space CONTENTS copied from the
+/// compositor, which is the refused store by the back door. A
+/// choice KiwiDesk's user authored on one Desktop copies nothing
+/// and may be keyed by it, session-only (#2771's flip).
 ///
 /// **Every entry point takes the Desktop's KEY rather than
 /// reading the topology.** A switch handler holds a

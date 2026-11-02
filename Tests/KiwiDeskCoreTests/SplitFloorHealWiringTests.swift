@@ -157,7 +157,8 @@ struct SplitFloorHealWiringTests {
         seed(core, window: w2, minWidth: 700)
         core.retile()
         let ratio = core.tiler.settings.resolvedStack(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            flip: nil
         ).masterRatio
         // 1170 pt split: the stack zone draws 700.25.
         #expect(abs((1 - ratio) * 1170 - 700.25) < 0.01)

@@ -280,7 +280,7 @@ struct ResizeRefusalTargetingTests {
         // is truncated — a shrink the range still admits cues
         // nothing at all, in stack as anywhere else.
         let live = core.state.workspaces[space]!
-        let stack = core.tiler.settings.resolvedStack(for: live)
+        let stack = core.tiler.settings.resolvedStack(for: live, flip: nil)
         core.writeCappedMasterRatio(
             proposed: stack.masterRatio - 600 / 1200,
             span: 1200,

@@ -37,6 +37,7 @@ extension KiwiCore {
                 )
             else { return Self.stackPositionError }
             tiler.settings.stack.stackPosition = position
+            forgetStackFlips()  // #2771
         case "stack.set_new_window_placement":
             guard let placement = parsePlacement(args) else {
                 return placementError
@@ -112,6 +113,7 @@ extension KiwiCore {
                 )
             else { return Self.stackPositionError }
             over.stackPosition = position
+            forgetStackFlips(of: SpaceID(space))  // #2771
         default:
             return .fail(
                 "unknown command: stack.set_\(field)_override"
@@ -119,41 +121,6 @@ extension KiwiCore {
         }
         tiler.settings.stack.override[SpaceID(space)] =
             over.isEmpty ? nil : over
-        return .ok()
-    }
-
-    /// `stack.toggle_stack_position([space])` (#2771): writes the
-    /// side opposite the Space's resolved one into its override, a
-    /// live change `revert_settings` undoes. The focused Space by
-    /// default; sizing is left as it is. A flip onto the global
-    /// side clears the override instead, so a second press leaves
-    /// no unsaved leaf pinning the Space.
-    private func toggleStackPosition(
-        _ args: [JSONValue]
-    ) -> CommandResponse {
-        let space: SpaceID
-        if let raw = args.first?.stringValue, !raw.isEmpty {
-            space = SpaceID(raw)
-            guard state.workspaces[space] != nil else {
-                return .fail("unknown space: \(raw)")
-            }
-        } else {
-            guard let active = state.workspaces.activeSpace else {
-                return .fail("no active space")
-            }
-            space = active
-        }
-        let side = tiler.settings.resolvedStack(for: space)
-            .stackPosition.opposite
-        guard side == tiler.settings.stack.stackPosition else {
-            return applyStackOverride(
-                field: "stack_position",
-                [.string(space.raw), .string(side.rawValue)]
-            )
-        }
-        var over = tiler.settings.stack.override[space] ?? StackOverride()
-        over.stackPosition = nil
-        tiler.settings.stack.override[space] = over.isEmpty ? nil : over
         return .ok()
     }
 

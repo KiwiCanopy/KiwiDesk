@@ -234,6 +234,10 @@ extension KiwiCore {
         tiler.pocketAtRest = { [weak self] in
             self?.pocketHoldsSeveral ?? false
         }
+        // The drawn stack side reads the one flip door (#2771).
+        tiler.stackFlip = { [weak self] space in
+            self?.stackFlip(of: space)
+        }
         // The loop owns whether an app's EUI is on at rest; the
         // applier's holds only borrow it (#1508).
         tiler.applier.enhancedUIAtRest = { [weak self] pid in

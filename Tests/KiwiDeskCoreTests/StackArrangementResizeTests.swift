@@ -71,13 +71,15 @@ struct StackArrangementResizeTests {
         topStackSpace(core)
         core.state.apply(.windowFocused(WindowID(3)))
         let before = core.tiler.settings.resolvedStack(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            flip: nil
         ).masterRatio
         core.execute("resize", args: [.string("y"), .number(300)])
         // #458: the write lands in the session layer.
         #expect(
             core.tiler.settings.resolvedStack(
-                for: core.state.workspaces[SpaceID("1")]!
+                for: core.state.workspaces[SpaceID("1")]!,
+                flip: nil
             ).masterRatio > before
         )
     }

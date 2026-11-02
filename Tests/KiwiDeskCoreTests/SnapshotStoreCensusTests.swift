@@ -139,6 +139,12 @@ struct SnapshotStoreCensusTests {
             (.behind, "re-seeded from the compositor at boot (#1146)"),
         "ownFronts":
             (.behind, "an age-bounded intent ledger (#1861)"),
+        "desktopMemory.stackFlips[]":
+            (
+                .behind,
+                "a session adjustment keyed by native Desktop ids, "
+                    + "which a restart may re-mint (#2771)"
+            ),
         "drawnSpaceModes":
             (.behind, "settled by the replay itself (#1177)"),
         "arrivals.ledger.created":
@@ -235,6 +241,7 @@ struct SnapshotStoreCensusTests {
         core.state.focusRecency[WindowID(1)] = .init(pid: 7, tick: 1)
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.ownFronts[WindowID(1)] = core.wallClock()
+        core.desktopMemory.stackFlips[nil] = [shown: .left]
         core.state.crossSession.placed.insert(WindowID(1))
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],
@@ -283,7 +290,7 @@ struct SnapshotStoreCensusTests {
             "state.heldSpaces", "state.temporaryArmed", "ownFronts",
             "tiler.stashDepartures.owed", "tiler.motionGate.owedWrites",
             "state.profilePartitioning.byArrangement[][]",
-            "state.crossSession.placed",
+            "state.crossSession.placed", "desktopMemory.stackFlips[]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

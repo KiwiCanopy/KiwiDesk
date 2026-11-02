@@ -313,10 +313,10 @@ extension KiwiCore {
             // Its frame is the other Space's layout's (#1177).
             refiledWindows.insert(window)
         }
-        // Every remembered window, up or not — a hidden app's
-        // included — or it returns to the old number (#1669).
+        // Every remembered window, a hidden app's included (#1669).
         state.renameRememberedSpace(source, to: target)
         spaceHistory.trails.rekey(source, to: target)  // #1655
+        rekeyStackFlips(source, to: target)  // #2771
     }
 
     /// `WorkspaceManager.add` nils the focus trackers of a window

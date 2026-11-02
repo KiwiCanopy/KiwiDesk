@@ -4,18 +4,19 @@ import Testing
 @testable import KiwiDeskCore
 
 /// `stack.toggle_stack_position([space])` (#2771): the opposite
-/// side of the Space's resolved position, written into its
-/// override as a live change `revert_settings` undoes.
+/// of the side the Space draws now, filed as session state for the
+/// Desktop shown — never a setting. These cores read no SkyLight,
+/// so every flip lands in the one Desktop-less entry.
 @Suite("Stack toggle position (#2771)", .serialized)
 @MainActor
 struct StackTogglePositionTests {
     private let verb = "stack.toggle_stack_position"
 
-    private func side(
+    private func drawn(
         _ core: KiwiCore,
         _ space: SpaceID = "1"
-    ) -> StackParams.StackPosition? {
-        core.tiler.settings.stack.override[space]?.stackPosition
+    ) -> StackParams.StackPosition {
+        core.drawnStackPosition(of: space)
     }
 
     @Test("every side flips to the one across the master zone")
@@ -37,31 +38,53 @@ struct StackTogglePositionTests {
     func focusedSpaceFlipsBack() throws {
         let core = try KeepFixture.core()
         #expect(core.state.workspaces.activeSpace == "1")
-        #expect(core.tiler.settings.stack.stackPosition == .right)
         #expect(core.execute(verb).isSuccess)
-        #expect(side(core) == .left)
+        #expect(drawn(core) == .left)
+        #expect(core.stackFlip(of: "1") == .left)
         #expect(core.execute(verb).isSuccess)
-        #expect(side(core) == nil)
-        #expect(core.tiler.settings.stack.override["1"] == nil)
-        #expect(core.tiler.settings.stack.stackPosition == .right)
-        #expect(core.unsavedLiveSettings() == nil)
+        #expect(drawn(core) == .right)
+        #expect(core.stackFlip(of: "1") == nil)
+        #expect(core.desktopMemory.stackFlips.isEmpty)
     }
 
-    @Test("the flip reads the resolved side, override before global")
-    func readsTheResolvedSide() throws {
+    @Test("the flip writes no setting, and revert_settings leaves it")
+    func writesNoSetting() throws {
+        let core = try KeepFixture.core()
+        let before = core.tiler.settings
+        #expect(core.execute(verb).isSuccess)
+        #expect(core.tiler.settings == before)
+        #expect(core.tiler.settings.stack.override["1"] == nil)
+        #expect(core.unsavedLiveSettings() == nil)
+        _ = core.execute("stack.set_master_count", args: [.number(3)])
+        let unsaved = try #require(core.unsavedLiveSettings())
+        let ids = Array(unsaved.leaves.keys)
+        #expect(ids.allSatisfy { !$0.contains("stack_position") })
+        #expect(
+            core.execute(
+                KiwiCore.revertSettingsCommand,
+                args: ids.map(JSONValue.string)
+            ).isSuccess
+        )
+        #expect(core.unsavedLiveSettings() == nil)
+        #expect(drawn(core) == .left)
+    }
+
+    @Test("the flip reads the drawn side, override before global")
+    func readsTheDrawnSide() throws {
         let core = try KeepFixture.core()
         _ = core.execute(
             "stack.set_stack_position",
             args: [.string("bottom")]
         )
         #expect(core.execute(verb).isSuccess)
-        #expect(side(core) == .top)
+        #expect(drawn(core) == .top)
         _ = core.execute(
             "stack.set_stack_position_override",
             args: [.string("1"), .string("left")]
         )
+        #expect(drawn(core) == .left)
         #expect(core.execute(verb).isSuccess)
-        #expect(side(core) == .right)
+        #expect(drawn(core) == .right)
     }
 
     @Test("an id names another Space; an unknown one is refused")
@@ -69,12 +92,12 @@ struct StackTogglePositionTests {
         let core = try KeepFixture.core()
         core.state.workspaces.ensureSpace("2", mode: .stack)
         #expect(core.execute(verb, args: [.string("2")]).isSuccess)
-        #expect(side(core, "2") == .left)
-        #expect(side(core) == nil)
+        #expect(drawn(core, "2") == .left)
+        #expect(drawn(core) == .right)
         let refused = core.execute(verb, args: [.string("9")])
         #expect(!refused.isSuccess)
         #expect(refused.error == "unknown space: 9")
-        #expect(core.tiler.settings.stack.override["9"] == nil)
+        #expect(core.stackFlip(of: "9") == nil)
     }
 
     @Test("only the side changes; sizing and other fields stay")
@@ -89,35 +112,35 @@ struct StackTogglePositionTests {
             args: [.string("1"), .number(2)]
         )
         #expect(core.execute(verb).isSuccess)
+        let space = try #require(core.state.workspaces["1"])
+        let params = core.tiler.settings.resolvedStack(
+            for: space,
+            flip: core.stackFlip(of: "1")
+        )
+        #expect(params.stackPosition == .left)
+        #expect(params.masterRatio == 0.7)
+        #expect(params.masterCount == 2)
         let over = try #require(core.tiler.settings.stack.override["1"])
-        #expect(over.stackPosition == .left)
-        #expect(over.masterRatio == 0.7)
-        #expect(over.masterCount == 2)
-        #expect(core.execute(verb).isSuccess)
-        let back = try #require(core.tiler.settings.stack.override["1"])
-        #expect(back.stackPosition == nil)
-        #expect(back.masterRatio == 0.7)
-        #expect(back.masterCount == 2)
+        #expect(over.stackPosition == nil)
     }
 
-    @Test("the flip is live, unsaved, and revert_settings undoes it")
-    func revertUndoes() throws {
+    @Test("get_state names the side a Stack Space draws")
+    func getStateReportsTheDrawnSide() throws {
         let core = try KeepFixture.core()
-        #expect(core.unsavedLiveSettings() == nil)
+        core.state.workspaces.ensureSpace("1", mode: .stack)
+        core.setSpaceMode("1", .stack)
+        func reported() -> String? {
+            guard case .object(let root) = core.stateJSON(),
+                case .array(let spaces)? = root["spaces"]
+            else { return nil }
+            for case .object(let space) in spaces
+            where space["id"]?.stringValue == "1" {
+                return space["stack_position"]?.stringValue
+            }
+            return nil
+        }
+        #expect(reported() == "right")
         #expect(core.execute(verb).isSuccess)
-        #expect(side(core) == .left)
-        #expect(core.tiler.settings.stack.stackPosition == .right)
-        let unsaved = try #require(core.unsavedLiveSettings())
-        let ids = Array(unsaved.leaves.keys)
-        #expect(ids.count == 1)
-        #expect(ids.first?.contains("stack_position") == true)
-        #expect(
-            core.execute(
-                KiwiCore.revertSettingsCommand,
-                args: ids.map(JSONValue.string)
-            ).isSuccess
-        )
-        #expect(side(core) == nil)
-        #expect(core.unsavedLiveSettings() == nil)
+        #expect(reported() == "left")
     }
 }
