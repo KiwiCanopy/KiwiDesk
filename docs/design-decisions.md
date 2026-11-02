@@ -432,6 +432,32 @@ the cask users are the stranded ones. It is an obligation on the cask
 ([#105](https://github.com/KiwiCanopy/KiwiDesk/issues/105)), not
 a property that exists for free.
 
+:::unreleased
+**A package manager's copy keeps Sparkle off, and says who updates
+it (#2909).** The cask goes the other way: it declares
+`auto_updates`, so Sparkle owns the install and `brew upgrade`
+stands aside. Nix cannot. A store-path bundle is read-only, and
+Home Manager's writable copy is put back to the configured version
+by the next switch, which is also what makes a generation rollback
+work. So under Nix the configuration owns the version, and the app
+gets out of its way. Switching off only the
+scheduled checks is not enough, because *Check for Updates* would
+still offer an update that cannot hold. So the app decides in
+`AppUpdaterFactory.make()`: a bundle under `/nix/store` gets the
+inert updater, and so does a bundle inside the folder that the
+`KiwiDeskUpdatesManagedFolder` default names, beside a
+`KiwiDeskUpdatesManagedBy` default naming its manager. The folder
+is part of the test because Home Manager writes defaults and never
+removes them: a name alone would keep Sparkle off forever on the
+cask copy of someone who left Nix. Settings then says where its updates come from
+instead of calling update checks off. The check is the store path
+or the key, never "the bundle is not writable", since a standard
+user's admin-owned `/Applications` is not writable either and
+Sparkle's authorization prompt is right there. A Nix user has no
+Sparkle to fall back on, so the release's hash bump is their only
+update path, and a release is not complete until it lands.
+:::
+
 Trade-off: the first release reaches fewer people. Accepted, and
 it buys something back — Sparkle's update path is first
 exercised against a real previous release instead of being
