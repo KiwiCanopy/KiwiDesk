@@ -29,7 +29,8 @@ struct SizeBoundPlumbingTests {
         let context = settings.context(
             bounds: bounds,
             space: Space(id: "1", mode: .scrolling),
-            sticky: []
+            sticky: [],
+            stackFlip: nil
         )
         #expect(context.sizeBounds.isEmpty)
     }
@@ -44,6 +45,7 @@ struct SizeBoundPlumbingTests {
             bounds: bounds,
             space: Space(id: "1", mode: .scrolling),
             sticky: [],
+            stackFlip: nil,
             sizeBounds: [WindowID(1): bound]
         )
         #expect(context.sizeBounds[WindowID(1)] == bound)

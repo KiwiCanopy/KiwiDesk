@@ -395,3 +395,15 @@ reopens the app, which only brings one of those windows forward, and
 for about ten seconds a second press waits for a window that never
 comes. The window count KiwiDesk reads sees only the Desktop shown.
 :::
+
+:::unreleased
+A [stack flip](lua-reference.md#stacktoggle_stack_position) lasts
+for the session and is filed under the macOS Desktop's own id
+([#2771](https://github.com/KiwiCanopy/KiwiDesk/issues/2771)), so a
+restart of KiwiDesk, a quit and relaunch, and a screen replug that
+makes macOS give a Desktop a new id each put the stack back on its
+authored side. A screen plugged in since the last Desktop switch
+refuses the flip until you switch Desktops once. To keep a side for
+one Desktop, bind a profile with that side to it
+([Design Decisions ▸ A stack flip belongs to one Desktop](design-decisions.md#a-stack-flip-belongs-to-one-desktop-2771)).
+:::

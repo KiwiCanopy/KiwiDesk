@@ -22,7 +22,10 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
-        let stack = tiler.settings.resolvedStack(for: space)
+        let stack = tiler.settings.resolvedStack(
+            for: space,
+            flip: stackFlip(of: space.id)
+        )
         let tiled = state.effectiveTiledMembers(of: space)
         let splitAxis =
             stack.stackPosition.splitsHorizontally ? "x" : "y"
@@ -80,7 +83,10 @@ extension KiwiCore {
         span: Double,
         space: Space
     ) -> CommandResponse {
-        let stack = tiler.settings.resolvedStack(for: space)
+        let stack = tiler.settings.resolvedStack(
+            for: space,
+            flip: stackFlip(of: space.id)
+        )
         let tiled = state.effectiveTiledMembers(of: space)
         let splitAxis =
             stack.stackPosition.splitsHorizontally ? "x" : "y"

@@ -25,6 +25,7 @@ extension KiwiCore {
         keys.reset()
         desktopBindings = [:]
         resetDeclarativeState()
+        forgetStackFlips()  // #2771: a config load ends them
         defersWindowRuleReconcile = true
         defer { defersWindowRuleReconcile = false }
         var issues: [ConfigIssue] = []

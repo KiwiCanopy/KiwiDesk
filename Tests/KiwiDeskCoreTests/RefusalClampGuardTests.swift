@@ -97,7 +97,8 @@ struct RefusalClampGuardTests {
         core.retile()
         let ratio = {
             core.tiler.settings.resolvedStack(
-                for: core.state.workspaces[space]!
+                for: core.state.workspaces[space]!,
+                flip: nil
             ).masterRatio
         }
         let before = ratio()

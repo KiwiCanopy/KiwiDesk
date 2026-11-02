@@ -72,7 +72,10 @@ extension KiwiCore {
         // params (#17): base value, master classification, and
         // the write target all follow the space's own override,
         // never the global — so a resize can't shift other spaces.
-        let stack = tiler.settings.resolvedStack(for: space.id)
+        let stack = tiler.settings.resolvedStack(
+            for: space,
+            flip: stackFlip(of: space.id)
+        )
         let track = tiler.settings.resolvedTrack(for: space.id)
         // Zone membership via the partition authority — never
         // a re-derived boundary comparison (#67 review).
@@ -206,8 +209,10 @@ extension KiwiCore {
                 focused: window
             )
         case .masterRatio(let delta):
-            let stack =
-                tiler.settings.resolvedStack(for: space)
+            let stack = tiler.settings.resolvedStack(
+                for: space,
+                flip: stackFlip(of: space.id)
+            )
             let splitH = stack.stackPosition.splitsHorizontally
             let available =
                 splitH ? bounds.width : bounds.height
@@ -246,7 +251,10 @@ extension KiwiCore {
             // on it — a master zone lined up along the split does
             // not — is the writer's verdict, cued there (#941).
             guard let window else { break }
-            let stack = tiler.settings.resolvedStack(for: space)
+            let stack = tiler.settings.resolvedStack(
+                for: space,
+                flip: stackFlip(of: space.id)
+            )
             let splitH = stack.stackPosition.splitsHorizontally
             let weightAxis = splitH ? "y" : "x"
             let span = Double(splitH ? bounds.height : bounds.width)
