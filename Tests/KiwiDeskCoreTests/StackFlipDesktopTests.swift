@@ -64,7 +64,7 @@ struct StackFlipDesktopTests {
         NativeSpaces.displayUUIDOverride = { $0 == display ? "UUID-A" : nil }
         defer { NativeSpaces.displayUUIDOverride = nil }
         show(core, ["UUID-A": 20, "UUID-B": 30])
-        #expect(core.stackFlipDesktop(of: "1") == .shown(20))
+        #expect(core.shownDesktop(of: "1") == .shown(20))
         #expect(core.execute(verb).isSuccess)
         #expect(core.desktopMemory.stackFlips[20]?["1"] == .left)
         show(core, ["UUID-A": 21, "UUID-B": 30])
@@ -85,7 +85,7 @@ struct StackFlipDesktopTests {
     func noReadingIsOneEntry() throws {
         let core = try core()
         show(core, [:])
-        #expect(core.stackFlipDesktop(of: "1") == .shown(nil))
+        #expect(core.shownDesktop(of: "1") == .shown(nil))
         #expect(core.execute(verb).isSuccess)
         #expect(core.desktopMemory.stackFlips[nil]?["1"] == .left)
     }
