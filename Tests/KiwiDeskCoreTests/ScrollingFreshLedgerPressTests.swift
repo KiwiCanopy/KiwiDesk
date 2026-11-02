@@ -73,9 +73,12 @@ struct ScrollingFreshLedgerPressTests {
         _ space: SpaceID
     ) throws -> CGFloat {
         let live = try #require(core.state.workspaces[space])
-        return core.tiler.settings.resolvedScrolling(for: live)
-            .slotSize
-            .editablePoints(along: 1200, gap: 0, horizontal: true)
+        return core.tiler.settings.resolvedScrolling(
+            for: live,
+            session: core.sessionRatios(of: live.id)
+        )
+        .slotSize
+        .editablePoints(along: 1200, gap: 0, horizontal: true)
     }
 
     @Test(

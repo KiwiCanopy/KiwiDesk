@@ -72,6 +72,7 @@ extension KiwiCore {
     ) {
         let stack = tiler.settings.resolvedStack(
             for: space,
+            session: sessionRatios(of: space.id),
             flip: stackFlip(of: space.id)
         )
         let tiled = state.effectiveTiledMembers(of: space)
@@ -200,7 +201,10 @@ extension KiwiCore {
         space: Space,
         focused: WindowID?
     ) {
-        let bsp = tiler.settings.resolvedBsp(for: space)
+        let bsp = tiler.settings.resolvedBsp(
+            for: space,
+            session: sessionRatios(of: space.id)
+        )
         let base =
             axis == "x" ? bsp.splitRatioH : bsp.splitRatioV
         let horizontal = axis == "x"

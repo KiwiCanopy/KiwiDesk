@@ -238,12 +238,18 @@ struct ProfileSpacesSeamTests {
     func noNativeDesktopKeyedContentsStore() throws {
         let allowed: [String: (Int, String)] = [
             "Profiles/DesktopMemory.swift": (
-                4,
-                "the #1207 focus debts, the #1564 sticky left and "
-                    + "the #2771 stack flip — session state"
+                5,
+                "the #1207 focus debts, the #1564 sticky left, "
+                    + "the #2771 stack flip and the #2921 session "
+                    + "sizes — session state"
             ),
             "Profiles/KiwiCore+DesktopIdentity.swift":
                 (1, "a mint's accumulator, held nowhere"),
+            "Models/StateSnapshot+InPlace.swift": (
+                2,
+                "the in-place record's #2921 sizes in transit, "
+                    + "adopted back into DesktopMemory"
+            ),
         ]
         let root = coreRoot
         let prefix = root.path + "/"

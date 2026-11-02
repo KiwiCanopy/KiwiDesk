@@ -75,13 +75,16 @@ struct ScrollingSlotCeilingTests {
         horizontal: Bool = true
     ) throws -> CGFloat {
         let live = try #require(core.state.workspaces[space])
-        return core.tiler.settings.resolvedScrolling(for: live)
-            .slotSize
-            .editablePoints(
-                along: along,
-                gap: 0,
-                horizontal: horizontal
-            )
+        return core.tiler.settings.resolvedScrolling(
+            for: live,
+            session: core.sessionRatios(of: live.id)
+        )
+        .slotSize
+        .editablePoints(
+            along: along,
+            gap: 0,
+            horizontal: horizontal
+        )
     }
 
     @Test("Growing past the viewport stops at the axis")

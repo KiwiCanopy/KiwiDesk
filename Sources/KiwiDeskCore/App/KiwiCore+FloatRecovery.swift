@@ -64,7 +64,8 @@ extension KiwiCore {
         var snapshot =
             inPlace
             ? state.inPlaceSnapshot(
-                monocleShown: tiler.monocleShownMembers
+                monocleShown: tiler.monocleShownMembers,
+                ratios: sessionRatioEntries(of:)
             )
             : state.snapshot()
         snapshot.arrangement = liveArrangement

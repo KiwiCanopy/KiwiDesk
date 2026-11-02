@@ -74,6 +74,7 @@ extension KiwiCore {
         // never the global — so a resize can't shift other spaces.
         let stack = tiler.settings.resolvedStack(
             for: space,
+            session: sessionRatios(of: space.id),
             flip: stackFlip(of: space.id)
         )
         let track = tiler.settings.resolvedTrack(for: space.id)
@@ -188,7 +189,10 @@ extension KiwiCore {
         // when the drag ran into one.
         case .bspRatioH(let delta):
             let base =
-                tiler.settings.resolvedBsp(for: space)
+                tiler.settings.resolvedBsp(
+                    for: space,
+                    session: sessionRatios(of: space.id)
+                )
                 .splitRatioH
             writeCappedBspRatio(
                 proposed: base + Double(delta),
@@ -199,7 +203,10 @@ extension KiwiCore {
             )
         case .bspRatioV(let delta):
             let base =
-                tiler.settings.resolvedBsp(for: space)
+                tiler.settings.resolvedBsp(
+                    for: space,
+                    session: sessionRatios(of: space.id)
+                )
                 .splitRatioV
             writeCappedBspRatio(
                 proposed: base + Double(delta),
@@ -211,6 +218,7 @@ extension KiwiCore {
         case .masterRatio(let delta):
             let stack = tiler.settings.resolvedStack(
                 for: space,
+                session: sessionRatios(of: space.id),
                 flip: stackFlip(of: space.id)
             )
             let splitH = stack.stackPosition.splitsHorizontally
@@ -253,6 +261,7 @@ extension KiwiCore {
             guard let window else { break }
             let stack = tiler.settings.resolvedStack(
                 for: space,
+                session: sessionRatios(of: space.id),
                 flip: stackFlip(of: space.id)
             )
             let splitH = stack.stackPosition.splitsHorizontally

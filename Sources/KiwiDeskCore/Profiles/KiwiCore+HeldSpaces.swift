@@ -294,8 +294,7 @@ extension KiwiCore {
     }
 
     /// Ends every held Space's record without touching the Space —
-    /// resetting every setting, which makes nothing a hold's to
-    /// keep.
+    /// resetting every setting makes nothing a hold's to keep.
     func forgetHeldSpaces() {
         state.heldSpaces = [:]
     }
@@ -317,6 +316,7 @@ extension KiwiCore {
         state.renameRememberedSpace(source, to: target)
         spaceHistory.trails.rekey(source, to: target)  // #1655
         rekeyStackFlips(source, to: target)  // #2771
+        rekeySessionRatios(source, to: target)  // #2921
     }
 
     /// `WorkspaceManager.add` nils the focus trackers of a window

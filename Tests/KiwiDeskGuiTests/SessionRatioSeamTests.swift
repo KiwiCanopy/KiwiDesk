@@ -1,87 +1,180 @@
 import Foundation
 import Testing
 
-/// A `sessionRatios` write lives in the interactive-resize seam
-/// (`KiwiCore+SessionRatioWrite`) or in the model's own reseeds
-/// (#458, #764). The per-space `_override` setters used to spell
-/// the clear raw beside their call sites, which is the form a
-/// fifth setter copies; a raw write that forgets the clear, or
-/// clears the wrong field, leaves an explicit write shadowed with
-/// nothing red. The scan counts the spellings that reach the
-/// store under `Sources/KiwiDeskCore` and pins each file outside
-/// the seam to its count, so a new site reds on arrival and a
-/// vanished one reds too. Fails OPEN for a store reached through
-/// a name the needles do not spell — a `Space` copied out under
-/// another name and mutated there, an `inout` hand-off of a
-/// field rather than the store — and for a member chain broken
-/// BEFORE the field (`$0.sessionRatios` alone on a line), which
-/// the formatter does not produce; review carries both.
-@Suite("Session ratio write seam (#764)")
+/// The session sizes' one door (#764, #2921): a resize writes and
+/// every overlay reads the per-Desktop layer through
+/// `KiwiCore+SessionRatioWrite`, and the resolvers require the
+/// door's answer, so no reader falls back to a shared value by
+/// accident. No fixture can see a reader that re-derives the
+/// sizes beside the door, so the spellings are counted. Fails
+/// OPEN for a store reached through a name the needles do not
+/// spell — a `DesktopMemory` held under another name — which
+/// review carries.
+@Suite("Session ratio seam (#764, #2921)")
 struct SessionRatioSeamTests {
-    /// A write: `sessionRatios`, optionally one member or a
-    /// key path away, assigned on this line or at its end (the
-    /// formatter breaks after `=`), or handed out `inout`
-    /// through whatever path reaches it.
-    private static let write = try! NSRegularExpression(
-        pattern:
-            #"sessionRatios(\.\w+|\[[^\]]*\])?\s*=(\s|$)"#
-            + #"|&[\w$\[\]!?.]*sessionRatios\b"#
-    )
-
-    /// Files that may spell a write, with today's count and why.
-    private let allowed: [String: Int] = [
-        // The seam: the four `write*`, the grid weights' one
-        // per axis (#763) and the two clears.
-        "Tiling/KiwiCore+SessionRatioWrite.swift": 8,
-        // The model's own init and `resetSizing`.
-        "Models/SpaceModel.swift": 2,
-        // The mode-change reseed (#458).
-        "State/WorkspaceManager.swift": 1,
-        // An in-place restart's replay of the layer the stop
-        // captured (#930): a restore, not a resize, so no field
-        // an explicit write set is shadowed by it.
-        "Models/StateSnapshot+InPlace.swift": 1,
+    private static let root = SourceScan.repoRoot(from: #filePath)
+    private static let trees = ["Sources/KiwiDeskCore", "Sources/KiwiDesk"]
+    private static let door = "KiwiCore+SessionRatioWrite.swift"
+    private static let overlays = [
+        "resolvedBsp(", "resolvedStack(", "resolvedScrolling(",
+        "resolvedGrid(",
     ]
 
-    /// Writes per line; a read (`space.sessionRatios.splitRatioH`
-    /// on the right of `let`, the overlay's `if let value =`) has
-    /// no `=` after the store and is not matched. `let
-    /// sessionRatios = …` would match and is fail-closed.
-    private static func writes(in source: String) -> Int {
-        source.split(separator: "\n").reduce(0) { count, line in
-            let text = String(line)
-            let range = NSRange(text.startIndex..., in: text)
-            return count
-                + (write.firstMatch(in: text, range: range) == nil
-                    ? 0 : 1)
+    /// The session argument a context build passes: the door, then
+    /// the flip, which only `context(` takes after it.
+    private static let contextDoor = try! NSRegularExpression(
+        pattern: #"session: sessionRatios\((of: )?space\.id\),\s*stackFlip:"#
+    )
+
+    private func sources() throws -> [(name: String, text: String)] {
+        var out: [(String, String)] = []
+        for tree in Self.trees {
+            let dir = Self.root.appendingPathComponent(tree)
+            for file in try SourceScan.swiftSources(under: dir) {
+                out.append(
+                    (
+                        file.lastPathComponent,
+                        try SourceScan.strippedSource(at: file)
+                    )
+                )
+            }
+        }
+        return out
+    }
+
+    /// Every overlay call: its file and its argument list.
+    private func overlayCalls() throws -> [(file: String, args: String)] {
+        var out: [(String, String)] = []
+        for (name, text) in try sources() {
+            for needle in Self.overlays {
+                var rest = Substring(text)
+                while let hit = rest.range(of: needle) {
+                    let before = rest[..<hit.lowerBound].suffix(5)
+                    let tail = String(rest[hit.lowerBound...])
+                    rest = rest[hit.upperBound...]
+                    if before == "func " { continue }
+                    let args = try #require(
+                        SourceScan.callArguments(of: needle, in: tail)
+                    )
+                    out.append((name, args))
+                }
+            }
+        }
+        return out
+    }
+
+    @Test("every overlay read hands the resolver the door")
+    func overlayReadsTakeTheDoor() throws {
+        let sized = try overlayCalls().filter {
+            $0.args.contains("session:")
+        }
+        #expect(sized.count >= 15)
+        for call in sized {
+            let subject =
+                call.args
+                .components(separatedBy: ",").first?
+                .replacingOccurrences(of: "for:", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+            let door =
+                call.args.contains(
+                    "session: sessionRatios(of: \(subject).id)"
+                )
+                || call.args.contains(
+                    "session: self.sessionRatios(of: \(subject).id)"
+                )
+                // `context`'s own required parameter.
+                || (call.file == "TilingSettings+Resolution.swift"
+                    && call.args.contains("session: session"))
+            #expect(door, "\(call.file): \(call.args)")
         }
     }
 
-    @Test("sessionRatios writes outside the seam stay pinned")
-    func writesStayInTheSeam() throws {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDeskCore")
-        let prefix = root.path + "/"
-        var counts: [String: Int] = [:]
-        for file in try SourceScan.swiftSources(under: root) {
-            let key = String(file.path.dropFirst(prefix.count))
-            let source = try SourceScan.strippedSource(at: file)
-            let hits = Self.writes(in: source)
-            guard hits > 0 else { continue }
-            counts[key] = hits
+    @Test("every context build hands it the session door")
+    func contextTakesTheDoor() throws {
+        var found: [String: Int] = [:]
+        for (name, text) in try sources() {
+            let builds = text.occurrences(of: "settings.context(")
+            let range = NSRange(text.startIndex..., in: text)
+            let doors = Self.contextDoor.numberOfMatches(
+                in: text,
+                range: range
+            )
+            #expect(builds == doors, "\(name)")
+            if doors > 0 { found[name] = doors }
         }
-        for (file, count) in counts.sorted(by: { $0.key < $1.key }) {
-            let unlisted =
-                "\(file) writes sessionRatios \(count)× — route it "
-                + "through KiwiCore+SessionRatioWrite (#764) or "
-                + "justify and pin it here"
-            #expect(allowed[file] == count, Comment(rawValue: unlisted))
+        #expect(
+            found == [
+                "TilingEngine+Layout.swift": 2,
+                "KiwiCore+ResizeScrollSlot.swift": 1,
+            ]
+        )
+    }
+
+    @Test("the engine's seam is wired to the door once")
+    func engineSeamIsWired() throws {
+        let source = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/App/KiwiCore+Bootstrap.swift"
+            )
+        )
+        #expect(source.occurrences(of: "tiler.sessionRatios = ") == 1)
+        let wired = try #require(
+            source.range(of: "tiler.sessionRatios = ")
+        )
+        let body = String(source[wired.upperBound...].prefix(120))
+        #expect(body.contains("self?.sessionRatios(of: space)"))
+    }
+
+    @Test("only the door touches the store and its writer")
+    func storeHasOneHome() throws {
+        var store: [String: Int] = [:]
+        var writer: [String: Int] = [:]
+        for (name, text) in try sources() {
+            let reads = text.occurrences(of: "desktopMemory.sessionRatios")
+            if reads > 0 { store[name] = reads }
+            let writes = text.occurrences(of: "withSessionRatios(of:")
+            if writes > 0 { writer[name] = writes }
         }
-        for (file, expected) in allowed {
-            let vanished =
-                "\(file) no longer writes sessionRatios \(expected)× "
-                + "— re-pin or drop its entry"
-            #expect(counts[file] == expected, Comment(rawValue: vanished))
+        #expect(Set(store.keys) == [Self.door])
+        #expect(Set(writer.keys) == [Self.door])
+        let memory = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/Profiles/DesktopMemory.swift"
+            )
+        )
+        #expect(memory.occurrences(of: "var sessionRatios:") == 1)
+    }
+
+    @Test("the renumber, the drop and a mode change carry the sizes")
+    func lifecycleIsWired() throws {
+        let core = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore"
+        )
+        func body(_ path: String, after needle: String) throws -> String {
+            let text = try SourceScan.strippedSource(
+                at: core.appendingPathComponent(path)
+            )
+            return try #require(
+                SourceScan.declarationBody(after: needle, in: text)
+            )
         }
+        #expect(
+            try body(
+                "Profiles/KiwiCore+HeldSpaces.swift",
+                after: "private func moveMembers("
+            ).contains("rekeySessionRatios(source, to: target)")
+        )
+        #expect(
+            try body(
+                "Profiles/KiwiCore+ProfileSpaces.swift",
+                after: "func forwardWindows(of space: SpaceID,"
+            ).contains("forgetSessionRatios(of: space)")
+        )
+        #expect(
+            try body(
+                "App/KiwiCore+TrackSeed.swift",
+                after: "func setSpaceMode("
+            ).contains("forgetSessionRatios(of: id)")
+        )
     }
 }

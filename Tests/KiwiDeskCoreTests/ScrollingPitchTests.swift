@@ -87,7 +87,10 @@ struct ScrollingPitchTests {
         let live = try #require(core.state.workspaces[space])
         guard
             case .points(let written) = core.tiler.settings
-                .resolvedScrolling(for: live).slotSize
+                .resolvedScrolling(
+                    for: live,
+                    session: core.sessionRatios(of: live.id)
+                ).slotSize
         else {
             Issue.record("the grow did not write points")
             return

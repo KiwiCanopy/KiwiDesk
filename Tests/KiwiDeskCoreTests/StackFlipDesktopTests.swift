@@ -101,6 +101,7 @@ struct StackFlipDesktopTests {
             bounds: CGRect(x: 0, y: 0, width: 100, height: 100),
             space: space,
             sticky: [],
+            session: SessionRatios(),
             stackFlip: core.tiler.stackFlip("1")
         )
         #expect(context.stack.stackPosition == .left)

@@ -72,6 +72,7 @@ struct StackArrangementResizeTests {
         core.state.apply(.windowFocused(WindowID(3)))
         let before = core.tiler.settings.resolvedStack(
             for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1")),
             flip: nil
         ).masterRatio
         core.execute("resize", args: [.string("y"), .number(300)])
@@ -79,6 +80,7 @@ struct StackArrangementResizeTests {
         #expect(
             core.tiler.settings.resolvedStack(
                 for: core.state.workspaces[SpaceID("1")]!,
+                session: core.sessionRatios(of: SpaceID("1")),
                 flip: nil
             ).masterRatio > before
         )

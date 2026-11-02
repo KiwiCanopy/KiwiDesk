@@ -115,6 +115,7 @@ struct StackTogglePositionTests {
         let space = try #require(core.state.workspaces["1"])
         let params = core.tiler.settings.resolvedStack(
             for: space,
+            session: core.sessionRatios(of: space.id),
             flip: core.stackFlip(of: "1")
         )
         #expect(params.stackPosition == .left)

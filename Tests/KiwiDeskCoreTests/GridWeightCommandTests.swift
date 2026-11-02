@@ -21,14 +21,14 @@ struct GridWeightCommandTests {
     }
 
     private func sessionColumns(_ core: KiwiCore) -> [Double]? {
-        core.state.workspaces[SpaceID("1")]?.sessionRatios
+        core.sessionRatios(of: SpaceID("1"))
             .gridColumnWeights
     }
 
     private func seedSession(_ core: KiwiCore) {
-        core.state.workspaces.withSpace(SpaceID("1")) {
-            $0.sessionRatios.gridColumnWeights = [1.5, 0.5]
-            $0.sessionRatios.gridRowWeights = [2]
+        core.withSessionRatios(of: SpaceID("1")) {
+            $0.gridColumnWeights = [1.5, 0.5]
+            $0.gridRowWeights = [2]
         }
     }
 
@@ -79,7 +79,7 @@ struct GridWeightCommandTests {
         #expect(sessionColumns(core) == nil)
         // The other axis's layer is not this verb's.
         #expect(
-            core.state.workspaces[SpaceID("1")]?.sessionRatios
+            core.sessionRatios(of: SpaceID("1"))
                 .gridRowWeights == [2]
         )
     }

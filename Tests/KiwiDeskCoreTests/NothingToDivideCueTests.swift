@@ -100,7 +100,7 @@ struct NothingToDivideCueTests {
         #expect(seen == [])
         // The write lands in the space's session ratio (#458).
         let written =
-            core.state.workspaces[sp.id]?.sessionRatios.masterRatio
+            core.sessionRatios(of: sp.id).masterRatio
         #expect(written != nil && written! < 0.6)
         let cross = refusals(core) {
             core.execute(
@@ -294,7 +294,11 @@ struct NothingToDivideCueTests {
             )
         )
         let live = core.state.workspaces[sp.id]!
-        let stack = core.tiler.settings.resolvedStack(for: live, flip: nil)
+        let stack = core.tiler.settings.resolvedStack(
+            for: live,
+            session: core.sessionRatios(of: live.id),
+            flip: nil
+        )
         let seen = refusals(core) {
             core.writeCappedMasterRatio(
                 proposed: stack.masterRatio - 600 / 1200,

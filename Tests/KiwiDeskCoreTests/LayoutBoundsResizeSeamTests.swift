@@ -74,7 +74,8 @@ struct LayoutBoundsResizeSeamTests {
 
     private func ratioH(_ core: KiwiCore) -> Double {
         core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1"))
         ).splitRatioH
     }
 
@@ -143,7 +144,10 @@ struct LayoutBoundsResizeSeamTests {
             return
         }
         let scrolling = core.tiler.settings
-            .resolvedScrolling(for: space)
+            .resolvedScrolling(
+                for: space,
+                session: core.sessionRatios(of: space.id)
+            )
         // Pin the default this arithmetic reasons from: a
         // vertical axis would measure the (bar-unaffected)
         // height and red this test for an unrelated reason.

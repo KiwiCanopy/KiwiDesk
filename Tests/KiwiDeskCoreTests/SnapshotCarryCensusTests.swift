@@ -19,7 +19,6 @@ struct SnapshotCarryCensusTests {
     private let w1 = WindowID(1)
     private let w2 = WindowID(2)
     private let spaceID = SpaceID("1")
-
     /// `Space` properties an in-place restart does not carry.
     private let spaceLeftBehind: [String: String] = [
         "handedBreaks":
@@ -116,14 +115,14 @@ struct SnapshotCarryCensusTests {
             $0.trackWeights = [self.w2: 1.5]
             $0.runHeads = [self.w2]
             $0.runTails = [self.w2]
-            $0.sessionRatios.splitRatioH = 0.31
-            $0.sessionRatios.splitRatioV = 0.62
-            $0.sessionRatios.masterRatio = 0.44
-            $0.sessionRatios.slotSize = .fraction(0.712345678)
-            $0.sessionRatios.gridColumnWeights = [1.25, 0.75, 1]
-            $0.sessionRatios.gridRowWeights = [0.6, 1.4]
             $0.maximized = self.w2
         }
+        // A per-Desktop size (#2921), carried or dropped with the
+        // rest of the session; its leaves are
+        // `SessionRatioCarryTests`'.
+        var sized = SessionRatios()
+        sized.masterRatio = 0.44
+        core.desktopMemory.sessionRatios = [20: [spaceID: sized]]
         core.state.setFloating(w1, true)
         core.state.setSticky(w1, .display)
         core.state.stickyReachOverrides[w1] = false
@@ -258,7 +257,7 @@ struct SnapshotCarryCensusTests {
         let space = try #require(b.state.workspaces[spaceID])
         #expect(space.windows == [w2, w1])
         #expect(space.mode == .track)
-        #expect(space.sessionRatios == SessionRatios())
+        #expect(b.desktopMemory.sessionRatios.isEmpty)
     }
 
     @Test("a plain capture carries no session memory")
@@ -276,7 +275,7 @@ struct SnapshotCarryCensusTests {
             try JSONDecoder().decode(StateSnapshot.self, from: data)
         )
         let space = try #require(b.state.workspaces[spaceID])
-        #expect(space.sessionRatios == SessionRatios())
+        #expect(b.desktopMemory.sessionRatios.isEmpty)
         #expect(space.stackWeights.isEmpty)
         #expect(b.state.windows[w1]?.isFloating == false)
         #expect(b.state.windows[w1]?.stickyScope == StickyScope.none)

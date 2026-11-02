@@ -24,6 +24,11 @@ extension KiwiCore {
             mode == .track
             && state.workspaces[id]?.mode != .track
         let seed = entering ? trackEntrySeed(for: id) : nil
+        // A mode change drops the sizes on every Desktop (#458,
+        // #2921 ruling 4), as `setMode` drops the Space's own.
+        if state.workspaces[id].map({ $0.mode != mode }) == true {
+            forgetSessionRatios(of: id)
+        }
         state.workspaces.setMode(id, mode, trackSeed: seed)
     }
 

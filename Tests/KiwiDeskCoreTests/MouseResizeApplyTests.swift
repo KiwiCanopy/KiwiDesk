@@ -43,7 +43,8 @@ struct MouseResizeApplyTests {
     /// drops on a no-override space land in the session layer.
     private func resolvedBsp(_ core: KiwiCore) -> BspParams {
         core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1"))
         )
     }
 
@@ -122,6 +123,7 @@ struct MouseResizeApplyTests {
         )
         let stack = core.tiler.settings.resolvedStack(
             for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1")),
             flip: nil
         )
         #expect(abs(stack.masterRatio - 0.5) < 1e-9)
@@ -142,6 +144,7 @@ struct MouseResizeApplyTests {
         )
         let stack = core.tiler.settings.resolvedStack(
             for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1")),
             flip: nil
         )
         #expect(abs(stack.masterRatio - 0.7) < 1e-9)
@@ -174,7 +177,8 @@ struct MouseResizeApplyTests {
             bounds: bounds
         )
         let after = core.tiler.settings.resolvedScrolling(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            session: core.sessionRatios(of: SpaceID("1"))
         ).slotSize
             .editablePoints(
                 along: bounds.width,
@@ -215,7 +219,8 @@ struct MouseResizeApplyTests {
                 bounds: bounds
             )
             return core.tiler.settings.resolvedScrolling(
-                for: core.state.workspaces[SpaceID("1")]!
+                for: core.state.workspaces[SpaceID("1")]!,
+                session: core.sessionRatios(of: SpaceID("1"))
             ).slotSize
                 .editablePoints(
                     along: bounds.width,

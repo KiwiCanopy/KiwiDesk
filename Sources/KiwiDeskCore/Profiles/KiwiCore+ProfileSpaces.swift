@@ -156,6 +156,7 @@ extension KiwiCore {
         state.temporaryArmed.remove(space)
         spaceHistory.trails.forget(space)  // #1655
         forgetStackFlips(of: space)  // #2771
+        forgetSessionRatios(of: space)  // #2921
     }
 
     /// Puts the incoming profile's own windows back in its own

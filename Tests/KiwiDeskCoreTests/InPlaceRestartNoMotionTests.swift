@@ -51,19 +51,24 @@ struct InPlaceRestartNoMotionTests {
         // Floated by hand: a manual override the scan cannot see.
         core.state.setFloating(WindowID(13), true)
         core.setSpaceMode(F.shown, mode)
-        core.state.workspaces.withSpace(F.shown) { space in
+        core.withSessionRatios(of: F.shown) { ratios in
             switch mode {
             case .bsp:
-                space.sessionRatios.splitRatioH = 0.31
-                space.sessionRatios.splitRatioV = 0.58
+                ratios.splitRatioH = 0.31
+                ratios.splitRatioV = 0.58
+            case .stack: ratios.masterRatio = 0.62
+            case .scrolling: ratios.slotSize = .fraction(0.63)
+            default: break
+            }
+        }
+        core.state.workspaces.withSpace(F.shown) { space in
+            switch mode {
             case .stack:
-                space.sessionRatios.masterRatio = 0.62
                 space.stackWeights = [WindowID(3): 1.7]
             case .track:
                 space.trackBreaks = [WindowID(1), WindowID(3)]
                 space.trackWeights = [WindowID(1): 1.4]
             case .scrolling:
-                space.sessionRatios.slotSize = .fraction(0.63)
                 space.focused = WindowID(3)
             case .monocle:
                 space.focused = WindowID(2)

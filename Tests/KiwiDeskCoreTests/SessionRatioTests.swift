@@ -30,11 +30,14 @@ struct SessionRatioTests {
         core.execute("resize", args: [.string("x"), .number(500)])
         // The resized space resolves its session value…
         let one = core.state.workspaces[SpaceID("1")]
-        #expect(one?.sessionRatios.splitRatioH != nil)
+        #expect(core.sessionRatios(of: SpaceID("1")).splitRatioH != nil)
         if let one {
             #expect(
-                core.tiler.settings.resolvedBsp(for: one)
-                    .splitRatioH != 0.5
+                core.tiler.settings.resolvedBsp(
+                    for: one,
+                    session: core.sessionRatios(of: one.id)
+                )
+                .splitRatioH != 0.5
             )
         }
         // …while the other no-override space still resolves
@@ -42,8 +45,11 @@ struct SessionRatioTests {
         let two = core.state.workspaces[SpaceID("2")]
         if let two {
             #expect(
-                core.tiler.settings.resolvedBsp(for: two)
-                    .splitRatioH == 0.5
+                core.tiler.settings.resolvedBsp(
+                    for: two,
+                    session: core.sessionRatios(of: two.id)
+                )
+                .splitRatioH == 0.5
             )
         }
         #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
@@ -54,15 +60,13 @@ struct SessionRatioTests {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(500)])
         // Dense same-mode applies (profile/GUI) must not wipe.
-        core.state.workspaces.setMode(SpaceID("1"), .bsp)
+        core.setSpaceMode(SpaceID("1"), .bsp)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
-        core.state.workspaces.setMode(SpaceID("1"), .stack)
+        core.setSpaceMode(SpaceID("1"), .stack)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios == SessionRatios()
+            core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
     }
 
@@ -78,15 +82,18 @@ struct SessionRatioTests {
             ).isSuccess
         )
         let session =
-            core.state.workspaces[SpaceID("1")]?.sessionRatios
+            core.sessionRatios(of: SpaceID("1"))
         // Only the written field is cleared; the V value is a
         // different knob and survives.
-        #expect(session?.splitRatioH == nil)
-        #expect(session?.splitRatioV != nil)
+        #expect(session.splitRatioH == nil)
+        #expect(session.splitRatioV != nil)
         if let space = core.state.workspaces[SpaceID("1")] {
             #expect(
-                core.tiler.settings.resolvedBsp(for: space)
-                    .splitRatioH == 0.4
+                core.tiler.settings.resolvedBsp(
+                    for: space,
+                    session: core.sessionRatios(of: space.id)
+                )
+                .splitRatioH == 0.4
             )
         }
     }
@@ -102,8 +109,7 @@ struct SessionRatioTests {
             ).isSuccess
         )
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioV == nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioV == nil
         )
         core.execute(
             "set_mode",
@@ -111,8 +117,7 @@ struct SessionRatioTests {
         )
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.masterRatio != nil
+            core.sessionRatios(of: SpaceID("1")).masterRatio != nil
         )
         #expect(
             core.execute(
@@ -121,8 +126,7 @@ struct SessionRatioTests {
             ).isSuccess
         )
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.masterRatio == nil
+            core.sessionRatios(of: SpaceID("1")).masterRatio == nil
         )
         core.execute(
             "set_mode",
@@ -130,8 +134,7 @@ struct SessionRatioTests {
         )
         core.execute("resize", args: [.string("x"), .number(50)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.slotSize != nil
+            core.sessionRatios(of: SpaceID("1")).slotSize != nil
         )
         #expect(
             core.execute(
@@ -140,8 +143,7 @@ struct SessionRatioTests {
             ).isSuccess
         )
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.slotSize == nil
+            core.sessionRatios(of: SpaceID("1")).slotSize == nil
         )
     }
 
@@ -149,11 +151,9 @@ struct SessionRatioTests {
     func consecutiveResizesAccumulate() {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(100)])
-        let first = core.state.workspaces[SpaceID("1")]?
-            .sessionRatios.splitRatioH
+        let first = core.sessionRatios(of: SpaceID("1")).splitRatioH
         core.execute("resize", args: [.string("x"), .number(100)])
-        let second = core.state.workspaces[SpaceID("1")]?
-            .sessionRatios.splitRatioH
+        let second = core.sessionRatios(of: SpaceID("1")).splitRatioH
         // A read regressed to the config-only resolver would
         // recompute global+delta each time: the second resize
         // would land on the same value and the window would
@@ -170,8 +170,7 @@ struct SessionRatioTests {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         let profile = Profile(
             name: "p",
@@ -181,15 +180,13 @@ struct SessionRatioTests {
         )
         core.apply(profile: profile, cause: .reapply)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios == SessionRatios()
+            core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
         // An event-driven (un-forced) apply keeps the layer.
         core.execute("resize", args: [.string("x"), .number(500)])
         core.apply(profile: profile, cause: .event)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
     }
 
@@ -207,13 +204,11 @@ struct SessionRatioTests {
         )
         core.apply(composed: composed, forceRetile: false)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         core.apply(composed: composed, forceRetile: true)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios == SessionRatios()
+            core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
     }
 
@@ -222,16 +217,14 @@ struct SessionRatioTests {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         var config = GuiConfig()
         config.settings = core.tiler.settings
         config.spaces = ["1"]
         core.applyProfileScopedState(from: config)
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios == SessionRatios()
+            core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
     }
 
@@ -240,13 +233,11 @@ struct SessionRatioTests {
         let core = makeCore()
         core.execute("resize", args: [.string("x"), .number(500)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.splitRatioH != nil
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
         )
         core.loadConfig()
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios == SessionRatios()
+            core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
     }
 
@@ -273,8 +264,7 @@ struct SessionRatioTests {
         )
         core.execute("resize", args: [.string("x"), .number(50)])
         #expect(
-            core.state.workspaces[SpaceID("1")]?
-                .sessionRatios.slotSize != nil
+            core.sessionRatios(of: SpaceID("1")).slotSize != nil
         )
         #expect(
             core.tiler.settings.scrolling.slotSize == globalBefore
@@ -296,8 +286,8 @@ struct SessionRatioTests {
             bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080)
         )
         let session =
-            core.state.workspaces[SpaceID("1")]?.sessionRatios
-        #expect(session?.splitRatioH != nil)
+            core.sessionRatios(of: SpaceID("1"))
+        #expect(session.splitRatioH != nil)
         #expect(core.tiler.settings.bsp.splitRatioH == 0.5)
     }
 }

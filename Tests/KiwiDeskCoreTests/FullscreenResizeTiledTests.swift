@@ -90,7 +90,7 @@ struct FullscreenResizeTiledTests {
         @MainActor
         init(_ core: KiwiCore) {
             let space = core.state.workspaces[SpaceID("1")]
-            ratios = space?.sessionRatios ?? SessionRatios()
+            ratios = core.sessionRatios(of: SpaceID("1"))
             stackWeights = space?.stackWeights ?? [:]
             trackWeights = space?.trackWeights ?? [:]
         }

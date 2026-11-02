@@ -81,7 +81,8 @@ struct HealStandDownTests {
 
     private func ratio(_ core: KiwiCore, _ space: SpaceID) -> Double {
         core.tiler.settings.resolvedBsp(
-            for: core.state.workspaces[space]!
+            for: core.state.workspaces[space]!,
+            session: core.sessionRatios(of: space)
         ).splitRatioH
     }
 

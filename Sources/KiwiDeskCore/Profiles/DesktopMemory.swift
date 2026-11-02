@@ -52,6 +52,15 @@ final class DesktopMemory {
     var stackFlips: [SkyLight.SpaceID?: SpaceSides] = [:]
     typealias SpaceSides = [SpaceID: StackParams.StackPosition]
 
+    /// The sizes a resize wrote for each Space on each Desktop
+    /// (#2921), keyed like `stackFlips`; the nil key is the one
+    /// shared entry for a Desktop no reading names. Session state
+    /// an in-place restart carries (#930): written and read in
+    /// `KiwiCore+SessionRatioWrite.swift` alone, through
+    /// `KiwiCore.sessionRatios(of:)`.
+    var sessionRatios: [SkyLight.SpaceID?: SpaceRatios] = [:]
+    typealias SpaceRatios = [SpaceID: SessionRatios]
+
     /// The last honored focus per native Desktop, any Space (#1564)
     /// — filed beside `honoredFocus`, read at the departure.
     var lastHonoredOn: [SkyLight.SpaceID: WindowID] = [:]

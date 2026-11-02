@@ -11,7 +11,13 @@ import Foundation
 extension StateSnapshot {
     /// One Space's session sizing and its Monocle hold.
     public struct SpaceSession: Codable, Sendable, Equatable {
+        /// The shared entry for a Desktop no reading names (#2921
+        /// ruling 3) — the one entry a build before 4.2.0 wrote, so
+        /// its file still crosses into it.
         public var ratios: SessionRatios
+        /// The sizes per named Desktop (#2921), by native id; nil
+        /// where none was sized.
+        public var desktopRatios: [DesktopRatios]?
         public var stackWeights: [UInt32: Double]
         public var scrollRest: ScrollRest?
         /// `TilingEngine.monocleShownMembers` (#881): the member
@@ -25,8 +31,17 @@ extension StateSnapshot {
         public var runHeads: [UInt32]?
         public var runTails: [UInt32]?
 
-        public init(space: Space, monocleShown: WindowID?) {
-            ratios = space.sessionRatios
+        public init(
+            space: Space,
+            ratios entries: [SkyLight.SpaceID?: SessionRatios],
+            monocleShown: WindowID?
+        ) {
+            ratios = entries[nil] ?? SessionRatios()
+            let named = entries.compactMap { desktop, ratios in
+                desktop.map { DesktopRatios(desktop: $0, ratios: ratios) }
+            }
+            desktopRatios =
+                named.isEmpty ? nil : named.sorted { $0.desktop < $1.desktop }
             stackWeights = Dictionary(
                 uniqueKeysWithValues: space.stackWeights.map {
                     ($0.key.raw, $0.value)
@@ -43,14 +58,40 @@ extension StateSnapshot {
                 ? nil : space.runTails.map(\.raw).sorted()
         }
 
+        /// Every entry, the shared one under nil.
+        public var ratioEntries: [SkyLight.SpaceID?: SessionRatios] {
+            var out: [SkyLight.SpaceID?: SessionRatios] = [nil: ratios]
+            for entry in desktopRatios ?? [] {
+                out[entry.desktop] = entry.ratios
+            }
+            return out
+        }
+
         private enum CodingKeys: String, CodingKey {
             case ratios = "session_ratios"
+            case desktopRatios = "desktop_ratios"
             case stackWeights = "stack_weights"
             case scrollRest = "scroll_rest"
             case monocleShown = "monocle_shown"
             case maximized
             case runHeads = "run_heads"
             case runTails = "run_tails"
+        }
+    }
+
+    /// One named Desktop's sizes for a Space (#2921).
+    public struct DesktopRatios: Codable, Sendable, Equatable {
+        public var desktop: SkyLight.SpaceID
+        public var ratios: SessionRatios
+
+        public init(desktop: SkyLight.SpaceID, ratios: SessionRatios) {
+            self.desktop = desktop
+            self.ratios = ratios
+        }
+
+        private enum CodingKeys: String, CodingKey {
+            case desktop
+            case ratios = "session_ratios"
         }
     }
 
@@ -97,9 +138,11 @@ extension StateSnapshot {
 extension StateCoordinator {
     /// The in-place stop's capture (#930): `snapshot()` plus each
     /// Space's and each window's session memory. `monocleShown`
-    /// is the engine's hold, which state does not own.
+    /// is the engine's hold and `ratios` each Space's per-Desktop
+    /// sizes (#2921), which state does not own.
     public func inPlaceSnapshot(
-        monocleShown: [SpaceID: WindowID]
+        monocleShown: [SpaceID: WindowID],
+        ratios: (SpaceID) -> [SkyLight.SpaceID?: SessionRatios]
     ) -> StateSnapshot {
         var snapshot = snapshot()
         snapshot.spaces = workspaces.allSpaces.map {
@@ -107,6 +150,7 @@ extension StateCoordinator {
                 of: $0,
                 session: StateSnapshot.SpaceSession(
                     space: $0,
+                    ratios: ratios($0.id),
                     monocleShown: monocleShown[$0.id]
                 )
             )
@@ -127,14 +171,14 @@ extension StateCoordinator {
 
     /// Re-applies what `inPlaceSnapshot` added. Space sizing is
     /// written AFTER the record's membership: re-filing a window
-    /// drops its stack weight and releases the scroll slot.
+    /// drops its stack weight and releases the scroll slot. The
+    /// per-Desktop ratios are `KiwiCore.restore`'s to adopt.
     mutating func adoptSession(
         _ record: StateSnapshot.SpaceRecord,
         in space: SpaceID
     ) {
         guard let session = record.session else { return }
         workspaces.withSpace(space) {
-            $0.sessionRatios = session.ratios
             $0.stackWeights = Dictionary(
                 uniqueKeysWithValues: session.stackWeights.map {
                     (WindowID($0.key), $0.value)

@@ -92,7 +92,7 @@ struct ScrollingEdgeDropTests {
         _ core: KiwiCore,
         _ space: SpaceID
     ) -> ScrollSize? {
-        core.state.workspaces[space]?.sessionRatios.slotSize
+        core.sessionRatios(of: space).slotSize
     }
 
     /// The drawn extent after the drop, along the row's axis.
@@ -212,10 +212,10 @@ struct ScrollingEdgeDropTests {
         )
         var frame = slot
         frame.size.width -= 200
-        let before = core.state.workspaces[space]?.sessionRatios
+        let before = core.sessionRatios(of: space)
         core.handleDragEnd(id, start: slot, frame: frame)
         #expect(
-            core.state.workspaces[space]?.sessionRatios == before
+            core.sessionRatios(of: space) == before
         )
     }
 }

@@ -261,6 +261,12 @@ public final class TilingEngine {
     var stackFlip: @MainActor (SpaceID) -> StackParams.StackPosition? = {
         _ in nil
     }
+    /// The sizes a resize wrote for a Space on the Desktop shown
+    /// now (#2921); `bootstrapCoreServices` wires it to
+    /// `KiwiCore.sessionRatios(of:)`, the one door.
+    var sessionRatios: @MainActor (SpaceID) -> SessionRatios = { _ in
+        SessionRatios()
+    }
 
     /// The fingerprint `screen`'s bar edges resolve under in
     /// `settings` (the live ones unless a draft is handed in) —

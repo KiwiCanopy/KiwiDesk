@@ -105,7 +105,7 @@ struct GridResizeTests {
         #expect(abs(width(core, 3) - third) < 0.5)
         // The session layer took it; the authored list did not.
         #expect(
-            core.state.workspaces[space]?.sessionRatios
+            core.sessionRatios(of: space)
                 .gridColumnWeights != nil
         )
         #expect(core.tiler.settings.grid.columnWeights.isEmpty)
@@ -205,7 +205,7 @@ struct GridResizeTests {
         // The middle column grows into the third.
         core.execute("resize", args: [.string("x"), .number(60)])
         let first = try #require(
-            core.state.workspaces[space]?.sessionRatios
+            core.sessionRatios(of: space)
                 .gridColumnWeights
         )
         try #require(first.count == 3)
@@ -219,7 +219,7 @@ struct GridResizeTests {
         // Two columns show; a press there keeps column 3's size.
         core.execute("resize", args: [.string("x"), .number(30)])
         let after =
-            core.state.workspaces[space]?.sessionRatios
+            core.sessionRatios(of: space)
             .gridColumnWeights
         let kept = try #require(after)
         try #require(kept.count == 3)
@@ -233,7 +233,7 @@ struct GridResizeTests {
         core.execute("resize", args: [.string("x"), .number(60)])
         core.execute("reset_layout_sizing", args: [])
         #expect(
-            core.state.workspaces[space]?.sessionRatios
+            core.sessionRatios(of: space)
                 .gridColumnWeights == nil
         )
         #expect(width(core, 1) == width(core, 2))
