@@ -293,8 +293,13 @@ stored, or one set back to its saved value, needs no keep. A config
 reload, a profile load, a built-in layout's apply or Settings that
 puts another value there before the keep replaces it, and the AI
 app is told. A command the binary does
-not know is refused rather than sent. `get_state` and
-`diagnose_window` hand the AI app your window titles.
+not know is refused rather than sent. `get_state` hands the AI
+app your window titles.
+
+:::unreleased
+So do `diagnose_window` for a window and `list_windows`, which the
+AI app can send through `run`.
+:::
 
 ChatGPT reaches only remote MCP servers, so it needs
 [OpenAI's Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
