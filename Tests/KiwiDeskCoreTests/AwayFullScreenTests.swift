@@ -135,14 +135,15 @@ struct AwayFullScreenTests {
         #expect(core.swapRefusal(.window(WindowID(7))) == .yoursFullScreen)
         // Row and press agree on every row, a tracked one included,
         // which keeps the verb's own verdict.
-        var tiled = ManagedWindow(
+        let tiled = ManagedWindow(
             id: WindowID(6),
             pid: 300,
             appName: "Notes",
             appBundleID: "com.apple.Notes"
         )
-        tiled.isFloating = true
         core.eventLoop.onEvent(.windowCreated(tiled))
+        // In no Space: a reason of its own, which its press keeps.
+        core.state.workspaces.remove(WindowID(6))
         let rows = core.jumpEntries()
         #expect(rows.count >= 2)
         for row in rows {
@@ -151,7 +152,8 @@ struct AwayFullScreenTests {
                 "\(row.target)"
             )
         }
-        #expect(rows.contains { $0.target == .window(WindowID(6)) })
+        let notes = rows.first { $0.target == .window(WindowID(6)) }
+        #expect(notes?.swapBlock == .unfiled)
         // Not yours: the row's own place again.
         core.state.windows.setFullscreen(WindowID(5), false)
         #expect(core.swapRefusal(.window(WindowID(7))) == .otherDesktop(2))
