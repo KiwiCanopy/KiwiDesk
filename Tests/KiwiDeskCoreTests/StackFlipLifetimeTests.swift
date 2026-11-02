@@ -105,10 +105,14 @@ struct StackFlipLifetimeTests {
 
     @Test("a config reload ends every flip")
     func reloadClears() throws {
-        // No profile, so no re-apply clears them on the load's way.
+        // A sidecar and no profile: no first-run seed and no
+        // re-apply clear them on the load's way.
         let core = try KeepFixture.core(gui: false)
+        try core.guiConfigStore.save(GuiConfig())
         core.desktopMemory.stackFlips = [10: ["1": .left]]
         core.loadConfig()
+        #expect(core.profiles.currentName == nil)
+        #expect(core.profiles.currentStandard == nil)
         #expect(flips(core) == 0)
     }
 

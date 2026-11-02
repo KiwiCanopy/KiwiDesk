@@ -73,8 +73,8 @@ editing here:
   every reader takes as a required argument, rekeyed at
   `moveMembers` and forgotten at `forwardWindows(of:to:)` like any
   per-Space session store; `stackFlips` is the instance
-  (`StackFlipSeamTests`), and `ProfileSpacesSeamTests` registers
-  every native-id-keyed map so a new one argues for itself. A
+  (`StackFlipSeamTests`), and a new native-id-keyed map joins
+  `ProfileSpacesSeamTests`' register with what it holds. A
   per-Desktop choice that must outlast the session is a profile
   bound to that Desktop, never a durable map.
 - **Ask the adoption state, through `KiwiCore.liveArrangement`,

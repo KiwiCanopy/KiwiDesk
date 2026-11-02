@@ -90,8 +90,8 @@ extension KiwiCore {
 
     // MARK: - Clearing doors
 
-    /// Every Space on every Desktop: an explicit apply, a config
-    /// load, `stack.set_stack_position` and the #634 reset.
+    /// Every Space on every Desktop: wherever the user's explicit
+    /// choice replaces the authored side (#2771's ruling).
     func forgetStackFlips() {
         desktopMemory.stackFlips = [:]
     }

@@ -264,7 +264,7 @@ struct ProfileSpacesSeamTests {
             found[String(file.path.dropFirst(prefix.count))] = hits
         }
         #expect(
-            found.mapValues { $0 } == allowed.mapValues(\.0),
+            found == allowed.mapValues(\.0),
             "a new native-Desktop-keyed store owes the #1230 argument"
         )
     }
