@@ -27,12 +27,12 @@ struct JumpSwapFooterTests {
         #expect(lit(.option) == 1)
         #expect(lit([.shift, .option]) == 1)
         #expect(lit(.option, swaps: false) == nil)
-        #expect(lit([.option, .command]) == nil)
+        #expect(lit([.option, .command]) == 2)
         // Without ⌥ the refusal is not asked.
         #expect(lit(.shift, swaps: false) == 1)
     }
 
-    @Test("⌥ rewrites the slot and leaves the digits unshifted")
+    @Test("⌥ rewrites the slot and the digits to what they do")
     func footerWords() {
         LocalizationManager.shared.select("en")
         for held: NSEvent.ModifierFlags in [.option, [.shift, .option]] {
@@ -42,7 +42,7 @@ struct JumpSwapFooterTests {
                 modifiers: held
             ).hints
             #expect(hints[1] == "⌥↩ Swap here")
-            #expect(hints[2] == "⌘1–9 Quick jump")
+            #expect(hints[2] == "⌥⌘1–9 Quick swap here")
         }
     }
 

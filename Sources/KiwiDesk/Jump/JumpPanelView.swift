@@ -178,15 +178,9 @@ struct JumpPanelView: View {
     private var rows: some View {
         let list = model.list
         let here = JumpRowText.here(of: list.snapshot)
-        let shiftRow = JumpHover.shiftRow(
+        let acted = JumpHover.actedRow(
             hover: model.hover,
-            selection: list.selection,
-            movesHere: { list.results[$0].entry.movesHere && here != nil }
-        )
-        let optionRow = JumpHover.shiftRow(
-            hover: model.hover,
-            selection: list.selection,
-            movesHere: { list.results[$0].entry.swapsHere }
+            selection: list.selection
         )
         // Eager: a lazy stack left a row below the fold unbuilt, so
         // the selection's scroll found no row to reach.
@@ -206,8 +200,7 @@ struct JumpPanelView: View {
                         index,
                         match,
                         here: here,
-                        shiftRow: shiftRow,
-                        optionRow: optionRow
+                        acted: acted
                     )
                 }
                 .id(index)
@@ -219,8 +212,7 @@ struct JumpPanelView: View {
         _ index: Int,
         _ match: JumpSearch.Match,
         here: JumpRowText.Place?,
-        shiftRow: Int?,
-        optionRow: Int?
+        acted: Int?
     ) -> some View {
         let list = model.list
         let entry = match.entry
@@ -240,14 +232,16 @@ struct JumpPanelView: View {
                 selected: index == list.selection,
                 clickable: true
             ),
-            ownsShift: index == shiftRow,
-            ownsOption: index == optionRow,
+            ownsShift: index == acted,
+            ownsOption: index == acted,
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,
             optionHeld: model.optionHeld,
-            wayHere: entry.movesHere ? here : nil,
+            wayHere: entry.movesHere && here != nil ? here : nil,
             waySwap: trades ? here : nil,
+            refusal: JumpRowRefusal(entry: entry),
+            pulsing: model.refusedRow == index,
             onActivate: { pick in
                 model.clickRow(index, pick: pick)
             },

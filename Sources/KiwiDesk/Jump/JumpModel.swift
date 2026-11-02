@@ -88,6 +88,11 @@ final class JumpModel: ObservableObject {
     let sheetCap: CGFloat
 
     var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
+    /// A pick the snapshot already refuses: what VoiceOver hears.
+    /// The controller sounds it and announces it (#2885).
+    var onRefuse: (String) -> Void = { _ in }
+    /// The row whose refused press swells its reason, for a beat.
+    @Published var refusedRow: Int?
     var onClose: () -> Void = {}
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
@@ -188,15 +193,17 @@ final class JumpModel: ObservableObject {
         case .page(let direction):
             move(by: direction * rowCap)
         case .pick(let moveHere):
-            if let match = list.selected {
-                onPick(match.entry, moveHere ? .moveHere : .jump)
+            if let index = list.selection {
+                pick(index, moveHere ? .moveHere : .jump)
             }
         case .swapHere:
-            if let match = list.selected { onPick(match.entry, .swapHere) }
+            if let index = list.selection { pick(index, .swapHere) }
         case .quick(let index, let moveHere):
-            if let match = list.quick(index) {
-                onPick(match.entry, moveHere ? .moveHere : .jump)
+            if list.quick(index) != nil {
+                pick(index, moveHere ? .moveHere : .jump)
             }
+        case .quickSwap(let index):
+            if list.quick(index) != nil { pick(index, .swapHere) }
         case .escape:
             if list.query.isEmpty {
                 onClose()
@@ -232,9 +239,8 @@ final class JumpModel: ObservableObject {
     func clickRow(_ index: Int, pick: JumpPick) {
         guard scope == .windows else { return }
         list.select(index)
-        if let match = list.selected { onPick(match.entry, pick) }
+        if list.selected != nil { self.pick(index, pick) }
     }
-
     /// ⇧, ⌥ and ⌘ as held now, for the footer's one lit hint.
     var heldModifiers: NSEvent.ModifierFlags {
         var flags: NSEvent.ModifierFlags = []

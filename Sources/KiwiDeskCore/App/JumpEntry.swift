@@ -46,9 +46,13 @@ public struct JumpEntry: Sendable, Equatable {
     /// Space — the GUI draws the way there by it, never by its own
     /// reading of the gates `moveHere(_:)` applies.
     public let movesHere: Bool
-    /// Whether Swap here would trade the window with yours (#2885):
-    /// the GUI lights the swap's hint and route by it alone.
-    public let swapsHere: Bool
+    /// Why Swap here would trade nothing (#2885), nil where it
+    /// trades: the GUI lights the swap's hint and words the row's
+    /// reason by it alone.
+    public let swapBlock: JumpSwapBlock?
+    /// Why Move here would refuse the row, nil where it moves or
+    /// has nothing to move (#2885).
+    public let moveBlock: JumpMoveBlock?
     /// Whether a lens is on and this row's app is not one it holds:
     /// the row sits under "Other apps", after every member's (#2103
     /// ruling 36). False for every row while no lens is on.
@@ -67,7 +71,8 @@ public struct JumpEntry: Sendable, Equatable {
         spaceIcon: SpaceGlyph?,
         status: Status,
         movesHere: Bool = false,
-        swapsHere: Bool = false,
+        swapBlock: JumpSwapBlock? = nil,
+        moveBlock: JumpMoveBlock? = nil,
         isOtherApp: Bool = false,
         screen: ScreenLabel? = nil
     ) {
@@ -81,7 +86,8 @@ public struct JumpEntry: Sendable, Equatable {
         self.spaceIcon = spaceIcon
         self.status = status
         self.movesHere = movesHere
-        self.swapsHere = swapsHere
+        self.swapBlock = swapBlock
+        self.moveBlock = moveBlock
     }
 }
 
@@ -123,7 +129,37 @@ public enum JumpTier: Int, Comparable, CaseIterable, Sendable {
     }
 }
 
+/// Why KiwiHub's Swap here would trade nothing (#2885): the row's
+/// window blocks it, or yours does. Core names it; the GUI words it.
+public enum JumpSwapBlock: Sendable, Equatable {
+    case floating
+    case fullScreen
+    case sticky
+    case pocketed
+    case minimized
+    case hiddenApp
+    /// Up on another macOS Desktop, numbered on its own screen.
+    case otherDesktop(Int?)
+    /// The row is your own window.
+    case yours
+    case yoursFloating
+    case yoursFullScreen
+    case yoursSticky
+    /// No window here to trade with.
+    case nothingHere
+}
+
+/// Why Move here would refuse a row (#2885): full screen, or the
+/// sticky gate keeping it where it is.
+public enum JumpMoveBlock: Sendable, Equatable {
+    case fullScreen
+    case sticky
+}
+
 extension JumpEntry {
+    /// Whether Swap here would trade the window with yours.
+    public var swapsHere: Bool { swapBlock == nil }
+
     public var tier: JumpTier {
         status == .minimized ? .minimized : .open
     }

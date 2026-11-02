@@ -18,6 +18,9 @@ enum JumpKey: Equatable {
     case swapHere
     /// ⌘1–9 or ⇧⌘1–9: the result at that 0-based index.
     case quick(Int, moveHere: Bool)
+    /// ⌥⌘1–9 or ⇧⌥⌘1–9 on Windows: Swap here on that result
+    /// (#2885, amending Ruling 1).
+    case quickSwap(Int)
     /// Esc: clears a query, then closes.
     case escape
     /// ⇥ (forward) or ⇧⇥ (back): the next side, wrapping, with
@@ -97,7 +100,7 @@ enum JumpKey: Equatable {
         default:
             // A Lua alternative is read after every built-in key,
             // so none can shadow one (#2600).
-            return quick(keyCode, held)
+            return quick(keyCode, held, scope: scope)
                 ?? alternative(keyCode, held, scope: scope, keys: keys)
         }
     }
@@ -177,14 +180,22 @@ enum JumpKey: Equatable {
 
     private static func quick(
         _ keyCode: UInt16,
-        _ held: NSEvent.ModifierFlags
+        _ held: NSEvent.ModifierFlags,
+        scope: JumpScope
     ) -> JumpKey? {
-        guard held.contains(.command),
-            held.subtracting([.command, .shift]).isEmpty
-        else { return nil }
+        guard held.contains(.command) else { return nil }
         let code = UInt32(keyCode)
         let row = KeypadKeys.digitTwins[code] ?? code
         guard let index = digitRows.firstIndex(of: row) else {
+            return nil
+        }
+        // ⌥ swaps, as on ↩: the one chord table (`JumpPick.of`).
+        if held.contains(.option) {
+            let pick = JumpPick.of(held.subtracting(.command))
+            return scope == .windows && pick == .swapHere
+                ? .quickSwap(index) : nil
+        }
+        guard held.subtracting([.command, .shift]).isEmpty else {
             return nil
         }
         return .quick(index, moveHere: held.contains(.shift))

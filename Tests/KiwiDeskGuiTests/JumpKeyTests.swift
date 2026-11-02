@@ -52,7 +52,11 @@ struct JumpKeyTests {
         #expect(key(36, [.option, .command]) == nil)
         #expect(key(36, [.option, .control]) == nil)
         #expect(key(18, .option) == nil)
-        #expect(key(18, [.option, .command]) == nil)
+        // ⌥⌘ and ⇧⌥⌘ digits swap that result (#2885).
+        #expect(key(18, [.option, .command]) == .quickSwap(0))
+        #expect(key(20, [.shift, .option, .command]) == .quickSwap(2))
+        #expect(key(85, [.option, .command]) == .quickSwap(2))
+        #expect(key(18, [.control, .option, .command]) == nil)
         for scope in [JumpScope.view, .shortcuts] {
             let swap = JumpKey.of(
                 keyCode: 36,
@@ -80,7 +84,6 @@ struct JumpKeyTests {
         // ⌘0 is no result; a plain digit types.
         #expect(key(29, .command) == nil)
         #expect(key(18) == nil)
-        #expect(key(18, [.command, .option]) == nil)
     }
 
     @Test("Esc is the escape, ⇥ steps forward, ⇧⇥ back, letters type")

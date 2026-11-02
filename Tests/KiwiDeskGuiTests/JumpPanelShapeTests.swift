@@ -142,26 +142,18 @@ struct JumpPanelShapeTests {
         #expect(!shows(selected: true, number: 1, command: true, shift: false))
     }
 
-    /// A ⇧-click moves the hovered row, so it claims the way here
-    /// and the selected row gives it up — unless that click moves
-    /// nothing, where ⇧↩'s selection keeps it (#2808).
-    @Test("the hovered row takes ⇧'s way here from the selection")
+    /// A click acts on the hovered row, so it takes the held
+    /// modifier's route or refusal from the selection, whatever it
+    /// would do (#2808, amended by #2885 ▸ refusals, 6).
+    @Test("the hovered row takes the held modifier's line")
     func wayHereFollowsHover() {
-        func row(_ hover: JumpHover?, moves: Set<Int> = [0, 1, 2]) -> Int? {
-            JumpHover.shiftRow(
-                hover: hover,
-                selection: 0,
-                movesHere: { moves.contains($0) }
-            )
+        func row(_ hover: JumpHover?) -> Int? {
+            JumpHover.actedRow(hover: hover, selection: 0)
         }
         #expect(row(.row(2)) == 2)
         #expect(row(nil) == 0)
         #expect(row(.row(0)) == 0)
-        #expect(row(.row(2), moves: [0]) == 0)
-        #expect(
-            JumpHover.shiftRow(hover: nil, selection: nil) { _ in true }
-                == nil
-        )
+        #expect(JumpHover.actedRow(hover: nil, selection: nil) == nil)
     }
 
     @Test("⇧ rewrites the digits to what they then do")

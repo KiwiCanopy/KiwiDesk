@@ -25,7 +25,11 @@ struct JumpRowMotionTests {
     func oneAnimationKeysBoth() throws {
         let row = try squashedRow()
         #expect(row.components(separatedBy: ".animation(").count == 2)
-        #expect(row.contains("value:[showsNumber,showsRoute])"))
+        #expect(
+            row.contains(
+                "value:[showsNumber,showsRoute,shownRefusal!=nil])"
+            )
+        )
     }
 
     /// The source keeps its identity, so the way here grows beside

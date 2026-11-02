@@ -13646,9 +13646,15 @@ whole list on the lighter chord.
 :::unreleased
 Under ⌥ or ⇧⌥ (#2885) the Move here slot reads "⌥↩ Swap here" and
 is the lit hint, unless the swap would refuse the selection; the
-digits read "⌘1–9 Quick jump" unlit, since they take no ⌥; and the
-row ⌥ acts on, by ⇧'s rule, shows "Space n ⇄ Space m" where the
-trade is with a window in the current Space.
+digits read "⌥⌘1–9 Quick swap here", lit under ⌥⌘; and the row ⌥
+acts on — the hovered row, else the selection, as for ⇧ — shows
+"Space n ⇄ Space m" where the trade is with a window in the current
+Space, or ⛔ and why where the swap would refuse it. ⇧ does the same
+for Move here, and "⇧↩ Move here" lights only for a selection it
+would move. A refused press stays in the panel: the reason swells
+once (none under Reduce Motion), the refusal sound plays where it is
+on, and VoiceOver hears "Can't swap: …". Refusal and dead-end
+feedback stay apart (#435/#436), so the panel never shakes.
 :::
 
 :::unreleased

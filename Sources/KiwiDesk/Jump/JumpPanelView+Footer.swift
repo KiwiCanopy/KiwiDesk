@@ -5,13 +5,15 @@ import SwiftUI
 /// key hints between them.
 extension JumpPanelView {
     var footer: some View {
-        JumpFooterRow(
+        let selected = model.list.selected?.entry
+        return JumpFooterRow(
             footer: JumpFooter(
                 scope: model.scope,
                 overflows: footerOverflows,
                 modifiers: model.heldModifiers,
                 hasSelection: model.hasSelection,
-                selectionSwaps: model.list.selected?.entry.swapsHere == true,
+                selectionSwaps: selected?.swapBlock == nil,
+                selectionMoves: selected?.moveBlock == nil,
                 quickCount: model.viewQuickCount,
                 turnsOff: model.view?.selectionTurnsOff ?? false,
                 naming: model.isNaming

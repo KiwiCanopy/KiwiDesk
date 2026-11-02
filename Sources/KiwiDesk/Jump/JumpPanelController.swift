@@ -271,6 +271,12 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         model.onPick = { [weak self] entry, pick in
             self?.pick(entry, pick)
         }
+        // A refusal the panel already shows stays in the panel: a
+        // beep where Refusal sound is on, and VoiceOver's words.
+        model.onRefuse = { [weak self, weak model] spoken in
+            self?.core.soundPanelRefusal()
+            model?.onAnnounce(spoken)
+        }
         model.onClose = { [weak self] in
             self?.close()
         }

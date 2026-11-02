@@ -114,7 +114,8 @@ extension KiwiCore {
                     spaceIcon: space.flatMap(jumpSpaceIcon),
                     status: status,
                     movesHere: jumpMovesHere(window, from: space, into: here),
-                    swapsHere: jumpSwapsHere(window.id, partner: partner),
+                    swapBlock: jumpSwapBlock(window.id, partner: partner),
+                    moveBlock: jumpMoveBlock(window, from: space, into: here),
                     isOtherApp: jumpIsOtherApp(window.appRef),
                     screen: status == .shown
                         ? jumpScreen(shownOn, hub: hub) : nil
@@ -149,6 +150,9 @@ extension KiwiCore {
                 ),
                 movesHere: canDriveDesktops && entry.appBundleID != nil
                     && here != nil,
+                swapBlock: .otherDesktop(
+                    snapshot.screenNumber(of: entry.nativeSpace)
+                ),
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: entry.appBundleID, name: entry.appName)
                 ),
@@ -186,6 +190,7 @@ extension KiwiCore {
                 spaceIcon: nil,
                 status: .minimized,
                 movesHere: here != nil,
+                swapBlock: .minimized,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: record.bundleID, name: record.app)
                 )
@@ -216,6 +221,7 @@ extension KiwiCore {
                     space: nil,
                     spaceIcon: nil,
                     status: .shown,
+                    swapBlock: .hiddenApp,
                     isOtherApp: jumpIsOtherApp(app.ref)
                 )
             }

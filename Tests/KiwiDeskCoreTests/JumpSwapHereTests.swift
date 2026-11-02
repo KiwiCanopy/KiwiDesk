@@ -161,6 +161,36 @@ struct JumpSwapHereTests {
         #expect(cued(recorder, .cannotSwapFloating))
     }
 
+    /// The reason names the side that blocks (refusals ▸ 1).
+    @Test("a row names whose window blocks the swap")
+    func rowNamesTheSide() {
+        let (core, _) = makeCore()
+        pair(core)
+        track(core, 3, in: "2", floating: true)
+        track(core, 4, in: "2", fullscreen: true)
+        func blocks() -> [JumpEntry.Target: JumpSwapBlock?] {
+            Dictionary(
+                uniqueKeysWithValues: core.jumpSnapshot().entries.map {
+                    ($0.target, $0.swapBlock)
+                }
+            )
+        }
+        var seen = blocks()
+        #expect(seen[.window(WindowID(3))] == .floating)
+        #expect(seen[.window(WindowID(4))] == .fullScreen)
+        #expect(seen[.window(WindowID(2))] == .some(nil))
+        // Your own window floats: every row names yours.
+        var mine = core.state.windows[WindowID(1)]
+        mine?.isFloating = true
+        if let mine { core.state.windows.upsert(mine) }
+        seen = blocks()
+        #expect(seen[.window(WindowID(2))] == .yoursFloating)
+        let moves = core.jumpSnapshot().entries.first {
+            $0.target == .window(WindowID(4))
+        }
+        #expect(moves?.moveBlock == .fullScreen)
+    }
+
     @Test("the row says whether it swaps")
     func rowSwapsHere() {
         let (core, _) = makeCore()

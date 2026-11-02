@@ -14,9 +14,11 @@ struct JumpFooter: View {
     var modifiers: NSEvent.ModifierFlags = []
     /// Whether a row or tile is selected; with none, nothing lights.
     var hasSelection = true
-    /// Whether Swap here would trade the selected row; a refused
-    /// one lights nothing under ⌥ (#2885).
+    /// Whether Swap here would trade the selected row, and whether
+    /// Move here would take it; a refused one lights nothing under
+    /// its modifier (#2885).
     var selectionSwaps = true
+    var selectionMoves = true
     /// How many items the View side's ⌘ digits reach on the
     /// selected line (#2309 ruling 7).
     var quickCount = 9
@@ -105,7 +107,8 @@ extension JumpFooter {
         // Windows: ↩ Jump, ⇧↩ Move here; View: ↩ Apply.
         case .pick(let moveHere):
             guard scope == .windows else { return moveHere ? nil : 0 }
-            return moveHere ? 1 : 0
+            guard moveHere else { return 0 }
+            return selectionMoves ? 1 : nil
         case .swapHere:
             return selectionSwaps ? 1 : nil
         default:
@@ -118,6 +121,7 @@ extension JumpFooter {
             scope: scope,
             naming: naming
         )
+        if case .quickSwap = digit { return 2 }
         guard case .quick(_, let moveHere) = digit else { return nil }
         if scope == .windows { return 2 }
         return moveHere ? nil : 1
@@ -125,6 +129,26 @@ extension JumpFooter {
 
     private var shiftHeld: Bool { modifiers.contains(.shift) }
     private var optionHeld: Bool { modifiers.contains(.option) }
+
+    /// The Windows digits' hint: ⇧ and ⌥ already rewrite it to
+    /// what the digits then do; ⌘ joining only lights it.
+    private var digitsHint: String {
+        if optionHeld {
+            return L(
+                "jump.footer.quick_swap_here",
+                "%1$@ Quick swap here",
+                "⌥⌘1–9"
+            )
+        }
+        if shiftHeld {
+            return L(
+                "jump.footer.quick_move_here",
+                "%1$@ Quick move here",
+                "⇧⌘1–9"
+            )
+        }
+        return L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9")
+    }
 
     var hints: [String] {
         let other = L(
@@ -142,15 +166,7 @@ extension JumpFooter {
                 optionHeld
                     ? L("jump.footer.swap_here", "%1$@ Swap here", "⌥↩")
                     : L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
-                // ⇧ already rewrites the digits to what they then
-                // do; ⌘ joining only lights them.
-                shiftHeld && !optionHeld
-                    ? L(
-                        "jump.footer.quick_move_here",
-                        "%1$@ Quick move here",
-                        "⇧⌘1–9"
-                    )
-                    : L("jump.footer.quick", "%1$@ Quick jump", "⌘1–9"),
+                digitsHint,
                 other,
             ]
         case .shortcuts:
