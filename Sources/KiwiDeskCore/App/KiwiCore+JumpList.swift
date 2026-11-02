@@ -28,7 +28,7 @@ extension KiwiCore {
     ) -> [JumpEntry] {
         let here = here ?? state.workspaces.activeSpace
         let partner = jumpSwapPartner(in: here)
-        // Your full-screen window refuses every trade first (#2930).
+        // Rows the verb cannot see refuse yours first (#2930).
         let yours = yoursSwapBlock(partner)
         let windows =
             trackedJumpEntries(here: here, hub: hub, partner: partner)

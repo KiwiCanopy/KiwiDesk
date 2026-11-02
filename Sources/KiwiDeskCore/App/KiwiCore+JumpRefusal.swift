@@ -13,15 +13,20 @@ extension KiwiCore {
         on display: DisplayID? = nil
     ) -> JumpSwapBlock? {
         let partner = jumpSwapPartner(in: moveHereSpace(on: display))
-        if let yours = yoursSwapBlock(partner) { return yours }
-        guard case .window(let id) = target else { return .hiddenApp }
+        // A row the verb cannot see answers yours first; a tracked
+        // row takes the verb's one verdict, as its row does.
+        let yours = yoursSwapBlock(partner)
+        guard case .window(let id) = target else {
+            return yours ?? .hiddenApp
+        }
         if let away = state.awayWindows[id] {
             let desktops = NativeSpaces.desktopSnapshot()
+            if let yours { return yours }
             if awayIsFullScreen(away, in: desktops) { return .fullScreen }
             return .otherDesktop(desktops.screenNumber(of: away.nativeSpace))
         }
         if state.minimizeOrder.contains(where: { $0.id == id }) {
-            return .minimized
+            return yours ?? .minimized
         }
         guard state.windows[id] != nil else { return nil }
         return jumpSwapBlock(id, partner: partner)
@@ -43,9 +48,9 @@ extension KiwiCore {
         return jumpMoveBlock(window, into: here)
     }
 
-    /// Your side's own block, read before the row's: a full-screen
-    /// window of yours trades with nothing, wherever the row is
-    /// (#2930) — what the row's own place would only obscure.
+    /// Your side's block for a row the verb cannot see — away,
+    /// minimized or a hidden app — read before the row's own: a
+    /// full-screen window of yours trades with nothing (#2930).
     func yoursSwapBlock(_ partner: WindowID?) -> JumpSwapBlock? {
         guard let partner, state.windows[partner]?.isFullscreen == true
         else { return nil }
