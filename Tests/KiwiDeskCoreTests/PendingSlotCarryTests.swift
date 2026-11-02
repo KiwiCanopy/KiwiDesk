@@ -78,6 +78,79 @@ struct PendingSlotCarryTests {
         #expect(next.workspaces[space]?.windows == row)
     }
 
+    /// The device case (2026-11-02): the other Desktop's windows
+    /// were tracked at the restart and carried no slot, so the
+    /// first return landed after them and the next departure's
+    /// re-rank kept it last. The start now ranks them too.
+    @Test("a return ranks against the members the start tracks")
+    func returnRanksAgainstTrackedMembers() throws {
+        let stayers = [WindowID(41), WindowID(40)]
+        var desk = departedDesk()
+        for id in stayers {
+            desk.apply(
+                .windowCreated(ManagedWindow(id: id, pid: 2, appName: "B"))
+            )
+            desk.workspaces.add(id, to: space)
+        }
+        let snapshot = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: JSONEncoder().encode(desk.snapshot())
+        )
+        var next = StateCoordinator()
+        next.workspaces.ensureSpace(SpaceID(1))
+        next.workspaces.ensureSpace(space)
+        next.workspaces.activate(space)
+        for id in stayers {
+            next.apply(
+                .windowCreated(ManagedWindow(id: id, pid: 2, appName: "B"))
+            )
+        }
+        next.adopt(snapshot)
+        for id in row {
+            let resumed = next.resumeCarriedDeparture(id)
+            #expect(resumed)
+        }
+        func arrive(_ id: WindowID) {
+            next.apply(
+                .windowCreated(ManagedWindow(id: id, pid: 1, appName: "A"))
+            )
+        }
+        // The device's order: the first slot re-lists first, the
+        // stayers' destroys land, then the rest re-list.
+        arrive(row[0])
+        for id in stayers {
+            next.apply(.windowDestroyed(id, wasMinimized: false))
+        }
+        arrive(row[2])
+        arrive(row[1])
+        #expect(next.workspaces[space]?.windows == row)
+    }
+
+    /// A stop on one Desktop and a start on the other: the row the
+    /// capture tracked is untracked at the start, and keeps its
+    /// order the same way, ahead of the carried windows.
+    @Test("an untracked row keeps its slots, ahead of the carried")
+    func untrackedRowKeepsItsSlots() throws {
+        let members = [WindowID(41), WindowID(40)]
+        var desk = departedDesk()
+        for id in members {
+            desk.apply(
+                .windowCreated(ManagedWindow(id: id, pid: 2, appName: "B"))
+            )
+            desk.workspaces.add(id, to: space)
+        }
+        let snapshot = try JSONDecoder().decode(
+            StateSnapshot.self,
+            from: JSONEncoder().encode(desk.snapshot())
+        )
+        var next = StateCoordinator()
+        next.workspaces.ensureSpace(SpaceID(1))
+        next.workspaces.ensureSpace(space)
+        next.adopt(snapshot)
+        let ranks = (members + row).map { next.departedSlots[$0]?.rank }
+        #expect(ranks == [0, 1, 2, 3, 4])
+    }
+
     @Test("only a carried filing resumes as a departure")
     func onlyCarriedFilingsResume() {
         var state = StateCoordinator()

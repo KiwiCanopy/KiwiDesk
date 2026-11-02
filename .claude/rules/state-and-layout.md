@@ -599,8 +599,9 @@ editing here:
   the one writer inside the arm). The ROW comes back too: a
   departed window carries its slot in `departedSlots` —
   written at a departure by `rememberDepartedSlot`, and at a
-  restart by `refilePending` alone, whose ranks order the carried
-  list only and carry no break provenance or hand-off link, so
+  restart by `rankRestoredRow` and `refilePending` alone, whose
+  ranks order the restored row and then the carried list and
+  carry no break provenance or hand-off link, so
   `forgetRestoredFiling` retires one with nothing to promote
   (#2907; the residue is `docs/accepted-limitations.md`'s) — and the
   fold re-inserts a `.departed` return by RANK against the

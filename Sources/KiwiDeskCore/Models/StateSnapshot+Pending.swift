@@ -60,16 +60,31 @@ extension StateCoordinator {
     }
 
     /// Files each window back that is neither live nor filed, its
-    /// place in `ids` as its slot (#2907): a window the boot census
-    /// finds on another Desktop resumes its departure through
-    /// `resumeCarriedDeparture` and returns to that slot.
-    mutating func refilePending(_ ids: [WindowID], in space: SpaceID) {
-        for (rank, id) in ids.enumerated()
+    /// place in `ids` after `first` as its slot (#2907): a window
+    /// the boot census finds on another Desktop resumes its
+    /// departure through `resumeCarriedDeparture` and returns to
+    /// that slot.
+    mutating func refilePending(
+        _ ids: [WindowID],
+        in space: SpaceID,
+        rankedFrom first: Int = 0
+    ) {
+        for (offset, id) in ids.enumerated()
         where windows[id] == nil && rememberedSpaces[id] == nil {
             remember(id, in: space)
             if departedSlots[id] == nil {
-                departedSlots[id] = DepartedSlot(rank: rank)
+                departedSlots[id] = DepartedSlot(rank: first + offset)
             }
+        }
+    }
+
+    /// Ranks a restored row by its place (#2907), tracked or not,
+    /// so a return ranks against the members already back: a
+    /// rankless member let the first return land last, and the
+    /// next departure's re-rank kept it there.
+    mutating func rankRestoredRow(_ ids: [WindowID]) {
+        for (rank, id) in ids.enumerated() where departedSlots[id] == nil {
+            departedSlots[id] = DepartedSlot(rank: rank)
         }
     }
 
