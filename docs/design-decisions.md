@@ -7329,8 +7329,9 @@ rather than a setting (owner, 2026-11-01):
   the head of each switch files, never a new WindowServer read on
   the retile path.
 - **No setting.** No "Live, not saved" row, no `revert_settings`
-  leaf, no Keep and no change report; `get_settings` reports the
-  authored side and `get_state` the side drawn.
+  leaf, no Keep and no change report; `get_settings` and the
+  Settings Layout preview show the authored side, which is what a
+  save writes, and `get_state` the side drawn (owner, 2026-11-02).
 - **It ends where an explicit choice is made.** A load, a config
   reload — which every Settings save of `gui.json` runs — a
   Settings save and `stack.set_stack_position` end every flip,

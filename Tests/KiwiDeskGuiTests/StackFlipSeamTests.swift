@@ -16,8 +16,8 @@ struct StackFlipSeamTests {
     /// Config-only reads that may read the authored side.
     private static let authoredSide: [String: Int] = [
         // The Space overload's base, and the Settings preview's
-        // `resolved(for:activeMode:)`, which draws the authored
-        // side — not ruled on #2771; raised on its PR.
+        // `resolved(for:activeMode:)`: it draws the authored side,
+        // what a save writes (owner, 2026-11-02).
         "TilingSettings+Resolution.swift": 2,
         // `get_settings`: reports the authored side by ruling.
         "TilingSettings+SpaceResolved.swift": 1,
