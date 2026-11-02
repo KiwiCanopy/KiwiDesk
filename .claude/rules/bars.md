@@ -1337,6 +1337,23 @@ rather than the row it names makes the user search again. So:
 - **The Layout rows' look is `LayoutModeRows.entries`**, and a
   second surface that draws those rows builds from it too,
   handing it its own words, so no sentence crosses the #96 seam.
+- **A row shows a chord only where pressing it does exactly what
+  clicking the row does (#2869).** The chord rides
+  `BarMenuRow.chord` into the native key-equivalent column alone —
+  never the title, the subtitle or a tooltip — drawn through the
+  one `KeyCombo.applyMenuEquivalent`, which refuses a sided chord
+  (#2601). It is read through `barMenuChord(_:for:)`: a
+  `BarMenuVerb` the GUI maps to its catalog Lua body, matched
+  exactly on the resolved active layer, and only in a
+  single-window menu whose window is `barFocus` — never in a
+  group menu, parent or child. Float / Tile and Remove from
+  Pocket carry it; Pocket Window does not, since `pocket` steps,
+  and neither do New Window, Move, App Rules…, Close, Quit, the
+  Space chip's rows or the shelf section. A new row joins
+  `BarMenuVerb` only once its key, on the focused window, is the
+  row's own act. A row with a chord drops its keyDown firing, so
+  Carbon's hotkey is the one action (`BarMenuChordTests`,
+  `BarMenuWiringTests` ▸ `verbsReadTheirRows`).
 
 ## A Space wears one marker, drawn after its identifier (#1790)
 

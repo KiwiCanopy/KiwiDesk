@@ -1,8 +1,11 @@
 import Foundation
+import KiwiDeskCore
 import Testing
 
+@testable import KiwiDesk
+
 /// The bars' right-click menus' GUI wiring (#1518), which no suite
-/// drives: the three hooks Core's rows call, the call that wires
+/// drives: the hooks Core's rows call, the call that wires
 /// them at launch, and the one Keep save both Layout menus take.
 @Suite("Bar menu wiring (#1518)")
 struct BarMenuWiringTests {
@@ -22,9 +25,30 @@ struct BarMenuWiringTests {
                 + "self?.dashboard.show(landing:landing)}",
             "core.barMenuHooks.keepLayout={[weakself]in"
                 + "self?.keepLayoutInProfile()}",
+            // #2869: the one live-chord reader, by exact Lua body.
+            "core.barMenuHooks.menuChord={[weakcore]verbin"
+                + "core.flatMap{ShortcutsOpenBinding.combo(core:$0,"
+                + "lua:Self.lua(of:verb))}}",
+            "core.barMenuHooks.layoutChar=LayoutKeyGlyph.char",
         ] {
             #expect(wiring.contains(needle), Comment(rawValue: needle))
         }
+    }
+
+    /// A bar menu row shows a chord only for its catalog body
+    /// (#2869 ▸ 2), so a verb mapped to another row's body draws
+    /// that row's key.
+    @Test("each menu verb reads its own catalog row")
+    @MainActor
+    func verbsReadTheirRows() {
+        #expect(
+            AppDelegate.lua(of: .toggleFloating)
+                == "KiwiDesk.toggle_floating()"
+        )
+        #expect(
+            AppDelegate.lua(of: .togglePocketWindow)
+                == "KiwiDesk.toggle_pocket_window()"
+        )
     }
 
     /// The bar menus' wiring runs at launch; their Keep reaches

@@ -129,7 +129,8 @@ extension KiwiCore {
                     ? L("bar.menu.tile_window", "Tile Window")
                     : L("bar.menu.float_window", "Float Window"),
                 enabled: refusal == nil,
-                subtitle: refusal?.sentence
+                subtitle: refusal?.sentence,
+                chord: barMenuChord(.toggleFloating, for: windows)
             ) { [weak self] in
                 _ = self?.execute(
                     floats ? "make_tiled" : "make_floating",
@@ -173,7 +174,10 @@ extension KiwiCore {
             return BarMenuRow.action(
                 title,
                 enabled: !keyed,
-                subtitle: keyed ? Self.pocketKeyKeepsIt : nil
+                subtitle: keyed ? Self.pocketKeyKeepsIt : nil,
+                chord: grouped
+                    ? nil
+                    : self?.barMenuChord(.togglePocketWindow, for: [id])
             ) { [weak self] in
                 _ = self?.execute(
                     "toggle_pocket_window",

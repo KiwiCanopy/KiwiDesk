@@ -39,9 +39,21 @@ final class BarContextMenus {
     /// Pinned in both `makeTestCore` twins.
     var pointer: @MainActor () -> NSPoint = { NSEvent.mouseLocation }
 
+    /// Whether a row's firing is AppKit's keyDown for a chord
+    /// Carbon already answered (#2869 ▸ 5); injected so a test can
+    /// hold it either way.
+    var actionIsKeyDown: @MainActor () -> Bool = {
+        NSApp.currentEvent?.type == .keyDown
+    }
+
     func menu(for hit: BarHit) -> NSMenu? {
         let rows = rows(hit)
-        return rows.isEmpty ? nil : BarMenu.make(rows)
+        guard !rows.isEmpty else { return nil }
+        return BarMenu.make(
+            rows,
+            layoutChar: hooks.layoutChar,
+            isKeyDown: actionIsKeyDown
+        )
     }
 
     func accessibilityActions(
