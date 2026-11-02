@@ -98,12 +98,18 @@ extension JumpFooter {
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
         let held = modifiers.intersection([.shift, .option, .command])
-        switch JumpKey.of(
-            keyCode: JumpKey.returnKey,
-            modifiers: held,
-            scope: scope,
-            naming: naming
-        ) {
+        // ⌘ lights the digits, though ↩ under it picks as without
+        // it (#2931 ▸ Ruling 5).
+        let lit =
+            held.contains(.command)
+            ? nil
+            : JumpKey.of(
+                keyCode: JumpKey.returnKey,
+                modifiers: held,
+                scope: scope,
+                naming: naming
+            )
+        switch lit {
         // Windows: ↩ Jump, ⇧↩ Move here; View: ↩ Apply.
         case .pick(let moveHere):
             guard scope == .windows else { return moveHere ? nil : 0 }
