@@ -248,7 +248,9 @@ jobs:
       # and a runner-image bump would silently build it with an
       # unannounced compiler while nothing on the artifact records
       # which. A release is precisely the run to stop rather than
-      # let vary.
+      # let vary. The pin holds a major.minor, not a build: the
+      # image may move the symlink to a newer build, which only
+      # `xcodebuild -version` below records.
       - name: Select Xcode
         run: |
           sudo xcode-select -s "$XCODE"

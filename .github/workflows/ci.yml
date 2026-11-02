@@ -215,8 +215,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_27.2.app \
-            || sudo xcode-select -s /Applications/Xcode.app
+          if ! sudo xcode-select -s /Applications/Xcode_27.2.app; then
+            echo "::warning::Xcode_27.2.app is gone; fell back to" \
+              "Xcode.app, which release.yml will not do"
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
           swift --version
           xcodebuild -version
 
@@ -306,8 +309,11 @@ jobs:
 
       - name: Select Xcode
         run: |
-          sudo xcode-select -s /Applications/Xcode_27.2.app \
-            || sudo xcode-select -s /Applications/Xcode.app
+          if ! sudo xcode-select -s /Applications/Xcode_27.2.app; then
+            echo "::warning::Xcode_27.2.app is gone; fell back to" \
+              "Xcode.app, which release.yml will not do"
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
           swift --version
           xcodebuild -version
 
