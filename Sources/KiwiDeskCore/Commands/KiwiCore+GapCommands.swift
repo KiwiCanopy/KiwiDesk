@@ -44,14 +44,12 @@ extension KiwiCore {
         }
         var rest = args.dropFirst()
         var height = width
-        switch rest.first {
-        case .number(let value)?:
+        // The CLI sends every argument as a string (#2918).
+        if let value = rest.first?.numberValue {
             height = value
             rest = rest.dropFirst()
-        case .null?:
+        } else if rest.first == .null {
             rest = rest.dropFirst()
-        default:
-            break
         }
         var layout: MinWindowSizes.Layout?
         switch rest.first {
@@ -94,12 +92,14 @@ extension KiwiCore {
         }
         var height = width
         switch args.dropFirst(2).first {
-        case .number(let value)?:
-            height = value
         case nil, .null?:
             break
-        default:
-            return .fail("expected height")
+        case let value?:
+            // A CLI height arrives as a string (#2918).
+            guard let number = value.numberValue else {
+                return .fail("expected height")
+            }
+            height = number
         }
         guard args.count <= 3 else {
             return .fail("expected at most space, width, height")
