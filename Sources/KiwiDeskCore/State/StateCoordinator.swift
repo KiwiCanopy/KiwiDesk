@@ -63,8 +63,8 @@ public struct StateCoordinator: Sendable {
 
     /// The slot a departed window held (#1207): a return re-inserts
     /// by this rank, so a Desktop's row comes back in the order it
-    /// left rather than in re-track order. Kept after the return so
-    /// later arrivals rank against it; rewritten at each departure.
+    /// left rather than in re-track order. Kept after the return;
+    /// written at each departure and at a restart (#2907).
     /// ONE value with the track head-ness the return re-applies
     /// (#1387), so every ender and the re-key carry both or neither.
     var departedSlots: [WindowID: DepartedSlot] = [:]

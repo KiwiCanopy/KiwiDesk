@@ -110,6 +110,20 @@ class — see
 | A screen whose **parking corner has another screen beside or below it** — a landscape screen between two taller portrait ones, or one with a screen under its bottom-right corner — shows the windows KiwiDesk parks there on that neighbour. | A parked window must stay on its own screen: parked on another screen's free corner, macOS moves it onto that screen's Desktop (measured 2026-10-29), which would break [Parking is not a Desktop move](spaces-and-desktops.md#parking-is-not-a-desktop-move). And macOS keeps a parked window's title bar about 48 pt on screen, so its body hangs off the corner into whatever lies beside and below it. | `TilingEngine.optimalHideCorner` over `ScreenNeighbors.detect` ([#410](https://github.com/KiwiCanopy/KiwiDesk/issues/410)) prefers bottom-right whenever no screen is to the right, and falls back to it when both sides have one; it does not count screens below. Reported on [#2547](https://github.com/KiwiCanopy/KiwiDesk/issues/2547). | Rearrange the screens in System Settings ▸ Displays so the corner each one parks in is clear ([With more than one screen](spaces-and-desktops.md#with-more-than-one-screen)). Planned in [#2754](https://github.com/KiwiCanopy/KiwiDesk/issues/2754): a warning in Settings ▸ Screens for an arrangement whose parking corner is covered, and a corner choice by least overlap that also counts screens below. |
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
+:::unreleased
+After KiwiDesk restarts, the windows waiting on another macOS
+Desktop come back to their Space in the order they left, but a
+sticky window that stayed in that Space can land between them
+rather than where it sat, and a Track column whose head was on
+that Desktop can lose its divider until you next leave it. A
+restart keeps each Space's waiting windows as a list, so it knows
+their order but not their places beside the windows that stayed
+or which of them headed a track
+([#2907](https://github.com/KiwiCanopy/KiwiDesk/issues/2907),
+`PendingSlotCarryTests`). Switch Desktops and back, or move the
+sticky window back by hand.
+:::
+
 The stale-bound row and the probe-pass row above say a genuine
 resize forgets what was learned about a window. That holds for a
 resize the app makes itself, such as System Settings switching

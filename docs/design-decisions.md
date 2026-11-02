@@ -5260,6 +5260,17 @@ flat-array trade's residue and stays in the limitations row.
 `SplitFloorHealWiringTests`, `SplitFloorCueTests`,
 `SplitFloorHealNeedleTests`)
 
+:::unreleased
+The heal moves the ratio only for a membership a Desktop shows
+(#2907). Through a Desktop switch a Space briefly holds both
+Desktops' windows, and a heal over that mix wrote the one ratio
+both Desktops share for a layout neither shows, ratcheting it a
+step each way on every swipe. So it stands down inside the
+switch's grace, owing the pass after it, and while a member sits
+on a Desktop nobody shows; a real floor waits for the first pass
+over its own Desktop alone. (`HealStandDownTests`)
+:::
+
 **Session weights are healed at retile, not validated forever
 at write time (#944).** [Principle] The write-time clamps above
 validate a weight against the membership at PRESS time, and
