@@ -145,7 +145,7 @@ struct UpdaterSeamGuardTests {
         // the answer is `ExternalUpdatesWiringTests`'; a check that
         // fires on an ordinary install is `ExternalUpdatesTests`'.
         for wiring in [
-            "ExternalUpdates.current(", "ManagedUpdater(manager:",
+            "ExternalUpdates.current(", "ManagedUpdater(",
             "choice(bundled: bundled,",
         ] {
             let checked = try Self.sites(

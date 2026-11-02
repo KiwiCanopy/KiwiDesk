@@ -16,24 +16,22 @@ final class ManagedUpdater: AppUpdating {
     var onWillRelaunch: () -> Void = {}
 
     /// `manager` names who installs updates, for the footer and the
-    /// automatic-install row.
-    init(
-        manager: String,
-        host: Bundle = .main,
-        record: WhatsNewRecord = WhatsNewRecord()
-    ) {
+    /// automatic-install row. No defaults: a test that left `record`
+    /// out would write the runner's own defaults through `launched`.
+    init(manager: String, host: Bundle, record: WhatsNewRecord) {
         updates = UpdateStateStore(.managed(by: manager))
         autoInstall = .inert(.managed(by: manager))
-        let feed = Self.feedURL(of: host)
         whatsNew = WhatsNewCoordinator(
             record: record,
             host: host,
-            feedURL: { feed }
+            feedURL: { Self.feedURL(of: host) }
         )
     }
 
     /// The feed Sparkle would read: a `SUFeedURL` default first, as
-    /// Sparkle resolves it, else the bundle's.
+    /// Sparkle resolves it, else the bundle's. Production gives
+    /// Sparkle no `feedURLString` delegate to diverge by
+    /// (`ManagedUpdaterTests`).
     static func feedURL(
         of host: Bundle,
         defaults: UserDefaults = .standard

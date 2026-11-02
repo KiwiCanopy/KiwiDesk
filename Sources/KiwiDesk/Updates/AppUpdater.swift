@@ -233,7 +233,12 @@ enum AppUpdaterFactory {
         )
         switch choice(bundled: bundled, manager: manager) {
         case .inert: return NoUpdater()
-        case .managed(let manager): return ManagedUpdater(manager: manager)
+        case .managed(let manager):
+            return ManagedUpdater(
+                manager: manager,
+                host: main,
+                record: WhatsNewRecord()
+            )
         case .sparkle: return SparkleUpdater()
         }
     }

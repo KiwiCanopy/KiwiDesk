@@ -119,6 +119,7 @@ struct ExternalUpdatesTests {
     func managedUpdaterSaysWho() {
         let updater = ManagedUpdater(
             manager: "Home Manager",
+            host: .main,
             record: WhatsNewRecord(makeScratchDefaults().defaults)
         )
         #expect(!updater.canCheckForUpdates)

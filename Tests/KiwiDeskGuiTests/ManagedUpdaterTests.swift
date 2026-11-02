@@ -65,6 +65,47 @@ struct ManagedUpdaterTests {
         )
     }
 
+    /// A Home Manager rollback is routine: 4.2 → 4.1 → 4.2 must not
+    /// owe 4.2's notes a second time.
+    @Test("a rollback and roll forward owes nothing twice")
+    func rollbackKeepsTheRecord() async throws {
+        let (defaults, name) = makeScratchDefaults()
+        defer { defaults.removePersistentDomain(forName: name) }
+        let record = WhatsNewRecord(defaults)
+        record.markAnswered("4.2.0")
+        for version in ["4.1.0", "4.2.0"] {
+            let whatsNew = try #require(
+                ManagedUpdater(
+                    manager: "Home Manager",
+                    host: try FeedFixture.host(version: version),
+                    record: record
+                ).whatsNew
+            )
+            whatsNew.fetch = { _ in
+                WhatsNewFixture.items(["4.2.0", "4.1.0"])
+            }
+            whatsNew.fetchNext = { _ in nil }
+
+            await whatsNew.launched(opensWindow: false, existingUser: true)
+
+            #expect(whatsNew.waiting == nil, Comment(rawValue: version))
+            #expect(record.lastRun == "4.2.0", Comment(rawValue: version))
+        }
+    }
+
+    /// The managed copy reads the feed itself; a Sparkle delegate
+    /// choosing another feed would leave it on the old one.
+    @Test("production gives Sparkle no feed of its own to pick")
+    func noFeedDelegate() throws {
+        let tree = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let sites = try SourceScan.identifierSites(
+            of: "feedURLString",
+            under: tree
+        )
+        #expect(sites.isEmpty, Comment(rawValue: "\(sites.map(\.site))"))
+    }
+
     @Test("a managed copy still never checks or installs")
     func neverChecks() throws {
         let updater = try Self.updater(current: "4.2.0", lastRun: "4.1.0")

@@ -12,7 +12,7 @@ import Sparkle
 final class WhatsNewCoordinator {
     private let record: WhatsNewRecord
     private let host: Bundle
-    /// The feed Sparkle resolved; asked at launch, not copied.
+    /// The channel's feed; asked at launch, not copied.
     private let feedURL: () -> URL?
     /// Fetches the feed; a test hands items in.
     var fetch: (URL) async -> [WhatsNewFeed.Item]? = WhatsNewFeed.fetch
@@ -119,17 +119,23 @@ final class WhatsNewCoordinator {
     /// fresh install and owed nothing.
     func launched(opensWindow: Bool, existingUser: Bool) async {
         let current = self.current
+        let compare = SUStandardVersionComparator.default
+            .compareVersion(_:toVersion:)
         guard
             let due = WhatsNewRecord.due(
                 current: current,
                 lastRun: record.lastRun,
                 seen: record.seen,
                 existingUser: existingUser,
-                compare: SUStandardVersionComparator.default
-                    .compareVersion(_:toVersion:)
+                compare: compare
             )
         else {
-            record.markAnswered(current)
+            // A rollback (a Home Manager generation, #2911) never
+            // lowers the record, or rolling forward owes read notes.
+            let older = record.lastRun.map {
+                compare(current, $0) == .orderedAscending
+            }
+            if older != true { record.markAnswered(current) }
             return
         }
         // Offline, or a feed that does not list this version yet
