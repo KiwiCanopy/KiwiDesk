@@ -128,8 +128,10 @@ struct JumpRefusalRowTests {
                     "Sources/KiwiDesk/Jump/JumpRowView.swift"
                 )
         ).split(whereSeparator: \.isWhitespace).joined()
-        #expect(row.contains("!entry.isHiddenApp,entry.moveBlock==nil"))
-        #expect(row.contains("ifentry.swapBlock==nil{"))
+        #expect(
+            row.contains("offered:!entry.isHiddenApp&&entry.moveBlock==nil")
+        )
+        #expect(row.contains("offered:entry.swapBlock==nil"))
     }
 
     @Test("a pick the snapshot allows goes ahead")

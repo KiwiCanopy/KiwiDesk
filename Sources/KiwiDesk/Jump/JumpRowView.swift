@@ -227,17 +227,33 @@ private struct MoveHereAction: ViewModifier {
 
     func body(content: Content) -> some View {
         content
-            .accessibilityActions {
-                if !entry.isHiddenApp, entry.moveBlock == nil {
-                    Button(L("jump.row.ax.move_here", "Move Here")) {
-                        run(.moveHere)
-                    }
-                }
-                if entry.swapBlock == nil {
-                    Button(L("jump.row.ax.swap_here", "Swap Here")) {
-                        run(.swapHere)
-                    }
-                }
-            }
+            .modifier(
+                NamedAction(
+                    name: L("jump.row.ax.move_here", "Move Here"),
+                    offered: !entry.isHiddenApp && entry.moveBlock == nil
+                ) { run(.moveHere) }
+            )
+            .modifier(
+                NamedAction(
+                    name: L("jump.row.ax.swap_here", "Swap Here"),
+                    offered: entry.swapBlock == nil
+                ) { run(.swapHere) }
+            )
+    }
+}
+
+/// One named VoiceOver action, present only where `offered`.
+private struct NamedAction: ViewModifier {
+    let name: String
+    let offered: Bool
+    let run: () -> Void
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if offered {
+            content.accessibilityAction(named: Text(name), run)
+        } else {
+            content
+        }
     }
 }
