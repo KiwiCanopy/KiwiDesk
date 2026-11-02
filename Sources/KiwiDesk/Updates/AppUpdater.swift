@@ -195,21 +195,55 @@ final class NoUpdater: AppUpdating {
     func checkForUpdates() {}
     var updatePending: Bool { false }
     var onUpdatePendingChanged: () -> Void = {}
-    let updates = UpdateStateStore()
+    let updates: UpdateStateStore
     var whatsNew: WhatsNewCoordinator? { nil }
-    let autoInstall = AutoInstallSetting.inert()
+    let autoInstall: AutoInstallSetting
     var onWillRelaunch: () -> Void = {}
+
+    /// `managedBy` names the package manager that installs this
+    /// copy's updates (#2909); nil for an unbundled run.
+    init(managedBy manager: String? = nil) {
+        updates = UpdateStateStore(
+            manager.map { .managed(by: $0) } ?? .unavailable
+        )
+        autoInstall = .inert(manager.map { .managed(by: $0) })
+    }
 }
 
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).
 @MainActor
 enum AppUpdaterFactory {
-    /// Returns live updater if bundled with feed URL, else inert updater.
+    /// Which updater a copy gets.
+    enum Choice: Equatable {
+        /// Unbundled, or no feed in the bundle.
+        case inert
+        /// A package manager installs its updates (#2909).
+        case managed(by: String)
+        case sparkle
+    }
+
+    /// Sparkle only for a bundled copy with a feed that no package
+    /// manager owns, since Sparkle replacing that copy would be
+    /// undone (#2909).
+    static func choice(bundled: Bool, manager: String?) -> Choice {
+        guard bundled else { return .inert }
+        return manager.map { .managed(by: $0) } ?? .sparkle
+    }
+
+    /// Builds the updater `choice` picks for the running copy.
     static func make() -> any AppUpdating {
-        guard Bundle.main.bundleIdentifier != nil,
-            Bundle.main.object(forInfoDictionaryKey: "SUFeedURL")
-                != nil
-        else { return NoUpdater() }
-        return SparkleUpdater()
+        let main = Bundle.main
+        let bundled =
+            main.bundleIdentifier != nil
+            && main.object(forInfoDictionaryKey: "SUFeedURL") != nil
+        let manager = ExternalUpdates.current(
+            defaults: .standard,
+            bundlePath: main.bundlePath
+        )
+        switch choice(bundled: bundled, manager: manager) {
+        case .inert: return NoUpdater()
+        case .managed(let manager): return NoUpdater(managedBy: manager)
+        case .sparkle: return SparkleUpdater()
+        }
     }
 }

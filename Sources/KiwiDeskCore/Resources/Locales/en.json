@@ -2428,6 +2428,7 @@
   "updates.state.checking": "Checking for updates…",
   "updates.state.failed": "Couldn't check for updates — you may be offline.",
   "updates.state.last_checked": "Last checked %1$@",
+  "updates.state.managed": "Updates for this copy come from %1$@.",
   "updates.state.not_checked": "Not checked yet",
   "updates.state.unavailable": "Update checks are off in this build.",
   "updates.state.up_to_date": "Up to date",

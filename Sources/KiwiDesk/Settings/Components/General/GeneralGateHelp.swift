@@ -24,6 +24,8 @@ enum GeneralGateHelp {
                 "general.login_item.unavailable_binary",
                 "Available only when running the KiwiDesk app."
             )
+        case .automaticInstall(.managed(let manager)):
+            return UpdateStateRow.managedSentence(manager)
         case .automaticInstall(.checksOff):
             return L(
                 "general.updates.install_automatically.checks_off",
