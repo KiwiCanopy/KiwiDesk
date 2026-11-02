@@ -32,8 +32,8 @@ enum ExternalUpdates {
 
     /// `manager(declared:folder:bundlePath:)` for the running copy.
     static func current(
-        defaults: UserDefaults = .standard,
-        bundlePath: String = Bundle.main.bundlePath
+        defaults: UserDefaults,
+        bundlePath: String
     ) -> String? {
         manager(
             // `string(forKey:)` would read a Bool as "1".

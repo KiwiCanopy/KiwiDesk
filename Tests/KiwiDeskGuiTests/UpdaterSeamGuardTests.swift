@@ -141,13 +141,12 @@ struct UpdaterSeamGuardTests {
 
         // The package-manager check (#2909): deleting it leaves
         // every count above at one while Sparkle offers a Nix copy
-        // an update the next switch undoes. The other direction, a
-        // check that fires on an ordinary install, is
-        // `ExternalUpdatesTests`' (`staleKeyIgnored`).
+        // an update the next switch undoes. What `make()` does with
+        // the answer is `ExternalUpdatesWiringTests`'; a check that
+        // fires on an ordinary install is `ExternalUpdatesTests`'.
         for wiring in [
-            // The whole `if let` so a hollowed condition reds too.
-            "if let manager = ExternalUpdates.current() {",
-            "NoUpdater(managedBy:",
+            "ExternalUpdates.current(", "NoUpdater(managedBy:",
+            "choice(bundled: bundled,",
         ] {
             let checked = try Self.sites(
                 of: wiring,

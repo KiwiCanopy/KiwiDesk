@@ -67,6 +67,17 @@ struct ExternalUpdatesTests {
         )
     }
 
+    @Test("a folder spelled with a trailing slash still holds the copy")
+    func folderIsStandardized() {
+        #expect(
+            ExternalUpdates.manager(
+                declared: "Home Manager",
+                folder: Self.folder + "/",
+                bundlePath: Self.copied
+            ) == "Home Manager"
+        )
+    }
+
     @Test("a declaration without its folder names nothing")
     func nameNeedsItsFolder() {
         #expect(
@@ -156,22 +167,5 @@ struct ExternalUpdatesTests {
         )
         #expect(sentence == UpdateStateRow.managedSentence("Home Manager"))
         #expect(sentence.contains("Home Manager"))
-    }
-
-    /// The footer's branch draws the managed sentence, not the
-    /// unbundled one (`UpdateStateRow`).
-    @Test("the footer draws the managed sentence")
-    func footerDrawsTheManagedSentence() throws {
-        let file = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent(
-                "Sources/KiwiDesk/Settings/Home/UpdateStateRow.swift"
-            )
-        let source = SourceScan.stripComments(
-            try String(contentsOf: file, encoding: .utf8)
-        ).filter { !$0.isWhitespace }
-        let branch =
-            "case.managed(letmanager):"
-            + "sentence(Self.managedSentence(manager)"
-        #expect(source.contains(branch))
     }
 }

@@ -213,17 +213,37 @@ final class NoUpdater: AppUpdating {
 /// Factory resolving active updater implementation (`UpdaterSeamGuardTests`).
 @MainActor
 enum AppUpdaterFactory {
-    /// Returns live updater if bundled with feed URL, else inert
-    /// updater — also when a package manager installs this copy's
-    /// updates, since Sparkle replacing it would be undone (#2909).
+    /// Which updater a copy gets.
+    enum Choice: Equatable {
+        /// Unbundled, or no feed in the bundle.
+        case inert
+        /// A package manager installs its updates (#2909).
+        case managed(by: String)
+        case sparkle
+    }
+
+    /// Sparkle only for a bundled copy with a feed that no package
+    /// manager owns, since Sparkle replacing that copy would be
+    /// undone (#2909).
+    static func choice(bundled: Bool, manager: String?) -> Choice {
+        guard bundled else { return .inert }
+        return manager.map { .managed(by: $0) } ?? .sparkle
+    }
+
+    /// Builds the updater `choice` picks for the running copy.
     static func make() -> any AppUpdating {
-        guard Bundle.main.bundleIdentifier != nil,
-            Bundle.main.object(forInfoDictionaryKey: "SUFeedURL")
-                != nil
-        else { return NoUpdater() }
-        if let manager = ExternalUpdates.current() {
-            return NoUpdater(managedBy: manager)
+        let main = Bundle.main
+        let bundled =
+            main.bundleIdentifier != nil
+            && main.object(forInfoDictionaryKey: "SUFeedURL") != nil
+        let manager = ExternalUpdates.current(
+            defaults: .standard,
+            bundlePath: main.bundlePath
+        )
+        switch choice(bundled: bundled, manager: manager) {
+        case .inert: return NoUpdater()
+        case .managed(let manager): return NoUpdater(managedBy: manager)
+        case .sparkle: return SparkleUpdater()
         }
-        return SparkleUpdater()
     }
 }
