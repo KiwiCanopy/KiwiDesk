@@ -888,6 +888,12 @@ return to the weights `grid.set_column_weight` and
 sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
 `"all"` has no default key.
 
+:::unreleased
+Sizing is kept per macOS Desktop ([resize](#resize)): a space id,
+or nothing, resets that Space on the Desktop you are on; `"all"`
+resets every Space on every Desktop.
+:::
+
 **Example:**
 
 ```lua
@@ -6642,6 +6648,15 @@ twin on that space — so an explicit write always shows. This
 covers the BSP split ratios, the stack master ratio, and the
 scrolling slot size — the three interactive-resize knobs —
 consistently.
+
+:::unreleased
+The session layer is kept per macOS Desktop: a Space shown on two
+Desktops keeps its own sizes on each, and a Desktop where you have
+not resized it uses the override, then the global. A screen
+connected since the last Desktop switch, or a Mac where KiwiDesk
+cannot read which Desktop is shown, shares one set of sizes across
+those Desktops. An in-place restart keeps every Desktop's sizes.
+:::
 
 **Example:**
 

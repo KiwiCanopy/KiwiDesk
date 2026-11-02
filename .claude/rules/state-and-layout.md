@@ -72,8 +72,10 @@ editing here:
   compositor — but only as session state, read through one door
   every reader takes as a required argument, rekeyed at
   `moveMembers` and forgotten at `forwardWindows(of:to:)` like any
-  per-Space session store; `stackFlips` is the instance
-  (`StackFlipSeamTests`), and a new native-id-keyed map joins
+  per-Space session store; `stackFlips` and the session sizes
+  (#2921) are the instances (`StackFlipSeamTests`,
+  `SessionRatioSeamTests`), the Desktop named through the one
+  `shownDesktop(of:)`, and a new native-id-keyed map joins
   `ProfileSpacesSeamTests`' register with what it holds. A
   per-Desktop choice that must outlast the session is a profile
   bound to that Desktop, never a durable map.
@@ -1865,11 +1867,13 @@ editing here:
   maximum nobody wrote.
 - **What counts as SIZING is stated where the store lives, and
   a resize never writes the authored override (#764).**
-  `Space.resetSizing` clears the per-Space sizes (the session
-  ratios, the stack and track weights); `reset_layout_sizing`
-  is a loop over it — the active Space, one by id, or `all`
-  (`ResetLayoutSizingScopeTests`) — lists nothing itself, and
-  touches
+  `Space.resetSizing` clears the sizes the Space holds (the
+  stack and track weights) and the session ratios' clearing doors
+  in `KiwiCore+SessionRatioWrite` clear the per-Desktop layer
+  (#2921); `reset_layout_sizing` is a loop over both — the active
+  Space or one by id on the Desktop shown, or `all` on every
+  Desktop (`ResetLayoutSizingScopeTests`) — lists nothing itself,
+  and touches
   `TilingSettings` not at all. A resize path writes through
   `KiwiCore+SessionRatioWrite`'s `write*` and never an
   override's size field, and the overlay in
@@ -1887,8 +1891,9 @@ editing here:
   layer down): `SessionRatioOverrideTests` ▸
   `overrideSetterClearsShadow` and
   `allOverrideSettersClearTheirField` hold the four setters,
-  and `SessionRatioSeamTests` holds every `sessionRatios` write
-  outside the seam file to the model's own reseeds. A stored
+  and `SessionRatioSeamTests` holds the store and its writer to
+  the seam file and every overlay read to the one
+  `sessionRatios(of:)` door, which each resolver requires. A stored
   property added to `Space` is classified by
   `SpaceSizingCensusTests` — cleared by `resetSizing`, or named
   structure with its reason — or it reds; a new resize knob
@@ -2412,8 +2417,8 @@ editing here:
   after the capture drops it. A store that changes what a layout
   draws rides it, or is named with its reason in a register:
   `SnapshotCarryCensusTests` round-trips every field of `Space`
-  and `ManagedWindow` — `SessionRatios` and `ScrollRest` leaf by
-  leaf — and `SnapshotStoreCensusTests` classifies every
+  and `ManagedWindow` — `SessionRatios` per Desktop and
+  `ScrollRest` leaf by leaf — and `SnapshotStoreCensusTests` classifies every
   id-keyed store the shared `idContainers` walker reaches,
   `floatFrames` (#1675) and the size-bound learner's ledgers
   named as left behind. A Space's session is adopted AFTER its

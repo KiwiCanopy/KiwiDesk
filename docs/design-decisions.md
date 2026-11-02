@@ -4033,6 +4033,8 @@ event-driven applies (monitor change, Desktop binding) keep it,
 so a display reconnect never eats an interactive resize. Covers
 the BSP split ratios, stack master ratio, and scrolling slot
 size — the same shape for all three, per the #458 scope note.
+The layer later moved off the `Space` to one store per macOS
+Desktop (#2921, *A stack flip belongs to one Desktop*).
 
 **The session layer outranks the authored override, and a
 resize never writes an override (#458 as amended by #764).**
@@ -5271,7 +5273,10 @@ both Desktops share for a layout neither shows, ratcheting it a
 step each way on every swipe. So it stands down inside the
 switch's grace, owing the pass after it, and while a member sits
 on a Desktop nobody shows; a real floor waits for the first pass
-over its own Desktop alone. (`HealStandDownTests`)
+over its own Desktop alone. (`HealStandDownTests`) The ratio is
+now each Desktop's own (#2921); the stand-down stays, since a heal
+over the mixed membership still writes the Desktop shown for a
+layout it does not draw.
 :::
 
 **Session weights are healed at retile, not validated forever
@@ -7388,6 +7393,29 @@ may be keyed by the Desktop, and it lives for the session. A side
 that must last per Desktop is already expressible: a profile bound
 to that Desktop. A further per-Desktop ask takes the same shape —
 session state behind one door — or is a profile binding.
+
+**The session sizes took that shape (#2921).** What a resize writes
+— the BSP split ratios, the stack master ratio, the scrolling slot
+size and the Grid weights — is kept per Space and per Desktop, in
+one `DesktopMemory` store beside the flip, read through one door
+that every resolver overlay takes as a required argument. Config
+stays shared: a layout-wide setting, a per-Space override and a
+profile apply to every Desktop that shows the Space. The stack and
+track weights are keyed per window, so they follow each Desktop's
+own windows already and stay on the Space. The owner's rulings
+(2026-11-02) where the sizes differ from the flip:
+
+- **An in-place restart carries them**, as sizing survived one
+  before (#930); the flip stays session-only.
+- **`reset_layout_sizing` resets one Space on the Desktop you are
+  on**; `all` resets every Space on every Desktop.
+- **A resize where no Desktop can be named** — a screen plugged in
+  since the last switch, no SkyLight reading — writes one shared
+  entry, which every unnamed Desktop reads. A named Desktop not
+  sized yet falls through to the override, then the global value.
+- **An explicit choice ends them on every Desktop**: an override
+  setter, a config reload and a mode change clear that Space's
+  sizes everywhere, as they clear the flip.
 :::
 
 ### A Desktop switch is not a close (#1207)
