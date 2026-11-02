@@ -255,8 +255,8 @@ struct RefusalCueSeamTests {
         // In Core the beep lives in exactly one place, which is
         // what keeps "a sound follows a pill" checkable at all.
         #expect(core.occurrences(of: "NSSound.beep()") == 1)
-        // The GUI's one beep is the settings row's own preview —
-        // it plays the cue being described, next to no refusal.
+        // The GUI's two beeps refuse nothing: a settings preview,
+        // and KiwiHub's dead ↩ chord (#2931, `JumpRefusalRowTests`).
         let gui = try Self.tree("KiwiDesk")
         let general = try Self.file(
             Self.root.appendingPathComponent(
@@ -265,7 +265,7 @@ struct RefusalCueSeamTests {
             )
         )
         #expect(general.occurrences(of: "NSSound.beep()") == 1)
-        #expect(gui.occurrences(of: "NSSound.beep()") == 1)
+        #expect(gui.occurrences(of: "NSSound.beep()") == 2)
     }
 
     /// The door every refusal pill takes draws WITHOUT the sound,

@@ -21,6 +21,10 @@ enum JumpKey: Equatable {
     /// ⌥⌘1–9 or ⇧⌥⌘1–9 on Windows: Swap here on that result
     /// (#2885, amending Ruling 1).
     case quickSwap(Int)
+    /// A Windows ↩ chord `JumpPick.of` picks nothing for: the
+    /// panel keeps it and beeps, as a field does a key it cannot
+    /// use — never a refusal (#2931).
+    case dead
     /// Esc: clears a query, then closes.
     case escape
     /// ⇥ (forward) or ⇧⇥ (back): the next side, wrapping, with
@@ -92,11 +96,19 @@ enum JumpKey: Equatable {
         case pageUp, pageDown:
             return .page(keyCode == pageUp ? -1 : 1)
         case returnKey, enter:
-            if scope == .windows, JumpPick.of(held) == .swapHere {
-                return .swapHere
+            // On Windows ↩ picks what a click picks (#2931).
+            guard scope == .windows else {
+                guard held.subtracting(.shift).isEmpty else {
+                    return nil
+                }
+                return .pick(moveHere: held.contains(.shift))
             }
-            guard held.subtracting(.shift).isEmpty else { return nil }
-            return .pick(moveHere: held.contains(.shift))
+            switch JumpPick.of(held) {
+            case .jump: return .pick(moveHere: false)
+            case .moveHere: return .pick(moveHere: true)
+            case .swapHere: return .swapHere
+            case nil: return .dead
+            }
         default:
             // A Lua alternative is read after every built-in key,
             // so none can shadow one (#2600).
@@ -189,37 +201,31 @@ enum JumpKey: Equatable {
         guard let index = digitRows.firstIndex(of: row) else {
             return nil
         }
-        // ⌥ swaps, as on ↩: the one chord table (`JumpPick.of`).
-        if held.contains(.option) {
-            let pick = JumpPick.of(held.subtracting(.command))
-            return scope == .windows && pick == .swapHere
-                ? .quickSwap(index) : nil
+        // The digits pick as ↩ does: the one chord table.
+        switch JumpPick.of(held) {
+        case .jump: return .quick(index, moveHere: false)
+        case .moveHere: return .quick(index, moveHere: true)
+        case .swapHere: return scope == .windows ? .quickSwap(index) : nil
+        case nil: return nil
         }
-        guard held.subtracting([.command, .shift]).isEmpty else {
-            return nil
-        }
-        return .quick(index, moveHere: held.contains(.shift))
     }
 }
 
 /// What a pick on a Windows row does: ↩ / a click Jump, ⇧ Move
-/// here, ⌥ or ⇧⌥ Swap here (#1875, #2885).
+/// here, ⌥ or ⇧⌥ Swap here (#1875, #2885, #2931).
 enum JumpPick: Equatable {
     case jump
     case moveHere
     case swapHere
 
-    /// The pick ↩ and a click make under `modifiers`, the one home
-    /// of the swap chords: ⌥ and ⇧⌥ swap, and ⌥ beside ⌃ or ⌘ —
-    /// kept for a follow (Ruling 1) — picks nothing.
+    /// The pick ↩, a click and the ⌘ digits make under
+    /// `modifiers`, the one chord table: ⌘ never changes the pick,
+    /// and any ⌃ picks nothing — ⌃-click is the secondary click
+    /// and ⌃⌥ is kept for a follow (#2885 ▸ Ruling 1; #2931).
     static func of(_ modifiers: NSEvent.ModifierFlags) -> JumpPick? {
-        let held = modifiers.intersection(
-            [.shift, .command, .option, .control]
-        )
-        guard held.contains(.option) else {
-            return held.contains(.shift) ? .moveHere : .jump
-        }
-        return held.subtracting([.shift, .option]).isEmpty
-            ? .swapHere : nil
+        let held = modifiers.intersection([.shift, .option, .control])
+        if held.contains(.control) { return nil }
+        if held.contains(.option) { return .swapHere }
+        return held.contains(.shift) ? .moveHere : .jump
     }
 }

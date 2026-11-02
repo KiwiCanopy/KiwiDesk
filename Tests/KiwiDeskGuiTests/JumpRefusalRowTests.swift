@@ -103,6 +103,7 @@ struct JumpRefusalRowTests {
         }
         #expect(sounders == 1)
         #expect(source.contains("model?.onAnnounce(spoken)"))
+        #expect(source.contains("model.onDeadKey={NSSound.beep()}"))
         #expect(
             source.contains(
                 "self?.core.swapRefusal(entry.target,on:self?.hubDisplay)"

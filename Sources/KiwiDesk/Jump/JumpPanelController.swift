@@ -277,6 +277,9 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
             self?.core.soundPanelRefusal()
             model?.onAnnounce(spoken)
         }
+        // A ↩ chord that picks nothing: the system beep, never
+        // the refusal sound (#2931 ▸ Ruling 4).
+        model.onDeadKey = { NSSound.beep() }
         // Core answers at the press, from the panel's screen.
         model.swapRefusal = { [weak self] entry in
             self?.core.swapRefusal(entry.target, on: self?.hubDisplay)
