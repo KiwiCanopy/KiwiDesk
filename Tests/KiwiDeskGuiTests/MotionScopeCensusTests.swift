@@ -53,6 +53,8 @@ struct MotionScopeCensusTests {
         "KiwiDeskCore/App/KiwiCore+LayoutPicker.swift": 3,
         // Jump to window's Jump and Bring here (#1875).
         "KiwiDeskCore/App/KiwiCore+JumpActions.swift": 2,
+        // KiwiHub's Swap here (#2885).
+        "KiwiDeskCore/App/KiwiCore+JumpSwap.swift": 1,
         // The scroll gestures' two consumers.
         "KiwiDeskCore/App/KiwiCore+ScrollPan.swift": 1,
         "KiwiDeskCore/App/KiwiCore+ScrollSpaceStep.swift": 1,

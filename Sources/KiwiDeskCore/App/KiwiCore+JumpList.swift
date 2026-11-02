@@ -17,7 +17,8 @@ extension KiwiCore {
         return JumpSnapshot(
             entries: jumpEntries(here: here, hub: hub),
             here: here,
-            hereIcon: here.flatMap(jumpSpaceIcon)
+            hereIcon: here.flatMap(jumpSpaceIcon),
+            swapsInHere: jumpHereFocus(in: here) != nil
         )
     }
 
@@ -27,7 +28,11 @@ extension KiwiCore {
     ) -> [JumpEntry] {
         let here = here ?? state.workspaces.activeSpace
         let windows =
-            trackedJumpEntries(here: here, hub: hub)
+            trackedJumpEntries(
+                here: here,
+                hub: hub,
+                partner: jumpSwapPartner(in: here)
+            )
             + awayJumpEntries(here: here, hub: hub)
             + minimizedJumpEntries(here: here)
         let ordered = windows.enumerated().sorted { lhs, rhs in
@@ -86,7 +91,8 @@ extension KiwiCore {
 
     private func trackedJumpEntries(
         here: SpaceID?,
-        hub: DisplayID?
+        hub: DisplayID?,
+        partner: WindowID?
     ) -> [JumpEntry] {
         state.windows.all
             .filter { !$0.isTransientOverlay }
@@ -108,6 +114,10 @@ extension KiwiCore {
                     spaceIcon: space.flatMap(jumpSpaceIcon),
                     status: status,
                     movesHere: jumpMovesHere(window, from: space, into: here),
+                    swapBlock: jumpSwapBlock(window.id, partner: partner),
+                    moveBlock: here.flatMap {
+                        jumpMoveBlock(window, into: $0)
+                    },
                     isOtherApp: jumpIsOtherApp(window.appRef),
                     screen: status == .shown
                         ? jumpScreen(shownOn, hub: hub) : nil
@@ -142,6 +152,9 @@ extension KiwiCore {
                 ),
                 movesHere: canDriveDesktops && entry.appBundleID != nil
                     && here != nil,
+                swapBlock: .otherDesktop(
+                    snapshot.screenNumber(of: entry.nativeSpace)
+                ),
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: entry.appBundleID, name: entry.appName)
                 ),
@@ -179,6 +192,7 @@ extension KiwiCore {
                 spaceIcon: nil,
                 status: .minimized,
                 movesHere: here != nil,
+                swapBlock: .minimized,
                 isOtherApp: jumpIsOtherApp(
                     AppRef(bundleID: record.bundleID, name: record.app)
                 )
@@ -209,6 +223,7 @@ extension KiwiCore {
                     space: nil,
                     spaceIcon: nil,
                     status: .shown,
+                    swapBlock: .hiddenApp,
                     isOtherApp: jumpIsOtherApp(app.ref)
                 )
             }
@@ -225,9 +240,8 @@ extension KiwiCore {
         from space: SpaceID?,
         into here: SpaceID?
     ) -> Bool {
-        guard let here, !window.isFullscreen, space != here
-        else { return false }
-        return stickyMoveBlock(window.id, to: here) == nil
+        guard let here, space != here else { return false }
+        return moveHereVerdict(window, into: here) == nil
     }
 
     /// The Space's own icon, the bar chip's reading, nil without

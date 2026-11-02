@@ -46,13 +46,14 @@ struct JumpModelTests {
     @Test("Return picks the selection, ⌘ digits pick by result")
     func picks() {
         let model = model()
-        var picked: [(String, Bool)] = []
+        var picked: [(String, JumpPick)] = []
         model.onPick = { picked.append(($0.app, $1)) }
         model.handle(.pick(moveHere: false), repeated: false)
         model.handle(.quick(2, moveHere: true), repeated: false)
         model.handle(.quick(5, moveHere: false), repeated: false)
-        #expect(picked.map(\.0) == ["Ghostty", "Notes"])
-        #expect(picked.map(\.1) == [false, true])
+        model.handle(.swapHere, repeated: false)
+        #expect(picked.map(\.0) == ["Ghostty", "Notes", "Ghostty"])
+        #expect(picked.map(\.1) == [.jump, .moveHere, .swapHere])
     }
 
     @Test("a page moves the selection by the visible rows")

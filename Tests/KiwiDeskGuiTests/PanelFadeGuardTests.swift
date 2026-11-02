@@ -131,7 +131,7 @@ struct PanelFadeGuardTests {
         controller.show()
         front.drain()
         defer { front.keyed.forEach { $0.orderOut(nil) } }
-        controller.pick(entry, moveHere: true)
+        controller.pick(entry, .moveHere)
         #expect(core.state.workspaces.space(of: WindowID(9)) == "1")
     }
 
@@ -149,7 +149,58 @@ struct PanelFadeGuardTests {
         defer { front.keyed.forEach { $0.orderOut(nil) } }
         controller.close()
         #expect(controller.panel?.isVisible == true)
-        controller.pick(entry, moveHere: true)
+        controller.pick(entry, .moveHere)
         #expect(core.state.workspaces.space(of: WindowID(9)) == "2")
+    }
+
+    /// Swap here is KiwiHub's first pick through the #292
+    /// preflight (#2885 ▸ Ruling 3): it runs after the dismiss, and
+    /// the verb vets the app the panel handed back — the provider
+    /// below refuses while the panel is open. The windows are this
+    /// process's, the one app a real AX observer watches.
+    @Test("a Swap here pick passes the preflight after the dismiss")
+    func swapPickPassesThePreflight() throws {
+        let core = makeTestCore()
+        core.tiler.visibleBounds = { _ in
+            CGRect(x: 0, y: 25, width: 1440, height: 875)
+        }
+        for space: SpaceID in ["1", "2"] {
+            core.state.workspaces.ensureSpace(space)
+        }
+        core.state.workspaces.activate("1")
+        for (id, space) in [(1, "1"), (2, "2")] as [(UInt32, SpaceID)] {
+            core.state.windows.upsert(
+                ManagedWindow(id: WindowID(id), pid: getpid(), appName: "A")
+            )
+            core.state.workspaces.add(WindowID(id), to: space)
+        }
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        let observer = try #require(AXApplicationObserver(pid: getpid()))
+        core.eventLoop.observers[getpid()] = observer
+        let controller = JumpPanelController(core: core)
+        controller.reduceMotion = { true }
+        // Another app is "in front" while the panel is open, so a
+        // pick run ahead of the dismiss is denied.
+        core.frontmostPIDProvider = { [weak controller] in
+            controller?.isOpen == true ? 1 : getpid()
+        }
+        let front = Front()
+        front.wire(controller.handBack)
+        controller.show()
+        front.drain()
+        defer { front.keyed.forEach { $0.orderOut(nil) } }
+        let row = JumpEntry(
+            target: .window(WindowID(2)),
+            pid: getpid(),
+            app: "A",
+            title: "",
+            space: "2",
+            spaceIcon: nil,
+            status: .shown
+        )
+        controller.pick(row, .swapHere)
+        #expect(controller.isOpen == false)
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
     }
 }

@@ -198,7 +198,14 @@ is unless one of them lands in the Space you are on, which then
 focuses it. Two windows in different Spaces, on one screen or
 two, trade places: each takes the other's slot. A floating
 window, a window in native full screen and a sticky window that
-cannot change Space are refused. A direction followed by a window
+cannot change Space are refused.
+
+:::unreleased
+A window swapped with itself, a pocketed window and those three
+refusals say why in a cue on the window.
+:::
+
+A direction followed by a window
 id swaps that window with its neighbour in that direction, in the
 Space you are on, and moves no focus.
 
@@ -6183,6 +6190,18 @@ under **Pocket**.
 - **⇧Return** moves the window into the Space you are on instead,
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
+
+:::unreleased
+**⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
+window with yours, as [swap_here](#swap_here) does, and **⌥⌘1** …
+**⌥⌘9** (or **⇧⌥⌘1** …) swap one of the first nine. Yours is
+the window focused on
+the screen KiwiHub opened on, else the focused window. A hidden app
+and a pocketed window are refused, and so, until #2884, are a
+minimized window and one on another macOS Desktop. A refused swap
+or Move here keeps KiwiHub open, with the refusal sound where that
+is on.
+:::
 
 :::unreleased
 **↑** on the first row selects the last, and **↓** on the last

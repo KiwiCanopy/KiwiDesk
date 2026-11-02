@@ -42,6 +42,38 @@ struct JumpKeyTests {
         #expect(key(36, .control) == nil)
     }
 
+    /// ⌥↩ and ⇧⌥↩ are one pick, so ⇧ never means "there"; ⌥ with
+    /// a digit picks nothing, and the other sides keep ⌥↩ (#2885).
+    @Test("⌥Return and ⇧⌥Return swap here")
+    func swapHere() {
+        #expect(key(36, .option) == .swapHere)
+        #expect(key(76, .option) == .swapHere)
+        #expect(key(36, [.shift, .option]) == .swapHere)
+        #expect(key(36, [.option, .command]) == nil)
+        #expect(key(36, [.option, .control]) == nil)
+        #expect(key(18, .option) == nil)
+        // ⌥⌘ and ⇧⌥⌘ digits swap that result (#2885).
+        #expect(key(18, [.option, .command]) == .quickSwap(0))
+        #expect(key(20, [.shift, .option, .command]) == .quickSwap(2))
+        #expect(key(85, [.option, .command]) == .quickSwap(2))
+        #expect(key(18, [.control, .option, .command]) == nil)
+        for scope in [JumpScope.view, .shortcuts] {
+            let swap = JumpKey.of(
+                keyCode: 36,
+                modifiers: .option,
+                scope: scope,
+                naming: false
+            )
+            #expect(swap != .swapHere, "\(scope)")
+        }
+        #expect(JumpPick.of(.option) == .swapHere)
+        #expect(JumpPick.of([.shift, .option]) == .swapHere)
+        #expect(JumpPick.of(.shift) == .moveHere)
+        #expect(JumpPick.of([]) == .jump)
+        #expect(JumpPick.of([.option, .control]) == nil)
+        #expect(JumpPick.of([.option, .command]) == nil)
+    }
+
     @Test("⌘1–9 pick by result, ⇧⌘ moves here, a keypad digit too")
     func quick() {
         #expect(key(18, .command) == .quick(0, moveHere: false))
@@ -52,7 +84,6 @@ struct JumpKeyTests {
         // ⌘0 is no result; a plain digit types.
         #expect(key(29, .command) == nil)
         #expect(key(18) == nil)
-        #expect(key(18, [.command, .option]) == nil)
     }
 
     @Test("Esc is the escape, ⇥ steps forward, ⇧⇥ back, letters type")

@@ -25,7 +25,11 @@ struct JumpRowMotionTests {
     func oneAnimationKeysBoth() throws {
         let row = try squashedRow()
         #expect(row.components(separatedBy: ".animation(").count == 2)
-        #expect(row.contains("value:[showsNumber,showsWayHere])"))
+        #expect(
+            row.contains(
+                "value:[showsNumber,showsRoute,shownRefusal!=nil])"
+            )
+        )
     }
 
     /// The source keeps its identity, so the way here grows beside
@@ -34,7 +38,7 @@ struct JumpRowMotionTests {
     @Test("the way here grows beside the source, never swaps it")
     func wayHereGrows() throws {
         let row = try squashedRow()
-        #expect(row.contains("expanded:showsWayHere"))
+        #expect(row.contains("expanded:showsRoute"))
         // Exactly one way-here view, built for every row it can
         // reach: a second construction is the swap coming back.
         #expect(row.components(separatedBy: "JumpWayHereView(").count == 2)

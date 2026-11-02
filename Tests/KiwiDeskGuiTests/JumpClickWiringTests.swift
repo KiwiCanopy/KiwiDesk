@@ -20,8 +20,7 @@ struct JumpClickWiringTests {
         let panel = try Self.squashed("JumpPanelView.swift")
         #expect(
             panel.contains(
-                "onActivate:{moveHereinmodel.clickRow(index,"
-                    + "moveHere:moveHere)}"
+                "onActivate:{pickinmodel.clickRow(index,pick:pick)}"
             )
         )
         #expect(panel.contains("onApply:{model.clickItem($0)}"))
@@ -49,13 +48,15 @@ struct JumpClickWiringTests {
             )
         )
         #expect(panel.contains("hover:model.hover,onApply:"))
-        // The ⇧ way here follows the one derived row (#2808).
+        // ⇧'s and ⌥'s line follow the one derived row (#2808).
         #expect(
             panel.contains(
-                "letshiftRow=JumpHover.shiftRow(hover:model.hover,"
+                "letacted=JumpHover.actedRow(hover:model.hover,"
+                    + "selection:list.selection)"
             )
         )
-        #expect(panel.contains("ownsShift:index==shiftRow,"))
+        #expect(panel.contains("ownsShift:index==acted,"))
+        #expect(panel.contains("ownsOption:index==acted,"))
         let side = try Self.squashed("JumpViewSide.swift")
         #expect(
             side.contains(

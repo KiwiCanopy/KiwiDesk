@@ -144,13 +144,13 @@ struct JumpHoverTests {
     @Test("a click selects the row, then picks it")
     func clickSelectsRow() {
         let model = model()
-        var picked: [(JumpEntry, Bool)] = []
+        var picked: [(JumpEntry, JumpPick)] = []
         model.onPick = { picked.append(($0, $1)) }
-        model.clickRow(1, moveHere: true)
+        model.clickRow(1, pick: .moveHere)
         #expect(model.list.selection == 1)
         #expect(picked.count == 1)
         #expect(picked.first?.0 == model.list.results[1].entry)
-        #expect(picked.first?.1 == true)
+        #expect(picked.first?.1 == .moveHere)
     }
 
     @Test("a click selects the item, then applies it")

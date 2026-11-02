@@ -14,8 +14,9 @@ private let jumpLog = Logger(
 /// shortcuts sheet and the view picker, one panel at Spotlight's
 /// height on the screen under the pointer, opened over a snapshot
 /// of every window KiwiDesk knows.
-/// A pick closes it and hands the row to Core's `jump(to:)` or
-/// `moveHere(_:)`; Esc, ⌘W and a click away close it.
+/// A pick closes it and hands the row to Core's `jump(to:)`,
+/// `moveHere(_:)` or `swapHere(_:)`; Esc, ⌘W and a click away
+/// close it.
 @MainActor
 final class JumpPanelController: NSObject, NSWindowDelegate {
     let core: KiwiCore
@@ -178,7 +179,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
 
     /// Closes on a pick, then runs it — once: a click during the
     /// exit fade picks nothing.
-    func pick(_ entry: JumpEntry, moveHere: Bool) {
+    func pick(_ entry: JumpEntry, _ pick: JumpPick) {
         guard
             dismiss(
                 distrusting: Self.distrustsHandoff(
@@ -187,14 +188,15 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
                 )
             )
         else { return }
-        jumpLog.log(
-            "KiwiDesk: jump pick; here \(moveHere, privacy: .public)"
-        )
-        guard moveHere else {
-            core.jump(to: entry.target)
-            return
+        let named = String(describing: pick)
+        jumpLog.log("KiwiDesk: jump pick \(named, privacy: .public)")
+        switch pick {
+        case .jump: core.jump(to: entry.target)
+        case .moveHere: core.moveHere(entry.target, on: hubDisplay)
+        // After the dismiss, so the swap verb's #292 preflight reads
+        // the app the panel handed back.
+        case .swapHere: core.swapHere(entry.target, on: hubDisplay)
         }
-        core.moveHere(entry.target, on: hubDisplay)
     }
 
     /// Whether a pick arms the own-window handoff distrust: never
@@ -266,8 +268,21 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         panel.onModifiers = { [weak model] in
             model?.noteModifiers($0)
         }
-        model.onPick = { [weak self] entry, moveHere in
-            self?.pick(entry, moveHere: moveHere)
+        model.onPick = { [weak self] entry, pick in
+            self?.pick(entry, pick)
+        }
+        // A refusal the panel already shows stays in the panel: a
+        // beep where Refusal sound is on, and VoiceOver's words.
+        model.onRefuse = { [weak self, weak model] spoken in
+            self?.core.soundPanelRefusal()
+            model?.onAnnounce(spoken)
+        }
+        // Core answers at the press, from the panel's screen.
+        model.swapRefusal = { [weak self] entry in
+            self?.core.swapRefusal(entry.target, on: self?.hubDisplay)
+        }
+        model.moveRefusal = { [weak self] entry in
+            self?.core.moveHereRefusal(entry.target, on: self?.hubDisplay)
         }
         model.onClose = { [weak self] in
             self?.close()

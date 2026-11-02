@@ -43,12 +43,12 @@ struct JumpWayHereView: View {
     let source: JumpRowText.Place?
     let here: JumpRowText.Place
     let expanded: Bool
+    /// Move here's one-way frame, or Swap here's two-way one.
+    var frame = JumpRowText.wayHereFrame
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(
-                SentenceFrame(JumpRowText.wayHereFrame).segments
-            ) { segment in
+            ForEach(SentenceFrame(frame).segments) { segment in
                 switch segment.slot {
                 case .argument(1):
                     if let source { JumpPlaceView(place: source) }
@@ -66,5 +66,31 @@ struct JumpWayHereView: View {
                 }
             }
         }
+    }
+}
+
+/// What a held ⌥ or ⇧ shows in place of a row's route where its
+/// pick would refuse the row (#2885): ⛔ and the reason in the
+/// row's ink. A refused press swells it once from its leading
+/// edge (Ruling 7); the row and the panel never move.
+struct JumpRefusalView: View {
+    let text: String
+    let pulsing: Bool
+
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    static let swell: CGFloat = 1.08
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "nosign")
+                .accessibilityHidden(true)
+            Text(text).fixedSize()
+        }
+        .scaleEffect(pulsing ? Self.swell : 1, anchor: .leading)
+        .animation(
+            reduceMotion ? nil : .spring(response: 0.2, dampingFraction: 0.6),
+            value: pulsing
+        )
     }
 }

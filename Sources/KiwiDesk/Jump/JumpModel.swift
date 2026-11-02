@@ -19,6 +19,8 @@ final class JumpModel: ObservableObject {
     @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
+    /// ⌥ previews Swap here (#2885).
+    @Published private(set) var optionHeld = false
     /// Bumped each time the panel becomes key; the field takes the
     /// focus on every bump.
     @Published private(set) var fieldFocusRequests = 0
@@ -85,7 +87,20 @@ final class JumpModel: ObservableObject {
     /// screen it opens on (`JumpPanelController.sheetCap`).
     let sheetCap: CGFloat
 
-    var onPick: (JumpEntry, _ moveHere: Bool) -> Void = { _, _ in }
+    var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
+    /// A pick Core refuses at the press: what VoiceOver hears. The
+    /// controller sounds it and announces it (#2885).
+    var onRefuse: (String) -> Void = { _ in }
+    /// Core's refusals read at the press, so a row the snapshot
+    /// refused that now goes ahead reaches the verb; the controller
+    /// wires Core's, a test keeps the snapshot's.
+    var swapRefusal: (JumpEntry) -> JumpSwapBlock? = { $0.swapBlock }
+    var moveRefusal: (JumpEntry) -> JumpMoveBlock? = { $0.moveBlock }
+    /// The row whose refused press swells its reason, for a beat.
+    @Published var refusedRow: Int?
+    /// The row a refused press showed its reason on, until the
+    /// modifier that named the pick is let go.
+    @Published var revealedRow: Int?
     var onClose: () -> Void = {}
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
@@ -186,13 +201,17 @@ final class JumpModel: ObservableObject {
         case .page(let direction):
             move(by: direction * rowCap)
         case .pick(let moveHere):
-            if let match = list.selected {
-                onPick(match.entry, moveHere)
+            if let index = list.selection {
+                pick(index, moveHere ? .moveHere : .jump)
             }
+        case .swapHere:
+            if let index = list.selection { pick(index, .swapHere) }
         case .quick(let index, let moveHere):
-            if let match = list.quick(index) {
-                onPick(match.entry, moveHere)
+            if list.quick(index) != nil {
+                pick(index, moveHere ? .moveHere : .jump)
             }
+        case .quickSwap(let index):
+            if list.quick(index) != nil { pick(index, .swapHere) }
         case .escape:
             if list.query.isEmpty {
                 onClose()
@@ -225,16 +244,17 @@ final class JumpModel: ObservableObject {
 
     /// A click selects the row, then does what ↩ does on it
     /// (#2365).
-    func clickRow(_ index: Int, moveHere: Bool) {
+    func clickRow(_ index: Int, pick: JumpPick) {
         guard scope == .windows else { return }
+        guard list.results.indices.contains(index) else { return }
         list.select(index)
-        if let match = list.selected { onPick(match.entry, moveHere) }
+        self.pick(index, pick)
     }
-
-    /// ⇧ and ⌘ as held now, for the footer's one lit hint.
+    /// ⇧, ⌥ and ⌘ as held now, for the footer's one lit hint.
     var heldModifiers: NSEvent.ModifierFlags {
         var flags: NSEvent.ModifierFlags = []
         if shiftHeld { flags.insert(.shift) }
+        if optionHeld { flags.insert(.option) }
         if commandHeld { flags.insert(.command) }
         return flags
     }
@@ -251,8 +271,11 @@ final class JumpModel: ObservableObject {
     func noteModifiers(_ flags: NSEvent.ModifierFlags) {
         let command = flags.contains(.command)
         let shift = flags.contains(.shift)
+        let option = flags.contains(.option)
         if command != commandHeld { commandHeld = command }
         if shift != shiftHeld { shiftHeld = shift }
+        if option != optionHeld { optionHeld = option }
+        if !shift, !option, revealedRow != nil { revealedRow = nil }
     }
 
     /// What VoiceOver hears when the results change.

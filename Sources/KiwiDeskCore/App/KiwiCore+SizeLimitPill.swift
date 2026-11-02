@@ -74,8 +74,15 @@ extension KiwiCore {
     /// than per frame — which is what makes sounding a real
     /// refusal safe where sounding every `.fail` never was.
     func soundRefusal() {
-        guard keys.isFiring, appWide.refusalSound
-        else { return }
+        guard keys.isFiring else { return }
+        soundPanelRefusal()
+    }
+
+    /// The refusal sound for a refusal a panel drew itself — KiwiHub
+    /// keeps a refused pick open with its reason in the row (#2885)
+    /// — so no hotkey fire gates it: the press is the panel's own.
+    public func soundPanelRefusal() {
+        guard appWide.refusalSound else { return }
         NSSound.beep()
     }
 

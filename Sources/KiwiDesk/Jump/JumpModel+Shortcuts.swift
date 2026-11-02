@@ -43,7 +43,8 @@ extension JumpModel {
             } else {
                 setShortcutQuery("")
             }
-        case .pick, .quick, .stepScope, .side, .keep, .swallow:
+        case .pick, .swapHere, .quick, .quickSwap, .stepScope, .side,
+            .keep, .swallow:
             break
         }
     }

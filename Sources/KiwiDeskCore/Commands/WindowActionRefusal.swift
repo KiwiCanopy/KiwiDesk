@@ -22,6 +22,17 @@ enum WindowActionRefusal: Equatable {
     /// `move_to_space(_and_follow)` named the Space the window
     /// is already in.
     case alreadyIn(window: String, space: String)
+    /// A swap named one window twice (#2885).
+    case swapWithSelf(window: String)
+    /// `swap_here` found no focused window to trade with.
+    case nothingHereToSwap
+    /// A side is floating: a float holds no slot (#2509).
+    case cannotSwapFloating
+    /// A side is full screen, in its own macOS Space (#670).
+    case cannotSwapFullScreen(window: String)
+    /// KiwiHub's Swap here reaches no slot for the row: pocketed,
+    /// a hidden app, minimized or on another Desktop (#2885).
+    case cannotSwapHere(window: String)
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -75,6 +86,34 @@ enum WindowActionRefusal: Equatable {
                 window,
                 space
             )
+        case .swapWithSelf(let window):
+            L(
+                "window_action.refusal.swap_with_self",
+                "“%1$@” can't be swapped with itself",
+                window
+            )
+        case .nothingHereToSwap:
+            L(
+                "window_action.refusal.nothing_here_to_swap",
+                "No window here to swap with"
+            )
+        case .cannotSwapFloating:
+            L(
+                "window_action.refusal.cannot_swap_floating",
+                "A floating window can't be swapped"
+            )
+        case .cannotSwapFullScreen(let window):
+            L(
+                "window_action.refusal.cannot_swap_full_screen",
+                "“%1$@” is full screen and can't be swapped",
+                window
+            )
+        case .cannotSwapHere(let window):
+            L(
+                "window_action.refusal.cannot_swap_here",
+                "“%1$@” can't be swapped here",
+                window
+            )
         }
     }
 
@@ -88,6 +127,11 @@ enum WindowActionRefusal: Equatable {
         case .allHere: "every matching window is already here"
         case .noTitleMatch: "no window title matches"
         case .alreadyIn: "the window is already in that Space"
+        case .swapWithSelf: "cannot swap a window with itself"
+        case .nothingHereToSwap: "no focused window to swap with"
+        case .cannotSwapFloating: "a floating window cannot be swapped"
+        case .cannotSwapFullScreen: "a full-screen window cannot be swapped"
+        case .cannotSwapHere: "the window cannot be swapped here"
         }
     }
 }

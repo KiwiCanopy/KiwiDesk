@@ -3,23 +3,37 @@ import SwiftUI
 
 /// One Jump to window row (#1875 ▸ Rows): the app's icon, the
 /// title with its match bold, and the trailing column — its Space,
-/// the way here under ⇧, and its ⌘ number while ⌘ is held.
+/// the way here under ⇧ or ⌥, and its ⌘ number while ⌘ is held.
 struct JumpRowView: View {
     let match: JumpSearch.Match
     let icon: NSImage?
     let isSelected: Bool
     /// The pointer lifts this row, grey (#2365).
     var isLifted = false
-    /// The row ⇧ alone acts on (`JumpHover.shiftRow`, #2808).
+    /// The row ⇧ acts on (`JumpHover.actedRow`, #2808).
     let ownsShift: Bool
+    /// The row ⌥ acts on, by the same rule (#2885).
+    var ownsOption = false
     /// The ⌘ number this row takes, nil from row 10 on.
     let number: Int?
     let commandHeld: Bool
     let shiftHeld: Bool
+    var optionHeld = false
     /// The current Space, drawn after the arrow; nil where ⇧
     /// changes nothing on this row.
     let wayHere: JumpRowText.Place?
-    let onActivate: (_ moveHere: Bool) -> Void
+    /// The current Space, where Swap here trades this row's window
+    /// across Spaces; nil where it trades none (#2885).
+    var waySwap: JumpRowText.Place?
+    /// What ⌥ and ⇧ say in place of the route where their pick
+    /// would refuse the row (#2885).
+    var refusal = JumpRowRefusal()
+    /// A refused press on this row: its reason swells once.
+    var pulsing = false
+    /// A refused press showed this row's reason, which stays while
+    /// the modifier is held, whichever row the pointer lifts.
+    var revealed = false
+    let onActivate: (JumpPick) -> Void
     /// The pointer moved over this row.
     var onHover: () -> Void = {}
     var onHoverEnd: () -> Void = {}
@@ -31,6 +45,15 @@ struct JumpRowView: View {
     /// The key panels' row (#2229 ▸ shared panel style): a
     /// `.body` line with room above and below.
     static let height: CGFloat = 34
+
+    /// A row's digit as the held modifiers press it: ⌥⌘ swaps,
+    /// ⇧⌘ moves here, ⌘ jumps.
+    static func digitChord(_ number: Int, _ shift: Bool, _ option: Bool)
+        -> String
+    {
+        if option { return "⌥⌘\(number)" }
+        return shift ? "⇧⌘\(number)" : "⌘\(number)"
+    }
     static let iconSize: CGFloat = 22
     /// The row's padding inside its selection.
     static let padding: CGFloat = 10
@@ -54,13 +77,36 @@ struct JumpRowView: View {
     /// ⇧ alone acts on one row (`ownsShift`); ⇧⌘ reaches every
     /// numbered row through its digit, so each shows its way here.
     var showsWayHere: Bool {
-        shiftHeld && wayHere != nil
+        shiftHeld && !optionHeld && wayHere != nil
             && (ownsShift || (commandHeld && number != nil))
+    }
+    /// ⌥ or ⇧⌥ draws the two-way route on its one row.
+    var showsWaySwap: Bool {
+        optionHeld && waySwap != nil
+            && (ownsOption || (commandHeld && number != nil))
+    }
+    /// The reason the held modifier's pick would refuse this row,
+    /// on the row it speaks for — ⇧⌘ on every numbered row, as its
+    /// way here.
+    var shownRefusal: String? {
+        // ⌥⌘ and ⇧⌘ reach every numbered row through its digit.
+        let digit = commandHeld && number != nil
+        let speaks = digit || revealed
+        if optionHeld { return ownsOption || speaks ? refusal.swap : nil }
+        guard shiftHeld, ownsShift || speaks else { return nil }
+        return refusal.move
+    }
+    /// The route ⌥ draws where it has one, else ⇧'s.
+    private var swapRoute: Bool { optionHeld && waySwap != nil }
+    private var showsRoute: Bool {
+        swapRoute ? showsWaySwap : showsWayHere
     }
 
     var body: some View {
         Button {
-            onActivate(NSEvent.modifierFlags.contains(.shift))
+            if let pick = JumpPick.of(NSEvent.modifierFlags) {
+                onActivate(pick)
+            }
         } label: {
             content.kiwiHubRowInk(
                 paint,
@@ -96,7 +142,7 @@ struct JumpRowView: View {
                 .lineLimit(1)
                 .layoutPriority(1)
             if showsNumber, let number {
-                Text(verbatim: shiftHeld ? "⇧⌘\(number)" : "⌘\(number)")
+                Text(verbatim: Self.digitChord(number, shiftHeld, optionHeld))
                     .font(.callout.monospacedDigit())
                     .foregroundStyle(secondaryInk)
                     .fixedSize()
@@ -108,7 +154,7 @@ struct JumpRowView: View {
         // here takes its room the same way, alone or with ⌘.
         .animation(
             reduceMotion ? nil : .easeOut(duration: 0.15),
-            value: [showsNumber, showsWayHere]
+            value: [showsNumber, showsRoute, shownRefusal != nil]
         )
         .padding(.horizontal, Self.padding)
         .frame(height: Self.height)
@@ -128,11 +174,27 @@ struct JumpRowView: View {
 
     @ViewBuilder private var trailing: some View {
         let place = JumpRowText.place(of: match.entry)
-        if let wayHere {
+        if let reason = shownRefusal {
+            JumpRefusalView(
+                text: reason,
+                pulsing: pulsing && !reduceMotion
+            )
+        } else {
+            route(place)
+        }
+    }
+
+    @ViewBuilder
+    private func route(_ place: JumpRowText.Place?) -> some View {
+        // One view whichever route it draws, so ⌥ re-frames the
+        // route in place rather than swapping the column.
+        if let target = swapRoute ? waySwap : wayHere {
             JumpWayHereView(
                 source: place,
-                here: wayHere,
-                expanded: showsWayHere
+                here: target,
+                expanded: showsRoute,
+                frame: swapRoute
+                    ? JumpRowText.waySwapFrame : JumpRowText.wayHereFrame
             )
         } else if let place {
             JumpPlaceView(place: place)
@@ -156,21 +218,42 @@ struct JumpRowView: View {
     }
 }
 
-/// VoiceOver's second action on a window row; a hidden app has
-/// no window to move, so its row offers none.
+/// VoiceOver's Move Here and Swap Here on a window row, each left
+/// off a row its pick would refuse (#2885) — a hidden app's row
+/// offers neither, having no window to move or swap.
 private struct MoveHereAction: ViewModifier {
     let entry: JumpEntry
-    let run: (_ moveHere: Bool) -> Void
+    let run: (JumpPick) -> Void
 
     func body(content: Content) -> some View {
-        if entry.isHiddenApp {
-            content
+        content
+            .modifier(
+                NamedAction(
+                    name: L("jump.row.ax.move_here", "Move Here"),
+                    offered: !entry.isHiddenApp && entry.moveBlock == nil
+                ) { run(.moveHere) }
+            )
+            .modifier(
+                NamedAction(
+                    name: L("jump.row.ax.swap_here", "Swap Here"),
+                    offered: entry.swapBlock == nil
+                ) { run(.swapHere) }
+            )
+    }
+}
+
+/// One named VoiceOver action, present only where `offered`.
+private struct NamedAction: ViewModifier {
+    let name: String
+    let offered: Bool
+    let run: () -> Void
+
+    @ViewBuilder
+    func body(content: Content) -> some View {
+        if offered {
+            content.accessibilityAction(named: Text(name), run)
         } else {
-            content.accessibilityAction(
-                named: Text(L("jump.row.ax.move_here", "Move Here"))
-            ) {
-                run(true)
-            }
+            content
         }
     }
 }
