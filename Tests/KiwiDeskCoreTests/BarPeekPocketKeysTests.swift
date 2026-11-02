@@ -49,7 +49,7 @@ struct BarPeekPocketKeysTests {
         #expect(header.frame.minY > safari.frame.maxY)
         #expect(header.frame.maxY < ghostty.frame.minY)
         // The key stands past its title, inside the wrap width.
-        let key = body.chords[0]
+        let key = try #require(body.chords.first)
         #expect(key.frame.minX >= ghostty.frame.maxX)
         #expect(key.frame.minY == ghostty.frame.minY)
     }
