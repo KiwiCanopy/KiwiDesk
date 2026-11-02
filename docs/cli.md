@@ -1009,6 +1009,12 @@ were missed. Each reconnection prints the confirmation line again.
 kiwidesk subscribe --reconnect space_change
 ```
 
+:::unreleased
+A stream whose reader goes away — `kiwidesk subscribe | head -1`
+once `head` has its line — ends with exit code 1, with or without
+`--reconnect`.
+:::
+
 Every window event carries `bundle_id` — the stable identity
 key (the one app rules and `focus_or_spawn` match on) — next to
 the locale-dependent display `app` name. It is JSON `null` for

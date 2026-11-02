@@ -37,6 +37,16 @@ public final class SocketClient {
         guard fd >= 0 else {
             throw SocketError.connectFailed("socket()")
         }
+        // An app gone mid-send must cost EPIPE, never the CLI
+        // process (#2870).
+        var on: Int32 = 1
+        setsockopt(
+            fd,
+            SOL_SOCKET,
+            SO_NOSIGPIPE,
+            &on,
+            socklen_t(MemoryLayout<Int32>.size)
+        )
         let size = socklen_t(
             MemoryLayout<sockaddr_un>.size
         )
@@ -60,6 +70,15 @@ public final class SocketClient {
 
     deinit {
         Darwin.close(fd)
+    }
+
+    /// Whether a send to a closed peer fails with EPIPE rather than
+    /// raising SIGPIPE; read back from the socket itself.
+    var ignoresBrokenPipe: Bool {
+        var value: Int32 = 0
+        var size = socklen_t(MemoryLayout<Int32>.size)
+        getsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &value, &size)
+        return value != 0
     }
 
     /// Bounds every later send and read to `seconds`; a read that
