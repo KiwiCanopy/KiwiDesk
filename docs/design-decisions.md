@@ -14718,23 +14718,16 @@ Space.
 Since every overflow scrolls and only a whole Space piles (#2542),
 no pile has a sticky exemption to refuse, and the pill is retired.
 
-**The sticky/floating marks are a filled state-color pair,
-defaulting to Automatic.** The one sticky glyph reads the one
+**The sticky/floating marks are a state-color pair, defaulting
+to Automatic.** The one sticky glyph reads the one
 `sticky.color`, so the on-window mark and the Space Bar sticky
 badge can never drift to different colors; floating gets its own
 `floating.color` in a minimal `floating` namespace. The color
-owns the *fill*, and the glyph on top is
-auto-contrasted black/white for legibility (a filled disc shows
-its hue far better than a thin glyph stroke at the 7–9 pt badge
-size, and an auto-contrast glyph means any picked fill stays
-readable — a guardrail on legibility, never taste). The Space Bar
-sticky/floating marks stay filled discs in the count badge's
-family; the on-window mark nests the same filled disc inside its
-glass square, so the two surfaces read as one mark. **Automatic**
-falls back to today's look on each surface: the badges inherit the
-count badge's own `groupBadgeColor` fill (the default trio stays
-one consistent color), and the mark drops the disc for the bare
-neutral `.labelColor` glyph on glass. The default is Automatic
+paints the glyph (below, #2831). **Automatic** keeps the label
+ink on each surface: the badges keep the count badge's own
+`groupBadgeColor` disc (the default trio stays one consistent
+color), and the mark is the bare neutral `.labelColor` glyph on
+glass. The default is Automatic
 (the empty-hex sentinel), not a concrete brand hex like the other
 color wells: the mark sits on top of arbitrary third-party window
 content all day, and the adaptive label color is the only default
@@ -14748,27 +14741,13 @@ pushpin family is off-limits — `SpaceAssignmentChip` uses
 `pin.fill` for the opposite idea (a window bound to one space).
 (#429)
 
-`floating.color` tints the floating badge and the on-window
-floating mark alike, as `sticky.color` does sticky's pair.
+`floating.color` paints the floating badge's glyph and the
+on-window floating mark's alike, as `sticky.color` does sticky's
+pair.
 
-**On Liquid Glass the mark's disc goes** (#1621). It existed
-because `.hudWindow` carries no colour; tinted glass carries the
-colour itself, through `GlassTint.apply`, fading downward. The
-glyph then takes `.labelColor` — under the dark variant
-`GlassTint` pins from a dark colour (#1308), under the app's
-appearance otherwise — never `contrastingGlyph` of the hex: the
-glass shows the colour at a capped alpha over whatever lies
-behind it, so a black/white pick made from the hex judges a
-colour that is never on screen. The two surfaces still read as
-one mark through the one `sticky.color`: a disc on the Space Bar
-badge, the glass's tint on the mark. With the finish off, or
-Reduce transparency on, the disc returns.
-
-The pocket mark takes the other branch on purpose (#2671): its
-colour is drawn opaque IN the glyph, filling the pocket, and its
-plate takes no tint, so the colour on screen is the hex itself and
-the dashed stitch takes `contrastingGlyph` of it, as the flat disc
-does. Moving the stitch to `.labelColor` would draw a black or
+The pocket mark's colour is drawn opaque IN the glyph, filling the
+pocket (#2671), so the colour on screen is the hex itself and the
+dashed stitch takes `contrastingGlyph` of it. Moving the stitch to `.labelColor` would draw a black or
 white line on a pocket the label ink judged against nothing. The
 pocket's outline is the colour itself and the kiwi slices draw no
 outline (owner, #2704): a contrasting outline read as a black
@@ -14780,7 +14759,7 @@ Automatic draws the slices bare too (owner, 2026-10-29, #2776): its
 outline, in the fill's ink, read as a dark ring above the pocket
 wherever the kiwis show alone, as on the pocket's handle.
 
-**Amended: a state's colour is its symbol's** (#2831, owner,
+**A state's colour is its symbol's** (#2831, owner,
 2026-10-31). `sticky.color`, `floating.color` and `pocket.color`
 paint the glyph itself, on the window mark and on the Space Bar
 badge alike, so the badge and the mark still read as one sign in
@@ -18322,9 +18301,8 @@ never made opaque** (#1620, #1621, #2797). A marker exists to be
 seen through: an opaque drop zone would hide the window a drop
 swaps with. So under the setting the drop zone draws flat grey at
 about 22 % with its rim in place of the frosted plate, the
-ghost's outline draws as always, and the mark draws its
-`.hudWindow` badge — a disc in the colour, or the bare glyph on
-Automatic.
+ghost's outline draws as always, and the mark draws its glyph,
+in its colour, on a neutral `.hudWindow` plate.
 
 **The panel's key did not merge with the bars'**: separate
 leaves, one row, through `SettingKey.masterWrites`. The bars
@@ -18337,8 +18315,9 @@ per-layout chain the same way, both bars reading them alike.
 
 **The drag visuals and the sticky mark join that switch as leaves
 of their own, filled from its reading on upgrade.** (#1620,
-#1621.) Each takes its own colour through `GlassTint.apply`,
-fading DOWNWARD, since neither sits on a screen edge the way the
+#1621.) The drag visuals take their own colour through
+`GlassTint.apply`, fading DOWNWARD, and the mark's glass stays
+untinted (#2831); neither sits on a screen edge the way the
 shelf does (#1622). A file written before them carries neither
 leaf, and absent they decode on — beside a shelf and panel the
 user may have set off, so the one row would open reading off

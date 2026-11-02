@@ -5646,19 +5646,15 @@ like any float: the frame it has when you put it back is kept for
 the screen that frame sits on, and it comes out at that frame on
 that screen.
 
-Out of the pocket it wears the pocket mark half over its top-right
+Out of the pocket it wears the pocket mark inside its top-right
 corner, whatever [`sticky.set_mark`](#stickyset_mark) and
 [`floating.set_mark`](#floatingset_mark) say, and no mark while it
 is maximized or presenting; [`pocket.set_color`](#pocketset_color)
 colors it. Its Space Bar glyph wears the pocket
-badge where the floating badge goes and no sticky badge;
+badge at the glyph's bottom-right corner, beside the floating badge,
+and no sticky badge;
 [`space_bar.set_sticky_badge(false)`](#space_barset_sticky_badge)
 hides it with the others.
-
-Out of the pocket the mark sits inside the window's top-right
-corner, as the sticky and floating marks do, and the Space Bar's
-pocket badge takes the glyph's bottom-right corner, beside the
-floating badge.
 
 macOS focusing a pocketed window — `⌘-Tab` to its app, a Dock
 click, a notification — takes it out as a call would, and so do
@@ -5821,15 +5817,11 @@ sticky.set_mark(false)
 empty string `""` for **Automatic** (default `""`).
 
 **Does:** tints the sticky mark — the on-window mark and the
-Space Bar sticky badge read this one value. The mark becomes a
-filled disc in the color with a legible auto-contrast glyph.
+Space Bar sticky badge read this one value.
 `""` is Automatic: the badge keeps the count-badge fill and the
 mark is a neutral glyph on glass that flips black/white with
 light and dark mode. Any non-empty value must parse as a hex
 color.
-
-On [Liquid Glass](#stickyset_liquid_glass) the color tints the
-mark's glass instead, and the disc goes.
 
 **Example:**
 
@@ -5865,25 +5857,16 @@ sticky.set_desktop_reach(false)
 
 **Expects:** a boolean (default `true`).
 
-**Does:** draws the on-window sticky mark as macOS 26 Liquid
-Glass, tinted by [`sticky.set_color`](#stickyset_color),
-strongest at the top and fading downward; with no color it is
-clear glass. The glyph drops its filled disc and takes the
-system label color: light on a dark color, which pins the glass
-dark, and otherwise as KiwiDesk's Appearance sets it. Off, below
-macOS 26, or while macOS's Reduce transparency is on, the mark
-is the badge `sticky.set_color` describes: a filled disc in the
-color, or the bare glyph on Automatic. Settings writes this
+**Does:** draws the on-window sticky mark as frosted, untinted
+macOS 26 Liquid Glass; [`sticky.set_color`](#stickyset_color)
+colors the glyph. Off, below macOS 26, or under Reduce
+transparency, the glyph sits on a neutral plate. Settings writes this
 through the one **Liquid Glass** switch
 ([kiwishelf.set_liquid_glass](#kiwishelfset_liquid_glass)).
 
-The floating mark draws the same way, tinted by
-[`floating.set_color`](#floatingset_color) where no sticky glyph
-shares its plate.
-
-The glass is frosted and untinted: a color goes on the glyph,
-never the glass, and the mark wears the same key-window rim as the
-bars.
+The floating mark draws the same way, its glyph colored by
+[`floating.set_color`](#floatingset_color). The mark wears the same
+key-window rim as the bars.
 
 **Example:**
 
@@ -5921,8 +5904,8 @@ empty string `""` for **Automatic** (default `""`).
 **Does:** tints the floating mark — the on-window mark and the
 Space Bar floating badge read this one value, as
 [`sticky.set_color`](#stickyset_color) describes for sticky. On
-a window that is both sticky and floating, Liquid Glass takes
-the sticky color and the floating glyph the label color. `""`
+a window that is both sticky and floating, each glyph takes its
+own color and the glass stays untinted. `""`
 is Automatic; any non-empty value must parse as a hex color.
 
 **Example:**
@@ -5930,9 +5913,6 @@ is Automatic; any non-empty value must parse as a hex color.
 ```lua
 floating.set_color("#8E5DE0")
 ```
-
-As for sticky, the color paints the floating glyph, on the mark
-and on the badge, beside a sticky glyph too.
 
 ### pocket.set_capacity
 
