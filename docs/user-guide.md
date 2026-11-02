@@ -702,14 +702,10 @@ come last in their Space's row. The badges have no Settings
 toggle; Lua hides them with `space_bar.set_sticky_badge(false)`.
 
 A window out of the [pocket](lua-reference.md#pocket) wears the
-**pocket mark** half over its top-right corner, in place of its
+**pocket mark** inside its top-right corner, in place of its
 sticky and floating marks, and its glyph wears the **pocket badge**
-on the bottom-left, in place of the floating badge; that glyph
-comes last in its row too.
-
-The pocket mark sits inside the window's top-right corner, as the
-sticky and floating marks do, and the pocket badge takes the
-glyph's bottom-right corner, beside the floating badge.
+on the bottom-right, beside the floating badge; that glyph comes
+last in its row too.
 
 **Drag a window onto a Space** to move it there:
 
