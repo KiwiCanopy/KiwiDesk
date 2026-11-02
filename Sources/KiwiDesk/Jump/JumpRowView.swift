@@ -3,7 +3,7 @@ import SwiftUI
 
 /// One Jump to window row (#1875 ▸ Rows): the app's icon, the
 /// title with its match bold, and the trailing column — its Space,
-/// the way here under ⇧, and its ⌘ number while ⌘ is held.
+/// the way here under ⇧ or ⌥, and its ⌘ number while ⌘ is held.
 struct JumpRowView: View {
     let match: JumpSearch.Match
     let icon: NSImage?
@@ -12,14 +12,20 @@ struct JumpRowView: View {
     var isLifted = false
     /// The row ⇧ alone acts on (`JumpHover.shiftRow`, #2808).
     let ownsShift: Bool
+    /// The row ⌥ acts on, by the same rule (#2885).
+    var ownsOption = false
     /// The ⌘ number this row takes, nil from row 10 on.
     let number: Int?
     let commandHeld: Bool
     let shiftHeld: Bool
+    var optionHeld = false
     /// The current Space, drawn after the arrow; nil where ⇧
     /// changes nothing on this row.
     let wayHere: JumpRowText.Place?
-    let onActivate: (_ moveHere: Bool) -> Void
+    /// The current Space, where Swap here trades this row's window
+    /// across Spaces; nil where it trades none (#2885).
+    var waySwap: JumpRowText.Place?
+    let onActivate: (JumpPick) -> Void
     /// The pointer moved over this row.
     var onHover: () -> Void = {}
     var onHoverEnd: () -> Void = {}
@@ -54,13 +60,20 @@ struct JumpRowView: View {
     /// ⇧ alone acts on one row (`ownsShift`); ⇧⌘ reaches every
     /// numbered row through its digit, so each shows its way here.
     var showsWayHere: Bool {
-        shiftHeld && wayHere != nil
+        shiftHeld && !optionHeld && wayHere != nil
             && (ownsShift || (commandHeld && number != nil))
+    }
+    /// ⌥ or ⇧⌥ draws the two-way route on its one row.
+    var showsWaySwap: Bool { optionHeld && ownsOption && waySwap != nil }
+    /// The route ⌥ draws where it has one, else ⇧'s.
+    private var swapRoute: Bool { optionHeld && waySwap != nil }
+    private var showsRoute: Bool {
+        swapRoute ? showsWaySwap : showsWayHere
     }
 
     var body: some View {
         Button {
-            onActivate(NSEvent.modifierFlags.contains(.shift))
+            onActivate(JumpPick.of(NSEvent.modifierFlags))
         } label: {
             content.kiwiHubRowInk(
                 paint,
@@ -108,7 +121,7 @@ struct JumpRowView: View {
         // here takes its room the same way, alone or with ⌘.
         .animation(
             reduceMotion ? nil : .easeOut(duration: 0.15),
-            value: [showsNumber, showsWayHere]
+            value: [showsNumber, showsRoute]
         )
         .padding(.horizontal, Self.padding)
         .frame(height: Self.height)
@@ -128,11 +141,15 @@ struct JumpRowView: View {
 
     @ViewBuilder private var trailing: some View {
         let place = JumpRowText.place(of: match.entry)
-        if let wayHere {
+        // One view whichever route it draws, so ⌥ re-frames the
+        // route in place rather than swapping the column.
+        if let target = swapRoute ? waySwap : wayHere {
             JumpWayHereView(
                 source: place,
-                here: wayHere,
-                expanded: showsWayHere
+                here: target,
+                expanded: showsRoute,
+                frame: swapRoute
+                    ? JumpRowText.waySwapFrame : JumpRowText.wayHereFrame
             )
         } else if let place {
             JumpPlaceView(place: place)
@@ -156,21 +173,27 @@ struct JumpRowView: View {
     }
 }
 
-/// VoiceOver's second action on a window row; a hidden app has
-/// no window to move, so its row offers none.
+/// VoiceOver's Move Here and Swap Here on a window row; a hidden
+/// app has no window to move or swap, so its row offers neither.
 private struct MoveHereAction: ViewModifier {
     let entry: JumpEntry
-    let run: (_ moveHere: Bool) -> Void
+    let run: (JumpPick) -> Void
 
     func body(content: Content) -> some View {
         if entry.isHiddenApp {
             content
         } else {
-            content.accessibilityAction(
-                named: Text(L("jump.row.ax.move_here", "Move Here"))
-            ) {
-                run(true)
-            }
+            content
+                .accessibilityAction(
+                    named: Text(L("jump.row.ax.move_here", "Move Here"))
+                ) {
+                    run(.moveHere)
+                }
+                .accessibilityAction(
+                    named: Text(L("jump.row.ax.swap_here", "Swap Here"))
+                ) {
+                    run(.swapHere)
+                }
         }
     }
 }

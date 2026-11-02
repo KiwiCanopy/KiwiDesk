@@ -46,6 +46,9 @@ public struct JumpEntry: Sendable, Equatable {
     /// Space — the GUI draws the way there by it, never by its own
     /// reading of the gates `moveHere(_:)` applies.
     public let movesHere: Bool
+    /// Whether Swap here would trade the window with yours (#2885):
+    /// the GUI lights the swap's hint and route by it alone.
+    public let swapsHere: Bool
     /// Whether a lens is on and this row's app is not one it holds:
     /// the row sits under "Other apps", after every member's (#2103
     /// ruling 36). False for every row while no lens is on.
@@ -64,6 +67,7 @@ public struct JumpEntry: Sendable, Equatable {
         spaceIcon: SpaceGlyph?,
         status: Status,
         movesHere: Bool = false,
+        swapsHere: Bool = false,
         isOtherApp: Bool = false,
         screen: ScreenLabel? = nil
     ) {
@@ -77,6 +81,7 @@ public struct JumpEntry: Sendable, Equatable {
         self.spaceIcon = spaceIcon
         self.status = status
         self.movesHere = movesHere
+        self.swapsHere = swapsHere
     }
 }
 

@@ -19,6 +19,8 @@ final class JumpModel: ObservableObject {
     @Published var sheetScroll = SheetScroll()
     @Published private(set) var commandHeld = false
     @Published private(set) var shiftHeld = false
+    /// ⌥ previews Swap here (#2885).
+    @Published private(set) var optionHeld = false
     /// Bumped each time the panel becomes key; the field takes the
     /// focus on every bump.
     @Published private(set) var fieldFocusRequests = 0
@@ -85,7 +87,7 @@ final class JumpModel: ObservableObject {
     /// screen it opens on (`JumpPanelController.sheetCap`).
     let sheetCap: CGFloat
 
-    var onPick: (JumpEntry, _ moveHere: Bool) -> Void = { _, _ in }
+    var onPick: (JumpEntry, JumpPick) -> Void = { _, _ in }
     var onClose: () -> Void = {}
     var onAnnounce: (String) -> Void = { _ in }
     var onResultsChange: () -> Void = {}
@@ -187,11 +189,13 @@ final class JumpModel: ObservableObject {
             move(by: direction * rowCap)
         case .pick(let moveHere):
             if let match = list.selected {
-                onPick(match.entry, moveHere)
+                onPick(match.entry, moveHere ? .moveHere : .jump)
             }
+        case .swapHere:
+            if let match = list.selected { onPick(match.entry, .swapHere) }
         case .quick(let index, let moveHere):
             if let match = list.quick(index) {
-                onPick(match.entry, moveHere)
+                onPick(match.entry, moveHere ? .moveHere : .jump)
             }
         case .escape:
             if list.query.isEmpty {
@@ -225,16 +229,17 @@ final class JumpModel: ObservableObject {
 
     /// A click selects the row, then does what ↩ does on it
     /// (#2365).
-    func clickRow(_ index: Int, moveHere: Bool) {
+    func clickRow(_ index: Int, pick: JumpPick) {
         guard scope == .windows else { return }
         list.select(index)
-        if let match = list.selected { onPick(match.entry, moveHere) }
+        if let match = list.selected { onPick(match.entry, pick) }
     }
 
-    /// ⇧ and ⌘ as held now, for the footer's one lit hint.
+    /// ⇧, ⌥ and ⌘ as held now, for the footer's one lit hint.
     var heldModifiers: NSEvent.ModifierFlags {
         var flags: NSEvent.ModifierFlags = []
         if shiftHeld { flags.insert(.shift) }
+        if optionHeld { flags.insert(.option) }
         if commandHeld { flags.insert(.command) }
         return flags
     }
@@ -251,8 +256,10 @@ final class JumpModel: ObservableObject {
     func noteModifiers(_ flags: NSEvent.ModifierFlags) {
         let command = flags.contains(.command)
         let shift = flags.contains(.shift)
+        let option = flags.contains(.option)
         if command != commandHeld { commandHeld = command }
         if shift != shiftHeld { shiftHeld = shift }
+        if option != optionHeld { optionHeld = option }
     }
 
     /// What VoiceOver hears when the results change.

@@ -820,6 +820,7 @@
   "jump.footer.quick_move_here": "%1$@ Sposta qui subito",
   "jump.footer.scope": "%1$@ %2$@",
   "jump.footer.scroll_hint": "Scorri per altre finestre",
+  "jump.footer.swap_here": "%1$@ Scambia qui",
   "jump.panel.ax_label": "Selettore di finestre",
   "jump.place.away": "%1$@ · Scrivania %2$d",
   "jump.place.away_screen": "%1$@ · %2$@ · Scrivania %3$d",
@@ -827,6 +828,7 @@
   "jump.place.desktop_screen": "%1$@ · Scrivania %2$d",
   "jump.place.screen": "%1$@ · %2$@",
   "jump.place.way_here": "%1$@ → %2$@",
+  "jump.place.way_swap": "%1$@ ⇄ %2$@",
   "jump.row.ax.away": "%1$@, Scrivania %2$d",
   "jump.row.ax.away_screen": "%1$@, Scrivania %2$d su %3$@",
   "jump.row.ax.desktop_screen": "Scrivania %1$d su %2$@",
@@ -834,6 +836,7 @@
   "jump.row.ax.move_here": "Sposta qui",
   "jump.row.ax.placed": "%1$@, %2$@",
   "jump.row.ax.screen": "%1$@ su %2$@",
+  "jump.row.ax.swap_here": "Scambia qui",
   "jump.row.ax.titled": "%1$@, %2$@",
   "jump.row.title": "%1$@ · %2$@",
   "jump.scope.label": "Mostra",
@@ -2464,8 +2467,13 @@
   "window_action.refusal.all_here": "Tutte le finestre di %1$@ sono qui",
   "window_action.refusal.already_in": "«%1$@» è già nello spazio %2$@",
   "window_action.refusal.cannot_move_here": "«%1$@» non può essere spostato qui",
+  "window_action.refusal.cannot_swap_floating": "Una finestra fluttuante non può essere scambiata",
+  "window_action.refusal.cannot_swap_full_screen": "«%1$@» è a tutto schermo e non può essere scambiata",
+  "window_action.refusal.cannot_swap_here": "«%1$@» non può essere scambiata qui",
   "window_action.refusal.no_close_button": "«%1$@» non ha il pulsante di chiusura",
   "window_action.refusal.no_new_window": "%1$@ non ha il comando «Nuova finestra»",
   "window_action.refusal.no_title_match": "Nessuna finestra di %1$@ corrisponde a «%2$@»",
-  "window_action.refusal.nothing_to_gather": "Nessuna finestra di %1$@ da raccogliere"
+  "window_action.refusal.nothing_here_to_swap": "Nessuna finestra qui con cui scambiare",
+  "window_action.refusal.nothing_to_gather": "Nessuna finestra di %1$@ da raccogliere",
+  "window_action.refusal.swap_with_self": "«%1$@» è la finestra in cui sei"
 }

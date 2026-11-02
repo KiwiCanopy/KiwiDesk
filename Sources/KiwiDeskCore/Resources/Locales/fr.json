@@ -820,6 +820,7 @@
   "jump.footer.quick_move_here": "%1$@ Déplacer ici directement",
   "jump.footer.scope": "%1$@ %2$@",
   "jump.footer.scroll_hint": "Faites défiler pour plus de fenêtres",
+  "jump.footer.swap_here": "%1$@ Échanger ici",
   "jump.panel.ax_label": "Sélecteur de fenêtres",
   "jump.place.away": "%1$@ · Bureau %2$d",
   "jump.place.away_screen": "%1$@ · %2$@ · Bureau %3$d",
@@ -827,6 +828,7 @@
   "jump.place.desktop_screen": "%1$@ · Bureau %2$d",
   "jump.place.screen": "%1$@ · %2$@",
   "jump.place.way_here": "%1$@ → %2$@",
+  "jump.place.way_swap": "%1$@ ⇄ %2$@",
   "jump.row.ax.away": "%1$@, Bureau %2$d",
   "jump.row.ax.away_screen": "%1$@, Bureau %2$d sur %3$@",
   "jump.row.ax.desktop_screen": "Bureau %1$d sur %2$@",
@@ -834,6 +836,7 @@
   "jump.row.ax.move_here": "Déplacer ici",
   "jump.row.ax.placed": "%1$@, %2$@",
   "jump.row.ax.screen": "%1$@ sur %2$@",
+  "jump.row.ax.swap_here": "Échanger ici",
   "jump.row.ax.titled": "%1$@, %2$@",
   "jump.row.title": "%1$@ · %2$@",
   "jump.scope.label": "Afficher",
@@ -2464,8 +2467,13 @@
   "window_action.refusal.all_here": "Toutes les fenêtres de %1$@ sont ici",
   "window_action.refusal.already_in": "« %1$@ » est déjà dans l'espace %2$@",
   "window_action.refusal.cannot_move_here": "« %1$@ » ne peut pas être déplacé ici",
+  "window_action.refusal.cannot_swap_floating": "Une fenêtre flottante ne peut pas être échangée",
+  "window_action.refusal.cannot_swap_full_screen": "« %1$@ » est en plein écran et ne peut pas être échangée",
+  "window_action.refusal.cannot_swap_here": "« %1$@ » ne peut pas être échangée ici",
   "window_action.refusal.no_close_button": "« %1$@ » n'a pas de bouton de fermeture",
   "window_action.refusal.no_new_window": "%1$@ n'a pas de commande « Nouvelle fenêtre »",
   "window_action.refusal.no_title_match": "Aucune fenêtre de %1$@ ne correspond à « %2$@ »",
-  "window_action.refusal.nothing_to_gather": "Aucune fenêtre de %1$@ à rassembler"
+  "window_action.refusal.nothing_here_to_swap": "Aucune fenêtre ici avec laquelle échanger",
+  "window_action.refusal.nothing_to_gather": "Aucune fenêtre de %1$@ à rassembler",
+  "window_action.refusal.swap_with_self": "« %1$@ » est la fenêtre dans laquelle vous êtes"
 }

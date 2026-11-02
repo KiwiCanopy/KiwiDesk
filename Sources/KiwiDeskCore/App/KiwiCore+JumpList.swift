@@ -27,7 +27,11 @@ extension KiwiCore {
     ) -> [JumpEntry] {
         let here = here ?? state.workspaces.activeSpace
         let windows =
-            trackedJumpEntries(here: here, hub: hub)
+            trackedJumpEntries(
+                here: here,
+                hub: hub,
+                partner: jumpSwapPartner(in: here)
+            )
             + awayJumpEntries(here: here, hub: hub)
             + minimizedJumpEntries(here: here)
         let ordered = windows.enumerated().sorted { lhs, rhs in
@@ -86,7 +90,8 @@ extension KiwiCore {
 
     private func trackedJumpEntries(
         here: SpaceID?,
-        hub: DisplayID?
+        hub: DisplayID?,
+        partner: WindowID?
     ) -> [JumpEntry] {
         state.windows.all
             .filter { !$0.isTransientOverlay }
@@ -108,6 +113,7 @@ extension KiwiCore {
                     spaceIcon: space.flatMap(jumpSpaceIcon),
                     status: status,
                     movesHere: jumpMovesHere(window, from: space, into: here),
+                    swapsHere: jumpSwapsHere(window, partner: partner),
                     isOtherApp: jumpIsOtherApp(window.appRef),
                     screen: status == .shown
                         ? jumpScreen(shownOn, hub: hub) : nil

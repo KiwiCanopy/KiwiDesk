@@ -13643,6 +13643,20 @@ through its digit, so each shows its own. Lighting every row under
 ⇧ would answer no "what does pressing now do", and repaint the
 whole list on the lighter chord.
 
+**⌥ is Swap here, and ⇧ never means "there" (#2885, owner ruling
+2026-11-01).** ⌥↩ and ⇧⌥↩ both bring the selected window into your
+slot and send yours to its slot, you staying put — "your window"
+being the focus of the Space shown on the screen KiwiHub opened on,
+as for Move here. Holding ⇧ and then adding ⌥ so lands on the
+action the eye expects, and a swap that follows the window has no
+KiwiHub key (⌃⌥↩ if it is ever wanted). Under ⌥ or ⇧⌥ the Move
+here slot reads "⌥↩ Swap here" and is the lit hint, the digits read
+"⌘1–9 Quick jump" unlit since they take no ⌥, and a selection the
+swap would refuse lights nothing; the row ⌥ acts on, by ⇧'s rule,
+shows "Space n ⇄ Space m". The pick runs the public `swap_here`
+verb after the panel dismisses, so the refusal and its cue are the
+verb's own.
+
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu
 brings arrows, type-select, Return, Escape and VoiceOver for free.

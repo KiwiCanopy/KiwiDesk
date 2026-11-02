@@ -81,6 +81,7 @@ extension KiwiCore {
         case .window(let id): incoming = id
         }
         guard let focused = focusedWindowID else {
+            cueWindowAction(.nothingHereToSwap, on: incoming)
             return .fail("no focused window")
         }
         return swapWindows(incoming, focused, focus: .staysHere)
@@ -96,6 +97,10 @@ extension KiwiCore {
         focus: SwapFocus
     ) -> CommandResponse {
         guard lead != partner else {
+            cueWindowAction(
+                .swapWithSelf(window: windowTitle(lead)),
+                on: lead
+            )
             return .fail("cannot swap a window with itself")
         }
         for id in [lead, partner] {
@@ -151,14 +156,19 @@ extension KiwiCore {
         return .ok()
     }
 
-    /// Why `id` holds no slot to swap, nil where it does: an
-    /// effective float has none and a native full-screen window
-    /// keeps its own Space (#670).
+    /// Why `id` holds no slot to swap, cued on it, nil where it
+    /// does: an effective float has none and a native full-screen
+    /// window keeps its own Space (#670).
     private func swapRefusal(_ id: WindowID) -> CommandResponse? {
         if state.windows[id]?.isFullscreen == true {
+            cueWindowAction(
+                .cannotSwapFullScreen(window: windowTitle(id)),
+                on: id
+            )
             return .fail("window \(id.raw) is full screen")
         }
         if isEffectiveFloatForPlacement(id) {
+            cueWindowAction(.cannotSwapFloating, on: id)
             return .fail("window \(id.raw) is floating")
         }
         return nil

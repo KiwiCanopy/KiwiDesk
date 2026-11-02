@@ -14,6 +14,9 @@ struct JumpFooter: View {
     var modifiers: NSEvent.ModifierFlags = []
     /// Whether a row or tile is selected; with none, nothing lights.
     var hasSelection = true
+    /// Whether Swap here would trade the selected row; a refused
+    /// one lights nothing under ⌥ (#2885).
+    var selectionSwaps = true
     /// How many items the View side's ⌘ digits reach on the
     /// selected line (#2309 ruling 7).
     var quickCount = 9
@@ -88,10 +91,11 @@ extension JumpFooter {
     /// itself — ↩ where it picks, else the ⌘ digits. Navigation and
     /// bridges never light; the Shortcuts side picks nothing (#2246).
     /// The index is into `hints`, whose order it follows: Jump,
-    /// Move here, the digits on Windows; Apply, the digits on View.
+    /// Move here (Swap here under ⌥), the digits on Windows; Apply,
+    /// the digits on View.
     var leading: Int? {
         guard hasSelection, scope != .shortcuts else { return nil }
-        let held = modifiers.intersection([.shift, .command])
+        let held = modifiers.intersection([.shift, .option, .command])
         switch JumpKey.of(
             keyCode: JumpKey.returnKey,
             modifiers: held,
@@ -102,6 +106,8 @@ extension JumpFooter {
         case .pick(let moveHere):
             guard scope == .windows else { return moveHere ? nil : 0 }
             return moveHere ? 1 : 0
+        case .swapHere:
+            return selectionSwaps ? 1 : nil
         default:
             break
         }
@@ -118,6 +124,7 @@ extension JumpFooter {
     }
 
     private var shiftHeld: Bool { modifiers.contains(.shift) }
+    private var optionHeld: Bool { modifiers.contains(.option) }
 
     var hints: [String] {
         let other = L(
@@ -130,10 +137,14 @@ extension JumpFooter {
         case .windows:
             return [
                 L("jump.footer.jump", "%1$@ Jump", "↩"),
-                L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
+                // ⌥ rewrites the slot to Swap here, as ⇧ rewrites the
+                // digits; the digits take no ⌥.
+                optionHeld
+                    ? L("jump.footer.swap_here", "%1$@ Swap here", "⌥↩")
+                    : L("jump.footer.move_here", "%1$@ Move here", "⇧↩"),
                 // ⇧ already rewrites the digits to what they then
                 // do; ⌘ joining only lights them.
-                shiftHeld
+                shiftHeld && !optionHeld
                     ? L(
                         "jump.footer.quick_move_here",
                         "%1$@ Quick move here",

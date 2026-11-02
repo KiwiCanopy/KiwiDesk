@@ -183,6 +183,11 @@ struct JumpPanelView: View {
             selection: list.selection,
             movesHere: { list.results[$0].entry.movesHere && here != nil }
         )
+        let optionRow = JumpHover.shiftRow(
+            hover: model.hover,
+            selection: list.selection,
+            movesHere: { list.results[$0].entry.swapsHere }
+        )
         // Eager: a lazy stack left a row below the fold unbuilt, so
         // the selection's scroll found no row to reach.
         return VStack(spacing: 0) {
@@ -197,7 +202,13 @@ struct JumpPanelView: View {
                     if let section = list.section(at: index) {
                         sectionHeader(section)
                     }
-                    row(index, match, here: here, shiftRow: shiftRow)
+                    row(
+                        index,
+                        match,
+                        here: here,
+                        shiftRow: shiftRow,
+                        optionRow: optionRow
+                    )
                 }
                 .id(index)
             }
@@ -208,9 +219,13 @@ struct JumpPanelView: View {
         _ index: Int,
         _ match: JumpSearch.Match,
         here: JumpRowText.Place?,
-        shiftRow: Int?
+        shiftRow: Int?,
+        optionRow: Int?
     ) -> some View {
         let list = model.list
+        let entry = match.entry
+        // A trade inside one Space has no route to draw.
+        let trades = entry.swapsHere && entry.space != list.snapshot.here
         return JumpRowView(
             match: match,
             icon: model.icons[match.entry.pid],
@@ -222,12 +237,15 @@ struct JumpPanelView: View {
                 clickable: true
             ),
             ownsShift: index == shiftRow,
+            ownsOption: index == optionRow,
             number: JumpList.number(ofRow: index),
             commandHeld: model.commandHeld,
             shiftHeld: model.shiftHeld,
-            wayHere: match.entry.movesHere ? here : nil,
-            onActivate: { moveHere in
-                model.clickRow(index, moveHere: moveHere)
+            optionHeld: model.optionHeld,
+            wayHere: entry.movesHere ? here : nil,
+            waySwap: trades ? here : nil,
+            onActivate: { pick in
+                model.clickRow(index, pick: pick)
             },
             onHover: {
                 model.hoverRow(index, pointer: model.currentPointer())

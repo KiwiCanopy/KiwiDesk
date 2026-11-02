@@ -20,8 +20,7 @@ struct JumpClickWiringTests {
         let panel = try Self.squashed("JumpPanelView.swift")
         #expect(
             panel.contains(
-                "onActivate:{moveHereinmodel.clickRow(index,"
-                    + "moveHere:moveHere)}"
+                "onActivate:{pickinmodel.clickRow(index,pick:pick)}"
             )
         )
         #expect(panel.contains("onApply:{model.clickItem($0)}"))

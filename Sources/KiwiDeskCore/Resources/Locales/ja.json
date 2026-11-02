@@ -820,6 +820,7 @@
   "jump.footer.quick_move_here": "%1$@ ここにクイック移動",
   "jump.footer.scope": "%1$@ %2$@",
   "jump.footer.scroll_hint": "スクロールしてさらにウインドウを表示",
+  "jump.footer.swap_here": "%1$@ ここと入れ替え",
   "jump.panel.ax_label": "ウインドウスイッチャー",
   "jump.place.away": "%1$@ · デスクトップ%2$d",
   "jump.place.away_screen": "%1$@ · %2$@ · デスクトップ%3$d",
@@ -827,6 +828,7 @@
   "jump.place.desktop_screen": "%1$@ · デスクトップ%2$d",
   "jump.place.screen": "%1$@ · %2$@",
   "jump.place.way_here": "%1$@ → %2$@",
+  "jump.place.way_swap": "%1$@ ⇄ %2$@",
   "jump.row.ax.away": "%1$@、デスクトップ%2$d",
   "jump.row.ax.away_screen": "%1$@、%3$@のデスクトップ%2$d",
   "jump.row.ax.desktop_screen": "%2$@のデスクトップ%1$d",
@@ -834,6 +836,7 @@
   "jump.row.ax.move_here": "ここに移動",
   "jump.row.ax.placed": "%1$@、%2$@",
   "jump.row.ax.screen": "%2$@の%1$@",
+  "jump.row.ax.swap_here": "ここと入れ替え",
   "jump.row.ax.titled": "%1$@、%2$@",
   "jump.row.title": "%1$@ · %2$@",
   "jump.scope.label": "表示",
@@ -2464,8 +2467,13 @@
   "window_action.refusal.all_here": "%1$@のウインドウはすべてここにあります",
   "window_action.refusal.already_in": "「%1$@」はすでにスペース %2$@ にあります",
   "window_action.refusal.cannot_move_here": "「%1$@」はここに移動できません",
+  "window_action.refusal.cannot_swap_floating": "フローティングウインドウは入れ替えできません",
+  "window_action.refusal.cannot_swap_full_screen": "「%1$@」はフルスクリーンのため入れ替えできません",
+  "window_action.refusal.cannot_swap_here": "「%1$@」はここと入れ替えできません",
   "window_action.refusal.no_close_button": "「%1$@」には閉じるボタンがありません",
   "window_action.refusal.no_new_window": "%1$@には「新規ウインドウ」コマンドがありません",
   "window_action.refusal.no_title_match": "「%2$@」に一致する%1$@のウインドウはありません",
-  "window_action.refusal.nothing_to_gather": "集める%1$@のウインドウはありません"
+  "window_action.refusal.nothing_here_to_swap": "ここに入れ替えるウインドウがありません",
+  "window_action.refusal.nothing_to_gather": "集める%1$@のウインドウはありません",
+  "window_action.refusal.swap_with_self": "「%1$@」は今いるウインドウです"
 }

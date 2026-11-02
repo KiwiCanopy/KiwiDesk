@@ -217,4 +217,39 @@ struct JumpMoveHereScreenTests {
         #expect(core.state.workspaces.space(of: WindowID(7)) == "5")
         #expect(core.state.workspaces.lastFocused == WindowID(7))
     }
+
+    /// Swap here from KiwiHub on screen 2 trades with screen 2's
+    /// focus, not the focused screen's, and stays there (#2885 ▸
+    /// Ruling 2).
+    @Test("Swap here trades with the panel screen's window")
+    func swapTradesWithThePanelScreen() {
+        let core = makeCore()
+        defer { teardown() }
+        track(core, 1, in: "1")
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        track(core, 3, in: "5")
+        core.state.workspaces.focus(WindowID(3), in: "5")
+        track(core, 2, in: "2")
+        let row = core.jumpSnapshot(on: DisplayID(2)).entries.first {
+            $0.target == .window(WindowID(2))
+        }
+        #expect(row?.swapsHere == true)
+        core.swapHere(
+            JumpEntry(
+                target: .window(WindowID(2)),
+                pid: pid,
+                app: "Notes",
+                title: "",
+                space: "2",
+                spaceIcon: nil,
+                status: .shown
+            ),
+            on: DisplayID(2)
+        )
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
+        #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+        #expect(core.state.workspaces.activeSpace == "5")
+        #expect(core.state.workspaces.lastFocused == WindowID(2))
+    }
 }

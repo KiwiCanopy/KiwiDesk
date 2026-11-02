@@ -13,6 +13,9 @@ enum JumpKey: Equatable {
     case page(Int)
     /// ↩ (Jump) or ⇧↩ (Move here).
     case pick(moveHere: Bool)
+    /// ⌥↩ or ⇧⌥↩ on Windows: Swap here (#2885), so ⇧ never
+    /// means "there".
+    case swapHere
     /// ⌘1–9 or ⇧⌘1–9: the result at that 0-based index.
     case quick(Int, moveHere: Bool)
     /// Esc: clears a query, then closes.
@@ -86,6 +89,11 @@ enum JumpKey: Equatable {
         case pageUp, pageDown:
             return .page(keyCode == pageUp ? -1 : 1)
         case returnKey, enter:
+            if scope == .windows, held.contains(.option),
+                held.subtracting([.shift, .option]).isEmpty
+            {
+                return .swapHere
+            }
             guard held.subtracting(.shift).isEmpty else { return nil }
             return .pick(moveHere: held.contains(.shift))
         default:
@@ -182,5 +190,19 @@ enum JumpKey: Equatable {
             return nil
         }
         return .quick(index, moveHere: held.contains(.shift))
+    }
+}
+
+/// What a pick on a Windows row does: ↩ / a click Jump, ⇧ Move
+/// here, ⌥ or ⇧⌥ Swap here (#1875, #2885).
+enum JumpPick: Equatable {
+    case jump
+    case moveHere
+    case swapHere
+
+    /// The pick a click makes under `modifiers`: ⌥ outranks ⇧.
+    static func of(_ modifiers: NSEvent.ModifierFlags) -> JumpPick {
+        if modifiers.contains(.option) { return .swapHere }
+        return modifiers.contains(.shift) ? .moveHere : .jump
     }
 }

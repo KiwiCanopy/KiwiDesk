@@ -31,6 +31,11 @@ struct JumpMoveHereTargetWiringTests {
                 of: "core.moveHere(entry.target,on:hubDisplay)"
             ) == 1
         )
+        // Swap here's "your window" is the same screen's (#2885).
+        #expect(
+            controller.occurrences(of: "core.swapHere(entry,on:hubDisplay)")
+                == 1
+        )
         // No GUI caller reaches either door without the screen.
         let files = try SourceScan.swiftSources(
             under: root.appendingPathComponent("Sources/KiwiDesk")
@@ -40,6 +45,7 @@ struct JumpMoveHereTargetWiringTests {
             let source = try Self.squashed(file)
             #expect(
                 source.occurrences(of: ".moveHere(")
+                    + source.occurrences(of: ".swapHere(")
                     == source.occurrences(of: ",on:hubDisplay)"),
                 "\(file.lastPathComponent)"
             )

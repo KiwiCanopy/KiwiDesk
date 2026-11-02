@@ -131,7 +131,7 @@ struct JumpPanelControllerTests {
     func pickArmsTheDistrust() {
         let (controller, core) = controller()
         controller.handBack.isAppActive = { true }
-        controller.pick(entry(), moveHere: true)
+        controller.pick(entry(), .moveHere)
         #expect(
             core.ignoredPanel.active.contains(
                 pid_t(ProcessInfo.processInfo.processIdentifier)
@@ -143,7 +143,7 @@ struct JumpPanelControllerTests {
     func ownPickArmsNothing() {
         let (controller, core) = controller()
         let own = pid_t(ProcessInfo.processInfo.processIdentifier)
-        controller.pick(entry(pid: own), moveHere: false)
+        controller.pick(entry(pid: own), .jump)
         #expect(core.ignoredPanel.active.isEmpty)
     }
 
@@ -164,7 +164,7 @@ struct JumpPanelControllerTests {
         let (controller, core) = controller()
         controller.panel = controller.makePanel()
         #expect(controller.panel?.isVisible == false)
-        controller.pick(entry(), moveHere: true)
+        controller.pick(entry(), .moveHere)
         #expect(core.ignoredPanel.active.isEmpty)
     }
 

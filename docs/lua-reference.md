@@ -218,6 +218,10 @@ focuses it; you stay where you are, and the focused window takes
 the other window's place, in its Space or on its screen. Refused
 as for [`swap`](#swap).
 
+:::unreleased
+A refused `swap` or `swap_here` says why in a cue on the window.
+:::
+
 **Example:**
 
 ```lua
@@ -6175,6 +6179,15 @@ under **Pocket**.
 - **⇧Return** moves the window into the Space you are on instead,
   as [move_here](#move_here) does.
 - **⌘1** … **⌘9** pick one of the first nine results.
+
+:::unreleased
+**⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
+window with yours, as [swap_here](#swap_here) does: it comes into
+your slot and takes the focus, yours takes its place, and you stay
+where you are. "Yours" is the window focused on the screen KiwiHub
+opened on. A minimized window, one on another macOS Desktop, a
+hidden app and a pocketed window are refused for now.
+:::
 
 :::unreleased
 **↑** on the first row selects the last, and **↓** on the last

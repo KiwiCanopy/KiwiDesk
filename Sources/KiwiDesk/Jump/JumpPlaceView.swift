@@ -43,12 +43,12 @@ struct JumpWayHereView: View {
     let source: JumpRowText.Place?
     let here: JumpRowText.Place
     let expanded: Bool
+    /// Move here's one-way frame, or Swap here's two-way one.
+    var frame = JumpRowText.wayHereFrame
 
     var body: some View {
         HStack(spacing: 0) {
-            ForEach(
-                SentenceFrame(JumpRowText.wayHereFrame).segments
-            ) { segment in
+            ForEach(SentenceFrame(frame).segments) { segment in
                 switch segment.slot {
                 case .argument(1):
                     if let source { JumpPlaceView(place: source) }

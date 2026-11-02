@@ -71,6 +71,12 @@ enum JumpRowText {
         L("jump.place.way_here", "%1$@ → %2$@")
     }
 
+    /// The frame ⌥ draws on that row: the two Spaces Swap here
+    /// trades between (#2885).
+    static var waySwapFrame: String {
+        L("jump.place.way_swap", "%1$@ ⇄ %2$@")
+    }
+
     /// The Hidden section's header — a key apart from a hidden
     /// app's spoken status, whose word agrees with one app, not
     /// many.
