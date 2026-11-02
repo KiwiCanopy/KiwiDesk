@@ -230,4 +230,42 @@ struct ProfileSpacesSeamTests {
             )
         }
     }
+
+    /// The same refusal keyed by a native Desktop id, which the
+    /// `[DesktopKey:` scan above cannot see (#2771). Each stored
+    /// map names what it holds; none copies Space CONTENTS.
+    @Test("Only the ruled maps are keyed by native Desktop id")
+    func noNativeDesktopKeyedContentsStore() throws {
+        let allowed: [String: (Int, String)] = [
+            "Profiles/DesktopMemory.swift": (
+                4,
+                "the #1207 focus debts, the #1564 sticky left and "
+                    + "the #2771 stack flip — session state"
+            ),
+            "Profiles/KiwiCore+DesktopIdentity.swift":
+                (1, "a mint's accumulator, held nowhere"),
+        ]
+        let root = coreRoot
+        let prefix = root.path + "/"
+        var found: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: root) {
+            let source = SourceScan.stripComments(
+                try String(contentsOf: file, encoding: .utf8)
+            )
+            let hits = source.split(separator: "\n")
+                .filter { line in
+                    (line.contains("[SkyLight.SpaceID:")
+                        || line.contains("[SkyLight.SpaceID?:"))
+                        && (line.contains("var ")
+                            || line.contains("let "))
+                }
+                .count
+            guard hits > 0 else { continue }
+            found[String(file.path.dropFirst(prefix.count))] = hits
+        }
+        #expect(
+            found.mapValues { $0 } == allowed.mapValues(\.0),
+            "a new native-Desktop-keyed store owes the #1230 argument"
+        )
+    }
 }

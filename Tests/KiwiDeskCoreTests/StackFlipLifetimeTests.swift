@@ -80,9 +80,34 @@ struct StackFlipLifetimeTests {
         #expect(flips(core) == 0)
     }
 
+    @Test("a forced Standard apply ends every flip; an unforced keeps")
+    func composedApply() throws {
+        let core = try flipped()
+        let display = try #require(core.state.workspaces.allDisplays.first)
+        let composed = try #require(
+            ProfileComposition.compose(
+                displays: [display],
+                mainID: display.id
+            )
+        )
+        core.apply(composed: composed, forceRetile: false)
+        #expect(flips(core) > 0)
+        core.apply(composed: composed, forceRetile: true)
+        #expect(flips(core) == 0)
+    }
+
+    @Test("a Settings save of the live profile ends every flip")
+    func settingsSaveClears() throws {
+        let core = try flipped()
+        core.applyProfileScopedState(from: core.loadGuiConfig())
+        #expect(flips(core) == 0)
+    }
+
     @Test("a config reload ends every flip")
     func reloadClears() throws {
-        let core = try flipped()
+        // No profile, so no re-apply clears them on the load's way.
+        let core = try KeepFixture.core(gui: false)
+        core.desktopMemory.stackFlips = [10: ["1": .left]]
         core.loadConfig()
         #expect(flips(core) == 0)
     }

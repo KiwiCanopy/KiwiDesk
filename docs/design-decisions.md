@@ -7316,15 +7316,13 @@ it. A setting is owed only when a user asks for one.
 :::unreleased
 `stack.toggle_stack_position` flips the side a Space's stack zone
 draws on the macOS Desktop its screen shows now, and on no other
-Desktop. It first shipped writing the Space's `stack_position`
-override, and a KiwiDesk Space is one Space on every Desktop, so
-with "Displays have separate Spaces" off a flip on one Desktop
-flipped the same Space on all of them. The owner's ruling
-(2026-11-01) makes the flip a temporary adjustment rather than a
-setting:
+Desktop. A KiwiDesk Space is one Space on every Desktop, so a flip
+stored on the Space — its `stack_position` override — flips it on
+every Desktop at once. The flip is therefore a temporary adjustment
+rather than a setting (owner, 2026-11-01):
 
 - **Session state, keyed by the Desktop, then the Space.** One
-  store in `DesktopMemory`, keyed by the Desktop's native Space id,
+  store in `DesktopMemory`, keyed by the macOS Desktop's own id,
   read through one door that the stack resolver takes as a required
   argument, so the render, the resize writers, the floor heal and
   the mouse resize read one answer. The Desktop comes from the map
@@ -7333,16 +7331,17 @@ setting:
 - **No setting.** No "Live, not saved" row, no `revert_settings`
   leaf, no Keep and no change report; `get_settings` reports the
   authored side and `get_state` the side drawn.
-- **It ends where an explicit choice is made.** A load, a reload,
-  an in-effect save and `stack.set_stack_position` end every flip,
+- **It ends where an explicit choice is made.** A load, a config
+  reload — which every Settings save of `gui.json` runs — a
+  Settings save and `stack.set_stack_position` end every flip,
   and the Space's override setter ends that Space's; a Desktop
   switch, a Desktop binding's load, a mode change and a sizing
   reset keep it. A restart does not carry it (the accepted
   limitation).
 
 **This sets the precedent for any later per-Desktop ask.** The
-refused store — `KiwiCore+DesktopSpaces.swift` — is a Desktop-keyed
-copy of Space CONTENTS, which the compositor owns and a copy would
+refused store (argued in `KiwiCore+DesktopSpaces.swift`) is a
+Desktop-keyed copy of Space CONTENTS, which the compositor owns and a copy would
 fight. A choice the user makes on one Desktop copies nothing, so it
 may be keyed by the Desktop, and it lives for the session. A side
 that must last per Desktop is already expressible: a profile bound

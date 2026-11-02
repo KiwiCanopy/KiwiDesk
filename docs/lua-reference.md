@@ -1708,14 +1708,16 @@ onto the authored side removes it. The master ratio and every
 other size stay as they are. A screen showing a full-screen app
 refuses the flip.
 
-It survives a Desktop switch and a profile a Desktop binding
-loads. It ends for every space on `load_profile`, a config reload,
-a Settings save of the active profile and
-[`stack.set_stack_position`](#stackset_stack_position), and for one
-space, on every Desktop, on
-[`stack.set_stack_position_override`](#stackset_stack_position_override).
-A restart forgets it. To keep a side per Desktop, bind a profile
-to that Desktop.
+It survives a Desktop switch, a profile a Desktop binding loads, a
+layout change and a sizing reset. It ends for every space on
+`load_profile`, picking a built-in layout set, a config reload, any
+Settings save, a backup restore or a change taken from a synced
+folder, a reset, and
+[`stack.set_stack_position`](#stackset_stack_position); for one
+space, on every Desktop, it ends on
+[`stack.set_stack_position_override`](#stackset_stack_position_override)
+and when the space is deleted. A restart forgets it. To keep a side
+per Desktop, bind a profile to that Desktop.
 :::
 
 **Example:**

@@ -20,20 +20,22 @@ extension KiwiCore {
     /// The Desktop `space`'s screen shows, from the map the head
     /// of each switch files (`DesktopMemory.shownSpaces`) — never
     /// a WindowServer read. Shared mode's one synthetic key
-    /// answers for every screen (`NativeSpaces.shownEntry`).
+    /// answers for every screen. An empty map reads as no SkyLight;
+    /// a screen the last switch did not file (plugged in since)
+    /// answers `.none` until its first switch — accepted residue.
     func stackFlipDesktop(of space: SpaceID) -> StackFlipDesktop {
-        let shown = desktopMemory.shownSpaces
-        guard !shown.isEmpty else { return .shown(nil) }
+        guard !desktopMemory.shownSpaces.isEmpty else { return .shown(nil) }
         let uuid =
             state.workspaces.display(of: space)
             .flatMap { NativeSpaces.displayUUID(for: $0) } ?? ""
-        guard let native = NativeSpaces.shownEntry(shown, screen: uuid)
-        else { return .none }
-        let isUser =
-            NativeSpaces.shownEntry(
-                desktopMemory.shownUserSpaces,
-                screen: uuid
-            ) ?? true
+        guard let native = shownDesktop(onScreen: uuid) else {
+            return .none
+        }
+        let isUser = NativeSpaces.spaceIsUser(
+            on: uuid,
+            filed: desktopMemory.shownUserSpaces,
+            live: { _ in true }
+        )
         return isUser ? .shown(native) : .none
     }
 

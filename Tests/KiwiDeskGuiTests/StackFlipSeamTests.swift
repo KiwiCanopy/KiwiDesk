@@ -13,17 +13,20 @@ struct StackFlipSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
     private static let trees = ["Sources/KiwiDeskCore", "Sources/KiwiDesk"]
 
-    /// Config-only reads, which draw nothing: the authored side or
-    /// the master count alone.
-    private static let configOnly: [String: Int] = [
-        // The Space overload's base, and the GUI preview's
-        // `resolved(for:activeMode:)`, which draws the authored side.
+    /// Config-only reads that may read the authored side.
+    private static let authoredSide: [String: Int] = [
+        // The Space overload's base, and the Settings preview's
+        // `resolved(for:activeMode:)`, which draws the authored
+        // side — not ruled on #2771; raised on its PR.
         "TilingSettings+Resolution.swift": 2,
         // `get_settings`: reports the authored side by ruling.
         "TilingSettings+SpaceResolved.swift": 1,
         // The door's own fallback and the toggle's authored side.
         "KiwiCore+StackFlip.swift": 2,
-        // Master count alone.
+    ]
+
+    /// Config-only reads of the master count alone.
+    private static let masterCountOnly: [String: Int] = [
         "KiwiCore+ZOrder.swift": 1,
         "KiwiCore+StackCommands.swift": 1,
         "KiwiCore+SwapBoundary.swift": 1,
@@ -31,9 +34,12 @@ struct StackFlipSeamTests {
         "LayoutDefaultsGates.swift": 1,
     ]
 
-    /// Every `resolvedStack(` call's argument list, by file.
-    private func calls() throws -> [(file: String, args: String)] {
-        var out: [(String, String)] = []
+    /// Every `resolvedStack(` call: its file, argument list and
+    /// the source after its closing paren.
+    private func calls() throws -> [(
+        file: String, args: String, after: String
+    )] {
+        var out: [(String, String, String)] = []
         for tree in Self.trees {
             let dir = Self.root.appendingPathComponent(tree)
             for file in try SourceScan.swiftSources(under: dir) {
@@ -50,7 +56,15 @@ struct StackFlipSeamTests {
                             in: tail
                         )
                     )
-                    out.append((file.lastPathComponent, args))
+                    let after = tail.dropFirst(
+                        "resolvedStack(".count + args.count + 1
+                    )
+                    out.append(
+                        (
+                            file.lastPathComponent, args,
+                            String(after.prefix(40))
+                        )
+                    )
                 }
             }
         }
@@ -62,9 +76,17 @@ struct StackFlipSeamTests {
         let flipped = try calls().filter { $0.args.contains("flip:") }
         #expect(flipped.count >= 8)
         for call in flipped {
+            // The flip read is the call's own subject's.
+            let subject =
+                call.args
+                .components(separatedBy: ",").first?
+                .replacingOccurrences(of: "for:", with: "")
+                .trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
             let door =
-                call.args.contains("flip: stackFlip(of:")
-                || call.args.contains("flip: self.stackFlip(of:")
+                call.args.contains("flip: stackFlip(of: \(subject).id)")
+                || call.args.contains(
+                    "flip: self.stackFlip(of: \(subject).id)"
+                )
                 // `context`'s own required parameter.
                 || (call.file == "TilingSettings+Resolution.swift"
                     && call.args.hasSuffix("flip: stackFlip"))
@@ -74,11 +96,20 @@ struct StackFlipSeamTests {
 
     @Test("a config-only read is registered with its reason")
     func configOnlyIsRegistered() throws {
-        var found: [String: Int] = [:]
+        var authored: [String: Int] = [:]
+        var masterCount: [String: Int] = [:]
         for call in try calls() where !call.args.contains("flip:") {
-            found[call.file, default: 0] += 1
+            let readsCount = call.after
+                .trimmingCharacters(in: .whitespacesAndNewlines)
+                .hasPrefix(".masterCount")
+            if readsCount, Self.masterCountOnly[call.file] != nil {
+                masterCount[call.file, default: 0] += 1
+            } else {
+                authored[call.file, default: 0] += 1
+            }
         }
-        #expect(found == Self.configOnly)
+        #expect(authored == Self.authoredSide)
+        #expect(masterCount == Self.masterCountOnly)
     }
 
     @Test("every context build hands it the flip door")
@@ -125,18 +156,23 @@ struct StackFlipSeamTests {
         #expect(body.contains("self?.stackFlip(of: space)"))
     }
 
-    @Test("only the flip file writes the store")
-    func storeHasOneWriterFile() throws {
+    @Test("only the flip file touches the store")
+    func storeHasOneHome() throws {
         var found: [String: Int] = [:]
-        let dir = Self.root.appendingPathComponent(Self.trees[0])
-        for file in try SourceScan.swiftSources(under: dir) {
-            let text = try SourceScan.strippedSource(at: file)
-            let count =
-                text.occurrences(of: "stackFlips =")
-                + text.occurrences(of: "stackFlips[")
-            if count > 0 { found[file.lastPathComponent] = count }
+        for tree in Self.trees {
+            let dir = Self.root.appendingPathComponent(tree)
+            for file in try SourceScan.swiftSources(under: dir) {
+                let text = try SourceScan.strippedSource(at: file)
+                let count = text.occurrences(of: "stackFlips")
+                if count > 0 { found[file.lastPathComponent] = count }
+            }
         }
-        #expect(found.keys.sorted() == ["KiwiCore+StackFlip.swift"])
+        // The declaration, and every read and write in the door.
+        #expect(found["DesktopMemory.swift"] == 1)
+        #expect(
+            Set(found.keys)
+                == ["DesktopMemory.swift", "KiwiCore+StackFlip.swift"]
+        )
     }
 
     @Test("the renumber and the drop carry the flip")

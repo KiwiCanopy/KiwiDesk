@@ -716,15 +716,9 @@ unmarking that window instead of the focused one.
 `stack.toggle_stack_position [space]` moves a space's stack zone
 to the opposite side (left ↔ right, top ↔ bottom) on the macOS
 Desktop its screen shows now, the focused space when no id is
-given. The flip lasts for the session and is no setting:
-`revert_settings` and `get_settings` do not see it, and
-`get_state` reports the side drawn. `load_profile`, a config
-reload and `stack.set_stack_position` end every flip;
-`stack.set_stack_position_override` ends that space's
-([Lua reference](lua-reference.md#stacktoggle_stack_position)).
-
-`get_state`'s space objects carry `stack_position` for a Stack
-space: the side it draws on the Desktop shown now.
+given. The flip lasts for the session and is no setting; what ends
+it, and the `stack_position` that `get_state` reports, are in the
+[Lua reference](lua-reference.md#stacktoggle_stack_position).
 :::
 
 `get_state`'s window objects carry `pocket`: `"pocketed"` or
