@@ -124,14 +124,10 @@ const buildCmd =
 // `brew install --cask kiwidesk` — a one-line edit here.
 const installCmd = "brew install --cask kiwicanopy/tap/kiwidesk";
 
-// The Home Manager rung (#2909): the flake input, the module and
-// the switch that turns it on. The module requires
-// targets.darwin.copyApps, the default from stateVersion 25.11.
-const nixSnippet = [
-  'inputs.kiwicanopy.url = "github:KiwiCanopy/nix";',
-  "imports = [ inputs.kiwicanopy.homeModules.kiwidesk ];",
-  "programs.kiwidesk.enable = true;",
-].join("\n");
+// The Home Manager rung (#2909): the one line a reader adds; the
+// flake input, the module import and copyApps are its README's.
+const nixLine = "programs.kiwidesk.enable = true;";
+const nixReadme = "https://github.com/KiwiCanopy/nix#readme";
 
 
 // A crisp kiwi-slice glyph (green skin, pale flesh ring, small
@@ -1274,8 +1270,9 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           {/* Rung 2 of a descending ladder (#904): Homebrew's block
                above stays open and first because it is how the beta
                ships and it carries the CLI; the disk image sits
-               directly under it as a quiet second path; building
-               from source stays collapsed at the bottom. A ladder
+               directly under it as a quiet second path; Nix and
+               Home Manager collapse beneath it (#2909), and building
+               from source, the contributors' path, stays last. A ladder
                says "there is a way, and there are other ways" —
                a side-by-side chooser would ask a reader to compare
                two things most of them have no basis to compare,
@@ -1310,10 +1307,6 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
           </p>
 
 
-          {/* Rung 3 (#2909): Nix and Home Manager, collapsed like
-               the source build below it. Homebrew and the disk
-               image update through the app; this copy updates
-               through home-manager switch, which its comment says. */}
           <details class="quickstart__alt">
             <summary>
               <Icon name="lucide:chevron-right"
@@ -1328,7 +1321,7 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                 <span class="code__dot" aria-hidden="true"></span>
                 <span class="code__title">{t.nix_title_bar}</span>
                 <button class="code__copy" type="button"
-                  data-copy={nixSnippet}
+                  data-copy={nixLine}
                   data-label-copy={t.build_copy}
                   data-label-done={t.build_copy_done}
                   aria-label={t.nix_copy_aria}>
@@ -1337,9 +1330,14 @@ KiwiDesk.bind(<span class="str">"cmd+alt+left"</span>, <span class="fn">function
                   <span class="code__copy-label">{t.build_copy}</span>
                 </button>
               </div>
-              <pre><code>{nixSnippet}
+              <pre><code>{nixLine}
 <span class="cmt">{t.nix_cmt}</span></code></pre>
             </div>
+            <p class="quickstart__note">
+              <a href={nixReadme} target="_blank" rel="noopener">
+                {t.nix_setup_link}
+              </a>
+            </p>
           </details>
 
           <details class="quickstart__alt">

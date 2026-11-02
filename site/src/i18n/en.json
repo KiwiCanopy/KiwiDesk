@@ -451,6 +451,7 @@
   "nix_cmt": "# updates arrive with home-manager switch",
   "nix_code_aria": "Install KiwiDesk with Home Manager",
   "nix_copy_aria": "Copy the Home Manager configuration",
+  "nix_setup_link": "The flake input and module import are in the KiwiCanopy/nix README",
   "nix_summary": "Or use Nix and Home Manager",
   "nix_title_bar": "home.nix",
   "layout_bsp": "Binary space partitioning: each new window halves a pane.",

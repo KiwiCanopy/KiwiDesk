@@ -552,6 +552,7 @@
   "nix_cmt": "# Updates kommen mit home-manager switch",
   "nix_code_aria": "KiwiDesk mit Home Manager installieren",
   "nix_copy_aria": "Home-Manager-Konfiguration kopieren",
+  "nix_setup_link": "Flake-Input und Modul-Import stehen in der README von KiwiCanopy/nix",
   "nix_summary": "Oder mit Nix und Home Manager",
   "nix_title_bar": "home.nix",
   "notfound_home": "Zurück zu KiwiDesk",
