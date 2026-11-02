@@ -2,10 +2,10 @@ import AppKit
 
 /// `explain_window` and `explain_app` (#1685 ▸ Ruling 6d): why a
 /// window floats or tiles and where it opens, as structure read
-/// from the doors that decide it — never re-detected here. Neither
-/// answer carries a window title. Keys follow `get_state`'s and
-/// `app_rule.list`'s spellings, since an AI app reads them side by
-/// side.
+/// from the doors that decide it — never re-detected here. Only
+/// `explain_window` carries a title (#2895). Keys follow
+/// `get_state`'s and `app_rule.list`'s spellings, since an AI app
+/// reads them side by side.
 extension KiwiCore {
     /// `explain_window [window]`: the named window, else the
     /// focused one (#1518).
@@ -22,6 +22,7 @@ extension KiwiCore {
                 .object([
                     "id": .number(Double(id.raw)),
                     "app": .string(window.appName),
+                    "title": .string(window.title),
                     "bundle_id": window.appBundleID.map {
                         .string($0)
                     } ?? .null,

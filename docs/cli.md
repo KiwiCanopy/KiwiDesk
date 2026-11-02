@@ -293,8 +293,13 @@ stored, or one set back to its saved value, needs no keep. A config
 reload, a profile load, a built-in layout's apply or Settings that
 puts another value there before the keep replaces it, and the AI
 app is told. A command the binary does
-not know is refused rather than sent. `get_state` and
-`diagnose_window` hand the AI app your window titles.
+not know is refused rather than sent. `get_state` hands the AI
+app your window titles.
+
+:::unreleased
+So do `diagnose_window` for a window and `list_windows`, which the
+AI app can send through `run`.
+:::
 
 ChatGPT reaches only remote MCP servers, so it needs
 [OpenAI's Secure MCP Tunnel](https://developers.openai.com/api/docs/guides/secure-mcp-tunnels)
@@ -566,6 +571,15 @@ with `jq`:
 ```bash
 kiwidesk list_windows | jq '.[] | select(.focused)'
 ```
+
+:::unreleased
+Each `list_windows` entry and the `explain_window` answer carry the
+window's `title`, as `get_state` has it:
+
+```bash
+kiwidesk list_windows | jq -r '.[] | "\(.id) \(.title)"'
+```
+:::
 
 `swap <window> [window]` swaps the focused window with the one an
 id names, or two named windows, across Spaces and screens too, and
