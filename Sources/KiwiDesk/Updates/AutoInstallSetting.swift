@@ -7,11 +7,13 @@ import Foundation
 @MainActor
 final class AutoInstallSetting: ObservableObject {
     /// Why the switch cannot be turned on.
-    enum Unavailable: Equatable {
+    enum Unavailable: Hashable {
         /// No update channel: an unbundled run.
         case noChannel
         /// Sparkle refuses it while automatic checks are off.
         case checksOff
+        /// A package manager installs updates (#2909).
+        case managed(by: String)
     }
 
     @Published private(set) var isOn: Bool
@@ -36,10 +38,12 @@ final class AutoInstallSetting: ObservableObject {
         watch = changes.sink { [weak self] in self?.refresh() }
     }
 
-    /// The inert channel's: off, and why.
-    static func inert() -> AutoInstallSetting {
-        AutoInstallSetting(
-            read: { (false, .noChannel) },
+    /// The inert channel's: off, and why — `noChannel` unless
+    /// another reason is handed in.
+    static func inert(_ reason: Unavailable? = nil) -> AutoInstallSetting {
+        let reason = reason ?? .noChannel
+        return AutoInstallSetting(
+            read: { (false, reason) },
             write: { _ in }
         )
     }

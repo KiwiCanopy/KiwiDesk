@@ -241,6 +241,8 @@ extension StateCoordinator {
         rememberedSpaces[id] = nil
         restoredFrames[id] = nil
         unjudgedFilings.remove(id)
+        // A carried slot goes with its filing (#2907).
+        retireDepartureRecord(of: id)
     }
 
     /// Clears all remembered space associations (`CGWindowID`, #634).

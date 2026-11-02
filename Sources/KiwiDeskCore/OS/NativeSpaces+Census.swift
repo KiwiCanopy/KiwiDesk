@@ -123,13 +123,40 @@ extension NativeSpaces {
     /// Production reads it through `KiwiCore.windowIsOnShownDesktop`
     /// alone (`DesktopRaiseGateSeamTests`).
     public static func isOnShownDesktop(_ window: WindowID) -> Bool? {
+        isOnShownDesktop(window, in: allSpaces)
+    }
+
+    /// `isOnShownDesktop` against a topology the caller may share,
+    /// read only once the window's hosts are known.
+    static func isOnShownDesktop(
+        _ window: WindowID,
+        in spaces: () -> [NativeSpace]
+    ) -> Bool? {
         guard let connection = SkyLight.connection,
             let hosts = SkyLight.windowSpaces(
                 window.raw,
                 connection: connection
             )
         else { return nil }
-        return hostsShownSpace(hosts, in: allSpaces())
+        return hostsShownSpace(hosts, in: spaces())
+    }
+
+    /// Whether any of `windows` is hosted only on Spaces no display
+    /// shows (#2907): `isOnShownDesktop` over a batch, the topology
+    /// read once; a window no read can place counts as shown.
+    /// Production reads it through `DesktopMemory.readOffShown`
+    /// alone (`HealStandDownSeamTests`).
+    public static func anyOffShownDesktop(_ windows: [WindowID]) -> Bool {
+        var topology: [NativeSpace]?
+        let spaces = {
+            if let topology { return topology }
+            let read = allSpaces()
+            topology = read
+            return read
+        }
+        return windows.contains {
+            isOnShownDesktop($0, in: spaces) == false
+        }
     }
 
     /// The pure verdict behind `isOnShownDesktop`: nil for a

@@ -597,7 +597,13 @@ editing here:
   that follows is intended, never an exemption in the #1161
   predicate (`ClosedReturnFocusTests`, `ClosedReturnSeamTests`
   the one writer inside the arm). The ROW comes back too: a
-  departed window carries its slot in `departedSlots`, and the
+  departed window carries its slot in `departedSlots` —
+  written at a departure by `rememberDepartedSlot`, and at a
+  restart by `rankRestoredRow` and `refilePending` alone, whose
+  ranks order the restored row and then the carried list and
+  carry no break provenance or hand-off link, so
+  `forgetRestoredFiling` retires one with nothing to promote
+  (#2907; the residue is `docs/accepted-limitations.md`'s) — and the
   fold re-inserts a `.departed` return by RANK against the
   members already back — never at the index, which a later slot
   already back would overtake (`ReturningSlotFoldTests`) — and
@@ -1974,7 +1980,17 @@ editing here:
   re-arms only through it until two looks a delay apart find no
   tracked window moving, and an apply door arms nothing of its
   own, or a Save with every bound learned keeps the reseeded ratio
-  until an unrelated event (#2785, `ApplyHealPassTests`). A floor the yield cannot fit is
+  until an unrelated event (#2785, `ApplyHealPassTests`). A
+  per-Space session-store heal asks the one `healStandsDown`
+  before it writes, so it never writes from a membership a
+  Desktop switch mixed: inside the switch grace it stands down
+  and owes that same pass, and while a member is a window no
+  shown Desktop hosts — read through the one batch seam
+  `DesktopMemory.readOffShown` — it stands down until the member
+  goes; the gate never decides membership (#2907,
+  `HealStandDownTests`). The scan holds the two heal files that
+  exist, so a new heal file asking the gate is review's
+  (`HealStandDownSeamTests`). A floor the yield cannot fit is
   the `unfit` verdict: cued ONCE per (space, axis, window)
   episode with the neighbour-minimum pill on the overhanging
   window, the memo in `KiwiCore.splitFloorCues` re-armed when
@@ -2442,7 +2458,16 @@ editing here:
   the windows that Space filed and that have not arrived —
   `pending`, or a held Space's `held.remembered` — through the
   one `StateCoordinator.spaceRecord(of:session:)`, quit and
-  in-place stop alike (#2008, `PendingFilingCarryTests`). Each
+  in-place stop alike (#2008, `PendingFilingCarryTests`). The
+  list's ORDER is the stored slot order, so every writer and
+  reader of the `pending` and `held.remembered` shapes keeps it,
+  the capture sorting through the one `slotOrder`; the start
+  gives each window its place as its slot, and the boot census
+  resumes a carried filing it finds up on an away Desktop as the
+  departure it was, through the one `resumeCarriedDeparture`, so
+  its return is ranked (#2907,
+  `PendingSlotCarryTests`, `AwayBootSeedTests` ▸
+  `carriedFilingResumes`). Each
   record decodes its
   payload on its own and a payload it cannot read costs only
   itself — sizing starts fresh, the arrangement restores

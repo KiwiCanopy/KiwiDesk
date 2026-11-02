@@ -299,7 +299,13 @@ extension StateCoordinator {
                     )
                 }
             }
-            refilePending(record.pending.map(WindowID.init), in: space)
+            let row = record.windows.map(WindowID.init)
+            rankRestoredRow(row)
+            refilePending(
+                record.pending.map(WindowID.init),
+                in: space,
+                rankedFrom: row.count
+            )
             adoptSession(record, in: space)
         }
         for record in snapshot.windows {

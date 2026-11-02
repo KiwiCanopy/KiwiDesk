@@ -7,6 +7,8 @@ import Sparkle
 enum UpdateState: Equatable {
     /// No channel: an unbundled run, or no feed in the bundle.
     case unavailable
+    /// A package manager installs this copy's updates (#2909).
+    case managed(by: String)
     /// No verdict this session: only WHEN the channel last checked
     /// is known, never what it found.
     case notChecked(lastChecked: Date?)

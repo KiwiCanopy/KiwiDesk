@@ -11,7 +11,7 @@ struct ApplyHealPassNeedleTests {
     private static let core = SourceScan.repoRoot(from: #filePath)
         .appendingPathComponent("Sources/KiwiDeskCore")
 
-    @Test("Only retile and the body's re-arm arm the pass")
+    @Test("Only retile, the re-arm and the heal stand-down arm the pass")
     func armSitesAreCensused() throws {
         var sites: [String: Int] = [:]
         for file in try SourceScan.swiftSources(under: Self.core) {
@@ -26,11 +26,13 @@ struct ApplyHealPassNeedleTests {
             ).count
             if calls > 0 { sites[file.lastPathComponent] = calls }
         }
-        // The re-arm and the declaration in the pass's own file.
+        // The re-arm and the declaration in the pass's own file,
+        // and the heal stand-down's grace arm (#2907).
         #expect(
             sites == [
                 "KiwiCore+Retile.swift": 1,
                 "KiwiCore+ApplyHealPass.swift": 2,
+                "KiwiCore+HealStandDown.swift": 1,
             ]
         )
     }

@@ -20,9 +20,10 @@ extension StateCoordinator {
         )
     }
 
-    /// The windows filed in Space `id` that have not arrived. A
-    /// filing's kind and a departure's slot end at a restart: each
-    /// comes back a `.restored` filing at the end of its row.
+    /// The windows filed in Space `id` that have not arrived, in
+    /// the order their slots give, unranked ones last by id: the
+    /// list's order carries the slots across a restart (#2907). A
+    /// filing's kind ends there, each coming back `.restored`.
     func pendingFilings(in id: SpaceID) -> [WindowID] {
         rememberedSpaces.filter {
             guard $0.value.space == id,
@@ -34,7 +35,14 @@ extension StateCoordinator {
                 return !unjudgedFilings.contains($0.key)
             }
             return true
-        }.keys.sorted { $0.raw < $1.raw }
+        }.keys.sorted(by: slotOrder)
+    }
+
+    /// The row order `departedSlots` gives, unranked windows last by
+    /// id: the capture's and the away preview's one rule (#2907).
+    func slotOrder(_ a: WindowID, _ b: WindowID) -> Bool {
+        (departedSlots[a]?.rank ?? .max, a.raw)
+            < (departedSlots[b]?.rank ?? .max, b.raw)
     }
 
     /// What those windows are owed at arrival (#1362, #1864), as
@@ -51,12 +59,45 @@ extension StateCoordinator {
         }.sorted { $0.id < $1.id }
     }
 
-    /// Files each window back that is neither live nor filed.
-    mutating func refilePending(_ ids: [WindowID], in space: SpaceID) {
-        for id in ids
+    /// Files each window back that is neither live nor filed, its
+    /// place in `ids` after `first` as its slot (#2907): a window
+    /// the boot census finds on another Desktop resumes its
+    /// departure through `resumeCarriedDeparture` and returns to
+    /// that slot.
+    mutating func refilePending(
+        _ ids: [WindowID],
+        in space: SpaceID,
+        rankedFrom first: Int = 0
+    ) {
+        for (offset, id) in ids.enumerated()
         where windows[id] == nil && rememberedSpaces[id] == nil {
             remember(id, in: space)
+            if departedSlots[id] == nil {
+                departedSlots[id] = DepartedSlot(rank: first + offset)
+            }
         }
+    }
+
+    /// Ranks a restored row by its place (#2907), tracked or not,
+    /// so a return ranks against the members already back: a
+    /// rankless member let the first return land last, and the
+    /// next departure's re-rank kept it there.
+    mutating func rankRestoredRow(_ ids: [WindowID]) {
+        for (rank, id) in ids.enumerated() where departedSlots[id] == nil {
+            departedSlots[id] = DepartedSlot(rank: rank)
+        }
+    }
+
+    /// Turns a carried filing back into the Desktop departure it
+    /// was (#2907), so its return takes its slot as a live
+    /// session's would; false for anything but a carried filing.
+    @discardableResult
+    mutating func resumeCarriedDeparture(_ id: WindowID) -> Bool {
+        guard case .restored(let space)? = rememberedSpaces[id],
+            departedSlots[id] != nil
+        else { return false }
+        rememberedSpaces[id] = .departed(space)
+        return true
     }
 }
 
