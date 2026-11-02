@@ -139,6 +139,24 @@ struct UpdaterSeamGuardTests {
             )
         }
 
+        // The package-manager check (#2909): deleting it leaves
+        // every count above at one while Sparkle offers a Nix copy
+        // an update the next switch undoes.
+        for wiring in [
+            "ExternalUpdates.current(", "NoUpdater(managedBy:",
+        ] {
+            let checked = try Self.sites(
+                of: wiring,
+                under: Self.productionTrees
+            )
+            #expect(checked.count == 1, Comment(rawValue: wiring))
+            #expect(
+                checked.allSatisfy {
+                    $0.file.lastPathComponent == Self.updaterAllowed
+                }
+            )
+        }
+
         // The wiring: `AppUpdaterFactory.make()` is called once,
         // from AppDelegate. Zero means the app ships without an
         // update channel and greys one menu row to say so.

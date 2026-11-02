@@ -21,6 +21,11 @@ struct UpdateStateRow: View {
                     ),
                     ink: SettingsTheme.ink3
                 )
+            case .managed(let manager):
+                sentence(
+                    Self.managedSentence(manager),
+                    ink: SettingsTheme.ink3
+                )
             case .notChecked(let lastChecked):
                 sentence(Self.notCheckedSentence(lastChecked, now: Date()))
                 // Nothing ran yet, so not "again".
@@ -123,6 +128,16 @@ struct UpdateStateRow: View {
         L(
             "updates.state.up_to_date_window_open",
             "Up to date · close the update window to check again"
+        )
+    }
+
+    /// Who installs this copy's updates (#2909) — also the
+    /// automatic-install row's reason, so the two say one thing.
+    static func managedSentence(_ manager: String) -> String {
+        L(
+            "updates.state.managed",
+            "Updates for this copy come from %1$@.",
+            manager
         )
     }
 
