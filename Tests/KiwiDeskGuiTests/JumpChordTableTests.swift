@@ -62,27 +62,32 @@ struct JumpChordTableTests {
         }
     }
 
-    @Test("the ⌘ digits resolve through JumpPick.of for all 16 chords")
-    func digitsReadTheTable() {
+    @Test(
+        "the ⌘ digits resolve through JumpPick.of for all 16 chords",
+        arguments: [JumpScope.windows, .view]
+    )
+    func digitsReadTheTable(scope: JumpScope) {
         let one = UInt16(JumpKey.digitRows[0])
         for held in combinations {
             let digit = JumpKey.of(
                 keyCode: one,
                 modifiers: held,
+                scope: scope,
                 naming: false
             )
             guard held.contains(.command) else {
                 #expect(digit == nil, "\(held)")
                 continue
             }
+            // Swap here is a Windows pick alone.
             let expected: JumpKey? =
                 switch JumpPick.of(held) {
                 case .jump: .quick(0, moveHere: false)
                 case .moveHere: .quick(0, moveHere: true)
-                case .swapHere: .quickSwap(0)
+                case .swapHere: scope == .windows ? .quickSwap(0) : nil
                 case nil: nil
                 }
-            #expect(digit == expected, "\(held)")
+            #expect(digit == expected, "\(scope) \(held)")
         }
     }
 
