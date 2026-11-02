@@ -145,6 +145,8 @@ struct SnapshotStoreCensusTests {
                 "a session adjustment keyed by native Desktop ids, "
                     + "which a restart may re-mint (#2771)"
             ),
+        "desktopMemory.sessionRatios[]":
+            (.inPlace, "per-Desktop sizes; SessionRatioCarryTests"),
         "drawnSpaceModes":
             (.behind, "settled by the replay itself (#1177)"),
         "arrivals.ledger.created":
@@ -242,6 +244,9 @@ struct SnapshotStoreCensusTests {
         core.tiler.monocleShownMembers[shown] = WindowID(1)
         core.ownFronts[WindowID(1)] = core.wallClock()
         core.desktopMemory.stackFlips[nil] = [shown: .left]
+        var sized = SessionRatios()
+        sized.masterRatio = 0.6
+        core.desktopMemory.sessionRatios[nil] = [shown: sized]
         core.state.crossSession.placed.insert(WindowID(1))
         core.state.profilePartitioning.record(
             [Space(id: hidden, windows: [WindowID(4)])],
@@ -291,6 +296,7 @@ struct SnapshotStoreCensusTests {
             "tiler.stashDepartures.owed", "tiler.motionGate.owedWrites",
             "state.profilePartitioning.byArrangement[][]",
             "state.crossSession.placed", "desktopMemory.stackFlips[]",
+            "desktopMemory.sessionRatios[]",
         ] {
             #expect(paths.contains(named), "\(named) was not reached")
         }

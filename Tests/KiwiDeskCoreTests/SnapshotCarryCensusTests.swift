@@ -228,7 +228,14 @@ struct SnapshotCarryCensusTests {
         )
         var spaces = try #require(json["spaces"] as? [[String: Any]])
         for index in spaces.indices {
-            spaces[index]["session"] = ["session_ratios": "wider"]
+            // One leaf damaged, the per-Desktop list kept (#2921),
+            // so a decode that adopted half a session would leak it.
+            var session = try #require(
+                spaces[index]["session"] as? [String: Any]
+            )
+            #expect(session["desktop_ratios"] != nil)
+            session["session_ratios"] = "wider"
+            spaces[index]["session"] = session
         }
         json["spaces"] = spaces
         var windows = try #require(json["windows"] as? [[String: Any]])

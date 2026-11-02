@@ -51,6 +51,7 @@ extension KiwiCore {
             if let session = record.session {
                 adoptSessionRatios(
                     session.ratioEntries,
+                    oneEntry: session.isOneEntry,
                     of: SpaceID(record.id)
                 )
             }

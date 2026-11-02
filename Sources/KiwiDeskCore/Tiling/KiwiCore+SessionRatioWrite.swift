@@ -154,12 +154,19 @@ extension KiwiCore {
     }
 
     /// Takes back what `sessionRatioEntries` captured, after the
-    /// replay re-stated the Space's mode.
+    /// replay re-stated the Space's mode. A `oneEntry` record — an
+    /// older build's, which kept one set per Space — lands on the
+    /// Desktop shown now, the one it was drawn on.
     func adoptSessionRatios(
         _ entries: [SkyLight.SpaceID?: SessionRatios],
+        oneEntry: Bool,
         of space: SpaceID
     ) {
         guard state.workspaces[space] != nil else { return }
+        if oneEntry, let ratios = entries[nil] {
+            withSessionRatios(of: space) { $0 = ratios }
+            return
+        }
         for (desktop, ratios) in entries where ratios != SessionRatios() {
             desktopMemory.sessionRatios[desktop, default: [:]][space] =
                 ratios

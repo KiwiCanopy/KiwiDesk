@@ -4033,8 +4033,13 @@ event-driven applies (monitor change, Desktop binding) keep it,
 so a display reconnect never eats an interactive resize. Covers
 the BSP split ratios, stack master ratio, and scrolling slot
 size — the same shape for all three, per the #458 scope note.
-The layer later moved off the `Space` to one store per macOS
-Desktop (#2921, *A stack flip belongs to one Desktop*).
+
+:::unreleased
+The layer is now kept per macOS Desktop (#2921, *A stack flip
+belongs to one Desktop*), so a reconnect that makes macOS give a
+Desktop a new id does drop that Desktop's sizes (the accepted
+limitation).
+:::
 
 **The session layer outranks the authored override, and a
 resize never writes an override (#458 as amended by #764).**
@@ -7407,15 +7412,17 @@ own windows already and stay on the Space. The owner's rulings
 
 - **An in-place restart carries them**, as sizing survived one
   before (#930); the flip stays session-only.
-- **`reset_layout_sizing` resets one Space on the Desktop you are
-  on**; `all` resets every Space on every Desktop.
+- **`reset_layout_sizing` resets one Space on the Desktop its
+  screen shows**; `all` resets every Space on every Desktop.
 - **A resize where no Desktop can be named** — a screen plugged in
   since the last switch, no SkyLight reading — writes one shared
   entry, which every unnamed Desktop reads. A named Desktop not
   sized yet falls through to the override, then the global value.
-- **An explicit choice ends them on every Desktop**: an override
-  setter, a config reload and a mode change clear that Space's
-  sizes everywhere, as they clear the flip.
+- **An explicit choice ends them on every Desktop.** An override
+  setter or a mode change clears that Space's sizes everywhere; a
+  config reload, an explicit profile apply and a Settings save
+  clear every Space's. Unlike the flip, a mode change ends them,
+  since a size means nothing under another layout.
 :::
 
 ### A Desktop switch is not a close (#1207)

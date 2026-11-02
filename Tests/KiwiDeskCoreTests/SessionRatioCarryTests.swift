@@ -49,9 +49,16 @@ struct SessionRatioCarryTests {
         return core
     }
 
-    private func processB(_ snapshot: Data) throws -> KiwiCore {
+    private func processB(
+        _ snapshot: Data,
+        shown: SkyLight.SpaceID? = nil
+    ) throws -> KiwiCore {
         let core = makeTestCore()
         core.state.workspaces.ensureSpace(space)
+        if let shown {
+            core.desktopMemory.shownSpaces = ["Main": shown]
+            core.desktopMemory.shownUserSpaces = ["Main": true]
+        }
         core.restore(
             try JSONDecoder().decode(StateSnapshot.self, from: snapshot)
         )
@@ -85,9 +92,10 @@ struct SessionRatioCarryTests {
     }
 
     /// A build before #2921 wrote one `session_ratios` per Space;
-    /// it crosses into the shared entry. The fixture is the real
-    /// encoder's output with the per-Desktop list removed.
-    @Test("an older record's ratios cross into the shared entry")
+    /// it lands on the Desktop shown at the restore, which is the
+    /// one it was drawn on. The fixture is the real encoder's
+    /// output with the per-Desktop list removed.
+    @Test("an older record's ratios cross onto the Desktop shown")
     func olderRecordCrosses() throws {
         var json = try #require(
             try JSONSerialization.jsonObject(
@@ -104,12 +112,13 @@ struct SessionRatioCarryTests {
             spaces[index]["session"] = session
         }
         json["spaces"] = spaces
-        let b = try processB(JSONSerialization.data(withJSONObject: json))
-        #expect(b.desktopMemory.sessionRatios[desktop] == nil)
-        #expect(
-            b.desktopMemory.sessionRatios[nil]?[space]?.masterRatio
-                == 0.58
+        let b = try processB(
+            JSONSerialization.data(withJSONObject: json),
+            shown: 30
         )
+        #expect(b.desktopMemory.sessionRatios[desktop] == nil)
+        #expect(b.desktopMemory.sessionRatios[nil] == nil)
+        #expect(b.sessionRatios(of: space).masterRatio == 0.58)
     }
 
     @Test("a plain capture carries no sizes")

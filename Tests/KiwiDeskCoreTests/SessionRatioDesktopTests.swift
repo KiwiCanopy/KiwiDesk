@@ -66,6 +66,11 @@ struct SessionRatioDesktopTests {
         #expect(core.sessionRatios(of: space) == SessionRatios())
         show(core, ["Main": 10])
         #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
+        // A Desktop other than the shown one holds sizes too, so
+        // only a reset of every Desktop empties the store.
+        show(core, ["Main": 11])
+        core.writeSplitRatioH(0.3, for: space)
+        show(core, ["Main": 10])
         #expect(
             core.execute("reset_layout_sizing", args: [.string("all")])
                 .isSuccess

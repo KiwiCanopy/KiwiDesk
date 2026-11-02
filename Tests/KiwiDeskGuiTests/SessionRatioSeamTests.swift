@@ -8,8 +8,10 @@ import Testing
 /// accident. No fixture can see a reader that re-derives the
 /// sizes beside the door, so the spellings are counted. Fails
 /// OPEN for a store reached through a name the needles do not
-/// spell — a `DesktopMemory` held under another name — which
-/// review carries.
+/// spell — a `DesktopMemory` held under another name — and for a
+/// resize path reading a size off the config-only
+/// `resolvedBsp(for: space.id)` overloads, which skip the layer
+/// and compile; both are review's.
 @Suite("Session ratio seam (#764, #2921)")
 struct SessionRatioSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -176,5 +178,14 @@ struct SessionRatioSeamTests {
                 after: "func setSpaceMode("
             ).contains("forgetSessionRatios(of: id)")
         )
+        // That clear holds only while `setSpaceMode` is the one
+        // caller of the model's mode write.
+        var callers: [String: Int] = [:]
+        for file in try SourceScan.swiftSources(under: core) {
+            let text = try SourceScan.strippedSource(at: file)
+            let hits = text.occurrences(of: "workspaces.setMode(")
+            if hits > 0 { callers[file.lastPathComponent] = hits }
+        }
+        #expect(callers == ["KiwiCore+TrackSeed.swift": 1])
     }
 }

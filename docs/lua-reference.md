@@ -889,9 +889,9 @@ sizes in this Space** under Shortcuts & Gestures ▸ Size & float.
 `"all"` has no default key.
 
 :::unreleased
-Sizing is kept per macOS Desktop ([resize](#resize)): a space id,
-or nothing, resets that Space on the Desktop you are on; `"all"`
-resets every Space on every Desktop.
+The session layer is kept per macOS Desktop ([resize](#resize)): a
+space id, or nothing, resets that Space on the Desktop its screen
+shows; `"all"` resets every Space on every Desktop.
 :::
 
 **Example:**
@@ -6655,7 +6655,8 @@ Desktops keeps its own sizes on each, and a Desktop where you have
 not resized it uses the override, then the global. A screen
 connected since the last Desktop switch, or a Mac where KiwiDesk
 cannot read which Desktop is shown, shares one set of sizes across
-those Desktops. An in-place restart keeps every Desktop's sizes.
+those Desktops ([accepted limitations](accepted-limitations.md)).
+An in-place restart keeps every Desktop's sizes.
 :::
 
 **Example:**

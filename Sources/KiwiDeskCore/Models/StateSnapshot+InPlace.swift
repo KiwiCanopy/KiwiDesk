@@ -12,11 +12,13 @@ extension StateSnapshot {
     /// One Space's session sizing and its Monocle hold.
     public struct SpaceSession: Codable, Sendable, Equatable {
         /// The shared entry for a Desktop no reading names (#2921
-        /// ruling 3) — the one entry a build before 4.2.0 wrote, so
-        /// its file still crosses into it.
+        /// ruling 3). A build before 4.2.0 wrote this key alone, as
+        /// the Space's one entry: such a record has no
+        /// `desktopRatios`, and the restore adopts it on the Desktop
+        /// shown (`isOneEntry`).
         public var ratios: SessionRatios
-        /// The sizes per named Desktop (#2921), by native id; nil
-        /// where none was sized.
+        /// The sizes per named Desktop (#2921), by native id; every
+        /// capture writes the list, an empty one included.
         public var desktopRatios: [DesktopRatios]?
         public var stackWeights: [UInt32: Double]
         public var scrollRest: ScrollRest?
@@ -40,8 +42,7 @@ extension StateSnapshot {
             let named = entries.compactMap { desktop, ratios in
                 desktop.map { DesktopRatios(desktop: $0, ratios: ratios) }
             }
-            desktopRatios =
-                named.isEmpty ? nil : named.sorted { $0.desktop < $1.desktop }
+            desktopRatios = named.sorted { $0.desktop < $1.desktop }
             stackWeights = Dictionary(
                 uniqueKeysWithValues: space.stackWeights.map {
                     ($0.key.raw, $0.value)
@@ -57,6 +58,9 @@ extension StateSnapshot {
                 space.runTails.isEmpty
                 ? nil : space.runTails.map(\.raw).sorted()
         }
+
+        /// A record a build before #2921 wrote: one entry per Space.
+        public var isOneEntry: Bool { desktopRatios == nil }
 
         /// Every entry, the shared one under nil.
         public var ratioEntries: [SkyLight.SpaceID?: SessionRatios] {
