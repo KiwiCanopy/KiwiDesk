@@ -92,7 +92,7 @@ struct PocketSurfaceTests {
         core.execute("pocket")
         let snapshot = core.state.inPlaceSnapshot(
             monocleShown: [:],
-            ratios: { _ in [:] }
+            ratios: { _ in .init(entries: [:], drawn: SessionRatios()) }
         )
         let data = try JSONEncoder().encode(snapshot)
         let read = try JSONDecoder().decode(StateSnapshot.self, from: data)

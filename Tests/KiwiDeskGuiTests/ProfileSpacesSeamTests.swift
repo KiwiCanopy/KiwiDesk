@@ -245,11 +245,6 @@ struct ProfileSpacesSeamTests {
             ),
             "Profiles/KiwiCore+DesktopIdentity.swift":
                 (1, "a mint's accumulator, held nowhere"),
-            "Models/StateSnapshot+InPlace.swift": (
-                2,
-                "the in-place record's #2921 sizes in transit, "
-                    + "adopted back into DesktopMemory"
-            ),
         ]
         let root = coreRoot
         let prefix = root.path + "/"

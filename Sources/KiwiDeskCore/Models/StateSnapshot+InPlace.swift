@@ -11,13 +11,11 @@ import Foundation
 extension StateSnapshot {
     /// One Space's session sizing and its Monocle hold.
     public struct SpaceSession: Codable, Sendable, Equatable {
-        /// The shared entry for a Desktop no reading names (#2921
-        /// ruling 3). A build before 4.2.0 wrote this key alone, as
-        /// the Space's one entry: such a record has no
-        /// `desktopRatios`, and the restore adopts it on the Desktop
-        /// shown (`isOneEntry`).
+        /// The sizes the Space draws at the capture. A build before
+        /// 4.2.0 kept this one set per Space and reads it back; this
+        /// build reads it only from such a record (`oneEntry`).
         public var ratios: SessionRatios
-        /// The sizes per named Desktop (#2921), by native id; every
+        /// Every Desktop's and arrangement's sizes (#2921); every
         /// capture writes the list, an empty one included.
         public var desktopRatios: [DesktopRatios]?
         public var stackWeights: [UInt32: Double]
@@ -35,14 +33,19 @@ extension StateSnapshot {
 
         public init(
             space: Space,
-            ratios entries: [SkyLight.SpaceID?: SessionRatios],
+            ratios sizing: SessionSizing,
             monocleShown: WindowID?
         ) {
-            ratios = entries[nil] ?? SessionRatios()
-            let named = entries.compactMap { desktop, ratios in
-                desktop.map { DesktopRatios(desktop: $0, ratios: ratios) }
-            }
-            desktopRatios = named.sorted { $0.desktop < $1.desktop }
+            ratios = sizing.drawn
+            desktopRatios = sizing.entries
+                .map {
+                    DesktopRatios(
+                        desktop: $0.key.desktop,
+                        arrangement: $0.key.arrangement,
+                        ratios: $0.value
+                    )
+                }
+                .sorted { $0.order < $1.order }
             stackWeights = Dictionary(
                 uniqueKeysWithValues: space.stackWeights.map {
                     ($0.key.raw, $0.value)
@@ -59,14 +62,22 @@ extension StateSnapshot {
                 ? nil : space.runTails.map(\.raw).sorted()
         }
 
-        /// A record a build before #2921 wrote: one entry per Space.
-        public var isOneEntry: Bool { desktopRatios == nil }
+        /// A record a build before #2921 wrote: its one set per
+        /// Space, else nil.
+        public var oneEntry: SessionRatios? {
+            desktopRatios == nil ? ratios : nil
+        }
 
-        /// Every entry, the shared one under nil.
-        public var ratioEntries: [SkyLight.SpaceID?: SessionRatios] {
-            var out: [SkyLight.SpaceID?: SessionRatios] = [nil: ratios]
+        /// Every entry the list carries.
+        public var ratioEntries: [SessionSizingKey: SessionRatios] {
+            var out: [SessionSizingKey: SessionRatios] = [:]
             for entry in desktopRatios ?? [] {
-                out[entry.desktop] = entry.ratios
+                out[
+                    SessionSizingKey(
+                        desktop: entry.desktop,
+                        arrangement: entry.arrangement
+                    )
+                ] = entry.ratios
             }
             return out
         }
@@ -83,18 +94,47 @@ extension StateSnapshot {
         }
     }
 
-    /// One named Desktop's sizes for a Space (#2921).
+    /// A Space's sizes as the in-place capture reads them (#2921):
+    /// every entry, and the set it draws now.
+    public struct SessionSizing: Sendable {
+        public var entries: [SessionSizingKey: SessionRatios]
+        public var drawn: SessionRatios
+
+        public init(
+            entries: [SessionSizingKey: SessionRatios],
+            drawn: SessionRatios
+        ) {
+            self.entries = entries
+            self.drawn = drawn
+        }
+    }
+
+    /// One Desktop's sizes for a Space under one arrangement
+    /// (#2921); a nil `desktop` is the shared entry.
     public struct DesktopRatios: Codable, Sendable, Equatable {
-        public var desktop: SkyLight.SpaceID
+        public var desktop: SkyLight.SpaceID?
+        public var arrangement: HeldOrigin.Arrangement?
         public var ratios: SessionRatios
 
-        public init(desktop: SkyLight.SpaceID, ratios: SessionRatios) {
+        public init(
+            desktop: SkyLight.SpaceID?,
+            arrangement: HeldOrigin.Arrangement?,
+            ratios: SessionRatios
+        ) {
             self.desktop = desktop
+            self.arrangement = arrangement
             self.ratios = ratios
+        }
+
+        /// A stable order for the capture's list.
+        var order: String {
+            "\(desktop.map(String.init) ?? "")|"
+                + (arrangement.map { String(describing: $0) } ?? "")
         }
 
         private enum CodingKeys: String, CodingKey {
             case desktop
+            case arrangement
             case ratios = "session_ratios"
         }
     }
@@ -146,7 +186,7 @@ extension StateCoordinator {
     /// sizes (#2921), which state does not own.
     public func inPlaceSnapshot(
         monocleShown: [SpaceID: WindowID],
-        ratios: (SpaceID) -> [SkyLight.SpaceID?: SessionRatios]
+        ratios: (SpaceID) -> StateSnapshot.SessionSizing
     ) -> StateSnapshot {
         var snapshot = snapshot()
         snapshot.spaces = workspaces.allSpaces.map {

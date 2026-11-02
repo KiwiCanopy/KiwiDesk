@@ -13,6 +13,9 @@ import Testing
 struct SessionRatioCarryTests {
     private let space = SpaceID("1")
     private let desktop: SkyLight.SpaceID = 20
+    /// The arrangement the named Desktop was sized under, which
+    /// crosses with it.
+    private let work = HeldOrigin.Arrangement.profile("Work")
 
     /// Every `SessionRatios` field away from its default.
     private var fullRatios: SessionRatios {
@@ -43,8 +46,8 @@ struct SessionRatioCarryTests {
         var shared = SessionRatios()
         shared.masterRatio = 0.58
         core.desktopMemory.sessionRatios = [
-            nil: [space: shared],
-            desktop: [space: fullRatios],
+            nil: [nil: [space: shared]],
+            desktop: [work: [space: fullRatios]],
         ]
         return core
     }
@@ -75,7 +78,7 @@ struct SessionRatioCarryTests {
     func everyLeafCrosses() throws {
         let b = try processB(try captured(processA()))
         let after = try #require(
-            b.desktopMemory.sessionRatios[desktop]?[space]
+            b.desktopMemory.sessionRatios[desktop]?[work]?[space]
         )
         let fresh = leaves(SessionRatios())
         for (label, value) in leaves(fullRatios) {
@@ -86,7 +89,7 @@ struct SessionRatioCarryTests {
             )
         }
         #expect(
-            b.desktopMemory.sessionRatios[nil]?[space]?.masterRatio
+            b.desktopMemory.sessionRatios[nil]?[nil]?[space]?.masterRatio
                 == 0.58
         )
     }
@@ -122,7 +125,7 @@ struct SessionRatioCarryTests {
     }
 
     /// A current capture holding only the shared entry still writes
-    /// its per-Desktop list, empty, so it never reads back as an
+    /// it in the per-Desktop list, so it never reads back as an
     /// older one-entry record and moves onto the Desktop shown.
     @Test("a shared-only capture stays a current record")
     func sharedOnlyStaysCurrent() throws {
@@ -133,11 +136,11 @@ struct SessionRatioCarryTests {
         let session = try #require(
             read.spaces.first { $0.id == space.raw }?.session
         )
-        #expect(session.desktopRatios == [])
-        #expect(!session.isOneEntry)
+        #expect(session.desktopRatios?.map(\.desktop) == [nil])
+        #expect(session.oneEntry == nil)
         let b = try processB(data, shown: 30)
         #expect(
-            b.desktopMemory.sessionRatios[nil]?[space]?.masterRatio
+            b.desktopMemory.sessionRatios[nil]?[nil]?[space]?.masterRatio
                 == 0.58
         )
         #expect(b.desktopMemory.sessionRatios[30] == nil)

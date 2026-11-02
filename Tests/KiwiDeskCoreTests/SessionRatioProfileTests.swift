@@ -1,0 +1,104 @@
+import CoreGraphics
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// A resize's sizes are filed under the arrangement live on their
+/// Desktop too (#2921 rulings 5–7): a switch keeps them, a load
+/// starts the Desktops shown fresh, a save of a profile ends that
+/// profile's everywhere, and a named reset of a Space with no
+/// screen resets it on every Desktop.
+@Suite("Session sizes per profile (#2921)", .serialized)
+@MainActor
+struct SessionRatioProfileTests {
+    private let space = SpaceID("1")
+    private let work = HeldOrigin.Arrangement.profile("Work")
+    private let play = HeldOrigin.Arrangement.profile("Play")
+
+    /// "Work" live (`KeepFixture`), with "Play" written beside it.
+    private func core() throws -> (KiwiCore, Profile) {
+        let core = try KeepFixture.core()
+        let other = KeepFixture.profile("Play")
+        _ = try core.profiles.write(other)
+        #expect(core.liveArrangement == work)
+        return (core, other)
+    }
+
+    private func show(_ core: KiwiCore, _ desktop: SkyLight.SpaceID) {
+        core.desktopMemory.shownSpaces = ["Main": desktop]
+        core.desktopMemory.shownUserSpaces = ["Main": true]
+    }
+
+    private func stored(
+        _ core: KiwiCore,
+        _ desktop: SkyLight.SpaceID,
+        _ arrangement: HeldOrigin.Arrangement
+    ) -> Double? {
+        core.desktopMemory.sessionRatios[desktop]?[arrangement]?[space]?
+            .splitRatioH
+    }
+
+    @Test("a profile switch keeps each profile's sizes")
+    func switchKeeps() throws {
+        let (core, other) = try core()
+        show(core, 10)
+        core.writeSplitRatioH(0.7, for: space)
+        core.apply(profile: other, cause: .event)
+        #expect(core.liveArrangement == play)
+        #expect(core.sessionRatios(of: space) == SessionRatios())
+        core.writeSplitRatioH(0.3, for: space)
+        let back = try core.profiles.read(name: "Work")
+        core.apply(profile: back, cause: .event)
+        #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
+        #expect(stored(core, 10, play) == 0.3)
+    }
+
+    @Test("a load starts the Desktops shown fresh, no other")
+    func loadClearsTheShownDesktop() throws {
+        let (core, _) = try core()
+        show(core, 11)
+        core.writeSplitRatioH(0.4, for: space)
+        show(core, 10)
+        core.writeSplitRatioH(0.7, for: space)
+        let sized = core.sessionRatios(of: space)
+        core.desktopMemory.sessionRatios[10]?[play] = [space: sized]
+        KeepFixture.load("Play", core)
+        #expect(core.desktopMemory.sessionRatios[10] == nil)
+        #expect(stored(core, 11, work) == 0.4)
+    }
+
+    @Test("a save of a profile ends its sizes on every Desktop")
+    func saveClearsTheProfile() throws {
+        let (core, _) = try core()
+        for desktop: SkyLight.SpaceID in [10, 11] {
+            show(core, desktop)
+            core.writeSplitRatioH(0.7, for: space)
+        }
+        let sized = core.sessionRatios(of: space)
+        core.desktopMemory.sessionRatios[11]?[play] = [space: sized]
+        core.reapplyIfInEffect("Work")
+        #expect(stored(core, 10, work) == nil)
+        #expect(stored(core, 11, work) == nil)
+        #expect(stored(core, 11, play) == 0.7)
+    }
+
+    @Test("a named reset of a Space with no screen is every Desktop's")
+    func screenlessResetIsEverywhere() throws {
+        let (core, _) = try core()
+        let held = SpaceID("7")
+        core.state.workspaces.ensureSpace(held)
+        try #require(core.state.workspaces.display(of: held) == nil)
+        var ratios = SessionRatios()
+        ratios.splitRatioH = 0.7
+        core.desktopMemory.sessionRatios = [
+            10: [work: [held: ratios]],
+            11: [play: [held: ratios]],
+        ]
+        #expect(
+            core.execute("reset_layout_sizing", args: [.string("7")])
+                .isSuccess
+        )
+        #expect(core.desktopMemory.sessionRatios.isEmpty)
+    }
+}

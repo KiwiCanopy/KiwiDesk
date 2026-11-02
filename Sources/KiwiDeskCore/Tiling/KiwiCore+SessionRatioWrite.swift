@@ -6,42 +6,61 @@ import Foundation
 /// wrote so `reset_layout_sizing` can return to it. Both the
 /// keyboard `resize` verb and the mouse-drag drop
 /// (`applyResizeAdjustment`) route here. The layer is per macOS
-/// Desktop (#2921): `DesktopMemory.sessionRatios`, read through
-/// `sessionRatios(of:)` alone, which every resolver overlay takes
-/// as a required argument (`SessionRatioSeamTests`).
+/// Desktop and per arrangement live on it (#2921):
+/// `DesktopMemory.sessionRatios`, read through `sessionRatios(of:)`
+/// alone, which every resolver overlay takes as a required argument
+/// (`SessionRatioSeamTests`).
 extension KiwiCore {
     /// The store key for `space` now: the Desktop its screen
-    /// shows, else the one shared entry (no SkyLight, a screen no
-    /// switch has filed yet — owner ruling 3, #2921).
-    private func sizingDesktop(of space: SpaceID) -> SkyLight.SpaceID? {
+    /// shows — else the one shared entry (no SkyLight, a screen no
+    /// switch has filed yet, ruling 3) — and the arrangement live.
+    private func sizingKey(of space: SpaceID) -> SessionSizingKey {
         guard case .shown(let desktop) = shownDesktop(of: space) else {
-            return nil
+            return SessionSizingKey(desktop: nil, arrangement: liveArrangement)
         }
-        return desktop
+        return SessionSizingKey(desktop: desktop, arrangement: liveArrangement)
     }
 
     /// The sizes a resize wrote for `space` on the Desktop shown
-    /// now — the ONE read door. A Desktop not sized yet answers
-    /// empty, so the overlay falls through to the override, then
-    /// the global value.
+    /// now under the arrangement live — the ONE read door. A
+    /// Desktop not sized under it answers empty, so the overlay
+    /// falls through to the override, then the global value.
     func sessionRatios(of space: SpaceID) -> SessionRatios {
-        desktopMemory.sessionRatios[sizingDesktop(of: space)]?[space]
-            ?? SessionRatios()
+        let key = sizingKey(of: space)
+        return desktopMemory.sessionRatios[key.desktop]?[key.arrangement]?[
+            space
+        ] ?? SessionRatios()
     }
 
-    /// Mutates `space`'s sizes on the Desktop shown now; an entry
-    /// left empty is dropped.
+    /// Mutates `space`'s sizes on the Desktop shown now under the
+    /// arrangement live; an entry left empty is dropped.
     func withSessionRatios(
         of space: SpaceID,
         _ body: (inout SessionRatios) -> Void
     ) {
         guard state.workspaces[space] != nil else { return }
-        let desktop = sizingDesktop(of: space)
-        var sizes = desktopMemory.sessionRatios[desktop] ?? [:]
-        var ratios = sizes[space] ?? SessionRatios()
+        let key = sizingKey(of: space)
+        var ratios = sizes(at: key)[space] ?? SessionRatios()
         body(&ratios)
-        sizes[space] = ratios == SessionRatios() ? nil : ratios
-        desktopMemory.sessionRatios[desktop] = sizes.isEmpty ? nil : sizes
+        setSizes(at: key) {
+            $0[space] = ratios == SessionRatios() ? nil : ratios
+        }
+    }
+
+    private func sizes(at key: SessionSizingKey) -> DesktopMemory.SpaceRatios {
+        desktopMemory.sessionRatios[key.desktop]?[key.arrangement] ?? [:]
+    }
+
+    private func setSizes(
+        at key: SessionSizingKey,
+        _ body: (inout DesktopMemory.SpaceRatios) -> Void
+    ) {
+        var byArrangement = desktopMemory.sessionRatios[key.desktop] ?? [:]
+        var sizes = byArrangement[key.arrangement] ?? [:]
+        body(&sizes)
+        byArrangement[key.arrangement] = sizes.isEmpty ? nil : sizes
+        desktopMemory.sessionRatios[key.desktop] =
+            byArrangement.isEmpty ? nil : byArrangement
     }
 
     func writeSplitRatioH(_ value: Double, for space: SpaceID) {
@@ -76,41 +95,64 @@ extension KiwiCore {
         }
     }
 
-    // MARK: - Clearing doors
+    // MARK: - Clearing doors (#2921 rulings 4 and 6)
 
-    /// Clears one session field on every Space and every Desktop —
-    /// the explicit global setters (`bsp.set_ratio_h`, `stack.set_
-    /// master_ratio`, `scroll.set_slot_size`) and a config load call
-    /// this so an explicit config write visibly
-    /// applies everywhere instead of being shadowed by earlier
-    /// interactive resizes (the #383 "visibly did nothing" trap,
-    /// session-layer edition).
+    /// Clears one session field on every Space, Desktop and
+    /// arrangement — the explicit global setters (`bsp.set_ratio_h`,
+    /// `stack.set_master_ratio`, `scroll.set_slot_size`), a config
+    /// load and a Settings apply call this so an explicit config
+    /// write visibly applies everywhere instead of being shadowed
+    /// by earlier interactive resizes (the #383 "visibly did
+    /// nothing" trap, session-layer edition).
     func clearSessionRatios(
         _ clear: (inout SessionRatios) -> Void
     ) {
-        mapSessionRatios { _, ratios in clear(&ratios) }
+        mapSessionRatios { _, _, ratios in clear(&ratios) }
     }
 
     /// The per-space `_override` setters' sibling: the layer
     /// outranks the override, so an explicit write on one Space
-    /// drops that Space's shadow on every Desktop (#764, #2921
-    /// ruling 4).
+    /// drops that Space's shadow on every Desktop and arrangement
+    /// (#764).
     func clearSessionRatios(
         for space: SpaceID,
         _ clear: (inout SessionRatios) -> Void
     ) {
-        mapSessionRatios { id, ratios in
+        mapSessionRatios { _, id, ratios in
             if id == space { clear(&ratios) }
         }
     }
 
+    /// A load starts the Desktops shown now fresh — each screen's,
+    /// as the last switch filed them, and the shared entry — every
+    /// arrangement's sizes on them; other Desktops keep theirs.
+    func forgetSessionRatiosOnShownDesktops() {
+        desktopMemory.sessionRatios[nil] = nil
+        for desktop in Set(desktopMemory.shownSpaces.values) {
+            desktopMemory.sessionRatios[desktop] = nil
+        }
+    }
+
+    /// A save of a profile clears that arrangement's sizes on every
+    /// Desktop — by the key, never by which Desktops show it now.
+    func forgetSessionRatios(under arrangement: HeldOrigin.Arrangement) {
+        mapSessionRatios { live, _, ratios in
+            if live == arrangement { ratios = SessionRatios() }
+        }
+    }
+
     /// `reset_layout_sizing <space>`: that Space on the Desktop
-    /// shown now only (#2921 ruling 2).
+    /// shown under the arrangement live; a Space with no screen
+    /// (held, not yet placed) on every Desktop (ruling 7).
     func resetSessionRatios(of space: SpaceID) {
+        guard state.workspaces.display(of: space) != nil else {
+            forgetSessionRatios(of: space)
+            return
+        }
         withSessionRatios(of: space) { $0 = SessionRatios() }
     }
 
-    /// A dropped Space forgets its sizes on every Desktop
+    /// A dropped Space forgets its sizes everywhere
     /// (`forwardWindows(of:to:)`, #1655).
     func forgetSessionRatios(of space: SpaceID) {
         clearSessionRatios(for: space) { $0 = SessionRatios() }
@@ -120,56 +162,86 @@ extension KiwiCore {
     func rekeySessionRatios(_ old: SpaceID, to new: SpaceID) {
         desktopMemory.sessionRatios = desktopMemory.sessionRatios
             .mapValues {
-                var sizes = $0
-                if let ratios = sizes.removeValue(forKey: old) {
-                    sizes[new] = ratios
+                $0.mapValues {
+                    var sizes = $0
+                    if let ratios = sizes.removeValue(forKey: old) {
+                        sizes[new] = ratios
+                    }
+                    return sizes
                 }
-                return sizes
             }
     }
 
     private func mapSessionRatios(
-        _ body: (SpaceID, inout SessionRatios) -> Void
+        _ body: (HeldOrigin.Arrangement?, SpaceID, inout SessionRatios)
+            -> Void
     ) {
         desktopMemory.sessionRatios = desktopMemory.sessionRatios
-            .mapValues { sizes in
-                var out: DesktopMemory.SpaceRatios = [:]
-                for (space, ratios) in sizes {
-                    var ratios = ratios
-                    body(space, &ratios)
-                    if ratios != SessionRatios() { out[space] = ratios }
+            .mapValues { byArrangement in
+                var kept:
+                    [HeldOrigin.Arrangement?: DesktopMemory.SpaceRatios] =
+                        [:]
+                for (arrangement, sizes) in byArrangement {
+                    var out: DesktopMemory.SpaceRatios = [:]
+                    for (space, ratios) in sizes {
+                        var ratios = ratios
+                        body(arrangement, space, &ratios)
+                        if ratios != SessionRatios() { out[space] = ratios }
+                    }
+                    if !out.isEmpty { kept[arrangement] = out }
                 }
-                return out
+                return kept
             }
             .filter { !$0.value.isEmpty }
     }
 
     // MARK: - The in-place restart's carry (#930)
 
-    /// Every Desktop's sizes for `space`, for the in-place capture.
-    func sessionRatioEntries(
+    /// `space`'s sizes for the in-place capture: every entry, and
+    /// the set it draws now.
+    func sessionSizing(of space: SpaceID) -> StateSnapshot.SessionSizing {
+        StateSnapshot.SessionSizing(
+            entries: sessionRatioEntries(of: space),
+            drawn: sessionRatios(of: space)
+        )
+    }
+
+    private func sessionRatioEntries(
         of space: SpaceID
-    ) -> [SkyLight.SpaceID?: SessionRatios] {
-        desktopMemory.sessionRatios.compactMapValues { $0[space] }
+    ) -> [SessionSizingKey: SessionRatios] {
+        var out: [SessionSizingKey: SessionRatios] = [:]
+        for (desktop, byArrangement) in desktopMemory.sessionRatios {
+            for (arrangement, sizes) in byArrangement {
+                if let ratios = sizes[space] {
+                    out[
+                        SessionSizingKey(
+                            desktop: desktop,
+                            arrangement: arrangement
+                        )
+                    ] =
+                        ratios
+                }
+            }
+        }
+        return out
     }
 
     /// Takes back what `sessionRatioEntries` captured, after the
-    /// replay re-stated the Space's mode. A `oneEntry` record — an
-    /// older build's, which kept one set per Space — lands on the
-    /// Desktop shown now, the one it was drawn on.
+    /// replay re-stated the Space's mode. `oneEntry` is an older
+    /// build's one set per Space, which lands where the Space is
+    /// drawn now.
     func adoptSessionRatios(
-        _ entries: [SkyLight.SpaceID?: SessionRatios],
-        oneEntry: Bool,
+        _ entries: [SessionSizingKey: SessionRatios],
+        oneEntry: SessionRatios?,
         of space: SpaceID
     ) {
         guard state.workspaces[space] != nil else { return }
-        if oneEntry, let ratios = entries[nil] {
-            withSessionRatios(of: space) { $0 = ratios }
+        if let oneEntry {
+            withSessionRatios(of: space) { $0 = oneEntry }
             return
         }
-        for (desktop, ratios) in entries where ratios != SessionRatios() {
-            desktopMemory.sessionRatios[desktop, default: [:]][space] =
-                ratios
+        for (key, ratios) in entries where ratios != SessionRatios() {
+            setSizes(at: key) { $0[space] = ratios }
         }
     }
 }

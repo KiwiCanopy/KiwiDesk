@@ -122,7 +122,7 @@ struct SnapshotCarryCensusTests {
         // `SessionRatioCarryTests`'.
         var sized = SessionRatios()
         sized.masterRatio = 0.44
-        core.desktopMemory.sessionRatios = [20: [spaceID: sized]]
+        core.desktopMemory.sessionRatios = [20: [nil: [spaceID: sized]]]
         core.state.setFloating(w1, true)
         core.state.setSticky(w1, .display)
         core.state.stickyReachOverrides[w1] = false

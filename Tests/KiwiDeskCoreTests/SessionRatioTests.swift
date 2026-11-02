@@ -165,20 +165,23 @@ struct SessionRatioTests {
         }
     }
 
-    @Test("An explicit profile apply reseeds the layer")
+    @Test("A load starts the layer fresh; an event apply keeps it")
     func explicitProfileApplyReseeds() {
         let core = makeCore()
-        core.execute("resize", args: [.string("x"), .number(500)])
-        #expect(
-            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
-        )
         let profile = Profile(
             name: "p",
             monitorSets: [MonitorSet(monitors: ["A:1x1"])],
             spaceModes: ["1": .bsp],
             settings: core.tiler.settings
         )
-        core.apply(profile: profile, cause: .reapply)
+        // Live first, so every read below is under one arrangement
+        // (#2921 ruling 5).
+        core.apply(profile: profile, cause: .event)
+        core.execute("resize", args: [.string("x"), .number(500)])
+        #expect(
+            core.sessionRatios(of: SpaceID("1")).splitRatioH != nil
+        )
+        core.apply(profile: profile, cause: .explicit)
         #expect(
             core.sessionRatios(of: SpaceID("1")) == SessionRatios()
         )
@@ -193,7 +196,6 @@ struct SessionRatioTests {
     @Test("A composed (preset) apply follows the same rule")
     func composedApplyReseeds() {
         let core = makeCore()
-        core.execute("resize", args: [.string("x"), .number(500)])
         let composed = ProfileComposition.Composed(
             sourceName: "standard",
             spaces: ["1"],
@@ -202,6 +204,8 @@ struct SessionRatioTests {
             settings: core.tiler.settings,
             sourceTitle: nil
         )
+        core.apply(composed: composed, forceRetile: false)
+        core.execute("resize", args: [.string("x"), .number(500)])
         core.apply(composed: composed, forceRetile: false)
         #expect(
             core.sessionRatios(of: SpaceID("1")).splitRatioH != nil

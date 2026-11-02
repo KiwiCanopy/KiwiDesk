@@ -70,7 +70,7 @@ struct CrossSessionRekeyParityTests {
             ),
             session: .init(
                 space: Space(id: "3"),
-                ratios: [:],
+                ratios: .init(entries: [:], drawn: SessionRatios()),
                 monocleShown: w
             ),
             held: .init(

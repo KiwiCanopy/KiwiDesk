@@ -25,6 +25,22 @@ public struct SessionRatios: Sendable, Equatable {
     public init() {}
 }
 
+/// Where a set of session sizes is filed (#2921): the macOS
+/// Desktop, by native id — nil for the one shared entry no reading
+/// names — and the arrangement live there when it was resized.
+public struct SessionSizingKey: Hashable, Sendable {
+    public var desktop: SkyLight.SpaceID?
+    public var arrangement: HeldOrigin.Arrangement?
+
+    public init(
+        desktop: SkyLight.SpaceID?,
+        arrangement: HeldOrigin.Arrangement?
+    ) {
+        self.desktop = desktop
+        self.arrangement = arrangement
+    }
+}
+
 /// The session snapshot's form (#930). The slot size is written
 /// exactly: `ScrollSize`'s own coding rounds a share to two
 /// decimals of a percent, which would move a resized slot.

@@ -26,6 +26,18 @@ struct SessionRatioDesktopTests {
         core.desktopMemory.shownUserSpaces = shown.mapValues { _ in true }
     }
 
+    /// The store's entry for `space` on `desktop` under the
+    /// arrangement live.
+    private func stored(
+        _ core: KiwiCore,
+        _ desktop: SkyLight.SpaceID?,
+        _ id: SpaceID? = nil
+    ) -> SessionRatios? {
+        core.desktopMemory.sessionRatios[desktop]?[core.liveArrangement]?[
+            id ?? space
+        ]
+    }
+
     /// What the render resolves for the Space, through the
     /// engine's wired door.
     private func drawnRatioH(_ core: KiwiCore) throws -> Double {
@@ -83,7 +95,7 @@ struct SessionRatioDesktopTests {
         let core = try core()
         show(core, [:])
         core.writeSplitRatioH(0.7, for: space)
-        #expect(core.desktopMemory.sessionRatios[nil]?[space] != nil)
+        #expect(stored(core, nil) != nil)
         // A screen no switch has filed names no Desktop either.
         show(core, ["6F1C1E9A-0000-4000-8000-000000000001": 30])
         #expect(core.sessionRatios(of: space).splitRatioH == 0.7)
@@ -104,7 +116,7 @@ struct SessionRatioDesktopTests {
             args: [.string("1"), .number(0.4)]
         )
         for desktop in [10, 11] as [SkyLight.SpaceID] {
-            let ratios = core.desktopMemory.sessionRatios[desktop]?[space]
+            let ratios = stored(core, desktop)
             #expect(ratios?.splitRatioH == nil)
             #expect(ratios?.masterRatio == 0.6)
         }
@@ -118,8 +130,8 @@ struct SessionRatioDesktopTests {
         show(core, ["Main": 10])
         core.writeSplitRatioH(0.7, for: space)
         core.rekeySessionRatios(space, to: "9")
-        #expect(core.desktopMemory.sessionRatios[10]?["9"] != nil)
-        #expect(core.desktopMemory.sessionRatios[10]?[space] == nil)
+        #expect(stored(core, 10, "9") != nil)
+        #expect(stored(core, 10) == nil)
         core.forgetSessionRatios(of: "9")
         #expect(core.desktopMemory.sessionRatios.isEmpty)
     }

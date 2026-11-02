@@ -10,8 +10,8 @@ extension KiwiCore {
     /// no default so every caller classifies itself (AGENTS.md
     /// §5) — `ProfileApplyCause` states what each one implies.
     /// The prune has two independent causes (`cause.prunesStale
-    /// || switching`), and the session ratio-layer clear rides
-    /// both an explicit apply and a profile change (#458, #764).
+    /// || switching`); a load starts the shown Desktops' session
+    /// sizes fresh, and a switch keeps them (#2921).
     func apply(
         profile: Profile,
         cause: ProfileApplyCause
@@ -44,13 +44,10 @@ extension KiwiCore {
         // The engine's cached durations sync via
         // `TilingEngine.settings.didSet` (#51).
         tiler.settings = resolvedSettings(of: profile)
-        // The session layer reseeds on an explicit apply, and on
-        // any apply that CHANGES the profile — it outranks the
-        // incoming authored overrides (#458, #764). A same-
-        // profile event apply keeps it.
-        if forceRetile || switching {
-            clearSessionRatios { $0 = SessionRatios() }
-        }
+        // A load starts the shown Desktops' sizes fresh; a switch
+        // keeps them, filed under the arrangement they were made
+        // under (#2921 rulings 5 and 6).
+        if cause == .explicit { forgetSessionRatiosOnShownDesktops() }
         // An explicit apply ends every stack flip; an event or
         // monitor apply keeps them (#2771).
         if forceRetile { forgetStackFlips() }
@@ -195,9 +192,9 @@ extension KiwiCore {
         // A seed the Standard plans is its own now (#1175).
         retireHealedSpaces(declared: Set(composed.spaces))
         tiler.settings = wearingSharedLook(composed.settings)
-        // Same explicit-apply reseed as `apply(profile:)`.
+        // A Standard's forced apply is a load (#2921 ruling 6).
         if forceRetile {
-            clearSessionRatios { $0 = SessionRatios() }
+            forgetSessionRatiosOnShownDesktops()
             forgetStackFlips()  // #2771
         }
         for space in composed.spaces {
