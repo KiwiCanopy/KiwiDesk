@@ -1948,8 +1948,10 @@ reaches.
 - **A key chord a bar surface draws takes `BarFont.chordFont(ofSize:)`,
   never the bar font** (#2923 ▸ Ruling 4): key notation the bar's
   family often lacks glyphs for, so a chord in it splits across two
-  faces. It is the one exception to the face rule above, and the
-  peek's Pocket key column is its one site (`BarPeekPocketKeysTests`).
+  faces. It is the one exception to the face rule above; a new chord
+  site asks `chordFont` and owes `BarPeekPocketKeysTests` a clause, as
+  the peek's Pocket key column has (`BarPeekPocketKeysTests` ▸
+  `keyColumn`).
 - **Resolve the weight in `BarFont` at render time, never on
   write**: the stored weight is the user's number whatever the
   family, and a missing family is kept by name and reported
