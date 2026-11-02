@@ -31,11 +31,12 @@ struct CLIEventStream {
 
     /// Streams the app's lines to `deliver`. Without `reconnect`
     /// it ends when the app goes away (0) or cannot be reached
-    /// (1); with it, it waits and re-subscribes until killed.
+    /// (1); with it, it waits and re-subscribes until killed. A
+    /// `deliver` that throws — its reader gone — ends it with 1.
     func run(
         events: [String],
         reconnect: Bool,
-        deliver: (String) -> Void
+        deliver: (String) throws -> Void
     ) -> Int32 {
         let request = CommandRequest(
             command: APIReference.socketOnlyCommand,
@@ -71,7 +72,7 @@ struct CLIEventStream {
                         gapOpen = false
                     }
                     delivered = true
-                    deliver(line)
+                    do { try deliver(line) } catch { return 1 }
                 }
             } catch {
                 guard reconnect else {
@@ -89,16 +90,18 @@ struct CLIEventStream {
         return 0
     }
 
-    /// `kiwidesk subscribe [--reconnect] [events…]`.
+    /// `kiwidesk subscribe [--reconnect] [events…]`, its lines to
+    /// `output`.
     static func subscribe(
         _ rest: [String],
-        stream: CLIEventStream = CLIEventStream()
+        stream: CLIEventStream = CLIEventStream(),
+        output: FileHandle = .standardOutput
     ) -> Int32 {
         let parsed = parse(rest)
         return stream.run(
             events: parsed.events,
             reconnect: parsed.reconnect,
-            deliver: writeLine
+            deliver: { try writeLine($0, to: output) }
         )
     }
 
@@ -119,8 +122,12 @@ struct CLIEventStream {
     }
 
     /// Writes one line to stdout unbuffered, so a pipe or a file
-    /// sees each event as it arrives.
-    static func writeLine(_ line: String) {
-        FileHandle.standardOutput.write(Data("\(line)\n".utf8))
+    /// sees each event as it arrives; throws once the reader is
+    /// gone, where the non-throwing write raises an exception.
+    static func writeLine(
+        _ line: String,
+        to handle: FileHandle = .standardOutput
+    ) throws {
+        try handle.write(contentsOf: Data("\(line)\n".utf8))
     }
 }
