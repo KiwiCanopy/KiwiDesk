@@ -22,7 +22,7 @@ enum WindowActionRefusal: Equatable {
     /// `move_to_space(_and_follow)` named the Space the window
     /// is already in.
     case alreadyIn(window: String, space: String)
-    /// A swap named the window it would trade with (#2885).
+    /// A swap named one window twice (#2885).
     case swapWithSelf(window: String)
     /// `swap_here` found no focused window to trade with.
     case nothingHereToSwap
@@ -89,7 +89,7 @@ enum WindowActionRefusal: Equatable {
         case .swapWithSelf(let window):
             L(
                 "window_action.refusal.swap_with_self",
-                "“%1$@” is the window you're in",
+                "“%1$@” can't be swapped with itself",
                 window
             )
         case .nothingHereToSwap:

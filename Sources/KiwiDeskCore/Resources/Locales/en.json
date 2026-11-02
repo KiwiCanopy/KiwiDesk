@@ -2483,5 +2483,5 @@
   "window_action.refusal.no_title_match": "No %1$@ window matches “%2$@”",
   "window_action.refusal.nothing_here_to_swap": "No window here to swap with",
   "window_action.refusal.nothing_to_gather": "No %1$@ window to gather",
-  "window_action.refusal.swap_with_self": "“%1$@” is the window you're in"
+  "window_action.refusal.swap_with_self": "“%1$@” can't be swapped with itself"
 }

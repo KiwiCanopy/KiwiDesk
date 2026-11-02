@@ -224,8 +224,12 @@ struct JumpPanelView: View {
     ) -> some View {
         let list = model.list
         let entry = match.entry
-        // A trade inside one Space has no route to draw.
-        let trades = entry.swapsHere && entry.space != list.snapshot.here
+        // A trade inside one Space, or with a window not here, has
+        // no route to here to draw.
+        let snapshot = list.snapshot
+        let trades =
+            entry.swapsHere && snapshot.swapsInHere
+            && entry.space != snapshot.here
         return JumpRowView(
             match: match,
             icon: model.icons[match.entry.pid],

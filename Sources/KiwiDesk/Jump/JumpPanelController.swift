@@ -195,7 +195,7 @@ final class JumpPanelController: NSObject, NSWindowDelegate {
         case .moveHere: core.moveHere(entry.target, on: hubDisplay)
         // After the dismiss, so the swap verb's #292 preflight reads
         // the app the panel handed back.
-        case .swapHere: core.swapHere(entry, on: hubDisplay)
+        case .swapHere: core.swapHere(entry.target, on: hubDisplay)
         }
     }
 

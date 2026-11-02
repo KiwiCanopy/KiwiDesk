@@ -49,21 +49,6 @@ struct JumpSwapHereTests {
         core.state.workspaces.add(WindowID(id), to: space)
     }
 
-    private func entry(
-        _ id: UInt32,
-        status: JumpEntry.Status = .shown
-    ) -> JumpEntry {
-        JumpEntry(
-            target: .window(WindowID(id)),
-            pid: getpid(),
-            app: "App",
-            title: "W\(id)",
-            space: nil,
-            spaceIcon: nil,
-            status: status
-        )
-    }
-
     private func cued(
         _ recorder: Recorder,
         _ refusal: WindowActionRefusal
@@ -85,7 +70,7 @@ struct JumpSwapHereTests {
         let observer = try #require(AXApplicationObserver(pid: getpid()))
         core.eventLoop.observers[getpid()] = observer
         core.frontmostPIDProvider = { getpid() }
-        core.swapHere(entry(2))
+        core.swapHere(.window(WindowID(2)))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
         #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
         #expect(core.state.workspaces.activeSpace == "1")
@@ -100,7 +85,7 @@ struct JumpSwapHereTests {
         let observer = try #require(AXApplicationObserver(pid: getpid()))
         core.eventLoop.observers[getpid()] = observer
         core.frontmostPIDProvider = { 1 }
-        core.swapHere(entry(2))
+        core.swapHere(.window(WindowID(2)))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "2")
         #expect(recorder.logs.contains { $0.contains("denied swap_here") })
     }
@@ -110,7 +95,7 @@ struct JumpSwapHereTests {
         let (core, recorder) = makeCore()
         pair(core)
         track(core, 3, in: "2", floating: true)
-        core.swapHere(entry(3))
+        core.swapHere(.window(WindowID(3)))
         #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
         #expect(cued(recorder, .cannotSwapFloating))
     }
@@ -120,7 +105,7 @@ struct JumpSwapHereTests {
         let (core, recorder) = makeCore()
         pair(core)
         track(core, 3, in: "2", fullscreen: true)
-        core.swapHere(entry(3))
+        core.swapHere(.window(WindowID(3)))
         #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
         #expect(cued(recorder, .cannotSwapFullScreen(window: "")))
     }
@@ -129,36 +114,41 @@ struct JumpSwapHereTests {
     func selfAndNothingHereAreCued() {
         let (core, recorder) = makeCore()
         pair(core)
-        core.swapHere(entry(1))
+        core.swapHere(.window(WindowID(1)))
         #expect(cued(recorder, .swapWithSelf(window: "")))
         let (empty, emptyLog) = makeCore()
         track(empty, 2, in: "2")
-        empty.swapHere(entry(2))
+        empty.swapHere(.window(WindowID(2)))
         #expect(empty.state.workspaces.space(of: WindowID(2)) == "2")
         #expect(cued(emptyLog, .nothingHereToSwap))
     }
 
     /// Slice 1 trades tracked rows only (Ruling 5).
-    @Test("a pocketed, hidden-app or untracked row is cued")
+    @Test("a minimized or hidden-app row is cued before any verb")
     func unreachableRowsAreCued() {
         let (core, recorder) = makeCore()
         pair(core)
-        core.swapHere(entry(9, status: .minimized))
+        core.swapHere(.window(WindowID(9)))
         #expect(cued(recorder, .cannotSwapHere(window: "")))
         recorder.logs = []
-        core.swapHere(
-            JumpEntry(
-                target: .hiddenApp(900_009),
-                pid: 900_009,
-                app: "Hidden",
-                title: "",
-                space: nil,
-                spaceIcon: nil,
-                status: .shown
-            )
-        )
+        core.swapHere(.hiddenApp(900_009))
         #expect(cued(recorder, .cannotSwapHere(window: "")))
         #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
+    }
+
+    /// A pocketed window is the verb's own refusal, CLI included.
+    @Test("a pocketed window is cued by the verb")
+    func pocketedIsCued() {
+        let (core, recorder) = makeCore()
+        pair(core)
+        track(core, 3, in: "1")
+        core.state.apply(.windowFocused(WindowID(3)))
+        #expect(core.execute("pocket").isSuccess)
+        #expect(core.state.isPocketed(WindowID(3)))
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        recorder.logs = []
+        #expect(!core.execute("swap_here", args: [.number(3)]).isSuccess)
+        #expect(cued(recorder, .cannotSwapHere(window: "")))
     }
 
     /// The CLI draws the same cues (Ruling 5).

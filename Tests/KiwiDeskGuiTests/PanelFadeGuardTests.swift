@@ -155,8 +155,9 @@ struct PanelFadeGuardTests {
 
     /// Swap here is KiwiHub's first pick through the #292
     /// preflight (#2885 ▸ Ruling 3): it runs after the dismiss, and
-    /// the verb vets the app the panel handed back. The windows are
-    /// this process's, the one app a real AX observer watches.
+    /// the verb vets the app the panel handed back — the provider
+    /// below refuses while the panel is open. The windows are this
+    /// process's, the one app a real AX observer watches.
     @Test("a Swap here pick passes the preflight after the dismiss")
     func swapPickPassesThePreflight() throws {
         let core = makeTestCore()
@@ -176,9 +177,13 @@ struct PanelFadeGuardTests {
         core.state.workspaces.focus(WindowID(1), in: "1")
         let observer = try #require(AXApplicationObserver(pid: getpid()))
         core.eventLoop.observers[getpid()] = observer
-        core.frontmostPIDProvider = { getpid() }
         let controller = JumpPanelController(core: core)
         controller.reduceMotion = { true }
+        // Another app is "in front" while the panel is open, so a
+        // pick run ahead of the dismiss is denied.
+        core.frontmostPIDProvider = { [weak controller] in
+            controller?.isOpen == true ? 1 : getpid()
+        }
         let front = Front()
         front.wire(controller.handBack)
         controller.show()

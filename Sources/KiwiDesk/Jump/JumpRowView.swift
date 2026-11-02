@@ -73,7 +73,9 @@ struct JumpRowView: View {
 
     var body: some View {
         Button {
-            onActivate(JumpPick.of(NSEvent.modifierFlags))
+            if let pick = JumpPick.of(NSEvent.modifierFlags) {
+                onActivate(pick)
+            }
         } label: {
             content.kiwiHubRowInk(
                 paint,

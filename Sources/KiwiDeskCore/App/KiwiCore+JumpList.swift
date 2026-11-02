@@ -17,7 +17,8 @@ extension KiwiCore {
         return JumpSnapshot(
             entries: jumpEntries(here: here, hub: hub),
             here: here,
-            hereIcon: here.flatMap(jumpSpaceIcon)
+            hereIcon: here.flatMap(jumpSpaceIcon),
+            swapsInHere: jumpHereFocus(in: here) != nil
         )
     }
 
@@ -113,7 +114,7 @@ extension KiwiCore {
                     spaceIcon: space.flatMap(jumpSpaceIcon),
                     status: status,
                     movesHere: jumpMovesHere(window, from: space, into: here),
-                    swapsHere: jumpSwapsHere(window, partner: partner),
+                    swapsHere: jumpSwapsHere(window.id, partner: partner),
                     isOtherApp: jumpIsOtherApp(window.appRef),
                     screen: status == .shown
                         ? jumpScreen(shownOn, hub: hub) : nil

@@ -13643,19 +13643,31 @@ through its digit, so each shows its own. Lighting every row under
 ⇧ would answer no "what does pressing now do", and repaint the
 whole list on the lighter chord.
 
+:::unreleased
+Under ⌥ or ⇧⌥ (#2885) the Move here slot reads "⌥↩ Swap here" and
+is the lit hint, unless the swap would refuse the selection; the
+digits read "⌘1–9 Quick jump" unlit, since they take no ⌥; and the
+row ⌥ acts on, by ⇧'s rule, shows "Space n ⇄ Space m" where the
+trade is with a window in the current Space.
+:::
+
+:::unreleased
 **⌥ is Swap here, and ⇧ never means "there" (#2885, owner ruling
 2026-11-01).** ⌥↩ and ⇧⌥↩ both bring the selected window into your
 slot and send yours to its slot, you staying put — "your window"
 being the focus of the Space shown on the screen KiwiHub opened on,
-as for Move here. Holding ⇧ and then adding ⌥ so lands on the
-action the eye expects, and a swap that follows the window has no
-KiwiHub key (⌃⌥↩ if it is ever wanted). Under ⌥ or ⇧⌥ the Move
-here slot reads "⌥↩ Swap here" and is the lit hint, the digits read
-"⌘1–9 Quick jump" unlit since they take no ⌥, and a selection the
-swap would refuse lights nothing; the row ⌥ acts on, by ⇧'s rule,
-shows "Space n ⇄ Space m". The pick runs the public `swap_here`
-verb after the panel dismisses, so the refusal and its cue are the
-verb's own.
+as for Move here, else the global focus. Holding ⇧ and then adding
+⌥ so lands on the action the eye expects, and a swap that follows
+the window has no KiwiHub key (⌃⌥↩ if it is ever wanted, which is
+why ⌥ beside ⌃ or ⌘ picks nothing). The pick runs after the panel
+dismisses, through the public swap verbs, so a refusal and its cue
+are the verb's own: `swap_here` under the #292 preflight, or, where
+your window is on a Space another screen shows, `swap` naming both
+windows — `swap_here`'s implied window is the active Space's focus,
+and switching there first would meet a preflight whose frontmost
+app has not followed — with the switch to that Space after the
+trade.
+:::
 
 **The layout picker is a side of the ⌃⌥J panel, not a menu
 (#2229).** #762 made the picker a native menu because a menu

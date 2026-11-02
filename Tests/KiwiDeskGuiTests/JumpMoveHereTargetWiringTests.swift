@@ -33,8 +33,9 @@ struct JumpMoveHereTargetWiringTests {
         )
         // Swap here's "your window" is the same screen's (#2885).
         #expect(
-            controller.occurrences(of: "core.swapHere(entry,on:hubDisplay)")
-                == 1
+            controller.occurrences(
+                of: "core.swapHere(entry.target,on:hubDisplay)"
+            ) == 1
         )
         // No GUI caller reaches either door without the screen.
         let files = try SourceScan.swiftSources(

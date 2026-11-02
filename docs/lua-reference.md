@@ -198,7 +198,14 @@ is unless one of them lands in the Space you are on, which then
 focuses it. Two windows in different Spaces, on one screen or
 two, trade places: each takes the other's slot. A floating
 window, a window in native full screen and a sticky window that
-cannot change Space are refused. A direction followed by a window
+cannot change Space are refused.
+
+:::unreleased
+A window swapped with itself, a pocketed window and those three
+refusals say why in a cue on the window.
+:::
+
+A direction followed by a window
 id swaps that window with its neighbour in that direction, in the
 Space you are on, and moves no focus.
 
@@ -217,10 +224,6 @@ reports it.
 focuses it; you stay where you are, and the focused window takes
 the other window's place, in its Space or on its screen. Refused
 as for [`swap`](#swap).
-
-:::unreleased
-A refused `swap` or `swap_here` says why in a cue on the window.
-:::
 
 **Example:**
 
@@ -6182,11 +6185,11 @@ under **Pocket**.
 
 :::unreleased
 **⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
-window with yours, as [swap_here](#swap_here) does: it comes into
-your slot and takes the focus, yours takes its place, and you stay
-where you are. "Yours" is the window focused on the screen KiwiHub
-opened on. A minimized window, one on another macOS Desktop, a
-hidden app and a pocketed window are refused for now.
+window with yours, as [swap_here](#swap_here) does. Yours is the
+window focused on the screen KiwiHub opened on, else the focused
+window. A hidden app and a pocketed window are refused, and so,
+until #2884, are a minimized window and one on another macOS
+Desktop.
 :::
 
 :::unreleased

@@ -66,6 +66,8 @@ struct JumpKeyTests {
         #expect(JumpPick.of([.shift, .option]) == .swapHere)
         #expect(JumpPick.of(.shift) == .moveHere)
         #expect(JumpPick.of([]) == .jump)
+        #expect(JumpPick.of([.option, .control]) == nil)
+        #expect(JumpPick.of([.option, .command]) == nil)
     }
 
     @Test("⌘1–9 pick by result, ⇧⌘ moves here, a keypad digit too")

@@ -2468,12 +2468,12 @@
   "window_action.refusal.already_in": "« %1$@ » est déjà dans l'espace %2$@",
   "window_action.refusal.cannot_move_here": "« %1$@ » ne peut pas être déplacé ici",
   "window_action.refusal.cannot_swap_floating": "Une fenêtre flottante ne peut pas être échangée",
-  "window_action.refusal.cannot_swap_full_screen": "« %1$@ » est en plein écran et ne peut pas être échangée",
-  "window_action.refusal.cannot_swap_here": "« %1$@ » ne peut pas être échangée ici",
+  "window_action.refusal.cannot_swap_full_screen": "« %1$@ » est en plein écran et ne peut pas être échangé",
+  "window_action.refusal.cannot_swap_here": "« %1$@ » ne peut pas être échangé ici",
   "window_action.refusal.no_close_button": "« %1$@ » n'a pas de bouton de fermeture",
   "window_action.refusal.no_new_window": "%1$@ n'a pas de commande « Nouvelle fenêtre »",
   "window_action.refusal.no_title_match": "Aucune fenêtre de %1$@ ne correspond à « %2$@ »",
   "window_action.refusal.nothing_here_to_swap": "Aucune fenêtre ici avec laquelle échanger",
   "window_action.refusal.nothing_to_gather": "Aucune fenêtre de %1$@ à rassembler",
-  "window_action.refusal.swap_with_self": "« %1$@ » est la fenêtre dans laquelle vous êtes"
+  "window_action.refusal.swap_with_self": "« %1$@ » ne peut pas être échangé avec lui-même"
 }

@@ -89,9 +89,7 @@ enum JumpKey: Equatable {
         case pageUp, pageDown:
             return .page(keyCode == pageUp ? -1 : 1)
         case returnKey, enter:
-            if scope == .windows, held.contains(.option),
-                held.subtracting([.shift, .option]).isEmpty
-            {
+            if scope == .windows, JumpPick.of(held) == .swapHere {
                 return .swapHere
             }
             guard held.subtracting(.shift).isEmpty else { return nil }
@@ -200,9 +198,17 @@ enum JumpPick: Equatable {
     case moveHere
     case swapHere
 
-    /// The pick a click makes under `modifiers`: ⌥ outranks ⇧.
-    static func of(_ modifiers: NSEvent.ModifierFlags) -> JumpPick {
-        if modifiers.contains(.option) { return .swapHere }
-        return modifiers.contains(.shift) ? .moveHere : .jump
+    /// The pick ↩ and a click make under `modifiers`, the one home
+    /// of the swap chords: ⌥ and ⇧⌥ swap, and ⌥ beside ⌃ or ⌘ —
+    /// kept for a follow (Ruling 1) — picks nothing.
+    static func of(_ modifiers: NSEvent.ModifierFlags) -> JumpPick? {
+        let held = modifiers.intersection(
+            [.shift, .command, .option, .control]
+        )
+        guard held.contains(.option) else {
+            return held.contains(.shift) ? .moveHere : .jump
+        }
+        return held.subtracting([.shift, .option]).isEmpty
+            ? .swapHere : nil
     }
 }

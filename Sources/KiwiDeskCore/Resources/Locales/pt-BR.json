@@ -2468,12 +2468,12 @@
   "window_action.refusal.already_in": "“%1$@” já está no espaço %2$@",
   "window_action.refusal.cannot_move_here": "“%1$@” não pode ser movido para cá",
   "window_action.refusal.cannot_swap_floating": "Uma janela flutuante não pode ser trocada",
-  "window_action.refusal.cannot_swap_full_screen": "“%1$@” está em tela cheia e não pode ser trocada",
-  "window_action.refusal.cannot_swap_here": "“%1$@” não pode ser trocada para cá",
+  "window_action.refusal.cannot_swap_full_screen": "“%1$@” está em tela cheia e não pode ser trocado",
+  "window_action.refusal.cannot_swap_here": "“%1$@” não pode ser trocado para cá",
   "window_action.refusal.no_close_button": "“%1$@” não tem botão de fechar",
   "window_action.refusal.no_new_window": "%1$@ não tem o comando “Nova Janela”",
   "window_action.refusal.no_title_match": "Nenhuma janela de %1$@ corresponde a “%2$@”",
   "window_action.refusal.nothing_here_to_swap": "Nenhuma janela aqui para trocar",
   "window_action.refusal.nothing_to_gather": "Nenhuma janela de %1$@ para reunir",
-  "window_action.refusal.swap_with_self": "“%1$@” é a janela em que você está"
+  "window_action.refusal.swap_with_self": "“%1$@” não pode ser trocado com ele mesmo"
 }

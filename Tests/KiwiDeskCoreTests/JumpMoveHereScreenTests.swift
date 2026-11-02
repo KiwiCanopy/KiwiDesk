@@ -234,22 +234,27 @@ struct JumpMoveHereScreenTests {
             $0.target == .window(WindowID(2))
         }
         #expect(row?.swapsHere == true)
-        core.swapHere(
-            JumpEntry(
-                target: .window(WindowID(2)),
-                pid: pid,
-                app: "Notes",
-                title: "",
-                space: "2",
-                spaceIcon: nil,
-                status: .shown
-            ),
-            on: DisplayID(2)
-        )
+        core.swapHere(.window(WindowID(2)), on: DisplayID(2))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "5")
         #expect(core.state.workspaces.space(of: WindowID(3)) == "2")
         #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
         #expect(core.state.workspaces.activeSpace == "5")
         #expect(core.state.workspaces.lastFocused == WindowID(2))
+    }
+
+    /// An empty Space on the panel's screen falls back to the
+    /// global focus, and you stay on the focused screen.
+    @Test("Swap here from an empty screen trades with the focus")
+    func swapFromAnEmptyScreen() {
+        let core = makeCore()
+        defer { teardown() }
+        track(core, 1, in: "1")
+        core.state.workspaces.focus(WindowID(1), in: "1")
+        track(core, 2, in: "2")
+        #expect(core.jumpSnapshot(on: DisplayID(2)).swapsInHere == false)
+        core.swapHere(.window(WindowID(2)), on: DisplayID(2))
+        #expect(core.state.workspaces.space(of: WindowID(2)) == "1")
+        #expect(core.state.workspaces.space(of: WindowID(1)) == "2")
+        #expect(core.state.workspaces.activeSpace == "1")
     }
 }

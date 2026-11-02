@@ -2475,5 +2475,5 @@
   "window_action.refusal.no_title_match": "Kein Fenster von %1$@ passt zu „%2$@“",
   "window_action.refusal.nothing_here_to_swap": "Hier ist kein Fenster zum Tauschen",
   "window_action.refusal.nothing_to_gather": "Kein Fenster von %1$@ zum Sammeln",
-  "window_action.refusal.swap_with_self": "„%1$@“ ist das Fenster, in dem du bist"
+  "window_action.refusal.swap_with_self": "„%1$@“ kann nicht mit sich selbst getauscht werden"
 }

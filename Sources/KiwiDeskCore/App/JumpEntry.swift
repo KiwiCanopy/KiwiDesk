@@ -92,15 +92,21 @@ public struct JumpSnapshot: Sendable, Equatable {
     public let entries: [JumpEntry]
     public let here: SpaceID?
     public let hereIcon: SpaceGlyph?
+    /// Whether Swap here trades with a window in `here`; where that
+    /// Space has no focus it trades with the global one (#2885), and
+    /// no row draws a route to `here`.
+    public let swapsInHere: Bool
 
     public init(
         entries: [JumpEntry],
         here: SpaceID?,
-        hereIcon: SpaceGlyph?
+        hereIcon: SpaceGlyph?,
+        swapsInHere: Bool = false
     ) {
         self.entries = entries
         self.here = here
         self.hereIcon = hereIcon
+        self.swapsInHere = swapsInHere
     }
 }
 

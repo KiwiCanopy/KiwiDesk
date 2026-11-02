@@ -33,7 +33,9 @@ extension KiwiCore {
             case .refused(let response):
                 return response
             case .window(let window):
-                if let refusal = swapRefusal(window) { return refusal }
+                if let block = slotBlock(window) {
+                    return refuseSwap(block)
+                }
                 guard
                     state.workspaces.space(of: window)
                         == state.workspaces.activeSpace
@@ -96,15 +98,10 @@ extension KiwiCore {
         _ partner: WindowID,
         focus: SwapFocus
     ) -> CommandResponse {
-        guard lead != partner else {
-            cueWindowAction(
-                .swapWithSelf(window: windowTitle(lead)),
-                on: lead
-            )
-            return .fail("cannot swap a window with itself")
-        }
-        for id in [lead, partner] {
-            if let refusal = swapRefusal(id) { return refusal }
+        // Both sides asked before anything moves (#445), so a
+        // refusal is the command's answer, not a silent no-op.
+        if let block = swapBlock(lead, partner) {
+            return refuseSwap(block)
         }
         guard let home = state.workspaces.space(of: lead),
             let away = state.workspaces.space(of: partner)
@@ -112,21 +109,6 @@ extension KiwiCore {
             return .fail("window is in no Space")
         }
         guard home == away else {
-            // Both sides asked before anything moves (#445), so a
-            // refusal is the command's answer, not a silent no-op.
-            if stickyMoveRefused(
-                lead,
-                to: away,
-                landingOn: landingDisplay(of: away)
-            )
-                || stickyMoveRefused(
-                    partner,
-                    to: home,
-                    landingOn: landingDisplay(of: home)
-                )
-            {
-                return .fail("a sticky window cannot change Space")
-            }
             moveWindow(
                 lead,
                 to: away,
@@ -154,23 +136,5 @@ extension KiwiCore {
             focusWindow(lead, warp: true)
         }
         return .ok()
-    }
-
-    /// Why `id` holds no slot to swap, cued on it, nil where it
-    /// does: an effective float has none and a native full-screen
-    /// window keeps its own Space (#670).
-    private func swapRefusal(_ id: WindowID) -> CommandResponse? {
-        if state.windows[id]?.isFullscreen == true {
-            cueWindowAction(
-                .cannotSwapFullScreen(window: windowTitle(id)),
-                on: id
-            )
-            return .fail("window \(id.raw) is full screen")
-        }
-        if isEffectiveFloatForPlacement(id) {
-            cueWindowAction(.cannotSwapFloating, on: id)
-            return .fail("window \(id.raw) is floating")
-        }
-        return nil
     }
 }
