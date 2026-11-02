@@ -196,7 +196,8 @@ struct SplitFloorCueTests {
         )
         #expect(
             core.tiler.settings.resolvedStack(
-                for: core.state.workspaces[space]!
+                for: core.state.workspaces[space]!,
+                flip: nil
             ).masterRatio == 0.6
         )
         let frame = try #require(

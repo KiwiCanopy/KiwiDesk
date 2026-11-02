@@ -117,7 +117,10 @@ extension KiwiCore {
                 )
             }
         case .stack:
-            let stack = tiler.settings.resolvedStack(for: space)
+            let stack = tiler.settings.resolvedStack(
+                for: space,
+                flip: stackFlip(of: space.id)
+            )
             let (master, stackZone) = StackLayout.partition(
                 tiled,
                 masterCount: stack.masterCount
@@ -135,8 +138,10 @@ extension KiwiCore {
                 context: context,
                 cues: &cues,
                 current: {
-                    self.tiler.settings.resolvedStack(for: $0)
-                        .masterRatio
+                    self.tiler.settings.resolvedStack(
+                        for: $0,
+                        flip: self.stackFlip(of: $0.id)
+                    ).masterRatio
                 },
                 write: { ratio, span in
                     self.writeCappedMasterRatio(

@@ -67,6 +67,16 @@ editing here:
   a named register so a new one has to argue for itself — the
   GUI's own binding rows are outside that scan;
   `KiwiCore+DesktopSpaces.swift` carries the argument.
+  **A choice the user makes on one Desktop may be keyed by the
+  Desktop's native id (#2771)** — it copies nothing from the
+  compositor — but only as session state, read through one door
+  every reader takes as a required argument, rekeyed at
+  `moveMembers` and forgotten at `forwardWindows(of:to:)` like any
+  per-Space session store; `stackFlips` is the instance
+  (`StackFlipSeamTests`), and a new native-id-keyed map joins
+  `ProfileSpacesSeamTests`' register with what it holds. A
+  per-Desktop choice that must outlast the session is a profile
+  bound to that Desktop, never a durable map.
 - **Ask the adoption state, through `KiwiCore.liveArrangement`,
   which arrangement that store is filing FOR** — a saved profile
   or a composed Standard (#1829) — rather than reading or adding

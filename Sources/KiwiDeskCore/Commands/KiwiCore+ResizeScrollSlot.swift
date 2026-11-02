@@ -67,7 +67,8 @@ extension KiwiCore {
         let context = tiler.settings.context(
             bounds: bounds,
             space: space,
-            sticky: []
+            sticky: [],
+            stackFlip: stackFlip(of: space.id)
         )
         let inner = context.gaps.inner
         let current = scrolling.slotSize

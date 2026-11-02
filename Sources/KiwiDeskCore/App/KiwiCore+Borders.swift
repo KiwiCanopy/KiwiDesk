@@ -192,10 +192,14 @@ extension KiwiCore {
         else { return nil }
         // Shared Spaces answer through their synthetic key here;
         // `cueDisplay` detects that mode from its own reading.
-        return NativeSpaces.shownEntry(
-            desktopMemory.shownSpaces,
-            screen: uuid
-        )
+        return shownDesktop(onScreen: uuid)
+    }
+
+    /// The native Space the screen `uuid` shows, as the last
+    /// Desktop switch filed it — the ring's and the stack flip's
+    /// one reading (#2149, #2771).
+    func shownDesktop(onScreen uuid: String) -> SkyLight.SpaceID? {
+        NativeSpaces.shownEntry(desktopMemory.shownSpaces, screen: uuid)
     }
 
     /// The rings to show for one space. Focused window always

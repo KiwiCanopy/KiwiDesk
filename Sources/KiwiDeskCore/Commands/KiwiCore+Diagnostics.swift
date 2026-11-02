@@ -88,6 +88,13 @@ extension KiwiCore {
                     }
                 ),
             ]
+            // The side a Stack Space draws on the Desktop shown
+            // now, its flip included (#2771).
+            if space.mode == .stack {
+                object["stack_position"] = .string(
+                    drawnStackPosition(of: space.id).rawValue
+                )
+            }
             // Session-only stack weights (#67), surfaced so
             // resize("y") state is inspectable from the CLI;
             // absent while the column is evenly split.

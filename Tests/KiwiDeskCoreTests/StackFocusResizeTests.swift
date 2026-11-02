@@ -71,7 +71,8 @@ struct StackFocusResizeTests {
     /// Session-resolved master ratio of space "1" (#458).
     private func resolvedMaster(_ core: KiwiCore) -> Double {
         core.tiler.settings.resolvedStack(
-            for: core.state.workspaces[SpaceID("1")]!
+            for: core.state.workspaces[SpaceID("1")]!,
+            flip: nil
         ).masterRatio
     }
 

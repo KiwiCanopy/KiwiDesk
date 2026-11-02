@@ -51,6 +51,9 @@ extension KiwiCore {
         if forceRetile || switching {
             clearSessionRatios { $0 = SessionRatios() }
         }
+        // An explicit apply ends every stack flip; an event or
+        // monitor apply keeps them (#2771).
+        if forceRetile { forgetStackFlips() }
         let declared = profile.declaredSpaces
         // A seed this profile declares is its own now (#1175).
         retireHealedSpaces(declared: declared)
@@ -195,6 +198,7 @@ extension KiwiCore {
         // Same explicit-apply reseed as `apply(profile:)`.
         if forceRetile {
             clearSessionRatios { $0 = SessionRatios() }
+            forgetStackFlips()  // #2771
         }
         for space in composed.spaces {
             state.workspaces.ensureSpace(space)
