@@ -33,7 +33,7 @@ struct OwnPidQueueNeedleTests {
     func frameApplyQueueKeepsOwnPidArm() throws {
         let source = try SourceScan.functionBody(
             of: "queue",
-            in: "FrameApplier.swift",
+            in: "FrameApplier+Queues.swift",
             under: "Tiling"
         )
         #expect(source.contains("pid == getpid()"))

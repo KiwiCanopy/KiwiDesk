@@ -5,8 +5,9 @@ import Testing
 
 /// The arrival focus Jump to window owes (#1875): paid when the
 /// window arrives — a Move here filed into the Space it was owed
-/// for first — and stood down off that Space, past the bound, or
-/// after a press or a commanded focus. Driven through the real
+/// for first, whatever stands the focus down (#2883) — and stood
+/// down off that Space, past the bound, or after a press or a
+/// commanded focus. Driven through the real
 /// fold and the `.windowCreated` arm, on minimized windows, which
 /// need no bridge. The verdict is read off the payer's own log
 /// line: the fold's new-window grant focuses an arrival in the
@@ -84,6 +85,19 @@ struct JumpFocusTests {
         #expect(core.jump.owed == nil)
     }
 
+    /// Its app rule files it in Space 2, so the arrival lands
+    /// elsewhere and only the filing brings it here (#2883).
+    private func moveHereAgainstRule(_ core: KiwiCore) {
+        core.state.appRules[bundle] = "2"
+        #expect(core.moveHere(.window(WindowID(4))))
+    }
+
+    /// The filing is the move the user asked for: paid whatever
+    /// stood the focus down (#2883).
+    private func expectFiledHere(_ core: KiwiCore) {
+        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
+    }
+
     /// Its app rule files it in Space 2: the arrival moves it here
     /// and focuses it, and nothing is filed ahead of the arrival.
     @Test("Move here files a minimized window here at its arrival")
@@ -124,33 +138,37 @@ struct JumpFocusTests {
     @Test("a Space switch before the arrival stands the focus down")
     func switchStandsDown() {
         let core = makeCore()
-        #expect(core.moveHere(.window(WindowID(4))))
+        moveHereAgainstRule(core)
         core.state.workspaces.activate("2")
         core.state.workspaces.focus(WindowID(2), in: "2")
         arrive(core)
         #expect(core.state.workspaces.activeSpace == "2")
         expectStoodDown(core)
+        #expect(core.state.workspaces.space(of: WindowID(4)) == "1")
     }
 
     @Test("an arrival past the bound stands the focus down")
     func boundStandsDown() {
         let core = makeCore()
-        #expect(core.moveHere(.window(WindowID(4))))
+        moveHereAgainstRule(core)
         core.wallClock = {
             self.start.addingTimeInterval(FollowFocusIntent.drainWindow)
         }
         arrive(core)
         expectStoodDown(core)
+        // Past the bound nothing is paid, the filing included.
+        #expect(core.state.workspaces.space(of: WindowID(4)) == "2")
     }
 
     @Test("a press since the move stands the focus down")
     func pressStandsDown() {
         let core = makeCore()
-        #expect(core.moveHere(.window(WindowID(4))))
+        moveHereAgainstRule(core)
         core.wallClock = { self.start.addingTimeInterval(2) }
         core.launchFollow.pressAge = { 1 }
         arrive(core)
         expectStoodDown(core)
+        expectFiledHere(core)
     }
 
     /// The control: the press that made the move is older.
@@ -167,10 +185,11 @@ struct JumpFocusTests {
     @Test("a commanded focus since the move stands the focus down")
     func commandedStandsDown() {
         let core = makeCore()
-        #expect(core.moveHere(.window(WindowID(4))))
+        moveHereAgainstRule(core)
         core.eventLoop.lastCommandedFocus = .now
         arrive(core)
         expectStoodDown(core)
+        expectFiledHere(core)
     }
 
     @Test("the debt follows a native-tab re-key")

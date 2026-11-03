@@ -11,7 +11,8 @@ import Foundation
 /// owed for is still the active one. A Move here that lands
 /// elsewhere (an un-minimized window taking its app rule) is
 /// filed into that Space at the payment, so nothing is filed
-/// ahead of an arrival that may never come. Not a
+/// ahead of an arrival that may never come, even where the focus
+/// then stands down (#2883). Not a
 /// `FollowFocusIntent`: that debt pays as a switch and holds the
 /// Desktop return down (#1207) while it stands, and this one
 /// must do neither. A window that never arrives needs no retire:
@@ -124,37 +125,55 @@ final class JumpState {
 }
 
 extension KiwiCore {
-    /// Pays Move here's focus at the window's arrival (#1875), in
-    /// the `.windowCreated` arm beside the follow's payment. Stands
-    /// down past the follow's bound, outside the Space it was owed
-    /// for, or after a press or a commanded focus since.
+    /// Pays Move here's two debts at the window's arrival (#1875),
+    /// in the `.windowCreated` arm beside the follow's payment.
+    /// The filing is the move the user asked for and is paid
+    /// whatever was pressed, focused or switched since (#2883);
+    /// only the focus stands down: off the Space it was owed for,
+    /// or after a press or a commanded focus since. Past the
+    /// follow's bound nothing is paid.
     func payMoveHereFocus(arrived window: WindowID) {
         guard let owed = jump.take(arrived: window) else { return }
-        let now = wallClock()
-        let age = now.timeIntervalSince(owed.at)
+        let age = wallClock().timeIntervalSince(owed.at)
+        guard age < FollowFocusIntent.drainWindow else {
+            onLog(
+                "move here: w\(window.raw) arrived past its bound — "
+                    + "nothing filed, focus stood down"
+            )
+            return
+        }
+        fileMoveHere(window, owed)
         let pressed = launchFollow.pressed(within: age)
         let commanded =
             eventLoop.lastCommandedFocus.map { $0 > owed.commandedAt }
             ?? false
-        let landed = state.workspaces.space(of: window)
-        let relocates =
-            owed.relocates && landed != nil
-            && stickyMoveBlock(window, to: owed.space) == nil
-        guard age < FollowFocusIntent.drainWindow,
-            state.workspaces.activeSpace == owed.space,
-            landed == owed.space || relocates,
+        guard state.workspaces.activeSpace == owed.space,
+            state.workspaces.space(of: window) == owed.space,
             !pressed, !commanded
         else {
             onLog("move here: w\(window.raw) arrived — focus stood down")
             return
         }
+        focusWindow(window, refocusRetile: false, warp: true)
+        onLog("move here: focus handed to w\(window.raw)")
+    }
+
+    /// Move here's filing: a landing elsewhere files into the owed
+    /// Space (a hidden one parks it) past the sticky gate, and a
+    /// hopped float that landed there is placed on its new screen.
+    /// Both need the Space still to exist.
+    private func fileMoveHere(_ window: WindowID, _ owed: JumpState.Owed) {
+        guard let landed = state.workspaces.space(of: window),
+            state.workspaces[owed.space] != nil
+        else { return }
         if landed != owed.space {
+            guard owed.relocates,
+                stickyMoveBlock(window, to: owed.space) == nil
+            else { return }
             fileMembership(window, into: owed.space, from: landed)
         } else if owed.hopped, reanchorFloat(window, to: owed.space) {
             // A hopped float may report its pre-move frame (#2770).
             onLog("move here: w\(window.raw) placed on its new screen")
         }
-        focusWindow(window, refocusRetile: false, warp: true)
-        onLog("move here: focus handed to w\(window.raw)")
     }
 }

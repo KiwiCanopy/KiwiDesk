@@ -395,11 +395,22 @@ editing here:
   DISPATCHED for that window — a hop the bridge accepted, an
   un-minimize — so the arrival is certain; the `.windowCreated`
   arm pays it with a bare focus while the Space it was owed for
-  is still active, a Move here that landed elsewhere filed there
-  first through `fileMembership` — never ahead of the arrival,
-  which may not come — and it stands down off that Space, past
-  `FollowFocusIntent.drainWindow`, or after a press or a
-  commanded focus since. Keep it off `followFocus`: that debt
+  is still active. **Its two debts are paid apart (#2883)**: the
+  filing — a Move here that landed elsewhere filed there through
+  `fileMembership` (a hidden Space parks it), a hopped float
+  placed through `reanchorFloat`, both only while that Space
+  exists and the sticky gate passes — is the move the user asked
+  for and is paid at the arrival whatever was pressed, focused
+  or switched since, never ahead of the arrival, which may not
+  come; only the focus stands down off that Space or after a
+  press or a commanded focus since. Past
+  `FollowFocusIntent.drainWindow` neither is paid
+  (`JumpFocusTests`, `JumpMoveHereCrossScreenTests` ▸
+  `pressStillFiles`). The hidden-app Move here never takes that
+  split: its window is named by the app's first honored focus
+  report, not by a dispatch, so a press or a commanded focus
+  since stands it down whole (`JumpHiddenAppTests` ▸
+  `pressStandsDown`). Keep it off `followFocus`: that debt
   pays as a Space switch and, while it stands, holds the #1207
   return and the #1564 sticky return down — the follow's
   register therefore names no Jump site
@@ -2369,7 +2380,26 @@ editing here:
   refuse the size, and a capture held for it re-sends on every
   retile. A capture not yet sent is delivered only by the whole
   frame, through the one `stashSent` record
-  (`StashRefusedSizeTests`).
+  (`StashRefusedSizeTests`). **A refused ORIGIN is sent twice,
+  then consumed** where the window answered, with a log line
+  naming the window and both origins (#2881): a new restore arm
+  counts its answers in that record, never a re-send per retile,
+  and a frame at a stash corner (`looksStashed`) is never an
+  answer (`StashRefusedSizeTests` ▸ `lostSetRetries`,
+  `cornerIsNoAnswer`). While the last send's instant lead (#881)
+  stands, the restore neither re-sends nor counts: its answer
+  may still be on the way (`StashRefusedSizeTests` ▸
+  `lagIsNoAnswer`).
+- **Let a float's move inside the echo grace past the drag's
+  echo guard only as an answer to a press newer than our last
+  write (#1798, #2087).** A move is `late` (after the release,
+  or with its release still in flight) or `answersPress` (the
+  button still held), each read in `KiwiCore+LateFlick` and each
+  asking `pressFollowsOwnWrite`; a new reason for a move to pass
+  the guard joins that file, never a flag at a call site. Floats
+  only, per the #1798 ruling; the trailing press both late
+  gestures share stays the one `recentSinglePress`
+  (`FloatFlickHeldTests`, `FloatFlickDropTests`).
 - **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the

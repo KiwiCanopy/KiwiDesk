@@ -71,16 +71,20 @@ struct JumpMoveHereTargetWiringTests {
         let source = try SourceScan.blankedSource(at: file)
             .split(whereSeparator: \.isWhitespace).joined()
         let pay = try #require(source.range(of: "funcpayMoveHereFocus("))
-        let body = String(source[pay.upperBound...])
+        let filing = try #require(source.range(of: "funcfileMoveHere("))
+        // The payment files before it focuses (#2883).
+        let payBody = String(source[pay.upperBound..<filing.lowerBound])
+        let files = try #require(payBody.range(of: "fileMoveHere(window,"))
+        let focus = try #require(payBody.range(of: "focusWindow(window,"))
+        #expect(files.lowerBound < focus.lowerBound)
+        let body = String(source[filing.upperBound...])
         let file2 = try #require(body.range(of: "fileMembership(window,"))
         let place = try #require(
             body.range(
                 of: "}elseifowed.hopped,reanchorFloat(window,to:owed.space)"
             )
         )
-        let focus = try #require(body.range(of: "focusWindow(window,"))
         #expect(file2.lowerBound < place.lowerBound)
-        #expect(place.lowerBound < focus.lowerBound)
-        #expect(body.occurrences(of: "reanchorFloat(") == 1)
+        #expect(source.occurrences(of: "reanchorFloat(") == 1)
     }
 }

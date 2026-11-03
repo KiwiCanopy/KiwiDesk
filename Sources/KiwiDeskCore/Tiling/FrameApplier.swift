@@ -11,10 +11,11 @@ final class FrameApplier {
 
     private var animatingPid: [WindowID: pid_t] = [:]
     private var pidCounts: [pid_t: Int] = [:]
-    private var queues: [pid_t: DispatchQueue] = [:]
+    /// Per-app frame queues, made by `queue(for:)`.
+    var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
     private let recent = RecentApplies()
-    private let instantTargets = InstantTargets()
+    let instantTargets = InstantTargets()
     let enhancedUI = EnhancedUIHolds()
     /// Writes the plate slide holds until it lands (#1956).
     let held = HeldWrites()
@@ -53,7 +54,7 @@ final class FrameApplier {
     var meter = WorkMeter.shared
 
     /// Grace period for ignoring self-inflicted AX frame echoes.
-    private static let echoGrace: TimeInterval = 1.0
+    static let echoGrace: TimeInterval = 1.0
 
     /// The clock the echo grace is measured on. Live by default;
     /// `makeTestCore` freezes it, since a starved runner can let
@@ -93,6 +94,28 @@ final class FrameApplier {
     func clearInstantTarget(_ id: WindowID) {
         instantTargets.clear(id)
     }
+
+    /// Called once per sweep in which instant writes' commanded
+    /// leads lapsed with no echo (#2882); inert unwired, wired once
+    /// at bootstrap.
+    var instantLeadLapsed: @MainActor () -> Void = {}
+
+    /// Runs a lapse sweep after its delay, on the main actor; a
+    /// test fires it by hand. Apart from `scheduleResend`, so a
+    /// suite stepping resends never receives a sweep.
+    var scheduleLapse:
+        @MainActor (TimeInterval, @escaping @MainActor () -> Void)
+            -> Void = { delay, work in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    MainActor.assumeIsolated(work)
+                }
+            }
+
+    /// How far past the grace a lapse sweep runs.
+    static let lapseMargin: TimeInterval = 0.05
+
+    /// Whether a lapse sweep is scheduled: one for every lead owed.
+    var lapseSweepPending = false
 
     /// Marks window animating and disables app EnhancedUserInterface.
     func beginAnimating(_ id: WindowID) {
@@ -192,6 +215,7 @@ final class FrameApplier {
         // overlay sync wants the commanded frame this same turn
         // (#881); a stamp for a gone window expires unread.
         instantTargets.record(id, frame: frame, now: clock())
+        scheduleLapseSweep(after: Self.echoGrace)
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
@@ -287,50 +311,6 @@ final class FrameApplier {
         let recent = recent
         let clock = clock
         return { recent.record($0, now: clock()) }
-    }
-
-    func queue(for pid: pid_t) -> DispatchQueue {
-        // Own process runs on main queue to prevent AppKit thread traps
-        // (#678 Phase 5).
-        if pid == getpid() {
-            return DispatchQueue.main
-        }
-        if let existing = queues[pid] {
-            return existing
-        }
-        let queue = DispatchQueue(
-            label: "org.kiwidesk.frames.\(pid)",
-            qos: .userInteractive
-        )
-        queues[pid] = queue
-        return queue
-    }
-
-    /// EUI holds ride the same per-app queue as the frames, so
-    /// off → frames → on ordering is guaranteed.
-    private func holdEUI(pid: pid_t, held: Bool) {
-        let holds = enhancedUI
-        let writer = writer
-        if held {
-            holds.noteQueued(
-                pid,
-                atRest: enhancedUIAtRest(pid),
-                instant: false
-            )
-        }
-        queue(for: pid).async {
-            if held {
-                holds.acquire(pid, writer)
-            } else {
-                holds.release(pid, writer)
-            }
-        }
-    }
-
-    /// The event loop stopped owning the app and left its EUI
-    /// at `leftOn`; a hold still open restores that.
-    func retireApp(_ pid: pid_t, leftOn: Bool) {
-        enhancedUI.retire(pid, leftOn: leftOn)
     }
 
     static func pid(of element: AXUIElement) -> pid_t? {
