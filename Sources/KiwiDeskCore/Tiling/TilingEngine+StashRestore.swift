@@ -102,9 +102,10 @@ extension TilingEngine {
             if let previous = stashSent[id],
                 previous.frame == original
             {
-                // The last send's lead stands: its answer may still
-                // be on the way, so nothing is re-sent or counted.
-                if let lead = recentInstantTarget(id),
+                // The last send still stands (#1508's one reading):
+                // its answer may be on the way, so nothing is
+                // re-sent or counted.
+                if let lead = commandedFrame(of: id),
                     Self.close(lead, to: original)
                 {
                     continue
