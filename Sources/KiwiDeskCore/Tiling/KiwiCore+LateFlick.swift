@@ -3,19 +3,10 @@ import Foundation
 
 /// The trailing-event reads of a float flick (#1798, #2087): which
 /// moves inside the frame applier's echo grace answer the hand
-/// rather than our own write. Floats only, per the #1798 ruling.
+/// rather than our own write. Floats only, per the #1798 ruling;
+/// the trailing press both late gestures share,
+/// `recentSinglePress`, stays with the drag.
 extension KiwiCore {
-    /// The last left press, while it is a SINGLE click released
-    /// under a second ago: the trailing-event window both late
-    /// gestures share (#1358, #1798).
-    var recentSinglePress: MouseTracker.Press? {
-        guard let press = mouse.press, let up = press.upAt,
-            wallClock().timeIntervalSince(up) < 1,
-            press.clickCount < 2
-        else { return nil }
-        return press
-    }
-
     /// Whether a move arriving after the release is a fast
     /// flick's only event (#1798): a single press on the window
     /// released moments ago, and the window a float, so the late

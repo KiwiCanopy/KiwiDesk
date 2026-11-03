@@ -102,6 +102,13 @@ extension TilingEngine {
             if let previous = stashSent[id],
                 previous.frame == original
             {
+                // The last send's lead stands: its answer may still
+                // be on the way, so nothing is re-sent or counted.
+                if let lead = applier.instantTarget(id),
+                    Self.close(lead, to: original)
+                {
+                    continue
+                }
                 sent = previous
                 // The window answered away from the origin: twice
                 // sent, its own frame is the best truth left. A
@@ -125,7 +132,8 @@ extension TilingEngine {
     }
 
     /// A sent capture and how many times the window answered it
-    /// away from its origin (#2881).
+    /// away from its origin (#2881): one per send, read once that
+    /// send's instant lead has cleared or lapsed.
     struct StashSend: Equatable {
         let frame: CGRect
         var answers = 0

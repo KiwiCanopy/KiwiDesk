@@ -67,7 +67,8 @@ public final class DragCoordinator {
     /// mid-flight — measuring from it loses everything before
     /// (#933: a fast border drag resized only part of the way).
     /// `answersPress` says the move answers a press newer than our
-    /// last write, so it is no echo of ours (#1798, #2087).
+    /// last write, so it is no echo of ours (#2087); a `late` move's
+    /// press is newer by its own test (#1798).
     public func windowMoved(
         _ id: WindowID,
         frame: CGRect,
@@ -76,7 +77,7 @@ public final class DragCoordinator {
         answersPress: Bool = false,
         previous: CGRect? = nil
     ) {
-        guard answersPress || !isAnimating(id) else {
+        guard late || answersPress || !isAnimating(id) else {
             cancel(id)
             return
         }

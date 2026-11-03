@@ -159,16 +159,17 @@ extension KiwiCore {
     }
 
     /// Move here's filing: a landing elsewhere files into the owed
-    /// Space (a hidden one parks it), and a hopped float that
-    /// landed there is placed on its new screen. Both need the
-    /// Space still to exist and pass the sticky gate.
+    /// Space (a hidden one parks it) past the sticky gate, and a
+    /// hopped float that landed there is placed on its new screen.
+    /// Both need the Space still to exist.
     private func fileMoveHere(_ window: WindowID, _ owed: JumpState.Owed) {
         guard let landed = state.workspaces.space(of: window),
-            state.workspaces[owed.space] != nil,
-            stickyMoveBlock(window, to: owed.space) == nil
+            state.workspaces[owed.space] != nil
         else { return }
         if landed != owed.space {
-            guard owed.relocates else { return }
+            guard owed.relocates,
+                stickyMoveBlock(window, to: owed.space) == nil
+            else { return }
             fileMembership(window, into: owed.space, from: landed)
         } else if owed.hopped, reanchorFloat(window, to: owed.space) {
             // A hopped float may report its pre-move frame (#2770).

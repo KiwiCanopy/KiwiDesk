@@ -15,7 +15,7 @@ final class FrameApplier {
     var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
     private let recent = RecentApplies()
-    private let instantTargets = InstantTargets()
+    let instantTargets = InstantTargets()
     let enhancedUI = EnhancedUIHolds()
     /// Writes the plate slide holds until it lands (#1956).
     let held = HeldWrites()
@@ -54,7 +54,7 @@ final class FrameApplier {
     var meter = WorkMeter.shared
 
     /// Grace period for ignoring self-inflicted AX frame echoes.
-    private static let echoGrace: TimeInterval = 1.0
+    static let echoGrace: TimeInterval = 1.0
 
     /// The clock the echo grace is measured on. Live by default;
     /// `makeTestCore` freezes it, since a starved runner can let
@@ -95,12 +95,14 @@ final class FrameApplier {
         instantTargets.clear(id)
     }
 
-    /// Called once when an instant write's commanded lead lapses
-    /// with no echo (#2882); inert unwired, wired once at bootstrap.
-    var instantLeadLapsed: @MainActor (WindowID) -> Void = { _ in }
+    /// Called once per sweep in which instant writes' commanded
+    /// leads lapsed with no echo (#2882); inert unwired, wired once
+    /// at bootstrap.
+    var instantLeadLapsed: @MainActor () -> Void = {}
 
-    /// Runs the lapse check after the grace; a test fires it by
-    /// hand.
+    /// Runs a lapse sweep after its delay, on the main actor; a
+    /// test fires it by hand. Apart from `scheduleResend`, so a
+    /// suite stepping resends never receives a sweep.
     var scheduleLapse:
         @MainActor (TimeInterval, @escaping @MainActor () -> Void)
             -> Void = { delay, work in
@@ -109,22 +111,11 @@ final class FrameApplier {
                 }
             }
 
-    /// How far past the grace the lapse check runs.
-    private static let lapseMargin: TimeInterval = 0.05
+    /// How far past the grace a lapse sweep runs.
+    static let lapseMargin: TimeInterval = 0.05
 
-    /// Reports a lead stamped at `stampedAt` that no echo cleared
-    /// and no newer write replaced, once its grace has passed.
-    private func lapseIfUnanswered(_ id: WindowID, stampedAt: TimeInterval) {
-        guard
-            instantTargets.lapse(
-                id,
-                stampedAt: stampedAt,
-                within: Self.echoGrace,
-                now: clock()
-            )
-        else { return }
-        instantLeadLapsed(id)
-    }
+    /// Whether a lapse sweep is scheduled: one for every lead owed.
+    var lapseSweepPending = false
 
     /// Marks window animating and disables app EnhancedUserInterface.
     func beginAnimating(_ id: WindowID) {
@@ -223,11 +214,8 @@ final class FrameApplier {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
         // (#881); a stamp for a gone window expires unread.
-        let stamped = clock()
-        instantTargets.record(id, frame: frame, now: stamped)
-        scheduleLapse(Self.echoGrace + Self.lapseMargin) { [weak self] in
-            self?.lapseIfUnanswered(id, stampedAt: stamped)
-        }
+        instantTargets.record(id, frame: frame, now: clock())
+        scheduleLapseSweep(after: Self.echoGrace)
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil

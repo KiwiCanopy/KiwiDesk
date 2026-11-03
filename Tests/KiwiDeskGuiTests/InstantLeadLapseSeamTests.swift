@@ -22,7 +22,7 @@ struct InstantLeadLapseSeamTests {
         let files = sites.map(\.file.lastPathComponent).sorted()
         #expect(
             files == [
-                "FrameApplier.swift", "FrameApplier.swift",
+                "FrameApplier+Lapse.swift", "FrameApplier.swift",
                 "KiwiCore+Bootstrap.swift",
             ],
             .init(
@@ -42,7 +42,7 @@ struct InstantLeadLapseSeamTests {
         try #require(!source.isEmpty)
         #expect(
             source.contains(
-                "tiler.applier.instantLeadLapsed={[weakself]_in"
+                "tiler.applier.instantLeadLapsed={[weakself]in"
                     + "self?.updateBorders()self?.updateMarks()}"
             )
         )

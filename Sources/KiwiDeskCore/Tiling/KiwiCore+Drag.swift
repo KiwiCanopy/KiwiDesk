@@ -59,6 +59,17 @@ extension KiwiCore {
         return live == .zero ? fallback : live
     }
 
+    /// The last left press, while it is a SINGLE click released
+    /// under a second ago: the trailing-event window both late
+    /// gestures share (#1358, #1798).
+    var recentSinglePress: MouseTracker.Press? {
+        guard let press = mouse.press, let up = press.upAt,
+            wallClock().timeIntervalSince(up) < 1,
+            press.clickCount < 2
+        else { return nil }
+        return press
+    }
+
     /// Whether the drop leaves `id` where nothing will place it
     /// (#1178) — the space it LANDED in is the active one, so this
     /// is the one active-space door, named for the drop's question.

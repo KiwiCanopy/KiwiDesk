@@ -2383,6 +2383,16 @@ editing here:
   and a frame at a stash corner (`looksStashed`) is never an
   answer (`StashRefusedSizeTests` ▸ `lostSetRetries`,
   `cornerIsNoAnswer`).
+- **Let a float's move inside the echo grace past the drag's
+  echo guard only as an answer to a press newer than our last
+  write (#1798, #2087).** A move is `late` (after the release,
+  or with its release still in flight) or `answersPress` (the
+  button still held), each read in `KiwiCore+LateFlick` and each
+  asking `pressFollowsOwnWrite`; a new reason for a move to pass
+  the guard joins that file, never a flag at a call site. Floats
+  only, per the #1798 ruling; the trailing press both late
+  gestures share stays the one `recentSinglePress`
+  (`FloatFlickHeldTests`, `FloatFlickDropTests`).
 - **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the

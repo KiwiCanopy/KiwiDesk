@@ -7,11 +7,14 @@ final class InstantTargets: @unchecked Sendable {
     private typealias Entry = (frame: CGRect, at: TimeInterval)
     private let lock = NSLock()
     private var entries: [WindowID: Entry] = [:]
+    /// Each standing lead's stamp, until its echo or its lapse.
+    private var owedLapses: [WindowID: TimeInterval] = [:]
 
     func record(_ id: WindowID, frame: CGRect, now: TimeInterval) {
         lock.lock()
         defer { lock.unlock() }
         entries[id] = (frame, now)
+        owedLapses[id] = now
     }
 
     func frame(
@@ -33,23 +36,26 @@ final class InstantTargets: @unchecked Sendable {
         lock.lock()
         defer { lock.unlock() }
         entries[id] = nil
+        owedLapses[id] = nil
     }
 
-    /// Drops the entry stamped at `stampedAt` once its grace has
-    /// passed: true where it was still standing (#2882).
-    func lapse(
-        _ id: WindowID,
-        stampedAt: TimeInterval,
+    /// Drops the owed lapses whose grace has passed (#2882):
+    /// whether any did, and the seconds until the next one is due.
+    /// Kept apart from `entries`, which a reader's expiry drops, so
+    /// no read can swallow a lapse; an echo's `clear` or a newer
+    /// `record` retires one.
+    func sweepLapses(
         within interval: TimeInterval,
         now: TimeInterval
-    ) -> Bool {
+    ) -> (lapsed: Bool, nextIn: TimeInterval?) {
         lock.lock()
         defer { lock.unlock() }
-        guard let entry = entries[id], entry.at == stampedAt,
-            now - entry.at > interval
-        else { return false }
-        entries[id] = nil
-        return true
+        let due = owedLapses.filter { now - $0.value > interval }
+        for id in due.keys { owedLapses[id] = nil }
+        let next = owedLapses.values.min().map {
+            max(interval - (now - $0), 0)
+        }
+        return (!due.isEmpty, next)
     }
 }
 

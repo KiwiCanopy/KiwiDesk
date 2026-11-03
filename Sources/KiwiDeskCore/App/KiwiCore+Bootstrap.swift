@@ -209,7 +209,7 @@ extension KiwiCore {
         overflowMarks.commandedFrame = commandedInstant
         // That lead lapsing unanswered owes one steady sync, no
         // re-order (#2882, #1925).
-        tiler.applier.instantLeadLapsed = { [weak self] _ in
+        tiler.applier.instantLeadLapsed = { [weak self] in
             self?.updateBorders()
             self?.updateMarks()
         }
