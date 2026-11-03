@@ -4580,17 +4580,22 @@ keeps exactly what the run planned. A window moved between
 Stack's zones, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's
-weight step. Only the window holding a length frees room by
-shrinking: any other hands its room to its mates, by weight or —
-beside only sized mates, whose leftover it draws — to the nearest
-mate's length, so a press on a neighbour never undoes the push.
+weight step. A shown mate takes what a shrink gives, by weight or —
+beside only sized mates, whose leftover the window draws — through
+the nearest mate's length, so a press on a neighbour never undoes
+the push.
 A run that shows only sized windows lets its last one take what
 the others leave, so every run keeps a window that draws the
-rest and every press moves the step it asks. A window left alone in its run draws at its length,
-the room a shrink freed left open toward the windows waiting: a
-press steps from what the window draws, as the scrolling slot
-does (#1057), so no store banks a length the screen does not
-show. It is sizing like the weights: a mode change and
+rest and every press moves the step it asks. A window left alone in its run always fills it: any
+shrink gives up what the next window needs at its minimum and that
+window returns at once, since room held open for nothing is the
+one state no press could explain (owner, 2026-11-04). Only a lone
+window pulls: beside a shown mate nothing is freed, and a waiting
+window returns by a focus step or once every member fits. Where
+every member fits the window keeps its length as the weight that
+draws it there, so the last pull does not jump. A press steps from
+what the window draws, as the scrolling slot does (#1057), so no
+store banks a length the screen does not show. It is sizing like the weights: a mode change and
 `reset_layout_sizing` clear it, and only an in-place restart
 carries it.
 
@@ -4598,8 +4603,8 @@ carries it.
 leaves or returns is always at one of its ends. A drag acts on the
 side of the edge it moved, a push and the matching pull touching
 the same window; the keyboard squeezes both sides and sends the
-last in order, and brings back the one after the run first, so a
-grow and the matching shrink are a round trip. A pull stops at the
+last in order, and brings back the one after the run first. A pull
+stops at the
 first window that does not fit rather than skip it for a smaller
 one, which would reorder what the user sees (owner, 2026-11-03,
 on ui-designer's advice).

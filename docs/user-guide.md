@@ -504,8 +504,8 @@ bounces and shows a frosted pill:
 :::unreleased
 Where windows that do not fit wait behind a `+n` overflow mark, a
 grow along that line does not stop at the neighbour: the neighbour
-joins the windows waiting and the `+n` counts it. A shrink brings
-waiting windows back while the next one fits.
+joins the windows waiting and the `+n` counts it. Shrinking a window
+alone on that line brings the next one back.
 :::
 
 Where the limit is the **app's own** — a minimum or maximum the

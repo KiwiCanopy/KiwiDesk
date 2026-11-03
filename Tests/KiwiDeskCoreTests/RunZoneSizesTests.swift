@@ -94,24 +94,6 @@ struct RunZoneSizesTests {
         #expect(zone.sizedMembers(in: context(sizes: [2: 600])).isEmpty)
     }
 
-    @Test("A lone sized window keeps its length, open toward the waiting")
-    func loneLengthIsDrawn() throws {
-        let lone = context(focus: 1, sizes: [1: 600], tails: [1])
-        #expect(zone.run(in: lone)?.visible == 0..<1)
-        let frame = try #require(zone.frames(in: lone)[ids[0]])
-        #expect(frame.minX == 0)
-        #expect(abs(frame.width - 600) < 0.5)
-    }
-
-    @Test("A lone sized window at the end leaves the room at the start")
-    func loneLengthAtTheEnd() throws {
-        let lone = context(focus: 4, sizes: [4: 600], heads: [4])
-        #expect(zone.run(in: lone)?.visible == 3..<4)
-        let frame = try #require(zone.frames(in: lone)[ids[3]])
-        #expect(abs(frame.maxX - 1000) < 0.5)
-        #expect(abs(frame.width - 600) < 0.5)
-    }
-
     @Test("A run showing only sized windows lets its last take the rest")
     func allSizedLastAbsorbs() throws {
         let both = context(sizes: [2: 450, 3: 450], heads: [2], tails: [3])
@@ -131,6 +113,88 @@ struct RunZoneSizesTests {
         let pulled = context(focus: 1, sizes: [1: 450, 2: 500], tails: [2])
         let frame = try #require(zone.frames(in: pulled)[ids[0]])
         #expect(abs(frame.width - 450) < 0.5)
+    }
+
+    @Test("A lone window fills its zone whatever length it holds")
+    func loneWindowFills() throws {
+        let lone = context(focus: 1, sizes: [1: 600], tails: [1])
+        #expect(zone.run(in: lone)?.visible == 0..<1)
+        let frame = try #require(zone.frames(in: lone)[ids[0]])
+        #expect(frame.width == 1000)
+    }
+
+    @Test("A lone window's shrink gives up only what the next one needs")
+    func loneShrinkSnaps() throws {
+        let lone = context(focus: 1, sizes: [1: 1000], tails: [1])
+        let press = try #require(
+            zone.press(ids[0], by: -1, toward: .end, in: lone)
+        )
+        #expect(press.visible == 0..<2)
+        let share = try #require(press.sizes[ids[0]] ?? nil)
+        #expect(share > 0.65)
+        #expect(share < 0.7)
+    }
+
+    @Test("A larger shrink of a lone window goes where it was asked")
+    func loneShrinkTakesTheAsk() throws {
+        let lone = context(focus: 1, sizes: [1: 1000], tails: [1])
+        let press = try #require(
+            zone.press(ids[0], by: -600, toward: .end, in: lone)
+        )
+        let share = try #require(press.sizes[ids[0]] ?? nil)
+        #expect(abs(share - 0.4) < 1e-9)
+    }
+
+    @Test("A lone window with no room for the next moves nothing")
+    func loneShrinkWithoutRoom() throws {
+        var lone = context(focus: 1, sizes: [1: 1000], tails: [1])
+        lone.sizeBounds[ids[0]] = EffectiveSizeBound(width: [
+            .init(asked: 50, answered: 900)
+        ])
+        let press = try #require(
+            zone.press(ids[0], by: -50, toward: .end, in: lone)
+        )
+        #expect(!press.movesRun)
+        #expect(press.refusal != nil)
+        #expect(press.sizes.isEmpty)
+    }
+
+    @Test("A pull showing every member keeps the length as a weight")
+    func fullPullKeepsTheLength() throws {
+        let two = RunZone(
+            members: Array(ids[0..<2]),
+            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
+            vertical: false
+        )
+        let lone = context(focus: 1, sizes: [1: 1000], tails: [1])
+        let press = try #require(
+            two.press(ids[0], by: -1, toward: .end, in: lone)
+        )
+        #expect(press.sizes[ids[0]] == .some(nil))
+        var after = lone
+        after.runSizes = [:]
+        after.runTails = []
+        after.stackWeights[ids[0]] = press.weight
+        #expect(two.run(in: after) == nil)
+        let next = try #require(two.frames(in: after)[ids[1]])
+        #expect(abs(next.width - 300) < 1)
+    }
+
+    @Test("A shrink that lets every member fit keeps its length as a weight")
+    func shrinkToFitEveryone() throws {
+        let three = RunZone(
+            members: Array(ids[0..<3]),
+            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
+            vertical: false
+        )
+        let sized = context(sizes: [2: 600], tails: [2])
+        #expect(three.run(in: sized)?.visible == 0..<2)
+        let press = try #require(
+            three.press(ids[1], by: -250, toward: .end, in: sized)
+        )
+        #expect(press.visible == 0..<3)
+        #expect(press.sizes[ids[1]] == .some(nil))
+        #expect(press.weight != nil)
     }
 
     @Test("A zone that piles answers no press")

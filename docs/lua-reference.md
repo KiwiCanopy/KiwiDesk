@@ -6552,12 +6552,13 @@ a grow does not stop at a neighbour's minimum (#2709): the
 neighbour it squeezes waits in the run, the grown window takes its
 room, and the overflow mark's `+n` counts it. A mouse drag pushes
 the neighbour on the side of the edge it moved; the keyboard
-squeezes both sides and sends the last window in order. A shrink
-brings waiting windows back for as long as the next one fits at
-its minimum: the one past the moved edge first (for the keyboard,
-the one after the run), then the other end's; a window alone in
-its run shrinks in place, leaving the room open until the next
-window fits. The window keeps its length, like the stack and
+squeezes both sides and sends the last window in order. A window
+alone in its run always fills it: any shrink gives up what the
+next window needs at its minimum and that window comes back, the
+one past the moved edge first (for the keyboard, the one after the
+run). Beside a shown window a shrink widens that window, and a
+waiting window comes back when you focus it or when every window
+fits. The window keeps its length, like the stack and
 track weights, while windows wait in its run, until
 [`reset_layout_sizing`](#reset_layout_sizing), a layout change, or
 the window moving between a Stack's zones clears it. Across the

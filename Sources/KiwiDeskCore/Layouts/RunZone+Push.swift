@@ -3,9 +3,8 @@ import CoreGraphics
 /// A press along a run's scroll direction (#2709 ruling): the one
 /// answer every capped writer takes. A grow past what the shown
 /// neighbours can give pushes the neighbour it squeezes into the
-/// run; a window holding a push's length pulls waiting windows back
-/// as it shrinks, while the next one fits at its floor; a window
-/// beside only sized mates moves the nearest mate's length; any
+/// run; a lone window's shrink brings the next one back at its floor;
+/// a window beside only sized mates moves the nearest mate's length; any
 /// other press is the run's weight step. The run stays contiguous,
 /// so the window that leaves or returns sits at one of its ends.
 /// Pure; the writers store what it answers.
@@ -63,7 +62,7 @@ extension RunZone {
         guard line.before.contains(index) else { return nil }
         guard let run = run(in: context) else {
             let step = lengthStep(line, index, by: delta, toward: side)
-            return step.movesRun ? lengths(step, of: id) : nil
+            return step.movesRun ? lengths(step, of: id, on: line) : nil
         }
         let shown = Array(run.visible)
         if shown.count > 1, line.weights[index] > 0,
@@ -76,10 +75,10 @@ extension RunZone {
             index,
             by: delta,
             toward: side,
-            pulls: shown.count == 1 || line.weights[index] == 0
+            pulls: shown.count == 1
         )
         if step.movesRun || line.weights[index] == 0 {
-            return lengths(step, of: id)
+            return lengths(step, of: id, on: line)
         }
         return weightStep(line, index, shown: shown, by: delta, in: context)
     }
@@ -145,11 +144,13 @@ extension RunZone {
     /// slot steps (#1057), so nothing banks a length the screen does
     /// not show. A grow drops the member at the pushed end, `.both`
     /// the last in order first (ruling 2), and the grown window takes
-    /// the pushed one's room; where `pulls`, a shrink brings back the
-    /// window waiting past the moved edge, `.both` the one after the
-    /// run first, then the other end's once that side has none
-    /// waiting, stopping at the first that does not fit at its floor
-    /// (ruling 4) — a window that returns keeps no length of its own.
+    /// the pushed one's room; where `pulls` — a lone window, which
+    /// always fills its zone — any shrink gives up what the window
+    /// waiting past the moved edge needs at its floor and brings it
+    /// back, `.both` the one after the run first, then the other
+    /// end's once that side has none waiting, stopping at the first
+    /// that does not fit (ruling 4). Any other shrink hands its room
+    /// to the shown mates. A window that returns keeps no length.
     func lengthStep(
         _ line: Line,
         _ index: Int,
@@ -201,15 +202,44 @@ extension RunZone {
                 if !fits(start, last) { target = asked }
             }
         } else if delta < 0, pulls {
-            while true {
+            func next() -> Int? {
                 let after = last + 1 < members.count ? last + 1 : nil
                 let ahead = start > 0 ? start - 1 : nil
-                let next = side == .start ? ahead ?? after : after ?? ahead
-                guard let next else { break }
-                let grown = (min(start, next), max(last, next))
+                return side == .start ? ahead ?? after : after ?? ahead
+            }
+            // A lone window fills its zone, so any shrink gives up
+            // what the next window needs at its floor: no room is
+            // ever held open for nothing.
+            if line.before.count == 1, let waiting = next() {
+                let margin = CGFloat(StackLayout.minSizeMargin)
+                let room = line.span - line.gap - line.bare[waiting] - margin
+                target = plannedLength(
+                    share: share(of: min(target, room)),
+                    floor: own
+                )
+            }
+            while let waiting = next() {
+                let grown = (min(start, waiting), max(last, waiting))
                 guard fits(grown.0, grown.1) else { break }
                 (start, last) = grown
             }
+            if start..<(last + 1) == line.before { target = extent }
+        }
+        // A window holding a length that shrinks far enough for every
+        // member to fit leaves no run: the render shows them all.
+        if delta < 0, line.weights[index] == 0,
+            ZoneRun.fits(
+                members.indices.map {
+                    if $0 == index { return target }
+                    return line.before.contains($0)
+                        ? line.floors[$0] : line.bare[$0]
+                },
+                gap: line.gap,
+                span: line.span
+            )
+        {
+            start = 0
+            last = members.count - 1
         }
         let visible = start..<(last + 1)
         return LengthStep(
@@ -224,8 +254,14 @@ extension RunZone {
     }
 
     /// A length answer: the window keeps the step's length, and a
-    /// window a pull brings back returns at its floor and share.
-    private func lengths(_ step: LengthStep, of id: WindowID) -> Press {
+    /// window a pull brings back returns at its floor and share. A
+    /// pull that shows every member leaves no run to hold a length,
+    /// so the window keeps it as the weight that draws it there.
+    private func lengths(
+        _ step: LengthStep,
+        of id: WindowID,
+        on line: Line
+    ) -> Press {
         var press = Press()
         if step.atOwnMinimum { press.cue = .ownMinimum }
         guard step.changed else {
@@ -234,7 +270,32 @@ extension RunZone {
             return press
         }
         for joined in step.joined { press.sizes[members[joined]] = .some(nil) }
-        press.sizes[id] = share(of: step.target)
+        if !step.joined.isEmpty, step.visible == members.indices {
+            let index = members.firstIndex(of: id) ?? 0
+            let others = members.indices.filter { $0 != index }
+            let total = others.reduce(0.0) {
+                $0 + (line.weights[$1] > 0 ? line.weights[$1] : 1)
+            }
+            let available =
+                line.span - line.gap * CGFloat(max(members.count - 1, 0))
+            let rest = available - step.target
+            press.sizes[id] = .some(nil)
+            for other in others where line.weights[other] == 0 {
+                press.sizes[members[other]] = .some(nil)
+            }
+            press.weight =
+                rest > 0
+                ? min(
+                    max(
+                        Double(step.target / rest) * total,
+                        StackLayout.weightRange.lowerBound
+                    ),
+                    StackLayout.weightRange.upperBound
+                )
+                : nil
+        } else {
+            press.sizes[id] = share(of: step.target)
+        }
         press.visible = step.visible
         press.movesRun = step.movesRun
         return press

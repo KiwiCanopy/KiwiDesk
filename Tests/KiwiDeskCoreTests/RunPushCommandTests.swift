@@ -102,9 +102,12 @@ struct RunPushCommandTests {
         // Alone in the zone, w2 took w3's room as well: a shrink
         // that leaves w3 its floor brings it back.
         #expect(grown.height > 700)
-        press(core, "y", 600 - grown.height)
-        #expect(!hidden(core, id).isEmpty)
-        press(core, "y", -300)
+        press(core, "y", -10)
+        let frames = core.tiler.calculatedFrames(state: core.state)
+        let kept = try #require(frames[w(2)])
+        let back = try #require(frames[w(3)])
+        #expect(abs(back.height - 300) < 1)
+        #expect(kept.height > back.height)
         #expect(hidden(core, id).isEmpty)
         #expect(core.state.workspaces[id]?.runTails.isEmpty == true)
         // Every window shows again, so the length plans nothing and
