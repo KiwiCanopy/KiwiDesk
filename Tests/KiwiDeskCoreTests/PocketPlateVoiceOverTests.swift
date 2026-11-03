@@ -77,6 +77,36 @@ struct PocketPlateVoiceOverTests {
         )
     }
 
+    /// A press while the click's list is open closes it, so the
+    /// menu is not opened over a list VoiceOver cannot reach.
+    @Test(
+        "a press over an open list closes the list",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func pressClosesTheList() throws {
+        let fixture = try fixture()
+        let core = fixture.core
+        core.pocketPlate.ordersPanel = true
+        core.shelves.peek.visibleArea = { _ in
+            CGRect(x: -20_000, y: -20_000, width: 40_000, height: 40_000)
+        }
+        defer {
+            core.shelves.peek.dismiss()
+            core.shelves.peek.panel.panel?.orderOut(nil)
+            core.pocketPlate.sync([])
+        }
+        var menus = 0
+        core.spaceBars.glyphActions.present = { _, _ in menus += 1 }
+        core.updatePocketPlate(slots: [:])
+        let display = try #require(core.pocketPlate.specs.keys.first)
+        let view = try #require(core.pocketPlate.view(on: display))
+        core.pocketPlate.onClick(view)
+        #expect(core.shelves.peek.shown?.view === view)
+        #expect(view.accessibilityPerformPress())
+        #expect(core.shelves.peek.shown == nil)
+        #expect(menus == 1)
+    }
+
     /// The click keeps its list; only the press takes the menu.
     @Test(
         "a click still grows the list and opens no menu",
