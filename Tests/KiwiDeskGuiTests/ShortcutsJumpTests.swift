@@ -25,7 +25,7 @@ struct ShortcutsJumpTests {
                 SettingsCatalog.shortcuts.desktopsSection.id,
                 SettingsCatalog.shortcuts.layoutKeys.id,
                 SettingsCatalog.shortcuts.sizeFloat.id,
-                SettingsCatalog.shortcuts.pocketKeys.id,
+                SettingsCatalog.shortcuts.pocketCard.id,
                 SettingsCatalog.shortcuts.openApplications.id,
                 SettingsCatalog.shortcuts.luaBindings.control.id,
             ]

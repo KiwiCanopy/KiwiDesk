@@ -32,7 +32,7 @@ extension KiwiCore {
     /// `NativeSpaces.desktopSnapshot()` and then answers every
     /// question from it, the #888 one-reading rule unchanged.
     func stampedDesktopSnapshot() -> DesktopSnapshot {
-        let snapshot = NativeSpaces.desktopSnapshot()
+        let snapshot = desktopMemory.readDesktops()
         var minted: [SkyLight.SpaceID: DesktopIdentity] = [:]
         for space in snapshot.spaces where space.isUser {
             if space.identity != nil {

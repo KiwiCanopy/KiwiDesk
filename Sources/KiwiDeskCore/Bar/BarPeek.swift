@@ -73,22 +73,7 @@ final class BarPeek {
     /// while one tracks: the relayout re-reads the pointer the
     /// click left on the item (#1946).
     private var menuTokens: [NSObjectProtocol] = []
-    private var menusTracking = 0
-    /// The window a bar menu opens on — a right-press on a shelf
-    /// panel, "N more" on the peek's anchor — ended with the
-    /// menu's tracking (#761).
-    /// Its identity, never the window, which this class does not own.
-    private var menuAnchor: ObjectIdentifier?
-
-    /// Whether the menu tracking now opened on `window` — what holds
-    /// a hiding shelf the menu belongs to (#761).
-    func menuTracks(on window: NSWindow) -> Bool {
-        var tracking = menusTracking > 0
-        #if DEBUG
-            if let menuTrackingOverride { tracking = menuTrackingOverride }
-        #endif
-        return tracking && menuAnchor == ObjectIdentifier(window)
-    }
+    private var menus = BarMenuTracking()
 
     #if DEBUG
         /// A test's menu tracking, which posting the real
@@ -96,10 +81,6 @@ final class BarPeek {
         var menuTrackingOverride: Bool? = nil
     #endif
 
-    /// A press that may open a bar menu on `window`.
-    func noteMenuAnchor(_ window: NSWindow?) {
-        menuAnchor = window.map(ObjectIdentifier.init)
-    }
     private let menuCentre: NotificationCenter
 
     /// `menus` posts the menus' tracking: the app's, or a test's
@@ -128,14 +109,28 @@ final class BarPeek {
         menuTokens.forEach(menuCentre.removeObserver)
     }
 
+    /// Whether the menu tracking now opened on `window` — what holds
+    /// a hiding shelf the menu belongs to (#761).
+    func menuTracks(on window: NSWindow) -> Bool {
+        var tracking = menus.isTracking
+        #if DEBUG
+            if let menuTrackingOverride { tracking = menuTrackingOverride }
+        #endif
+        return tracking && menus.opened(on: window)
+    }
+
+    /// A press that may open a bar menu on `window`.
+    func noteMenuAnchor(_ window: NSWindow?) {
+        menus.note(window)
+    }
+
     private func menuBegan() {
-        menusTracking += 1
+        menus.began()
         dismiss()
     }
 
     private func menuEnded() {
-        menusTracking = max(menusTracking - 1, 0)
-        if menusTracking == 0 { menuAnchor = nil }
+        menus.ended()
     }
 
     /// What `reporter` — an item view — finds under the pointer:
@@ -175,7 +170,7 @@ final class BarPeek {
         // A reused item view standing for other windows is a new
         // anchor, so the source is compared beside the view; a
         // neighbour inside the hull does not swap in.
-        guard menusTracking == 0,
+        guard !menus.isTracking,
             !Self.same(spent, anchor, source),
             !Self.same(pending, anchor, source),
             !holdsPointer
@@ -196,7 +191,7 @@ final class BarPeek {
         let ticket = generation
         schedule(Timing.dwell) { [weak self] in
             guard let self, ticket == self.generation,
-                self.menusTracking == 0,
+                !self.menus.isTracking,
                 let pending = self.pending
             else { return }
             self.present(pending, fades: true)

@@ -137,7 +137,7 @@ extension KiwiCore {
             .filter(\.isUp)
             .sorted { $0.id.raw < $1.id.raw }
         guard !away.isEmpty else { return [] }
-        let snapshot = NativeSpaces.desktopSnapshot()
+        let snapshot = desktopMemory.readDesktops()
         return away.map { entry in
             let space = state.rememberedSpace(of: entry.id)
             let host = snapshot.spaces.first { $0.id == entry.nativeSpace }

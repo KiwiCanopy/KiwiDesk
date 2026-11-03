@@ -20,7 +20,7 @@ extension KiwiCore {
             return yours ?? .hiddenApp
         }
         if let away = state.awayWindows[id] {
-            let desktops = NativeSpaces.desktopSnapshot()
+            let desktops = desktopMemory.readDesktops()
             if let yours { return yours }
             if awayIsFullScreen(away, in: desktops) { return .fullScreen }
             return .otherDesktop(desktops.screenNumber(of: away.nativeSpace))
@@ -39,7 +39,7 @@ extension KiwiCore {
     ) -> JumpMoveBlock? {
         guard case .window(let id) = target else { return nil }
         if let away = state.awayWindows[id] {
-            let desktops = NativeSpaces.desktopSnapshot()
+            let desktops = desktopMemory.readDesktops()
             return awayIsFullScreen(away, in: desktops) ? .fullScreen : nil
         }
         guard let window = state.windows[id],

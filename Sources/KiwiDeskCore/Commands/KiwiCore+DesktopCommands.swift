@@ -112,7 +112,7 @@ extension KiwiCore {
         guard
             let target = Self.desktopTarget(
                 number: number,
-                in: NativeSpaces.desktopSnapshot()
+                in: desktopMemory.readDesktops()
             )
         else {
             return .refused(.fail("no Desktop \(number)"))

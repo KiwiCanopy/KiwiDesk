@@ -131,7 +131,9 @@ struct ShownUserSpaceSeamTests {
             .appendingPathComponent("Tests")
         for twin in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
             let source = try SourceScan.strippedSource(
-                at: tests.appendingPathComponent("\(twin)/TestCore.swift")
+                at: tests.appendingPathComponent(
+                    "\(twin)/TestCoreDesktopPins.swift"
+                )
             )
             #expect(
                 source.contains(
@@ -139,7 +141,34 @@ struct ShownUserSpaceSeamTests {
                 ),
                 "\(twin)"
             )
+            // The filed half: the reading every verdict is filed
+            // from answers no reading unless a suite states a
+            // topology override.
+            #expect(
+                source.contains(
+                    "core.desktopMemory.readDesktops = {\n"
+                        + "        statesNoTopology\n"
+                        + "            ? DesktopSnapshot("
+                ),
+                "\(twin)"
+            )
+            let factory = try SourceScan.strippedSource(
+                at: tests.appendingPathComponent("\(twin)/TestCore.swift")
+            )
+            #expect(factory.contains("pinDesktopReads(core)"), "\(twin)")
         }
+        // Every `desktopSnapshot` read in Core goes through the
+        // seam, its default the one left; `activeDesktopNumber()`,
+        // which reads it unqualified, is outside this needle.
+        #expect(
+            try sites(of: "NativeSpaces.desktopSnapshot")
+                == ["DesktopMemory.swift": 1]
+        )
+        #expect(
+            try sites(of: "desktopMemory.readDesktops()")[
+                "KiwiCore+DesktopIdentity.swift"
+            ] == 1
+        )
     }
 
     @Test("only the reading and a display change write the verdict")

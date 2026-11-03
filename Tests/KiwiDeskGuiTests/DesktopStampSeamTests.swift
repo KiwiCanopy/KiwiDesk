@@ -24,7 +24,9 @@ struct DesktopStampSeamTests {
     @Test("makeTestCore refuses the stamp write")
     func testCorePinsTheWrite() throws {
         let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"].map {
-            Self.tests.appendingPathComponent("\($0)/TestCore.swift")
+            Self.tests.appendingPathComponent(
+                "\($0)/TestCoreDesktopPins.swift"
+            )
         }
         for twin in twins {
             let source = try SourceScan.strippedSource(at: twin)

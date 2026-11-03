@@ -81,11 +81,9 @@ extension KiwiCore {
         overflowMarks.peek = shelves.peek
         overflowMarks.openMenu = { [weak self] mark, anchor in
             self?.presentBarWindowMenu(
-                mark.windows,
-                kind: .overflow,
+                .run(mark.windows),
                 space: mark.space,
-                at: anchor,
-                keyed: false
+                at: anchor
             )
         }
     }
