@@ -127,8 +127,7 @@ func makeTestCore(
     // them. That already shipped once: a command-path test brought
     // the real Finder forward on every run. Making "no app is
     // running" the default means the safe state is what a suite
-    // gets by forgetting; a test that wants the branch states a
-    // pid itself.
+    // gets by forgetting; a test wanting the branch states a pid.
     core.openOrFocus.runningAppPID = { _ in nil }
     core.openOrFocus.openApp = { _, _ in false }
     core.openOrFocus.bundleIDNamed = { _ in nil }
@@ -147,9 +146,10 @@ func makeTestCore(
     // The layout picker's pointer (#762, #2229): live, it would
     // pick the Space under the developer's mouse.
     core.shelves.contextMenus.pointer = { .zero }
-    // New Window activates the target's app and both window
-    // actions press another app's AX element (#1518).
+    // New Window and Jump's full-screen raise activate an app (#2939),
+    // and both window actions press another app's AX element (#1518).
     core.openOrFocus.activate = { _ in }
+    core.openOrFocus.raiseFullScreen = { _, _, _ in false }
     // Open or Focus's first press asks the app's AX-focused
     // window when nothing is stamped yet (#1840).
     core.eventLoop.shadows.focusedWindow = { _ in nil }

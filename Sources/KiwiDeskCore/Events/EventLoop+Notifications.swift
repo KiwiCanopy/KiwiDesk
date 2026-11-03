@@ -227,8 +227,12 @@ extension EventLoop {
     /// drift warning): a second hand-list of these maps would
     /// let one caller stop clearing what the other clears.
     /// Emits no event: each caller owns its own fold or emit,
-    /// so the registry and the fold cannot double-report.
+    /// so the registry and the fold cannot double-report. A path
+    /// that can remove a window to a full-screen Space releases
+    /// BEFORE it emits `.windowDestroyed`, in the same turn: the
+    /// gone handler claims the released element there (#2939).
     func releaseWindowRegistration(_ id: WindowID, pid: pid_t) {
+        fullScreenElements.noteRelease(id, elements[pid]?[id])
         elements[pid]?[id] = nil
         detectedFloating[id] = nil
         detectedFullscreen[id] = nil

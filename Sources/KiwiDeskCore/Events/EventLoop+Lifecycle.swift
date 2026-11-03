@@ -37,6 +37,7 @@ extension EventLoop {
             onEnhancedUIRetired(pid, baseline)
         }
         observers = [:]
+        fullScreenElements.forgetAll()
         processIdentity.forgetAll()
         shadows.forgetAll()
         elements = [:]
