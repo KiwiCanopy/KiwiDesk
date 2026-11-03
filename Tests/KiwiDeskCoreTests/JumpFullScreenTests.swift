@@ -204,6 +204,22 @@ struct JumpFullScreenTests {
         #expect(calls().activated == [pid])
     }
 
+    /// A raise the element refused stamps nothing: a stamp would read
+    /// the app's next report for the window as our own raise.
+    @Test("a tracked window's refused raise stamps no self-raise")
+    func trackedRefusalStampsNothing() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.state.apply(.windowCreated(window(fullscreen: true)))
+        core.state.workspaces.add(id, to: "1")
+        core.eventLoop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
+        let calls = record(core, raises: false)
+        core.jump(to: .window(id))
+        #expect(calls().raised.count == 1)
+        #expect(calls().activated == [pid])
+        #expect(core.selfRaiseStamp(id, now: core.wallClock()) == nil)
+    }
+
     @Test("a tracked full-screen window is raised by its own element")
     func trackedRaises() {
         defer { resetAuthorityOverrides() }
