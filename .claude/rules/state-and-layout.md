@@ -1989,7 +1989,16 @@ editing here:
   (the trier names the reason, the blocker marks itself), the
   bounce on the trier
   (`ResizeSizeLimitFeedbackTests`,
-  `ResizeNeighborLimitTests`). And a weight clamp divides the
+  `ResizeNeighborLimitTests`). Along a run's scroll direction a
+  grow pushes instead (#2709): a press or drag inside a zone laid
+  by floor and weight takes the one `RunZone.resize` through
+  `resizeInRun`, and a whole-zone weight step a neighbour's floor
+  stopped takes `pushOrCue` before any neighbour-minimum cue, so
+  no writer refuses a grow the run could take; the result is a
+  `Space.runSizes` length and the run's two ends, written together
+  (`RunZonePushTests`, `RunPushCommandTests`). A mouse caller hands
+  the edge it moved (`MouseResize.movedSide`), the keyboard `.both`.
+  And a weight clamp divides the
   span the LAYOUT divides — the one
   `StackLayout.weightedSpan` copy, kept `minSizeMargin` above
   exact equality — never the raw region span, which crosses

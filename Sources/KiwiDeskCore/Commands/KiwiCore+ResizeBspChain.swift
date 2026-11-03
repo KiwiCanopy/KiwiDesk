@@ -42,7 +42,8 @@ extension KiwiCore {
         _ window: WindowID,
         axis: String,
         delta: Double,
-        space: Space
+        space: Space,
+        toward side: RunZone.PushSide = .both
     ) -> CommandResponse? {
         guard let screen = TilingEngine.screen(for: space.id, in: state),
             let found = bspChain(of: space, on: screen),
@@ -64,12 +65,14 @@ extension KiwiCore {
             !across.first.isEmpty || !across.second.isEmpty
         // A line laid by floor and weight, whether it hides a
         // window or not, takes the run's own step.
-        if let run = chain.run(in: context) {
+        if chain.run(in: context) != nil {
             return resizeInRun(
                 window,
-                run: RunCover.Run(zone: chain, run: run, in: context),
+                zone: chain,
+                context: context,
                 axis: axis,
                 delta: delta,
+                toward: side,
                 space: space,
                 otherAxisDivides: otherAxisDivides
             )
@@ -93,14 +96,16 @@ extension KiwiCore {
                 plannedMinSize(of: $0, axis: axis)
             }
         )
-        if delta < 0, outcome.hitOwnMinimum {
-            refuseShrinkAtMinimum(window, axis: axis)
-        } else if delta > 0, let blocked = outcome.blockedByOther {
-            refuseGrowAtNeighborMinimum(
-                window,
-                anchor: chain.members[blocked],
-                axis: axis
-            )
+        if pushOrCue(
+            outcome,
+            of: window,
+            members: chain.members,
+            axis: axis,
+            delta: delta,
+            toward: side,
+            space: space
+        ) {
+            return .ok()
         }
         state.workspaces.withSpace(space.id) {
             $0.stackWeights[window] = outcome.value

@@ -95,7 +95,7 @@ struct GridRunCommandTests {
         #expect(core.activeSpace?.focused == target)
     }
 
-    @Test("A press along an auto-sized run moves its weights")
+    @Test("A press along an auto-sized run sizes the window")
     func autoSizedRunTakesRunWeights() throws {
         let core = makeCore()
         let id = grid(core, focus: 4, autoSize: true)
@@ -110,7 +110,7 @@ struct GridRunCommandTests {
             ).isSuccess
         )
         let space = try #require(core.state.workspaces[id])
-        #expect(space.stackWeights[WindowID(4)] != nil)
+        #expect(space.runSizes[WindowID(4)] != nil)
         // The grid's own column weights stay where they were.
         #expect(core.sessionRatios(of: id) == columns)
     }

@@ -1,10 +1,11 @@
 import Foundation
 
-/// A weight resize inside a scrolled run (#2235): the layout gives
-/// every shown window its floor and divides only what is left by
-/// weight (`ZoneRun.frames`), so the press divides that span over
-/// the shown windows alone — the span the layout divides (#933),
-/// and never a hidden window named in a refusal (#1259).
+/// A resize along a zone's scroll direction (#2235, #2709): the
+/// layout gives every shown window its floor and divides only what
+/// is left by weight (`ZoneRun.frames`), and a grow past what the
+/// shown neighbours can give pushes the squeezed one into the run,
+/// a shrink pulling waiting windows back — the one rule
+/// `RunZone.resize` answers, for every layout that scrolls a run.
 extension KiwiCore {
     /// The write for `focused` when its zone is laid by floor and
     /// weight — a run, hiding windows or not (#2774) — nil
@@ -15,31 +16,134 @@ extension KiwiCore {
         _ focused: WindowID,
         axis: String,
         delta: Double,
+        toward side: RunZone.PushSide,
         space: Space,
         otherAxisDivides: Bool
     ) -> CommandResponse? {
-        guard
-            let run = tiler.runCovers[space.id]?.runs.first(where: {
-                $0.shown.contains(focused)
-            }) ?? unhidingRun(of: focused, in: space)
+        guard let found = runZone(of: focused, axis: axis, in: space),
+            found.zone.run(in: found.context) != nil
         else { return nil }
         return resizeInRun(
             focused,
-            run: run,
+            zone: found.zone,
+            context: found.context,
             axis: axis,
             delta: delta,
+            toward: side,
             space: space,
             otherAxisDivides: otherAxisDivides
         )
     }
 
-    /// The run `focused` sits in where its zone is laid by floor
-    /// and weight but hides nothing, which no cover records — any
-    /// such zone, a refusal's (#2774) or a corroborated floor's.
-    private func unhidingRun(
+    /// The whole-zone weight step's cue (#933), or — for a grow a
+    /// neighbour's floor stopped — that grow carried on along the
+    /// zone's scroll direction (#2709), pushing the squeezed
+    /// neighbour into the run where the floors no longer fit. True
+    /// when the push wrote, and the caller then writes no weight.
+    func pushOrCue(
+        _ outcome: StackLayout.WeightStepOutcome,
         of focused: WindowID,
+        members: [WindowID],
+        axis: String,
+        delta: Double,
+        toward side: RunZone.PushSide,
+        space: Space
+    ) -> Bool {
+        if delta < 0, outcome.hitOwnMinimum {
+            refuseShrinkAtMinimum(focused, axis: axis)
+        } else if delta > 0, let blocked = outcome.blockedByOther {
+            if pushIntoRun(
+                focused,
+                axis: axis,
+                delta: delta,
+                toward: side,
+                space: space
+            ) {
+                return true
+            }
+            refuseGrowAtNeighborMinimum(
+                focused,
+                anchor: members[blocked],
+                axis: axis
+            )
+        }
+        return false
+    }
+
+    /// The push `pushOrCue` carries a blocked grow on with; false
+    /// where `focused` sits in no zone along `axis`.
+    private func pushIntoRun(
+        _ focused: WindowID,
+        axis: String,
+        delta: Double,
+        toward side: RunZone.PushSide,
+        space: Space
+    ) -> Bool {
+        guard delta > 0,
+            let found = runZone(of: focused, axis: axis, in: space),
+            let resize = found.zone.resize(
+                focused,
+                by: CGFloat(delta),
+                toward: side,
+                in: found.context
+            ),
+            resize.changed
+        else { return false }
+        write(resize, of: focused, in: found.zone, space: space)
+        return true
+    }
+
+    /// The write for `focused` inside `zone`'s run — the zone a
+    /// press finds, or a BSP chain's own (#2542).
+    func resizeInRun(
+        _ focused: WindowID,
+        zone: RunZone,
+        context: LayoutContext,
+        axis: String,
+        delta: Double,
+        toward side: RunZone.PushSide,
+        space: Space,
+        otherAxisDivides: Bool
+    ) -> CommandResponse {
+        guard zone.members.count > 1,
+            let resize = zone.resize(
+                focused,
+                by: CGFloat(delta),
+                toward: side,
+                in: context
+            )
+        else {
+            refuseNothingToDivide(
+                focused,
+                otherAxisDivides: otherAxisDivides
+            )
+            return .fail("the focused window is alone in its run")
+        }
+        if resize.atOwnMinimum {
+            refuseShrinkAtMinimum(focused, axis: axis)
+        }
+        guard resize.changed else {
+            // A lone shown window fills the zone: a grow has no
+            // room to take, a shrink frees none the next fits.
+            if !resize.atOwnMinimum {
+                refuseNothingToDivide(
+                    focused,
+                    otherAxisDivides: otherAxisDivides
+                )
+            }
+            return .fail("nothing in the run can move")
+        }
+        write(resize, of: focused, in: zone, space: space)
+        return .ok()
+    }
+
+    /// The zone `focused` sits in along `axis`, read from the
+    /// render's own input.
+    private func runZone(
+        of focused: WindowID,
+        axis: String,
         in space: Space
-    ) -> RunCover.Run? {
+    ) -> (zone: RunZone, context: LayoutContext)? {
         guard let screen = TilingEngine.screen(for: space.id, in: state)
         else { return nil }
         let input = tiler.layoutInput(
@@ -48,69 +152,31 @@ extension KiwiCore {
             screen: screen
         )
         guard
-            let zones = RunZone.zones(
+            let zone = RunZone.zones(
                 mode: space.mode,
                 tiled: input.tiled,
                 in: input.context
-            ),
-            let zone = zones.first(where: {
-                $0.members.contains(focused)
-            }),
-            let run = zone.run(in: input.context)
+            )?.first(where: { $0.members.contains(focused) }),
+            zone.vertical == (axis == "y")
         else { return nil }
-        return RunCover.Run(zone: zone, run: run, in: input.context)
+        return (zone, input.context)
     }
 
-    /// The write for `focused` inside `run` — the recorded one, or
-    /// a BSP chain's own run, which shows every window when no
-    /// cover records it (#2542).
-    func resizeInRun(
-        _ focused: WindowID,
-        run: RunCover.Run,
-        axis: String,
-        delta: Double,
-        space: Space,
-        otherAxisDivides: Bool
-    ) -> CommandResponse {
-        let shown = Array(run.shown)
-        guard shown.count > 1, let index = shown.firstIndex(of: focused)
-        else {
-            // A run showing one window has no share to move.
-            refuseNothingToDivide(
-                focused,
-                otherAxisDivides: otherAxisDivides
-            )
-            return .fail("the focused window is alone in its run")
-        }
-        guard run.extra > 0 else {
-            // Every shown window sits at its floor: nothing to
-            // give or take without hiding a window.
-            if delta < 0 {
-                refuseShrinkAtMinimum(focused, axis: axis)
-            } else {
-                refuseGrowAtNeighborMinimum(
-                    focused,
-                    anchor: shown[index == 0 ? 1 : index - 1],
-                    axis: axis
-                )
-            }
-            return .fail("every shown window is at its minimum")
-        }
-        let weights = shown.map {
-            max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
-        }
-        // Floors are kept by the layout itself, so the step
-        // divides the extra with no minimum of its own.
-        let outcome = StackLayout.weightStep(
-            weights: weights,
-            at: index,
-            delta: delta,
-            span: Double(run.extra),
-            minSizes: Array(repeating: 0, count: shown.count)
-        )
+    /// Stores the window's run size and the run's ends together,
+    /// so the next pass draws the run the write planned.
+    private func write(
+        _ resize: RunZone.Resize,
+        of focused: WindowID,
+        in zone: RunZone,
+        space: Space
+    ) {
         state.workspaces.withSpace(space.id) {
-            $0.stackWeights[focused] = outcome.value
+            $0.runSizes[focused] = resize.size
+            ($0.runHeads, $0.runTails) = zone.ends(
+                showing: resize.visible,
+                heads: $0.runHeads,
+                tails: $0.runTails
+            )
         }
-        return .ok()
     }
 }

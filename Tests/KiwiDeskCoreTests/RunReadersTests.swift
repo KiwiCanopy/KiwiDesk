@@ -86,26 +86,10 @@ struct RunReadersTests {
             }
         )
         #expect(Array(run.shown) == [WindowID(2), WindowID(3)])
-        #expect(run.extra > 0)
-        // The run's step: the shown pair over the span their
-        // floors leave, with no minimum of its own.
-        let expected = StackLayout.weightStep(
-            weights: [1, 1],
-            at: 0,
-            delta: 50,
-            span: Double(run.extra),
-            minSizes: [0, 0]
-        ).value
-        // The whole-zone step the run replaced divides the full
-        // span over every member, which lands elsewhere.
-        let wholeZone = StackLayout.weightStep(
-            weights: [1, 1, 1, 1, 1],
-            at: 0,
-            delta: 50,
-            span: 780,
-            minSizes: Array(repeating: 300, count: 5)
-        ).value
-        #expect(abs(expected - wholeZone) > 0.01)
+        #expect(run.extra > 50)
+        let before = try #require(
+            core.tiler.calculatedFrames(state: core.state)[WindowID(2)]
+        )
         let response = core.resizeStackMember(
             WindowID(2),
             axis: "y",
@@ -114,9 +98,17 @@ struct RunReadersTests {
             space: space
         )
         #expect(response.isSuccess)
-        let weight = try #require(
-            core.state.workspaces[id]?.stackWeights[WindowID(2)]
+        // The press's points land on the window the run draws
+        // (#2709): its floor stays, the share takes the step.
+        core.retile(animated: false)
+        let after = try #require(
+            core.tiler.calculatedFrames(state: core.state)[WindowID(2)]
         )
-        #expect(abs(weight - expected) < 0.0001)
+        #expect(abs(after.height - before.height - 50) < 0.5)
+        #expect(
+            core.tiler.runCovers[id]?.runs.first?.shown.contains(
+                WindowID(3)
+            ) == true
+        )
     }
 }

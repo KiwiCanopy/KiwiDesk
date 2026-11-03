@@ -501,6 +501,12 @@ bounces and shows a frosted pill:
 - On a scrolling space, growing stops at a maximum the app
   enforces (System Settings will not grow past its own width).
 
+:::unreleased
+Along a window row that scrolls its overflow, a grow does not stop
+at the neighbour: the neighbour goes into the row's overflow and
+its `+n` counts it. A shrink brings it back once it fits again.
+:::
+
 Where the limit is the **app's own** — a minimum or maximum the
 app enforces, which KiwiDesk learns — the pill says so instead:
 *This app won't go smaller*, *Neighboring app won't go smaller*,

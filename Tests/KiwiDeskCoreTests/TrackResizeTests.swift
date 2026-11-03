@@ -88,10 +88,12 @@ struct TrackResizeTests {
             // Two tracks: [1] [2, 3].
             $0.trackBreaks = [WindowID(2)]
         }
+        // A step window 3 can give at its floor: a larger one
+        // pushes it into the run (#2709).
         #expect(
             core.execute(
                 "resize",
-                args: [.string("y"), .number(100)]
+                args: [.string("y"), .number(40)]
             ).isSuccess
         )
         let after = core.state.workspaces[space]!
@@ -236,7 +238,7 @@ struct TrackResizeTests {
             $0.trackBreaks = [WindowID(2)]
         }
         let slot = CGRect(x: 400, y: 25, width: 400, height: 350)
-        let dragged = CGRect(x: 400, y: 25, width: 400, height: 450)
+        let dragged = CGRect(x: 400, y: 25, width: 400, height: 390)
         core.handleResizeEnd(
             WindowID(2),
             slot: slot,

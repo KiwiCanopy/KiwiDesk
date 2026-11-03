@@ -28,6 +28,23 @@ public enum ResizeAdjustment: Equatable, Sendable {
 
 /// Translates mouse resizes into layout adjustments (#56, #122, #128).
 public enum MouseResize {
+    /// The edge a drag moved along one axis, the one that moved
+    /// more — the side a resize along a run pushes or pulls on
+    /// (#2709).
+    public static func movedSide(
+        from slot: CGRect,
+        to frame: CGRect,
+        vertical: Bool
+    ) -> RunZone.PushSide {
+        let leading =
+            vertical
+            ? abs(frame.minY - slot.minY) : abs(frame.minX - slot.minX)
+        let trailing =
+            vertical
+            ? abs(frame.maxY - slot.maxY) : abs(frame.maxX - slot.maxX)
+        return leading > trailing ? .start : .end
+    }
+
     /// Minimum size delta to qualify as intentional resize gesture.
     public static let threshold: CGFloat = 10
 

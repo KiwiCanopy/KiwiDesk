@@ -169,8 +169,20 @@ public struct RunZone: Sendable, Equatable {
         return max(span - used, 0)
     }
 
+    /// Each member's planned length along the zone's axis — its
+    /// run size where it has one — its floor without the size, and
+    /// the gap between shown members: the readings a resize along
+    /// the run plans with (`resize(_:by:toward:in:)`, #2709).
+    func floorsAndGap(
+        in context: LayoutContext
+    ) -> (floors: [CGFloat], bare: [CGFloat], gap: CGFloat) {
+        let plan = placement(in: context)
+        return (plan.floors, plan.bare, plan.gap)
+    }
+
     private struct Plan {
         let floors: [CGFloat]
+        let bare: [CGFloat]
         let weights: [Double]
         let gap: CGFloat
         let piles: Bool
@@ -183,25 +195,38 @@ public struct RunZone: Sendable, Equatable {
             vertical
             ? context.gaps.inner.vertical : context.gaps.inner.horizontal
         let cell = cellFloor(gap: gap)
-        let floors = members.map {
+        let bare = members.map {
             max(
                 context.plannedFloor(of: $0, horizontal: !vertical),
                 cell
             )
         }
-        let weights = members.map {
-            max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
+        // A window a resize along the run sized (#2709) is planned
+        // at that length and takes no share of what is left.
+        let floors = zip(members, bare).map { member, floor in
+            context.runSizes[member].map { max(min($0, span), floor) }
+                ?? floor
         }
+        let weights = members.map {
+            context.runSizes[$0] != nil
+                ? 0
+                : max(
+                    context.stackWeights[$0] ?? 1,
+                    StackLayout.weightFloor
+                )
+        }
+        let sized = members.contains { context.runSizes[$0] != nil }
         // The emergency whole-zone pile (#44): not even one window
         // fits at the minimum size.
         let piles =
             span <= 0
             || span < context.minWindowSize.along(horizontal: !vertical)
         guard !members.isEmpty, !piles,
-            !fitsWhole(floors, weights, gap, context)
+            sized || !fitsWhole(floors, weights, gap, context)
         else {
             return Plan(
                 floors: floors,
+                bare: bare,
                 weights: weights,
                 gap: gap,
                 piles: piles,
@@ -218,6 +243,7 @@ public struct RunZone: Sendable, Equatable {
         )
         return Plan(
             floors: floors,
+            bare: bare,
             weights: weights,
             gap: gap,
             piles: false,

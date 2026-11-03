@@ -6509,6 +6509,23 @@ The sizes are kept as [column and row weights](#gridset_column_weight)
 in a session layer that
 [`reset_layout_sizing`](#reset_layout_sizing) clears.
 
+:::unreleased
+Along a run's scroll direction — a Stack zone, a Track track, an
+auto-sized Grid's last track once the grid is full, a BSP chain —
+a grow does not stop at a neighbour's minimum (#2709): the
+neighbour it squeezes goes into the run and the grown window takes
+its room, the overflow mark's `+n` counting it. A mouse drag pushes
+the neighbour on the side of the edge it moved; the keyboard
+squeezes both sides and sends the last window in order. A shrink
+brings waiting windows back for as long as the next one fits at
+its minimum: the one past the moved edge first (for the keyboard,
+the one after the run), then the other end's. The window keeps the
+length you gave it, in the same session layer
+[`reset_layout_sizing`](#reset_layout_sizing) clears. Across the
+run, in a fixed Grid's last row and in BSP's halved splits a grow
+still stops at the neighbour's minimum.
+:::
+
 `set_refusal_sound(true)` adds the system alert sound
 to that pill; only a hotkey fire sounds, so CLI and IPC callers
 see the pill and read the error JSON without hearing anything.

@@ -43,6 +43,7 @@ struct SpaceSizingCensusTests {
         space.windows = [w1, w2]
         space.focused = w1
         space.stackWeights = [w1: 2]
+        space.runSizes = [w2: 420]
         space.scrollRest = ScrollRest(offset: 40)
         space.trackBreaks = [w2]
         space.handedBreaks = [w2]
@@ -99,9 +100,9 @@ struct SpaceSizingCensusTests {
             }
         }
         // The census is not vacuous: the sizing stores are the
-        // two `resize` writes into inside the Space — the session
+        // three `resize` writes into inside the Space — the session
         // ratios live per Desktop, outside it (#2921).
-        #expect(cleared == ["stackWeights", "trackWeights"])
+        #expect(cleared == ["stackWeights", "runSizes", "trackWeights"])
         #expect(
             Set(structure.keys).union(cleared) == Set(after.keys)
         )

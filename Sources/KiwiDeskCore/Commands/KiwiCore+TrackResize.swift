@@ -15,7 +15,8 @@ extension KiwiCore {
         axis: String,
         delta: Double,
         span: Double,
-        space: Space
+        space: Space,
+        toward side: RunZone.PushSide = .both
     ) -> CommandResponse {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.effectiveTiledMembers(of: space)
@@ -68,7 +69,8 @@ extension KiwiCore {
             space: space,
             focused: window,
             tracks: ranges.count,
-            column: tiled[ranges[track]]
+            column: tiled[ranges[track]],
+            toward: side
         )
     }
 
@@ -252,7 +254,8 @@ extension KiwiCore {
         // Whether the ACROSS axis divides, which is the press
         // to send the user to when this one cannot (#1258).
         tracks: Int,
-        column: ArraySlice<WindowID>
+        column: ArraySlice<WindowID>,
+        toward side: RunZone.PushSide
     ) -> CommandResponse {
         // The share write keys per-window state by id: a
         // tiled-sticky traveler (#414 v2) is not in
@@ -299,6 +302,7 @@ extension KiwiCore {
             focused,
             axis: alongAxis,
             delta: delta,
+            toward: side,
             space: space,
             otherAxisDivides: tracks > 1
         ) {
@@ -325,16 +329,16 @@ extension KiwiCore {
             span: effectiveSpan,
             minSizes: minSizes
         )
-        if delta < 0, outcome.hitOwnMinimum {
-            refuseShrinkAtMinimum(focused, axis: alongAxis)
-        } else if delta > 0,
-            let blocked = outcome.blockedByOther
-        {
-            refuseGrowAtNeighborMinimum(
-                focused,
-                anchor: members[blocked],
-                axis: alongAxis
-            )
+        if pushOrCue(
+            outcome,
+            of: focused,
+            members: members,
+            axis: alongAxis,
+            delta: delta,
+            toward: side,
+            space: space
+        ) {
+            return .ok()
         }
         state.workspaces.withSpace(space.id) {
             $0.stackWeights[focused] = outcome.value

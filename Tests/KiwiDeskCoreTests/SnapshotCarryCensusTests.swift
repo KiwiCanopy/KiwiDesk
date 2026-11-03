@@ -104,6 +104,7 @@ struct SnapshotCarryCensusTests {
             $0.windows = [self.w2, self.w1]
             $0.focused = self.w1
             $0.stackWeights = [self.w1: 2]
+            $0.runSizes = [self.w2: 420]
             $0.scrollRest = ScrollRest(
                 offset: 40,
                 focus: self.w1,
@@ -284,6 +285,7 @@ struct SnapshotCarryCensusTests {
         let space = try #require(b.state.workspaces[spaceID])
         #expect(b.desktopMemory.sessionRatios.isEmpty)
         #expect(space.stackWeights.isEmpty)
+        #expect(space.runSizes.isEmpty)
         #expect(b.state.windows[w1]?.isFloating == false)
         #expect(b.state.windows[w1]?.stickyScope == StickyScope.none)
     }

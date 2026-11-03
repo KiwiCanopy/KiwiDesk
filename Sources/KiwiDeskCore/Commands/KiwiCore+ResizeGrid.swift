@@ -89,6 +89,7 @@ extension KiwiCore {
                 window,
                 axis: axis,
                 delta: delta,
+                toward: edge.map { $0 == .leading ? .start : .end } ?? .both,
                 space: space,
                 otherAxisDivides: true
             )

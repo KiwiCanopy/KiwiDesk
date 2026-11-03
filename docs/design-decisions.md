@@ -4512,6 +4512,48 @@ whole-zone pile of the other runs. With no layout piling part of
 a Space, the "Sticky windows can't be moved to the pile" refusal
 (#438) has nothing left to refuse and is retired.
 
+:::unreleased
+**A grow along a run pushes into it (#2709).** Where windows
+already scroll — a Stack zone, a Track track, an auto-sized Grid's
+full last track, a BSP chain — a resize along the scroll direction
+no longer stops at a neighbour's minimum: the neighbour it
+squeezes waits in the run and the grown window takes its room, and
+a shrink brings waiting windows back while the next fits at its
+minimum. One rule in the shared writers (`RunZone.resize`), not
+per layout: a run reader asks `RunZone.zones`, never a mode list,
+and a Grid or BSP push that looked like a Stack run yet behaved
+differently would be the inconsistency. The cue is the overflow
+mark's count alone, since the push is the gesture doing what was
+asked.
+
+*The grown length is stored, not a weight.* A run picks which
+windows show from their floors alone, so a share — relative by
+construction — cannot keep a pushed window out: at the next pass
+the floors fit again and it returns. The window keeps the length
+the gesture gave it (`Space.runSizes`), planned as its floor, and
+the run's two ends are written beside it so the next pass draws
+the run the write planned. It is sizing like the weights: a mode
+change and `reset_layout_sizing` clear it, and only an in-place
+restart carries it.
+
+*Which window moves.* The run stays contiguous, so the window that
+leaves or returns is always at one of its ends. A drag acts on the
+side of the edge it moved, a push and the matching pull touching
+the same window; the keyboard squeezes both sides and sends the
+last in order, and brings back the one after the run first, so a
+grow and the matching shrink are a round trip. A pull stops at the
+first window that does not fit rather than skip it for a smaller
+one, which would reorder what the user sees (owner, 2026-11-03,
+on ui-designer's advice).
+
+*Where it stops.* Across the run, the grow keeps the neighbour's
+minimum and its pill: the run cannot take a window on that axis. A
+fixed Grid's last row draws its columns' cells, so a drag there
+moves the column line for every row rather than breaking the row
+out of the grid, and BSP's halved splits move a ratio. Neither
+reaches the run writer, so neither needs an exception.
+:::
+
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
 An out-of-range `master_ratio` would collapse the whole space

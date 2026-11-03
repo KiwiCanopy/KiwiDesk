@@ -90,11 +90,15 @@ public struct ZoneRun: Sendable, Equatable {
         var slots: [CGRect] = []
         var position = vertical ? region.minY : region.minX
         for index in shown {
+            // Shown windows that all carry a run size (#2709) share
+            // what is left evenly.
+            let share =
+                weightTotal > 0
+                ? weights[index] / weightTotal : 1 / Double(shown.count)
             let extent =
                 shown.count == 1
                 ? available
-                : floors[index]
-                    + extra * CGFloat(weights[index] / weightTotal)
+                : floors[index] + extra * CGFloat(share)
             slots.append(
                 vertical
                     ? CGRect(

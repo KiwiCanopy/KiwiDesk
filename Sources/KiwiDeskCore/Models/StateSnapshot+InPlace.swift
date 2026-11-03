@@ -19,6 +19,9 @@ extension StateSnapshot {
         /// capture writes the list, an empty one included.
         public var desktopRatios: [DesktopRatios]?
         public var stackWeights: [UInt32: Double]
+        /// `Space.runSizes` (#2709); absent from a build before
+        /// 4.2.0 and while no window carries one.
+        public var runSizes: [UInt32: Double]?
         public var scrollRest: ScrollRest?
         /// `TilingEngine.monocleShownMembers` (#881): the member
         /// shown while a float holds the focus.
@@ -51,6 +54,14 @@ extension StateSnapshot {
                     ($0.key.raw, $0.value)
                 }
             )
+            runSizes =
+                space.runSizes.isEmpty
+                ? nil
+                : Dictionary(
+                    uniqueKeysWithValues: space.runSizes.map {
+                        ($0.key.raw, Double($0.value))
+                    }
+                )
             scrollRest = space.scrollRest
             self.monocleShown = monocleShown?.raw
             maximized = space.maximized?.raw
@@ -86,6 +97,7 @@ extension StateSnapshot {
             case ratios = "session_ratios"
             case desktopRatios = "desktop_ratios"
             case stackWeights = "stack_weights"
+            case runSizes = "run_sizes"
             case scrollRest = "scroll_rest"
             case monocleShown = "monocle_shown"
             case maximized
@@ -226,6 +238,11 @@ extension StateCoordinator {
             $0.stackWeights = Dictionary(
                 uniqueKeysWithValues: session.stackWeights.map {
                     (WindowID($0.key), $0.value)
+                }
+            )
+            $0.runSizes = Dictionary(
+                uniqueKeysWithValues: (session.runSizes ?? [:]).map {
+                    (WindowID($0.key), CGFloat($0.value))
                 }
             )
             $0.scrollRest = session.scrollRest
