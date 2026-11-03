@@ -46,7 +46,8 @@ extension RunZone {
 
     /// The answer for growing `id` by `delta` points along the zone's
     /// axis (negative shrinks), moving the edge on `side`. Nil where
-    /// `id` is not shown, or — for a zone that fits whole — where
+    /// `id` is not shown, where the zone piles, or — for a zone that
+    /// fits whole — where
     /// the grow moves no window into the run, and the caller then
     /// keeps its whole-zone step.
     public func press(

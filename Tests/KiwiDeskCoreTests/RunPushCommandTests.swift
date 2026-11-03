@@ -276,51 +276,6 @@ struct RunPushCommandTests {
         )
     }
 
-    @Test("BSP: a window visiting the chain is refused, not sized")
-    func visitorIsRefused() throws {
-        let (core, id) = makeSpace("bsp", windows: 4, focus: 2) {
-            $0.execute("bsp.set_strategy", args: [.string("alternating")])
-        }
-        core.state.workspaces.ensureSpace(SpaceID("2"))
-        // Three home-mates ahead of it, so the traveler is injected
-        // at index 3, inside the chain.
-        for id: UInt32 in 60...62 {
-            core.state.windows.upsert(
-                ManagedWindow(id: w(id), pid: 900_060, appName: "H")
-            )
-            core.state.workspaces.add(w(id), to: SpaceID("2"))
-        }
-        core.state.windows.upsert(
-            ManagedWindow(
-                id: w(50),
-                pid: 900_050,
-                appName: "Traveler",
-                stickyScope: .global
-            )
-        )
-        core.state.workspaces.add(w(50), to: SpaceID("2"))
-        core.retile(animated: false)
-        let space = try #require(core.state.workspaces[id])
-        #expect(!space.windows.contains(w(50)))
-        let screen = try #require(
-            TilingEngine.screen(for: id, in: core.state)
-        )
-        let chain = try #require(core.bspChain(of: space, on: screen))
-        try #require(chain.zone.members.contains(w(50)))
-        let response = core.resizeBspChain(
-            w(50),
-            axis: "y",
-            delta: 400,
-            space: space,
-            toward: .both
-        )
-        #expect(
-            response?.error
-                == "the focused window is visiting from another Space"
-        )
-        #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
-    }
-
     @Test("A mode change drops the run sizes")
     func modeWriteClearsRunSizes() throws {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)

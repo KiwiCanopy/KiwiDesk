@@ -4543,11 +4543,11 @@ the run the write planned. The length is a share of the run's
 span, as every other sizing store is, so a Space shown on a
 smaller screen keeps its proportions rather than hiding more
 windows than the user pushed. The run decides when it counts: in
-the zone it was given in, named by its role among the layout's
-zones so a reorder or a track opening beside it keeps the length,
-while that run would still hide a window with it; the persist step
-keeps exactly what the run planned. A window moved to
-another zone, or a run whose windows all fit again, plans at its
+a zone of the role it was given in — Stack's master or stack zone,
+any track — so a reorder or a track opening beside it keeps the
+length, while that run would still hide a window with it; the persist step
+keeps exactly what the run planned. A window moved between
+Stack's zones, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's
 weight step. Only the window holding a length frees room by

@@ -18,10 +18,11 @@ extension RunZone {
     }
 
     /// The lengths pushes gave members, by member index, honoured
-    /// only for a length given in this zone (`RunSize.zone`), while
-    /// its run keeps stored ends and would still hide a window with
-    /// them: a window moved to another zone, or a run that would
-    /// show everything at its floors, plans at its floor and share.
+    /// only for a length given in a zone of this role (`RunSize.zone`),
+    /// while its run keeps stored ends and would still hide a window
+    /// with them: a window moved to a zone of another role, or a run
+    /// that would show everything at its floors, plans at its floor
+    /// and share.
     func honouredSizes(
         bare: [CGFloat],
         gap: CGFloat,

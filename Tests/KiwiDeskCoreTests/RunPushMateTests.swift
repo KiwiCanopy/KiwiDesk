@@ -208,6 +208,8 @@ struct RunPushMateTests {
 
     @Test("A window moved to Stack's master zone drops its length")
     func moveToMasterDropsTheLength() throws {
+        // The lone-window master zone fits, so the fit gate drops it
+        // here; `foreignZoneIsDropped` holds the role check.
         let (core, id) = try dragMiddle(leading: true)
         #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
         core.state.workspaces.withSpace(id) {

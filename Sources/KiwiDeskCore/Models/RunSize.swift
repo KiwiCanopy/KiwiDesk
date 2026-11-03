@@ -8,7 +8,8 @@ import CoreGraphics
 public struct RunSize: Sendable, Equatable, Codable {
     /// The window's length over the run's span, 0…1.
     public var share: CGFloat
-    /// The zone the length was given in (`RunZone.ordinal`).
+    /// The role of the zone the length was given in
+    /// (`RunZone.ordinal`).
     public var zone: Int
 
     public init(share: CGFloat, zone: Int) {

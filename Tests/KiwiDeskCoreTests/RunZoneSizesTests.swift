@@ -133,6 +133,19 @@ struct RunZoneSizesTests {
         #expect(abs(frame.width - 450) < 0.5)
     }
 
+    @Test("A zone that piles answers no press")
+    func piledZoneAnswersNothing() {
+        let piled = RunZone(
+            members: ids,
+            region: CGRect(x: 0, y: 0, width: 200, height: 600),
+            vertical: false
+        )
+        #expect(piled.piles(in: context()))
+        #expect(
+            piled.press(ids[1], by: 50, toward: .end, in: context()) == nil
+        )
+    }
+
     @Test("A press beside sized mates moves the nearest one's length")
     func nearestMateMoves() throws {
         let before = try #require(
