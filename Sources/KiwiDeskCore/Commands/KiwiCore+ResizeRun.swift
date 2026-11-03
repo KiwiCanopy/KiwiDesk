@@ -94,7 +94,6 @@ extension KiwiCore {
             resize,
             of: focused,
             in: found.zone,
-            weights: found.zone.shareWeights(in: found.context),
             space: space
         )
         return true
@@ -143,7 +142,7 @@ extension KiwiCore {
         // Beside only sized mates the window draws what they leave,
         // so its press moves a mate's length the other way and the
         // push that mate made stands.
-        if shown.count > 1,
+        if shown.count > 1, weights[index] > 0,
             shown.allSatisfy({ $0 == index || weights[$0] == 0 })
         {
             return resizeBesideSized(
@@ -181,7 +180,6 @@ extension KiwiCore {
                 resize,
                 of: focused,
                 in: zone,
-                weights: weights,
                 space: space
             )
             return .ok()
@@ -273,24 +271,18 @@ extension KiwiCore {
     }
 
     /// Stores the window's run size and the run's ends together,
-    /// so the next pass draws the run the write planned. A window
-    /// the push leaves beside only sized mates draws what they leave
-    /// and takes no length, so the run always keeps a window that
-    /// takes the rest — save a lone one, which keeps its length.
+    /// so the next pass draws the run the write planned.
     func write(
         _ resize: RunZone.Resize,
         of focused: WindowID,
         in zone: RunZone,
-        weights: [Double],
         space: Space
     ) {
-        let index = zone.members.firstIndex(of: focused)
-        let others = resize.visible.filter { $0 != index }
-        let absorbs = !others.isEmpty && others.allSatisfy { weights[$0] == 0 }
         state.workspaces.withSpace(space.id) {
-            $0.runSizes[focused] =
-                absorbs
-                ? nil : RunSize(share: resize.size, zone: zone.members[0])
+            $0.runSizes[focused] = RunSize(
+                share: resize.size,
+                zone: zone.members[0]
+            )
             ($0.runHeads, $0.runTails) = zone.ends(
                 showing: resize.visible,
                 heads: $0.runHeads,

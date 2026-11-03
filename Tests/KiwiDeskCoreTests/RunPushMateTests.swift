@@ -166,11 +166,54 @@ struct RunPushMateTests {
         press(core, "y", 500)
         // w3 gives all it has and goes into the run; w4 fills.
         #expect(hidden(core, id) == [w(2), w(3)])
+        let sizes = core.state.workspaces[id]?.runSizes ?? [:]
+        #expect(sizes[w(3)] == nil)
+        #expect((sizes[w(4)]?.share ?? 0) == 1)
+    }
+
+    @Test("Stack: presses in a run of sized windows move the step they ask")
+    func pressesInAnAllSizedRun() throws {
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 4,
+            focus: 3,
+            height: 1020
+        )
+        core.state.workspaces.withSpace(id) {
+            $0.runSizes = [
+                self.w(3): RunSize(share: 0.45, zone: self.w(2)),
+                self.w(4): RunSize(share: 0.45, zone: self.w(2)),
+            ]
+            $0.runHeads = [self.w(3)]
+        }
+        core.retile(animated: false)
+        #expect(hidden(core, id) == [w(2)])
+        func height(_ id: UInt32) -> CGFloat {
+            core.tiler.calculatedFrames(state: core.state)[w(id)]?.height
+                ?? 0
+        }
+        let sized = height(3)
+        press(core, "y", 30)
+        #expect(abs(height(3) - sized - 30) < 1)
+        // w4 takes what w3 leaves; its press moves w3's length.
+        core.state.workspaces.focus(w(4), in: id)
+        let rest = height(4)
+        press(core, "y", -30)
+        #expect(abs(height(4) - rest + 30) < 1)
+        #expect(hidden(core, id) == [w(2)])
     }
 
     @Test("A length whose zone anchor moved is dropped at the next pass")
     func foreignAnchorIsDropped() throws {
-        let (core, id) = try dragMiddle(leading: true)
+        // Four stack windows in 1000 pt: the run hides one at its
+        // floors alone, so only the anchor can drop the length.
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 5,
+            focus: 3,
+            height: 1020
+        )
+        #expect(hidden(core, id).count == 1)
         core.state.workspaces.withSpace(id) {
             $0.runSizes[self.w(3)] = RunSize(share: 0.6, zone: self.w(9))
         }

@@ -204,8 +204,8 @@ public struct RunZone: Sendable, Equatable {
         // and takes none of what is left; its zero share never fits
         // whole, so the zone lays out as a run.
         let sizes = honouredSizes(bare: bare, gap: gap, in: context)
-        let floors = members.indices.map { sizes[$0] ?? bare[$0] }
-        let weights = members.indices.map {
+        var floors = members.indices.map { sizes[$0] ?? bare[$0] }
+        var weights = members.indices.map {
             sizes[$0] != nil
                 ? 0
                 : max(
@@ -238,6 +238,19 @@ public struct RunZone: Sendable, Equatable {
             tail: ZoneRun.tail(of: members, in: context.runTails),
             focus: context.focused.flatMap { members.firstIndex(of: $0) }
         )
+        // A run that shows only sized windows lets its last one take
+        // what the others leave, so a run always has a window that
+        // draws the rest.
+        if run.visible.count > 1,
+            run.visible.allSatisfy({ weights[$0] == 0 })
+        {
+            let last = run.visible.upperBound - 1
+            floors[last] = bare[last]
+            weights[last] = max(
+                context.stackWeights[members[last]] ?? 1,
+                StackLayout.weightFloor
+            )
+        }
         return Plan(
             floors: floors,
             bare: bare,

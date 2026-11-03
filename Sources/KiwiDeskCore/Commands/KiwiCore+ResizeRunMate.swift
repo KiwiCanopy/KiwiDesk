@@ -53,15 +53,26 @@ extension KiwiCore {
         // the window at the end the press moves toward — the last
         // in order for the keyboard; the window keeps drawing what
         // the sized mates leave, or the whole zone once alone.
-        writeLength(bare[mate], of: member, in: zone, space: space)
         guard let run = zone.run(in: context) else { return .ok() }
         var shown = run.visible
+        var dropped: Int?
         if shown.upperBound - 1 > index,
             side != .start || shown.lowerBound == index
         {
+            dropped = shown.upperBound - 1
             shown = shown.lowerBound..<(shown.upperBound - 1)
         } else if shown.lowerBound < index {
+            dropped = shown.lowerBound
             shown = (shown.lowerBound + 1)..<shown.upperBound
+        }
+        // A mate the push hides keeps no length; one left shown
+        // keeps its floor.
+        if dropped == mate {
+            state.workspaces.withSpace(space.id) {
+                $0.runSizes[member] = nil
+            }
+        } else {
+            writeLength(bare[mate], of: member, in: zone, space: space)
         }
         state.workspaces.withSpace(space.id) {
             ($0.runHeads, $0.runTails) = zone.ends(

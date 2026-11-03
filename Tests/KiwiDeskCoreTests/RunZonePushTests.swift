@@ -181,6 +181,19 @@ struct RunZonePushTests {
         #expect(!resize.movesRun)
     }
 
+    @Test("A window holding no length never pulls, even with room")
+    func unsizedShrinkPullsNothing() throws {
+        // The run rests pinned at two windows where three would fit:
+        // window 2's shrink hands its room to window 1 instead.
+        let pinned = context(tails: [2])
+        #expect(zone.run(in: pinned)?.visible == 0..<2)
+        let resize = try #require(
+            zone.resize(ids[1], by: -50, toward: .end, in: pinned)
+        )
+        #expect(resize.visible == 0..<2)
+        #expect(!resize.movesRun)
+    }
+
     @Test("A shrink that frees too little pulls nothing")
     func shrinkStopsAtTheFloor() throws {
         let resize = try #require(
@@ -248,6 +261,28 @@ struct RunZonePushTests {
         let frame = try #require(zone.frames(in: lone)[ids[3]])
         #expect(abs(frame.maxX - 1000) < 0.5)
         #expect(abs(frame.width - 600) < 0.5)
+    }
+
+    @Test("A run showing only sized windows lets its last take the rest")
+    func allSizedLastAbsorbs() throws {
+        let both = context(sizes: [2: 450, 3: 450], heads: [2], tails: [3])
+        #expect(zone.run(in: both)?.visible == 1..<3)
+        let frames = zone.frames(in: both)
+        let first = try #require(frames[ids[1]])
+        let last = try #require(frames[ids[2]])
+        #expect(abs(first.width - 450) < 0.5)
+        #expect(abs(last.maxX - 1000) < 0.5)
+        #expect(zone.plannedSize(of: ids[2], in: both) == nil)
+        #expect(zone.shareWeights(in: both)[2] > 0)
+    }
+
+    @Test("A pulled window holding a length keeps the shrunk one's")
+    func pulledSizedWindowKeepsBoth() throws {
+        // Window 1 shrank to 450 and pulled back window 2, which
+        // still holds 500: window 1 draws what it asked for.
+        let pulled = context(focus: 1, sizes: [1: 450, 2: 500], tails: [2])
+        let frame = try #require(zone.frames(in: pulled)[ids[0]])
+        #expect(abs(frame.width - 450) < 0.5)
     }
 
     @Test("A window not shown has nothing to resize")

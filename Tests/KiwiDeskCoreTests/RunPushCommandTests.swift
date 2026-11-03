@@ -199,8 +199,15 @@ struct RunPushCommandTests {
             for: try #require(core.state.workspaces[id]),
             session: core.sessionRatios(of: id)
         ).splitRatioH
-        core.execute("resize", args: [.string("y"), .number(400)])
-        // The write itself stores the length and the ends.
+        // The writer, without the dispatcher's retile: the write
+        // itself stores the length and the ends.
+        _ = core.resizeBspChain(
+            focus,
+            axis: "y",
+            delta: 400,
+            space: try #require(core.state.workspaces[id]),
+            toward: .both
+        )
         let written = try #require(core.state.workspaces[id])
         #expect(written.runSizes[focus] != nil)
         #expect(written.runTails.contains(focus))

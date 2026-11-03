@@ -4551,7 +4551,10 @@ disagree, and a press that moves no window keeps the run's
 weight step. Only the window holding a length frees room by
 shrinking: any other hands its room to its mates, by weight or —
 beside only sized mates, whose leftover it draws — to the nearest
-mate's length, so a press on a neighbour never undoes the push. A window left alone in its run draws at its length,
+mate's length, so a press on a neighbour never undoes the push.
+A run that shows only sized windows lets its last one take what
+the others leave, so every run keeps a window that draws the
+rest and every press moves the step it asks. A window left alone in its run draws at its length,
 the room a shrink freed left open toward the windows waiting: a
 press steps from what the window draws, as the scrolling slot
 does (#1057), so no store banks a length the screen does not
