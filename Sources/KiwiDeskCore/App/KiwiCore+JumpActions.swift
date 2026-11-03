@@ -77,11 +77,10 @@ extension KiwiCore {
         }
         if let window = state.windows[id] {
             // A full-screen window keeps its own macOS Space, which
-            // no KiwiDesk Space switch reaches (#670); its app comes
-            // forward instead — the accepted v1 residue.
+            // no KiwiDesk Space switch reaches (#670): it is raised
+            // there (#2939).
             guard !window.isFullscreen else {
-                onLog("jump: w\(id.raw) is full screen — app activated")
-                openOrFocus.activate(window.pid)
+                jumpToFullScreen(id, pid: window.pid)
                 return
             }
             // The bar lists' one pick (#1946): a Space Bar row on
@@ -94,6 +93,11 @@ extension KiwiCore {
             return
         }
         if let away = state.awayWindows[id] {
+            // No bridge reaches a full-screen Space (#2930, #2939).
+            if awayIsFullScreen(away, in: NativeSpaces.desktopSnapshot()) {
+                jumpToFullScreen(id, pid: away.pid)
+                return
+            }
             guard reachJumpTarget(away) else {
                 onLog(
                     "jump: w\(id.raw) not reached on its Desktop — "

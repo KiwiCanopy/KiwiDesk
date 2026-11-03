@@ -220,6 +220,17 @@ A slow cold start takes you there too: the press counts when the app's process s
 
 New Window, or an un-minimize from the window switcher, pressed in the moment after a macOS Desktop switch — before KiwiDesk has read the arriving Desktop's windows, under half a second — does not take you to the window's Space when that window arrives with the switch's own windows; it opens where its app rule files it ([#2347](https://github.com/KiwiCanopy/KiwiDesk/issues/2347)). A window of the same app that the switch reveals cannot take you there instead either.
 
+:::unreleased
+A window already in native full screen on a Space no screen showed
+as KiwiDesk started is not listed in KiwiHub's window switcher until
+its Space has been shown once
+([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939)).
+macOS lists no window on a full-screen Space that is not shown, so
+KiwiDesk first sees such a window when its Space is shown; from then
+on the switcher lists it, and picking it shows its Space. Show the
+Space once from Mission Control or with a swipe.
+:::
+
 Reopening an app whose last window you closed while the app kept running can take you to **another macOS Desktop**. Some apps — Microsoft Word for one — hide a closed window and show that same window again when you click the app in the Dock, and macOS switches to the Desktop that window was on before KiwiDesk hears of it (measured 2026-10-13). KiwiDesk does not switch you back: undoing a switch macOS has already made would move you between two Desktops on every reopen ([#1515](https://github.com/KiwiCanopy/KiwiDesk/issues/1515)). An app you quit opens its next window on the Desktop you are on. macOS's own *When switching to an application, switch to a Space with open windows for the application* (System Settings ▸ Desktop & Dock ▸ Mission Control) governs that switch; whether turning it off keeps you on your Desktop for a re-shown window is not measured.
 
 [`new_window`](lua-reference.md#new_window) takes you there too, whatever the app already shows. It finds the app's **File ▸ New Window** by its ⌘N or ⇧⌘N shortcut and a word for "window" in any language macOS ships, because apps expose no other name for that menu item ([#1518](https://github.com/KiwiCanopy/KiwiDesk/issues/1518)). What remains: an app whose New Window has no such shortcut (Claude's "New Session in New Window") is refused with a pill even though it has the item.

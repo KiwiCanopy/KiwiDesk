@@ -6200,6 +6200,15 @@ under **Pocket**.
 - **⌘1** … **⌘9** pick one of the first nine results.
 
 :::unreleased
+A window in native full screen is listed, and **Return** shows it
+on its own full-screen Space
+([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939)).
+One already full screen on a Space no screen showed when KiwiDesk
+started is listed once its Space has been shown
+([accepted limitations](accepted-limitations.md)).
+:::
+
+:::unreleased
 **⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
 window with yours, as [swap_here](#swap_here) does, and **⌥⌘1** …
 **⌥⌘9** (or **⇧⌥⌘1** …) swap one of the first nine. Yours is
@@ -6217,9 +6226,6 @@ selects the first. Holding the key down stops at the end instead,
 so the list never runs past it; press again to go round. **Page
 Up** and **Page Down** stop at the ends.
 :::
-
-A window in native full screen is listed, and Return activates its
-app rather than switching to its full-screen Space.
 
 The `"view"` side is the **view picker**, three lines in one
 panel, the current item on each marked ✓. The menu bar's **Open

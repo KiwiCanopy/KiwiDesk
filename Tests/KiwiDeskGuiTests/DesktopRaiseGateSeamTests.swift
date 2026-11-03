@@ -2,10 +2,11 @@ import Foundation
 import Testing
 
 /// The Desktop raise gate's site census (#1345): every Core file
-/// that spells the activating raise (`AXHelper.raise(`) also
-/// spells the compositor gate, and the set of such files is the
-/// ruled one — a new raise site joins the census AND asks the
-/// gate, or it is the bounce again. Comment-stripped substrings:
+/// that spells an activating raise (`AXHelper.raise(` or
+/// `AXHelper.activateThenRaise(`) also spells the compositor gate,
+/// save the ruled ones that pass it on purpose, and the set of such
+/// files is the ruled one — a new raise site joins the census AND
+/// asks the gate, or it is the bounce again. Comment-stripped substrings:
 /// a gate spelled in an unrelated function of the same file
 /// satisfies this scan, which the behavior suites
 /// (`DesktopRaiseGateTests`, `DesktopRaiseGateArmTests`) are
@@ -22,6 +23,20 @@ struct DesktopRaiseGateSeamTests {
         "KiwiCore+PlacementBounce.swift",
         "KiwiCore+FocusEvents.swift",
         "KiwiCore+AccessibilityReturn.swift",
+    ]
+
+    /// The activating raises, both orders (#496, #2939).
+    private static let raises = [
+        "AXHelper.raise(",
+        "AXHelper.activateThenRaise(",
+    ]
+
+    /// The files whose ordered raise passes the gate on purpose,
+    /// each with its ruling: Jump's full-screen seam default, which
+    /// only Jump's arm calls (#2939; `JumpFullScreenSeamTests` holds
+    /// the one spelling).
+    private static let passesOnPurpose: Set<String> = [
+        "KiwiCore+LaunchRestore.swift"
     ]
 
     /// Either spelling of the gate's consult.
@@ -43,15 +58,24 @@ struct DesktopRaiseGateSeamTests {
             let source = SourceScan.stripComments(
                 try String(contentsOf: url, encoding: .utf8)
             )
-            guard source.contains("AXHelper.raise(") else { continue }
+            guard Self.raises.contains(where: source.contains)
+            else { continue }
             found.insert(url.lastPathComponent)
-            if !Self.gates.contains(where: source.contains) {
+            // The exemption is the ordered raise's alone: a file
+            // spelling `AXHelper.raise(` asks the gate wherever it is.
+            let exempt =
+                Self.passesOnPurpose.contains(url.lastPathComponent)
+                && !source.contains("AXHelper.raise(")
+            if !exempt, !Self.gates.contains(where: source.contains) {
                 ungated.append(url.lastPathComponent)
             }
         }
         // Fail-shut: an empty walk found nothing to scan.
         try #require(!found.isEmpty)
-        #expect(found == Self.allowed, "found \(found)")
+        #expect(
+            found == Self.allowed.union(Self.passesOnPurpose),
+            "found \(found)"
+        )
         #expect(ungated.isEmpty, "ungated \(ungated)")
     }
 

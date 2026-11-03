@@ -3070,6 +3070,27 @@ refused; and the read costs ~0.15 ms per raise (the topology copy
 is live rather than cached from the switch handler, whose stamp is
 the notification's timing and not the compositor's.
 
+**Jump to a full-screen window is the one raise that crosses on
+purpose (#2939).** A native full-screen window lives on a macOS
+Space of its own that no Desktop switch reaches (#670), so for
+Jump — a verb that means to switch — a raise is the only way
+there, and a Jump that only activated the app left the user of an
+app with several windows on another of its windows. The arm stays
+Jump's alone: an implicit raise reaching it would carry the user
+onto a full-screen Space nobody asked for, the bounce this entry
+exists to prevent. Its order is the reverse of #496's — activate
+the app, then make the window main and raise it — because with
+the app's main window on the other screen the #496 order left the
+screen on its Desktop, while activate-then-raise switched the
+screen hosting the window, and only that screen, in every case
+measured (2026-11-03, two screens, macOS 27.2, TextEdit; #2939
+carries the table). `AXHelper.raise` keeps #496's order for every
+other raise; its docstring says why. The residue is a window
+KiwiDesk never saw, since Accessibility lists no window on a
+full-screen Space nobody shows: it is not listed until its Space
+is shown once, as [Accepted limitations](accepted-limitations.md)
+records.
+
 ### A focus report is only as good as the activation behind it (#1322)
 
 **[Rationale]**

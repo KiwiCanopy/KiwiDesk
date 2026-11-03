@@ -52,6 +52,13 @@ struct OpenOrFocusSeams {
         NSRunningApplication(processIdentifier: pid)?.activate()
     }
 
+    /// Jump's raise of a window on its own full-screen Space
+    /// (#2939), its app activated first; false where the element no
+    /// longer names the window.
+    var raiseFullScreen: @MainActor (AXUIElement, WindowID, pid_t) -> Bool = {
+        AXHelper.activateThenRaise($0, window: $1, pid: $2)
+    }
+
     /// Launches the app — the branch taken when it is not running,
     /// or when `spawn_new` asks for a fresh instance — and, on a
     /// running app with no window at all, reopens it so it opens
