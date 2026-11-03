@@ -6200,6 +6200,14 @@ under **Pocket**.
 - **⌘1** … **⌘9** pick one of the first nine results.
 
 :::unreleased
+**Return** on a window in native full screen shows that window on
+its own full-screen Space
+([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939)). A
+window already in full screen when KiwiDesk started brings only its
+app forward ([accepted limitations](accepted-limitations.md)).
+:::
+
+:::unreleased
 **⌥Return** (or **⇧⌥Return**, or an ⌥-click) swaps the selected
 window with yours, as [swap_here](#swap_here) does, and **⌥⌘1** …
 **⌥⌘9** (or **⇧⌥⌘1** …) swap one of the first nine. Yours is

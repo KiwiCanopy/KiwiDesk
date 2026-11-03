@@ -73,6 +73,13 @@ extension KiwiCore {
                 removed: effects.removedWindow,
                 nativeSpace: space
             )
+            // The element Jump raises it by on its Space (#2939).
+            if !NativeSpaces.isUserSpace(space, in: spaces) {
+                eventLoop.fullScreenElements.keep(
+                    id,
+                    away: Set(state.awayWindows.keys)
+                )
+            }
         }
         emitWindowDestroyed(
             id,

@@ -229,6 +229,7 @@ extension EventLoop {
     /// Emits no event: each caller owns its own fold or emit,
     /// so the registry and the fold cannot double-report.
     func releaseWindowRegistration(_ id: WindowID, pid: pid_t) {
+        fullScreenElements.noteRelease(id, elements[pid]?[id])
         elements[pid]?[id] = nil
         detectedFloating[id] = nil
         detectedFullscreen[id] = nil

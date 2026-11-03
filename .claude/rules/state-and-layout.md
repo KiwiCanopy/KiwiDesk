@@ -1364,6 +1364,22 @@ editing here:
   `honoredFocus`, since it is id-keyed like it
   (`DesktopSettleDepartureTests`). The arm reads no on-screen
   flag on purpose: the argument is the design-decisions entry's.
+  **Jump's full-screen arm passes the gate on purpose (#2939)**:
+  Jump means to switch and `switchDesktop` reaches no native
+  full-screen Space (#670), so a Jump to a window hosted on one —
+  tracked `isFullscreen`, or away on a census `fullScreen` Space
+  (#2930) — goes through the one `jumpToFullScreen`, which
+  activates the app FIRST and then makes the window main and
+  raises it (`AXHelper.activateThenRaise`), never `AXHelper.raise`,
+  whose #496 order lands the raise in a background app and reaches
+  nothing (measured 2026-11-02/03 on one and two screens, macOS
+  27.2, TextEdit). An away window's
+  element is the one `FullScreenElements` kept at its full-screen
+  departure, alive while the ledger lists it and re-checked by id
+  at use; a window with none brings its app forward
+  (`docs/accepted-limitations.md`). `JumpFullScreenSeamTests` holds
+  the raise, its seam and the arm to Jump, and both twins to the
+  pin; `JumpFullScreenTests` holds the arms.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once
