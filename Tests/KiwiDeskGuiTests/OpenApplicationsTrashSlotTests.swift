@@ -10,7 +10,7 @@ import Testing
 /// card's trailing reach and key columns line up — the Open
 /// applications card's KiwiDesk rows sat one trash-width off.
 ///
-/// Main-actor spend: three `NSHostingView` fitting sizes, once.
+/// Main-actor spend: six `NSHostingView` fitting sizes, once.
 @Suite("Rule trash column width")
 @MainActor
 struct OpenApplicationsTrashSlotTests {
@@ -82,5 +82,45 @@ struct OpenApplicationsTrashSlotTests {
                     + "privatevarreservesTrashSlot"
             )
         )
+    }
+
+    /// A setting row in a card with trash rows holds the slot too,
+    /// so its control ends where the recorders do (#2922).
+    @Test("a setting row holds the slot when its card asks")
+    func settingRowHoldsTheSlot() {
+        let row = ShortcutSettingRow(title: "x", help: "x") {
+            Text("x")
+        }
+        let bare = width(row)
+        let held = width(
+            row.environment(\.keybindingReservesTrashSlot, true)
+        )
+        let slot = width(AppRuleDeleteButton.slot)
+        #expect(slot > 0)
+        #expect(held - bare >= slot)
+    }
+
+    /// The Holds row and the key rows share one ask; the per-app
+    /// rows, which draw their own trash, stay outside it. The ask
+    /// is the card's one spelling of the key, so no row inside it
+    /// sets it back.
+    @Test("the Pocket card's Holds row holds the slot")
+    func pocketHoldsRowHoldsTheSlot() throws {
+        let group = try source("PocketGroup.swift")
+        #expect(
+            group.contains(
+                "Group{capacityRowForEach(ShortcutsRowOrder.pocketAtRest"
+            )
+        )
+        #expect(
+            group.contains(
+                "}}.environment(\\.keybindingReservesTrashSlot,true)"
+                    + "PocketAppRows("
+            )
+        )
+        let asks = group.components(
+            separatedBy: "keybindingReservesTrashSlot"
+        )
+        #expect(asks.count == 2, "one ask, nothing overriding it")
     }
 }

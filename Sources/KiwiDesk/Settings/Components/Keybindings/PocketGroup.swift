@@ -11,18 +11,21 @@ struct PocketGroup: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.pocketKeys) {
-            // What it holds leads its keys (owner, #2678).
-            capacityRow
-            ForEach(ShortcutsRowOrder.pocketAtRest, id: \.id) { key in
-                KeybindingFamilyRows(
-                    model: model,
-                    bindings: $bindings,
-                    key: key,
-                    expander: expander
-                )
+            Group {
+                // What it holds leads its keys (owner, #2678).
+                capacityRow
+                ForEach(ShortcutsRowOrder.pocketAtRest, id: \.id) {
+                    key in
+                    KeybindingFamilyRows(
+                        model: model,
+                        bindings: $bindings,
+                        key: key,
+                        expander: expander
+                    )
+                }
             }
-            // Aligns the key rows with the per-app rows' trash, as
-            // Open applications does.
+            // Aligns the trash-less rows with the per-app rows'
+            // trash, as Open applications does (#2922).
             .environment(\.keybindingReservesTrashSlot, true)
             // Each app's own key (#2612).
             PocketAppRows(model: model, bindings: $bindings)

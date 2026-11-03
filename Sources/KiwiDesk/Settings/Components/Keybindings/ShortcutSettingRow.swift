@@ -14,6 +14,8 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
     let helpSubject: String
     let reach: Reach
     let control: Control
+    @Environment(\.keybindingReservesTrashSlot)
+    private var reservesTrashSlot
 
     init(
         title: String,
@@ -45,6 +47,9 @@ struct ShortcutSettingRow<Reach: View, Control: View>: View {
             Spacer()
             reach
             KeyRecorderField.footprint.overlay { control }
+            if reservesTrashSlot {
+                AppRuleDeleteButton.slot
+            }
         }
     }
 }

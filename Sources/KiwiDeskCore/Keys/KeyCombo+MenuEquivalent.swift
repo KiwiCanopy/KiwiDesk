@@ -42,6 +42,23 @@ extension KeyCombo {
         return UInt32(event.keyCode) == keyCode && held == menuModifiers
     }
 
+    /// The keyDown behind the menu action firing now, or nil for a
+    /// click.
+    @MainActor public static func menuKeyDown() -> NSEvent? {
+        NSApp.currentEvent.flatMap { $0.type == .keyDown ? $0 : nil }
+    }
+
+    /// Whether `event` is AppKit's keyDown for `chord`, which
+    /// Carbon's hotkey already answered: a menu row drops only that
+    /// firing, so Return on a picked row stands (#2869).
+    public static func isCarbonTwin(
+        of chord: KeyCombo?,
+        event: NSEvent?
+    ) -> Bool {
+        guard let chord, let event else { return false }
+        return chord.isPressed(by: event)
+    }
+
     private static func menuKey(
         for code: UInt32,
         layoutChar: (UInt32) -> String?

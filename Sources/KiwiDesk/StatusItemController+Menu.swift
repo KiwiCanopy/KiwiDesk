@@ -149,16 +149,22 @@ extension StatusItemController {
         // Carbon owns a bound chord globally; AppKit's duplicate
         // keyDown is dropped — but `⌘,` has no Carbon twin, so its
         // keyDown is the row's only path (#1381).
-        if menuActionIsKeyDown(), settingsComboProvider() != nil {
+        if KeyCombo.isCarbonTwin(
+            of: settingsComboProvider(),
+            event: menuKeyDown()
+        ) {
             return
         }
         onOpenDashboard()
     }
 
     @objc private func openKiwiHub(_ sender: NSMenuItem) {
-        // Carbon owns shortcut globally; ignore AppKit's duplicate keyDown
-        // event.
-        if menuActionIsKeyDown() { return }
+        if KeyCombo.isCarbonTwin(
+            of: kiwiHubComboProvider(),
+            event: menuKeyDown()
+        ) {
+            return
+        }
         onOpenKiwiHub()
     }
 

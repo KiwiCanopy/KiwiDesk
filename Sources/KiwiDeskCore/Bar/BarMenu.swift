@@ -170,9 +170,7 @@ enum BarMenu {
             // arrow keys picked is the row's one firing.
             let drawn = item.keyEquivalent.isEmpty ? nil : row.chord
             let handler = Handler {
-                if let drawn, let event = keyDown(),
-                    drawn.isPressed(by: event)
-                {
+                if KeyCombo.isCarbonTwin(of: drawn, event: keyDown()) {
                     return
                 }
                 perform()

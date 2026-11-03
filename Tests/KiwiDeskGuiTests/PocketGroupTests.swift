@@ -78,8 +78,13 @@ struct PocketGroupTests {
         // where the pocket sits is KiwiShelf's card.
         let body = try #require(source.range(of: "var body: some View"))
         let drawn = String(source[body.upperBound...])
+        // The row's own line at any depth, so wrapping it moves
+        // nothing.
         let holds = try #require(
-            drawn.range(of: "\n            capacityRow\n")
+            drawn.range(
+                of: #"\n\s*capacityRow\n"#,
+                options: .regularExpression
+            )
         )
         let keys = try #require(
             drawn.range(of: "ShortcutsRowOrder.pocketAtRest")

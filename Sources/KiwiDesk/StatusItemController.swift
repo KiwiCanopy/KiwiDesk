@@ -20,13 +20,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// The combo bound to Open Settings (#1381), read the same way;
     /// nil keeps the app menu's `⌘,`.
     var settingsComboProvider: () -> KeyCombo? = { nil }
-    /// Whether the menu action firing now was AppKit's keyDown
-    /// for a chord Carbon already answered — the one reading
-    /// both chrome actions drop their duplicate on; injected so
-    /// a test can hold it either way.
-    var menuActionIsKeyDown: () -> Bool = {
-        NSApp.currentEvent?.type == .keyDown
-    }
+    /// The keyDown behind the menu action firing now, or nil;
+    /// injected for tests (#2869).
+    var menuKeyDown: () -> NSEvent? = { KeyCombo.menuKeyDown() }
 
     /// Drives the found-only "Update Available…" row and the
     /// pending mark (#874, #1536). Inert by default —

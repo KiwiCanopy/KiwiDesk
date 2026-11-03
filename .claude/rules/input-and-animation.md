@@ -19,6 +19,15 @@ editing here:
   keyboard tap is the side tap below (`docs/design-decisions.md` ▸
   *Left and right modifiers are told apart by one keyboard tap*).
   Mouse presses are read through `NSEvent` monitors.
+- **A menu row drawing a Carbon-bound chord drops only that
+  chord's own keyDown, asked of the one `KeyCombo.isCarbonTwin`**
+  — Carbon's hotkey already acted, and every other keyboard
+  firing, Return on an arrow-picked row, is the row's (#2869). The
+  bar menus and the status item read it through an injected
+  keyDown defaulting to `KeyCombo.menuKeyDown`, never a check of
+  their own (`CarbonTwinSeamTests` ▸ `callersAreNamed`, whose
+  map a new caller joins; `BarMenuChordTests`,
+  `QuickMenuHubRowTests` ▸ `hubRowOpens` for the behaviour).
 - **The running hotkey table is written only from saved files.**
   A new writer — a caller of `applyStructuredKeybindings`, of
   `KeybindingManager.replaceLayers`, or of `keys.bind` /

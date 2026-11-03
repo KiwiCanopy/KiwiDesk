@@ -42,9 +42,7 @@ final class BarContextMenus {
     /// The keyDown firing a row now, if a key fires it: one whose
     /// drawn chord Carbon already answered is dropped (#2869 ▸ 5).
     /// Injected so a test can hand either.
-    var keyDown: @MainActor () -> NSEvent? = {
-        NSApp.currentEvent.flatMap { $0.type == .keyDown ? $0 : nil }
-    }
+    var keyDown: @MainActor () -> NSEvent? = { KeyCombo.menuKeyDown() }
 
     func menu(for hit: BarHit) -> NSMenu? {
         let rows = rows(hit)
