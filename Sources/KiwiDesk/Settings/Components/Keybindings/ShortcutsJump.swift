@@ -31,7 +31,7 @@ enum ShortcutsJumpGroup: CaseIterable, Hashable, Sendable {
             return SettingsCatalog.shortcuts.desktopsSection
         case .layout: return SettingsCatalog.shortcuts.layoutKeys
         case .sizeFloat: return SettingsCatalog.shortcuts.sizeFloat
-        case .pocket: return SettingsCatalog.shortcuts.pocketKeys
+        case .pocket: return SettingsCatalog.shortcuts.pocketCard
         case .openApplications:
             return SettingsCatalog.shortcuts.openApplications
         case .luaBindings:
