@@ -207,6 +207,11 @@ extension KiwiCore {
                 frame: frame,
                 validated: late,
                 late: late,
+                answersPress: isHeldFlick(
+                    id,
+                    frame: frame,
+                    previous: preEventFrame
+                ),
                 previous: preEventFrame
             )
         case .windowResized(let id, let frame):

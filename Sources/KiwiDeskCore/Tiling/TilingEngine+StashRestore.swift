@@ -17,7 +17,8 @@ extension TilingEngine {
     ///
     /// A capture is consumed only once the window's STATE frame
     /// reads back at the original — i.e. the restore's AX echo
-    /// landed — once SENT, at its origin alone (`delivered`).
+    /// landed — once SENT, at its origin alone (`delivered`),
+    /// or where it answered a second send off it (#2881).
     /// Consuming eagerly opened an echo-lag hole: on a rapid
     /// space bounce (A→B→A→B on a held hotkey) the next
     /// stash saw a nil entry while the state frame still read
@@ -52,7 +53,7 @@ extension TilingEngine {
                 || state.awayWindows[$0.key] != nil
         }
         stashSent = stashSent.filter {
-            stashedFrames[$0.key] == $0.value
+            stashedFrames[$0.key] == $0.value.frame
         }
         // Restore floats for every space currently shown on some
         // display, not just the focused one (#multi-monitor): a
@@ -71,7 +72,7 @@ extension TilingEngine {
             guard id != dragExemptWindow else { continue }
             if let current = state.windows[id]?.frame,
                 Self.close(current, to: original)
-                    || (stashSent[id] == original
+                    || (stashSent[id]?.frame == original
                         && Self.delivered(current, to: original))
             {
                 stashedFrames[id] = nil
@@ -97,12 +98,67 @@ extension TilingEngine {
             {
                 continue
             }
-            stashSent[id] = original
+            var sent = StashSend(frame: original)
+            if let previous = stashSent[id],
+                previous.frame == original
+            {
+                // The last send still stands (#1508's one reading):
+                // its answer may be on the way, so nothing is
+                // re-sent or counted.
+                if let lead = commandedFrame(of: id),
+                    Self.close(lead, to: original)
+                {
+                    continue
+                }
+                sent = previous
+                // The window answered away from the origin: twice
+                // sent, its own frame is the best truth left. A
+                // corner is never an answer (#412, #1352).
+                if let current = state.windows[id]?.frame,
+                    !looksStashed(current)
+                {
+                    sent.answers += 1
+                    if sent.answers >= Self.stashSendLimit {
+                        consumeRefused(id, original, at: current)
+                        continue
+                    }
+                }
+            }
+            stashSent[id] = sent
             // One write, a take-out's held until the brief pocket's
             // plate lands (#2680).
             animation.cancel(window: id)
             setFrame(id, original)
         }
+    }
+
+    /// A sent capture and how many times the window answered it
+    /// away from its origin (#2881): one per send, read once that
+    /// send's instant lead has cleared or lapsed.
+    struct StashSend: Equatable {
+        let frame: CGRect
+        var answers = 0
+    }
+
+    /// Sends a refused origin gets before its capture is consumed:
+    /// #677's "twice" (#2881).
+    static let stashSendLimit = 2
+
+    /// Consumes a capture whose origin the window refused twice,
+    /// logging the window and both origins (#2881).
+    private func consumeRefused(
+        _ id: WindowID,
+        _ original: CGRect,
+        at current: CGRect
+    ) {
+        stashedFrames[id] = nil
+        stashSent[id] = nil
+        let asked = "\(Int(original.minX)),\(Int(original.minY))"
+        let landed = "\(Int(current.minX)),\(Int(current.minY))"
+        onLog(
+            "stash restore: \(id) refused \(asked) twice, "
+                + "kept at \(landed)"
+        )
     }
 
     /// Whether a SENT capture has been delivered: the window

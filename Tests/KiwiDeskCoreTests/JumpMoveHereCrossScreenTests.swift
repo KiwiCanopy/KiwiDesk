@@ -174,6 +174,37 @@ struct JumpMoveHereCrossScreenTests {
         #expect(core.state.workspaces.lastFocused == WindowID(7))
     }
 
+    /// A click or a key-down before a wrong-screen arrival stands
+    /// only the focus down: the filing is the move the user asked
+    /// for (#2883).
+    @Test("a press before a wrong-screen arrival still files it")
+    func pressStillFiles() {
+        let core = makeCore()
+        defer { teardown() }
+        park(core, on: 11)
+        let start = core.wallClock()
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
+        #expect(core.moveHere(.window(WindowID(7)), on: DisplayID(2)))
+        core.state.rememberedSpaces[WindowID(7)] = .departed("1")
+        core.wallClock = { start.addingTimeInterval(2) }
+        core.launchFollow.pressAge = { 1 }
+        core.handle(
+            .windowCreated(
+                ManagedWindow(
+                    id: WindowID(7),
+                    pid: pid,
+                    appName: "Notes",
+                    appBundleID: bundle
+                )
+            )
+        )
+        #expect(core.state.workspaces.space(of: WindowID(7)) == "5")
+        #expect(
+            lines.contains { $0.contains("w7 arrived — focus stood down") }
+        )
+    }
+
     @Test("the hop's screen key refuses a screen the reading lacks")
     func hopDisplayKey() {
         let core = makeCore()
