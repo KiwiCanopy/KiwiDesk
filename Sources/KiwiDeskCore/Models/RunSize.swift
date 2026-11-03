@@ -15,6 +15,13 @@ public struct RunSize: Sendable, Equatable, Codable {
         self.share = share
         self.zone = zone
     }
+
+    /// The in-place payload's keys, a stored cross-version shape
+    /// (#930, `RunSizeCodingTests`).
+    private enum CodingKeys: String, CodingKey {
+        case share
+        case zone
+    }
 }
 
 extension [WindowID: RunSize] {

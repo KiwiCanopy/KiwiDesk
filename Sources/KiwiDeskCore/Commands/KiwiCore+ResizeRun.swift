@@ -90,7 +90,13 @@ extension KiwiCore {
             ),
             resize.movesRun
         else { return false }
-        write(resize, of: focused, in: found.zone, space: space)
+        write(
+            resize,
+            of: focused,
+            in: found.zone,
+            weights: found.zone.shareWeights(in: found.context),
+            space: space
+        )
         return true
     }
 
@@ -129,36 +135,30 @@ extension KiwiCore {
             )
             return .fail("the focused window is alone in its run")
         }
-        // A window whose only weighted mate is itself draws what
-        // the sized mate leaves, so its press moves the mate's
-        // length the other way and the push the mate made stands.
         let weights = zone.shareWeights(in: context)
-        let weighted = run.visible.filter { weights[$0] > 0 }
-        if let index = zone.members.firstIndex(of: focused),
-            !resize.movesRun, weighted == [index],
-            let mate = run.visible.first(where: { weights[$0] == 0 }),
-            let moved = zone.resize(
-                zone.members[mate],
-                by: CGFloat(-delta),
-                toward: side == .both ? .both : mate < index ? .end : .start,
-                in: context
-            )
-        {
-            if moved.atOwnMinimum {
-                refuseGrowAtNeighborMinimum(
-                    focused,
-                    anchor: zone.members[mate],
-                    axis: axis
-                )
-            }
-            guard moved.changed else {
-                return .fail("every shown window is at its minimum")
-            }
-            write(moved, of: zone.members[mate], in: zone, space: space)
-            return .ok()
+        let shown = Array(run.visible)
+        guard let index = zone.members.firstIndex(of: focused) else {
+            return .fail("no focused tiled window")
         }
-        // A push or a pull, or a window a push already sized, takes
-        // a length; any other press keeps the run's weight step.
+        // Beside only sized mates the window draws what they leave,
+        // so its press moves a mate's length the other way and the
+        // push that mate made stands.
+        if shown.count > 1,
+            shown.allSatisfy({ $0 == index || weights[$0] == 0 })
+        {
+            return resizeBesideSized(
+                focused,
+                at: index,
+                zone: zone,
+                context: context,
+                axis: axis,
+                delta: delta,
+                toward: side,
+                space: space
+            )
+        }
+        // A push, a pull, or a window a push already sized takes a
+        // length; any other press keeps the run's weight step.
         if resize.movesRun
             || zone.plannedSize(of: focused, in: context) != nil
         {
@@ -177,7 +177,13 @@ extension KiwiCore {
                 )
                 return .fail("the focused window is alone in its run")
             }
-            write(resize, of: focused, in: zone, space: space)
+            write(
+                resize,
+                of: focused,
+                in: zone,
+                weights: weights,
+                space: space
+            )
             return .ok()
         }
         return weighInRun(
@@ -267,24 +273,45 @@ extension KiwiCore {
     }
 
     /// Stores the window's run size and the run's ends together,
-    /// so the next pass draws the run the write planned. A run
-    /// keeps one sized window: the others share what is left.
-    private func write(
+    /// so the next pass draws the run the write planned. A window
+    /// the push leaves beside only sized mates draws what they leave
+    /// and takes no length, so the run always keeps a window that
+    /// takes the rest — save a lone one, which keeps its length.
+    func write(
         _ resize: RunZone.Resize,
         of focused: WindowID,
         in zone: RunZone,
+        weights: [Double],
         space: Space
     ) {
+        let index = zone.members.firstIndex(of: focused)
+        let others = resize.visible.filter { $0 != index }
+        let absorbs = !others.isEmpty && others.allSatisfy { weights[$0] == 0 }
         state.workspaces.withSpace(space.id) {
-            for member in zone.members { $0.runSizes[member] = nil }
-            $0.runSizes[focused] = RunSize(
-                share: resize.size,
-                zone: zone.members[0]
-            )
+            $0.runSizes[focused] =
+                absorbs
+                ? nil : RunSize(share: resize.size, zone: zone.members[0])
             ($0.runHeads, $0.runTails) = zone.ends(
                 showing: resize.visible,
                 heads: $0.runHeads,
                 tails: $0.runTails
+            )
+        }
+    }
+
+    /// Stores `length` points as `member`'s run size in `zone`.
+    func writeLength(
+        _ length: CGFloat,
+        of member: WindowID,
+        in zone: RunZone,
+        space: Space
+    ) {
+        let span = zone.span
+        guard span > 0 else { return }
+        state.workspaces.withSpace(space.id) {
+            $0.runSizes[member] = RunSize(
+                share: length / span,
+                zone: zone.members[0]
             )
         }
     }

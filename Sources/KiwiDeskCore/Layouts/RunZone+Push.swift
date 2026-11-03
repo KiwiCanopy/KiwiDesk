@@ -51,7 +51,7 @@ extension RunZone {
         // Every press steps from what the window draws, as the
         // scrolling slot does (#1057), so nothing banks a length
         // the screen does not show.
-        let (_, bare, gap) = floorsAndGap(in: context)
+        let (floors, bare, gap) = floorsAndGap(in: context)
         let span = length(region)
         let extent = drawn
         let own = bare[index]
@@ -63,11 +63,9 @@ extension RunZone {
         var target = planned(extent + delta)
         var start = before.lowerBound
         var last = before.upperBound - 1
-        // The write leaves the run one sized window, so every other
-        // member plans at its floor.
         func fits(_ first: Int, _ end: Int) -> Bool {
             ZoneRun.fits(
-                (first...end).map { $0 == index ? target : bare[$0] },
+                (first...end).map { $0 == index ? target : floors[$0] },
                 gap: gap,
                 span: span
             )
@@ -97,7 +95,11 @@ extension RunZone {
                 target = planned(max(target, room))
                 if !fits(start, last) { target = asked }
             }
-        } else if delta < 0 {
+        } else if delta < 0,
+            before.count == 1 || plannedSize(of: id, in: context) != nil
+        {
+            // Only a window holding a length frees room by shrinking:
+            // any other hands it to its mates by weight.
             while true {
                 let after = last + 1 < members.count ? last + 1 : nil
                 let ahead = start > 0 ? start - 1 : nil

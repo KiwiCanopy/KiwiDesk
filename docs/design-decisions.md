@@ -4544,11 +4544,14 @@ span, as every other sizing store is, so a Space shown on a
 smaller screen keeps its proportions rather than hiding more
 windows than the user pushed. The run decides when it counts: in
 the zone it was given in, while that run would still hide a
-window with it, one sized window per run. A window moved to
+window with it. A window moved to
 another zone, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's
-weight step. A window left alone in its run draws at its length,
+weight step. Only the window holding a length frees room by
+shrinking: any other hands its room to its mates, by weight or —
+beside only sized mates, whose leftover it draws — to the nearest
+mate's length, so a press on a neighbour never undoes the push. A window left alone in its run draws at its length,
 the room a shrink freed left open toward the windows waiting: a
 press steps from what the window draws, as the scrolling slot
 does (#1057), so no store banks a length the screen does not

@@ -16,20 +16,28 @@ extension KiwiCore {
     /// owes no z-order restore (#2235 ruling, 2026-10-22).
     func persistRunHeads() {
         for (id, cover) in tiler.runCovers {
-            // A push's length lasts while its run hides a window
-            // (#2709): once every member shows, it plans nothing.
-            let hiding = Set(cover.runs.flatMap(\.zone.members))
-            guard let space = state.workspaces[id],
+            // A push's length lasts while the run it was given in
+            // hides a window (#2709): once every member shows, or
+            // the window sits in another zone, it plans nothing.
+            var zoneOf: [WindowID: WindowID] = [:]
+            for run in cover.runs {
+                for member in run.zone.members {
+                    zoneOf[member] = run.zone.members.first
+                }
+            }
+            guard let space = state.workspaces[id] else { continue }
+            let sizes = space.runSizes.filter {
+                zoneOf[$0.key] == $0.value.zone
+            }
+            guard
                 space.runHeads != cover.heads
                     || space.runTails != cover.tails
-                    || space.runSizes.keys.contains(where: {
-                        !hiding.contains($0)
-                    })
+                    || sizes != space.runSizes
             else { continue }
             state.workspaces.withSpace(id) {
                 $0.runHeads = cover.heads
                 $0.runTails = cover.tails
-                $0.runSizes = $0.runSizes.filter { hiding.contains($0.key) }
+                $0.runSizes = sizes
             }
         }
     }

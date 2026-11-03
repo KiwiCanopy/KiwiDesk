@@ -241,6 +241,15 @@ struct RunZonePushTests {
         #expect(abs(frame.width - 600) < 0.5)
     }
 
+    @Test("A lone sized window at the end leaves the room at the start")
+    func loneLengthAtTheEnd() throws {
+        let lone = context(focus: 4, sizes: [4: 600], heads: [4])
+        #expect(zone.run(in: lone)?.visible == 3..<4)
+        let frame = try #require(zone.frames(in: lone)[ids[3]])
+        #expect(abs(frame.maxX - 1000) < 0.5)
+        #expect(abs(frame.width - 600) < 0.5)
+    }
+
     @Test("A window not shown has nothing to resize")
     func hiddenWindowAnswersNil() {
         #expect(

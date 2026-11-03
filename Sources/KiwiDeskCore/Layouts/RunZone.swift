@@ -248,7 +248,7 @@ public struct RunZone: Sendable, Equatable {
         )
     }
 
-    private var span: CGFloat { vertical ? region.height : region.width }
+    var span: CGFloat { vertical ? region.height : region.width }
 
     /// The length a push gave `id` where this zone plans it.
     func plannedSize(
@@ -266,31 +266,6 @@ public struct RunZone: Sendable, Equatable {
     /// divides it — zero for a sized window.
     func shareWeights(in context: LayoutContext) -> [Double] {
         placement(in: context).weights
-    }
-
-    /// The lengths pushes gave members, by member index, honoured
-    /// only for a length given in this zone (`RunSize.zone`), while
-    /// its run keeps stored ends and would still hide a window with
-    /// them: a window moved to another zone, or a run that would
-    /// show everything at its floors, plans at its floor and share.
-    private func honouredSizes(
-        bare: [CGFloat],
-        gap: CGFloat,
-        in context: LayoutContext
-    ) -> [Int: CGFloat] {
-        guard let first = members.first,
-            members.contains(where: {
-                context.runHeads.contains($0) || context.runTails.contains($0)
-            })
-        else { return [:] }
-        var sizes: [Int: CGFloat] = [:]
-        for (index, member) in members.enumerated() {
-            guard let size = context.runSizes[member], size.zone == first
-            else { continue }
-            sizes[index] = max(min(size.share * span, span), bare[index])
-        }
-        let planned = members.indices.map { sizes[$0] ?? bare[$0] }
-        return ZoneRun.fits(planned, gap: gap, span: span) ? [:] : sizes
     }
 
     /// Every member's floor under fixed cells: an equal cell's

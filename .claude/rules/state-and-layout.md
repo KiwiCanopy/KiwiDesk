@@ -1999,8 +1999,10 @@ editing here:
   stopped takes `pushOrCue` before any neighbour-minimum cue — a
   writer refuses no grow the run could take. A press that moves a
   window into or out of the run writes a `Space.runSizes` entry
-  and the run's two ends together, one sized window per run, every
-  other press the run's weight step; the run itself decides when a
+  and the run's two ends together, and only a window holding a
+  length pulls; a press beside only sized mates moves the nearest
+  mate's length (`resizeBesideSized`), every other press the run's
+  weight step; the run itself decides when a
   length plans (`RunZone.plannedSize`), never a writer or the
   persist step beside it (`RunZonePushTests`,
   `RunPushCommandTests`). A press steps from the drawn frame, and

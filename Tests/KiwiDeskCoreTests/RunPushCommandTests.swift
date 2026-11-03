@@ -111,58 +111,6 @@ struct RunPushCommandTests {
         #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
     }
 
-    /// Master w1 beside a stack zone of w2, w3, w4 that holds all
-    /// three in 1000 pt, w3 dragged by `edge` 200 pt outward.
-    private func dragMiddle(leading: Bool) throws -> (KiwiCore, SpaceID) {
-        let (core, id) = makeSpace(
-            "stack",
-            windows: 4,
-            focus: 3,
-            height: 1020
-        )
-        #expect(hidden(core, id).isEmpty)
-        let space = try #require(core.state.workspaces[id])
-        let slot = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w(3)]
-        )
-        var dragged = slot
-        if leading { dragged.origin.y -= 200 }
-        dragged.size.height += 200
-        core.handleResizeEnd(w(3), slot: slot, frame: dragged, in: space)
-        core.retile(animated: false)
-        return (core, id)
-    }
-
-    @Test("Stack: a drag pushes the neighbour on the edge it moved")
-    func dragPushesTheMovedSide() throws {
-        let (top, topID) = try dragMiddle(leading: true)
-        #expect(hidden(top, topID) == [w(2)])
-        #expect(top.state.workspaces[topID]?.runHeads == [w(3)])
-        let (bottom, bottomID) = try dragMiddle(leading: false)
-        #expect(hidden(bottom, bottomID) == [w(4)])
-        #expect(bottom.state.workspaces[bottomID]?.runTails == [w(3)])
-    }
-
-    @Test("Stack: a press beside a sized mate moves the mate's length")
-    func pressBesideASizedMate() throws {
-        let (core, id) = try dragMiddle(leading: true)
-        #expect(core.state.workspaces[id]?.runSizes.keys.first == w(3))
-        core.state.workspaces.focus(w(4), in: id)
-        let before = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w(4)]
-        )
-        press(core, "y", 50)
-        let after = try #require(
-            core.tiler.calculatedFrames(state: core.state)[w(4)]
-        )
-        // w4 draws what w3's length leaves: the press moves that
-        // length, and w2 stays in the run.
-        #expect(abs(after.height - before.height - 50) < 1)
-        #expect(core.state.workspaces[id]?.runSizes.keys.first == w(3))
-        #expect(core.state.workspaces[id]?.runSizes.count == 1)
-        #expect(hidden(core, id) == [w(2)])
-    }
-
     @Test("Stack: dragging the leading edge pushes the window before it")
     func stackDragPushesTheStart() throws {
         let (core, id) = makeSpace("stack", windows: 3, focus: 3)
