@@ -7,9 +7,10 @@ import Testing
 /// each in-scope surface reads the resolved paint through
 /// `deskPlate`/`platePaint` or the palette they write, a plate
 /// view with no writer takes `SchematicPalette.unresolved`, and
-/// two sets close it: only the resolver names the dark plate
-/// token, and only the resolver, `LookPlate` (#1740) and KiwiHub's
-/// `JumpLayoutTile` write the palette environment.
+/// three sets close it: only the resolver names the dark plate
+/// token; only the resolver, `LookPlate` (#1740) and KiwiHub's
+/// `JumpLayoutTile` write the palette environment; and only
+/// `appearanceWriters` force an appearance anywhere in the trees.
 @Suite("Plate ground wiring")
 struct PlateGroundWiringTests {
     /// Surface file → the squashed consult it must carry.
@@ -37,14 +38,18 @@ struct PlateGroundWiringTests {
     /// The one file that names the dark plate token.
     private let resolver = "HomeCardPlate+Ground.swift"
 
-    private func sources() throws -> [(String, String)] {
+    /// Each scanned file, comments stripped and whitespace squashed;
+    /// `spaced` keeps the whitespace, which a declaration read needs.
+    private func sources(spaced: Bool = false) throws -> [(String, String)] {
         try ChromeScanRoots.sources(from: #filePath).map {
-            (
+            let source = SourceScan.stripComments(
+                try String(contentsOf: $0, encoding: .utf8)
+            )
+            return (
                 $0.lastPathComponent,
-                SourceScan.stripComments(
-                    try String(contentsOf: $0, encoding: .utf8)
-                )
-                .split(whereSeparator: \.isWhitespace).joined()
+                spaced
+                    ? source
+                    : source.split(whereSeparator: \.isWhitespace).joined()
             )
         }
     }
@@ -72,7 +77,8 @@ struct PlateGroundWiringTests {
             // forcing its own would pick the plate for it. The
             // KiwiVision scene's windows take the appearance the
             // mode will show, below the writer, and are the one
-            // spelling allowed, in that file alone.
+            // spelling allowed, in that file alone (its row in
+            // `appearanceWriters` counts the same write).
             let forced =
                 file == "KiwiVisionScene.swift"
                 ? source.replacingOccurrences(
@@ -83,29 +89,56 @@ struct PlateGroundWiringTests {
                 : source
             #expect(
                 !forced.contains("\\.colorScheme")
+                    && !forced.contains("EnvironmentValues.colorScheme")
                     && !forced.contains("preferredColorScheme("),
                 Comment(rawValue: "\(file) forces an appearance")
             )
         }
         // One fallback: a plate view with no writer reads the
-        // resolver's unresolved paint, never a value it picks. The
-        // schematic kit's own fallbacks are its brand mode, drawn
-        // with no plate at all.
-        let picked = try Regex("palette\\?\\.\\w+\\?\\?")
+        // resolver's unresolved paint, never a value it picks — a
+        // member of another palette (`palette?.x ?? y`) or a palette
+        // of its own (`palette ?? y`). The schematic kit's own
+        // fallbacks are its brand mode, drawn with no plate at all.
+        // Trade: a palette handed in as an init parameter or stored
+        // property under another name is not a reader here.
+        let reader = try Regex(
+            "@Environment\\(\\\\(?:EnvironmentValues)?\\.schematicPalette\\)"
+                + "\\s*(?:(?:private|fileprivate|internal|public)\\s+)?"
+                + "var\\s+(\\w+)"
+        )
+        let spaced = Dictionary(
+            try sources(spaced: true),
+            uniquingKeysWith: { first, _ in first }
+        )
         func brandMode(_ file: String) -> Bool {
             file.hasPrefix("LayoutSchematic")
                 || file.hasSuffix("Schematic.swift")
                 || file == "SchematicCardColors.swift"
         }
         var scanned = 0
+        // The reader is found by its declaration, whatever it is
+        // named (#2871); a non-palette name reads as itself.
+        var named = 0
         for (file, source) in all where !brandMode(file) {
             scanned += 1
-            guard source.contains(picked) else { continue }
-            Issue.record(
-                Comment(rawValue: "\(file) picks its own fallback")
-            )
+            let names = (spaced[file] ?? "").matches(of: reader).compactMap {
+                $0.output[1].substring.map(String.init)
+            }
+            named += names.filter { $0 == "palette" }.count
+            for name in Set(names + ["palette"]) {
+                let own = "(?:^|[^\\w.])" + name
+                let picked = try Regex(
+                    own + "\\?\\.\\w+\\?\\?|" + own
+                        + "\\?\\?(?!\\.unresolved)"
+                )
+                guard source.contains(picked) else { continue }
+                Issue.record(
+                    Comment(rawValue: "\(file) picks its own fallback")
+                )
+            }
         }
         #expect(scanned > 50)
+        #expect(named > 20)
     }
 
     @Test("only the resolver names the dark plate or writes paint")
@@ -121,13 +154,60 @@ struct PlateGroundWiringTests {
             }
             // Any mention that is not an `@Environment` read is a
             // write, whatever the modifier spelling it.
-            let mentions = source.occurrences(of: "\\.schematicPalette")
-            let reads = source.occurrences(
-                of: "@Environment(\\.schematicPalette)"
-            )
+            let mentions =
+                source.occurrences(of: "\\.schematicPalette")
+                + source.occurrences(
+                    of: "\\EnvironmentValues.schematicPalette"
+                )
+            let reads =
+                source.occurrences(of: "@Environment(\\.schematicPalette)")
+                + source.occurrences(
+                    of: "@Environment(\\EnvironmentValues.schematicPalette)"
+                )
             if mentions > reads { wrote.insert(file) }
         }
         #expect(named == [resolver])
         #expect(wrote == writers)
+    }
+
+    /// A forced appearance anywhere in the scanned trees, a helper
+    /// a surface draws included, picks the plate for the picture
+    /// (#2871). File → its writes, each with its reason. A write is
+    /// any mention of the `colorScheme` key that is not an
+    /// `@Environment` read, a `preferredColorScheme(` or
+    /// `.colorScheme(` modifier, or an AppKit appearance set
+    /// (`NSApp.appearance =`, `.appearance = NSAppearance`). Trade:
+    /// an appearance set through any other AppKit spelling is not
+    /// seen.
+    private let appearanceWriters: [String: Int] = [
+        // The KiwiVision scene's windows, below the plate writer.
+        "KiwiVisionScene.swift": 1,
+        // Forces only under a ruled tint (`panelGlassChrome`, #2569),
+        // whose surfaces paint their own palette and draw no plate.
+        "GlassChrome.swift": 1,
+        // The user's app-wide appearance, which the verdict follows.
+        "AppearanceChoice+Scheme.swift": 1,
+    ]
+
+    @Test("only the ruled files force an appearance")
+    func appearanceWritesAreRuled() throws {
+        let key = try Regex(
+            "\\\\(?:EnvironmentValues)?\\.colorScheme(?!\\w)"
+        )
+        var found: [String: Int] = [:]
+        for (file, source) in try sources() {
+            let mentions = source.matches(of: key).count
+            let reads = [
+                "@Environment(\\.colorScheme)",
+                "@Environment(\\EnvironmentValues.colorScheme)",
+            ].reduce(0) { $0 + source.occurrences(of: $1) }
+            let modifiers = [
+                "preferredColorScheme(", ".colorScheme(",
+                "NSApp.appearance=", ".appearance=NSAppearance",
+            ].reduce(0) { $0 + source.occurrences(of: $1) }
+            let writes = mentions - reads + modifiers
+            if writes > 0 { found[file] = writes }
+        }
+        #expect(found == appearanceWriters)
     }
 }

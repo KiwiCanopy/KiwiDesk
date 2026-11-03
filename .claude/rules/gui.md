@@ -1162,7 +1162,12 @@ must keep:
   `SchematicPalette.unresolved`, and a value the light plate
   needs is an accessor on the paint. Every desk picture takes
   it, KiwiVision's scene included; only the look tiles
-  (`LookPlate`, #1740) keep their own ground. On the dark
+  (`LookPlate`, #1740) keep their own ground. **No view forces
+  an appearance where the plate verdict could read it** — a
+  `colorScheme` write, `preferredColorScheme`, an AppKit
+  appearance set; a file in the Settings trees that must joins
+  `PlateGroundWiringTests` ▸ `appearanceWritesAreRuled`'s
+  register with its reason (#2871). On the dark
   plate the fold floors against it, on the light one the ink
   floors against its bar composite and a failing look keeps
   the dark plate. The two
