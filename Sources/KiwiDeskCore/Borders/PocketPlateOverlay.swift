@@ -39,8 +39,10 @@ final class PocketPlateOverlay {
     var onHover: @MainActor (DisplayID, Bool) -> Void = { _, _ in }
     /// The pointer pushed against the edge on a display's handle.
     var onPush: @MainActor (DisplayID) -> Void = { _ in }
-    /// A click on one display's pocket, and a press on its panel.
+    /// A click on one display's pocket.
     var onClick: @MainActor (PocketPlateView) -> Void = { _ in }
+    /// VoiceOver's press on one display's pocket (#2936).
+    var onPress: @MainActor (PocketPlateView) -> Void = { _ in }
     var onPanelPress: @MainActor (NSView?, NSEvent.EventType) -> Void = {
         _,
         _ in
@@ -296,7 +298,10 @@ final class PocketPlateOverlay {
             guard let view else { return }
             self?.onClick(view)
         }
-        view.onPress = view.onClick
+        view.onPress = { [weak self, weak view] in
+            guard let view else { return }
+            self?.onPress(view)
+        }
         view.onHover = { [weak self] on in
             self?.onHover(display, on)
         }

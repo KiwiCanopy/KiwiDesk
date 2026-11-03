@@ -1207,7 +1207,7 @@ Obligations:
   target list**, or subview order decides who takes the click —
   a render re-adds the glyph views above kept targets
   (`SpaceBarGlyphTargetTests` ▸ `hitTestPrefersTheTarget`).
-- **A window menu — VoiceOver's press on a list glyph, the
+- **A window menu — VoiceOver's press on any list anchor, the
   peek's "N more" — is built by `SpaceBarWindowMenu` in the one
   `presentBarWindowMenu` and shown through
   `SpaceBarGlyphActions.present`**, which both `makeTestCore`

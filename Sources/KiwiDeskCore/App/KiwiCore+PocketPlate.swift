@@ -180,6 +180,9 @@ extension KiwiCore {
         pocketPlate.onClick = { [weak self] view in
             self?.openPocketList(from: view)
         }
+        pocketPlate.onPress = { [weak self] view in
+            self?.openPocketMenu(from: view)
+        }
         pocketPlate.onHover = { [weak self] display, on in
             self?.pocketHovered(display, on)
         }
@@ -192,6 +195,16 @@ extension KiwiCore {
         pocketPlate.onPanelPress = { [weak self] hit, type in
             self?.shelves.peek.pressed(on: hit, type: type)
         }
+    }
+
+    /// VoiceOver's press: the native menu of the windows inside, at
+    /// `view`, since the peek is hidden from accessibility (#2936);
+    /// through the peek's one menu door, keyed as its list is.
+    func openPocketMenu(from view: PocketPlateView) {
+        shelves.peek.dismiss()
+        // The menu holds a revealed shelf out while it tracks (#761).
+        shelves.peek.noteMenuAnchor(view.window)
+        shelves.peek.openMenu(.pocket(pocketPlateWindows), nil, view)
     }
 
     /// Grows the list of the windows inside out of `view`.
