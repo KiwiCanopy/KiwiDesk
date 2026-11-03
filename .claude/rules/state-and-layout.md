@@ -395,11 +395,18 @@ editing here:
   DISPATCHED for that window — a hop the bridge accepted, an
   un-minimize — so the arrival is certain; the `.windowCreated`
   arm pays it with a bare focus while the Space it was owed for
-  is still active, a Move here that landed elsewhere filed there
-  first through `fileMembership` — never ahead of the arrival,
-  which may not come — and it stands down off that Space, past
-  `FollowFocusIntent.drainWindow`, or after a press or a
-  commanded focus since. Keep it off `followFocus`: that debt
+  is still active. **Its two debts are paid apart (#2883)**: the
+  filing — a Move here that landed elsewhere filed there through
+  `fileMembership` (a hidden Space parks it), a hopped float
+  placed through `reanchorFloat`, both only while that Space
+  exists and the sticky gate passes — is the move the user asked
+  for and is paid at the arrival whatever was pressed, focused
+  or switched since, never ahead of the arrival, which may not
+  come; only the focus stands down off that Space or after a
+  press or a commanded focus since. Past
+  `FollowFocusIntent.drainWindow` neither is paid
+  (`JumpFocusTests`, `JumpMoveHereCrossScreenTests` ▸
+  `pressStillFiles`). Keep it off `followFocus`: that debt
   pays as a Space switch and, while it stands, holds the #1207
   return and the #1564 sticky return down — the follow's
   register therefore names no Jump site
