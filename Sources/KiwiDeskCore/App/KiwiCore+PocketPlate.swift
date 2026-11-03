@@ -202,6 +202,8 @@ extension KiwiCore {
     /// through the peek's one menu door, keyed as its list is.
     func openPocketMenu(from view: PocketPlateView) {
         shelves.peek.dismiss()
+        // The menu holds a revealed shelf out while it tracks (#761).
+        shelves.peek.noteMenuAnchor(view.window)
         shelves.peek.openMenu(.pocket(pocketPlateWindows), nil, view)
     }
 

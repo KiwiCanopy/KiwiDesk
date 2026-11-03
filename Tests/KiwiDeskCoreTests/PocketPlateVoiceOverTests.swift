@@ -66,7 +66,6 @@ struct PocketPlateVoiceOverTests {
         #expect(view.accessibilityPerformPress())
         let menu = try #require(shown)
         #expect(anchor === view)
-        #expect(core.shelves.peek.shown == nil)
         // A row per window inside: the general one, then the keyed.
         #expect(menu.items.filter { $0.action != nil }.count == 2)
         #expect(menu.items.contains { $0.isSectionHeader })
@@ -75,6 +74,25 @@ struct PocketPlateVoiceOverTests {
             last.accessibilityLabel()?.hasSuffix("Pocket key Control Option T")
                 == true
         )
+    }
+
+    /// The press takes the peek's one menu door, so the menu's kind
+    /// and keys stay the source's (bars.md ▸ a window menu).
+    @Test(
+        "the press asks the peek's menu door for the pocket",
+        .enabled(if: NSScreen.main != nil)
+    )
+    func pressTakesTheMenuDoor() throws {
+        let fixture = try fixture()
+        let core = fixture.core
+        defer { core.pocketPlate.sync([]) }
+        var asked: [BarPeekSource] = []
+        core.shelves.peek.openMenu = { source, _, _ in asked.append(source) }
+        core.updatePocketPlate(slots: [:])
+        let display = try #require(core.pocketPlate.specs.keys.first)
+        let view = try #require(core.pocketPlate.view(on: display))
+        #expect(view.accessibilityPerformPress())
+        #expect(asked == [.pocket([general, mine])])
     }
 
     /// A press while the click's list is open closes it, so the

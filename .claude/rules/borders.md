@@ -475,13 +475,13 @@ filter beside them, while the capacity stays `pocketAcceptsMark`'s
 answering `shelfBeyondBars` (`PocketPlateTests`); the peek and its
 VoiceOver menu set the keyed windows last, under the Pocket Keys
 header, through `BarPeekSource.keysPocketWindows`
-(`PocketListKeyedTests`). **VoiceOver's press on the plate opens that
-menu, never the peek**, which is hidden from accessibility: the
-plate's `onPress` takes the peek's one `openMenu` door, never the
-click's list (#2936, `PocketPlateVoiceOverTests`). **As a drop target it acts through `pocket`
-naming the window and lights on the one `pocketNamedRefusal`**, the
-bar menus' Pocket Window door, so the light and the drop never
-disagree, and it takes a drop only where it is lit — a refused
+(`PocketListKeyedTests`). **VoiceOver's press on the plate opens
+that menu, never the peek**, which is hidden from accessibility:
+the plate's `onPress` takes the peek's one `openMenu` door, never
+the click's list (#2936, `PocketPlateVoiceOverTests`). **As a drop
+target it acts through `pocket` naming the window and lights on the
+one `pocketNamedRefusal`**, the bar menus' Pocket Window door, so
+the light and the drop never disagree, and it takes a drop only where it is lit — a refused
 window drops as it would anywhere else, told why. It shows for a
 move alone, latched off once the gesture reads as a resize, ranks
 after the Space Bar at move and drop alike, takes a drop only once
