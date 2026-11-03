@@ -2121,13 +2121,21 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
-## The palette library is Core's (#2875)
+## The palette and look libraries are Core's (#2875, #2952)
 
-**A `Sources/KiwiDesk` file reads and writes palettes through
-`KiwiCore`'s palette doors (`KiwiCore+Palettes.swift`) and never
-holds a `PaletteStore`, under any name**, so an alias cannot
-write past a door; a read the GUI needs joins those doors
-(`PaletteDoorSeamTests`).
+**A `Sources/KiwiDesk` file reads and writes palettes and looks
+through `KiwiCore`'s doors (`KiwiCore+Palettes.swift`,
+`KiwiCore+Looks.swift`) and never holds a `PaletteStore` or a
+`LookStore`, under any name**, so an alias cannot write past a
+door; a read the GUI needs joins those doors
+(`PaletteDoorSeamTests`, `LookDoorSeamTests`, whose `readOnly`
+list names the two store spellings that hold no store). **Whether
+a typed palette or look name may be saved or renamed is asked of
+the one `paletteNameVerdict` / `lookNameVerdict`**, which the write
+doors refuse through, never a combination of reads beside it
+(#2953, `LibraryNameVerdictTests`; the buttons' asks,
+`PaletteDoorSeamTests` ▸ `actionsTakeTheDoors` and
+`LookDoorSeamTests` ▸ `buttonsAskTheVerdict`).
 
 ## A KiwiHub pick asks Core at the press (#2885)
 

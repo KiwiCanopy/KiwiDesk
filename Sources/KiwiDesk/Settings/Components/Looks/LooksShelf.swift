@@ -19,8 +19,6 @@ struct LooksShelf: View {
     /// one succeeds.
     @State var failure: String?
 
-    var store: LookStore { model.lookStore }
-
     private let columns = [
         GridItem(.adaptive(minimum: 132), spacing: 12, alignment: .top)
     ]

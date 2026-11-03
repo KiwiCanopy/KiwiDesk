@@ -85,10 +85,7 @@ extension SharedLookSection {
     /// numbered past a taken one. A refused write stages no switch:
     /// the save was the user's condition for it.
     private func saveOwnLook(of profile: String) -> Bool {
-        let store = model.lookStore
-        let name = KiwiCore.uniqueName(base: profile) {
-            store.isBuiltinName($0) || store.hasUserLook($0)
-        }
+        let name = model.core.freeLookName(base: profile)
         defer { model.refreshLooks() }
         do {
             _ = try model.core.saveLook(

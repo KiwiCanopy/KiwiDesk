@@ -17,16 +17,16 @@ extension PaletteShelf {
 
     // MARK: - Save current
 
-    /// Validation evaluated on typed name string (#843).
+    /// Validation evaluated on typed name string (#843), Core's
+    /// one verdict (#2953).
     func canSave(_ typed: String) -> Bool {
-        let name = trimmed(typed)
-        return !name.isEmpty && !core.isBundledPaletteName(name)
+        core.paletteNameVerdict(typed).isAllowed
     }
 
     /// "Overwrite" when the name is an existing user palette, else
     /// "Save" — the Finder duplicate-file idiom.
     func saveLabel(_ typed: String) -> String {
-        core.hasUserPalette(trimmed(typed))
+        core.paletteNameVerdict(typed) == .overwrites
             ? L("palettes.overwrite", "Overwrite")
             : L("palettes.save", "Save")
     }
@@ -34,8 +34,7 @@ extension PaletteShelf {
     /// The caption under the field, or nil while there is
     /// nothing to say.
     func saveNotice(_ typed: String) -> String? {
-        let name = trimmed(typed)
-        if core.isBundledPaletteName(name) {
+        if core.paletteNameVerdict(typed) == .bundled {
             return L(
                 "palettes.reserved",
                 "That name is a built-in palette — choose another."
@@ -77,15 +76,9 @@ extension PaletteShelf {
 
     // MARK: - Rename / delete
 
-    /// A rename is allowed to a non-empty name that isn't a
-    /// built-in's and isn't already another user palette's (a
-    /// no-op rename to the same name is fine).
+    /// A rename is allowed to a name Core's verdict allows (#2953).
     func canRename(_ typed: String, from oldName: String) -> Bool {
-        let name = trimmed(typed)
-        guard !name.isEmpty, !core.isBundledPaletteName(name) else {
-            return false
-        }
-        return name == oldName || !core.hasUserPalette(name)
+        core.paletteNameVerdict(typed, renaming: oldName).isAllowed
     }
 
     /// Per-tile rename binding seeded from request (#843).

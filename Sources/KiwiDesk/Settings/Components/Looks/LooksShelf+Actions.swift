@@ -19,20 +19,20 @@ extension LooksShelf {
 
     // MARK: - Save current
 
+    /// Core's one verdict on the typed name (#2953).
     func canSave(_ typed: String) -> Bool {
-        let name = trimmed(typed)
-        return !name.isEmpty && !store.isBuiltinName(name)
+        core.lookNameVerdict(typed).isAllowed
     }
 
     func saveLabel(_ typed: String) -> String {
-        store.hasUserLook(trimmed(typed))
+        core.lookNameVerdict(typed) == .overwrites
             ? L("looks.overwrite", "Overwrite")
             : L("looks.save", "Save")
     }
 
     /// Why a typed name cannot be saved, said before the save.
     func saveNotice(_ typed: String) -> String? {
-        guard store.isBuiltinName(trimmed(typed)) else { return nil }
+        guard core.lookNameVerdict(typed) == .bundled else { return nil }
         return L(
             "looks.reserved",
             "That name is a built-in look — choose another."
@@ -54,9 +54,7 @@ extension LooksShelf {
     }
 
     func nextUserName() -> String {
-        KiwiCore.uniqueName(base: defaultName) {
-            store.isBuiltinName($0) || store.hasUserLook($0)
-        }
+        core.freeLookName(base: defaultName)
     }
 
     /// A write refused by an unreadable or newer library.
@@ -112,7 +110,7 @@ extension LooksShelf {
         panel.allowedContentTypes = [.json]
         panel.nameFieldStringValue = "\(look.name).json"
         guard panel.runModal() == .OK, let url = panel.url else { return }
-        try? store.export(LookExport(look: look), to: url)
+        try? core.exportLook(look, to: url)
     }
 
     func importLook() {

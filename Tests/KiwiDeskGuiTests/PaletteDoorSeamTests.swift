@@ -41,5 +41,15 @@ struct PaletteDoorSeamTests {
         ] {
             #expect(flat.occurrences(of: door) == 1, "\(door)")
         }
+        // Save and Rename ask Core's name verdict (#2953).
+        #expect(
+            flat.contains("core.paletteNameVerdict(typed).isAllowed")
+        )
+        #expect(
+            flat.contains(
+                "core.paletteNameVerdict(typed,renaming:oldName)"
+                    + ".isAllowed"
+            )
+        )
     }
 }

@@ -107,14 +107,15 @@ extension KiwiCore {
 
     private func saveLiveLook(_ args: [JSONValue]) -> CommandResponse {
         guard let name = lookName(args) else { return noName }
-        let library = lookLibrary
-        if library.isBuiltinName(name) {
+        switch lookNameVerdict(name) {
+        case .bundled:
             return .fail("a bundled look is named \(name)")
-        }
-        if library.hasUserLook(name) {
+        case .overwrites:
             return .fail(
                 "a look named \(name) exists; delete it first"
             )
+        case .free, .blank, .taken:
+            break
         }
         do {
             try saveLook(named: name, from: tiler.settings)

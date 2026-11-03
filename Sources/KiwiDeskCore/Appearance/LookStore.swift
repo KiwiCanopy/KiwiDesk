@@ -112,12 +112,14 @@ public final class LookStore {
     }
 
     public func rename(from: String, to: String) throws {
-        guard !isBuiltinName(to) else {
-            throw StoreError.reservedName(to)
-        }
-        guard to == from || !hasUserLook(to) else {
-            throw StoreError.duplicateName(to)
-        }
+        let verdict = LibraryNameVerdict.judge(
+            to,
+            renaming: from,
+            bundled: isBuiltinName,
+            saved: hasUserLook
+        )
+        if verdict == .bundled { throw StoreError.reservedName(to) }
+        if verdict == .taken { throw StoreError.duplicateName(to) }
         var looks = try libraryLooks()
         guard let index = looks.firstIndex(where: { $0.name == from })
         else { throw StoreError.notFound(from) }
