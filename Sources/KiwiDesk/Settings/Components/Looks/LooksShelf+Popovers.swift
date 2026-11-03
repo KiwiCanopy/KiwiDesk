@@ -21,15 +21,27 @@ extension LooksShelf {
     }
 
     func renamePopover(_ request: NameEditRequest) -> some View {
+        Self.renamePopover(request, model: model) { name, old in
+            renameLook(name, from: old)
+        }
+    }
+
+    /// The one rename popover for a user look, Advanced's and
+    /// Simple's (#2943); `rename` gets the new name, then the old.
+    static func renamePopover(
+        _ request: NameEditRequest,
+        model: SettingsModel,
+        rename: @escaping (String, String) -> Void
+    ) -> some View {
         let old = request.subject ?? request.seed
         return NameEditPopover(
             seed: request.seed,
-            placeholder: Self.namePlaceholder,
+            placeholder: namePlaceholder,
             width: 160,
             confirmLabel: { _ in L("looks.rename_confirm", "Rename") },
-            isValid: { canRename($0, from: old) }
+            isValid: { model.canRenameUserLook($0, from: old) }
         ) { name in
-            renameLook(name, from: old)
+            rename(name, old)
         }
     }
 }
