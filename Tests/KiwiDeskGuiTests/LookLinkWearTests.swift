@@ -1,8 +1,8 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// A look a gallery link added is worn as an unsaved change with its
 /// tile marked, in Simple and Advanced alike (#1740 ▸ Step 3
@@ -15,7 +15,7 @@ struct LookLinkWearTests {
         look.style["kiwishelf.thickness"] = .number(41)
         look.author = "Anna"
         look.galleryID = "dusk"
-        try model.lookStore.save(look)
+        try model.core.lookLibrary.save(look)
         return look
     }
 
@@ -59,8 +59,8 @@ struct LookLinkWearTests {
         let dusk = try linked(model)
         var dawn = LookBody(of: model.config.settings).named("Dawn")
         dawn.galleryID = "dawn"
-        try model.lookStore.save(dawn)
-        try model.lookStore.save(
+        try model.core.lookLibrary.save(dawn)
+        try model.core.lookLibrary.save(
             LookBody(of: model.config.settings).named("Mine")
         )
         model.wearLinkedLook(dusk)
@@ -76,7 +76,7 @@ struct LookLinkWearTests {
     func renameKeepsThePlace() throws {
         let model = makeTestModel()
         model.wearLinkedLook(try linked(model))
-        try model.lookStore.save(
+        try model.core.lookLibrary.save(
             LookBody(of: model.config.settings).named("Mine")
         )
         model.refreshLooks()

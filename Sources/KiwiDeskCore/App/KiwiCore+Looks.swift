@@ -1,15 +1,15 @@
 import Foundation
 
-/// The look library's Core doors (#1684). A look owns its colours
-/// (#1752), so the look and palette libraries never reach into
-/// each other; a write still goes through here, never a store call
-/// at a GUI site, and a store refuses while its own file is
+/// The look library's Core doors (#1684), in the palette doors'
+/// shape (#2952): a look owns its colours (#1752), so the two
+/// libraries never reach into each other; the GUI reads and writes
+/// looks through here and never holds the store
+/// (`LookDoorSeamTests`), and a store refuses while its own file is
 /// unreadable.
 extension KiwiCore {
     /// The look library, built on demand — stateless like
-    /// `paletteLibrary`, and public so the GUI reads Core's one
-    /// store rather than building its own.
-    public var lookLibrary: LookStore {
+    /// `paletteLibrary`.
+    var lookLibrary: LookStore {
         let store = LookStore(directory: configDirectory)
         store.migrationBackups = migrationBackups
         return store
@@ -23,9 +23,24 @@ extension KiwiCore {
         LookCatalog.bundled(sizes: starterSizes())
     }
 
-    /// Renames a saved look; the store refuses a bundled or taken
-    /// name and an unreadable library (#2860).
+    /// The saved user looks, read from disk.
+    public var userLooks: [ShelfLook] {
+        lookLibrary.userLooks()
+    }
+
+    /// `base`, or the first `base N` no bundled or user look holds.
+    public func freeLookName(base: String) -> String {
+        let library = lookLibrary
+        return Self.uniqueName(base: base) {
+            library.isBuiltinName($0) || library.hasUserLook($0)
+        }
+    }
+
+    /// Renames a saved look; a name `lookNameVerdict` refuses
+    /// throws `LibraryNameRefusal`, and the store refuses an
+    /// unreadable library (#2860).
     public func renameLook(from old: String, to new: String) throws {
+        try requireName(lookNameVerdict(new, renaming: old))
         try lookLibrary.rename(from: old, to: new)
     }
 
@@ -35,15 +50,23 @@ extension KiwiCore {
     }
 
     /// Saves `settings`' styling and colours as look `name`, with
-    /// the credit its origin still earns (#1740).
+    /// the credit its origin still earns (#1740); a name
+    /// `lookNameVerdict` refuses throws `LibraryNameRefusal`.
     @discardableResult
     public func saveLook(
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
+        try requireName(lookNameVerdict(name))
         let look = ShelfLook.current(named: name, in: settings)
         try lookLibrary.save(look)
         return look
+    }
+
+    /// Writes `look`, which owns its colours (#1752), as a look
+    /// file at `url`.
+    public func exportLook(_ look: ShelfLook, to url: URL) throws {
+        try lookLibrary.export(LookExport(look: look), to: url)
     }
 
     /// Imports a look file under a free name.
@@ -86,10 +109,9 @@ extension KiwiCore {
         fallbackName: String
     ) throws -> ShelfLook {
         var look = imported
-        let looks = lookLibrary
-        look.name = Self.uniqueName(
+        look.name = freeLookName(
             base: Self.named(look.name, else: fallbackName)
-        ) { looks.isBuiltinName($0) || looks.hasUserLook($0) }
+        )
         try lookLibrary.save(look)
         return look
     }
@@ -101,7 +123,7 @@ extension KiwiCore {
     }
 
     /// `base`, then `base 2`, `base 3`, … skipping taken names.
-    public static func uniqueName(
+    static func uniqueName(
         base: String,
         taken: (String) -> Bool
     ) -> String {

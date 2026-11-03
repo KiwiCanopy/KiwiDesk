@@ -3,8 +3,6 @@ import KiwiDeskCore
 
 /// Look application for SettingsModel (#1684).
 extension SettingsModel {
-    var lookStore: LookStore { core.lookLibrary }
-
     /// Every palette, bundled first, from the model's copy of the
     /// user library (#805).
     var allPalettes: [ColorPalette] {
@@ -39,14 +37,10 @@ extension SettingsModel {
         return !isDirty
     }
 
-    /// Whether `typed` may rename the user look `old`: not blank,
-    /// no bundled look's name, and no other user look's.
+    /// Whether `typed` may rename the user look `old`, Core's one
+    /// verdict (#2953).
     func canRenameUserLook(_ typed: String, from old: String) -> Bool {
-        let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !name.isEmpty, !lookStore.isBuiltinName(name) else {
-            return false
-        }
-        return name == old || !lookStore.hasUserLook(name)
+        core.lookNameVerdict(typed, renaming: old).isAllowed
     }
 
     /// Renames a user look; it keeps its place in My looks (#2860).
@@ -63,8 +57,8 @@ extension SettingsModel {
         refreshLooks()
     }
 
-    /// Re-reads the user looks from the store.
+    /// Re-reads the user looks from Core's door.
     func refreshLooks() {
-        userLooks = lookStore.userLooks()
+        userLooks = core.userLooks
     }
 }

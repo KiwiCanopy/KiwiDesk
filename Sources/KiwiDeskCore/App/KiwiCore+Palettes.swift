@@ -21,13 +21,13 @@ extension KiwiCore {
     }
 
     /// Whether `name` is a bundled palette's, which no user
-    /// palette may take.
-    public func isBundledPaletteName(_ name: String) -> Bool {
+    /// palette may take; the GUI asks `paletteNameVerdict` (#2953).
+    func isBundledPaletteName(_ name: String) -> Bool {
         paletteLibrary.isBuiltinName(name)
     }
 
     /// Whether a user palette is saved under `name`.
-    public func hasUserPalette(_ name: String) -> Bool {
+    func hasUserPalette(_ name: String) -> Bool {
         paletteLibrary.hasUserPalette(name)
     }
 
@@ -40,12 +40,14 @@ extension KiwiCore {
         }
     }
 
-    /// Saves `settings`' colours as palette `name`.
+    /// Saves `settings`' colours as palette `name`; a name
+    /// `paletteNameVerdict` refuses throws `LibraryNameRefusal`.
     @discardableResult
     public func savePalette(
         named name: String,
         from settings: TilingSettings
     ) throws -> ColorPalette {
+        try requireName(paletteNameVerdict(name))
         let palette = ColorPalette(
             name: name,
             colors: ColorPaletteKeys.extract(from: settings)
@@ -56,6 +58,7 @@ extension KiwiCore {
 
     /// Renames a user palette; no look names one (#1752).
     public func renamePalette(from old: String, to new: String) throws {
+        try requireName(paletteNameVerdict(new, renaming: old))
         try paletteLibrary.rename(from: old, to: new)
     }
 

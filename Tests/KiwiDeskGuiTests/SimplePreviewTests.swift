@@ -54,7 +54,7 @@ struct SimplePreviewTests {
         let model = model(["a"])
         var look = LookBody(of: model.config.settings).named("Mine")
         look.style["kiwishelf.thickness"] = .number(41)
-        try model.lookStore.save(look)
+        try model.core.lookLibrary.save(look)
         model.refreshLooks()
         let before = model.config.settings
         model.hoverSimple(.look("Mine"), inside: true)
