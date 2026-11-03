@@ -3,19 +3,18 @@ import Testing
 
 /// A reply key names one concept across every query reply and event
 /// (#2963, `docs/design-decisions.md` ▸ *Each query reply owns its
-/// fields*): a key spelled with two `JSONValue` cases in Core's reply
-/// builders reds until it is renamed or given its reason in
-/// `exempt`, and a retired key reds wherever it is spelled again.
-/// Reads only a value written as a bare case — `"k": .bool(` — so a
-/// value built through `.map { … } ?? .null` or a helper hides its
-/// case, and a synonym (`mode` beside `layout_mode`) is caught only
-/// once it joins `retired`.
+/// fields, and a concept has one key*): a key spelled with two
+/// `JSONValue` cases anywhere in Core reds until it is renamed or
+/// given its reason in `exempt`, and a retired key reds wherever it
+/// is spelled again. Reads only a value written as a bare case —
+/// `"k": .bool(` — so a value built through `.map { … } ?? .null`
+/// or a helper hides its case (`focused`, a Space's window id beside
+/// a window's bool, is subject-scoped and unseen for that reason),
+/// and a synonym (`mode` beside `layout_mode`) is caught only once
+/// it joins `retired`.
 @Suite("Reply key vocabulary (#2963)")
 struct ReplyKeyVocabularyTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
-
-    /// The directories that build replies and event payloads.
-    private static let dirs = ["Commands", "App", "Profiles"]
 
     /// Key → why it may take more than one case. Each is
     /// subject-scoped: the object it sits in says what it means.
@@ -30,33 +29,35 @@ struct ReplyKeyVocabularyTests {
         "floats", "layout_mode", "tiles", "ignores",
     ]
 
+    /// Every Core file: a reply built in a new directory is read
+    /// without joining a list.
+    private func coreSources() throws -> [URL] {
+        let urls = try SourceScan.swiftSources(
+            under: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore"
+            )
+        )
+        #expect(!urls.isEmpty)
+        return urls
+    }
+
     /// Key → case → files spelling it.
     private func census() throws -> [String: [String: Set<String>]] {
         var seen: [String: [String: Set<String>]] = [:]
-        var files = 0
-        for dir in Self.dirs {
-            let urls = try SourceScan.swiftSources(
-                under: Self.root.appendingPathComponent(
-                    "Sources/KiwiDeskCore/\(dir)"
-                )
-            )
-            files += urls.count
-            for url in urls {
-                let text = try SourceScan.strippedSource(at: url)
-                let pattern =
-                    #/
-                    "([a-z][a-z0-9_]*)" : \s* \.
-                    (bool|number|string|array|object) \b
-                    /#
-                for hit in text.matches(of: pattern) {
-                    seen[String(hit.1), default: [:]][
-                        String(hit.2),
-                        default: []
-                    ].insert(url.lastPathComponent)
-                }
+        for url in try coreSources() {
+            let text = try SourceScan.strippedSource(at: url)
+            let pattern =
+                #/
+                "([a-z][a-z0-9_]*)" \s* : \s* \.
+                (bool|number|string|array|object) \b
+                /#
+            for hit in text.matches(of: pattern) {
+                seen[String(hit.1), default: [:]][
+                    String(hit.2),
+                    default: []
+                ].insert(url.lastPathComponent)
             }
         }
-        #expect(files > 0)
         return seen
     }
 
@@ -85,19 +86,11 @@ struct ReplyKeyVocabularyTests {
     @Test("no retired key is spelled again")
     func retiredStayRetired() throws {
         var back: [String] = []
-        for dir in Self.dirs {
-            let urls = try SourceScan.swiftSources(
-                under: Self.root.appendingPathComponent(
-                    "Sources/KiwiDeskCore/\(dir)"
-                )
-            )
-            #expect(!urls.isEmpty)
-            for url in urls {
-                let text = try SourceScan.strippedSource(at: url)
-                for key in Self.retired
-                where text.contains("\"\(key)\":") {
-                    back.append("\(key) in \(url.lastPathComponent)")
-                }
+        for url in try coreSources() {
+            let text = try SourceScan.strippedSource(at: url)
+            for key in Self.retired
+            where text.contains(try Regex("\"\(key)\"\\s*:")) {
+                back.append("\(key) in \(url.lastPathComponent)")
             }
         }
         #expect(back.isEmpty, "retired keys respelled: \(back)")

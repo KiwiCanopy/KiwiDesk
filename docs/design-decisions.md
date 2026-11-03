@@ -1256,15 +1256,19 @@ The query replies split by job (#2963): `get_state` holds what
 KiwiDesk stores — Spaces with their flat window lists, and each
 window's own facts; `list_windows` holds where each window is
 placed and shown; `explain_*` holds verdicts and their causes.
-Every reply carries `id`, the key a script joins on, and names a
-window with `app` and `title` too, so a reader need not join only
-to tell windows apart. Every other field lives in the reply whose
+Every reply about a window carries its `id`, the key a script
+joins on, and its `title` — with `app` where the reply is not
+already about one app — so a reader need not join only to tell
+windows apart. Every other field lives in the reply whose
 job owns it, and neither query becomes the other's superset:
 `get_state` would take a WindowServer read on every call, and a
 stored flag beside its verdict is the pair a reader confuses.
 
-A concept takes one key across every reply and event, and a
-derived verdict never takes the name of the stored fact it reads:
+A concept takes one key across every reply and event, and a key
+names one concept, save where the object it sits in scopes it —
+`id` is a Space's string or a window's number, `focused` a Space's
+window id or a window's bool. A derived verdict never takes the
+name of the stored fact it reads:
 `floating` is a window's own flag, `effective_float` the flag or
 a floating-layout Space. Rule lists take the names of the Lua
 globals they mirror. A reply key is a machine contract but no

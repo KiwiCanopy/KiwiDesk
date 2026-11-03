@@ -993,16 +993,12 @@ kiwidesk subscribe space_change layout_change
 
 Each event is one JSON line:
 
+:::unreleased
 ```json
 {"event": "space_change",
  "data": {"space_id": "3", "mode": "bsp",
           "window_count": 4}}
 ```
-
-:::unreleased
-`space_change` and `layout_change` carry the layout as `mode`, as
-`get_state` names it; 4.1.0 and earlier call it `layout_mode`
-(#2963).
 :::
 
 Events: `space_change`, `layout_change`, `focus_change`,

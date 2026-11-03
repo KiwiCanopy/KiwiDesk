@@ -38,6 +38,10 @@ struct ListMonitorsOriginTests {
             }
             let x = try #require(frame["x"]?.numberValue)
             let y = try #require(frame["y"]?.numberValue)
+            // The rectangle is nested whole, never flat (#2963).
+            #expect(frame["width"]?.numberValue != nil)
+            #expect(frame["height"]?.numberValue != nil)
+            #expect(monitor["x"] == nil && monitor["width"] == nil)
             byID[UInt32(id)] = (x, y)
         }
         return byID

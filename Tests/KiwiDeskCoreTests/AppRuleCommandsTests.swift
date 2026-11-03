@@ -88,6 +88,9 @@ struct AppRuleCommandsTests {
             return
         }
         #expect(floats.contains(.string("com.y")))
+        // The lists take the Lua globals' names (#2963).
+        #expect(fields["tile_rules"] != nil)
+        #expect(fields["ignore_rules"] != nil)
         #expect(fields["owner"] == .string("gui"))
         #expect(fields["profile"] == .string("Work"))
     }
