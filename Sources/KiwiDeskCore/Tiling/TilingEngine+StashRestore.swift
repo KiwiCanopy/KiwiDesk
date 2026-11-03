@@ -104,7 +104,7 @@ extension TilingEngine {
             {
                 // The last send's lead stands: its answer may still
                 // be on the way, so nothing is re-sent or counted.
-                if let lead = applier.instantTarget(id),
+                if let lead = recentInstantTarget(id),
                     Self.close(lead, to: original)
                 {
                     continue
