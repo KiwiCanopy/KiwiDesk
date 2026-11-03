@@ -88,7 +88,7 @@ public struct LayoutContext: Sendable {
     public var stackWeights: [WindowID: Double]
     /// Each window's length along its run (`Space.runSizes`,
     /// #2709).
-    public var runSizes: [WindowID: CGFloat] = [:]
+    public var runSizes: [WindowID: RunSize] = [:]
     /// Viewport offset and anchor slot from last scrolling tile (#66, #966).
     public var scrollRest: ScrollRest?
     /// Track layout break markers (#128).

@@ -228,7 +228,7 @@ struct StackFocusResizeTests {
         #expect(space?.runTails == [WindowID(2)])
         #expect(space?.runHeads.isEmpty == true)
         #expect(space?.stackWeights[WindowID(2)] == nil)
-        #expect((space?.runSizes[WindowID(2)] ?? 0) > 0.5)
+        #expect((space?.runSizes[WindowID(2)]?.share ?? 0) > 0.5)
         #expect(
             core.tiler.runCovers[SpaceID("1")]?.behind[WindowID(1)]
                 == WindowID(2)

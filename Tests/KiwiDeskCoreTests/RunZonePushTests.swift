@@ -35,7 +35,10 @@ struct RunZonePushTests {
             runTails: Set(tails.map { WindowID(UInt32($0)) })
         )
         for (id, size) in sizes {
-            context.runSizes[WindowID(UInt32(id))] = size / 1000
+            context.runSizes[WindowID(UInt32(id))] = RunSize(
+                share: size / 1000,
+                zone: ids[0]
+            )
         }
         return context
     }
@@ -47,7 +50,9 @@ struct RunZonePushTests {
         over context: LayoutContext
     ) -> LayoutContext {
         var context = context
-        context.runSizes[WindowID(UInt32(id))] = resize.size
+        context.runSizes = [
+            WindowID(UInt32(id)): RunSize(share: resize.size, zone: ids[0])
+        ]
         (context.runHeads, context.runTails) = zone.ends(
             showing: resize.visible,
             heads: context.runHeads,
@@ -63,6 +68,7 @@ struct RunZonePushTests {
 
     @Test("A grow toward the end pushes the end neighbour")
     func growPushesTheEnd() throws {
+        let rest = try #require(zone.frames(in: context())[ids[0]])
         let resize = try #require(
             zone.resize(ids[1], by: 200, toward: .end, in: context())
         )
@@ -72,6 +78,12 @@ struct RunZonePushTests {
         #expect(zone.run(in: after)?.visible == 0..<2)
         let frame = try #require(zone.frames(in: after)[ids[1]])
         #expect(abs(frame.width - resize.size * 1000) < 0.5)
+        // Window 2 takes window 3's room: window 1 keeps what it
+        // drew.
+        let kept = try #require(zone.frames(in: after)[ids[0]])
+        #expect(abs(kept.width - rest.width) < 0.5)
+        #expect(abs(frame.minX - kept.maxX) < 50)
+        #expect(abs(frame.maxX - 1000) < 0.5)
     }
 
     @Test("A grow toward the start pushes the start neighbour")
@@ -154,10 +166,13 @@ struct RunZonePushTests {
 
     @Test("A pull stops at a window that does not fit, never skipping it")
     func pullStopsAtTheFirstMisfit() throws {
-        // Window 1 waits before the run planned at 500, window 4
-        // after it at its 300 floor: a shrink of window 2's start
+        // Window 1 waits before the run with a learned 500-pt floor,
+        // window 4 after it at 300: a shrink of window 2's start
         // edge frees room for 300 alone, so nothing comes back.
-        let held = context(sizes: [1: 500, 2: 600], heads: [2], tails: [3])
+        var held = context(sizes: [2: 600], heads: [2], tails: [3])
+        held.sizeBounds[ids[0]] = EffectiveSizeBound(width: [
+            .init(asked: 50, answered: 500)
+        ])
         #expect(zone.run(in: held)?.visible == 1..<3)
         let resize = try #require(
             zone.resize(ids[1], by: -300, toward: .start, in: held)
@@ -196,6 +211,34 @@ struct RunZonePushTests {
             zone.resize(ids[1], by: 300 - extent, toward: .both, in: pushed)
         )
         #expect(shrunk.visible == 0..<3)
+    }
+
+    @Test("A run that would show everything plans no length")
+    func fittingRunPlansNoLength() throws {
+        let three = RunZone(
+            members: Array(ids[0..<3]),
+            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
+            vertical: false
+        )
+        let sized = context(sizes: [2: 350], tails: [3])
+        #expect(three.plannedSize(of: ids[1], in: sized) == nil)
+        #expect(zone.plannedSize(of: ids[1], in: middle()) == 600)
+    }
+
+    @Test("A length given in another zone plans nothing here")
+    func foreignLengthPlansNothing() {
+        var moved = middle()
+        moved.runSizes[ids[1]] = RunSize(share: 0.6, zone: ids[1])
+        #expect(zone.plannedSize(of: ids[1], in: moved) == nil)
+    }
+
+    @Test("A lone sized window keeps its length, open toward the waiting")
+    func loneLengthIsDrawn() throws {
+        let lone = context(focus: 1, sizes: [1: 600], tails: [1])
+        #expect(zone.run(in: lone)?.visible == 0..<1)
+        let frame = try #require(zone.frames(in: lone)[ids[0]])
+        #expect(frame.minX == 0)
+        #expect(abs(frame.width - 600) < 0.5)
     }
 
     @Test("A window not shown has nothing to resize")

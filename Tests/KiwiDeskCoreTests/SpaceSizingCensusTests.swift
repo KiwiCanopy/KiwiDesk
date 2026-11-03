@@ -43,7 +43,7 @@ struct SpaceSizingCensusTests {
         space.windows = [w1, w2]
         space.focused = w1
         space.stackWeights = [w1: 2]
-        space.runSizes = [w2: 420]
+        space.runSizes = [w2: RunSize(share: 0.42, zone: w2)]
         space.scrollRest = ScrollRest(offset: 40)
         space.trackBreaks = [w2]
         space.handedBreaks = [w2]

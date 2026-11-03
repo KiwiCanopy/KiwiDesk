@@ -21,7 +21,7 @@ extension StateSnapshot {
         public var stackWeights: [UInt32: Double]
         /// `Space.runSizes` (#2709); absent from a build before
         /// 4.2.0 and while no window carries one.
-        public var runSizes: [UInt32: Double]?
+        public var runSizes: [UInt32: RunSize]?
         public var scrollRest: ScrollRest?
         /// `TilingEngine.monocleShownMembers` (#881): the member
         /// shown while a float holds the focus.
@@ -59,7 +59,7 @@ extension StateSnapshot {
                 ? nil
                 : Dictionary(
                     uniqueKeysWithValues: space.runSizes.map {
-                        ($0.key.raw, Double($0.value))
+                        ($0.key.raw, $0.value)
                     }
                 )
             scrollRest = space.scrollRest
@@ -242,7 +242,7 @@ extension StateCoordinator {
             )
             $0.runSizes = Dictionary(
                 uniqueKeysWithValues: (session.runSizes ?? [:]).map {
-                    (WindowID($0.key), CGFloat($0.value))
+                    (WindowID($0.key), $0.value)
                 }
             )
             $0.scrollRest = session.scrollRest

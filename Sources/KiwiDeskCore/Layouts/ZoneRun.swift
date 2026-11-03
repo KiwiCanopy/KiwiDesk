@@ -102,18 +102,26 @@ public struct ZoneRun: Sendable, Equatable {
         let floorTotal = shown.reduce(CGFloat(0)) { $0 + floors[$1] }
         let weightTotal = shown.reduce(0.0) { $0 + weights[$1] }
         let extra = max(available - floorTotal, 0)
+        // A lone window a push sized (#2709) keeps its length, the
+        // room a shrink freed left open toward the windows waiting.
+        let keepsLength = shown.count == 1 && weightTotal == 0
         var slots: [CGRect] = []
         var position = vertical ? region.minY : region.minX
+        if keepsLength, visible.upperBound == count, let only = shown.first {
+            position += span - floors[only]
+        }
         for index in shown {
-            // Shown windows that all carry a run size (#2709) share
-            // what is left evenly.
+            // Shown windows that all carry a run size share what is
+            // left evenly.
             let share =
                 weightTotal > 0
                 ? weights[index] / weightTotal : 1 / Double(shown.count)
             let extent =
-                shown.count == 1
-                ? available
-                : floors[index] + extra * CGFloat(share)
+                keepsLength
+                ? floors[index]
+                : shown.count == 1
+                    ? available
+                    : floors[index] + extra * CGFloat(share)
             slots.append(
                 vertical
                     ? CGRect(

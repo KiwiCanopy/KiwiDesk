@@ -21,9 +21,7 @@ extension Space {
         if let weight = stackWeights.removeValue(forKey: old) {
             stackWeights[new] = weight
         }
-        if let size = runSizes.removeValue(forKey: old) {
-            runSizes[new] = size
-        }
+        runSizes.rename(old, to: new)
         if trackBreaks.remove(old) != nil {
             trackBreaks.insert(new)
         }

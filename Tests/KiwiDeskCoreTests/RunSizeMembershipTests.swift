@@ -5,7 +5,8 @@ import Testing
 
 /// A run size (#2709) follows its window through the Space's
 /// membership doors: a window leaving takes its entry with it, and
-/// a trade hands the entry to the window taking the slot.
+/// a trade hands the entry, and the zone it names, to the window
+/// taking the slot.
 @Suite("Run size membership (#2709)")
 struct RunSizeMembershipTests {
     private let a = WindowID(1)
@@ -14,7 +15,7 @@ struct RunSizeMembershipTests {
 
     private func space() -> Space {
         var space = Space(id: SpaceID("1"), windows: [a, b])
-        space.runSizes = [a: 0.6]
+        space.runSizes = [a: RunSize(share: 0.6, zone: a)]
         return space
     }
 
@@ -29,6 +30,6 @@ struct RunSizeMembershipTests {
     func tradeCarriesTheSize() {
         var space = space()
         space.replace(a, with: c)
-        #expect(space.runSizes == [c: 0.6])
+        #expect(space.runSizes == [c: RunSize(share: 0.6, zone: c)])
     }
 }

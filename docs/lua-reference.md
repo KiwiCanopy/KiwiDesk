@@ -6552,9 +6552,10 @@ the neighbour on the side of the edge it moved; the keyboard
 squeezes both sides and sends the last window in order. A shrink
 brings waiting windows back for as long as the next one fits at
 its minimum: the one past the moved edge first (for the keyboard,
-the one after the run), then the other end's. The window keeps
-its length, like the stack and track weights, while windows wait
-in its run, until [`reset_layout_sizing`](#reset_layout_sizing) or
+the one after the run), then the other end's; a window alone in
+its run shrinks in place, leaving the room open until the next
+window fits. The window keeps its length, like the stack and
+track weights, while windows wait in its run, until [`reset_layout_sizing`](#reset_layout_sizing) or
 a layout change clears it. Across the run, in a fixed Grid's last
 track and in BSP's halved splits a grow still stops at the
 neighbour's minimum.

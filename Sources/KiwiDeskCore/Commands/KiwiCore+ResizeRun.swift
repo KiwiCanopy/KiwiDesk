@@ -129,22 +129,52 @@ extension KiwiCore {
             )
             return .fail("the focused window is alone in its run")
         }
+        // A window whose only weighted mate is itself draws what
+        // the sized mate leaves, so its press moves the mate's
+        // length the other way and the push the mate made stands.
+        let weights = zone.shareWeights(in: context)
+        let weighted = run.visible.filter { weights[$0] > 0 }
+        if let index = zone.members.firstIndex(of: focused),
+            !resize.movesRun, weighted == [index],
+            let mate = run.visible.first(where: { weights[$0] == 0 }),
+            let moved = zone.resize(
+                zone.members[mate],
+                by: CGFloat(-delta),
+                toward: side == .both ? .both : mate < index ? .end : .start,
+                in: context
+            )
+        {
+            if moved.atOwnMinimum {
+                refuseGrowAtNeighborMinimum(
+                    focused,
+                    anchor: zone.members[mate],
+                    axis: axis
+                )
+            }
+            guard moved.changed else {
+                return .fail("every shown window is at its minimum")
+            }
+            write(moved, of: zone.members[mate], in: zone, space: space)
+            return .ok()
+        }
         // A push or a pull, or a window a push already sized, takes
         // a length; any other press keeps the run's weight step.
-        if resize.movesRun || zone.plannedSize(of: focused, in: context) != nil
+        if resize.movesRun
+            || zone.plannedSize(of: focused, in: context) != nil
         {
             if resize.atOwnMinimum {
                 refuseShrinkAtMinimum(focused, axis: axis)
             }
             guard resize.changed else {
+                if resize.atOwnMinimum {
+                    return .fail("every shown window is at its minimum")
+                }
                 // A lone shown window fills the zone and has no
                 // room left to grow into.
-                if !resize.atOwnMinimum {
-                    refuseNothingToDivide(
-                        focused,
-                        otherAxisDivides: otherAxisDivides
-                    )
-                }
+                refuseNothingToDivide(
+                    focused,
+                    otherAxisDivides: otherAxisDivides
+                )
                 return .fail("the focused window is alone in its run")
             }
             write(resize, of: focused, in: zone, space: space)
@@ -153,6 +183,7 @@ extension KiwiCore {
         return weighInRun(
             focused,
             shown: Array(zone.members[run.visible]),
+            weights: Array(weights[run.visible]),
             extra: zone.runExtra(in: context) ?? 0,
             axis: axis,
             delta: delta,
@@ -167,6 +198,7 @@ extension KiwiCore {
     private func weighInRun(
         _ focused: WindowID,
         shown: [WindowID],
+        weights: [Double],
         extra: CGFloat,
         axis: String,
         delta: Double,
@@ -194,10 +226,10 @@ extension KiwiCore {
             }
             return .fail("every shown window is at its minimum")
         }
+        // A sized mate draws no share (`RunZone.shareWeights`), so
+        // the step divides only among the weighted ones.
         let outcome = StackLayout.weightStep(
-            weights: shown.map {
-                max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
-            },
+            weights: weights,
             at: index,
             delta: delta,
             span: Double(extra),
@@ -245,7 +277,10 @@ extension KiwiCore {
     ) {
         state.workspaces.withSpace(space.id) {
             for member in zone.members { $0.runSizes[member] = nil }
-            $0.runSizes[focused] = resize.size
+            $0.runSizes[focused] = RunSize(
+                share: resize.size,
+                zone: zone.members[0]
+            )
             ($0.runHeads, $0.runTails) = zone.ends(
                 showing: resize.visible,
                 heads: $0.runHeads,

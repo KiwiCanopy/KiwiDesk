@@ -121,9 +121,9 @@ public struct Space: Sendable, Equatable {
     public var focused: WindowID?
     /// Per-window vertical share in stack column (#67).
     public var stackWeights: [WindowID: Double]
-    /// Per-window length in points a resize along its run set
-    /// (#2709); the run plans the window at it (`RunZone`).
-    public var runSizes: [WindowID: CGFloat] = [:]
+    /// Per-window length a push along its run set (#2709,
+    /// `RunSize`); the run plans the window at it (`RunZone`).
+    public var runSizes: [WindowID: RunSize] = [:]
     /// Scrolling layout last-computed viewport rest
     /// (#66, #966, `ScrollRest`).
     public var scrollRest: ScrollRest?

@@ -4542,12 +4542,19 @@ the run's two ends are written beside it so the next pass draws
 the run the write planned. The length is a share of the run's
 span, as every other sizing store is, so a Space shown on a
 smaller screen keeps its proportions rather than hiding more
-windows than the user pushed. It lasts while its run hides a
-window, one sized window per run, and plans nothing once the
-window has moved to a zone whose run keeps no ends: a press that
-moves no window keeps the run's weight step. It is sizing like the
-weights: a mode change and `reset_layout_sizing` clear it, and
-only an in-place restart carries it.
+windows than the user pushed. The run decides when it counts: in
+the zone it was given in, while that run would still hide a
+window with it, one sized window per run. A window moved to
+another zone, or a run whose windows all fit again, plans at its
+floor and share, so the pass that draws and the store never
+disagree, and a press that moves no window keeps the run's
+weight step. A window left alone in its run draws at its length,
+the room a shrink freed left open toward the windows waiting: a
+press steps from what the window draws, as the scrolling slot
+does (#1057), so no store banks a length the screen does not
+show. It is sizing like the weights: a mode change and
+`reset_layout_sizing` clear it, and only an in-place restart
+carries it.
 
 *Which window moves.* The run stays contiguous, so the window that
 leaves or returns is always at one of its ends. A drag acts on the

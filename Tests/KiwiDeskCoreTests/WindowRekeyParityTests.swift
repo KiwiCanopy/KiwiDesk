@@ -44,7 +44,7 @@ private func trackedFixture() -> StateCoordinator {
     state.apply(.windowCreated(window(old)))
     state.workspaces.withSpace(SpaceID(1)) { space in
         space.stackWeights[old] = 2.0
-        space.runSizes[old] = 0.6
+        space.runSizes[old] = RunSize(share: 0.6, zone: old)
         space.trackBreaks.insert(old)
         space.handedBreaks.insert(old)
         space.trackWeights[old] = 1.5

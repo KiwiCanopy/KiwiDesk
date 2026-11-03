@@ -116,7 +116,10 @@ extension KiwiCore {
                 object["run_sizes"] = .object(
                     Dictionary(
                         uniqueKeysWithValues: space.runSizes.map {
-                            (String($0.key.raw), .number(Double($0.value)))
+                            (
+                                String($0.key.raw),
+                                .number(Double($0.value.share))
+                            )
                         }
                     )
                 )

@@ -8,10 +8,7 @@ import CoreGraphics
 /// Pure; the capped writers write what it answers.
 extension RunZone {
     /// The side of the resized window a gesture moves: the edge a
-    /// mouse drag moved, measured from the drawn frame, or both
-    /// for the keyboard `resize`, which steps from the length the
-    /// run plans — a lone shown window draws the whole zone, so
-    /// repeated shrinks there still add up.
+    /// mouse drag moved, or both for the keyboard `resize`.
     public enum PushSide: Sendable, Equatable {
         case start, end, both
     }
@@ -51,18 +48,26 @@ extension RunZone {
         guard before.contains(index),
             let drawn = frames[id].map(length)
         else { return nil }
-        let (floors, bare, gap) = floorsAndGap(in: context)
+        // Every press steps from what the window draws, as the
+        // scrolling slot does (#1057), so nothing banks a length
+        // the screen does not show.
+        let (_, bare, gap) = floorsAndGap(in: context)
         let span = length(region)
-        let extent =
-            side == .both && plannedSize(of: id, in: context) != nil
-            ? floors[index] : drawn
+        let extent = drawn
         let own = bare[index]
-        var target = min(max(extent + delta, own), span)
+        // The length the render will plan from the stored share.
+        func planned(_ length: CGFloat) -> CGFloat {
+            guard span > 0 else { return own }
+            return max(min(length / span * span, span), own)
+        }
+        var target = planned(extent + delta)
         var start = before.lowerBound
         var last = before.upperBound - 1
+        // The write leaves the run one sized window, so every other
+        // member plans at its floor.
         func fits(_ first: Int, _ end: Int) -> Bool {
             ZoneRun.fits(
-                (first...end).map { $0 == index ? target : floors[$0] },
+                (first...end).map { $0 == index ? target : bare[$0] },
                 gap: gap,
                 span: span
             )
@@ -88,7 +93,9 @@ extension RunZone {
                     - kept.reduce(CGFloat(0)) {
                         $0 + (frames[members[$1]].map(length) ?? 0)
                     }
-                target = min(max(target, room), span)
+                let asked = target
+                target = planned(max(target, room))
+                if !fits(start, last) { target = asked }
             }
         } else if delta < 0 {
             while true {

@@ -169,9 +169,8 @@ public struct RunZone: Sendable, Equatable {
         return max(span - used, 0)
     }
 
-    /// Each member's planned length along the zone's axis — its
-    /// run size where it has one — its floor without the size, and
-    /// the gap between shown members: the readings a resize along
+    /// Each member's planned length — its run size where it has
+    /// one — its floor without it, and the gap: what a resize along
     /// the run plans with (`resize(_:by:toward:in:)`, #2709).
     func floorsAndGap(
         in context: LayoutContext
@@ -201,19 +200,16 @@ public struct RunZone: Sendable, Equatable {
                 cell
             )
         }
-        // A window a push sized (#2709) is planned at that share of
-        // the span and takes none of what is left; its zero share
-        // never fits whole, so the zone lays out as a run.
-        let floors = members.indices.map { index in
-            plannedSize(of: members[index], in: context).map {
-                max($0, bare[index])
-            } ?? bare[index]
-        }
-        let weights = members.map {
-            plannedSize(of: $0, in: context) != nil
+        // A window a push sized (#2709) is planned at its length
+        // and takes none of what is left; its zero share never fits
+        // whole, so the zone lays out as a run.
+        let sizes = honouredSizes(bare: bare, gap: gap, in: context)
+        let floors = members.indices.map { sizes[$0] ?? bare[$0] }
+        let weights = members.indices.map {
+            sizes[$0] != nil
                 ? 0
                 : max(
-                    context.stackWeights[$0] ?? 1,
+                    context.stackWeights[members[$0]] ?? 1,
                     StackLayout.weightFloor
                 )
         }
@@ -254,20 +250,47 @@ public struct RunZone: Sendable, Equatable {
 
     private var span: CGFloat { vertical ? region.height : region.width }
 
-    /// The length a push gave `id` (`Space.runSizes`, a share of
-    /// the span), honoured only while this zone's run keeps stored
-    /// ends — a window that moved to another zone, or a run that
-    /// shows everything again, plans at its floor and share.
+    /// The length a push gave `id` where this zone plans it.
     func plannedSize(
         of id: WindowID,
         in context: LayoutContext
     ) -> CGFloat? {
-        guard let share = context.runSizes[id],
+        let plan = placement(in: context)
+        guard let index = members.firstIndex(of: id),
+            plan.weights.indices.contains(index), plan.weights[index] == 0
+        else { return nil }
+        return plan.floors[index]
+    }
+
+    /// Each member's share of what the floors leave, as the render
+    /// divides it — zero for a sized window.
+    func shareWeights(in context: LayoutContext) -> [Double] {
+        placement(in: context).weights
+    }
+
+    /// The lengths pushes gave members, by member index, honoured
+    /// only for a length given in this zone (`RunSize.zone`), while
+    /// its run keeps stored ends and would still hide a window with
+    /// them: a window moved to another zone, or a run that would
+    /// show everything at its floors, plans at its floor and share.
+    private func honouredSizes(
+        bare: [CGFloat],
+        gap: CGFloat,
+        in context: LayoutContext
+    ) -> [Int: CGFloat] {
+        guard let first = members.first,
             members.contains(where: {
                 context.runHeads.contains($0) || context.runTails.contains($0)
             })
-        else { return nil }
-        return min(share * span, span)
+        else { return [:] }
+        var sizes: [Int: CGFloat] = [:]
+        for (index, member) in members.enumerated() {
+            guard let size = context.runSizes[member], size.zone == first
+            else { continue }
+            sizes[index] = max(min(size.share * span, span), bare[index])
+        }
+        let planned = members.indices.map { sizes[$0] ?? bare[$0] }
+        return ZoneRun.fits(planned, gap: gap, span: span) ? [:] : sizes
     }
 
     /// Every member's floor under fixed cells: an equal cell's
