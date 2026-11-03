@@ -63,7 +63,17 @@ extension KiwiCore {
         _ window: AwayWindow,
         in desktops: DesktopSnapshot
     ) -> Bool {
-        !NativeSpaces.isUserSpace(window.nativeSpace, in: desktops.spaces)
+        isFullScreenHost(window.nativeSpace, in: desktops.spaces)
+    }
+
+    /// Whether `space` is a native full-screen Space rather than a
+    /// Desktop — the one verdict the away row, Jump's arm and the
+    /// element it keeps share (#2939).
+    func isFullScreenHost(
+        _ space: SkyLight.SpaceID,
+        in spaces: [NativeSpace]
+    ) -> Bool {
+        !NativeSpaces.isUserSpace(space, in: spaces)
     }
 
     /// Why a Swap here would not trade tracked `window` with

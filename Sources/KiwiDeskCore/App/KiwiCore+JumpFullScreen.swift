@@ -17,9 +17,9 @@ extension KiwiCore {
                 of: id,
                 away: Set(state.awayWindows.keys)
             )
-        // Our own raise, so its report is no bounce (#1161, #465).
-        if tracked { stampSelfRaise(id, now: wallClock()) }
         if let element, openOrFocus.raiseFullScreen(element, id, pid) {
+            // Our own raise, so its report is no bounce (#1161, #465).
+            if tracked { stampSelfRaise(id, now: wallClock()) }
             onLog("jump: w\(id.raw) is full screen — raised on its Space")
             return
         }

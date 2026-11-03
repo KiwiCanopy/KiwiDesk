@@ -750,7 +750,9 @@ editing here:
   window nothing has filed) is UNFILED: every reader carries the
   skip branch — `awayMembers(of:)` omits it, `get_state` lists it
   only at the top level — and a new reader owes the same branch.
-  What the ledger must never become: a member of `space.windows`
+  A per-away-id side store prunes itself to the ledger at each use
+  and re-checks the id, so it takes no ender or re-key wiring
+  (`FullScreenElements`, #2939). What the ledger must never become: a member of `space.windows`
   with a flag (every `space.windows` consumer would gain an
   exclusion, and the return-by-rank fold above would be
   reworked), or a reason for the sweep to remove anything
@@ -1329,12 +1331,14 @@ editing here:
   through the one `reassertCrossesDesktops` and HONOR the report
   instead. Unknown to the server passes: a close in flight raises
   nothing, and a host without the read keeps every raise. A verb
-  that means to switch takes `switchDesktop`, never a raise.
+  that means to switch takes `switchDesktop`, never a raise — save
+  Jump's full-screen arm below, which no `switchDesktop` reaches.
   `DesktopRaiseGateTests` holds the gate and both consumers,
   `DesktopRaiseGateArmTests` the three arms each beside a shown
   control, and `DesktopRaiseGateSeamTests` the census of files
-  that may spell `AXHelper.raise(` — a new raise site joins it
-  and asks the gate in the same file. Further arms follow from
+  that may spell an activating raise (`AXHelper.raise(`, and
+  `AXHelper.activateThenRaise(` in its one ruled home) — a new raise
+  site joins it and asks the gate in the same file. Further arms follow from
   the same reading that a swipe is not a close — append one here
   rather than opening a bullet of its own: a window that LEFT
   WITH ITS DESKTOP — `vanished`, and not a move verb's own
@@ -1364,22 +1368,24 @@ editing here:
   `honoredFocus`, since it is id-keyed like it
   (`DesktopSettleDepartureTests`). The arm reads no on-screen
   flag on purpose: the argument is the design-decisions entry's.
-  **Jump's full-screen arm passes the gate on purpose (#2939)**:
-  Jump means to switch and `switchDesktop` reaches no native
-  full-screen Space (#670), so a Jump to a window hosted on one —
-  tracked `isFullscreen`, or away on a census `fullScreen` Space
-  (#2930) — goes through the one `jumpToFullScreen`, which
-  activates the app FIRST and then makes the window main and
-  raises it (`AXHelper.activateThenRaise`), never `AXHelper.raise`,
-  whose #496 order lands the raise in a background app and reaches
-  nothing (measured 2026-11-02/03 on one and two screens, macOS
-  27.2, TextEdit). An away window's
-  element is the one `FullScreenElements` kept at its full-screen
-  departure, alive while the ledger lists it and re-checked by id
-  at use; a window with none brings its app forward
-  (`docs/accepted-limitations.md`). `JumpFullScreenSeamTests` holds
-  the raise, its seam and the arm to Jump, and both twins to the
-  pin; `JumpFullScreenTests` holds the arms.
+  **Jump's full-screen arm goes around the gate on purpose
+  (#2939)**: Jump means to switch and `switchDesktop` reaches no
+  native full-screen Space (#670), so a Jump to a window hosted on
+  one — tracked `isFullscreen`, or away on a census `fullScreen`
+  Space (#2930), judged by the one `isFullScreenHost` — goes through
+  the one `jumpToFullScreen`, which activates the app FIRST and then
+  raises (`AXHelper.activateThenRaise`), never `AXHelper.raise`.
+  No implicit raise calls the arm, its seam or its raise. An away
+  window's element comes from `FullScreenElements`, never a
+  remote-token scan, which is a ruling of its own; and a removal
+  path that can vanish a window to a full-screen Space releases its
+  registration BEFORE it emits `.windowDestroyed`, in the same turn,
+  since the gone handler claims the element there. A window with no
+  element brings its app forward (`docs/accepted-limitations.md`).
+  `JumpFullScreenSeamTests` holds the seam and the arm to Jump and
+  both twins to the pin, `DesktopRaiseGateSeamTests` the raise's one
+  home, `JumpFullScreenTests` the arms and the sweep's order; the
+  argument is the design-decisions entry's.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
   of bare `AXHelper.raiseQuietly` calls. The AX call returns once

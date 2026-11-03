@@ -86,6 +86,60 @@ struct JumpFullScreenTests {
         #expect(calls().activated.isEmpty)
     }
 
+    /// The real sweep, not the hand-built pair: a sweep that emitted
+    /// the destroy ahead of the release would keep nothing.
+    @Test("the sweep's removal keeps the element for the Jump")
+    func sweepKeepsTheElement() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.eventLoop.onEvent(.windowCreated(window()))
+        let element = AXUIElementCreateApplication(pid)
+        core.eventLoop.elements[pid] = [id: element]
+        core.desktopMemory.readWindowSpace = { _ in .hosted(9) }
+        // Past the #1272 refusal's budget, with no census to refuse.
+        core.eventLoop.fullscreenSpaceHosts = { _ in false }
+        core.eventLoop.onScreenNormalWindowIDs = { [:] }
+        core.eventLoop.appIsHidden = { _ in false }
+        core.eventLoop.reconcileTabsAndSweep(
+            pid: pid,
+            app: AppRef(bundleID: "app.test.notes", name: "Notes"),
+            appeared: [],
+            live: [],
+            minimized: [],
+            coalesceTabs: false
+        )
+        #expect(core.state.awayWindows[id]?.nativeSpace == 9)
+        let calls = record(core)
+        core.jump(to: .window(id))
+        #expect(calls().raised.first.map { CFEqual($0.0, element) } == true)
+    }
+
+    /// The slot names its window: a destroy folded with no release
+    /// of its own never takes the element another window released.
+    @Test("a departure keeps only the element its own release left")
+    func slotNamesItsWindow() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        depart(core, to: 4, element: AXUIElementCreateApplication(pid))
+        let other = WindowID(8)
+        var window = window()
+        window = ManagedWindow(
+            id: other,
+            pid: pid,
+            appName: window.appName,
+            appBundleID: window.appBundleID
+        )
+        core.eventLoop.onEvent(.windowCreated(window))
+        core.desktopMemory.readWindowSpace = { _ in .hosted(9) }
+        core.eventLoop.onEvent(.windowDestroyed(other, wasMinimized: false))
+        #expect(core.state.awayWindows[other]?.nativeSpace == 9)
+        let away = Set(core.state.awayWindows.keys)
+        #expect(
+            core.eventLoop.fullScreenElements.element(of: other, away: away)
+                == nil
+        )
+    }
+
     @Test("a raise the element refuses brings the app forward")
     func refusedRaiseActivates() {
         defer { resetAuthorityOverrides() }

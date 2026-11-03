@@ -50,13 +50,14 @@ struct PlacementBounceSeamTests {
             "reassertAgainstPlacementBounce(",
             ["KiwiCore+FocusEvents.swift", "KiwiCore+PlacementBounce.swift"]
         ),
-        // The self ledger's one minter is what `raiseWindow`
-        // stamps through.
+        // The self ledger's one minter is what `raiseWindow` and
+        // Jump's full-screen raise (#2939) stamp through.
         (
             "stampSelfRaise(",
             [
                 "KiwiCore+ClickProvenance.swift",
                 "KiwiCore+FocusRaise.swift",
+                "KiwiCore+JumpFullScreen.swift",
             ]
         ),
     ]

@@ -1,12 +1,12 @@
 import Foundation
 import Testing
 
-/// Jump's full-screen raise is the one raise that passes the #1345
-/// gate on purpose (#2939), so it is reachable from Jump alone:
-/// `AXHelper.activateThenRaise(` is spelled only as its seam's
-/// default, the seam is called only by the arm, and the arm only by
-/// Jump. An implicit raise reaching it would switch the user onto
-/// a full-screen Space nobody asked for. Comment-stripped needles,
+/// Jump's full-screen raise goes around the #1345 gate on purpose
+/// (#2939), so it is reachable from Jump alone: the seam
+/// `DesktopRaiseGateSeamTests` rules as its one spelling is called
+/// only by the arm, and the arm only by Jump. An implicit raise
+/// reaching it would switch the user onto a full-screen Space
+/// nobody asked for. Comment-stripped needles,
 /// spelled as the call; the arm's own definition is subtracted.
 /// Here because `SourceScan` scans both trees (AGENTS.md §1).
 @Suite("Jump's full-screen raise census (#2939)")
@@ -41,14 +41,6 @@ struct JumpFullScreenSeamTests {
 
     private func occurrences(of needle: String, in source: String) -> Int {
         source.components(separatedBy: needle).count - 1
-    }
-
-    @Test("the ordered raise is spelled once, as the seam's default")
-    func raiseHasOneHome() throws {
-        #expect(
-            try calls("AXHelper.activateThenRaise(")
-                == ["KiwiCore+LaunchRestore.swift": 1]
-        )
     }
 
     @Test("the seam is called by the arm alone")
