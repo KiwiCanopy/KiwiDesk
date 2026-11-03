@@ -74,7 +74,7 @@ struct BoxGlassRadiusNeedleTests {
             under: "Bar"
         )
         let glass = try #require(
-            SourceScan.callArguments(of: "GlassPlate.update(", in: door)
+            SourceScan.callArguments(of: "GlassPlate.round(", in: door)
         )
         let tint = try #require(
             SourceScan.callArguments(of: "GlassTint.apply(", in: door)

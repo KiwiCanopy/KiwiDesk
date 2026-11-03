@@ -1633,19 +1633,22 @@ Obligations:
   `place` — and a drag moves the host
   too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
   `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
-  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). The pair's own
-  frame writers, `GlassPlate.update` and `GlassTint.apply`, take
-  no motion input and start no motion (`GlassPairMotionSeamTests`),
-  so a call site cannot make either travel.
-- **A hosted glass's frame has one writer, its host's
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). An unhosted
+  glass's frame writers, `GlassPlate.update` and `GlassTint.apply`,
+  take no motion input and start no motion
+  (`GlassPairMotionSeamTests`), so a call site cannot make either
+  travel.
+- **Write a hosted glass's frame only through its host's
   `GlassBoxHost.setFrameSize` (#2878)**, which lays every pair
-  view, never a rider, to the host's bounds exactly on every size
-  the host takes, and fits the glass's content through the one
-  `GlassPlate.fitContent` beside it. A box resizes only by
+  view, never a rider, to the host's bounds exactly on every frame
+  write the host takes, and fits the glass's content through the
+  one `GlassPlate.fitContent` beside it. Resize a box only by
   resizing its host: `GlassBox.place` rounds the glass and moves
-  the host and writes no glass frame, and nothing mints a glass
-  with an autoresizing mask, so the layout engine never derives it
-  from the host (`GlassBoxOwnershipTests`,
+  the host; never hand a hosted glass to `GlassPlate.update`, and
+  mint no glass with an autoresizing mask, so the layout engine
+  never derives it from the host. `GlassTint.applyBehind` seats
+  its backdrop at the glass's frame, which the host's next write
+  lays out (`GlassBoxOwnershipTests`,
   `GlassPairMotionSeamTests` ▸ `hostIsTheOneWriter`,
   `hostLayoutStartsNoMotion`, `ShelfPlateGlassHostTests` ▸
   `hostResizeFillsThePair`). A glass resized another way fits its

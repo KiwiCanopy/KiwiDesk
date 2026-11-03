@@ -152,8 +152,8 @@ struct SpaceBarGlideWiringTests {
         #expect(overlay.boxGlasses.count == 3)
         for (glass, tint) in zip(overlay.boxGlasses, overlay.boxTints) {
             let host = try #require(glass.superview)
-            // Within a point: autoresizing rounds each step to the
-            // pixel grid; the defect overshot by the size change.
+            // Within a point of the host, which writes the pair at
+            // each size (#2878); the defect overshot by the change.
             for pair in [glass.frame, tint.frame] {
                 #expect(abs(pair.width - host.bounds.width) < 1)
                 #expect(abs(pair.minX - host.bounds.minX) < 1)

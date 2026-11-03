@@ -98,8 +98,8 @@ struct ShelfPlateGlassHostTests {
     }
 
     /// The door every gliding glass takes: only the host travels,
-    /// and the pair is written to the host's bounds before it
-    /// moves; the host writes it to each size after (#2388).
+    /// and the host writes the pair to each size it takes (#2388,
+    /// #2878).
     @Test("GlassBox.place moves the host and fills it with the pair")
     func placeMovesOnlyTheHost() throws {
         guard #available(macOS 26, *) else { return }

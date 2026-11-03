@@ -53,11 +53,10 @@ enum GlassPlate {
         guard #available(macOS 26, *),
             let glass = view as? NSGlassEffectView
         else { return }
-        // Never travels: a gliding glass rides its `GlassBox` host
-        // (#2095), and an equal write would cancel its follow.
+        // An unhosted glass alone: a `GlassBox` glass is its host's
+        // to write (#2878). Never travels (#2095).
         if glass.frame != frame { glass.frame = frame }
-        glass.cornerRadius = cornerRadius
-        fitContent(glass)
+        round(glass, cornerRadius: cornerRadius)
     }
 
     /// Rounds a glass and fits its content, writing no frame: a

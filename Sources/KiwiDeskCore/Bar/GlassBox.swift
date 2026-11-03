@@ -18,14 +18,12 @@ protocol GlassBoxRider: NSView {}
 final class GlassBoxHost: NSView {
     override var isFlipped: Bool { true }
 
-    /// A hosted glass's one frame writer (#2878): every new size
-    /// the host takes writes its pair, never a rider, to its bounds
+    /// A hosted glass's one frame writer (#2878): every size the
+    /// host takes writes its pair, never a rider, to its bounds
     /// exactly. Autoresizing left a glass at the fused plate's
     /// width when the host shrank (#2388, device).
     override func setFrameSize(_ newSize: NSSize) {
-        let resized = newSize != frame.size
         super.setFrameSize(newSize)
-        guard resized else { return }
         for view in subviews
         where view.frame != bounds && !(view is GlassBoxRider) {
             view.frame = bounds

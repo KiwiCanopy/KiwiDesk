@@ -86,7 +86,7 @@ struct GlassBoxContentFitTests {
     }
 
     /// The device state: the box already has its size, so the
-    /// place's own `GlassPlate.update` heals the chip.
+    /// place's `GlassPlate.round` fits the chip.
     @Test("A place heals content stranded at an old size")
     func placeHealsStaleContent() throws {
         guard

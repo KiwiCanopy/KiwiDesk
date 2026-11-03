@@ -25,6 +25,10 @@ struct GlassPairMotionSeamTests {
             input: "frame: CGRect"
         ),
         (
+            file: "GlassPlate.swift", declaration: "static func round(",
+            input: "_ view: NSView"
+        ),
+        (
             file: "GlassPlate.swift",
             declaration: "static func setBackdrop(",
             input: "_ view: NSView"
@@ -139,13 +143,15 @@ struct GlassPairMotionSeamTests {
         )
         #expect(host.occurrences(of: ".frame =") == 1, "\(host)")
         #expect(source.occurrences(of: ".frame =") == 1)
+        // The class, not one spelling: no frame door on the glass.
+        for call in ["GlassPlate.update(", "glass.setFrame"] {
+            #expect(!source.contains(call), "\(call)")
+        }
         let masks = source.components(separatedBy: "\n")
             .filter { $0.contains("autoresizingMask") }
         try #require(!masks.isEmpty)
         #expect(
-            !masks.contains {
-                $0.contains(".width") || $0.contains(".height")
-            },
+            masks.allSatisfy { $0.contains("autoresizingMask = []") },
             "\(masks)"
         )
     }
