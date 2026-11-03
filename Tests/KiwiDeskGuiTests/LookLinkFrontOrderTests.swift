@@ -9,18 +9,26 @@ import Testing
 struct LookLinkFrontOrderTests {
     @Test("the link wears its look inside show's closure")
     func linkWearsBeforeFront() throws {
-        let link = try SourceScan.functionBody(
-            of: "addLinkedLook",
-            in: "AppDelegate+LookLink.swift",
-            under: "",
-            root: "Sources/KiwiDesk"
-        ).filter { !$0.isWhitespace }
+        func body(_ name: String) throws -> String {
+            try SourceScan.functionBody(
+                of: name,
+                in: "AppDelegate+LookLink.swift",
+                under: "",
+                root: "Sources/KiwiDesk"
+            ).filter { !$0.isWhitespace }
+        }
+        let wear = try body("wear")
         #expect(
-            link.contains(
+            wear.contains(
                 "dashboard.show{self.dashboard.model.wearLinkedLook(look)}"
             )
         )
-        #expect(!link.contains("dashboard.show()"))
+        // A held look and a downloaded one both wear through it
+        // (#2943).
+        let link = try body("addLinkedLook")
+        #expect(link.contains("wear(held)"))
+        #expect(link.contains("wear(look)"))
+        #expect(!link.contains("dashboard.show"))
     }
 
     @Test("show edits the draft after the reload and before the front")
