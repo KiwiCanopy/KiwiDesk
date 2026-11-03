@@ -4554,8 +4554,8 @@ already scroll — a Stack zone, a Track track, an auto-sized Grid's
 full last track, a BSP chain — a resize along the scroll direction
 does not stop at a neighbour's minimum: the neighbour it
 squeezes waits in the run and the grown window takes its room, and
-a shrink brings waiting windows back while the next fits at its
-minimum. One pure answer, `RunZone.press`, that every capped
+a lone window's shrink brings the next one back at its minimum.
+One pure answer, `RunZone.press`, that every capped
 writer stores, not per layout: the press finds its run through
 `RunZone.zones`, never a mode list, and a Grid or BSP push that
 looked like a Stack run yet behaved differently would be the
@@ -4593,7 +4593,8 @@ one state no press could explain (owner, 2026-11-04). Only a lone
 window pulls: beside a shown mate nothing is freed, and a waiting
 window returns by a focus step or once every member fits. Where
 every member fits the window keeps its length as the weight that
-draws it there, so the last pull does not jump. A press steps from
+draws it there, solved against the render, so the last pull does
+not jump, save where a stored weight hits its limit. A press steps from
 what the window draws, as the scrolling slot does (#1057), so no
 store banks a length the screen does not show. It is sizing like the weights: a mode change and
 `reset_layout_sizing` clear it, and only an in-place restart

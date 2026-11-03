@@ -62,7 +62,8 @@ extension RunZone {
         guard line.before.contains(index) else { return nil }
         guard let run = run(in: context) else {
             let step = lengthStep(line, index, by: delta, toward: side)
-            return step.movesRun ? lengths(step, of: id, on: line) : nil
+            return step.movesRun
+                ? lengths(step, of: id, on: line, context) : nil
         }
         let shown = Array(run.visible)
         if shown.count > 1, line.weights[index] > 0,
@@ -78,7 +79,7 @@ extension RunZone {
             pulls: shown.count == 1
         )
         if step.movesRun || line.weights[index] == 0 {
-            return lengths(step, of: id, on: line)
+            return lengths(step, of: id, on: line, context)
         }
         return weightStep(line, index, shown: shown, by: delta, in: context)
     }
@@ -104,11 +105,12 @@ extension RunZone {
     /// shows.
     static let unchangedTolerance: CGFloat = 0.5
 
-    /// The run as the render plans it: each member's planned and
-    /// bare length, its share weight and drawn length, the gap and
-    /// the members shown.
+    /// The run as the render plans it: each member's planned, held
+    /// (its stored length, even taking the rest) and bare length, its
+    /// share weight and drawn length, the gap and the members shown.
     struct Line {
         var floors: [CGFloat]
+        let held: [CGFloat]
         let bare: [CGFloat]
         let weights: [Double]
         var drawn: [CGFloat]
@@ -120,8 +122,10 @@ extension RunZone {
     private func line(in context: LayoutContext) -> Line {
         let (floors, bare, gap) = floorsAndGap(in: context)
         let frames = frames(in: context)
+        let sizes = honouredSizes(bare: bare, gap: gap, in: context)
         return Line(
             floors: floors,
+            held: members.indices.map { sizes[$0] ?? bare[$0] },
             bare: bare,
             weights: shareWeights(in: context),
             drawn: members.map { frames[$0].map(length) ?? 0 },
@@ -166,6 +170,7 @@ extension RunZone {
         )
         var start = line.before.lowerBound
         var last = line.before.upperBound - 1
+        var refused = false
         func fits(_ first: Int, _ end: Int) -> Bool {
             ZoneRun.fits(
                 (first...end).map {
@@ -210,7 +215,7 @@ extension RunZone {
             // A lone window fills its zone, so any shrink gives up
             // what the next window needs at its floor: no room is
             // ever held open for nothing.
-            if line.before.count == 1, let waiting = next() {
+            if let waiting = next() {
                 let margin = CGFloat(StackLayout.minSizeMargin)
                 let room = line.span - line.gap - line.bare[waiting] - margin
                 target = plannedLength(
@@ -223,7 +228,10 @@ extension RunZone {
                 guard fits(grown.0, grown.1) else { break }
                 (start, last) = grown
             }
-            if start..<(last + 1) == line.before { target = extent }
+            if start..<(last + 1) == line.before {
+                target = extent
+                refused = true
+            }
         }
         // A window holding a length that shrinks far enough for every
         // member to fit leaves no run: the render shows them all.
@@ -232,7 +240,7 @@ extension RunZone {
                 members.indices.map {
                     if $0 == index { return target }
                     return line.before.contains($0)
-                        ? line.floors[$0] : line.bare[$0]
+                        ? line.held[$0] : line.bare[$0]
                 },
                 gap: line.gap,
                 span: line.span
@@ -246,7 +254,7 @@ extension RunZone {
             target: target,
             visible: visible,
             joined: visible.filter { !line.before.contains($0) },
-            atOwnMinimum: delta < 0 && extent + delta < own,
+            atOwnMinimum: !refused && delta < 0 && extent + delta < own,
             changed: visible != line.before
                 || abs(target - extent) > Self.unchangedTolerance,
             movesRun: visible != line.before
@@ -260,7 +268,8 @@ extension RunZone {
     private func lengths(
         _ step: LengthStep,
         of id: WindowID,
-        on line: Line
+        on line: Line,
+        _ context: LayoutContext
     ) -> Press {
         var press = Press()
         if step.atOwnMinimum { press.cue = .ownMinimum }
@@ -271,28 +280,17 @@ extension RunZone {
         }
         for joined in step.joined { press.sizes[members[joined]] = .some(nil) }
         if !step.joined.isEmpty, step.visible == members.indices {
-            let index = members.firstIndex(of: id) ?? 0
-            let others = members.indices.filter { $0 != index }
-            let total = others.reduce(0.0) {
-                $0 + (line.weights[$1] > 0 ? line.weights[$1] : 1)
-            }
-            let available =
-                line.span - line.gap * CGFloat(max(members.count - 1, 0))
-            let rest = available - step.target
             press.sizes[id] = .some(nil)
-            for other in others where line.weights[other] == 0 {
-                press.sizes[members[other]] = .some(nil)
+            for (at, weight) in line.weights.enumerated()
+            where weight == 0 && members[at] != id {
+                press.sizes[members[at]] = .some(nil)
             }
-            press.weight =
-                rest > 0
-                ? min(
-                    max(
-                        Double(step.target / rest) * total,
-                        StackLayout.weightRange.lowerBound
-                    ),
-                    StackLayout.weightRange.upperBound
-                )
-                : nil
+            press.weight = weight(
+                drawing: id,
+                at: step.target,
+                floor: line.bare[members.firstIndex(of: id) ?? 0],
+                in: context
+            )
         } else {
             press.sizes[id] = share(of: step.target)
         }

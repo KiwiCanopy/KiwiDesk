@@ -43,6 +43,58 @@ extension RunZone {
         return ZoneRun.fits(planned, gap: gap, span: span) ? [:] : sizes
     }
 
+    /// `id`'s weight apart from any length: its stored share, or 1.
+    func plainWeight(
+        of id: WindowID,
+        in context: LayoutContext
+    ) -> Double {
+        max(context.stackWeights[id] ?? 1, StackLayout.weightFloor)
+    }
+
+    /// The weight that draws `id` at `length` once this zone's run
+    /// ends and lengths are gone, every member showing: tried against
+    /// the render itself, whose whole split and floor-and-share split
+    /// each hold only where the floors allow.
+    func weight(
+        drawing id: WindowID,
+        at length: CGFloat,
+        floor: CGFloat,
+        in context: LayoutContext
+    ) -> Double {
+        var plain = context
+        for member in members { plain.runSizes[member] = nil }
+        (plain.runHeads, plain.runTails) = ends(
+            showing: members.indices,
+            heads: context.runHeads,
+            tails: context.runTails
+        )
+        let others = members.filter { $0 != id }
+        let total = others.reduce(0.0) {
+            $0 + plainWeight(of: $1, in: context)
+        }
+        let (_, bare, gap) = floorsAndGap(in: context)
+        let available = span - gap * CGFloat(max(members.count - 1, 0))
+        func ratio(_ part: CGFloat, of whole: CGFloat) -> Double? {
+            whole > part && part > 0 ? Double(part / (whole - part)) : nil
+        }
+        let candidates = [
+            ratio(length, of: available),
+            ratio(length - floor, of: available - bare.reduce(0, +)),
+        ].compactMap { $0.map { $0 * total } }
+        func drawn(_ weight: Double) -> CGFloat {
+            var trial = plain
+            trial.stackWeights[id] = weight
+            let frame = frames(in: trial)[id]
+            return (vertical ? frame?.height : frame?.width) ?? 0
+        }
+        let range = StackLayout.weightRange
+        return
+            candidates
+            .map { min(max($0, range.lowerBound), range.upperBound) }
+            .min { abs(drawn($0) - length) < abs(drawn($1) - length) }
+            ?? range.lowerBound
+    }
+
     /// The members whose stored length this zone plans — what the
     /// persist step keeps.
     func sizedMembers(in context: LayoutContext) -> Set<WindowID> {

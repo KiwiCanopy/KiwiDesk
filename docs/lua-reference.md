@@ -6556,7 +6556,8 @@ squeezes both sides and sends the last window in order. A window
 alone in its run always fills it: any shrink gives up what the
 next window needs at its minimum and that window comes back, the
 one past the moved edge first (for the keyboard, the one after the
-run). Beside a shown window a shrink widens that window, and a
+run), then the other end's once that side has none waiting. A next
+window that cannot fit refuses the shrink. Beside a shown window a shrink widens that window, and a
 waiting window comes back when you focus it or when every window
 fits. The window keeps its length, like the stack and
 track weights, while windows wait in its run, until

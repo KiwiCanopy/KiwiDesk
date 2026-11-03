@@ -215,10 +215,7 @@ public struct RunZone: Sendable, Equatable {
         var weights = members.indices.map {
             sizes[$0] != nil
                 ? 0
-                : max(
-                    context.stackWeights[members[$0]] ?? 1,
-                    StackLayout.weightFloor
-                )
+                : plainWeight(of: members[$0], in: context)
         }
         // The emergency whole-zone pile (#44): not even one window
         // fits at the minimum size.
@@ -253,10 +250,7 @@ public struct RunZone: Sendable, Equatable {
         {
             let last = run.visible.upperBound - 1
             floors[last] = bare[last]
-            weights[last] = max(
-                context.stackWeights[members[last]] ?? 1,
-                StackLayout.weightFloor
-            )
+            weights[last] = plainWeight(of: members[last], in: context)
         }
         return Plan(
             floors: floors,
