@@ -11,8 +11,8 @@ import Foundation
 /// owed for is still the active one. A Move here that lands
 /// elsewhere (an un-minimized window taking its app rule) is
 /// filed into that Space at the payment, so nothing is filed
-/// ahead of an arrival that may never come, and whatever stands
-/// the focus down since (#2883). Not a
+/// ahead of an arrival that may never come, even where the focus
+/// then stands down (#2883). Not a
 /// `FollowFocusIntent`: that debt pays as a switch and holds the
 /// Desktop return down (#1207) while it stands, and this one
 /// must do neither. A window that never arrives needs no retire:

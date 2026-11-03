@@ -95,7 +95,9 @@ Since #881 the steady state has a second input: a just-issued
 pending (`syncFrame`'s `commanded`, stamped by the applier,
 cleared by the first self-echo or the echo grace) — monocle
 park's instant switch has no ticks, so without it the ring
-drew a whole switch behind.
+drew a whole switch behind. The stash restore waits on the same
+lead for its answer (#2881, state-and-layout.md), so a new
+`clearInstantTarget` site also ends that wait.
 
 Whatever holds the frame must also resolve **`screen` from the
 same rect**: it selects the backing scale, so a held frame paired

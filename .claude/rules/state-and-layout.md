@@ -406,7 +406,11 @@ editing here:
   press or a commanded focus since. Past
   `FollowFocusIntent.drainWindow` neither is paid
   (`JumpFocusTests`, `JumpMoveHereCrossScreenTests` ▸
-  `pressStillFiles`). Keep it off `followFocus`: that debt
+  `pressStillFiles`). The hidden-app Move here never takes that
+  split: its window is named by the app's first honored focus
+  report, not by a dispatch, so a press or a commanded focus
+  since stands it down whole (`JumpHiddenAppTests` ▸
+  `pressStandsDown`). Keep it off `followFocus`: that debt
   pays as a Space switch and, while it stands, holds the #1207
   return and the #1564 sticky return down — the follow's
   register therefore names no Jump site
@@ -2382,7 +2386,10 @@ editing here:
   counts its answers in that record, never a re-send per retile,
   and a frame at a stash corner (`looksStashed`) is never an
   answer (`StashRefusedSizeTests` ▸ `lostSetRetries`,
-  `cornerIsNoAnswer`).
+  `cornerIsNoAnswer`). While the last send's instant lead (#881)
+  stands, the restore neither re-sends nor counts: its answer
+  may still be on the way (`StashRefusedSizeTests` ▸
+  `lagIsNoAnswer`).
 - **Let a float's move inside the echo grace past the drag's
   echo guard only as an answer to a press newer than our last
   write (#1798, #2087).** A move is `late` (after the release,

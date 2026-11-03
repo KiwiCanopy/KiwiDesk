@@ -32,6 +32,30 @@ struct InstantLeadLapseSeamTests {
         )
     }
 
+    /// Every recorded lead is owed a sweep: `applyInstant` is the
+    /// one recorder, and it schedules the sweep beside the record.
+    @Test("one lead recorder, scheduling its sweep")
+    func oneRecorder() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "instantTargets.record(",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent) == ["FrameApplier.swift"]
+        )
+        let body = try SourceScan.functionBody(
+            of: "applyInstant",
+            in: "FrameApplier.swift",
+            under: "Tiling"
+        ).split(whereSeparator: \.isWhitespace).joined()
+        #expect(
+            body.contains(
+                "instantTargets.record(id,frame:frame,now:clock())"
+                    + "scheduleLapseSweep(after:Self.echoGrace)"
+            )
+        )
+    }
+
     @Test("the wiring is the two steady syncs, no re-order")
     func wiringIsTheSteadySyncs() throws {
         let source = try SourceScan.strippedSource(

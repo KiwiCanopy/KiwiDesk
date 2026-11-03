@@ -106,6 +106,7 @@ struct InstantLeadLapseTests {
         let (core, hands) = written()
         core.tiler.setFrame(WindowID(2), asked)
         core.tiler.setFrame(WindowID(3), asked)
+        #expect(hands.owed.count == 1)
         passGrace(hands)
         #expect(hands.lapses == 1)
     }
