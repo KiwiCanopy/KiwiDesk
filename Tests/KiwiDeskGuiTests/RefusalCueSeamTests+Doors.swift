@@ -55,7 +55,7 @@ extension RefusalCueSeamTests {
         // In Core the beep lives in exactly one place, which is
         // what keeps "a sound follows a pill" checkable at all.
         #expect(core.occurrences(of: "NSSound.beep()") == 1)
-        // The GUI's two beeps refuse nothing: a settings preview,
+        // The GUI's beeps refuse nothing: a settings preview,
         // and KiwiHub's dead ↩ chord (#2931, `JumpRefusalRowTests`).
         let gui = try Self.tree("KiwiDesk")
         let general = try Self.file(
@@ -64,8 +64,18 @@ extension RefusalCueSeamTests {
                     + "GeneralSection+AppWide.swift"
             )
         )
+        let hub = try Self.file(
+            Self.root.appendingPathComponent(
+                "Sources/KiwiDesk/Jump/JumpPanelController.swift"
+            )
+        )
         #expect(general.occurrences(of: "NSSound.beep()") == 1)
-        #expect(gui.occurrences(of: "NSSound.beep()") == 2)
+        // Derived from the beeps it names (#2938), so a beep moved
+        // to another GUI file breaks the sum.
+        let named =
+            general.occurrences(of: "NSSound.beep()")
+            + hub.occurrences(of: "model.onDeadKey={NSSound.beep()}")
+        #expect(gui.occurrences(of: "NSSound.beep()") == named)
     }
 
     /// The door every refusal pill takes draws WITHOUT the sound,
@@ -75,40 +85,51 @@ extension RefusalCueSeamTests {
     /// KiwiVision's out-of-reach cue, which a profile switch draws
     /// rather than a press (#2103 ruling 16). A further caller
     /// would be a refusal silently exempt from `refusal.sound` —
-    /// the defect this suite exists to catch.
+    /// the defect this suite exists to catch. Each file's calls are
+    /// counted sounded (`soundIfDrawn(` wrapping the call) and
+    /// unsounded apart (#2873), so a dropped wrapper moves one
+    /// across and reds; a sound spoken from a `let` the call
+    /// returned reads as unsounded, a shape `soundSitsWithTheDrawing`
+    /// refuses.
     @Test("the unsounded pill door has its named callers")
     func pillDoorCallersAreNamed() throws {
         let core = Self.root.appendingPathComponent(
             "Sources/KiwiDeskCore"
         )
-        var callers: [String: Int] = [:]
+        var callers: [String: Calls] = [:]
         for file in try SourceScan.swiftSources(under: core) {
             let text = try Self.file(file)
             let calls =
                 text.occurrences(of: "flashRefusalPill(")
                 - text.occurrences(of: "funcflashRefusalPill(")
-            if calls > 0 { callers[file.lastPathComponent] = calls }
+            let sounded = text.occurrences(
+                of: "soundIfDrawn(flashRefusalPill("
+            )
+            guard calls > 0 else { continue }
+            callers[file.lastPathComponent] = Calls(
+                sounded: sounded,
+                unsounded: calls - sounded
+            )
         }
         #expect(
             callers == [
-                "KiwiCore+SizeLimitPill.swift": 1,
-                "KiwiCore+WindowActions.swift": 1,
-                "KiwiCore+VisionReach.swift": 1,
-                // A bar's shortcut refused (#761), sounded
-                // through `soundIfDrawn`, at the bar alone (#2567).
-                "KiwiCore+ShelfRevealCue.swift": 1,
+                "KiwiCore+SizeLimitPill.swift": .unsounded(1),
+                "KiwiCore+WindowActions.swift": .unsounded(1),
+                "KiwiCore+VisionReach.swift": .unsounded(1),
+                // A bar's shortcut refused (#761), sounded at the bar
+                // alone (#2567).
+                "KiwiCore+ShelfRevealCue.swift": .sounded(1),
                 // The pocket's refusals — sticky (#2446), a second
-                // window (#2675), an app's own window (#2612) —
-                // sounded through `soundIfDrawn`.
-                "KiwiCore+Pocket.swift": 1,
-                "KiwiCore+PocketWindow.swift": 1,
-                "KiwiCore+PocketApp.swift": 1,
+                // window (#2675), an app's own window (#2612).
+                "KiwiCore+Pocket.swift": .sounded(1),
+                "KiwiCore+PocketWindow.swift": .sounded(1),
+                "KiwiCore+PocketApp.swift": .sounded(1),
                 // A Hyper press with nothing to do (#2480): silent
                 // by ruling, on a window or else the shelf.
-                "KiwiCore+HyperBarePress.swift": 2,
+                "KiwiCore+HyperBarePress.swift": .unsounded(2),
                 // Maximize on a floating window (#2448): its only
-                // cue, so it announces.
-                "KiwiCore+Maximize.swift": 1,
+                // cue, so it announces, unsounded.
+                "KiwiCore+Maximize.swift": .unsounded(1),
             ],
             "found: \(callers)"
         )
@@ -146,5 +167,16 @@ extension RefusalCueSeamTests {
         )
         #expect(shelfPrimitive == 1)
         #expect(shelfDoor.occurrences(of: "borders.flashShelfPill(") == 1)
+    }
+
+    /// One file's door calls: wrapped in `soundIfDrawn` or not.
+    struct Calls: Equatable, CustomStringConvertible {
+        var sounded = 0
+        var unsounded = 0
+
+        static func sounded(_ n: Int) -> Calls { Calls(sounded: n) }
+        static func unsounded(_ n: Int) -> Calls { Calls(unsounded: n) }
+
+        var description: String { "\(sounded) sounded, \(unsounded) not" }
     }
 }
