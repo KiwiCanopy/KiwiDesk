@@ -25,7 +25,8 @@ public enum SettingsLanding: Equatable, Sendable {
     case newLens
     /// Shortcuts & Gestures, on its Pocket card (#2941).
     case pocketShortcuts
-    /// The Pocket card's "Add an app to your Pocket…" row (#2941).
+    /// The Pocket card's add row, "Give an app its own Pocket key…"
+    /// (#2941).
     case pocketKeys
 }
 
@@ -82,7 +83,8 @@ public enum BarMenuVerb: CaseIterable, Sendable {
 }
 
 /// A Pocket verb whose chord an empty Pocket's peek draws (#2941):
-/// the GUI maps each to its catalog Lua body.
+/// the GUI maps each to its catalog Lua body. Never `BarMenuVerb`,
+/// whose cases are a menu's key-equivalent column (#2869).
 public enum PocketVerb: CaseIterable, Sendable {
     /// `pocket`: Pocket or take out.
     case pocket

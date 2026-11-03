@@ -310,7 +310,7 @@ final class BarPeek {
         guard let view = anchor.view, let window = view.window,
             let frame = Self.screenFrame(of: view),
             let content = content(anchor.source, anchor.space),
-            !content.isEmpty,
+            !content.hasNothingToShow,
             let shelf = shelf(window)
         else {
             if was != nil { panel.hide(animated: false) }

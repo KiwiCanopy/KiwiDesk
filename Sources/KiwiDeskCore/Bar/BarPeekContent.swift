@@ -163,7 +163,7 @@ struct BarPeekContent: Equatable {
     }
 
     /// Whether the peek has anything to show.
-    var isEmpty: Bool { groups.isEmpty && empty == nil }
+    var hasNothingToShow: Bool { groups.isEmpty && empty == nil }
 
     /// `count` windows in order — the first, or the last
     /// `fromEnd` — each group keeping the count it stands for; a

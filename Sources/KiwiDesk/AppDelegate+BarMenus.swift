@@ -48,7 +48,7 @@ extension AppDelegate {
     static func pocketLua(of verb: PocketVerb) -> String {
         switch verb {
         case .pocket: KeybindingCatalog.pocket.lua
-        case .togglePocketWindow: KeybindingCatalog.pocketWindow.lua
+        case .togglePocketWindow: lua(of: BarMenuVerb.togglePocketWindow)
         }
     }
 

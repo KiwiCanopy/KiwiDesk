@@ -62,6 +62,19 @@ struct PocketEmptyPlateTests {
         // The empty state speaks, so its panel is reachable.
         let panel = core.shelves.peek.panel.panel
         #expect(panel?.isAccessibilityElement() == true)
+        // A hover peek the same panel shows next stays hidden.
+        core.shelves.peek.dismiss()
+        let area = CGRect(x: 0, y: 0, width: 1440, height: 900)
+        core.shelves.peek.panel.show(
+            BarPeekContent(rows: []),
+            shelf: KiwiShelf(),
+            edge: .bottom,
+            anchor: CGRect(x: 100, y: 0, width: 20, height: 20),
+            strip: CGRect(x: 0, y: 0, width: 1440, height: 30),
+            visible: area,
+            fades: false
+        )
+        #expect(panel?.isAccessibilityElement() == false)
     }
 
     @Test(

@@ -125,9 +125,22 @@ struct BarPeekSeamTests {
                 )
             )
         )
+        // An empty Pocket's state is built on every show too (#2941).
+        #expect(content.contains("pocketEmptyState("))
+        let empty = try #require(
+            SourceScan.declarationBody(
+                after: "func pocketEmptyState(",
+                in: try SourceScan.strippedSource(
+                    at: app.appendingPathComponent(
+                        "KiwiCore+PocketEmpty.swift"
+                    )
+                )
+            )
+        )
         let bodies = [
             ("barPeekContent", content),
             ("barWindowRows", rows),
+            ("pocketEmptyState", empty),
         ]
         for (name, body) in bodies {
             for needle in Self.compositorReads where body.contains(needle) {

@@ -61,7 +61,11 @@ extension KiwiCore {
                     landing: .pocketShortcuts
                 ),
                 .init(
-                    title: L("pocket.list.empty.keys", "Pocket Keys…"),
+                    // The words of the row it lands on, one key.
+                    title: L(
+                        "shortcuts.pocket_app.add",
+                        "Give an app its own Pocket key…"
+                    ),
                     landing: .pocketKeys
                 ),
             ]

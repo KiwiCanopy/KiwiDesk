@@ -64,8 +64,9 @@ struct PocketEmptyPeekTests {
                     + "window.",
             ]
         )
-        #expect(state.lines[0].spoken.contains("Control Option P"))
-        #expect(state.lines[1].spoken.contains("Control Option Shift P"))
+        let spoken = state.lines.map(\.spoken)
+        #expect(spoken.first?.contains("Control Option P") == true)
+        #expect(spoken.last?.contains("Control Option Shift P") == true)
         #expect(state.rows.map(\.landing) == [.pocketShortcuts, .pocketKeys])
         #expect(state.spoken.hasPrefix("Your Pocket is empty\n"))
     }

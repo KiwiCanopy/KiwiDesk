@@ -29,6 +29,10 @@ struct BarMenuWiringTests {
             "core.barMenuHooks.menuChord={[weakcore]verbin"
                 + "core.flatMap{ShortcutsOpenBinding.combo(core:$0,"
                 + "lua:Self.lua(of:verb))}}",
+            // #2941: an empty Pocket's chords, each verb its own.
+            "core.barMenuHooks.pocketVerbChord={[weakcore]verbin"
+                + "core.flatMap{ShortcutsOpenBinding.rendered(core:$0,"
+                + "lua:Self.pocketLua(of:verb))}}",
             "core.barMenuHooks.layoutChar=LayoutKeyGlyph.char",
         ] {
             #expect(wiring.contains(needle), Comment(rawValue: needle))
