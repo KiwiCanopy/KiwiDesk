@@ -8,7 +8,7 @@ extension SettingsModel {
     /// Every palette, bundled first, from the model's copy of the
     /// user library (#805).
     var allPalettes: [ColorPalette] {
-        paletteStore.builtins() + userPalettes
+        core.bundledPalettes + userPalettes
     }
 
     /// Paints `look` onto the draft — its styling and its colors

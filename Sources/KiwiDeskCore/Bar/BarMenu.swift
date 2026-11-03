@@ -23,6 +23,9 @@ struct BarMenuRow {
     /// An SF Symbol name.
     var symbol: String?
     var subtitle: String?
+    /// Drawn in the key-equivalent column only, and only where the
+    /// chord does exactly what the row does (#2869).
+    var chord: KeyCombo?
 
     static var separator: BarMenuRow {
         BarMenuRow(title: "", kind: .separator)
@@ -38,6 +41,7 @@ struct BarMenuRow {
         checked: Bool = false,
         symbol: String? = nil,
         subtitle: String? = nil,
+        chord: KeyCombo? = nil,
         perform: @escaping @MainActor () -> Void
     ) -> BarMenuRow {
         BarMenuRow(
@@ -46,7 +50,8 @@ struct BarMenuRow {
             enabled: enabled,
             checked: checked,
             symbol: symbol,
-            subtitle: subtitle
+            subtitle: subtitle,
+            chord: chord
         )
     }
 
@@ -74,11 +79,20 @@ struct BarMenuRow {
 @MainActor
 enum BarMenu {
     /// The `NSMenu`: auto-enabling off at every level, each row
-    /// stating `isEnabled` itself (#802).
-    static func make(_ rows: [BarMenuRow]) -> NSMenu {
+    /// stating `isEnabled` itself (#802). A row's chord draws
+    /// through `layoutChar`, and a firing by the keyDown of that
+    /// drawn chord (`keyDown`, the event firing now) is dropped,
+    /// Carbon's hotkey being the one action (#2869 ▸ 5).
+    static func make(
+        _ rows: [BarMenuRow],
+        layoutChar: (UInt32) -> String?,
+        keyDown: @escaping @MainActor () -> NSEvent?
+    ) -> NSMenu {
         let menu = NSMenu()
         menu.autoenablesItems = false
-        for row in rows { menu.addItem(item(row)) }
+        for row in rows {
+            menu.addItem(item(row, layoutChar: layoutChar, keyDown: keyDown))
+        }
         return menu
     }
 
@@ -119,7 +133,11 @@ enum BarMenu {
         }
     }
 
-    private static func item(_ row: BarMenuRow) -> NSMenuItem {
+    private static func item(
+        _ row: BarMenuRow,
+        layoutChar: (UInt32) -> String?,
+        keyDown: @escaping @MainActor () -> NSEvent?
+    ) -> NSMenuItem {
         if row.isSeparator { return .separator() }
         if case .header = row.kind { return .sectionHeader(title: row.title) }
         let item = NSMenuItem(
@@ -145,9 +163,20 @@ enum BarMenu {
         case .separator, .header:
             break
         case .submenu(let rows):
-            item.submenu = make(rows)
+            item.submenu = make(rows, layoutChar: layoutChar, keyDown: keyDown)
         case .action(let perform):
-            let handler = Handler(perform)
+            row.chord?.applyMenuEquivalent(to: item, layoutChar: layoutChar)
+            // Only the drawn chord's own press: Return on a row the
+            // arrow keys picked is the row's one firing.
+            let drawn = item.keyEquivalent.isEmpty ? nil : row.chord
+            let handler = Handler {
+                if let drawn, let event = keyDown(),
+                    drawn.isPressed(by: event)
+                {
+                    return
+                }
+                perform()
+            }
             item.target = handler
             item.action = #selector(Handler.fire(_:))
             // `target` is weak: the row keeps its handler alive

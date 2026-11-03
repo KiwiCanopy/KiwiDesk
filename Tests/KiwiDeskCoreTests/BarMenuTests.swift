@@ -31,7 +31,11 @@ struct BarMenuTests {
     @Test("the menu states each row and never auto-enables")
     func menuShape() throws {
         var fired: [String] = []
-        let menu = BarMenu.make(rows { fired.append($0) })
+        let menu = BarMenu.make(
+            rows { fired.append($0) },
+            layoutChar: { _ in nil },
+            keyDown: { nil }
+        )
         #expect(!menu.autoenablesItems)
         #expect(
             menu.items.map(\.title) == ["Layout", "Greyed", "", "Looks…"]

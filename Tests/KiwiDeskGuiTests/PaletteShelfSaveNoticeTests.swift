@@ -54,7 +54,7 @@ struct PaletteShelfSaveNoticeTests {
         let customColors = ColorPaletteKeys.extract(
             from: model.config.settings
         )
-        try? shelf.store.save(
+        try? model.core.paletteLibrary.save(
             ColorPalette(name: "Studio Dark", colors: customColors)
         )
         #expect(

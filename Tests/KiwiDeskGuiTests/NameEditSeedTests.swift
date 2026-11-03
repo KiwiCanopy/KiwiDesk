@@ -61,7 +61,7 @@ struct NameEditSeedTests {
         // the two assertions below from passing vacuously on an
         // empty list.
         let builtin = try #require(
-            view.store.builtins().first?.name
+            view.core.bundledPalettes.first?.name
         )
         #expect(view.canRename("Anything", from: "Anything"))
         #expect(!view.canRename("", from: "Anything"))

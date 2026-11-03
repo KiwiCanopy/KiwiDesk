@@ -12,7 +12,7 @@ struct PaletteShelf: View {
     /// Focus target after tile deletion (#816).
     @FocusState var returningTile: String?
 
-    var store: PaletteStore { model.paletteStore }
+    var core: KiwiCore { model.core }
 
     /// Staged config colors extracted once per redraw (#843).
     private var liveColors: [String: String] {
@@ -50,7 +50,7 @@ struct PaletteShelf: View {
                 alignment: .leading,
                 spacing: 12
             ) {
-                ForEach(store.builtins(), id: \.name) { palette in
+                ForEach(core.bundledPalettes, id: \.name) { palette in
                     if palette.name == PaletteCatalog.neonName
                         && !model.config.settings.borderStyle.glow
                     {

@@ -98,7 +98,10 @@ extension StatusItemController {
         // right-aligned treatment; its duplicate keyboard action
         // is ignored in `openKiwiHub` below.
         if let combo = kiwiHubComboProvider() {
-            Self.applyMenuEquivalent(combo, to: hub)
+            combo.applyMenuEquivalent(
+                to: hub,
+                layoutChar: LayoutKeyGlyph.char
+            )
         }
         menu.addItem(hub)
         let settings = NSMenuItem(
@@ -112,7 +115,10 @@ extension StatusItemController {
         // `⌘,` above is the app menu's, which fires only while a
         // KiwiDesk window is key.
         if let combo = settingsComboProvider() {
-            Self.applyMenuEquivalent(combo, to: settings)
+            combo.applyMenuEquivalent(
+                to: settings,
+                layoutChar: LayoutKeyGlyph.char
+            )
         }
         menu.addItem(settings)
 
@@ -137,50 +143,6 @@ extension StatusItemController {
     /// (`BootCountText`, #2874), empty once boot is past the scan.
     static func startingTitle(for phase: BootPhase) -> String {
         BootCountText.line(for: phase) ?? ""
-    }
-
-    static func applyMenuEquivalent(
-        _ combo: KeyCombo,
-        to item: NSMenuItem
-    ) {
-        // A menu key equivalent has no side, so drawing `R⌘H` as
-        // `⌘H` would promise the left key too (#2601).
-        guard !combo.modifiers.isSided else { return }
-        var modifiers: NSEvent.ModifierFlags = []
-        if combo.modifiers.contains(.control) {
-            modifiers.insert(.control)
-        }
-        if combo.modifiers.contains(.option) {
-            modifiers.insert(.option)
-        }
-        if combo.modifiers.contains(.shift) {
-            modifiers.insert(.shift)
-        }
-        if combo.modifiers.contains(.command) {
-            modifiers.insert(.command)
-        }
-        guard let key = menuKey(for: combo.keyCode) else { return }
-        item.keyEquivalent = key
-        item.keyEquivalentModifierMask = modifiers
-    }
-
-    private static func menuKey(for code: UInt32) -> String? {
-        let special: [UInt32: String] = [
-            36: "\r", 76: "\u{3}", 48: "\t", 49: " ",
-            51: "\u{8}", 117: "\u{7F}", 53: "\u{1B}",
-            123: "\u{F702}", 124: "\u{F703}",
-            125: "\u{F701}", 126: "\u{F700}",
-            115: "\u{F729}", 119: "\u{F72B}",
-            116: "\u{F72C}", 121: "\u{F72D}",
-            122: "\u{F704}", 120: "\u{F705}",
-            99: "\u{F706}", 118: "\u{F707}",
-            96: "\u{F708}", 97: "\u{F709}",
-            98: "\u{F70A}", 100: "\u{F70B}",
-            101: "\u{F70C}", 109: "\u{F70D}",
-            103: "\u{F70E}", 111: "\u{F70F}",
-        ]
-        return special[code]
-            ?? LayoutKeyGlyph.char(for: code)?.lowercased()
     }
 
     @objc private func openDashboard() {
