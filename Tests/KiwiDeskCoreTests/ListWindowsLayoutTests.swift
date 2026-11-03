@@ -80,7 +80,7 @@ struct ListWindowsLayoutTests {
         core.state.apply(.windowFocused(WindowID(1)))
         let seen = try entries(core)
         for id: UInt32 in [1, 2] {
-            #expect(seen[id]?["floats"] == .bool(true))
+            #expect(seen[id]?["effective_float"] == .bool(true))
             #expect(seen[id]?["visibility"] == .string("visible"))
         }
         #expect(seen[2]?["frame"] == KiwiCore.json(rect: frame))
@@ -165,7 +165,7 @@ struct ListWindowsLayoutTests {
             ] {
                 #expect(listed[id]?[key] == explain[key], "\(key)")
             }
-            #expect(listed[id]?["floats"] == float["floats"])
+            #expect(listed[id]?["effective_float"] == float["effective_float"])
         }
     }
 
@@ -182,7 +182,7 @@ struct ListWindowsLayoutTests {
         core.state.workspaces.add(WindowID(3), to: "1")
         core.state.workspaces.activate("2")
         let listed = try #require(try entries(core)[3])
-        #expect(listed["floats"] == .bool(true))
+        #expect(listed["effective_float"] == .bool(true))
         let explained = core.execute("explain_window", args: [.number(3)])
         guard case .object(let explain)? = explained.data,
             case .object(let float)? = explain["float"]
@@ -190,6 +190,6 @@ struct ListWindowsLayoutTests {
             Issue.record("explain_window answered \(explained)")
             return
         }
-        #expect(float["floats"] == listed["floats"])
+        #expect(float["effective_float"] == listed["effective_float"])
     }
 }

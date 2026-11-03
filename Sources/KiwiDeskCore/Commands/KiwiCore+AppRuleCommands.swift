@@ -56,12 +56,14 @@ extension KiwiCore {
     private func appRuleList() -> JSONValue {
         let floats = eventLoop.floatRules
         return .object([
-            "spaces": .object(state.appRules.mapValues { .string($0.raw) }),
-            "floats": .array(floats.rawRules.sorted().map(JSONValue.string)),
-            "tiles": .array(
+            "app_rules": .object(state.appRules.mapValues { .string($0.raw) }),
+            "float_rules": .array(
+                floats.rawRules.sorted().map(JSONValue.string)
+            ),
+            "tile_rules": .array(
                 floats.guess.tileRules.sorted().map(JSONValue.string)
             ),
-            "ignores": .array(
+            "ignore_rules": .array(
                 eventLoop.ignoreRules.rawRules.sorted().map(JSONValue.string)
             ),
             "float_automatically": .bool(floats.guess.enabled),
@@ -79,7 +81,7 @@ extension KiwiCore {
         return .object([
             "space": state.appRules[app].map { .string($0.raw) }
                 ?? .null,
-            "floats": .array(mine.sorted().map(JSONValue.string)),
+            "float_rules": .array(mine.sorted().map(JSONValue.string)),
             "tile_rule": .bool(floats.guess.tileRules.contains(app)),
             "float_automatically": .bool(floats.guess.enabled),
         ])

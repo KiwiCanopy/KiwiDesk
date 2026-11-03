@@ -12,7 +12,7 @@ extension KiwiCore {
             .spaceChange,
             data: .object([
                 "space_id": .string(id.raw),
-                "layout_mode": .string(space.mode.rawValue),
+                "mode": .string(space.mode.rawValue),
                 "window_count": .number(
                     Double(space.windows.count)
                 ),
@@ -29,7 +29,7 @@ extension KiwiCore {
             .layoutChange,
             data: .object([
                 "space_id": .string(space.id.raw),
-                "layout_mode": .string(space.mode.rawValue),
+                "mode": .string(space.mode.rawValue),
             ]),
             luaArgs: [
                 .string(space.id.raw),

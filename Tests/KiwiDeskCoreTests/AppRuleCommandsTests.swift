@@ -82,12 +82,15 @@ struct AppRuleCommandsTests {
             Issue.record("no list")
             return
         }
-        #expect(fields["spaces"] == .object(["com.x": .string("1")]))
-        guard case .array(let floats)? = fields["floats"] else {
+        #expect(fields["app_rules"] == .object(["com.x": .string("1")]))
+        guard case .array(let floats)? = fields["float_rules"] else {
             Issue.record("no floats")
             return
         }
         #expect(floats.contains(.string("com.y")))
+        // The lists take the Lua globals' names (#2963).
+        #expect(fields["tile_rules"] != nil)
+        #expect(fields["ignore_rules"] != nil)
         #expect(fields["owner"] == .string("gui"))
         #expect(fields["profile"] == .string("Work"))
     }

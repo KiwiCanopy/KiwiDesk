@@ -31,7 +31,13 @@ struct CommandTests {
         #expect(
             core.state.workspaces[SpaceID(2)]?.mode == .stack
         )
-        #expect(events.contains { $0.0 == .layoutChange })
+        let change = events.first { $0.0 == .layoutChange }?.1
+        // The layout rides as `mode`, as get_state names it (#2963).
+        guard case .object(let data)? = change else {
+            Issue.record("no layout_change payload")
+            return
+        }
+        #expect(data["mode"] == .string("stack"))
     }
 
     @Test("set_gap_global updates tiling settings")
