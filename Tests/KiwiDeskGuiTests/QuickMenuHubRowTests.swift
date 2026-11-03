@@ -31,6 +31,24 @@ struct QuickMenuHubRowTests {
         StatusItemController(item: FakeStatusItem())
     }
 
+    private func press(
+        _ keyCode: UInt16,
+        _ modifiers: NSEvent.ModifierFlags
+    ) -> NSEvent? {
+        NSEvent.keyEvent(
+            with: .keyDown,
+            location: .zero,
+            modifierFlags: modifiers,
+            timestamp: 0,
+            windowNumber: 0,
+            context: nil,
+            characters: "",
+            charactersIgnoringModifiers: "",
+            isARepeat: false,
+            keyCode: keyCode
+        )
+    }
+
     private func titles(_ controller: StatusItemController) -> [String] {
         let menu = NSMenu()
         controller.menuNeedsUpdate(menu)
@@ -57,10 +75,15 @@ struct QuickMenuHubRowTests {
         )
     }
 
-    @Test("a click opens KiwiHub once; a keyDown duplicate does not")
+    /// Only the bound chord's own keyDown is Carbon's twin; Return
+    /// on an arrow-picked row is the row's one firing (#2869).
+    @Test("a click or Return opens KiwiHub; the chord's twin does not")
     func hubRowOpens() {
         reset()
         let controller = controller()
+        controller.kiwiHubComboProvider = {
+            KeyCombo(keyCode: 37, modifiers: [.control, .option])
+        }
         var opened = 0
         controller.onOpenKiwiHub = { opened += 1 }
         func fire() {
@@ -69,12 +92,15 @@ struct QuickMenuHubRowTests {
             let item = menu.items.first { $0.title == "Open KiwiHub…" }
             _ = item?.target?.perform(item?.action, with: item)
         }
-        controller.menuActionIsKeyDown = { true }
+        controller.menuKeyDown = { [self] in press(37, [.control, .option]) }
         fire()
         #expect(opened == 0, "Carbon already fired the chord")
-        controller.menuActionIsKeyDown = { false }
+        controller.menuKeyDown = { [self] in press(36, []) }
         fire()
-        #expect(opened == 1)
+        #expect(opened == 1, "Return on the picked row opens")
+        controller.menuKeyDown = { nil }
+        fire()
+        #expect(opened == 2)
     }
 
     @Test("the KiwiHub chord uses the native menu column")
@@ -136,17 +162,21 @@ struct QuickMenuHubRowTests {
             let item = menu.items.first { $0.title == "Settings…" }
             _ = item?.target?.perform(item?.action, with: item)
         }
-        controller.menuActionIsKeyDown = { true }
+        controller.menuKeyDown = { [self] in press(43, [.command]) }
         fire()
         #expect(opened == 1, "⌘, keyDown is the only path")
         controller.settingsComboProvider = {
             KeyCombo(keyCode: 43, modifiers: [.control, .option])
         }
+        controller.menuKeyDown = { [self] in press(43, [.control, .option]) }
         fire()
         #expect(opened == 1, "Carbon already fired the bound chord")
-        controller.menuActionIsKeyDown = { false }
+        controller.menuKeyDown = { [self] in press(36, []) }
         fire()
-        #expect(opened == 2, "a click still opens")
+        #expect(opened == 2, "Return on the picked row opens")
+        controller.menuKeyDown = { nil }
+        fire()
+        #expect(opened == 3, "a click still opens")
     }
 
     @Test("native column covers every special-key glyph")
