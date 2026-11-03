@@ -193,6 +193,11 @@ struct QuickMenuHubRowTests {
         controller.menuKeyDown = { [self] in press(43, [.command]) }
         fire()
         #expect(opened == 5, "⌘, opens beside a sided chord")
+        // Either-side flags cannot tell a sided chord's press apart,
+        // so its keyDown is never taken for Carbon's twin.
+        controller.menuKeyDown = { [self] in press(43, [.control, .option]) }
+        fire()
+        #expect(opened == 6, "a sided chord's keyDown is no twin")
     }
 
     @Test("native column covers every special-key glyph")
