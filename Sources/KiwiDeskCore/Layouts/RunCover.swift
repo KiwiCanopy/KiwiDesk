@@ -17,7 +17,7 @@ public struct RunCover: Sendable, Equatable {
         public let bounds: CGRect
         /// The members whose push length the run plans (#2709,
         /// `RunZone.sizedMembers`) — what the persist step keeps.
-        public var sized: Set<WindowID> = []
+        public let sized: Set<WindowID>
 
         /// Members shown, in drawn order.
         public var shown: ArraySlice<WindowID> {
@@ -97,8 +97,7 @@ public struct RunCover: Sendable, Equatable {
 
 extension RunCover.Run {
     /// `run` as `zone` draws it in `context` — the one assembly
-    /// `RunCover.of` and a BSP press over a run no cover records
-    /// share (#2542).
+    /// (#2542).
     public init(zone: RunZone, run: ZoneRun, in context: LayoutContext) {
         self.init(
             zone: zone,

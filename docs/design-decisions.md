@@ -4543,10 +4543,10 @@ the run the write planned. The length is a share of the run's
 span, as every other sizing store is, so a Space shown on a
 smaller screen keeps its proportions rather than hiding more
 windows than the user pushed. The run decides when it counts: in
-the zone it was given in, named by its place among the layout's
-zones so a reorder inside it keeps the length, while that run
-would still hide a window with it; the persist step keeps exactly
-what the run planned. A window moved to
+the zone it was given in, named by its role among the layout's
+zones so a reorder or a track opening beside it keeps the length,
+while that run would still hide a window with it; the persist step
+keeps exactly what the run planned. A window moved to
 another zone, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's
@@ -4576,11 +4576,10 @@ on ui-designer's advice).
 
 *Where it stops.* Across the run, the grow keeps the neighbour's
 minimum and its pill: the run cannot take a window on that axis. A
-fixed Grid's last track draws the cells of the tracks across it,
-so a drag there moves that line for every track rather than
-breaking the last one out of the grid, and BSP's halved splits
-move a ratio. Neither
-reaches the run writer, so neither needs an exception.
+Grid's last track that draws the cells of the tracks across it
+moves that line for every track rather than breaking out of the
+grid, and BSP's halved splits move a ratio; the rule reaches only
+a line laid by floor and weight, so neither needs an exception.
 :::
 
 **The stack cascade is a last resort; extreme ratios clamp at

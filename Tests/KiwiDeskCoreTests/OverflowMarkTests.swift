@@ -22,7 +22,8 @@ private func cover(
                 ),
                 run: ZoneRun(visible: visible, count: ids.count),
                 extra: 0,
-                bounds: bounds
+                bounds: bounds,
+                sized: []
             )
         ]
     )

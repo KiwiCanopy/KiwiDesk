@@ -68,7 +68,7 @@ public struct ZoneRun: Sendable, Equatable {
 
     /// Whether `lengths` laid in a row with `gap` between them fit
     /// `span` — the one fit the render and a resize along the run
-    /// (`RunZone.resize`, #2709) both ask.
+    /// (`RunZone.press`, #2709) both ask.
     static func fits(
         _ lengths: some Sequence<CGFloat>,
         gap: CGFloat,

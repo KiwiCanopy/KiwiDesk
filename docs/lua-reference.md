@@ -6557,9 +6557,9 @@ its run shrinks in place, leaving the room open until the next
 window fits. The window keeps its length, like the stack and
 track weights, while windows wait in its run, until
 [`reset_layout_sizing`](#reset_layout_sizing), a layout change, or
-the window moving to another zone clears it. Across the run, in a fixed Grid's last
-track and in BSP's halved splits a grow still stops at the
-neighbour's minimum.
+the window moving between a Stack's zones clears it. Across the
+run, in a Grid's last track while it draws its cells and in BSP's
+halved splits a grow still stops at the neighbour's minimum.
 :::
 
 The pill says *whose* minimum it was (#1261): "Minimum window

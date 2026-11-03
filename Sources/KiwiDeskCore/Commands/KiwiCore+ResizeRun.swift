@@ -72,6 +72,59 @@ extension KiwiCore {
         return false
     }
 
+    /// The write for `window` in a BSP chain or a Grid's last track
+    /// that fits whole, sharing its line by weight alone: the Stack
+    /// zone writer's step (`resizeStackMember`), a grow its floors
+    /// stop pushing into the run through `pushOrCue`.
+    func resizeFittingZone(
+        _ window: WindowID,
+        zone: RunZone,
+        context: LayoutContext,
+        axis: String,
+        delta: Double,
+        toward side: RunZone.PushSide,
+        space: Space
+    ) -> CommandResponse {
+        guard space.windows.contains(window) else {
+            return .fail(
+                "the focused window is visiting from "
+                    + "another Space"
+            )
+        }
+        guard let index = zone.members.firstIndex(of: window) else {
+            return .fail("no focused tiled window")
+        }
+        let gap =
+            zone.vertical
+            ? context.gaps.inner.vertical : context.gaps.inner.horizontal
+        let outcome = StackLayout.weightStep(
+            weights: zone.members.map {
+                max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
+            },
+            at: index,
+            delta: delta,
+            span: Double(zone.span - gap * CGFloat(zone.members.count - 1)),
+            minSizes: zone.members.map {
+                plannedMinSize(of: $0, axis: axis)
+            }
+        )
+        if pushOrCue(
+            outcome,
+            of: window,
+            members: zone.members,
+            axis: axis,
+            delta: delta,
+            toward: side,
+            space: space
+        ) {
+            return .ok()
+        }
+        state.workspaces.withSpace(space.id) {
+            $0.stackWeights[window] = outcome.value
+        }
+        return .ok()
+    }
+
     /// The write for `focused` inside `zone`'s run — the zone a
     /// press finds, or a BSP chain's own (#2542).
     func resizeInRun(

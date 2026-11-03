@@ -1465,12 +1465,12 @@ editing here:
   run's two ends are written together — by `persistRunHeads`
   after a pass (▸ `retileKeepsTheTail`), through `RunZone.ends`
   at a resize write (#2709). A layout joins the runs through
-  `RunZone.zones` alone, and a run reader — the focus step
+  `RunZone.zones` alone, its zones naming their role through
+  `RunZone.ordinal` where a window can change role among them
+  (#2709), and a run reader — the focus step
   (`runStep`), the park keep beside the inward post-pass, the
   readers above — reads a `RunCover` (the recorded one, or
-  `RunCover.of` on a pass that records none, or a zone's own run
-  through `RunCover.Run(zone:run:in:)` where no cover records a
-  run that hides nothing), never a list of
+  `RunCover.of` on a pass that records none), never a list of
   layout modes; a mode write clears every sizing store — the
   session ratios and `Space.resetSizing`'s set
   (`SpaceSizingCensusTests`), which every run reads — never a

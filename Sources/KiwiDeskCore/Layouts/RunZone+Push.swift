@@ -56,8 +56,10 @@ extension RunZone {
         in context: LayoutContext
     ) -> Press? {
         guard let index = members.firstIndex(of: id),
-            let line = line(in: context), line.before.contains(index)
+            !piles(in: context)
         else { return nil }
+        let line = line(in: context)
+        guard line.before.contains(index) else { return nil }
         guard let run = run(in: context) else {
             let step = lengthStep(line, index, by: delta, toward: side)
             return step.movesRun ? lengths(step, of: id) : nil
@@ -105,7 +107,7 @@ extension RunZone {
     /// The run as the render plans it: each member's planned and
     /// bare length, its share weight and drawn length, the gap and
     /// the members shown.
-    private struct Line {
+    struct Line {
         var floors: [CGFloat]
         let bare: [CGFloat]
         let weights: [Double]
@@ -115,7 +117,7 @@ extension RunZone {
         let before: Range<Int>
     }
 
-    private func line(in context: LayoutContext) -> Line? {
+    private func line(in context: LayoutContext) -> Line {
         let (floors, bare, gap) = floorsAndGap(in: context)
         let frames = frames(in: context)
         return Line(
@@ -129,7 +131,7 @@ extension RunZone {
         )
     }
 
-    private struct LengthStep {
+    struct LengthStep {
         let target: CGFloat
         let visible: Range<Int>
         let joined: [Int]
@@ -145,8 +147,9 @@ extension RunZone {
     /// the pushed one's room; where `pulls`, a shrink brings back the
     /// window waiting past the moved edge, `.both` the one after the
     /// run first, then the other end's once that side has none
-    /// waiting, stopping at the first that does not fit (ruling 4).
-    private func lengthStep(
+    /// waiting, stopping at the first that does not fit at its floor
+    /// (ruling 4) — a window that returns keeps no length of its own.
+    func lengthStep(
         _ line: Line,
         _ index: Int,
         by delta: CGFloat,
@@ -163,7 +166,11 @@ extension RunZone {
         var last = line.before.upperBound - 1
         func fits(_ first: Int, _ end: Int) -> Bool {
             ZoneRun.fits(
-                (first...end).map { $0 == index ? target : line.floors[$0] },
+                (first...end).map {
+                    if $0 == index { return target }
+                    return line.before.contains($0)
+                        ? line.floors[$0] : line.bare[$0]
+                },
                 gap: line.gap,
                 span: line.span
             )
@@ -229,96 +236,6 @@ extension RunZone {
         press.sizes[id] = share(of: step.target)
         press.visible = step.visible
         press.movesRun = step.movesRun
-        return press
-    }
-
-    /// The press of the one window that draws what sized mates leave:
-    /// the nearest mate's length moves the other way, and a grow past
-    /// what that mate can give sets it to its floor and pushes on.
-    private func besideSized(
-        _ line: Line,
-        _ index: Int,
-        by delta: CGFloat,
-        toward side: PushSide
-    ) -> Press {
-        let sized = line.before.filter {
-            $0 != index && line.weights[$0] == 0
-        }
-        let ahead = sized.filter { $0 < index }.max()
-        let after = sized.filter { $0 > index }.min()
-        var press = Press()
-        guard let mate = side == .start ? ahead ?? after : after ?? ahead
-        else {
-            press.refusal = .alone
-            return press
-        }
-        let member = members[mate]
-        // The window draws the rest, so it keeps no length of its own.
-        press.sizes[members[index]] = .some(nil)
-        if delta < 0 {
-            let give = min(-delta, line.drawn[index] - line.bare[index])
-            guard give > Self.unchangedTolerance else {
-                return Press(cue: .ownMinimum, refusal: .atMinimum)
-            }
-            if give < -delta - Self.unchangedTolerance {
-                press.cue = .ownMinimum
-            }
-            press.sizes[member] = share(of: line.drawn[mate] + give)
-            return press
-        }
-        let room = line.drawn[mate] - line.bare[mate]
-        guard delta > room else {
-            press.sizes[member] = share(of: line.drawn[mate] - delta)
-            return press
-        }
-        var given = line
-        given.floors[mate] = line.bare[mate]
-        given.drawn[mate] = line.bare[mate]
-        given.drawn[index] += room
-        let push = lengthStep(given, index, by: delta - room, toward: side)
-        guard push.movesRun else {
-            press.sizes[member] = share(of: line.bare[mate])
-            press.cue = .neighborMinimum(member)
-            return press
-        }
-        press.sizes[member] =
-            push.visible.contains(mate) ? share(of: line.bare[mate]) : nil
-        press.sizes[members[index]] = share(of: push.target)
-        press.visible = push.visible
-        press.movesRun = true
-        return press
-    }
-
-    /// The run's weight step (#2235): it divides the span the shown
-    /// windows' floors leave, among the windows that take a share,
-    /// with no minimum of its own, since the layout keeps the floors.
-    private func weightStep(
-        _ line: Line,
-        _ index: Int,
-        shown: [Int],
-        by delta: CGFloat,
-        in context: LayoutContext
-    ) -> Press {
-        guard shown.count > 1, let at = shown.firstIndex(of: index) else {
-            return Press(cue: .nothingToDivide, refusal: .alone)
-        }
-        let extra = runExtra(in: context) ?? 0
-        guard extra > 0 else {
-            let anchor = members[shown[at == 0 ? 1 : at - 1]]
-            return Press(
-                cue: delta < 0 ? .ownMinimum : .neighborMinimum(anchor),
-                refusal: .atMinimum
-            )
-        }
-        var press = Press()
-        press.weight =
-            StackLayout.weightStep(
-                weights: shown.map { line.weights[$0] },
-                at: at,
-                delta: Double(delta),
-                span: Double(extra),
-                minSizes: Array(repeating: 0, count: shown.count)
-            ).value
         return press
     }
 

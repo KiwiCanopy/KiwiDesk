@@ -16,10 +16,10 @@ public struct RunZone: Sendable, Equatable {
     /// them by floor and weight. Nil sizes the run from its
     /// members' floors alone.
     public let slots: [CGRect]?
-    /// The zone's place among its layout's zones — the master zone
-    /// 0 and the stack zone 1, a track its index — what a push's
-    /// length names (`RunSize.zone`), so a reorder inside the zone
-    /// keeps it.
+    /// The zone's role among its layout's zones — Stack's master 0
+    /// and stack 1, any other zone 0, since Track's tracks share one
+    /// along-span — what a push's length names (`RunSize.zone`), so
+    /// a reorder or a track opening beside it keeps the length.
     public let ordinal: Int
 
     public init(
@@ -178,7 +178,7 @@ public struct RunZone: Sendable, Equatable {
 
     /// Each member's planned length — its run size where it has
     /// one — its floor without it, and the gap: what a resize along
-    /// the run plans with (`resize(_:by:toward:in:)`, #2709).
+    /// the run plans with (`press(_:by:toward:in:)`, #2709).
     func floorsAndGap(
         in context: LayoutContext
     ) -> (floors: [CGFloat], bare: [CGFloat], gap: CGFloat) {
@@ -269,18 +269,6 @@ public struct RunZone: Sendable, Equatable {
     }
 
     var span: CGFloat { vertical ? region.height : region.width }
-
-    /// The length a push gave `id` where this zone plans it.
-    func plannedSize(
-        of id: WindowID,
-        in context: LayoutContext
-    ) -> CGFloat? {
-        let plan = placement(in: context)
-        guard let index = members.firstIndex(of: id),
-            plan.weights.indices.contains(index), plan.weights[index] == 0
-        else { return nil }
-        return plan.floors[index]
-    }
 
     /// Each member's share of what the floors leave, as the render
     /// divides it — zero for a sized window.

@@ -48,7 +48,7 @@ extension KiwiCore {
         guard let screen = TilingEngine.screen(for: space.id, in: state),
             let found = bspChain(of: space, on: screen),
             found.zone.vertical == (axis == "y"),
-            let index = found.zone.members.firstIndex(of: window)
+            found.zone.members.contains(window)
         else { return nil }
         let chain = found.zone
         let context = found.context
@@ -77,39 +77,14 @@ extension KiwiCore {
                 otherAxisDivides: otherAxisDivides
             )
         }
-        // A chain that fits whole shares its line by weight alone:
-        // the Stack zone writer's step (`resizeStackMember`).
-        let gap =
-            chain.vertical
-            ? context.gaps.inner.vertical : context.gaps.inner.horizontal
-        let span =
-            (chain.vertical ? chain.region.height : chain.region.width)
-            - gap * CGFloat(chain.members.count - 1)
-        let outcome = StackLayout.weightStep(
-            weights: chain.members.map {
-                max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
-            },
-            at: index,
-            delta: delta,
-            span: Double(span),
-            minSizes: chain.members.map {
-                plannedMinSize(of: $0, axis: axis)
-            }
-        )
-        if pushOrCue(
-            outcome,
-            of: window,
-            members: chain.members,
+        return resizeFittingZone(
+            window,
+            zone: chain,
+            context: context,
             axis: axis,
             delta: delta,
             toward: side,
             space: space
-        ) {
-            return .ok()
-        }
-        state.workspaces.withSpace(space.id) {
-            $0.stackWeights[window] = outcome.value
-        }
-        return .ok()
+        )
     }
 }

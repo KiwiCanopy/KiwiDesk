@@ -111,6 +111,7 @@ struct RunPushMateTests {
     func dragPushesTheMovedSide() throws {
         let (top, topID) = try dragMiddle(leading: true)
         #expect(hidden(top, topID) == [w(2)])
+        #expect(top.state.workspaces[topID]?.runSizes[w(3)]?.zone == 1)
         #expect(top.state.workspaces[topID]?.runHeads == [w(3)])
         let (bottom, bottomID) = try dragMiddle(leading: false)
         #expect(hidden(bottom, bottomID) == [w(4)])
@@ -205,6 +206,45 @@ struct RunPushMateTests {
         #expect(core.state.workspaces[id]?.runSizes[w(4)] == nil)
     }
 
+    @Test("A window moved to Stack's master zone drops its length")
+    func moveToMasterDropsTheLength() throws {
+        let (core, id) = try dragMiddle(leading: true)
+        #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
+        core.state.workspaces.withSpace(id) {
+            $0.windows = [self.w(3), self.w(1), self.w(2), self.w(4)]
+        }
+        core.retile(animated: false)
+        #expect(core.state.workspaces[id]?.runSizes[w(3)] == nil)
+    }
+
+    @Test("A grow past one sized mate's room keeps the other mates shown")
+    func pushOnKeepsTheMate() throws {
+        // Stack zone w2…w6 in 1400 pt showing w3, w4, w5; w3 and w4
+        // sized, w5 pressed: w4 gives all it has and stays shown,
+        // and w3 at the far end leaves.
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 6,
+            focus: 5,
+            height: 1420
+        )
+        core.state.workspaces.withSpace(id) {
+            $0.runSizes = [
+                self.w(3): RunSize(share: 0.35, zone: 1),
+                self.w(4): RunSize(share: 0.3, zone: 1),
+            ]
+            $0.runHeads = [self.w(3)]
+            $0.runTails = [self.w(5)]
+        }
+        core.retile(animated: false)
+        #expect(hidden(core, id) == [w(2), w(6)])
+        press(core, "y", 300)
+        let sizes = core.state.workspaces[id]?.runSizes ?? [:]
+        #expect(hidden(core, id).contains(w(3)))
+        #expect(!hidden(core, id).contains(w(4)))
+        #expect(abs((sizes[w(4)]?.share ?? 0) - 300.0 / 1400) < 0.01)
+    }
+
     @Test("A push survives a reorder inside its zone")
     func reorderKeepsThePush() throws {
         let (core, id) = try dragMiddle(leading: true)
@@ -217,8 +257,8 @@ struct RunPushMateTests {
         #expect(hidden(core, id).count == 1)
     }
 
-    @Test("A length whose zone anchor moved is dropped at the next pass")
-    func foreignAnchorIsDropped() throws {
+    @Test("A length given in a zone of another role is dropped")
+    func foreignZoneIsDropped() throws {
         // Four stack windows in 1000 pt: the run hides one at its
         // floors alone, so only the anchor can drop the length.
         let (core, id) = makeSpace(
@@ -233,5 +273,25 @@ struct RunPushMateTests {
         }
         core.retile(animated: false)
         #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
+    }
+
+    @Test("Track: a push survives an earlier track closing")
+    func trackPushSurvivesAnEarlierTrack() throws {
+        let (core, id) = makeSpace("track", windows: 4, focus: 3) {
+            $0.execute("track.set_new_window", args: [.string("own_track")])
+        }
+        core.state.workspaces.withSpace(id) {
+            // Three tracks: [1] [2] [3, 4].
+            $0.trackBreaks = [self.w(1), self.w(2), self.w(3)]
+        }
+        core.retile(animated: false)
+        let vertical =
+            core.tiler.settings.resolvedTrack(for: id).axis == .vertical
+        press(core, vertical ? "y" : "x", 400)
+        #expect(hidden(core, id) == [w(4)])
+        core.state.workspaces.withSpace(id) { $0.remove(self.w(1)) }
+        core.retile(animated: false)
+        #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
+        #expect(hidden(core, id) == [w(4)])
     }
 }

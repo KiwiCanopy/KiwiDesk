@@ -1,11 +1,10 @@
 import CoreGraphics
 
 /// The length a push along a run gave a window (#2709,
-/// `Space.runSizes`): a share of the run's span, and the zone it was
-/// given in, by its place among the layout's zones
-/// (`RunZone.ordinal`). A window planned in any other zone, or in a
-/// run that would show everything at its floors, plans at its floor
-/// and share (`RunZone`).
+/// `Space.runSizes`): a share of the run's span, and the role of the
+/// zone it was given in (`RunZone.ordinal`). A window planned in a
+/// zone of another role, or in a run that would show everything at
+/// its floors, plans at its floor and share (`RunZone`).
 public struct RunSize: Sendable, Equatable, Codable {
     /// The window's length over the run's span, 0…1.
     public var share: CGFloat

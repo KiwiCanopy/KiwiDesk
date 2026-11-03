@@ -83,18 +83,28 @@ extension KiwiCore {
         // column, takes a press along it as a run weight (#2541).
         if shape.scrolls, horizontal == shape.rowMajor,
             index >= GridLayout.runStart(of: shape),
-            GridLayout.zones(for: tiled, in: context)?.first?
-                .drawsSlots(in: context) == false,
-            let response = resizeInRun(
+            let zone = GridLayout.zones(for: tiled, in: context)?.first,
+            !zone.drawsSlots(in: context)
+        {
+            let side: RunZone.PushSide =
+                edge.map { $0 == .leading ? .start : .end } ?? .both
+            return resizeInRun(
                 window,
                 axis: axis,
                 delta: delta,
-                toward: edge.map { $0 == .leading ? .start : .end } ?? .both,
+                toward: side,
                 space: space,
                 otherAxisDivides: true
             )
-        {
-            return response
+                ?? resizeFittingZone(
+                    window,
+                    zone: zone,
+                    context: context,
+                    axis: axis,
+                    delta: delta,
+                    toward: side,
+                    space: space
+                )
         }
         let cell = GridLayout.cell(index, of: shape)
         let span = horizontal ? cell.columns : cell.rows

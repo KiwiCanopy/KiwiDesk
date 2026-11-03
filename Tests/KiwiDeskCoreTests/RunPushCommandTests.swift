@@ -26,6 +26,7 @@ struct RunPushCommandTests {
         _ mode: String,
         windows count: UInt32,
         focus: UInt32,
+        width: CGFloat = 1220,
         height: CGFloat = 820,
         setup: (KiwiCore) -> Void = { _ in }
     ) -> (KiwiCore, SpaceID) {
@@ -37,7 +38,7 @@ struct RunPushCommandTests {
                 )
         )
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1220, height: height)
+            CGRect(x: 0, y: 0, width: width, height: height)
         }
         core.tiler.settings.gapsGlobal = Gaps.uniform(10)
         for verb in [
@@ -167,6 +168,57 @@ struct RunPushCommandTests {
         #expect(core.state.workspaces[id]?.runSizes[w(5)] != nil)
     }
 
+    @Test("Auto-sized Grid: a last row that fits whole pushes too")
+    func autoGridFittingRowPushes() throws {
+        let (core, id) = makeSpace(
+            "grid",
+            windows: 9,
+            focus: 5,
+            width: 2560
+        ) {
+            $0.execute("grid.set_type", args: [.string("rigid")])
+            $0.execute(
+                "grid.set_dimensions",
+                args: [.number(3), .number(2)]
+            )
+            $0.execute("grid.set_auto_size", args: [.bool(true)])
+        }
+        // w1's learned 800 caps the columns at three, so w4…w9 run
+        // along a last row that holds them all at their floors.
+        let answer = CGSize(width: 800, height: 385)
+        for step in [CGFloat(60), CGFloat(110)] {
+            for _ in 0..<2 {
+                core.tiler.boundLearner.recordAsk(
+                    w(1),
+                    size: CGSize(width: 800 - step, height: 385)
+                )
+                core.tiler.boundLearner.observe(
+                    w(1),
+                    currentSize: answer,
+                    settledRead: true
+                )
+            }
+        }
+        core.retile(animated: false)
+        let space = try #require(core.state.workspaces[id])
+        let screen = try #require(
+            TilingEngine.screen(for: id, in: core.state)
+        )
+        let input = core.tiler.layoutInput(
+            state: core.state,
+            space: space,
+            screen: screen
+        )
+        let zone = try #require(
+            GridLayout.zones(for: input.tiled, in: input.context)?.first
+        )
+        #expect(zone.run(in: input.context) == nil)
+        #expect(hidden(core, id).isEmpty)
+        press(core, "x", 2000)
+        #expect(!hidden(core, id).isEmpty)
+        #expect(core.state.workspaces[id]?.runSizes[w(5)] != nil)
+    }
+
     @Test("Fixed Grid: the last row keeps its cells, nothing is pushed")
     func fixedGridKeepsItsColumns() throws {
         let (core, id) = makeSpace("grid", windows: 9, focus: 5) {
@@ -274,7 +326,8 @@ struct RunPushCommandTests {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)
         press(core, "y", 300)
         #expect(core.state.workspaces[id]?.runSizes.isEmpty == false)
-        core.execute("set_mode", args: [.string(id.raw), .string("track")])
+        // The mode write itself, ahead of any pass's persist.
+        core.state.workspaces.setMode(id, .track)
         #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
     }
 }
