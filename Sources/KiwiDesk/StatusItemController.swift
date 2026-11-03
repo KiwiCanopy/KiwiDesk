@@ -20,16 +20,9 @@ final class StatusItemController: NSObject, NSMenuDelegate {
     /// The combo bound to Open Settings (#1381), read the same way;
     /// nil keeps the app menu's `⌘,`.
     var settingsComboProvider: () -> KeyCombo? = { nil }
-    /// The keyDown behind the menu action firing now, or nil for
-    /// a click. A row drops it only when it is the row's own bound
-    /// chord, which Carbon already answered; Return on an
-    /// arrow-picked row still fires. Injected so a test can hold
-    /// either.
-    var menuKeyDown: () -> NSEvent? = {
-        guard let event = NSApp.currentEvent, event.type == .keyDown
-        else { return nil }
-        return event
-    }
+    /// The keyDown behind the menu action firing now, or nil;
+    /// injected for tests (#2869).
+    var menuKeyDown: () -> NSEvent? = { KeyCombo.menuKeyDown() }
 
     /// Drives the found-only "Update Available…" row and the
     /// pending mark (#874, #1536). Inert by default —

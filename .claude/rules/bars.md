@@ -1358,8 +1358,9 @@ rather than the row it names makes the user search again. So:
   preflight's refusal, where the row's named window still acts.
   A firing by the drawn chord's own keyDown is dropped, so
   Carbon's hotkey is the one action, and every other keyboard
-  firing — Return on a picked row — stands (`BarMenuChordTests`,
-  `BarMenuWiringTests` ▸ `verbsReadTheirRows`).
+  firing — Return on a picked row — stands, through the one
+  `KeyCombo.isCarbonTwin` ([input-and-animation.md](input-and-animation.md);
+  `BarMenuChordTests`, `BarMenuWiringTests` ▸ `verbsReadTheirRows`).
 
 ## A Space wears one marker, drawn after its identifier (#1790)
 

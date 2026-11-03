@@ -98,9 +98,13 @@ struct QuickMenuHubRowTests {
         controller.menuKeyDown = { [self] in press(36, []) }
         fire()
         #expect(opened == 1, "Return on the picked row opens")
+        // The chord's key under other modifiers is no twin.
+        controller.menuKeyDown = { [self] in press(37, []) }
+        fire()
+        #expect(opened == 2, "the bare key is no twin")
         controller.menuKeyDown = { nil }
         fire()
-        #expect(opened == 2)
+        #expect(opened == 3)
     }
 
     @Test("the KiwiHub chord uses the native menu column")
@@ -174,9 +178,21 @@ struct QuickMenuHubRowTests {
         controller.menuKeyDown = { [self] in press(36, []) }
         fire()
         #expect(opened == 2, "Return on the picked row opens")
+        // The chord's key under other modifiers is no twin.
+        controller.menuKeyDown = { [self] in press(43, [.command]) }
+        fire()
+        #expect(opened == 3, "⌘, is no twin of ⌃⌥,")
         controller.menuKeyDown = { nil }
         fire()
-        #expect(opened == 3, "a click still opens")
+        #expect(opened == 4, "a click still opens")
+        // A sided chord draws nothing, so the row keeps ⌘, and its
+        // keyDown is the row's own firing again.
+        controller.settingsComboProvider = {
+            KeyCombo.parse("rctrl+alt+comma")
+        }
+        controller.menuKeyDown = { [self] in press(43, [.command]) }
+        fire()
+        #expect(opened == 5, "⌘, opens beside a sided chord")
     }
 
     @Test("native column covers every special-key glyph")

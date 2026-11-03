@@ -100,14 +100,27 @@ struct OpenApplicationsTrashSlotTests {
         #expect(held - bare >= slot)
     }
 
+    /// The Holds row and the key rows share one ask; the per-app
+    /// rows, which draw their own trash, stay outside it. The ask
+    /// is the card's one spelling of the key, so no row inside it
+    /// sets it back.
     @Test("the Pocket card's Holds row holds the slot")
     func pocketHoldsRowHoldsTheSlot() throws {
         let group = try source("PocketGroup.swift")
         #expect(
             group.contains(
-                "capacityRow"
-                    + ".environment(\\.keybindingReservesTrashSlot,true)"
+                "Group{capacityRowForEach(ShortcutsRowOrder.pocketAtRest"
             )
         )
+        #expect(
+            group.contains(
+                "}}.environment(\\.keybindingReservesTrashSlot,true)"
+                    + "PocketAppRows("
+            )
+        )
+        let asks = group.components(
+            separatedBy: "keybindingReservesTrashSlot"
+        )
+        #expect(asks.count == 2, "one ask, nothing overriding it")
     }
 }
