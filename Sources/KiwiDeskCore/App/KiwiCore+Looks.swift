@@ -7,7 +7,8 @@ import Foundation
 /// unreadable.
 extension KiwiCore {
     /// The look library, built on demand — stateless like
-    /// `paletteLibrary`, and public for the same one-owner reason.
+    /// `paletteLibrary`, and public so the GUI reads Core's one
+    /// store rather than building its own.
     public var lookLibrary: LookStore {
         let store = LookStore(directory: configDirectory)
         store.migrationBackups = migrationBackups

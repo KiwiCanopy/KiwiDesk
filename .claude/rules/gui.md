@@ -570,10 +570,10 @@ itself before the shell states focus (#991, #996).
 
 ## The palette library is Core's (#2875)
 
-**A Settings surface reads and writes palettes through
+**A `Sources/KiwiDesk` file reads and writes palettes through
 `KiwiCore`'s palette doors (`KiwiCore+Palettes.swift`) and never
-holds `PaletteStore` or `paletteLibrary`**, so an alias cannot
-write past a door; a read the shelf needs joins those doors
+names `PaletteStore` or `paletteLibrary`**, so an alias cannot
+write past a door; a read the GUI needs joins those doors
 (`PaletteDoorSeamTests`).
 
 ## Window management starts through one door (#2050)
