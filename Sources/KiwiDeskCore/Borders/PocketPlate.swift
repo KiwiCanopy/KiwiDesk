@@ -31,7 +31,7 @@ final class PocketPlatePanel: NSPanel {
 final class PocketPlateView: NSView, BarPeekListAnchor {
     /// A left click on the plate.
     var onClick: @MainActor () -> Void = {}
-    /// VoiceOver's press.
+    /// VoiceOver's press, which opens the native menu (#2936).
     var onPress: @MainActor () -> Void = {}
 
     let pocket = BriefPocketView(frame: .zero)
