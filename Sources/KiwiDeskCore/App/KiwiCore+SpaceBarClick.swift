@@ -46,11 +46,9 @@ extension KiwiCore {
             return
         }
         presentBarWindowMenu(
-            pick.windows,
-            kind: pick.kind,
+            pick.peekSource,
             space: pick.space,
-            at: pick.anchor,
-            keyed: pick.peekSource.keysPocketWindows
+            at: pick.anchor
         )
     }
 
@@ -81,6 +79,22 @@ extension KiwiCore {
             self?.fromSpaceBar { self?.pickBarRow(id, on: space) }
         }
         spaceBars.glyphActions.present(menu, anchor)
+    }
+
+    /// The same menu for a peek source: its windows, its kind and
+    /// whether it keys the pocket's app windows, all read off it.
+    func presentBarWindowMenu(
+        _ source: BarPeekSource,
+        space: SpaceID?,
+        at anchor: NSView
+    ) {
+        presentBarWindowMenu(
+            source.windows,
+            kind: source.menuKind,
+            space: space,
+            at: anchor,
+            keyed: source.keysPocketWindows
+        )
     }
 
     /// The one pick a bar list's row takes — a peek row's and a
