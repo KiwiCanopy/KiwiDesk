@@ -231,12 +231,12 @@ struct RunZoneSizesTests {
             .init(asked: 50, answered: 500)
         ])
         let press = try #require(
-            three.press(ids[0], by: -150, toward: .end, in: sized)
+            three.press(ids[0], by: -250, toward: .end, in: sized)
         )
         #expect(press.visible == 0..<3)
         let after = written(press, of: ids[0], over: sized, in: three)
         let frame = try #require(three.frames(in: after)[ids[0]])
-        #expect(abs(frame.width - 350) < 1)
+        #expect(abs(frame.width - 250) < 1)
     }
 
     @Test("A neighbour's shrink widens the window taking the rest")
