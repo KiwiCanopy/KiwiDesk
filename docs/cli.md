@@ -297,8 +297,8 @@ not know is refused rather than sent. `get_state` hands the AI
 app your window titles.
 
 :::unreleased
-So do `diagnose_window` for a window and `list_windows`, which the
-AI app can send through `run`.
+So do `diagnose_window` and `list_windows`, which the AI app can
+send through `run`.
 :::
 
 ChatGPT reaches only remote MCP servers, so it needs
@@ -573,8 +573,9 @@ kiwidesk list_windows | jq '.[] | select(.focused)'
 ```
 
 :::unreleased
-Each `list_windows` entry and the `explain_window` answer carry the
-window's `title`, as `get_state` has it:
+Each `list_windows` entry, the `explain_window` answer and each
+window `explain_app` lists carry the window's `title`, as
+`get_state` has it:
 
 ```bash
 kiwidesk list_windows | jq -r '.[] | "\(.id) \(.title)"'
