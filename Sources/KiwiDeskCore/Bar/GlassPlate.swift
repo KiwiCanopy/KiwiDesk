@@ -60,6 +60,17 @@ enum GlassPlate {
         fitContent(glass)
     }
 
+    /// Rounds a glass and fits its content, writing no frame: a
+    /// hosted glass's frame is its host's to write (#2878).
+    @MainActor
+    static func round(_ view: NSView, cornerRadius: CGFloat) {
+        guard #available(macOS 26, *),
+            let glass = view as? NSGlassEffectView
+        else { return }
+        glass.cornerRadius = cornerRadius
+        fitContent(glass)
+    }
+
     /// Embeds `content` in the glass: inside its tint where
     /// `GlassTint` has made one the glass's content, else as the
     /// content itself.

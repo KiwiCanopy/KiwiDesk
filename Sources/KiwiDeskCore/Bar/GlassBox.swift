@@ -18,11 +18,14 @@ protocol GlassBoxRider: NSView {}
 final class GlassBoxHost: NSView {
     override var isFlipped: Bool { true }
 
-    /// The host writes its pair, never a rider, to every size it
-    /// takes: autoresizing left a hosted glass at the fused
-    /// plate's width when the host shrank (#2388, device).
+    /// A hosted glass's one frame writer (#2878): every new size
+    /// the host takes writes its pair, never a rider, to its bounds
+    /// exactly. Autoresizing left a glass at the fused plate's
+    /// width when the host shrank (#2388, device).
     override func setFrameSize(_ newSize: NSSize) {
+        let resized = newSize != frame.size
         super.setFrameSize(newSize)
+        guard resized else { return }
         for view in subviews
         where view.frame != bounds && !(view is GlassBoxRider) {
             view.frame = bounds
@@ -30,39 +33,6 @@ final class GlassBoxHost: NSView {
         subviews.filter { !($0 is GlassBoxRider) }
             .forEach(GlassPlate.fitContent)
     }
-
-    /// Bumped by every glide `GlassBox.place` starts, so only the
-    /// latest glide's landing settles the box.
-    private(set) var glideGeneration = 0
-    /// Runs a landing after a delay — a timer, since a transaction
-    /// completion begun inside a layout pass never fires (see
-    /// `BarMotion.playWalk`); a test drains it by hand.
-    var afterLanding: Landing = { delay, body in
-        Task { @MainActor in
-            try? await Task.sleep(for: .seconds(delay))
-            body()
-        }
-    }
-    typealias Landing = (
-        TimeInterval, @escaping @MainActor () -> Void
-    ) -> Void
-
-    /// Settles `glass` once the glide just started has landed,
-    /// unless a newer glide has started since (#2425).
-    func settleAfterGlide(_ glass: NSView, lasting span: TimeInterval) {
-        glideGeneration += 1
-        let generation = glideGeneration
-        afterLanding(span + Self.landingSlack) { [weak self, weak glass] in
-            guard let self, let glass,
-                self.glideGeneration == generation
-            else { return }
-            GlassBox.settle(glass)
-        }
-    }
-
-    /// Past the glide's own length, so the settle never lands
-    /// inside its last frames.
-    static let landingSlack: TimeInterval = 0.05
 
     override func hitTest(_ point: NSPoint) -> NSView? {
         let hit = super.hitTest(point)
@@ -74,8 +44,8 @@ final class GlassBoxHost: NSView {
 enum GlassBox {
     /// A fresh glass and tint inside a box-sized host added to
     /// `parent` — beneath `sibling` where one is named — that the
-    /// pair fills: the host writes it on every resize. The masks
-    /// stay as the device-checked shape and are not relied on.
+    /// pair fills: the host writes it on every resize, and no
+    /// autoresizing mask lets the layout engine derive it (#2878).
     static func make(
         in parent: NSView,
         below sibling: NSView? = nil
@@ -89,7 +59,7 @@ enum GlassBox {
             parent.addSubview(host)
         }
         let tint = GlassBackdrop()
-        glass.autoresizingMask = [.width, .height]
+        glass.autoresizingMask = []
         host.addSubview(glass)
         return (glass, tint)
     }
@@ -105,12 +75,12 @@ enum GlassBox {
         host(of: glass)?.frame ?? glass.frame
     }
 
-    /// Lays a box out at `frame`: the pair takes the host's CURRENT
-    /// bounds — the one write a host whose size stays the same gets
-    /// — then the host, the one view that travels (#2095), moves
-    /// and writes the pair to each size it takes
-    /// (`GlassBoxHost.setFrameSize`). A fresh host lands rather
-    /// than gliding from nowhere. `visible` false hides the whole
+    /// Lays a box out at `frame`: rounds the glass and paints its
+    /// tint, then moves the host, the one view that travels
+    /// (#2095) and the glass's one frame writer
+    /// (`GlassBoxHost.setFrameSize`, #2878); a box resizes only by
+    /// resizing its host. A fresh host lands rather than gliding
+    /// from nowhere. `visible` false hides the whole
     /// box, which still takes its slot; `fill` is the Fill its tint
     /// paints, on the glass or, `behind`, beneath it.
     static func place(
@@ -127,15 +97,7 @@ enum GlassBox {
     ) {
         guard let host = host(of: glass) else { return }
         host.isHidden = !visible
-        let bounds = host.bounds
-        // A glass Auto Layout rounded to the backing is left there:
-        // rewriting it stranded it at its old size (#2388, device).
-        GlassPlate.update(
-            glass,
-            frame: GlassPlate.fills(glass.frame, bounds)
-                ? glass.frame : bounds,
-            cornerRadius: cornerRadius
-        )
+        GlassPlate.round(glass, cornerRadius: cornerRadius)
         if behind {
             GlassTint.applyBehind(
                 tint,
@@ -153,29 +115,7 @@ enum GlassBox {
                 edge: edge
             )
         }
-        let travels = animated && host.frame != .zero
-        move(host, frame, travels)
-        // Auto Layout can leave a growing glass at its old size
-        // through an animated host move; the landing writes it.
-        if travels {
-            host.settleAfterGlide(
-                glass,
-                lasting: max(BarMotion.slide, BarMotion.shelfGlideLength)
-            )
-        }
-    }
-
-    /// Writes a box's glass, and the glass's content, to its
-    /// host's bounds where the glass is off them: during an
-    /// animated host move Auto Layout can leave a growing glass at
-    /// its old size, and the next `place` keeps it there (#2425,
-    /// device).
-    static func settle(_ glass: NSView) {
-        guard let host = host(of: glass) else { return }
-        if !GlassPlate.fills(glass.frame, host.bounds) {
-            glass.frame = host.bounds
-        }
-        GlassPlate.fitContent(glass)
+        move(host, frame, animated && host.frame != .zero)
     }
 
     /// Seats an item's stroke stack in its box's host above the

@@ -1630,48 +1630,28 @@ Obligations:
   pair gliding by its own frames trails a crescent ahead of the
   box. A glass pair that travels is minted, laid out and taken
   out through the one `GlassBox` — laid out through its one
-  `place`, which writes the pair to the host's CURRENT bounds
-  before the host moves — and a drag moves the host
+  `place` — and a drag moves the host
   too (`SpaceBarGlideWiringTests` ▸ `boxGlassTravels`,
   `boxGlassFillsItsHost`, `AppBarBoxHostTests` ▸
-  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). **Write the
-  pair to each size the host takes in `GlassBoxHost.setFrameSize`,
-  never trusting autoresizing to carry it** — a hosted glass stayed
-  at a fused plate's width when the shelf shrank (#2388, device
-  2026-10-18) — **and leave a hosted glass that already fills its
-  host within `GlassPlate.fills` alone before a glide**: Auto Layout
-  rounds it to the backing, and rewriting that rounding is what
-  stranded it (`ShelfPlateGlassHostTests` ▸
-  `hostResizeFillsThePair`, `roundedGlassIsNotRewritten`). The
-  host's writer joins the pair's writers below
-  (`GlassPairMotionSeamTests` ▸ `hostLayoutStartsNoMotion`). The pair's own
+  `glideMovesTheHost`, `ShelfPlateGlassHostTests`). The pair's own
   frame writers, `GlassPlate.update` and `GlassTint.apply`, take
   no motion input and start no motion (`GlassPairMotionSeamTests`),
   so a call site cannot make either travel.
-- **Write a glass's content to the glass after every resize of
-  the glass, through the one `GlassPlate.fitContent`** — called
-  by `GlassPlate.update` and by `GlassBoxHost.setFrameSize`,
-  which writes its glass directly — never trusting the glass's
-  own layout to carry it (#2426; `GlassBoxContentFitTests`). A
-  glass resized another way calls it too. It starts no motion
-  (`GlassPairMotionSeamTests` ▸ `contentFitStartsNoMotion`).
-- **Settle every box `GlassBox.place` glides, in `place` itself,
-  through its host's one landing** (`GlassBoxHost.settleAfterGlide`,
-  then `GlassBox.settle`): during an animated host move Auto
-  Layout can leave a growing glass at its old size, and the next
-  `place` then keeps it there, so a Space chip drew one switch
-  behind for good (#2425, device 2026-10-18: a window moved out of
-  the shown Space and back). The landing waits out the longest bar
-  glide on the host's `afterLanding` timer, never a transaction
-  completion, which never fires when begun inside a layout pass
-  (`BarMotion.playWalk`); only the host's latest glide settles, so
-  a superseded landing writes nothing mid-glide
-  (`GlassBoxContentFitTests` ▸ `glideLandingSettles`,
-  `supersededLandingWritesNothing`; `GlassPairMotionSeamTests` ▸
-  `settleStartsNoMotion`). This reconciles three writers of one
-  glass — `place`, the host's `setFrameSize` and the glass's own
-  layout — rather than removing them; that ownership is #2425's
-  open half.
+- **A hosted glass's frame has one writer, its host's
+  `GlassBoxHost.setFrameSize` (#2878)**, which lays every pair
+  view, never a rider, to the host's bounds exactly on every size
+  the host takes, and fits the glass's content through the one
+  `GlassPlate.fitContent` beside it. A box resizes only by
+  resizing its host: `GlassBox.place` rounds the glass and moves
+  the host and writes no glass frame, and nothing mints a glass
+  with an autoresizing mask, so the layout engine never derives it
+  from the host (`GlassBoxOwnershipTests`,
+  `GlassPairMotionSeamTests` ▸ `hostIsTheOneWriter`,
+  `hostLayoutStartsNoMotion`, `ShelfPlateGlassHostTests` ▸
+  `hostResizeFillsThePair`). A glass resized another way fits its
+  content through `fitContent` too, which starts no motion
+  (#2426; `GlassBoxContentFitTests`, `GlassPairMotionSeamTests` ▸
+  `contentFitStartsNoMotion`).
 - **A glass surface is thinned only by a ruling, and only on its
   own view's opacity.** The drop zone's glass sits at
   `DragMarkerView.glassOpacity` so the window a drop swaps with stays

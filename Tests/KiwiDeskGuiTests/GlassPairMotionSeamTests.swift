@@ -122,24 +122,31 @@ struct GlassPairMotionSeamTests {
         }
     }
 
-    /// A box settles to its host once the run's glide has landed
-    /// (#2425): written after the motion, its body starts none.
-    @Test("a box's settle starts no motion")
-    func settleStartsNoMotion() throws {
-        let declaration = "static func settle("
+    /// A hosted glass has one frame writer, its host's
+    /// `setFrameSize` (#2878): no other frame write in GlassBox.swift
+    /// and no autoresizing mask that lets the layout engine derive
+    /// the glass from the host.
+    @Test("the host is a box glass's one frame writer")
+    func hostIsTheOneWriter() throws {
         let source = try SourceScan.strippedSource(
             at: Self.bar.appendingPathComponent("GlassBox.swift")
         )
-        let body = try #require(
-            SourceScan.declarationBody(after: declaration, in: source),
-            "\(declaration) is gone from GlassBox.swift"
-        )
-        #expect(body.contains("glass.frame = host.bounds"), "\(body)")
-        for spelling in Self.motionStarts {
-            #expect(
-                !body.contains(spelling),
-                "a box's settle starts motion: \(spelling)"
+        let host = try #require(
+            SourceScan.declarationBody(
+                after: "override func setFrameSize(",
+                in: source
             )
-        }
+        )
+        #expect(host.occurrences(of: ".frame =") == 1, "\(host)")
+        #expect(source.occurrences(of: ".frame =") == 1)
+        let masks = source.components(separatedBy: "\n")
+            .filter { $0.contains("autoresizingMask") }
+        try #require(!masks.isEmpty)
+        #expect(
+            !masks.contains {
+                $0.contains(".width") || $0.contains(".height")
+            },
+            "\(masks)"
+        )
     }
 }
