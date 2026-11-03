@@ -174,7 +174,10 @@ bite large test PRs:
     `makeTestCore` factory and its `NoopHotkeyRegistrar` (#565),
     one copy per test target since test targets cannot see each
     other; `MachineTouchTests` pins the twins identical and pins
-    every `KiwiCore(` in the test trees to them.
+    every `KiwiCore(` in the test trees to them. A file split from
+    the factory at the §2.1 ceiling is the same admission, twinned
+    alike; `MachineTouchTests` ▸ `testCoreTwins`' argument list is
+    the register of those files.
     It clears the statelessness bar (a per-instance id counter, no
     assertions, no setup/teardown coupling), but it is admitted on
     a **second, distinct ground** from the four above. Their risk

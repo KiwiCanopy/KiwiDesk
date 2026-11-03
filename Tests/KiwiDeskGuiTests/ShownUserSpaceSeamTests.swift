@@ -142,9 +142,14 @@ struct ShownUserSpaceSeamTests {
                 "\(twin)"
             )
             // The filed half: the reading every verdict is filed
-            // from answers the fixture's topology alone.
+            // from answers no reading unless a suite states a
+            // topology override.
             #expect(
-                source.contains("core.desktopMemory.readDesktops = {"),
+                source.contains(
+                    "core.desktopMemory.readDesktops = {\n"
+                        + "        statesNoTopology\n"
+                        + "            ? DesktopSnapshot("
+                ),
                 "\(twin)"
             )
             let factory = try SourceScan.strippedSource(
@@ -152,15 +157,16 @@ struct ShownUserSpaceSeamTests {
             )
             #expect(factory.contains("pinDesktopReads(core)"), "\(twin)")
         }
-        // The stamped reading every filing takes goes through it.
+        // Core reads the Desktops through the seam alone: its
+        // default is the one live read left.
         #expect(
-            try sites(of: "desktopMemory.readDesktops()")
-                == ["KiwiCore+DesktopIdentity.swift": 1]
+            try sites(of: "NativeSpaces.desktopSnapshot")
+                == ["DesktopMemory.swift": 1]
         )
         #expect(
-            try sites(of: "NativeSpaces.desktopSnapshot()")[
+            try sites(of: "desktopMemory.readDesktops()")[
                 "KiwiCore+DesktopIdentity.swift"
-            ] == nil
+            ] == 1
         )
     }
 

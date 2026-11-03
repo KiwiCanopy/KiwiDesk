@@ -55,7 +55,7 @@ extension KiwiCore {
     /// The full menu of `windows` at `anchor` — VoiceOver's press
     /// and the peek's "N more" (#1946) — its rows the one bar-row
     /// pick a peek row takes.
-    func presentBarWindowMenu(
+    private func presentBarWindowMenu(
         _ windows: [WindowID],
         kind: SpaceBarGlyphPick.Kind,
         space: SpaceID?,

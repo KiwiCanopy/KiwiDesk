@@ -1,31 +1,30 @@
 import AppKit
 
 /// The peek's menu tracking (#1946, #761): any menu opening closes
-/// it, and the window a bar menu opens on holds its shelf while the
-/// menu tracks. Split from `BarPeek.swift` at the 350-line ceiling.
-extension BarPeek {
-    /// Whether the menu tracking now opened on `window` — what holds
-    /// a hiding shelf the menu belongs to (#761).
-    func menuTracks(on window: NSWindow) -> Bool {
-        var tracking = menusTracking > 0
-        #if DEBUG
-            if let menuTrackingOverride { tracking = menuTrackingOverride }
-        #endif
-        return tracking && menuAnchor == ObjectIdentifier(window)
+/// the peek, which would otherwise stand beside it, and none opens
+/// while one tracks; the window a bar menu opens on — a right-press
+/// on a shelf panel, "N more" on the peek's anchor — holds its
+/// shelf until the menu's tracking ends. Moved only through its
+/// begin and end, which the menus' notifications balance.
+struct BarMenuTracking {
+    private var count = 0
+    /// Its identity, never the window, which the peek does not own.
+    private var anchor: ObjectIdentifier?
+
+    var isTracking: Bool { count > 0 }
+
+    func opened(on window: NSWindow) -> Bool {
+        anchor == ObjectIdentifier(window)
     }
 
-    /// A press that may open a bar menu on `window`.
-    func noteMenuAnchor(_ window: NSWindow?) {
-        menuAnchor = window.map(ObjectIdentifier.init)
+    mutating func began() { count += 1 }
+
+    mutating func ended() {
+        count = max(count - 1, 0)
+        if count == 0 { anchor = nil }
     }
 
-    func menuBegan() {
-        menusTracking += 1
-        dismiss()
-    }
-
-    func menuEnded() {
-        menusTracking = max(menusTracking - 1, 0)
-        if menusTracking == 0 { menuAnchor = nil }
+    mutating func note(_ window: NSWindow?) {
+        anchor = window.map(ObjectIdentifier.init)
     }
 }

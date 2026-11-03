@@ -10,13 +10,14 @@ func pinDesktopReads(_ core: KiwiCore) {
     // Same class, sixth time (#1146): the compositor reads behind the
     // gone classifier, the away ledger, the heal stand-down and the
     // shelf stand-down's host Space (#2937) default LIVE. Pin "no
-    // compositor", and the filed Desktop reading to the fixture's
-    // own topology: a suite that states none reads no Desktop.
+    // compositor", and the Desktop reading to no reading unless a
+    // suite states a topology override, whose unstated reads stay
+    // live (`NativeSpaces.desktopSnapshot`).
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
     core.desktopMemory.readOffShown = { _ in false }
     core.desktopMemory.liveSpaceIsUser = { _ in true }
     core.desktopMemory.readDesktops = {
-        NativeSpaces.spacesOverride == nil
+        statesNoTopology
             ? DesktopSnapshot(
                 authority: nil,
                 mainUUID: nil,
@@ -39,4 +40,13 @@ func pinDesktopReads(_ core: KiwiCore) {
     // stamping suite takes the live writer back explicitly, with
     // the bridge itself faked.
     core.desktopMemory.writeStamp = { _, _ in false }
+}
+
+/// Whether a suite states none of the topology overrides the live
+/// Desktop reading takes, so `pinDesktopReads` hands it no reading.
+private var statesNoTopology: Bool {
+    NativeSpaces.spacesOverride == nil
+        && NativeSpaces.activeSpaceIDOverride == nil
+        && NativeSpaces.activeDesktopNumberOverride == nil
+        && NativeSpaces.mainDisplayUUIDOverride == nil
 }

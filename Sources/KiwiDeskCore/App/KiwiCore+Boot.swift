@@ -194,7 +194,7 @@ extension KiwiCore {
         drainDeferredBootApps()
         crossLegacyShortcutOffer()  // #2324
         topUpDesktopShortcuts(
-            desktops: NativeSpaces.desktopSnapshot().userDesktops
+            desktops: desktopMemory.readDesktops().userDesktops
         )
         topUpGenerationShortcuts()  // #2211
         followSyncFolder(sync.storedFolder())  // #2324

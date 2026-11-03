@@ -162,7 +162,7 @@ extension KiwiCore {
         // here and the boot scan's first `.displaysChanged` is
         // the door that loads it (#1394,
         // `DesktopBindingFitTests` ▸ `bootDisplayEventFiresIt`).
-        applyDesktopBinding(in: NativeSpaces.desktopSnapshot())
+        applyDesktopBinding(in: desktopMemory.readDesktops())
         defersWindowRuleReconcile = false
         // The rule owner/profile just changed: re-sync every app
         // once against the FINAL effective rules. Without this,
