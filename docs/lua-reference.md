@@ -5240,9 +5240,12 @@ Settings Save of the rules or a quit; over the CLI or an AI app,
 
 **Expects:** nothing.
 
-**Does:** returns the live rules: `spaces` (bundle id → Space),
-`floats`, `tiles`, `ignores`, `float_automatically`, the `owner`
-of the rules (`gui` or `lua`) and the live `profile`.
+:::unreleased
+**Does:** returns the live rules: `app_rules` (bundle id →
+Space), `float_rules`, `tile_rules`, `ignore_rules`,
+`float_automatically`, the `owner` of the rules (`gui` or `lua`)
+and the live `profile`.
+:::
 
 #### app_rule.set_space / app_rule.remove_space
 
@@ -8181,23 +8184,24 @@ end
 **Expects:** optionally a window id from `get_state`'s `windows`;
 the focused window otherwise.
 
+:::unreleased
 **Does:** returns why the window floats or tiles: `id`, `app`,
 `bundle_id`, `space_id`, `mode`, `floating` (its own float flag,
 as `get_state` has it), `float`, `app_rule`, `sticky` (`none`,
 `global` or `display`), `fullscreen`, `presenting` and `focused`.
-`float` holds `floats` (whether it floats, a floating-layout Space
-included — for a sticky window, the Space it is drawn on), `cause` (`detection`, `user`, `space_mode` or `nil`) and
+`float` holds `effective_float` (whether it floats: its own flag
+or a floating-layout Space — for a sticky window, the Space it is
+drawn on), `cause` (`detection`, `user`, `space_mode` or `nil`) and
 `detection` (`reason` — `rule`, `panel`, `accessory_app` or
 `fixed_size` — `is_guess`, and `escapes`, what would let it tile:
 `set_float_automatically`, `app_rule.remove_float`, or `tile_rule`,
 a Tile rule only Settings, Lua or a profile writes). `app_rule`
-holds the app's Space rule (`space`), its float rules (`floats`),
-whether it has a Tile rule (`tile_rule`) and
+holds the app's Space rule (`space`), its float rules
+(`float_rules`), whether it has a Tile rule (`tile_rule`) and
 `float_automatically`. `space_id`, `mode` and `app_rule` are `nil`
 where the window has none. Any other id is refused, an away
 window's included; ask `explain_app` instead.
 
-:::unreleased
 The answer also carries `title`, the window's title as `get_state`
 has it.
 :::
@@ -8304,11 +8308,14 @@ end)
 **Expects:** optionally a Space id; every tracked window otherwise.
 An unknown Space is refused.
 
+:::unreleased
 **Does:** returns where each window sits, one entry per window, in
 Space order: `id` (as `get_state` has it), `space_id`, `display`
 (the `list_monitors` id of the screen it draws on), `shown`,
-`frame` (`x`, `y`, `width`, `height`), `visibility`, `floats`,
-`focused` and `fullscreen`. `visibility` is `visible`, `hidden`,
+`frame` (`x`, `y`, `width`, `height`), `visibility`,
+`effective_float` (as
+[`explain_window`](#explain_window) has it), `focused` and
+`fullscreen`. `visibility` is `visible`, `hidden`,
 `partly` (another window covers part of it), or
 `partly_left`, `_right`, `_top` or `_bottom` (the screen's edge cuts
 it, and that side is still in view). A tile's frame is where its
@@ -8319,9 +8326,10 @@ window on a Space no screen shows, or parked out of sight, has
 `frame` `null`, and `visibility` too where no screen shows it; a
 full-screen window has no `visibility`.
 
-`list_monitors` reports each screen's `x` and `y` in the same
-coordinates, and `layout_frame`, the area its shown Space lays
-windows out in.
+`list_monitors` reports each screen's `frame` (`x`, `y`, `width`,
+`height`) in the same coordinates, and `layout_frame`, the area
+its shown Space lays windows out in.
+:::
 
 Each entry also carries `app`, `pid`, `index` (the window's
 place in its Space's row, from 1; `null` for a window no Space

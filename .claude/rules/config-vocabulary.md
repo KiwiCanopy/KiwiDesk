@@ -15,6 +15,8 @@ paths:
   - "Sources/KiwiDeskCore/Appearance/**"
   - "Sources/KiwiDeskCore/Models/**"
   - "Sources/KiwiDeskCore/Animation/**"
+  # The event payloads' keys are authored here (#2963).
+  - "Sources/KiwiDeskCore/App/KiwiCore+Emitters.swift"
   - "Sources/KiwiDesk/Settings/**"
   # The space/Desktop rule below governs COPY, which is authored
   # in none of the dirs above — #768 swept eleven catalogs, four
@@ -61,6 +63,18 @@ vocabulary spans Lua and profile JSON:
   synonyms or plurals.
 - When adding a setting, pick the Lua name first and derive the
   JSON key via `CodingKeys`. `SettingsCodingTests` pins this shape.
+- **A query reply or event key names one concept, and a concept
+  takes one key (#2963).** Put a new reply field in the reply whose
+  job owns it, name a derived verdict apart from the stored fact it
+  reads (`effective_float` beside `floating`), and name a rule list
+  after the Lua global it mirrors. A rename takes no alias, no
+  dual-emit and no `ConfigMigration` — a reply is no stored value —
+  and a retired key joins `ReplyKeyVocabularyTests`' `retired`,
+  which also holds one value kind per key across Core. The "wire
+  is exempt" clauses below freeze the screen and Space nouns in
+  existing wire names; they do not exempt a new reply key from
+  this rule. The argument is `docs/design-decisions.md` ▸ *Each
+  query reply owns its fields, and a concept has one key*.
 
 ## Noun glossary (R6/#406)
 
