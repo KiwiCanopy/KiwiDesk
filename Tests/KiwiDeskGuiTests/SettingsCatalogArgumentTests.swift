@@ -231,8 +231,9 @@ struct SettingsCatalogArgumentTests {
         // 131 #2389, 132 #2497, 134 #2524, 141 #2507, 144 #2601. 142 #2593.
         // 144 #2655 macOS Desktops, 148 #2654 Hyper key and layers,
         // 149 #2676 Animate float, 152 #2680 the Pocket card, its
-        // Edge and Position rows, 153 #2678 its Holds row.
-        #expect(direct.values.reduce(0, +) == 153)
+        // Edge and Position rows, 153 #2678 its Holds row, 154
+        // #2941 its add row.
+        #expect(direct.values.reduce(0, +) == 154)
         // One parameterized layout-mode mount, not six literal
         // ones: turn 10's strip mounts the SELECTED layout's card
         // and nothing else, so the six anchor ids come from

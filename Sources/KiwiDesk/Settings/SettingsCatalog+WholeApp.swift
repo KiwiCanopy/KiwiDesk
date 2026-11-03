@@ -124,6 +124,12 @@ struct ShortcutsControls: Sendable {
         "Pocket"
     )
     let pocketCapacity = SettingsControl("pocket.capacity", "Holds")
+    /// Its add row, where an empty Pocket's row of the same words
+    /// lands (#2941).
+    let pocketAppAdd = SettingsControl(
+        "shortcuts.pocket_app.add",
+        "Give an app its own Pocket key…"
+    )
     let openApplications = SettingsControl(
         "shortcuts.section.open_applications",
         "Open applications"

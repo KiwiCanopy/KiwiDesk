@@ -49,6 +49,26 @@ struct BarMenuLandingTests {
         )
     }
 
+    /// An empty Pocket's two rows (#2941 ▸ 3): its card, and the
+    /// card's "Add an app" row, as the search lands.
+    @Test("the Pocket landings name the card and its add row")
+    func pocketLandings() {
+        #expect(
+            SettingsAnchor(landing: .pocketShortcuts)
+                == SettingsAnchor(
+                    destination: .shortcuts,
+                    anchor: SettingsCatalog.shortcuts.pocketKeys.id
+                )
+        )
+        #expect(
+            SettingsAnchor(landing: .pocketKeys)
+                == SettingsAnchor(
+                    destination: .shortcuts,
+                    anchor: SettingsCatalog.shortcuts.pocketAppAdd.id
+                )
+        )
+    }
+
     /// A Space's card is a surface of Spaces alone: the reveal
     /// keeps it there and nowhere else.
     @Test("a Space landing opens that Space's card on Spaces")

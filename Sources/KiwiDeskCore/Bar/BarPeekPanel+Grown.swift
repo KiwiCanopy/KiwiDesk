@@ -68,5 +68,6 @@ extension BarPeekPanel {
             in: list,
             anchor: nil
         )
+        if content.empty != nil { body.focusEmptyInfo() }
     }
 }

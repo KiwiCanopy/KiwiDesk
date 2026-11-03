@@ -23,6 +23,9 @@ extension KiwiCore {
         peek.pick = { [weak self] id, space in
             self?.fromSpaceBar { self?.pickBarRow(id, on: space) }
         }
+        peek.land = { [weak self] landing in
+            self?.barMenuHooks.openSettings(landing)
+        }
         peek.openMenu = { [weak self] source, space, anchor in
             self?.presentBarWindowMenu(
                 source.windows,
@@ -43,7 +46,11 @@ extension KiwiCore {
         on space: SpaceID?
     ) -> BarPeekContent? {
         let rows = barWindowRows(source.windows)
-        guard !rows.isEmpty else { return nil }
+        guard !rows.isEmpty else {
+            // An empty Pocket explains itself (#2941).
+            return source.keysPocketWindows
+                ? BarPeekContent(empty: pocketEmptyState()) : nil
+        }
         let focus = barFocus(on: space)
         guard source.keysPocketWindows else {
             return BarPeekContent(

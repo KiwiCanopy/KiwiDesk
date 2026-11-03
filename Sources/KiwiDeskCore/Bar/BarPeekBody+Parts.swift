@@ -9,7 +9,15 @@ extension BarPeekBody {
         _ font: NSFont,
         _ color: NSColor
     ) -> NSTextField {
-        let field = NSTextField(wrappingLabelWithString: text)
+        style(NSTextField(wrappingLabelWithString: text), font, color)
+    }
+
+    /// Gives `field` a label's font, ink and wrapping.
+    static func style<Field: NSTextField>(
+        _ field: Field,
+        _ font: NSFont,
+        _ color: NSColor
+    ) -> Field {
         field.font = font
         field.textColor = color
         field.lineBreakMode = .byWordWrapping

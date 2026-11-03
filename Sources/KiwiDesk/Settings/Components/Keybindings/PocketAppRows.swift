@@ -99,6 +99,7 @@ struct PocketAppRows: View {
                 exclude: Set(KeybindingCatalog.pocketApps(in: bindings))
             )
             .fixedSize()
+            .searchAnchored(SettingsCatalog.shortcuts.pocketAppAdd)
             .accessibilityLabel(Self.addLabel)
             .accessibilityValue(
                 L("shortcuts.choose_app", "Choose app…")
@@ -177,7 +178,7 @@ struct PocketAppRows: View {
     }
 
     static var addLabel: String {
-        L("shortcuts.pocket_app.add", "Add an app to your Pocket…")
+        SettingsCatalog.shortcuts.pocketAppAdd.text
     }
 
     static var help: String {

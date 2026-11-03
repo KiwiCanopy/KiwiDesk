@@ -1184,7 +1184,10 @@ Obligations:
   the mouse but is non-activating and key only for a grown list
   (below), and hidden from
   accessibility (`BarPeekTests` ▸
-  `panelTakesClicksWithoutActivating`). The argument is
+  `panelTakesClicksWithoutActivating`) — save an empty Pocket's
+  state, which no menu twins, so it speaks: its text one element,
+  each row a button landing through the peek's one `land` door on
+  a `SettingsLanding` (#2941, `PocketEmptyPeekTests`). The argument is
   `docs/design-decisions.md` ▸ A bar item's hover peek.
 - **A list peek marks the focused window's row with a check**
   (#2063), read through `barFocus(on:)` (below), in

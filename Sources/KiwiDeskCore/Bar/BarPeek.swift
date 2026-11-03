@@ -26,6 +26,9 @@ final class BarPeek {
         _,
         _ in
     }
+    /// An empty Pocket's Settings row pressed (#2941): Core's
+    /// landing door.
+    var land: @MainActor (SettingsLanding) -> Void = { _ in }
     /// The stored shelf the bar panel `window` draws, which the
     /// peek wears — `ShelfManager`'s; its render gates it.
     var shelf: @MainActor (NSWindow) -> KiwiShelf? = { _ in nil }
@@ -307,7 +310,7 @@ final class BarPeek {
         guard let view = anchor.view, let window = view.window,
             let frame = Self.screenFrame(of: view),
             let content = content(anchor.source, anchor.space),
-            !content.groups.isEmpty,
+            !content.hasNothingToShow,
             let shelf = shelf(window)
         else {
             if was != nil { panel.hide(animated: false) }

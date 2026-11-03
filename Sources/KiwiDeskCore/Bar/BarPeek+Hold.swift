@@ -107,11 +107,20 @@ extension BarPeek {
         openMenu(shown.source, shown.space, view)
     }
 
+    /// An empty Pocket's Settings row: the peek closes and Core
+    /// opens Settings there (#2941).
+    func landed(_ landing: SettingsLanding) {
+        guard shown != nil else { return }
+        dismiss()
+        land(landing)
+    }
+
     /// The panel, its body's buttons wired to this peek.
     func wiredPanel() -> BarPeekPanel {
         let made = BarPeekPanel()
         made.body.onPick = { [weak self] in self?.picked($0) }
         made.body.onMore = { [weak self] in self?.openedMore() }
+        made.body.onLand = { [weak self] in self?.landed($0) }
         made.body.onPointerInside = { [weak self] in
             self?.bodyReported(inside: $0)
         }

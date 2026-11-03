@@ -31,9 +31,10 @@ struct BindingNameDoorTests {
                 + "binding's label is read (#2737)"
         ),
         "ShortcutsOpenBinding.swift": (
-            1,
-            "SidedChordWords.label, a Pocket key's spoken chord — "
-                + "no binding's label is read (#2612)"
+            2,
+            "SidedChordWords.label, a Pocket key's and an app's "
+                + "Pocket key's spoken chord — no binding's label is "
+                + "read (#2612, #2941)"
         ),
         "KeybindingAppGroup+Row.swift": (
             2,

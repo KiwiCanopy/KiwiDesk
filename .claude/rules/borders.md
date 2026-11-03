@@ -478,7 +478,14 @@ header, through `BarPeekSource.keysPocketWindows`
 (`PocketListKeyedTests`). **VoiceOver's press on the plate opens
 that menu, never the peek**, which is hidden from accessibility:
 the plate's `onPress` takes the peek's one `openMenu` door, never
-the click's list (#2936, `PocketPlateVoiceOverTests`). **As a drop
+the click's list (#2936, `PocketPlateVoiceOverTests`) — save an
+empty pocket, whose press and click both grow the empty state,
+the one peek body that speaks (#2941, `PocketEmptyPlateTests`).
+**An empty pocket's content is `pocketEmptyState`, read when the
+peek shows**: each chord through the one `pocketVerbChord` hook,
+never `menuChord`, a line only while its key is bound, and `pocket`'s
+line worded on the one `pocketPutBackNext` its verb steps by
+(`PocketEmptyPeekTests`). **As a drop
 target it acts through `pocket` naming the window and lights on the
 one `pocketNamedRefusal`**, the bar menus' Pocket Window door, so
 the light and the drop never disagree, and it takes a drop only where it is lit — a refused

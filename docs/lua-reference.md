@@ -5772,7 +5772,7 @@ the key works again when you switch back. Closing the window or
 quitting the app frees the key, and the next call opens a fresh
 window. If the app is hidden, the call shows it again. Settings ▸
 Shortcuts & Gestures ▸ Pocket writes this shortcut: one row per
-app, added with **Add an app to your Pocket…**.
+app, added with **Give an app its own Pocket key…**.
 
 Called with no such shortcut — from the CLI, say — the window it
 opens is an ordinary pocket window, counted like any other: under

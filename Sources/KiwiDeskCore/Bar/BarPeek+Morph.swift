@@ -38,7 +38,7 @@ extension BarPeek {
         guard let anchor = shown, let frame = anchor.frame,
             let window = anchor.view?.window,
             let content = content(anchor.source, anchor.space),
-            !content.groups.isEmpty, content != panel.drawn,
+            !content.hasNothingToShow, content != panel.drawn,
             let shelf = shelf(window)
         else { return }
         showPanel(

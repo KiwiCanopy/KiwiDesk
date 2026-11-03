@@ -27,8 +27,12 @@ final class BarPeekPanel {
     /// The fade-out in flight; its landing orders the panel out
     /// unless a show cleared it meanwhile.
     var leaving: UUID?
-    /// What the panel shows; nil while it is closed.
-    var drawn: BarPeekContent?
+    /// What the panel shows; nil while it is closed. Every show
+    /// writes it, so the panel speaks for an empty Pocket's state
+    /// alone and stays hidden for every other peek (#2941).
+    var drawn: BarPeekContent? {
+        didSet { panel?.setAccessibilityElement(drawn?.empty != nil) }
+    }
     /// The list grown out of an anchor that shows, or is closing
     /// back into it (#2563); nil for every other peek.
     var morph: Morph?

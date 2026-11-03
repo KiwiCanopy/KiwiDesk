@@ -73,6 +73,8 @@ final class BarPeekBody: NSView {
     /// drew (#2923).
     var sectionHeader: NSTextField?
     var chords: [NSTextField] = []
+    /// An empty Pocket's header, which speaks its lines (#2941).
+    var emptyInfo: NSTextField?
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
     /// The buttons the last build laid out, top to bottom, and the
@@ -87,6 +89,8 @@ final class BarPeekBody: NSView {
     /// A row's window picked, or "N more" pressed — the peek's.
     var onPick: @MainActor (WindowID) -> Void = { _ in }
     var onMore: @MainActor () -> Void = {}
+    /// An empty Pocket's Settings row pressed (#2941).
+    var onLand: @MainActor (SettingsLanding) -> Void = { _ in }
     /// The pointer entered (true) or left the body — its own
     /// tracking, so a held peek polls only the gap (#1946).
     var onPointerInside: @MainActor (Bool) -> Void = { _ in }
@@ -109,9 +113,13 @@ final class BarPeekBody: NSView {
         check = nil
         sectionHeader = nil
         chords = []
+        emptyInfo = nil
         resetTargets(shelf)
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
+        if let empty = content.empty {
+            return layout(empty, shelf: shelf)
+        }
         let ink = NSColor(kiwiHex: shelf.itemColor)
         let headerInk = NSColor(kiwiHex: shelf.peekHeaderColor)
         let textFont = shelf.textFont(ofSize: Metrics.textSize)
