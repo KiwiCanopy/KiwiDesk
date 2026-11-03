@@ -25,7 +25,7 @@ public struct RunSize: Sendable, Equatable, Codable {
     }
 }
 
-extension [WindowID: RunSize] {
+extension Dictionary where Key == WindowID, Value == RunSize {
     /// The entry under `old` moved to `new` — the re-key and the
     /// trade both take it.
     mutating func rename(_ old: WindowID, to new: WindowID) {
