@@ -25,7 +25,9 @@ editing here:
   firing, Return on an arrow-picked row, is the row's (#2869). The
   bar menus and the status item read it through an injected
   keyDown defaulting to `KeyCombo.menuKeyDown`, never a check of
-  their own (`BarMenuChordTests`, `QuickMenuHubRowTests`).
+  their own (`CarbonTwinSeamTests` ▸ `callersAreNamed`, whose
+  map a new caller joins; `BarMenuChordTests`,
+  `QuickMenuHubRowTests` ▸ `hubRowOpens` for the behaviour).
 - **The running hotkey table is written only from saved files.**
   A new writer — a caller of `applyStructuredKeybindings`, of
   `KeybindingManager.replaceLayers`, or of `keys.bind` /
