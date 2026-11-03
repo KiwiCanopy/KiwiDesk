@@ -37,14 +37,18 @@ struct PlateGroundWiringTests {
     /// The one file that names the dark plate token.
     private let resolver = "HomeCardPlate+Ground.swift"
 
-    private func sources() throws -> [(String, String)] {
+    /// Each scanned file, comments stripped and whitespace squashed;
+    /// `spaced` keeps the whitespace, which a declaration read needs.
+    private func sources(spaced: Bool = false) throws -> [(String, String)] {
         try ChromeScanRoots.sources(from: #filePath).map {
-            (
+            let source = SourceScan.stripComments(
+                try String(contentsOf: $0, encoding: .utf8)
+            )
+            return (
                 $0.lastPathComponent,
-                SourceScan.stripComments(
-                    try String(contentsOf: $0, encoding: .utf8)
-                )
-                .split(whereSeparator: \.isWhitespace).joined()
+                spaced
+                    ? source
+                    : source.split(whereSeparator: \.isWhitespace).joined()
             )
         }
     }
@@ -94,7 +98,11 @@ struct PlateGroundWiringTests {
         // with no plate at all.
         let reader = try Regex(
             "@Environment\\(\\\\(?:EnvironmentValues)?\\.schematicPalette\\)"
-                + "(?:private|fileprivate)?var(\\w+):"
+                + "\\s*(?:(?:private|fileprivate)\\s+)?var\\s+(\\w+)"
+        )
+        let spaced = Dictionary(
+            try sources(spaced: true),
+            uniquingKeysWith: { first, _ in first }
         )
         func brandMode(_ file: String) -> Bool {
             file.hasPrefix("LayoutSchematic")
@@ -107,10 +115,10 @@ struct PlateGroundWiringTests {
         var named = 0
         for (file, source) in all where !brandMode(file) {
             scanned += 1
-            let names = source.matches(of: reader).compactMap {
+            let names = (spaced[file] ?? "").matches(of: reader).compactMap {
                 $0.output[1].substring.map(String.init)
             }
-            named += names.count
+            named += names.filter { $0 == "palette" }.count
             for name in Set(names + ["palette"]) {
                 let picked = try Regex(name + "\\?\\.\\w+\\?\\?")
                 guard source.contains(picked) else { continue }
