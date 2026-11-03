@@ -99,6 +99,49 @@ struct ShownUserSpaceSeamTests {
         )
     }
 
+    /// The stand-down's live read goes through the one seam both test
+    /// cores pin (#2937): a host's own full-screen Space stood the
+    /// pocket suites down on the owner's Mac.
+    @Test("the stand-down's live Space read is a pinned seam")
+    func liveReadIsPinned() throws {
+        let covering = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "App/KiwiCore+ScreenCovering.swift"
+            )
+        )
+        let standDown = try #require(
+            SourceScan.declarationBody(
+                after: "func shelfStandsDown(on display: DisplayID)",
+                in: covering
+            )
+        )
+        #expect(
+            standDown.occurrences(of: "live: desktopMemory.liveSpaceIsUser")
+                == 1
+        )
+        #expect(
+            try sites(of: "NativeSpaces.currentSpaceIsUser(")
+                == ["KiwiCore+ScreenCovering.swift": 1]
+        )
+        #expect(
+            try sites(of: "NativeSpaces.liveSpaceIsUser")
+                == ["DesktopMemory.swift": 1]
+        )
+        let tests = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Tests")
+        for twin in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
+            let source = try SourceScan.strippedSource(
+                at: tests.appendingPathComponent("\(twin)/TestCore.swift")
+            )
+            #expect(
+                source.contains(
+                    "core.desktopMemory.liveSpaceIsUser = { _ in true }"
+                ),
+                "\(twin)"
+            )
+        }
+    }
+
     @Test("only the reading and a display change write the verdict")
     func writersAreRuled() throws {
         #expect(
