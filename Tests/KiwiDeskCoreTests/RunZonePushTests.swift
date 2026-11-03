@@ -231,6 +231,23 @@ struct RunZonePushTests {
         #expect(shrunk.visible == 0..<2)
     }
 
+    @Test("A grow squeezes the window taking the rest before it pushes")
+    func growSqueezesTheTaker() throws {
+        let three = RunZone(
+            members: Array(ids[0..<3]),
+            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
+            vertical: false
+        )
+        // Both hold a length, so window 2 takes the rest: it gives
+        // back down to its floor before anything leaves.
+        let sized = context(focus: 1, sizes: [1: 400, 2: 500], tails: [2])
+        let press = try #require(
+            three.press(ids[0], by: 100, toward: .end, in: sized)
+        )
+        #expect(press.visible == 0..<2)
+        #expect(!press.movesRun)
+    }
+
     @Test("A window holding no length never pulls, even with room")
     func unsizedShrinkPullsNothing() throws {
         // The run rests pinned at two windows where three would fit:
