@@ -88,7 +88,8 @@ extension KiwiCore {
     func shelfStandsDown(on display: DisplayID) -> Bool {
         !NativeSpaces.currentSpaceIsUser(
             display: display,
-            filed: desktopMemory.shownUserSpaces
+            filed: desktopMemory.shownUserSpaces,
+            live: desktopMemory.liveSpaceIsUser
         )
             || showsPresentation(on: display)
             || showsMaximized(on: display)

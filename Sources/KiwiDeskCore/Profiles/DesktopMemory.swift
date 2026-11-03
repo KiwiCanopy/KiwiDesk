@@ -177,6 +177,11 @@ final class DesktopMemory {
     var readOffShown: @MainActor ([WindowID]) -> Bool =
         NativeSpaces.anyOffShownDesktop
 
+    /// Whether a screen no Desktop reading filed shows a user
+    /// Desktop — the shelf stand-down's live read (#2937), pinned
+    /// to true by `makeTestCore`.
+    var liveSpaceIsUser: (String) -> Bool = NativeSpaces.liveSpaceIsUser
+
     /// The native Space each screen shows, filed at the HEAD of
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).

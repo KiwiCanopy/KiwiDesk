@@ -202,20 +202,23 @@ public enum NativeSpaces {
         return isUserSpace(id, in: allSpaces())
     }
 
-    /// Whether space on display is a user desktop.
+    /// Whether space on display is a user desktop; a screen no
+    /// Desktop reading filed is answered by `live` (#2937).
     public static func currentSpaceIsUser(
         display: DisplayID,
-        filed: [String: Bool]
+        filed: [String: Bool],
+        live: (String) -> Bool
     ) -> Bool {
         #if DEBUG
             if let override = currentSpaceIsUserOverride {
                 return override(display)
             }
         #endif
-        return spaceIsUser(on: displayUUID(for: display), filed: filed) {
-            guard let id = currentSpace(displayUUID: $0) else { return true }
-            return isUserSpace(id, in: allSpaces())
-        }
+        return spaceIsUser(
+            on: displayUUID(for: display),
+            filed: filed,
+            live: live
+        )
     }
 
     /// A screen's filed verdict where the last Desktop reading
