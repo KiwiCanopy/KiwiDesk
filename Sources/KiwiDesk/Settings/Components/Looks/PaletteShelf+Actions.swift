@@ -3,7 +3,8 @@ import KiwiDeskCore
 import SwiftUI
 import UniformTypeIdentifiers
 
-/// Palette shelf mutation and file action handlers (#375, `PaletteStore`).
+/// Palette shelf mutation and file action handlers (#375), each
+/// through Core's palette doors (#2875).
 extension PaletteShelf {
     /// The one re-read after a shelf mutation (#805).
     func reload() {
@@ -19,13 +20,13 @@ extension PaletteShelf {
     /// Validation evaluated on typed name string (#843).
     func canSave(_ typed: String) -> Bool {
         let name = trimmed(typed)
-        return !name.isEmpty && !store.isBuiltinName(name)
+        return !name.isEmpty && !core.isBundledPaletteName(name)
     }
 
     /// "Overwrite" when the name is an existing user palette, else
     /// "Save" — the Finder duplicate-file idiom.
     func saveLabel(_ typed: String) -> String {
-        store.hasUserPalette(trimmed(typed))
+        core.hasUserPalette(trimmed(typed))
             ? L("palettes.overwrite", "Overwrite")
             : L("palettes.save", "Save")
     }
@@ -34,7 +35,7 @@ extension PaletteShelf {
     /// nothing to say.
     func saveNotice(_ typed: String) -> String? {
         let name = trimmed(typed)
-        if store.isBuiltinName(name) {
+        if core.isBundledPaletteName(name) {
             return L(
                 "palettes.reserved",
                 "That name is a built-in palette — choose another."
@@ -43,7 +44,7 @@ extension PaletteShelf {
         let live = ColorPaletteKeys.extract(
             from: model.config.settings
         )
-        let all = store.builtins() + store.userPalettes()
+        let all = core.allPalettes
         if let matching = all.first(where: {
             $0.isApplied(matching: live)
         }) {
@@ -59,33 +60,19 @@ extension PaletteShelf {
     func saveCurrent(_ typed: String) {
         let name = trimmed(typed)
         guard canSave(name) else { return }
-        let palette = ColorPalette(
-            name: name,
-            colors: ColorPaletteKeys.extract(
-                from: model.config.settings
-            )
+        _ = try? core.savePalette(
+            named: name,
+            from: model.config.settings
         )
-        try? store.save(palette)
         saveRequest = nil
         reload()
     }
 
     /// The next free "My Palette N" for the save field's default.
     func nextUserName() -> String {
-        uniqueName(base: L("palettes.default_name", "My Palette"))
-    }
-
-    /// `base`, then `base 2`, `base 3`, … skipping every built-in
-    /// and existing user name.
-    func uniqueName(base: String) -> String {
-        guard taken(base) else { return base }
-        var n = 2
-        while taken("\(base) \(n)") { n += 1 }
-        return "\(base) \(n)"
-    }
-
-    private func taken(_ name: String) -> Bool {
-        store.isBuiltinName(name) || store.hasUserPalette(name)
+        core.freePaletteName(
+            base: L("palettes.default_name", "My Palette")
+        )
     }
 
     // MARK: - Rename / delete
@@ -95,10 +82,10 @@ extension PaletteShelf {
     /// no-op rename to the same name is fine).
     func canRename(_ typed: String, from oldName: String) -> Bool {
         let name = trimmed(typed)
-        guard !name.isEmpty, !store.isBuiltinName(name) else {
+        guard !name.isEmpty, !core.isBundledPaletteName(name) else {
             return false
         }
-        return name == oldName || !store.hasUserPalette(name)
+        return name == oldName || !core.hasUserPalette(name)
     }
 
     /// Per-tile rename binding seeded from request (#843).
@@ -119,7 +106,7 @@ extension PaletteShelf {
         guard canRename(name, from: oldName) else { return }
         // Core's door re-points the looks drawn in it (#1684); a
         // refusal leaves the popover open on the name typed.
-        if (try? model.core.renamePalette(from: oldName, to: name)) != nil {
+        if (try? core.renamePalette(from: oldName, to: name)) != nil {
             renameRequest = nil
         }
         model.refreshLooks()
@@ -129,7 +116,7 @@ extension PaletteShelf {
     /// Deletes a palette and directs focus to the neighbouring tile (#816).
     func deletePalette(_ name: String) {
         let neighbour = neighbourAfterDeleting(name)
-        try? store.delete(name)
+        try? core.deletePalette(name)
         reload()
         returningTile = neighbour
     }
@@ -149,7 +136,7 @@ extension PaletteShelf {
         panel.nameFieldStringValue = "\(palette.name).json"
         guard panel.runModal() == .OK, let url = panel.url
         else { return }
-        try? store.export(palette, to: url)
+        try? core.exportPalette(palette, to: url)
     }
 
     func importPalette() {
@@ -158,15 +145,8 @@ extension PaletteShelf {
         panel.canChooseDirectories = false
         panel.allowsMultipleSelection = false
         guard panel.runModal() == .OK, let url = panel.url,
-            let imported = try? store.importPalette(from: url)
+            (try? core.importPalette(from: url)) != nil
         else { return }
-        // Never shadow a built-in or an existing user palette on
-        // import — settle on the next free name.
-        let named = ColorPalette(
-            name: uniqueName(base: imported.name),
-            colors: imported.colors
-        )
-        try? store.save(named)
         reload()
     }
 }

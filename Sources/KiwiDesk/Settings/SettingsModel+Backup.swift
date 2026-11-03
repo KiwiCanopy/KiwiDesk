@@ -4,9 +4,6 @@ import UniformTypeIdentifiers
 
 /// Export and restore whole setup from Settings (#606).
 extension SettingsModel {
-    /// Shared palette store (`KiwiCore.paletteLibrary`).
-    var paletteStore: PaletteStore { core.paletteLibrary }
-
     /// Suggested filename with ISO date for backup exports.
     var suggestedBackupName: String {
         let formatter = DateFormatter()

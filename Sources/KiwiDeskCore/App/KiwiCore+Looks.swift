@@ -7,7 +7,8 @@ import Foundation
 /// unreadable.
 extension KiwiCore {
     /// The look library, built on demand — stateless like
-    /// `paletteLibrary`, and public for the same one-owner reason.
+    /// `paletteLibrary`, and public so the GUI reads Core's one
+    /// store rather than building its own.
     public var lookLibrary: LookStore {
         let store = LookStore(directory: configDirectory)
         store.migrationBackups = migrationBackups
@@ -20,16 +21,6 @@ extension KiwiCore {
     /// `LookCatalog.bundled` (`LookCatalogSeamTests`).
     public var bundledLooks: [ShelfLook] {
         LookCatalog.bundled(sizes: starterSizes())
-    }
-
-    /// Every palette, bundled first.
-    public var allPalettes: [ColorPalette] {
-        paletteLibrary.builtins() + paletteLibrary.userPalettes()
-    }
-
-    /// Renames a user palette; no look names one (#1752).
-    public func renamePalette(from old: String, to new: String) throws {
-        try paletteLibrary.rename(from: old, to: new)
     }
 
     /// Renames a saved look; the store refuses a bundled or taken

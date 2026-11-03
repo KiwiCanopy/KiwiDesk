@@ -15,12 +15,9 @@ extension KiwiCore {
     /// read hits the file and every write rewrites it — so
     /// building one per use costs nothing.
     ///
-    /// `public` so there is ONE owner rather than two. It was
-    /// internal at first, which left `SettingsModel` constructing
-    /// its own store over the same path — a second construction
-    /// that existed because of an access modifier rather than a
-    /// design decision (`architect-reviewer`, 2026-08-17).
-    public var paletteLibrary: PaletteStore {
+    /// Internal: the GUI reaches the library only through the
+    /// palette doors (`KiwiCore+Palettes`, `PaletteDoorSeamTests`).
+    var paletteLibrary: PaletteStore {
         let store = PaletteStore(directory: configDirectory)
         store.migrationBackups = migrationBackups
         return store

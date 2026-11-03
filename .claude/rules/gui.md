@@ -2116,6 +2116,14 @@ Desktop list included — takes the same door
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
 
+## The palette library is Core's (#2875)
+
+**A `Sources/KiwiDesk` file reads and writes palettes through
+`KiwiCore`'s palette doors (`KiwiCore+Palettes.swift`) and never
+holds a `PaletteStore`, under any name**, so an alias cannot
+write past a door; a read the GUI needs joins those doors
+(`PaletteDoorSeamTests`).
+
 ## A KiwiHub pick asks Core at the press (#2885)
 
 **Every Windows-side pick — a key, a click, a digit, a VoiceOver
