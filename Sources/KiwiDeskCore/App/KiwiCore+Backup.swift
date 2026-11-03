@@ -15,10 +15,9 @@ extension KiwiCore {
     /// read hits the file and every write rewrites it — so
     /// building one per use costs nothing.
     ///
-    /// `public` for the GUI suites' fixtures; the GUI itself reaches
-    /// the library only through the palette doors
-    /// (`KiwiCore+Palettes`, `PaletteDoorSeamTests`).
-    public var paletteLibrary: PaletteStore {
+    /// Internal: the GUI reaches the library only through the
+    /// palette doors (`KiwiCore+Palettes`, `PaletteDoorSeamTests`).
+    var paletteLibrary: PaletteStore {
         let store = PaletteStore(directory: configDirectory)
         store.migrationBackups = migrationBackups
         return store

@@ -568,14 +568,6 @@ answer do not (#1542's rank; `WhatsNewHandoffTests`,
 destination, so `stateTrailFocus` records the input source
 itself before the shell states focus (#991, #996).
 
-## The palette library is Core's (#2875)
-
-**A `Sources/KiwiDesk` file reads and writes palettes through
-`KiwiCore`'s palette doors (`KiwiCore+Palettes.swift`) and never
-names `PaletteStore` or `paletteLibrary`**, so an alias cannot
-write past a door; a read the GUI needs joins those doors
-(`PaletteDoorSeamTests`).
-
 ## Window management starts through one door (#2050)
 
 **Every path that starts window management calls
@@ -2123,6 +2115,14 @@ Desktop list included — takes the same door
 `controllerPassesTheRepeat`); the argument is
 `docs/design-decisions.md` ▸ *A KiwiHub list wraps on a fresh
 press and stops on a held key*.
+
+## The palette library is Core's (#2875)
+
+**A `Sources/KiwiDesk` file reads and writes palettes through
+`KiwiCore`'s palette doors (`KiwiCore+Palettes.swift`) and never
+holds a `PaletteStore`, under any name**, so an alias cannot
+write past a door; a read the GUI needs joins those doors
+(`PaletteDoorSeamTests`).
 
 ## A KiwiHub pick asks Core at the press (#2885)
 

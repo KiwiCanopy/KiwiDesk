@@ -1,8 +1,8 @@
 import Foundation
-import KiwiDeskCore
 import Testing
 
 @testable import KiwiDesk
+@testable import KiwiDeskCore
 
 /// The one in-memory copy of `palettes.json` (#805):
 /// `SettingsModel.userPalettes`, which the shelf draws and
