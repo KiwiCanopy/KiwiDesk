@@ -8217,16 +8217,16 @@ no escapes.
 that list ignores the app's raised windows, as it does Ghostty's
 quick terminal),
 `running` (each process's `pid`, whether KiwiDesk `observed` it,
-its `policy` and whether it is `hidden`), `windows` (tracked
-ids), `minimized` (ids), `away` (each `id` with its `space_id`)
-and `app_rule`, as `explain_window` has it. An app nothing knows
+its `policy` and whether it is `hidden`), `windows` (the tracked
+windows), `minimized`, `away` (each with its `space_id`) and
+`app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
 
 :::unreleased
-`windows` and `minimized` list each window as `{id, title}`, and
-each `away` entry carries `title` too. A minimized or away window's
-title is the one it had when it left; a window found away at start
-has none (`""`).
+Each entry of `windows`, `minimized` and `away` is the window's
+`id` and `title`; a minimized or away window's title is the one it
+had when it left, and a window found away at start has none
+(`""`).
 :::
 
 ### get_config_status
