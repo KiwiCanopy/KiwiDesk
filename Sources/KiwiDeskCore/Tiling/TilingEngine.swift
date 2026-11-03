@@ -132,8 +132,11 @@ public final class TilingEngine {
     /// by the layout on every retile.
     var stashedFrames: [WindowID: CGRect] = [:]
     /// The capture `restoreStashed` last SENT per window: only a
-    /// sent capture may be delivered at its origin alone (#2129).
-    var stashSent: [WindowID: CGRect] = [:]
+    /// sent capture may be delivered at its origin alone (#2129),
+    /// and its answers away from that origin are counted (#2881).
+    var stashSent: [WindowID: StashSend] = [:]
+    /// The engine's log seam, wired in `KiwiCore+Bootstrap`.
+    var onLog: @MainActor (String) -> Void = CoreLog.write
 
     /// Which Spaces' parks a re-issuing pass forces (#1508).
     var stashDepartures = StashDepartures()

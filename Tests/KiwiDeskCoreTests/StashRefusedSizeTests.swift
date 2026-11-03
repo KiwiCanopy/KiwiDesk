@@ -74,20 +74,64 @@ struct StashRefusedSizeTests {
         #expect(record?.frame == real)
     }
 
-    /// The control: an answer away from the asked origin is a set
-    /// that did not land, and the capture keeps re-sending it.
+    /// An answer away from the asked origin is a set that did not
+    /// land: sent once more, then the window's own frame is kept
+    /// (#2881) — two sends, matching #677's "twice".
     @Test(
-        "a set that never landed is sent again",
+        "a refused origin is sent twice, then consumed",
         arguments: [CGVector(dx: 0, dy: 40), CGVector(dx: 40, dy: 0)]
     )
     func lostSetRetries(_ offset: CGVector) throws {
         let (core, asked) = try followed()
+        let seen = Seen()
+        watch(core, asked, into: seen)
         let elsewhere = asked.offsetBy(dx: offset.dx, dy: offset.dy)
         core.handle(.windowMoved(window, elsewhere))
         // An echo inside the grace is ours: the capture stands.
         core.retile(pass: .apply)
         #expect(core.tiler.stashOriginal(window) == asked)
-        #expect(core.tiler.recentInstantTarget(window) == asked)
+        #expect(seen.sends == 1)
+        core.handle(.windowMoved(window, elsewhere))
+        core.retile(pass: .apply)
+        core.retile(pass: .apply)
+        #expect(core.tiler.stashOriginal(window) == nil)
+        #expect(seen.sends == 1)
+        #expect(seen.lines.contains { $0.contains("\(window) refused") })
+    }
+
+    /// The control: a state frame still at a stash corner is no
+    /// answer (#412, #1352), so the capture keeps re-sending.
+    @Test("a frame at the corner keeps re-sending")
+    func cornerIsNoAnswer() throws {
+        let (core, asked) = try followed()
+        let seen = Seen()
+        watch(core, asked, into: seen)
+        let corner = TilingEngine.stashFrame(
+            asked,
+            in: screen,
+            corner: .bottomRight
+        )
+        for _ in 1...3 {
+            core.handle(.windowMoved(window, corner))
+            core.retile(pass: .apply)
+        }
+        #expect(core.tiler.stashOriginal(window) == asked)
+        #expect(seen.sends == 3)
+        #expect(seen.lines.isEmpty)
+    }
+
+    /// What the restore sent the window, and the engine's lines.
+    private final class Seen {
+        var sends = 0
+        var lines: [String] = []
+    }
+
+    private func watch(_ core: KiwiCore, _ asked: CGRect, into seen: Seen) {
+        let window = self.window
+        core.tiler.applier.issued = { id, frame in
+            if id == window, frame == asked { seen.sends += 1 }
+        }
+        core.tiler.onLog = { seen.lines.append($0) }
     }
 
     /// A capture never sent is not delivered by an origin match:

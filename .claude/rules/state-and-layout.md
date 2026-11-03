@@ -2369,7 +2369,13 @@ editing here:
   refuse the size, and a capture held for it re-sends on every
   retile. A capture not yet sent is delivered only by the whole
   frame, through the one `stashSent` record
-  (`StashRefusedSizeTests`).
+  (`StashRefusedSizeTests`). **A refused ORIGIN is sent twice,
+  then consumed** where the window answered, with a log line
+  naming the window and both origins (#2881): a new restore arm
+  counts its answers in that record, never a re-send per retile,
+  and a frame at a stash corner (`looksStashed`) is never an
+  answer (`StashRefusedSizeTests` ▸ `lostSetRetries`,
+  `cornerIsNoAnswer`).
 - **A space entering floating mode gathers by REACHABILITY
   (#1177), and an entry is a change in what was DRAWN.** A
   floating layout assigns nothing, so the switch inherits the
