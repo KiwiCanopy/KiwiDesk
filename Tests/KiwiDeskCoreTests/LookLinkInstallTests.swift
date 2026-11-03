@@ -75,10 +75,11 @@ struct LookLinkInstallTests {
     func heldLookAnswers() throws {
         let core = try KeepFixture.core()
         #expect(core.heldGalleryLook(for: link) == nil)
-        var copy = try LookStore.importLook(data: file(named: "Copy"))
-        copy.galleryID = "dusk"
-        try core.lookLibrary.save(copy)
-        try core.installGalleryLook(file(), from: link, fallbackName: "x")
+        for name in ["Copy", "Copy 2"] {
+            var copy = try LookStore.importLook(data: file(named: name))
+            copy.galleryID = "dusk"
+            try core.lookLibrary.save(copy)
+        }
         #expect(core.heldGalleryLook(for: link)?.name == "Copy")
     }
 
