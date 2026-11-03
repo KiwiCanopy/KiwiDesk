@@ -32,6 +32,12 @@ extension KiwiCore {
         else { return .fail("the focused window is alone in its run") }
         let member = zone.members[mate]
         let step = CGFloat(delta)
+        // The window draws what its mates leave, so a length of its
+        // own would only come back wrong once it stops taking the
+        // rest.
+        state.workspaces.withSpace(space.id) {
+            $0.runSizes[focused] = nil
+        }
         if step < 0 {
             // The mate takes back what the window gives, down to the
             // window's own floor.

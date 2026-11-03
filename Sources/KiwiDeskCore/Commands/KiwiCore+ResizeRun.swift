@@ -271,7 +271,9 @@ extension KiwiCore {
     }
 
     /// Stores the window's run size and the run's ends together,
-    /// so the next pass draws the run the write planned.
+    /// so the next pass draws the run the write planned. A window a
+    /// pull brings back returns at its floor and share, so the
+    /// shrunk window lands where it was asked on either side.
     func write(
         _ resize: RunZone.Resize,
         of focused: WindowID,
@@ -279,6 +281,7 @@ extension KiwiCore {
         space: Space
     ) {
         state.workspaces.withSpace(space.id) {
+            for member in resize.joined { $0.runSizes[member] = nil }
             $0.runSizes[focused] = RunSize(
                 share: resize.size,
                 zone: zone.members[0]

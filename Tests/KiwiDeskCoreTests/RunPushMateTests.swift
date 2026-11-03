@@ -201,6 +201,8 @@ struct RunPushMateTests {
         press(core, "y", -30)
         #expect(abs(height(4) - rest + 30) < 1)
         #expect(hidden(core, id) == [w(2)])
+        // w4 keeps no length of its own while it takes the rest.
+        #expect(core.state.workspaces[id]?.runSizes[w(4)] == nil)
     }
 
     @Test("A length whose zone anchor moved is dropped at the next pass")

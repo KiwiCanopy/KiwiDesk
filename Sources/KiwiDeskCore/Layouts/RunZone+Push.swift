@@ -26,6 +26,8 @@ extension RunZone {
         public let changed: Bool
         /// Whether a window left or joined the shown run.
         public let movesRun: Bool
+        /// Members a pull brought back into the shown run.
+        public let joined: [WindowID]
     }
 
     /// The run `id` ends in after growing by `delta` points along
@@ -117,7 +119,10 @@ extension RunZone {
             atOwnMinimum: delta < 0 && extent + delta < own,
             changed: visible != before
                 || abs(target - extent) > Self.unchangedTolerance,
-            movesRun: visible != before
+            movesRun: visible != before,
+            joined: visible.filter { !before.contains($0) }.map {
+                members[$0]
+            }
         )
     }
 
