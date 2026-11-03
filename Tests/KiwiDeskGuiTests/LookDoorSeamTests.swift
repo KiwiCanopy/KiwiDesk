@@ -5,7 +5,9 @@ import Testing
 /// (#2952), the palette doors' twin: no GUI file names Core's handle
 /// to the store or the store itself, save the two spellings that
 /// write nothing — its error cases a catch narrates and the
-/// stateless parse of a look file's bytes.
+/// stateless parse of a look file's bytes. A door call's presence
+/// is all a needle reads: one gated off or never reached stays
+/// green.
 @Suite("Look door seam")
 struct LookDoorSeamTests {
     private static let root = SourceScan.repoRoot(from: #filePath)
@@ -60,9 +62,9 @@ struct LookDoorSeamTests {
     func buttonsAskTheVerdict() throws {
         let needles = [
             "Settings/Components/Looks/LooksShelf+Actions.swift":
-                "core.lookNameVerdict(typed)",
+                "core.lookNameVerdict(typed).isAllowed",
             "Settings/SettingsModel+Look.swift":
-                "core.lookNameVerdict(typed,renaming:old)",
+                "core.lookNameVerdict(typed,renaming:old).isAllowed",
         ]
         for (path, needle) in needles {
             let flat = try SourceScan.strippedSource(

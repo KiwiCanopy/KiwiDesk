@@ -41,10 +41,9 @@ extension KiwiCore {
     /// throws `LibraryNameRefusal`, and the store refuses an
     /// unreadable library (#2860).
     public func renameLook(from old: String, to new: String) throws {
-        let name = try admittedName(
-            new,
-            lookNameVerdict(new, renaming: old)
-        )
+        let name = try admittedName(new) {
+            lookNameVerdict($0, renaming: old)
+        }
         try lookLibrary.rename(from: old, to: name)
     }
 
@@ -62,7 +61,7 @@ extension KiwiCore {
         from settings: TilingSettings
     ) throws -> ShelfLook {
         let look = ShelfLook.current(
-            named: try admittedName(name, lookNameVerdict(name)),
+            named: try admittedName(name) { lookNameVerdict($0) },
             in: settings
         )
         try lookLibrary.save(look)
@@ -124,7 +123,7 @@ extension KiwiCore {
 
     /// `name` trimmed, or `fallback` when nothing is left.
     static func named(_ name: String, else fallback: String) -> String {
-        let trimmed = name.trimmingCharacters(in: .whitespacesAndNewlines)
+        let trimmed = LibraryNameVerdict.normalized(name)
         return trimmed.isEmpty ? fallback : trimmed
     }
 

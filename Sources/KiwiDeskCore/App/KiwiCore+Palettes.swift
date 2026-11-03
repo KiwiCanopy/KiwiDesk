@@ -37,7 +37,7 @@ extension KiwiCore {
         from settings: TilingSettings
     ) throws -> ColorPalette {
         let palette = ColorPalette(
-            name: try admittedName(name, paletteNameVerdict(name)),
+            name: try admittedName(name) { paletteNameVerdict($0) },
             colors: ColorPaletteKeys.extract(from: settings)
         )
         try paletteLibrary.save(palette)
@@ -46,10 +46,9 @@ extension KiwiCore {
 
     /// Renames a user palette; no look names one (#1752).
     public func renamePalette(from old: String, to new: String) throws {
-        let name = try admittedName(
-            new,
-            paletteNameVerdict(new, renaming: old)
-        )
+        let name = try admittedName(new) {
+            paletteNameVerdict($0, renaming: old)
+        }
         try paletteLibrary.rename(from: old, to: name)
     }
 

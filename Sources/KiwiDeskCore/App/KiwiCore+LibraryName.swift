@@ -34,15 +34,17 @@ extension KiwiCore {
         )
     }
 
-    /// `typed` trimmed, the name a write stores, once `verdict`
-    /// allows it; else throws `LibraryNameRefusal`.
+    /// `typed` trimmed, the name a write stores, once `judge` allows
+    /// that very string; else throws `LibraryNameRefusal`.
     func admittedName(
         _ typed: String,
-        _ verdict: LibraryNameVerdict
+        by judge: (String) -> LibraryNameVerdict
     ) throws -> String {
+        let name = LibraryNameVerdict.normalized(typed)
+        let verdict = judge(name)
         guard verdict.isAllowed else {
             throw LibraryNameRefusal(verdict: verdict)
         }
-        return LibraryNameVerdict.normalized(typed)
+        return name
     }
 }
