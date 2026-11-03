@@ -97,8 +97,8 @@ struct PocketEmptyPeekTests {
         let state = try empty(core)
         #expect(
             state.lines.map(\.drawn) == [
-                "Drag a window here to pocket it, or give Pocket a "
-                    + "shortcut in Settings."
+                "Drag a window here to pocket it, or set a shortcut "
+                    + "for Pocket or take out in Settings."
             ]
         )
         bind(core, toggle: false)

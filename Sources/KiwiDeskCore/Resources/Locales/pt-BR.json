@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Cor da marca Pocket",
   "pocket.list.empty.focused": "Arraste uma janela até aqui ou pressione %1$@ para guardar a janela em foco no Pocket na hora.",
-  "pocket.list.empty.no_shortcut": "Arraste uma janela até aqui para guardá-la no Pocket, ou defina um atalho para o Pocket nos Ajustes.",
+  "pocket.list.empty.no_shortcut": "Arraste uma janela até aqui para guardá-la no Pocket, ou defina um atalho para “%1$@” nos Ajustes.",
   "pocket.list.empty.out": "Arraste uma janela até aqui ou pressione %1$@ para guardar de volta no Pocket a última que você usou.",
   "pocket.list.empty.shortcuts": "Atalhos do Pocket…",
   "pocket.list.empty.title": "Seu Pocket está vazio",

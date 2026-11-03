@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Цвет метки Pocket",
   "pocket.list.empty.focused": "Перетащи окно сюда или нажми %1$@, чтобы сразу убрать окно в фокусе в Pocket.",
-  "pocket.list.empty.no_shortcut": "Перетащи окно сюда, чтобы убрать его в Pocket, или назначь сочетание клавиш для Pocket в настройках.",
+  "pocket.list.empty.no_shortcut": "Перетащи окно сюда, чтобы убрать его в Pocket, или назначь в настройках сочетание клавиш для «%1$@».",
   "pocket.list.empty.out": "Перетащи окно сюда или нажми %1$@, чтобы убрать обратно в Pocket последнее использованное окно.",
   "pocket.list.empty.shortcuts": "Сочетания клавиш Pocket…",
   "pocket.list.empty.title": "Твой Pocket пуст",

@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Colore del marcatore Pocket",
   "pocket.list.empty.focused": "Trascina qui una finestra, oppure premi %1$@ per mettere subito nella Pocket la finestra con focus.",
-  "pocket.list.empty.no_shortcut": "Trascina qui una finestra per metterla nella Pocket, oppure assegna una scorciatoia alla Pocket nelle Impostazioni.",
+  "pocket.list.empty.no_shortcut": "Trascina qui una finestra per metterla nella Pocket, oppure assegna una scorciatoia a «%1$@» nelle Impostazioni.",
   "pocket.list.empty.out": "Trascina qui una finestra, oppure premi %1$@ per rimettere nella Pocket l'ultima che hai usato.",
   "pocket.list.empty.shortcuts": "Scorciatoie Pocket…",
   "pocket.list.empty.title": "La tua Pocket è vuota",

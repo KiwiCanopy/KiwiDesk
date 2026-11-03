@@ -30,10 +30,13 @@ extension KiwiCore {
                 }
             )
         } else {
+            // Names the command, never the feature, through its own
+            // label key (#818, #2941 ▸ 2).
             let text = L(
                 "pocket.list.empty.no_shortcut",
-                "Drag a window here to pocket it, or give Pocket a "
-                    + "shortcut in Settings."
+                "Drag a window here to pocket it, or set a shortcut for "
+                    + "%1$@ in Settings.",
+                L("keybinding.pocket", "Pocket or take out")
             )
             lines.append(.init(drawn: text, spoken: text))
         }

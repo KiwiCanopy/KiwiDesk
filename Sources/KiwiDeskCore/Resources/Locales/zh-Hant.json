@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Pocket 標記顏色",
   "pocket.list.empty.focused": "將視窗拖到這裡，或按 %1$@ 立即將焦點視窗放入 Pocket。",
-  "pocket.list.empty.no_shortcut": "將視窗拖到這裡即可放入 Pocket，或在「設定」中為 Pocket 設定快速鍵。",
+  "pocket.list.empty.no_shortcut": "將視窗拖到這裡即可放入 Pocket，或在「設定」中為「%1$@」設定快速鍵。",
   "pocket.list.empty.out": "將視窗拖到這裡，或按 %1$@ 將你最後用過的那個放回 Pocket。",
   "pocket.list.empty.shortcuts": "Pocket 快速鍵…",
   "pocket.list.empty.title": "你的 Pocket 是空的",

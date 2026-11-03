@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Pocket マークのカラー",
   "pocket.list.empty.focused": "ウインドウをここにドラッグするか、%1$@ を押してフォーカス中のウインドウをすぐに Pocket に入れてください。",
-  "pocket.list.empty.no_shortcut": "ウインドウをここにドラッグして Pocket に入れるか、設定で Pocket にショートカットを割り当ててください。",
+  "pocket.list.empty.no_shortcut": "ウインドウをここにドラッグして Pocket に入れるか、設定で「%1$@」にショートカットを割り当ててください。",
   "pocket.list.empty.out": "ウインドウをここにドラッグするか、%1$@ を押して最後に使ったウインドウを Pocket に戻してください。",
   "pocket.list.empty.shortcuts": "Pocket のショートカット…",
   "pocket.list.empty.title": "Pocket は空です",

@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Farbe der Pocket-Markierung",
   "pocket.list.empty.focused": "Ziehe ein Fenster hierher oder drücke %1$@, um das fokussierte Fenster sofort in die Pocket zu stecken.",
-  "pocket.list.empty.no_shortcut": "Ziehe ein Fenster hierher, um es in die Pocket zu stecken, oder lege in den Einstellungen ein Tastenkürzel für die Pocket fest.",
+  "pocket.list.empty.no_shortcut": "Ziehe ein Fenster hierher, um es in die Pocket zu stecken, oder lege in den Einstellungen ein Tastenkürzel für „%1$@“ fest.",
   "pocket.list.empty.out": "Ziehe ein Fenster hierher oder drücke %1$@, um das zuletzt benutzte Fenster wieder in die Pocket zu stecken.",
   "pocket.list.empty.shortcuts": "Pocket-Tastenkürzel…",
   "pocket.list.empty.title": "Deine Pocket ist leer",

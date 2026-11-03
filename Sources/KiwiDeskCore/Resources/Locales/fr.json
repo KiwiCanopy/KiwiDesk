@@ -1700,7 +1700,7 @@
   "pocket.color": "Pocket",
   "pocket.color.a11y": "Couleur de la marque Pocket",
   "pocket.list.empty.focused": "Faites glisser une fenêtre ici, ou appuyez sur %1$@ pour mettre tout de suite la fenêtre ciblée dans la Pocket.",
-  "pocket.list.empty.no_shortcut": "Faites glisser une fenêtre ici pour la mettre dans la Pocket, ou attribuez un raccourci à la Pocket dans les Réglages.",
+  "pocket.list.empty.no_shortcut": "Faites glisser une fenêtre ici pour la mettre dans la Pocket, ou attribuez un raccourci à « %1$@ » dans les Réglages.",
   "pocket.list.empty.out": "Faites glisser une fenêtre ici, ou appuyez sur %1$@ pour remettre dans la Pocket celle que vous avez utilisée en dernier.",
   "pocket.list.empty.shortcuts": "Raccourcis Pocket…",
   "pocket.list.empty.title": "Votre Pocket est vide",
