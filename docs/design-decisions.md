@@ -20193,6 +20193,23 @@ KiwiHub's middle side, one ⇧⇥ from where the row lands); and a
 **Support** row (it lives in Settings as a discreet link — a menu
 opened daily is no place for a recurring support ask).
 
+:::unreleased
+**A bar menu row shows its chord only where the chord IS the row
+(#2869).** The bars' right-click menus teach the same way, in the
+native key-equivalent column, but a chord there is a promise that
+pressing it does what clicking does. So it shows on Float / Tile
+Window and Remove from Pocket, and only in the focused window's
+own menu: the key acts on the focus, so beside any other window
+it would act on a window the row does not name, and a group's
+menu, parent or child, shows none (#2869 ▸ 4). Pocket Window shows none, because its key steps — it puts
+back or takes out before it pockets — and matches the row only
+while the pocket is empty. A user's own Lua spelling, or a chord
+with a left- or right-only modifier, shows nothing rather than a
+key that might not be the row's. The column is display only: the
+row drops AppKit's matching keyDown, since Carbon's hotkey has
+already acted, or Float would toggle twice.
+:::
+
 **The real logo ships pre-rasterized, no asset catalog.**
 Vector masters live in `/assets`; the app bundles plain
 PNG/TIFF copies regenerated with macOS built-ins

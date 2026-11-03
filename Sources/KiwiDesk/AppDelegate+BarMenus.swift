@@ -19,6 +19,21 @@ extension AppDelegate {
                 ShortcutsOpenBinding.pocketAppChord(core: $0, app: app)
             }
         }
+        core.barMenuHooks.menuChord = { [weak core] verb in
+            core.flatMap {
+                ShortcutsOpenBinding.combo(core: $0, lua: Self.lua(of: verb))
+            }
+        }
+        core.barMenuHooks.layoutChar = LayoutKeyGlyph.char
+    }
+
+    /// A bar menu verb's catalog Lua body (#2869 ▸ 2): a binding
+    /// shows its chord only when spelled exactly so.
+    static func lua(of verb: BarMenuVerb) -> String {
+        switch verb {
+        case .toggleFloating: KeybindingCatalog.toggleFloating.lua
+        case .togglePocketWindow: KeybindingCatalog.pocketWindow.lua
+        }
     }
 
     /// A Space chip's Delete of a profile Space (#1790), in Settings'

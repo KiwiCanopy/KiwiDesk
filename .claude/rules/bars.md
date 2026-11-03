@@ -1337,6 +1337,29 @@ rather than the row it names makes the user search again. So:
 - **The Layout rows' look is `LayoutModeRows.entries`**, and a
   second surface that draws those rows builds from it too,
   handing it its own words, so no sentence crosses the #96 seam.
+- **A row shows a chord only where pressing it does exactly what
+  clicking the row does (#2869).** The chord rides
+  `BarMenuRow.chord` into the native key-equivalent column alone —
+  never the title, the subtitle or a tooltip — drawn through the
+  one `KeyCombo.applyMenuEquivalent`, which refuses a sided chord
+  (#2601). It is read through `barMenuChord(_:for:in:)`, handed the
+  whole set the menu stands for: a `BarMenuVerb` the GUI maps to
+  its catalog Lua body, matched exactly on the resolved active
+  layer, and only in a single-window menu whose window is both
+  `barFocus` and `focusedWindowID`, the window the key acts on —
+  never in a group menu, parent or child. The rows that carry it
+  are `BarMenuVerb`'s cases; never Pocket Window while `pocket`
+  steps, and never New Window, Move to Current Space, App Rules…,
+  Close Window, Quit, a Space chip's rows or the KiwiShelf
+  section. A new row joins `BarMenuVerb` only once its key, on
+  the focused window, is the row's own act. A greyed row keeps its
+  chord, as a native menu does: its key refuses as the row would;
+  so does the key while a KiwiDesk window is in front, the #292
+  preflight's refusal, where the row's named window still acts.
+  A firing by the drawn chord's own keyDown is dropped, so
+  Carbon's hotkey is the one action, and every other keyboard
+  firing — Return on a picked row — stands (`BarMenuChordTests`,
+  `BarMenuWiringTests` ▸ `verbsReadTheirRows`).
 
 ## A Space wears one marker, drawn after its identifier (#1790)
 
