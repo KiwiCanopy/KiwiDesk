@@ -48,6 +48,20 @@ struct SimplePreviewTests {
         #expect(model.simplePreviewHover == nil)
     }
 
+    /// #2943 put My looks on the line; the hover read bundled alone.
+    @Test("a hovered look of the user's own is painted too")
+    func userLookHoverPaints() throws {
+        let model = model(["a"])
+        var look = LookBody(of: model.config.settings).named("Mine")
+        look.style["kiwishelf.thickness"] = .number(41)
+        try model.lookStore.save(look)
+        model.refreshLooks()
+        let before = model.config.settings
+        model.hoverSimple(.look("Mine"), inside: true)
+        #expect(model.simplePreviewHover == .look("Mine"))
+        #expect(model.simplePreviewSettings != before)
+    }
+
     @Test("a new visit forgets the hovered look")
     func visitResets() {
         let model = model(["a"])

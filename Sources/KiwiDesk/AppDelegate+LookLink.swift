@@ -3,8 +3,9 @@ import KiwiDeskCore
 
 /// The gallery's "Add to KiwiDesk" links (#1740 ▸ Step 3 decisions):
 /// `kiwidesk://look/<id>` downloads that one look, adds it to My
-/// looks under a free name and wears it as an unsaved Settings
-/// change. Nothing is saved without the user.
+/// looks under a free name — or finds the one already there (#2943)
+/// — and wears it as an unsaved Settings change. Nothing is saved
+/// without the user.
 extension AppDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
         for link in urls.compactMap(LookLink.init) {
@@ -13,6 +14,10 @@ extension AppDelegate {
     }
 
     private func addLinkedLook(_ link: LookLink) async {
+        if let held = core.heldGalleryLook(for: link) {
+            wear(held)
+            return
+        }
         do {
             let data = try await link.fetch {
                 try await URLSession.shared.data(for: $0)
@@ -22,13 +27,17 @@ extension AppDelegate {
                 from: link,
                 fallbackName: L("looks.default_name", "My Look")
             )
-            // Worn before the window fronts, or its first frame
-            // draws the look it had and its plates flash (#2863).
-            dashboard.show {
-                self.dashboard.model.wearLinkedLook(look)
-            }
+            wear(look)
         } catch {
             Self.refuseLinkedLook(Self.linkFailure(error))
+        }
+    }
+
+    private func wear(_ look: ShelfLook) {
+        // Worn before the window fronts, or its first frame draws
+        // the look it had and its plates flash (#2863).
+        dashboard.show {
+            self.dashboard.model.wearLinkedLook(look)
         }
     }
 
