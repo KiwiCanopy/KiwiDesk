@@ -502,9 +502,10 @@ bounces and shows a frosted pill:
   enforces (System Settings will not grow past its own width).
 
 :::unreleased
-Along a window row that scrolls its overflow, a grow does not stop
-at the neighbour: the neighbour goes into the row's overflow and
-its `+n` counts it. A shrink brings it back once it fits again.
+Where windows that do not fit wait behind a `+n` overflow mark, a
+grow along that line does not stop at the neighbour: the neighbour
+joins the windows waiting and the `+n` counts it. A shrink brings
+waiting windows back while the next one fits.
 :::
 
 Where the limit is the **app's own** — a minimum or maximum the

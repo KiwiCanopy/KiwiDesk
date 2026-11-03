@@ -454,8 +454,9 @@ synonym:
   more (`space_bar.set_glyph_span`, #1528) — a cap it is not,
   since nothing stops at it.
 - **sizing** — the collective of a layout's size adjustments:
-  the BSP and stack ratios, the scrolling slot size and the
-  stack/track weights — what `resize` writes and
+  the BSP and stack ratios, the scrolling slot size, the
+  stack/track weights and the run sizes (`Space.runSizes`,
+  #2709) — what `resize` writes and
   `reset_layout_sizing` clears (#764, `ResetLayoutSizingTests`).
   A single extent stays a *size* (`slot_size`,
   `min_window_size`), and a *count* or *limit* (`master_count`,

@@ -123,24 +123,26 @@ struct RunPressFloorTests {
         let extra = zone.runExtra(in: context) ?? 0
         #expect(extra > 0)
         #expect(run.visible.count == 2)
-        let before = try #require(zone.frames(in: context)[WindowID(2)])
+        let expected = StackLayout.weightStep(
+            weights: [1, 1],
+            at: 0,
+            delta: 5,
+            span: Double(extra),
+            minSizes: [0, 0]
+        ).value
         let response = core.resizeStackMember(
             WindowID(2),
             axis: "y",
             delta: 5,
             span: 780,
-            space: space
+            space: space,
+            toward: .both
         )
         #expect(response.isSuccess)
-        // The run's step lands the press's points on the window
-        // the run draws (#2709).
-        let (after, laid) = try self.zone(
-            of: WindowID(2),
-            in: core,
-            space: id
+        let weight = try #require(
+            core.state.workspaces[id]?.stackWeights[WindowID(2)]
         )
-        let grown = try #require(after.frames(in: laid)[WindowID(2)])
-        #expect(abs(grown.height - before.height - 5) < 0.5)
+        #expect(abs(weight - expected) < 0.0001)
     }
 
     /// The press stops where the run would start: after it the
@@ -161,7 +163,8 @@ struct RunPressFloorTests {
             axis: "y",
             delta: -120,
             span: core.layoutSpan(of: space, horizontal: false),
-            space: space
+            space: space,
+            toward: .both
         )
         core.retile(animated: false)
         let after = try zone(of: WindowID(3), in: core, space: id)
@@ -189,7 +192,8 @@ struct RunPressFloorTests {
             axis: "y",
             delta: -120,
             span: core.layoutSpan(of: space, horizontal: false),
-            space: space
+            space: space,
+            toward: .both
         )
         core.retile(animated: false)
         let after = try zone(of: WindowID(2), in: core, space: id)

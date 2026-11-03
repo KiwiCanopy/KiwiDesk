@@ -35,9 +35,8 @@ public struct ZoneRun: Sendable, Equatable {
         let count = floors.count
         guard count > 0 else { return ZoneRun(visible: 0..<0, count: 0) }
         func fits(_ start: Int, _ last: Int) -> Bool {
-            let used = floors[start...last].reduce(0, +)
-            return start == last
-                || used + gap * CGFloat(last - start) <= span
+            start == last
+                || Self.fits(floors[start...last], gap: gap, span: span)
         }
         guard !fits(0, count - 1) else {
             return ZoneRun(visible: 0..<count, count: count)
@@ -65,6 +64,22 @@ public struct ZoneRun: Sendable, Equatable {
             if let focus, focus == last { start += 1 } else { last -= 1 }
         }
         return ZoneRun(visible: start..<(last + 1), count: count)
+    }
+
+    /// Whether `lengths` laid in a row with `gap` between them fit
+    /// `span` — the one fit the render and a resize along the run
+    /// (`RunZone.resize`, #2709) both ask.
+    static func fits(
+        _ lengths: some Sequence<CGFloat>,
+        gap: CGFloat,
+        span: CGFloat
+    ) -> Bool {
+        var count = 0
+        let used = lengths.reduce(CGFloat(0)) {
+            count += 1
+            return $0 + $1
+        }
+        return used + gap * CGFloat(max(count - 1, 0)) <= span
     }
 
     /// Frames for a zone's members: the shown run shares `region`

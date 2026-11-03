@@ -201,28 +201,29 @@ public struct RunZone: Sendable, Equatable {
                 cell
             )
         }
-        // A window a resize along the run sized (#2709) is planned
-        // at that length and takes no share of what is left.
-        let floors = zip(members, bare).map { member, floor in
-            context.runSizes[member].map { max(min($0, span), floor) }
-                ?? floor
+        // A window a push sized (#2709) is planned at that share of
+        // the span and takes none of what is left; its zero share
+        // never fits whole, so the zone lays out as a run.
+        let floors = members.indices.map { index in
+            plannedSize(of: members[index], in: context).map {
+                max($0, bare[index])
+            } ?? bare[index]
         }
         let weights = members.map {
-            context.runSizes[$0] != nil
+            plannedSize(of: $0, in: context) != nil
                 ? 0
                 : max(
                     context.stackWeights[$0] ?? 1,
                     StackLayout.weightFloor
                 )
         }
-        let sized = members.contains { context.runSizes[$0] != nil }
         // The emergency whole-zone pile (#44): not even one window
         // fits at the minimum size.
         let piles =
             span <= 0
             || span < context.minWindowSize.along(horizontal: !vertical)
         guard !members.isEmpty, !piles,
-            sized || !fitsWhole(floors, weights, gap, context)
+            !fitsWhole(floors, weights, gap, context)
         else {
             return Plan(
                 floors: floors,
@@ -252,6 +253,22 @@ public struct RunZone: Sendable, Equatable {
     }
 
     private var span: CGFloat { vertical ? region.height : region.width }
+
+    /// The length a push gave `id` (`Space.runSizes`, a share of
+    /// the span), honoured only while this zone's run keeps stored
+    /// ends — a window that moved to another zone, or a run that
+    /// shows everything again, plans at its floor and share.
+    func plannedSize(
+        of id: WindowID,
+        in context: LayoutContext
+    ) -> CGFloat? {
+        guard let share = context.runSizes[id],
+            members.contains(where: {
+                context.runHeads.contains($0) || context.runTails.contains($0)
+            })
+        else { return nil }
+        return min(share * span, span)
+    }
 
     /// Every member's floor under fixed cells: an equal cell's
     /// extent, rounded down so exactly `slots.count` fit the span.

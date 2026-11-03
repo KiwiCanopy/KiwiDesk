@@ -71,7 +71,8 @@ extension KiwiCore {
     }
 
     /// The push `pushOrCue` carries a blocked grow on with; false
-    /// where `focused` sits in no zone along `axis`.
+    /// where `focused` sits in no zone along `axis`, is visiting,
+    /// or the grow moves no window into the run.
     private func pushIntoRun(
         _ focused: WindowID,
         axis: String,
@@ -79,7 +80,7 @@ extension KiwiCore {
         toward side: RunZone.PushSide,
         space: Space
     ) -> Bool {
-        guard delta > 0,
+        guard delta > 0, space.windows.contains(focused),
             let found = runZone(of: focused, axis: axis, in: space),
             let resize = found.zone.resize(
                 focused,
@@ -87,7 +88,7 @@ extension KiwiCore {
                 toward: side,
                 in: found.context
             ),
-            resize.changed
+            resize.movesRun
         else { return false }
         write(resize, of: focused, in: found.zone, space: space)
         return true
@@ -105,13 +106,22 @@ extension KiwiCore {
         space: Space,
         otherAxisDivides: Bool
     ) -> CommandResponse {
-        guard zone.members.count > 1,
+        // A run-size entry under a visitor's id could never be
+        // pruned (#308): its Space never removes it.
+        guard space.windows.contains(focused) else {
+            return .fail(
+                "the focused window is visiting from "
+                    + "another Space"
+            )
+        }
+        guard
             let resize = zone.resize(
                 focused,
                 by: CGFloat(delta),
                 toward: side,
                 in: context
-            )
+            ),
+            let run = zone.run(in: context)
         else {
             refuseNothingToDivide(
                 focused,
@@ -119,21 +129,83 @@ extension KiwiCore {
             )
             return .fail("the focused window is alone in its run")
         }
-        if resize.atOwnMinimum {
-            refuseShrinkAtMinimum(focused, axis: axis)
+        // A push or a pull, or a window a push already sized, takes
+        // a length; any other press keeps the run's weight step.
+        if resize.movesRun || zone.plannedSize(of: focused, in: context) != nil
+        {
+            if resize.atOwnMinimum {
+                refuseShrinkAtMinimum(focused, axis: axis)
+            }
+            guard resize.changed else {
+                // A lone shown window fills the zone and has no
+                // room left to grow into.
+                if !resize.atOwnMinimum {
+                    refuseNothingToDivide(
+                        focused,
+                        otherAxisDivides: otherAxisDivides
+                    )
+                }
+                return .fail("the focused window is alone in its run")
+            }
+            write(resize, of: focused, in: zone, space: space)
+            return .ok()
         }
-        guard resize.changed else {
-            // A lone shown window fills the zone: a grow has no
-            // room to take, a shrink frees none the next fits.
-            if !resize.atOwnMinimum {
-                refuseNothingToDivide(
+        return weighInRun(
+            focused,
+            shown: Array(zone.members[run.visible]),
+            extra: zone.runExtra(in: context) ?? 0,
+            axis: axis,
+            delta: delta,
+            space: space,
+            otherAxisDivides: otherAxisDivides
+        )
+    }
+
+    /// A weight press inside a run that moves no window (#2235):
+    /// the step divides the span the shown windows' floors leave,
+    /// with no minimum of its own, since the layout keeps them.
+    private func weighInRun(
+        _ focused: WindowID,
+        shown: [WindowID],
+        extra: CGFloat,
+        axis: String,
+        delta: Double,
+        space: Space,
+        otherAxisDivides: Bool
+    ) -> CommandResponse {
+        guard shown.count > 1, let index = shown.firstIndex(of: focused)
+        else {
+            refuseNothingToDivide(
+                focused,
+                otherAxisDivides: otherAxisDivides
+            )
+            return .fail("the focused window is alone in its run")
+        }
+        guard extra > 0 else {
+            // Every shown window sits at its floor.
+            if delta < 0 {
+                refuseShrinkAtMinimum(focused, axis: axis)
+            } else {
+                refuseGrowAtNeighborMinimum(
                     focused,
-                    otherAxisDivides: otherAxisDivides
+                    anchor: shown[index == 0 ? 1 : index - 1],
+                    axis: axis
                 )
             }
-            return .fail("nothing in the run can move")
+            return .fail("every shown window is at its minimum")
         }
-        write(resize, of: focused, in: zone, space: space)
+        let outcome = StackLayout.weightStep(
+            weights: shown.map {
+                max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
+            },
+            at: index,
+            delta: delta,
+            span: Double(extra),
+            minSizes: Array(repeating: 0, count: shown.count)
+        )
+        state.workspaces.withSpace(space.id) {
+            $0.stackWeights[focused] = outcome.value
+        }
         return .ok()
     }
 
@@ -163,7 +235,8 @@ extension KiwiCore {
     }
 
     /// Stores the window's run size and the run's ends together,
-    /// so the next pass draws the run the write planned.
+    /// so the next pass draws the run the write planned. A run
+    /// keeps one sized window: the others share what is left.
     private func write(
         _ resize: RunZone.Resize,
         of focused: WindowID,
@@ -171,6 +244,7 @@ extension KiwiCore {
         space: Space
     ) {
         state.workspaces.withSpace(space.id) {
+            for member in zone.members { $0.runSizes[member] = nil }
             $0.runSizes[focused] = resize.size
             ($0.runHeads, $0.runTails) = zone.ends(
                 showing: resize.visible,

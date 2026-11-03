@@ -193,7 +193,7 @@ extension KiwiCore {
         for window: WindowID?,
         in space: Space,
         bounds: CGRect,
-        moved: (_ vertical: Bool) -> RunZone.PushSide = { _ in .both }
+        moved: (_ vertical: Bool) -> RunZone.PushSide
     ) {
         switch adjustment {
         // The ratio and slot writes go through the same capped
@@ -300,7 +300,8 @@ extension KiwiCore {
                 axis: acrossAxis,
                 delta: Double(delta),
                 span: span,
-                space: space
+                space: space,
+                toward: moved(!vertical)
             )
         case .trackAlong(let delta):
             guard let window else { break }

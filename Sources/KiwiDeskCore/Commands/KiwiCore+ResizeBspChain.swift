@@ -43,7 +43,7 @@ extension KiwiCore {
         axis: String,
         delta: Double,
         space: Space,
-        toward side: RunZone.PushSide = .both
+        toward side: RunZone.PushSide
     ) -> CommandResponse? {
         guard let screen = TilingEngine.screen(for: space.id, in: state),
             let found = bspChain(of: space, on: screen),

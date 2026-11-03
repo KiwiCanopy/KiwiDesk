@@ -285,7 +285,6 @@ struct SnapshotCarryCensusTests {
         let space = try #require(b.state.workspaces[spaceID])
         #expect(b.desktopMemory.sessionRatios.isEmpty)
         #expect(space.stackWeights.isEmpty)
-        #expect(space.runSizes.isEmpty)
         #expect(b.state.windows[w1]?.isFloating == false)
         #expect(b.state.windows[w1]?.stickyScope == StickyScope.none)
     }

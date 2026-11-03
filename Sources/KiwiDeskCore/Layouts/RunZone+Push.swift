@@ -18,8 +18,8 @@ extension RunZone {
 
     /// What a resize along the run leaves.
     public struct Resize: Sendable, Equatable {
-        /// The resized member's new `Space.runSizes` entry, in
-        /// points along the zone's axis.
+        /// The resized member's new `Space.runSizes` entry: its
+        /// length as a share of the zone's span.
         public let size: CGFloat
         /// Members shown after the write, in member indices.
         public let visible: Range<Int>
@@ -27,6 +27,8 @@ extension RunZone {
         public let atOwnMinimum: Bool
         /// Whether anything moved: the member's extent or the run.
         public let changed: Bool
+        /// Whether a window left or joined the shown run.
+        public let movesRun: Bool
     }
 
     /// The run `id` ends in after growing by `delta` points along
@@ -45,23 +47,25 @@ extension RunZone {
     ) -> Resize? {
         guard let index = members.firstIndex(of: id) else { return nil }
         let before = run(in: context)?.visible ?? members.indices
+        let frames = frames(in: context)
         guard before.contains(index),
-            let drawn = frames(in: context)[id].map(length)
+            let drawn = frames[id].map(length)
         else { return nil }
-        let extent =
-            side == .both ? context.runSizes[id] ?? drawn : drawn
         let (floors, bare, gap) = floorsAndGap(in: context)
         let span = length(region)
+        let extent =
+            side == .both && plannedSize(of: id, in: context) != nil
+            ? floors[index] : drawn
         let own = bare[index]
-        let target = min(max(extent + delta, own), span)
+        var target = min(max(extent + delta, own), span)
         var start = before.lowerBound
         var last = before.upperBound - 1
         func fits(_ first: Int, _ end: Int) -> Bool {
-            let others = (first...end).reduce(CGFloat(0)) {
-                $1 == index ? $0 : $0 + floors[$1]
-            }
-            return target + others + gap * CGFloat(end - first)
-                <= span + Self.pushTolerance
+            ZoneRun.fits(
+                (first...end).map { $0 == index ? target : floors[$0] },
+                gap: gap,
+                span: span
+            )
         }
         if delta > 0 {
             while !fits(start, last) {
@@ -74,6 +78,17 @@ extension RunZone {
                 } else {
                     break
                 }
+            }
+            // The grown window takes the pushed one's room: the
+            // windows that stay keep the lengths they drew.
+            if start..<(last + 1) != before {
+                let kept = (start...last).filter { $0 != index }
+                let room =
+                    span - gap * CGFloat(kept.count)
+                    - kept.reduce(CGFloat(0)) {
+                        $0 + (frames[members[$1]].map(length) ?? 0)
+                    }
+                target = min(max(target, room), span)
             }
         } else if delta < 0 {
             while true {
@@ -88,11 +103,12 @@ extension RunZone {
         }
         let visible = start..<(last + 1)
         return Resize(
-            size: target,
+            size: span > 0 ? target / span : 0,
             visible: visible,
             atOwnMinimum: delta < 0 && extent + delta < own,
             changed: visible != before
-                || abs(target - extent) > Self.pushTolerance
+                || abs(target - extent) > Self.unchangedTolerance,
+            movesRun: visible != before
         )
     }
 
@@ -113,9 +129,9 @@ extension RunZone {
         return (heads, tails)
     }
 
-    /// A point of slack on the fit, so a frame rounded by the
-    /// layout neither pushes nor refuses a window it holds.
-    static let pushTolerance: CGFloat = 0.5
+    /// Below this many points a resize moved nothing the screen
+    /// shows.
+    static let unchangedTolerance: CGFloat = 0.5
 
     private func length(_ rect: CGRect) -> CGFloat {
         vertical ? rect.height : rect.width

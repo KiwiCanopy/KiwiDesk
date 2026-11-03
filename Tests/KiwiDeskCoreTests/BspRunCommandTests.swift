@@ -116,7 +116,7 @@ struct BspRunCommandTests {
         #expect(core.activeSpace?.focused == target)
     }
 
-    @Test("A press along the chain sizes its run, not a ratio")
+    @Test("A press along the chain moves its weights, not a ratio")
     func pressAlongTheChainTakesRunWeights() throws {
         let (core, id) = makeCore(focus: 2)
         let run = try #require(core.tiler.runCovers[id]?.runs.first)
@@ -134,7 +134,7 @@ struct BspRunCommandTests {
             ).isSuccess
         )
         let space = try #require(core.state.workspaces[id])
-        #expect(space.runSizes[WindowID(2)] != nil)
+        #expect(space.stackWeights[WindowID(2)] != nil)
         #expect(
             core.tiler.settings.resolvedBsp(
                 for: space,
@@ -194,7 +194,7 @@ struct BspRunCommandTests {
         )
     }
 
-    @Test("A drag along the chain sizes its run, not a ratio")
+    @Test("A drag along the chain moves its weights, not a ratio")
     func dragAlongTheChainTakesRunWeights() throws {
         let (core, id) = makeCore(focus: 2)
         core.tiler.settings.mouseResize = .layout
@@ -213,7 +213,7 @@ struct BspRunCommandTests {
         grown.size.height += 40
         core.handleResizeEnd(window, slot: slot, frame: grown, in: before)
         let space = try #require(core.state.workspaces[id])
-        #expect((space.runSizes[window] ?? 0) > slot.height)
+        #expect((space.stackWeights[window] ?? 1) > 1)
         #expect(
             core.tiler.settings.resolvedBsp(
                 for: space,
@@ -223,7 +223,7 @@ struct BspRunCommandTests {
         )
     }
 
-    @Test("A press along a run that shows every window sizes it")
+    @Test("A press along a run that shows every window moves weights")
     func showingRunTakesWeights() throws {
         // w3's learned 450 breaks the equal shares, so the line is
         // laid by floor and weight, yet all three still fit: a run
@@ -238,14 +238,17 @@ struct BspRunCommandTests {
             session: core.sessionRatios(of: before.id)
         )
         .splitRatioV
+        // The line has 10 pt to give: a step it can give takes
+        // weights, a larger one pushes a window into the run
+        // (#2709).
         #expect(
             core.execute(
                 "resize",
-                args: [.string("y"), .number(20)]
+                args: [.string("y"), .number(5)]
             ).isSuccess
         )
         let space = try #require(core.state.workspaces[id])
-        #expect(space.runSizes[WindowID(2)] != nil)
+        #expect(space.stackWeights[WindowID(2)] != nil)
         #expect(
             core.tiler.settings.resolvedBsp(
                 for: space,

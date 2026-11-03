@@ -4093,8 +4093,9 @@ Interactive resizes accumulate per space and across weeks, and
 the two routes back before `reset_layout_sizing` — nudging each
 ratio in the opposite direction, or `load_profile`, which also
 discards every non-sizing change since — were not answers. The
-verb clears the two stores a resize writes (the #458 session
-layer and the stack and track weights) on the active space by
+verb clears what a resize writes (the #458 session layer and the
+sizes `Space.resetSizing` holds, `SpaceSizingCensusTests`) on the
+active space by
 default — a reset is about the manual resizing in front of the
 user, and a bound key should undo what they just did, not what
 they did elsewhere — on one space by id, or on every space for
@@ -4313,6 +4314,11 @@ applied: inside a run it divides only the span left after the
 shown windows' floors, which is the span the layout divides
 (#933), so a press never writes a share the run does not draw.
 
+:::unreleased
+A press that moves a window into or out of the run writes a length
+instead (*A grow along a run pushes into it*, below).
+:::
+
 *Learned floors, judged once per pass.* A floor is the configured
 minimum, or an app's corroborated learned minimum where larger
 (#677/#1055) — the bound Track's automatic count already reads
@@ -4516,13 +4522,14 @@ a Space, the "Sticky windows can't be moved to the pile" refusal
 **A grow along a run pushes into it (#2709).** Where windows
 already scroll — a Stack zone, a Track track, an auto-sized Grid's
 full last track, a BSP chain — a resize along the scroll direction
-no longer stops at a neighbour's minimum: the neighbour it
+does not stop at a neighbour's minimum: the neighbour it
 squeezes waits in the run and the grown window takes its room, and
 a shrink brings waiting windows back while the next fits at its
-minimum. One rule in the shared writers (`RunZone.resize`), not
-per layout: a run reader asks `RunZone.zones`, never a mode list,
-and a Grid or BSP push that looked like a Stack run yet behaved
-differently would be the inconsistency. The cue is the overflow
+minimum. One rule, `RunZone.resize`, that every capped writer
+takes, not per layout: the resize finds its run through
+`RunZone.zones`, never a mode list, and a Grid or BSP push that
+looked like a Stack run yet behaved differently would be the
+inconsistency. The cue is the overflow
 mark's count alone, since the push is the gesture doing what was
 asked.
 
@@ -4532,9 +4539,15 @@ construction — cannot keep a pushed window out: at the next pass
 the floors fit again and it returns. The window keeps the length
 the gesture gave it (`Space.runSizes`), planned as its floor, and
 the run's two ends are written beside it so the next pass draws
-the run the write planned. It is sizing like the weights: a mode
-change and `reset_layout_sizing` clear it, and only an in-place
-restart carries it.
+the run the write planned. The length is a share of the run's
+span, as every other sizing store is, so a Space shown on a
+smaller screen keeps its proportions rather than hiding more
+windows than the user pushed. It lasts while its run hides a
+window, one sized window per run, and plans nothing once the
+window has moved to a zone whose run keeps no ends: a press that
+moves no window keeps the run's weight step. It is sizing like the
+weights: a mode change and `reset_layout_sizing` clear it, and
+only an in-place restart carries it.
 
 *Which window moves.* The run stays contiguous, so the window that
 leaves or returns is always at one of its ends. A drag acts on the
@@ -4548,9 +4561,10 @@ on ui-designer's advice).
 
 *Where it stops.* Across the run, the grow keeps the neighbour's
 minimum and its pill: the run cannot take a window on that axis. A
-fixed Grid's last row draws its columns' cells, so a drag there
-moves the column line for every row rather than breaking the row
-out of the grid, and BSP's halved splits move a ratio. Neither
+fixed Grid's last track draws the cells of the tracks across it,
+so a drag there moves that line for every track rather than
+breaking the last one out of the grid, and BSP's halved splits
+move a ratio. Neither
 reaches the run writer, so neither needs an exception.
 :::
 
@@ -7496,8 +7510,9 @@ through one door
 that every resolver overlay takes as a required argument. Config
 stays shared: a layout-wide setting, a per-Space override and a
 profile apply to every Desktop that shows the Space. The stack and
-track weights are keyed per window, so they follow each Desktop's
-own windows already and stay on the Space. The owner's rulings
+track weights and the run sizes (#2709) are keyed per window, so
+they follow each Desktop's own windows already and stay on the
+Space. The owner's rulings
 (2026-11-02) where the sizes differ from the flip:
 
 - **An in-place restart carries them**, as sizing survived one

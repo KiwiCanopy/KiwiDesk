@@ -24,7 +24,8 @@ extension KiwiCore {
                 focused,
                 axis: axis,
                 delta: delta,
-                space: space
+                space: space,
+                toward: .both
             )
         {
             return response

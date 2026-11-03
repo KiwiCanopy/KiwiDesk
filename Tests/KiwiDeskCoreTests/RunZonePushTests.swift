@@ -7,7 +7,8 @@ import Testing
 /// (#2709): a grow past what the shown neighbours can give pushes
 /// the one on the moved side into the run, a shrink pulls the
 /// waiting one past the moved edge back while it fits. Pure, over
-/// one horizontal zone of four 300-pt floors in 1000 pt, no gaps.
+/// one horizontal zone of four 300-pt floors in 1000 pt, no gaps;
+/// a run size is a share of that span.
 @Suite("Run zone push (#2709)")
 struct RunZonePushTests {
     private let ids = (1...4).map { WindowID(UInt32($0)) }
@@ -34,7 +35,7 @@ struct RunZonePushTests {
             runTails: Set(tails.map { WindowID(UInt32($0)) })
         )
         for (id, size) in sizes {
-            context.runSizes[WindowID(UInt32(id))] = size
+            context.runSizes[WindowID(UInt32(id))] = size / 1000
         }
         return context
     }
@@ -70,7 +71,7 @@ struct RunZonePushTests {
         let after = writing(resize, of: 2, over: context())
         #expect(zone.run(in: after)?.visible == 0..<2)
         let frame = try #require(zone.frames(in: after)[ids[1]])
-        #expect(abs(frame.width - resize.size) < 0.5)
+        #expect(abs(frame.width - resize.size * 1000) < 0.5)
     }
 
     @Test("A grow toward the start pushes the start neighbour")
@@ -99,7 +100,7 @@ struct RunZonePushTests {
         #expect(resize.visible == 0..<3)
         let after = writing(resize, of: 2, over: context())
         let frame = try #require(zone.frames(in: after)[ids[1]])
-        #expect(abs(frame.width - resize.size) < 0.5)
+        #expect(abs(frame.width - resize.size * 1000) < 0.5)
     }
 
     /// Window 2 grown to 600 with 3 shown beside it: windows 1 and
@@ -151,6 +152,20 @@ struct RunZonePushTests {
         #expect(pulled.visible == 1..<4)
     }
 
+    @Test("A pull stops at a window that does not fit, never skipping it")
+    func pullStopsAtTheFirstMisfit() throws {
+        // Window 1 waits before the run planned at 500, window 4
+        // after it at its 300 floor: a shrink of window 2's start
+        // edge frees room for 300 alone, so nothing comes back.
+        let held = context(sizes: [1: 500, 2: 600], heads: [2], tails: [3])
+        #expect(zone.run(in: held)?.visible == 1..<3)
+        let resize = try #require(
+            zone.resize(ids[1], by: -300, toward: .start, in: held)
+        )
+        #expect(resize.visible == 1..<3)
+        #expect(!resize.movesRun)
+    }
+
     @Test("A shrink that frees too little pulls nothing")
     func shrinkStopsAtTheFloor() throws {
         let resize = try #require(
@@ -166,7 +181,7 @@ struct RunZonePushTests {
             zone.resize(ids[1], by: -400, toward: .end, in: middle())
         )
         #expect(resize.atOwnMinimum)
-        #expect(resize.size == 300)
+        #expect(abs(resize.size - 0.3) < 1e-9)
     }
 
     @Test("A grow and the matching shrink bring back the same window")

@@ -900,7 +900,8 @@ The session layer is kept per macOS Desktop and profile
 ([resize](#resize)): a space id, or nothing, resets that Space on
 the Desktop its screen shows under the profile live there — a Space
 with no screen, on every Desktop; `"all"` resets every Space on
-every Desktop.
+every Desktop. It also clears the length a grow along a run kept
+([resize](#resize)).
 :::
 
 **Example:**
@@ -4941,6 +4942,11 @@ it fits, so a step reveals one window. A zone at rest keeps the
 windows it shows; closing one lets the others grow into the
 room.
 
+:::unreleased
+A window you grew along the zone past what its neighbours could
+give keeps that length instead ([resize](#resize)).
+:::
+
 Each end of a zone that hides windows shows a "+n" overflow mark
 on its edge window, counting that end's hidden windows. Clicking
 the mark opens the list of them, nearest first; clicking one
@@ -6509,23 +6515,6 @@ The sizes are kept as [column and row weights](#gridset_column_weight)
 in a session layer that
 [`reset_layout_sizing`](#reset_layout_sizing) clears.
 
-:::unreleased
-Along a run's scroll direction — a Stack zone, a Track track, an
-auto-sized Grid's last track once the grid is full, a BSP chain —
-a grow does not stop at a neighbour's minimum (#2709): the
-neighbour it squeezes goes into the run and the grown window takes
-its room, the overflow mark's `+n` counting it. A mouse drag pushes
-the neighbour on the side of the edge it moved; the keyboard
-squeezes both sides and sends the last window in order. A shrink
-brings waiting windows back for as long as the next one fits at
-its minimum: the one past the moved edge first (for the keyboard,
-the one after the run), then the other end's. The window keeps the
-length you gave it, in the same session layer
-[`reset_layout_sizing`](#reset_layout_sizing) clears. Across the
-run, in a fixed Grid's last row and in BSP's halved splits a grow
-still stops at the neighbour's minimum.
-:::
-
 `set_refusal_sound(true)` adds the system alert sound
 to that pill; only a hotkey fire sounds, so CLI and IPC callers
 see the pill and read the error JSON without hearing anything.
@@ -6552,6 +6541,24 @@ window that cannot shrink; on a refused grow the resized window
 also names the reason while the blocking neighbor marks itself
 at its minimum. Keyboard and mouse resizes share these clamps
 and cues.
+
+:::unreleased
+Along a run's scroll direction — a Stack zone, a Track track, an
+auto-sized Grid's last track once the grid is full, a BSP chain —
+a grow does not stop at a neighbour's minimum (#2709): the
+neighbour it squeezes waits in the run, the grown window takes its
+room, and the overflow mark's `+n` counts it. A mouse drag pushes
+the neighbour on the side of the edge it moved; the keyboard
+squeezes both sides and sends the last window in order. A shrink
+brings waiting windows back for as long as the next one fits at
+its minimum: the one past the moved edge first (for the keyboard,
+the one after the run), then the other end's. The window keeps
+its length, like the stack and track weights, while windows wait
+in its run, until [`reset_layout_sizing`](#reset_layout_sizing) or
+a layout change clears it. Across the run, in a fixed Grid's last
+track and in BSP's halved splits a grow still stops at the
+neighbour's minimum.
+:::
 
 The pill says *whose* minimum it was (#1261): "Minimum window
 size reached" and "Neighboring window at its minimum size" mean

@@ -1462,8 +1462,9 @@ editing here:
   z-order restore or gate that judges frames computed now leaves
   out what `parkedByRun` names, and a classifier of the last
   pass's slots takes `shownSlots()` (`RunRestWiringTests`); a
-  run's two ends are written together by `persistRunHeads`
-  (▸ `retileKeepsTheTail`). A layout joins the runs through
+  run's two ends are written together — by `persistRunHeads`
+  after a pass (▸ `retileKeepsTheTail`), through `RunZone.ends`
+  at a resize write (#2709). A layout joins the runs through
   `RunZone.zones` alone, and a run reader — the focus step
   (`runStep`), the park keep beside the inward post-pass, the
   readers above — reads a `RunCover` (the recorded one, or
@@ -1471,13 +1472,14 @@ editing here:
   through `RunCover.Run(zone:run:in:)` where no cover records a
   run that hides nothing), never a list of
   layout modes; a mode write clears every sizing store — the
-  session ratios, the track weights and `stackWeights`, which
-  every run reads — never a list of the modes it leaves or
+  session ratios and `Space.resetSizing`'s set
+  (`SpaceSizingCensusTests`), which every run reads — never a
+  list of the modes it leaves or
   enters (#2541, the #458 reseed). A layout whose stored ratios
   sit beside a run — BSP's chain (#2542) — routes every ratio door
   (the keyboard press, the mouse drag, the capped writer, the
   floor heal) through the run first: a press or drag along the
-  chain takes a run weight through the one `resizeBspChain`, and a
+  chain takes the run's step through the one `resizeBspChain`, and a
   side classifier counts the chain as one block at its region
   through `BspSplit.sides(…, chain:)`, never its members' slots,
   so no ratio moves for a window no ratio places
@@ -1919,8 +1921,9 @@ editing here:
   maximum nobody wrote.
 - **What counts as SIZING is stated where the store lives, and
   a resize never writes the authored override (#764).**
-  `Space.resetSizing` clears the sizes the Space holds (the
-  stack and track weights) and the session ratios' clearing doors
+  `Space.resetSizing` clears the sizes the Space holds (its
+  docstring and `SpaceSizingCensusTests` name them) and the
+  session ratios' clearing doors
   in `KiwiCore+SessionRatioWrite` clear the per-Desktop layer
   (#2921); `reset_layout_sizing` is a loop over both — the active
   Space or one by id on the Desktop shown, or `all` on every
@@ -1993,8 +1996,8 @@ editing here:
   grow pushes instead (#2709): a press or drag inside a zone laid
   by floor and weight takes the one `RunZone.resize` through
   `resizeInRun`, and a whole-zone weight step a neighbour's floor
-  stopped takes `pushOrCue` before any neighbour-minimum cue, so
-  no writer refuses a grow the run could take; the result is a
+  stopped takes `pushOrCue` before any neighbour-minimum cue — a
+  writer refuses no grow the run could take; the result is a
   `Space.runSizes` length and the run's two ends, written together
   (`RunZonePushTests`, `RunPushCommandTests`). A mouse caller hands
   the edge it moved (`MouseResize.movedSide`), the keyboard `.both`.

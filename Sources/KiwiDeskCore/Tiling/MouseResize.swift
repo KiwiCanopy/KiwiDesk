@@ -221,15 +221,15 @@ public enum MouseResize {
             if abs(dw) >= abs(dh), abs(dw) > threshold {
                 return .gridColumn(
                     dw,
-                    leading: abs(frame.minX - slot.minX)
-                        > abs(frame.maxX - slot.maxX)
+                    leading: movedSide(from: slot, to: frame, vertical: false)
+                        == .start
                 )
             }
             if abs(dh) > threshold {
                 return .gridRow(
                     dh,
-                    leading: abs(frame.minY - slot.minY)
-                        > abs(frame.maxY - slot.maxY)
+                    leading: movedSide(from: slot, to: frame, vertical: true)
+                        == .start
                 )
             }
             return nil

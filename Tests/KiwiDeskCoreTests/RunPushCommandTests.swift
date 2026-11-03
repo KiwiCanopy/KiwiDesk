@@ -26,6 +26,7 @@ struct RunPushCommandTests {
         _ mode: String,
         windows count: UInt32,
         focus: UInt32,
+        height: CGFloat = 820,
         setup: (KiwiCore) -> Void = { _ in }
     ) -> (KiwiCore, SpaceID) {
         let core = makeTestCore(
@@ -36,7 +37,7 @@ struct RunPushCommandTests {
                 )
         )
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1220, height: 820)
+            CGRect(x: 0, y: 0, width: 1220, height: height)
         }
         core.tiler.settings.gapsGlobal = Gaps.uniform(10)
         for verb in [
@@ -105,6 +106,38 @@ struct RunPushCommandTests {
         press(core, "y", -300)
         #expect(hidden(core, id).isEmpty)
         #expect(core.state.workspaces[id]?.runTails.isEmpty == true)
+    }
+
+    /// Master w1 beside a stack zone of w2, w3, w4 that holds all
+    /// three in 1000 pt, w3 dragged by `edge` 200 pt outward.
+    private func dragMiddle(leading: Bool) throws -> (KiwiCore, SpaceID) {
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 4,
+            focus: 3,
+            height: 1020
+        )
+        #expect(hidden(core, id).isEmpty)
+        let space = try #require(core.state.workspaces[id])
+        let slot = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w(3)]
+        )
+        var dragged = slot
+        if leading { dragged.origin.y -= 200 }
+        dragged.size.height += 200
+        core.handleResizeEnd(w(3), slot: slot, frame: dragged, in: space)
+        core.retile(animated: false)
+        return (core, id)
+    }
+
+    @Test("Stack: a drag pushes the neighbour on the edge it moved")
+    func dragPushesTheMovedSide() throws {
+        let (top, topID) = try dragMiddle(leading: true)
+        #expect(hidden(top, topID) == [w(2)])
+        #expect(top.state.workspaces[topID]?.runHeads == [w(3)])
+        let (bottom, bottomID) = try dragMiddle(leading: false)
+        #expect(hidden(bottom, bottomID) == [w(4)])
+        #expect(bottom.state.workspaces[bottomID]?.runTails == [w(3)])
     }
 
     @Test("Stack: dragging the leading edge pushes the window before it")
@@ -199,6 +232,9 @@ struct RunPushCommandTests {
         let after = try #require(core.tiler.runCovers[id]?.runs.first)
         #expect(after.shown.count == shown - 1)
         #expect(after.shown.contains(focus))
+        let space = try #require(core.state.workspaces[id])
+        #expect(space.runSizes[focus] != nil)
+        #expect(space.runTails.contains(focus))
         // The halved part keeps its ratio.
         #expect(
             core.tiler.settings.resolvedBsp(

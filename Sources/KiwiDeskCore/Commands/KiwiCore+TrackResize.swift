@@ -16,7 +16,7 @@ extension KiwiCore {
         delta: Double,
         span: Double,
         space: Space,
-        toward side: RunZone.PushSide = .both
+        toward side: RunZone.PushSide
     ) -> CommandResponse {
         let params = tiler.settings.resolvedTrack(for: space.id)
         let tiled = state.effectiveTiledMembers(of: space)
@@ -92,7 +92,8 @@ extension KiwiCore {
             axis: axis,
             delta: delta,
             span: span,
-            space: space
+            space: space,
+            toward: .both
         )
     }
 

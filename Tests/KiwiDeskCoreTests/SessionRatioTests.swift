@@ -287,7 +287,8 @@ struct SessionRatioTests {
             .bspRatioH(0.1),
             for: nil,
             in: space,
-            bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080)
+            bounds: CGRect(x: 0, y: 0, width: 1920, height: 1080),
+            moved: { _ in .both }
         )
         let session =
             core.sessionRatios(of: SpaceID("1"))
