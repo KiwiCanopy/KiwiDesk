@@ -15,7 +15,8 @@ struct GlassBoxOwnershipTests {
         let parent = NSView(
             frame: CGRect(x: 0, y: 0, width: 400, height: 40)
         )
-        return try #require(GlassBox.make(in: parent))
+        let made = try #require(GlassBox.make(in: parent))
+        return made
     }
 
     private func place(
