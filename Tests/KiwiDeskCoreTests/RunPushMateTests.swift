@@ -181,8 +181,8 @@ struct RunPushMateTests {
         )
         core.state.workspaces.withSpace(id) {
             $0.runSizes = [
-                self.w(3): RunSize(share: 0.45, zone: self.w(2)),
-                self.w(4): RunSize(share: 0.45, zone: self.w(2)),
+                self.w(3): RunSize(share: 0.45, zone: 1),
+                self.w(4): RunSize(share: 0.45, zone: 1),
             ]
             $0.runHeads = [self.w(3)]
         }
@@ -205,6 +205,18 @@ struct RunPushMateTests {
         #expect(core.state.workspaces[id]?.runSizes[w(4)] == nil)
     }
 
+    @Test("A push survives a reorder inside its zone")
+    func reorderKeepsThePush() throws {
+        let (core, id) = try dragMiddle(leading: true)
+        #expect(hidden(core, id) == [w(2)])
+        core.state.workspaces.withSpace(id) {
+            $0.windows = [self.w(1), self.w(3), self.w(2), self.w(4)]
+        }
+        core.retile(animated: false)
+        #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
+        #expect(hidden(core, id).count == 1)
+    }
+
     @Test("A length whose zone anchor moved is dropped at the next pass")
     func foreignAnchorIsDropped() throws {
         // Four stack windows in 1000 pt: the run hides one at its
@@ -217,7 +229,7 @@ struct RunPushMateTests {
         )
         #expect(hidden(core, id).count == 1)
         core.state.workspaces.withSpace(id) {
-            $0.runSizes[self.w(3)] = RunSize(share: 0.6, zone: self.w(9))
+            $0.runSizes[self.w(3)] = RunSize(share: 0.6, zone: 7)
         }
         core.retile(animated: false)
         #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)

@@ -16,17 +16,24 @@ public struct RunZone: Sendable, Equatable {
     /// them by floor and weight. Nil sizes the run from its
     /// members' floors alone.
     public let slots: [CGRect]?
+    /// The zone's place among its layout's zones — the master zone
+    /// 0 and the stack zone 1, a track its index — what a push's
+    /// length names (`RunSize.zone`), so a reorder inside the zone
+    /// keeps it.
+    public let ordinal: Int
 
     public init(
         members: [WindowID],
         region: CGRect,
         vertical: Bool,
-        slots: [CGRect]? = nil
+        slots: [CGRect]? = nil,
+        ordinal: Int = 0
     ) {
         self.members = members
         self.region = region
         self.vertical = vertical
         self.slots = slots
+        self.ordinal = ordinal
     }
 
     /// The zones `mode` lays `tiled` along, nil for a layout that

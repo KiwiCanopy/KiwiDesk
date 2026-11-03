@@ -1993,21 +1993,20 @@ editing here:
   bounce on the trier
   (`ResizeSizeLimitFeedbackTests`,
   `ResizeNeighborLimitTests`). Along a run's scroll direction a
-  grow pushes instead (#2709): a press or drag inside a zone laid
-  by floor and weight asks the one `RunZone.resize` through
-  `resizeInRun`, and a whole-zone weight step a neighbour's floor
-  stopped takes `pushOrCue` before any neighbour-minimum cue — a
-  writer refuses no grow the run could take. A press that moves a
-  window into or out of the run writes a `Space.runSizes` entry
-  and the run's two ends together, and only a window holding a
-  length pulls; a press beside only sized mates moves the nearest
-  mate's length (`resizeBesideSized`), every other press the run's
-  weight step; the run itself decides when a
-  length plans (`RunZone.plannedSize`), never a writer or the
-  persist step beside it (`RunZonePushTests`,
-  `RunPushCommandTests`). A press steps from the drawn frame, and
-  a mouse caller hands the edge it moved (`MouseResize.movedSide`),
-  the keyboard `.both`.
+  grow pushes instead (#2709): what a press inside a zone laid by
+  floor and weight writes is the one pure `RunZone.press`, which
+  `resizeInRun` stores whole and a whole-zone weight step a
+  neighbour's floor stopped asks through `pushOrCue` before any
+  neighbour-minimum cue — a writer refuses no grow the run could
+  take, and decides no length, side or pushed window of its own.
+  A press's lengths and the run's two ends are stored in one
+  write, and whether a stored length plans is the run's alone
+  (`RunZone.honouredSizes`): the render takes it and the persist
+  step keeps exactly what it planned (`RunCover.Run.sized`), never
+  a predicate of its own (`RunZonePushTests`,
+  `RunPushCommandTests`, `RunPushMateTests`). A mouse caller hands
+  the edge it moved (`MouseResize.movedSide`), the keyboard
+  `.both`.
   And a weight clamp divides the
   span the LAYOUT divides — the one
   `StackLayout.weightedSpan` copy, kept `minSizeMargin` above

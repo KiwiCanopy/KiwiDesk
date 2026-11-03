@@ -104,7 +104,8 @@ public struct StackLayout: LayoutSystem {
                 members: Array(stack),
                 region: halves.stack,
                 vertical: params.stackPosition.stackOrientation
-                    == .vertical
+                    == .vertical,
+                ordinal: 1
             ),
         ]
     }

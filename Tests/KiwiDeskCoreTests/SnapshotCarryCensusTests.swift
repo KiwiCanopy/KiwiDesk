@@ -104,7 +104,7 @@ struct SnapshotCarryCensusTests {
             $0.windows = [self.w2, self.w1]
             $0.focused = self.w1
             $0.stackWeights = [self.w1: 2]
-            $0.runSizes = [self.w2: RunSize(share: 0.42, zone: self.w1)]
+            $0.runSizes = [self.w2: RunSize(share: 0.42, zone: 1)]
             $0.scrollRest = ScrollRest(
                 offset: 40,
                 focus: self.w1,

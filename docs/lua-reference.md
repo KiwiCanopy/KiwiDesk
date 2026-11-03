@@ -6555,8 +6555,9 @@ its minimum: the one past the moved edge first (for the keyboard,
 the one after the run), then the other end's; a window alone in
 its run shrinks in place, leaving the room open until the next
 window fits. The window keeps its length, like the stack and
-track weights, while windows wait in its run, until [`reset_layout_sizing`](#reset_layout_sizing) or
-a layout change clears it. Across the run, in a fixed Grid's last
+track weights, while windows wait in its run, until
+[`reset_layout_sizing`](#reset_layout_sizing), a layout change, or
+the window moving to another zone clears it. Across the run, in a fixed Grid's last
 track and in BSP's halved splits a grow still stops at the
 neighbour's minimum.
 :::

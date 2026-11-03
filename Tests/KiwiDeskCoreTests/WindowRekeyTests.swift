@@ -23,10 +23,10 @@ struct WindowRekeyTests {
             trackBreaks: [old],
             trackWeights: [old: 1.5]
         )
-        space.runSizes[old] = RunSize(share: 0.6, zone: old)
+        space.runSizes[old] = RunSize(share: 0.6, zone: 1)
         space.rekey(old, to: new)
         #expect(space.windows == [WindowID(1), new, WindowID(3)])
-        #expect(space.runSizes == [new: RunSize(share: 0.6, zone: new)])
+        #expect(space.runSizes == [new: RunSize(share: 0.6, zone: 1)])
         #expect(space.focused == new)
         #expect(space.stackWeights[new] == 2.0)
         #expect(space.stackWeights[old] == nil)

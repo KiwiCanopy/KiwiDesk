@@ -71,7 +71,8 @@ public struct TrackLayout: LayoutSystem {
             RunZone(
                 members: Array(windows[range]),
                 region: regions[track],
-                vertical: vertical
+                vertical: vertical,
+                ordinal: track
             )
         }
     }

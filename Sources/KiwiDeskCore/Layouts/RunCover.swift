@@ -15,6 +15,9 @@ public struct RunCover: Sendable, Equatable {
         /// The bounds this run's ends sit flush with
         /// (`RunZone.markBounds`, #2235, #2542).
         public let bounds: CGRect
+        /// The members whose push length the run plans (#2709,
+        /// `RunZone.sizedMembers`) — what the persist step keeps.
+        public var sized: Set<WindowID> = []
 
         /// Members shown, in drawn order.
         public var shown: ArraySlice<WindowID> {
@@ -101,7 +104,8 @@ extension RunCover.Run {
             zone: zone,
             run: run,
             extra: zone.runExtra(in: context) ?? 0,
-            bounds: zone.markBounds(in: context)
+            bounds: zone.markBounds(in: context),
+            sized: zone.sizedMembers(in: context)
         )
     }
 }

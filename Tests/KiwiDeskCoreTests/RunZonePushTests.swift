@@ -37,28 +37,37 @@ struct RunZonePushTests {
         for (id, size) in sizes {
             context.runSizes[WindowID(UInt32(id))] = RunSize(
                 share: size / 1000,
-                zone: ids[0]
+                zone: 0
             )
         }
         return context
     }
 
-    /// `context` with `resize` written as the writers write it.
+    /// `context` with `press` written as the writers write it.
     private func writing(
-        _ resize: RunZone.Resize,
+        _ press: RunZone.Press,
         of id: Int,
         over context: LayoutContext
     ) -> LayoutContext {
         var context = context
-        context.runSizes = [
-            WindowID(UInt32(id)): RunSize(share: resize.size, zone: ids[0])
-        ]
-        (context.runHeads, context.runTails) = zone.ends(
-            showing: resize.visible,
-            heads: context.runHeads,
-            tails: context.runTails
-        )
+        for (member, share) in press.sizes {
+            context.runSizes[member] = share.map {
+                RunSize(share: $0, zone: 0)
+            }
+        }
+        if let visible = press.visible {
+            (context.runHeads, context.runTails) = zone.ends(
+                showing: visible,
+                heads: context.runHeads,
+                tails: context.runTails
+            )
+        }
         return context
+    }
+
+    /// The share `press` gives window `id`, 0 where it sets none.
+    private func size(_ press: RunZone.Press, _ id: Int) -> CGFloat {
+        (press.sizes[WindowID(UInt32(id))] ?? nil) ?? 0
     }
 
     @Test("At rest the run shows the first three and hides the fourth")
@@ -70,14 +79,14 @@ struct RunZonePushTests {
     func growPushesTheEnd() throws {
         let rest = try #require(zone.frames(in: context())[ids[0]])
         let resize = try #require(
-            zone.resize(ids[1], by: 200, toward: .end, in: context())
+            zone.press(ids[1], by: 200, toward: .end, in: context())
         )
         #expect(resize.visible == 0..<2)
-        #expect(resize.changed)
+        #expect(resize.movesRun)
         let after = writing(resize, of: 2, over: context())
         #expect(zone.run(in: after)?.visible == 0..<2)
         let frame = try #require(zone.frames(in: after)[ids[1]])
-        #expect(abs(frame.width - resize.size * 1000) < 0.5)
+        #expect(abs(frame.width - size(resize, 2) * 1000) < 0.5)
         // Window 2 takes window 3's room: window 1 keeps what it
         // drew.
         let kept = try #require(zone.frames(in: after)[ids[0]])
@@ -89,7 +98,7 @@ struct RunZonePushTests {
     @Test("A grow toward the start pushes the start neighbour")
     func growPushesTheStart() throws {
         let resize = try #require(
-            zone.resize(ids[1], by: 200, toward: .start, in: context())
+            zone.press(ids[1], by: 200, toward: .start, in: context())
         )
         #expect(resize.visible == 1..<3)
         let after = writing(resize, of: 2, over: context())
@@ -99,20 +108,19 @@ struct RunZonePushTests {
     @Test("A grow squeezing both sides sends the last in order")
     func growBothSendsTheLast() throws {
         let resize = try #require(
-            zone.resize(ids[1], by: 200, toward: .both, in: context())
+            zone.press(ids[1], by: 200, toward: .both, in: context())
         )
         #expect(resize.visible == 0..<2)
     }
 
-    @Test("A grow the neighbours can still give pushes nobody")
+    @Test("A grow the neighbours can still give is the weight step")
     func smallGrowKeepsTheRun() throws {
         let resize = try #require(
-            zone.resize(ids[1], by: 20, toward: .end, in: context())
+            zone.press(ids[1], by: 20, toward: .end, in: context())
         )
-        #expect(resize.visible == 0..<3)
-        let after = writing(resize, of: 2, over: context())
-        let frame = try #require(zone.frames(in: after)[ids[1]])
-        #expect(abs(frame.width - resize.size * 1000) < 0.5)
+        #expect(resize.visible == nil)
+        #expect(resize.sizes.isEmpty)
+        #expect((resize.weight ?? 1) > 1)
     }
 
     /// Window 2 grown to 600 with 3 shown beside it: windows 1 and
@@ -130,15 +138,15 @@ struct RunZonePushTests {
     @Test("A shrink pulls back the window past the moved edge")
     func shrinkPullsTheMovedSide() throws {
         let start = try #require(
-            zone.resize(ids[1], by: -300, toward: .start, in: middle())
+            zone.press(ids[1], by: -300, toward: .start, in: middle())
         )
         #expect(start.visible == 0..<3)
         let end = try #require(
-            zone.resize(ids[1], by: -300, toward: .end, in: middle())
+            zone.press(ids[1], by: -300, toward: .end, in: middle())
         )
         #expect(end.visible == 1..<4)
         let both = try #require(
-            zone.resize(ids[1], by: -300, toward: .both, in: middle())
+            zone.press(ids[1], by: -300, toward: .both, in: middle())
         )
         #expect(both.visible == 1..<4)
         let after = writing(start, of: 2, over: middle())
@@ -151,7 +159,7 @@ struct RunZonePushTests {
         // the end, and a shrink of the start edge still brings it.
         let grown = context(sizes: [2: 600], tails: [3])
         let resize = try #require(
-            zone.resize(ids[1], by: -300, toward: .start, in: grown)
+            zone.press(ids[1], by: -300, toward: .start, in: grown)
         )
         #expect(resize.visible == 0..<3)
         // Window 3 grown at the tail end: windows 1 and 2 wait
@@ -159,7 +167,7 @@ struct RunZonePushTests {
         let tail = context(focus: 3, sizes: [3: 600], heads: [3])
         #expect(zone.run(in: tail)?.visible == 2..<4)
         let pulled = try #require(
-            zone.resize(ids[2], by: -300, toward: .end, in: tail)
+            zone.press(ids[2], by: -300, toward: .end, in: tail)
         )
         #expect(pulled.visible == 1..<4)
     }
@@ -175,7 +183,7 @@ struct RunZonePushTests {
         ])
         #expect(zone.run(in: held)?.visible == 1..<3)
         let resize = try #require(
-            zone.resize(ids[1], by: -300, toward: .start, in: held)
+            zone.press(ids[1], by: -300, toward: .start, in: held)
         )
         #expect(resize.visible == 1..<3)
         #expect(!resize.movesRun)
@@ -188,40 +196,41 @@ struct RunZonePushTests {
         let pinned = context(tails: [2])
         #expect(zone.run(in: pinned)?.visible == 0..<2)
         let resize = try #require(
-            zone.resize(ids[1], by: -50, toward: .end, in: pinned)
+            zone.press(ids[1], by: -50, toward: .end, in: pinned)
         )
-        #expect(resize.visible == 0..<2)
+        #expect(resize.visible == nil)
+        #expect(resize.weight != nil)
         #expect(!resize.movesRun)
     }
 
     @Test("A shrink that frees too little pulls nothing")
     func shrinkStopsAtTheFloor() throws {
         let resize = try #require(
-            zone.resize(ids[1], by: -50, toward: .end, in: middle())
+            zone.press(ids[1], by: -50, toward: .end, in: middle())
         )
         #expect(resize.visible == 1..<3)
-        #expect(!resize.atOwnMinimum)
+        #expect(resize.cue == nil)
     }
 
     @Test("A shrink past the window's floor stops there and says so")
     func shrinkAtOwnFloor() throws {
         let resize = try #require(
-            zone.resize(ids[1], by: -400, toward: .end, in: middle())
+            zone.press(ids[1], by: -400, toward: .end, in: middle())
         )
-        #expect(resize.atOwnMinimum)
-        #expect(abs(resize.size - 0.3) < 1e-9)
+        #expect(resize.cue == .ownMinimum)
+        #expect(abs(size(resize, 2) - 0.3) < 1e-9)
     }
 
     @Test("A grow and the matching shrink bring back the same window")
     func roundTrip() throws {
         let rest = context()
         let grown = try #require(
-            zone.resize(ids[1], by: 200, toward: .both, in: rest)
+            zone.press(ids[1], by: 200, toward: .both, in: rest)
         )
         let pushed = writing(grown, of: 2, over: rest)
         let extent = try #require(zone.frames(in: pushed)[ids[1]]).width
         let shrunk = try #require(
-            zone.resize(ids[1], by: 300 - extent, toward: .both, in: pushed)
+            zone.press(ids[1], by: 300 - extent, toward: .both, in: pushed)
         )
         #expect(shrunk.visible == 0..<3)
     }
@@ -241,7 +250,7 @@ struct RunZonePushTests {
     @Test("A length given in another zone plans nothing here")
     func foreignLengthPlansNothing() {
         var moved = middle()
-        moved.runSizes[ids[1]] = RunSize(share: 0.6, zone: ids[1])
+        moved.runSizes[ids[1]] = RunSize(share: 0.6, zone: 1)
         #expect(zone.plannedSize(of: ids[1], in: moved) == nil)
     }
 
@@ -288,7 +297,7 @@ struct RunZonePushTests {
     @Test("A window not shown has nothing to resize")
     func hiddenWindowAnswersNil() {
         #expect(
-            zone.resize(ids[3], by: 50, toward: .end, in: context()) == nil
+            zone.press(ids[3], by: 50, toward: .end, in: context()) == nil
         )
     }
 }

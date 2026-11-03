@@ -4525,8 +4525,8 @@ full last track, a BSP chain — a resize along the scroll direction
 does not stop at a neighbour's minimum: the neighbour it
 squeezes waits in the run and the grown window takes its room, and
 a shrink brings waiting windows back while the next fits at its
-minimum. One rule, `RunZone.resize`, that every capped writer
-takes, not per layout: the resize finds its run through
+minimum. One pure answer, `RunZone.press`, that every capped
+writer stores, not per layout: the press finds its run through
 `RunZone.zones`, never a mode list, and a Grid or BSP push that
 looked like a Stack run yet behaved differently would be the
 inconsistency. The cue is the overflow
@@ -4543,8 +4543,10 @@ the run the write planned. The length is a share of the run's
 span, as every other sizing store is, so a Space shown on a
 smaller screen keeps its proportions rather than hiding more
 windows than the user pushed. The run decides when it counts: in
-the zone it was given in, while that run would still hide a
-window with it. A window moved to
+the zone it was given in, named by its place among the layout's
+zones so a reorder inside it keeps the length, while that run
+would still hide a window with it; the persist step keeps exactly
+what the run planned. A window moved to
 another zone, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's

@@ -12,7 +12,7 @@ struct RunSizeCodingTests {
     @Test("A run size stores share and zone")
     func storedKeysArePinned() throws {
         let data = try JSONEncoder().encode(
-            RunSize(share: 0.5, zone: WindowID(7))
+            RunSize(share: 0.5, zone: 7)
         )
         let object = try #require(
             JSONSerialization.jsonObject(with: data) as? [String: Any]
@@ -20,7 +20,7 @@ struct RunSizeCodingTests {
         #expect(Set(object.keys) == ["share", "zone"])
         #expect(
             try JSONDecoder().decode(RunSize.self, from: data)
-                == RunSize(share: 0.5, zone: WindowID(7))
+                == RunSize(share: 0.5, zone: 7)
         )
     }
 }
