@@ -10721,6 +10721,27 @@ user cannot make, and Advanced ▸ Screens still holds the pins.
 Inside a control Simple does draw, the rule binds as before: a
 control Advanced greys, Simple greys too.
 
+:::unreleased
+**Simple's Look line holds every look the user has** (#2943,
+owner ruling 2026-11-03, superseding #2737's "the bundled looks").
+My looks lead, newest first, then a hairline, then the bundled
+looks: the same set Advanced lists, in one line. A line that held
+only the look the latest gallery link added dropped the earlier
+one on the next link and every look on a reopen, while My looks
+still held them all. That is the "hiding a thing the user made
+without saying so" the entry above calls losing their work. No
+cap: the line already scrolls, and a cap would hide looks without
+naming them. "Newest" is store order reversed, since a new look
+is appended and a rename or save-over keeps its place, so no add
+time is stored. Each user look carries Rename and Delete through
+Advanced's own writes; a bundled look has no menu, because greyed
+rows promise an action it will never have. Re-adding a gallery
+look the user already holds wears that look and saves no copy,
+and the look stays as the user keeps it, renamed or edited:
+overwriting it from a changed gallery file would undo their work
+without a word.
+:::
+
 Simple is a root beside Home, not a navigator, so *Home is the
 only navigator* still holds inside Advanced. Every install opens
 on Simple until the user picks a root, an updated one too: the

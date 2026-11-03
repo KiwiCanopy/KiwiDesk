@@ -60,12 +60,19 @@ extension KiwiCore {
 
     /// Adds a look a gallery link downloaded (#1740) under a free
     /// name, keeping the gallery id a look started from it credits.
+    /// A gallery id My looks already holds answers with that look,
+    /// as the user keeps it, and saves no copy (#2943).
     @discardableResult
     public func installGalleryLook(
         _ data: Data,
         from link: LookLink,
         fallbackName: String
     ) throws -> ShelfLook {
+        if let held = lookLibrary.userLooks().first(where: {
+            $0.galleryID == link.id
+        }) {
+            return held
+        }
         var look = try LookStore.importLook(data: data)
         look.galleryID = link.id
         return try addImported(look, fallbackName: fallbackName)

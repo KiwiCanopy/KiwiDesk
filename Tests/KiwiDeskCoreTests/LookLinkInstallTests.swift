@@ -41,16 +41,34 @@ struct LookLinkInstallTests {
         #expect(stored?.author == "Anna")
     }
 
-    @Test("a second install of a taken name takes a free one")
+    @Test("another gallery look under a taken name takes a free one")
     func freeName() throws {
         let core = try KeepFixture.core()
         try core.installGalleryLook(file(), from: link, fallbackName: "x")
+        let other = LookLink(URL(string: "kiwidesk://look/dusk-2")!)!
         let second = try core.installGalleryLook(
             file(),
-            from: link,
+            from: other,
             fallbackName: "x"
         )
         #expect(second.name == "Dusk 2")
+    }
+
+    /// #2943: a re-add found the look by name only, so it saved a copy.
+    @Test("a re-add answers with the look held, renamed or not")
+    func reAddSavesNoCopy() throws {
+        let core = try KeepFixture.core()
+        try core.installGalleryLook(file(), from: link, fallbackName: "x")
+        try core.renameLook(from: "Dusk", to: "Evening")
+        let again = try core.installGalleryLook(
+            file(named: "Dusk changed"),
+            from: link,
+            fallbackName: "x"
+        )
+        #expect(again.name == "Evening")
+        #expect(
+            try core.lookLibrary.libraryLooks().map(\.name) == ["Evening"]
+        )
     }
 
     @Test("a look started from it credits the gallery id")

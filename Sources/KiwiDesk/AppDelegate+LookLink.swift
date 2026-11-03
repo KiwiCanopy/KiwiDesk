@@ -3,8 +3,9 @@ import KiwiDeskCore
 
 /// The gallery's "Add to KiwiDesk" links (#1740 ▸ Step 3 decisions):
 /// `kiwidesk://look/<id>` downloads that one look, adds it to My
-/// looks under a free name and wears it as an unsaved Settings
-/// change. Nothing is saved without the user.
+/// looks under a free name — or finds the one already there (#2943)
+/// — and wears it as an unsaved Settings change. Nothing is saved
+/// without the user.
 extension AppDelegate {
     func application(_ application: NSApplication, open urls: [URL]) {
         for link in urls.compactMap(LookLink.init) {
