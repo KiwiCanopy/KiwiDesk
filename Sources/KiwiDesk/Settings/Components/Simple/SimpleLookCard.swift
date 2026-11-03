@@ -2,14 +2,15 @@ import AppKit
 import KiwiDeskCore
 import SwiftUI
 
-/// Simple's Look line (#2737 ruling 3): the bundled looks as one
-/// sideways line, each tile its name alone, the description its
-/// hover help and VoiceOver hint, led by the look a gallery link
-/// added (#1740) and ended, while the gallery is live, by its
+/// Simple's Look line (#2737 ruling 3, re-ruled by #2943): My
+/// looks newest first, then the bundled looks, as one sideways
+/// line, each tile its name alone, the description its hover help
+/// and VoiceOver hint, ended, while the gallery is live, by its
 /// Browse tile. No palette editing, no saving.
 struct SimpleLookCard: View {
     @ObservedObject var model: SettingsModel
     @FocusState private var focusedTile: String?
+    @State private var renameRequest: NameEditRequest?
 
     var body: some View {
         SimpleCard(title: Self.title) {
@@ -33,18 +34,21 @@ struct SimpleLookCard: View {
 
     private var line: some View {
         HStack(alignment: .top, spacing: 10) {
-            let linked = Self.linked(in: model)?.name
-            ForEach(Self.looks(in: model), id: \.name) { look in
-                if look.name == linked {
-                    // The gallery's look is the user's to delete; a
-                    // hairline sets it apart from the bundled (#2860).
-                    tile(look).rowActions { menu(look) }
-                    Divider()
-                        .frame(height: PaletteTile<EmptyView>.plateHeight)
-                } else {
-                    tile(look)
-                }
+            let mine = Self.mine(in: model)
+            ForEach(mine, id: \.name) { look in
+                tile(look)
+                    .popover(item: renameBinding(look.name)) {
+                        renamePopover($0).settingsPopoverChrome()
+                    }
+                    .rowActions { menu(look) }
             }
+            if !mine.isEmpty {
+                // A hairline sets the user's looks apart from the
+                // bundled (#2860).
+                Divider()
+                    .frame(height: PaletteTile<EmptyView>.plateHeight)
+            }
+            ForEach(model.core.bundledLooks, id: \.name) { tile($0) }
             browseTile
         }
         .padding(.vertical, 2)
@@ -66,14 +70,15 @@ struct SimpleLookCard: View {
         }
     }
 
-    /// The look a gallery link added, while My looks still holds it.
-    static func linked(in model: SettingsModel) -> ShelfLook? {
-        model.userLooks.first { $0.name == model.linkedLook }
+    /// My looks, newest first: the store appends a new look and
+    /// keeps a renamed or saved-over one in place (#2943).
+    static func mine(in model: SettingsModel) -> [ShelfLook] {
+        model.userLooks.reversed()
     }
 
-    /// The linked look, then the bundled ones.
+    /// My looks, then the bundled ones.
     static func looks(in model: SettingsModel) -> [ShelfLook] {
-        (linked(in: model).map { [$0] } ?? []) + model.core.bundledLooks
+        mine(in: model) + model.core.bundledLooks
     }
 
     private func tile(_ look: ShelfLook) -> some View {
@@ -91,9 +96,18 @@ struct SimpleLookCard: View {
         .focused($focusedTile, equals: look.name)
     }
 
-    /// The gallery look's menu (#2860): Delete alone; renaming and
-    /// sharing are Advanced's, and a bundled look has no menu.
+    /// A user look's menu (#2860, #2943): Rename and Delete, through
+    /// Advanced's writes; exporting and sharing are Advanced's, and a
+    /// bundled look has no menu.
+    @ViewBuilder
     private func menu(_ look: ShelfLook) -> some View {
+        Button(L("looks.rename", "Rename…")) {
+            renameRequest = NameEditRequest(
+                seed: look.name,
+                subject: look.name
+            )
+        }
+        Divider()
         Button(L("looks.delete", "Delete"), role: .destructive) {
             let neighbour = DeletionFocus.neighbour(
                 after: look.name,
@@ -101,6 +115,20 @@ struct SimpleLookCard: View {
             )
             model.deleteUserLook(look.name)
             focusedTile = neighbour
+        }
+    }
+
+    private func renameBinding(_ name: String) -> Binding<NameEditRequest?> {
+        Binding(
+            get: { renameRequest?.subject == name ? renameRequest : nil },
+            set: { if $0 == nil { renameRequest = nil } }
+        )
+    }
+
+    private func renamePopover(_ request: NameEditRequest) -> some View {
+        LooksShelf.renamePopover(request, model: model) { name, old in
+            model.renameUserLook(from: old, to: name)
+            renameRequest = nil
         }
     }
 

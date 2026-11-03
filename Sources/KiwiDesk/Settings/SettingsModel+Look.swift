@@ -25,7 +25,6 @@ extension SettingsModel {
     /// (`SettingsWindowController.show(beforeFront:)`, #2863).
     func wearLinkedLook(_ look: ShelfLook) {
         refreshLooks()
-        linkedLook = look.name
         applyLook(look)
         guard !showsSimple else { return }
         land(on: SettingsAnchor(destination: .looks))
@@ -50,30 +49,22 @@ extension SettingsModel {
         return name == old || !lookStore.hasUserLook(name)
     }
 
-    /// Renames a user look; a gallery link on it follows the name,
-    /// so Simple's line keeps the look (#2860).
+    /// Renames a user look; it keeps its place in My looks (#2860).
     func renameUserLook(from old: String, to typed: String) {
         let name = typed.trimmingCharacters(in: .whitespacesAndNewlines)
         guard canRenameUserLook(name, from: old) else { return }
-        do {
-            try core.renameLook(from: old, to: name)
-            if linkedLook == old { linkedLook = name }
-        } catch {}
+        try? core.renameLook(from: old, to: name)
         refreshLooks()
     }
 
-    /// Deletes a user look; a gallery link on it goes with it.
+    /// Deletes a user look.
     func deleteUserLook(_ name: String) {
         try? core.deleteLook(name)
         refreshLooks()
     }
 
-    /// Re-reads the user looks from the store, forgetting a linked
-    /// look the library no longer holds.
+    /// Re-reads the user looks from the store.
     func refreshLooks() {
         userLooks = lookStore.userLooks()
-        if !userLooks.contains(where: { $0.name == linkedLook }) {
-            linkedLook = nil
-        }
     }
 }
