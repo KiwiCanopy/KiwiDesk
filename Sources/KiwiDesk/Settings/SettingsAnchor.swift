@@ -101,7 +101,7 @@ extension SettingsAnchor {
         case .pocketShortcuts:
             self.init(
                 destination: .shortcuts,
-                anchor: SettingsCatalog.shortcuts.pocketKeys.id
+                anchor: SettingsCatalog.shortcuts.pocketCard.id
             )
         case .pocketKeys:
             self.init(

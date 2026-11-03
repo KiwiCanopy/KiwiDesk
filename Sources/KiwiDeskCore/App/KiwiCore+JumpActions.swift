@@ -94,7 +94,7 @@ extension KiwiCore {
         }
         if let away = state.awayWindows[id] {
             // No bridge reaches a full-screen Space (#2930, #2939).
-            if awayIsFullScreen(away, in: NativeSpaces.desktopSnapshot()) {
+            if awayIsFullScreen(away, in: desktopMemory.readDesktops()) {
                 jumpToFullScreen(id, pid: away.pid)
                 return
             }
@@ -198,7 +198,7 @@ extension KiwiCore {
         // The row's own verdict: a full-screen window stays (#2930).
         let fullScreen = awayIsFullScreen(
             away,
-            in: NativeSpaces.desktopSnapshot()
+            in: desktopMemory.readDesktops()
         )
         guard !fullScreen, let bundleID = away.appBundleID?.lowercased(),
             let hopped = hopAwayWindows(

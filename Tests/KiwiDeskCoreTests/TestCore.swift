@@ -205,26 +205,7 @@ func makeTestCore(
     core.eventLoop.registersWorkspaceObservers = false
     armForeignAppTripwires(core)
     armStartTripwire(core)
-    // Same class, sixth time (#1146): the compositor reads behind the
-    // gone classifier, the away ledger, the heal stand-down and the
-    // shelf stand-down's host Space (#2937) default LIVE. Pin "no
-    // compositor"; a filed Desktop reading still reads the host.
-    core.desktopMemory.readWindowSpace = { _ in .unavailable }
-    core.desktopMemory.readOffShown = { _ in false }
-    core.desktopMemory.liveSpaceIsUser = { _ in true }
-    core.windowIsOnScreen = { _ in nil }
-    core.windowIsOnShownDesktop = { _ in nil }
-    core.vision.listWindows = { [] }
-    core.desktopMemory.readCensus = { _ in nil }
-    // Same class, seventh time (#1147): the Desktop stamp write
-    // defaults LIVE, and a fixture space id is a real Desktop id
-    // on the host — Desktop 1 is id 1 — so any suite that boots a
-    // core or switches Desktops would stamp the developer's own
-    // Desktops through the real bridge. Pin "the write is
-    // refused", which is exactly the bridge-absent host; the
-    // stamping suite takes the live writer back explicitly, with
-    // the bridge itself faked.
-    core.desktopMemory.writeStamp = { _, _ in false }
+    pinDesktopReads(core)
     // The Desktop shortcut mark lives in the app's defaults; a
     // fixture offers nothing unless it states a mark.
     core.desktopMemory.readLegacyShortcutOffer = {

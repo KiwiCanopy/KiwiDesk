@@ -10,7 +10,7 @@ struct PocketGroup: View {
     let expander: ShortcutsFamilyRows
 
     var body: some View {
-        SettingsSection(SettingsCatalog.shortcuts.pocketKeys) {
+        SettingsSection(SettingsCatalog.shortcuts.pocketCard) {
             Group {
                 // What it holds leads its keys (owner, #2678).
                 capacityRow

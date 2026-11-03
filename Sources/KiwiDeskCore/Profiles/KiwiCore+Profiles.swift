@@ -286,7 +286,7 @@ extension KiwiCore {
         // it, and asks under both of the Desktop's keys (#1147).
         guard
             let binding = mainDesktopBinding(
-                in: NativeSpaces.desktopSnapshot()
+                in: desktopMemory.readDesktops()
             ),
             case .success(let pick) = boundProfile(of: binding)
         else { return false }

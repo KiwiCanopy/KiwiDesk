@@ -23,7 +23,7 @@ extension KiwiCore {
     func awayReach(bundleID: String) -> AwayReach? {
         let away = awayWindows(bundleID: bundleID)
         guard !away.isEmpty else { return nil }
-        let snapshot = NativeSpaces.desktopSnapshot()
+        let snapshot = desktopMemory.readDesktops()
         guard let census = desktopMemory.readCensus(snapshot.spaces) else {
             return nil
         }

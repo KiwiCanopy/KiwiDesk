@@ -182,6 +182,12 @@ final class DesktopMemory {
     /// to true by `makeTestCore`.
     var liveSpaceIsUser: (String) -> Bool = NativeSpaces.liveSpaceIsUser
 
+    /// Core's one Desktop reading — `stampedDesktopSnapshot`'s, whose
+    /// filed verdicts hang on it, and every query's. `makeTestCore`
+    /// pins it to no reading unless a suite states a topology
+    /// override; a fixture's unstated reads stay live.
+    var readDesktops: () -> DesktopSnapshot = NativeSpaces.desktopSnapshot
+
     /// The native Space each screen shows, filed at the HEAD of
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).

@@ -27,13 +27,7 @@ extension KiwiCore {
             self?.barMenuHooks.openSettings(landing)
         }
         peek.openMenu = { [weak self] source, space, anchor in
-            self?.presentBarWindowMenu(
-                source.windows,
-                kind: source.menuKind,
-                space: space,
-                at: anchor,
-                keyed: source.keysPocketWindows
-            )
+            self?.presentBarWindowMenu(source, space: space, at: anchor)
         }
     }
 

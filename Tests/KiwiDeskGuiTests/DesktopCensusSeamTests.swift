@@ -207,7 +207,9 @@ struct DesktopCensusSeamTests {
     @Test("makeTestCore pins both compositor doors")
     func testCorePinsBothDoors() throws {
         let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"].map {
-            Self.tests.appendingPathComponent("\($0)/TestCore.swift")
+            Self.tests.appendingPathComponent(
+                "\($0)/TestCoreDesktopPins.swift"
+            )
         }
         for twin in twins {
             let source = try SourceScan.strippedSource(at: twin)
