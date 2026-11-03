@@ -8199,7 +8199,7 @@ window's included; ask `explain_app` instead.
 
 :::unreleased
 The answer also carries `title`, the window's title as `get_state`
-has it. `explain_app` still returns no titles.
+has it.
 :::
 
 `detection.reason` can also read `raised_layer`: a standard
@@ -8221,6 +8221,13 @@ its `policy` and whether it is `hidden`), `windows` (tracked
 ids), `minimized` (ids), `away` (each `id` with its `space_id`)
 and `app_rule`, as `explain_window` has it. An app nothing knows
 answers empty lists.
+
+:::unreleased
+`windows` and `minimized` list each window as `{id, title}`, and
+each `away` entry carries `title` too. A minimized or away window's
+title is the one it had when it left; a window found away at start
+has none (`""`).
+:::
 
 ### get_config_status
 

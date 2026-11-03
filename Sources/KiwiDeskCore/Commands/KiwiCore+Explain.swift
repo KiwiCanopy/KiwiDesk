@@ -96,15 +96,18 @@ extension KiwiCore {
         guard let app, !app.isEmpty else {
             return .fail("expected an app's bundle id")
         }
+        // Each window is `{id, title}`, as `list_windows` names one
+        // (#2895); a minimized or away title is the one it left with.
         let windows = state.windows.all
             .filter { $0.appBundleID?.lowercased() == app }
-            .map { JSONValue.number(Double($0.id.raw)) }
+            .map { Self.named($0.id, $0.title) }
         let minimized = state.minimizeOrder
             .filter { $0.bundleID?.lowercased() == app }
-            .map { JSONValue.number(Double($0.id.raw)) }
+            .map { Self.named($0.id, $0.title) }
         let away = awayWindows(bundleID: app).map {
             JSONValue.object([
                 "id": .number(Double($0.id.raw)),
+                "title": .string($0.title),
                 "space_id": state.rememberedSpace(of: $0.id).map {
                     .string($0.raw)
                 } ?? .null,
@@ -133,6 +136,10 @@ extension KiwiCore {
                 "app_rule": appRuleFacts(app),
             ])
         )
+    }
+
+    private static func named(_ id: WindowID, _ title: String) -> JSONValue {
+        .object(["id": .number(Double(id.raw)), "title": .string(title)])
     }
 
     /// The app's live processes, each with whether KiwiDesk
