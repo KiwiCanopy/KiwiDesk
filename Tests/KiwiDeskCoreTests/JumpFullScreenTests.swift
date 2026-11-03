@@ -120,7 +120,9 @@ struct JumpFullScreenTests {
     func slotNamesItsWindow() {
         defer { resetAuthorityOverrides() }
         let core = makeCore()
-        depart(core, to: 4, element: AXUIElementCreateApplication(pid))
+        // `id`'s release fills the slot, and no destroy claims it.
+        core.eventLoop.elements[pid] = [id: AXUIElementCreateApplication(pid)]
+        core.eventLoop.releaseWindowRegistration(id, pid: pid)
         let other = WindowID(8)
         var window = window()
         window = ManagedWindow(

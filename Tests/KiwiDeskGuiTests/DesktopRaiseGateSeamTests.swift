@@ -31,9 +31,10 @@ struct DesktopRaiseGateSeamTests {
         "AXHelper.activateThenRaise(",
     ]
 
-    /// The raises that pass the gate on purpose, each with its
-    /// ruling: Jump's full-screen seam default, which only Jump's
-    /// arm calls (#2939, `JumpFullScreenSeamTests`).
+    /// The files whose ordered raise passes the gate on purpose,
+    /// each with its ruling: Jump's full-screen seam default, which
+    /// only Jump's arm calls (#2939; `JumpFullScreenSeamTests` holds
+    /// the one spelling).
     private static let passesOnPurpose: Set<String> = [
         "KiwiCore+LaunchRestore.swift"
     ]
@@ -60,9 +61,12 @@ struct DesktopRaiseGateSeamTests {
             guard Self.raises.contains(where: source.contains)
             else { continue }
             found.insert(url.lastPathComponent)
-            if !Self.passesOnPurpose.contains(url.lastPathComponent),
-                !Self.gates.contains(where: source.contains)
-            {
+            // The exemption is the ordered raise's alone: a file
+            // spelling `AXHelper.raise(` asks the gate wherever it is.
+            let exempt =
+                Self.passesOnPurpose.contains(url.lastPathComponent)
+                && !source.contains("AXHelper.raise(")
+            if !exempt, !Self.gates.contains(where: source.contains) {
                 ungated.append(url.lastPathComponent)
             }
         }

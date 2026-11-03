@@ -1337,7 +1337,7 @@ editing here:
   `DesktopRaiseGateArmTests` the three arms each beside a shown
   control, and `DesktopRaiseGateSeamTests` the census of files
   that may spell an activating raise (`AXHelper.raise(`, and
-  `AXHelper.activateThenRaise(` in its one ruled home) — a new raise
+  `AXHelper.activateThenRaise(` in its one ruled file) — a new raise
   site joins it and asks the gate in the same file. Further arms follow from
   the same reading that a swipe is not a close — append one here
   rather than opening a bullet of its own: a window that LEFT
@@ -1382,9 +1382,10 @@ editing here:
   registration BEFORE it emits `.windowDestroyed`, in the same turn,
   since the gone handler claims the element there. A window with no
   element brings its app forward (`docs/accepted-limitations.md`).
-  `JumpFullScreenSeamTests` holds the seam and the arm to Jump and
-  both twins to the pin, `DesktopRaiseGateSeamTests` the raise's one
-  home, `JumpFullScreenTests` the arms and the sweep's order; the
+  `JumpFullScreenSeamTests` holds the raise's one home, the seam and
+  the arm to Jump and both twins to the pin, `DesktopRaiseGateSeamTests`
+  every other raise site to the gate, `JumpFullScreenTests` the arms
+  and the sweep's order; the
   argument is the design-decisions entry's.
 - **Several raises that must land in a given ORDER go through
   `raiseSequentially` / `performZOrderSequence`** — never a loop
