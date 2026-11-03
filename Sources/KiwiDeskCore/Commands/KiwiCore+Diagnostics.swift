@@ -54,12 +54,7 @@ extension KiwiCore {
             return JSONValue.object([
                 "id": .number(Double(display.id.raw)),
                 "name": .string(display.name),
-                "x": .number(Double(frame.minX)),
-                "y": .number(Double(frame.minY)),
-                "width": .number(Double(display.frame.width)),
-                "height": .number(
-                    Double(display.frame.height)
-                ),
+                "frame": Self.json(rect: frame),
                 "layout_frame": laid.map(Self.json(rect:)) ?? .null,
                 "fingerprint": .string(display.fingerprint),
             ])

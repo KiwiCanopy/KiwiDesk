@@ -32,8 +32,12 @@ struct ListMonitorsOriginTests {
         for entry in list {
             guard case .object(let monitor) = entry else { continue }
             let id = try #require(monitor["id"]?.numberValue)
-            let x = try #require(monitor["x"]?.numberValue)
-            let y = try #require(monitor["y"]?.numberValue)
+            guard case .object(let frame)? = monitor["frame"] else {
+                Issue.record("no nested frame in \(monitor)")
+                continue
+            }
+            let x = try #require(frame["x"]?.numberValue)
+            let y = try #require(frame["y"]?.numberValue)
             byID[UInt32(id)] = (x, y)
         }
         return byID

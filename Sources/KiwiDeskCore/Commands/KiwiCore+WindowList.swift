@@ -160,7 +160,7 @@ extension KiwiCore {
             "visibility": placement.map {
                 Self.json(visibility: $0.visibility)
             } ?? .null,
-            "floats": .bool(
+            "effective_float": .bool(
                 EffectiveFloat.applies(
                     isFloating: window.isFloating,
                     mode: site.drawn.flatMap { state.workspaces[$0]?.mode }

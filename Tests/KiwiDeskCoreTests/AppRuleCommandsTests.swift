@@ -82,8 +82,8 @@ struct AppRuleCommandsTests {
             Issue.record("no list")
             return
         }
-        #expect(fields["spaces"] == .object(["com.x": .string("1")]))
-        guard case .array(let floats)? = fields["floats"] else {
+        #expect(fields["app_rules"] == .object(["com.x": .string("1")]))
+        guard case .array(let floats)? = fields["float_rules"] else {
             Issue.record("no floats")
             return
         }

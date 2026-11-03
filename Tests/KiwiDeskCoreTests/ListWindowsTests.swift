@@ -85,7 +85,7 @@ struct ListWindowsTests {
             #expect(entry["visibility"] == .string("visible"))
             #expect(hasRect(entry["frame"]))
             #expect(entry["space_id"] == .string("1"))
-            #expect(entry["floats"] == .bool(false))
+            #expect(entry["effective_float"] == .bool(false))
             #expect(entry["title"] == .string("Title \(id)"))
         }
         #expect(seen[1]?["focused"] == .bool(true))
@@ -113,7 +113,7 @@ struct ListWindowsTests {
         )
         core.state.apply(.windowFocused(WindowID(1)))
         let entry = try #require(try entries(core)[2])
-        #expect(entry["floats"] == .bool(true))
+        #expect(entry["effective_float"] == .bool(true))
         #expect(entry["shown"] == .bool(true))
         #expect(
             entry["frame"]

@@ -67,7 +67,7 @@ struct ExplainCommandsTests {
         let core = makeCore()
         track(core)
         let floating = explain(core)["float"]
-        #expect(field(floating, "floats") == .bool(false))
+        #expect(field(floating, "effective_float") == .bool(false))
         #expect(field(floating, "cause") == .null)
         #expect(field(floating, "detection") == .null)
     }
@@ -144,7 +144,7 @@ struct ExplainCommandsTests {
         let answer = explain(core)
         let floating = answer["float"]
         #expect(field(floating, "cause") == .string("space_mode"))
-        #expect(field(floating, "floats") == .bool(true))
+        #expect(field(floating, "effective_float") == .bool(true))
         #expect(answer["floating"] == .bool(false))
         #expect(answer["mode"] == .string("floating"))
     }
@@ -164,7 +164,7 @@ struct ExplainCommandsTests {
         let rule = answer["app_rule"]
         #expect(field(rule, "space") == .string("3"))
         #expect(
-            field(rule, "floats")
+            field(rule, "float_rules")
                 == .array([.string("\(bundle):Info")])
         )
         #expect(field(rule, "tile_rule") == .bool(true))

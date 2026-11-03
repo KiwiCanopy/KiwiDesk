@@ -78,7 +78,7 @@ extension KiwiCore {
                 ])
             } ?? .null
         return .object([
-            "floats": .bool(
+            "effective_float": .bool(
                 EffectiveFloat.applies(isFloating: flag, mode: mode)
             ),
             "cause": cause,
