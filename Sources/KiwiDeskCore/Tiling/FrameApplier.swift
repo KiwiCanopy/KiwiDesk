@@ -11,7 +11,8 @@ final class FrameApplier {
 
     private var animatingPid: [WindowID: pid_t] = [:]
     private var pidCounts: [pid_t: Int] = [:]
-    private var queues: [pid_t: DispatchQueue] = [:]
+    /// Per-app frame queues, made by `queue(for:)`.
+    var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
     private let recent = RecentApplies()
     private let instantTargets = InstantTargets()
@@ -92,6 +93,37 @@ final class FrameApplier {
     /// Retires instant target stamp upon arrival of first self-echo.
     func clearInstantTarget(_ id: WindowID) {
         instantTargets.clear(id)
+    }
+
+    /// Called once when an instant write's commanded lead lapses
+    /// with no echo (#2882); inert unwired, wired once at bootstrap.
+    var instantLeadLapsed: @MainActor (WindowID) -> Void = { _ in }
+
+    /// Runs the lapse check after the grace; a test fires it by
+    /// hand.
+    var scheduleLapse:
+        @MainActor (TimeInterval, @escaping @MainActor () -> Void)
+            -> Void = { delay, work in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    MainActor.assumeIsolated(work)
+                }
+            }
+
+    /// How far past the grace the lapse check runs.
+    private static let lapseMargin: TimeInterval = 0.05
+
+    /// Reports a lead stamped at `stampedAt` that no echo cleared
+    /// and no newer write replaced, once its grace has passed.
+    private func lapseIfUnanswered(_ id: WindowID, stampedAt: TimeInterval) {
+        guard
+            instantTargets.lapse(
+                id,
+                stampedAt: stampedAt,
+                within: Self.echoGrace,
+                now: clock()
+            )
+        else { return }
+        instantLeadLapsed(id)
     }
 
     /// Marks window animating and disables app EnhancedUserInterface.
@@ -191,7 +223,11 @@ final class FrameApplier {
         // Recorded before the element guard, at enqueue time: the
         // overlay sync wants the commanded frame this same turn
         // (#881); a stamp for a gone window expires unread.
-        instantTargets.record(id, frame: frame, now: clock())
+        let stamped = clock()
+        instantTargets.record(id, frame: frame, now: stamped)
+        scheduleLapse(Self.echoGrace + Self.lapseMargin) { [weak self] in
+            self?.lapseIfUnanswered(id, stampedAt: stamped)
+        }
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
@@ -287,50 +323,6 @@ final class FrameApplier {
         let recent = recent
         let clock = clock
         return { recent.record($0, now: clock()) }
-    }
-
-    func queue(for pid: pid_t) -> DispatchQueue {
-        // Own process runs on main queue to prevent AppKit thread traps
-        // (#678 Phase 5).
-        if pid == getpid() {
-            return DispatchQueue.main
-        }
-        if let existing = queues[pid] {
-            return existing
-        }
-        let queue = DispatchQueue(
-            label: "org.kiwidesk.frames.\(pid)",
-            qos: .userInteractive
-        )
-        queues[pid] = queue
-        return queue
-    }
-
-    /// EUI holds ride the same per-app queue as the frames, so
-    /// off → frames → on ordering is guaranteed.
-    private func holdEUI(pid: pid_t, held: Bool) {
-        let holds = enhancedUI
-        let writer = writer
-        if held {
-            holds.noteQueued(
-                pid,
-                atRest: enhancedUIAtRest(pid),
-                instant: false
-            )
-        }
-        queue(for: pid).async {
-            if held {
-                holds.acquire(pid, writer)
-            } else {
-                holds.release(pid, writer)
-            }
-        }
-    }
-
-    /// The event loop stopped owning the app and left its EUI
-    /// at `leftOn`; a hold still open restores that.
-    func retireApp(_ pid: pid_t, leftOn: Bool) {
-        enhancedUI.retire(pid, leftOn: leftOn)
     }
 
     static func pid(of element: AXUIElement) -> pid_t? {

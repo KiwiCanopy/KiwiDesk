@@ -207,6 +207,12 @@ extension KiwiCore {
         borders.commandedFrame = commandedInstant
         stickyMarks.commandedFrame = commandedInstant
         overflowMarks.commandedFrame = commandedInstant
+        // That lead lapsing unanswered owes one steady sync, no
+        // re-order (#2882, #1925).
+        tiler.applier.instantLeadLapsed = { [weak self] _ in
+            self?.updateBorders()
+            self?.updateMarks()
+        }
         // Both marks move through the ring's one panel move, so a
         // test core's pin reaches them too (#2531).
         let movePanel: PanelPlacement.Move = {

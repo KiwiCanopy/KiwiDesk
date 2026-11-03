@@ -34,6 +34,23 @@ final class InstantTargets: @unchecked Sendable {
         defer { lock.unlock() }
         entries[id] = nil
     }
+
+    /// Drops the entry stamped at `stampedAt` once its grace has
+    /// passed: true where it was still standing (#2882).
+    func lapse(
+        _ id: WindowID,
+        stampedAt: TimeInterval,
+        within interval: TimeInterval,
+        now: TimeInterval
+    ) -> Bool {
+        lock.lock()
+        defer { lock.unlock() }
+        guard let entry = entries[id], entry.at == stampedAt,
+            now - entry.at > interval
+        else { return false }
+        entries[id] = nil
+        return true
+    }
 }
 
 /// Recent frame application timestamps for echo suppression.

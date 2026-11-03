@@ -172,6 +172,15 @@ second cancel the other:
   window whose app accepted no AX write at all — the ring rode our
   commanded frames to the target while the window never moved, and
   no echo and no WindowServer event is coming.
+- **An instant lead's lapse, its instant twin** (#2882). An
+  `applyInstant` write starts no animation, so the late resync
+  never runs for it; a lead that lapses with no echo (an app that
+  refused the write) owes one steady `updateBorders()` /
+  `updateMarks()` at the lapse, with no `reassertOrder`, so the
+  switch path gains no round trip (#1925). It runs through the
+  applier's one `instantLeadLapsed` seam, inert by default and
+  wired once in `KiwiCore+Bootstrap`, never from a call site
+  (`InstantLeadLapseTests`, `InstantLeadLapseSeamTests`).
 
 ## The switch path adds no ring round trip beyond its ruled re-stacks
 
