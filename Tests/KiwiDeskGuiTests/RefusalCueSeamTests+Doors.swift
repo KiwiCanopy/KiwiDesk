@@ -55,7 +55,7 @@ extension RefusalCueSeamTests {
         // In Core the beep lives in exactly one place, which is
         // what keeps "a sound follows a pill" checkable at all.
         #expect(core.occurrences(of: "NSSound.beep()") == 1)
-        // The GUI's two beeps refuse nothing: a settings preview,
+        // The GUI's beeps refuse nothing: a settings preview,
         // and KiwiHub's dead ↩ chord (#2931, `JumpRefusalRowTests`).
         let gui = try Self.tree("KiwiDesk")
         let general = try Self.file(
@@ -89,7 +89,8 @@ extension RefusalCueSeamTests {
     /// counted sounded (`soundIfDrawn(` wrapping the call) and
     /// unsounded apart (#2873), so a dropped wrapper moves one
     /// across and reds; a sound spoken from a `let` the call
-    /// returned reads as unsounded, the trade.
+    /// returned reads as unsounded, a shape `soundSitsWithTheDrawing`
+    /// refuses.
     @Test("the unsounded pill door has its named callers")
     func pillDoorCallersAreNamed() throws {
         let core = Self.root.appendingPathComponent(
@@ -101,11 +102,9 @@ extension RefusalCueSeamTests {
             let calls =
                 text.occurrences(of: "flashRefusalPill(")
                 - text.occurrences(of: "funcflashRefusalPill(")
-            let sounded = [
-                "soundIfDrawn(flashRefusalPill(",
-                "soundIfDrawn(self.flashRefusalPill(",
-                "soundIfDrawn(self?.flashRefusalPill(",
-            ].reduce(0) { $0 + text.occurrences(of: $1) }
+            let sounded = text.occurrences(
+                of: "soundIfDrawn(flashRefusalPill("
+            )
             guard calls > 0 else { continue }
             callers[file.lastPathComponent] = Calls(
                 sounded: sounded,
