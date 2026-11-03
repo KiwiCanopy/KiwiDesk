@@ -157,8 +157,9 @@ struct ShownUserSpaceSeamTests {
             )
             #expect(factory.contains("pinDesktopReads(core)"), "\(twin)")
         }
-        // Core reads the Desktops through the seam alone: its
-        // default is the one live read left.
+        // Every `desktopSnapshot` read in Core goes through the
+        // seam, its default the one left; `activeDesktopNumber()`,
+        // which reads it unqualified, is outside this needle.
         #expect(
             try sites(of: "NativeSpaces.desktopSnapshot")
                 == ["DesktopMemory.swift": 1]
