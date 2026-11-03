@@ -202,11 +202,15 @@ extension KiwiCore {
                 tiler.clearInstantTarget(id)
             }
             let late = isLateFlick(id, frame: frame, previous: preEventFrame)
+            let held =
+                !late
+                && isHeldFlick(id, frame: frame, previous: preEventFrame)
             drag.windowMoved(
                 id,
                 frame: frame,
                 validated: late,
                 late: late,
+                answersPress: late || held,
                 previous: preEventFrame
             )
         case .windowResized(let id, let frame):

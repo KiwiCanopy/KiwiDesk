@@ -708,7 +708,12 @@ editing here:
   the resize-vs-move ghost gate both went blind on it while
   working for every other app. Trailing events read the record
   through the one `recentSinglePress`, which #1798's late float
-  move shares. `MouseTracker`'s local arm closes that, under two
+  move shares. A float's move inside the echo grace passes the
+  drag's echo guard only through `answersPress`, set from the
+  `KiwiCore+LateFlick` reads — late, held, or a release in
+  flight — each asking that the press began after our last
+  write (#2087, `FloatFlickHeldTests`, `FloatFlickDropTests`).
+  `MouseTracker`'s local arm closes that, under two
   obligations:
   - **Gate the recorded press on `OwnWindowTiling.identifier`**,
     read from the pressed window
