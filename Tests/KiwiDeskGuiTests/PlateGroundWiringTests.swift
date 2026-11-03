@@ -7,9 +7,10 @@ import Testing
 /// each in-scope surface reads the resolved paint through
 /// `deskPlate`/`platePaint` or the palette they write, a plate
 /// view with no writer takes `SchematicPalette.unresolved`, and
-/// two sets close it: only the resolver names the dark plate
-/// token, and only the resolver, `LookPlate` (#1740) and KiwiHub's
-/// `JumpLayoutTile` write the palette environment.
+/// three sets close it: only the resolver names the dark plate
+/// token; only the resolver, `LookPlate` (#1740) and KiwiHub's
+/// `JumpLayoutTile` write the palette environment; and only
+/// `appearanceWriters` force an appearance anywhere in the trees.
 @Suite("Plate ground wiring")
 struct PlateGroundWiringTests {
     /// Surface file → the squashed consult it must carry.
@@ -76,7 +77,8 @@ struct PlateGroundWiringTests {
             // forcing its own would pick the plate for it. The
             // KiwiVision scene's windows take the appearance the
             // mode will show, below the writer, and are the one
-            // spelling allowed, in that file alone.
+            // spelling allowed, in that file alone (its row in
+            // `appearanceWriters` counts the same write).
             let forced =
                 file == "KiwiVisionScene.swift"
                 ? source.replacingOccurrences(
@@ -93,12 +95,16 @@ struct PlateGroundWiringTests {
             )
         }
         // One fallback: a plate view with no writer reads the
-        // resolver's unresolved paint, never a value it picks. The
-        // schematic kit's own fallbacks are its brand mode, drawn
-        // with no plate at all.
+        // resolver's unresolved paint, never a value it picks — a
+        // member of another palette (`palette?.x ?? y`) or a palette
+        // of its own (`palette ?? y`). The schematic kit's own
+        // fallbacks are its brand mode, drawn with no plate at all.
+        // Trade: a palette handed in as an init parameter or stored
+        // property under another name is not a reader here.
         let reader = try Regex(
             "@Environment\\(\\\\(?:EnvironmentValues)?\\.schematicPalette\\)"
-                + "\\s*(?:(?:private|fileprivate)\\s+)?var\\s+(\\w+)"
+                + "\\s*(?:(?:private|fileprivate|internal|public)\\s+)?"
+                + "var\\s+(\\w+)"
         )
         let spaced = Dictionary(
             try sources(spaced: true),
@@ -120,7 +126,11 @@ struct PlateGroundWiringTests {
             }
             named += names.filter { $0 == "palette" }.count
             for name in Set(names + ["palette"]) {
-                let picked = try Regex(name + "\\?\\.\\w+\\?\\?")
+                let own = "(?:^|[^\\w.])" + name
+                let picked = try Regex(
+                    own + "\\?\\.\\w+\\?\\?|" + own
+                        + "\\?\\?(?!\\.unresolved)"
+                )
                 guard source.contains(picked) else { continue }
                 Issue.record(
                     Comment(rawValue: "\(file) picks its own fallback")
@@ -162,26 +172,40 @@ struct PlateGroundWiringTests {
 
     /// A forced appearance anywhere in the scanned trees, a helper
     /// a surface draws included, picks the plate for the picture
-    /// (#2871). File → its writes, each with its reason; a reader
-    /// of the appearance (`@Environment(\.colorScheme)`) is no
-    /// write.
+    /// (#2871). File → its writes, each with its reason. A write is
+    /// any mention of the `colorScheme` key that is not an
+    /// `@Environment` read, a `preferredColorScheme(` or
+    /// `.colorScheme(` modifier, or an AppKit appearance set
+    /// (`NSApp.appearance =`, `.appearance = NSAppearance`). Trade:
+    /// an appearance set through any other AppKit spelling is not
+    /// seen.
     private let appearanceWriters: [String: Int] = [
         // The KiwiVision scene's windows, below the plate writer.
         "KiwiVisionScene.swift": 1,
-        // Glass chrome takes its tint's scheme; no plate under it.
+        // Forces only under a ruled tint (`panelGlassChrome`, #2569),
+        // whose surfaces paint their own palette and draw no plate.
         "GlassChrome.swift": 1,
+        // The user's app-wide appearance, which the verdict follows.
+        "AppearanceChoice+Scheme.swift": 1,
     ]
 
     @Test("only the ruled files force an appearance")
     func appearanceWritesAreRuled() throws {
+        let key = try Regex(
+            "\\\\(?:EnvironmentValues)?\\.colorScheme(?!\\w)"
+        )
         var found: [String: Int] = [:]
         for (file, source) in try sources() {
-            let writes = [
-                ".environment(\\.colorScheme",
-                ".environment(\\EnvironmentValues.colorScheme",
-                "preferredColorScheme(",
-                ".colorScheme(.",
+            let mentions = source.matches(of: key).count
+            let reads = [
+                "@Environment(\\.colorScheme)",
+                "@Environment(\\EnvironmentValues.colorScheme)",
             ].reduce(0) { $0 + source.occurrences(of: $1) }
+            let modifiers = [
+                "preferredColorScheme(", ".colorScheme(",
+                "NSApp.appearance=", ".appearance=NSAppearance",
+            ].reduce(0) { $0 + source.occurrences(of: $1) }
+            let writes = mentions - reads + modifiers
             if writes > 0 { found[file] = writes }
         }
         #expect(found == appearanceWriters)
