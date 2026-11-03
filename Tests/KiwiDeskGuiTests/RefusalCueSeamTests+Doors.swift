@@ -3,9 +3,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The refusal cue seam's builder and door censuses (#1261, #1255),
-/// split from `RefusalCueSeamTests` at the 350-line ceiling (#2873);
-/// one suite, so a citation names it alike.
+/// The refusal cue seam's builder and door censuses (#1261, #1255):
+/// an extension of the one suite, so a citation names it.
 extension RefusalCueSeamTests {
     /// Whose floor a minimum pill names is derived by the
     /// builders, never handed in (#1261): every `appBound:` the
