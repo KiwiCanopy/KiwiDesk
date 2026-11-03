@@ -149,8 +149,8 @@ struct ExplainCommandsTests {
         #expect(answer["mode"] == .string("floating"))
     }
 
-    @Test("the app's rules are its own slice, and no title is told")
-    func appRulesAndNoTitle() {
+    @Test("the app's rules are its own slice, and the title is told")
+    func appRulesAndTitle() {
         let core = makeCore()
         track(core)
         core.state.appRules[bundle] = SpaceID("3")
@@ -168,8 +168,7 @@ struct ExplainCommandsTests {
                 == .array([.string("\(bundle):Info")])
         )
         #expect(field(rule, "tile_rule") == .bool(true))
-        let text = String(describing: answer)
-        #expect(!text.contains("Secret title"))
+        #expect(answer["title"] == .string("Secret title"))
     }
 
     @Test("an unknown window is refused")
@@ -211,6 +210,7 @@ struct ExplainCommandsTests {
         #expect(field(answer["ignored"], "by_rule") == .bool(true))
         #expect(field(answer["ignored"], "built_in") == .bool(false))
         #expect(answer["windows"] == .array([.number(Double(id.raw))]))
+        #expect(!String(describing: answer).contains("Secret title"))
         guard case .array(let running)? = answer["running"],
             let process = running.first
         else {

@@ -149,10 +149,16 @@ struct ModifierSidesCardTests {
     func menuSkipsSidedChords() throws {
         let item = NSMenuItem(title: "", action: nil, keyEquivalent: "")
         let sided = try #require(KeyCombo.parse("rcmd+k"))
-        StatusItemController.applyMenuEquivalent(sided, to: item)
+        sided.applyMenuEquivalent(
+            to: item,
+            layoutChar: LayoutKeyGlyph.char
+        )
         #expect(item.keyEquivalent.isEmpty)
         let plain = try #require(KeyCombo.parse("cmd+k"))
-        StatusItemController.applyMenuEquivalent(plain, to: item)
+        plain.applyMenuEquivalent(
+            to: item,
+            layoutChar: LayoutKeyGlyph.char
+        )
         #expect(!item.keyEquivalent.isEmpty)
     }
 }

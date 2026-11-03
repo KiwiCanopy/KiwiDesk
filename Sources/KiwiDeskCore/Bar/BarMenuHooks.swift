@@ -50,7 +50,26 @@ public struct BarMenuHooks {
         _ in nil
     }
 
+    /// The live chord of a bound menu verb (#2869 ▸ 2), read from
+    /// the resolved active layer; nil where none is bound.
+    public var menuChord: @MainActor (BarMenuVerb) -> KeyCombo? = { _ in
+        nil
+    }
+    /// The active layout's base character for a key code, which a
+    /// menu's key-equivalent column draws (`LayoutKeyGlyph`).
+    public var layoutChar: (UInt32) -> String? = { _ in nil }
+
     public init() {}
+}
+
+/// A bar menu row whose chord may show in the key-equivalent
+/// column (#2869 ▸ 2): the GUI maps each to its catalog Lua body,
+/// which a binding must match exactly.
+public enum BarMenuVerb: CaseIterable, Sendable {
+    /// Float Window / Tile Window ↔ `toggle_floating`.
+    case toggleFloating
+    /// Remove from Pocket ↔ `toggle_pocket_window`.
+    case togglePocketWindow
 }
 
 /// A chord as the GUI draws it and as VoiceOver says it (#2601).

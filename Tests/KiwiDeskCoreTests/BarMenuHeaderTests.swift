@@ -16,7 +16,11 @@ struct BarMenuHeaderTests {
 
     @Test("a header is a section header in the menu")
     func headerIsASectionHeader() {
-        let menu = BarMenu.make(rows())
+        let menu = BarMenu.make(
+            rows(),
+            layoutChar: { _ in nil },
+            keyDown: { nil }
+        )
         #expect(menu.items[0].isSectionHeader)
         #expect(menu.items[0].title == "Safari")
         #expect(!menu.items[1].isSectionHeader)
