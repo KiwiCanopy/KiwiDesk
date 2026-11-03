@@ -6203,8 +6203,8 @@ under **Pocket**.
 A window in native full screen is listed, and **Return** shows it
 on its own full-screen Space
 ([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939)).
-One that was full screen on a Space no screen showed when KiwiDesk
-started brings only its app forward
+One already full screen on a Space no screen showed when KiwiDesk
+started is listed once its Space has been shown
 ([accepted limitations](accepted-limitations.md)).
 :::
 

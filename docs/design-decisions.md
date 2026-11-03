@@ -3087,8 +3087,9 @@ measured (2026-11-03, two screens, macOS 27.2, TextEdit; #2939
 carries the table). `AXHelper.raise` keeps #496's order for every
 other raise; its docstring says why. The residue is a window
 KiwiDesk never saw, since Accessibility lists no window on a
-full-screen Space nobody shows; it brings its app forward, as
-[Accepted limitations](accepted-limitations.md) records.
+full-screen Space nobody shows: it is not listed until its Space
+is shown once, as [Accepted limitations](accepted-limitations.md)
+records.
 
 ### A focus report is only as good as the activation behind it (#1322)
 
