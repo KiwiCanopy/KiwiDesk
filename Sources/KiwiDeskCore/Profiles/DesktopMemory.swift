@@ -182,6 +182,11 @@ final class DesktopMemory {
     /// to true by `makeTestCore`.
     var liveSpaceIsUser: (String) -> Bool = NativeSpaces.liveSpaceIsUser
 
+    /// The Desktop reading every filed verdict comes from, through
+    /// `stampedDesktopSnapshot`; `makeTestCore` pins it to a
+    /// fixture's topology, never the host's.
+    var readDesktops: () -> DesktopSnapshot = NativeSpaces.desktopSnapshot
+
     /// The native Space each screen shows, filed at the HEAD of
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).

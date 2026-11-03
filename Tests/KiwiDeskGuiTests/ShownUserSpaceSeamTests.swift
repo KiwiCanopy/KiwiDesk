@@ -131,7 +131,9 @@ struct ShownUserSpaceSeamTests {
             .appendingPathComponent("Tests")
         for twin in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
             let source = try SourceScan.strippedSource(
-                at: tests.appendingPathComponent("\(twin)/TestCore.swift")
+                at: tests.appendingPathComponent(
+                    "\(twin)/TestCoreDesktopPins.swift"
+                )
             )
             #expect(
                 source.contains(
@@ -139,7 +141,27 @@ struct ShownUserSpaceSeamTests {
                 ),
                 "\(twin)"
             )
+            // The filed half: the reading every verdict is filed
+            // from answers the fixture's topology alone.
+            #expect(
+                source.contains("core.desktopMemory.readDesktops = {"),
+                "\(twin)"
+            )
+            let factory = try SourceScan.strippedSource(
+                at: tests.appendingPathComponent("\(twin)/TestCore.swift")
+            )
+            #expect(factory.contains("pinDesktopReads(core)"), "\(twin)")
         }
+        // The stamped reading every filing takes goes through it.
+        #expect(
+            try sites(of: "desktopMemory.readDesktops()")
+                == ["KiwiCore+DesktopIdentity.swift": 1]
+        )
+        #expect(
+            try sites(of: "NativeSpaces.desktopSnapshot()")[
+                "KiwiCore+DesktopIdentity.swift"
+            ] == nil
+        )
     }
 
     @Test("only the reading and a display change write the verdict")

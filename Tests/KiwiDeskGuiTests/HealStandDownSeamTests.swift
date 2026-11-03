@@ -52,7 +52,9 @@ struct HealStandDownSeamTests {
             .appendingPathComponent("Tests")
         for twin in ["KiwiDeskCoreTests", "KiwiDeskGuiTests"] {
             let source = try SourceScan.strippedSource(
-                at: tests.appendingPathComponent("\(twin)/TestCore.swift")
+                at: tests.appendingPathComponent(
+                    "\(twin)/TestCoreDesktopPins.swift"
+                )
             )
             #expect(
                 source.contains("readOffShown = { _ in false }"),

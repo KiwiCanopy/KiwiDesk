@@ -146,7 +146,9 @@ struct DesktopRaiseGateSeamTests {
         let tests = SourceScan.repoRoot(from: #filePath)
             .appendingPathComponent("Tests")
         let twins = ["KiwiDeskCoreTests", "KiwiDeskGuiTests"].map {
-            tests.appendingPathComponent("\($0)/TestCore.swift")
+            tests.appendingPathComponent(
+                "\($0)/TestCoreDesktopPins.swift"
+            )
         }
         for twin in twins {
             let source = try SourceScan.strippedSource(at: twin)
