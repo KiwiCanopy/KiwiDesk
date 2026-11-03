@@ -197,7 +197,7 @@ public struct DesktopSnapshot: Sendable {
 /// Active-desktop authority and queries for Desktop bindings (#888).
 extension NativeSpaces {
     /// Whether the screen `uuid` shows a user Desktop now, read
-    /// from the WindowServer.
+    /// from the WindowServer; true where it names no Space there.
     public static func liveSpaceIsUser(_ uuid: String) -> Bool {
         guard let id = currentSpace(displayUUID: uuid) else { return true }
         return isUserSpace(id, in: allSpaces())

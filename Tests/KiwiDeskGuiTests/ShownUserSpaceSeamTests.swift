@@ -104,9 +104,20 @@ struct ShownUserSpaceSeamTests {
     /// pocket suites down on the owner's Mac.
     @Test("the stand-down's live Space read is a pinned seam")
     func liveReadIsPinned() throws {
+        let covering = try SourceScan.strippedSource(
+            at: Self.core.appendingPathComponent(
+                "App/KiwiCore+ScreenCovering.swift"
+            )
+        )
+        let standDown = try #require(
+            SourceScan.declarationBody(
+                after: "func shelfStandsDown(on display: DisplayID)",
+                in: covering
+            )
+        )
         #expect(
-            try sites(of: "live: desktopMemory.liveSpaceIsUser")
-                == ["KiwiCore+ScreenCovering.swift": 1]
+            standDown.occurrences(of: "live: desktopMemory.liveSpaceIsUser")
+                == 1
         )
         #expect(
             try sites(of: "NativeSpaces.currentSpaceIsUser(")

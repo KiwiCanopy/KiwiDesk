@@ -188,10 +188,10 @@ func makeTestCore(
     core.eventLoop.registersWorkspaceObservers = false
     armForeignAppTripwires(core)
     armStartTripwire(core)
-    // Same class, sixth time (#1146, #2937): the compositor reads
-    // behind the gone classifier, the away ledger and both stand-downs
-    // default LIVE, and a fixture id can be a real window or Space on
-    // the host. Pin "no compositor" on `desktopMemory`.
+    // Same class, sixth time (#1146): the compositor reads behind the
+    // gone classifier, the away ledger, the heal stand-down and the
+    // shelf stand-down's host Space (#2937) default LIVE. Pin "no
+    // compositor"; a filed Desktop reading still reads the host.
     core.desktopMemory.readWindowSpace = { _ in .unavailable }
     core.desktopMemory.readOffShown = { _ in false }
     core.desktopMemory.liveSpaceIsUser = { _ in true }

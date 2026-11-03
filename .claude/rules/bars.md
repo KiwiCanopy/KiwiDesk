@@ -429,7 +429,9 @@ twice, was a question the user answered twice. The argument is
   it. **Read its user-Space half from the verdict a Desktop
   reading filed** (`DesktopMemory.shownUserSpaces`), never two
   WindowServer round trips per pass, and let a screen no reading
-  named read live. Every event that can change which Space a
+  named read live, through `DesktopMemory.liveSpaceIsUser` alone,
+  which both `makeTestCore` twins pin to true (#2937,
+  `ShownUserSpaceSeamTests` ▸ `liveReadIsPinned`). Every event that can change which Space a
   screen shows files that verdict from its reading or drops it —
   the switch handler at its head, boot, a display change and the
   monitor change's reading — while a query taking a reading owes

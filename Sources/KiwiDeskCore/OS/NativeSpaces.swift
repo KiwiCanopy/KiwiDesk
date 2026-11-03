@@ -259,6 +259,7 @@ public enum NativeSpaces {
         /// Override for per-display pointer verification (#1023).
         public static nonisolated(unsafe) var currentSpaceOverride:
             ((String) -> SkyLight.SpaceID?)?
+        /// The whole verdict per fixture display, filed and live.
         public static nonisolated(unsafe) var currentSpaceIsUserOverride:
             ((DisplayID) -> Bool)?
         public static nonisolated(unsafe) var spacesOverride: [NativeSpace]?
