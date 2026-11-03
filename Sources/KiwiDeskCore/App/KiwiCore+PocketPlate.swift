@@ -198,9 +198,16 @@ extension KiwiCore {
     }
 
     /// VoiceOver's press: the native menu of the windows inside, at
-    /// `view`, since the peek is hidden from accessibility (#2936);
-    /// through the peek's one menu door, keyed as its list is.
+    /// `view`, since the window list is hidden from accessibility
+    /// (#2936); through the peek's one menu door, keyed as its list
+    /// is.
     func openPocketMenu(from view: PocketPlateView) {
+        // An empty Pocket has no menu: its press grows the empty
+        // state, which speaks (#2941 ▸ 1).
+        guard !pocketPlateWindows.isEmpty else {
+            openPocketList(from: view)
+            return
+        }
         shelves.peek.dismiss()
         // The menu holds a revealed shelf out while it tracks (#761).
         shelves.peek.noteMenuAnchor(view.window)

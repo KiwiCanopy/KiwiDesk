@@ -19,6 +19,14 @@ extension AppDelegate {
                 ShortcutsOpenBinding.pocketAppChord(core: $0, app: app)
             }
         }
+        core.barMenuHooks.pocketVerbChord = { [weak core] verb in
+            core.flatMap {
+                ShortcutsOpenBinding.rendered(
+                    core: $0,
+                    lua: Self.pocketLua(of: verb)
+                )
+            }
+        }
         core.barMenuHooks.menuChord = { [weak core] verb in
             core.flatMap {
                 ShortcutsOpenBinding.combo(core: $0, lua: Self.lua(of: verb))
@@ -32,6 +40,14 @@ extension AppDelegate {
     static func lua(of verb: BarMenuVerb) -> String {
         switch verb {
         case .toggleFloating: KeybindingCatalog.toggleFloating.lua
+        case .togglePocketWindow: KeybindingCatalog.pocketWindow.lua
+        }
+    }
+
+    /// A Pocket verb's catalog Lua body (#2941).
+    static func pocketLua(of verb: PocketVerb) -> String {
+        switch verb {
+        case .pocket: KeybindingCatalog.pocket.lua
         case .togglePocketWindow: KeybindingCatalog.pocketWindow.lua
         }
     }

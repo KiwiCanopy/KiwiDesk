@@ -23,6 +23,10 @@ public enum SettingsLanding: Equatable, Sendable {
     case kiwiVision
     /// KiwiVision with its add-lens popover open (#2359 ruling 4).
     case newLens
+    /// Shortcuts & Gestures, on its Pocket card (#2941).
+    case pocketShortcuts
+    /// The Pocket card's "Add an app to your Pocket…" row (#2941).
+    case pocketKeys
 }
 
 /// What a bar menu, or a Core pill naming a key, asks of the GUI
@@ -50,6 +54,11 @@ public struct BarMenuHooks {
         _ in nil
     }
 
+    /// The live chord of a Pocket verb an empty Pocket's peek
+    /// names (#2941 ▸ 5), drawn and spoken; nil where none is bound.
+    public var pocketVerbChord: @MainActor (PocketVerb) -> RenderedChord? =
+        { _ in nil }
+
     /// The live chord of a bound menu verb (#2869 ▸ 2), read from
     /// the resolved active layer; nil where none is bound.
     public var menuChord: @MainActor (BarMenuVerb) -> KeyCombo? = { _ in
@@ -69,6 +78,15 @@ public enum BarMenuVerb: CaseIterable, Sendable {
     /// Float Window / Tile Window ↔ `toggle_floating`.
     case toggleFloating
     /// Remove from Pocket ↔ `toggle_pocket_window`.
+    case togglePocketWindow
+}
+
+/// A Pocket verb whose chord an empty Pocket's peek draws (#2941):
+/// the GUI maps each to its catalog Lua body.
+public enum PocketVerb: CaseIterable, Sendable {
+    /// `pocket`: Pocket or take out.
+    case pocket
+    /// `toggle_pocket_window`: Toggle Pocket.
     case togglePocketWindow
 }
 

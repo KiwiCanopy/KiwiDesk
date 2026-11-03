@@ -23,7 +23,10 @@ extension BarPeekBody {
         cutAtTop: Bool = false
     ) -> CGSize {
         let whole = layout(content, shelf: shelf, hidden: 0)
-        guard whole.height > maxHeight else { return whole }
+        // An empty state has no windows to cut (#2941).
+        guard whole.height > maxHeight, content.empty == nil else {
+            return whole
+        }
         let total = content.windowCount
         var keep = max(total - 1, 1)
         while true {

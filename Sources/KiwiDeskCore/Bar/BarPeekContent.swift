@@ -141,6 +141,8 @@ struct BarPeekContent: Equatable {
     /// A list's peek reserves the trailing check column on every
     /// row, checked or not, so no title moves with focus (#2063).
     let checks: Bool
+    /// What an empty Pocket's click holds in place of rows (#2941).
+    private(set) var empty: Empty?
 
     /// The windows shown, top to bottom: the rows' order.
     var order: [WindowID] { groups.flatMap { $0.rows.map(\.window) } }
@@ -153,6 +155,15 @@ struct BarPeekContent: Equatable {
         self.header = header
         self.checks = checks
     }
+
+    /// An empty Pocket's peek (#2941): no rows, the empty state alone.
+    init(empty: Empty) {
+        self.init(groups: [], header: .full, checks: false)
+        self.empty = empty
+    }
+
+    /// Whether the peek has anything to show.
+    var isEmpty: Bool { groups.isEmpty && empty == nil }
 
     /// `count` windows in order — the first, or the last
     /// `fromEnd` — each group keeping the count it stands for; a

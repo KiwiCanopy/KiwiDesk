@@ -49,6 +49,12 @@ struct BarMenuWiringTests {
             AppDelegate.lua(of: .togglePocketWindow)
                 == "KiwiDesk.toggle_pocket_window()"
         )
+        // An empty Pocket's two keys (#2941).
+        #expect(AppDelegate.pocketLua(of: .pocket) == "KiwiDesk.pocket()")
+        #expect(
+            AppDelegate.pocketLua(of: .togglePocketWindow)
+                == "KiwiDesk.toggle_pocket_window()"
+        )
     }
 
     /// The bar menus' wiring runs at launch; their Keep reaches

@@ -10,6 +10,8 @@ extension BarPeekBody {
     enum Action: Equatable {
         case window(WindowID)
         case more
+        /// An empty Pocket's row opening Settings (#2941).
+        case landing(SettingsLanding)
     }
 
     /// One button: what it does, where it takes the pointer, and
@@ -96,10 +98,7 @@ extension BarPeekBody {
         guard let armed = pressed, target(at: point) == armed,
             armed < targets.count
         else { return }
-        switch targets[armed].action {
-        case .window(let id): onPick(id)
-        case .more: onMore()
-        }
+        act(targets[armed].action)
     }
 
     /// The arrow keys on a grown list (#2563): lifts the button
@@ -115,9 +114,15 @@ extension BarPeekBody {
     /// Return on a grown list: acts as a click on the lifted button.
     func activateHovered() {
         guard let index = hovered, index < targets.count else { return }
-        switch targets[index].action {
+        act(targets[index].action)
+    }
+
+    /// What a button does, a click, Return or VoiceOver's press.
+    func act(_ action: Action) {
+        switch action {
         case .window(let id): onPick(id)
         case .more: onMore()
+        case .landing(let landing): onLand(landing)
         }
     }
 

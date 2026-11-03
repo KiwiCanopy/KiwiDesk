@@ -111,6 +111,9 @@ struct CoreLocalizationBoundaryTests {
         "App/KiwiCore+OverflowMarks.swift": 4,
         // The pocket plate's VoiceOver name (#2678); Core draws it.
         "App/KiwiCore+PocketPlate.swift": 1,
+        // An empty Pocket's peek copy (#2941): its header, lines
+        // and two Settings rows, drawn by Core's peek.
+        "App/KiwiCore+PocketEmpty.swift": 7,
         // The Space Bar's item labels and a11y strings, and the
         // App Bar's a11y labels (#901, a float's two #1826), drawn
         // by Core; one Space

@@ -36,6 +36,16 @@ enum ShortcutsOpenBinding {
         combo(core: core) { $0.lua == verb }
     }
 
+    /// A bound action's chord, drawn and spoken (#2601, #2941).
+    @MainActor static func rendered(
+        core: KiwiCore,
+        lua verb: String
+    ) -> RenderedChord? {
+        comboGlyphs(core: core, lua: verb).map {
+            RenderedChord(drawn: $0, spoken: SidedChordWords.label($0))
+        }
+    }
+
     /// A lens's chord: the row that toggles it, however its name is
     /// spelled (#2103 ruling 39).
     @MainActor static func lensGlyphs(

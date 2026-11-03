@@ -6442,6 +6442,24 @@ key, since mixed into the general groups it would break the put-in
 order ⌃⌥P steps.
 :::
 
+:::unreleased
+**An empty Pocket's click grows an empty state** (owner,
+2026-11-03, #2941): a faded Pocket that lights on hover invites a
+click, and a click that opened nothing left a newcomer with no way
+to learn how a window goes in. The click, and VoiceOver's press,
+grow the same click-held panel the list uses, holding a header,
+one sentence per bound key — `pocket` worded for what it would do
+now, marking the focus or putting the last-used window back, and
+Toggle Pocket — the drag in the first, and rows to the Pocket's
+shortcuts and to adding an app's own key. It keeps "draws no
+count" and the #2776 fade, and hover still only lights it. Listing
+the two verbs as rows with their keys was rejected: rows in a
+click-held list read as acts on the focus (#2869), and Settings
+labels name keys without explaining the Pocket. A Settings link
+alone sends the user away instead of answering. Unlike the list,
+this panel speaks to VoiceOver, since no menu could twin it.
+:::
+
 ### Spaces, profiles & config ownership
 
 **[Principle]**

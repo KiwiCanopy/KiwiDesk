@@ -98,6 +98,16 @@ extension SettingsAnchor {
             self.init(destination: .kiwiVision)
         case .newLens:
             self.init(destination: .kiwiVision, surface: .newLens)
+        case .pocketShortcuts:
+            self.init(
+                destination: .shortcuts,
+                anchor: SettingsCatalog.shortcuts.pocketKeys.id
+            )
+        case .pocketKeys:
+            self.init(
+                destination: .shortcuts,
+                anchor: SettingsCatalog.shortcuts.pocketAppAdd.id
+            )
         }
     }
 }

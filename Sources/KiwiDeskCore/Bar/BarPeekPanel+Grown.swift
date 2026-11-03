@@ -57,6 +57,9 @@ extension BarPeekPanel {
         panel.takesKey = true
         panel.setFrame(list, display: false)
         paint(shelf, edge: request.edge, size: size)
+        // An empty Pocket's state speaks; a window list has its menu
+        // twin (#2941).
+        panel.setAccessibilityElement(content.empty != nil)
         guard adopt(content, next, panel: panel) else { return }
         playOpen(
             panel,
@@ -68,5 +71,6 @@ extension BarPeekPanel {
             in: list,
             anchor: nil
         )
+        if content.empty != nil { body.focusEmptyInfo() }
     }
 }
