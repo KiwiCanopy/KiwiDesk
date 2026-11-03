@@ -209,8 +209,16 @@ struct ExplainCommandsTests {
         #expect(answer["bundle_id"] == .string(bundle))
         #expect(field(answer["ignored"], "by_rule") == .bool(true))
         #expect(field(answer["ignored"], "built_in") == .bool(false))
-        #expect(answer["windows"] == .array([.number(Double(id.raw))]))
-        #expect(!String(describing: answer).contains("Secret title"))
+        // Each list names its windows by id and title (#2895).
+        #expect(
+            answer["windows"]
+                == .array([
+                    .object([
+                        "id": .number(Double(id.raw)),
+                        "title": .string("Secret title"),
+                    ])
+                ])
+        )
         guard case .array(let running)? = answer["running"],
             let process = running.first
         else {
@@ -223,6 +231,46 @@ struct ExplainCommandsTests {
         #expect(field(process, "policy") == .string("accessory"))
         #expect(field(process, "observed") == .bool(false))
         #expect(field(process, "hidden") == .bool(true))
+    }
+
+    /// A minimized or away window is named by the title it left
+    /// with, from its own record (#2895).
+    @Test("explain_app names minimized and away windows by title")
+    func explainAppTitlesEveryList() {
+        let core = makeCore()
+        core.eventLoop.runningApplications = { [] }
+        core.eventLoop.visiblePIDs = { [] }
+        core.state.minimizeOrder.append(
+            .init(
+                id: WindowID(8),
+                pid: 4242,
+                bundleID: bundle,
+                app: "App",
+                title: "Folded"
+            )
+        )
+        core.state.awayWindows[WindowID(9)] = AwayWindow(
+            id: WindowID(9),
+            pid: 4242,
+            appName: "App",
+            appBundleID: bundle,
+            title: "Elsewhere",
+            nativeSpace: 4
+        )
+        let response = core.execute("explain_app", args: [.string(bundle)])
+        guard case .object(let answer)? = response.data,
+            case .array(let minimized)? = answer["minimized"],
+            case .array(let away)? = answer["away"]
+        else {
+            Issue.record("no answer: \(response.error ?? "")")
+            return
+        }
+        #expect(
+            minimized
+                == [.object(["id": .number(8), "title": .string("Folded")])]
+        )
+        #expect(field(away.first, "id") == .number(9))
+        #expect(field(away.first, "title") == .string("Elsewhere"))
     }
 
     @Test("a raised-layer app is read off the built-in table")
