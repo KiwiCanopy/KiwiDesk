@@ -71,6 +71,17 @@ struct LookLinkInstallTests {
         )
     }
 
+    @Test("the held look answers its gallery id, first in store order")
+    func heldLookAnswers() throws {
+        let core = try KeepFixture.core()
+        #expect(core.heldGalleryLook(for: link) == nil)
+        var copy = try LookStore.importLook(data: file(named: "Copy"))
+        copy.galleryID = "dusk"
+        try core.lookLibrary.save(copy)
+        try core.installGalleryLook(file(), from: link, fallbackName: "x")
+        #expect(core.heldGalleryLook(for: link)?.name == "Copy")
+    }
+
     @Test("a look started from it credits the gallery id")
     func creditCarriesTheID() throws {
         let core = try KeepFixture.core()

@@ -126,14 +126,7 @@ struct SimpleLookCard: View {
     }
 
     private func renamePopover(_ request: NameEditRequest) -> some View {
-        let old = request.subject ?? request.seed
-        return NameEditPopover(
-            seed: request.seed,
-            placeholder: LooksShelf.namePlaceholder,
-            width: 160,
-            confirmLabel: { _ in L("looks.rename_confirm", "Rename") },
-            isValid: { model.canRenameUserLook($0, from: old) }
-        ) { name in
+        LooksShelf.renamePopover(request, model: model) { name, old in
             model.renameUserLook(from: old, to: name)
             renameRequest = nil
         }

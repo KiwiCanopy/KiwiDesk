@@ -14,6 +14,10 @@ extension AppDelegate {
     }
 
     private func addLinkedLook(_ link: LookLink) async {
+        if let held = core.heldGalleryLook(for: link) {
+            wear(held)
+            return
+        }
         do {
             let data = try await link.fetch {
                 try await URLSession.shared.data(for: $0)
@@ -23,13 +27,17 @@ extension AppDelegate {
                 from: link,
                 fallbackName: L("looks.default_name", "My Look")
             )
-            // Worn before the window fronts, or its first frame
-            // draws the look it had and its plates flash (#2863).
-            dashboard.show {
-                self.dashboard.model.wearLinkedLook(look)
-            }
+            wear(look)
         } catch {
             Self.refuseLinkedLook(Self.linkFailure(error))
+        }
+    }
+
+    private func wear(_ look: ShelfLook) {
+        // Worn before the window fronts, or its first frame draws
+        // the look it had and its plates flash (#2863).
+        dashboard.show {
+            self.dashboard.model.wearLinkedLook(look)
         }
     }
 

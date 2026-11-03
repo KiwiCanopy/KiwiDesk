@@ -2,7 +2,7 @@ import KiwiDeskCore
 
 /// What the pointer previews on Simple's Space cards (#2777).
 enum SimplePreviewHover: Equatable {
-    /// A bundled look, by name, painted over the draft.
+    /// A look on Simple's line, by name, painted over the draft.
     case look(String)
 }
 
@@ -40,6 +40,6 @@ extension SettingsModel {
     }
 
     private func hoveredLook(_ name: String) -> ShelfLook? {
-        core.bundledLooks.first { $0.name == name }
+        SimpleLookCard.looks(in: self).first { $0.name == name }
     }
 }

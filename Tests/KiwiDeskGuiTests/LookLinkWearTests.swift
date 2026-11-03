@@ -106,7 +106,19 @@ struct LookLinkWearTests {
             .filter { !$0.isWhitespace }
         #expect(source.occurrences(of: ".rowActions{") == 1)
         #expect(source.contains("ForEach(mine,id:\\.name)"))
+        #expect(source.contains("letmine=Self.mine(in:model)"))
         #expect(source.contains(".rowActions{menu(look)}"))
+        // The line's order: My looks, the hairline only while one
+        // exists, then the bundled looks (#2943 ruling 2).
+        let order = [
+            "ForEach(mine,id:\\.name)",
+            "if!mine.isEmpty{Divider()",
+            "ForEach(model.core.bundledLooks,id:\\.name){tile($0)}",
+            "browseTile",
+        ].map { source.range(of: $0)?.lowerBound }
+        #expect(!order.contains(nil))
+        let found = order.compactMap { $0 }
+        #expect(found == found.sorted())
         #expect(
             source.contains(
                 "ForEach(model.core.bundledLooks,id:\\.name){tile($0)}"
@@ -120,12 +132,33 @@ struct LookLinkWearTests {
         // One write for both roots (gui.md ▸ shares its one write).
         #expect(source.contains("model.deleteUserLook(look.name)"))
         #expect(source.contains("model.renameUserLook(from:old,to:name)"))
-        #expect(source.contains("model.canRenameUserLook($0,from:old)"))
         let shelf = try SourceScan.swiftSources(under: root)
             .first { $0.lastPathComponent == "LooksShelf+Actions.swift" }
         let shelfSource = try SourceScan.strippedSource(
             at: try #require(shelf)
         )
         #expect(shelfSource.contains("model.deleteUserLook(name)"))
+        // One rename popover for both roots.
+        #expect(source.contains("LooksShelf.renamePopover(request,"))
+        #expect(!source.contains("NameEditPopover("))
+    }
+
+    /// #2943: a re-add downloaded first, so offline it failed though
+    /// My looks held the look.
+    @Test("a link asks for the held look before it downloads")
+    func heldBeforeFetch() throws {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk")
+        let file = try SourceScan.swiftSources(under: root)
+            .first { $0.lastPathComponent == "AppDelegate+LookLink.swift" }
+        let source = try SourceScan.strippedSource(at: try #require(file))
+            .filter { !$0.isWhitespace }
+        let held = try #require(
+            source.range(
+                of: "ifletheld=core.heldGalleryLook(for:link){wear(held)"
+            )
+        )
+        let fetch = try #require(source.range(of: "link.fetch"))
+        #expect(held.lowerBound < fetch.lowerBound)
     }
 }
