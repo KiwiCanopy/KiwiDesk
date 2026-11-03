@@ -17,6 +17,5 @@ extension SettingsModel {
         settingsRoot = SettingsRootPreference.read(from: preferences)
         settleSimpleTarget()
         nav.resetSurfaces()
-        linkedLook = nil
     }
 }

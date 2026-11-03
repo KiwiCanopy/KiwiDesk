@@ -60,9 +60,9 @@ extension SettingsButtonStyleConventionTests {
                     + "seam feeds (#845, #1684)"
             ),
             "SimpleLookCard.swift": (
-                1, "rowActions",
+                2, "rowActions",
                 "Returned to the row-menu builder the rowActions "
-                    + "seam feeds (#2860)"
+                    + "seam feeds (#2860, #2943)"
             ),
             "PaletteShelf.swift": (
                 3, "menuItem",
