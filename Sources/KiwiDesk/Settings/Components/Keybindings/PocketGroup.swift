@@ -11,8 +11,10 @@ struct PocketGroup: View {
 
     var body: some View {
         SettingsSection(SettingsCatalog.shortcuts.pocketKeys) {
-            // What it holds leads its keys (owner, #2678).
+            // What it holds leads its keys (owner, #2678); its menu
+            // ends where the recorders do (#2922).
             capacityRow
+                .environment(\.keybindingReservesTrashSlot, true)
             ForEach(ShortcutsRowOrder.pocketAtRest, id: \.id) { key in
                 KeybindingFamilyRows(
                     model: model,
