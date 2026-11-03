@@ -28,10 +28,11 @@ extension KiwiCore {
         lookLibrary.userLooks()
     }
 
-    /// `base`, or the first `base N` no bundled or user look holds.
+    /// `base`, trimmed, or the first `base N` no bundled or user
+    /// look holds.
     public func freeLookName(base: String) -> String {
         let library = lookLibrary
-        return Self.uniqueName(base: base) {
+        return Self.uniqueName(base: LibraryNameVerdict.normalized(base)) {
             library.isBuiltinName($0) || library.hasUserLook($0)
         }
     }
@@ -40,8 +41,11 @@ extension KiwiCore {
     /// throws `LibraryNameRefusal`, and the store refuses an
     /// unreadable library (#2860).
     public func renameLook(from old: String, to new: String) throws {
-        try requireName(lookNameVerdict(new, renaming: old))
-        try lookLibrary.rename(from: old, to: new)
+        let name = try admittedName(
+            new,
+            lookNameVerdict(new, renaming: old)
+        )
+        try lookLibrary.rename(from: old, to: name)
     }
 
     /// Deletes a saved look (#2860).
@@ -57,8 +61,10 @@ extension KiwiCore {
         named name: String,
         from settings: TilingSettings
     ) throws -> ShelfLook {
-        try requireName(lookNameVerdict(name))
-        let look = ShelfLook.current(named: name, in: settings)
+        let look = ShelfLook.current(
+            named: try admittedName(name, lookNameVerdict(name)),
+            in: settings
+        )
         try lookLibrary.save(look)
         return look
     }

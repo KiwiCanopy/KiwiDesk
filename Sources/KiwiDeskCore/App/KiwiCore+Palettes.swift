@@ -20,22 +20,11 @@ extension KiwiCore {
         bundledPalettes + userPalettes
     }
 
-    /// Whether `name` is a bundled palette's, which no user
-    /// palette may take; the GUI asks `paletteNameVerdict` (#2953).
-    func isBundledPaletteName(_ name: String) -> Bool {
-        paletteLibrary.isBuiltinName(name)
-    }
-
-    /// Whether a user palette is saved under `name`.
-    func hasUserPalette(_ name: String) -> Bool {
-        paletteLibrary.hasUserPalette(name)
-    }
-
-    /// `base`, or the first `base N` no bundled or user palette
-    /// holds.
+    /// `base`, trimmed, or the first `base N` no bundled or user
+    /// palette holds.
     public func freePaletteName(base: String) -> String {
         let library = paletteLibrary
-        return Self.uniqueName(base: base) {
+        return Self.uniqueName(base: LibraryNameVerdict.normalized(base)) {
             library.isBuiltinName($0) || library.hasUserPalette($0)
         }
     }
@@ -47,9 +36,8 @@ extension KiwiCore {
         named name: String,
         from settings: TilingSettings
     ) throws -> ColorPalette {
-        try requireName(paletteNameVerdict(name))
         let palette = ColorPalette(
-            name: name,
+            name: try admittedName(name, paletteNameVerdict(name)),
             colors: ColorPaletteKeys.extract(from: settings)
         )
         try paletteLibrary.save(palette)
@@ -58,8 +46,11 @@ extension KiwiCore {
 
     /// Renames a user palette; no look names one (#1752).
     public func renamePalette(from old: String, to new: String) throws {
-        try requireName(paletteNameVerdict(new, renaming: old))
-        try paletteLibrary.rename(from: old, to: new)
+        let name = try admittedName(
+            new,
+            paletteNameVerdict(new, renaming: old)
+        )
+        try paletteLibrary.rename(from: old, to: name)
     }
 
     /// Deletes a user palette.

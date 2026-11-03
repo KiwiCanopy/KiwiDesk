@@ -2133,7 +2133,9 @@ list names the two store spellings that hold no store). **Whether
 a typed palette or look name may be saved or renamed is asked of
 the one `paletteNameVerdict` / `lookNameVerdict`**, which the write
 doors refuse through, never a combination of reads beside it
-(#2953, `LibraryNameVerdictTests`).
+(#2953, `LibraryNameVerdictTests`; the buttons' asks,
+`PaletteDoorSeamTests` ▸ `actionsTakeTheDoors` and
+`LookDoorSeamTests` ▸ `buttonsAskTheVerdict`).
 
 ## A KiwiHub pick asks Core at the press (#2885)
 

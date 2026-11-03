@@ -54,4 +54,21 @@ struct LookDoorSeamTests {
             }
         }
     }
+
+    /// Save and Rename ask Core's one name verdict (#2953).
+    @Test("the shelf's buttons ask the name verdict")
+    func buttonsAskTheVerdict() throws {
+        let needles = [
+            "Settings/Components/Looks/LooksShelf+Actions.swift":
+                "core.lookNameVerdict(typed)",
+            "Settings/SettingsModel+Look.swift":
+                "core.lookNameVerdict(typed,renaming:old)",
+        ]
+        for (path, needle) in needles {
+            let flat = try SourceScan.strippedSource(
+                at: Self.gui.appendingPathComponent(path)
+            ).split(whereSeparator: \.isWhitespace).joined()
+            #expect(flat.contains(needle), "\(path)")
+        }
+    }
 }

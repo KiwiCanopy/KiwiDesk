@@ -26,14 +26,13 @@ struct PaletteLibraryDoorTests {
     func freeName() throws {
         let core = makeTestCore()
         let builtin = try #require(core.bundledPalettes.first)
-        #expect(core.isBundledPaletteName(builtin.name))
+        #expect(core.paletteNameVerdict(builtin.name) == .bundled)
         #expect(
             core.freePaletteName(base: builtin.name)
                 == "\(builtin.name) 2"
         )
         _ = try core.savePalette(named: "Mine", from: TilingSettings())
-        #expect(core.hasUserPalette("Mine"))
-        #expect(!core.isBundledPaletteName("Mine"))
+        #expect(core.paletteNameVerdict("Mine") == .overwrites)
         #expect(core.freePaletteName(base: "Mine") == "Mine 2")
         #expect(core.freePaletteName(base: "Free") == "Free")
         #expect(core.userPalettes.map(\.name) == ["Mine"])

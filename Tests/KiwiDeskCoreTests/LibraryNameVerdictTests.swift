@@ -72,7 +72,28 @@ struct LibraryNameVerdictTests {
         #expect(throws: LibraryNameRefusal(verdict: .taken)) {
             try core.renamePalette(from: "Mine", to: "Ours")
         }
+        try core.renameLook(from: "Mine", to: "Mine")
+        try core.renamePalette(from: "Mine", to: "Mine")
+        #expect(throws: LibraryNameRefusal(verdict: .blank)) {
+            try core.renameLook(from: "Mine", to: " ")
+        }
         try core.renameLook(from: "Mine", to: "New")
         #expect(core.userLooks.map(\.name).sorted() == ["New", "Ours"])
+    }
+
+    /// A door judges and stores one trimmed name, so a padded name
+    /// lands on the entry the verdict named.
+    @Test("a padded name is judged and stored trimmed")
+    func paddedNamesAreTrimmed() throws {
+        let core = makeTestCore()
+        let settings = TilingSettings()
+        _ = try core.savePalette(named: "Mine", from: settings)
+        _ = try core.savePalette(named: " Mine ", from: settings)
+        #expect(core.userPalettes.map(\.name) == ["Mine"])
+        _ = try core.saveLook(named: " Mine ", from: settings)
+        try core.renameLook(from: "Mine", to: " New ")
+        #expect(core.userLooks.map(\.name) == ["New"])
+        #expect(core.freeLookName(base: " New ") == "New 2")
+        #expect(core.freePaletteName(base: " Mine ") == "Mine 2")
     }
 }

@@ -129,12 +129,14 @@ public final class PaletteStore {
     }
 
     public func rename(from: String, to: String) throws {
-        guard !isBuiltinName(to) else {
-            throw StoreError.reservedName(to)
-        }
-        guard to == from || !hasUserPalette(to) else {
-            throw StoreError.duplicateName(to)
-        }
+        let verdict = LibraryNameVerdict.judge(
+            to,
+            renaming: from,
+            bundled: isBuiltinName,
+            saved: hasUserPalette
+        )
+        if verdict == .bundled { throw StoreError.reservedName(to) }
+        if verdict == .taken { throw StoreError.duplicateName(to) }
         var palettes = try libraryPalettes()
         guard
             let index = palettes.firstIndex(where: {
