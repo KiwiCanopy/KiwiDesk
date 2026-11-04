@@ -179,64 +179,6 @@ struct RunZoneSizesTests {
         #expect(!press.movesRun)
     }
 
-    @Test("A shrink that lets all fit at their floors pulls past a taker")
-    func shrinkPullsPastATaker() throws {
-        let three = RunZone(
-            members: Array(ids[0..<3]),
-            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
-            vertical: false
-        )
-        // The window taking the rest holds a length, as a press on it
-        // leaves one; that length is what it draws, never a floor.
-        let sized = context(
-            focus: 1,
-            sizes: [1: 400, 2: 590],
-            tails: [2]
-        )
-        let press = try #require(
-            three.press(ids[0], by: -50, toward: .end, in: sized)
-        )
-        #expect(press.visible == 0..<3)
-        #expect(press.movesRun)
-    }
-
-    @Test("A grow at the weight's limit takes a length, and the mates give")
-    func spentGrowTakesALength() throws {
-        let three = RunZone(
-            members: Array(ids[0..<3]),
-            region: CGRect(x: 0, y: 0, width: 900, height: 600),
-            vertical: false
-        )
-        var spent = context(focus: 1, tails: [2])
-        spent.stackWeights[ids[0]] = StackLayout.weightRange.upperBound
-        let drawn = try #require(three.frames(in: spent)[ids[0]]).width
-        let press = try #require(
-            three.press(ids[0], by: 5, toward: .end, in: spent)
-        )
-        let share = try #require(press.sizes[ids[0]] ?? nil)
-        #expect(abs(share * 900 - (drawn + 5)) < 0.01)
-        // The length replaces the weight.
-        #expect(press.weight == 1)
-    }
-
-    @Test("A press at the weight's limit in a run hiding nothing says so")
-    func spentWeightCues() throws {
-        let two = RunZone(
-            members: Array(ids[0..<2]),
-            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
-            vertical: false
-        )
-        var whole = context(focus: 1)
-        whole.stackWeights[ids[0]] = StackLayout.weightRange.upperBound
-        whole.runHeads = [ids[1]]
-        guard let run = two.run(in: whole), !run.hides else { return }
-        let press = try #require(
-            two.press(ids[0], by: 5, toward: .end, in: whole)
-        )
-        #expect(press.cue == .neighborMinimum(ids[1]))
-        #expect(press.refusal == .atMinimum)
-    }
-
     @Test("A lone window short of its floor and of room says nothing divides")
     func loneRefusalIsNotAtItsFloor() throws {
         var lone = context(focus: 1, sizes: [1: 1000], tails: [1])

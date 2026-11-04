@@ -49,17 +49,18 @@ extension KiwiCore {
     ) -> Bool {
         // A weight already at its limit moves nothing, and a silent
         // press never ends a hold.
-        let range = StackLayout.weightRange
-        let weight = space.stackWeights[focused] ?? 1
+        let spent =
+            members.count > 1
+            && StackLayout.weightSpent(
+                space.stackWeights[focused] ?? 1,
+                by: delta
+            )
         let at = members.firstIndex(of: focused) ?? 0
-        let spent = members.count > 1 && weight >= range.upperBound
-        if delta < 0,
-            outcome.hitOwnMinimum || weight <= range.lowerBound
-        {
+        if delta < 0, outcome.hitOwnMinimum || spent {
             refuseShrinkAtMinimum(focused, axis: axis)
         } else if delta > 0,
             let blocked = outcome.blockedByOther
-                ?? (spent ? (at == 0 ? 1 : at - 1) : nil)
+                ?? (spent ? StackLayout.nearestMate(of: at) : nil)
         {
             if space.windows.contains(focused),
                 let found = runZone(of: focused, axis: axis, in: space),
@@ -188,6 +189,8 @@ extension KiwiCore {
             return .fail("the focused window is alone in its run")
         case .atMinimum:
             return .fail("every shown window is at its minimum")
+        case .atWeightLimit:
+            return .fail("the window's share is at its limit")
         case nil:
             store(press, of: focused, in: zone, space: space)
             return .ok()

@@ -28,8 +28,10 @@ extension RunZone {
         // lengths keep filling the zone and the run still hides what
         // the push hid, however far the mate gives way.
         if delta < 0 {
-            let give = min(-delta, line.drawn[index] - line.bare[index])
-            guard give > Self.unchangedTolerance else {
+            let room = line.drawn[index] - line.bare[index]
+            let give = min(-delta, room)
+            // A step within the room moves, however small.
+            guard room > Self.unchangedTolerance || -delta <= room else {
                 return Press(cue: .ownMinimum, refusal: .atMinimum)
             }
             if give < -delta - Self.unchangedTolerance {
@@ -74,7 +76,7 @@ extension RunZone {
         }
         let extra = runExtra(in: context) ?? 0
         guard extra > 0 else {
-            let anchor = members[shown[at == 0 ? 1 : at - 1]]
+            let anchor = members[shown[StackLayout.nearestMate(of: at)]]
             return Press(
                 cue: delta < 0 ? .ownMinimum : .neighborMinimum(anchor),
                 refusal: .atMinimum

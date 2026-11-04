@@ -26,6 +26,9 @@ extension RunZone {
         public enum Refusal: Sendable, Equatable {
             /// The window is the one shown and has no room to take.
             case alone
+            /// The window's weight is at its limit, and a run hiding
+            /// nothing holds no length.
+            case atWeightLimit
             /// Every shown window sits at its floor.
             case atMinimum
         }
@@ -78,7 +81,10 @@ extension RunZone {
             toward: side,
             pulls: shown.count == 1
         )
-        let spent = weightSpent(line.weights[index], by: delta)
+        let spent = StackLayout.weightSpent(
+            line.weights[index],
+            by: Double(delta)
+        )
         if step.movesRun || line.weights[index] == 0 || (spent && run.hides) {
             return lengths(step, of: id, on: line, context)
         }
@@ -89,19 +95,13 @@ extension RunZone {
             return Press(
                 cue: delta < 0
                     ? .ownMinimum
-                    : .neighborMinimum(members[shown[at == 0 ? 1 : at - 1]]),
-                refusal: .atMinimum
+                    : .neighborMinimum(
+                        members[shown[StackLayout.nearestMate(of: at)]]
+                    ),
+                refusal: .atWeightLimit
             )
         }
         return weightStep(line, index, shown: shown, by: delta, in: context)
-    }
-
-    /// Whether `weight` sits at the limit a press of `delta` moves
-    /// it toward, where the weight step can move nothing.
-    private func weightSpent(_ weight: Double, by delta: CGFloat) -> Bool {
-        let range = StackLayout.weightRange
-        return delta > 0
-            ? weight >= range.upperBound : weight <= range.lowerBound
     }
 
     /// `heads` and `tails` with this zone's ends set to show
@@ -270,12 +270,16 @@ extension RunZone {
             last = members.count - 1
         }
         let visible = start..<(last + 1)
+        // A step smaller than the tolerance still moves what the
+        // clamps left alone; only a clamp makes a press a refusal.
+        let clamped = abs(target - (extent + delta)) > 0.001
         return LengthStep(
             target: target,
             visible: visible,
             joined: visible.filter { !line.before.contains($0) },
-            atOwnMinimum: !refused && delta < 0 && extent + delta < own,
-            changed: visible != line.before
+            atOwnMinimum: !refused && delta < 0 && extent + delta < own
+                && visible == line.before,
+            changed: visible != line.before || !clamped
                 || abs(target - extent) > Self.unchangedTolerance,
             movesRun: visible != line.before
         )
