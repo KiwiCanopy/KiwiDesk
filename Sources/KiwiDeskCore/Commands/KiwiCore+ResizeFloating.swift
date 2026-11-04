@@ -59,11 +59,17 @@ extension KiwiCore {
         // precisely because it is neither — it re-arms itself
         // per press and compounds without bound on an app that
         // silently refuses every ask (#1057).
+        // A locked app's refused writes leave no echo, so a press on
+        // one measures from where the window is (#2973).
+        let lockedRatio = state.floatAspects[id]?.ratio
         let base =
             tiler.animation.commandedFrame(
                 window: id,
                 includingHeldGlide: isGlideWrite
-            ) ?? window.frame
+            )
+            ?? (lockedRatio == nil
+                ? nil : windowServer.readWindowBounds(id))
+            ?? window.frame
         // The region the float may occupy — screen bounds less
         // every painted bar strip (#1091). The resize needs the
         // whole rect rather than a clamp, because pinning is a
@@ -72,13 +78,33 @@ extension KiwiCore {
         // "this window is already wider than the space between
         // the bars".
         let region = floatGrowBounds(of: id)
-        let outcome = FloatResize.resized(
-            base,
-            horizontal: axis == "x",
-            delta: delta,
-            minSize: minSize,
-            bounds: region
-        )
+        let outcome: FloatResize.Outcome
+        if let lockedRatio, base.height > 0 {
+            let ratio = FloatResize.heldRatio(
+                lockedRatio,
+                measured: base.width / base.height
+            )
+            state.floatAspects[id]?.ratio = ratio
+            outcome = FloatResize.scaled(
+                base,
+                horizontal: axis == "x",
+                delta: delta,
+                ratio: ratio,
+                minSize: CGSize(
+                    width: plannedMinSize(of: id, axis: "x"),
+                    height: plannedMinSize(of: id, axis: "y")
+                ),
+                bounds: region
+            )
+        } else {
+            outcome = FloatResize.resized(
+                base,
+                horizontal: axis == "x",
+                delta: delta,
+                minSize: minSize,
+                bounds: region
+            )
+        }
         // Growing the top edge under a top app bar would re-hide
         // the title bar; keep the result clear of the strip
         // (#242). Still applied on top of the region math: the
@@ -140,7 +166,10 @@ extension KiwiCore {
             // stops generating the #611 retarget storm — a
             // changed target every frame — that the settle
             // watchdog cannot tell from a long drag.
-            animated: resizeWritesAnimated,
+            // A locked app fits each spring step into its box and
+            // lands short of the ask, so it takes the ask whole
+            // (#2973, measured on mpv).
+            animated: resizeWritesAnimated && lockedRatio == nil,
             sizing: .allSpringSized
         )
         // Record what was just commanded, so a glide frame
@@ -168,6 +197,18 @@ extension KiwiCore {
         // step per glide frame — the two look interchangeable,
         // so say which (architect review, 2026-08-29).
         tiler.animation.recordGlideCommanded(id, frame: target)
+        // A glide step owes nothing: its press armed the judgement.
+        if !isGlideWrite {
+            oweFloatAspectJudgement(
+                FloatAspectAsk(
+                    window: id,
+                    axis: axis,
+                    delta: delta,
+                    base: base,
+                    asked: target.size
+                )
+            )
+        }
         return .ok()
     }
 }

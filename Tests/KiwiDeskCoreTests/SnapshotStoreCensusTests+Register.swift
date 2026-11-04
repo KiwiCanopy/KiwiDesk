@@ -46,6 +46,12 @@ extension SnapshotStoreCensusTests {
                     + "(#1675) — no frame at the restart; it is "
                     + "placed anew"
             ),
+        "state.floatAspects":
+            (
+                .behind,
+                "a float's judged aspect lock (#2973) — the first "
+                    + "press after a restart judges it again"
+            ),
         "tiler.boundLearner.lastAsks":
             (.behind, "the size-bound learner (#677) — a residue"),
         "tiler.boundLearner.candidates":

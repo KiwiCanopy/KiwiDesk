@@ -35,6 +35,8 @@ final class DeferredTasks {
         /// cancel the other.
         case borderResync
         case floatRaise
+        /// Reads how an app answered a float's resize (#2973).
+        case floatAspect
         /// Adoption-heal sweep for unhandled windows (#675).
         case adoptionHeal
         /// The heal's census read off the main actor (#1956);
@@ -133,7 +135,7 @@ final class DeferredTasks {
             case .focusFollow, .spaceSettle, .moveSettle,
                 .desktopSettle, .desktopMoveReap, .desktopFollowReap,
                 .desktopSwitchVerify, .borderDropSettle, .floatRaise,
-                .awayReachReap, .gatherReap, .pocketFocus:
+                .floatAspect, .awayReachReap, .gatherReap, .pocketFocus:
                 return true
             case .startupSweep, .bootScan, .deferredBootApps,
                 .borderResync, .adoptionHeal, .adoptionHealRead,

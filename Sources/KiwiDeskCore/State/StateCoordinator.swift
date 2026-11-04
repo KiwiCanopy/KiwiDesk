@@ -140,11 +140,9 @@ public struct StateCoordinator: Sendable {
     /// pid covering a hidden or minimized window no fold lists.
     var floatFrames: [WindowID: FloatFrame] = [:]
 
-    /// One remembered float frame and the process that owns it.
-    struct FloatFrame: Sendable, Equatable {
-        let pid: pid_t
-        let frame: CGRect
-    }
+    /// A float's judged aspect lock (#2973): session state, ending
+    /// where `floatFrames` ends. A restart judges it again.
+    var floatAspects: [WindowID: FloatAspect] = [:]
 
     /// User floats remembered across close/reopen (#160, #1810).
     /// Keyed by app + title, not `WindowID`: a reopened window
@@ -221,9 +219,7 @@ public struct StateCoordinator: Sendable {
         ) {
             stickyReachOverrides[new] = reach
         }
-        if let frame = floatFrames.removeValue(forKey: old) {
-            floatFrames[new] = frame
-        }
+        rekeyFloatMemory(old, to: new)
         if let rank = focusRecency.removeValue(forKey: old) {
             focusRecency[new] = rank
         }
@@ -254,6 +250,7 @@ public struct StateCoordinator: Sendable {
                 stickyReachOverrides[id] = nil
             }
             floatFrames = floatFrames.filter { $0.value.pid != pid }
+            floatAspects = floatAspects.filter { $0.value.pid != pid }
             focusRecency = focusRecency.filter { $0.value.pid != pid }
             forgetMinimized(pid: pid)
             // The app's exit ends its away entries for good
