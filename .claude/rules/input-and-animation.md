@@ -360,7 +360,11 @@ editing here:
   re-decides its animation beside the call site instead of
   taking `resizeWritesAnimated` reds exactly one assertion in
   the whole tree, and that one is display-gated, so the routing
-  is pinned by a source scan as well (guard-prover, 2026-08-29). A new resize write path
+  is pinned by a source scan as well (guard-prover, 2026-08-29).
+  One ruled narrowing: an aspect-locked float's press writes
+  instantly too, since a locked app fits each spring step into its
+  box and lands short (#2973, `FloatAspectJudgementTests` ▸
+  `lockedPressIsInstant`). A new resize write path
   inherits the instant write and owes the same two questions:
   what is my next frame's base, and what retires it?
 

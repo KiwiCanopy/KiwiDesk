@@ -129,13 +129,7 @@ extension KiwiCore {
         //
         // The EFFECTIVE float, never the flag (#1184), on the
         // membership `space.focused` carries.
-        if let focused = space.focused,
-            let window = state.windows[focused],
-            EffectiveFloat.applies(
-                isFloating: window.isFloating,
-                mode: space.mode
-            )
-        {
+        if let focused = space.focused, resizeRoutesAsFloat(focused) {
             return resizeFloating(
                 focused,
                 axis: axis,

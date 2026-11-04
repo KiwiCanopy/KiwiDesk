@@ -2,12 +2,13 @@ import CoreGraphics
 
 /// The math of a float whose app holds its aspect ratio (#2973).
 extension FloatResize {
-    /// How an app answered a size ask, read from where it landed.
+    /// How an app answered a one-axis size ask, read from where the
+    /// window landed.
     public enum AspectAnswer: Equatable {
+        /// The pressed axis moved and the other stayed.
         case complied
         case unchanged
-        /// Fitted inside the asked box: the axis nobody asked to
-        /// change moved too, keeping the ratio. Only a lock does it.
+        /// Both axes moved and the ratio held. Only a lock does it.
         case fitted
         case other
     }
@@ -31,19 +32,23 @@ extension FloatResize {
         abs(measured - held) > ratioChange ? measured : held
     }
 
-    /// Reads `answered` against the size asked and the size before.
+    /// Reads where a window landed against where it stood, for an ask
+    /// on one axis. The other axis moving is the proof of a lock.
     public static func aspectAnswer(
         base: CGSize,
-        asked: CGSize,
-        answered: CGSize
+        answered: CGSize,
+        horizontal: Bool
     ) -> AspectAnswer {
-        func near(_ a: CGSize, _ b: CGSize) -> Bool {
-            abs(a.width - b.width) <= answerTolerance
-                && abs(a.height - b.height) <= answerTolerance
+        let widthMoved = abs(answered.width - base.width) > answerTolerance
+        let heightMoved = abs(answered.height - base.height) > answerTolerance
+        let pressedMoved = horizontal ? widthMoved : heightMoved
+        let otherMoved = horizontal ? heightMoved : widthMoved
+        guard otherMoved else {
+            return pressedMoved ? .complied : .unchanged
         }
-        if near(answered, asked) { return .complied }
-        if near(answered, base) { return .unchanged }
-        guard base.height > 0, answered.height > 0 else { return .other }
+        guard pressedMoved, base.height > 0, answered.height > 0 else {
+            return .other
+        }
         let drift = abs(
             answered.width / answered.height - base.width / base.height
         )
@@ -70,9 +75,17 @@ extension FloatResize {
             ? frame.width + delta
             : (frame.height + delta) * ratio
         var width = askedWidth
+        var refusal: Refusal?
         if delta >= 0 {
             if let bounds {
-                width = min(width, bounds.width, bounds.height * ratio)
+                let room = min(bounds.width, bounds.height * ratio)
+                guard room - frame.width > boundaryTolerance else {
+                    return Outcome(frame: frame, refusal: .blocked)
+                }
+                width = min(width, room)
+                if askedWidth - width > boundaryTolerance {
+                    refusal = .truncated
+                }
             }
             width = max(width, frame.width)
         } else {
@@ -83,33 +96,20 @@ extension FloatResize {
             )
             width = min(max(width, floor), frame.width)
         }
-        let settled = CGSize(
-            width: width.rounded(),
-            height: (width / ratio).rounded()
-        )
         let across = resized(
             frame,
             horizontal: true,
-            delta: settled.width - frame.width,
+            delta: width - frame.width,
             minSize: 1,
             bounds: bounds
         )
         let placed = resized(
             across.frame,
             horizontal: false,
-            delta: settled.height - frame.height,
+            delta: width / ratio - frame.height,
             minSize: 1,
             bounds: bounds
         )
-        var refusal: Refusal?
-        if delta >= 0 {
-            let gained = width - frame.width
-            if gained <= boundaryTolerance {
-                refusal = .blocked
-            } else if askedWidth - width > boundaryTolerance {
-                refusal = .truncated
-            }
-        }
         return Outcome(frame: placed.frame, refusal: refusal)
     }
 }

@@ -57,7 +57,10 @@ struct FloatGlideSeamTests {
         // each resize write ROUTES through the one policy, never
         // what the policy currently returns. Retuning the policy
         // reds nothing here; re-deciding it beside a call site
-        // reds both clauses.
+        // reds both clauses. The needle's trade: it matches a prefix,
+        // so a condition appended to the policy passes. The one ruled
+        // today is the aspect-locked float (#2973), held on its own by
+        // `FloatAspectJudgementTests` ▸ `lockedPressIsInstant`.
         let routed = try Self.sites(
             of: "animated: resizeWritesAnimated"
         )

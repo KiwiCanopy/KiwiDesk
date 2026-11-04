@@ -13,32 +13,46 @@ struct FloatResizeAspectTests {
     private let screen = CGRect(x: 0, y: 0, width: 1600, height: 1000)
 
     private func answer(
-        _ asked: (CGFloat, CGFloat),
-        _ answered: (CGFloat, CGFloat)
+        _ width: CGFloat,
+        _ height: CGFloat,
+        horizontal: Bool = true
     ) -> FloatResize.AspectAnswer {
         FloatResize.aspectAnswer(
             base: frame.size,
-            asked: CGSize(width: asked.0, height: asked.1),
-            answered: CGSize(width: answered.0, height: answered.1)
+            answered: CGSize(width: width, height: height),
+            horizontal: horizontal
         )
     }
 
-    @Test("A shrink a lock fits inside its box reads as fitted")
+    @Test("Both axes moving at the ratio reads as fitted")
     func shrinkIsFitted() {
-        #expect(answer((680, 450), (679, 382)) == .fitted)
-        #expect(answer((800, 330), (586, 330)) == .fitted)
+        #expect(answer(679, 382) == .fitted)
+        #expect(answer(586, 330, horizontal: false) == .fitted)
     }
 
-    @Test("A grow a lock refuses reads as unchanged")
+    @Test("Staying put reads as unchanged, within an app's rounding")
     func growIsUnchanged() {
-        #expect(answer((920, 450), (799, 450)) == .unchanged)
-        #expect(answer((800, 570), (800, 450)) == .unchanged)
+        #expect(answer(800, 450) == .unchanged)
+        #expect(answer(799, 450) == .unchanged)
     }
 
-    @Test("A free window complies, and a broken ratio is no fit")
+    @Test("Only the pressed axis moving reads as a free window")
     func freeWindow() {
-        #expect(answer((920, 450), (920, 450)) == .complied)
-        #expect(answer((920, 600), (860, 400)) == .other)
+        #expect(answer(920, 450) == .complied)
+        #expect(answer(800, 570, horizontal: false) == .complied)
+    }
+
+    @Test("A short answer on the pressed axis alone proves no lock")
+    func snappedIsNoFit() {
+        // A cell-grid app stopping short: ratio drift 0.011, inside the
+        // tolerance, and still not a lock, since the height never moved.
+        #expect(answer(795, 450) == .complied)
+    }
+
+    @Test("A broken ratio, or the other axis alone, is no fit")
+    func brokenRatio() {
+        #expect(answer(860, 400) == .other)
+        #expect(answer(800, 400) == .other)
     }
 
     @Test("Either axis scales both, about the window's centre")
@@ -77,7 +91,7 @@ struct FloatResizeAspectTests {
             minSize: floor,
             bounds: short
         )
-        #expect(outcome.frame.height == 500)
+        #expect(abs(outcome.frame.height - 500) < 0.5)
         #expect(
             abs(outcome.frame.width / outcome.frame.height - ratio)
                 <= FloatResize.ratioTolerance
@@ -85,18 +99,41 @@ struct FloatResizeAspectTests {
         #expect(outcome.refusal == .truncated)
     }
 
-    @Test("A window at its boundary takes nothing")
+    @Test("A window at its boundary is left exactly as it stands")
     func blocked() {
+        // 470 high against a held 1.778 would read 450: a refused press
+        // must not re-derive the height.
+        let tall = CGRect(x: 400, y: 0, width: 800, height: 470)
         let outcome = FloatResize.scaled(
-            frame,
+            tall,
             horizontal: true,
             delta: 50,
             ratio: ratio,
             minSize: floor,
             bounds: CGRect(x: 400, y: 0, width: 800, height: 1000)
         )
-        #expect(outcome.frame.size == frame.size)
+        #expect(outcome.frame == tall)
         #expect(outcome.refusal == .blocked)
+    }
+
+    @Test("A glide frame's small delta has room, and accumulates")
+    func smallDeltaIsNotBlocked() {
+        // `step * 6 * dt` at 120 Hz is under 1 pt: a judge reading the
+        // delta instead of the room would call this a wall.
+        var current = frame
+        for _ in 0..<10 {
+            let outcome = FloatResize.scaled(
+                current,
+                horizontal: true,
+                delta: 0.4,
+                ratio: ratio,
+                minSize: floor,
+                bounds: screen
+            )
+            #expect(outcome.refusal == nil)
+            current = outcome.frame
+        }
+        #expect(abs(current.width - 804) < 0.01)
     }
 
     @Test("A shrink stops both axes at the higher floor")

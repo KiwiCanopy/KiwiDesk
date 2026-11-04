@@ -61,14 +61,19 @@ extension KiwiCore {
         // silently refuses every ask (#1057).
         // A locked app's refused writes leave no echo, so a press on
         // one measures from where the window is (#2973).
-        let lockedRatio = state.floatAspects[id]?.ratio
+        let aspect = state.floatAspects[id]
+        let lockedRatio = aspect?.ratio
+        // Read before this press writes: the baseline its answer is
+        // judged against. A judged window reads nothing more.
+        let shown =
+            (aspect == nil || lockedRatio != nil) && !isGlideWrite
+            ? windowServer.readWindowBounds(id) : nil
         let base =
             tiler.animation.commandedFrame(
                 window: id,
                 includingHeldGlide: isGlideWrite
             )
-            ?? (lockedRatio == nil
-                ? nil : windowServer.readWindowBounds(id))
+            ?? (lockedRatio == nil ? nil : shown)
             ?? window.frame
         // The region the float may occupy — screen bounds less
         // every painted bar strip (#1091). The resize needs the
@@ -198,13 +203,13 @@ extension KiwiCore {
         // so say which (architect review, 2026-08-29).
         tiler.animation.recordGlideCommanded(id, frame: target)
         // A glide step owes nothing: its press armed the judgement.
-        if !isGlideWrite {
+        if let shown, aspect == nil {
             oweFloatAspectJudgement(
                 FloatAspectAsk(
                     window: id,
                     axis: axis,
                     delta: delta,
-                    base: base,
+                    base: shown,
                     asked: target.size
                 )
             )

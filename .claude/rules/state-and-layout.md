@@ -2715,7 +2715,11 @@ editing here:
   minimum exceeds the region is re-asked forever without one;
   `FloatFitLedger` is #677's shape one subsystem over, and it is
   deliberately NOT an entry in `SizeBoundLearner`, which only
-  the layout loop may record into. And **a resize that cannot
+  the layout loop may record into. **A float's aspect lock is
+  judged apart from that learner too (#2973)**, through the one
+  `floatAspects` record, which ends wherever `floatFrames` ends, and
+  a new ender of one takes the other (`FloatAspectJudgementTests`). And
+  **a resize that cannot
   deliver its whole ask owes a cue** — blocked or merely
   TRUNCATED, which is #933's own rule at the other end and was
   missing on the grow side; route it through `cueResizeRefusal`

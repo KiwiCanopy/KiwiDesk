@@ -5564,10 +5564,17 @@ would leave the first set dead, so the answer is the signal.
 A one-axis shrink that moves both axes proves a lock outright. A
 one-axis grow answered unchanged proves nothing, since a fixed-size
 window answers the same and a slow app has merely not landed yet,
-so it earns one 12 pt one-axis shrink as a probe, whichever axis was
-pressed: only a lock moves the other axis too. The price is one
-press, the first on that window, landing about 0.9 s late. A window
-judged free or locked is never judged again while it lives.
+so it earns one 12 pt one-axis shrink as a probe on the pressed axis:
+only a lock moves the other axis too. The price is the first press on
+a locked window landing about 0.9 s late, and a slow free app whose grow
+outlasts the wait taking the shrink before its asked size. A window
+judged free or locked is never judged again while it lives. The
+judgement waits out a held key or a hand on the window rather than
+owing through the motion gate, since no later pass can pay a probe; a
+window moved or left during the probe's 0.3 s stays unjudged, its
+shrink unpaid. Two cues are short of the rule, accepted: a replayed
+press lands outside any fire, so a truncation there draws no pill, and
+a floor the other axis sets is named on the pressed axis.
 
 A locked window's press scales both axes through the split, its
 writes instant, because an app fitting each spring step into a box

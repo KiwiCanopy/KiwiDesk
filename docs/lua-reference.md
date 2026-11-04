@@ -7809,6 +7809,11 @@ animations.set_on_scrolling(true)
 **Does:** enables or disables animation on window resizes (split-ratio
 changes, mouse-resize settle).
 
+:::unreleased
+A floating window whose app holds its aspect ratio
+([`resize`](#resize)) resizes instantly whatever this says (#2973).
+:::
+
 **Example:**
 
 ```lua
