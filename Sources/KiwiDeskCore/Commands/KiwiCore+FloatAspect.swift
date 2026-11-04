@@ -52,7 +52,7 @@ extension KiwiCore {
             }
             return
         }
-        guard state.floatAspects[ask.window] == nil,
+        guard state.floatAspects[ask.window]?.isSettled != true,
             FloatResize.aspectAskIsReadable(
                 base: ask.base.size,
                 asked: ask.target.size,
@@ -113,7 +113,7 @@ extension KiwiCore {
             lockFloatAspect(ask.window, pid: pid, ratioOf: ask.base)
             endFloatAspectJudgement()
         case .complied:
-            state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
+            fileFloatAspectFree(ask.window, pid: pid, size: live.size)
             endFloatAspectJudgement()
         case .unchanged where ask.delta > 0:
             probeFloatAspect(ask, live: live)
@@ -162,6 +162,11 @@ extension KiwiCore {
             endFloatAspectJudgement()
             return
         }
+        // A button down is a hand on it: what it does is the user's.
+        if tiler.motionGate.quiescence.buttonsDown() {
+            endFloatAspectJudgement()
+            return
+        }
         if floatAspectStandsDown {
             scheduleFloatAspectProbeAnswer(ask, live: live)
             return
@@ -172,17 +177,23 @@ extension KiwiCore {
             tiler.applyFrame(ask.window, from: live, to: live, animated: false)
             return
         }
-        guard answered.origin == live.origin else { return }
+        guard
+            abs(answered.minX - live.minX) <= FloatResize.answerTolerance,
+            abs(answered.minY - live.minY) <= FloatResize.answerTolerance
+        else { return }
         let answer = FloatResize.aspectAnswer(
             base: live.size,
             answered: answered.size,
             horizontal: ask.horizontal
         )
         if answer == .unchanged {
+            var refused = state.floatAspects[ask.window]?.refusedAxes ?? []
+            refused.insert(ask.axis)
             state.floatAspects[ask.window] = .init(
                 pid: pid,
                 ratio: nil,
-                fixedSize: answered.size
+                refusedAxes: refused,
+                refusedSize: answered.size
             )
             tiler.applyFrame(
                 ask.window,
@@ -193,7 +204,7 @@ extension KiwiCore {
             return
         }
         guard answer == .fitted else {
-            state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
+            fileFloatAspectFree(ask.window, pid: pid, size: answered.size)
             tiler.applyFrame(
                 ask.window,
                 from: answered,
@@ -212,6 +223,33 @@ extension KiwiCore {
             axis: ask.axis,
             delta: ask.delta + lost
         )
+    }
+
+    /// A press on a refused axis: the size alone, at the frame shown.
+    func askRefusedAxis(
+        _ id: WindowID,
+        from shown: CGRect,
+        axis: String,
+        delta: Double
+    ) {
+        var asked = shown
+        if axis == "x" {
+            asked.size.width = max(shown.width + delta, 1)
+        } else {
+            asked.size.height = max(shown.height + delta, 1)
+        }
+        tiler.applyFrame(id, from: shown, to: asked, animated: false)
+    }
+
+    /// Free on the pressed axis, keeping any axis already refused.
+    private func fileFloatAspectFree(
+        _ id: WindowID,
+        pid: pid_t,
+        size: CGSize
+    ) {
+        var record = state.floatAspects[id] ?? .init(pid: pid, ratio: nil)
+        if record.refusedSize != nil { record.refusedSize = size }
+        state.floatAspects[id] = record
     }
 
     private func lockFloatAspect(

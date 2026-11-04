@@ -5572,11 +5572,13 @@ free app whose grow outlasts the wait taking the shrink before its asked
 size. A press on the other axis voids an ask not yet probed, since two
 axes moving would read as a lock. A window
 judged free or locked is never judged again while it lives. A window
-that refuses the shrink too is fixed size: it goes back where the press
-found it, and a later press writes nothing and says the app won't go
-further, since one more ask would only move it by the split's half step.
-A fixed window that changes size by itself is judged anew, so one that
-turns resizable with no change of size stays refused until it closes.
+that refuses the shrink too has refused that axis: it goes back where
+the press found it, and a later press on that axis says the app won't go
+further and asks at the same origin, since moving it would only walk it
+by the split's half step. It keeps asking so a verdict cannot outlive its
+evidence: an app that was merely slow complies, its size leaves the one
+refused at, and the record ends, at the cost of one false pill. The other
+axis is judged on its own, since a window can be fixed on one alone.
 The
 judgement waits out a held key or a moving pointer rather than owing
 through the motion gate, since no later pass can pay a probe, and a

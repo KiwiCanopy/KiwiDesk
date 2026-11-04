@@ -136,6 +136,30 @@ extension FloatAspectJudgementTests {
         core.state.floatAspectProbing = nil
     }
 
+    @Test("A core stopped mid-probe leaves no press dead")
+    func stoppedProbeIsInert() {
+        let core = makeCore()
+        answer(core, start.size)
+        press(core, 50)
+        core.judgeFloatAspect(ask("x", 50, to: grow))
+        #expect(core.state.floatAspectProbing == id)
+        core.deferred.cancelAll()
+        press(core, 50)
+        #expect(core.tiler.recentInstantTarget(id)?.width == 850)
+        core.deferred.cancel(.floatAspect)
+    }
+
+    @Test("A button down during the probe's wait leaves the window alone")
+    func buttonDuringProbe() {
+        let core = makeCore()
+        core.tiler.motionGate.quiescence.buttonsDown = { true }
+        answer(core, CGSize(width: 900, height: 450))
+        core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
+        #expect(core.state.floatAspects[id] == nil)
+        #expect(core.tiler.recentInstantTarget(id) == nil)
+        #expect(!core.deferred.isScheduled(.floatAspect))
+    }
+
     @Test("A moving pointer delays the judgement and the probe's answer")
     func movingPointerWaits() {
         let core = makeCore()

@@ -10,12 +10,17 @@ extension StateCoordinator {
     }
 
     /// One judged float (#2973): `ratio` is width / height while
-    /// locked; `fixedSize` is the size of a window that refused both a
-    /// grow and a shrink; both nil is a window free of a lock.
+    /// locked; `refusedAxes` are those on which it refused a grow and a
+    /// shrink, at `refusedSize`, which it leaves if it ever complies.
+    /// All empty is a window free of a lock.
     struct FloatAspect: Sendable, Equatable {
         let pid: pid_t
         var ratio: CGFloat?
-        var fixedSize: CGSize? = nil
+        var refusedAxes: Set<String> = []
+        var refusedSize: CGSize? = nil
+
+        /// Nothing further to judge: locked, or free on every axis.
+        var isSettled: Bool { ratio != nil || refusedSize == nil }
     }
 
     /// Carries both records across a native-tab re-key.
@@ -26,5 +31,6 @@ extension StateCoordinator {
         if let aspect = floatAspects.removeValue(forKey: old) {
             floatAspects[new] = aspect
         }
+        if floatAspectProbing == old { floatAspectProbing = new }
     }
 }

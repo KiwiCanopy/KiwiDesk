@@ -275,20 +275,18 @@ extension KiwiCore {
         )
     }
 
-    /// A press on a float proved fixed size (#2973): the app's own
+    /// A press on an axis a float refused (#2973): the app's own
     /// limit, whichever way it was pressed.
-    func refuseFixedSizeFloat(
+    func refuseFloatRefusedAxis(
         _ window: WindowID,
         axis: String,
         delta: Double
     ) {
-        guard delta > 0 else {
+        if delta > 0 {
+            refuseGrowAtMaximum(window, axis: axis)
+        } else {
             refuseShrinkAtMinimum(window, axis: axis)
-            return
         }
-        cueResizeRefusal(
-            .ownMaximum(window, axis: axis, atBoundary: false)
-        )
     }
 
     /// A resize refused because a NEIGHBOR sits at its own

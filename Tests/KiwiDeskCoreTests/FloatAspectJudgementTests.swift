@@ -152,41 +152,76 @@ struct FloatAspectJudgementTests {
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
 
-    @Test("A window refusing the probe too is fixed, and goes back")
-    func fixedSizeIsRecorded() {
+    @Test("A window refusing the probe too refused that axis, and goes back")
+    func refusedAxisIsRecorded() {
         let core = makeCore()
         // The press walked it half a step before the probe.
         let walked = start.offsetBy(dx: -25, dy: 0)
         core.windowServer.readWindowBounds = { _ in walked }
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: walked)
-        #expect(core.state.floatAspects[id]?.fixedSize == start.size)
+        #expect(core.state.floatAspects[id]?.refusedAxes == ["x"])
+        #expect(core.state.floatAspects[id]?.refusedSize == start.size)
         #expect(core.state.floatAspects[id]?.ratio == nil)
         #expect(core.tiler.recentInstantTarget(id) == start)
     }
 
-    @Test("A fixed window's press writes nothing, either way")
-    func fixedPressWritesNothing() {
-        let core = makeCore()
+    private func refusedOnX(_ core: KiwiCore) {
         core.state.floatAspects[id] = .init(
             pid: 900_001,
             ratio: nil,
-            fixedSize: start.size
+            refusedAxes: ["x"],
+            refusedSize: start.size
         )
         answer(core, start.size)
+    }
+
+    @Test("A press on a refused axis keeps its place and keeps asking")
+    func refusedPressKeepsItsPlace() {
+        let core = makeCore()
+        refusedOnX(core)
         press(core, 50)
+        #expect(
+            core.tiler.recentInstantTarget(id)
+                == CGRect(origin: start.origin, size: grow)
+        )
         press(core, -50)
-        #expect(core.tiler.recentInstantTarget(id) == nil)
-        #expect(core.state.floatAspects[id]?.fixedSize == start.size)
+        #expect(core.tiler.recentInstantTarget(id)?.origin == start.origin)
+        #expect(core.state.floatAspects[id]?.refusedAxes == ["x"])
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
 
-    @Test("A fixed window that changed size by itself is judged anew")
-    func fixedWindowResizedIsRejudged() {
+    @Test("The other axis of a refused window resizes and is judged")
+    func otherAxisStillResizes() {
+        let core = makeCore()
+        refusedOnX(core)
+        #expect(
+            core.execute("resize", args: [.string("y"), .number(50)])
+                .isSuccess
+        )
+        #expect(core.tiler.recentInstantTarget(id)?.height == 500)
+        #expect(core.deferred.isScheduled(.floatAspect))
+        core.deferred.cancel(.floatAspect)
+    }
+
+    @Test("Free on the other axis keeps the refused one, at its new size")
+    func freeKeepsTheRefusedAxis() {
+        let core = makeCore()
+        refusedOnX(core)
+        let taller = CGSize(width: 800, height: 500)
+        answer(core, taller)
+        core.judgeFloatAspect(ask("y", 50, to: taller))
+        #expect(core.state.floatAspects[id]?.refusedAxes == ["x"])
+        #expect(core.state.floatAspects[id]?.refusedSize == taller)
+    }
+
+    @Test("A window that left the refused size is judged anew")
+    func complyingEndsTheRecord() {
         let core = makeCore()
         core.state.floatAspects[id] = .init(
             pid: 900_001,
             ratio: nil,
-            fixedSize: CGSize(width: 230, height: 408)
+            refusedAxes: ["x"],
+            refusedSize: CGSize(width: 230, height: 408)
         )
         answer(core, start.size)
         press(core, 50)
@@ -194,6 +229,16 @@ struct FloatAspectJudgementTests {
         #expect(core.tiler.recentInstantTarget(id)?.width == 850)
         #expect(core.deferred.isScheduled(.floatAspect))
         core.deferred.cancel(.floatAspect)
+    }
+
+    @Test("A glide step on a refused axis takes no write")
+    func refusedGlideStepWritesNothing() {
+        let core = makeCore()
+        refusedOnX(core)
+        core.keys.holdGlide.isApplyingGlideStep = true
+        press(core, 50)
+        core.keys.holdGlide.isApplyingGlideStep = false
+        #expect(core.tiler.recentInstantTarget(id) == nil)
     }
 
     @Test("A slow app that took the probe gets its press, and is not locked")
