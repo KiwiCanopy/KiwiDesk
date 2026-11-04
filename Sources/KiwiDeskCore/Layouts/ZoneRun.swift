@@ -35,9 +35,8 @@ public struct ZoneRun: Sendable, Equatable {
         let count = floors.count
         guard count > 0 else { return ZoneRun(visible: 0..<0, count: 0) }
         func fits(_ start: Int, _ last: Int) -> Bool {
-            let used = floors[start...last].reduce(0, +)
-            return start == last
-                || used + gap * CGFloat(last - start) <= span
+            start == last
+                || Self.fits(floors[start...last], gap: gap, span: span)
         }
         guard !fits(0, count - 1) else {
             return ZoneRun(visible: 0..<count, count: count)
@@ -67,6 +66,24 @@ public struct ZoneRun: Sendable, Equatable {
         return ZoneRun(visible: start..<(last + 1), count: count)
     }
 
+    /// Whether `lengths` laid in a row with `gap` between them fit
+    /// `span` — the one fit the render and a resize along the run
+    /// (`RunZone.press`, #2709) both ask. Lengths that exactly fill
+    /// the span round-trip through stored shares, so a hundredth of a
+    /// point of slack keeps rounding from hiding a window.
+    static func fits(
+        _ lengths: some Sequence<CGFloat>,
+        gap: CGFloat,
+        span: CGFloat
+    ) -> Bool {
+        var count = 0
+        let used = lengths.reduce(CGFloat(0)) {
+            count += 1
+            return $0 + $1
+        }
+        return used + gap * CGFloat(max(count - 1, 0)) <= span + 0.01
+    }
+
     /// Frames for a zone's members: the shown run shares `region`
     /// along the axis, each window getting its floor plus a
     /// weighted share of what is left; a hidden window is handed
@@ -90,11 +107,15 @@ public struct ZoneRun: Sendable, Equatable {
         var slots: [CGRect] = []
         var position = vertical ? region.minY : region.minX
         for index in shown {
+            // Shown windows that all carry a run size share what is
+            // left evenly.
+            let share =
+                weightTotal > 0
+                ? weights[index] / weightTotal : 1 / Double(shown.count)
             let extent =
                 shown.count == 1
                 ? available
-                : floors[index]
-                    + extra * CGFloat(weights[index] / weightTotal)
+                : floors[index] + extra * CGFloat(share)
             slots.append(
                 vertical
                     ? CGRect(

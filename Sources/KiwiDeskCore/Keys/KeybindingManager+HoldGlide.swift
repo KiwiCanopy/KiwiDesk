@@ -55,6 +55,13 @@ extension KeybindingManager {
         holdGlide.noteRefusal()
     }
 
+    /// Ends a running glide with no cue: where a hold stops short of
+    /// a push, which is no refusal (#2709).
+    public func endGlide() {
+        guard holdGlide.isGliding else { return }
+        holdGlide.cancelRun()
+    }
+
     /// Executes the key-down binding, then lets the ladder judge
     /// the fire's tally (#1056/#1082). `id` is CARRIED from the
     /// registration itself, and looked up for EXISTENCE only — the

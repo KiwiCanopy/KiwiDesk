@@ -106,6 +106,19 @@ extension KiwiCore {
                     )
                 )
             }
+            // A push's run lengths (#2709), as shares of the span.
+            if !space.runSizes.isEmpty {
+                object["run_sizes"] = .object(
+                    Dictionary(
+                        uniqueKeysWithValues: space.runSizes.map {
+                            (
+                                String($0.key.raw),
+                                .number(Double($0.value.share))
+                            )
+                        }
+                    )
+                )
+            }
             // Session-only track partition (#128), same
             // rationale as stack_weights: break markers and
             // per-head track weights, absent outside track

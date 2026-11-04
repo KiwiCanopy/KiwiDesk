@@ -9,10 +9,8 @@ import Testing
 /// below (#764). Discovered by reflection over a fixture that
 /// sets every property away from its default, so a store added
 /// tomorrow reds until it is classified. `WorkspaceManager
-/// .setMode` clears a DIFFERENT set on purpose — a mode reseed
-/// drops the track weights while the in-track shares
-/// (`stackWeights`) survive by ruling
-/// (`docs/accepted-limitations.md`) — and is not held here.
+/// .setMode` calls the reset too, so what it clears is this set
+/// (#2541, #2709).
 @Suite("Space sizing census (#764)")
 struct SpaceSizingCensusTests {
     private let w1 = WindowID(1)
@@ -43,6 +41,7 @@ struct SpaceSizingCensusTests {
         space.windows = [w1, w2]
         space.focused = w1
         space.stackWeights = [w1: 2]
+        space.runSizes = [w2: RunSize(share: 0.42, zone: 1)]
         space.scrollRest = ScrollRest(offset: 40)
         space.trackBreaks = [w2]
         space.handedBreaks = [w2]
@@ -99,9 +98,9 @@ struct SpaceSizingCensusTests {
             }
         }
         // The census is not vacuous: the sizing stores are the
-        // two `resize` writes into inside the Space — the session
+        // three `resize` writes into inside the Space — the session
         // ratios live per Desktop, outside it (#2921).
-        #expect(cleared == ["stackWeights", "trackWeights"])
+        #expect(cleared == ["stackWeights", "runSizes", "trackWeights"])
         #expect(
             Set(structure.keys).union(cleared) == Set(after.keys)
         )

@@ -56,7 +56,8 @@ struct MouseResizeApplyTests {
             .bspRatioH(0.1),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let bsp = resolvedBsp(core)
         #expect(abs(bsp.splitRatioH - 0.6) < 1e-9)
@@ -73,7 +74,8 @@ struct MouseResizeApplyTests {
             .bspRatioV(0.1),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let bsp = resolvedBsp(core)
         #expect(abs(bsp.splitRatioV - 0.6) < 1e-9)
@@ -92,7 +94,8 @@ struct MouseResizeApplyTests {
             .bspRatioH(0.5),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         #expect(abs(resolvedBsp(core).splitRatioH - 0.7) < 1e-9)
     }
@@ -106,7 +109,8 @@ struct MouseResizeApplyTests {
             .bspRatioV(0.5),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         #expect(abs(resolvedBsp(core).splitRatioV - 0.625) < 1e-9)
     }
@@ -119,7 +123,8 @@ struct MouseResizeApplyTests {
             .masterRatio(-0.1),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let stack = core.tiler.settings.resolvedStack(
             for: core.state.workspaces[SpaceID("1")]!,
@@ -140,7 +145,8 @@ struct MouseResizeApplyTests {
             .masterRatio(0.5),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let stack = core.tiler.settings.resolvedStack(
             for: core.state.workspaces[SpaceID("1")]!,
@@ -174,7 +180,8 @@ struct MouseResizeApplyTests {
             .scrollSlot(-100),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let after = core.tiler.settings.resolvedScrolling(
             for: core.state.workspaces[SpaceID("1")]!,
@@ -216,7 +223,8 @@ struct MouseResizeApplyTests {
                 .scrollSlot(400),
                 for: nil,
                 in: live,
-                bounds: bounds
+                bounds: bounds,
+                moved: { _ in .both }
             )
             return core.tiler.settings.resolvedScrolling(
                 for: core.state.workspaces[SpaceID("1")]!,
@@ -270,7 +278,8 @@ struct MouseResizeApplyTests {
             .trackAcross(100),
             for: WindowID(1),
             in: core.state.workspaces[space]!,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let weights =
             core.state.workspaces[space]!.trackWeights
@@ -300,7 +309,8 @@ struct MouseResizeApplyTests {
             .trackAlong(100),
             for: WindowID(1),
             in: core.state.workspaces[space]!,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let weights =
             core.state.workspaces[space]!.stackWeights

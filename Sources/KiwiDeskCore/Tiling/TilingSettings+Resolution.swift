@@ -262,6 +262,7 @@ extension TilingSettings {
             track: resolvedTrack(for: space.id)
         )
         context.parkBounds = parkBounds
+        context.runSizes = space.runSizes
         return context
     }
 

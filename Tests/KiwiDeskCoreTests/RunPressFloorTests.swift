@@ -135,7 +135,8 @@ struct RunPressFloorTests {
             axis: "y",
             delta: 5,
             span: 780,
-            space: space
+            space: space,
+            toward: .both
         )
         #expect(response.isSuccess)
         let weight = try #require(
@@ -162,7 +163,8 @@ struct RunPressFloorTests {
             axis: "y",
             delta: -120,
             span: core.layoutSpan(of: space, horizontal: false),
-            space: space
+            space: space,
+            toward: .both
         )
         core.retile(animated: false)
         let after = try zone(of: WindowID(3), in: core, space: id)
@@ -190,7 +192,8 @@ struct RunPressFloorTests {
             axis: "y",
             delta: -120,
             span: core.layoutSpan(of: space, horizontal: false),
-            space: space
+            space: space,
+            toward: .both
         )
         core.retile(animated: false)
         let after = try zone(of: WindowID(2), in: core, space: id)

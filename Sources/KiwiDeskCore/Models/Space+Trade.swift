@@ -28,6 +28,7 @@ extension Space {
         if let weight = stackWeights.removeValue(forKey: resident) {
             stackWeights[incoming] = weight
         }
+        runSizes.rename(resident, to: incoming)
         if focused == resident { focused = incoming }
         releaseScrollSlot()
         endMaximize()

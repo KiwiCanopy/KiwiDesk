@@ -121,6 +121,9 @@ public struct Space: Sendable, Equatable {
     public var focused: WindowID?
     /// Per-window vertical share in stack column (#67).
     public var stackWeights: [WindowID: Double]
+    /// Per-window length a push along its run set (#2709,
+    /// `RunSize`); the run plans the window at it (`RunZone`).
+    public var runSizes: [WindowID: RunSize] = [:]
     /// Scrolling layout last-computed viewport rest
     /// (#66, #966, `ScrollRest`).
     public var scrollRest: ScrollRest?
@@ -173,7 +176,7 @@ public struct Space: Sendable, Equatable {
     }
 
     /// Clears this Space's SIZING — what `resize` accumulates in
-    /// the Space: the stack and track weights — and nothing
+    /// the Space: the weights and the run sizes — and nothing
     /// structural (#764). The one statement of which stored
     /// properties are sizes: `SpaceSizingCensusTests` classifies
     /// every property as cleared here or named structure, so a
@@ -182,6 +185,7 @@ public struct Space: Sendable, Equatable {
     /// cleared beside this by `reset_layout_sizing`.
     public mutating func resetSizing() {
         stackWeights = [:]
+        runSizes = [:]
         trackWeights = [:]
     }
 
@@ -270,6 +274,7 @@ public struct Space: Sendable, Equatable {
         trackWeights[window] = nil
         windows.removeAll { $0 == window }
         stackWeights[window] = nil
+        runSizes[window] = nil
         // The successor keeps the run resting where it was
         // (#2235); one in the next zone loses to that zone's own
         // head (`ZoneRun.head`).

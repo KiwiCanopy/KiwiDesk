@@ -42,12 +42,13 @@ extension KiwiCore {
         _ window: WindowID,
         axis: String,
         delta: Double,
-        space: Space
+        space: Space,
+        toward side: RunZone.PushSide
     ) -> CommandResponse? {
         guard let screen = TilingEngine.screen(for: space.id, in: state),
             let found = bspChain(of: space, on: screen),
             found.zone.vertical == (axis == "y"),
-            let index = found.zone.members.firstIndex(of: window)
+            found.zone.members.contains(window)
         else { return nil }
         let chain = found.zone
         let context = found.context
@@ -64,47 +65,26 @@ extension KiwiCore {
             !across.first.isEmpty || !across.second.isEmpty
         // A line laid by floor and weight, whether it hides a
         // window or not, takes the run's own step.
-        if let run = chain.run(in: context) {
+        if chain.run(in: context) != nil {
             return resizeInRun(
                 window,
-                run: RunCover.Run(zone: chain, run: run, in: context),
+                zone: chain,
+                context: context,
                 axis: axis,
                 delta: delta,
+                toward: side,
                 space: space,
                 otherAxisDivides: otherAxisDivides
             )
         }
-        // A chain that fits whole shares its line by weight alone:
-        // the Stack zone writer's step (`resizeStackMember`).
-        let gap =
-            chain.vertical
-            ? context.gaps.inner.vertical : context.gaps.inner.horizontal
-        let span =
-            (chain.vertical ? chain.region.height : chain.region.width)
-            - gap * CGFloat(chain.members.count - 1)
-        let outcome = StackLayout.weightStep(
-            weights: chain.members.map {
-                max(space.stackWeights[$0] ?? 1, StackLayout.weightFloor)
-            },
-            at: index,
+        return resizeFittingZone(
+            window,
+            zone: chain,
+            context: context,
+            axis: axis,
             delta: delta,
-            span: Double(span),
-            minSizes: chain.members.map {
-                plannedMinSize(of: $0, axis: axis)
-            }
+            toward: side,
+            space: space
         )
-        if delta < 0, outcome.hitOwnMinimum {
-            refuseShrinkAtMinimum(window, axis: axis)
-        } else if delta > 0, let blocked = outcome.blockedByOther {
-            refuseGrowAtNeighborMinimum(
-                window,
-                anchor: chain.members[blocked],
-                axis: axis
-            )
-        }
-        state.workspaces.withSpace(space.id) {
-            $0.stackWeights[window] = outcome.value
-        }
-        return .ok()
     }
 }

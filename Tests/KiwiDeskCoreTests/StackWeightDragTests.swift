@@ -81,7 +81,8 @@ struct StackWeightDragTests {
             .stackWeight(100),
             for: WindowID(2),
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         #expect((weight(core, 2) ?? 1) > 1)
         #expect(weight(core, 1) == nil)
@@ -96,7 +97,8 @@ struct StackWeightDragTests {
             .stackWeight(-100),
             for: WindowID(2),
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         #expect((weight(core, 2) ?? 1) < 1)
     }
@@ -112,7 +114,8 @@ struct StackWeightDragTests {
             .stackWeight(150),
             for: WindowID(2),
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let typed = makeCore()
         _ = stackSpace(typed)
@@ -144,7 +147,8 @@ struct StackWeightDragTests {
             .stackWeight(100),
             for: WindowID(2),
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         #expect((weight(core, 2) ?? 1) > 1)
     }
@@ -172,7 +176,8 @@ struct StackWeightDragTests {
             axis: "y",
             delta: 100,
             span: Double(bounds.height),
-            space: space
+            space: space,
+            toward: .both
         )
         #expect(!response.isSuccess)
         #expect(weight(core, 3) == nil)
@@ -180,7 +185,8 @@ struct StackWeightDragTests {
             .stackWeight(100),
             for: WindowID(3),
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         #expect(weight(core, 3) == nil)
     }
@@ -225,7 +231,8 @@ struct StackWeightDragTests {
             axis: "y",
             delta: 100,
             span: Double(bounds.height),
-            space: space
+            space: space,
+            toward: .both
         )
         #expect(
             response.error
@@ -268,7 +275,8 @@ struct StackWeightDragTests {
             .stackWeight(100),
             for: nil,
             in: space,
-            bounds: bounds
+            bounds: bounds,
+            moved: { _ in .both }
         )
         let weights = core.state.workspaces[SpaceID("1")]?.stackWeights
         #expect(weights?.isEmpty == true)

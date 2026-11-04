@@ -67,7 +67,8 @@ extension KiwiCore {
             axis: axis,
             delta: delta,
             span: span,
-            space: space
+            space: space,
+            toward: .both
         )
     }
 
@@ -75,14 +76,16 @@ extension KiwiCore {
     /// zone's own axis, for the window a gesture is ABOUT: the
     /// keyboard verb hands `space.focused`, the mouse drop the
     /// dragged window (#941), and a refusal names the one that
-    /// cannot move (#435).
+    /// cannot move (#435). `side` is the edge a drag moved; the
+    /// keyboard moves both (#2709).
     @discardableResult
     func resizeStackMember(
         _ focused: WindowID,
         axis: String,
         delta: Double,
         span: Double,
-        space: Space
+        space: Space,
+        toward side: RunZone.PushSide
     ) -> CommandResponse {
         let stack = tiler.settings.resolvedStack(
             for: space,
@@ -184,6 +187,7 @@ extension KiwiCore {
             focused,
             axis: axis,
             delta: delta,
+            toward: side,
             space: space,
             otherAxisDivides: masterSplitDivides(tiled, stack, in: space)
         ) {
@@ -230,16 +234,16 @@ extension KiwiCore {
             span: effectiveSpan,
             minSizes: minSizes
         )
-        if delta < 0, outcome.hitOwnMinimum {
-            refuseShrinkAtMinimum(focused, axis: axis)
-        } else if delta > 0,
-            let blocked = outcome.blockedByOther
-        {
-            refuseGrowAtNeighborMinimum(
-                focused,
-                anchor: members[blocked],
-                axis: axis
-            )
+        if pushOrCue(
+            outcome,
+            of: focused,
+            members: members,
+            axis: axis,
+            delta: delta,
+            toward: side,
+            space: space
+        ) {
+            return .ok()
         }
         state.workspaces.withSpace(space.id) {
             $0.stackWeights[focused] = outcome.value

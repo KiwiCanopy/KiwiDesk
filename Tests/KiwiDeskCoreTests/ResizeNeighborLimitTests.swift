@@ -251,7 +251,8 @@ struct ResizeNeighborLimitTests {
             axis: "y",
             delta: -100,
             span: 800,
-            space: space
+            space: space,
+            toward: .both
         )
         #expect(!res.isSuccess)
         #expect(

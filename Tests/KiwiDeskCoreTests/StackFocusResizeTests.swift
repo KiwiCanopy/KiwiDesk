@@ -204,37 +204,34 @@ struct StackFocusResizeTests {
         #expect((space?.stackWeights[WindowID(3)] ?? 0) > 1)
     }
 
-    @Test("growing past the min-size cliff is capped, not stored")
-    func growthCappedAtOverflowCliff() {
+    @Test("growing past the min-size cliff pushes the mate into the run")
+    func growthPastCliffPushesTheMate() {
         let core = makeCore()
         stackSpace(core)
-        // The cap derives from the display height, which the
-        // fixture pins (#531) — a 6K host legitimately reaches
-        // the 10 clamp otherwise — from the minimum, which
-        // stays at its 300pt default, and since #933 from the
-        // gaps the layout carves off the span (outer top+bottom
-        // and one inner gap for a 2-window column) plus the
-        // quarter-point cascade margin. All pinned, not
-        // assumed.
+        // The cliff derives from the pinned display (#531) and
+        // the 300pt default minimum: the column of two cannot
+        // hold w2 grown by 400 with w1 at its floor.
         #expect(core.tiler.settings.minWindowSizes == MinWindowSizes(all: 300))
         core.tiler.settings.gapsGlobal = Gaps.uniform(10)
-        let span = Double(Self.display.height) - 20 - 10
-        let minSize = 300 + StackLayout.minSizeMargin
         core.state.apply(.windowFocused(WindowID(2)))
-        // Hammer Grow height far past where the column mate
-        // would drop below min_window_size: the stored weight
-        // must stop at the cliff instead of ratcheting to the
-        // 10 clamp (review finding). Cap for a 2-window column
-        // with the mate at weight 1: span/minSize − 1.
+        // Hammer Grow height far past the cliff: the first press
+        // sends w1 into the run (#2709) and w2 fills the column;
+        // the rest find nothing left to grow into, and the stored
+        // share never ratchets to the 10 clamp.
         for _ in 1...50 {
             core.execute(
                 "resize",
                 args: [.string("y"), .number(400)]
             )
         }
-        let expected = min(max(span / minSize - 1, 1), 10)
         let space = core.state.workspaces[SpaceID("1")]
-        let weight = space?.stackWeights[WindowID(2)] ?? 0
-        #expect(abs(weight - expected) < 1e-9)
+        #expect(space?.runTails == [WindowID(2)])
+        #expect(space?.runHeads.isEmpty == true)
+        #expect(space?.stackWeights[WindowID(2)] == nil)
+        #expect((space?.runSizes[WindowID(2)]?.share ?? 0) > 0.5)
+        #expect(
+            core.tiler.runCovers[SpaceID("1")]?.behind[WindowID(1)]
+                == WindowID(2)
+        )
     }
 }

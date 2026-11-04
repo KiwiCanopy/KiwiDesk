@@ -4123,8 +4123,9 @@ Interactive resizes accumulate per space and across weeks, and
 the two routes back before `reset_layout_sizing` — nudging each
 ratio in the opposite direction, or `load_profile`, which also
 discards every non-sizing change since — were not answers. The
-verb clears the two stores a resize writes (the #458 session
-layer and the stack and track weights) on the active space by
+verb clears what a resize writes (the #458 session layer and the
+sizes `Space.resetSizing` holds, `SpaceSizingCensusTests`) on the
+active space by
 default — a reset is about the manual resizing in front of the
 user, and a bound key should undo what they just did, not what
 they did elsewhere — on one space by id, or on every space for
@@ -4343,6 +4344,11 @@ applied: inside a run it divides only the span left after the
 shown windows' floors, which is the span the layout divides
 (#933), so a press never writes a share the run does not draw.
 
+:::unreleased
+A press that moves a window into or out of the run writes a length
+instead (*A grow along a run pushes into it*, below).
+:::
+
 *Learned floors, judged once per pass.* A floor is the configured
 minimum, or an app's corroborated learned minimum where larger
 (#677/#1055) — the bound Track's automatic count already reads
@@ -4541,6 +4547,95 @@ one window at `min_window_size` still cascades, matching the
 whole-zone pile of the other runs. With no layout piling part of
 a Space, the "Sticky windows can't be moved to the pile" refusal
 (#438) has nothing left to refuse and is retired.
+
+:::unreleased
+**A grow along a run pushes into it (#2709).** Where windows
+already scroll — a Stack zone, a Track track, an auto-sized Grid's
+full last track, a BSP chain — a resize along the scroll direction
+does not stop at a neighbour's minimum: the neighbour it
+squeezes waits in the run and the grown window takes its room, and
+a lone window's shrink brings the next one back at its minimum.
+One pure answer, `RunZone.press`, that every capped
+writer stores, not per layout: the press finds its run through
+`RunZone.zones`, never a mode list, and a Grid or BSP push that
+looked like a Stack run yet behaved differently would be the
+inconsistency. The cue is the overflow
+mark's count alone, since the push is the gesture doing what was
+asked.
+
+*A hold stops short of a push; only a press pushes* (owner,
+2026-11-04, on ui-designer's advice). A glide can hide several
+windows in a second, and beside a shown window a shrink no longer
+brings them back, so a run of steps must not be able to do that. A
+hold ends silently with the neighbour at its minimum, and pressing
+again pushes one window; if still held, that press glides to the
+next neighbour's minimum and stops. So each press moves at most one
+window out. This end is no refusal, so it stands outside the funnel
+that ends a hold on a refusal cue, and no pill says so: the neighbour's
+minimum pill would claim a limit that is not one, and the `+n` mark
+already answers the press. A tap is one step and a drag commits once,
+so neither changes.
+
+*The grown length is stored, not a weight.* A run picks which
+windows show from their floors alone, so a share — relative by
+construction — cannot keep a pushed window out: at the next pass
+the floors fit again and it returns. The window keeps the length
+the gesture gave it (`Space.runSizes`), planned as its floor, and
+the run's two ends are written beside it so the next pass draws
+the run the write planned. The length is a share of the run's
+span, as every other sizing store is, so a Space shown on a
+smaller screen keeps its proportions rather than hiding more
+windows than the user pushed. The run decides when it counts: in
+a zone of the role it was given in — Stack's master or stack zone,
+any track — so a reorder or a track opening beside it keeps the
+length, while that run would still hide a window with it; the persist step
+keeps exactly what the run planned. A window moved between
+Stack's zones, or a run whose windows all fit again, plans at its
+floor and share, so the pass that draws and the store never
+disagree, and a press that moves no window keeps the run's
+weight step. A weight at its limit cannot step, so a press there
+takes a length while the run hides a window. In a run hiding none
+a grow pushes the neighbour, whatever it has left above its minimum,
+since nothing else can grow the window, and a shrink cues. A held
+step there just ends. A length replaces the window's weight. A shown mate takes what a shrink gives, by weight or —
+beside only sized mates, whose leftover the window draws — through
+the nearest mate's length, so a press on a neighbour never undoes
+the push.
+A run that shows only sized windows lets its last one take what
+the others leave, so every run keeps a window that draws the
+rest and every press moves the step it asks. A window left alone in its run always fills it: any
+shrink gives up what the next window needs at its minimum and that
+window returns at once, since room held open for nothing is the
+one state no press could explain (owner, 2026-11-04). Only a lone
+window pulls: beside a shown mate nothing is freed, and a waiting
+window returns by a focus step or once every member fits, the
+shown windows that take a share counted at their minimum. Where
+every member fits the window keeps its length as the weight that
+draws it there, solved against the render, so the last pull does
+not jump, save where a weight's limit or unequal floors leave no
+weight that draws it exactly, which can land it either side. A press steps from
+what the window draws, as the scrolling slot does (#1057), so no
+store banks a length the screen does not show. It is sizing like the weights: a mode change and
+`reset_layout_sizing` clear it, and only an in-place restart
+carries it.
+
+*Which window moves.* The run stays contiguous, so the window that
+leaves or returns is always at one of its ends. A drag acts on the
+side of the edge it moved, a push and the matching pull touching
+the same window; the keyboard squeezes both sides and sends the
+last in order, and brings back the one after the run first. A pull
+stops at the
+first window that does not fit rather than skip it for a smaller
+one, which would reorder what the user sees (owner, 2026-11-03,
+on ui-designer's advice).
+
+*Where it stops.* Across the run, the grow keeps the neighbour's
+minimum and its pill: the run cannot take a window on that axis. A
+Grid's last track that draws the cells of the tracks across it
+moves that line for every track rather than breaking out of the
+grid, and BSP's halved splits move a ratio; the rule reaches only
+a line laid by floor and weight, so neither needs an exception.
+:::
 
 **The stack cascade is a last resort; extreme ratios clamp at
 layout time, and interactive writes cap at the visible cliff.**
@@ -7484,8 +7579,9 @@ through one door
 that every resolver overlay takes as a required argument. Config
 stays shared: a layout-wide setting, a per-Space override and a
 profile apply to every Desktop that shows the Space. The stack and
-track weights are keyed per window, so they follow each Desktop's
-own windows already and stay on the Space. The owner's rulings
+track weights and the run sizes (#2709) are keyed per window, so
+they follow each Desktop's own windows already and stay on the
+Space. The owner's rulings
 (2026-11-02) where the sizes differ from the flip:
 
 - **An in-place restart carries them**, as sizing survived one

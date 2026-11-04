@@ -46,6 +46,19 @@ extension StackLayout {
         ).value
     }
 
+    /// Whether `weight` sits at the limit a press of `delta` moves
+    /// it toward, where a weight step can move nothing (#2709).
+    static func weightSpent(_ weight: Double, by delta: Double) -> Bool {
+        delta > 0
+            ? weight >= weightRange.upperBound
+            : weight <= weightRange.lowerBound
+    }
+
+    /// The member a refusal at `index` of a line names (#2709).
+    static func nearestMate(of index: Int) -> Int {
+        index == 0 ? 1 : index - 1
+    }
+
     /// Per-share interactive weight step respecting individual size floors
     /// (#933, #677, #925).
     public static func weightStep(

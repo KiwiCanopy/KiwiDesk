@@ -16,17 +16,24 @@ public struct RunZone: Sendable, Equatable {
     /// them by floor and weight. Nil sizes the run from its
     /// members' floors alone.
     public let slots: [CGRect]?
+    /// The zone's role among its layout's zones — Stack's master 0
+    /// and stack 1, any other zone 0, since Track's tracks share one
+    /// along-span — what a push's length names (`RunSize.zone`), so
+    /// a reorder or a track opening beside it keeps the length.
+    public let ordinal: Int
 
     public init(
         members: [WindowID],
         region: CGRect,
         vertical: Bool,
-        slots: [CGRect]? = nil
+        slots: [CGRect]? = nil,
+        ordinal: Int = 0
     ) {
         self.members = members
         self.region = region
         self.vertical = vertical
         self.slots = slots
+        self.ordinal = ordinal
     }
 
     /// The zones `mode` lays `tiled` along, nil for a layout that
@@ -169,8 +176,19 @@ public struct RunZone: Sendable, Equatable {
         return max(span - used, 0)
     }
 
+    /// Each member's planned length — its run size where it has
+    /// one — its floor without it, and the gap: what a resize along
+    /// the run plans with (`press(_:by:toward:in:)`, #2709).
+    func floorsAndGap(
+        in context: LayoutContext
+    ) -> (floors: [CGFloat], bare: [CGFloat], gap: CGFloat) {
+        let plan = placement(in: context)
+        return (plan.floors, plan.bare, plan.gap)
+    }
+
     private struct Plan {
         let floors: [CGFloat]
+        let bare: [CGFloat]
         let weights: [Double]
         let gap: CGFloat
         let piles: Bool
@@ -183,14 +201,21 @@ public struct RunZone: Sendable, Equatable {
             vertical
             ? context.gaps.inner.vertical : context.gaps.inner.horizontal
         let cell = cellFloor(gap: gap)
-        let floors = members.map {
+        let bare = members.map {
             max(
                 context.plannedFloor(of: $0, horizontal: !vertical),
                 cell
             )
         }
-        let weights = members.map {
-            max(context.stackWeights[$0] ?? 1, StackLayout.weightFloor)
+        // A window a push sized (#2709) is planned at its length
+        // and takes none of what is left; its zero share never fits
+        // whole, so the zone lays out as a run.
+        let sizes = honouredSizes(bare: bare, gap: gap, in: context)
+        var floors = members.indices.map { sizes[$0] ?? bare[$0] }
+        var weights = members.indices.map {
+            sizes[$0] != nil
+                ? 0
+                : plainWeight(of: members[$0], in: context)
         }
         // The emergency whole-zone pile (#44): not even one window
         // fits at the minimum size.
@@ -202,6 +227,7 @@ public struct RunZone: Sendable, Equatable {
         else {
             return Plan(
                 floors: floors,
+                bare: bare,
                 weights: weights,
                 gap: gap,
                 piles: piles,
@@ -216,8 +242,19 @@ public struct RunZone: Sendable, Equatable {
             tail: ZoneRun.tail(of: members, in: context.runTails),
             focus: context.focused.flatMap { members.firstIndex(of: $0) }
         )
+        // A run that shows only sized windows lets its last one take
+        // what the others leave, so a run always has a window that
+        // draws the rest.
+        if run.visible.count > 1,
+            run.visible.allSatisfy({ weights[$0] == 0 })
+        {
+            let last = run.visible.upperBound - 1
+            floors[last] = bare[last]
+            weights[last] = plainWeight(of: members[last], in: context)
+        }
         return Plan(
             floors: floors,
+            bare: bare,
             weights: weights,
             gap: gap,
             piles: false,
@@ -225,7 +262,13 @@ public struct RunZone: Sendable, Equatable {
         )
     }
 
-    private var span: CGFloat { vertical ? region.height : region.width }
+    var span: CGFloat { vertical ? region.height : region.width }
+
+    /// Each member's share of what the floors leave, as the render
+    /// divides it — zero for a sized window.
+    func shareWeights(in context: LayoutContext) -> [Double] {
+        placement(in: context).weights
+    }
 
     /// Every member's floor under fixed cells: an equal cell's
     /// extent, rounded down so exactly `slots.count` fit the span.

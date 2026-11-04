@@ -44,6 +44,7 @@ private func trackedFixture() -> StateCoordinator {
     state.apply(.windowCreated(window(old)))
     state.workspaces.withSpace(SpaceID(1)) { space in
         space.stackWeights[old] = 2.0
+        space.runSizes[old] = RunSize(share: 0.6, zone: 1)
         space.trackBreaks.insert(old)
         space.handedBreaks.insert(old)
         space.trackWeights[old] = 1.5
@@ -100,7 +101,8 @@ private func trackedFixture() -> StateCoordinator {
 /// `awayWindows` (#1146), `closedDepartures` (#1414),
 /// `unjudgedFilings` (#1646), `focusRecency` (#1840),
 /// `crossSession.placed` (#1385), plus
-/// each space's `windows`, `stackWeights`, `trackBreaks`,
+/// each space's `windows`, `stackWeights`, `runSizes` (#2709),
+/// `trackBreaks`,
 /// `handedBreaks` (#1387), `trackWeights`, `runHeads` and
 /// `runTails` (#2235).
 /// Bumping the fixture
@@ -109,7 +111,7 @@ private func trackedFixture() -> StateCoordinator {
 /// clear it. The fixture's `scrollRest` is deliberately NOT
 /// counted: it holds a bare id, not a container, so reflection
 /// never renders it here (see the limitations above).
-private let expectedContainerCount = 19
+private let expectedContainerCount = 20
 
 /// The renderings of every WindowID-keyed container the shared
 /// walker (`idContainers`) finds.

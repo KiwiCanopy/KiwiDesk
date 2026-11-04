@@ -116,14 +116,26 @@ extension KiwiCore {
                 id,
                 axis: $0.axis,
                 delta: Double($0.points),
-                space: space
+                space: space,
+                toward: MouseResize.movedSide(
+                    from: slot,
+                    to: frame,
+                    vertical: $0.axis == "y"
+                )
             )
         }) == nil {
             applyResizeAdjustment(
                 adjustment,
                 for: id,
                 in: space,
-                bounds: bounds
+                bounds: bounds,
+                moved: { vertical in
+                    MouseResize.movedSide(
+                        from: slot,
+                        to: frame,
+                        vertical: vertical
+                    )
+                }
             )
         }
         // **No sizing promise here**, unlike the keyboard verb —
@@ -180,7 +192,8 @@ extension KiwiCore {
         _ adjustment: ResizeAdjustment?,
         for window: WindowID?,
         in space: Space,
-        bounds: CGRect
+        bounds: CGRect,
+        moved: (_ vertical: Bool) -> RunZone.PushSide
     ) {
         switch adjustment {
         // The ratio and slot writes go through the same capped
@@ -272,7 +285,8 @@ extension KiwiCore {
                 axis: weightAxis,
                 delta: Double(delta),
                 span: span,
-                space: space
+                space: space,
+                toward: moved(weightAxis == "y")
             )
         case .trackAcross(let delta):
             guard let window else { break }
@@ -286,7 +300,8 @@ extension KiwiCore {
                 axis: acrossAxis,
                 delta: Double(delta),
                 span: span,
-                space: space
+                space: space,
+                toward: moved(!vertical)
             )
         case .trackAlong(let delta):
             guard let window else { break }
@@ -300,7 +315,8 @@ extension KiwiCore {
                 axis: alongAxis,
                 delta: Double(delta),
                 span: span,
-                space: space
+                space: space,
+                toward: moved(vertical)
             )
         case .gridColumn(let delta, let leading):
             guard let window else { break }

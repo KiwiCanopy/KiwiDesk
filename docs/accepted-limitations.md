@@ -111,6 +111,12 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+A reload drops the length a grow along a run kept as well, so the
+windows it pushed come back once they fit
+([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
+:::
+
+:::unreleased
 A cross-screen float delivery is sent at most twice: when macOS
 re-clamps the window both times, it stays where it was clamped,
 and KiwiDesk stops re-sending it

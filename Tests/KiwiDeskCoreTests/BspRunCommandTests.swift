@@ -238,10 +238,13 @@ struct BspRunCommandTests {
             session: core.sessionRatios(of: before.id)
         )
         .splitRatioV
+        // The line has 10 pt to give: a step it can give takes
+        // weights, a larger one pushes a window into the run
+        // (#2709).
         #expect(
             core.execute(
                 "resize",
-                args: [.string("y"), .number(20)]
+                args: [.string("y"), .number(5)]
             ).isSuccess
         )
         let space = try #require(core.state.workspaces[id])

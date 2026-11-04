@@ -111,7 +111,8 @@ struct RunReadersTests {
             axis: "y",
             delta: 50,
             span: 780,
-            space: space
+            space: space,
+            toward: .both
         )
         #expect(response.isSuccess)
         let weight = try #require(

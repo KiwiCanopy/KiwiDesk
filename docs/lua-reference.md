@@ -900,7 +900,8 @@ The session layer is kept per macOS Desktop and profile
 ([resize](#resize)): a space id, or nothing, resets that Space on
 the Desktop its screen shows under the profile live there — a Space
 with no screen, on every Desktop; `"all"` resets every Space on
-every Desktop.
+every Desktop. It also clears the length a grow along a run kept
+([resize](#resize)).
 :::
 
 **Example:**
@@ -4941,6 +4942,11 @@ it fits, so a step reveals one window. A zone at rest keeps the
 windows it shows; closing one lets the others grow into the
 room.
 
+:::unreleased
+A window you grew along the zone past what its neighbours could
+give keeps that length instead ([resize](#resize)).
+:::
+
 Each end of a zone that hides windows shows a "+n" overflow mark
 on its edge window, counting that end's hidden windows. Clicking
 the mark opens the list of them, nearest first; clicking one
@@ -6539,6 +6545,28 @@ also names the reason while the blocking neighbor marks itself
 at its minimum. Keyboard and mouse resizes share these clamps
 and cues.
 
+:::unreleased
+Along a run's scroll direction — a Stack zone, a Track track, an
+auto-sized Grid's last track once the grid is full, a BSP chain —
+a grow does not stop at a neighbour's minimum (#2709): the
+neighbour it squeezes waits in the run, the grown window takes its
+room, and the overflow mark's `+n` counts it. A mouse drag pushes
+the neighbour on the side of the edge it moved; the keyboard
+squeezes both sides and sends the last window in order. A window
+alone in its run always fills it: any shrink gives up what the
+next window needs at its minimum and that window comes back, the
+one past the moved edge first (for the keyboard, the one after the
+run), then the other end's once that side has none waiting. A next
+window that cannot fit refuses the shrink. Beside a shown window a shrink widens that window, and a
+waiting window comes back when you focus it or when every window
+fits. The window keeps its length, like the stack and
+track weights, while windows wait in its run, until
+[`reset_layout_sizing`](#reset_layout_sizing), a layout change, or
+the window moving between a Stack's zones clears it. Across the
+run, in a Grid's last track while it draws its cells and in BSP's
+halved splits a grow still stops at the neighbour's minimum.
+:::
+
 The pill says *whose* minimum it was (#1261): "Minimum window
 size reached" and "Neighboring window at its minimum size" mean
 the `min_window_size` bound, and lowering it helps; "This app
@@ -6599,6 +6627,12 @@ shortcut recorder ends the run immediately.
 A glide writes each frame instantly, on every layout and on a
 floating window alike, whatever `animations.set_on_window_resize`
 says and under system **Reduce Motion** (#1082/#1090).
+
+:::unreleased
+A glide along a run stops with the neighbour at its minimum and pushes
+nothing; pressing again pushes one window
+([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
+:::
 
 A floating resize accumulates against what was last
 *commanded* — the in-flight animation's target where one exists

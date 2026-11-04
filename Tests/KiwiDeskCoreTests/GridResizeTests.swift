@@ -260,7 +260,8 @@ struct GridResizeTests {
             .gridRow(40, leading: true),
             for: WindowID(2),
             in: core.state.workspaces[space]!,
-            bounds: CGRect(x: 0, y: 0, width: 1220, height: 820)
+            bounds: CGRect(x: 0, y: 0, width: 1220, height: 820),
+            moved: { _ in .both }
         )
         core.retile()
         #expect(abs(height(2) - (half + 40)) < 0.5)
@@ -276,7 +277,8 @@ struct GridResizeTests {
             .gridColumn(40, leading: true),
             for: WindowID(2),
             in: core.state.workspaces[space]!,
-            bounds: CGRect(x: 0, y: 0, width: 1220, height: 820)
+            bounds: CGRect(x: 0, y: 0, width: 1220, height: 820),
+            moved: { _ in .both }
         )
         core.retile()
         #expect(abs(width(core, 2) - (third + 40)) < 0.5)

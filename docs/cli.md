@@ -881,7 +881,8 @@ structure alone
 
 :::unreleased
 A named space, or the active one, resets on the Desktop its screen
-shows; `all` resets every Desktop.
+shows; `all` resets every Desktop. It also clears the length a
+grow along a run kept.
 :::
 
 Every layout global has a per-space `_override` twin (e.g.
@@ -930,6 +931,12 @@ In grid (#763), `x` moves the edge the focused cell shares with
 the next column (the previous one for the last column) and `y`
 the same for rows, writing session-scoped column and row
 weights.
+
+:::unreleased
+Along a run's scroll direction a grow pushes its neighbour into
+the run instead of stopping at its minimum
+([Lua reference](lua-reference.md#resize)).
+:::
 
 ### Deleting a Space
 

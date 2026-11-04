@@ -16,13 +16,20 @@ extension KiwiCore {
     /// owes no z-order restore (#2235 ruling, 2026-10-22).
     func persistRunHeads() {
         for (id, cover) in tiler.runCovers {
-            guard let space = state.workspaces[id],
+            // A push's length lasts exactly while the run plans it
+            // (#2709, `RunCover.Run.sized`).
+            let planned = Set(cover.runs.flatMap(\.sized))
+            guard let space = state.workspaces[id] else { continue }
+            let sizes = space.runSizes.filter { planned.contains($0.key) }
+            guard
                 space.runHeads != cover.heads
                     || space.runTails != cover.tails
+                    || sizes != space.runSizes
             else { continue }
             state.workspaces.withSpace(id) {
                 $0.runHeads = cover.heads
                 $0.runTails = cover.tails
+                $0.runSizes = sizes
             }
         }
     }
