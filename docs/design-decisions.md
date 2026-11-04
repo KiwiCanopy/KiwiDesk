@@ -5566,13 +5566,22 @@ one-axis grow answered unchanged proves nothing, since a fixed-size
 window answers the same and a slow app has merely not landed yet,
 so it earns one 12 pt one-axis shrink as a probe on the pressed axis:
 only a lock moves the other axis too. The price is the first press on
-a locked window landing about 0.9 s late, and a slow free app whose grow
-outlasts the wait taking the shrink before its asked size. A window
-judged free or locked is never judged again while it lives. The
-judgement waits out a held key or a hand on the window rather than
-owing through the motion gate, since no later pass can pay a probe; a
-window moved or left during the probe's 0.3 s stays unjudged, its
-shrink unpaid. Two cues are short of the rule, accepted: a replayed
+a locked window landing about 0.9 s late, a first HOLD on one moving
+nothing until its release and then only the press's step, and a slow
+free app whose grow outlasts the wait taking the shrink before its asked
+size. A press on the other axis voids an ask not yet probed, since two
+axes moving would read as a lock. A window
+judged free or locked is never judged again while it lives. A window
+that refuses the shrink too is fixed size: it goes back where the press
+found it, and a later press writes nothing and says the app won't go
+further, since one more ask would only move it by the split's half step.
+A fixed window that changes size by itself is judged anew, so one that
+turns resizable with no change of size stays refused until it closes.
+The
+judgement waits out a held key or a moving pointer rather than owing
+through the motion gate, since no later pass can pay a probe, and a
+written probe keeps its wait until they rest; a window moved or left
+during it stays unjudged, its shrink unpaid. Two cues are short of the rule, accepted: a replayed
 press lands outside any fire, so a truncation there draws no pill, and
 a floor the other axis sets is named on the pressed axis.
 

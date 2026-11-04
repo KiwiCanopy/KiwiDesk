@@ -55,6 +55,22 @@ extension FloatResize {
         return drift <= ratioTolerance ? .fitted : .other
     }
 
+    /// Whether an ask moves the window far enough to read its answer:
+    /// a lock carrying it at the base's ratio must move the other axis
+    /// past the tolerance, or a small shrink reads as a free window.
+    public static func aspectAskIsReadable(
+        base: CGSize,
+        asked: CGSize,
+        horizontal: Bool
+    ) -> Bool {
+        guard base.width > 0, base.height > 0 else { return false }
+        let carried =
+            horizontal
+            ? abs(asked.width - base.width) * base.height / base.width
+            : abs(asked.height - base.height) * base.width / base.height
+        return carried > answerTolerance
+    }
+
     /// Resizes `frame` so the pressed axis moves by `delta` and the
     /// other follows at `ratio` (width / height), each axis through
     /// `resized`'s edge split. Both axes stop together at the first

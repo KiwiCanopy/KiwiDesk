@@ -275,6 +275,22 @@ extension KiwiCore {
         )
     }
 
+    /// A press on a float proved fixed size (#2973): the app's own
+    /// limit, whichever way it was pressed.
+    func refuseFixedSizeFloat(
+        _ window: WindowID,
+        axis: String,
+        delta: Double
+    ) {
+        guard delta > 0 else {
+            refuseShrinkAtMinimum(window, axis: axis)
+            return
+        }
+        cueResizeRefusal(
+            .ownMaximum(window, axis: axis, atBoundary: false)
+        )
+    }
+
     /// A resize refused because a NEIGHBOR sits at its own
     /// effective minimum (#933). The pairing — which window
     /// wears the second pill, and what it says — is the

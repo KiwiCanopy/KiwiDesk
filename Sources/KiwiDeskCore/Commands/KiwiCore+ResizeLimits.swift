@@ -68,7 +68,9 @@ extension KiwiCore {
         axis: String,
         raisedBy floor: Double = 0
     ) -> Bool {
-        plannedMinSize(of: id, axis: axis)
+        // A window proved fixed is the app's whole limit (#2973).
+        if state.floatAspects[id]?.fixedSize != nil { return true }
+        return plannedMinSize(of: id, axis: axis)
             > max(
                 Double(minWindowSize(of: id).on(axis: axis)),
                 floor

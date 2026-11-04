@@ -55,6 +55,21 @@ struct FloatResizeAspectTests {
         #expect(answer(800, 400) == .other)
     }
 
+    @Test("An ask is readable once a lock would move the other axis")
+    func askIsReadable() {
+        func readable(_ width: CGFloat, _ height: CGFloat, _ h: Bool) -> Bool {
+            FloatResize.aspectAskIsReadable(
+                base: frame.size,
+                asked: CGSize(width: width, height: height),
+                horizontal: h
+            )
+        }
+        #expect(!readable(796, 450, true))
+        #expect(readable(790, 450, true))
+        #expect(readable(800, 447, false))
+        #expect(!readable(800, 449, false))
+    }
+
     @Test("Either axis scales both, about the window's centre")
     func scalesBoth() {
         let wide = FloatResize.scaled(

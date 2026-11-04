@@ -143,6 +143,9 @@ public struct StateCoordinator: Sendable {
     /// A float's judged aspect lock (#2973): session state, ending
     /// where `floatFrames` ends. A restart judges it again.
     var floatAspects: [WindowID: FloatAspect] = [:]
+    /// The judgement in flight: a press's axis, then a probe's window.
+    var floatAspectAskAxis: String?
+    var floatAspectProbing: WindowID?
 
     /// User floats remembered across close/reopen (#160, #1810).
     /// Keyed by app + title, not `WindowID`: a reopened window

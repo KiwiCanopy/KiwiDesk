@@ -8,13 +8,14 @@ import Foundation
 extension KiwiCore {
     /// One press being judged. `base` is where the window stood when
     /// it was pressed, read from WindowServer: a spring's target is
-    /// what was asked, never what the app showed.
+    /// what was asked, never what the app showed. `target` is the frame
+    /// the press asked for, split and clamped.
     struct FloatAspectAsk {
         let window: WindowID
         let axis: String
         let delta: Double
         let base: CGRect
-        let asked: CGSize
+        let target: CGRect
 
         var horizontal: Bool { axis == "x" }
     }
@@ -42,18 +43,30 @@ extension KiwiCore {
 
     /// Arms one judgement. One runs at a time, holding its slot until
     /// it ends and never replaced by a press, so a probe already
-    /// written always gets its answer.
-    /// An ask inside the tolerance would read as a complying no-op.
+    /// written always gets its answer. A press on the other axis voids
+    /// an ask not yet probed, or both axes moving would read as a lock.
     func oweFloatAspectJudgement(_ ask: FloatAspectAsk) {
-        let moved =
-            ask.horizontal
-            ? ask.asked.width - ask.base.width
-            : ask.asked.height - ask.base.height
-        guard !deferred.isScheduled(.floatAspect),
-            state.floatAspects[ask.window] == nil,
-            abs(moved) > FloatResize.answerTolerance
+        guard !deferred.isScheduled(.floatAspect) else {
+            if let axis = state.floatAspectAskAxis, axis != ask.axis {
+                endFloatAspectJudgement()
+            }
+            return
+        }
+        guard state.floatAspects[ask.window] == nil,
+            FloatResize.aspectAskIsReadable(
+                base: ask.base.size,
+                asked: ask.target.size,
+                horizontal: ask.horizontal
+            )
         else { return }
+        state.floatAspectAskAxis = ask.axis
         scheduleFloatAspectJudgement(ask)
+    }
+
+    private func endFloatAspectJudgement() {
+        state.floatAspectAskAxis = nil
+        state.floatAspectProbing = nil
+        deferred.cancel(.floatAspect)
     }
 
     private func scheduleFloatAspectJudgement(_ ask: FloatAspectAsk) {
@@ -80,7 +93,7 @@ extension KiwiCore {
         guard resizeRoutesAsFloat(ask.window),
             let pid = state.windows[ask.window]?.pid
         else {
-            deferred.cancel(.floatAspect)
+            endFloatAspectJudgement()
             return
         }
         if floatAspectStandsDown {
@@ -88,7 +101,7 @@ extension KiwiCore {
             return
         }
         guard let live = windowServer.readWindowBounds(ask.window) else {
-            deferred.cancel(.floatAspect)
+            endFloatAspectJudgement()
             return
         }
         switch FloatResize.aspectAnswer(
@@ -98,15 +111,14 @@ extension KiwiCore {
         ) {
         case .fitted:
             lockFloatAspect(ask.window, pid: pid, ratioOf: ask.base)
-            tiler.animation.recordGlideCommanded(ask.window, frame: live)
-            deferred.cancel(.floatAspect)
+            endFloatAspectJudgement()
         case .complied:
             state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
-            deferred.cancel(.floatAspect)
+            endFloatAspectJudgement()
         case .unchanged where ask.delta > 0:
             probeFloatAspect(ask, live: live)
         case .unchanged, .other:
-            deferred.cancel(.floatAspect)
+            endFloatAspectJudgement()
         }
     }
 
@@ -119,7 +131,16 @@ extension KiwiCore {
         } else {
             probe.size.height -= Self.floatAspectProbeStep
         }
+        state.floatAspectAskAxis = nil
+        state.floatAspectProbing = ask.window
         tiler.applyFrame(ask.window, from: live, to: probe, animated: false)
+        scheduleFloatAspectProbeAnswer(ask, live: live)
+    }
+
+    private func scheduleFloatAspectProbeAnswer(
+        _ ask: FloatAspectAsk,
+        live: CGRect
+    ) {
         deferred.schedule(
             .floatAspect,
             after: .seconds(Self.floatAspectProbeSeconds)
@@ -128,37 +149,57 @@ extension KiwiCore {
         }
     }
 
-    /// Reads the probe's answer: a lock takes the press's step in
-    /// proportion, from where the probe left it. Anything else is free
-    /// of a lock, and a window the probe moved takes the size the press
-    /// asked for. A window the user moved or left in the wait keeps
-    /// what it has, unjudged.
+    /// Reads the probe's answer, waiting out a key or a pointer, since
+    /// the shrink is owed its verdict. A lock takes the press's step in
+    /// proportion, from where the probe left it. A window that refused
+    /// the shrink too is fixed, and goes back where the press found it.
+    /// Anything else is free of a lock, and takes what the press asked.
+    /// A window moved or left in the wait keeps what it has, unjudged.
     func judgeFloatAspectProbe(_ ask: FloatAspectAsk, live: CGRect) {
-        deferred.cancel(.floatAspect)
-        guard resizeRoutesAsFloat(ask.window), !tiler.motionGate.holdsNow,
+        guard resizeRoutesAsFloat(ask.window),
             let pid = state.windows[ask.window]?.pid
-        else { return }
-        let asked = CGRect(origin: live.origin, size: ask.asked)
+        else {
+            endFloatAspectJudgement()
+            return
+        }
+        if floatAspectStandsDown {
+            scheduleFloatAspectProbeAnswer(ask, live: live)
+            return
+        }
+        endFloatAspectJudgement()
         guard let answered = windowServer.readWindowBounds(ask.window)
         else {
             tiler.applyFrame(ask.window, from: live, to: live, animated: false)
             return
         }
+        guard answered.origin == live.origin else { return }
         let answer = FloatResize.aspectAnswer(
             base: live.size,
             answered: answered.size,
             horizontal: ask.horizontal
         )
+        if answer == .unchanged {
+            state.floatAspects[ask.window] = .init(
+                pid: pid,
+                ratio: nil,
+                fixedSize: answered.size
+            )
+            tiler.applyFrame(
+                ask.window,
+                from: answered,
+                to: CGRect(origin: ask.base.origin, size: answered.size),
+                animated: false
+            )
+            return
+        }
         guard answer == .fitted else {
             state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
-            if answer != .unchanged {
-                tiler.applyFrame(
-                    ask.window,
-                    from: answered,
-                    to: asked,
-                    animated: false
-                )
-            }
+            tiler.applyFrame(
+                ask.window,
+                from: answered,
+                to: ask.target,
+                animated: false
+            )
             return
         }
         lockFloatAspect(ask.window, pid: pid, ratioOf: live)

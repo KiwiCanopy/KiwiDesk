@@ -59,15 +59,33 @@ extension KiwiCore {
         // precisely because it is neither — it re-arms itself
         // per press and compounds without bound on an app that
         // silently refuses every ask (#1057).
+        // A probe's answer is owed: a press writing now would read as
+        // the user moving the window, stranding the shrink (#2973).
+        if state.floatAspectProbing == id { return .ok() }
         // A locked app's refused writes leave no echo, so a press on
         // one measures from where the window is (#2973).
-        let aspect = state.floatAspects[id]
+        var aspect = state.floatAspects[id]
         let lockedRatio = aspect?.ratio
         // Read before this press writes: the baseline its answer is
         // judged against. A judged window reads nothing more.
         let shown =
-            (aspect == nil || lockedRatio != nil) && !isGlideWrite
+            (aspect == nil || lockedRatio != nil
+                || aspect?.fixedSize != nil) && !isGlideWrite
             ? windowServer.readWindowBounds(id) : nil
+        // A window proved fixed takes no write, so it cannot walk. One
+        // that has changed size by itself is judged anew.
+        if let fixed = aspect?.fixedSize, let shown {
+            if FloatResize.aspectAnswer(
+                base: fixed,
+                answered: shown.size,
+                horizontal: axis == "x"
+            ) == .unchanged {
+                refuseFixedSizeFloat(id, axis: axis, delta: delta)
+                return .ok()
+            }
+            state.floatAspects[id] = nil
+            aspect = nil
+        }
         let base =
             tiler.animation.commandedFrame(
                 window: id,
@@ -210,7 +228,7 @@ extension KiwiCore {
                     axis: axis,
                     delta: delta,
                     base: shown,
-                    asked: target.size
+                    target: target
                 )
             )
         }

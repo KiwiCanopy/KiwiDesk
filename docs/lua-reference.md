@@ -6501,7 +6501,8 @@ further.
 On a floating window whose app holds its aspect ratio, such as mpv
 or QuickTime Player, either axis scales both, and both stop at the
 first floor or screen edge. KiwiDesk learns this from the first
-press on that window, which lands about a second late (#2973).
+press on that window, which lands about a second late (#2973). A
+window it finds fixed in size stays where it is and takes no resize.
 :::
 
 "Floating" here is the window's *effective* float (#1184): its
