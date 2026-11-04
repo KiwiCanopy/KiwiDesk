@@ -25,13 +25,14 @@ extension KiwiCore {
     }
 
     /// What the tiled plane coming to rest pays (#2284, #2343): the
-    /// z-order restore that waited for it and the deferred focus
-    /// raise where the caller says they run, then the owed float
-    /// raise, last so the floats land above both. Every rest site
-    /// takes this door, never a payer beside it.
+    /// deferred focus raise and the z-order restore that waited for
+    /// it where the caller says they run, then the owed float raise,
+    /// last so the floats land above both. The focus goes first: the
+    /// restore's raises cannot beat the old key window (#2985).
+    /// Every rest site takes this door, never a payer beside it.
     func tiledPlaneCameToRest(restore: Bool, focusRaise: Bool) {
-        if restore { runPendingZOrderRestore() }
         if focusRaise { runPendingFocusRaise() }
+        if restore { runPendingZOrderRestore() }
         runPendingFloatRaise()
     }
 

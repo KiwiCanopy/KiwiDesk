@@ -125,6 +125,15 @@ Move or drag it to place it.
 :::
 
 :::unreleased
+In a Scrolling row walled by another screen, a focus step can show
+the wrong window of an edge pile for the length of its slide, until
+the focus raise lands at the end of it
+([#2985](https://github.com/KiwiCanopy/KiwiDesk/issues/2985)).
+KiwiDesk keeps only the windows that show in order, since raising
+every buried window took longer than the time a restack is given.
+:::
+
+:::unreleased
 After KiwiDesk restarts, the windows waiting on another macOS
 Desktop come back to their Space in the order they left, but a
 sticky window that stayed in that Space can land between them

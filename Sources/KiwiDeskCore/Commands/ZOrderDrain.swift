@@ -15,6 +15,11 @@ struct ZOrderDrain: Sendable {
     let isCurrent: @Sendable () -> Bool
     /// Windows the sequence must land above but never raises (#418).
     let floor: [WindowID]
+    /// The window just raised ahead of this sequence, waited on
+    /// before the first raise for at most `landingLimit`: the old
+    /// key window in the floor stands above a raise until the
+    /// activation lands (#2985).
+    var front: WindowID?
     /// Budget and exhaustion policy.
     let policy: Policy
 
@@ -40,7 +45,7 @@ struct ZOrderDrain: Sendable {
         var seenIDs = Set<WindowID>()
         let order = rawOrder.filter { seenIDs.insert($0).inserted }
         let targets = seenIDs
-        let observed = stacking()
+        let observed = frontSettled(deadline: deadline)
         // An empty read is `CGWindowListCopyWindowInfo` answering
         // nothing at all (the list otherwise always carries the
         // menu bar) — never a screen with no windows. Diffing
@@ -60,6 +65,23 @@ struct ZOrderDrain: Sendable {
         let planned = Set(plan)
         let untouched = seen.filter { !planned.contains($0) }
         return issue(plan, over: untouched, deadline: deadline)
+    }
+
+    /// The stacking once `front` clears the floor, or as it stands
+    /// when no front is named or the wait runs out.
+    private func frontSettled(deadline: TimeInterval) -> [WindowID] {
+        var observed = stacking()
+        guard let front, !floor.isEmpty else { return observed }
+        let below = Set(floor)
+        let limit = min(now() + Self.landingLimit, deadline)
+        while !observed.isEmpty,
+            !Self.clears([front], floor: below, in: observed),
+            now() < limit
+        {
+            sleep(Self.pollInterval)
+            observed = stacking()
+        }
+        return observed
     }
 
     /// Issues the planned raises, awaiting verification per step.

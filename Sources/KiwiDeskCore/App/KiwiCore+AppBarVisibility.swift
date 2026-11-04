@@ -136,16 +136,11 @@ extension KiwiCore {
             } ?? []
         // Judged against the area the layout fills, so the row's
         // edge sliver measures as the sliver.
-        for id in tiled {
-            let rank = order.firstIndex(of: id)
-            let over = rank.map { order[($0 + 1)...] } ?? []
-            verdicts[id] = BarVisibility.judge(
-                laid.frames[id],
-                on: laid.usable,
-                above: over.compactMap { laid.frames[$0] }
-            )
-        }
-        return verdicts
+        return Self.scrollingVerdicts(
+            order: order,
+            frames: laid.frames,
+            on: laid.usable
+        )
     }
 
     /// A float's own move or resize changes how the focused window

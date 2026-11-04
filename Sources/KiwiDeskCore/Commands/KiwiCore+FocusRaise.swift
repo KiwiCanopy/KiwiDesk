@@ -245,7 +245,7 @@ extension KiwiCore {
         // how a click crosses several slots at once.
         //
         // The narrowness is load-bearing, not thrift. The restore
-        // raises every tiled pile-mate through the blocking
+        // raises each pile-mate that shows through the blocking
         // ordered queue, and the tiled plane then sits above the
         // float layer until the next genuine focus event
         // re-raises it (#418) — arming that on every step would

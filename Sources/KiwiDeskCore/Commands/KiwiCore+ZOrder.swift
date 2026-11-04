@@ -25,15 +25,7 @@ extension KiwiCore {
     ///
     /// NOT deferred past a restore that is still draining, though
     /// a sequence queued behind another does lag the settle
-    /// (#684's second half, still open). Holding it back and
-    /// running it from the drain's completion was built and
-    /// reverted: it re-raised windows whose echoes were still in
-    /// flight, and the ledger then consumed a stamp on its FIRST
-    /// echo, so the second echo read as a deliberate focus
-    /// change (owner QA, 2026-08-02). #689 retired consumption
-    /// (stamps expire by age), which removes that specific
-    /// blocker — re-attempting the coalesce now needs its own
-    /// red-proof, not this comment's permission.
+    /// (#684's second half, still open).
     func scheduleZOrderRestore() {
         pendingZOrderRestore = true
         // An owed pass has not drawn yet (#804): the restore waits
@@ -269,10 +261,14 @@ extension KiwiCore {
     /// side must stack toward its own edge — the column
     /// nearest the focus on top, farther ones underneath —
     /// so the piles read as the row receding to the left and
-    /// to the right of the viewport.
+    /// to the right of the viewport. Only what shows is raised
+    /// (#2985): a long row's whole sequence outran the drain's
+    /// budget, leaving the shown windows, raised last, unverified.
     private func restoreScrollingZOrder(_ space: Space) {
         let tiled = state.effectiveTiledMembers(of: space)
-        guard tiled.count > 1 else { return }
+        guard tiled.count > 1,
+            let usable = tiler.layoutInput(state: state)?.context.usable
+        else { return }
         // Anchor, not `space.focused` — see restoreTrackZOrder.
         // The pile split follows the traveler's slot too: it is
         // the row position the viewport actually centers on.
@@ -281,13 +277,17 @@ extension KiwiCore {
             anchor.flatMap {
                 tiled.firstIndex(of: $0)
             } ?? 0
+        let plan = Self.scrollingRestorePlan(
+            tiled,
+            focusIndex: focusIndex,
+            frames: tiler.calculatedFrames(state: state),
+            on: usable
+        )
         raiseSequentially(
-            Self.scrollingRaiseOrder(
-                tiled,
-                focusIndex: focusIndex
-            ),
+            plan.raise,
             thenFocus: anchor,
-            above: []
+            above: plan.floor,
+            front: anchor
         )
     }
 
@@ -299,11 +299,13 @@ extension KiwiCore {
     /// issued back to back — which took ~10 ms for eight windows —
     /// leaves the apps to land them in whatever order they get to
     /// them, and the pile settles scrambled. `ZOrderDrain` owns
-    /// the verification, the budget and the measurements.
+    /// the verification, the budget and the measurements. `front`
+    /// is the window the drain waits on before its first raise.
     private func raiseSequentially(
         _ ids: [WindowID],
         thenFocus focused: WindowID?,
-        above floor: [WindowID]
+        above floor: [WindowID],
+        front: WindowID? = nil
     ) {
         let pairs = ids.compactMap { id in
             eventLoop.element(for: id).map { (id, $0) }
@@ -328,6 +330,7 @@ extension KiwiCore {
         performZOrderSequence(
             targets: pairs,
             above: floor,
+            front: front,
             generation: generation
         ) {
             [weak self] in

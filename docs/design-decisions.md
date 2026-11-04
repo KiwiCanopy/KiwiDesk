@@ -3726,6 +3726,19 @@ recomputed from the connected screens on every retile
 screen plugged in or out is correct from the retile the display
 change already triggers.
 
+:::unreleased
+**A wall's pile keeps only what shows in order (#2985).** A restore
+raises the windows that show and leaves the buried ones below them
+in any order, because raising a long row one verified window at a
+time outran its time budget, and the windows raised last are the
+ones on screen. Corner-parking the buried windows would remove the
+overlap instead, and was rejected again: walled on both sides, the
+hide corner hangs the body onto a neighbouring screen, which is
+what the wall exists to prevent, every park snaps, and a slot that
+cannot fully fit still underlaps its neighbour, so the restore
+would stay. The traded cost is the limitation below.
+:::
+
 **Monocle hides by z-order, and `park` is the opt-in for
 bodies the stack shows through (#881).** The default `stack`
 hides the unfocused members entirely behind the focused window

@@ -107,4 +107,64 @@ extension KiwiCore {
         return Array(windows[..<focusIndex])
             + windows[(focusIndex + 1)...].reversed()
     }
+
+    /// Each scrolling tile's verdict when stacked in `order`, back
+    /// to front, in the area the row fills: the one reading the App
+    /// Bar and the pile restore share (#2234, #2985).
+    nonisolated static func scrollingVerdicts(
+        order: [WindowID],
+        frames: [WindowID: CGRect],
+        on usable: CGRect
+    ) -> [WindowID: BarVisibility] {
+        var verdicts: [WindowID: BarVisibility] = [:]
+        for (rank, id) in order.enumerated() {
+            verdicts[id] = BarVisibility.judge(
+                frames[id],
+                on: usable,
+                above: order[(rank + 1)...].compactMap { frames[$0] }
+            )
+        }
+        return verdicts
+    }
+
+    /// What a scrolling restore raises and what it must land above
+    /// (#2985): only a window that shows and overlaps another needs
+    /// a place in the stack, since a hidden one's order cannot show.
+    /// Hidden windows are the floor, the previous focus and pinned
+    /// slivers among them: a sliver over a flush neighbour paints a
+    /// strip on it. The focus is neither, its re-assert closing the
+    /// restore. Raise order keeps `scrollingRaiseOrder`'s.
+    nonisolated static func scrollingRestorePlan(
+        _ windows: [WindowID],
+        focusIndex: Int,
+        frames: [WindowID: CGRect],
+        on usable: CGRect
+    ) -> (raise: [WindowID], floor: [WindowID]) {
+        guard windows.indices.contains(focusIndex) else {
+            return (windows, [])
+        }
+        let order = scrollingRaiseOrder(windows, focusIndex: focusIndex)
+        let verdicts = scrollingVerdicts(
+            order: order + [windows[focusIndex]],
+            frames: frames,
+            on: usable
+        )
+        let floor = order.filter { verdicts[$0] == .hidden }
+        let hidden = Set(floor)
+        let raise = order.filter { id in
+            guard !hidden.contains(id), let rect = frames[id] else {
+                return false
+            }
+            return windows.contains { other in
+                guard other != id, let cover = frames[other] else {
+                    return false
+                }
+                let overlap = rect.intersection(cover)
+                return !overlap.isNull
+                    && overlap.width > BarVisibility.tolerance
+                    && overlap.height > BarVisibility.tolerance
+            }
+        }
+        return (raise, floor)
+    }
 }

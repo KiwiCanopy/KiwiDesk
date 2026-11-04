@@ -24,6 +24,8 @@ final class FakeWindowServer: @unchecked Sendable {
     var defaultLatency: TimeInterval = 0.01
     /// Every raise issued, in order.
     private(set) var raised: [WindowID] = []
+    /// The clock at each raise in `raised`.
+    private(set) var raisedAt: [TimeInterval] = []
     var clock: TimeInterval = 0
     /// How many raises this sequence stays current for, so a test
     /// can supersede it mid-drain.
@@ -43,8 +45,19 @@ final class FakeWindowServer: @unchecked Sendable {
 
     /// The drain a live restore builds
     /// (`KiwiCore.performZOrderSequence`).
-    func restoreDrain(above floor: [WindowID] = []) -> ZOrderDrain {
-        drain(above: floor, policy: .restore)
+    func restoreDrain(
+        above floor: [WindowID] = [],
+        front: WindowID? = nil
+    ) -> ZOrderDrain {
+        var drain = drain(above: floor, policy: .restore)
+        drain.front = front
+        return drain
+    }
+
+    /// A raise issued ahead of the drain, landing `delay` from now:
+    /// the focus raise a scrolling restore waits on (#2985).
+    func land(_ id: WindowID, after delay: TimeInterval) {
+        inFlight.append((id, clock + delay))
     }
 
     /// The drain the quit-grid restack builds
@@ -74,6 +87,7 @@ final class FakeWindowServer: @unchecked Sendable {
         ZOrderDrain(
             raise: { [self] id in
                 raised.append(id)
+                raisedAt.append(clock)
                 let delay = latency[id] ?? defaultLatency
                 guard delay.isFinite else { return }
                 inFlight.append((id, clock + delay))

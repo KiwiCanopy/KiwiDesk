@@ -1225,6 +1225,21 @@ editing here:
   double-target correction clicks into — the monocle arm
   shipped that way twice (#689). `ZOrderMonocleArmTests` and
   `ZOrderFocusJumpTests` pin one arm each.
+- **A scrolling restore raises only what shows, above what does
+  not (#2985)**, through the one `KiwiCore.scrollingRestorePlan`,
+  which judges the slots with the App Bar's own
+  `scrollingVerdicts`: a hidden window's order cannot show, and a
+  whole row's sequence outran the drain's budget and left the
+  shown windows, raised last, unverified. Hidden windows are the
+  plan's floor, a pinned sliver and the previous focus among them,
+  so a new reason to raise a window joins the plan rather than a
+  filter beside it. **The deferred focus raise pays ahead of the
+  restore in `tiledPlaneCameToRest`, and the drain waits on it
+  through `ZOrderDrain.front`**, since a quiet raise cannot beat
+  the old key window (`ZOrderScrollingRestoreTests`,
+  `ZOrderScrollingRestoreWiringTests`,
+  `FloatRaiseLandingWiringTests` ▸ `debtIsPaidAtRest`). The cost is
+  `docs/accepted-limitations.md`'s.
 - **An echo ledger is age-bounded and NEVER consumed by its
   echo** — `zOrderRaiseEchoes` (#689) and `selfRaiseStamps`
   (#887) alike. A lazy app reports a raised window's focus

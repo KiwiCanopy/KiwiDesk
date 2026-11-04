@@ -255,6 +255,7 @@ extension KiwiCore {
     func performZOrderSequence(
         targets: [(WindowID, AXUIElement)],
         above floor: [WindowID],
+        front: WindowID? = nil,
         generation: Int,
         completion: @MainActor @escaping () -> Void
     ) {
@@ -283,6 +284,7 @@ extension KiwiCore {
         let drain = zOrderDrain(
             over: foreign,
             above: floor,
+            front: front,
             generation: generation
         )
         let order = foreign.map(\.0)
@@ -317,6 +319,7 @@ extension KiwiCore {
     private func zOrderDrain(
         over targets: [(WindowID, AXUIElement)],
         above floor: [WindowID],
+        front: WindowID?,
         generation: Int
     ) -> ZOrderDrain {
         nonisolated(unsafe) let elements = Dictionary(
@@ -333,6 +336,7 @@ extension KiwiCore {
             sleep: { Thread.sleep(forTimeInterval: $0) },
             isCurrent: { generations.value == generation },
             floor: floor,
+            front: front,
             policy: .restore
         )
     }
