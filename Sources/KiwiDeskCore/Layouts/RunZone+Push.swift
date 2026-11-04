@@ -293,6 +293,21 @@ extension RunZone {
             )
         } else {
             press.sizes[id] = share(of: step.target)
+            // A window taking the rest holds what it will now draw,
+            // or its old length would make the next pass hide it.
+            let index = members.firstIndex(of: id)
+            let shown = step.visible.filter { $0 != index }
+            if let taker = shown.first(where: {
+                line.weights[$0] > 0 && line.held[$0] > line.bare[$0]
+            }) {
+                let others = shown.filter { $0 != taker }
+                let rest =
+                    line.span - line.gap * CGFloat(shown.count) - step.target
+                    - others.reduce(CGFloat(0)) { $0 + line.held[$1] }
+                press.sizes[members[taker]] = share(
+                    of: max(rest, line.bare[taker])
+                )
+            }
         }
         press.visible = step.visible
         press.movesRun = step.movesRun

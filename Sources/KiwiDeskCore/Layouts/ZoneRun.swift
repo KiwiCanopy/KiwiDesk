@@ -68,7 +68,9 @@ public struct ZoneRun: Sendable, Equatable {
 
     /// Whether `lengths` laid in a row with `gap` between them fit
     /// `span` — the one fit the render and a resize along the run
-    /// (`RunZone.press`, #2709) both ask.
+    /// (`RunZone.press`, #2709) both ask. Lengths that exactly fill
+    /// the span round-trip through stored shares, so a hundredth of a
+    /// point of slack keeps rounding from hiding a window.
     static func fits(
         _ lengths: some Sequence<CGFloat>,
         gap: CGFloat,
@@ -79,7 +81,7 @@ public struct ZoneRun: Sendable, Equatable {
             count += 1
             return $0 + $1
         }
-        return used + gap * CGFloat(max(count - 1, 0)) <= span
+        return used + gap * CGFloat(max(count - 1, 0)) <= span + 0.01
     }
 
     /// Frames for a zone's members: the shown run shares `region`
