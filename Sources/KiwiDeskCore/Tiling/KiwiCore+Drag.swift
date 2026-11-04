@@ -215,9 +215,11 @@ extension KiwiCore {
         {
             // Only edges shared with a neighbor trade space;
             // pulling an outer (screen-side) edge snaps back
-            // instead of growing windows on the far side.
-            // All deltas are measured from the start frame
-            // (where the window really was), not the slot.
+            // instead of growing windows on the far side, save a
+            // shrink along a run, which answers as the keyboard
+            // does (#2970). All deltas are measured from the
+            // start frame (where the window really was), not the
+            // slot.
             let effective =
                 !MouseResize.tradesWithNeighbors(space.mode)
                 ? frame
@@ -227,7 +229,10 @@ extension KiwiCore {
                     neighbors:
                         slots
                         .filter { $0.key != id }
-                        .map(\.value)
+                        .map(\.value),
+                    shrinkTrades: {
+                        shrinkTrades(of: id, vertical: $0, in: space)
+                    }
                 )
             if MouseResize.isResize(
                 from: start,

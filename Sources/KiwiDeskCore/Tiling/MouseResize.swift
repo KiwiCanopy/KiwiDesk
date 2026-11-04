@@ -73,11 +73,15 @@ public enum MouseResize {
     }
 
     /// Drops size changes from dragging an outer edge lacking
-    /// neighbors — for modes that `tradesWithNeighbors` only.
+    /// neighbors — for modes that `tradesWithNeighbors` only. An
+    /// axis that shrank stays where `shrinkTrades(vertical)` says
+    /// someone beyond the slots takes the room (#2970); a grow on
+    /// that edge still drops.
     public static func keepingInnerEdgeChanges(
         slot: CGRect,
         frame: CGRect,
-        neighbors: [CGRect]
+        neighbors: [CGRect],
+        shrinkTrades: (_ vertical: Bool) -> Bool
     ) -> CGRect {
         var result = frame
         let movedLeft =
@@ -94,7 +98,7 @@ public enum MouseResize {
                     && neighbors.contains {
                         $0.midX > slot.maxX
                     })
-            if !ok {
+            if !ok, frame.width >= slot.width || !shrinkTrades(false) {
                 result.size.width = slot.width
             }
         }
@@ -113,7 +117,7 @@ public enum MouseResize {
                     && neighbors.contains {
                         $0.midY > slot.maxY
                     })
-            if !ok {
+            if !ok, frame.height >= slot.height || !shrinkTrades(true) {
                 result.size.height = slot.height
             }
         }

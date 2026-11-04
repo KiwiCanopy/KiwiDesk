@@ -80,7 +80,7 @@ extension RunZone {
             index,
             by: stepped,
             toward: side,
-            pulls: shown.count == 1
+            pulls: shrinkTaker(shown: run) == .waitingWindow
         )
         let spent = StackLayout.weightSpent(
             line.weights[index],

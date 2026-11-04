@@ -45,7 +45,8 @@ struct MouseResizeEdgeTests {
             MouseResize.keepingInnerEdgeChanges(
                 slot: master,
                 frame: outer,
-                neighbors: [stack]
+                neighbors: [stack],
+                shrinkTrades: { _ in false }
             ).width == master.width
         )
         // Master pulled wider on its RIGHT (inner) edge:
@@ -55,7 +56,8 @@ struct MouseResizeEdgeTests {
             MouseResize.keepingInnerEdgeChanges(
                 slot: master,
                 frame: inner,
-                neighbors: [stack]
+                neighbors: [stack],
+                shrinkTrades: { _ in false }
             ).width == master.width + 100
         )
         // Stack pulled narrower from its RIGHT (outer) edge.
@@ -69,7 +71,8 @@ struct MouseResizeEdgeTests {
             MouseResize.keepingInnerEdgeChanges(
                 slot: stack,
                 frame: stackOuter,
-                neighbors: [master]
+                neighbors: [master],
+                shrinkTrades: { _ in false }
             ).width == stack.width
         )
         // Height changes with no vertical neighbor revert.
@@ -77,9 +80,63 @@ struct MouseResizeEdgeTests {
             MouseResize.keepingInnerEdgeChanges(
                 slot: master,
                 frame: grown(master, dh: 80),
-                neighbors: [stack]
+                neighbors: [stack],
+                shrinkTrades: { _ in false }
             ).height == master.height
         )
+    }
+
+    @Test("A shrink the zone can take stays, per axis; a grow never")
+    func shrinkTradesKeepsTheShrink() {
+        let slot = CGRect(x: 20, y: 45, width: 580, height: 700)
+        let shrunk = CGRect(x: 20, y: 145, width: 580, height: 600)
+        let trades = { (vertical: Bool) in vertical }
+        #expect(
+            MouseResize.keepingInnerEdgeChanges(
+                slot: slot,
+                frame: shrunk,
+                neighbors: [],
+                shrinkTrades: trades
+            ).height == 600
+        )
+        // The width axis does not trade, whatever the height does.
+        let narrowed = CGRect(x: 120, y: 45, width: 480, height: 700)
+        #expect(
+            MouseResize.keepingInnerEdgeChanges(
+                slot: slot,
+                frame: narrowed,
+                neighbors: [],
+                shrinkTrades: trades
+            ).width == 580
+        )
+        // The mirror: the width trades, the height does not.
+        let widthTrades = { (vertical: Bool) in !vertical }
+        #expect(
+            MouseResize.keepingInnerEdgeChanges(
+                slot: slot,
+                frame: narrowed,
+                neighbors: [],
+                shrinkTrades: widthTrades
+            ).width == 480
+        )
+        #expect(
+            MouseResize.keepingInnerEdgeChanges(
+                slot: slot,
+                frame: shrunk,
+                neighbors: [],
+                shrinkTrades: widthTrades
+            ).height == 700
+        )
+        // A grow on the outer edge has nobody to take room from.
+        let grew = grown(slot, dw: 80, dh: 80)
+        let kept = MouseResize.keepingInnerEdgeChanges(
+            slot: slot,
+            frame: grew,
+            neighbors: [],
+            shrinkTrades: { _ in true }
+        )
+        #expect(kept.height == 700)
+        #expect(kept.width == 580)
     }
 
     @Test("Near-edge band detects resize start points")

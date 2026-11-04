@@ -2006,7 +2006,13 @@ editing here:
   a predicate of its own (`RunZonePushTests`,
   `RunPushCommandTests`, `RunPushMateTests`). A mouse caller hands
   the edge it moved (`MouseResize.movedSide`), the keyboard
-  `.both`.
+  `.both`. A shrink of an outer edge reaches that writer only past
+  the drop's filter, `MouseResize.keepingInnerEdgeChanges`, whose
+  required `shrinkTrades` reads the one `RunZone.shrinkTaker` that
+  `press` reads to pull, so a drag and the keyboard cannot disagree;
+  a new way for a zone to hand on a shrink answers there, and a run
+  drag test starts at `handleDragEnd`, since a test from
+  `handleResizeEnd` skips the filter (#2970, `RunDragEndTests`).
   And a weight clamp divides the
   span the LAYOUT divides — the one
   `StackLayout.weightedSpan` copy, kept `minSizeMargin` above

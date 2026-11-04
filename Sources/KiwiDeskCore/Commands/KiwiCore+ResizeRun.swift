@@ -228,6 +228,33 @@ extension KiwiCore {
         return true
     }
 
+    /// Whether a drag shrinking `id` on `vertical`'s axis hands the
+    /// room to someone in its zone, past any neighbour the drop's
+    /// slots show (#2970). A Stack zone lined up along the split has
+    /// no such step: the mouse moves the split there, so its outer
+    /// edge snaps back (#941).
+    func shrinkTrades(
+        of id: WindowID,
+        vertical: Bool,
+        in space: Space
+    ) -> Bool {
+        guard
+            let found = runZone(
+                of: id,
+                axis: vertical ? "y" : "x",
+                in: space
+            ),
+            found.zone.shrinkTaker(of: id, in: found.context) != nil
+        else { return false }
+        guard space.mode == .stack else { return true }
+        return vertical
+            == tiler.settings.resolvedStack(
+                for: space,
+                session: sessionRatios(of: space.id),
+                flip: stackFlip(of: space.id)
+            ).stackPosition.splitsHorizontally
+    }
+
     /// The zone `focused` sits in along `axis`, read from the
     /// render's own input.
     private func runZone(

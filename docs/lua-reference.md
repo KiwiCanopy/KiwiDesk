@@ -4649,6 +4649,15 @@ Only edges **shared with a neighbor** trade area — pulling a
 window's outer, screen-side edge has nobody to trade with and
 snaps back.
 
+:::unreleased
+A zone's own line has someone to trade with, so dragging an outer
+edge inward along a Stack zone, a Track track, an auto-sized Grid's
+full last track or a BSP chain resizes as
+[`resize`](#resize) does (#2970): beside a shown window that window
+widens, and a window alone in its run brings the next one back.
+Dragging that edge outward still snaps back.
+:::
+
 Scrolling is the exception: one slot size serves the whole row,
 so any edge of a column resizes it, including the outer edge of
 the first or last column.
