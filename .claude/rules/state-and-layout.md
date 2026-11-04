@@ -2007,12 +2007,14 @@ editing here:
   `RunPushCommandTests`, `RunPushMateTests`). A mouse caller hands
   the edge it moved (`MouseResize.movedSide`), the keyboard
   `.both`. A shrink of an outer edge reaches that writer only past
-  the drop's filter, `MouseResize.keepingInnerEdgeChanges`, whose
-  required `shrinkTrades` reads the one `RunZone.shrinkTaker` that
-  `press` reads to pull, so a drag and the keyboard cannot disagree;
-  a new way for a zone to hand on a shrink answers there, and a run
-  drag test starts at `handleDragEnd`, since a test from
-  `handleResizeEnd` skips the filter (#2970, `RunDragEndTests`).
+  the drop's filter, `MouseResize.keepingInnerEdgeChanges`, so the
+  filter's required `shrinkTrades` and `press`'s pull both read
+  `RunZone.shrinkTaker`: a new way for a zone to hand on a shrink
+  answers in `shrinkTaker`, and an axis another door owns — a Stack
+  master zone along the split, whose axis moves the ratio — says so
+  in `MouseResize.stepsZone`. A test of an outer edge starts at
+  `handleDragEnd`, since one from `handleResizeEnd` skips the filter
+  (#2970, `RunDragEndTests`, `RunDragEndChainTests`).
   And a weight clamp divides the
   span the LAYOUT divides — the one
   `StackLayout.weightedSpan` copy, kept `minSizeMargin` above

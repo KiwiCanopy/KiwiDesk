@@ -4635,8 +4635,8 @@ way the `resize` command does, applied when you release: neighbors
 give or take the difference. What changes depends on the layout —
 Master/Stack maps a drag along the split to the master ratio, BSP
 steers its split ratio toward the dragged side, Scrolling adjusts
-the slot size. Axes a layout has no parameter for (grid,
-monocle, and a master zone lined up along the split — see
+the slot size. Axes a layout has no parameter for (monocle,
+and a master zone lined up along the split — see
 [Accepted limitations](accepted-limitations.md)) animate back into
 place. Floating windows resize freely.
 
@@ -4650,16 +4650,15 @@ window's outer, screen-side edge has nobody to trade with and
 snaps back.
 
 :::unreleased
-A zone's own line has someone to trade with, so dragging an outer
-edge inward along a Stack zone, a Track track, an auto-sized Grid's
-full last track or a BSP chain resizes as
-[`resize`](#resize) does (#2970): beside a shown window that window
-widens, and a window alone in its run brings the next one back.
-Dragging that edge outward still snaps back.
+The exception is a shrink along a Stack zone, a Track track, an
+auto-sized Grid's full last track or a BSP chain: dragging the outer
+edge inward answers as [`resize`](#resize) does (#2970). Dragging it
+outward still snaps back, and so does a window alone in its zone with
+none waiting, or a master zone lined up along the split.
 :::
 
-Scrolling is the exception: one slot size serves the whole row,
-so any edge of a column resizes it, including the outer edge of
+In Scrolling one slot size serves the whole row, so any edge of a
+column resizes it, including the outer edge of
 the first or last column.
 
 The layout follows the size the window actually reached when you

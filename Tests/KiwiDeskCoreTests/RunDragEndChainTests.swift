@@ -90,10 +90,6 @@ struct RunDragEndChainTests {
         try #require(core.tiler.calculatedFrames(state: core.state)[id])
     }
 
-    private func hidden(_ core: KiwiCore, _ id: SpaceID) -> Set<WindowID> {
-        Set(core.tiler.runCovers[id]?.behind.keys.map { $0 } ?? [])
-    }
-
     private func run(
         _ core: KiwiCore,
         _ id: SpaceID

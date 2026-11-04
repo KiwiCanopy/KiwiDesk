@@ -14,9 +14,10 @@ extension RunZone {
 
     /// Who takes a shrink of `id` along the zone; nil where none
     /// does: `id` is not shown, the zone piles or draws its fixed
-    /// cells, or `id` is alone with nobody waiting. The one answer
-    /// the mouse drop's outer-edge filter and `press` read, so a
-    /// drag and the keyboard cannot disagree (#2970).
+    /// cells, or `id` is alone with nobody waiting. The mouse drop's
+    /// outer-edge filter and `press`'s pull both read it (#2970); it
+    /// says nothing of whether a next window fits, which `press`
+    /// answers with its refusal.
     public func shrinkTaker(
         of id: WindowID,
         in context: LayoutContext

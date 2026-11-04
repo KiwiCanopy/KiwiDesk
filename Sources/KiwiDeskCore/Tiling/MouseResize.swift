@@ -58,7 +58,7 @@ public enum MouseResize {
     }
 
     /// Whether a drop in `mode` trades size with a neighbour, so
-    /// an outer edge (nobody to trade with) must snap back.
+    /// an outer edge with nobody to trade with must snap back.
     /// Scrolling trades with nobody: one slot length serves the
     /// row, so any edge resizes it. Exhaustive on purpose — a new
     /// mode decides here, beside its `translate` case.
@@ -69,6 +69,23 @@ public enum MouseResize {
         case .bsp, .stack, .track: return true
         case .scrolling: return false
         case .monocle, .grid, .floating: return true
+        }
+    }
+
+    /// Whether a drag along `vertical`'s axis in `mode` steps a
+    /// zone along its own line, not a ratio `translate` maps that
+    /// axis to: a Stack master zone lined up along the split has no
+    /// zone step there (#2970). Exhaustive on purpose, as
+    /// `tradesWithNeighbors` is.
+    public static func stepsZone(
+        _ mode: LayoutMode,
+        stackSplitHorizontal: Bool,
+        vertical: Bool
+    ) -> Bool {
+        switch mode {
+        case .stack: return vertical == stackSplitHorizontal
+        case .bsp, .track, .grid: return true
+        case .scrolling, .monocle, .floating: return false
         }
     }
 

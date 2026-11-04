@@ -21,11 +21,13 @@ import Testing
 @MainActor
 struct RunDragEndTests {
     /// `count` windows in one `mode` Space on a 1220 × 820 display
-    /// with 10-pt gaps and every bar off, `focus` focused.
+    /// with 10-pt gaps and every bar off, `focus` focused; `height`
+    /// under two floors leaves a lone window nothing that fits.
     private func makeSpace(
         _ mode: String,
         windows count: UInt32,
         focus: UInt32,
+        height: CGFloat = 820,
         setup: (KiwiCore) -> Void = { _ in }
     ) -> (KiwiCore, SpaceID) {
         let core = makeTestCore(
@@ -36,7 +38,7 @@ struct RunDragEndTests {
                 )
         )
         core.tiler.visibleBounds = { _ in
-            CGRect(x: 0, y: 0, width: 1220, height: 820)
+            CGRect(x: 0, y: 0, width: 1220, height: height)
         }
         core.tiler.settings.gapsGlobal = Gaps.uniform(10)
         for verb in [
@@ -95,13 +97,6 @@ struct RunDragEndTests {
 
     private func hidden(_ core: KiwiCore, _ id: SpaceID) -> Set<WindowID> {
         Set(core.tiler.runCovers[id]?.behind.keys.map { $0 } ?? [])
-    }
-
-    private func run(
-        _ core: KiwiCore,
-        _ id: SpaceID
-    ) throws -> RunCover.Run {
-        try #require(core.tiler.runCovers[id]?.runs.first)
     }
 
     /// `slot` with its `edge` moved `points` inward along the axis;
@@ -163,6 +158,39 @@ struct RunDragEndTests {
         try drop(core, w(2), vertical: true, leading: leading, by: 20)
         #expect(hidden(core, id).isEmpty)
         #expect(abs(try frame(core, w(3)).height - 300) < 1)
+        #expect(refusals.isEmpty)
+    }
+
+    @Test("Stack: a next window that cannot fit refuses, as the key does")
+    func stackUnfitNextRefuses() throws {
+        // Two 300-pt floors and a gap overflow the 600-pt zone, so w2
+        // shows alone with w3 waiting.
+        let (core, id) = makeSpace("stack", windows: 3, focus: 2, height: 620)
+        #expect(hidden(core, id) == [w(3)])
+        let slot = try frame(core, w(2))
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        try drop(core, w(2), vertical: true, leading: false, by: 20)
+        #expect(hidden(core, id) == [w(3)])
+        #expect(try frame(core, w(2)) == slot)
+        #expect(refusals.count == 1)
+    }
+
+    @Test("Stack: a zone of one with none waiting snaps back and cues nothing")
+    func stackZoneOfOneSnapsBack() throws {
+        // A master zone lying along y, so y is the zone's own line.
+        let (core, id) = makeSpace("stack", windows: 3, focus: 1) {
+            $0.execute(
+                "stack.set_master_orientation",
+                args: [.string("vertical")]
+            )
+        }
+        let first = try #require(core.state.workspaces[id]?.windows.first)
+        let slot = try frame(core, first)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        try drop(core, first, vertical: true, leading: true, by: 60)
+        #expect(try frame(core, first) == slot)
         #expect(refusals.isEmpty)
     }
 
