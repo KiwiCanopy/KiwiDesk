@@ -2803,7 +2803,8 @@ editing here:
   owes through that door, and one left ungated is a ruling. One is
   ruled: a write no pass can re-derive, the float aspect probe and what
   answers it (#2973), waits out `holdsNow` instead of owing, re-checks
-  that the window has not moved before writing, and abandons a written
+  that the window has not moved before writing, save a read with no
+  answer, which restores the probe's frame, and abandons a written
   probe on a button down (`FloatAspectJudgementTests`). The
   snapshot restore owes its tracked-window writes there too, paid
   from the replay's record only while the screens it was owed

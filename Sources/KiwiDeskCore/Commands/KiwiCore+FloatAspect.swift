@@ -30,11 +30,12 @@ extension KiwiCore {
     /// it ends and never replaced by a press, so a probe already
     /// written always gets its answer. A press on the other axis of
     /// the window asked voids it, or both axes moving would read as a
-    /// lock.
+    /// lock; so does one the other way, which undid what is being asked.
     func oweFloatAspectJudgement(_ ask: FloatAspectAsk) {
         guard !deferred.isScheduled(.floatAspect) else {
-            if case .asking(ask.window, let axis) = state.floatAspectFlight,
-                axis != ask.axis
+            if case .asking(ask.window, let axis, let grows) =
+                state.floatAspectFlight,
+                axis != ask.axis || grows != (ask.delta > 0)
             {
                 endFloatAspectJudgement()
             }
@@ -47,7 +48,11 @@ extension KiwiCore {
                 horizontal: ask.horizontal
             )
         else { return }
-        state.floatAspectFlight = .asking(ask.window, axis: ask.axis)
+        state.floatAspectFlight = .asking(
+            ask.window,
+            axis: ask.axis,
+            grows: ask.delta > 0
+        )
         scheduleFloatAspectJudgement(ask)
     }
 
@@ -148,9 +153,11 @@ extension KiwiCore {
     /// Reads the probe's answer, waiting out a key or a pointer, since
     /// the shrink is owed its verdict. A lock takes the press's step in
     /// proportion, from where the probe left it. Anything else holds no
-    /// lock: a window that took the probe takes what the press asked,
-    /// and one that refused it too is left as it is, its walk being a
-    /// fixed-size window's. A window moved, left or held in the wait
+    /// lock: a window that took the probe takes the size the press
+    /// asked, where it stands, and one that refused it too is left as
+    /// it is, its walk being a fixed-size window's. One with no answer
+    /// goes back where the probe found it. A window moved, left or held
+    /// in the wait
     /// keeps what it has, unjudged.
     func judgeFloatAspectProbe(_ ask: FloatAspectAsk, live: CGRect) {
         guard resizeRoutesAsFloat(ask.window),
@@ -194,7 +201,7 @@ extension KiwiCore {
             tiler.applyFrame(
                 ask.window,
                 from: answered,
-                to: ask.target,
+                to: CGRect(origin: answered.origin, size: ask.target.size),
                 animated: false
             )
         }

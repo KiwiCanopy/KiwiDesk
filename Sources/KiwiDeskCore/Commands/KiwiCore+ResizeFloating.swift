@@ -16,8 +16,9 @@ extension KiwiCore {
     /// screen edge the old origin anchor stopped the resize dead.
     /// `FloatResize` argues it. Applies through the tiler's
     /// shared frame policy (`applyFrame`) — animated per
-    /// `resizeWritesAnimated`, echo-tracked either way — and
-    /// skips the layout retile: no tiled window moved.
+    /// `resizeWritesAnimated` save on an aspect-locked window (#2973),
+    /// echo-tracked either way — and skips the layout retile: no
+    /// tiled window moved.
     func resizeFloating(
         _ id: WindowID,
         axis: String,
@@ -37,6 +38,13 @@ extension KiwiCore {
         // `resizeWritesAnimated` asks the same question for the
         // animation choice, in its own file.
         let isGlideWrite = keys.isApplyingGlideStep
+        // A probe's answer is owed: a press writing now would read as
+        // the user moving the window, stranding the shrink (#2973).
+        if state.floatAspectFlight == .probing(id),
+            deferred.isScheduled(.floatAspect)
+        {
+            return .ok()
+        }
         // Accumulate against the COMMANDED frame, not the echo
         // (#129/#1056/#1090): `state.windows[id].frame` is
         // echo-fed, and the echo lags by whole steps — so a
@@ -59,13 +67,6 @@ extension KiwiCore {
         // precisely because it is neither — it re-arms itself
         // per press and compounds without bound on an app that
         // silently refuses every ask (#1057).
-        // A probe's answer is owed: a press writing now would read as
-        // the user moving the window, stranding the shrink (#2973).
-        if state.floatAspectFlight == .probing(id),
-            deferred.isScheduled(.floatAspect)
-        {
-            return .ok()
-        }
         // A locked app's refused writes leave no echo, so a press on
         // one measures from where the window is (#2973).
         let aspect = state.floatAspects[id]

@@ -165,19 +165,40 @@ struct FloatAspectJudgementTests {
     func slowAppIsNotLocked() {
         let core = makeCore()
         // One axis moved: its late grow, or the probe, never a lock. The
-        // press's own split frame lands, not its size at the old origin.
-        answer(core, probed)
-        let split = CGRect(x: 375, y: 200, width: 850, height: 450)
-        let press = KiwiCore.FloatAspectAsk(
-            window: id,
-            axis: "x",
-            delta: 50,
-            base: start,
-            target: split
+        // press's size lands where the window stands now.
+        let moved = CGRect(x: 375, y: 200, width: 788, height: 450)
+        core.windowServer.readWindowBounds = { _ in moved }
+        core.judgeFloatAspectProbe(
+            KiwiCore.FloatAspectAsk(
+                window: id,
+                axis: "x",
+                delta: 50,
+                base: start,
+                target: CGRect(x: 375, y: 200, width: 850, height: 450)
+            ),
+            live: CGRect(origin: moved.origin, size: start.size)
         )
-        core.judgeFloatAspectProbe(press, live: start)
         #expect(core.state.floatAspects[id] == .init(pid: 900_001, ratio: nil))
-        #expect(core.tiler.recentInstantTarget(id) == split)
+        #expect(
+            core.tiler.recentInstantTarget(id)
+                == CGRect(x: 375, y: 200, width: 850, height: 450)
+        )
+    }
+
+    @Test("A press's size lands at the origin the window has now")
+    func askLandsWhereItStands() {
+        let core = makeCore()
+        // A hold walked it far past the first press's split.
+        let walked = CGRect(x: 100, y: 200, width: 788, height: 450)
+        core.windowServer.readWindowBounds = { _ in walked }
+        core.judgeFloatAspectProbe(
+            ask("x", 50, to: grow),
+            live: CGRect(origin: walked.origin, size: start.size)
+        )
+        #expect(
+            core.tiler.recentInstantTarget(id)
+                == CGRect(origin: walked.origin, size: grow)
+        )
     }
 
     @Test("A probe with no answer goes back and stays unjudged")

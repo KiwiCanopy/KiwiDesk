@@ -145,6 +145,29 @@ extension FloatAspectJudgementTests {
         core.state.floatAspectFlight = nil
     }
 
+    @Test("A press the other way voids an ask it has undone")
+    func oppositePressVoids() {
+        let core = makeCore()
+        answer(core, start.size)
+        press(core, 50)
+        #expect(core.deferred.isScheduled(.floatAspect))
+        press(core, -50)
+        #expect(!core.deferred.isScheduled(.floatAspect))
+        #expect(core.state.floatAspectFlight == nil)
+    }
+
+    @Test("A press the same way keeps the ask")
+    func samePressKeeps() {
+        let core = makeCore()
+        answer(core, start.size)
+        press(core, 50)
+        let armed = core.deferred.task(for: .floatAspect)
+        press(core, 50)
+        #expect(core.deferred.task(for: .floatAspect) == armed)
+        core.deferred.cancel(.floatAspect)
+        core.state.floatAspectFlight = nil
+    }
+
     @Test("A locked window's press arms nothing")
     func lockedArmsNothing() {
         let core = makeCore()

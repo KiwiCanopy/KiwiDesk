@@ -19,7 +19,7 @@ extension StateCoordinator {
     /// The judgement in flight: a press's ask, then a written probe.
     /// Means nothing once `.floatAspect` is no longer scheduled.
     enum FloatAspectFlight: Sendable, Equatable {
-        case asking(WindowID, axis: String)
+        case asking(WindowID, axis: String, grows: Bool)
         case probing(WindowID)
     }
 
