@@ -104,24 +104,24 @@ struct LayoutStripTests {
         #expect(clear == nil)
     }
 
-    @Test("the strip is masked, measured and follows Tab focus")
+    @Test("the strip takes the container and follows Tab focus")
     func wiring() throws {
         let strip = try Self.squashed(
             "Sources/KiwiDesk/Settings/Components/Layouts/"
                 + "LayoutStrip.swift"
         )
-        #expect(strip.contains(".mask(StripFade(fades:fades))"))
-        // The live offset and viewport feed the fade and the follow.
-        #expect(strip.contains("Self.fades(offset:offset,viewport:viewport)"))
+        // The live scroll feeds the fade and the follow.
         #expect(
             strip.contains(
-                "Self.followAnchor(index:index,offset:offset,"
-                    + "viewport:viewport)"
+                "SidewaysStrip(scroll:$scroll,fades:Self.run.fades(scroll))"
             )
         )
-        #expect(strip.contains("action:{offset=$0}"))
-        #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
-        #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
+        #expect(
+            strip.contains(
+                "Self.followAnchor(index:index,offset:scroll.offset,"
+                    + "viewport:scroll.viewport)"
+            )
+        )
         #expect(strip.contains(".focused($focused,equals:mode)"))
         #expect(strip.contains(".id(mode)"))
         #expect(
@@ -156,10 +156,6 @@ struct LayoutStripTests {
                 ".scaleEffect(factor).frame(width:Self.schematicWidth,"
                     + "height:Self.depth)"
             )
-        )
-        // The fades call itself, not followMargin's twin.
-        #expect(
-            metrics.contains("offset:offset,viewport:viewport,depth:depth)")
         )
     }
 }

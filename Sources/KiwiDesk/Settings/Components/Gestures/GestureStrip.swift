@@ -12,15 +12,20 @@ struct GestureStrip: View {
     let settings: TilingSettings
     let gestures: ScrollGestureBase
     let onLand: (GestureItem) -> Void
-    @State private var offset: CGFloat = 0
-    @State private var viewport: CGFloat = 0
+    @State private var scroll = StripScroll()
 
     /// Between two pictures of a group, and between two groups.
     nonisolated static let gap: CGFloat = 10
     nonisolated static let groupGap: CGFloat = 24
 
     var body: some View {
-        ScrollView(.horizontal) {
+        SidewaysStrip(
+            scroll: $scroll,
+            fades: Self.fades(
+                offset: scroll.offset,
+                viewport: scroll.viewport
+            )
+        ) {
             HStack(spacing: 0) {
                 ForEach(GestureItem.allCases) { item in
                     GestureStripPlate(
@@ -32,23 +37,9 @@ struct GestureStrip: View {
                     .padding(.leading, Self.leading(of: item))
                 }
             }
-            .onGeometryChange(for: CGFloat.self) {
-                -$0.frame(in: .named(Self.space)).minX
-            } action: {
-                offset = $0
-            }
         }
-        .coordinateSpace(.named(Self.space))
-        .onGeometryChange(for: CGFloat.self) {
-            $0.size.width
-        } action: {
-            viewport = $0
-        }
-        .mask(StripFade(fades: fades))
         .accessibilityHidden(true)
     }
-
-    nonisolated private static let space = "gestureStrip"
 
     /// The room ahead of `item`: none for the first, a group's gap
     /// where a group starts, the pictures' gap otherwise.
@@ -60,13 +51,9 @@ struct GestureStrip: View {
         return all[index - 1].group == item.group ? gap : groupGap
     }
 
-    var fades: ShelfOverflow.Fades {
-        Self.fades(offset: offset, viewport: viewport)
-    }
-
-    /// Core's overflow fades (`ShelfOverflow.fades`), handed each
-    /// picture's run with a group's extra room on its last picture,
-    /// since that arithmetic takes one gap.
+    /// Core's overflow fades, handed each picture's run with a
+    /// group's extra room on its last picture, since that arithmetic
+    /// takes one gap.
     nonisolated static func fades(offset: CGFloat, viewport: CGFloat)
         -> ShelfOverflow.Fades
     {
@@ -76,16 +63,10 @@ struct GestureStrip: View {
             let extra = next.map { leading(of: $0) - gap } ?? 0
             return GesturePlate<EmptyView>.size.width + extra
         }
-        let total =
-            lengths.reduce(0, +)
-            + gap * CGFloat(max(lengths.count - 1, 0))
-        return ShelfOverflow.fades(
+        return StripRun(
             lengths: lengths,
             gap: gap,
-            total: total,
-            offset: offset,
-            viewport: viewport,
             depth: GesturePlate<EmptyView>.size.height
-        )
+        ).fades(StripScroll(offset: offset, viewport: viewport))
     }
 }

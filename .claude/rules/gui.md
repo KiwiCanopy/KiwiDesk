@@ -2158,14 +2158,14 @@ a refusal (`JumpChordTableTests`).
 
 ## A sideways strip fades, follows and keeps its scroller (#2901)
 
-**A Settings strip that scrolls sideways fades through
-`StripFade` over `ShelfOverflow.fades`, and one that takes
-keyboard focus scrolls the focused item clear of that fade
-through `ShelfOverflow.offset` with `followMargin`** — the
-bars' own arithmetic, never a fade or a follow of its own
-(`GestureStripTests`, `LayoutStripTests`). A bare `scrollTo`
-stops the item at the viewport's edge, which is where the fade
-draws.
+**A Settings strip that scrolls sideways is a `SidewaysStrip`
+answered by a `StripRun`, and one that takes keyboard focus scrolls
+the focused item clear of the fade through
+`StripRun.followAnchor`** — the bars' own arithmetic, never a fade
+or a follow of its own (#2987, `SidewaysStripTests`, whose `allowed`
+map is the one copy of who may hold a sideways scroll view). A bare
+`scrollTo` stops the item at the viewport's edge, which is where the
+fade draws.
 
 **A Settings strip that scrolls sideways keeps the platform's
 scroller**, which a mouse user drags to reach what the strip cuts

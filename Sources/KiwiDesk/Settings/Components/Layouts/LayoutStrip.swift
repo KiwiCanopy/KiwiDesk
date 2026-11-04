@@ -9,8 +9,7 @@ struct LayoutStrip: View {
     @ObservedObject var model: SettingsModel
     @Binding var selection: LayoutMode
     @State private var hovered: LayoutMode?
-    @State private var offset: CGFloat = 0
-    @State private var viewport: CGFloat = 0
+    @State private var scroll = StripScroll()
     @FocusState private var focused: LayoutMode?
     @Environment(\.isEnabled) private var isEnabled
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -19,16 +18,9 @@ struct LayoutStrip: View {
         VStack(alignment: .leading, spacing: 8) {
             SettingsGroupHeader(chooseTitle)
             ScrollViewReader { proxy in
-                ScrollView(.horizontal) {
+                SidewaysStrip(scroll: $scroll, fades: Self.run.fades(scroll)) {
                     row
                 }
-                .coordinateSpace(.named(Self.space))
-                .onGeometryChange(for: CGFloat.self) {
-                    $0.size.width
-                } action: {
-                    viewport = $0
-                }
-                .mask(StripFade(fades: fades))
                 // The ring inset stays inside the clip; the row
                 // still lines up with the header.
                 .padding(.horizontal, -Self.ringRoom)
@@ -41,10 +33,6 @@ struct LayoutStrip: View {
         .accessibilityLabel(chooseTitle)
     }
 
-    private var fades: ShelfOverflow.Fades {
-        Self.fades(offset: offset, viewport: viewport)
-    }
-
     /// Scrolls a Tab-focused tile clear of the fade, as the bars
     /// follow their active item (`ShelfOverflow.offset`).
     private func follow(_ mode: LayoutMode?, with proxy: ScrollViewProxy) {
@@ -52,8 +40,8 @@ struct LayoutStrip: View {
             let index = LayoutMode.placementTabs.firstIndex(of: mode),
             let anchor = Self.followAnchor(
                 index: index,
-                offset: offset,
-                viewport: viewport
+                offset: scroll.offset,
+                viewport: scroll.viewport
             )
         else { return }
         withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
@@ -73,11 +61,6 @@ struct LayoutStrip: View {
             }
         }
         .padding(Self.ringRoom)
-        .onGeometryChange(for: CGFloat.self) {
-            -$0.frame(in: .named(Self.space)).minX
-        } action: {
-            offset = $0
-        }
     }
 
     private var chooseTitle: String {

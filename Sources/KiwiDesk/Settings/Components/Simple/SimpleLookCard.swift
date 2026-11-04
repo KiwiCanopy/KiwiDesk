@@ -6,23 +6,27 @@ import SwiftUI
 /// looks newest first, then the bundled looks, as one sideways
 /// line, each tile its name alone, the description its hover help
 /// and VoiceOver hint, ended, while the gallery is live, by its
-/// Browse tile. No palette editing, no saving.
+/// Browse tile. No palette editing, no saving. Centred while it fits
+/// (owner 2026-10-29); past that a `SidewaysStrip` that follows Tab.
 struct SimpleLookCard: View {
     @ObservedObject var model: SettingsModel
     @FocusState private var focusedTile: String?
     @State private var renameRequest: NameEditRequest?
+    @State private var scroll = StripScroll()
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         SimpleCard(title: Self.title) {
-            // Centred while the line fits; scrolling once it
-            // overflows (owner 2026-10-29), its trailing edge faded
-            // so the line's end reads as more to come.
             ViewThatFits(in: .horizontal) {
                 line.frame(maxWidth: .infinity)
-                ScrollView(.horizontal) {
-                    line.padding(.trailing, Self.fade)
+                ScrollViewReader { proxy in
+                    SidewaysStrip(scroll: $scroll, fades: run.fades(scroll)) {
+                        line
+                    }
+                    .onChange(of: focusedTile) { _, id in
+                        follow(id, with: proxy)
+                    }
                 }
-                .mask(Self.trailingFade)
             }
             CrossReferenceRow(
                 prose: Self.hintProse,
@@ -33,7 +37,7 @@ struct SimpleLookCard: View {
     }
 
     private var line: some View {
-        HStack(alignment: .top, spacing: 10) {
+        HStack(alignment: .top, spacing: Self.gap) {
             let mine = Self.mine(in: model)
             ForEach(mine, id: \.name) { look in
                 tile(look)
@@ -54,19 +58,41 @@ struct SimpleLookCard: View {
         .padding(.vertical, 2)
     }
 
-    /// The fade's length; the scrolled line ends past it, so its
-    /// last tile clears the fade once scrolled to.
-    private static let fade: CGFloat = 28
+    /// The line's entries in order: each look's name, the hairline as
+    /// an empty name while My looks has any, and the Browse tile.
+    static func entries(mine: [String], bundled: [String]) -> [String] {
+        mine + (mine.isEmpty ? [] : [""]) + bundled + [browseID]
+    }
 
-    private static var trailingFade: some View {
-        HStack(spacing: 0) {
-            Color.black
-            LinearGradient(
-                colors: [.black, .clear],
-                startPoint: .leading,
-                endPoint: .trailing
+    private var entries: [String] {
+        Self.entries(
+            mine: Self.mine(in: model).map(\.name),
+            bundled: model.core.bundledLooks.map(\.name)
+        )
+    }
+
+    private var run: StripRun { Self.run(entries: entries) }
+
+    static func run(entries: [String]) -> StripRun {
+        StripRun(
+            lengths: entries.map { $0.isEmpty ? hairline : tileWidth },
+            gap: gap,
+            depth: PaletteTile<EmptyView>.plateHeight
+        )
+    }
+
+    /// Scrolls a Tab-focused tile clear of the fade.
+    private func follow(_ id: String?, with proxy: ScrollViewProxy) {
+        guard let id,
+            let index = entries.firstIndex(of: id),
+            let anchor = run.followAnchor(
+                index: index,
+                width: Self.tileWidth,
+                scroll: scroll
             )
-            .frame(width: fade)
+        else { return }
+        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
+            proxy.scrollTo(id, anchor: anchor)
         }
     }
 
@@ -94,6 +120,7 @@ struct SimpleLookCard: View {
         }
         .frame(width: Self.tileWidth)
         .focused($focusedTile, equals: look.name)
+        .id(look.name)
     }
 
     /// A user look's menu (#2860, #2943): Rename and Delete, through
@@ -145,6 +172,8 @@ struct SimpleLookCard: View {
             NSWorkspace.shared.open(SupportLinks.looks)
         }
         .frame(width: Self.tileWidth)
+        .focused($focusedTile, equals: Self.browseID)
+        .id(Self.browseID)
     }
 
     /// The Browse tile's label.
@@ -167,4 +196,9 @@ struct SimpleLookCard: View {
 
     /// Narrower than the shelf's grid cell: a line, not a grid.
     static let tileWidth: CGFloat = 104
+    static let gap: CGFloat = 10
+    /// The hairline's run: `Divider`'s own width.
+    static let hairline: CGFloat = 1
+    /// The Browse tile's focus and scroll id; no look name holds it.
+    static let browseID = "\u{0}browse"
 }

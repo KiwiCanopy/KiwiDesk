@@ -13,7 +13,6 @@ extension LayoutStrip {
     nonisolated static let gap: CGFloat = 10
     /// Room around the row for a tile's focus ring, inside the clip.
     nonisolated static let ringRoom: CGFloat = 4
-    nonisolated static let space = "layoutStrip"
 
     /// Factor from `SchematicScale.tile` down to the strip's size.
     nonisolated static var schematicFactor: CGFloat {
@@ -34,9 +33,7 @@ extension LayoutStrip {
         }
     }
 
-    nonisolated static var rowWidth: CGFloat {
-        lengths.reduce(0, +) + gap * CGFloat(max(lengths.count - 1, 0))
-    }
+    nonisolated static var rowWidth: CGFloat { run.total }
 
     /// The fade's depth: the drawn thumbnail's height.
     nonisolated static var depth: CGFloat {
@@ -59,61 +56,27 @@ extension LayoutStrip {
         .frame(width: Self.schematicWidth, height: Self.depth)
     }
 
-    /// Core's overflow fades (`ShelfOverflow.fades`), as the gesture
-    /// strip's.
+    /// The tiles' run, the ring room carried on the end tiles.
+    nonisolated static var run: StripRun {
+        StripRun(lengths: lengths, gap: gap, depth: depth, inset: ringRoom)
+    }
+
     nonisolated static func fades(offset: CGFloat, viewport: CGFloat)
         -> ShelfOverflow.Fades
     {
-        ShelfOverflow.fades(
-            lengths: lengths,
-            gap: gap,
-            total: rowWidth,
-            offset: offset,
-            viewport: viewport,
-            depth: depth
-        )
+        run.fades(StripScroll(offset: offset, viewport: viewport))
     }
 
-    /// Where Core's follow (`ShelfOverflow.offset`) puts the strip
-    /// for the tile at `index`, clear of the fade.
-    nonisolated static func followOffset(
-        index: Int,
-        offset: CGFloat,
-        viewport: CGFloat
-    ) -> CGFloat {
-        ShelfOverflow.offset(
-            current: offset,
-            lengths: lengths,
-            gap: gap,
-            total: rowWidth,
-            activeIndex: index,
-            viewport: viewport,
-            margin: ShelfOverflow.followMargin(
-                gap: gap,
-                depth: depth,
-                viewport: viewport
-            )
-        )
-    }
-
-    /// `followOffset` as a `scrollTo` anchor on the tile, or nil
-    /// where the strip need not move: an anchor's x places the
-    /// tile's leading edge at x · (viewport − tile) in view.
+    /// Where a Tab onto the tile at `index` scrolls the strip.
     nonisolated static func followAnchor(
         index: Int,
         offset: CGFloat,
         viewport: CGFloat
     ) -> UnitPoint? {
-        let target = followOffset(
+        run.followAnchor(
             index: index,
-            offset: offset,
-            viewport: viewport
+            width: tileWidth,
+            scroll: StripScroll(offset: offset, viewport: viewport)
         )
-        guard abs(target - offset) > 0.5, viewport > tileWidth else {
-            return nil
-        }
-        let start = ringRoom + CGFloat(index) * (tileWidth + gap)
-        let share = (start - target) / (viewport - tileWidth)
-        return UnitPoint(x: min(max(share, 0), 1), y: 0.5)
     }
 }
