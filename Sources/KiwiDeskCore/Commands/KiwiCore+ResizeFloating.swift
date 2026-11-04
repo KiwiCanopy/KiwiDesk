@@ -68,35 +68,13 @@ extension KiwiCore {
         }
         // A locked app's refused writes leave no echo, so a press on
         // one measures from where the window is (#2973).
-        var aspect = state.floatAspects[id]
+        let aspect = state.floatAspects[id]
         let lockedRatio = aspect?.ratio
         // Read before this press writes: the baseline its answer is
-        // judged against. A window free on this axis needs none.
+        // judged against. A window judged free needs none.
         let shown =
-            aspect?.skipsRead(axis: axis) != true && !isGlideWrite
+            (aspect == nil || lockedRatio != nil) && !isGlideWrite
             ? windowServer.readWindowBounds(id) : nil
-        // A window that left the size it refused at complied after all:
-        // a refusal never outlives its evidence, so it is judged anew.
-        if let refused = aspect?.refusedSize, let shown,
-            FloatResize.aspectAnswer(
-                base: refused,
-                answered: shown.size,
-                horizontal: axis == "x"
-            ) != .unchanged
-        {
-            aspect?.refusedAsks = []
-            aspect?.refusedSize = nil
-            state.floatAspects[id] = aspect
-        }
-        // A refused ask keeps its place, so it cannot walk, and keeps
-        // asking, so an app slow to answer can still comply.
-        if aspect?.refuses(axis: axis, delta: delta) == true {
-            if let shown {
-                askRefused(id, from: shown, axis: axis, delta: delta)
-            }
-            refuseFloatRefusedAsk(id, axis: axis, delta: delta)
-            return .ok()
-        }
         let base =
             tiler.animation.commandedFrame(
                 window: id,
@@ -232,9 +210,7 @@ extension KiwiCore {
         // so say which (architect review, 2026-08-29).
         tiler.animation.recordGlideCommanded(id, frame: target)
         // A glide step owes nothing: its press armed the judgement.
-        if let shown,
-            aspect?.isJudged(axis: axis, delta: delta) != true
-        {
+        if let shown, lockedRatio == nil {
             oweFloatAspectJudgement(
                 FloatAspectAsk(
                     window: id,

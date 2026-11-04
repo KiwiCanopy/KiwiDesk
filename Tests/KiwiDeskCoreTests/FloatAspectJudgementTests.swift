@@ -100,37 +100,15 @@ struct FloatAspectJudgementTests {
         #expect(core.tiler.recentInstantTarget(id) == nil)
     }
 
-    @Test("A refused shrink files that ask alone and undoes its half step")
-    func refusedShrinkIsFiled() {
+    @Test("A refused shrink proves nothing and takes no probe")
+    func refusedShrinkIsUnjudged() {
         let core = makeCore()
-        let walked = start.offsetBy(dx: 25, dy: 0)
-        core.windowServer.readWindowBounds = { _ in walked }
-        let shrink = KiwiCore.FloatAspectAsk(
-            window: id,
-            axis: "x",
-            delta: -50,
-            base: start,
-            target: CGRect(x: 425, y: 200, width: 750, height: 450)
-        )
-        core.judgeFloatAspect(shrink)
-        #expect(core.state.floatAspects[id]?.refusedAsks == ["x-"])
-        #expect(core.tiler.recentInstantTarget(id) == start)
-    }
-
-    @Test("A grow on a window refused only a shrink is judged")
-    func growAfterRefusedShrinkIsJudged() {
-        let core = makeCore()
-        core.state.floatAspects[id] = .init(
-            pid: 900_001,
-            ratio: nil,
-            refusedAsks: ["x-"],
-            refusedSize: start.size
-        )
         answer(core, start.size)
-        press(core, 50)
-        #expect(core.tiler.recentInstantTarget(id)?.width == 850)
-        #expect(core.deferred.isScheduled(.floatAspect))
-        core.deferred.cancel(.floatAspect)
+        core.judgeFloatAspect(
+            ask("x", -50, to: CGSize(width: 750, height: 450))
+        )
+        #expect(core.state.floatAspects[id] == nil)
+        #expect(core.tiler.recentInstantTarget(id) == nil)
     }
 
     @Test("A locked press scales both axes from where the window is")
@@ -161,37 +139,26 @@ struct FloatAspectJudgementTests {
         #expect(core.tiler.animation.targetFrame(window: id) == nil)
     }
 
-    @Test("A free axis keeps its one-axis resize, and the other is judged")
-    func compliedIsFreeOnItsAxis() {
+    @Test("A free window keeps its one-axis resize and is judged once")
+    func compliedIsFree() {
         let core = makeCore()
         answer(core, grow)
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.state.floatAspects[id]?.freeAxes == ["x"])
+        #expect(core.state.floatAspects[id] == .init(pid: 900_001, ratio: nil))
         #expect(core.tiler.recentInstantTarget(id) == nil)
 
         press(core, 50)
         #expect(core.tiler.recentInstantTarget(id)?.height == 450)
         #expect(!core.deferred.isScheduled(.floatAspect))
-
-        #expect(
-            core.execute("resize", args: [.string("y"), .number(50)])
-                .isSuccess
-        )
-        #expect(core.deferred.isScheduled(.floatAspect))
-        core.deferred.cancel(.floatAspect)
     }
 
-    @Test("A window refusing the probe too refused both ways, and goes back")
-    func refusedAxisIsRecorded() {
+    @Test("A window refusing the probe too holds no lock, and takes no write")
+    func fixedSizeIsFree() {
         let core = makeCore()
-        // The press walked it half a step before the probe.
-        let walked = start.offsetBy(dx: -25, dy: 0)
-        core.windowServer.readWindowBounds = { _ in walked }
-        core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: walked)
-        #expect(core.state.floatAspects[id]?.refusedAsks == ["x+", "x-"])
-        #expect(core.state.floatAspects[id]?.refusedSize == start.size)
-        #expect(core.state.floatAspects[id]?.ratio == nil)
-        #expect(core.tiler.recentInstantTarget(id) == start)
+        answer(core, start.size)
+        core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
+        #expect(core.state.floatAspects[id] == .init(pid: 900_001, ratio: nil))
+        #expect(core.tiler.recentInstantTarget(id) == nil)
     }
 
     @Test("A slow app that took the probe gets its press, and is not locked")
@@ -209,7 +176,7 @@ struct FloatAspectJudgementTests {
             target: split
         )
         core.judgeFloatAspectProbe(press, live: start)
-        #expect(core.state.floatAspects[id]?.freeAxes == ["x"])
+        #expect(core.state.floatAspects[id] == .init(pid: 900_001, ratio: nil))
         #expect(core.tiler.recentInstantTarget(id) == split)
     }
 

@@ -29,11 +29,7 @@ extension FloatAspectJudgementTests {
         // a lock's answer would read as a free window.
         press(core, -4)
         #expect(!core.deferred.isScheduled(.floatAspect))
-        core.state.floatAspects[id] = .init(
-            pid: 900_001,
-            ratio: nil,
-            freeAxes: ["x"]
-        )
+        core.state.floatAspects[id] = .init(pid: 900_001, ratio: nil)
         press(core, 50)
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
@@ -81,6 +77,19 @@ extension FloatAspectJudgementTests {
         press(core, 50)
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
         #expect(!core.deferred.isScheduled(.floatAspect))
+    }
+
+    @Test("A hold's walked window is still judged at its release")
+    func holdWalkIsJudged() {
+        let core = makeCore()
+        // Far from both the press's frames: the frame the last write sent.
+        let walked = start.offsetBy(dx: -300, dy: 0)
+        core.tiler.placements.stamp(id, target: walked)
+        core.windowServer.readWindowBounds = { _ in walked }
+        core.judgeFloatAspect(ask("x", 50, to: grow))
+        #expect(core.tiler.recentInstantTarget(id)?.size == probed)
+        core.deferred.cancel(.floatAspect)
+        core.state.floatAspectFlight = nil
     }
 
     @Test("A window moved during the wait is left where the hand put it")
@@ -231,11 +240,7 @@ extension FloatAspectJudgementTests {
             reads += 1
             return frame
         }
-        core.state.floatAspects[id] = .init(
-            pid: 900_001,
-            ratio: nil,
-            freeAxes: ["x"]
-        )
+        core.state.floatAspects[id] = .init(pid: 900_001, ratio: nil)
         press(core, 50)
         #expect(reads == 0)
         core.state.floatAspects[id] = .init(pid: 900_001, ratio: ratio)

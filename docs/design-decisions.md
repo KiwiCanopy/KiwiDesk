@@ -5570,27 +5570,19 @@ a locked window landing about 0.9 s late, a first HOLD on one moving
 nothing until its release and then only the press's step, and a slow
 free app whose grow outlasts the wait taking the shrink before its asked
 size. A press on the other axis voids an ask not yet probed, since two
-axes moving would read as a lock. Each axis and direction is judged on
-its own, since a window can be fixed on one alone and one at its minimum
-refuses a shrink only. A window that takes an ask is free on that axis,
-and a lock holds for the window's life. A window that refuses a grow and
-then the probe has refused both directions; one that refuses a shrink has
-refused that alone. Either goes back where the press found it, and a
-later press of a refused ask says the app won't go further and asks at
-the same origin, since moving it would only walk it by the split's half
-step. It keeps asking so a refusal cannot outlive its evidence: an app
-that was merely slow complies, its size leaves the one refused at, and
-the refusals end, at the cost of one false pill. A locked app already at
-its own minimum refuses a grow too, and stays so until something else
-changes its size, accepted. The
-judgement waits out a held key or a moving pointer rather than owing
-through the motion gate, since no later pass can re-derive a probe, and
-a written probe keeps its wait until they rest. A window moved or left
-in the wait stays unjudged, as does one a button is down on during a
-probe, its shrink unpaid; so does a native-tab re-key mid-judgement. Two
-cues are short of the rule, accepted: a replayed
-press lands outside any fire, so a truncation there draws no pill, and
-a floor the other axis sets is named on the pressed axis.
+axes moving would read as a lock. A window judged free or locked is
+never judged again while it lives, so a window whose lock changes
+waits for a new window. A locked app already at its own minimum refuses
+the probe too and reads as free, accepted. A fixed-size window also reads
+as free and keeps the half-step walk it has always had, which is a defect
+of the split rather than of this judgement. The judgement waits out a
+held key or a moving pointer rather than owing through the motion gate,
+since no later pass can re-derive a probe, and a written probe keeps its
+wait until they rest. A window a hand moved in the wait stays unjudged,
+as does one a button is down on during a probe, its shrink unpaid; so
+does a native-tab re-key mid-judgement. A replayed press lands outside
+any fire, so a truncation there draws no pill, and a floor the other axis
+sets is named on the pressed axis, both accepted.
 
 A locked window's press scales both axes through the split, its
 writes instant, because an app fitting each spring step into a box
@@ -5598,7 +5590,9 @@ lands short of the ask (mpv's ratio fell from 1.776 to 1.706 over
 five sprung presses, 1.778 to 1.771 over five instant ones). It holds
 the proven ratio and replaces it only when the window measures
 0.1 away, which a new video does; re-reading it per press re-bases on
-the last press's rounding. The record is session state, so a restart
+the last press's rounding. With the ratio held, a spring still lost it
+on mpv (1.774 to 1.702 over five presses) and not on QuickTime Player,
+so the instant write stays for both. The record is session state, so a restart
 judges again. A tiled slot belongs to the layout and is out of scope.
 
 *The boundary is the screen edges and the bars together, derived

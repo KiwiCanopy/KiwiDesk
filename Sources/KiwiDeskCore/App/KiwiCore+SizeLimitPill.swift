@@ -275,20 +275,6 @@ extension KiwiCore {
         )
     }
 
-    /// A press on an ask a float refused (#2973): the app's own limit,
-    /// whichever way it was pressed.
-    func refuseFloatRefusedAsk(
-        _ window: WindowID,
-        axis: String,
-        delta: Double
-    ) {
-        if delta > 0 {
-            refuseGrowAtMaximum(window, axis: axis)
-        } else {
-            refuseShrinkAtMinimum(window, axis: axis)
-        }
-    }
-
     /// A resize refused because a NEIGHBOR sits at its own
     /// effective minimum (#933). The pairing — which window
     /// wears the second pill, and what it says — is the

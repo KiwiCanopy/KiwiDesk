@@ -1,11 +1,10 @@
 import CoreGraphics
 import Foundation
 
-/// What a float's answers show about its app's size limits, judged one
-/// ask at a time (#2973). AX states no lock, but a locked app fits a
-/// size ask inside the asked box: a one-axis grow lands nowhere and a
-/// one-axis shrink moves both axes. `docs/design-decisions.md` has the
-/// argument.
+/// A float whose app holds its aspect ratio, judged from its answers
+/// (#2973). AX states no such lock, but a locked app fits a size ask
+/// inside the asked box: a one-axis grow lands nowhere and a one-axis
+/// shrink moves both axes. `docs/design-decisions.md` has the argument.
 extension KiwiCore {
     /// One press being judged. `base` is where the window stood when
     /// it was pressed, read from WindowServer: a spring's target is
@@ -41,7 +40,7 @@ extension KiwiCore {
             }
             return
         }
-        guard
+        guard state.floatAspects[ask.window] == nil,
             FloatResize.aspectAskIsReadable(
                 base: ask.base.size,
                 asked: ask.target.size,
@@ -77,8 +76,10 @@ extension KiwiCore {
     }
 
     /// Reads the press's answer, once the hand has left the window. A
-    /// window that has left both where it stood and where it was sent
-    /// was moved: its frames from before the wait are no use.
+    /// window that has left where it stood, where the press sent it and
+    /// where the last write sent it was moved by a hand, which its
+    /// frames from before the wait must not undo. A hold's frames walk
+    /// it, and the last write's origin is where they end.
     func judgeFloatAspect(_ ask: FloatAspectAsk) {
         guard resizeRoutesAsFloat(ask.window),
             let pid = state.windows[ask.window]?.pid
@@ -93,6 +94,9 @@ extension KiwiCore {
         guard let live = windowServer.readWindowBounds(ask.window),
             FloatResize.sameOrigin(live, ask.base)
                 || FloatResize.sameOrigin(live, ask.target)
+                || tiler.placements.recent(ask.window).map({
+                    FloatResize.sameOrigin(live, $0)
+                }) == true
         else {
             endFloatAspectJudgement()
             return
@@ -106,24 +110,11 @@ extension KiwiCore {
             lockFloatAspect(ask.window, pid: pid, ratioOf: ask.base)
             endFloatAspectJudgement()
         case .complied:
-            fileFloatAspectFree(ask, pid: pid, size: live.size)
+            state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
             endFloatAspectJudgement()
         case .unchanged where ask.delta > 0:
             probeFloatAspect(ask, live: live)
-        case .unchanged:
-            fileFloatAspectRefused(
-                ask,
-                pid: pid,
-                asks: [
-                    StateCoordinator.FloatAspect.ask(
-                        axis: ask.axis,
-                        delta: ask.delta
-                    )
-                ],
-                answered: live
-            )
-            endFloatAspectJudgement()
-        case .other:
+        case .unchanged, .other:
             endFloatAspectJudgement()
         }
     }
@@ -156,11 +147,11 @@ extension KiwiCore {
 
     /// Reads the probe's answer, waiting out a key or a pointer, since
     /// the shrink is owed its verdict. A lock takes the press's step in
-    /// proportion, from where the probe left it. A window that refused
-    /// the shrink too refused both directions, and goes back where the
-    /// press found it. Anything else is free, and takes what the press
-    /// asked. A window moved, left or held in the wait keeps what it
-    /// has, unjudged.
+    /// proportion, from where the probe left it. Anything else holds no
+    /// lock: a window that took the probe takes what the press asked,
+    /// and one that refused it too is left as it is, its walk being a
+    /// fixed-size window's. A window moved, left or held in the wait
+    /// keeps what it has, unjudged.
     func judgeFloatAspectProbe(_ ask: FloatAspectAsk, live: CGRect) {
         guard resizeRoutesAsFloat(ask.window),
             !tiler.motionGate.quiescence.buttonsDown(),
@@ -185,13 +176,6 @@ extension KiwiCore {
             answered: answered.size,
             horizontal: ask.horizontal
         ) {
-        case .unchanged:
-            fileFloatAspectRefused(
-                ask,
-                pid: pid,
-                asks: [ask.axis + "+", ask.axis + "-"],
-                answered: answered
-            )
         case .fitted:
             lockFloatAspect(ask.window, pid: pid, ratioOf: live)
             let lost =
@@ -203,8 +187,10 @@ extension KiwiCore {
                 axis: ask.axis,
                 delta: ask.delta + lost
             )
+        case .unchanged:
+            state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
         case .complied, .other:
-            fileFloatAspectFree(ask, pid: pid, size: answered.size)
+            state.floatAspects[ask.window] = .init(pid: pid, ratio: nil)
             tiler.applyFrame(
                 ask.window,
                 from: answered,
@@ -214,82 +200,16 @@ extension KiwiCore {
         }
     }
 
-    /// A press of a refused ask: the size alone, at the frame shown,
-    /// inside the bounds any resize keeps. It stamps no instant target,
-    /// or the ring would draw a size the app is refusing.
-    func askRefused(
-        _ id: WindowID,
-        from shown: CGRect,
-        axis: String,
-        delta: Double
-    ) {
-        let horizontal = axis == "x"
-        let extent = horizontal ? shown.width : shown.height
-        let region = floatGrowBounds(of: id)
-        let room = region.map { horizontal ? $0.width : $0.height }
-        let floor = min(CGFloat(plannedMinSize(of: id, axis: axis)), extent)
-        let size =
-            delta > 0
-            ? min(extent + delta, room ?? .infinity)
-            : max(extent + delta, floor)
-        var asked = shown
-        if horizontal {
-            asked.size.width = size
-        } else {
-            asked.size.height = size
-        }
-        tiler.applyFrame(
-            id,
-            from: shown,
-            to: floatFrameClampedClearOfBars(id, frame: asked),
-            animated: false
-        )
-        tiler.clearInstantTarget(id)
-    }
-
-    /// Free on the pressed axis. A refusal on the other stands, at the
-    /// size the window has now.
-    private func fileFloatAspectFree(
-        _ ask: FloatAspectAsk,
-        pid: pid_t,
-        size: CGSize
-    ) {
-        var record =
-            state.floatAspects[ask.window] ?? .init(pid: pid, ratio: nil)
-        record.freeAxes.insert(ask.axis)
-        if record.refusedSize != nil { record.refusedSize = size }
-        state.floatAspects[ask.window] = record
-    }
-
-    /// Files `asks` as refused and undoes the press's half step.
-    private func fileFloatAspectRefused(
-        _ ask: FloatAspectAsk,
-        pid: pid_t,
-        asks: Set<String>,
-        answered: CGRect
-    ) {
-        var record =
-            state.floatAspects[ask.window] ?? .init(pid: pid, ratio: nil)
-        record.refusedAsks.formUnion(asks)
-        record.refusedSize = answered.size
-        state.floatAspects[ask.window] = record
-        tiler.applyFrame(
-            ask.window,
-            from: answered,
-            to: CGRect(origin: ask.base.origin, size: answered.size),
-            animated: false
-        )
-    }
-
     private func lockFloatAspect(
         _ id: WindowID,
         pid: pid_t,
         ratioOf frame: CGRect
     ) {
         guard frame.height > 0 else { return }
-        var record = state.floatAspects[id] ?? .init(pid: pid, ratio: nil)
-        record.ratio = frame.width / frame.height
-        state.floatAspects[id] = record
+        state.floatAspects[id] = .init(
+            pid: pid,
+            ratio: frame.width / frame.height
+        )
         onLog("window \(id.raw) holds its aspect ratio")
     }
 }

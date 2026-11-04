@@ -49,7 +49,7 @@ extension SnapshotStoreCensusTests {
         "state.floatAspects":
             (
                 .behind,
-                "what a float's resize answers showed (#2973) — the "
+                "a float's judged aspect lock (#2973) — the "
                     + "first press after a restart judges it again"
             ),
         "tiler.boundLearner.lastAsks":

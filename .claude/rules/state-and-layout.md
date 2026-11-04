@@ -2719,8 +2719,7 @@ editing here:
   judged apart from that learner too (#2973)**, through the one
   `floatAspects` record, which a close, a gone-for-good retire and the
   app's exit end as they end `floatFrames`, so a new such ender takes
-  both; its refusals also end when the window leaves `refusedSize`
-  (`FloatAspectJudgementTests`). And
+  both (`FloatAspectJudgementTests`). And
   **a resize that cannot
   deliver its whole ask owes a cue** — blocked or merely
   TRUNCATED, which is #933's own rule at the other end and was

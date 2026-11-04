@@ -140,8 +140,8 @@ public struct StateCoordinator: Sendable {
     /// pid covering a hidden or minimized window no fold lists.
     var floatFrames: [WindowID: FloatFrame] = [:]
 
-    /// A float's judged aspect lock (#2973): session state, ending
-    /// where `floatFrames` ends. A restart judges it again.
+    /// A float's judged aspect lock (#2973): session state, which a
+    /// close, a gone-for-good retire and the app's exit end.
     var floatAspects: [WindowID: FloatAspect] = [:]
     var floatAspectFlight: FloatAspectFlight?
 

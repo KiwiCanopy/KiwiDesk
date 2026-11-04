@@ -60,8 +60,7 @@ struct FloatGlideSeamTests {
         // reds both clauses. The needle's trade: it matches a prefix,
         // so a condition appended to the policy passes. The one ruled
         // today is the aspect-locked float (#2973), held on its own by
-        // `FloatAspectJudgementTests` ▸ `lockedPressIsInstant`; a float's
-        // refused press writes through its own door, `askRefused`.
+        // `FloatAspectJudgementTests` ▸ `lockedPressIsInstant`.
         let routed = try Self.sites(
             of: "animated: resizeWritesAnimated"
         )

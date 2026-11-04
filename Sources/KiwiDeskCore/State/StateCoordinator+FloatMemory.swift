@@ -9,36 +9,11 @@ extension StateCoordinator {
         let frame: CGRect
     }
 
-    /// What a float's answers showed (#2973): `ratio` is width / height
-    /// while locked; `freeAxes` took a one-axis ask; `refusedAsks` are
-    /// the asks it refused, at `refusedSize`, which it leaves if it ever
-    /// complies. A refused shrink says nothing of a grow.
+    /// A float's judged aspect lock (#2973): `ratio` is width / height
+    /// while locked, nil for a window judged not to hold one.
     struct FloatAspect: Sendable, Equatable {
         let pid: pid_t
         var ratio: CGFloat?
-        var freeAxes: Set<String> = []
-        var refusedAsks: Set<String> = []
-        var refusedSize: CGSize? = nil
-
-        static func ask(axis: String, delta: Double) -> String {
-            axis + (delta > 0 ? "+" : "-")
-        }
-
-        func refuses(axis: String, delta: Double) -> Bool {
-            refusedAsks.contains(Self.ask(axis: axis, delta: delta))
-        }
-
-        /// Nothing left to learn from this press.
-        func isJudged(axis: String, delta: Double) -> Bool {
-            ratio != nil || freeAxes.contains(axis)
-                || refuses(axis: axis, delta: delta)
-        }
-
-        /// A press needs no read of the window: free here, with no
-        /// refusal whose evidence it could outlive.
-        func skipsRead(axis: String) -> Bool {
-            ratio == nil && refusedSize == nil && freeAxes.contains(axis)
-        }
     }
 
     /// The judgement in flight: a press's ask, then a written probe.
