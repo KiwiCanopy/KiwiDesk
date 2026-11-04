@@ -231,6 +231,7 @@ extension StateCoordinator {
         unjudgedFilings.remove(id)
         restoredFrames[id] = nil
         floatFrames[id] = nil
+        floatAspects[id] = nil
         retireDepartureRecord(of: id)
     }
 

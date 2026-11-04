@@ -5549,6 +5549,55 @@ remembering which way the last grow went — a stored direction
 needs invalidating on every move, mode change and display change,
 and buys back less than it costs.
 
+**A float whose app holds its ratio is told by its answers, and
+its resize keys scale it ([#2973](https://github.com/KiwiCanopy/KiwiDesk/issues/2973)).**
+[Principle] Nothing states such a lock: AX exposes no bound, and
+Apple documents `contentAspectRatio` as constraining a user's
+resize only. But mpv and QuickTime Player fit an AX size ask
+inside the asked box (measured 2026-11-04): from 800 × 450, a
+width of 680 lands at 679 × 382, and a width of 920 lands nowhere,
+while AX reports success. So a grow on one axis did nothing but
+move the window by the split's half step per press. A list of
+apps would be stale the day it shipped and a second set of keys
+would leave the first set dead, so the answer is the signal.
+
+A one-axis shrink that moves both axes proves a lock outright. A
+one-axis grow answered unchanged proves nothing, since a fixed-size
+window answers the same and a slow app has merely not landed yet,
+so it earns one 12 pt one-axis shrink as a probe on the pressed axis:
+only a lock moves the other axis too. The price is the first grow on
+a locked window landing about 0.9 s late, a first HOLD on one sliding
+the window without resizing it until its release and then taking only
+the press's step, and a slow free app whose grow outlasts the wait taking
+the shrink before its asked size. A press the other way voids an ask not
+yet probed, since it undid what was asked, and so does a press on the
+other axis, since two
+axes moving would read as a lock. A window judged free or locked is
+never judged again while it lives, so a window whose lock changes
+waits for a new window. A locked app already at its own minimum refuses
+the probe too and reads as free, accepted. A fixed-size window also reads
+as free and keeps the half-step walk it has always had, which is a defect
+of the split rather than of this judgement. The judgement waits out a
+held key or a moving pointer rather than owing through the motion gate,
+since no later pass can re-derive a probe, and a written probe keeps its
+wait until they rest. A window a hand moved in the wait stays unjudged,
+as does one a button is down on during a probe or that lost the focus
+during it, its shrink unpaid; so
+does a native-tab re-key mid-judgement. A replayed press lands outside
+any fire, so a truncation there draws no pill, and a floor the other axis
+sets is named on the pressed axis, both accepted.
+
+A locked window's press scales both axes through the split, its
+writes instant, because an app fitting each spring step into a box
+lands short of the ask (mpv's ratio fell from 1.776 to 1.706 over
+five sprung presses, 1.778 to 1.771 over five instant ones). It holds
+the proven ratio and replaces it only when the window measures
+0.1 away, which a new video does; re-reading it per press re-bases on
+the last press's rounding. With the ratio held, a spring still lost it
+on mpv (1.774 to 1.702 over five presses) and not on QuickTime Player,
+so the instant write stays for both. The record is session state, so a restart
+judges again. A tiled slot belongs to the layout and is out of scope.
+
 *The boundary is the screen edges and the bars together, derived
 once.* `KiwiCore.floatBounds` is the one answer to "where may a
 float sit": the display's visible bounds with every painted strip

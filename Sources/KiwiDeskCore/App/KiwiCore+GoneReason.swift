@@ -60,6 +60,7 @@ extension KiwiCore {
             // A close ends the re-float memory (#1675); a vanish
             // or a hide comes back under the same id and keeps it.
             state.floatFrames[id] = nil
+            state.floatAspects[id] = nil
             state.focusRecency[id] = nil
             // Closing the window empties its slot (#2446).
             state.emptyPocket(id)

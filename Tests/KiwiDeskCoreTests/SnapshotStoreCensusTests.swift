@@ -77,6 +77,7 @@ struct SnapshotStoreCensusTests {
         core.state.setSticky(WindowID(2), .display)
         core.state.stickyReachOverrides[WindowID(2)] = true
         core.state.floatFrames[WindowID(1)] = .init(pid: 7, frame: .zero)
+        core.state.floatAspects[WindowID(1)] = .init(pid: 7, ratio: 1.5)
         core.windowCreates.noteCreated(WindowID(1), at: core.wallClock())
         for raw: UInt32 in [2, 3] {
             core.arrivals.hold(
