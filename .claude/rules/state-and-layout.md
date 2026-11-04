@@ -2717,8 +2717,10 @@ editing here:
   deliberately NOT an entry in `SizeBoundLearner`, which only
   the layout loop may record into. **A float's aspect lock is
   judged apart from that learner too (#2973)**, through the one
-  `floatAspects` record, which ends wherever `floatFrames` ends, and
-  a new ender of one takes the other (`FloatAspectJudgementTests`). And
+  `floatAspects` record, which a close, a gone-for-good retire and the
+  app's exit end as they end `floatFrames`, so a new such ender takes
+  both; its refusals also end when the window leaves `refusedSize`
+  (`FloatAspectJudgementTests`). And
   **a resize that cannot
   deliver its whole ask owes a cue** — blocked or merely
   TRUNCATED, which is #933's own rule at the other end and was
@@ -2799,7 +2801,11 @@ editing here:
   re-derived there, and forgotten by a drag or by any frame written
   under user motion (`MotionGate.frameWritten`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
-  owes through that door, and one left ungated is a ruling. The
+  owes through that door, and one left ungated is a ruling. One is
+  ruled: a write no pass can re-derive, the float aspect probe and what
+  answers it (#2973), waits out `holdsNow` instead of owing, re-checks
+  that the window has not moved before writing, and abandons a written
+  probe on a button down (`FloatAspectJudgementTests`). The
   snapshot restore owes its tracked-window writes there too, paid
   from the replay's record only while the screens it was owed
   under (#633) and the Space it filed the window in still hold —

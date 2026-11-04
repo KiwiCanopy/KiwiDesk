@@ -61,7 +61,7 @@ extension KiwiCore {
         // silently refuses every ask (#1057).
         // A probe's answer is owed: a press writing now would read as
         // the user moving the window, stranding the shrink (#2973).
-        if state.floatAspectProbing == id,
+        if state.floatAspectFlight == .probing(id),
             deferred.isScheduled(.floatAspect)
         {
             return .ok()
@@ -71,13 +71,12 @@ extension KiwiCore {
         var aspect = state.floatAspects[id]
         let lockedRatio = aspect?.ratio
         // Read before this press writes: the baseline its answer is
-        // judged against. A judged window reads nothing more.
+        // judged against. A window free on this axis needs none.
         let shown =
-            (aspect == nil || lockedRatio != nil
-                || aspect?.refusedSize != nil) && !isGlideWrite
+            aspect?.skipsRead(axis: axis) != true && !isGlideWrite
             ? windowServer.readWindowBounds(id) : nil
         // A window that left the size it refused at complied after all:
-        // a verdict never outlives the evidence, so it is judged anew.
+        // a refusal never outlives its evidence, so it is judged anew.
         if let refused = aspect?.refusedSize, let shown,
             FloatResize.aspectAnswer(
                 base: refused,
@@ -85,16 +84,17 @@ extension KiwiCore {
                 horizontal: axis == "x"
             ) != .unchanged
         {
-            state.floatAspects[id] = nil
-            aspect = nil
+            aspect?.refusedAsks = []
+            aspect?.refusedSize = nil
+            state.floatAspects[id] = aspect
         }
-        // A refused axis keeps its place, so it cannot walk, and keeps
+        // A refused ask keeps its place, so it cannot walk, and keeps
         // asking, so an app slow to answer can still comply.
-        if aspect?.refusedAxes.contains(axis) == true {
+        if aspect?.refuses(axis: axis, delta: delta) == true {
             if let shown {
-                askRefusedAxis(id, from: shown, axis: axis, delta: delta)
+                askRefused(id, from: shown, axis: axis, delta: delta)
             }
-            refuseFloatRefusedAxis(id, axis: axis, delta: delta)
+            refuseFloatRefusedAsk(id, axis: axis, delta: delta)
             return .ok()
         }
         let base =
@@ -232,7 +232,9 @@ extension KiwiCore {
         // so say which (architect review, 2026-08-29).
         tiler.animation.recordGlideCommanded(id, frame: target)
         // A glide step owes nothing: its press armed the judgement.
-        if let shown, aspect?.isSettled != true {
+        if let shown,
+            aspect?.isJudged(axis: axis, delta: delta) != true
+        {
             oweFloatAspectJudgement(
                 FloatAspectAsk(
                     window: id,

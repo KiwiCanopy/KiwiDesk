@@ -363,8 +363,10 @@ editing here:
   is pinned by a source scan as well (guard-prover, 2026-08-29).
   One ruled narrowing: an aspect-locked float's press writes
   instantly too, since a locked app fits each spring step into its
-  box and lands short (#2973, `FloatAspectJudgementTests` ▸
-  `lockedPressIsInstant`). A new resize write path
+  box and lands short, and so does the ask a float's refused press
+  repeats, since it moves nothing (#2973,
+  `FloatAspectJudgementTests` ▸ `lockedPressIsInstant`). A new resize
+  write path
   inherits the instant write and owes the same two questions:
   what is my next frame's base, and what retires it?
 

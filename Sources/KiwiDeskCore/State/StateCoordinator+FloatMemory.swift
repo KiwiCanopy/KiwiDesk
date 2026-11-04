@@ -9,21 +9,47 @@ extension StateCoordinator {
         let frame: CGRect
     }
 
-    /// One judged float (#2973): `ratio` is width / height while
-    /// locked; `refusedAxes` are those on which it refused a grow and a
-    /// shrink, at `refusedSize`, which it leaves if it ever complies.
-    /// All empty is a window free of a lock.
+    /// What a float's answers showed (#2973): `ratio` is width / height
+    /// while locked; `freeAxes` took a one-axis ask; `refusedAsks` are
+    /// the asks it refused, at `refusedSize`, which it leaves if it ever
+    /// complies. A refused shrink says nothing of a grow.
     struct FloatAspect: Sendable, Equatable {
         let pid: pid_t
         var ratio: CGFloat?
-        var refusedAxes: Set<String> = []
+        var freeAxes: Set<String> = []
+        var refusedAsks: Set<String> = []
         var refusedSize: CGSize? = nil
 
-        /// Nothing further to judge: locked, or free on every axis.
-        var isSettled: Bool { ratio != nil || refusedSize == nil }
+        static func ask(axis: String, delta: Double) -> String {
+            axis + (delta > 0 ? "+" : "-")
+        }
+
+        func refuses(axis: String, delta: Double) -> Bool {
+            refusedAsks.contains(Self.ask(axis: axis, delta: delta))
+        }
+
+        /// Nothing left to learn from this press.
+        func isJudged(axis: String, delta: Double) -> Bool {
+            ratio != nil || freeAxes.contains(axis)
+                || refuses(axis: axis, delta: delta)
+        }
+
+        /// A press needs no read of the window: free here, with no
+        /// refusal whose evidence it could outlive.
+        func skipsRead(axis: String) -> Bool {
+            ratio == nil && refusedSize == nil && freeAxes.contains(axis)
+        }
     }
 
-    /// Carries both records across a native-tab re-key.
+    /// The judgement in flight: a press's ask, then a written probe.
+    /// Means nothing once `.floatAspect` is no longer scheduled.
+    enum FloatAspectFlight: Sendable, Equatable {
+        case asking(WindowID, axis: String)
+        case probing(WindowID)
+    }
+
+    /// Carries both records across a native-tab re-key. A judgement in
+    /// flight is not carried: it ends unjudged at its next read.
     mutating func rekeyFloatMemory(_ old: WindowID, to new: WindowID) {
         if let frame = floatFrames.removeValue(forKey: old) {
             floatFrames[new] = frame
@@ -31,6 +57,5 @@ extension StateCoordinator {
         if let aspect = floatAspects.removeValue(forKey: old) {
             floatAspects[new] = aspect
         }
-        if floatAspectProbing == old { floatAspectProbing = new }
     }
 }

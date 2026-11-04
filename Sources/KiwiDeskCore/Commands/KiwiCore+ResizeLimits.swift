@@ -68,8 +68,8 @@ extension KiwiCore {
         axis: String,
         raisedBy floor: Double = 0
     ) -> Bool {
-        // An axis a float refused is the app's whole limit (#2973).
-        if state.floatAspects[id]?.refusedAxes.contains(axis) == true {
+        // A shrink a float refused is the app's whole limit (#2973).
+        if state.floatAspects[id]?.refuses(axis: axis, delta: -1) == true {
             return true
         }
         return plannedMinSize(of: id, axis: axis)

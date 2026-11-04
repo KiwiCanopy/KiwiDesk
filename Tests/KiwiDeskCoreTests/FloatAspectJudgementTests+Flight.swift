@@ -29,7 +29,11 @@ extension FloatAspectJudgementTests {
         // a lock's answer would read as a free window.
         press(core, -4)
         #expect(!core.deferred.isScheduled(.floatAspect))
-        core.state.floatAspects[id] = .init(pid: 900_001, ratio: nil)
+        core.state.floatAspects[id] = .init(
+            pid: 900_001,
+            ratio: nil,
+            freeAxes: ["x"]
+        )
         press(core, 50)
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
@@ -79,6 +83,18 @@ extension FloatAspectJudgementTests {
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
 
+    @Test("A window moved during the wait is left where the hand put it")
+    func movedDuringAsk() {
+        let core = makeCore()
+        core.windowServer.readWindowBounds = { [start] _ in
+            start.offsetBy(dx: 300, dy: 120)
+        }
+        core.judgeFloatAspect(ask("x", 50, to: grow))
+        #expect(core.state.floatAspects[id] == nil)
+        #expect(core.tiler.recentInstantTarget(id) == nil)
+        #expect(!core.deferred.isScheduled(.floatAspect))
+    }
+
     @Test("A press on the other axis voids an ask not yet probed")
     func otherAxisVoids() {
         let core = makeCore()
@@ -105,7 +121,7 @@ extension FloatAspectJudgementTests {
         #expect(core.tiler.recentInstantTarget(id) == written)
         #expect(core.deferred.task(for: .floatAspect) == probing)
         core.deferred.cancel(.floatAspect)
-        core.state.floatAspectProbing = nil
+        core.state.floatAspectFlight = nil
     }
 
     @Test("The end of a probe lets presses through again")
@@ -114,9 +130,9 @@ extension FloatAspectJudgementTests {
         answer(core, start.size)
         press(core, 50)
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.state.floatAspectProbing == id)
+        #expect(core.state.floatAspectFlight == .probing(id))
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
-        #expect(core.state.floatAspectProbing == nil)
+        #expect(core.state.floatAspectFlight == nil)
     }
 
     @Test("A press on the other axis leaves a written probe its answer")
@@ -133,7 +149,7 @@ extension FloatAspectJudgementTests {
         )
         #expect(core.deferred.task(for: .floatAspect) == probing)
         core.deferred.cancel(.floatAspect)
-        core.state.floatAspectProbing = nil
+        core.state.floatAspectFlight = nil
     }
 
     @Test("A core stopped mid-probe leaves no press dead")
@@ -142,7 +158,7 @@ extension FloatAspectJudgementTests {
         answer(core, start.size)
         press(core, 50)
         core.judgeFloatAspect(ask("x", 50, to: grow))
-        #expect(core.state.floatAspectProbing == id)
+        #expect(core.state.floatAspectFlight == .probing(id))
         core.deferred.cancelAll()
         press(core, 50)
         #expect(core.tiler.recentInstantTarget(id)?.width == 850)
@@ -215,7 +231,11 @@ extension FloatAspectJudgementTests {
             reads += 1
             return frame
         }
-        core.state.floatAspects[id] = .init(pid: 900_001, ratio: nil)
+        core.state.floatAspects[id] = .init(
+            pid: 900_001,
+            ratio: nil,
+            freeAxes: ["x"]
+        )
         press(core, 50)
         #expect(reads == 0)
         core.state.floatAspects[id] = .init(pid: 900_001, ratio: ratio)

@@ -94,6 +94,22 @@ extension KiwiCore {
             && tiler.settings.animations.onWindowResize
     }
 
+    /// The float `resize` routes to itself: the active Space's focus,
+    /// floating and not native full screen. It reads `space.mode`, as
+    /// the membership `space.focused` carries, and a judgement reading
+    /// the window later asks the same question (#2973).
+    func resizeRoutesAsFloat(_ id: WindowID) -> Bool {
+        guard let space = activeSpace,
+            space.focused == id,
+            let window = state.windows[id],
+            !window.isFullscreen
+        else { return false }
+        return EffectiveFloat.applies(
+            isFloating: window.isFloating,
+            mode: space.mode
+        )
+    }
+
     func resize(_ args: [JSONValue]) -> CommandResponse {
         guard let axis = args.first?.stringValue,
             axis == "x" || axis == "y",

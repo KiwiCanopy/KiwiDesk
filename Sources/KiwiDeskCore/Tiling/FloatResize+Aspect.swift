@@ -32,6 +32,12 @@ extension FloatResize {
         abs(measured - held) > ratioChange ? measured : held
     }
 
+    /// Whether two frames stand in one place, within an app's rounding.
+    public static func sameOrigin(_ a: CGRect, _ b: CGRect) -> Bool {
+        abs(a.minX - b.minX) <= answerTolerance
+            && abs(a.minY - b.minY) <= answerTolerance
+    }
+
     /// Reads where a window landed against where it stood, for an ask
     /// on one axis. The other axis moving is the proof of a lock.
     public static func aspectAnswer(

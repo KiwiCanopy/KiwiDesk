@@ -5570,20 +5570,25 @@ a locked window landing about 0.9 s late, a first HOLD on one moving
 nothing until its release and then only the press's step, and a slow
 free app whose grow outlasts the wait taking the shrink before its asked
 size. A press on the other axis voids an ask not yet probed, since two
-axes moving would read as a lock. A window
-judged free or locked is never judged again while it lives. A window
-that refuses the shrink too has refused that axis: it goes back where
-the press found it, and a later press on that axis says the app won't go
-further and asks at the same origin, since moving it would only walk it
-by the split's half step. It keeps asking so a verdict cannot outlive its
-evidence: an app that was merely slow complies, its size leaves the one
-refused at, and the record ends, at the cost of one false pill. The other
-axis is judged on its own, since a window can be fixed on one alone.
-The
+axes moving would read as a lock. Each axis and direction is judged on
+its own, since a window can be fixed on one alone and one at its minimum
+refuses a shrink only. A window that takes an ask is free on that axis,
+and a lock holds for the window's life. A window that refuses a grow and
+then the probe has refused both directions; one that refuses a shrink has
+refused that alone. Either goes back where the press found it, and a
+later press of a refused ask says the app won't go further and asks at
+the same origin, since moving it would only walk it by the split's half
+step. It keeps asking so a refusal cannot outlive its evidence: an app
+that was merely slow complies, its size leaves the one refused at, and
+the refusals end, at the cost of one false pill. A locked app already at
+its own minimum refuses a grow too, and stays so until something else
+changes its size, accepted. The
 judgement waits out a held key or a moving pointer rather than owing
-through the motion gate, since no later pass can pay a probe, and a
-written probe keeps its wait until they rest; a window moved or left
-during it stays unjudged, its shrink unpaid. Two cues are short of the rule, accepted: a replayed
+through the motion gate, since no later pass can re-derive a probe, and
+a written probe keeps its wait until they rest. A window moved or left
+in the wait stays unjudged, as does one a button is down on during a
+probe, its shrink unpaid; so does a native-tab re-key mid-judgement. Two
+cues are short of the rule, accepted: a replayed
 press lands outside any fire, so a truncation there draws no pill, and
 a floor the other axis sets is named on the pressed axis.
 

@@ -275,9 +275,9 @@ extension KiwiCore {
         )
     }
 
-    /// A press on an axis a float refused (#2973): the app's own
-    /// limit, whichever way it was pressed.
-    func refuseFloatRefusedAxis(
+    /// A press on an ask a float refused (#2973): the app's own limit,
+    /// whichever way it was pressed.
+    func refuseFloatRefusedAsk(
         _ window: WindowID,
         axis: String,
         delta: Double
