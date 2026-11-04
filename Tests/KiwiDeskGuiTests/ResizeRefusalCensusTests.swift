@@ -83,6 +83,9 @@ struct ResizeRefusalCensusTests {
             "ownMinimum on a shrink, neighborMinimum on a grow — "
             + "every shown window of the run sits at its floor "
             + "(#2235)",
+        "the window's share is at its limit":
+            "ownMinimum on a tap's shrink, whose weight is at its floor "
+            + "above the window's; a held step ends with no cue (#2709)",
         "the focused window is fullscreen":
             "windowIsFullscreen — it fills a macOS Space of its "
             + "own (#670), refused ONCE in resize() ahead of every "
