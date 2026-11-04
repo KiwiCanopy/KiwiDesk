@@ -2156,7 +2156,7 @@ a modifier test beside it; a ↩ chord it answers nil for is
 `JumpKey.dead`, the system beep wired in the controller, and never
 a refusal (`JumpChordTableTests`).
 
-## A sideways strip fades and follows through Core (#2901)
+## A sideways strip fades, follows and keeps its scroller (#2901)
 
 **A Settings strip that scrolls sideways fades through
 `StripFade` over `ShelfOverflow.fades`, and one that takes
@@ -2166,6 +2166,16 @@ bars' own arithmetic, never a fade or a follow of its own
 (`GestureStripTests`, `LayoutStripTests`). A bare `scrollTo`
 stops the item at the viewport's edge, which is where the fade
 draws.
+
+**A Settings strip that scrolls sideways keeps the platform's
+scroller**, which a mouse user drags to reach what the strip cuts
+(#2901 ▸ Ruling). Never hide it by argument, and a hide above a
+strip names `axes: .vertical` alone, since Apple documents the
+modifier as reaching nested scroll views (not measured here;
+`StripScrollerTests`). The scroller gives reach and the fade stays
+the cue: under *Automatically* a trackpad shows it only during a
+gesture (`docs/design-decisions.md` ▸ The platform's own indicator
+does not work).
 
 ## A sided chord is drawn once and spoken in words (#2601)
 
