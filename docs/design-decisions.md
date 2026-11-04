@@ -4563,6 +4563,17 @@ inconsistency. The cue is the overflow
 mark's count alone, since the push is the gesture doing what was
 asked.
 
+*A shrink of an outer edge answers as the keyboard does* (owner,
+2026-11-04, #2970). A window beside a shown mate gives that mate the
+room, and a lone window brings back the next one, though neither has
+a neighbour past that edge: the room has somewhere to go. One answer,
+`RunZone.shrinkTaker`, says where, and the drop's filter and `press`
+both read it. Counting a waiting window as a neighbour was rejected:
+its slot is parked, and a grow would reach the writer and cue. A grow
+on that edge still snaps back, silently. A master zone lined up along
+the split keeps its snap back too, since `resize` moves the split on
+that axis and a drag of its outer edge has no zone step to take.
+
 *A hold stops short of a push; only a press pushes* (owner,
 2026-11-04, on ui-designer's advice). A glide can hide several
 windows in a second, and beside a shown window a shrink no longer

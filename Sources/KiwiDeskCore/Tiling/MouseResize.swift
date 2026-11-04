@@ -58,7 +58,7 @@ public enum MouseResize {
     }
 
     /// Whether a drop in `mode` trades size with a neighbour, so
-    /// an outer edge (nobody to trade with) must snap back.
+    /// an outer edge with nobody to trade with must snap back.
     /// Scrolling trades with nobody: one slot length serves the
     /// row, so any edge resizes it. Exhaustive on purpose — a new
     /// mode decides here, beside its `translate` case.
@@ -72,12 +72,33 @@ public enum MouseResize {
         }
     }
 
+    /// Whether a drag along `vertical`'s axis in `mode` steps a
+    /// zone along its own line, not a ratio `translate` maps that
+    /// axis to: a Stack master zone lined up along the split has no
+    /// zone step there (#2970). Exhaustive on purpose, as
+    /// `tradesWithNeighbors` is.
+    public static func stepsZone(
+        _ mode: LayoutMode,
+        stackSplitHorizontal: Bool,
+        vertical: Bool
+    ) -> Bool {
+        switch mode {
+        case .stack: return vertical == stackSplitHorizontal
+        case .bsp, .track, .grid: return true
+        case .scrolling, .monocle, .floating: return false
+        }
+    }
+
     /// Drops size changes from dragging an outer edge lacking
-    /// neighbors — for modes that `tradesWithNeighbors` only.
+    /// neighbors — for modes that `tradesWithNeighbors` only. An
+    /// axis that shrank stays where `shrinkTrades(vertical)` says
+    /// someone beyond the slots takes the room (#2970); a grow on
+    /// that edge still drops.
     public static func keepingInnerEdgeChanges(
         slot: CGRect,
         frame: CGRect,
-        neighbors: [CGRect]
+        neighbors: [CGRect],
+        shrinkTrades: (_ vertical: Bool) -> Bool
     ) -> CGRect {
         var result = frame
         let movedLeft =
@@ -94,7 +115,7 @@ public enum MouseResize {
                     && neighbors.contains {
                         $0.midX > slot.maxX
                     })
-            if !ok {
+            if !ok, frame.width >= slot.width || !shrinkTrades(false) {
                 result.size.width = slot.width
             }
         }
@@ -113,7 +134,7 @@ public enum MouseResize {
                     && neighbors.contains {
                         $0.midY > slot.maxY
                     })
-            if !ok {
+            if !ok, frame.height >= slot.height || !shrinkTrades(true) {
                 result.size.height = slot.height
             }
         }

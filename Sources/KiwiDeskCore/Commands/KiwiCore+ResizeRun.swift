@@ -228,6 +228,35 @@ extension KiwiCore {
         return true
     }
 
+    /// Whether a drag shrinking `id` on `vertical`'s axis hands the
+    /// room to someone in its zone, past any neighbour the drop's
+    /// slots show (#2970): `RunZone.shrinkTaker`, where the mouse
+    /// steps the zone on that axis at all (`MouseResize.stepsZone`).
+    func shrinkTrades(
+        of id: WindowID,
+        vertical: Bool,
+        in space: Space
+    ) -> Bool {
+        let split = tiler.settings.resolvedStack(
+            for: space,
+            session: sessionRatios(of: space.id),
+            flip: stackFlip(of: space.id)
+        ).stackPosition.splitsHorizontally
+        guard
+            MouseResize.stepsZone(
+                space.mode,
+                stackSplitHorizontal: split,
+                vertical: vertical
+            ),
+            let found = runZone(
+                of: id,
+                axis: vertical ? "y" : "x",
+                in: space
+            )
+        else { return false }
+        return found.zone.shrinkTaker(of: id, in: found.context) != nil
+    }
+
     /// The zone `focused` sits in along `axis`, read from the
     /// render's own input.
     private func runZone(

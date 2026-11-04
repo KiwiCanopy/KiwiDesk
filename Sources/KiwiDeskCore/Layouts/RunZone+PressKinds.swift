@@ -4,6 +4,39 @@ import CoreGraphics
 /// the window's own (#2709): beside only sized mates, and the run's
 /// weight step.
 extension RunZone {
+    /// Who takes the room a shrink along the zone gives up.
+    public enum ShrinkTaker: Sendable, Equatable {
+        /// A shown mate draws wider.
+        case shownMate
+        /// The lone window gives way and the next one comes back.
+        case waitingWindow
+    }
+
+    /// Who takes a shrink of `id` along the zone; nil where none
+    /// does: `id` is not shown, the zone piles or draws its fixed
+    /// cells, or `id` is alone with nobody waiting. The mouse drop's
+    /// outer-edge filter and `press`'s pull both read it (#2970); it
+    /// says nothing of whether a next window fits, which `press`
+    /// answers with its refusal.
+    public func shrinkTaker(
+        of id: WindowID,
+        in context: LayoutContext
+    ) -> ShrinkTaker? {
+        guard let index = members.firstIndex(of: id),
+            !piles(in: context), !drawsSlots(in: context)
+        else { return nil }
+        guard let run = run(in: context) else {
+            return members.count > 1 ? .shownMate : nil
+        }
+        return run.visible.contains(index) ? shrinkTaker(shown: run) : nil
+    }
+
+    /// `shrinkTaker(of:in:)` for a member `run` shows.
+    func shrinkTaker(shown run: ZoneRun) -> ShrinkTaker? {
+        if run.visible.count > 1 { return .shownMate }
+        return run.hides ? .waitingWindow : nil
+    }
+
     /// The press of the one window that draws what sized mates leave:
     /// the nearest mate's length moves the other way, and a grow past
     /// what that mate can give sets it to its floor and pushes on.
