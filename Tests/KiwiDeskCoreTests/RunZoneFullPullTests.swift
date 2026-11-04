@@ -10,14 +10,6 @@ import Testing
 struct RunZoneFullPullTests {
     private let ids = (1...4).map { WindowID(UInt32($0)) }
 
-    private var zone: RunZone {
-        RunZone(
-            members: ids,
-            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
-            vertical: false
-        )
-    }
-
     private func context(
         focus: Int = 2,
         sizes: [Int: CGFloat] = [:],
@@ -38,32 +30,6 @@ struct RunZoneFullPullTests {
             )
         }
         return context
-    }
-
-    /// `context` with `press` written as the writers write it.
-    private func writing(
-        _ press: RunZone.Press,
-        over context: LayoutContext
-    ) -> LayoutContext {
-        var context = context
-        for (member, share) in press.sizes {
-            context.runSizes[member] = share.map {
-                RunSize(share: $0, zone: 0)
-            }
-        }
-        if let visible = press.visible {
-            (context.runHeads, context.runTails) = zone.ends(
-                showing: visible,
-                heads: context.runHeads,
-                tails: context.runTails
-            )
-        }
-        return context
-    }
-
-    /// The share `press` gives window `id`, 0 where it sets none.
-    private func size(_ press: RunZone.Press, _ id: Int) -> CGFloat {
-        (press.sizes[WindowID(UInt32(id))] ?? nil) ?? 0
     }
 
     /// `press` written into `context`, as the writers store it.
@@ -146,7 +112,7 @@ struct RunZoneFullPullTests {
         #expect(abs(frame.width - 250) < 1)
     }
 
-    @Test("A full pull down to a window's floor lands at it")
+    @Test("A full pull down to a window's floor comes near it")
     func fullPullToTheFloor() throws {
         let three = RunZone(
             members: Array(ids[0..<3]),

@@ -47,9 +47,20 @@ extension KiwiCore {
         toward side: RunZone.PushSide,
         space: Space
     ) -> Bool {
-        if delta < 0, outcome.hitOwnMinimum {
+        // A weight already at its limit moves nothing, and a silent
+        // press never ends a hold.
+        let range = StackLayout.weightRange
+        let weight = space.stackWeights[focused] ?? 1
+        let at = members.firstIndex(of: focused) ?? 0
+        let spent = members.count > 1 && weight >= range.upperBound
+        if delta < 0,
+            outcome.hitOwnMinimum || weight <= range.lowerBound
+        {
             refuseShrinkAtMinimum(focused, axis: axis)
-        } else if delta > 0, let blocked = outcome.blockedByOther {
+        } else if delta > 0,
+            let blocked = outcome.blockedByOther
+                ?? (spent ? (at == 0 ? 1 : at - 1) : nil)
+        {
             if space.windows.contains(focused),
                 let found = runZone(of: focused, axis: axis, in: space),
                 let press = found.zone.press(

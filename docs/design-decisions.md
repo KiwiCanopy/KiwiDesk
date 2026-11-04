@@ -4580,7 +4580,10 @@ keeps exactly what the run planned. A window moved between
 Stack's zones, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's
-weight step. A shown mate takes what a shrink gives, by weight or —
+weight step. A weight at its limit cannot step, so a press there
+takes a length while the run hides a window, and in a run hiding
+none it cues, since a silent press would never end a hold. A
+length replaces the window's weight. A shown mate takes what a shrink gives, by weight or —
 beside only sized mates, whose leftover the window draws — through
 the nearest mate's length, so a press on a neighbour never undoes
 the push.
@@ -4591,11 +4594,12 @@ shrink gives up what the next window needs at its minimum and that
 window returns at once, since room held open for nothing is the
 one state no press could explain (owner, 2026-11-04). Only a lone
 window pulls: beside a shown mate nothing is freed, and a waiting
-window returns by a focus step or once every member fits. Where
+window returns by a focus step or once every member fits, the
+shown windows that take a share counted at their minimum. Where
 every member fits the window keeps its length as the weight that
 draws it there, solved against the render, so the last pull does
 not jump, save where a weight's limit or unequal floors leave no
-weight that draws it exactly. A press steps from
+weight that draws it exactly, which can land it either side. A press steps from
 what the window draws, as the scrolling slot does (#1057), so no
 store banks a length the screen does not show. It is sizing like the weights: a mode change and
 `reset_layout_sizing` clear it, and only an in-place restart

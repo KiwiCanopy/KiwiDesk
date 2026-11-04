@@ -22,6 +22,8 @@ extension RunZone {
         else { return Press(cue: .nothingToDivide, refusal: .alone) }
         let member = members[mate]
         var press = Press()
+        // A length replaces the weight (`lengths`).
+        if line.weights[index] != 1 { press.weight = 1 }
         // The window holds what it now draws as well, so the shown
         // lengths keep filling the zone and the run still hides what
         // the push hid, however far the mate gives way.

@@ -78,10 +78,30 @@ extension RunZone {
             toward: side,
             pulls: shown.count == 1
         )
-        if step.movesRun || line.weights[index] == 0 {
+        let spent = weightSpent(line.weights[index], by: delta)
+        if step.movesRun || line.weights[index] == 0 || (spent && run.hides) {
             return lengths(step, of: id, on: line, context)
         }
+        // A run that shows everyone holds no length, so a spent
+        // weight stops here and says so: a silent press never ends
+        // a hold.
+        if spent, let at = shown.firstIndex(of: index) {
+            return Press(
+                cue: delta < 0
+                    ? .ownMinimum
+                    : .neighborMinimum(members[shown[at == 0 ? 1 : at - 1]]),
+                refusal: .atMinimum
+            )
+        }
         return weightStep(line, index, shown: shown, by: delta, in: context)
+    }
+
+    /// Whether `weight` sits at the limit a press of `delta` moves
+    /// it toward, where the weight step can move nothing.
+    private func weightSpent(_ weight: Double, by delta: CGFloat) -> Bool {
+        let range = StackLayout.weightRange
+        return delta > 0
+            ? weight >= range.upperBound : weight <= range.lowerBound
     }
 
     /// `heads` and `tails` with this zone's ends set to show
@@ -240,7 +260,7 @@ extension RunZone {
                 members.indices.map {
                     if $0 == index { return target }
                     return line.before.contains($0)
-                        ? line.held[$0] : line.bare[$0]
+                        ? line.floors[$0] : line.bare[$0]
                 },
                 gap: line.gap,
                 span: line.span
@@ -293,6 +313,9 @@ extension RunZone {
             )
         } else {
             press.sizes[id] = share(of: step.target)
+            // A length replaces the weight, which would otherwise
+            // come back whenever the length stops being honoured.
+            if plainWeight(of: id, in: context) != 1 { press.weight = 1 }
             // A window taking the rest holds what it will now draw,
             // or its old length would make the next pass hide it.
             let index = members.firstIndex(of: id)

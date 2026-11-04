@@ -45,6 +45,13 @@ struct RunZonePressPropertyTests {
                 .init(asked: 50, answered: floor)
             ])
         }
+        // Some start from a resized desk, so a press can meet a
+        // weight at either limit.
+        let range = StackLayout.weightRange
+        let weights = [range.lowerBound, 0.5, 3, range.upperBound]
+        for id in ids where random.next(3) == 0 {
+            context.stackWeights[id] = weights[random.next(4)]
+        }
         return (zone, context, floors)
     }
 
@@ -107,8 +114,12 @@ struct RunZonePressPropertyTests {
                 let at = before.lowerBound + random.next(before.count)
                 let id = zone.members[at]
                 context.focused = id
-                let delta = CGFloat(random.next(61) - 30) * 10
-                guard delta != 0 else { continue }
+                // A tap's step or a hold's few points.
+                let size =
+                    random.next(2) == 0
+                    ? CGFloat(random.next(30) + 1) * 10
+                    : CGFloat(random.next(6) + 2)
+                let delta = random.next(2) == 0 ? size : -size
                 let side: RunZone.PushSide =
                     [.start, .end, .both][random.next(3)]
                 let drawn = zone.frames(in: context)[id]?.width ?? 0
@@ -154,8 +165,27 @@ struct RunZonePressPropertyTests {
                 // The pressed window stays shown and moves the right way.
                 #expect(after.contains(at), note)
                 let now = frames[id]?.width ?? 0
-                if delta > 0 { #expect(now >= drawn - 1, note) }
-                if delta < 0 { #expect(now <= drawn + 1, note) }
+                let pulledEveryone =
+                    press.visible == zone.members.indices
+                    && before != zone.members.indices
+                // A weight step can cross the render's whole split,
+                // which redraws every share (#2967). A pull's weight
+                // can only come near what it asks.
+                let lengthPress = !press.sizes.isEmpty || press.movesRun
+                if delta > 0, lengthPress {
+                    #expect(now >= drawn - 1, note)
+                }
+                if delta < 0, lengthPress, !pulledEveryone {
+                    #expect(now <= drawn + 1, note)
+                }
+                // A press that cues nothing moved something: a silent
+                // no-op never ends a hold.
+                if press.cue == nil {
+                    #expect(
+                        abs(now - drawn) > 0.01 || after != before,
+                        note
+                    )
+                }
             }
         }
     }

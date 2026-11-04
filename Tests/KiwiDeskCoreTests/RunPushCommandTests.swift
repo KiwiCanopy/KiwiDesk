@@ -279,6 +279,26 @@ struct RunPushCommandTests {
         )
     }
 
+    @Test("A zone that fits whole cues a press its weight's limit stops")
+    func spentWeightInAWholeZoneCues() throws {
+        // 4000 pt keeps w3 above its floor even at w2's limit, so the
+        // zone lays whole, with no run for a press to step.
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 3,
+            focus: 2,
+            height: 4000
+        )
+        core.state.workspaces.withSpace(id) {
+            $0.stackWeights[w(2)] = StackLayout.weightRange.upperBound
+        }
+        core.retile(animated: false)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        press(core, "y", 5)
+        #expect(refusals.count == 1)
+    }
+
     @Test("A mode change drops the run sizes")
     func modeWriteClearsRunSizes() throws {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)
