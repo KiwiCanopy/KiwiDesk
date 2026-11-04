@@ -4594,9 +4594,10 @@ Stack's zones, or a run whose windows all fit again, plans at its
 floor and share, so the pass that draws and the store never
 disagree, and a press that moves no window keeps the run's
 weight step. A weight at its limit cannot step, so a press there
-takes a length while the run hides a window, and in a run hiding
-none it cues, since a silent press would never end a hold. A
-length replaces the window's weight. A shown mate takes what a shrink gives, by weight or —
+takes a length while the run hides a window. In a run hiding none
+a grow pushes the neighbour, whatever it has left above its minimum,
+since nothing else can grow the window, and a shrink cues. A held
+step there just ends. A length replaces the window's weight. A shown mate takes what a shrink gives, by weight or —
 beside only sized mates, whose leftover the window draws — through
 the nearest mate's length, so a press on a neighbour never undoes
 the push.

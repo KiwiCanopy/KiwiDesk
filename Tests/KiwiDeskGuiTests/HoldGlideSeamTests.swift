@@ -244,9 +244,9 @@ struct HoldGlideSeamTests {
             \(byFile["KiwiCore+ResizeFloating.swift"]?.count ?? 0)
             """
         )
-        // The fifth is #2709's: a glide step stops short of a push,
-        // and a limit ends it with no cue, both in the run's writer.
-        #expect(byFile["KiwiCore+ResizeRun.swift"]?.count == 2)
+        // The fifth is #2709's: a glide step that would push, or that
+        // meets a weight's limit, ends with no cue, in the run's writer.
+        #expect(byFile["KiwiCore+ResizeRun.swift"]?.count == 1)
         #expect(byFile["KiwiCore+MotionCause.swift"]?.count == 1)
         #expect(
             Set(byFile.keys) == [

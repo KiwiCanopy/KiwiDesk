@@ -119,8 +119,38 @@ struct RunZonePressLimitTests {
         #expect(press.weight == 1)
     }
 
-    @Test("A press at the weight's limit in a run hiding nothing says so")
-    func spentWeightCues() throws {
+    @Test("A hold's stop beside a sized mate sets that mate to its floor")
+    func stopBesideASizedMate() throws {
+        let three = RunZone(
+            members: Array(ids[0..<3]),
+            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
+            vertical: false
+        )
+        let sized = context(focus: 2, sizes: [1: 500], tails: [2])
+        let stop = try #require(
+            three.stopShortOfPush(ids[1], toward: .start, in: sized)
+        )
+        #expect(stop.sizes[ids[0]] == .some(0.3))
+        let share = try #require(stop.sizes[ids[1]] ?? nil)
+        #expect(abs(share - 0.69) < 0.001)
+        #expect(!stop.movesRun)
+    }
+
+    @Test("A hold's stop writes nothing in a run hiding nothing")
+    func stopInARunHidingNothing() {
+        let two = RunZone(
+            members: Array(ids[0..<2]),
+            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
+            vertical: false
+        )
+        #expect(
+            two.stopShortOfPush(ids[0], toward: .end, in: context(focus: 1))
+                == nil
+        )
+    }
+
+    @Test("A press at the weight's limit in a run hiding nothing pushes")
+    func spentWeightPushes() throws {
         let two = RunZone(
             members: Array(ids[0..<2]),
             region: CGRect(x: 0, y: 0, width: 1000, height: 600),
@@ -133,7 +163,8 @@ struct RunZonePressLimitTests {
         let press = try #require(
             two.press(ids[0], by: 5, toward: .end, in: whole)
         )
-        #expect(press.cue == .neighborMinimum(ids[1]))
-        #expect(press.refusal == .atWeightLimit)
+        #expect(press.movesRun)
+        #expect(press.visible == 0..<1)
+        #expect(press.cue == nil)
     }
 }

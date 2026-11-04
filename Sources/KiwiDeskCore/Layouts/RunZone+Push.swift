@@ -63,8 +63,9 @@ extension RunZone {
         else { return nil }
         let line = line(in: context)
         guard line.before.contains(index) else { return nil }
+        let stepped = pushingPastSpentWeight(line, index, by: delta)
         guard let run = run(in: context) else {
-            let step = lengthStep(line, index, by: delta, toward: side)
+            let step = lengthStep(line, index, by: stepped, toward: side)
             return step.movesRun
                 ? lengths(step, of: id, on: line, context) : nil
         }
@@ -77,7 +78,7 @@ extension RunZone {
         let step = lengthStep(
             line,
             index,
-            by: delta,
+            by: stepped,
             toward: side,
             pulls: shown.count == 1
         )
@@ -88,18 +89,10 @@ extension RunZone {
         if step.movesRun || line.weights[index] == 0 || (spent && run.hides) {
             return lengths(step, of: id, on: line, context)
         }
-        // A run that shows everyone holds no length, so a spent
-        // weight stops here and says so: a silent press never ends
-        // a hold.
-        if spent, let at = shown.firstIndex(of: index) {
-            return Press(
-                cue: delta < 0
-                    ? .ownMinimum
-                    : .neighborMinimum(
-                        members[shown[StackLayout.nearestMate(of: at)]]
-                    ),
-                refusal: .atWeightLimit
-            )
+        // A run that shows everyone holds no length, so a shrink at
+        // its limit stops here and says so. A grow there pushes.
+        if spent {
+            return Press(cue: .ownMinimum, refusal: .atWeightLimit)
         }
         return weightStep(line, index, shown: shown, by: delta, in: context)
     }

@@ -57,7 +57,10 @@ extension KiwiCore {
             )
         let at = members.firstIndex(of: focused) ?? 0
         if delta < 0, outcome.hitOwnMinimum || spent {
-            refuseShrinkAtMinimum(focused, axis: axis)
+            // A limit above the floor is no minimum: a hold just ends.
+            if outcome.hitOwnMinimum || !endGlideStep() {
+                refuseShrinkAtMinimum(focused, axis: axis)
+            }
         } else if delta > 0,
             let blocked = outcome.blockedByOther
                 ?? (spent ? StackLayout.nearestMate(of: at) : nil)
@@ -72,27 +75,13 @@ extension KiwiCore {
                 ),
                 press.movesRun
             {
-                if stopGlideShortOfPush(
-                    focused,
-                    zone: found.zone,
-                    context: found.context,
-                    toward: side,
-                    space: space
-                ) {
-                    // A zone hiding nothing holds no length, so the
-                    // caller's capped weight is where the hold stops.
-                    return found.zone.run(in: found.context)?.hides == true
-                }
+                // A zone that fits whole holds no length, so the
+                // caller's capped weight is where a hold stops.
+                if endGlideStep() { return false }
                 store(press, of: focused, in: found.zone, space: space)
                 return true
             }
-            // A limit is no neighbour's minimum: a hold just ends.
-            if spent, outcome.blockedByOther == nil,
-                keys.isApplyingGlideStep
-            {
-                keys.endGlide()
-                return false
-            }
+            if endGlideStep() { return false }
             refuseGrowAtNeighborMinimum(
                 focused,
                 anchor: members[blocked],
@@ -189,16 +178,18 @@ extension KiwiCore {
             )
             return .fail("the focused window is alone in its run")
         }
-        if delta > 0,
-            press.movesRun || press.refusal == .atWeightLimit,
-            stopGlideShortOfPush(
+        if delta > 0, press.movesRun, endGlideStep() {
+            if let stop = zone.stopShortOfPush(
                 focused,
-                zone: zone,
-                context: context,
                 toward: side,
-                space: space
-            )
-        {
+                in: context
+            ) {
+                store(stop, of: focused, in: zone, space: space)
+            }
+            return .ok()
+        }
+        // A limit above the floor is no minimum: a hold just ends.
+        if press.refusal == .atWeightLimit, endGlideStep() {
             return .ok()
         }
         switch press.cue {
@@ -227,25 +218,12 @@ extension KiwiCore {
         }
     }
 
-    /// During a glide step, stops the hold where a push would begin
-    /// and writes the window there; true when it did. Only a press
-    /// pushes (#2709), so a hold cannot hide windows faster than
-    /// they can be pulled back; this end is no refusal, so no cue.
-    private func stopGlideShortOfPush(
-        _ focused: WindowID,
-        zone: RunZone,
-        context: LayoutContext,
-        toward side: RunZone.PushSide,
-        space: Space
-    ) -> Bool {
+    /// During a glide step, ends the hold with no cue; true when it
+    /// did. Only a press pushes (#2709), so a hold cannot hide windows
+    /// faster than they can be pulled back, and stopping there is no
+    /// refusal.
+    private func endGlideStep() -> Bool {
         guard keys.isApplyingGlideStep else { return false }
-        if let stop = zone.stopShortOfPush(
-            focused,
-            toward: side,
-            in: context
-        ) {
-            store(stop, of: focused, in: zone, space: space)
-        }
         keys.endGlide()
         return true
     }

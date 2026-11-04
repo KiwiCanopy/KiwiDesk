@@ -227,6 +227,12 @@ editing here:
     once per FRAME instead of once per hold. The suite holds
     every `refuse*` function to the funnel and the funnel as
     the one `borders.onResizeRefusal` caller.
+    **A hold can also end with no refusal, through
+    `KeybindingManager.endGlide` (#2709):** only for a glide step
+    that would push a window into a run, or that meets a weight's
+    limit above the floor, each of which is no limit the window
+    has. Anything else that stops a window routes through the
+    funnel.
     **Since #1258 the funnel also DRAWS, bumps and sounds**, so
     a new refusal adds a CASE and a sentence, never a body: the
     case carries what the drawing decides from (its axis, its

@@ -22,7 +22,7 @@ import Testing
 struct RunPushCommandTests {
     /// `count` windows in one `mode` Space on a 1220 × 820 display
     /// with 10-pt gaps and every bar off, `focus` focused.
-    private func makeSpace(
+    func makeSpace(
         _ mode: String,
         windows count: UInt32,
         focus: UInt32,
@@ -73,7 +73,7 @@ struct RunPushCommandTests {
         return (core, space)
     }
 
-    private func press(
+    func press(
         _ core: KiwiCore,
         _ axis: String,
         _ points: Double
@@ -82,11 +82,11 @@ struct RunPushCommandTests {
         core.retile(animated: false)
     }
 
-    private func hidden(_ core: KiwiCore, _ id: SpaceID) -> Set<WindowID> {
+    func hidden(_ core: KiwiCore, _ id: SpaceID) -> Set<WindowID> {
         Set(core.tiler.runCovers[id]?.behind.keys.map { $0 } ?? [])
     }
 
-    private func w(_ raw: UInt32) -> WindowID { WindowID(raw) }
+    func w(_ raw: UInt32) -> WindowID { WindowID(raw) }
 
     @Test("Stack: a grow pushes the zone mate in, a shrink pulls it back")
     func stackPushAndPull() throws {
@@ -277,48 +277,6 @@ struct RunPushCommandTests {
                 session: core.sessionRatios(of: id)
             ).splitRatioH == ratio
         )
-    }
-
-    @Test("A zone that fits whole cues a press its weight's limit stops")
-    func spentWeightInAWholeZoneCues() throws {
-        // 4000 pt keeps w3 above its floor even at w2's limit, so the
-        // zone lays whole, with no run for a press to step.
-        let (core, id) = makeSpace(
-            "stack",
-            windows: 3,
-            focus: 2,
-            height: 4000
-        )
-        core.state.workspaces.withSpace(id) {
-            $0.stackWeights[w(2)] = StackLayout.weightRange.upperBound
-        }
-        core.retile(animated: false)
-        var refusals: [ResizeRefusal] = []
-        core.borders.onResizeRefusal = { refusals.append($0) }
-        press(core, "y", 5)
-        #expect(refusals.count == 1)
-    }
-
-    @Test("A hold stops short of a push, and the next press pushes")
-    func holdStopsShortOfPush() throws {
-        let (core, id) = makeSpace("stack", windows: 3, focus: 2)
-        var refusals: [ResizeRefusal] = []
-        core.borders.onResizeRefusal = { refusals.append($0) }
-        // A glide step that would push w3.
-        core.keys.holdGlide.isGliding = true
-        core.keys.holdGlide.isApplyingGlideStep = true
-        press(core, "y", 300)
-        core.keys.holdGlide.isApplyingGlideStep = false
-        #expect(hidden(core, id).isEmpty)
-        #expect(!core.keys.isGliding)
-        #expect(refusals.isEmpty)
-        let frames = core.tiler.calculatedFrames(state: core.state)
-        let mate = try #require(frames[w(3)])
-        #expect(abs(mate.height - 300) < 1)
-        // The press after it pushes.
-        press(core, "y", 5)
-        #expect(hidden(core, id) == [w(3)])
-        #expect(refusals.isEmpty)
     }
 
     @Test("A mode change drops the run sizes")

@@ -56,6 +56,28 @@ extension RunZone {
         return press
     }
 
+    /// The step a press takes: as asked, or for a grow at its weight's
+    /// limit in a run hiding nothing, far enough to push. No weight can
+    /// grow the window, so the press is the one way on (#2709), whatever
+    /// the mates have left above their floors.
+    func pushingPastSpentWeight(
+        _ line: Line,
+        _ index: Int,
+        by delta: CGFloat
+    ) -> CGFloat {
+        // A run that hides a window holds a length instead.
+        guard delta > 0, line.before.count == members.count,
+            members.count > 1,
+            StackLayout.weightSpent(line.weights[index], by: Double(delta))
+        else { return delta }
+        let others = line.before.filter { $0 != index }
+        let slack =
+            line.span - line.gap * CGFloat(others.count)
+            - others.reduce(CGFloat(0)) { $0 + line.floors[$1] }
+            - line.drawn[index]
+        return max(delta, slack + 1)
+    }
+
     /// The sized mate a press beside only sized mates moves.
     private func nearestSized(
         _ line: Line,
@@ -94,7 +116,9 @@ extension RunZone {
             press.sizes[members[mate]] = share(of: line.bare[mate])
         }
         for other in others
-        where line.weights[other] > 0 && line.held[other] > line.bare[other] {
+        where line.weights[other] > 0
+            && line.held[other] > line.bare[other]
+        {
             press.sizes[members[other]] = share(of: line.bare[other])
         }
         let rest =
