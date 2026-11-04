@@ -139,7 +139,7 @@ extension RunZone {
         let before: Range<Int>
     }
 
-    private func line(in context: LayoutContext) -> Line {
+    func line(in context: LayoutContext) -> Line {
         let (floors, bare, gap) = floorsAndGap(in: context)
         let frames = frames(in: context)
         let sizes = honouredSizes(bare: bare, gap: gap, in: context)

@@ -6628,6 +6628,12 @@ A glide writes each frame instantly, on every layout and on a
 floating window alike, whatever `animations.set_on_window_resize`
 says and under system **Reduce Motion** (#1082/#1090).
 
+:::unreleased
+A glide along a run stops with the neighbour at its minimum and pushes
+nothing; pressing again pushes one window
+([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
+:::
+
 A floating resize accumulates against what was last
 *commanded* — the in-flight animation's target where one exists
 (#129), and the glide's own record where none does — rather than

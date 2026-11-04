@@ -4563,6 +4563,19 @@ inconsistency. The cue is the overflow
 mark's count alone, since the push is the gesture doing what was
 asked.
 
+*A hold stops short of a push; only a press pushes* (owner,
+2026-11-04, on ui-designer's advice). A glide can hide several
+windows in a second, and beside a shown window a shrink no longer
+brings them back, so a run of steps must not be able to do that. A
+hold ends silently with the neighbour at its minimum, and pressing
+again pushes one window; if still held, that press glides to the
+next neighbour's minimum and stops. So each press moves at most one
+window out. This end is no refusal, so it stands outside the funnel
+that ends a hold on a refusal cue, and no pill says so: the neighbour's
+minimum pill would claim a limit that is not one, and the `+n` mark
+already answers the press. A tap is one step and a drag commits once,
+so neither changes.
+
 *The grown length is stored, not a weight.* A run picks which
 windows show from their floors alone, so a share — relative by
 construction — cannot keep a pushed window out: at the next pass

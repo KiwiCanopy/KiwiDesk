@@ -299,6 +299,28 @@ struct RunPushCommandTests {
         #expect(refusals.count == 1)
     }
 
+    @Test("A hold stops short of a push, and the next press pushes")
+    func holdStopsShortOfPush() throws {
+        let (core, id) = makeSpace("stack", windows: 3, focus: 2)
+        var refusals: [ResizeRefusal] = []
+        core.borders.onResizeRefusal = { refusals.append($0) }
+        // A glide step that would push w3.
+        core.keys.holdGlide.isGliding = true
+        core.keys.holdGlide.isApplyingGlideStep = true
+        press(core, "y", 300)
+        core.keys.holdGlide.isApplyingGlideStep = false
+        #expect(hidden(core, id).isEmpty)
+        #expect(!core.keys.isGliding)
+        #expect(refusals.isEmpty)
+        let frames = core.tiler.calculatedFrames(state: core.state)
+        let mate = try #require(frames[w(3)])
+        #expect(abs(mate.height - 300) < 1)
+        // The press after it pushes.
+        press(core, "y", 5)
+        #expect(hidden(core, id) == [w(3)])
+        #expect(refusals.isEmpty)
+    }
+
     @Test("A mode change drops the run sizes")
     func modeWriteClearsRunSizes() throws {
         let (core, id) = makeSpace("stack", windows: 3, focus: 2)

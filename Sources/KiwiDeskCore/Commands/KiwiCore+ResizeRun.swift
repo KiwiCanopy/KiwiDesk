@@ -72,8 +72,26 @@ extension KiwiCore {
                 ),
                 press.movesRun
             {
+                if stopGlideShortOfPush(
+                    focused,
+                    zone: found.zone,
+                    context: found.context,
+                    toward: side,
+                    space: space
+                ) {
+                    // A zone hiding nothing holds no length, so the
+                    // caller's capped weight is where the hold stops.
+                    return found.zone.run(in: found.context)?.hides == true
+                }
                 store(press, of: focused, in: found.zone, space: space)
                 return true
+            }
+            // A limit is no neighbour's minimum: a hold just ends.
+            if spent, outcome.blockedByOther == nil,
+                keys.isApplyingGlideStep
+            {
+                keys.endGlide()
+                return false
             }
             refuseGrowAtNeighborMinimum(
                 focused,
@@ -171,6 +189,18 @@ extension KiwiCore {
             )
             return .fail("the focused window is alone in its run")
         }
+        if delta > 0,
+            press.movesRun || press.refusal == .atWeightLimit,
+            stopGlideShortOfPush(
+                focused,
+                zone: zone,
+                context: context,
+                toward: side,
+                space: space
+            )
+        {
+            return .ok()
+        }
         switch press.cue {
         case .ownMinimum:
             refuseShrinkAtMinimum(focused, axis: axis)
@@ -195,6 +225,29 @@ extension KiwiCore {
             store(press, of: focused, in: zone, space: space)
             return .ok()
         }
+    }
+
+    /// During a glide step, stops the hold where a push would begin
+    /// and writes the window there; true when it did. Only a press
+    /// pushes (#2709), so a hold cannot hide windows faster than
+    /// they can be pulled back; this end is no refusal, so no cue.
+    private func stopGlideShortOfPush(
+        _ focused: WindowID,
+        zone: RunZone,
+        context: LayoutContext,
+        toward side: RunZone.PushSide,
+        space: Space
+    ) -> Bool {
+        guard keys.isApplyingGlideStep else { return false }
+        if let stop = zone.stopShortOfPush(
+            focused,
+            toward: side,
+            in: context
+        ) {
+            store(stop, of: focused, in: zone, space: space)
+        }
+        keys.endGlide()
+        return true
     }
 
     /// The zone `focused` sits in along `axis`, read from the
