@@ -38,7 +38,10 @@ struct StripScrollerTests {
         #expect(sources.contains { $0.1.contains("ScrollView(.horizontal") })
         for (name, source) in sources {
             for tail in Self.tails(of: "showsIndicators:", in: source) {
-                #expect(tail.hasPrefix("true"), "\(name) hides a scroller")
+                #expect(
+                    tail.hasPrefix("true)") || tail.hasPrefix("true,"),
+                    "\(name) hides a scroller"
+                )
             }
         }
     }
@@ -47,9 +50,17 @@ struct StripScrollerTests {
     /// hide beyond the vertical axis also hides a strip below it.
     @Test("a hiding modifier names only the vertical axis")
     func hidingIsVerticalOnly() throws {
-        let allowed = [".automatic", ".visible", ".hidden,axes:.vertical)"]
+        let allowed = [
+            ".automatic)", ".automatic,", ".visible)", ".visible,",
+            ".hidden,axes:.vertical)",
+        ]
         var sites = 0
         for (name, source) in try Self.settingsSources() {
+            // The modifier's environment value is the same hide.
+            #expect(
+                !source.contains("horizontalScrollIndicatorVisibility"),
+                "\(name) hides a strip through the environment"
+            )
             for tail in Self.tails(of: ".scrollIndicators(", in: source) {
                 sites += 1
                 #expect(
