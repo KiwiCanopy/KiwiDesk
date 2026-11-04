@@ -19,7 +19,7 @@ struct SimpleLookCard: View {
             // so the line's end reads as more to come.
             ViewThatFits(in: .horizontal) {
                 line.frame(maxWidth: .infinity)
-                ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.horizontal) {
                     line.padding(.trailing, Self.fade)
                 }
                 .mask(Self.trailingFade)

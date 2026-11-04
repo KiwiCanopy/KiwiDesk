@@ -61,7 +61,7 @@ struct SpacesPanelPreview: View {
     // MARK: - The chip row
 
     private var chips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        ScrollView(.horizontal) {
             HStack(spacing: 6) {
                 ForEach(spaces, id: \.raw) { candidate in
                     chip(candidate)

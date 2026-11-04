@@ -2167,6 +2167,13 @@ bars' own arithmetic, never a fade or a follow of its own
 stops the item at the viewport's edge, which is where the fade
 draws.
 
+**A Settings strip that scrolls sideways keeps the platform's
+scroller**, which a mouse user drags to reach what the strip cuts
+(owner, 2026-11-04). Never hide it by argument, and a
+`.scrollIndicators(.hidden)` above a strip names the axis it means,
+since the modifier reaches nested scroll views
+(`StripScrollerTests`).
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord takes it from `ChordGlyphs`**, which

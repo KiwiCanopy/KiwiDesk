@@ -43,7 +43,9 @@ struct SettingsDetailPanel: View {
                 .padding(.bottom, 18)
                 .environment(\.panelViewportBottom, viewportBottom)
             }
-            .scrollIndicators(.hidden)
+            // Vertical only: the modifier reaches a nested sideways
+            // strip, which keeps its scroller (#2901).
+            .scrollIndicators(.hidden, axes: .vertical)
             .onGeometryChange(for: CGFloat.self) {
                 $0.frame(in: .global).maxY
             } action: {

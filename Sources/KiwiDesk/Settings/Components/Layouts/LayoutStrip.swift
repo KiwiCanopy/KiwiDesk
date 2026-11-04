@@ -19,7 +19,7 @@ struct LayoutStrip: View {
         VStack(alignment: .leading, spacing: 8) {
             SettingsGroupHeader(chooseTitle)
             ScrollViewReader { proxy in
-                ScrollView(.horizontal, showsIndicators: false) {
+                ScrollView(.horizontal) {
                     row
                 }
                 .coordinateSpace(.named(Self.space))
