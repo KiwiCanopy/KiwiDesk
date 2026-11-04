@@ -210,7 +210,7 @@ extension KiwiCore {
         // so say which (architect review, 2026-08-29).
         tiler.animation.recordGlideCommanded(id, frame: target)
         // A glide step owes nothing: its press armed the judgement.
-        if let shown, lockedRatio == nil {
+        if let shown, aspect == nil {
             oweFloatAspectJudgement(
                 FloatAspectAsk(
                     window: id,

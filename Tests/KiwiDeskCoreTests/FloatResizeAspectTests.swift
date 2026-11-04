@@ -164,6 +164,76 @@ struct FloatResizeAspectTests {
         #expect(outcome.frame.size == CGSize(width: 400, height: 225))
     }
 
+    @Test("The other axis alone never reads as a fit, whatever its ratio")
+    func otherAxisAlone() {
+        // Drift 0.012: inside the tolerance, so only the pressed axis tells.
+        #expect(answer(800, 447) == .other)
+    }
+
+    @Test("A y ask is carried at the ratio, and a zero base reads nothing")
+    func readableEdges() {
+        // 2 pt of height carries 3.56 of width, past the tolerance.
+        #expect(
+            FloatResize.aspectAskIsReadable(
+                base: frame.size,
+                asked: CGSize(width: 800, height: 448),
+                horizontal: false
+            )
+        )
+        #expect(
+            !FloatResize.aspectAskIsReadable(
+                base: CGSize(width: 0, height: 450),
+                asked: CGSize(width: 50, height: 450),
+                horizontal: true
+            )
+        )
+    }
+
+    @Test("A move on y alone is another origin")
+    func sameOriginReadsBothAxes() {
+        #expect(!FloatResize.sameOrigin(frame, frame.offsetBy(dx: 0, dy: 40)))
+        #expect(!FloatResize.sameOrigin(frame, frame.offsetBy(dx: 40, dy: 0)))
+        #expect(FloatResize.sameOrigin(frame, frame.offsetBy(dx: 2, dy: 2)))
+    }
+
+    @Test("A grow never shrinks, and a shrink never grows")
+    func directionHolds() {
+        // Inside the held band: 441 high at the ratio would be 784 wide.
+        let grow = FloatResize.scaled(
+            CGRect(x: 400, y: 200, width: 800, height: 440),
+            horizontal: false,
+            delta: 1,
+            ratio: ratio,
+            minSize: floor,
+            bounds: screen
+        )
+        #expect(grow.frame.width == 800)
+        // A height floor above the window's own never lifts it.
+        let shrink = FloatResize.scaled(
+            CGRect(x: 400, y: 200, width: 700, height: 450),
+            horizontal: true,
+            delta: -50,
+            ratio: ratio,
+            minSize: CGSize(width: 100, height: 500),
+            bounds: screen
+        )
+        #expect(shrink.frame.width == 700)
+    }
+
+    @Test("A width floor stops both axes when it is the higher")
+    func widthFloorStopsBoth() {
+        let outcome = FloatResize.scaled(
+            frame,
+            horizontal: true,
+            delta: -700,
+            ratio: ratio,
+            minSize: CGSize(width: 600, height: 100),
+            bounds: screen
+        )
+        #expect(outcome.frame.width == 600)
+        #expect(abs(outcome.frame.height - 600 / ratio) < 0.01)
+    }
+
     @Test("Rounding keeps the held ratio, and a new video replaces it")
     func heldRatio() {
         #expect(FloatResize.heldRatio(1.778, measured: 1.759) == 1.778)

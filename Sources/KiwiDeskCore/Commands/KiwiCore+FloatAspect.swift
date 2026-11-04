@@ -40,7 +40,7 @@ extension KiwiCore {
             }
             return
         }
-        guard state.floatAspects[ask.window] == nil,
+        guard
             FloatResize.aspectAskIsReadable(
                 base: ask.base.size,
                 asked: ask.target.size,

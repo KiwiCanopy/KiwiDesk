@@ -174,15 +174,21 @@ extension FloatAspectJudgementTests {
         core.deferred.cancel(.floatAspect)
     }
 
-    @Test("A button down during the probe's wait leaves the window alone")
+    @Test("A button down during the probe's wait ends it, leaving the window")
     func buttonDuringProbe() {
         let core = makeCore()
+        answer(core, start.size)
+        press(core, 50)
+        core.judgeFloatAspect(ask("x", 50, to: grow))
+        #expect(core.deferred.isScheduled(.floatAspect))
+        let probe = core.tiler.recentInstantTarget(id)
         core.tiler.motionGate.quiescence.buttonsDown = { true }
         answer(core, CGSize(width: 900, height: 450))
         core.judgeFloatAspectProbe(ask("x", 50, to: grow), live: start)
         #expect(core.state.floatAspects[id] == nil)
-        #expect(core.tiler.recentInstantTarget(id) == nil)
+        #expect(core.tiler.recentInstantTarget(id) == probe)
         #expect(!core.deferred.isScheduled(.floatAspect))
+        #expect(core.state.floatAspectFlight == nil)
     }
 
     @Test("A moving pointer delays the judgement and the probe's answer")
