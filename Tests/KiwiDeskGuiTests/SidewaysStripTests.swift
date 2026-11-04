@@ -24,102 +24,154 @@ struct SidewaysStripTests {
         )
     }
 
-    /// Who may hold a sideways scroll view: the container, and the
-    /// Spaces chips, whose widths vary, so a `StripRun` needs measured
-    /// lengths first.
-    private static let allowed: Set<String> = [
-        "SidewaysStrip.swift", "SpacesPanelPreview.swift",
+    private static func settingsSources() throws -> [(String, String)] {
+        let url = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent(root)
+        return try SourceScan.swiftSources(under: url).map {
+            ($0.lastPathComponent, try squashed($0))
+        }
+    }
+
+    /// Who may hold a scroll view that is not plainly vertical, and
+    /// how many. Reads each `ScrollView(`'s first argument, so an array
+    /// or a variable axis counts; a helper that wraps one is not seen.
+    private static let allowed: [String: (count: Int, why: String)] = [
+        "SidewaysStrip.swift": (1, "the container itself"),
+        "SpacesPanelPreview.swift": (
+            1, "chip widths vary, so a run needs measuring first (#2990)"
+        ),
+        "ScreensPicture.swift": (
+            1, "a two-axis canvas of screens, not a strip of items"
+        ),
     ]
 
     @Test("a sideways scroll view lives in the container")
     func oneScroller() throws {
-        let files = try SourceScan.swiftSources(
-            under: SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent(Self.root)
-        )
-        var holders: Set<String> = []
-        for url in files {
-            let source = try Self.squashed(url)
-            if source.contains("ScrollView(.horizontal") {
-                holders.insert(url.lastPathComponent)
+        var holders: [String: Int] = [:]
+        for (name, source) in try Self.settingsSources() {
+            for tail in source.components(separatedBy: "ScrollView(")
+                .dropFirst()
+            where !tail.hasPrefix(".vertical")
+                && !tail.hasPrefix("showsIndicators:")
+                && !tail.hasPrefix(")")
+            {
+                holders[name, default: 0] += 1
             }
         }
-        #expect(holders == Self.allowed)
+        #expect(holders == Self.allowed.mapValues(\.count))
     }
 
-    @Test("the container measures its scroll and draws the fade")
+    /// Core's arithmetic is reached through the run alone, so a strip
+    /// cannot fade or follow by a reading of its own.
+    @Test("only the run calls Core's fade and follow")
+    func oneArithmetic() throws {
+        var callers: Set<String> = []
+        for (name, source) in try Self.settingsSources()
+        where source.contains("ShelfOverflow.fades(")
+            || source.contains("ShelfOverflow.offset(")
+        {
+            callers.insert(name)
+        }
+        #expect(callers == ["StripRun.swift"])
+    }
+
+    @Test("the container owns its scroll and draws the run's fade")
     func containerWiring() throws {
         let strip = try Self.squashed(
             "Components/Common/SidewaysStrip.swift"
         )
-        #expect(strip.contains(".mask(StripFade(fades:fades))"))
+        #expect(strip.contains("@Stateprivatevarscroll=StripScroll()"))
+        #expect(strip.contains(".mask(StripFade(fades:run.fades(scroll)))"))
         // The offset reads the run's leading edge in the scroller's
         // own space, negated: a dropped sign never fades the lead.
-        #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
-        #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
+        #expect(strip.contains("-$0.frame(in:.named(stripSpace)).minX"))
+        #expect(strip.contains(".coordinateSpace(.named(stripSpace))"))
         #expect(strip.contains("action:{scroll.offset=$0}"))
         #expect(strip.contains("action:{scroll.viewport=$0}"))
+        #expect(strip.contains(".onChange(of:followed){_,itemin"))
+        #expect(
+            strip.contains(
+                "run.followAnchor(index:item.index,scroll:scroll)"
+            )
+        )
+        #expect(strip.contains("proxy.scrollTo(item.id,anchor:anchor)"))
     }
 
-    @Test("the run adds its gaps and answers Core's fades")
+    @Test("the run counts its gaps and end room and answers Core's fades")
     func runArithmetic() {
-        let run = StripRun(lengths: [100, 100, 100], gap: 10, depth: 60)
-        #expect(run.total == 320)
-        let scroll = StripScroll(offset: 0, viewport: 200)
+        let bare = StripRun(lengths: [100, 100, 100], gap: 10, depth: 60)
+        #expect(bare.total == 320)
+        let roomy = StripRun(
+            lengths: [100, 100, 100],
+            gap: 10,
+            depth: 60,
+            endRoom: 4
+        )
+        #expect(roomy.total == 328)
         let core = ShelfOverflow.fades(
-            lengths: run.lengths,
+            lengths: [100, 100, 100],
             gap: 10,
             total: 320,
             offset: 0,
             viewport: 200,
             depth: 60
         )
-        #expect(run.fades(scroll) == core)
+        #expect(bare.fades(StripScroll(offset: 0, viewport: 200)) == core)
         #expect(core.trailing > 0)
     }
 
-    /// The inset is room before the first item, so a follow onto it
-    /// leaves that room in view; a later item starts past its gaps.
-    @Test("the follow anchor counts the inset and the gaps")
+    /// The end room stays in view on a follow to the first item, and a
+    /// later item starts past its gaps.
+    @Test("the follow anchor counts the end room and the gaps")
     func followStart() throws {
-        let run = StripRun(lengths: [104, 100, 100, 100], gap: 10, depth: 60)
+        let run = StripRun(lengths: [100, 100, 100, 100], gap: 10, depth: 60)
         let end = StripScroll(offset: run.total - 200, viewport: 200)
-        let first = try #require(
-            run.followAnchor(index: 0, width: 100, scroll: end)
-        )
+        let first = try #require(run.followAnchor(index: 0, scroll: end))
         #expect(first.x == 0)
-        let inset = StripRun(
-            lengths: [104, 100, 100, 100],
+        let roomy = StripRun(
+            lengths: [100, 100, 100, 100],
             gap: 10,
             depth: 60,
-            inset: 4
+            endRoom: 4
         )
         let shifted = try #require(
-            inset.followAnchor(index: 0, width: 100, scroll: end)
+            roomy.followAnchor(
+                index: 0,
+                scroll: StripScroll(offset: roomy.total - 200, viewport: 200)
+            )
         )
-        #expect(shifted.x > 0)
+        #expect(abs(shifted.x * 100 - 4) < 0.01)
         let rest = StripScroll(offset: 0, viewport: 200)
-        #expect(run.followAnchor(index: 0, width: 100, scroll: rest) == nil)
-        #expect(run.followAnchor(index: 3, width: 100, scroll: rest) != nil)
+        #expect(run.followAnchor(index: 0, scroll: rest) == nil)
+        #expect(run.followAnchor(index: 3, scroll: rest) != nil)
+        #expect(run.followAnchor(index: 9, scroll: rest) == nil)
     }
 
-    @Test("the look line's run holds every tile and the hairline")
+    private static func look(_ name: String) -> ShelfLook {
+        ShelfLook(name: name, style: [:], colors: [:])
+    }
+
+    @Test("the look line's run measures what it draws, in order")
     @MainActor func lookRun() {
         let entries = SimpleLookCard.entries(
-            mine: ["Mine"],
-            bundled: ["Default", "Glass"]
+            mine: [Self.look("Mine")],
+            bundled: [Self.look("Default"), Self.look("Mine")]
         )
-        let browse = SimpleLookCard.browseID
-        #expect(entries == ["Mine", "", "Default", "Glass", browse])
-        let tile = SimpleLookCard.tileWidth
-        let run = SimpleLookCard.run(entries: entries)
         #expect(
-            run.lengths == [tile, SimpleLookCard.hairline, tile, tile, tile]
+            entries.map(\.id) == [
+                "mine:Mine", "hairline", "bundled:Default", "bundled:Mine",
+                "browse",
+            ]
+        )
+        let tile = SimpleLookCard.tileWidth
+        #expect(
+            SimpleLookCard.run(entries: entries).lengths
+                == [tile, SimpleLookCard.hairline, tile, tile, tile]
         )
         // No looks of the user's, no hairline.
         #expect(
-            SimpleLookCard.entries(mine: [], bundled: ["Default"])
-                == ["Default", browse]
+            SimpleLookCard.entries(mine: [], bundled: [Self.look("Default")])
+                .map(\.id) == ["bundled:Default", "browse"]
         )
     }
 
@@ -127,9 +179,11 @@ struct SidewaysStripTests {
     /// static fade this replaced.
     @Test("the look line fades only an end that cuts a tile")
     @MainActor func lookFades() {
-        let names = (0..<8).map { "Look \($0)" }
         let run = SimpleLookCard.run(
-            entries: SimpleLookCard.entries(mine: [], bundled: names)
+            entries: SimpleLookCard.entries(
+                mine: [],
+                bundled: (0..<8).map { Self.look("Look \($0)") }
+            )
         )
         let viewport: CGFloat = 400
         let rest = run.fades(StripScroll(offset: 0, viewport: viewport))
@@ -140,7 +194,8 @@ struct SidewaysStripTests {
         #expect(end.leading > 0 && end.trailing == 0)
     }
 
-    @Test("the look line takes the container and follows every tile")
+    /// The line draws the same list the run measures.
+    @Test("the look line takes the container and draws its entries")
     func lookWiring() throws {
         let card = try Self.squashed(
             "Components/Simple/SimpleLookCard.swift"
@@ -148,14 +203,18 @@ struct SidewaysStripTests {
         #expect(card.contains("ViewThatFits(in:.horizontal)"))
         #expect(
             card.contains(
-                "SidewaysStrip(scroll:$scroll,fades:run.fades(scroll))"
+                "SidewaysStrip(run:Self.run(entries:entries),"
+                    + "followed:followed(in:entries))"
             )
         )
-        #expect(card.contains("follow(id,with:proxy)"))
-        #expect(card.contains("proxy.scrollTo(id,anchor:anchor)"))
-        #expect(card.contains(".id(look.name)"))
-        #expect(card.contains(".focused($focusedTile,equals:Self.browseID)"))
-        #expect(card.contains(".id(Self.browseID)"))
+        #expect(card.contains("ForEach(entries){entryin"))
+        #expect(card.contains("view(for:entry).id(entry.id)"))
+        #expect(card.contains(".focused($focusedTile,equals:look.name)"))
+        #expect(card.contains(".focused($focusedTile,equals:browseFocus)"))
+        #expect(card.contains("StripFollow(id:entries[index].id,index:index)"))
+        // One read of the bundled looks per render (the catalog
+        // decodes from disk), and none of a scroll tick's.
+        #expect(card.components(separatedBy: "bundledLooks").count == 3)
         #expect(!card.contains("LinearGradient"))
     }
 }

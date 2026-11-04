@@ -12,20 +12,46 @@ struct SimpleLookCard: View {
     @ObservedObject var model: SettingsModel
     @FocusState private var focusedTile: String?
     @State private var renameRequest: NameEditRequest?
-    @State private var scroll = StripScroll()
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    /// One thing on the line, in order.
+    enum Entry: Identifiable {
+        case mine(ShelfLook)
+        case hairline
+        case bundled(ShelfLook)
+        case browse
+
+        var id: String {
+            switch self {
+            case .mine(let look): "mine:" + look.name
+            case .hairline: "hairline"
+            case .bundled(let look): "bundled:" + look.name
+            case .browse: "browse"
+            }
+        }
+
+        /// The `focusedTile` value this entry takes, if any.
+        var focusName: String? {
+            switch self {
+            case .mine(let look), .bundled(let look): look.name
+            case .hairline: nil
+            case .browse: browseFocus
+            }
+        }
+    }
 
     var body: some View {
+        let entries = Self.entries(
+            mine: Self.mine(in: model),
+            bundled: model.core.bundledLooks
+        )
         SimpleCard(title: Self.title) {
             ViewThatFits(in: .horizontal) {
-                line.frame(maxWidth: .infinity)
-                ScrollViewReader { proxy in
-                    SidewaysStrip(scroll: $scroll, fades: run.fades(scroll)) {
-                        line
-                    }
-                    .onChange(of: focusedTile) { _, id in
-                        follow(id, with: proxy)
-                    }
+                line(entries).frame(maxWidth: .infinity)
+                SidewaysStrip(
+                    run: Self.run(entries: entries),
+                    followed: followed(in: entries)
+                ) {
+                    line(entries)
                 }
             }
             CrossReferenceRow(
@@ -36,64 +62,60 @@ struct SimpleLookCard: View {
         }
     }
 
-    private var line: some View {
+    private func line(_ entries: [Entry]) -> some View {
         HStack(alignment: .top, spacing: Self.gap) {
-            let mine = Self.mine(in: model)
-            ForEach(mine, id: \.name) { look in
-                tile(look)
-                    .popover(item: renameBinding(look.name)) {
-                        renamePopover($0).settingsPopoverChrome()
-                    }
-                    .rowActions { menu(look) }
+            ForEach(entries) { entry in
+                view(for: entry).id(entry.id)
             }
-            if !mine.isEmpty {
-                // A hairline sets the user's looks apart from the
-                // bundled (#2860).
-                Divider()
-                    .frame(height: PaletteTile<EmptyView>.plateHeight)
-            }
-            ForEach(model.core.bundledLooks, id: \.name) { tile($0) }
-            browseTile
         }
         .padding(.vertical, 2)
     }
 
-    /// The line's entries in order: each look's name, the hairline as
-    /// an empty name while My looks has any, and the Browse tile.
-    static func entries(mine: [String], bundled: [String]) -> [String] {
-        mine + (mine.isEmpty ? [] : [""]) + bundled + [browseID]
+    @ViewBuilder
+    private func view(for entry: Entry) -> some View {
+        switch entry {
+        case .mine(let look):
+            tile(look)
+                .popover(item: renameBinding(look.name)) {
+                    renamePopover($0).settingsPopoverChrome()
+                }
+                .rowActions { menu(look) }
+        case .hairline:
+            // Sets the user's looks apart from the bundled (#2860).
+            Divider()
+                .frame(height: PaletteTile<EmptyView>.plateHeight)
+        case .bundled(let look):
+            tile(look)
+        case .browse:
+            browseTile
+        }
     }
 
-    private var entries: [String] {
-        Self.entries(
-            mine: Self.mine(in: model).map(\.name),
-            bundled: model.core.bundledLooks.map(\.name)
-        )
+    /// My looks, the hairline only while one exists, the bundled
+    /// looks, then Browse (#2943 ruling 2).
+    static func entries(mine: [ShelfLook], bundled: [ShelfLook]) -> [Entry] {
+        mine.map(Entry.mine) + (mine.isEmpty ? [] : [.hairline])
+            + bundled.map(Entry.bundled) + [.browse]
     }
 
-    private var run: StripRun { Self.run(entries: entries) }
-
-    static func run(entries: [String]) -> StripRun {
+    static func run(entries: [Entry]) -> StripRun {
         StripRun(
-            lengths: entries.map { $0.isEmpty ? hairline : tileWidth },
+            lengths: entries.map {
+                if case .hairline = $0 { hairline } else { tileWidth }
+            },
             gap: gap,
             depth: PaletteTile<EmptyView>.plateHeight
         )
     }
 
-    /// Scrolls a Tab-focused tile clear of the fade.
-    private func follow(_ id: String?, with proxy: ScrollViewProxy) {
-        guard let id,
-            let index = entries.firstIndex(of: id),
-            let anchor = run.followAnchor(
-                index: index,
-                width: Self.tileWidth,
-                scroll: scroll
-            )
-        else { return }
-        withAnimation(reduceMotion ? nil : .easeOut(duration: 0.2)) {
-            proxy.scrollTo(id, anchor: anchor)
-        }
+    /// The Tab-focused tile, which the strip scrolls clear of the fade.
+    private func followed(in entries: [Entry]) -> StripFollow<String>? {
+        guard let focusedTile,
+            let index = entries.firstIndex(where: {
+                $0.focusName == focusedTile
+            })
+        else { return nil }
+        return StripFollow(id: entries[index].id, index: index)
     }
 
     /// My looks, newest first: the store appends a new look and
@@ -120,7 +142,6 @@ struct SimpleLookCard: View {
         }
         .frame(width: Self.tileWidth)
         .focused($focusedTile, equals: look.name)
-        .id(look.name)
     }
 
     /// A user look's menu (#2860, #2943): Rename and Delete, through
@@ -172,8 +193,7 @@ struct SimpleLookCard: View {
             NSWorkspace.shared.open(SupportLinks.looks)
         }
         .frame(width: Self.tileWidth)
-        .focused($focusedTile, equals: Self.browseID)
-        .id(Self.browseID)
+        .focused($focusedTile, equals: browseFocus)
     }
 
     /// The Browse tile's label.
@@ -199,6 +219,7 @@ struct SimpleLookCard: View {
     static let gap: CGFloat = 10
     /// The hairline's run: `Divider`'s own width.
     static let hairline: CGFloat = 1
-    /// The Browse tile's focus and scroll id; no look name holds it.
-    static let browseID = "\u{0}browse"
 }
+
+/// The Browse tile's `focusedTile` value; no look name holds it.
+private let browseFocus = "\u{0}browse"

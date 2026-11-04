@@ -12,20 +12,13 @@ struct GestureStrip: View {
     let settings: TilingSettings
     let gestures: ScrollGestureBase
     let onLand: (GestureItem) -> Void
-    @State private var scroll = StripScroll()
 
     /// Between two pictures of a group, and between two groups.
     nonisolated static let gap: CGFloat = 10
     nonisolated static let groupGap: CGFloat = 24
 
     var body: some View {
-        SidewaysStrip(
-            scroll: $scroll,
-            fades: Self.fades(
-                offset: scroll.offset,
-                viewport: scroll.viewport
-            )
-        ) {
+        SidewaysStrip(run: Self.run) {
             HStack(spacing: 0) {
                 ForEach(GestureItem.allCases) { item in
                     GestureStripPlate(
@@ -51,12 +44,9 @@ struct GestureStrip: View {
         return all[index - 1].group == item.group ? gap : groupGap
     }
 
-    /// Core's overflow fades, handed each picture's run with a
-    /// group's extra room on its last picture, since that arithmetic
-    /// takes one gap.
-    nonisolated static func fades(offset: CGFloat, viewport: CGFloat)
-        -> ShelfOverflow.Fades
-    {
+    /// Each picture's run, with a group's extra room on its last
+    /// picture, since Core's arithmetic takes one gap.
+    nonisolated static var run: StripRun {
         let all = GestureItem.allCases
         let lengths = all.indices.map { index -> CGFloat in
             let next = index + 1 < all.count ? all[index + 1] : nil
@@ -67,6 +57,6 @@ struct GestureStrip: View {
             lengths: lengths,
             gap: gap,
             depth: GesturePlate<EmptyView>.size.height
-        ).fades(StripScroll(offset: offset, viewport: viewport))
+        )
     }
 }

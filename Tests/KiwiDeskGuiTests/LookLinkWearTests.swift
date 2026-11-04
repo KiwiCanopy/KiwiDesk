@@ -105,25 +105,18 @@ struct LookLinkWearTests {
         let source = try SourceScan.strippedSource(at: try #require(card))
             .filter { !$0.isWhitespace }
         #expect(source.occurrences(of: ".rowActions{") == 1)
-        #expect(source.contains("ForEach(mine,id:\\.name)"))
-        #expect(source.contains("letmine=Self.mine(in:model)"))
+        #expect(source.contains("mine:Self.mine(in:model)"))
         #expect(source.contains(".rowActions{menu(look)}"))
         // The line's order: My looks, the hairline only while one
         // exists, then the bundled looks (#2943 ruling 2).
-        let order = [
-            "ForEach(mine,id:\\.name)",
-            "if!mine.isEmpty{Divider()",
-            "ForEach(model.core.bundledLooks,id:\\.name){tile($0)}",
-            "browseTile",
-        ].map { source.range(of: $0)?.lowerBound }
-        #expect(!order.contains(nil))
-        let found = order.compactMap { $0 }
-        #expect(found == found.sorted())
         #expect(
             source.contains(
-                "ForEach(model.core.bundledLooks,id:\\.name){tile($0)}"
+                "mine.map(Entry.mine)+(mine.isEmpty?[]:[.hairline])"
+                    + "+bundled.map(Entry.bundled)+[.browse]"
             )
         )
+        #expect(source.contains("bundled:model.core.bundledLooks"))
+        #expect(source.contains("case.bundled(letlook):tile(look)"))
         #expect(source.contains("L(\"looks.delete\""))
         #expect(source.contains("L(\"looks.rename\""))
         // No Export or Share row beside them.
