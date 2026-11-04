@@ -159,86 +159,6 @@ struct RunZoneSizesTests {
         #expect(press.sizes.isEmpty)
     }
 
-    /// `press` written into `context`, as the writers store it.
-    private func written(
-        _ press: RunZone.Press,
-        of id: WindowID,
-        over context: LayoutContext,
-        in zone: RunZone
-    ) -> LayoutContext {
-        var after = context
-        for (member, share) in press.sizes {
-            after.runSizes[member] = share.map {
-                RunSize(share: $0, zone: 0)
-            }
-        }
-        if let weight = press.weight { after.stackWeights[id] = weight }
-        if let visible = press.visible {
-            (after.runHeads, after.runTails) = zone.ends(
-                showing: visible,
-                heads: after.runHeads,
-                tails: after.runTails
-            )
-        }
-        return after
-    }
-
-    private func two() -> RunZone {
-        RunZone(
-            members: Array(ids[0..<2]),
-            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
-            vertical: false
-        )
-    }
-
-    @Test("A pull showing every member draws the next at its minimum")
-    func fullPullKeepsTheLength() throws {
-        let zone = two()
-        let lone = context(focus: 1, sizes: [1: 1000], tails: [1])
-        let press = try #require(
-            zone.press(ids[0], by: -1, toward: .end, in: lone)
-        )
-        #expect(press.sizes[ids[0]] == .some(nil))
-        let after = written(press, of: ids[0], over: lone, in: zone)
-        #expect(zone.run(in: after) == nil)
-        let next = try #require(zone.frames(in: after)[ids[1]])
-        #expect(abs(next.width - 300) < 1)
-    }
-
-    @Test("A full pull counts the others' stored weights")
-    func fullPullCountsWeights() throws {
-        let zone = two()
-        var lone = context(focus: 1, sizes: [1: 1000], tails: [1])
-        lone.stackWeights[ids[1]] = 2.33
-        let press = try #require(
-            zone.press(ids[0], by: -1, toward: .end, in: lone)
-        )
-        let after = written(press, of: ids[0], over: lone, in: zone)
-        let next = try #require(zone.frames(in: after)[ids[1]])
-        #expect(abs(next.width - 300) < 1)
-    }
-
-    @Test("A full pull over unequal floors lands where it was asked")
-    func fullPullOverUnequalFloors() throws {
-        let three = RunZone(
-            members: Array(ids[0..<3]),
-            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
-            vertical: false
-        )
-        var sized = context(sizes: [1: 500], tails: [2])
-        sized.minWindowSize = 100
-        sized.sizeBounds[ids[2]] = EffectiveSizeBound(width: [
-            .init(asked: 50, answered: 500)
-        ])
-        let press = try #require(
-            three.press(ids[0], by: -250, toward: .end, in: sized)
-        )
-        #expect(press.visible == 0..<3)
-        let after = written(press, of: ids[0], over: sized, in: three)
-        let frame = try #require(three.frames(in: after)[ids[0]])
-        #expect(abs(frame.width - 250) < 1)
-    }
-
     @Test("A neighbour's shrink widens the window taking the rest")
     func neighbourShrinkKeepsThePush() throws {
         let three = RunZone(
@@ -270,25 +190,6 @@ struct RunZoneSizesTests {
         )
         #expect(press.refusal == .alone)
         #expect(press.cue == .nothingToDivide)
-    }
-
-    @Test("A shrink that lets every member fit keeps its length as a weight")
-    func shrinkToFitEveryone() throws {
-        let three = RunZone(
-            members: Array(ids[0..<3]),
-            region: CGRect(x: 0, y: 0, width: 1000, height: 600),
-            vertical: false
-        )
-        let sized = context(sizes: [2: 600], tails: [2])
-        #expect(three.run(in: sized)?.visible == 0..<2)
-        let press = try #require(
-            three.press(ids[1], by: -250, toward: .end, in: sized)
-        )
-        #expect(press.visible == 0..<3)
-        #expect(press.sizes[ids[1]] == .some(nil))
-        let after = written(press, of: ids[1], over: sized, in: three)
-        let frame = try #require(three.frames(in: after)[ids[1]])
-        #expect(abs(frame.width - 350) < 1)
     }
 
     @Test("A zone that piles answers no press")

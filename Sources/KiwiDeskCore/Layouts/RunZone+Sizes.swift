@@ -77,17 +77,19 @@ extension RunZone {
         func ratio(_ part: CGFloat, of whole: CGFloat) -> Double? {
             whole > part && part > 0 ? Double(part / (whole - part)) : nil
         }
-        let candidates = [
-            ratio(length, of: available),
-            ratio(length - floor, of: available - bare.reduce(0, +)),
-        ].compactMap { $0.map { $0 * total } }
+        let range = StackLayout.weightRange
+        let candidates =
+            [range.lowerBound, range.upperBound]
+            + [
+                ratio(length, of: available),
+                ratio(length - floor, of: available - bare.reduce(0, +)),
+            ].compactMap { $0.map { $0 * total } }
         func drawn(_ weight: Double) -> CGFloat {
             var trial = plain
             trial.stackWeights[id] = weight
             let frame = frames(in: trial)[id]
             return (vertical ? frame?.height : frame?.width) ?? 0
         }
-        let range = StackLayout.weightRange
         return
             candidates
             .map { min(max($0, range.lowerBound), range.upperBound) }

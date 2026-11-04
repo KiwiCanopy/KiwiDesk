@@ -22,9 +22,9 @@ extension RunZone {
         else { return Press(cue: .nothingToDivide, refusal: .alone) }
         let member = members[mate]
         var press = Press()
-        // While it draws the rest the window keeps no length; a push
-        // on past the mate's room gives it one below.
-        press.sizes[members[index]] = .some(nil)
+        // The window holds what it now draws as well, so the shown
+        // lengths keep filling the zone and the run still hides what
+        // the push hid, however far the mate gives way.
         if delta < 0 {
             let give = min(-delta, line.drawn[index] - line.bare[index])
             guard give > Self.unchangedTolerance else {
@@ -34,11 +34,13 @@ extension RunZone {
                 press.cue = .ownMinimum
             }
             press.sizes[member] = share(of: line.drawn[mate] + give)
+            press.sizes[members[index]] = share(of: line.drawn[index] - give)
             return press
         }
         let room = line.drawn[mate] - line.bare[mate]
         guard delta > room else {
             press.sizes[member] = share(of: line.drawn[mate] - delta)
+            press.sizes[members[index]] = share(of: line.drawn[index] + delta)
             return press
         }
         var given = line

@@ -7,7 +7,8 @@ import Testing
 /// (#2709): a grow past what the shown neighbours can give pushes
 /// the one on the moved side into the run, a shrink pulls the
 /// waiting one past the moved edge back while it fits. Pure, over
-/// one horizontal zone of four 300-pt floors in 1000 pt, no gaps;
+/// one horizontal zone of four 300-pt floors in 1000 pt, with
+/// `Gaps()`' inner gap;
 /// a run size is a share of that span.
 @Suite("Run zone push (#2709)")
 struct RunZonePushTests {

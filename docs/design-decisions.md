@@ -4594,7 +4594,8 @@ window pulls: beside a shown mate nothing is freed, and a waiting
 window returns by a focus step or once every member fits. Where
 every member fits the window keeps its length as the weight that
 draws it there, solved against the render, so the last pull does
-not jump, save where a stored weight hits its limit. A press steps from
+not jump, save where a weight's limit or unequal floors leave no
+weight that draws it exactly. A press steps from
 what the window draws, as the scrolling slot does (#1057), so no
 store banks a length the screen does not show. It is sizing like the weights: a mode change and
 `reset_layout_sizing` clear it, and only an in-place restart

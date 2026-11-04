@@ -133,8 +133,7 @@ struct RunPushMateTests {
         // w4 draws what w3's length leaves: the press moves that
         // length, and w2 stays in the run.
         #expect(abs(after.height - before.height - 50) < 1)
-        #expect(core.state.workspaces[id]?.runSizes.keys.first == w(3))
-        #expect(core.state.workspaces[id]?.runSizes.count == 1)
+        #expect(core.state.workspaces[id]?.runSizes[w(3)] != nil)
         #expect(hidden(core, id) == [w(2)])
     }
 
@@ -158,6 +157,33 @@ struct RunPushMateTests {
             core.tiler.calculatedFrames(state: core.state)[w(4)]
         )
         #expect(abs(floor.height - 300) < 1)
+    }
+
+    @Test("Stack: a grow down to where all would fit keeps the push")
+    func growBesideAMateKeepsThePush() throws {
+        // w2 holds 500, w3 draws the rest, w4 waits. The press takes
+        // w2 to 360, where all three would fit at w3's minimum.
+        let (core, id) = makeSpace(
+            "stack",
+            windows: 4,
+            focus: 3,
+            height: 1020
+        )
+        core.state.workspaces.withSpace(id) {
+            $0.runSizes = [self.w(2): RunSize(share: 0.5, zone: 1)]
+            $0.runTails = [self.w(3)]
+        }
+        core.retile(animated: false)
+        #expect(hidden(core, id) == [w(4)])
+        let before = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w(3)]
+        )
+        press(core, "y", 140)
+        let after = try #require(
+            core.tiler.calculatedFrames(state: core.state)[w(3)]
+        )
+        #expect(hidden(core, id) == [w(4)])
+        #expect(abs(after.height - before.height - 140) < 1)
     }
 
     @Test("Stack: a grow past the sized mate's room pushes on")
@@ -202,8 +228,9 @@ struct RunPushMateTests {
         press(core, "y", -30)
         #expect(abs(height(4) - rest + 30) < 1)
         #expect(hidden(core, id) == [w(2)])
-        // w4 keeps no length of its own while it takes the rest.
-        #expect(core.state.workspaces[id]?.runSizes[w(4)] == nil)
+        // w4 holds what it draws, so a later scroll does not move it.
+        let share = core.state.workspaces[id]?.runSizes[w(4)]?.share ?? 0
+        #expect(abs(share * 1000 - height(4)) < 1)
     }
 
     @Test("A window moved to Stack's master zone drops its length")
