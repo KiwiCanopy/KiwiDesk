@@ -43,19 +43,17 @@ public final class KiwiCore {
     /// What `keys` holds, by the apply that installed it (#2482).
     var installedKeybindings: InstalledKeybindings?
     var bundledLooksMemo = BundledLooksMemo()  // #2993
+
     /// The global window-rule bases (`GlobalRuleBase`).
     var globalRuleBase = GlobalRuleBase()
     /// Holds AX reconciles while `loadConfig` tries candidate rule
     /// states; one pass runs once the final profile wins.
     var defersWindowRuleReconcile = false
 
-    /// Boot's half of the same suppression (#836). **Raised in
-    /// `start()`, lowered where the startup sweep is armed** —
-    /// one pair, because the skip is valid exactly while nothing
-    /// has yet armed the pass that heals it. Every exit from
-    /// `start()` lowers it, `stop()` included. What it buys, what
-    /// it costs, and why it is not keyed on `BootPhase` are
-    /// argued at its one reader, `mayReconcileWindowRulesNow`.
+    /// Boot's half of the same suppression (#836): raised in
+    /// `start()`, lowered where the startup sweep is armed or on any
+    /// exit from `start()`. The argument is at its one reader,
+    /// `mayReconcileWindowRulesNow`.
     var defersWindowRuleReconcileToSweep = false
     /// A bound Desktop switch's apply; its sweep follows (#2347).
     var defersRuleSweepToSwitchPass = false

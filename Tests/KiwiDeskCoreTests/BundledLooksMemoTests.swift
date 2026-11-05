@@ -4,7 +4,8 @@ import Testing
 @testable import KiwiDeskCore
 
 /// The bundled looks are built once per set of screen sizes (#2993),
-/// and a change of screens still reaches Glass (#1739).
+/// and a change of screens still reaches Glass (#1739). Main-actor
+/// spend: two test cores, no window.
 @MainActor
 @Suite("Bundled looks memo")
 struct BundledLooksMemoTests {
@@ -31,9 +32,8 @@ struct BundledLooksMemoTests {
     @Test("repeated reads build once")
     func readsBuildOnce() {
         let (core, _) = core(on: Self.desktop)
-        let first = core.bundledLooks
-        #expect(!first.isEmpty)
-        #expect(core.bundledLooks == first)
+        #expect(!core.bundledLooks.isEmpty)
+        _ = core.bundledLooks
         #expect(core.bundledLooksMemo.builds == 1)
     }
 
@@ -65,5 +65,9 @@ struct BundledLooksMemoTests {
         #expect(one.map(\.name) == ["1"])
         #expect(two.map(\.name) == ["2"])
         #expect(memo.builds == 2)
+        // The main screen comes first, and it decides the compact
+        // shelf (#1952), so an order is a key of its own.
+        _ = memo.looks(for: [Self.desktop, Self.laptop], build: build)
+        #expect(memo.builds == 3)
     }
 }

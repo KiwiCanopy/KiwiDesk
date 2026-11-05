@@ -2,9 +2,10 @@ import CoreGraphics
 
 /// The bundled looks last built, kept while the screens they were
 /// sized for stay (#2993): a build reads two catalogs from disk, and
-/// nothing else moves its answer.
+/// nothing else moves its answer (`LookCatalogSeamTests` ▸
+/// `catalogReadsNoHost`). A failed read stays until the screens change.
 struct BundledLooksMemo {
-    /// How many times `build` ran.
+    /// How many times `build` ran, for tests.
     private(set) var builds = 0
     private var last: (sizes: [CGSize], looks: [ShelfLook])?
 

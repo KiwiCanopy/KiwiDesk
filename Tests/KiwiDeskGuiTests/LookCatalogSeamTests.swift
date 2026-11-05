@@ -68,6 +68,38 @@ struct LookCatalogSeamTests {
         )
     }
 
+    /// `KiwiCore.bundledLooks` keeps the answer per screen sizes
+    /// (#2993), so nothing under the catalog may read anything else
+    /// that moves. Trade: the file list is hand-kept and the needles
+    /// are spellings, so a new file or a read through a helper is
+    /// review's.
+    @Test("the catalog reads no host state")
+    func catalogReadsNoHost() throws {
+        let stems: Set<String> = [
+            "LookCatalog", "PaletteCatalog", "StarterSetup",
+            "StarterTuning", "StarterAllocation",
+            "StarterAllocation+Ultrawide", "ScreenClass", "LookKeys",
+            "ColorPaletteKeys",
+        ]
+        let files = try sources().filter {
+            stems.contains($0.deletingPathExtension().lastPathComponent)
+        }
+        #expect(files.count == stems.count)
+        let needles = [
+            "NSScreen", "ScreenList", "Locale", "UserDefaults",
+            "FileManager", "ProcessInfo", "NSApp", "Date(", " L(",
+        ]
+        for file in files {
+            let text = try SourceScan.strippedSource(at: file)
+            for needle in needles {
+                #expect(
+                    !text.contains(needle),
+                    "\(file.lastPathComponent) reads \(needle)"
+                )
+            }
+        }
+    }
+
     /// Glass extracts the styling alone: every authored look merges
     /// onto it, so motion here would reset a user's animations on
     /// every bundled pick (#2176).
