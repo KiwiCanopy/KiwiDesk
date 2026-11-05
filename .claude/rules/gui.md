@@ -2190,8 +2190,9 @@ does not work).
 **A Settings strip's content clears an overlay scroller through the
 one `StripScrollerRoom`, inside the `ScrollView`**, handed that
 strip's content width and viewport (`StripScrollerTests` ▸
-`clearance`, `clearanceHome`); a bottom padding of its own beside it
-is review's. As measured on macOS 27, 2026-11-05, an overlay scroller
+`clearance`, `clearanceHome`), never a bottom padding of its own
+beside it, which review holds since those needles do not see one. As
+measured on macOS 27, 2026-11-05, an overlay scroller
 draws over the content's bottom edge, a legacy one grows the scroll
 view by its own height, and a strip that fits hides either. A macOS
 release re-measures `overlayHeight`.

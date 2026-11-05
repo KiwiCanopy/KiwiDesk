@@ -95,8 +95,10 @@ struct StripScrollerTests {
 
     /// The modifier is the one reader of the style, and each strip
     /// takes it inside its scroll view, its widths read off the content
-    /// and the scroll view. Matches squashed source, so a strip's own
-    /// bottom padding beside the modifier is not seen.
+    /// and the scroll view. The needles are contiguous so the modifier
+    /// stays inside the scroll view: a harmless modifier inside a span
+    /// reds, and a bottom padding on what a host hands the strip is not
+    /// seen.
     @Test("the clearance has one home and both strips take it")
     func clearanceHome() throws {
         let sources = try Self.settingsSources()
@@ -132,6 +134,11 @@ struct StripScrollerTests {
                 "ScrollView(.horizontal){content"
                     + ".modifier(StripScrollerRoom("
                     + "contentWidth:run.total,viewport:scroll.viewport))"
+            ) == true
+        )
+        #expect(
+            takers["SpacesPanelPreview.swift"]?.contains(
+                "SpacePreviewChipRow{HStack(spacing:6)"
             ) == true
         )
         // One needle, so the content's width and the scroll view's stay
