@@ -21,7 +21,13 @@
    ========================================================= */
 :root {
   /* ---- Darks ---- */
-  --kiwi-seed: #0d1512; /* deep brand bg (darkest surface) */
+  --kiwi-seed: #000000; /* dark page ground */
+  --kiwi-surface: #08120c; /* dark cards, bands, sidebar */
+  --kiwi-sunken: #0f1b13; /* dark code wells, card and hero top */
+  --kiwi-raised: #132318; /* dark inline code */
+  --kiwi-mist: #16271a; /* dark accent tint */
+  --kiwi-line-subtle: #1a2c20; /* dark inner rule */
+  --kiwi-line: #2b4534; /* dark outline */
   --kiwi-ink: #12251a; /* forest ink, green-forward, no teal */
 
   /* ---- Chromatics ---- */

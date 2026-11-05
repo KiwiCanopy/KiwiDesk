@@ -21,7 +21,16 @@
 // component owns the theme and nothing else.
 ---
 
-<meta name="theme-color" content="#101d0b" />
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: light)"
+  content="#101d0b"
+/>
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: dark)"
+  content="black"
+/>
 <script is:inline>
   (function () {
     var root = document.documentElement;
