@@ -102,7 +102,12 @@ struct SpacesPanelPreview: View {
                 scale: .panel
             )
             .padding(10)
-            .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
+            .deskPlate(
+                settings,
+                in: RoundedRectangle(
+                    cornerRadius: SettingsTheme.panelPlateRadius
+                )
+            )
         } else {
             Text(
                 L(

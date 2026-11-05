@@ -21,7 +21,9 @@ struct LayoutPreviewPanel: View {
                 .padding(10)
                 .deskPlate(
                     model.config.settings,
-                    in: RoundedRectangle(cornerRadius: 12)
+                    in: RoundedRectangle(
+                        cornerRadius: SettingsTheme.panelPlateRadius
+                    )
                 )
                 countRow
             }

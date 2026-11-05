@@ -34,6 +34,7 @@ struct SettingsThemeMetricTests {
         "cardHeightCompact": "HomeCard.swift",
         "plateHeight": "HomeCardPlate.swift",
         "sectionRadius": "SettingsSection.swift",
+        "panelPlateRadius": "BarsPanelPreview.swift",
         "disclosureRadius": "SettingsDisclosure.swift",
         "chipRadius": "Chips.swift",
         "screenCardStroke": "ScreenCard.swift",
@@ -147,7 +148,7 @@ struct SettingsThemeMetricTests {
     /// both together. That is the strong claim this net defers,
     /// and deferring it to "the area will write one" is how a
     /// third area lists a stroke pair here, points at its view,
-    /// and writes no chrome suite at all. The four radii carry no
+    /// and writes no chrome suite at all. The radii carry no
     /// state suffix and correctly escape.
     @Test("a state-suffixed metric pair is guarded together")
     func metricPairsAreGuardedTogether() throws {

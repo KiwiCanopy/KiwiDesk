@@ -1800,6 +1800,9 @@ Every surface, border and ink in the Settings tree comes from
   not move it — so its ink is the resolved paint's, never an
   ambient grey, and Advanced's Layouts sketch files sit in the
   stems for it.
+- **A warning takes `WarningBox`, never a `warningSurface` fill of
+  its own** (#2982, `WarningBoxSeamTests` ▸ `oneFill`,
+  `WarningBoxSeamTests` ▸ `sitesTakeTheBox`).
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from

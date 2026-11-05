@@ -41,7 +41,12 @@ struct PaletteScenePanel: View {
         .padding(BarsPanelPreview.framePad)
         .frame(height: BarsPanelPreview.shortFrame)
         .frame(maxWidth: .infinity)
-        .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
+        .deskPlate(
+            settings,
+            in: RoundedRectangle(
+                cornerRadius: SettingsTheme.panelPlateRadius
+            )
+        )
         .accessibilityHidden(true)
         .allowsHitTesting(false)
     }
