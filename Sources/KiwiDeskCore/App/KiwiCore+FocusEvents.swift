@@ -291,33 +291,23 @@ extension KiwiCore {
         // same rule (#293): layout-independent, so it can't
         // ride the focus-driven retile alone.
         updateBars()
-        // Warp only for focus changes KiwiDesk did not
-        // make itself (cmd+tab, app-driven focus): a
-        // self-raise already warped at intent time in
-        // `focusWindow`, and an echo that moved no focus
-        // (same-window re-focus) is not a change (#186).
-        // A report with CLICK provenance is mouse-made focus
-        // and needs no warp — the pointer is exactly where
-        // the user put it. The fire-time inside check cannot
-        // cover this: in a focus-driven layout the click PANS
-        // the row, so the clicked window's settled slot slides
-        // out from under the cursor and the "warp" yanks the
-        // pointer after it (#689 device QA).
+        // Warp only for focus changes KiwiDesk did not make itself
+        // (cmd+tab, app-driven focus): a self-raise warped at intent
+        // time, and an echo that moved no focus is no change (#186).
+        // A click needs none: in a focus-driven layout it PANS the
+        // row, so the "warp" would yank the pointer after the slot
+        // sliding out from under it (#689 device QA).
         if !selfEcho, effects.focusBefore != id,
             !recentClickReached(id, now: wallClock())
         {
             warpMouseToFocused(id)
         }
-        // cmd+tab (or a click) can reach a window hidden
-        // in an inactive Space; pull that space
-        // forward instead of typing into a stashed window.
-        // Deferred: app activation transiently re-reports
-        // the app's OLD focused window right before a new
-        // window opens — only follow if focus settles.
-        // A STICKY window is exempt (#414): it is visible
-        // and legitimately focusable on every space, so
-        // following its home would yank the user back to
-        // it on every interaction — the fly-back bug.
+        // cmd+tab or a click can reach a window hidden in an inactive
+        // Space; pull that Space forward. Deferred: app activation
+        // re-reports the app's OLD focused window right before a new
+        // one opens, so follow only if focus settles. A STICKY window
+        // is exempt (#414): focusable on every Space, following its
+        // home would yank the user back on every interaction.
         if let space = state.workspaces.space(of: id),
             space != state.workspaces.activeSpace,
             state.windows[id]?.isSticky != true
@@ -328,6 +318,7 @@ extension KiwiCore {
             // exempt above): one idempotent no-op pass, by
             // design. Our own raise's echo finishes that
             // command's pan, so it moves as user motion (#804).
+            let offsetBefore = activeSpace?.scrollRest?.offset
             let pass = {
                 self.retileWithScrollDuration(
                     sizing: endedMaximize ? .allSpringSized : .mayInstantSize,
@@ -335,15 +326,24 @@ extension KiwiCore {
                 )
             }
             if selfEcho { withUserMotion(pass) } else { pass() }
+            armReportedScrollMove(
+                to: id,
+                from: effects.focusBefore,
+                offsetBefore: offsetBefore,
+                now: now
+            )
         } else if filedHere {
             retile(animated: true)
         } else if let ended {
             retileEndingMaximize(ended)
         }
-        // Keep floats above the just-focused tiled window
-        // (#418). Skipped on a self-echo so the raise's own
-        // focus handoff cannot re-trigger it.
-        if !selfEcho {
+        // Keep floats above the just-focused tiled window (#418). Not
+        // on a self-echo, whose handoff would re-trigger it, save a
+        // click moving the focus onto a stamped window (#2985).
+        if !selfEcho
+            || (effects.focusBefore != id
+                && recentClickReached(id, now: now))
+        {
             raiseFloatsAbove(afterFocusing: id)
         }
     }

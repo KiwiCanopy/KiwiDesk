@@ -1110,6 +1110,10 @@ editing here:
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
   call, which no unit test reaches, is
   `ZOrderSequenceWiringTests`' needle).
+- **A focused float schedules no float-tier raise of its own, so a
+  raise owed ahead of it and any mode's restore ending under it pay
+  through `raiseFloatsForFocusedFloat` (#2985,
+  `FocusedFloatRaiseTests`)**, and a Space with no tile owes none.
 - **A commanded focus onto another window owes the float-tier
   raise at the command (#2284)** — its report comes back as our
   own echo, which the focus handler's `!selfEcho` arm skips, so a
@@ -1144,7 +1148,9 @@ editing here:
   never a filter beside it: an undrawn float takes no raise and
   is no focus recipient (#2850, `EmptySwitchYieldVisibilityTests`).
 - A mutation that can change **which windows overlap** — a
-  reorder, a swap, a focus move that crosses more than one slot —
+  reorder, a swap, a focus move that crosses more than one slot
+  or, in Scrolling, moves the row and shows another window (#2985,
+  below) —
   **arms the matching z-order restore after its own retile**
   (`scheduleScrollingZOrderRestoreIfOverflowing`,
   `scheduleTrackZOrderRestoreIfOverflowing`, or
@@ -1225,6 +1231,35 @@ editing here:
   double-target correction clicks into — the monocle arm
   shipped that way twice (#689). `ZOrderMonocleArmTests` and
   `ZOrderFocusJumpTests` pin one arm each.
+- **A scrolling restore raises only what shows, above what does
+  not (#2985)**, through the one `KiwiCore.scrollingRestorePlan`,
+  judged on the slots: a whole row's sequence outran the drain's
+  budget and left the shown windows, raised last, unverified. A
+  window off the area or inside one window stacked over it is
+  buried, its order cannot show, and it is the plan's floor, the
+  previous focus too when it is buried; a new reason to raise a
+  window joins the plan rather than a filter beside it. An empty plan lifts the
+  anchor over the floor, as Monocle's restore does, so the reliable
+  raise and the closing re-assert still run.
+  **The buried order is no longer kept, so a door that moves the
+  focus and the row owes a restore where it would not have before,
+  through `scrollFocusMoveOwesRestore`** — the row moved, by
+  `Space.scrollRest`'s offset read ahead of the pass, and
+  `scrollingRowShowsOthers` answers, whose area share is its own and
+  not the App Bar's strip test — or, on a focused close, through
+  `scrollingRowShowsOthers` alone, with the float raise the close
+  owes. **A door that keeps the focus arms nothing**: a restore ends
+  in a focus re-assert, and under a tiled focus owes no float raise
+  (#936, #418), so it states its residue in
+  `docs/accepted-limitations.md`. A window arriving with the focus
+  states it too: its fold moved the focus, so the report asks of no
+  move.
+  **The deferred focus raise pays ahead of the restore in
+  `tiledPlaneCameToRest`, and the drain waits on it through
+  `ZOrderDrain.front`**, since a quiet raise cannot beat the old
+  key window (`ZOrderScrollingRestoreTests`,
+  `ZOrderScrollingRestoreWiringTests`,
+  `FloatRaiseLandingWiringTests` ▸ `debtIsPaidAtRest`).
 - **An echo ledger is age-bounded and NEVER consumed by its
   echo** — `zOrderRaiseEchoes` (#689) and `selfRaiseStamps`
   (#887) alike. A lazy app reports a raised window's focus
