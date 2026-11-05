@@ -34,6 +34,12 @@ final class FixedSizeDoor {
 }
 
 extension FrameApplier {
+    func clearInstantTarget(_ id: WindowID, unlessSized size: CGSize) {
+        if let sent = instantTarget(id), sent.size != size {
+            clearInstantTarget(id)
+        }
+    }
+
     func sizeLead(_ id: WindowID, run: SizeLedRun) -> SizeLedWrite.Lead {
         let door = fixedSizeDoor
         door.serial += 1
@@ -70,8 +76,6 @@ extension TilingEngine {
             animation.cancel(window: id)
         }
         applier.forgetResend(id, unlessSized: anchor.size)
-        if let sent = applier.instantTarget(id), sent.size != anchor.size {
-            applier.clearInstantTarget(id)
-        }
+        applier.clearInstantTarget(id, unlessSized: anchor.size)
     }
 }
