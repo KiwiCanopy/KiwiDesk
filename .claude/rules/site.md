@@ -407,6 +407,26 @@ after the document. The voices committed before #2369 remain in
 git history; rewriting it is the owner's call for a voice that
 withdraws.
 
+## An inline script runs by hash (#3021)
+
+`site/csp-inline-scripts.mjs` gives every built page a `<meta>`
+`script-src` listing its inline scripts by hash, and
+`scripts/check-site-tokens.py` ▸ `check_inline_scripts_hashed` holds
+the built pages to it. `_headers` keeps `'unsafe-inline'` because it is one policy
+for every page; browsers enforce both.
+
+- **Never add an `on*` attribute.** A hash cannot allow one, so it dies
+  with only a console error. Use `addEventListener`.
+- **Never set `'unsafe-inline'` on the page policy to get a script
+  working.** A script the build emits is hashed already; one that fails
+  was added after the build or at runtime, and that is the thing to fix.
+- **Never turn on `security.csp` or `ClientRouter` without redoing this.**
+  `security.csp` skips `is:inline` scripts and puts hashes in `style-src`,
+  which makes browsers ignore the `'unsafe-inline'` that Mermaid's injected
+  `<style>` needs (astro 7.4, 2026-11-05). `ClientRouter` runs the next
+  page's scripts under the first page's policy and blocks them, and no
+  check on built pages can see that.
+
 ## The 404 is a user page, so withdraw Starlight's (#635)
 
 `src/pages/404.astro` and `disable404Route: true` in

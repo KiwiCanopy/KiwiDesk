@@ -5,6 +5,7 @@ import sitemap from "@astrojs/sitemap";
 import icon from "astro-icon";
 import mermaid from "astro-mermaid";
 import { unified } from "@astrojs/markdown-remark";
+import { cspInlineScripts } from "./csp-inline-scripts.mjs";
 import { remarkDocsLinks } from "./remark-docs-links.mjs";
 import { remarkUnreleased } from "./remark-unreleased.mjs";
 
@@ -199,5 +200,6 @@ export default defineConfig({
         },
       ],
     }),
+    cspInlineScripts(),
   ],
 });
