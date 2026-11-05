@@ -131,12 +131,8 @@ extension KiwiCore {
     /// the focus anchor (`focusedWindowID`) so a stale target
     /// no-ops and a tiled-sticky traveler still counts (#1727).
     func raiseFloatsAbove(afterFocusing id: WindowID) {
-        // Focusing a float returns without rescheduling, so a
-        // `.floatRaise` still pending from a tile focus <50ms earlier
-        // fires and no-ops (its id is stale) — a second float can then
-        // sit under a tile until the next tiled focus re-raises the
-        // layer. Self-healing and rare (sub-50ms tile→float); the
-        // z-order thrash the coalescing removes is the worse failure.
+        // Focusing a float returns without rescheduling: a `.floatRaise`
+        // still pending from a tile focus pays for the float instead.
         guard
             !isEffectiveFloatOnActiveSpace(id),
             floatLayerTargets().contains(where: floatIsDrawn)
@@ -145,8 +141,11 @@ extension KiwiCore {
         floatRaiseDebt.owed = nil
         deferred.schedule(.floatRaise, after: .milliseconds(50)) {
             [weak self] in
-            guard let self, id == self.focusedWindowID
-            else { return }
+            guard let self else { return }
+            guard id == self.focusedWindowID else {
+                self.raiseFloatsForFocusedFloat()
+                return
+            }
             if self.tiledPlaneMoving {
                 self.floatRaiseDebt.owed = id
                 return

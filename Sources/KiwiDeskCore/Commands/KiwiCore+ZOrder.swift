@@ -308,6 +308,11 @@ extension KiwiCore {
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(focused, warp: false)
+                // The raises lifted tiles over the other floats, and a
+                // re-assert owes no raise; the rest above pays this.
+                if self.isEffectiveFloatOnActiveSpace(focused) {
+                    self.floatRaiseDebt.owed = focused
+                }
             }
         }
     }

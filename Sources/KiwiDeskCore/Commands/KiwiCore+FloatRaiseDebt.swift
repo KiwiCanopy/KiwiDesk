@@ -38,12 +38,30 @@ extension KiwiCore {
 
     /// Pays the owed raise; the raise re-asks the predicate, so a
     /// restore this settle just started owes it again, to its own
-    /// completion. A debt for a focus that has moved on is dropped:
-    /// paying it would replace the newer focus's scheduled raise.
+    /// completion. A debt for a focus that has moved on to a tile is
+    /// dropped: paying it would replace that focus's scheduled raise.
     func runPendingFloatRaise() {
         guard let id = floatRaiseDebt.owed else { return }
         floatRaiseDebt.owed = nil
+        if raiseFloatsForFocusedFloat() { return }
         guard id == focusedWindowID else { return }
         raiseFloatsAbove(afterFocusing: id)
+    }
+
+    /// The raise a focused float's own focus never schedules, since
+    /// it needs none for itself: tiles lifted ahead of it still stand
+    /// over the other floats (#2985). True when the focus is a float,
+    /// which takes the raise now or owes it to the plane's rest.
+    @discardableResult
+    func raiseFloatsForFocusedFloat() -> Bool {
+        guard let focus = focusedWindowID,
+            isEffectiveFloatOnActiveSpace(focus)
+        else { return false }
+        if tiledPlaneMoving {
+            floatRaiseDebt.owed = focus
+        } else {
+            raiseFloatsAndSticky(thenFocus: focus)
+        }
+        return true
     }
 }

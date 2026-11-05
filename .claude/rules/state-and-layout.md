@@ -1246,7 +1246,10 @@ editing here:
   `scrollingRowShowsOthers` alone, with the float raise the close
   owes. **A door that keeps the focus arms nothing**: a restore ends
   in a focus re-assert and owes no float raise (#936, #418), so it
-  states its residue in `docs/accepted-limitations.md`.
+  states its residue in `docs/accepted-limitations.md`. A focused
+  float schedules no raise of its own, so a raise owed ahead of it and
+  a restore ending under it pay through `raiseFloatsForFocusedFloat`
+  (`FocusedFloatRaiseTests`).
   **The deferred focus raise pays ahead of the restore in
   `tiledPlaneCameToRest`, and the drain waits on it through
   `ZOrderDrain.front`**, since a quiet raise cannot beat the old

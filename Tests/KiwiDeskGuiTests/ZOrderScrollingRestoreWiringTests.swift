@@ -106,6 +106,28 @@ struct ZOrderScrollingRestoreWiringTests {
         #expect(pass.upperBound <= asked.lowerBound)
     }
 
+    /// Neither arm reaches a unit test: the drain's completion needs a
+    /// live element, and with none the raise answers as a no-op.
+    @Test("A focused float's raise is issued, and a restore owes it")
+    func focusedFloatOwes() throws {
+        let raise = try body(
+            of: "raiseFloatsForFocusedFloat",
+            in: "KiwiCore+FloatRaiseDebt.swift"
+        )
+        #expect(raise.contains("raiseFloatsAndSticky(thenFocus:focus)"))
+        let sequence = try body(
+            of: "raiseSequentially",
+            in: "KiwiCore+ZOrder.swift"
+        )
+        let reassert = try #require(
+            sequence.range(of: "self.focusWindow(focused,warp:false)")
+        )
+        let owes = try #require(
+            sequence.range(of: "self.floatRaiseDebt.owed=focused")
+        )
+        #expect(reassert.upperBound <= owes.lowerBound)
+    }
+
     @Test("A close arms on another window, and owes the floats")
     func closeArms() throws {
         let close = try SourceScan.functionBody(
