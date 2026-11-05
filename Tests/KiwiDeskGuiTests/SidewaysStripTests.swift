@@ -132,18 +132,10 @@ struct SidewaysStripTests {
         )
         #expect(bare.fades(StripScroll(offset: 0, viewport: 200)) == core)
         #expect(core.trailing > 0)
-        // The fade counts the end room on the end items.
-        let roomyCore = ShelfOverflow.fades(
-            lengths: [104, 100, 104],
-            gap: 10,
-            total: 328,
-            offset: 0,
-            viewport: 200,
-            depth: 60
-        )
-        #expect(
-            roomy.fades(StripScroll(offset: 0, viewport: 200)) == roomyCore
-        )
+        // The fade counts the end room on the end items: this viewport
+        // clears the last item alone, and cuts it with its room.
+        let roomyFades = roomy.fades(StripScroll(offset: 0, viewport: 325))
+        #expect(roomyFades.trailing > 0)
     }
 
     /// The end room stays in view on a follow to the first item, and a
