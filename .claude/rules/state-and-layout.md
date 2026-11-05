@@ -1771,8 +1771,12 @@ editing here:
   moves a window ending near a screen's bottom or right edge
   clear of it before sizing it, which macOS would otherwise
   refuse; its docstring carries
-  the measurement. The screens it reads come from
-  `TilingEngine.allScreenFrames`, never a live read in the applier.
+  the measurement. Only an edge with a band lifts (#2966,
+  `EdgeBandGateTests`): another screen reaches past it, and for the
+  bottom, "Displays have separate Spaces" is off. A lift that runs
+  where nothing refuses is a visible jump per press. The screens it
+  reads come from `TilingEngine.allScreenFrames`, never a live read
+  in the applier.
   Whether a write shrinks the window is the window's own frame,
   read on its queue for every sized write ending near either
   edge — never a record of what was asked or echoed, which an

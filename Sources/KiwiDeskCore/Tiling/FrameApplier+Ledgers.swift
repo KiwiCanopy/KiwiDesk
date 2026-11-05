@@ -101,7 +101,7 @@ final class PendingFrames: @unchecked Sendable {
         var setSize: Bool
         /// The screen whose edge band the size write clears
         /// (#2894).
-        var band: CGRect? = nil
+        var band: EdgeBand? = nil
         /// A floating resize's write (#2981).
         var lead: SizeLedWrite.Lead? = nil
     }

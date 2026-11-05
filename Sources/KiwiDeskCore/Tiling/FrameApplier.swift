@@ -29,18 +29,18 @@ final class FrameApplier {
     let motion = MotionScope()
     var cause: @MainActor () -> MotionCause = { .ambient }
 
-    /// Moves one of KiwiDesk's own windows through AppKit, in
-    /// this turn; false where no own window answers, and the AX
-    /// write goes ahead. A test records it.
+    /// Moves one of KiwiDesk's own windows through AppKit in this
+    /// turn; false where none answers, so the AX write goes ahead.
     var ownWindowMove: @MainActor (WindowID, CGRect, Bool) -> Bool =
         FrameApplier.moveOwnWindow
 
     /// The AX writes the queues perform; a test counts them.
     var writer = FrameWriter.live
 
-    /// Every screen's whole AX frame, for the edge-band write
-    /// (#2894); wired by `TilingEngine`, empty (no band) unwired.
+    /// Every screen's whole AX frame, for the edge band (#2894).
     var screenFrames: @MainActor () -> [CGRect] = { [] }
+    /// "Displays have separate Spaces", for the edge band (#2966).
+    var separateSpaces: @MainActor () -> Bool = { false }
 
     /// Whether the app's EUI is on at rest — the event loop's
     /// warmed baseline, wired at bootstrap. Off by default: an
@@ -160,7 +160,7 @@ final class FrameApplier {
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
-        let band = bandScreen(frame, setSize: setSize)
+        let band = edgeBand(frame, setSize: setSize)
         let lead = takeLead(id)
         if stageHeld(id, frame, setSize: setSize, band: band, lead: lead) {
             return
@@ -235,7 +235,7 @@ final class FrameApplier {
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
-        let band = bandScreen(frame, setSize: setSize)
+        let band = edgeBand(frame, setSize: setSize)
         let run = sizeLedRuns[id]
         let lead = takeLead(id)
         // A held write owes no resend: it lands once, at the

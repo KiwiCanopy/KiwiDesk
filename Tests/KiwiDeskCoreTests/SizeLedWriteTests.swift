@@ -92,7 +92,7 @@ struct SizeLedWriteTests {
         to app: SizeLedApp,
         from anchor: CGRect,
         setSize: Bool = true,
-        band: CGRect? = nil
+        band: EdgeBand? = nil
     ) {
         SizeLedWrite.Lead(anchor: anchor, screens: [screen]).write(
             frame,
@@ -248,14 +248,15 @@ struct SizeLedWriteTests {
 
     @Test("A shrink in the band lifts a settable window, never a fixed one")
     func bandLift() {
+        let edgeBand = EdgeBand(screen: screen, bottom: true, right: true)
         let low = CGRect(x: 300, y: 817, width: 400, height: 300)
         let asked = CGRect(x: 300, y: 822, width: 400, height: 290)
         let free = SizeLedApp(low, .free, screen: screen)
-        write(asked, to: free, from: low, band: screen)
+        write(asked, to: free, from: low, band: edgeBand)
         #expect(free.writes.withLock { $0 }.first == "position")
         #expect(free.now == asked)
         let fixed = SizeLedApp(low, .fixed, screen: screen)
-        write(asked, to: fixed, from: low, band: screen)
+        write(asked, to: fixed, from: low, band: edgeBand)
         #expect(fixed.writes.withLock { $0 }.first == "size")
         #expect(fixed.now == low)
     }
