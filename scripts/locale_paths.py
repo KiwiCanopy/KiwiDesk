@@ -149,3 +149,4 @@ def site_override_conflict(site: bool) -> str | None:
         "catalogs while believing it was redirected. Unset "
         "them, or run without --site."
     )
+# probe
