@@ -2177,9 +2177,9 @@ re-evaluates the host. The Spaces preview chips are the held-out
 strip: scroller only, no fade and no follow, until their varying
 widths are measured (#2990).
 
-**A Settings strip that scrolls sideways keeps the platform's
-scroller**, which a mouse user drags to reach what the strip cuts
-(#2901 ▸ Ruling). Never hide it by argument, and a hide above a
+**A strip that scrolls sideways in Settings or the first-launch tour
+keeps the platform's scroller**, which a mouse user drags to reach
+what the strip cuts (#2901 ▸ Ruling). Never hide it by argument, and a hide above a
 strip names `axes: .vertical` alone, since Apple documents the
 modifier as reaching nested scroll views (not measured here;
 `StripScrollerTests`). The scroller gives reach and the fade stays
@@ -2187,9 +2187,9 @@ the cue: under *Automatically* a trackpad shows it only during a
 gesture (`docs/design-decisions.md` ▸ The platform's own indicator
 does not work).
 
-**A Settings strip's content clears an overlay scroller through the
-one `StripScrollerRoom`, inside the `ScrollView`**, handed that
-strip's content width and viewport (`StripScrollerTests` ▸
+**A strip's content in those two trees clears an overlay scroller
+through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
+that strip's content width and viewport (`StripScrollerTests` ▸
 `clearance`, `clearanceHome`), never a bottom padding of its own
 beside it, which review holds since those needles do not see one. As
 measured on macOS 27, 2026-11-05, an overlay scroller

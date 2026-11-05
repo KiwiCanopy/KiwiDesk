@@ -4,25 +4,28 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A sideways strip in Settings keeps the platform's scroller, which
-/// a mouse user needs to reach what it cuts (#2901). Scans source
-/// off the main actor; whether macOS draws it is a device check.
+/// A sideways strip in Settings or the first-launch tour keeps the
+/// platform's scroller, which a mouse user needs to reach what it cuts
+/// (#2901). Scans source off the main actor; whether macOS draws it is
+/// a device check.
 ///
 /// Both walks read every site's arguments instead of matching a hide's
 /// spelling. They trade reach for that: a modifier wrapped in a helper
 /// that takes the visibility as a value is not seen at the wrapper's
 /// caller.
-@Suite("Settings strip scroller")
+@Suite("Sideways strip scroller")
 struct StripScrollerTests {
-    private static func settingsSources() throws -> [(String, String)] {
-        let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
-        return try SourceScan.swiftSources(under: root).map { url in
-            let source = try SourceScan.strippedSource(at: url)
-            return (
-                url.lastPathComponent,
-                source.split(whereSeparator: \.isWhitespace).joined()
-            )
+    private static func stripSources() throws -> [(String, String)] {
+        let repo = SourceScan.repoRoot(from: #filePath)
+        return try ["Settings", "Onboarding"].flatMap { tree in
+            let root = repo.appendingPathComponent("Sources/KiwiDesk/\(tree)")
+            return try SourceScan.swiftSources(under: root).map { url in
+                let source = try SourceScan.strippedSource(at: url)
+                return (
+                    url.lastPathComponent,
+                    source.split(whereSeparator: \.isWhitespace).joined()
+                )
+            }
         }
     }
 
@@ -35,9 +38,9 @@ struct StripScrollerTests {
         }
     }
 
-    @Test("no Settings scroll view hides its scroller by argument")
+    @Test("no strip's scroll view hides its scroller by argument")
     func noHiddenArgument() throws {
-        let sources = try Self.settingsSources()
+        let sources = try Self.stripSources()
         #expect(sources.contains { $0.1.contains("ScrollView(.horizontal") })
         for (name, source) in sources {
             for tail in Self.tails(of: "showsIndicators:", in: source) {
@@ -58,7 +61,7 @@ struct StripScrollerTests {
             ".hidden,axes:.vertical)",
         ]
         var sites = 0
-        for (name, source) in try Self.settingsSources() {
+        for (name, source) in try Self.stripSources() {
             // The modifier's environment value is the same hide.
             #expect(
                 !source.contains("horizontalScrollIndicatorVisibility"),
@@ -101,7 +104,7 @@ struct StripScrollerTests {
     /// seen.
     @Test("the clearance has one home and both strips take it")
     func clearanceHome() throws {
-        let sources = try Self.settingsSources()
+        let sources = try Self.stripSources()
         let readers = sources.filter {
             $0.1.contains("preferredScrollerStyle")
         }
@@ -114,7 +117,7 @@ struct StripScrollerTests {
         #expect(
             Set(takers.keys) == [
                 "StripScrollerRoom.swift", "SidewaysStrip.swift",
-                "SpacesPanelPreview.swift",
+                "SpacesPanelPreview.swift", "OnboardingLooksRows.swift",
             ]
         )
         let home = try #require(takers["StripScrollerRoom.swift"])
@@ -154,5 +157,27 @@ struct StripScrollerTests {
                     + "action:{viewport=$0}"
             ) == true
         )
+        try expectTourRowsTakeIt(takers)
+    }
+
+    /// One scroll view, so a row cannot go bare beside it, and no bottom
+    /// padding, which the row's clearance replaces.
+    private func expectTourRowsTakeIt(_ takers: [String: String]) throws {
+        let tour = try #require(takers["OnboardingLooksRows.swift"])
+        let scrolls = Self.tails(of: "ScrollView(.horizontal", in: tour)
+        #expect(scrolls.count == 1)
+        let room =
+            "ScrollView(.horizontal){content"
+            + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+            + "action:{width=$0}"
+            + ".modifier(StripScrollerRoom("
+            + "contentWidth:width,viewport:viewport))}"
+            + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+            + "action:{viewport=$0}"
+        #expect(tour.contains(room))
+        let row = "OnboardingStripScroll{HStack(alignment:.top,spacing:8)"
+        let rows = Self.tails(of: row, in: tour)
+        #expect(rows.count == 2)
+        #expect(!tour.contains(".padding(.bottom"))
     }
 }
