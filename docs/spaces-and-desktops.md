@@ -191,6 +191,10 @@ screen onto its own Desktop's Space, but never selects a profile.
 With a single screen, the main screen's Desktop is simply *the*
 Desktop.
 
+The profile it loads applies to every screen, so a second screen
+can change Space too, even though its Desktop did not. A Space
+both profiles have stays on screen.
+
 A Desktop you bound that is not on your main screen keeps its
 row in the card, with a *not on main screen* badge; the binding
 goes live again if a screen change makes that Desktop your main
