@@ -1,7 +1,7 @@
 name: Site
 
 # Builds the Astro/Starlight docs site so a broken build is caught
-# in the PR gate, not on Cloudflare after merge. Path-filtered to
+# in the PR gate, not on Cloudflare after merge. Builds only for
 # the site and the content it renders (docs/ and assets/ are
 # symlinked into the site, so a docs edit can break the build).
 #
@@ -19,7 +19,9 @@ name: Site
 # same reason one
 # level up — editing a check did not previously run it, and
 # several of its checks read inputs from outside site/. Both are
-# inputs to the GATE, not to the build. Written without a count:
+# inputs to the GATE, not to the build, and so are extract-keys,
+# which the gate runs, and build-app.sh, whose feed URL
+# check-site-tokens.py reads. Written without a count:
 # #1232 moved it, and a number here is one nothing derives.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
@@ -28,7 +30,8 @@ name: Site
 # (scripts/protect-main.sh), so pull_request takes no `paths:`: a
 # filtered-out workflow never reports and a required check waits
 # forever, while a job skipped by `if:` satisfies one. The `changes`
-# job applies push's list below, the one list of the site's inputs.
+# job applies push's list below, the one list of the site's inputs,
+# and builds when it cannot read an entry.
 # push keeps the trigger filter, so a Swift-only merge cannot cancel
 # a site run through the concurrency group.
 on:
@@ -43,6 +46,8 @@ on:
       - "ROADMAP.md"
       - "scripts/check-site-tokens.py"
       - "scripts/unreleased-strip"
+      - "scripts/extract-keys"
+      - "scripts/build-app.sh"
       - ".github/workflows/site.yml"
   pull_request:
 
@@ -81,16 +86,23 @@ jobs:
           git cat-file -e "${BASE}^{commit}" 2>/dev/null || answer true
           # --no-renames: a file moved out of an input still names
           # the path it left.
-          changed="$(git diff --name-only --no-renames "$BASE"...HEAD)"
+          changed="$(git -c core.quotePath=false diff --name-only \
+            --no-renames "$BASE"...HEAD)"
           inputs="$(awk '
             /^    paths:$/ { list = 1; next }
-            list && /^      - / { gsub(/^      - "|"$/, ""); print; next }
-            list { exit }
+            !list { next }
+            /^ *(#.*)?$/ { next }
+            !/^      / { exit }
+            /^      - "[^" ]*"$/ { gsub(/^      - "|"$/, ""); print; next }
+            { print "*" }
           ' .github/workflows/site.yml)"
           if [ -z "$changed" ] || [ -z "$inputs" ]; then
             answer true
           fi
           while IFS= read -r file; do
+            # Git still quotes a name holding a quote or a control
+            # character, and a quoted name matches nothing.
+            case "$file" in \"*) answer true ;; esac
             while IFS= read -r input; do
               case "$input" in
                 */'**')

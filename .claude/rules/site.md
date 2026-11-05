@@ -156,7 +156,7 @@ clause green and takes the only thing watching this with it.
 lets the release-time sweep stay fail-fast. It sits in the
 workflow carrying the appcast, so a malformed `:::` reaching
 `main` would otherwise block the update feed on a docs typo.
-`docs/**` is a path input of `site.yml` on both triggers, held by
+`docs/**` is on `site.yml`'s one list of inputs, held by
 `UnreleasedStripWorkflowTests` and `GuideRouteGateInputTests` —
 that suite also holds `scripts/unreleased-strip` itself as an
 input, since the gate runs it and `check-site-tokens.py` imports
@@ -630,8 +630,16 @@ without this `gh pr merge --auto` lands before the build reports.
 `changes` job applies the `push` trigger's `paths:`, the one list of
 the site's inputs, and skips the build on a PR outside it, which is
 what lets a Swift-only PR through (`SiteGateRequiredTests`).
-`scripts/protect-main.sh`'s `CONTEXTS` requires it. A new input joins
-that one list.
+`scripts/protect-main.sh`'s `CONTEXTS` requires it. Anything the gate
+runs or reads outside `site/` joins that one list, since a wrong skip
+passes the check with nothing built, and a change that spells an entry
+any way but `- "path"` builds every PR until it is fixed.
+
+The price is accepted: a red on this gate blocks the merge with no
+override, so a site gate that reads a remote source (the voices'
+Sanity read below) can hold every site and docs PR until that source
+recovers. A gate step reading a remote source says what it does when
+the source is down.
 
 **A path served to a program is not a page**, so the site's page
 rules do not reach it. Give it no `/de/` or `/ja/` route, add it
