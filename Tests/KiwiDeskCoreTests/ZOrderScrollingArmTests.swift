@@ -183,13 +183,34 @@ struct ZOrderScrollingArmTests {
     }
 
     /// The closing re-assert's echo reports the focus it already holds.
+    /// A running drain, so "the row moved" answers yes and only the
+    /// refusal of a move onto itself is left.
     @Test("Our own raise's echo arms nothing")
     func selfEchoArmsNothing() throws {
         let core = try makeCore()
         try startDummyPan(core)
+        core.floatRaiseDebt.restoresInFlight = 1
         core.selfRaiseStamps[WindowID(4)] = core.wallClock()
         report(core, 4)
         #expect(!core.pendingZOrderRestore)
+        core.floatRaiseDebt.restoresInFlight = 0
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// A click inside a raise's echo window is the user's own move:
+    /// it arms, and owes the floats the raise the handler skips for
+    /// an echo.
+    @Test("A click on a stamped window arms and owes the floats")
+    func clickedEchoArms() throws {
+        let core = try makeCore()
+        try startDummyPan(core)
+        core.deferred.cancel(.floatRaise)
+        core.selfRaiseStamps[WindowID(5)] = core.wallClock()
+        core.lastLeftClick = (core.wallClock(), .zero, WindowID(5))
+        report(core, 5)
+        #expect(core.pendingZOrderRestore)
+        #expect(core.deferred.isScheduled(.floatRaise))
+        core.deferred.cancel(.floatRaise)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -211,12 +232,29 @@ struct ZOrderScrollingArmTests {
     func closeOwesFloats() throws {
         let core = try makeCore()
         try startDummyPan(core)
+        core.deferred.cancel(.floatRaise)
         core.armCloseReturnRestack(
             to: WindowID(4),
             fromRemovedSlot: 4
         )
         #expect(core.pendingZOrderRestore)
-        #expect(core.deferred.task(for: .floatRaise) != nil)
+        #expect(core.deferred.isScheduled(.floatRaise))
+        core.deferred.cancel(.floatRaise)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// A close that arms nothing lifted nothing.
+    @Test("A close that arms nothing owes the floats nothing")
+    func stillCloseOwesNothing() throws {
+        let core = try makeCore()
+        try startDummyPan(core)
+        core.deferred.cancel(.floatRaise)
+        core.armCloseReturnRestack(
+            to: WindowID(4),
+            fromRemovedSlot: nil
+        )
+        #expect(!core.pendingZOrderRestore)
+        #expect(!core.deferred.isScheduled(.floatRaise))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 }

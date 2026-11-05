@@ -308,11 +308,15 @@ extension KiwiCore {
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(focused, warp: false)
-                // The raises lifted tiles over the other floats, and a
-                // re-assert owes no raise; the rest above pays this.
-                if self.isEffectiveFloatOnActiveSpace(focused) {
-                    self.floatRaiseDebt.owed = focused
-                }
+            }
+            // The raises lifted tiles over the other floats, and neither
+            // a re-assert nor a float's focus owes a raise; the rest
+            // above pays this. The live anchor: a sticky visitor holds
+            // no focus slot, and a float may have taken it mid-drain.
+            if let live = self.focusedWindowID,
+                self.isEffectiveFloatOnActiveSpace(live)
+            {
+                self.floatRaiseDebt.owed = live
             }
         }
     }

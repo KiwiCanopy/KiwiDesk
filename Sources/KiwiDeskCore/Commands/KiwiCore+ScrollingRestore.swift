@@ -50,8 +50,8 @@ extension KiwiCore {
             let input = tiler.layoutInput(state: state)
         else { return nil }
         let anchor = state.focusAnchor(of: space, tiled: tiled)
-        // A focused float has no slot: the slot the layout seats then
-        // decides what is buried, as it decides the frames.
+        // A focused float has no slot: a fixed anchor's seated slot
+        // then decides what is buried, as it decides the frames.
         let seated =
             anchor.flatMap { tiled.contains($0) ? $0 : nil }
             ?? ScrollingLayout.subject(of: tiled, context: input.context)
@@ -67,10 +67,10 @@ extension KiwiCore {
     /// Whether a focus move along the row owes a restore: the row
     /// moved, by the pass's persisted offset against `offsetBefore`,
     /// and shows another window. False unless both ends are in the
-    /// row, as `scrollFocusJumpsSlots` is: a restore buries floats
-    /// (#418), and a focused float owes no raise that lifts them
-    /// back. A held pass pans later, and a drain still running was
-    /// planned for the old focus.
+    /// row, as `scrollFocusJumpsSlots` is: no evidence of a move along
+    /// it, and a spurious restack buries floats (#418). A held pass
+    /// pans later, and a drain still running was planned for the old
+    /// focus.
     func scrollFocusMoveOwesRestore(
         to target: WindowID,
         from previous: WindowID?,
@@ -110,6 +110,9 @@ extension KiwiCore {
             )
         else { return }
         scheduleScrollingZOrderRestoreIfOverflowing()
+        // A report with click provenance can be our own raise's echo,
+        // which the handler's own float raise skips.
+        raiseFloatsAbove(afterFocusing: id)
     }
 
     /// Whether the row now shows a window nothing raised, past the

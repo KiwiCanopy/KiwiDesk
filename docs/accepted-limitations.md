@@ -130,8 +130,9 @@ show the wrong window of an edge pile for the length of its slide,
 until the restack at the end of it
 ([#2985](https://github.com/KiwiCanopy/KiwiDesk/issues/2985)).
 Moving a window out of the Space, closing a window that does not hold
-the focus, hiding an app, a window arriving without the focus or
-changing the slot size or anchor can leave it there until the row next
+the focus, hiding an app, a window arriving without the focus, moving
+the focus from a float onto the row or changing the slot size or
+anchor can leave it there until the row next
 moves, and a pile showing only a strip can show a window other than
 the next one. KiwiDesk keeps only the windows that
 show in order, since raising every buried window took longer than the

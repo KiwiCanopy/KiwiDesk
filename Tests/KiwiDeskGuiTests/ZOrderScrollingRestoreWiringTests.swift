@@ -89,6 +89,11 @@ struct ZOrderScrollingRestoreWiringTests {
         )
         #expect(ask.contains("tiler.motionGate.owed!=nil"))
         #expect(ask.contains("floatRaiseDebt.restoresInFlight>0"))
+        let arm = try body(
+            of: "armReportedScrollMove",
+            in: "KiwiCore+ScrollingRestore.swift"
+        )
+        #expect(arm.contains("!isRestoredDesktopFocus(id,now:now)"))
     }
 
     private func expectAskAroundPass(
@@ -123,12 +128,16 @@ struct ZOrderScrollingRestoreWiringTests {
             sequence.range(of: "self.focusWindow(focused,warp:false)")
         )
         let owes = try #require(
-            sequence.range(of: "self.floatRaiseDebt.owed=focused")
+            sequence.range(
+                of: "ifletlive=self.focusedWindowID,"
+                    + "self.isEffectiveFloatOnActiveSpace(live)"
+                    + "{self.floatRaiseDebt.owed=live}"
+            )
         )
         #expect(reassert.upperBound <= owes.lowerBound)
     }
 
-    @Test("A close arms on another window, and owes the floats")
+    @Test("A close arms on another window")
     func closeArms() throws {
         let close = try SourceScan.functionBody(
             of: "armCloseReturnRestack",

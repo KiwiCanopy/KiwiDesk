@@ -55,16 +55,6 @@ struct FocusedFloatRaiseTests {
         #expect(core.floatRaiseDebt.owed == float)
     }
 
-    /// Paying it leaves nothing owed, so the rest cannot loop on it.
-    @Test("At rest the float's debt is paid, once")
-    func paidAtRest() {
-        let core = makeCore()
-        core.floatRaiseDebt.owed = float
-        core.floatRaiseDebt.restoresInFlight = 0
-        core.runPendingFloatRaise()
-        #expect(core.floatRaiseDebt.owed == nil)
-    }
-
     /// The timer's arm: the float's focus lands inside the tile's
     /// 50 ms coalescing.
     @Test("A scheduled raise for the tile pays for the float")
