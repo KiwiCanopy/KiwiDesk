@@ -123,6 +123,9 @@ struct SettingsAnchorIdentityTests {
         // of the strip's fade (#2901). Not a reveal target — the
         // strip's tiles are a picker, and search lands on its card.
         "LayoutStrip.swift": 1,
+        // Scroll identity: the Look line's follow, as the layout
+        // strip's (#2987).
+        "SimpleLookCard.swift": 1,
     ]
 
     @Test("no ad-hoc .id() outside collection identity")
