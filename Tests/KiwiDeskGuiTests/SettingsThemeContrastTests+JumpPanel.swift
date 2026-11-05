@@ -1,3 +1,4 @@
+import AppKit
 import SwiftUI
 import Testing
 
@@ -5,11 +6,35 @@ import Testing
 
 /// Jump to window's selected row (#1875 ▸ Ruling — the selected
 /// row is the kiwi accent): an opaque accent fill whose inks are
-/// fixed in both modes, as the fill is. The panel's ground is
-/// glass, which has no hex, so `page` stands in for it — the
+/// one value, measured on each mode's fill. The panel's ground is
+/// glass, which has no hex, so `hubGround` stands in for it — the
 /// nearest opaque match for the `.regularMaterial` fallback. A
 /// proxy: the glass branch is a device check.
 extension SettingsThemeContrastTests {
+    /// Fixed here, never a Settings surface: the Settings page's
+    /// black does not move the glass, and measuring on it would
+    /// flatter every ink above.
+    private static let hubGround = Color(
+        nsColor: NSColor(name: nil) { appearance in
+            let isDark =
+                appearance.bestMatch(from: [.aqua, .darkAqua])
+                == .darkAqua
+            return isDark
+                ? NSColor(
+                    srgbRed: 0x17 / 255,
+                    green: 0x1C / 255,
+                    blue: 0x19 / 255,
+                    alpha: 1
+                )
+                : NSColor(
+                    srgbRed: 0xFB / 255,
+                    green: 0xFC / 255,
+                    blue: 0xFA / 255,
+                    alpha: 1
+                )
+        }
+    )
+
     static let jumpPanel: [Pairing] = [
         Pairing(
             "accentInk on the selected Jump to window row",
@@ -27,13 +52,13 @@ extension SettingsThemeContrastTests {
         Pairing(
             "ink2 on a lifted KiwiHub row",
             SettingsTheme.ink2,
-            on: SettingsTheme.page,
+            on: hubGround,
             layers: [SettingsTheme.chipRest]
         ),
         Pairing(
             "ink2 on a lifted KiwiHub chip",
             SettingsTheme.ink2,
-            on: SettingsTheme.page,
+            on: hubGround,
             layers: [SettingsTheme.chipHover]
         ),
         // `.tertiary` names an item that cannot be applied: the
@@ -41,7 +66,7 @@ extension SettingsThemeContrastTests {
         Pairing(
             "ink3 on a lifted KiwiHub chip",
             SettingsTheme.ink3,
-            on: SettingsTheme.page,
+            on: hubGround,
             layers: [SettingsTheme.chipHover],
             floor: 3.0
         ),
@@ -52,7 +77,7 @@ extension SettingsThemeContrastTests {
         Pairing(
             "ink2 chord on the Jump scope switch's track",
             SettingsTheme.ink2,
-            on: SettingsTheme.page,
+            on: hubGround,
             layers: [SettingsTheme.trackFill]
         ),
     ]
@@ -65,13 +90,13 @@ extension SettingsThemeContrastTests {
         for dark in [false, true] {
             let fill = try ThemeContrast.contrast(
                 SettingsTheme.accent,
-                over: SettingsTheme.page,
+                over: hubGround,
                 inkAlpha: 1,
                 dark: dark
             )
             let hairline = try ThemeContrast.contrast(
                 SettingsTheme.hairline,
-                over: SettingsTheme.page,
+                over: hubGround,
                 inkAlpha: 1,
                 dark: dark
             )

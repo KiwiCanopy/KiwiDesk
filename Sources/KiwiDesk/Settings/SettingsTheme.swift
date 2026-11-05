@@ -111,8 +111,9 @@ enum SettingsTheme {
         dark: 0x2B_45_34
     )
 
-    /// A rule inside a container: between a card's groups or
-    /// entries, under its own edge in dark.
+    /// A rule that is no plane's edge: between a card's groups or
+    /// entries, between chips in a strip. Under `hairline` in dark,
+    /// so it never competes with the edge of what holds it.
     static let hairlineSubtle = token(
         light: 0xE4_E9_E1,
         dark: 0x1A_2C_20
