@@ -8721,7 +8721,10 @@ Dark's page is pure black, and a plane on it reads by its edge
 rather than by a lifted grey, so the accent sits one step brighter
 there and the line splits in two: `hairline` is a plane's edge,
 and `hairlineSubtle` is a rule that is no plane's edge, which would
-otherwise compete with the edge of what holds it. A mark the accent
+otherwise compete with the edge of what holds it. The header takes
+the page's black and keeps its line, since a full-width band of
+green read as more saturated than the neutral controls on it, and
+those controls stay neutral. A mark the accent
 paints on a picture follows the accent, since it names the same
 state as the controls beside the board.
 :::

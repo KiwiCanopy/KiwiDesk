@@ -32,7 +32,8 @@ struct SettingsThemeWiringTests {
         // (17a); the accent below stays at the root, where the
         // one `.tint` is set.
         "page": "SettingsView+Chrome.swift",
-        "card": "SettingsHeaderBar.swift",
+        "card": "SettingsSection.swift",
+        "headerGround": "SettingsHeaderBar.swift",
         "cardHover": "HomeCard.swift",
         "sunken": "Chips.swift",
         "previewPlate": "HomeCardPlate+Ground.swift",

@@ -55,7 +55,7 @@ struct SettingsHeaderBar: View {
         .padding(.top, 16)
         .padding(.bottom, 18)
         .frame(maxWidth: .infinity, alignment: .leading)
-        .background(SettingsTheme.card)
+        .background(SettingsTheme.headerGround)
         .onChange(of: destination) { _, _ in
             searchExpanded = false
         }

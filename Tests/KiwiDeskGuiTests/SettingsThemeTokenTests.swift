@@ -55,6 +55,12 @@ struct SettingsThemeTokenTests {
     private let pins: [Pin] = [
         Pin("page", 0xFB_FC_FA, 0x00_00_00, SettingsTheme.page),
         Pin("card", 0xFF_FF_FF, 0x08_12_0C, SettingsTheme.card),
+        Pin(
+            "headerGround",
+            0xFF_FF_FF,
+            0x00_00_00,
+            SettingsTheme.headerGround
+        ),
         Pin("panel", 0xF4_F6_F1, 0x08_12_0C, SettingsTheme.panel),
         // The pointer's own surface (#1173): `card` stepped one
         // notch toward the ground in each appearance, matched by

@@ -12,8 +12,12 @@ enum SettingsTheme {
     /// Window background behind all content.
     static let page = token(light: 0xFB_FC_FA, dark: 0x00_00_00)
 
-    /// Containers and rows: header bar, cards, section containers, footer.
+    /// Containers and rows: cards, section containers, footer.
     static let card = token(light: 0xFF_FF_FF, dark: 0x08_12_0C)
+
+    /// The header bar's ground: white as a card in light, the page's
+    /// black in dark, where its hairline is what shapes it.
+    static let headerGround = token(light: 0xFF_FF_FF, dark: 0x00_00_00)
 
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x08_12_0C)
