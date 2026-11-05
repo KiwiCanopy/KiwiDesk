@@ -90,13 +90,13 @@ extension SettingsThemeContrastTests {
         for dark in [false, true] {
             let fill = try ThemeContrast.contrast(
                 SettingsTheme.accent,
-                over: hubGround,
+                over: Self.hubGround,
                 inkAlpha: 1,
                 dark: dark
             )
             let hairline = try ThemeContrast.contrast(
                 SettingsTheme.hairline,
-                over: hubGround,
+                over: Self.hubGround,
                 inkAlpha: 1,
                 dark: dark
             )
