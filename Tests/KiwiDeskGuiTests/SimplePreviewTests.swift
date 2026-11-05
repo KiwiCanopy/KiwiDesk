@@ -31,6 +31,18 @@ struct SimplePreviewTests {
         #expect(model.nav.simpleHover == nil)
     }
 
+    /// #2993: 4 ms a build, read twice per card on every hover.
+    @Test("a hover builds no look catalog")
+    func hoverBuildsNoCatalog() throws {
+        let model = model(["a", "b"])
+        let look = try #require(model.core.bundledLooks.first)
+        let builds = model.core.bundledLooksMemo.builds
+        model.hoverSimple(.look(look.name), inside: true)
+        _ = model.simplePreviewSettings
+        _ = SimpleLookCard.looks(in: model)
+        #expect(model.core.bundledLooksMemo.builds == builds)
+    }
+
     @Test("a hovered look is painted over the draft, not written")
     func lookHoverPaints() throws {
         let model = model(["a"])

@@ -62,7 +62,8 @@ struct LookCatalogSeamTests {
             .filter { !$0.isWhitespace }
         #expect(
             squashed.contains(
-                "LookCatalog.bundled(sizes:starterSizes())"
+                "bundledLooksMemo.looks(for:starterSizes(),"
+                    + "build:LookCatalog.bundled(sizes:))"
             )
         )
     }
