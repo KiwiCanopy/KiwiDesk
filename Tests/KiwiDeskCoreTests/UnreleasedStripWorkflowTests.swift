@@ -83,11 +83,10 @@ struct UnreleasedStripWorkflowTests {
         // `docs/**`. The site half is deliberately not asserted —
         // a literal opening with that directory's name is what
         // `CiPathFilterTests` refuses in a Swift suite.
-        // BOTH triggers, counted. `push` and `pull_request`
-        // carry their own `paths:`, and the one that matters is
-        // `pull_request` — the check has to fire on the PR that
-        // adds a malformed marker, not after it merges. Deleting
-        // that one alone passed a single-occurrence clause.
+        // Counted, in the one list: push's `paths:`, which the
+        // `changes` job also applies to a PR, so the check fires
+        // on the PR that adds a malformed marker
+        // (`SiteGateRequiredTests`).
         let docs = site.split(separator: "\n")
             .filter {
                 $0.trimmingCharacters(in: .whitespaces)
@@ -95,11 +94,12 @@ struct UnreleasedStripWorkflowTests {
             }
             .count
         #expect(
-            docs == 2,
+            docs == 1,
             """
             site.yml names docs/** \(docs)× — it needs one entry \
-            under push and one under pull_request, or the corpus \
-            check cannot fire for the edit it watches (#1232)
+            in push's paths, which the changes job also applies \
+            to a PR, or the corpus check cannot fire for the edit \
+            it watches (#1232)
             """
         )
     }

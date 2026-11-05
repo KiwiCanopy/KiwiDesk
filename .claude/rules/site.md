@@ -623,6 +623,16 @@ BUILT output, and `site.yml` runs on every `site/**` PR. Read
 it — a guard agreeing with its own literal is how the two would
 drift apart while staying green.
 
+**`Build site` is a required check on `main`, so `--auto` waits for
+it.** On a change confined to `site/**` the macOS jobs skip, and
+without this `gh pr merge --auto` lands before the build reports.
+`site.yml`'s `pull_request` trigger therefore stays unfiltered: a
+`changes` job applies the `push` trigger's `paths:`, the one list of
+the site's inputs, and skips the build on a PR outside it, which is
+what lets a Swift-only PR through (`SiteGateRequiredTests`).
+`scripts/protect-main.sh`'s `CONTEXTS` requires it. A new input joins
+that one list.
+
 **A path served to a program is not a page**, so the site's page
 rules do not reach it. Give it no `/de/` or `/ja/` route, add it
 to no sitemap, and localize no part of it: Sparkle asks for one

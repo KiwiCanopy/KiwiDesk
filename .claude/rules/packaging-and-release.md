@@ -804,7 +804,9 @@ output — and on its failure too: a gated job's `if:` takes
 `!cancelled()` and a failure arm, so a `changes` job that did not
 succeed runs everything. The bare `if:` implies `success()`, and a
 failed filter would otherwise skip the build and pass the check
-with nothing run (#1984, `CiPathFilterTests`).
+with nothing run (#1984, `CiPathFilterTests`). `site.yml`'s
+`pull_request` trigger takes the same shape, since `Build site` is
+required too; `.claude/rules/site.md` owns it.
 
 **Add an entry to `.github/ci-ignore.txt` only when no test, no
 build step and no lint step reads the path** — and audit all three,
@@ -907,8 +909,8 @@ one head, a race over which verdict lands. **The fallback
 delivers less since the CLA check (#1521):** a `github.token` PR
 fires no `pull_request_target` either, and `cla.yml` cannot be
 dispatched — the action needs a PR event — so on that path the
-sync PR sits blocked on "CLA" until a human pushes any commit to
-its branch, the remedy `app-font.yml`'s fallback PR still states.
+sync PR sits blocked on "CLA" and "Build site" until a human pushes
+any commit to its branch, the remedy `app-font.yml`'s fallback PR still states.
 The PAT path is untouched: the PR's author is the owner, signed
 once, and the `github-actions[bot]` commit author is on the
 allowlist.

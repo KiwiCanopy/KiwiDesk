@@ -23,6 +23,14 @@ name: Site
 # #1232 moved it, and a number here is one nothing derives.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
+#
+# `Build site` is a required check on main
+# (scripts/protect-main.sh), so pull_request takes no `paths:`: a
+# filtered-out workflow never reports and a required check waits
+# forever, while a job skipped by `if:` satisfies one. The `changes`
+# job applies push's list below, the one list of the site's inputs.
+# push keeps the trigger filter, so a Swift-only merge cannot cancel
+# a site run through the concurrency group.
 on:
   push:
     branches: [main]
@@ -37,23 +45,75 @@ on:
       - "scripts/unreleased-strip"
       - ".github/workflows/site.yml"
   pull_request:
-    paths:
-      - "site/**"
-      - "docs/**"
-      - "assets/**"
-      - "Sources/KiwiDesk/SupportLinks.swift"
-      - "Sources/KiwiDesk/Updates/NextOnMyList.swift"
-      - "ROADMAP.md"
-      - "scripts/check-site-tokens.py"
-      - "scripts/unreleased-strip"
-      - ".github/workflows/site.yml"
 
 concurrency:
   group: site-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect site changes
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The diff base is a commit on this repo, and a shallow
+          # clone would not contain it.
+          fetch-depth: 0
+
+      - name: Decide whether the site must build
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # Every unknown resolves to "run": a wrong skip passes a
+          # required check with nothing built.
+          answer() {
+            echo "run=$1" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+          # A push already passed the trigger's own `paths:`.
+          [ "$EVENT" = pull_request ] || answer true
+          git cat-file -e "${BASE}^{commit}" 2>/dev/null || answer true
+          # --no-renames: a file moved out of an input still names
+          # the path it left.
+          changed="$(git diff --name-only --no-renames "$BASE"...HEAD)"
+          inputs="$(awk '
+            /^    paths:$/ { list = 1; next }
+            list && /^      - / { gsub(/^      - "|"$/, ""); print; next }
+            list { exit }
+          ' .github/workflows/site.yml)"
+          if [ -z "$changed" ] || [ -z "$inputs" ]; then
+            answer true
+          fi
+          while IFS= read -r file; do
+            while IFS= read -r input; do
+              case "$input" in
+                */'**')
+                  case "$file" in
+                    "${input%/\*\*}"/*) answer true ;;
+                  esac
+                  ;;
+                # Only `dir/**` and exact paths are compared here.
+                *'*'*|*'?'*|*'['*) answer true ;;
+                "$file") answer true ;;
+              esac
+            done <<< "$inputs"
+          done <<< "$changed"
+          answer false
+
   build:
+    needs: changes
+    # A failed or timed-out filter builds: a bare `if:` implies
+    # success(), and the skip it makes passes a required check with
+    # nothing run (#1984).
+    if: >-
+      ${{ !cancelled() && (needs.changes.result != 'success'
+      || needs.changes.outputs.run == 'true') }}
     name: Build site
     runs-on: ubuntu-latest
     defaults:
