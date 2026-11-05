@@ -3732,7 +3732,8 @@ Scrolling restore raises the windows that show and leaves the buried
 ones below them in any order, because raising a long row one verified
 window at a time outran its time budget, and the windows raised last
 are the ones on screen. A focus move between two of the row's windows
-that moves the row, by command or by a click, and a focused close take a restore of their own for that
+that moves the row, by command, a click or an app's activation, and a
+focused close take a restore of their own for that
 reason, which a whole-row restack never needed. A change that keeps
 the focus takes none: a restore ends by re-asserting the focus, which
 would steal it from an event nobody asked to move focus for, and such

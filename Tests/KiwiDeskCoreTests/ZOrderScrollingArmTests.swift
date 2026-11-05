@@ -132,8 +132,8 @@ struct ZOrderScrollingArmTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
-    /// A restore lifts tiles over the floats and a focused float owes
-    /// no raise to lift them back (#418).
+    /// No evidence of a move along the row, and a spurious restack
+    /// lifts tiles over the floats (#418).
     @Test("A move with an end off the row asks nothing")
     func floatEndsAskNothing() throws {
         let core = try makeCore()
@@ -240,6 +240,27 @@ struct ZOrderScrollingArmTests {
         #expect(core.pendingZOrderRestore)
         #expect(core.deferred.isScheduled(.floatRaise))
         core.deferred.cancel(.floatRaise)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// A row that fits has no restore for the raise to answer.
+    @Test("A close in a row that fits owes the floats nothing")
+    func fittingCloseOwesNothing() throws {
+        let core = try makeCore()
+        #expect(
+            core.execute(
+                "scroll.set_slot_size",
+                args: [.number(200)]
+            ).isSuccess
+        )
+        try startDummyPan(core)
+        core.deferred.cancel(.floatRaise)
+        core.armCloseReturnRestack(
+            to: WindowID(4),
+            fromRemovedSlot: 0
+        )
+        #expect(!core.pendingZOrderRestore)
+        #expect(!core.deferred.isScheduled(.floatRaise))
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 

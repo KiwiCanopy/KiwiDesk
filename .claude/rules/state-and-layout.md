@@ -1110,6 +1110,10 @@ editing here:
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
   call, which no unit test reaches, is
   `ZOrderSequenceWiringTests`' needle).
+- **A focused float schedules no float-tier raise of its own, so a
+  raise owed ahead of it and any mode's restore ending under it pay
+  through `raiseFloatsForFocusedFloat` (#2985,
+  `FocusedFloatRaiseTests`)**, and a Space with no tile owes none.
 - **A commanded focus onto another window owes the float-tier
   raise at the command (#2284)** — its report comes back as our
   own echo, which the focus handler's `!selfEcho` arm skips, so a
@@ -1245,11 +1249,11 @@ editing here:
   not the App Bar's strip test — or, on a focused close, through
   `scrollingRowShowsOthers` alone, with the float raise the close
   owes. **A door that keeps the focus arms nothing**: a restore ends
-  in a focus re-assert and owes no float raise (#936, #418), so it
-  states its residue in `docs/accepted-limitations.md`. A focused
-  float schedules no raise of its own, so a raise owed ahead of it and
-  a restore ending under it pay through `raiseFloatsForFocusedFloat`
-  (`FocusedFloatRaiseTests`).
+  in a focus re-assert, and under a tiled focus owes no float raise
+  (#936, #418), so it states its residue in
+  `docs/accepted-limitations.md`. A window arriving with the focus
+  states it too: its fold moved the focus, so the report asks of no
+  move.
   **The deferred focus raise pays ahead of the restore in
   `tiledPlaneCameToRest`, and the drain waits on it through
   `ZOrderDrain.front`**, since a quiet raise cannot beat the old

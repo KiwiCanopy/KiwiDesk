@@ -337,10 +337,13 @@ extension KiwiCore {
         } else if let ended {
             retileEndingMaximize(ended)
         }
-        // Keep floats above the just-focused tiled window
-        // (#418). Skipped on a self-echo so the raise's own
-        // focus handoff cannot re-trigger it.
-        if !selfEcho {
+        // Keep floats above the just-focused tiled window (#418). Not
+        // on a self-echo, whose handoff would re-trigger it, save a
+        // click moving the focus onto a stamped window (#2985).
+        if !selfEcho
+            || (effects.focusBefore != id
+                && recentClickReached(id, now: now))
+        {
             raiseFloatsAbove(afterFocusing: id)
         }
     }

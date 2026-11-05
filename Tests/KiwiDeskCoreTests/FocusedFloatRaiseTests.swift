@@ -68,6 +68,25 @@ struct FocusedFloatRaiseTests {
         #expect(core.floatRaiseDebt.owed == float)
     }
 
+    /// With no tile in the Space there is no plane to clear, so a
+    /// debt to pay would only re-assert the focus (#1286).
+    @Test("A Space with no plane owes no raise")
+    func noPlaneOwesNothing() {
+        let core = makeCore()
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: tile,
+                pid: pid_t(900_001),
+                appName: "App",
+                title: "Title",
+                frame: CGRect(x: 100, y: 100, width: 400, height: 300),
+                isFloating: true
+            )
+        )
+        #expect(core.raiseFloatsForFocusedFloat())
+        #expect(core.floatRaiseDebt.owed == nil)
+    }
+
     /// The control: a tile's focus takes the path it always took.
     @Test("A focused tile is not the float's case")
     func tileStandsAside() {

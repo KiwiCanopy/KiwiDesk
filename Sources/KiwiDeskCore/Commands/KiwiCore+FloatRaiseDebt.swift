@@ -6,8 +6,9 @@ import Foundation
 /// raise waits and is paid when the plane comes to rest.
 @MainActor
 final class FloatRaiseDebt {
-    /// The focus the owed raise keeps floats above; one slot, so
-    /// only the last focus raises.
+    /// The focus the owed raise was owed to; one slot, so only the
+    /// last focus raises. Dropped once another tile holds the focus,
+    /// which schedules its own, and paid for a float that does.
     var owed: WindowID?
     /// Tiled z-order restores draining — never the float raise's
     /// own, which a newer focus must still supersede at once.
@@ -51,16 +52,21 @@ extension KiwiCore {
     /// The raise a focused float's own focus never schedules, since
     /// it needs none for itself: tiles lifted ahead of it still stand
     /// over the other floats (#2985). True when the focus is a float,
-    /// which takes the raise now or owes it to the plane's rest.
+    /// which takes the raise now or owes it to the plane's rest. A
+    /// Space with no tile has no plane to lift the floats over, as in
+    /// floating mode (#1286).
     @discardableResult
     func raiseFloatsForFocusedFloat() -> Bool {
         guard let focus = focusedWindowID,
             isEffectiveFloatOnActiveSpace(focus)
         else { return false }
+        guard let space = activeSpace,
+            !floatRaiseFloor(of: space, excluding: focus).isEmpty
+        else { return true }
         if tiledPlaneMoving {
             floatRaiseDebt.owed = focus
         } else {
-            raiseFloatsAndSticky(thenFocus: focus)
+            raiseLandingFloats(thenFocus: focus)
         }
         return true
     }

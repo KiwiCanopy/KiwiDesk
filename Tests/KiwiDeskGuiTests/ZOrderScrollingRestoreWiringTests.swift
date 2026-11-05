@@ -119,7 +119,7 @@ struct ZOrderScrollingRestoreWiringTests {
             of: "raiseFloatsForFocusedFloat",
             in: "KiwiCore+FloatRaiseDebt.swift"
         )
-        #expect(raise.contains("raiseFloatsAndSticky(thenFocus:focus)"))
+        #expect(raise.contains("raiseLandingFloats(thenFocus:focus)"))
         let sequence = try body(
             of: "raiseSequentially",
             in: "KiwiCore+ZOrder.swift"

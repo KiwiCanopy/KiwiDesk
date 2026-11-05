@@ -92,7 +92,9 @@ extension KiwiCore {
 
     /// The focus report's arm (#2985): a click or an app's activation
     /// pans the row with no command behind it. Our own raise's echo
-    /// moved no focus, so the ask refuses it. Not macOS restoring a
+    /// moved no focus, so the ask refuses it, save a tiled sticky
+    /// traveler's, whose `previous` is the slot: a spare restore, at
+    /// most one a report. Not macOS restoring a
     /// Desktop's focus, since a drain's quiet raises have no #1345
     /// gate and the draw list shows both Desktops mid-switch.
     func armReportedScrollMove(
@@ -110,9 +112,6 @@ extension KiwiCore {
             )
         else { return }
         scheduleScrollingZOrderRestoreIfOverflowing()
-        // A report with click provenance can be our own raise's echo,
-        // which the handler's own float raise skips.
-        raiseFloatsAbove(afterFocusing: id)
     }
 
     /// Whether the row now shows a window nothing raised, past the

@@ -41,15 +41,17 @@ extension KiwiCore {
     /// scrambles no stacking. Call *after* the swap's retile, so
     /// the restore rides the new animations' settle rather than
     /// firing from the pre-swap frames (the #153 ordering rule).
-    func scheduleScrollingZOrderRestoreIfOverflowing() {
+    @discardableResult
+    func scheduleScrollingZOrderRestoreIfOverflowing() -> Bool {
         guard let input = tiler.layoutInput(state: state),
             input.space.mode == .scrolling,
             ScrollingLayout.rowOverflows(
                 for: input.tiled,
                 in: input.context
             )
-        else { return }
+        else { return false }
         scheduleZOrderRestore()
+        return true
     }
 
     /// Requests a z-order restore whose paired retile is the
