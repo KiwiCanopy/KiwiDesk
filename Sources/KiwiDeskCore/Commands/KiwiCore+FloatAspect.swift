@@ -81,9 +81,10 @@ extension KiwiCore {
     }
 
     /// Reads the press's answer, once the hand has left the window. A
-    /// window that has left where its answer puts it (`SizeLedWrite`,
-    /// #2981) and where the last write sent it was moved by a hand,
-    /// which its frames from before the wait must not undo.
+    /// window that has left where it stood, where the press sent it,
+    /// where its answer puts it (`SizeLedWrite`, #2981) and where the
+    /// last write sent it was moved by a hand, which its frames from
+    /// before the wait must not undo.
     func judgeFloatAspect(_ ask: FloatAspectAsk) {
         guard resizeRoutesAsFloat(ask.window),
             let pid = state.windows[ask.window]?.pid
@@ -96,17 +97,19 @@ extension KiwiCore {
             return
         }
         guard let live = windowServer.readWindowBounds(ask.window),
-            FloatResize.sameOrigin(
-                live,
-                CGRect(
-                    origin: SizeLedWrite.origin(
-                        asked: ask.target,
-                        anchor: ask.base,
-                        answer: live.size
-                    ),
-                    size: live.size
+            FloatResize.sameOrigin(live, ask.base)
+                || FloatResize.sameOrigin(live, ask.target)
+                || FloatResize.sameOrigin(
+                    live,
+                    CGRect(
+                        origin: SizeLedWrite.origin(
+                            asked: ask.target,
+                            anchor: ask.base,
+                            answer: live.size
+                        ),
+                        size: live.size
+                    )
                 )
-            )
                 || tiler.placements.recent(ask.window).map({
                     FloatResize.sameOrigin(live, $0)
                 }) == true

@@ -2745,8 +2745,8 @@ editing here:
   branch was (`docs/design-decisions.md` ▸ *A floating keyboard resize
   is symmetric*). A new keyboard path takes `sizeLedFrom`, which is
   review's, since the parameter defaults to nil. A reader asking
-  where a press left the window asks `SizeLedWrite.origin`, as the
-  #2973 judge does, never the press's base or target alone.
+  where a press left the window asks `SizeLedWrite.origin` too, as
+  the #2973 judge does, not the press's base and target alone.
 - An **explicit settings apply must `retile(pass: .apply)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

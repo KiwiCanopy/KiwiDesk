@@ -165,8 +165,8 @@ struct FloatAspectJudgementTests {
     func slowAppIsNotLocked() {
         let core = makeCore()
         // One axis moved: its late grow, or the probe, never a lock. The
-        // press's size lands where the window stands now.
-        let moved = CGRect(x: 375, y: 200, width: 788, height: 450)
+        // press's size and split land from where the window stands now.
+        let moved = CGRect(x: 400, y: 200, width: 788, height: 450)
         core.windowServer.readWindowBounds = { _ in moved }
         core.judgeFloatAspectProbe(
             KiwiCore.FloatAspectAsk(

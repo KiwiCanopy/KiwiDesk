@@ -190,9 +190,9 @@ struct SizeLedResizeWiringTests {
     func judgeWriteLeads() async {
         let core = floatCore()
         let app = answering(core, .atMaximum)
-        core.windowServer.readWindowBounds = { [start] _ in
-            CGRect(origin: start.origin, size: CGSize(width: 488, height: 400))
-        }
+        let probed = CGRect(x: 100, y: 100, width: 488, height: 400)
+        app.frame.withLock { $0 = probed }
+        core.windowServer.readWindowBounds = { _ in probed }
         core.judgeFloatAspectProbe(
             KiwiCore.FloatAspectAsk(
                 window: WindowID(1),
