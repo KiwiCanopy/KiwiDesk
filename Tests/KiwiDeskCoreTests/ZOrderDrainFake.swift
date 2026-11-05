@@ -30,6 +30,9 @@ final class FakeWindowServer: @unchecked Sendable {
     /// How many raises this sequence stays current for, so a test
     /// can supersede it mid-drain.
     var currentUntilRaises = Int.max
+    /// The clock at which this sequence stops being current, so a
+    /// test can supersede it while it waits.
+    var currentUntilClock = TimeInterval.infinity
     /// The frontmost app's key window, which a quiet raise cannot
     /// get above — measured on device, 0 of 7 windows over 600 ms.
     /// A raise lands directly UNDER it, not at the front. Modelled
@@ -97,6 +100,7 @@ final class FakeWindowServer: @unchecked Sendable {
             sleep: { [self] seconds in clock += seconds },
             isCurrent: { [self] in
                 raised.count < currentUntilRaises
+                    && clock < currentUntilClock
             },
             floor: floor,
             policy: policy

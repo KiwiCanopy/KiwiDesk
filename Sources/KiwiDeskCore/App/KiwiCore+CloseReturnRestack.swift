@@ -41,11 +41,13 @@ extension KiwiCore {
         else { return }
         let from = min(slot, tiled.count - 1)
         // A close brings the pile's next window into view, whose
-        // order a restore no longer keeps (#2985).
+        // order a restore no longer keeps (#2985). The fold moved the
+        // focus already, so no focus raise owes the floats this lift.
         if abs(targetIndex - from) > 1
             || scrollingRowShowsOthers(leaving: nil)
         {
             scheduleScrollingZOrderRestoreIfOverflowing()
+            raiseFloatsAbove(afterFocusing: target)
         }
     }
 }

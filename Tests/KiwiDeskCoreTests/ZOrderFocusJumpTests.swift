@@ -8,7 +8,7 @@ import Testing
 /// #674: the scrolling edge-pile restore was armed only by swaps,
 /// window drags and Desktop switches — never by a plain
 /// focus change or an App Bar drop. A ±1 focus step masked the
-/// gap (the lone target raise is the whole visible change), but
+/// gap (the lone target raise was the whole visible change), but
 /// an App Bar item carries an absolute `WindowID`, so a click can
 /// jump several slots and leave every window between the two
 /// stacked for the previous focus.
@@ -102,10 +102,10 @@ struct ZOrderFocusJumpTests {
         #expect(!core.pendingZOrderRestore)
     }
 
-    /// A ±1 step needs no restack: the target raise is the whole
-    /// visible change. Arming it anyway would put a full pile
-    /// re-raise — which buries the float layer until the next
-    /// genuine focus event — on every scrolling focus step.
+    /// A ±1 step showing nothing but its own two windows needs no
+    /// restack: the target raise is the whole visible change. Arming
+    /// it anyway would bury the float layer until the next genuine
+    /// focus event on every scrolling focus step.
     @Test("A single-slot step in the same row arms nothing")
     func singleSlotStepSkipsRestore() {
         let core = makeCore()

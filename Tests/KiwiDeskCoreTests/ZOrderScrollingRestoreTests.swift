@@ -220,14 +220,15 @@ struct ZOrderScrollingRestoreTests {
     @Test("A superseded drain stops waiting")
     func supersededStopsWaiting() {
         let server = FakeWindowServer(order: ids([1, 3, 4]))
-        server.currentUntilRaises = 0
+        // Current at the drain's opening guard, stale within the wait.
+        server.currentUntilClock = 0.03
         let drain = server.restoreDrain(
             above: ids([1]),
             front: WindowID(4)
         )
         _ = drain.run(ids([3]))
         #expect(server.raised.isEmpty)
-        #expect(server.clock == 0)
+        #expect(server.clock < ZOrderDrain.landingLimit)
     }
 
     @Test("A drain that names no focus does not wait")

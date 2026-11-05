@@ -171,8 +171,10 @@ extension KiwiCore {
         }
     }
 
-    /// The largest single cover, as `BarVisibility.judge` reads it,
-    /// with the App Bar's share for "all but buried".
+    /// The largest single cover, with the App Bar's constant for
+    /// "all but buried" as a share of the window's area. The App
+    /// Bar's own strip test is a length along the cut axis, so the
+    /// two can disagree on one window.
     private nonisolated static func showsMoreThanAStrip(
         _ rect: CGRect,
         under over: [CGRect],

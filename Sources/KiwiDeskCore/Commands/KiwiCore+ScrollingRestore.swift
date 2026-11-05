@@ -47,29 +47,69 @@ extension KiwiCore {
     )? {
         let tiled = state.effectiveTiledMembers(of: space)
         guard tiled.count > 1,
-            let usable = tiler.layoutInput(state: state)?.context.usable
+            let input = tiler.layoutInput(state: state)
         else { return nil }
         let anchor = state.focusAnchor(of: space, tiled: tiled)
+        // A focused float has no slot: the slot the layout seats then
+        // decides what is buried, as it decides the frames.
+        let seated =
+            anchor.flatMap { tiled.contains($0) ? $0 : nil }
+            ?? ScrollingLayout.subject(of: tiled, context: input.context)
         let plan = Self.scrollingRestorePlan(
             tiled,
-            focusIndex: anchor.flatMap { tiled.firstIndex(of: $0) } ?? 0,
+            focusIndex: seated.flatMap { tiled.firstIndex(of: $0) } ?? 0,
             frames: tiler.calculatedFrames(state: state),
-            on: usable
+            on: input.context.usable
         )
         return (plan.raise, plan.floor, plan.shown, anchor)
     }
 
-    /// Whether a focus step owes a restore. False from a focused
-    /// float, as `scrollFocusJumpsSlots` is: no evidence of a move
-    /// along the row, and a spurious restack buries that float.
-    func scrollFocusStepShowsOthers(
+    /// Whether a focus move along the row owes a restore: the row
+    /// moved, by the pass's persisted offset against `offsetBefore`,
+    /// and shows another window. False unless both ends are in the
+    /// row, as `scrollFocusJumpsSlots` is: a restore buries floats
+    /// (#418), and a focused float owes no raise that lifts them
+    /// back. A held pass pans later, and a drain still running was
+    /// planned for the old focus.
+    func scrollFocusMoveOwesRestore(
         to target: WindowID,
-        from previous: WindowID?
+        from previous: WindowID?,
+        offsetBefore: CGFloat?
     ) -> Bool {
         guard let previous, previous != target, let space = activeSpace,
-            state.effectiveTiledMembers(of: space).contains(previous)
+            space.mode == .scrolling
         else { return false }
-        return scrollingRowShowsOthers(leaving: previous)
+        let tiled = state.effectiveTiledMembers(of: space)
+        guard tiled.contains(previous), tiled.contains(target) else {
+            return false
+        }
+        let moved =
+            space.scrollRest?.offset != offsetBefore
+            || tiler.motionGate.owed != nil
+            || floatRaiseDebt.restoresInFlight > 0
+        return moved && scrollingRowShowsOthers(leaving: previous)
+    }
+
+    /// The focus report's arm (#2985): a click or an app's activation
+    /// pans the row with no command behind it. Our own raise's echo
+    /// moved no focus, so the ask refuses it. Not macOS restoring a
+    /// Desktop's focus, since a drain's quiet raises have no #1345
+    /// gate and the draw list shows both Desktops mid-switch.
+    func armReportedScrollMove(
+        to id: WindowID,
+        from previous: WindowID?,
+        offsetBefore: CGFloat?,
+        now: Date
+    ) {
+        guard !eventLoop.isWithinSpaceSwitchGrace(now: now),
+            !isRestoredDesktopFocus(id, now: now),
+            scrollFocusMoveOwesRestore(
+                to: id,
+                from: previous,
+                offsetBefore: offsetBefore
+            )
+        else { return }
+        scheduleScrollingZOrderRestoreIfOverflowing()
     }
 
     /// Whether the row now shows a window nothing raised, past the

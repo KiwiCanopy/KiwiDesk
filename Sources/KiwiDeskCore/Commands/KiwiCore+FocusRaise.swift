@@ -181,6 +181,7 @@ extension KiwiCore {
             if let ended { retileEndingMaximize(ended) }
             return true
         }
+        let offsetBefore = activeSpace?.scrollRest?.offset
         retileWithScrollDuration(
             sizing: endedMaximize ? .allSpringSized : .mayInstantSize,
             stateChange: ended
@@ -239,9 +240,9 @@ extension KiwiCore {
         // Scrolling: a multi-slot JUMP leaves every window
         // between the old and the new focus stacked for the old
         // one, which the edge piles show (#674). A ±1 step owes it
-        // only where it brings a window into view beyond the one it
-        // left (#2985): the raise above fronts the new focus, and a
-        // restore keeps only what shows in order. An App Bar item
+        // only where the row moved and shows a window beyond the one
+        // it left (#2985): the raise above fronts the new focus, and
+        // a restore keeps only what shows in order. An App Bar item
         // carries an absolute `WindowID`, which is how a click
         // crosses several slots at once.
         //
@@ -272,7 +273,11 @@ extension KiwiCore {
         // see every second jump silently skip its restack
         // (owner device QA, 2026-08-02).
         if scrollFocusJumpsSlots(to: id, from: previousFocused)
-            || scrollFocusStepShowsOthers(to: id, from: previousFocused)
+            || scrollFocusMoveOwesRestore(
+                to: id,
+                from: previousFocused,
+                offsetBefore: offsetBefore
+            )
         {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }

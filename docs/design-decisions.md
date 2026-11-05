@@ -3727,13 +3727,16 @@ screen plugged in or out is correct from the retile the display
 change already triggers.
 
 :::unreleased
-**A wall's pile keeps only what shows in order (#2985).** A restore
-raises the windows that show and leaves the buried ones below them
-in any order, because raising a long row one verified window at a
-time outran its time budget, and the windows raised last are the
-ones on screen. A step or a close that brings a buried window into
-view takes a restore of its own for that reason, which a whole-row
-restack never needed. Corner-parking the buried windows would remove
+**A Scrolling pile keeps only what shows in order (#2985).** A
+Scrolling restore raises the windows that show and leaves the buried
+ones below them in any order, because raising a long row one verified
+window at a time outran its time budget, and the windows raised last
+are the ones on screen. A focus move that moves the row, by command or
+by a click, and a focused close take a restore of their own for that
+reason, which a whole-row restack never needed. A change that keeps
+the focus takes none: a restore ends by re-asserting the focus, which
+would steal it from an event nobody asked to move focus for, and such
+a change owes the floats no raise back. Corner-parking the buried windows would remove
 the overlap instead, and was rejected again: walled on both sides,
 the hide corner hangs the body onto a neighbouring screen, which is
 what the wall exists to prevent, every park snaps, and a slot that

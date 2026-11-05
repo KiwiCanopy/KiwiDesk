@@ -23,6 +23,8 @@ struct ZOrderScrollingRestoreWiringTests {
         )
         #expect(restore.contains("plan.raise,"))
         #expect(restore.contains("front:plan.anchor"))
+        // An empty plan lifts the anchor, not nothing.
+        #expect(restore.contains("plan.anchor.map{[$0]}??[]"))
         // The floor reaches both arms, the empty plan's included.
         let floors = restore.components(separatedBy: "above:plan.floor")
         #expect(floors.count == 3)
@@ -59,13 +61,53 @@ struct ZOrderScrollingRestoreWiringTests {
         }
     }
 
-    @Test("A step and a close arm on a window coming into view")
-    func stepAndCloseArm() throws {
+    /// The offset is read ahead of the pass and asked after it, at
+    /// both doors a focus move comes through: read after, every step
+    /// reads as no move.
+    @Test("A focus move and a report ask around their pass")
+    func movesAskAroundThePass() throws {
         let focus = try body(
             of: "focusWindow",
             in: "KiwiCore+FocusRaise.swift"
         )
-        #expect(focus.contains("||scrollFocusStepShowsOthers(to:id,"))
+        try expectAskAroundPass(
+            focus,
+            ask: "||scrollFocusMoveOwesRestore(to:id,"
+        )
+        let report = try SourceScan.functionBody(
+            of: "handleWindowFocused",
+            in: "KiwiCore+FocusEvents.swift",
+            under: "App"
+        ).filter { !$0.isWhitespace }
+        try expectAskAroundPass(
+            report,
+            ask: "armReportedScrollMove(to:id,"
+        )
+        let ask = try body(
+            of: "scrollFocusMoveOwesRestore",
+            in: "KiwiCore+ScrollingRestore.swift"
+        )
+        #expect(ask.contains("tiler.motionGate.owed!=nil"))
+        #expect(ask.contains("floatRaiseDebt.restoresInFlight>0"))
+    }
+
+    private func expectAskAroundPass(
+        _ source: String,
+        ask: String
+    ) throws {
+        let read = try #require(
+            source.range(of: "letoffsetBefore=activeSpace?.scrollRest?.offset")
+        )
+        let pass = try #require(
+            source.range(of: "retileWithScrollDuration(")
+        )
+        let asked = try #require(source.range(of: ask))
+        #expect(read.upperBound <= pass.lowerBound)
+        #expect(pass.upperBound <= asked.lowerBound)
+    }
+
+    @Test("A close arms on another window, and owes the floats")
+    func closeArms() throws {
         let close = try SourceScan.functionBody(
             of: "armCloseReturnRestack",
             in: "KiwiCore+CloseReturnRestack.swift",

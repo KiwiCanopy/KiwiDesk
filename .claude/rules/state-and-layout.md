@@ -1144,7 +1144,9 @@ editing here:
   never a filter beside it: an undrawn float takes no raise and
   is no focus recipient (#2850, `EmptySwitchYieldVisibilityTests`).
 - A mutation that can change **which windows overlap** — a
-  reorder, a swap, a focus move that crosses more than one slot —
+  reorder, a swap, a focus move that crosses more than one slot
+  or, in Scrolling, moves the row and shows another window (#2985,
+  below) —
   **arms the matching z-order restore after its own retile**
   (`scheduleScrollingZOrderRestoreIfOverflowing`,
   `scheduleTrackZOrderRestoreIfOverflowing`, or
@@ -1231,16 +1233,20 @@ editing here:
   budget and left the shown windows, raised last, unverified. A
   window off the area or inside one window stacked over it is
   buried, its order cannot show, and it is the plan's floor, the
-  previous focus among them; a new reason to raise a window joins
-  the plan rather than a filter beside it. An empty plan lifts the
+  previous focus too when it is buried; a new reason to raise a
+  window joins the plan rather than a filter beside it. An empty plan lifts the
   anchor over the floor, as Monocle's restore does, so the reliable
   raise and the closing re-assert still run.
-  **The buried order is no longer kept, so a mutation that brings a
-  buried window into view owes a restore where it would not have
-  before.** A step and a close ask `scrollingRowShowsOthers`, which
-  leaves out the window the focus left and one showing no more than
-  a strip; a new such mutation takes the same ask or states the
-  residue in `docs/accepted-limitations.md`.
+  **The buried order is no longer kept, so a door that moves the
+  focus and the row owes a restore where it would not have before,
+  through `scrollFocusMoveOwesRestore`** — the row moved, by
+  `Space.scrollRest`'s offset read ahead of the pass, and
+  `scrollingRowShowsOthers` answers, whose area share is its own and
+  not the App Bar's strip test — or, on a focused close, through
+  `scrollingRowShowsOthers` alone, with the float raise the close
+  owes. **A door that keeps the focus arms nothing**: a restore ends
+  in a focus re-assert and owes no float raise (#936, #418), so it
+  states its residue in `docs/accepted-limitations.md`.
   **The deferred focus raise pays ahead of the restore in
   `tiledPlaneCameToRest`, and the drain waits on it through
   `ZOrderDrain.front`**, since a quiet raise cannot beat the old
