@@ -84,6 +84,51 @@ struct HoldGlideRefusalWiringTests {
         #expect(refusals.count == 1)
     }
 
+    @Test("A press during a glide still cues its refusal (#3017)")
+    func pressDuringGlideCues() throws {
+        let f = try HoldGlideFixture(
+            body: #"KiwiDesk.resize("x", -200)"#
+        )
+        f.core.execute(
+            "set_min_window_size",
+            args: [.number(300)]
+        )
+        f.seedBspPair()
+        var refusals: [ResizeRefusal] = []
+        f.core.borders.onResizeRefusal = { refusals.append($0) }
+        f.registrar.press(keyCode: f.combo.keyCode)
+        try f.beginGlide()
+        // Stops with the glide, so a later press from rest cannot
+        // answer for the one the glide was running under.
+        var presses = 0
+        while f.core.keys.isGliding, refusals.isEmpty {
+            f.registrar.press(keyCode: f.combo.keyCode)
+            presses += 1
+            try #require(presses < 20)
+        }
+        #expect(refusals.count == 1)
+    }
+
+    @Test("A retile's cue during a glide still draws (#3017)")
+    func retileDuringGlideCues() throws {
+        let f = try HoldGlideFixture(
+            body: #"KiwiDesk.resize("x", -50)"#
+        )
+        f.seedBspPair()
+        var refusals: [ResizeRefusal] = []
+        f.core.borders.onResizeRefusal = { refusals.append($0) }
+        f.registrar.press(keyCode: f.combo.keyCode)
+        try f.beginGlide()
+        #expect(f.core.keys.isGliding)
+        f.core.refuseFloorUnfitAtRetile(
+            WindowID(1),
+            anchor: WindowID(2),
+            axis: "x"
+        )
+        #expect(refusals.count == 1)
+        #expect(f.core.keys.isGliding)
+    }
+
     @Test("A press refused at the wall arms nothing")
     func refusedPressNeverArms() throws {
         // A floating window already at the minimum: the shrink
