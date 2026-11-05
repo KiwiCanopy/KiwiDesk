@@ -37,7 +37,7 @@ final class FrameApplier {
     /// The AX writes the queues perform; a test counts them.
     var writer = FrameWriter.live
 
-    /// Every screen's whole AX frame, for the edge band (#2894).
+    /// Every screen's whole AX frame, for the edge band and `sizeLead`.
     var screenFrames: @MainActor () -> [CGRect] = { [] }
     /// "Displays have separate Spaces", for the edge band (#2966).
     var separateSpaces: @MainActor () -> Bool = { false }

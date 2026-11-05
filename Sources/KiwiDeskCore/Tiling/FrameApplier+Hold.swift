@@ -16,8 +16,7 @@ final class HeldWrites: @unchecked Sendable {
     struct Entry: Equatable {
         var frame: CGRect
         var setSize: Bool
-        /// The screen whose edge band the size write clears
-        /// (#2894).
+        /// The edge band the size write clears (#2894, #2966).
         var band: EdgeBand? = nil
         /// A floating resize's write (#2981).
         var lead: SizeLedWrite.Lead? = nil

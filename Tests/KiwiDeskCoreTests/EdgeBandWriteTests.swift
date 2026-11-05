@@ -86,7 +86,7 @@ struct EdgeBandWriteTests {
         )
     }
 
-    @Test("A frame ending near a screen's bottom names that screen")
+    @Test("A frame ending near a screen's bottom names its band")
     func screenNearTheBottom() {
         let near = { EdgeBandWrite.band(for: $0, among: [self.band]) }
         #expect(near(slot) == band)

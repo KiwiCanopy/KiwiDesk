@@ -68,7 +68,7 @@ struct EdgeBandRightEdgeTests {
         AXUIElementCreateApplication(getpid())
     }
 
-    @Test("A frame ending near a screen's right edge names that screen")
+    @Test("A frame ending near a screen's right edge names its band")
     func screenNearTheRight() {
         let near = { EdgeBandWrite.band(for: $0, among: [self.band]) }
         #expect(near(upper) == band)

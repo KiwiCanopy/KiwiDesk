@@ -21,7 +21,8 @@ struct EdgeBand: Equatable, Sendable {
 /// (#2966, table in the issue), anywhere along it: where along an
 /// edge macOS refuses depends on the neighbours' extent, which no
 /// gate here models. With "Displays have separate Spaces" on, the
-/// bottom band is measured gone; the right edge is not measured
+/// bottom band was gone in one Finder run (2026-11-04); its control
+/// with the setting off was Firefox. The right edge is not measured
 /// there, so it keeps its band.
 enum EdgeBandWrite {
     /// How far inside a screen's bottom or right edge a shrink is

@@ -1771,15 +1771,15 @@ editing here:
   moves a window ending near a screen's bottom or right edge
   clear of it before sizing it, which macOS would otherwise
   refuse; its docstring carries
-  the measurement. Only an edge with a band lifts (#2966,
-  `EdgeBandGateTests`): another screen reaches past it, and for the
-  bottom, "Displays have separate Spaces" is off. A lift that runs
-  where nothing refuses is a visible jump per press. The screens it
-  reads come from `TilingEngine.allScreenFrames`, never a live read
-  in the applier.
+  the measurement. Lift only an edge `EdgeBandWrite.bands` names
+  (#2966, `EdgeBandGateTests`); its docstring carries where a band
+  is measured and where it is not. A lift that runs where nothing
+  refuses is a visible jump per press. The screens it reads come
+  from `TilingEngine.allScreenFrames`, never a live read in the
+  applier, and the setting through `FrameApplier.separateSpaces`.
   Whether a write shrinks the window is the window's own frame,
-  read on its queue for every sized write ending near either
-  edge — never a record of what was asked or echoed, which an
+  read on its queue for every sized write ending near an edge
+  with a band — never a record of what was asked or echoed, which an
   app's own resize or a spring's overshoot leaves behind. A merge
   over a waiting write keeps its band through the one
   `EdgeBandWrite.mergedBand`, held and queued alike

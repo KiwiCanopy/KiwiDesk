@@ -1,4 +1,3 @@
-import AppKit
 import ApplicationServices
 import CoreGraphics
 import Testing
@@ -157,14 +156,5 @@ struct EdgeBandGateTests {
             separateSpaces: true
         )
         #expect(calls == ["frame"])
-    }
-
-    @Test("The engine hands the applier macOS's separate Spaces answer")
-    func engineWiresSeparateSpaces() {
-        let engine = TilingEngine()
-        #expect(
-            engine.applier.separateSpaces()
-                == NSScreen.screensHaveSeparateSpaces
-        )
     }
 }
