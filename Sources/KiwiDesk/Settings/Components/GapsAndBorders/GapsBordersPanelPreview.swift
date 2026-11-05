@@ -67,9 +67,10 @@ struct GapsBordersPanelPreview: View {
                     .system(size: 10, weight: .semibold)
                         .monospaced()
                 )
-                .kerning(1.2)
+                .kerning(1.4)
                 .textCase(.uppercase)
                 .foregroundStyle(SettingsTheme.ink3)
+                .accessibilityAddTraits(.isHeader)
             content()
         }
     }

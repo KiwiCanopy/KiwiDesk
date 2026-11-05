@@ -99,7 +99,10 @@ struct AnnouncedValuePinTests {
     /// headings (architect review, 2026-08-24).
     private static let headings: [String: Int] = [
         "SettingsSection.swift": 2,
-        "SettingsDetailPanel.swift": 2,
+        // The panel's eyebrows, through its one helper.
+        "SettingsDetailPanel.swift": 1,
+        // Gaps & Borders' preview groups (#2983).
+        "GapsBordersPanelPreview.swift": 1,
         // Every drawer header, through the one style (#1021).
         // Fifteen of them were absent from the headings rotor —
         // the owner's "too small to read as one", on the channel
