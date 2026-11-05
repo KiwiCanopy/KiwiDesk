@@ -64,11 +64,12 @@ count in this sentence for the next author to falsify.
 11. `site.yml`'s list of inputs names everything this gate runs,
    imports or reads from outside the site, because a wrong skip
    passes a required check with nothing built. It sees the build
-   job's scripts and their repo imports, joins onto this file's repo
-   root, symlinks under the site, and string paths climbing out of
-   the site to a file at the repo root. A read through a helper or a
-   computed path goes unseen, and so does `extract-keys`' own root,
-   whose joins are mostly for the app mode the gate never takes.
+   job's scripts and their repo imports, literal joins onto this
+   file's repo root, symlinks under the site, and literal `../` paths
+   that resolve out of the site from the file holding them, or
+   `process.cwd(), "..", name` from the site. A read through a helper
+   or a computed path goes unseen, and so does `extract-keys`' own
+   root, whose joins are mostly for the app mode the gate never takes.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -1927,7 +1928,12 @@ def listed_inputs(workflow: str) -> list[str]:
             if not entry:
                 fail(
                     f"site.yml: {line.strip()!r} is neither a plain "
-                    'path nor "dir/**", so every PR builds'
+                    'path nor "dir/**", which the filter cannot compare'
+                )
+            if (REPO / entry[1]).is_dir():
+                fail(
+                    f'site.yml: "{entry[1]}" is a directory, and only '
+                    f'"{entry[1]}/**" matches what is inside it'
                 )
             entries.append(entry[1])
     if not entries:
@@ -1956,7 +1962,10 @@ def gate_scripts(roots: list[str]) -> list[str]:
             continue
         seen.append(script)
         text = (REPO / script).read_text("utf-8")
-        for module in re.findall(r"^(?:from|import) (\w+)", text, re.M):
+        modules = re.findall(r"^\s*from (\w+)", text, re.M)
+        for spelled in re.findall(r"^\s*import ([\w ,.]+)", text, re.M):
+            modules += [name.split()[0] for name in spelled.split(",")]
+        for module in modules:
             path = f"scripts/{module}.py"
             if (REPO / path).exists():
                 work.append(path)
@@ -1964,32 +1973,55 @@ def gate_scripts(roots: list[str]) -> list[str]:
 
 
 def site_outside_reads(root: str) -> tuple[list[str], list[str]]:
-    """Symlink targets and root files the site's sources climb to."""
+    """Symlink targets and `../` paths leading out of the site."""
+    site = REPO / root
     links: list[str] = []
-    parents: list[str] = []
-    for folder, dirs, files in os.walk(REPO / root):
-        dirs[:] = [
-            name for name in dirs
-            if name not in {"node_modules", "dist", ".astro"}
-        ]
+    climbs: list[str] = []
+
+    def out_of_site(target: str) -> str | None:
+        target = os.path.normpath(target)
+        inside = target.startswith(str(REPO) + os.sep)
+        if not inside or target.startswith(str(site) + os.sep):
+            return None
+        return os.path.relpath(target, REPO)
+
+    for folder, dirs, files in os.walk(site):
+        if pathlib.Path(folder) == site:
+            dirs[:] = [
+                name for name in dirs
+                if name not in {"node_modules", "dist", ".astro", ".cache"}
+            ]
         for name in dirs + files:
             path = pathlib.Path(folder) / name
             if path.is_symlink():
-                target = os.path.normpath(
+                target = out_of_site(
                     os.path.join(folder, os.readlink(path))
                 )
-                links.append(os.path.relpath(target, REPO))
-            elif path.suffix in {".ts", ".mjs", ".astro"}:
-                text = path.read_text("utf-8")
-                for found in re.findall(
-                    r"""["'`](?:\.\./)+([\w.-]+)["'`]"""
-                    r"""|["']\.\.["'], *["']([\w.-]+)["']""",
+                if target:
+                    links.append(target)
+        for name in files:
+            path = pathlib.Path(folder) / name
+            if path.is_symlink() or path.suffix not in SCAN_SUFFIXES:
+                continue
+            text = source_without_comments(path)
+            found = [
+                os.path.join(folder, literal)
+                for literal in re.findall(
+                    r"""["'`]((?:\.\./)+[^"'`\s?]+)(?:\?\w+)?["'`]""",
                     text,
-                ):
-                    parent = found[0] or found[1]
-                    if (REPO / parent).exists():
-                        parents.append(parent)
-    return links, parents
+                )
+            ] + [
+                os.path.join(site, "..", literal)
+                for literal in re.findall(
+                    r'''process\.cwd\(\),\s*["']\.\.["'],\s*'''
+                    r'''["']([^"']+)["']''',
+                    text,
+                )
+            ]
+            for target in map(out_of_site, found):
+                if target and (REPO / target).exists():
+                    climbs.append(target)
+    return links, climbs
 
 
 def check_gate_inputs() -> None:
@@ -2014,7 +2046,7 @@ def check_gate_inputs() -> None:
         "/".join(re.findall(r'"([^"]+)"', spelled))
         for script in scripts
         for spelled in re.findall(
-            r'REPO((?: / "[^"]+")+)',
+            r'REPO((?:\s*/\s*"[^"]+")+)(?!\s*/)',
             (REPO / script).read_text("utf-8"),
         )
     ]

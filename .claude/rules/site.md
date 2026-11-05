@@ -634,10 +634,10 @@ what lets a Swift-only PR through (`SiteGateRequiredTests`).
 runs, imports or reads outside `site/` joins that one list, since a
 wrong skip passes the check with nothing built;
 `check-site-tokens.py` ▸ `check_gate_inputs` holds the list to the
-shapes its docstring names, on this gate for the reason the feed
-check is, and a read of any other shape is review's. An entry
-written as anything but a plain `- "path"` or `- "dir/**"` builds every
-PR until it is fixed.
+shapes its header's item 11 names, on this gate for the reason the feed
+check is, and a read of any other shape is review's. Write an entry as
+a plain `- "path"` or `- "dir/**"`: the filter builds on anything else
+and this gate refuses it.
 
 The price is accepted: a red on this gate blocks the merge with no
 override, so a site gate that reads a remote source (the voices'
