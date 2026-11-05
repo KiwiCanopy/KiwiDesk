@@ -70,6 +70,10 @@ count in this sentence for the next author to falsify.
    `process.cwd(), "..", name, ...` from the site. A read through a helper
    or a computed path goes unseen, and so does `extract-keys`' own
    root, whose joins are mostly for the app mode the gate never takes.
+12. No inline script runs without its hash: every page's own script
+   policy precedes its first script, allows each inline script it
+   carries, and no element uses an `on*` attribute, which a hash
+   cannot allow.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -90,6 +94,8 @@ of a silently skipped assertion.
 from __future__ import annotations
 
 import argparse
+import base64
+import hashlib
 import html.parser
 import importlib.machinery
 import importlib.util
@@ -1552,6 +1558,87 @@ def check_raster_favicon(dist: pathlib.Path) -> None:
     print(f"raster favicon: declared on all {len(pages)} built page(s)")
 
 
+class _ScriptAudit(html.parser.HTMLParser):
+    """Collects a page's script policies, inline scripts and `on*` attributes,
+    with a real parser so it cannot share a misparse with the build step."""
+
+    def __init__(self) -> None:
+        super().__init__(convert_charrefs=False)
+        self.policies: list[str] = []
+        self.first_script_after_policy = True
+        self.inline: list[str] = []
+        self.handlers: list[str] = []
+        self._body: list[str] | None = None
+
+    def handle_starttag(self, tag, attrs) -> None:
+        named = dict(attrs)
+        self.handlers += [n for n, _ in attrs if n.startswith("on")]
+        if tag == "meta":
+            if (named.get("http-equiv") or "").lower() == (
+                "content-security-policy"
+            ):
+                self.policies.append(named.get("content") or "")
+        elif tag == "script":
+            if not self.policies:
+                self.first_script_after_policy = False
+            self._body = None if "src" in named else []
+
+    def handle_data(self, data) -> None:
+        if self._body is not None:
+            self._body.append(data)
+
+    def handle_endtag(self, tag) -> None:
+        if tag == "script" and self._body is not None:
+            body = "".join(self._body)
+            if body.strip():
+                self.inline.append(body)
+            self._body = None
+
+
+def check_inline_scripts_hashed(dist: pathlib.Path) -> None:
+    """Every inline script runs by hash, on every built page (#3021).
+
+    A page whose script is missing from its policy loses that script with
+    only a console error to show for it, so a build stays green while theme
+    switching or a page's controls stop working.
+    """
+    pages = sorted(dist.rglob("*.html"))
+    problems: list[str] = []
+    total = 0
+    for page in pages:
+        audit = _ScriptAudit()
+        audit.feed(page.read_text())
+        audit.close()
+        name = page.relative_to(dist)
+        if len(audit.policies) != 1:
+            problems.append(f"{name}: {len(audit.policies)} script policies")
+            continue
+        policy = audit.policies[0]
+        if "'unsafe-inline'" in policy:
+            problems.append(f"{name}: policy allows 'unsafe-inline'")
+        if not audit.first_script_after_policy:
+            problems.append(f"{name}: a script precedes the policy")
+        if audit.handlers:
+            problems.append(f"{name}: inline handler {audit.handlers[0]}")
+        for body in audit.inline:
+            total += 1
+            digest = base64.b64encode(
+                hashlib.sha256(body.encode()).digest()
+            ).decode()
+            if f"'sha256-{digest}'" not in policy:
+                problems.append(f"{name}: unhashed {body.strip()[:40]!r}")
+    if not total:
+        fail("script policy: no inline scripts found, so nothing was checked")
+    if problems:
+        listed = "; ".join(problems[:5])
+        fail(
+            f"{len(problems)} script policy problem(s): {listed}. "
+            "site/csp-inline-scripts.mjs writes these policies at build."
+        )
+    print(f"script policy: {total} inline script(s) hashed "
+          f"across {len(pages)} page(s)")
+
+
 def check_no_sanity_in_dist(dist: pathlib.Path) -> None:
     """No built page loads an image from another host, and no built
     file names a Sanity host (#2369).
@@ -2101,6 +2188,7 @@ def main() -> None:
     check_typed_changelog(dist)
     check_roadmap_feed(dist)
     check_raster_favicon(dist)
+    check_inline_scripts_hashed(dist)
     check_no_sanity_in_dist(dist)
     check_voices_rendered(dist)
     check_looks_rendered(dist)
