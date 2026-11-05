@@ -193,7 +193,9 @@ Desktop.
 
 The profile it loads applies to every screen, so a second screen
 can change Space too, even though its Desktop did not. A Space
-both profiles have stays on screen.
+both profiles have stays on screen; for one that still has windows
+and that the new profile lacks, see [Switching holds the Spaces it
+does not name](#spaces-belong-to-a-profile-and-sit-on-screens).
 
 A Desktop you bound that is not on your main screen keeps its
 row in the card, with a *not on main screen* badge; the binding
