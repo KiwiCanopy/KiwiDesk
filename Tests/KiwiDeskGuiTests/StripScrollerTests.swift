@@ -15,19 +15,32 @@ import Testing
 /// caller.
 @Suite("Sideways strip scroller")
 struct StripScrollerTests {
-    private static func stripSources() throws -> [(String, String)] {
-        let repo = SourceScan.repoRoot(from: #filePath)
-        return try ["Settings", "Onboarding"].flatMap { tree in
-            let root = repo.appendingPathComponent("Sources/KiwiDesk/\(tree)")
-            return try SourceScan.swiftSources(under: root).map { url in
-                let source = try SourceScan.strippedSource(at: url)
-                return (
-                    url.lastPathComponent,
-                    source.split(whereSeparator: \.isWhitespace).joined()
-                )
-            }
+    private static func sources(in tree: String) throws -> [(String, String)] {
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/\(tree)")
+        return try SourceScan.swiftSources(under: root).map { url in
+            let source = try SourceScan.strippedSource(at: url)
+            return (
+                url.lastPathComponent,
+                source.split(whereSeparator: \.isWhitespace).joined()
+            )
         }
     }
+
+    private static func stripSources() throws -> [(String, String)] {
+        try sources(in: "Settings") + sources(in: "Onboarding")
+    }
+
+    /// A scroll row's two widths on their own writes, and the modifier
+    /// inside the scroll view.
+    private static let measuredRoom =
+        "ScrollView(.horizontal){content"
+        + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+        + "action:{width=$0}"
+        + ".modifier(StripScrollerRoom("
+        + "contentWidth:width,viewport:viewport))}"
+        + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+        + "action:{viewport=$0}"
 
     /// What follows each occurrence of `needle`.
     private static func tails(of needle: String, in source: String)
@@ -102,7 +115,7 @@ struct StripScrollerTests {
     /// stays inside the scroll view: a harmless modifier inside a span
     /// reds, and a bottom padding on what a host hands the strip is not
     /// seen.
-    @Test("the clearance has one home and both strips take it")
+    @Test("the clearance has one home and every strip takes it")
     func clearanceHome() throws {
         let sources = try Self.stripSources()
         let readers = sources.filter {
@@ -144,40 +157,38 @@ struct StripScrollerTests {
                 "SpacePreviewChipRow{HStack(spacing:6)"
             ) == true
         )
-        // One needle, so the content's width and the scroll view's stay
-        // on their own writes and the modifier inside the scroll view.
         #expect(
-            takers["SpacesPanelPreview.swift"]?.contains(
-                "ScrollView(.horizontal){content"
-                    + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
-                    + "action:{width=$0}"
-                    + ".modifier(StripScrollerRoom("
-                    + "contentWidth:width,viewport:viewport))}"
-                    + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
-                    + "action:{viewport=$0}"
-            ) == true
+            takers["SpacesPanelPreview.swift"]?.contains(Self.measuredRoom)
+                == true
         )
         try expectTourRowsTakeIt(takers)
     }
 
-    /// One scroll view, so a row cannot go bare beside it, and no bottom
-    /// padding, which the row's clearance replaces.
+    /// Both rows take the one scroll row. The padding clause is
+    /// file-wide, so a harmless bottom padding on a tile or a header
+    /// here reds too: that is its price for seeing one beside a row.
     private func expectTourRowsTakeIt(_ takers: [String: String]) throws {
         let tour = try #require(takers["OnboardingLooksRows.swift"])
-        let scrolls = Self.tails(of: "ScrollView(.horizontal", in: tour)
-        #expect(scrolls.count == 1)
-        let room =
-            "ScrollView(.horizontal){content"
-            + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
-            + "action:{width=$0}"
-            + ".modifier(StripScrollerRoom("
-            + "contentWidth:width,viewport:viewport))}"
-            + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
-            + "action:{viewport=$0}"
-        #expect(tour.contains(room))
+        #expect(tour.contains(Self.measuredRoom))
         let row = "OnboardingStripScroll{HStack(alignment:.top,spacing:8)"
         let rows = Self.tails(of: row, in: tour)
         #expect(rows.count == 2)
         #expect(!tour.contains(".padding(.bottom"))
+    }
+
+    /// `SidewaysStripTests` watches Settings only, so a new tour strip
+    /// needs this count to meet the clearance. It reads each
+    /// `ScrollView(`'s first argument, so an axis that opens `.vertical`
+    /// is not seen.
+    @Test("the tour's one sideways scroll view is the one with the room")
+    func tourHolders() throws {
+        var holders: [String: Int] = [:]
+        for (name, source) in try Self.sources(in: "Onboarding") {
+            for tail in Self.tails(of: "ScrollView(", in: source)
+            where !tail.hasPrefix(".vertical") {
+                holders[name, default: 0] += 1
+            }
+        }
+        #expect(holders == ["OnboardingLooksRows.swift": 1])
     }
 }
