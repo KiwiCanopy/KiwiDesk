@@ -6,8 +6,9 @@
 // fonts, versions, page details) are in the issue body.
 //
 // Works without JavaScript: the grid ships in Discover order and
-// each look's detail is a `:target` section below it. The script
-// adds search, the tag filter and the other two orders on top.
+// each look's detail is a `:target` overlay over it. The scripts
+// add search, the tag filter, the other two orders, and the
+// overlay's Escape, focus and kept scroll position on top.
 import PageShell, { type Lang } from "./PageShell.astro";
 import LookPicture from "./LookPicture.astro";
 import en from "../i18n/en.json";
@@ -296,20 +297,6 @@ const MAX_CARD_TAGS = 4;
               )}
               <div class="card__foot">
                 <div class="stats">
-                  {look.likes > 0 && (
-                    <span class="stat">
-                      <svg width="14" height="14" viewBox="0 0 16 16"
-                        fill="none" stroke="currentColor" stroke-width="1.6"
-                        aria-hidden="true">
-                        <path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.5 1.3C13.5 10.2 8 13.5 8 13.5z"
-                          stroke-linejoin="round" />
-                      </svg>
-                      <span aria-hidden="true">{shortCount(look.likes, lang)}</span>
-                      <span class="visually-hidden">
-                        {plural("looks_likes", look.likes)}
-                      </span>
-                    </span>
-                  )}
                   {look.downloads > 0 && (
                     <span class="stat">
                       <span aria-hidden="true">↓</span>
@@ -320,11 +307,26 @@ const MAX_CARD_TAGS = 4;
                     </span>
                   )}
                 </div>
-                <a class="btn btn--primary btn--sm look-get" href={action.href}
-                  aria-label={f(action.ariaKey, { name: look.name })}>
-                  {t(action.labelKey)}
-                </a>
-                <span class="touch-note">{t("looks_touch_card")}</span>
+                <div class="card__actions">
+                  <a class="like-btn" href={look.likeUrl} target="_blank"
+                    rel="noopener" aria-label={likeAria(look)}
+                    title={likeAria(look)}>
+                    <svg width="16" height="16" viewBox="0 0 16 16"
+                      fill="none" stroke="currentColor" stroke-width="1.6"
+                      aria-hidden="true">
+                      <path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.5 1.3C13.5 10.2 8 13.5 8 13.5z"
+                        stroke-linejoin="round" />
+                    </svg>
+                    {look.likes > 0 && (
+                      <span aria-hidden="true">{shortCount(look.likes, lang)}</span>
+                    )}
+                  </a>
+                  <a class="btn btn--primary btn--sm look-get" href={action.href}
+                    aria-label={f(action.ariaKey, { name: look.name })}>
+                    {t("looks_add_card")}
+                  </a>
+                  <span class="touch-note">{t("looks_touch_card")}</span>
+                </div>
               </div>
             </div>
           </li>
@@ -346,108 +348,125 @@ const MAX_CARD_TAGS = 4;
         .map((id) => byId.get(id))
         .filter((l): l is Look => !!l);
       return (
-        <article class="detail" id={anchor(look.id)}
-          aria-labelledby={titleId(look.id)}>
-          <a class="detail__back small" href={`#${cardId(look.id)}`}>
-            <span aria-hidden="true">← </span>{t("looks_back")}
-          </a>
-          <LookPicture look={look} size="detail"
-            badgeScreenshot={t("looks_badge_screenshot")}
-            badgePreview={t("looks_badge_preview")}
-            altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })} />
-          <h2 id={titleId(look.id)}>{look.name}</h2>
-          <p class="byline">{f("looks_by", { author: look.author })}</p>
-          {credit && <p class="based" set:html={credit} />}
-          {look.description && <p class="desc">{look.description}</p>}
-
-          <div class="detail__actions">
-            <a class="btn btn--primary btn--sm look-get" href={action.href}
-              aria-label={f(action.ariaKey, { name: look.name })}>
-              {t(action.labelKey)}
+        <article class="detail" id={anchor(look.id)} role="dialog"
+          aria-modal="true" aria-labelledby={titleId(look.id)}
+          data-card={cardId(look.id)}>
+          <a class="detail__scrim" href={`#${cardId(look.id)}`} tabindex="-1"
+            aria-hidden="true"></a>
+          <div class="detail__sheet" tabindex="-1">
+            <a class="detail__close" href={`#${cardId(look.id)}`}
+              aria-label={t("looks_back")} title={t("looks_back")}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none"
+                stroke="currentColor" stroke-width="1.8" aria-hidden="true">
+                <path d="M2 2l10 10M12 2L2 12" stroke-linecap="round" />
+              </svg>
             </a>
-            <a class="seg" href={look.likeUrl} target="_blank"
-              rel="noopener" aria-label={likeAria(look)}>
-              <span class="seg__main">
-                <svg width="15" height="15" viewBox="0 0 16 16" fill="none"
-                  stroke="currentColor" stroke-width="1.6" aria-hidden="true">
-                  <path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.5 1.3C13.5 10.2 8 13.5 8 13.5z"
-                    stroke-linejoin="round" />
-                </svg>
-                {t("looks_like")}
-                <span class="seg__out" aria-hidden="true">↗</span>
-              </span>
-              {look.likes > 0 && (
-                <span class="seg__count">
-                  {f("looks_like_count", { n: fullCount(look.likes, lang) })}
-                  <Fragment set:html={ghMark} />
-                </span>
-              )}
-            </a>
-            {look.downloads > 0 && (
-              <span class="small">
-                <span aria-hidden="true">↓ </span>
-                {plural("looks_downloads", look.downloads)}
-              </span>
-            )}
-          </div>
-          <p class="small look-get look-file">
-            <a href={look.downloadUrl}>{t("looks_download_file")}</a>
-          </p>
-          <p class="touch-note">{t("looks_touch_detail")}</p>
+            <div class="detail__main">
+              <LookPicture look={look} size="detail"
+                badgeScreenshot={t("looks_badge_screenshot")}
+                badgePreview={t("looks_badge_preview")}
+                altScreenshot={f("looks_picture_alt_screenshot", { name: look.name })} />
+              <div class="detail__info">
+                <h2 id={titleId(look.id)}>{look.name}</h2>
+                <p class="byline">{f("looks_by", { author: look.author })}</p>
+                {credit && <p class="based" set:html={credit} />}
+                {look.description && <p class="desc">{look.description}</p>}
 
-          <hr class="rule" />
-          {needsNewerApp(look) && (
-            <p class="needs">{t("looks_needs_newer")}</p>
-          )}
-          <ul class="facts">
-            {look.version && (
-              <li>{f("looks_made_with", { version: look.version })}</li>
-            )}
-            <li>{dateLine(look)}</li>
-            {font && <li>{f("looks_font", { font })}</li>}
-            {wallpaper && <li set:html={wallpaper} />}
-          </ul>
-          {look.needsFonts.map((name) => (
-            <p class="needs" set:html={needsFontHtml(look, name)} />
-          ))}
-          {look.tags.length > 0 && (
-            <ul class="tags">
-              {look.tags.map((tag) => <li class="tag">{tag}</li>)}
-            </ul>
-          )}
-          {look.inspiredBy && (
-            <p class="facts-line">
-              {f("looks_inspired_by", { palette: look.inspiredBy })}
-            </p>
-          )}
-          {look.keywords.length > 0 && (
-            <p class="keywords">
-              {f("looks_keywords", { list: look.keywords.join(", ") })}
-            </p>
-          )}
-
-          {derived.length > 0 && (
-            <>
-              <hr class="rule" />
-              <h3>{t("looks_built_on")}</h3>
-              <ul class="built">
-                {derived.map((d) => (
-                  <li>
-                    <a href={`#${anchor(d.id)}`}>{d.name}</a>
-                    <span class="who">{f("looks_by", { author: d.author })}</span>
-                  </li>
+                <div class="detail__actions">
+                  <a class="btn btn--primary btn--sm look-get" href={action.href}
+                    aria-label={f(action.ariaKey, { name: look.name })}>
+                    {t(action.labelKey)}
+                  </a>
+                  <a class="seg" href={look.likeUrl} target="_blank"
+                    rel="noopener" aria-label={likeAria(look)}>
+                    <span class="seg__main">
+                      <svg width="15" height="15" viewBox="0 0 16 16" fill="none"
+                        stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                        <path d="M8 13.5S2.5 10.2 2.5 6.3A2.8 2.8 0 0 1 8 5a2.8 2.8 0 0 1 5.5 1.3C13.5 10.2 8 13.5 8 13.5z"
+                          stroke-linejoin="round" />
+                      </svg>
+                      {t("looks_like")}
+                      <span class="seg__out" aria-hidden="true">↗</span>
+                    </span>
+                    {look.likes > 0 && (
+                      <span class="seg__count">
+                        {f("looks_like_count", { n: fullCount(look.likes, lang) })}
+                        <Fragment set:html={ghMark} />
+                      </span>
+                    )}
+                  </a>
+                </div>
+                <p class="small detail__get-more">
+                  {look.downloads > 0 && (
+                    <span>
+                      <span aria-hidden="true">↓ </span>
+                      {plural("looks_downloads", look.downloads)}
+                    </span>
+                  )}
+                  <a class="look-get look-file" href={look.downloadUrl}>
+                    {t("looks_download_file")}
+                  </a>
+                </p>
+                <p class="touch-note">{t("looks_touch_detail")}</p>
+                {needsNewerApp(look) && (
+                  <p class="needs">{t("looks_needs_newer")}</p>
+                )}
+                {look.needsFonts.map((name) => (
+                  <p class="needs" set:html={needsFontHtml(look, name)} />
                 ))}
-              </ul>
-            </>
-          )}
+              </div>
+            </div>
 
-          <hr class="rule" />
-          <p class="caption">
-            <Fragment set:html={h("looks_license")} />
-            {" · "}
-            <a class="quiet" href={REPORT_URL} target="_blank"
-              rel="noopener">{t("looks_report")}</a>
-          </p>
+            <div class="detail__more">
+              <div>
+                <ul class="facts">
+                  {look.version && (
+                    <li>{f("looks_made_with", { version: look.version })}</li>
+                  )}
+                  <li>{dateLine(look)}</li>
+                  {font && <li>{f("looks_font", { font })}</li>}
+                  {wallpaper && <li set:html={wallpaper} />}
+                </ul>
+                {look.inspiredBy && (
+                  <p class="facts-line">
+                    {f("looks_inspired_by", { palette: look.inspiredBy })}
+                  </p>
+                )}
+              </div>
+              <div>
+                {look.tags.length > 0 && (
+                  <ul class="tags">
+                    {look.tags.map((tag) => <li class="tag">{tag}</li>)}
+                  </ul>
+                )}
+                {look.keywords.length > 0 && (
+                  <p class="keywords">
+                    {f("looks_keywords", { list: look.keywords.join(", ") })}
+                  </p>
+                )}
+              </div>
+              {derived.length > 0 && (
+                <div>
+                  <h3>{t("looks_built_on")}</h3>
+                  <ul class="built">
+                    {derived.map((d) => (
+                      <li>
+                        <a href={`#${anchor(d.id)}`}>{d.name}</a>
+                        <span class="who">{f("looks_by", { author: d.author })}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </div>
+
+            <p class="caption">
+              <Fragment set:html={h("looks_license")} />
+              {" · "}
+              <a class="quiet" href={REPORT_URL} target="_blank"
+                rel="noopener">{t("looks_report")}</a>
+            </p>
+          </div>
         </article>
       );
     })}
@@ -648,6 +667,27 @@ const MAX_CARD_TAGS = 4;
   .card[hidden] {
     display: none;
   }
+  /* The whole card opens the detail: the title link's ::after covers
+     it, and the card's other links sit above that cover. */
+  .look-card {
+    position: relative;
+    scroll-margin-top: 6rem;
+  }
+  .look-card:hover {
+    border-color: var(--border-strong);
+  }
+  .card__title a::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+  }
+  .look-card :global(.based a),
+  .look-card :global(.needs a),
+  .look-card .like-btn,
+  .look-card .look-get {
+    position: relative;
+    z-index: 1;
+  }
   .card__body {
     display: flex;
     flex-direction: column;
@@ -736,8 +776,9 @@ const MAX_CARD_TAGS = 4;
     padding-top: 0.7rem;
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     justify-content: space-between;
-    gap: 0.75rem;
+    gap: 0.5rem 0.75rem;
     border-top: 1px solid var(--border);
     min-height: 3rem;
   }
@@ -753,6 +794,40 @@ const MAX_CARD_TAGS = 4;
     align-items: center;
     gap: 0.3rem;
   }
+  .card__actions {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    margin-left: auto;
+  }
+  .like-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    align-self: stretch;
+    gap: 0.3rem;
+    min-width: 2.25rem;
+    padding-inline: 0.5rem;
+    border-radius: 12px;
+    font-size: 0.84rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+    border: 1px solid var(--border-strong);
+    background: var(--ghost-bg);
+    color: var(--text);
+  }
+  .like-btn:hover {
+    border-color: var(--ghost-hover-border);
+  }
+  .like-btn:hover svg {
+    fill: currentColor;
+  }
+  @media (pointer: coarse) {
+    .like-btn {
+      min-height: 44px;
+      min-width: 44px;
+    }
+  }
   .result-none {
     margin: 1rem 0;
     color: var(--text-dim);
@@ -764,47 +839,129 @@ const MAX_CARD_TAGS = 4;
     margin: 0 0 0.75rem;
   }
 
-  /* ---- Detail: one centered column, shown when targeted ---- */
+  /* ---- Detail: an overlay over the grid, shown when targeted. Its
+     height never passes the window: the sheet scrolls inside itself
+     and the page behind stays put. ---- */
+  :global(html:has(.detail:target)) {
+    overflow: hidden;
+  }
+  /* The overlay's stacking context must clear the sticky nav's. */
+  :global(main:has(.detail:target)) {
+    position: relative;
+    z-index: 60;
+  }
   .detail {
     display: none;
-    max-width: 720px;
-    margin: 3.5rem auto 2rem;
-    scroll-margin-top: 5.5rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--accent);
-    background: var(--card-bg);
-    box-shadow: 0 0 0 3px var(--nav-hover-bg), var(--shadow-sm);
-    padding: clamp(16px, 3vw, 1.75rem);
+    position: fixed;
+    inset: 0;
+    z-index: 200;
+    padding: clamp(0.5rem, 3vw, 2rem);
   }
   .detail:target {
-    display: block;
+    display: grid;
+    place-items: center;
   }
-  .detail__back {
-    display: inline-block;
-    margin-bottom: 0.9rem;
-    color: var(--text-dim);
+  .detail__scrim {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.6);
+    cursor: default;
+  }
+  .detail__sheet {
+    position: relative;
+    box-sizing: border-box;
+    width: min(1100px, 100%);
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border);
+    background: var(--bg-3);
+    box-shadow: var(--shadow-sm);
+    padding: clamp(14px, 2.5vw, 1.5rem);
+  }
+  .detail__sheet:focus {
+    outline: none;
+  }
+  /* Sticky, so a long sheet scrolled inside itself can still close;
+     the negative margin keeps the float from narrowing the content. */
+  .detail__close {
+    position: sticky;
+    top: 0;
+    z-index: 2;
+    float: right;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    margin-bottom: -2.25rem;
+    border-radius: 50%;
+    border: 1px solid var(--border-strong);
+    background: var(--bg-3);
+    color: var(--text);
+  }
+  .detail__close:hover {
+    border-color: var(--ghost-hover-border);
+  }
+  .detail__main {
+    display: grid;
+    gap: 1rem clamp(1rem, 3vw, 1.75rem);
+  }
+  .detail__info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.3rem;
+    min-width: 0;
+  }
+  .detail__more {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(min(100%, 15rem), 1fr));
+    gap: 1rem clamp(1rem, 3vw, 1.75rem);
+    margin-top: 1.1rem;
+    padding-top: 1.1rem;
+    border-top: 1px solid var(--border);
+  }
+  .detail__more > div:empty {
+    display: none;
+  }
+  /* Beside each other only where both keep a useful width; a window
+     tiled to half a screen gets the stacked sheet. */
+  @media (min-width: 800px) {
+    .detail__main {
+      grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+      align-items: start;
+    }
+    /* The close button floats over the picture's row, so the title
+       column clears it. */
+    .detail__info {
+      padding-right: 2.5rem;
+    }
   }
   .detail h2 {
-    font-size: clamp(1.6rem, 3.6vw, 2.1rem);
+    font-size: clamp(1.5rem, 3vw, 2rem);
     line-height: 1.15;
-    margin: 1.25rem 0 0.25rem;
+    margin: 0 0 0.1rem;
     letter-spacing: -0.015em;
   }
   .detail .desc {
-    margin-top: 0.6rem;
+    margin-top: 0.4rem;
     color: var(--text);
   }
   .detail__actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
-    gap: 0.7rem 1rem;
-    margin: 1.1rem 0 0.4rem;
+    gap: 0.6rem;
+    margin: 0.8rem 0 0.2rem;
+  }
+  .detail__get-more {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1rem;
+    margin: 0.25rem 0 0;
   }
   .look-file {
-    margin: 0.1rem 0 0;
-  }
-  .look-file a {
     color: var(--text-dim);
     text-decoration: underline;
     text-underline-offset: 3px;
@@ -846,14 +1003,9 @@ const MAX_CARD_TAGS = 4;
     width: 1.05em;
     height: 1.05em;
   }
-  .rule {
-    border: 0;
-    border-top: 1px solid var(--border);
-    margin: 1.25rem 0;
-  }
   .facts {
     list-style: none;
-    margin: 0 0 0.8rem;
+    margin: 0;
     padding: 0;
     display: grid;
     gap: 0.2rem;
@@ -861,7 +1013,7 @@ const MAX_CARD_TAGS = 4;
     color: var(--text-dim);
   }
   .detail .needs {
-    margin-bottom: 0.8rem;
+    margin-top: 0.4rem;
   }
   .facts-line {
     margin: 0.7rem 0 0;
@@ -900,7 +1052,9 @@ const MAX_CARD_TAGS = 4;
     color: var(--text-faint);
   }
   .caption {
-    margin: 0;
+    margin: 1.1rem 0 0;
+    padding-top: 0.9rem;
+    border-top: 1px solid var(--border);
     font-size: 0.84rem;
     color: var(--text-faint);
   }
@@ -945,6 +1099,63 @@ const MAX_CARD_TAGS = 4;
 </style>
 
 <script>
+  // The overlay: opening and closing keep the page where it is, Escape
+  // closes, focus moves in, stays in, and returns to the card.
+  const openDetail = () =>
+    document.querySelector<HTMLElement>(".detail:target");
+  /** Moves to `#id` with the page's scroll position unchanged. */
+  const goTo = (id: string) => {
+    const y = window.scrollY;
+    location.hash = id;
+    window.scrollTo({ top: y, behavior: "instant" });
+  };
+  document.addEventListener("click", (event) => {
+    const link = (event.target as Element).closest?.<HTMLAnchorElement>(
+      'a[href^="#look-"]',
+    );
+    if (!link || event.metaKey || event.ctrlKey || event.shiftKey) return;
+    event.preventDefault();
+    goTo((link.getAttribute("href") ?? "").slice(1));
+  });
+  let lastDetail: HTMLElement | null = null;
+  const syncFocus = () => {
+    const detail = openDetail();
+    if (detail) {
+      detail.querySelector<HTMLElement>(".detail__sheet")?.focus();
+    } else if (lastDetail) {
+      document
+        .getElementById(lastDetail.dataset.card ?? "")
+        ?.querySelector<HTMLElement>(".card__title a")
+        ?.focus({ preventScroll: true });
+    }
+    lastDetail = detail;
+  };
+  window.addEventListener("hashchange", syncFocus);
+  window.addEventListener("load", syncFocus);
+  document.addEventListener("keydown", (event) => {
+    const detail = openDetail();
+    if (!detail) return;
+    if (event.key === "Escape") {
+      goTo(detail.dataset.card ?? "");
+    } else if (event.key === "Tab") {
+      const stops = Array.from(
+        detail.querySelectorAll<HTMLElement>(".detail__sheet a[href]"),
+      ).filter((a) => a.offsetParent !== null);
+      const first = stops[0];
+      const last = stops[stops.length - 1];
+      const here = document.activeElement;
+      const leaving =
+        !detail.contains(here) ||
+        (event.shiftKey
+          ? here === first || here === first?.closest(".detail__sheet")
+          : here === last);
+      if (leaving && first && last) {
+        event.preventDefault();
+        (event.shiftKey ? last : first).focus();
+      }
+    }
+  });
+
   // Search, tag filter and sort over the cards the build already
   // ordered for Discover. Each card carries its rank in every order
   // and its search text, so nothing here fetches anything.

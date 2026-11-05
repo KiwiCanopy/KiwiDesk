@@ -556,6 +556,7 @@
   "looks_needs_newer": "Needs a newer KiwiDesk",
   "looks_get_font": "Get the font",
   "looks_add": "Add to KiwiDesk",
+  "looks_add_card": "Add to KiwiDesk",
   "looks_add_aria": "Add {name} to KiwiDesk",
   "looks_download_file": "Download file",
   "looks_touch_card": "Add it on your Mac",
