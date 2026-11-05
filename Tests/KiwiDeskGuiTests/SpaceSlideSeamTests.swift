@@ -57,6 +57,7 @@ struct SpaceSlideSeamTests {
             where body.contains("writer.setFrame(")
                 || body.contains("writer.setPosition(")
                 || body.contains("EdgeBandWrite.write(")
+                || body.contains("lead.write(")
             {
                 writers.append(name)
                 guard !Self.releases.contains(name) else { continue }

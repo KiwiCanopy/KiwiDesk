@@ -1729,7 +1729,10 @@ editing here:
   slide's landing (#2524, `FrameApplierHeldTests` ▸
   `heldSetOwesNoResend`).
 - **Route an applier write with a size through
-  `EdgeBandWrite.write`, never `writer.setFrame` (#2894).** It
+  `EdgeBandWrite.write`, never `writer.setFrame` (#2894)**, or
+  through `SizeLedWrite`'s `Lead.write` for a floating keyboard
+  resize, which lifts through `EdgeBandWrite.lift` (#2981,
+  `EdgeBandWriteSeamTests` ▸ `sizeLedTakesTheLift`). `EdgeBandWrite`
   moves a window ending near a screen's bottom or right edge
   clear of it before sizing it, which macOS would otherwise
   refuse; its docstring carries
@@ -2734,6 +2737,14 @@ editing here:
   the reversibility table, the both-pinned refusal and the
   accepted contact residue at half a step; the product argument
   is `docs/design-decisions.md`'s.
+  **A floating keyboard resize's origin follows the app's answer to
+  its size (#2981, `SizeLedWriteTests`, `SizeLedResizeWiringTests`)**:
+  its frames reach `TilingEngine.applyFrame` with `sizeLedFrom`, and
+  `SizeLedWrite` judges each one on the app's queue. Keep it per
+  write: a stored verdict about a window is what that issue's rejected
+  branch was (`docs/design-decisions.md` ▸ *A floating keyboard resize
+  is symmetric*). A new keyboard path takes `sizeLedFrom`, which is
+  review's, since the parameter defaults to nil.
 - An **explicit settings apply must `retile(pass: .apply)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a

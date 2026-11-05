@@ -5549,6 +5549,35 @@ remembering which way the last grow went — a stored direction
 needs invalidating on every move, mode change and display change,
 and buys back less than it costs.
 
+:::unreleased
+*A refused size moves nothing (#2981).* An app that refuses a size
+still takes an origin written with it: on 4.1.0 Calculator stayed
+230 x 408 while its x went 749, 724, 699. So the size goes first and
+the origin follows the app's answer, as far along the line from where
+the window is to the asked frame as the size got. A full answer lands
+exactly on the split.
+
+Each write judges itself and no verdict about a window is stored; a
+write carries only where the window was at its press, for one spring
+or one instant write. A branch that recorded verdicts per window and
+per ask (refused axes, free axes, a refused size) broke three ways: a
+window fixed on one axis lost both, a slow app read as fixed stayed
+dead, and a window at its minimum drew a false pill. With no verdict
+there is nothing to go stale or to clear. An answer that arrives
+after the read counts as a refusal for that write, and the next write
+corrects it.
+
+macOS clamps a size write at a screen's right and bottom edges while
+the origin has not moved (TextEdit, Terminal and mpv, macOS 27,
+2026-11-04), so a short answer that ends within a cell grid of those
+edges can mean "no room yet", which is exactly the pinned grow above.
+Only the move tells them apart, so that one case writes the whole
+frame and takes the origin back if the size still fell short. A window
+fixed on both axes says so through its size attribute and stays put;
+one that keeps an axis or a ratio shows the half step for a moment
+there, or off every screen.
+:::
+
 **A float whose app holds its ratio is told by its answers, and
 its resize keys scale it ([#2973](https://github.com/KiwiCanopy/KiwiDesk/issues/2973)).**
 [Principle] Nothing states such a lock: AX exposes no bound, and
@@ -5566,8 +5595,8 @@ one-axis grow answered unchanged proves nothing, since a fixed-size
 window answers the same and a slow app has merely not landed yet,
 so it earns one 12 pt one-axis shrink as a probe on the pressed axis:
 only a lock moves the other axis too. The price is the first grow on
-a locked window landing about 0.9 s late, a first HOLD on one sliding
-the window without resizing it until its release and then taking only
+a locked window landing about 0.9 s late, a first HOLD on one doing
+nothing until its release and then taking only
 the press's step, and a slow free app whose grow outlasts the wait taking
 the shrink before its asked size. A press the other way voids an ask not
 yet probed, since it undid what was asked, and so does a press on the

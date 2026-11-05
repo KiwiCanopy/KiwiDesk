@@ -219,17 +219,18 @@ extension TilingEngine {
     /// otherwise an instant, echo-tracked set with any
     /// in-flight animation cancelled. The single authority for
     /// this policy — `retile` and the floating keyboard resize
-    /// both route here; never copy the branch (a copy already
-    /// drifted once, dropping the cancel). The animation screen
-    /// is the display the target frame lands on (multi-monitor:
+    /// both route here; never copy the branch. The animation
+    /// screen is the display the target frame lands on (multi-monitor:
     /// one `DisplayLink` per monitor), falling back to main.
     ///
     /// `sizing` says why this frame is being applied (#593);
     /// it reaches `SizeStep` through the animation and decides
     /// whether a shrinking axis may slide instead of snapping.
     /// `.mayInstantSize` is the default because mismarking is asymmetric —
-    /// see `BatchSizing`. Returns whether the frame was written
-    /// instantly, the verdict an ask's settle probe keys on (#2187).
+    /// see `BatchSizing`. `sizeLedFrom` makes the origin follow the
+    /// app's answer to the size (`SizeLedWrite`, #2981). Returns
+    /// whether the frame was written instantly, the verdict an
+    /// ask's settle probe keys on (#2187).
     @discardableResult
     public func applyFrame(
         _ id: WindowID,
@@ -237,8 +238,10 @@ extension TilingEngine {
         to target: CGRect,
         animated: Bool,
         isNewWindow: Bool = false,
-        sizing: BatchSizing = .mayInstantSize
+        sizing: BatchSizing = .mayInstantSize,
+        sizeLedFrom anchor: CGRect? = nil
     ) -> Bool {
+        applier.sizeLedAnchors[id] = anchor
         // Every engine frame retires the open size ask (#1694);
         // the layout loop re-opens one with `recordAsk` right
         // after its own `applyFrame`, so only a LAYOUT frame is
@@ -267,6 +270,7 @@ extension TilingEngine {
             return false
         } else {
             animation.cancel(window: id)
+            applier.sizeLedAnchors[id] = anchor  // cancel ended it
             // A parked corner may lie on a neighbour: no resend on
             // a park or an unpark, so a switch moves each window once.
             setFrame(
@@ -313,8 +317,7 @@ extension TilingEngine {
     /// is still pending, nil otherwise (#881). The overlay
     /// syncs read it (`FollowSource.syncFrame`'s `commanded`)
     /// so a ring moves at the instant switch; the first
-    /// self-echo clears it (`KiwiCore+Events`), after which the
-    /// echo-fed state frame is the better truth.
+    /// self-echo clears it (`KiwiCore+Events`).
     func recentInstantTarget(_ id: WindowID) -> CGRect? {
         applier.instantTarget(id)
     }
@@ -328,8 +331,7 @@ extension TilingEngine {
             ?? recentInstantTarget(id)
     }
 
-    /// See `recentInstantTarget` — called on the first
-    /// self-echo.
+    /// See `recentInstantTarget`; called on the first self-echo.
     func clearInstantTarget(_ id: WindowID) {
         applier.clearInstantTarget(id)
     }

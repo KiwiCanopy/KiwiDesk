@@ -145,6 +145,17 @@ enum EdgeBandWrite {
         nearEdgeOf screen: CGRect?,
         writer: FrameWriter
     ) {
+        lift(frame, element, nearEdgeOf: screen, writer: writer)
+        writer.setFrame(frame, element)
+    }
+
+    /// The move ahead of a size write, where one is owed.
+    static func lift(
+        _ frame: CGRect,
+        _ element: AXUIElement,
+        nearEdgeOf screen: CGRect?,
+        writer: FrameWriter
+    ) {
         if let screen,
             let current = writer.frame(element),
             let origin = liftedOrigin(
@@ -155,6 +166,5 @@ enum EdgeBandWrite {
         {
             writer.setPosition(origin, element)
         }
-        writer.setFrame(frame, element)
     }
 }

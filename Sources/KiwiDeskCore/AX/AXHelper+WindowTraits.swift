@@ -75,6 +75,20 @@ struct WindowTraits: Equatable {
 }
 
 extension AXHelper {
+    /// Whether the window's size can be written. Blocking IPC into
+    /// the app; an unanswered read says yes, the default write.
+    static func isSizeSettable(_ element: AXUIElement) -> Bool {
+        var settable = DarwinBoolean(true)
+        let error = WorkMeter.shared.ax {
+            AXUIElementIsAttributeSettable(
+                element,
+                kAXSizeAttribute as CFString,
+                &settable
+            )
+        }
+        return error != .success || settable.boolValue
+    }
+
     private static let titlebarButtons = [
         kAXCloseButtonAttribute, kAXMinimizeButtonAttribute,
         kAXZoomButtonAttribute, kAXFullScreenButtonAttribute,
