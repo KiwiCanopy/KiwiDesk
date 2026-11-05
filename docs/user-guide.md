@@ -514,8 +514,12 @@ app enforces, which KiwiDesk learns — the pill says so instead:
 *This app won't go bigger*. Lowering the configured minimum does
 not move those.
 
-Running out of screen is a silent stop. Under a held resize
-shortcut, a refusal shows its pill once and ends the glide.
+Running out of screen is a silent stop.
+
+:::unreleased
+A held resize shortcut also stops silently at a limit. A fresh press
+there shows the pill.
+:::
 
 Floating windows join directional focus as a second tier: when
 no tiled window lies in the pressed direction, focus reaches a
