@@ -34,6 +34,7 @@ struct SettingsThemeMetricTests {
         "cardHeightCompact": "HomeCard.swift",
         "plateHeight": "HomeCardPlate.swift",
         "sectionRadius": "SettingsSection.swift",
+        "panelPlateRadius": "BarsPanelPreview.swift",
         "disclosureRadius": "SettingsDisclosure.swift",
         "chipRadius": "Chips.swift",
         "screenCardStroke": "ScreenCard.swift",

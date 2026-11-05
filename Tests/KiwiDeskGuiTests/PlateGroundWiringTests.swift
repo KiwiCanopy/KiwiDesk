@@ -18,9 +18,11 @@ struct PlateGroundWiringTests {
         "HomeCardPlate.swift": ".deskPlate(settings,in:Rectangle())",
         "SimpleSpacePicture.swift": ".deskPlate(settings,in:shape)",
         "BarsPanelPreview.swift":
-            ".deskPlate(settings,in:RoundedRectangle(cornerRadius:12))",
+            ".deskPlate(settings,in:RoundedRectangle("
+            + "cornerRadius:SettingsTheme.panelPlateRadius))",
         "PaletteScenePanel.swift":
-            ".deskPlate(settings,in:RoundedRectangle(cornerRadius:12))",
+            ".deskPlate(settings,in:RoundedRectangle("
+            + "cornerRadius:SettingsTheme.panelPlateRadius))",
         "KeyboardPreviewPanel.swift": ".platePaint(model.config.settings)",
         "KeyboardBoard.swift": ".fill((palette??.unresolved).base)",
         "GesturesDrawer.swift": ".platePaint(settings)",
