@@ -8,6 +8,8 @@ struct SpacesPanelPreview: View {
     @ObservedObject var model: SettingsModel
     @State private var selected: SpaceID?
     @State private var windows = LayoutSchematic.defaultWindowCount
+    @State private var chipsWidth: CGFloat = 0
+    @State private var chipsViewport: CGFloat = 0
 
     private var spaces: [SpaceID] { model.config.spaces }
 
@@ -68,6 +70,19 @@ struct SpacesPanelPreview: View {
                 }
             }
             .padding(.vertical, 2)
+            .onGeometryChange(for: CGFloat.self) {
+                $0.size.width
+            } action: {
+                chipsWidth = $0
+            }
+            .modifier(
+                StripScrollerRoom(overflows: chipsWidth > chipsViewport)
+            )
+        }
+        .onGeometryChange(for: CGFloat.self) {
+            $0.size.width
+        } action: {
+            chipsViewport = $0
         }
     }
 

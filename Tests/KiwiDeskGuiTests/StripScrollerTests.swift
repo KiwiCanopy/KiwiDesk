@@ -1,5 +1,8 @@
+import AppKit
 import Foundation
 import Testing
+
+@testable import KiwiDesk
 
 /// A sideways strip in Settings keeps the platform's scroller, which
 /// a mouse user needs to reach what it cuts (#2901). Scans source
@@ -70,5 +73,68 @@ struct StripScrollerTests {
             }
         }
         #expect(sites > 0)
+    }
+
+    /// Room only where an overlay scroller draws over the content: a
+    /// strip that fits draws no scroller, and SwiftUI already grows the
+    /// scroll view by a legacy one.
+    @Test("the clearance answers the overflow and the scroller style")
+    func clearance() {
+        let room = StripScrollerRoom.room
+        #expect(
+            room(true, .overlay) == StripScrollerRoom.overlayHeight
+        )
+        #expect(StripScrollerRoom.overlayHeight > 0)
+        #expect(room(false, .overlay) == 0)
+        #expect(room(true, .legacy) == 0)
+        #expect(room(false, .legacy) == 0)
+    }
+
+    /// The modifier is the one home: only it pads for a scroller or
+    /// reads the style, and each strip's overflow is its own reading.
+    @Test("the clearance has one home and both strips take it")
+    func clearanceHome() throws {
+        let sources = try Self.settingsSources()
+        let readers = sources.filter {
+            $0.1.contains("preferredScrollerStyle")
+        }
+        #expect(readers.map(\.0) == ["StripScrollerRoom.swift"])
+        let takers = Dictionary(
+            uniqueKeysWithValues: sources.filter {
+                $0.1.contains("StripScrollerRoom")
+            }
+        )
+        #expect(
+            Set(takers.keys) == [
+                "StripScrollerRoom.swift", "SidewaysStrip.swift",
+                "SpacesPanelPreview.swift",
+            ]
+        )
+        let home = try #require(takers["StripScrollerRoom.swift"])
+        #expect(
+            home.contains(
+                ".padding(.bottom,Self.room(overflows:overflows,style:style))"
+            )
+        )
+        #expect(
+            home.contains(
+                "preferredScrollerStyleDidChangeNotification"
+            )
+        )
+        #expect(
+            takers["SidewaysStrip.swift"]?.contains(
+                ".modifier(StripScrollerRoom("
+                    + "overflows:run.total>scroll.viewport))"
+            ) == true
+        )
+        #expect(
+            takers["SpacesPanelPreview.swift"]?.contains(
+                ".modifier(StripScrollerRoom("
+                    + "overflows:chipsWidth>chipsViewport))"
+            ) == true
+        )
+        let preview = try #require(takers["SpacesPanelPreview.swift"])
+        #expect(preview.contains("action:{chipsWidth=$0}"))
+        #expect(preview.contains("action:{chipsViewport=$0}"))
     }
 }
