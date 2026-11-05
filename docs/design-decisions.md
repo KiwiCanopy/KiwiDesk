@@ -5181,6 +5181,19 @@ stop keeps gliding harmlessly — matching that silence's own
 ruling rather than inventing a signal for it. The cue is heard
 during the glide as well as the press fire, since the glide runs
 outside any binding fire.
+
+:::unreleased
+This supersedes "pills once per hold" and "the cue is heard during the
+glide" above; remove both when this ships. A hold now stops silently at
+any limit, and only a fresh press at the limit draws the pill, the bump
+and the sound (#3017), a press's own fixed-size report included, however
+late it lands. A pill on a hold arrived while the window was still
+catching up, 32 to 75 pt before it landed on TextEdit, and a hold that
+has stopped already says so. A mouse or CLI refusal during a glide stays
+silent too, which needs a drag or a script beside a held chord. A
+retile's cue is no hold's, so it still draws.
+:::
+
 Structurally, the engine arms only when its registrar can report
 releases (`HotkeyReleaseReporting` — a hold with no stop channel
 must never start); any registration teardown (layer switch,

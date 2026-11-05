@@ -154,6 +154,32 @@ struct FixedSizeReportTests {
         #expect(heard.map(\.pressed) == [true])
     }
 
+    /// A slow app's report for the arming press lands past the
+    /// key-repeat wait; a glide step's own report is no press (#3017).
+    @Test("In a glide, a pressed report cues and a step's does not")
+    func reportDuringGlide() throws {
+        for pressed in [true, false] {
+            let f = try HoldGlideFixture(
+                body: #"KiwiDesk.resize("x", 50)"#
+            )
+            f.seedFloating()
+            _ = answering(f.core, .free)
+            var cues = 0
+            f.core.borders.onResizeRefusal = { _ in cues += 1 }
+            f.registrar.press(keyCode: f.combo.keyCode)
+            try f.beginGlide()
+            #expect(f.core.keys.isGliding)
+            f.core.handleFixedSize(
+                report(
+                    serial: f.core.tiler.applier.fixedSizeDoor.serial + 1,
+                    pressed: pressed
+                )
+            )
+            #expect(cues == (pressed ? 1 : 0))
+            #expect(!f.core.keys.isGliding)
+        }
+    }
+
     /// With animations on, every write is a spring tick after the fire.
     @Test(
         "A spring's writes carry the press that started it",

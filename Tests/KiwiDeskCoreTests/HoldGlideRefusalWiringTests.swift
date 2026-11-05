@@ -6,9 +6,9 @@ import Testing
 
 /// The refusal half of hold-to-glide's production wiring
 /// (#933/#1055, retimed #1082), on the shared
-/// `HoldGlideFixture`: a real size-limit cue reaching the engine
-/// and ending the hold, so the pill flashes once per hold rather
-/// than once per frame. Split from `HoldGlideWiringTests` at
+/// `HoldGlideFixture`: a real size-limit refusal reaching the engine
+/// and ending the hold, silently unless a press made it (#3017).
+/// Split from `HoldGlideWiringTests` at
 /// §2.1's ceiling; which cue SITES feed the funnel at all is
 /// `HoldGlideEligibilitySeamTests`' derived scan.
 @MainActor
@@ -17,12 +17,12 @@ struct HoldGlideRefusalWiringTests {
     @Test("A refusal reached mid-glide ends the run")
     func midGlideRefusalEndsTheRun() throws {
         // A held bsp shrink walks the ratio toward the floor;
-        // the frame that gets clamped fires the real #933 cue
+        // the frame that gets clamped reaches the real #933 funnel
         // outside any binding fire, which must be the glide's
-        // last — ONE pill per hold. That the cue is heard at all
-        // there is the #1082 half: `noteResizeRefusal` gates on
-        // `isFiring || isGliding`, and dropping the second term
-        // leaves the pill flashing every frame. Which cue SITES
+        // last, with no cue (#3017). That the funnel is heard at
+        // all there is the #1082 half: `noteResizeRefusal` gates
+        // on `isFiring || isGliding`, and dropping the second term
+        // runs on to the bound. Which cue SITES
         // feed the engine is `HoldGlideEligibilitySeamTests`' derived scan,
         // not a list here.
         //
@@ -38,10 +38,8 @@ struct HoldGlideRefusalWiringTests {
         // named failure: pinned at the one duration where an
         // unrelated net rescued the bug it named.
         //
-        // `cueResizeRefusal` notifies the engine and THEN fires
-        // this seam, so the cue count is untouched by the gate
-        // and discriminates cleanly: one refusal ends the hold,
-        // a narrowed gate pills once per frame.
+        // So the frame count below is what discriminates the gate:
+        // one refusal ends the hold, a narrowed gate overruns.
         let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", -200)"#
         )
@@ -68,9 +66,8 @@ struct HoldGlideRefusalWiringTests {
             frames += 1
             try #require(frames < 200)
         }
-        // Exactly one pill for the whole hold — the assertion the
-        // inert version was missing.
-        #expect(refusals.count == 1)
+        // A hold stops silently; only a fresh press cues (#3017).
+        #expect(refusals.isEmpty)
         // And the run ended on the REFUSAL rather than being
         // rescued by the run bound. Derived from the bound rather
         // than pinned at a literal, so a retune of either cannot
@@ -81,6 +78,55 @@ struct HoldGlideRefusalWiringTests {
         )
         #expect(f.frameTick == nil)
         #expect(f.core.keys.isGliding == false)
+
+        f.registrar.release(keyCode: f.combo.keyCode)
+        f.registrar.press(keyCode: f.combo.keyCode)
+        #expect(refusals.count == 1)
+    }
+
+    @Test("A press during a glide still cues its refusal (#3017)")
+    func pressDuringGlideCues() throws {
+        let f = try HoldGlideFixture(
+            body: #"KiwiDesk.resize("x", -200)"#
+        )
+        f.core.execute(
+            "set_min_window_size",
+            args: [.number(300)]
+        )
+        f.seedBspPair()
+        var refusals: [ResizeRefusal] = []
+        f.core.borders.onResizeRefusal = { refusals.append($0) }
+        f.registrar.press(keyCode: f.combo.keyCode)
+        try f.beginGlide()
+        // Stops with the glide, so a later press from rest cannot
+        // answer for the one the glide was running under.
+        var presses = 0
+        while f.core.keys.isGliding, refusals.isEmpty {
+            f.registrar.press(keyCode: f.combo.keyCode)
+            presses += 1
+            try #require(presses < 20)
+        }
+        #expect(refusals.count == 1)
+    }
+
+    @Test("A retile's cue during a glide still draws (#3017)")
+    func retileDuringGlideCues() throws {
+        let f = try HoldGlideFixture(
+            body: #"KiwiDesk.resize("x", -50)"#
+        )
+        f.seedBspPair()
+        var refusals: [ResizeRefusal] = []
+        f.core.borders.onResizeRefusal = { refusals.append($0) }
+        f.registrar.press(keyCode: f.combo.keyCode)
+        try f.beginGlide()
+        #expect(f.core.keys.isGliding)
+        f.core.refuseFloorUnfitAtRetile(
+            WindowID(1),
+            anchor: WindowID(2),
+            axis: "x"
+        )
+        #expect(refusals.count == 1)
+        #expect(f.core.keys.isGliding)
     }
 
     @Test("A press refused at the wall arms nothing")

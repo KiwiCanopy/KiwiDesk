@@ -1012,7 +1012,12 @@ refusal that could not draw — a sticky mark switched off, a
 window with no overlay — stays silent.
 
 Only hotkey fires cue; the same command over CLI/IPC stays
-silent, and a held chord sounds once per hold.
+silent.
+
+:::unreleased
+A held chord stops silently at a limit: it neither draws nor sounds.
+A fresh press there does both.
+:::
 
 A refusal only the app can give — [`new_window`](#new_window)
 finding no New Window, [`close_window`](#close_window) no close
@@ -6642,9 +6647,14 @@ While [`set_modifier_sides`](#set_modifier_sides) is on, a
 shortcut whose keys a sided shortcut also uses — sided or not —
 fires once per press.
 
-A refusal that cues (#933/#1055) ends the run, so a held shrink
-parked on a minimum flashes its pill once; scrolling's wordless
-out-of-screen stop keeps gliding harmlessly until release.
+A limit (#933/#1055) ends the run; scrolling's wordless out-of-screen
+stop keeps gliding harmlessly until release.
+
+:::unreleased
+A hold reaching a limit stops with no pill, and a fresh press there
+shows it (#3017).
+:::
+
 Releasing the chord, switching layers, or arming a Settings
 shortcut recorder ends the run immediately.
 
