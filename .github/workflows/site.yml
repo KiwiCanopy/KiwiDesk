@@ -20,8 +20,8 @@ name: Site
 # level up — editing a check did not previously run it, and
 # several of its checks read inputs from outside site/. Both are
 # inputs to the GATE, not to the build, and so are extract-keys,
-# which the gate runs, and build-app.sh, whose feed URL
-# check-site-tokens.py reads. Written without a count:
+# which the gate runs, the modules it imports, and build-app.sh,
+# whose feed URL check-site-tokens.py reads. Written without a count:
 # #1232 moved it, and a number here is one nothing derives.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
@@ -47,6 +47,9 @@ on:
       - "scripts/check-site-tokens.py"
       - "scripts/unreleased-strip"
       - "scripts/extract-keys"
+      - "scripts/locale_decoder.py"
+      - "scripts/locale_paths.py"
+      - "scripts/localization_guards.py"
       - "scripts/build-app.sh"
       - ".github/workflows/site.yml"
   pull_request:
@@ -88,12 +91,17 @@ jobs:
           # the path it left.
           changed="$(git -c core.quotePath=false diff --name-only \
             --no-renames "$BASE"...HEAD)"
+          # Only a plain path or `dir/**` is compared, and anything else
+          # reads as `*`, which builds. The trade: a path holding any
+          # other character builds every PR until it is written plainly.
           inputs="$(awk '
             /^    paths:$/ { list = 1; next }
             !list { next }
-            /^ *(#.*)?$/ { next }
+            /^[ \t]*(#.*)?$/ { next }
             !/^      / { exit }
-            /^      - "[^" ]*"$/ { gsub(/^      - "|"$/, ""); print; next }
+            /^      - "[A-Za-z0-9._\/-]+(\/\*\*)?"$/ {
+              gsub(/^      - "|"$/, ""); print; next
+            }
             { print "*" }
           ' .github/workflows/site.yml)"
           if [ -z "$changed" ] || [ -z "$inputs" ]; then
@@ -105,13 +113,12 @@ jobs:
             case "$file" in \"*) answer true ;; esac
             while IFS= read -r input; do
               case "$input" in
+                '*') answer true ;;
                 */'**')
                   case "$file" in
                     "${input%/\*\*}"/*) answer true ;;
                   esac
                   ;;
-                # Only `dir/**` and exact paths are compared here.
-                *'*'*|*'?'*|*'['*) answer true ;;
                 "$file") answer true ;;
               esac
             done <<< "$inputs"

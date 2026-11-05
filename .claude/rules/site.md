@@ -582,7 +582,7 @@ on a live English page until someone widens the list.
 
 **Every site catalog carries every key `en.json` has**, enforced
 by `scripts/extract-keys --site --check`, which `site.yml` runs on
-any PR touching `site/**`, `docs/**` or `assets/**`. The app
+any PR touching an input on its list. The app
 corpus deliberately has no such rule: an `L(key, english)` call
 site carries its English inline, so an app locale may lag and the
 worksheet round exists for it to catch up. A site component reads
@@ -631,9 +631,11 @@ without this `gh pr merge --auto` lands before the build reports.
 the site's inputs, and skips the build on a PR outside it, which is
 what lets a Swift-only PR through (`SiteGateRequiredTests`).
 `scripts/protect-main.sh`'s `CONTEXTS` requires it. Anything the gate
-runs or reads outside `site/` joins that one list, since a wrong skip
-passes the check with nothing built, and a change that spells an entry
-any way but `- "path"` builds every PR until it is fixed.
+runs, imports or reads outside `site/` joins that one list, since a
+wrong skip passes the check with nothing built; the suite derives
+those inputs from the gate and holds the list to them. An entry
+written as anything but a plain `- "path"` or `- "dir/**"` builds every
+PR until it is fixed.
 
 The price is accepted: a red on this gate blocks the merge with no
 override, so a site gate that reads a remote source (the voices'

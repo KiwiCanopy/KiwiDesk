@@ -5,10 +5,12 @@ import Testing
 /// leaves the site alone** (`.claude/rules/site.md`). The verdict
 /// clauses run the `changes` step from `site.yml` against a throwaway
 /// repository holding the real workflow, so they are the filter's own
-/// answer and not a reading of its text.
+/// answer and not a reading of its text. One suite across three files,
+/// split at the §2.1 ceiling.
 @Suite("The site gate is required")
 struct SiteGateRequiredTests {
     private static let stepName = "Decide whether the site must build"
+    static let workflowPath = ".github/workflows/site.yml"
 
     private static func git(
         _ arguments: [String],
@@ -68,35 +70,19 @@ struct SiteGateRequiredTests {
             .joined(separator: "\n")
     }
 
-    private static func realWorkflow() throws -> String {
+    static func realWorkflow() throws -> String {
         try String(
             contentsOf: scriptFixtureRepoRoot()
-                .appendingPathComponent(".github/workflows/site.yml"),
+                .appendingPathComponent(workflowPath),
             encoding: .utf8
         )
-    }
-
-    /// A file inside each entry of the workflow's own list, read here
-    /// rather than typed: the list is the subject, and typing an
-    /// ignored path in a suite is what `CiPathFilterTests` refuses.
-    private static func onePathPerInput() throws -> [String] {
-        let entries = try realWorkflow()
-            .split(separator: "\n")
-            .drop { $0 != "    paths:" }
-            .dropFirst()
-            .prefix { $0.hasPrefix("      - ") }
-            .map { $0.dropFirst(8).filter { $0 != "\"" } }
-        try #require(!entries.isEmpty, "site.yml's list read empty")
-        return entries.map {
-            $0.hasSuffix("/**") ? $0.dropLast(2) + "probe.txt" : String($0)
-        }
     }
 
     /// The `run` output for a PR that changes `paths` on a head that
     /// is, as on a runner, a merge of the PR into a base that moved.
     /// An existing file is appended to, so a PR on the workflow keeps
     /// its list.
-    private static func verdict(
+    static func verdict(
         changing paths: [String],
         event: String = "pull_request",
         base: String? = nil,
@@ -111,11 +97,7 @@ struct SiteGateRequiredTests {
             withIntermediateDirectories: true
         )
         try git(["init", "-q", "-b", "trunk"], in: repo)
-        try write(
-            workflow ?? realWorkflow(),
-            to: ".github/workflows/site.yml",
-            in: repo
-        )
+        try write(workflow ?? realWorkflow(), to: workflowPath, in: repo)
         try git(["add", "."], in: repo)
         try git(["commit", "-qm", "fork point"], in: repo)
         try git(["checkout", "-qb", "pr"], in: repo)
@@ -149,122 +131,6 @@ struct SiteGateRequiredTests {
         try #require(run.status == 0, "filter failed: \(run.stderr)")
         return try String(contentsOf: output, encoding: .utf8)
             .trimmingCharacters(in: .whitespacesAndNewlines)
-    }
-
-    /// A workflow whose only input is `docs/**`, with `line` beside it.
-    private static func listBeside(_ line: String) -> String {
-        """
-        on:
-          push:
-            paths:
-              \(line)
-              - "docs/**"
-
-        """
-    }
-
-    @Test("A PR touching any site input builds")
-    func inputsBuild() throws {
-        for path in try Self.onePathPerInput() {
-            #expect(
-                try Self.verdict(changing: [path]) == "run=true",
-                "\(path)"
-            )
-        }
-    }
-
-    @Test("An input beside other paths builds")
-    func inputBesideOthersBuilds() throws {
-        let input = try #require(Self.onePathPerInput().first)
-        #expect(
-            try Self.verdict(
-                changing: ["Sources/KiwiDesk/Foo.swift", input]
-            ) == "run=true"
-        )
-    }
-
-    @Test("A PR leaving the site alone skips, so it cannot strand")
-    func othersSkip() throws {
-        for path in [
-            "Sources/KiwiDeskCore/State/Foo.swift",
-            "Sources/KiwiDesk/SupportLinks.swift.orig",
-            "scripts/unreleased-strip2",
-            "sitemap/a.txt",
-            "NOTES.md",
-        ] {
-            #expect(
-                try Self.verdict(changing: [path]) == "run=false",
-                "\(path)"
-            )
-        }
-    }
-
-    @Test("A non-ASCII or quoted name still matches or builds")
-    func quotedNames() throws {
-        #expect(
-            try Self.verdict(changing: ["docs/Übersicht.md"]) == "run=true"
-        )
-        #expect(
-            try Self.verdict(changing: ["other/we\"ird.md"]) == "run=true"
-        )
-    }
-
-    @Test("A comment or blank line inside the list keeps the list going")
-    func commentsDoNotEndTheList() throws {
-        for line in ["# a note", ""] {
-            #expect(
-                try Self.verdict(
-                    changing: ["docs/a.md"],
-                    workflow: Self.listBeside(line)
-                ) == "run=true",
-                "after \(line)"
-            )
-            #expect(
-                try Self.verdict(
-                    changing: ["other/a.md"],
-                    workflow: Self.listBeside(line)
-                ) == "run=false",
-                "after \(line)"
-            )
-        }
-    }
-
-    @Test("Every unknown builds")
-    func unknownsBuild() throws {
-        #expect(
-            try Self.verdict(changing: ["a.swift"], event: "push")
-                == "run=true"
-        )
-        #expect(
-            try Self.verdict(
-                changing: ["a.swift"],
-                base: String(repeating: "0", count: 40)
-            ) == "run=true",
-            "an unusable base must build"
-        )
-        #expect(
-            try Self.verdict(changing: []) == "run=true",
-            "an empty diff must build"
-        )
-        #expect(
-            try Self.verdict(
-                changing: ["a.swift"],
-                workflow: "name: Site\n"
-            ) == "run=true",
-            "an empty input list must build"
-        )
-        for entry in [
-            "- \"*.md\"", "- docs/old.md", "- 'docs/old.md'",
-            "- \"docs/old.md\" # note",
-        ] {
-            #expect(
-                try Self.verdict(
-                    changing: ["a.swift"],
-                    workflow: Self.listBeside(entry)
-                ) == "run=true",
-                "an entry the filter cannot compare must build: \(entry)"
-            )
-        }
     }
 
     @Test("The trigger reports on every PR and the skip is the job's")
