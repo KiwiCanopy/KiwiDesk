@@ -1800,6 +1800,9 @@ Every surface, border and ink in the Settings tree comes from
   not move it — so its ink is the resolved paint's, never an
   ambient grey, and Advanced's Layouts sketch files sit in the
   stems for it.
+- **A warning takes `WarningBox`, never a `warningSurface` fill of
+  its own** (#2982, `WarningBoxSeamTests` ▸ `oneFill`,
+  `WarningBoxSeamTests` ▸ `sitesTakeTheBox`).
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
@@ -2183,6 +2186,16 @@ modifier as reaching nested scroll views (not measured here;
 the cue: under *Automatically* a trackpad shows it only during a
 gesture (`docs/design-decisions.md` ▸ The platform's own indicator
 does not work).
+
+**A Settings strip's content clears an overlay scroller through the
+one `StripScrollerRoom`, inside the `ScrollView`**, handed that
+strip's content width and viewport (`StripScrollerTests` ▸
+`clearance`, `clearanceHome`), never a bottom padding of its own
+beside it, which review holds since those needles do not see one. As
+measured on macOS 27, 2026-11-05, an overlay scroller
+draws over the content's bottom edge, a legacy one grows the scroll
+view by its own height, and a strip that fits hides either. A macOS
+release re-measures `overlayHeight`.
 
 ## A sided chord is drawn once and spoken in words (#2601)
 

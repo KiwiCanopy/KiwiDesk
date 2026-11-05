@@ -18,9 +18,13 @@ extension KiwiCore {
     /// The bundled looks, Glass derived for the screens the
     /// starter is sized from (`starterSizes`), so picking it on a
     /// first run changes nothing (#1739) — the one door to
-    /// `LookCatalog.bundled` (`LookCatalogSeamTests`).
+    /// `LookCatalog.bundled` (`LookCatalogSeamTests`), built once per
+    /// set of sizes, since a hover reads it per Space card (#2993).
     public var bundledLooks: [ShelfLook] {
-        LookCatalog.bundled(sizes: starterSizes())
+        bundledLooksMemo.looks(
+            for: starterSizes(),
+            build: LookCatalog.bundled(sizes:)
+        )
     }
 
     /// The saved user looks, read from disk.

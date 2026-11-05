@@ -101,16 +101,7 @@ struct SyncReviewSheet: View {
 
     /// Glyph and words, never hue alone, in the warning colours.
     private var warning: some View {
-        Label(SyncText.pickEach, systemImage: "exclamationmark.triangle")
-            .font(.callout.weight(.medium))
-            .foregroundStyle(SettingsTheme.warningInk)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 10)
-            .frame(maxWidth: .infinity, alignment: .leading)
-            .background(
-                RoundedRectangle(cornerRadius: 6)
-                    .fill(SettingsTheme.warningSurface)
-            )
+        WarningBox(text: SyncText.pickEach) { EmptyView() }
     }
 
     private func note(_ text: String) -> some View {

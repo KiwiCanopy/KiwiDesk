@@ -76,17 +76,22 @@ struct SettingsDetailPanel: View {
 
     private var header: some View {
         HStack(spacing: 10) {
-            Text(headerSentence)
-                .font(
-                    .system(size: 10, weight: .semibold)
-                        .monospaced()
-                )
-                .kerning(1.4)
-                .textCase(.uppercase)
-                .foregroundStyle(SettingsTheme.ink3)
-                .accessibilityAddTraits(.isHeader)
+            eyebrow(headerSentence)
             Spacer()
         }
+    }
+
+    /// A panel's mono uppercase heading.
+    private func eyebrow(_ text: String) -> some View {
+        Text(text)
+            .font(
+                .system(size: 10, weight: .semibold)
+                    .monospaced()
+            )
+            .kerning(1.4)
+            .textCase(.uppercase)
+            .foregroundStyle(SettingsTheme.ink3)
+            .accessibilityAddTraits(.isHeader)
     }
 
     @ViewBuilder private var preview: some View {
@@ -132,21 +137,13 @@ struct SettingsDetailPanel: View {
         )
         return VStack(alignment: .leading, spacing: 12) {
             SettingsTheme.hairline.frame(height: 1)
-            Text(
+            eyebrow(
                 L(
                     "panel.changed_in_draft",
                     "Changed in this draft — %1$d",
                     rows.count
                 )
             )
-            .font(
-                .system(size: 10, weight: .semibold)
-                    .monospaced()
-            )
-            .kerning(1.4)
-            .textCase(.uppercase)
-            .foregroundStyle(SettingsTheme.ink3)
-            .accessibilityAddTraits(.isHeader)
             if !rows.isEmpty {
                 SettingsDiffRowsView(
                     rows: rows,
