@@ -21,7 +21,16 @@
 // component owns the theme and nothing else.
 ---
 
-<meta name="theme-color" content="#101d0b" />
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: light)"
+  content="#101d0b"
+/>
+<meta
+  name="theme-color"
+  media="(prefers-color-scheme: dark)"
+  content="black"
+/>
 <script is:inline>
   (function () {
     var root = document.documentElement;
@@ -39,5 +48,20 @@
       // bare `:root`, so the resolved theme and the CSS default agree.
       root.dataset.theme = "dark";
     }
+    // The metas answer the OS for a page with no script; the theme
+    // answers a stored choice and the toggle, so it wins here.
+    var metas = document.querySelectorAll('meta[name="theme-color"]');
+    var light = metas[0].content;
+    var dark = metas[1].content;
+    function paintChrome() {
+      var chrome = root.dataset.theme === "light" ? light : dark;
+      metas[0].content = chrome;
+      metas[1].content = chrome;
+    }
+    paintChrome();
+    new MutationObserver(paintChrome).observe(root, {
+      attributes: true,
+      attributeFilter: ["data-theme"],
+    });
   })();
 </script>

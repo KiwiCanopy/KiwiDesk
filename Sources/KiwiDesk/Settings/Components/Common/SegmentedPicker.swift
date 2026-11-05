@@ -268,8 +268,8 @@ struct SegmentedPicker<Value: Hashable>: View {
         .contentShape(Capsule())
     }
 
-    /// The fill is fixed in both modes on the selected segment,
-    /// so its ink is too; the hover lift takes full ink, `ink2`
+    /// The selected segment's ink is one value, measured on each
+    /// mode's fill; the hover lift takes full ink, `ink2`
     /// falling under 4.5:1 on it in dark.
     private func hintText(
         _ hint: String,

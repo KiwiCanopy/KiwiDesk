@@ -55,7 +55,7 @@ struct SettingsCollapsibleSection<Content: View>: View {
             .accessibilityLabel(summary)
             if !isExpanded, let preview { preview }
             if isExpanded {
-                SettingsTheme.hairline.frame(height: 1)
+                SettingsTheme.hairlineSubtle.frame(height: 1)
                 content()
             }
         }

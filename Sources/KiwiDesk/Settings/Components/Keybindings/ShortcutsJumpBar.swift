@@ -116,7 +116,7 @@ struct ShortcutsJumpBar: View {
         if group.ruledAfter {
             HStack(spacing: Self.spacing) {
                 chip(group)
-                SettingsTheme.hairline
+                SettingsTheme.hairlineSubtle
                     .frame(width: 1, height: 18)
                     .accessibilityHidden(true)
             }

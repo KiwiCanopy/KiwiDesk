@@ -1659,6 +1659,11 @@ Every surface, border and ink in the Settings tree comes from
   (stem-derived, so a §2.1 split cannot fall out of it) — on
   mode-varying surfaces `.secondary` still self-inverts and
   "prefer a concrete ink" stays a preference.
+- **A plane's edge is `hairline`; a rule that is no plane's edge
+  is `hairlineSubtle`** — between a card's groups or entries,
+  between chips in a strip. The two differ only in dark, where a
+  rule at the edge's strength competes with the edge of what holds
+  it. No scan tells a rule from an edge, so this is review's.
 - **A dark plane on a dark ground takes the `planeRing` seam**
   (16b's one non-swap construction): where a fixed-dark surface
   meets a mode-varying one — the plate, the save pill, the
