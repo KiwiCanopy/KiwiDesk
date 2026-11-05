@@ -33,8 +33,12 @@ struct PlateGroundWiringTests {
         "OnboardingSpaceRow.swift": ".deskPlate(settings,",
         "OnboardingView+Closing.swift": ".deskPlate(model.tilingSettings(),",
         "LayoutStrip.swift": ".deskPlate(model.config.settings,",
-        "LayoutPreviewPanel.swift": ".deskPlate(model.config.settings,",
-        "SpacesPanelPreview.swift": ".deskPlate(settings,",
+        "LayoutPreviewPanel.swift":
+            ".deskPlate(model.config.settings,in:RoundedRectangle("
+            + "cornerRadius:SettingsTheme.panelPlateRadius))",
+        "SpacesPanelPreview.swift":
+            ".deskPlate(settings,in:RoundedRectangle("
+            + "cornerRadius:SettingsTheme.panelPlateRadius))",
     ]
 
     /// The one file that names the dark plate token.

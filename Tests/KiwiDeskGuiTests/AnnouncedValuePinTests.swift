@@ -184,7 +184,7 @@ struct AnnouncedValuePinTests {
     }
 
     /// The census counts the helper's one trait, so it cannot see a
-    /// panel eyebrow leave the helper (#2983).
+    /// panel eyebrow leave the helper without a trait (#2983).
     @Test("the panel's eyebrows take the one helper")
     func panelEyebrowsTakeTheHelper() throws {
         let url = try #require(

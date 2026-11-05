@@ -1,8 +1,8 @@
 import SwiftUI
 
 /// The one warning surface Settings draws: a triangle and the
-/// sentence in `warningInk` on `warningSurface`, the one fix on the
-/// same line. A solid surface, never an opacity wash: a wash takes
+/// sentence in `warningInk` on `warningSurface`, an optional accessory
+/// on the same line. A solid surface, never an opacity wash: a wash takes
 /// its result from whatever is behind it and cannot promise 4.5:1
 /// for `warningInk`.
 struct WarningBox<Accessory: View>: View {
