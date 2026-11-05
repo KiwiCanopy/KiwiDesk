@@ -74,7 +74,9 @@ extension KiwiCore {
     /// than per frame — which is what makes sounding a real
     /// refusal safe where sounding every `.fail` never was.
     func soundRefusal() {
-        guard keys.isFiring else { return }
+        // A pressed write's report stands in for its fire (#2994).
+        guard keys.isFiring || tiler.applier.fixedSizeDoor.reportingPress
+        else { return }
         soundPanelRefusal()
     }
 
@@ -252,6 +254,26 @@ extension KiwiCore {
     func refuseGrowAtMaximum(_ window: WindowID, axis: String) {
         cueResizeRefusal(
             .ownMaximum(window, axis: axis, atBoundary: false)
+        )
+    }
+
+    /// A press on a float whose size macOS says cannot be set (#2994):
+    /// the app's own limit either way, on macOS's statement rather
+    /// than a learned floor or ceiling. The one verdict no derivation
+    /// answers (`RefusalCueSeamTests`).
+    func refuseFixedSize(
+        _ window: WindowID,
+        axis: String,
+        shrinks: Bool
+    ) {
+        cueResizeRefusal(
+            shrinks
+                ? .ownMinimum(
+                    window,
+                    axis: axis,
+                    appBound: true
+                )
+                : .ownMaximum(window, axis: axis, atBoundary: false)
         )
     }
 

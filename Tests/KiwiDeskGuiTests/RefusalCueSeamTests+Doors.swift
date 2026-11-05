@@ -8,18 +8,28 @@ import Testing
 extension RefusalCueSeamTests {
     /// Whose floor a minimum pill names is derived by the
     /// builders, never handed in (#1261): every `appBound:` the
-    /// builders' file spells is the one derivation's call, and
+    /// builders' file spells is the one derivation's call, save
+    /// macOS's statement that a size cannot be set (#2994), and
     /// no builder takes the verdict as a parameter. Derived
     /// rather than pinned (#1021) — whatever the builders
     /// number, each verdict is that call.
-    @Test("a minimum pill's verdict is derived, never handed in")
+    @Test("a minimum pill's verdict is derived or macOS's statement")
     func appBoundIsDerivedByTheBuilders() throws {
         let pill = try Self.core("App/KiwiCore+SizeLimitPill.swift")
         let verdicts = pill.occurrences(of: "appBound:")
         #expect(verdicts > 0)
+        // macOS's statement is the one verdict with no derivation (#2994).
+        let stated = pill.occurrences(of: "appBound:true")
+        #expect(stated == 1)
+        // Its sound stays the funnel's, gated on the drawing.
+        let report = try Self.core("Commands/KiwiCore+FixedSize.swift")
+        #expect(!report.contains("soundPanelRefusal"))
+        #expect(!report.contains("soundRefusal"))
+        #expect(pill.contains("keys.isFiring||tiler.applier.fixedSizeDoor"))
         #expect(
             verdicts
-                == pill.occurrences(of: "appBound:minimumIsAppBound("),
+                == pill.occurrences(of: "appBound:minimumIsAppBound(")
+                + stated,
             Comment(
                 rawValue: "a builder spelled appBound: from "
                     + "something other than minimumIsAppBound — "

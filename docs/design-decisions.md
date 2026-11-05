@@ -4988,7 +4988,8 @@ derived ONCE, from the same resolution every clamp measured
 against — a window's effective minimum is `max(min_window_size,
 learned app floor)`, so "which term won" is the same question at
 every path, and the refusal builders answer it rather than each
-call site by hand — a clamp that adds a floor of its own (the
+call site by hand, save macOS's statement that a size cannot be set
+(#2994), which states the verdict — a clamp that adds a floor of its own (the
 scrolling slot's 100 pt) hands that floor in, never the verdict,
 since a learned floor under it is not what bound. The maximum
 needs no verdict at all: no
@@ -5596,6 +5597,23 @@ frame and takes the origin back if the size still fell short. A window
 fixed on both axes says so through its size attribute and stays put;
 one that keeps an axis or a ratio shows the half step for a moment
 there, or off every screen.
+
+A refused ask must not climb either (#2994). A press on a spring and
+a hold step measure from what was last asked, which is what keeps a
+hold from losing steps on an app that echoes late (#1090). On Digital
+Color Meter that ask ran to the screen's edge while the window stayed
+439 x 217: the ring followed it and "No room left to grow" fired with
+the screen empty. An answer cannot settle this: a cell grid answers a
+sub-row ask with its old size and a late app answers before it moves,
+so re-basing on a short answer would stall both. macOS can: such a
+window's size attribute is not settable. So the write that finds this
+reports it, and KiwiDesk ends that run and draws the app's own limit.
+It is heard per write and kept nowhere, and writes already out when
+the cue draws are not cued again. A press during #2973's probe writes
+nothing, so it reports nothing. A window fixed on one axis, or at its
+own maximum, reports settable and still climbs to the screen's edge.
+The first step of each press still shows on the ring, since the ask
+has to go out before the app can answer.
 :::
 
 **A float whose app holds its ratio is told by its answers, and

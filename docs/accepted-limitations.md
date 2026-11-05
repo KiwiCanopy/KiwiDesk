@@ -120,6 +120,16 @@ escape is planned.
 :::
 
 :::unreleased
+A floating window whose app fixes one axis, or which sits at its own
+maximum, can show its ring growing past the window on repeated resize
+presses or a hold, until "No room left to grow" fires at the screen's
+edge. macOS reports its size as settable, and a short answer alone
+looks the same as a cell grid or a late app
+([#2994](https://github.com/KiwiCanopy/KiwiDesk/issues/2994)). No
+escape is planned.
+:::
+
+:::unreleased
 A reload drops the length a grow along a run kept as well, so the
 windows it pushed come back once they fit
 ([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
