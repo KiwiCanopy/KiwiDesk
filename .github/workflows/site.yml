@@ -111,6 +111,9 @@ jobs:
             # Git still quotes a name holding a quote or a control
             # character, and a quoted name matches nothing.
             case "$file" in \"*) answer true ;; esac
+            # The list is read from this PR, so a PR dropping this file's
+            # own entry must still build for the gate to refuse it.
+            [ "$file" != .github/workflows/site.yml ] || answer true
             while IFS= read -r input; do
               case "$input" in
                 '*') answer true ;;

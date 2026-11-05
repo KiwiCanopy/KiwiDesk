@@ -128,6 +128,13 @@ extension SiteGateRequiredTests {
             ) == "run=true",
             "an empty input list must build"
         )
+        #expect(
+            try Self.verdict(
+                changing: [Self.workflowPath],
+                workflow: Self.listBeside("")
+            ) == "run=true",
+            "a PR dropping the workflow's own entry must build"
+        )
     }
 
     @Test("An entry the filter cannot compare builds")

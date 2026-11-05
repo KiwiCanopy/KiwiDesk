@@ -67,7 +67,7 @@ count in this sentence for the next author to falsify.
    job's scripts and their repo imports, literal joins onto this
    file's repo root, symlinks under the site, and literal `../` paths
    that resolve out of the site from the file holding them, or
-   `process.cwd(), "..", name` from the site. A read through a helper
+   `process.cwd(), "..", name, ...` from the site. A read through a helper
    or a computed path goes unseen, and so does `extract-keys`' own
    root, whose joins are mostly for the app mode the gate never takes.
 
@@ -1964,7 +1964,9 @@ def gate_scripts(roots: list[str]) -> list[str]:
         text = (REPO / script).read_text("utf-8")
         modules = re.findall(r"^\s*from (\w+)", text, re.M)
         for spelled in re.findall(r"^\s*import ([\w ,.]+)", text, re.M):
-            modules += [name.split()[0] for name in spelled.split(",")]
+            modules += [
+                name.split()[0] for name in spelled.split(",") if name.strip()
+            ]
         for module in modules:
             path = f"scripts/{module}.py"
             if (REPO / path).exists():
@@ -2011,10 +2013,12 @@ def site_outside_reads(root: str) -> tuple[list[str], list[str]]:
                     text,
                 )
             ] + [
-                os.path.join(site, "..", literal)
-                for literal in re.findall(
-                    r'''process\.cwd\(\),\s*["']\.\.["'],\s*'''
-                    r'''["']([^"']+)["']''',
+                os.path.join(
+                    site, "..", *re.findall(r'''["']([^"']+)["']''', segments)
+                )
+                for segments in re.findall(
+                    r'''process\.cwd\(\),\s*["']\.\.["']'''
+                    r'''((?:,\s*["'][^"']+["'])+)''',
                     text,
                 )
             ]
