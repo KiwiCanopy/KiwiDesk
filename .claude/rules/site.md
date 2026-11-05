@@ -632,8 +632,10 @@ the site's inputs, and skips the build on a PR outside it, which is
 what lets a Swift-only PR through (`SiteGateRequiredTests`).
 `scripts/protect-main.sh`'s `CONTEXTS` requires it. Anything the gate
 runs, imports or reads outside `site/` joins that one list, since a
-wrong skip passes the check with nothing built; the suite derives
-those inputs from the gate and holds the list to them. An entry
+wrong skip passes the check with nothing built;
+`check-site-tokens.py` ▸ `check_gate_inputs` holds the list to the
+shapes its docstring names, on this gate for the reason the feed
+check is, and a read of any other shape is review's. An entry
 written as anything but a plain `- "path"` or `- "dir/**"` builds every
 PR until it is fixed.
 

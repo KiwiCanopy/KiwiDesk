@@ -5,8 +5,9 @@ import Testing
 /// leaves the site alone** (`.claude/rules/site.md`). The verdict
 /// clauses run the `changes` step from `site.yml` against a throwaway
 /// repository holding the real workflow, so they are the filter's own
-/// answer and not a reading of its text. One suite across three files,
-/// split at the §2.1 ceiling.
+/// answer and not a reading of its text. One suite across two files,
+/// split at the §2.1 ceiling. The list's membership is the site gate's
+/// to hold (`check-site-tokens.py` ▸ `check_gate_inputs`).
 @Suite("The site gate is required")
 struct SiteGateRequiredTests {
     private static let stepName = "Decide whether the site must build"

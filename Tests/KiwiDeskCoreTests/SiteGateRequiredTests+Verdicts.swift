@@ -6,8 +6,8 @@ extension SiteGateRequiredTests {
     /// A file inside each entry of the workflow's own list, read here
     /// rather than typed: the list is the subject, and typing an
     /// ignored path in a suite is what `CiPathFilterTests` refuses.
-    /// Deleting an entry only shortens this, so `gateInputsAreListed`
-    /// is what holds the list's membership.
+    /// Deleting an entry only shortens this: the gate's
+    /// `check_gate_inputs` holds the list's membership.
     private static func onePathPerInput() throws -> [String] {
         let entries = try realWorkflow()
             .split(separator: "\n")
