@@ -104,3 +104,61 @@
 .kd-unreleased > :last-child {
   margin-bottom: 0;
 }
+
+/* Docs diagrams in the brand palette. Mermaid inlines its theme as
+   id-scoped rules, so these need !important; autoTheme still redraws
+   on a theme change and these follow without any script. Edge labels
+   mask their line, so they match astro-mermaid's 2% block tint. */
+:root {
+  --kd-diagram-node: var(--kiwi-shade);
+  --kd-diagram-border: var(--kiwi-bright);
+  --kd-diagram-text: var(--kiwi-frost);
+  --kd-diagram-line: var(--kiwi-frost);
+  --kd-diagram-label: color-mix(in srgb, var(--sl-color-black) 98%, white);
+}
+
+:root[data-theme="light"] {
+  --kd-diagram-node: var(--kiwi-cream);
+  --kd-diagram-border: var(--kiwi-flesh-text);
+  --kd-diagram-text: var(--kiwi-ink);
+  --kd-diagram-line: var(--kiwi-ink);
+  --kd-diagram-label: color-mix(in srgb, var(--sl-color-black) 98%, black);
+}
+
+.mermaid svg .node rect,
+.mermaid svg .node polygon,
+.mermaid svg .node circle,
+.mermaid svg .node path {
+  fill: var(--kd-diagram-node) !important;
+  stroke: var(--kd-diagram-border) !important;
+  stroke-width: 1.5px !important;
+  filter: none !important;
+}
+
+.mermaid svg .node .label rect {
+  fill: none !important;
+  stroke: none !important;
+}
+
+.mermaid svg .flowchart-link {
+  stroke: var(--kd-diagram-line) !important;
+}
+
+.mermaid svg .marker,
+.mermaid svg .arrowMarkerPath {
+  fill: var(--kd-diagram-line) !important;
+  stroke: var(--kd-diagram-line) !important;
+}
+
+.mermaid svg .label,
+.mermaid svg .label span,
+.mermaid svg .edgeLabel,
+.mermaid svg .edgeLabel p {
+  color: var(--kd-diagram-text) !important;
+}
+
+.mermaid svg .edgeLabel,
+.mermaid svg .edgeLabel p,
+.mermaid svg .labelBkg {
+  background-color: var(--kd-diagram-label) !important;
+}

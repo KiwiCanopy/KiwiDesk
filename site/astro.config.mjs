@@ -74,7 +74,6 @@ export default defineConfig({
     // Dagre, because mermaid 12's default ELK adds about 540 KB of
     // compressed JS to every page carrying a diagram.
     mermaid({
-      theme: "forest",
       autoTheme: true,
       mermaidConfig: { layout: "dagre" },
     }),
