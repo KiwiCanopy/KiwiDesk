@@ -76,22 +76,27 @@ struct StripScrollerTests {
     }
 
     /// Room only where an overlay scroller draws over the content: a
-    /// strip that fits draws no scroller, and SwiftUI already grows the
-    /// scroll view by a legacy one.
+    /// strip that fits draws no scroller, an unmeasured one is not
+    /// known to overflow, and SwiftUI already grows the scroll view by
+    /// a legacy one.
     @Test("the clearance answers the overflow and the scroller style")
     func clearance() {
         let room = StripScrollerRoom.room
         #expect(
-            room(true, .overlay) == StripScrollerRoom.overlayHeight
+            room(200, 100, .overlay) == StripScrollerRoom.overlayHeight
         )
         #expect(StripScrollerRoom.overlayHeight > 0)
-        #expect(room(false, .overlay) == 0)
-        #expect(room(true, .legacy) == 0)
-        #expect(room(false, .legacy) == 0)
+        #expect(room(100, 100, .overlay) == 0)
+        #expect(room(50, 100, .overlay) == 0)
+        #expect(room(200, 0, .overlay) == 0)
+        #expect(room(200, 100, .legacy) == 0)
+        #expect(room(50, 100, .legacy) == 0)
     }
 
-    /// The modifier is the one home: only it pads for a scroller or
-    /// reads the style, and each strip's overflow is its own reading.
+    /// The modifier is the one reader of the style, and each strip
+    /// takes it inside its scroll view, its widths read off the content
+    /// and the scroll view. Matches squashed source, so a strip's own
+    /// bottom padding beside the modifier is not seen.
     @Test("the clearance has one home and both strips take it")
     func clearanceHome() throws {
         let sources = try Self.settingsSources()
@@ -113,7 +118,8 @@ struct StripScrollerTests {
         let home = try #require(takers["StripScrollerRoom.swift"])
         #expect(
             home.contains(
-                ".padding(.bottom,Self.room(overflows:overflows,style:style))"
+                ".padding(.bottom,Self.room(contentWidth:contentWidth,"
+                    + "viewport:viewport,style:style))"
             )
         )
         #expect(
@@ -123,18 +129,23 @@ struct StripScrollerTests {
         )
         #expect(
             takers["SidewaysStrip.swift"]?.contains(
-                ".modifier(StripScrollerRoom("
-                    + "overflows:run.total>scroll.viewport))"
+                "ScrollView(.horizontal){content"
+                    + ".modifier(StripScrollerRoom("
+                    + "contentWidth:run.total,viewport:scroll.viewport))"
             ) == true
         )
+        // One needle, so the content's width and the scroll view's stay
+        // on their own writes and the modifier inside the scroll view.
         #expect(
             takers["SpacesPanelPreview.swift"]?.contains(
-                ".modifier(StripScrollerRoom("
-                    + "overflows:chipsWidth>chipsViewport))"
+                "ScrollView(.horizontal){content"
+                    + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+                    + "action:{width=$0}"
+                    + ".modifier(StripScrollerRoom("
+                    + "contentWidth:width,viewport:viewport))}"
+                    + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+                    + "action:{viewport=$0}"
             ) == true
         )
-        let preview = try #require(takers["SpacesPanelPreview.swift"])
-        #expect(preview.contains("action:{chipsWidth=$0}"))
-        #expect(preview.contains("action:{chipsViewport=$0}"))
     }
 }

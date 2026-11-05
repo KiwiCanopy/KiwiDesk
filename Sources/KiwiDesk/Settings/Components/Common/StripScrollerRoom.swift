@@ -5,7 +5,8 @@ import SwiftUI
 /// overlay scroller off it (#2901). Applied inside the `ScrollView`,
 /// and following the system's scroller style as it changes.
 struct StripScrollerRoom: ViewModifier {
-    let overflows: Bool
+    let contentWidth: CGFloat
+    let viewport: CGFloat
     @State private var style = NSScroller.preferredScrollerStyle
 
     /// An overlay scroller's height over the content's bottom edge.
@@ -16,7 +17,11 @@ struct StripScrollerRoom: ViewModifier {
         content
             .padding(
                 .bottom,
-                Self.room(overflows: overflows, style: style)
+                Self.room(
+                    contentWidth: contentWidth,
+                    viewport: viewport,
+                    style: style
+                )
             )
             .onReceive(
                 NotificationCenter.default.publisher(
@@ -27,12 +32,16 @@ struct StripScrollerRoom: ViewModifier {
             }
     }
 
-    /// No room where no scroller draws. A legacy scroller gets none
-    /// either: SwiftUI already grows the scroll view by its height.
+    /// No room where no scroller draws, or before the viewport is
+    /// measured. A legacy scroller gets none either: SwiftUI already
+    /// grows the scroll view by its height.
     nonisolated static func room(
-        overflows: Bool,
+        contentWidth: CGFloat,
+        viewport: CGFloat,
         style: NSScroller.Style
     ) -> CGFloat {
-        overflows && style == .overlay ? overlayHeight : 0
+        guard style == .overlay, viewport > 0, contentWidth > viewport
+        else { return 0 }
+        return overlayHeight
     }
 }

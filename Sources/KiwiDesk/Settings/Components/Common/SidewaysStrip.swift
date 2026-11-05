@@ -28,7 +28,8 @@ struct SidewaysStrip<ID: Hashable, Content: View>: View {
                 content
                     .modifier(
                         StripScrollerRoom(
-                            overflows: run.total > scroll.viewport
+                            contentWidth: run.total,
+                            viewport: scroll.viewport
                         )
                     )
                     .onGeometryChange(for: CGFloat.self) {

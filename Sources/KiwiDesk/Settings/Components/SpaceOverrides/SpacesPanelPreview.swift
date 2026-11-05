@@ -8,8 +8,6 @@ struct SpacesPanelPreview: View {
     @ObservedObject var model: SettingsModel
     @State private var selected: SpaceID?
     @State private var windows = LayoutSchematic.defaultWindowCount
-    @State private var chipsWidth: CGFloat = 0
-    @State private var chipsViewport: CGFloat = 0
 
     private var spaces: [SpaceID] { model.config.spaces }
 
@@ -63,26 +61,13 @@ struct SpacesPanelPreview: View {
     // MARK: - The chip row
 
     private var chips: some View {
-        ScrollView(.horizontal) {
+        SpacePreviewChipRow {
             HStack(spacing: 6) {
                 ForEach(spaces, id: \.raw) { candidate in
                     chip(candidate)
                 }
             }
             .padding(.vertical, 2)
-            .onGeometryChange(for: CGFloat.self) {
-                $0.size.width
-            } action: {
-                chipsWidth = $0
-            }
-            .modifier(
-                StripScrollerRoom(overflows: chipsWidth > chipsViewport)
-            )
-        }
-        .onGeometryChange(for: CGFloat.self) {
-            $0.size.width
-        } action: {
-            chipsViewport = $0
         }
     }
 
@@ -226,6 +211,33 @@ struct SpacesPanelPreview: View {
                 .foregroundStyle(SettingsTheme.ink2)
                 .font(.caption.monospacedDigit())
                 .settingsReadout()
+        }
+    }
+}
+
+/// The preview's chips, scrolling sideways. Its widths are its own
+/// state, so a window resize never re-evaluates the panel's schematic.
+private struct SpacePreviewChipRow<Content: View>: View {
+    @ViewBuilder let content: Content
+    @State private var width: CGFloat = 0
+    @State private var viewport: CGFloat = 0
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            content
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.width
+                } action: {
+                    width = $0
+                }
+                .modifier(
+                    StripScrollerRoom(contentWidth: width, viewport: viewport)
+                )
+        }
+        .onGeometryChange(for: CGFloat.self) {
+            $0.size.width
+        } action: {
+            viewport = $0
         }
     }
 }
