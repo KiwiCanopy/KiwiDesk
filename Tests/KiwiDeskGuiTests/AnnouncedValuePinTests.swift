@@ -183,6 +183,21 @@ struct AnnouncedValuePinTests {
         )
     }
 
+    /// The census counts the helper's one trait, so it cannot see a
+    /// panel eyebrow leave the helper (#2983).
+    @Test("the panel's eyebrows take the one helper")
+    func panelEyebrowsTakeTheHelper() throws {
+        let url = try #require(
+            try ChromeScanRoots.sources(from: #filePath).first {
+                $0.lastPathComponent == "SettingsDetailPanel.swift"
+            }
+        )
+        let source = try SourceScan.strippedSource(at: url)
+            .filter { !$0.isWhitespace }
+        #expect(source.contains("eyebrow(headerSentence)"))
+        #expect(source.contains("eyebrow(L(\"panel.changed_in_draft\""))
+    }
+
     /// The save pill's appearance announcement is cancellable —
     /// a Save inside the delay must not hear "Unsaved changes"
     /// over a clean tree (code review, 2026-08-24). A needle on
