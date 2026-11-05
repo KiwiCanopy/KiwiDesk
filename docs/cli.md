@@ -16,8 +16,8 @@ kiwidesk list_commands        # every command, grouped
 kiwidesk help <name>          # one command's arguments
 ```
 
-> The Homebrew cask puts it on your `PATH` as lower-case
-> `kiwidesk`, which every example here uses. A source build
+> The Homebrew cask and the Nix package put it on your `PATH` as
+> lower-case `kiwidesk`, which every example here uses. A source build
 > produces `.build/release/KiwiDesk` instead — same commands, so
 > substitute that path for `kiwidesk` throughout. The capitalized
 > `KiwiDesk` elsewhere on this page is the Lua global, the config

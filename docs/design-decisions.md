@@ -1381,7 +1381,7 @@ stranger who recognises one papercut instantly is worth more than
 four they have to qualify for, and a page that lists grievances in
 a row reads as a complaint.
 
-### Two install paths, one recommended per mode — never a chooser
+### One recommended install path per mode — never a chooser
 
 **[Principle]**
 
@@ -1416,6 +1416,16 @@ failure this entry exists to avoid. `docs/cli.md` owns what a
 `.dmg` user does about it, and that answer has to exist before
 the difference may be named: a caveat with no resolution is a
 dead end rather than a difference.
+
+**A third path, Nix and Home Manager, is Nerd-only and collapsed
+(#2909).** Its one stated difference is who updates it: that copy
+updates with `home-manager switch`, not through the app, so "it
+keeps itself up to date" stops being true for it and the rung says
+so. It stays off Simple mode and the guide for the same reason the
+CLI note does, and it shows only the line a reader adds to their
+own config, linking the flake's README for the rest: the flake
+owns its setup once, and a copied setup on this page would go
+stale against it.
 
 ### A restore replaces; it never merges
 
