@@ -79,7 +79,7 @@ extension FloatAspectJudgementTests {
         #expect(!core.deferred.isScheduled(.floatAspect))
     }
 
-    @Test("A hold's walked window is still judged at its release")
+    @Test("A window at the last write's origin is still judged at its release")
     func holdWalkIsJudged() {
         let core = makeCore()
         // Far from both the press's frames: the frame the last write sent.

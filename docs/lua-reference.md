@@ -6521,6 +6521,15 @@ strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
 
+:::unreleased
+A window whose app refuses the size stays where it is and `resize`
+still reports success; one that takes part of the size moves only as
+far as the size did. An app that keeps an axis or its ratio can show
+the half step for a moment at a screen's right or bottom edge, or
+off every screen
+([#2981](https://github.com/KiwiCanopy/KiwiDesk/issues/2981)).
+:::
+
 Tiled windows resize in bsp, stack, scrolling, track and grid
 layouts; monocle reports "not supported" and flashes a pill on
 the focused window saying the layout has no resizing (#1255). In

@@ -29,10 +29,46 @@ struct EdgeBandWriteSeamTests {
                 source.occurrences(of: "writer.setFrame(") == 0,
                 "\(file) writes a frame past EdgeBandWrite.write"
             )
+            #expect(
+                source.occurrences(of: "writer.setSize(") == 0,
+                "\(file) sizes a window past the band"
+            )
             routed += source.occurrences(of: "EdgeBandWrite.write(")
         }
         // apply, applyInstant and the hold's release.
         #expect(routed == 3)
+    }
+
+    /// A floating resize's write sizes by itself, so it spells the
+    /// lift and no frame, and the live writer owes it `frame`,
+    /// `setSize` and `sizeSettable`: each defaults inert, and a lost
+    /// one compiles (#2981).
+    @Test("the size-led write takes the lift, and live wires it")
+    func sizeLedTakesTheLift() throws {
+        let tiling = Self.root.appendingPathComponent(
+            "Sources/KiwiDeskCore/Tiling"
+        )
+        let led = try SourceScan.strippedSource(
+            at: tiling.appendingPathComponent("SizeLedWrite.swift")
+        )
+        #expect(led.occurrences(of: "EdgeBandWrite.lift(") == 1)
+        #expect(led.occurrences(of: "writer.setFrame(") == 0)
+        let live = try SourceScan.strippedSource(
+            at: tiling.appendingPathComponent(
+                "FrameApplier+EnhancedUI.swift"
+            )
+        )
+        #expect(live.occurrences(of: "frame: { element in") == 1)
+        #expect(
+            live.occurrences(
+                of: "setSize: { WindowControl.setSize($0, of: $1) }"
+            ) == 1
+        )
+        #expect(
+            live.occurrences(
+                of: "sizeSettable: { AXHelper.isSizeSettable($0) }"
+            ) == 1
+        )
     }
 
     /// The two waiting-write stores merge a band by one rule, so

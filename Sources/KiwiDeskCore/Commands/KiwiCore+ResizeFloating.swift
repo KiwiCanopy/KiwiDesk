@@ -14,7 +14,9 @@ extension KiwiCore {
     /// the boundary is pinned (#1091), so the origin moves: a
     /// chord has no grabbed edge to anchor on, and against a
     /// screen edge the old origin anchor stopped the resize dead.
-    /// `FloatResize` argues it. Applies through the tiler's
+    /// `FloatResize` argues it, and the origin follows what the
+    /// app answers to the size (`SizeLedWrite`, #2981). Applies
+    /// through the tiler's
     /// shared frame policy (`applyFrame`) — animated per
     /// `resizeWritesAnimated` save on an aspect-locked window (#2973),
     /// echo-tracked either way — and skips the layout retile: no
@@ -155,6 +157,17 @@ extension KiwiCore {
                 refuseShrinkAtMinimum(id, axis: axis)
             }
         }
+        // Where the window really is, never `base`, whose commanded
+        // size the app may have refused (#2981): this spring's own
+        // anchor, else the tracked frame, moved to where another
+        // spring is carrying it.
+        let anchor =
+            tiler.applier.sizeLedAnchors[id]
+            ?? CGRect(
+                origin: tiler.animation.targetFrame(window: id)?.origin
+                    ?? window.frame.origin,
+                size: window.frame.size
+            )
         // Promises (#593): a float resizes ITSELF and no tiled
         // window moves — there is no sibling yielding room, and a
         // float already overlaps the layout by definition, so the
@@ -183,7 +196,8 @@ extension KiwiCore {
             // lands short of the ask, so it takes the ask whole
             // (#2973, measured on mpv).
             animated: resizeWritesAnimated && lockedRatio == nil,
-            sizing: .allSpringSized
+            sizing: .allSpringSized,
+            sizeLedFrom: anchor
         )
         // Record what was just commanded, so a glide frame
         // accumulates from it rather than from an echo that has

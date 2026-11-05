@@ -19,6 +19,8 @@ final class HeldWrites: @unchecked Sendable {
         /// The screen whose edge band the size write clears
         /// (#2894).
         var band: CGRect? = nil
+        /// A floating resize's write (#2981).
+        var lead: SizeLedWrite.Lead? = nil
     }
 
     enum Staging: Equatable {
@@ -74,6 +76,7 @@ final class HeldWrites: @unchecked Sendable {
         _ frame: CGRect,
         setSize: Bool,
         band: CGRect? = nil,
+        lead: SizeLedWrite.Lead? = nil,
         now: DispatchTime = .now()
     ) -> Staging {
         lock.lock()
@@ -86,6 +89,7 @@ final class HeldWrites: @unchecked Sendable {
                 frame: frame
             )
             entry.setSize = entry.setSize || setSize
+            entry.lead = lead
             staged[id] = entry
             return .merged
         }
@@ -93,7 +97,12 @@ final class HeldWrites: @unchecked Sendable {
             deadlines[id] = nil
             return .pass
         }
-        staged[id] = Entry(frame: frame, setSize: setSize, band: band)
+        staged[id] = Entry(
+            frame: frame,
+            setSize: setSize,
+            band: band,
+            lead: lead
+        )
         return .staged(deadline)
     }
 
@@ -159,9 +168,16 @@ extension FrameApplier {
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool,
-        band: CGRect? = nil
+        band: CGRect? = nil,
+        lead: SizeLedWrite.Lead? = nil
     ) -> Bool {
-        switch held.stage(id, frame, setSize: setSize, band: band) {
+        switch held.stage(
+            id,
+            frame,
+            setSize: setSize,
+            band: band,
+            lead: lead
+        ) {
         case .pass: return false
         case .merged: return true
         case .staged(let deadline):
@@ -234,7 +250,15 @@ extension FrameApplier {
         _ target: AXUIElement,
         _ writer: FrameWriter
     ) {
-        if entry.setSize {
+        if let lead = entry.lead {
+            lead.write(
+                entry.frame,
+                target,
+                entry.setSize,
+                entry.band,
+                writer
+            )
+        } else if entry.setSize {
             EdgeBandWrite.write(
                 entry.frame,
                 target,

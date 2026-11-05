@@ -58,6 +58,46 @@ extension FloatAspectJudgementTests {
         )
     }
 
+    /// The press's size-led write held the origin, so the split
+    /// is still owed with the size (#2981).
+    @Test("A slow app's asked size takes the press's split too")
+    func probeOtherTakesTheSplit() {
+        let core = makeCore()
+        answer(core, broken)
+        let split = CGRect(x: 375, y: 200, width: 850, height: 450)
+        core.judgeFloatAspectProbe(
+            KiwiCore.FloatAspectAsk(
+                window: id,
+                axis: "x",
+                delta: 50,
+                base: start,
+                target: split
+            ),
+            live: start
+        )
+        #expect(core.tiler.recentInstantTarget(id) == split)
+    }
+
+    /// A cell grid answers short of the ask, and the write put its
+    /// origin that far along the line; no hand moved it (#2981).
+    @Test("A partial answer at its own origin is judged, not a hand's")
+    func partialAnswerIsJudged() {
+        let core = makeCore()
+        let target = CGRect(x: 375, y: 200, width: 850, height: 450)
+        let partial = CGRect(x: 390, y: 200, width: 820, height: 450)
+        core.windowServer.readWindowBounds = { _ in partial }
+        core.judgeFloatAspect(
+            KiwiCore.FloatAspectAsk(
+                window: id,
+                axis: "x",
+                delta: 50,
+                base: start,
+                target: target
+            )
+        )
+        #expect(core.state.floatAspects[id] == .init(pid: 900_001, ratio: nil))
+    }
+
     @Test("A window sent to the press's own split origin is judged")
     func targetOriginIsNotMoved() {
         let core = makeCore()

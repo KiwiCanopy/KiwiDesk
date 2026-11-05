@@ -81,10 +81,10 @@ extension KiwiCore {
     }
 
     /// Reads the press's answer, once the hand has left the window. A
-    /// window that has left where it stood, where the press sent it and
-    /// where the last write sent it was moved by a hand, which its
-    /// frames from before the wait must not undo. A hold's frames walk
-    /// it, and the last write's origin is where they end.
+    /// window that has left where it stood, where the press sent it,
+    /// where its answer puts it (`SizeLedWrite`, #2981) and where the
+    /// last write sent it was moved by a hand, which its frames from
+    /// before the wait must not undo.
     func judgeFloatAspect(_ ask: FloatAspectAsk) {
         guard resizeRoutesAsFloat(ask.window),
             let pid = state.windows[ask.window]?.pid
@@ -99,6 +99,17 @@ extension KiwiCore {
         guard let live = windowServer.readWindowBounds(ask.window),
             FloatResize.sameOrigin(live, ask.base)
                 || FloatResize.sameOrigin(live, ask.target)
+                || FloatResize.sameOrigin(
+                    live,
+                    CGRect(
+                        origin: SizeLedWrite.origin(
+                            asked: ask.target,
+                            anchor: ask.base,
+                            answer: live.size
+                        ),
+                        size: live.size
+                    )
+                )
                 || tiler.placements.recent(ask.window).map({
                     FloatResize.sameOrigin(live, $0)
                 }) == true
@@ -155,7 +166,7 @@ extension KiwiCore {
     /// proportion, from where the probe left it. Anything else holds no
     /// lock: a window that took the probe takes the size the press
     /// asked, where it stands, and one that refused it too is left as
-    /// it is, its walk being a fixed-size window's. One with no answer
+    /// it is, a fixed-size window. One with no answer
     /// goes back where the probe found it. A window moved, left or held
     /// in the wait
     /// keeps what it has, unjudged.
@@ -201,8 +212,16 @@ extension KiwiCore {
             tiler.applyFrame(
                 ask.window,
                 from: answered,
-                to: CGRect(origin: answered.origin, size: ask.target.size),
-                animated: false
+                // The press's split, from where the window stands now:
+                // its size-led write held the origin (#2981).
+                to: CGRect(
+                    x: answered.minX + ask.target.minX - ask.base.minX,
+                    y: answered.minY + ask.target.minY - ask.base.minY,
+                    width: ask.target.width,
+                    height: ask.target.height
+                ),
+                animated: false,
+                sizeLedFrom: answered
             )
         }
     }
