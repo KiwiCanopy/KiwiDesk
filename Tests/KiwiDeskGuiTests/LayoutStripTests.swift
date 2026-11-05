@@ -142,6 +142,11 @@ struct LayoutStripTests {
         #expect(strip.contains(".focused($focused,equals:mode)"))
         #expect(strip.contains(".id(mode)"))
         #expect(
+            strip.contains(
+                "letindex=LayoutMode.placementTabs.firstIndex(of:focused)"
+            )
+        )
+        #expect(
             strip.contains("returnStripFollow(id:focused,index:index)")
         )
         #expect(

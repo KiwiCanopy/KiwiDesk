@@ -106,7 +106,7 @@ struct LookLinkWearTests {
             .filter { !$0.isWhitespace }
         #expect(source.occurrences(of: ".rowActions{") == 1)
         #expect(source.contains("mine:Self.mine(in:model)"))
-        #expect(source.contains(".rowActions{menu(look)}"))
+        #expect(source.contains(".rowActions{menu(look,in:entries)}"))
         // The line's order: My looks, the hairline only while one
         // exists, then the bundled looks (#2943 ruling 2).
         #expect(
@@ -116,7 +116,11 @@ struct LookLinkWearTests {
             )
         )
         #expect(source.contains("bundled:model.core.bundledLooks"))
-        #expect(source.contains("case.bundled(letlook):tile(look)"))
+        #expect(
+            source.contains("case.bundled(letlook):tile(look,id:entry.id)")
+        )
+        #expect(source.contains("case.hairline:Divider()"))
+        #expect(source.contains("case.browse:browseTile"))
         #expect(source.contains("L(\"looks.delete\""))
         #expect(source.contains("L(\"looks.rename\""))
         // No Export or Share row beside them.

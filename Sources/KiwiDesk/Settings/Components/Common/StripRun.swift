@@ -16,7 +16,9 @@ struct StripFollow<ID: Hashable>: Equatable {
 /// A strip's items along its run, answering Core's overflow
 /// arithmetic (`ShelfOverflow`) for the fade and the focus follow.
 struct StripRun {
-    /// The items' own widths.
+    /// The items' own widths. A followed run passes them bare, since
+    /// the anchor reads an item's width here; only an unfollowed run
+    /// may add room to one.
     let lengths: [CGFloat]
     let gap: CGFloat
     /// The fade's depth: the items' drawn height.
