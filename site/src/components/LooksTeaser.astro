@@ -166,10 +166,12 @@ const pictureName = featured ? `${featured.id}.png` : "";
     box-shadow: var(--shadow-sm);
     color: inherit;
     text-decoration: none;
-    transition: border-color 0.2s ease, transform 0.2s ease;
+    transition: border-color 0.2s ease, transform 0.2s ease,
+      box-shadow 0.2s ease;
   }
   .lt-card:hover {
     border-color: var(--accent);
+    box-shadow: var(--teaser-hover-shadow);
     transform: translateY(-2px);
   }
   .lt-card__name {

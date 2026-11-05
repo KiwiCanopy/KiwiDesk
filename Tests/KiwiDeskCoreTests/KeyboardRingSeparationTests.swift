@@ -46,7 +46,7 @@ struct KeyboardRingSeparationTests {
     /// bound reserved combo conflict-class (2026-08-10): an
     /// own-row collision and a macOS overwrite ring the same
     /// solid red on the same green. Amber could not follow the
-    /// warning onto a bound key — it measures 10.5 here against
+    /// warning onto a bound key — it measures 10.5 in light against
     /// the floor of 60, which is the number that had confined
     /// the reserved ring to free keys in the first place.
     @Test("The conflict ring reads on the bound key it rings")

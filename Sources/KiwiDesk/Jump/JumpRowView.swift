@@ -63,7 +63,7 @@ struct JumpRowView: View {
     static let titleMinWidth: CGFloat = 120
 
     private var showsNumber: Bool { commandHeld && number != nil }
-    /// The selection's fill is fixed in both modes, so its inks are.
+    /// One selection ink in both modes, measured on each mode's fill.
     private var titleInk: AnyShapeStyle {
         if isSelected { return AnyShapeStyle(paint.selectionInk) }
         if isLifted, let ink = paint.hoverInk { return AnyShapeStyle(ink) }

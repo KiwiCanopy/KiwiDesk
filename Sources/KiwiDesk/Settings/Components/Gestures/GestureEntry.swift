@@ -214,6 +214,6 @@ struct GesturePlate<Content: View>: View {
 /// the card's end, which its edge closes.
 struct GestureRule: View {
     var body: some View {
-        SettingsTheme.hairline.frame(height: 1)
+        SettingsTheme.hairlineSubtle.frame(height: 1)
     }
 }

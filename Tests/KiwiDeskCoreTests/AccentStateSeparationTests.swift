@@ -34,11 +34,12 @@ struct AccentStateSeparationTests {
         return source
     }
 
-    /// `let name = token(light: 0xAA_BB_CC, …)` → the light hex.
-    /// All three state fills are fixed in both modes, which the
-    /// token suite pins, so one hex is the whole colour.
+    /// `let name = token(light: 0xAA_BB_CC, dark: 0xDD_EE_FF` →
+    /// one mode's hex. The live fills differ per mode, so the
+    /// floor is measured in each.
     private func fill(
         _ name: String,
+        dark: Bool,
         in source: String
     ) throws -> String {
         let squashed =
@@ -49,7 +50,11 @@ struct AccentStateSeparationTests {
             squashed.range(of: "let\(name)=token(light:0x"),
             Comment(rawValue: "no such token: \(name)")
         )
-        let hex = squashed[start.upperBound...]
+        let lightHex = squashed[start.upperBound...]
+            .prefix { $0.isHexDigit || $0 == "_" }
+        let rest = squashed[start.upperBound...]
+            .dropFirst(lightHex.count + ",dark:0x".count)
+        let hex = (dark ? rest : lightHex)
             .prefix { $0.isHexDigit || $0 == "_" }
             .replacingOccurrences(of: "_", with: "")
         try #require(hex.count == 6)
@@ -72,28 +77,35 @@ struct AccentStateSeparationTests {
     @Test("the disabled fill separates from both live fills")
     func disabledSeparatesFromLiveFills() throws {
         let source = try themeSource()
-        let off = try fill("accentDisabled", in: source)
-        for name in ["accent", "accentPressed"] {
-            let live = try fill(name, in: source)
-            let measured = try #require(
-                ColorVision.separation(live, off)
+        for dark in [false, true] {
+            let off = try fill(
+                "accentDisabled",
+                dark: dark,
+                in: source
             )
-            #expect(
-                measured >= ColorVision.separationFloor,
-                Comment(
-                    rawValue: String(
-                        format:
-                            "%@ vs accentDisabled separates by "
-                            + "%.1f under protanopia, under the "
-                            + "%.0f floor — an unavailable "
-                            + "button would still read as "
-                            + "available",
-                        name,
-                        measured,
-                        ColorVision.separationFloor
+            for name in ["accent", "accentPressed"] {
+                let live = try fill(name, dark: dark, in: source)
+                let measured = try #require(
+                    ColorVision.separation(live, off)
+                )
+                #expect(
+                    measured >= ColorVision.separationFloor,
+                    Comment(
+                        rawValue: String(
+                            format:
+                                "%@ vs accentDisabled (%@) "
+                                + "separates by %.1f under "
+                                + "protanopia, under the %.0f "
+                                + "floor — an unavailable button "
+                                + "would still read as available",
+                            name,
+                            dark ? "dark" : "light",
+                            measured,
+                            ColorVision.separationFloor
+                        )
                     )
                 )
-            )
+            }
         }
     }
 }

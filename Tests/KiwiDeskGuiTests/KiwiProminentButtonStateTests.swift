@@ -25,9 +25,9 @@ struct KiwiProminentButtonStateTests {
     /// legibility on that ground is measured by nobody.
     ///
     /// The near-black pill and the light-mode page are opposite
-    /// polarity, which is the whole difficulty — one opaque fill
-    /// has to stay visible on both without moving with the
-    /// appearance.
+    /// polarity, which is the whole difficulty — the disabled
+    /// fill is one opaque colour that has to stay visible on both
+    /// without moving with the appearance.
     private let grounds: [(String, Color)] = [
         ("savePill", SettingsTheme.savePill),
         ("page", SettingsTheme.page),

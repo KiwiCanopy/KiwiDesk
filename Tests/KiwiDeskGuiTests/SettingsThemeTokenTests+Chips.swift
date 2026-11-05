@@ -40,10 +40,9 @@ extension SettingsThemeTokenTests {
         Pin(
             "chipEdge",
             0x12_25_1A,
-            0xE6_EC_E6,
+            0x7A_95_83,
             SettingsTheme.chipEdge,
-            lightAlpha: 0.18,
-            darkAlpha: 0.20
+            lightAlpha: 0.18
         ),
         // A segmented control's well, fill and rim (#2047).
         Pin(
