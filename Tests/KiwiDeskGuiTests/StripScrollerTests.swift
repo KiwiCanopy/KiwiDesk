@@ -4,19 +4,20 @@ import Testing
 
 @testable import KiwiDesk
 
-/// A sideways strip in Settings keeps the platform's scroller, which
-/// a mouse user needs to reach what it cuts (#2901). Scans source
-/// off the main actor; whether macOS draws it is a device check.
+/// A sideways strip in Settings or the first-launch tour keeps the
+/// platform's scroller, which a mouse user needs to reach what it cuts
+/// (#2901). Scans source off the main actor; whether macOS draws it is
+/// a device check.
 ///
 /// Both walks read every site's arguments instead of matching a hide's
 /// spelling. They trade reach for that: a modifier wrapped in a helper
 /// that takes the visibility as a value is not seen at the wrapper's
 /// caller.
-@Suite("Settings strip scroller")
+@Suite("Sideways strip scroller")
 struct StripScrollerTests {
-    private static func settingsSources() throws -> [(String, String)] {
+    private static func sources(in tree: String) throws -> [(String, String)] {
         let root = SourceScan.repoRoot(from: #filePath)
-            .appendingPathComponent("Sources/KiwiDesk/Settings")
+            .appendingPathComponent("Sources/KiwiDesk/\(tree)")
         return try SourceScan.swiftSources(under: root).map { url in
             let source = try SourceScan.strippedSource(at: url)
             return (
@@ -25,6 +26,21 @@ struct StripScrollerTests {
             )
         }
     }
+
+    private static func stripSources() throws -> [(String, String)] {
+        try sources(in: "Settings") + sources(in: "Onboarding")
+    }
+
+    /// A scroll row's two widths on their own writes, and the modifier
+    /// inside the scroll view.
+    private static let measuredRoom =
+        "ScrollView(.horizontal){content"
+        + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+        + "action:{width=$0}"
+        + ".modifier(StripScrollerRoom("
+        + "contentWidth:width,viewport:viewport))}"
+        + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
+        + "action:{viewport=$0}"
 
     /// What follows each occurrence of `needle`.
     private static func tails(of needle: String, in source: String)
@@ -35,9 +51,9 @@ struct StripScrollerTests {
         }
     }
 
-    @Test("no Settings scroll view hides its scroller by argument")
+    @Test("no strip's scroll view hides its scroller by argument")
     func noHiddenArgument() throws {
-        let sources = try Self.settingsSources()
+        let sources = try Self.stripSources()
         #expect(sources.contains { $0.1.contains("ScrollView(.horizontal") })
         for (name, source) in sources {
             for tail in Self.tails(of: "showsIndicators:", in: source) {
@@ -58,7 +74,7 @@ struct StripScrollerTests {
             ".hidden,axes:.vertical)",
         ]
         var sites = 0
-        for (name, source) in try Self.settingsSources() {
+        for (name, source) in try Self.stripSources() {
             // The modifier's environment value is the same hide.
             #expect(
                 !source.contains("horizontalScrollIndicatorVisibility"),
@@ -99,9 +115,9 @@ struct StripScrollerTests {
     /// stays inside the scroll view: a harmless modifier inside a span
     /// reds, and a bottom padding on what a host hands the strip is not
     /// seen.
-    @Test("the clearance has one home and both strips take it")
+    @Test("the clearance has one home and every strip takes it")
     func clearanceHome() throws {
-        let sources = try Self.settingsSources()
+        let sources = try Self.stripSources()
         let readers = sources.filter {
             $0.1.contains("preferredScrollerStyle")
         }
@@ -114,7 +130,7 @@ struct StripScrollerTests {
         #expect(
             Set(takers.keys) == [
                 "StripScrollerRoom.swift", "SidewaysStrip.swift",
-                "SpacesPanelPreview.swift",
+                "SpacesPanelPreview.swift", "OnboardingLooksRows.swift",
             ]
         )
         let home = try #require(takers["StripScrollerRoom.swift"])
@@ -141,18 +157,38 @@ struct StripScrollerTests {
                 "SpacePreviewChipRow{HStack(spacing:6)"
             ) == true
         )
-        // One needle, so the content's width and the scroll view's stay
-        // on their own writes and the modifier inside the scroll view.
         #expect(
-            takers["SpacesPanelPreview.swift"]?.contains(
-                "ScrollView(.horizontal){content"
-                    + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
-                    + "action:{width=$0}"
-                    + ".modifier(StripScrollerRoom("
-                    + "contentWidth:width,viewport:viewport))}"
-                    + ".onGeometryChange(for:CGFloat.self){$0.size.width}"
-                    + "action:{viewport=$0}"
-            ) == true
+            takers["SpacesPanelPreview.swift"]?.contains(Self.measuredRoom)
+                == true
         )
+        try expectTourRowsTakeIt(takers)
+    }
+
+    /// Both rows take the one scroll row. The padding clause is
+    /// file-wide, so a harmless bottom padding on a tile or a header
+    /// here reds too: that is its price for seeing one beside a row.
+    private func expectTourRowsTakeIt(_ takers: [String: String]) throws {
+        let tour = try #require(takers["OnboardingLooksRows.swift"])
+        #expect(tour.contains(Self.measuredRoom))
+        let row = "OnboardingStripScroll{HStack(alignment:.top,spacing:8)"
+        let rows = Self.tails(of: row, in: tour)
+        #expect(rows.count == 2)
+        #expect(!tour.contains(".padding(.bottom"))
+    }
+
+    /// `SidewaysStripTests` watches Settings only, so a new tour strip
+    /// needs this count to meet the clearance. It reads each
+    /// `ScrollView(`'s first argument, so an axis that opens `.vertical`
+    /// is not seen.
+    @Test("the tour's one sideways scroll view is the one with the room")
+    func tourHolders() throws {
+        var holders: [String: Int] = [:]
+        for (name, source) in try Self.sources(in: "Onboarding") {
+            for tail in Self.tails(of: "ScrollView(", in: source)
+            where !tail.hasPrefix(".vertical") {
+                holders[name, default: 0] += 1
+            }
+        }
+        #expect(holders == ["OnboardingLooksRows.swift": 1])
     }
 }

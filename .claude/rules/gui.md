@@ -2175,25 +2175,30 @@ is the one copy of who may hold a sideways scroll view). A bare
 fade draws. The container owns the scroll, so a tick never
 re-evaluates the host. The Spaces preview chips are the held-out
 strip: scroller only, no fade and no follow, until their varying
-widths are measured (#2990).
+widths are measured (#2990). The first-launch tour's rows are outside
+this paragraph: scroller only as well, centring the applied tile
+themselves.
 
-**A Settings strip that scrolls sideways keeps the platform's
-scroller**, which a mouse user drags to reach what the strip cuts
-(#2901 ▸ Ruling). Never hide it by argument, and a hide above a
-strip names `axes: .vertical` alone, since Apple documents the
-modifier as reaching nested scroll views (not measured here;
-`StripScrollerTests`). The scroller gives reach and the fade stays
-the cue: under *Automatically* a trackpad shows it only during a
-gesture (`docs/design-decisions.md` ▸ The platform's own indicator
-does not work).
+**A strip that scrolls sideways in Settings or the first-launch tour
+keeps the platform's scroller**, which a mouse user drags to reach
+what the strip cuts (#2901 ▸ Ruling, whose text names Settings; the
+tour follows it for the same reach). Never hide it by argument, and a
+hide above a strip names `axes: .vertical` alone, since Apple documents
+the modifier as reaching nested scroll views (not measured here;
+`StripScrollerTests`). The scroller gives reach and, on a
+`SidewaysStrip`, the fade stays the cue: under *Automatically* a
+trackpad shows the scroller only during a gesture
+(`docs/design-decisions.md` ▸ The platform's own indicator does not
+work), so a tour row cut at its edge is the only cue there.
 
-**A Settings strip's content clears an overlay scroller through the
-one `StripScrollerRoom`, inside the `ScrollView`**, handed that
-strip's content width and viewport (`StripScrollerTests` ▸
+**A strip's content in those two trees clears an overlay scroller
+through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
+that strip's content width and viewport (`StripScrollerTests` ▸
 `clearance`, `clearanceHome`), never a bottom padding of its own
-beside it, which review holds since those needles do not see one. As
-measured on macOS 27, 2026-11-05, an overlay scroller
-draws over the content's bottom edge, a legacy one grows the scroll
+beside it, which review holds in Settings since those needles do not
+see one there, and `StripScrollerTests` holds in the tour's rows. A
+new sideways strip in the tour joins that suite's `tourHolders`. As
+measured on macOS 27, 2026-11-05, an overlay scroller draws over the content's bottom edge, a legacy one grows the scroll
 view by its own height, and a strip that fits hides either. A macOS
 release re-measures `overlayHeight`.
 
