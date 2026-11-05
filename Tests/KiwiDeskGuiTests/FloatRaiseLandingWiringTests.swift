@@ -82,10 +82,10 @@ struct FloatRaiseLandingWiringTests {
             in: "KiwiCore+FloatRaiseDebt.swift",
             under: "Commands"
         )
-        // The restore, then the focus raise, then the floats.
+        // The focus raise, then the restore (#2985), then the floats.
         let order = [
-            "runPendingZOrderRestore()",
             "runPendingFocusRaise()",
+            "runPendingZOrderRestore()",
             "runPendingFloatRaise()",
         ].map { door.range(of: $0)?.lowerBound }
         #expect(!order.contains(nil), "door pays all three")

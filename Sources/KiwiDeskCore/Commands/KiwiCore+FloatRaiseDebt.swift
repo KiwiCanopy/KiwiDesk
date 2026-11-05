@@ -6,8 +6,9 @@ import Foundation
 /// raise waits and is paid when the plane comes to rest.
 @MainActor
 final class FloatRaiseDebt {
-    /// The focus the owed raise keeps floats above; one slot, so
-    /// only the last focus raises.
+    /// The focus the owed raise was owed to; one slot, so only the
+    /// last focus raises. Dropped once another tile holds the focus,
+    /// which schedules its own, and paid for a float that does.
     var owed: WindowID?
     /// Tiled z-order restores draining — never the float raise's
     /// own, which a newer focus must still supersede at once.
@@ -25,24 +26,48 @@ extension KiwiCore {
     }
 
     /// What the tiled plane coming to rest pays (#2284, #2343): the
-    /// z-order restore that waited for it and the deferred focus
-    /// raise where the caller says they run, then the owed float
-    /// raise, last so the floats land above both. Every rest site
-    /// takes this door, never a payer beside it.
+    /// deferred focus raise and the z-order restore that waited for
+    /// it where the caller says they run, then the owed float raise,
+    /// last so the floats land above both. The focus goes first: the
+    /// restore's raises cannot beat the old key window (#2985).
+    /// Every rest site takes this door, never a payer beside it.
     func tiledPlaneCameToRest(restore: Bool, focusRaise: Bool) {
-        if restore { runPendingZOrderRestore() }
         if focusRaise { runPendingFocusRaise() }
+        if restore { runPendingZOrderRestore() }
         runPendingFloatRaise()
     }
 
     /// Pays the owed raise; the raise re-asks the predicate, so a
     /// restore this settle just started owes it again, to its own
-    /// completion. A debt for a focus that has moved on is dropped:
-    /// paying it would replace the newer focus's scheduled raise.
+    /// completion. A debt for a focus that has moved on to a tile is
+    /// dropped: paying it would replace that focus's scheduled raise.
     func runPendingFloatRaise() {
         guard let id = floatRaiseDebt.owed else { return }
         floatRaiseDebt.owed = nil
+        if raiseFloatsForFocusedFloat() { return }
         guard id == focusedWindowID else { return }
         raiseFloatsAbove(afterFocusing: id)
+    }
+
+    /// The raise a focused float's own focus never schedules, since
+    /// it needs none for itself: tiles lifted ahead of it still stand
+    /// over the other floats (#2985). True when the focus is a float,
+    /// which takes the raise now or owes it to the plane's rest. A
+    /// Space with no tile has no plane to lift the floats over, as in
+    /// floating mode (#1286).
+    @discardableResult
+    func raiseFloatsForFocusedFloat() -> Bool {
+        guard let focus = focusedWindowID,
+            isEffectiveFloatOnActiveSpace(focus)
+        else { return false }
+        guard let space = activeSpace,
+            !floatRaiseFloor(of: space, excluding: focus).isEmpty
+        else { return true }
+        if tiledPlaneMoving {
+            floatRaiseDebt.owed = focus
+        } else {
+            raiseLandingFloats(thenFocus: focus)
+        }
+        return true
     }
 }

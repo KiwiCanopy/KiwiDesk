@@ -162,7 +162,7 @@ extension KiwiCore {
         // anchor, else the tracked frame, moved to where another
         // spring is carrying it.
         let anchor =
-            tiler.applier.sizeLedAnchors[id]
+            tiler.applier.sizeLedRuns[id]?.anchor
             ?? CGRect(
                 origin: tiler.animation.targetFrame(window: id)?.origin
                     ?? window.frame.origin,
@@ -197,7 +197,7 @@ extension KiwiCore {
             // (#2973, measured on mpv).
             animated: resizeWritesAnimated && lockedRatio == nil,
             sizing: .allSpringSized,
-            sizeLedFrom: anchor
+            sizeLedFrom: SizeLedRun(anchor: anchor, pressed: keys.isFiring)
         )
         // Record what was just commanded, so a glide frame
         // accumulates from it rather than from an echo that has

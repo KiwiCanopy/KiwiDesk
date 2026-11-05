@@ -61,6 +61,15 @@ count in this sentence for the next author to falsify.
 10. Every indexable page carries a link-preview card that exists,
    is the size its tags state, and is its page family's card in
    the page's own language, with that card's catalog alt text.
+11. `site.yml`'s list of inputs names everything this gate runs,
+   imports or reads from outside the site, because a wrong skip
+   passes a required check with nothing built. It sees the build
+   job's scripts and their repo imports, literal joins onto this
+   file's repo root, symlinks under the site, and literal `../` paths
+   that resolve out of the site from the file holding them, or
+   `process.cwd(), "..", name, ...` from the site. A read through a helper
+   or a computed path goes unseen, and so does `extract-keys`' own
+   root, whose joins are mostly for the app mode the gate never takes.
 
 KNOWN LIMIT. This reads CSS with regexes, not a parser, so treat it
 as a net for ordinary edits rather than proof. `CONSUMERS` names the
@@ -86,6 +95,7 @@ import importlib.machinery
 import importlib.util
 import io
 import json
+import os
 import pathlib
 import re
 import sys
@@ -1902,6 +1912,169 @@ def check_og_images(dist: pathlib.Path) -> None:
           f"card in their own language, {len(owed)} card(s) in use")
 
 
+def listed_inputs(workflow: str) -> list[str]:
+    """The workflow's `paths:` list, in the filter step's grammar."""
+    entries: list[str] = []
+    inside = False
+    for line in workflow.splitlines():
+        if line == "    paths:":
+            inside = True
+        elif inside and not re.fullmatch(r"[ \t]*(#.*)?", line):
+            if not line.startswith("      "):
+                break
+            entry = re.fullmatch(
+                r'      - "([A-Za-z0-9._/-]+(?:/\*\*)?)"', line
+            )
+            if not entry:
+                fail(
+                    f"site.yml: {line.strip()!r} is neither a plain "
+                    'path nor "dir/**", which the filter cannot compare'
+                )
+            if (REPO / entry[1]).is_dir():
+                fail(
+                    f'site.yml: "{entry[1]}" is a directory, and only '
+                    f'"{entry[1]}/**" matches what is inside it'
+                )
+            entries.append(entry[1])
+    if not entries:
+        fail("site.yml's list of inputs read empty")
+    return entries
+
+
+def is_listed(path: str, entries: list[str]) -> bool:
+    return any(
+        path == entry
+        or (
+            entry.endswith("/**")
+            and (path + "/").startswith(entry[:-2])
+        )
+        for entry in entries
+    )
+
+
+def gate_scripts(roots: list[str]) -> list[str]:
+    """`roots` and every repo module they import, transitively."""
+    seen: list[str] = []
+    work = list(roots)
+    while work:
+        script = work.pop()
+        if script in seen:
+            continue
+        seen.append(script)
+        text = (REPO / script).read_text("utf-8")
+        modules = re.findall(r"^\s*from (\w+)", text, re.M)
+        for spelled in re.findall(r"^\s*import ([\w ,.]+)", text, re.M):
+            modules += [
+                name.split()[0] for name in spelled.split(",") if name.strip()
+            ]
+        for module in modules:
+            path = f"scripts/{module}.py"
+            if (REPO / path).exists():
+                work.append(path)
+    return seen
+
+
+def site_outside_reads(root: str) -> tuple[list[str], list[str]]:
+    """Symlink targets and `../` paths leading out of the site."""
+    site = REPO / root
+    links: list[str] = []
+    climbs: list[str] = []
+
+    def out_of_site(target: str) -> str | None:
+        target = os.path.normpath(target)
+        inside = target.startswith(str(REPO) + os.sep)
+        if not inside or target.startswith(str(site) + os.sep):
+            return None
+        return os.path.relpath(target, REPO)
+
+    for folder, dirs, files in os.walk(site):
+        if pathlib.Path(folder) == site:
+            dirs[:] = [
+                name for name in dirs
+                if name not in {"node_modules", "dist", ".astro", ".cache"}
+            ]
+        for name in dirs + files:
+            path = pathlib.Path(folder) / name
+            if path.is_symlink():
+                target = out_of_site(
+                    os.path.join(folder, os.readlink(path))
+                )
+                if target:
+                    links.append(target)
+        for name in files:
+            path = pathlib.Path(folder) / name
+            if path.is_symlink() or path.suffix not in SCAN_SUFFIXES:
+                continue
+            text = source_without_comments(path)
+            found = [
+                os.path.join(folder, literal)
+                for literal in re.findall(
+                    r"""["'`]((?:\.\./)+[^"'`\s?]+)(?:\?\w+)?["'`]""",
+                    text,
+                )
+            ] + [
+                os.path.join(
+                    site, "..", *re.findall(r'''["']([^"']+)["']''', segments)
+                )
+                for segments in re.findall(
+                    r'''process\.cwd\(\),\s*["']\.\.["']'''
+                    r'''((?:,\s*["'][^"']+["'])+)''',
+                    text,
+                )
+            ]
+            for target in map(out_of_site, found):
+                if target and (REPO / target).exists():
+                    climbs.append(target)
+    return links, climbs
+
+
+def check_gate_inputs() -> None:
+    workflow_path = ".github/workflows/site.yml"
+    workflow = (REPO / workflow_path).read_text("utf-8")
+    entries = listed_inputs(workflow)
+    job = re.search(
+        r"^  build:\n(.*?)(?=^  \S|\Z)", workflow, re.M | re.S
+    )
+    if not job:
+        fail("site.yml has no build job")
+    body = "\n".join(
+        line for line in job[1].splitlines()
+        if not line.lstrip().startswith("#")
+    )
+    root = re.search(r"working-directory: (\S+)", body)
+    if not root:
+        fail("site.yml's build job names no working directory")
+    roots = re.findall(r"\.\./(scripts/[\w.-]+)", body)
+    scripts = gate_scripts(roots)
+    joins = [
+        "/".join(re.findall(r'"([^"]+)"', spelled))
+        for script in scripts
+        for spelled in re.findall(
+            r'REPO((?:\s*/\s*"[^"]+")+)(?!\s*/)',
+            (REPO / script).read_text("utf-8"),
+        )
+    ]
+    links, parents = site_outside_reads(root[1])
+    # An empty family means its scan stopped seeing the tree, which
+    # would pass for having found nothing to hold.
+    for name, family in (
+        ("script run by the build job", roots),
+        ("repo module import", scripts[len(roots):]),
+        ("repo join", joins),
+        ("symlink under the site", links),
+        ("read above the site", parents),
+    ):
+        if not family:
+            fail(f"found no {name}: this check no longer reads the gate")
+    required = {root[1], workflow_path, *scripts, *joins, *links, *parents}
+    missing = sorted(p for p in required if not is_listed(p, entries))
+    if missing:
+        fail(
+            "the site gate reads these but site.yml's list of inputs "
+            f"does not name them, so a PR on one skips: {missing}"
+        )
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -1914,6 +2087,7 @@ def main() -> None:
     tokens = token_map()
     check_token_layer(tokens)
     check_accent(tokens)
+    check_gate_inputs()
     dist = pathlib.Path(args.dist).resolve()
     check_branded_404(dist)
     check_appcast(dist)

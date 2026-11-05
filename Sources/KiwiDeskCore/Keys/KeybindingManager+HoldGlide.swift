@@ -49,9 +49,14 @@ extension KeybindingManager {
     /// 2026-08-29): the same `cueResizeRefusal` funnel serves the
     /// MOUSE end, so a mouse refusal during a glide ends the
     /// keyboard hold. Accepted — it needs a drag and a held chord
-    /// at once, and the failure is a hold that stops early.
+    /// at once, and the failure is a hold that stops early. The
+    /// armed term widens that residue to the key-repeat wait, and to
+    /// a CLI refusal, on the same terms.
     public func noteResizeRefusal() {
-        guard isFiring || holdGlide.isGliding else { return }
+        // An armed hold too: a write's report lands in the key-repeat
+        // wait (#2994).
+        guard isFiring || holdGlide.isGliding || holdGlide.heldID != nil
+        else { return }
         holdGlide.noteRefusal()
     }
 

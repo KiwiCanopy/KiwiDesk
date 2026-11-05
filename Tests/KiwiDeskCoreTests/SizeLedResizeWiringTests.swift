@@ -94,47 +94,23 @@ struct SizeLedResizeWiringTests {
         )
     }
 
-    @Test("A glide on a fixed window never walks, past a boundary too")
-    func fixedGlide() async throws {
-        let f = try HoldGlideFixture(
-            body: #"KiwiDesk.resize("x", 50)"#
-        )
-        f.seedFloating()
-        f.core.execute(
-            "animations.set_on_window_resize",
-            args: [.bool(false)]
-        )
-        let app = answering(f.core, .fixed)
-        f.registrar.press(keyCode: f.combo.keyCode)
-        try f.beginGlide()
-        await drain()
-        // The commanded width runs until the region stops the hold,
-        // past where the ask stopped moving its origin.
-        var frames = 0
-        while f.frameTick != nil, frames < 600 {
-            try f.frame(1.0 / 60)
-            frames += 1
-            await drain()
-            #expect(app.now == start)
-        }
-        #expect(frames > 1)
-        #expect(try #require(f.commandedWidth()) > 700)
-    }
-
     @Test("Any other engine frame ends the run")
     func otherFrameEnds() async {
         let core = floatCore()
         core.tiler.settings.animations.onWindowResize = true
         let app = answering(core, .fixed)
         let asked = CGRect(x: 75, y: 100, width: 550, height: 400)
-        core.tiler.applier.sizeLedAnchors[WindowID(1)] = start
+        core.tiler.applier.sizeLedRuns[WindowID(1)] = SizeLedRun(
+            anchor: start,
+            pressed: false
+        )
         core.tiler.applyFrame(
             WindowID(1),
             from: start,
             to: asked,
             animated: false
         )
-        #expect(core.tiler.applier.sizeLedAnchors[WindowID(1)] == nil)
+        #expect(core.tiler.applier.sizeLedRuns[WindowID(1)] == nil)
         await drain()
         #expect(app.now.minX == asked.minX)
     }
@@ -153,11 +129,11 @@ struct SizeLedResizeWiringTests {
             from: start,
             to: asked,
             animated: true,
-            sizeLedFrom: start
+            sizeLedFrom: SizeLedRun(anchor: start, pressed: false)
         )
-        #expect(core.tiler.applier.sizeLedAnchors[id] == start)
+        #expect(core.tiler.applier.sizeLedRuns[id]?.anchor == start)
         core.tiler.applyFrame(id, from: start, to: asked, animated: true)
-        #expect(core.tiler.applier.sizeLedAnchors[id] == nil)
+        #expect(core.tiler.applier.sizeLedRuns[id] == nil)
         core.tiler.animation.cancelAll(snapToTargets: false)
         await drain()
     }
@@ -169,7 +145,7 @@ struct SizeLedResizeWiringTests {
         let applier = core.tiler.applier
         let id = WindowID(1)
         applier.holdWrites([id], until: .now() + 0.05)
-        applier.sizeLedAnchors[id] = start
+        applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.applyInstant(
             id,
             CGRect(x: 75, y: 100, width: 550, height: 400),
@@ -218,7 +194,7 @@ struct SizeLedResizeWiringTests {
         let asked = CGRect(x: 75, y: 100, width: 550, height: 400)
         applier.holdWrites([id], until: .now() + 0.05)
         applier.applyInstant(id, start, setSize: true)
-        applier.sizeLedAnchors[id] = start
+        applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.applyInstant(id, asked, setSize: true)
         // A generous guard, never a tight deadline (#344).
         for _ in 0..<500 where app.writes.withLock({ $0.isEmpty }) {
@@ -240,7 +216,7 @@ struct SizeLedResizeWiringTests {
         _ = answering(core, .fixed)
         press(core, "x", 50)
         press(core, "x", 50)
-        #expect(core.tiler.applier.sizeLedAnchors[WindowID(1)] == start)
+        #expect(core.tiler.applier.sizeLedRuns[WindowID(1)]?.anchor == start)
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
@@ -257,7 +233,7 @@ struct SizeLedResizeWiringTests {
         core.tiler.applyFrame(id, from: start, to: moved, animated: true)
         press(core, "x", 50)
         #expect(
-            core.tiler.applier.sizeLedAnchors[id]
+            core.tiler.applier.sizeLedRuns[id]?.anchor
                 == CGRect(origin: moved.origin, size: start.size)
         )
         core.tiler.animation.cancelAll(snapToTargets: false)
@@ -278,14 +254,14 @@ struct SizeLedResizeWiringTests {
             from: start,
             to: asked,
             animated: true,
-            sizeLedFrom: start
+            sizeLedFrom: SizeLedRun(anchor: start, pressed: false)
         )
         core.tiler.applyFrame(
             id,
             from: start,
             to: asked,
             animated: false,
-            sizeLedFrom: start
+            sizeLedFrom: SizeLedRun(anchor: start, pressed: false)
         )
         await drain()
         #expect(app.now == start)
@@ -299,20 +275,20 @@ struct SizeLedResizeWiringTests {
         let id = WindowID(1)
         let asked = CGRect(x: 75, y: 100, width: 550, height: 400)
 
-        applier.sizeLedAnchors[id] = start
+        applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.applyInstant(id, asked, setSize: true)
-        #expect(applier.sizeLedAnchors[id] == nil)
+        #expect(applier.sizeLedRuns[id] == nil)
         await drain()
         #expect(app.now == start)
 
         applier.beginAnimating(id)
-        applier.sizeLedAnchors[id] = start
+        applier.sizeLedRuns[id] = SizeLedRun(anchor: start, pressed: false)
         applier.apply(id, asked, setSize: true)
-        #expect(applier.sizeLedAnchors[id] == start)
+        #expect(applier.sizeLedRuns[id]?.anchor == start)
         await drain()
         #expect(app.now == start)
         applier.endAnimating(id)
-        #expect(applier.sizeLedAnchors[id] == nil)
+        #expect(applier.sizeLedRuns[id] == nil)
     }
 
     @Test("A cross-screen set's second write keeps the anchor")
@@ -322,7 +298,10 @@ struct SizeLedResizeWiringTests {
         let applier = core.tiler.applier
         var owed: [@MainActor () -> Void] = []
         applier.scheduleResend = { _, work in owed.append(work) }
-        applier.sizeLedAnchors[WindowID(1)] = start
+        applier.sizeLedRuns[WindowID(1)] = SizeLedRun(
+            anchor: start,
+            pressed: false
+        )
         applier.applyInstant(
             WindowID(1),
             CGRect(x: 75, y: 100, width: 550, height: 400),

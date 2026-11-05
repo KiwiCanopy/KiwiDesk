@@ -246,10 +246,13 @@ editing here:
     assertion on BOTH its values; `NothingToDivideCueTests` and
     `RefusalCueSeamTests` (▸ the funnel never sounds ahead of
     its drawing) are where those live. The gate on that
-    funnel is `isFiring || isGliding`, not `isFiring` alone: a
-    glide runs outside any binding fire, so dropping the second
-    term makes the cue unreachable exactly where the hold needs
-    it (`HoldGlideRefusalWiringTests`).
+    funnel, in `noteResizeRefusal`, is `isFiring`, `isGliding` or an
+    armed hold, not
+    `isFiring` alone: a glide runs outside any binding fire, so
+    dropping the second term makes the cue unreachable exactly
+    where the hold needs it (`HoldGlideRefusalWiringTests`), and a
+    fixed window's report lands in the key-repeat wait (#2994,
+    `FixedSizeWindowWiringTests`).
   - The engine arms only when its registrar conforms to
     `HotkeyReleaseReporting` — a hold with no stop channel
     must never start — so a wrapper or replacement registrar

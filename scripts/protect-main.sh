@@ -74,7 +74,8 @@
 #
 # Status checks are listed by JOB NAME and must match the
 # workflows that report them — .github/workflows/ci.yml for the two
-# macOS jobs, cla.yml for the CLA check. This is the setting that
+# macOS jobs, cla.yml for the CLA check, site.yml for the site
+# build. This is the setting that
 # finally makes CI block rather than report (#532).
 #
 # ci.yml's two jobs are gated on its `changes` job rather than
@@ -89,6 +90,10 @@
 # every pull_request_target with no path filter, so it always
 # reports — except on a PR opened with GITHUB_TOKEN, which fires
 # no PR event at all (the same rule file, the fallback paragraph).
+# "Build site" takes ci.yml's shape: site.yml's pull_request trigger
+# is unfiltered and a `changes` job skips the build. ORDER as for
+# CLA: site.yml must carry that shape on main before this runs, or
+# every PR outside the site's inputs waits on "Build site" forever.
 
 set -euo pipefail
 
@@ -111,14 +116,15 @@ fi
 # Echoed from the workflow rather than trusted, because a rename in
 # CI would silently invalidate the list.
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
-echo "Job display names in .github/workflows/ci.yml and cla.yml:"
+echo "Job display names in .github/workflows/{ci,cla,site}.yml:"
 awk '/^jobs:/{j=1; next} j && /^  [a-zA-Z0-9_-]+:$/{id=$1}
      j && /^    name:/{sub(/^    name: */, ""); print "  " id " -> " $0}' \
-    "$ROOT/.github/workflows/ci.yml" "$ROOT/.github/workflows/cla.yml"
+    "$ROOT/.github/workflows/ci.yml" "$ROOT/.github/workflows/cla.yml" \
+    "$ROOT/.github/workflows/site.yml"
 # "CLA" is .github/workflows/cla.yml's job (#1521): an unsigned
 # commit author cannot merge; the owner is not exempt and passes
 # after signing once.
-CONTEXTS='["Build, Lint & Test", "Release Build", "CLA"]'
+CONTEXTS='["Build, Lint & Test", "Release Build", "CLA", "Build site"]'
 echo "Requiring: $CONTEXTS"
 echo "If the names above disagree, fix CONTEXTS and re-run."
 

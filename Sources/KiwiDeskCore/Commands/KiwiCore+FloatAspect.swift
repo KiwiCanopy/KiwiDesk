@@ -56,6 +56,14 @@ extension KiwiCore {
         scheduleFloatAspectJudgement(ask)
     }
 
+    /// macOS has said this window is fixed (#2994): no answer is
+    /// owed, and a probe would only write at a window that cannot take
+    /// it. A probe already written keeps its slot.
+    func endFloatAspectAsk(of id: WindowID) {
+        guard case .asking(id, _, _) = state.floatAspectFlight else { return }
+        endFloatAspectJudgement()
+    }
+
     private func endFloatAspectJudgement() {
         state.floatAspectFlight = nil
         deferred.cancel(.floatAspect)
@@ -221,7 +229,10 @@ extension KiwiCore {
                     height: ask.target.height
                 ),
                 animated: false,
-                sizeLedFrom: answered
+                sizeLedFrom: SizeLedRun(
+                    anchor: answered,
+                    pressed: keys.isFiring
+                )
             )
         }
     }

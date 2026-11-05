@@ -120,6 +120,16 @@ escape is planned.
 :::
 
 :::unreleased
+A floating window whose app fixes one axis, or which sits at its own
+maximum, can show its ring growing past the window on repeated resize
+presses or a hold, until "No room left to grow" fires at the screen's
+edge. macOS reports its size as settable, and a short answer alone
+looks the same as a cell grid or a late app
+([#2994](https://github.com/KiwiCanopy/KiwiDesk/issues/2994)). No
+escape is planned.
+:::
+
+:::unreleased
 A reload drops the length a grow along a run kept as well, so the
 windows it pushed come back once they fit
 ([#2709](https://github.com/KiwiCanopy/KiwiDesk/issues/2709)).
@@ -131,6 +141,21 @@ re-clamps the window both times, it stays where it was clamped,
 and KiwiDesk stops re-sending it
 ([#2881](https://github.com/KiwiCanopy/KiwiDesk/issues/2881)).
 Move or drag it to place it.
+:::
+
+:::unreleased
+In a Scrolling row, a focus step or closing the focused window can
+show the wrong window of an edge pile for the length of its slide,
+until the restack at the end of it
+([#2985](https://github.com/KiwiCanopy/KiwiDesk/issues/2985)).
+Moving a window out of the Space, closing a window that does not hold
+the focus, hiding an app, a window arriving, moving the focus from a
+float onto the row or changing the slot size or anchor can leave it
+there until the row next moves, and a pile showing only a strip can
+show a window other than the next one. KiwiDesk keeps only the windows
+that show in order, since raising every buried window took longer than
+the time a restack is given. A float you focus while the row settles
+has the other floats raised once it comes to rest.
 :::
 
 :::unreleased

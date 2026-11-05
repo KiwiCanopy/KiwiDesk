@@ -72,6 +72,11 @@ struct FrameSetReaderCensusTests {
         "KiwiCore+ZOrder.swift": (
             .slots, "the cascade raise order is a region order"
         ),
+        "KiwiCore+ScrollingRestore.swift": (
+            .slots,
+            "a pile is judged on the slots: a residue wider than its "
+                + "slot would read as a pile (#2985)"
+        ),
         "KiwiCore+TrackNavigate.swift": (
             .slots, "navigation is geometric over shown regions"
         ),
@@ -129,6 +134,7 @@ struct FrameSetReaderCensusTests {
             "the warp centres on the focus, which a run always shows",
         "KiwiCore+ZOrder.swift":
             "a whole-zone pile's cascade; a run takes its own restore",
+        "KiwiCore+ScrollingRestore.swift": "Scrolling draws no run",
         "KiwiCore+ResizeScrollSlot.swift": "Scrolling draws no run",
         "KiwiCore+RatioWriters.swift":
             "a scrolled chain classifies by its region (#2542)",

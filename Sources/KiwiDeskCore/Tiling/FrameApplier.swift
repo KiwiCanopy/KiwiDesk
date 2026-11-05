@@ -13,7 +13,8 @@ final class FrameApplier {
     private var pidCounts: [pid_t: Int] = [:]
     /// Where a floating resize's window was at its press (#2981):
     /// lasts a spring or one instant write.
-    var sizeLedAnchors: [WindowID: CGRect] = [:]
+    var sizeLedRuns: [WindowID: SizeLedRun] = [:]
+    let fixedSizeDoor = FixedSizeDoor()
     /// Per-app frame queues, made by `queue(for:)`.
     var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
@@ -135,7 +136,7 @@ final class FrameApplier {
 
     /// Ends window animation and restores EnhancedUserInterface if last.
     func endAnimating(_ id: WindowID) {
-        sizeLedAnchors[id] = nil
+        sizeLedRuns[id] = nil
         guard let pid = animatingPid.removeValue(forKey: id)
         else { return }
         pidCounts[pid, default: 1] -= 1
@@ -147,16 +148,15 @@ final class FrameApplier {
 
     /// The lead for this write, spent unless a spring carries it.
     private func takeLead(_ id: WindowID) -> SizeLedWrite.Lead? {
-        guard let anchor = sizeLedAnchors[id] else { return nil }
-        if animatingPid[id] == nil { sizeLedAnchors[id] = nil }
-        return SizeLedWrite.Lead(anchor: anchor, screens: screenFrames())
+        guard let run = sizeLedRuns[id] else { return nil }
+        if animatingPid[id] == nil { sizeLedRuns[id] = nil }
+        return sizeLead(id, run: run)
     }
 
     /// Dispatches frame to target app queue (position-only unless `setSize`).
     func apply(_ id: WindowID, _ frame: CGRect, setSize: Bool) {
-        // Ahead of the element guard and the coalescing return,
-        // like `applyInstant`'s target stamp: the echo must never
-        // precede the stamp (#1254).
+        // Ahead of the element guard and the coalescing return: the
+        // echo must never precede the stamp (#1254).
         recent.record(id, now: clock())
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
@@ -228,15 +228,15 @@ final class FrameApplier {
         setSize: Bool,
         resend: Bool = false
     ) {
-        // Recorded before the element guard, at enqueue time: the
-        // overlay sync wants the commanded frame this same turn
-        // (#881); a stamp for a gone window expires unread.
+        // At enqueue, ahead of the element guard: the overlay sync
+        // wants the commanded frame this same turn (#881).
         instantTargets.record(id, frame: frame, now: clock())
         scheduleLapseSweep(after: Self.echoGrace)
         recent.record(id, now: clock())  // as `apply`, #1254
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
         let band = bandScreen(frame, setSize: setSize)
+        let run = sizeLedRuns[id]
         let lead = takeLead(id)
         // A held write owes no resend: it lands once, at the
         // slide's landing, on the screen it was sent to (#2524).
@@ -285,7 +285,7 @@ final class FrameApplier {
         }
         if pendingResends[id] != nil {
             scheduleResend(crossScreenResendDelay) { [weak self] in
-                self?.resendIfCurrent(id, frame, anchor: lead?.anchor)
+                self?.resendIfCurrent(id, frame, run: run)
             }
         }
     }
@@ -310,6 +310,9 @@ final class FrameApplier {
     /// Each window's set still owed its second write, cleared by
     /// any newer write to that window.
     private var pendingResends: [WindowID: CGRect] = [:]
+    func forgetResend(_ id: WindowID, unlessSized size: CGSize) {
+        if pendingResends[id]?.size != size { pendingResends[id] = nil }
+    }
 
     /// The second write of a set that moved a window onto another
     /// screen: an app easing its frame (EUI on, Zen) clamps the
@@ -322,12 +325,12 @@ final class FrameApplier {
     private func resendIfCurrent(
         _ id: WindowID,
         _ frame: CGRect,
-        anchor: CGRect?
+        run: SizeLedRun?
     ) {
         guard pendingResends[id] == frame, animatingPid[id] == nil,
             !resendStandsDown(id)
         else { return }
-        sizeLedAnchors[id] = anchor
+        sizeLedRuns[id] = run
         applyInstant(id, frame, setSize: true)
     }
 
