@@ -23,6 +23,14 @@ struct GestureStripTests {
         ).split(whereSeparator: \.isWhitespace).joined()
     }
 
+    private static func fades(offset: CGFloat, viewport: CGFloat)
+        -> ShelfOverflow.Fades
+    {
+        GestureStrip.run.fades(
+            StripScroll(offset: offset, viewport: viewport)
+        )
+    }
+
     @Test("a group starts a wider gap than a picture")
     func groupGaps() {
         let leads = GestureItem.allCases.map(GestureStrip.leading(of:))
@@ -45,18 +53,18 @@ struct GestureStripTests {
                 $0 + GestureStrip.leading(of: $1)
             } + CGFloat(GestureItem.allCases.count) * Self.plate.width
         let viewport: CGFloat = 664
-        let rest = GestureStrip.fades(offset: 0, viewport: viewport)
+        let rest = Self.fades(offset: 0, viewport: viewport)
         #expect(rest.leading == 0)
         #expect(rest.trailing > 0)
-        let mid = GestureStrip.fades(offset: 500, viewport: viewport)
+        let mid = Self.fades(offset: 500, viewport: viewport)
         #expect(mid.leading > 0 && mid.trailing > 0)
-        let end = GestureStrip.fades(
+        let end = Self.fades(
             offset: total - viewport,
             viewport: viewport
         )
         #expect(end.leading > 0)
         #expect(end.trailing == 0)
-        let wide = GestureStrip.fades(offset: 0, viewport: total + 1)
+        let wide = Self.fades(offset: 0, viewport: total + 1)
         #expect(wide.leading == 0 && wide.trailing == 0)
         #expect(
             rest.trailing
@@ -98,11 +106,7 @@ struct GestureStripTests {
     func plateIsPointerOnly() throws {
         let strip = try Self.squashed(Self.gestures + "GestureStrip.swift")
         #expect(strip.contains(".accessibilityHidden(true)"))
-        #expect(strip.contains(".mask(StripFade(fades:fades))"))
-        // The offset reads the run's leading edge in the scroller's
-        // own space, negated: a dropped sign never fades the lead.
-        #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
-        #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
+        #expect(strip.contains("SidewaysStrip(run:Self.run)"))
         let plate = try Self.squashed(
             Self.gestures + "GestureStripPlate.swift"
         )

@@ -11,6 +11,9 @@ final class FrameApplier {
 
     private var animatingPid: [WindowID: pid_t] = [:]
     private var pidCounts: [pid_t: Int] = [:]
+    /// Where a floating resize's window was at its press (#2981):
+    /// lasts a spring or one instant write.
+    var sizeLedAnchors: [WindowID: CGRect] = [:]
     /// Per-app frame queues, made by `queue(for:)`.
     var queues: [pid_t: DispatchQueue] = [:]
     private let pending = PendingFrames()
@@ -132,6 +135,7 @@ final class FrameApplier {
 
     /// Ends window animation and restores EnhancedUserInterface if last.
     func endAnimating(_ id: WindowID) {
+        sizeLedAnchors[id] = nil
         guard let pid = animatingPid.removeValue(forKey: id)
         else { return }
         pidCounts[pid, default: 1] -= 1
@@ -139,6 +143,13 @@ final class FrameApplier {
             pidCounts[pid] = nil
             holdEUI(pid: pid, held: false)
         }
+    }
+
+    /// The lead for this write, spent unless a spring carries it.
+    private func takeLead(_ id: WindowID) -> SizeLedWrite.Lead? {
+        guard let anchor = sizeLedAnchors[id] else { return nil }
+        if animatingPid[id] == nil { sizeLedAnchors[id] = nil }
+        return SizeLedWrite.Lead(anchor: anchor, screens: screenFrames())
     }
 
     /// Dispatches frame to target app queue (position-only unless `setSize`).
@@ -150,7 +161,10 @@ final class FrameApplier {
         issued(id, frame)
         pendingResends[id] = nil  // a spring supersedes a resend
         let band = bandScreen(frame, setSize: setSize)
-        if stageHeld(id, frame, setSize: setSize, band: band) { return }
+        let lead = takeLead(id)
+        if stageHeld(id, frame, setSize: setSize, band: band, lead: lead) {
+            return
+        }
         guard let element = elementProvider(id) else { return }
         guard
             let pid = animatingPid[id] ?? Self.pid(of: element)
@@ -162,7 +176,8 @@ final class FrameApplier {
                 element: target,
                 frame: frame,
                 setSize: setSize,
-                band: band
+                band: band,
+                lead: lead
             )
         )
         guard !alreadyScheduled else {
@@ -177,7 +192,9 @@ final class FrameApplier {
         queue(for: pid).async {
             waited()
             guard let entry = store.take(id) else { return }
-            if entry.setSize {
+            if let lead = entry.lead {
+                lead.write(entry, writer)
+            } else if entry.setSize {
                 EdgeBandWrite.write(
                     entry.frame,
                     entry.element,
@@ -220,9 +237,10 @@ final class FrameApplier {
         issued(id, frame)
         pendingResends[id] = resend && setSize ? frame : nil
         let band = bandScreen(frame, setSize: setSize)
+        let lead = takeLead(id)
         // A held write owes no resend: it lands once, at the
         // slide's landing, on the screen it was sent to (#2524).
-        if stageHeld(id, frame, setSize: setSize, band: band) {
+        if stageHeld(id, frame, setSize: setSize, band: band, lead: lead) {
             pendingResends[id] = nil
             return
         }
@@ -250,7 +268,9 @@ final class FrameApplier {
         queue(for: pid).async {
             waited()
             holds.beginInstant(pid, writer)
-            if setSize {
+            if let lead {
+                lead.write(frame, target, setSize, band, writer)
+            } else if setSize {
                 EdgeBandWrite.write(
                     frame,
                     target,
@@ -265,7 +285,7 @@ final class FrameApplier {
         }
         if pendingResends[id] != nil {
             scheduleResend(crossScreenResendDelay) { [weak self] in
-                self?.resendIfCurrent(id, frame)
+                self?.resendIfCurrent(id, frame, anchor: lead?.anchor)
             }
         }
     }
@@ -299,10 +319,15 @@ final class FrameApplier {
     /// The same ask as the first write, so deliberately not an
     /// engine frame: it retires no ask and stamps no placement
     /// (#1694, #1161).
-    private func resendIfCurrent(_ id: WindowID, _ frame: CGRect) {
+    private func resendIfCurrent(
+        _ id: WindowID,
+        _ frame: CGRect,
+        anchor: CGRect?
+    ) {
         guard pendingResends[id] == frame, animatingPid[id] == nil,
             !resendStandsDown(id)
         else { return }
+        sizeLedAnchors[id] = anchor
         applyInstant(id, frame, setSize: true)
     }
 

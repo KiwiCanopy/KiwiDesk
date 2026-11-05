@@ -1551,7 +1551,7 @@ then shows every such setting in ONE sheet (#2450), not an alert
 per setting: an alert per setting would ask four times for one
 nudge of the Outer gap, and a list the user sees whole is easier
 to answer than a run of questions. Each row starts with neither
-Yours nor Theirs picked, and Save stays dimmed beside an amber
+Yours nor Theirs picked, and Save stays dimmed beside a
 warning band until every row has a side, so Return does nothing
 until then and Escape cancels: a conflict is two Macs
 disagreeing, and a default — or an accept-all control — would let
@@ -5569,6 +5569,83 @@ remembering which way the last grow went — a stored direction
 needs invalidating on every move, mode change and display change,
 and buys back less than it costs.
 
+:::unreleased
+*A refused size moves nothing (#2981).* An app that refuses a size
+still takes an origin written with it: on 4.1.0 Calculator stayed
+230 x 408 while its x went 749, 724, 699. So the size goes first and
+the origin follows the app's answer, as far along the line from where
+the window is to the asked frame as the size got. A full answer lands
+exactly on the split.
+
+Each write judges itself and no verdict about a window is stored; a
+write carries only where the window was at its press, for one spring
+or one instant write. A branch that recorded verdicts per window and
+per ask (refused axes, free axes, a refused size) broke three ways: a
+window fixed on one axis lost both, a slow app read as fixed stayed
+dead, and a window at its minimum drew a false pill. With no verdict
+there is nothing to go stale or to clear. An answer that arrives
+after the read counts as a refusal for that write, and the next write
+corrects it.
+
+macOS clamps a size write at a screen's right and bottom edges while
+the origin has not moved (TextEdit, Terminal and mpv, macOS 27,
+2026-11-04), so a short answer that ends within a cell grid of those
+edges can mean "no room yet", which is exactly the pinned grow above.
+Only the move tells them apart, so that one case writes the whole
+frame and takes the origin back if the size still fell short. A window
+fixed on both axes says so through its size attribute and stays put;
+one that keeps an axis or a ratio shows the half step for a moment
+there, or off every screen.
+:::
+
+**A float whose app holds its ratio is told by its answers, and
+its resize keys scale it ([#2973](https://github.com/KiwiCanopy/KiwiDesk/issues/2973)).**
+[Principle] Nothing states such a lock: AX exposes no bound, and
+Apple documents `contentAspectRatio` as constraining a user's
+resize only. But mpv and QuickTime Player fit an AX size ask
+inside the asked box (measured 2026-11-04): from 800 × 450, a
+width of 680 lands at 679 × 382, and a width of 920 lands nowhere,
+while AX reports success. So a grow on one axis did nothing but
+move the window by the split's half step per press. A list of
+apps would be stale the day it shipped and a second set of keys
+would leave the first set dead, so the answer is the signal.
+
+A one-axis shrink that moves both axes proves a lock outright. A
+one-axis grow answered unchanged proves nothing, since a fixed-size
+window answers the same and a slow app has merely not landed yet,
+so it earns one 12 pt one-axis shrink as a probe on the pressed axis:
+only a lock moves the other axis too. The price is the first grow on
+a locked window landing about 0.9 s late, a first HOLD on one doing
+nothing until its release and then taking only
+the press's step, and a slow free app whose grow outlasts the wait taking
+the shrink before its asked size. A press the other way voids an ask not
+yet probed, since it undid what was asked, and so does a press on the
+other axis, since two
+axes moving would read as a lock. A window judged free or locked is
+never judged again while it lives, so a window whose lock changes
+waits for a new window. A locked app already at its own minimum refuses
+the probe too and reads as free, accepted. A fixed-size window also reads
+as free, and stays put ([#2981](https://github.com/KiwiCanopy/KiwiDesk/issues/2981)). The judgement waits out a
+held key or a moving pointer rather than owing through the motion gate,
+since no later pass can re-derive a probe, and a written probe keeps its
+wait until they rest. A window a hand moved in the wait stays unjudged,
+as does one a button is down on during a probe or that lost the focus
+during it, its shrink unpaid; so
+does a native-tab re-key mid-judgement. A replayed press lands outside
+any fire, so a truncation there draws no pill, and a floor the other axis
+sets is named on the pressed axis, both accepted.
+
+A locked window's press scales both axes through the split, its
+writes instant, because an app fitting each spring step into a box
+lands short of the ask (mpv's ratio fell from 1.776 to 1.706 over
+five sprung presses, 1.778 to 1.771 over five instant ones). It holds
+the proven ratio and replaces it only when the window measures
+0.1 away, which a new video does; re-reading it per press re-bases on
+the last press's rounding. With the ratio held, a spring still lost it
+on mpv (1.774 to 1.702 over five presses) and not on QuickTime Player,
+so the instant write stays for both. The record is session state, so a restart
+judges again. A tiled slot belongs to the layout and is out of scope.
+
 *The boundary is the screen edges and the bars together, derived
 once.* `KiwiCore.floatBounds` is the one answer to "where may a
 float sit": the display's visible bounds with every painted strip
@@ -8653,12 +8730,28 @@ banner's amber could not be given one at all while it was
 inside this one window, and that is the price. What it buys is
 that the window looks like KiwiDesk rather than like a generic
 form, which is the same argument as the entry above: the IA and
-the look are ours. The accent is also identical in light and
-dark, because brand recognisability is the thing it carries —
-the same reason the tokens that paint *pictures* (the desktop
-plate, the keyboard board's fills) hold one value in both modes:
-what a picture shows must not change with the window's
-appearance.
+the look are ours. The accent stays one kiwi green in light and
+dark, because brand recognisability is the thing it carries. The
+tokens that paint *pictures* (the desktop plate, the keyboard
+board's free keys) hold one value in both modes, since what a
+picture shows must not change with the window's appearance.
+
+:::unreleased
+Dark's page is pure black, and a plane on it reads by its edge
+rather than by a lifted grey, so the accent sits one step brighter
+there and the line splits in two: `hairline` is a plane's edge,
+and `hairlineSubtle` is a rule that is no plane's edge, which would
+otherwise compete with the edge of what holds it. The header takes
+the page's black and keeps its line, since a full-width band of
+green read as more saturated than the neutral controls on it, and
+those controls stay neutral. A mark the accent
+paints on a picture follows the accent, since it names the same
+state as the controls beside the board.
+:::
+
+The site takes the same black, surfaces and lines but keeps its
+hero glow, card gradient and brown pill, because a marketing page
+flattened to one colour read as stark beside the app.
 
 What breaks if this is ignored: a second hex literal beside a
 view, which is invisible until the day the palette moves and one
@@ -11321,9 +11414,9 @@ better indicator" is a false choice.
 
 "No fixed surface token can be a rest cue at all" holds for
 `hairline` too, which is green-tinted and so answers the
-achromatic objection outright: it fails for a different, measured
-reason — about 1.05:1 against `sunken`, invisible on precisely the
-drawer whose card already is `sunken`. And a resting fill is
+achromatic objection outright: it failed for a different, measured
+reason — about 1.05:1 against `sunken` when this was ruled, invisible
+on precisely the drawer whose card already is `sunken`. And a resting fill is
 refused on a second ground: fifteen headers wearing a band would
 make the drawers the most-filled things on pages whose real
 controls carry no fill at all.
@@ -14858,7 +14951,7 @@ pointer resting on the marked chip must not read as unmarking it.
 **A chip must read as a button before it is pointed at** (#1520
 amendment 5, owner ruling 2026-10-07). A hairline capsule is the
 passive chip's vocabulary — a badge, a tag — and on the chip's
-own rest fill the container hairline all but vanishes in dark,
+own rest fill the container hairline all but vanished in dark,
 so the row read as labels. The chip therefore draws an edge of
 its own, `chipEdge`, which must separate from the rest fill it
 rims by more than the container hairline separates from the

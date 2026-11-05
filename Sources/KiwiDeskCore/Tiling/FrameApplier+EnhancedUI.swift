@@ -16,6 +16,12 @@ struct FrameWriter: Sendable {
     /// 109 ms worst (macOS 27, 2026-11-01); nil leaves the write
     /// as is.
     var frame: @Sendable (AXUIElement) -> CGRect? = { _ in nil }
+    /// The size alone, for a floating resize's write (#2981).
+    var setSize: @Sendable (CGSize, AXUIElement) -> Void = { _, _ in }
+    /// Whether the window's size can be written at all. False on a
+    /// fixed-size window (Calculator, Digital Color Meter), true on
+    /// one that only keeps an axis or a ratio.
+    var sizeSettable: @Sendable (AXUIElement) -> Bool = { _ in true }
 
     static let live = FrameWriter(
         setFrame: { WindowControl.setFrame($0, of: $1) },
@@ -26,7 +32,9 @@ struct FrameWriter: Sendable {
         frame: { element in
             let frame = AXHelper.frame(of: element)
             return frame.size == .zero ? nil : frame
-        }
+        },
+        setSize: { WindowControl.setSize($0, of: $1) },
+        sizeSettable: { AXHelper.isSizeSettable($0) }
     )
 }
 

@@ -23,7 +23,9 @@
 /// would put the divergence the crossing removed back at that
 /// one window — and it stands the VERB down, not the float
 /// ROUTE, which would drop the press into the layout and let a
-/// window nothing places move its neighbours. #1286 swept the
+/// window nothing places move its neighbours. Judging a resized
+/// float's aspect lock takes the same predicate as its verb (#2973).
+/// #1286 swept the
 /// flag's readers and ruled two more: the unfocused focus ring
 /// reaches every float, so it asks neither the flag nor this
 /// (owner ruling 2026-09-13, `FloatingModeRingTests`), and

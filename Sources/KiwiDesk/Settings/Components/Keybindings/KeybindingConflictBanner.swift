@@ -10,12 +10,7 @@ struct KeybindingConflictBanner: View {
 
     var body: some View {
         if let message = model.liveKeybindingBanner {
-            HStack(alignment: .top, spacing: 10) {
-                Image(systemName: "exclamationmark.triangle.fill")
-                    .foregroundStyle(SettingsTheme.warningInk)
-                Text(message)
-                    .font(.callout)
-                    .frame(maxWidth: .infinity, alignment: .leading)
+            WarningBox(text: message) {
                 Button {
                     model.keybindingWarning = nil
                 } label: {
@@ -33,11 +28,6 @@ struct KeybindingConflictBanner: View {
                     )
                 )
             }
-            .padding(12)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(SettingsTheme.warningSurface)
-            )
         }
     }
 }

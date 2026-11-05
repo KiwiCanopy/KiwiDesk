@@ -16,7 +16,8 @@ public enum LookCatalog {
     /// Every built-in, Glass first, Glass derived for `sizes` —
     /// the screens in positional order (`StarterSetup.sizes`).
     /// Callers outside the catalog take `KiwiCore.bundledLooks`
-    /// (`LookCatalogSeamTests`).
+    /// (`LookCatalogSeamTests`), which keeps the answer per `sizes`
+    /// (#2993), so a further input joins that memo's key.
     public static func bundled(sizes: [CGSize]) -> [ShelfLook] {
         let glass = defaultLook(sizes: sizes)
         let palettes = PaletteCatalog.bundled()

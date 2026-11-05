@@ -1659,6 +1659,11 @@ Every surface, border and ink in the Settings tree comes from
   (stem-derived, so a §2.1 split cannot fall out of it) — on
   mode-varying surfaces `.secondary` still self-inverts and
   "prefer a concrete ink" stays a preference.
+- **A plane's edge is `hairline`; a rule that is no plane's edge
+  is `hairlineSubtle`** — between a card's groups or entries,
+  between chips in a strip. The two differ only in dark, where a
+  rule at the edge's strength competes with the edge of what holds
+  it. No scan tells a rule from an edge, so this is review's.
 - **A dark plane on a dark ground takes the `planeRing` seam**
   (16b's one non-swap construction): where a fixed-dark surface
   meets a mode-varying one — the plate, the save pill, the
@@ -1795,6 +1800,9 @@ Every surface, border and ink in the Settings tree comes from
   not move it — so its ink is the resolved paint's, never an
   ambient grey, and Advanced's Layouts sketch files sit in the
   stems for it.
+- **A warning takes `WarningBox`, never a `warningSurface` fill of
+  its own** (#2982, `WarningBoxSeamTests` ▸ `oneFill`,
+  `WarningBoxSeamTests` ▸ `sitesTakeTheBox`).
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
@@ -2156,16 +2164,38 @@ a modifier test beside it; a ↩ chord it answers nil for is
 `JumpKey.dead`, the system beep wired in the controller, and never
 a refusal (`JumpChordTableTests`).
 
-## A sideways strip fades and follows through Core (#2901)
+## A sideways strip fades, follows and keeps its scroller (#2901)
 
-**A Settings strip that scrolls sideways fades through
-`StripFade` over `ShelfOverflow.fades`, and one that takes
-keyboard focus scrolls the focused item clear of that fade
-through `ShelfOverflow.offset` with `followMargin`** — the
-bars' own arithmetic, never a fade or a follow of its own
-(`GestureStripTests`, `LayoutStripTests`). A bare `scrollTo`
-stops the item at the viewport's edge, which is where the fade
-draws.
+**A Settings strip that scrolls sideways is a `SidewaysStrip` handed
+a `StripRun`, and one that takes keyboard focus hands it the focused
+item as a `StripFollow`** — the bars' own arithmetic, never a fade or
+a follow of its own (#2987, `SidewaysStripTests`, whose `allowed` map
+is the one copy of who may hold a sideways scroll view). A bare
+`scrollTo` stops the item at the viewport's edge, which is where the
+fade draws. The container owns the scroll, so a tick never
+re-evaluates the host. The Spaces preview chips are the held-out
+strip: scroller only, no fade and no follow, until their varying
+widths are measured (#2990).
+
+**A Settings strip that scrolls sideways keeps the platform's
+scroller**, which a mouse user drags to reach what the strip cuts
+(#2901 ▸ Ruling). Never hide it by argument, and a hide above a
+strip names `axes: .vertical` alone, since Apple documents the
+modifier as reaching nested scroll views (not measured here;
+`StripScrollerTests`). The scroller gives reach and the fade stays
+the cue: under *Automatically* a trackpad shows it only during a
+gesture (`docs/design-decisions.md` ▸ The platform's own indicator
+does not work).
+
+**A Settings strip's content clears an overlay scroller through the
+one `StripScrollerRoom`, inside the `ScrollView`**, handed that
+strip's content width and viewport (`StripScrollerTests` ▸
+`clearance`, `clearanceHome`), never a bottom padding of its own
+beside it, which review holds since those needles do not see one. As
+measured on macOS 27, 2026-11-05, an overlay scroller
+draws over the content's bottom edge, a legacy one grows the scroll
+view by its own height, and a strip that fits hides either. A macOS
+release re-measures `overlayHeight`.
 
 ## A sided chord is drawn once and spoken in words (#2601)
 

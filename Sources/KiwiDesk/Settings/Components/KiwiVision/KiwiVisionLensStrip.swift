@@ -17,7 +17,7 @@ struct KiwiVisionLensStrip: View {
                 selected: selected == nil
             ) { model.nav.kiwiVisionLens = nil }
             Rectangle()
-                .fill(SettingsTheme.hairline)
+                .fill(SettingsTheme.hairlineSubtle)
                 .frame(width: 1, height: 16)
                 .padding(.horizontal, 2)
                 .accessibilityHidden(true)

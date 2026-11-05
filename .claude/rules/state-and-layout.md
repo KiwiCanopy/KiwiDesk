@@ -1764,7 +1764,10 @@ editing here:
   slide's landing (#2524, `FrameApplierHeldTests` ▸
   `heldSetOwesNoResend`).
 - **Route an applier write with a size through
-  `EdgeBandWrite.write`, never `writer.setFrame` (#2894).** It
+  `EdgeBandWrite.write`, never `writer.setFrame` (#2894)**, or
+  through `SizeLedWrite`'s `Lead.write` for a floating keyboard
+  resize, which lifts through `EdgeBandWrite.lift` (#2981,
+  `EdgeBandWriteSeamTests` ▸ `sizeLedTakesTheLift`). `EdgeBandWrite`
   moves a window ending near a screen's bottom or right edge
   clear of it before sizing it, which macOS would otherwise
   refuse; its docstring carries
@@ -2750,7 +2753,12 @@ editing here:
   minimum exceeds the region is re-asked forever without one;
   `FloatFitLedger` is #677's shape one subsystem over, and it is
   deliberately NOT an entry in `SizeBoundLearner`, which only
-  the layout loop may record into. And **a resize that cannot
+  the layout loop may record into. **A float's aspect lock is
+  judged apart from that learner too (#2973)**, through the one
+  `floatAspects` record, which a close, a gone-for-good retire and the
+  app's exit end as they end `floatFrames`, so a new such ender takes
+  both (`FloatAspectJudgementTests`). And
+  **a resize that cannot
   deliver its whole ask owes a cue** — blocked or merely
   TRUNCATED, which is #933's own rule at the other end and was
   missing on the grow side; route it through `cueResizeRefusal`
@@ -2764,6 +2772,16 @@ editing here:
   the reversibility table, the both-pinned refusal and the
   accepted contact residue at half a step; the product argument
   is `docs/design-decisions.md`'s.
+  **A floating keyboard resize's origin follows the app's answer to
+  its size (#2981, `SizeLedWriteTests`, `SizeLedResizeWiringTests`)**:
+  its frames reach `TilingEngine.applyFrame` with `sizeLedFrom`, and
+  `SizeLedWrite` judges each one on the app's queue. Keep it per
+  write: a stored verdict about a window is what that issue's rejected
+  branch was (`docs/design-decisions.md` ▸ *A floating keyboard resize
+  is symmetric*). A new keyboard path takes `sizeLedFrom`, which is
+  review's, since the parameter defaults to nil. A reader asking
+  where a press left the window asks `SizeLedWrite.origin` too, as
+  the #2973 judge does, not the press's base and target alone.
 - An **explicit settings apply must `retile(pass: .apply)`**. The
   engine's "already there" tolerance (±2 pt per edge) absorbs
   AX-echo lag and app-side clamping; un-forced, it swallows a
@@ -2830,7 +2848,12 @@ editing here:
   re-derived there, and forgotten by a drag or by any frame written
   under user motion (`MotionGate.frameWritten`) (#2627,
   `DetectedFloatPlacementHoldTests`); a new ambient direct writer
-  owes through that door, and one left ungated is a ruling. The
+  owes through that door, and one left ungated is a ruling. One is
+  ruled: a write no pass can re-derive, the float aspect probe and what
+  answers it (#2973), waits out `holdsNow` instead of owing, re-checks
+  that the window has not moved before writing, save a read with no
+  answer, which restores the probe's frame, and abandons a written
+  probe on a button down (`FloatAspectJudgementTests`). The
   snapshot restore owes its tracked-window writes there too, paid
   from the replay's record only while the screens it was owed
   under (#633) and the Space it filed the window in still hold —

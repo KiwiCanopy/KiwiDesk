@@ -21,7 +21,13 @@
    ========================================================= */
 :root {
   /* ---- Darks ---- */
-  --kiwi-seed: #0d1512; /* deep brand bg (darkest surface) */
+  --kiwi-seed: #000000; /* black */
+  --kiwi-night: #08120c; /* green-black */
+  --kiwi-dusk: #0f1b13; /* one step above night */
+  --kiwi-shade: #132318; /* deep forest shade */
+  --kiwi-moss: #16271a; /* dark moss */
+  --kiwi-fern-dim: #1a2c20; /* dim fern */
+  --kiwi-fern: #2b4534; /* muted fern */
   --kiwi-ink: #12251a; /* forest ink, green-forward, no teal */
 
   /* ---- Chromatics ---- */

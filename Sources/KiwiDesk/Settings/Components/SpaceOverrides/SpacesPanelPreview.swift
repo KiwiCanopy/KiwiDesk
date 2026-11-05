@@ -61,7 +61,7 @@ struct SpacesPanelPreview: View {
     // MARK: - The chip row
 
     private var chips: some View {
-        ScrollView(.horizontal, showsIndicators: false) {
+        SpacePreviewChipRow {
             HStack(spacing: 6) {
                 ForEach(spaces, id: \.raw) { candidate in
                     chip(candidate)
@@ -102,7 +102,12 @@ struct SpacesPanelPreview: View {
                 scale: .panel
             )
             .padding(10)
-            .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
+            .deskPlate(
+                settings,
+                in: RoundedRectangle(
+                    cornerRadius: SettingsTheme.panelPlateRadius
+                )
+            )
         } else {
             Text(
                 L(
@@ -206,6 +211,33 @@ struct SpacesPanelPreview: View {
                 .foregroundStyle(SettingsTheme.ink2)
                 .font(.caption.monospacedDigit())
                 .settingsReadout()
+        }
+    }
+}
+
+/// The preview's chips, scrolling sideways. Its widths are its own
+/// state, so a window resize never re-evaluates the panel's schematic.
+private struct SpacePreviewChipRow<Content: View>: View {
+    @ViewBuilder let content: Content
+    @State private var width: CGFloat = 0
+    @State private var viewport: CGFloat = 0
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            content
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.width
+                } action: {
+                    width = $0
+                }
+                .modifier(
+                    StripScrollerRoom(contentWidth: width, viewport: viewport)
+                )
+        }
+        .onGeometryChange(for: CGFloat.self) {
+            $0.size.width
+        } action: {
+            viewport = $0
         }
     }
 }

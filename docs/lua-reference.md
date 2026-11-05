@@ -6497,6 +6497,13 @@ larger minimum the app itself enforces once KiwiDesk has learned
 it (#677). A window already smaller than that shrinks no
 further.
 
+:::unreleased
+On a floating window whose app holds its aspect ratio, such as mpv
+or QuickTime Player, either axis scales both, and both stop at the
+first floor or screen edge. KiwiDesk learns this from the first
+press on that window; a first grow lands about a second late (#2973).
+:::
+
 "Floating" here is the window's *effective* float (#1184): its
 own float flag — set by a toggle, `make_floating`, a
 `float_rules` entry or KiwiDesk's own detection — **or**
@@ -6513,6 +6520,15 @@ side; the boundary is the screen's visible bounds less any bar
 strips on that space, so a float cannot be grown underneath a
 bar, and when both edges are against it a grow refuses and
 flashes a pill. Shrinking pins the same way.
+
+:::unreleased
+A window whose app refuses the size stays where it is and `resize`
+still reports success; one that takes part of the size moves only as
+far as the size did. An app that keeps an axis or its ratio can show
+the half step for a moment at a screen's right or bottom edge, or
+off every screen
+([#2981](https://github.com/KiwiCanopy/KiwiDesk/issues/2981)).
+:::
 
 Tiled windows resize in bsp, stack, scrolling, track and grid
 layouts; monocle reports "not supported" and flashes a pill on
@@ -7801,6 +7817,11 @@ animations.set_on_scrolling(true)
 
 **Does:** enables or disables animation on window resizes (split-ratio
 changes, mouse-resize settle).
+
+:::unreleased
+A floating window whose app holds its aspect ratio
+([`resize`](#resize)) resizes instantly whatever this says (#2973).
+:::
 
 **Example:**
 
