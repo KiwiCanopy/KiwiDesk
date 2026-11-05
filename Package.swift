@@ -31,7 +31,7 @@ let package = Package(
     // without AppKit-adjacent vendor code (AGENTS.md §1).
     //
     // Upstream ships `Sparkle.framework` AD-HOC signed with no
-    // Team ID (checked against 2.10.0, both distributions), so
+    // Team ID (checked against 2.10.1, both distributions), so
     // there is no vendor signature to preserve and
     // scripts/build-app.sh signs the whole nest with our
     // Developer ID. See packaging-and-release.md.
