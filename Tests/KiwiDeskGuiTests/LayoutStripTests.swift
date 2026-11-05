@@ -26,10 +26,29 @@ struct LayoutStripTests {
             + 2 * LayoutStrip.ringRoom
     }
 
+    private static func fades(offset: CGFloat, viewport: CGFloat)
+        -> ShelfOverflow.Fades
+    {
+        LayoutStrip.run.fades(
+            StripScroll(offset: offset, viewport: viewport)
+        )
+    }
+
+    private static func followAnchor(
+        index: Int,
+        offset: CGFloat,
+        viewport: CGFloat
+    ) -> UnitPoint? {
+        LayoutStrip.run.followAnchor(
+            index: index,
+            scroll: StripScroll(offset: offset, viewport: viewport)
+        )
+    }
+
     @Test("all six tiles fit the widest pane")
     func sixFit() {
         #expect(LayoutStrip.rowWidth <= Self.widestViewport)
-        let fades = LayoutStrip.fades(
+        let fades = Self.fades(
             offset: 0,
             viewport: Self.widestViewport
         )
@@ -39,11 +58,11 @@ struct LayoutStripTests {
     @Test("a narrow strip fades only an end that cuts a tile")
     func fadesFollowTheOffset() {
         let viewport: CGFloat = 460
-        let rest = LayoutStrip.fades(offset: 0, viewport: viewport)
+        let rest = Self.fades(offset: 0, viewport: viewport)
         #expect(rest.leading == 0 && rest.trailing > 0)
-        let mid = LayoutStrip.fades(offset: 200, viewport: viewport)
+        let mid = Self.fades(offset: 200, viewport: viewport)
         #expect(mid.leading > 0 && mid.trailing > 0)
-        let end = LayoutStrip.fades(
+        let end = Self.fades(
             offset: LayoutStrip.rowWidth - viewport,
             viewport: viewport
         )
@@ -56,9 +75,9 @@ struct LayoutStripTests {
     func edgeInAGapFades() {
         let first = LayoutStrip.ringRoom + LayoutStrip.tileWidth
         let viewport = first + LayoutStrip.gap / 2
-        let rest = LayoutStrip.fades(offset: 0, viewport: viewport)
+        let rest = Self.fades(offset: 0, viewport: viewport)
         #expect(rest.trailing > 0)
-        let end = LayoutStrip.fades(
+        let end = Self.fades(
             offset: LayoutStrip.rowWidth - viewport,
             viewport: viewport
         )
@@ -78,7 +97,7 @@ struct LayoutStripTests {
             viewport: viewport
         )
         let ahead = try #require(
-            LayoutStrip.followAnchor(
+            Self.followAnchor(
                 index: 3,
                 offset: 0,
                 viewport: viewport
@@ -88,15 +107,22 @@ struct LayoutStripTests {
         #expect(lead + tile <= viewport - margin + 0.5)
         let end = LayoutStrip.rowWidth - viewport
         let back = try #require(
-            LayoutStrip.followAnchor(
+            Self.followAnchor(
                 index: 1,
                 offset: end,
                 viewport: viewport
             )
         )
         #expect(back.x * (viewport - tile) >= margin - 0.5)
+        // Back to the first tile, the ring room stays in view.
+        let first = try #require(
+            Self.followAnchor(index: 0, offset: end, viewport: viewport)
+        )
+        #expect(
+            abs(first.x * (viewport - tile) - LayoutStrip.ringRoom) < 0.5
+        )
         // A tile already clear asks for no scroll.
-        let clear = LayoutStrip.followAnchor(
+        let clear = Self.followAnchor(
             index: 0,
             offset: 0,
             viewport: viewport
@@ -104,33 +130,25 @@ struct LayoutStripTests {
         #expect(clear == nil)
     }
 
-    @Test("the strip is masked, measured and follows Tab focus")
+    @Test("the strip takes the container and follows Tab focus")
     func wiring() throws {
         let strip = try Self.squashed(
             "Sources/KiwiDesk/Settings/Components/Layouts/"
                 + "LayoutStrip.swift"
         )
-        #expect(strip.contains(".mask(StripFade(fades:fades))"))
-        // The live offset and viewport feed the fade and the follow.
-        #expect(strip.contains("Self.fades(offset:offset,viewport:viewport)"))
         #expect(
-            strip.contains(
-                "Self.followAnchor(index:index,offset:offset,"
-                    + "viewport:viewport)"
-            )
+            strip.contains("SidewaysStrip(run:Self.run,followed:followed)")
         )
-        #expect(strip.contains("action:{offset=$0}"))
-        #expect(strip.contains("-$0.frame(in:.named(Self.space)).minX"))
-        #expect(strip.contains(".coordinateSpace(.named(Self.space))"))
         #expect(strip.contains(".focused($focused,equals:mode)"))
         #expect(strip.contains(".id(mode)"))
         #expect(
             strip.contains(
-                ".onChange(of:focused){_,modein"
-                    + "follow(mode,with:proxy)}"
+                "letindex=LayoutMode.placementTabs.firstIndex(of:focused)"
             )
         )
-        #expect(strip.contains("proxy.scrollTo(mode,anchor:anchor)"))
+        #expect(
+            strip.contains("returnStripFollow(id:focused,index:index)")
+        )
         #expect(
             strip.contains("schematic(mode).padding(Self.platePadding)")
         )
@@ -156,10 +174,6 @@ struct LayoutStripTests {
                 ".scaleEffect(factor).frame(width:Self.schematicWidth,"
                     + "height:Self.depth)"
             )
-        )
-        // The fades call itself, not followMargin's twin.
-        #expect(
-            metrics.contains("offset:offset,viewport:viewport,depth:depth)")
         )
     }
 }
