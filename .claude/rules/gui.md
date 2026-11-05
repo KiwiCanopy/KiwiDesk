@@ -2187,6 +2187,16 @@ the cue: under *Automatically* a trackpad shows it only during a
 gesture (`docs/design-decisions.md` ▸ The platform's own indicator
 does not work).
 
+**A Settings strip's content clears an overlay scroller through the
+one `StripScrollerRoom`, inside the `ScrollView`**, handed that
+strip's content width and viewport (`StripScrollerTests` ▸
+`clearance`, `clearanceHome`), never a bottom padding of its own
+beside it, which review holds since those needles do not see one. As
+measured on macOS 27, 2026-11-05, an overlay scroller
+draws over the content's bottom edge, a legacy one grows the scroll
+view by its own height, and a strip that fits hides either. A macOS
+release re-measures `overlayHeight`.
+
 ## A sided chord is drawn once and spoken in words (#2601)
 
 **A surface drawing a chord takes it from `ChordGlyphs`**, which

@@ -25,11 +25,18 @@ struct SidewaysStrip<ID: Hashable, Content: View>: View {
     var body: some View {
         ScrollViewReader { proxy in
             ScrollView(.horizontal) {
-                content.onGeometryChange(for: CGFloat.self) {
-                    -$0.frame(in: .named(stripSpace)).minX
-                } action: {
-                    scroll.offset = $0
-                }
+                content
+                    .modifier(
+                        StripScrollerRoom(
+                            contentWidth: run.total,
+                            viewport: scroll.viewport
+                        )
+                    )
+                    .onGeometryChange(for: CGFloat.self) {
+                        -$0.frame(in: .named(stripSpace)).minX
+                    } action: {
+                        scroll.offset = $0
+                    }
             }
             .coordinateSpace(.named(stripSpace))
             .onGeometryChange(for: CGFloat.self) {
