@@ -111,8 +111,8 @@ extension KiwiCore {
     /// a per-function body is where a wrong sentence and a
     /// missing bump hid through five review rounds.
     ///
-    /// A PRESS cue also ends a held keyboard run (#1056), so a
-    /// refusal pills once per hold rather than per frame —
+    /// A PRESS cue also ends a held keyboard run (#1056), and a
+    /// glide step's refusal ends it with no cue at all (#3017) —
     /// `HoldGlideEligibilitySeamTests` pins this as the only
     /// production caller of `borders.onResizeRefusal`, which is
     /// what makes "a cue stops the run" structural rather than a
@@ -127,9 +127,12 @@ extension KiwiCore {
         _ refusal: ResizeRefusal,
         fromPress: Bool = true
     ) {
+        // A hold stops silently at any limit; a press cues (#3017).
+        let held = fromPress && keys.holdGlide.isGliding && !keys.isFiring
         if fromPress {
             keys.noteResizeRefusal()
         }
+        if held { return }
         borders.onResizeRefusal(refusal)
         if let direction = refusal.bumpDirection {
             if fromPress {

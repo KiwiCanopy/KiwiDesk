@@ -17,12 +17,12 @@ struct HoldGlideRefusalWiringTests {
     @Test("A refusal reached mid-glide ends the run")
     func midGlideRefusalEndsTheRun() throws {
         // A held bsp shrink walks the ratio toward the floor;
-        // the frame that gets clamped fires the real #933 cue
+        // the frame that gets clamped reaches the real #933 funnel
         // outside any binding fire, which must be the glide's
-        // last — ONE pill per hold. That the cue is heard at all
-        // there is the #1082 half: `noteResizeRefusal` gates on
-        // `isFiring || isGliding`, and dropping the second term
-        // leaves the pill flashing every frame. Which cue SITES
+        // last, with no cue (#3017). That the funnel is heard at
+        // all there is the #1082 half: `noteResizeRefusal` gates
+        // on `isFiring || isGliding`, and dropping the second term
+        // runs on to the bound. Which cue SITES
         // feed the engine is `HoldGlideEligibilitySeamTests`' derived scan,
         // not a list here.
         //
@@ -38,10 +38,8 @@ struct HoldGlideRefusalWiringTests {
         // named failure: pinned at the one duration where an
         // unrelated net rescued the bug it named.
         //
-        // `cueResizeRefusal` notifies the engine and THEN fires
-        // this seam, so the cue count is untouched by the gate
-        // and discriminates cleanly: one refusal ends the hold,
-        // a narrowed gate pills once per frame.
+        // So the frame count below is what discriminates the gate:
+        // one refusal ends the hold, a narrowed gate overruns.
         let f = try HoldGlideFixture(
             body: #"KiwiDesk.resize("x", -200)"#
         )
@@ -68,9 +66,8 @@ struct HoldGlideRefusalWiringTests {
             frames += 1
             try #require(frames < 200)
         }
-        // Exactly one pill for the whole hold — the assertion the
-        // inert version was missing.
-        #expect(refusals.count == 1)
+        // A hold stops silently; only a fresh press cues (#3017).
+        #expect(refusals.isEmpty)
         // And the run ended on the REFUSAL rather than being
         // rescued by the run bound. Derived from the bound rather
         // than pinned at a literal, so a retune of either cannot
@@ -81,6 +78,10 @@ struct HoldGlideRefusalWiringTests {
         )
         #expect(f.frameTick == nil)
         #expect(f.core.keys.isGliding == false)
+
+        f.registrar.release(keyCode: f.combo.keyCode)
+        f.registrar.press(keyCode: f.combo.keyCode)
+        #expect(refusals.count == 1)
     }
 
     @Test("A press refused at the wall arms nothing")

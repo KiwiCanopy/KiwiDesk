@@ -224,7 +224,9 @@ editing here:
   - A new size-limit refusal cue routes through
     `cueResizeRefusal` (`KiwiCore+SizeLimitPill.swift`) — the
     funnel is what ends a held run, so a cue beside it pills
-    once per FRAME instead of once per hold. The suite holds
+    once per FRAME. A glide step's refusal ends the run with no
+    cue, and only a press draws one (#3017,
+    `HoldGlideRefusalWiringTests`). The suite holds
     every `refuse*` function to the funnel and the funnel as
     the one `borders.onResizeRefusal` caller.
     **A hold can also end with no refusal, through
