@@ -17,13 +17,12 @@ struct EdgeBand: Equatable, Sendable {
 /// 2026-11-01/02). A resize keeps the top-left corner, so only
 /// these two edges move. AX frames: y grows down.
 ///
-/// A band exists where another screen reaches past that edge line
-/// and the window's span along it is not wholly beside one neighbour
-/// on that edge (#2966; Firefox and Finder alike, bare AX, separate
-/// Spaces off, 2026-11-05). Two neighbours sharing a span are not
-/// measured, so they keep the band. With "Displays have separate
-/// Spaces" on, the bottom band was gone in one Finder run
-/// (2026-11-04); the right edge is not measured there and keeps it.
+/// A band exists only with "Displays have separate Spaces" off, where
+/// another screen reaches past that edge line and the window's span
+/// along it is not wholly beside one neighbour on that edge (#2966;
+/// Firefox and Finder alike, bare AX, five arrangements of two screens
+/// under each setting, 2026-11-05/06). Two neighbours sharing a span
+/// are not measured, so they keep the band.
 enum EdgeBandWrite {
     /// How far inside a screen's bottom or right edge a shrink is
     /// refused: measured ~19 pt, escaped from ~25 pt, set wider so
@@ -36,11 +35,11 @@ enum EdgeBandWrite {
         for frame: CGRect,
         separateSpaces: Bool
     ) -> [EdgeBand] {
-        screens.compactMap { screen in
+        guard !separateSpaces else { return [] }
+        return screens.compactMap { screen in
             let others = screens.filter { $0 != screen }
             let bottom =
-                !separateSpaces
-                && others.contains { $0.maxY > screen.maxY }
+                others.contains { $0.maxY > screen.maxY }
                 && !others.contains {
                     abs($0.minY - screen.maxY) <= 1
                         && $0.minX <= frame.minX && $0.maxX >= frame.maxX

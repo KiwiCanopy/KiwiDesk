@@ -7,8 +7,8 @@ import os
 
 /// A shrink near an edge is lifted only where macOS refuses it
 /// (#2966). The table is the 2026-11-05 measurement: a 3200 x
-/// 1440 screen around a 1728 x 1117 laptop, separate Spaces off,
-/// Firefox and Finder alike. Screens are AX frames.
+/// 1440 screen around a 1728 x 1117 laptop, Firefox and Finder alike.
+/// Screens are AX frames.
 @Suite("The edge lift runs only where the band exists (#2966)")
 @MainActor
 struct EdgeBandGateTests {
@@ -99,14 +99,14 @@ struct EdgeBandGateTests {
         #expect(bands.first { $0.screen == laptop }?.bottom == true)
     }
 
-    @Test("Separate Spaces removes the bottom band and keeps the right")
-    func separateSpacesKeepsTheRight() {
+    @Test("Separate Spaces has no band on either edge")
+    func separateSpacesHasNone() {
         let got = edges(
             window(x: 16, y: 641),
             beside: other(800, 1117),
             separateSpaces: true
         )
-        #expect(got == (false, true))
+        #expect(got == (false, false))
     }
 
     @Test("A frame near an edge with no band names nothing")
