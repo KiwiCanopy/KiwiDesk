@@ -68,6 +68,14 @@ struct FocusedFloatRaiseTests {
         #expect(core.floatRaiseDebt.owed == float)
     }
 
+    @Test("A plane at rest takes the raise rather than owing it")
+    func restingPlaneOwesNothing() {
+        let core = makeCore()
+        core.floatRaiseDebt.restoresInFlight = 0
+        #expect(core.raiseFloatsForFocusedFloat())
+        #expect(core.floatRaiseDebt.owed == nil)
+    }
+
     /// With no tile in the Space there is no plane to clear, so a
     /// debt to pay would only re-assert the focus (#1286).
     @Test("A Space with no plane owes no raise")

@@ -147,8 +147,22 @@ struct ZOrderCloseReturnArmTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
-    /// A row that fits shows every window with no overlap, so the
-    /// plan raises nothing and the pick owes no restore.
+    /// An overflowing row whose slots show nothing past the focus but
+    /// slivers: the pick brought nothing into view worth a restore.
+    @Test("An adjacent pick showing only slivers arms nothing")
+    func adjacentPickShowingSliversArmsNothing() {
+        let core = makeCore()
+        _ = makeSpace(core, windows: 6, focused: 3)
+        guard startDummyPan(core) else { return }
+        core.armCloseReturnRestack(
+            to: WindowID(3),
+            fromRemovedSlot: 2
+        )
+        #expect(!core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// A row that fits has no pile for a restore to order.
     @Test("An adjacent pick in a row that fits arms nothing")
     func adjacentPickInFittingRowArmsNothing() {
         let core = makeCore()

@@ -19,7 +19,7 @@ import Testing
 struct ZOrderScrollingArmTests {
     /// Six tiles and a float (7), 460 pt slots, focus seated on tile 4
     /// so a step back to 3 moves nothing and a step to 5 pans.
-    private func makeCore() throws -> KiwiCore {
+    private func makeCore(tiles: Int = 6) throws -> KiwiCore {
         let core = makeTestCore(
             configDirectory:
                 testTemporaryDirectory
@@ -30,7 +30,7 @@ struct ZOrderScrollingArmTests {
         core.tiler.visibleBounds = { _ in
             CGRect(x: 0, y: 25, width: 1440, height: 875)
         }
-        for id in 1...7 {
+        for id in Array(1...tiles) + [7] {
             core.state.apply(
                 .windowCreated(
                     ManagedWindow(
@@ -57,7 +57,7 @@ struct ZOrderScrollingArmTests {
                 args: [.number(460)]
             ).isSuccess
         )
-        core.focusWindow(WindowID(4), warp: false)
+        core.focusWindow(WindowID(UInt32(min(4, tiles))), warp: false)
         core.tiler.animation.cancelAll(snapToTargets: true)
         core.pendingZOrderRestore = false
         // The seat's restore stamps what it raised and its pass what
@@ -68,8 +68,10 @@ struct ZOrderScrollingArmTests {
         for id in 1...7 {
             core.tiler.placements.forget(WindowID(UInt32(id)))
         }
-        // The premise every case below reads: another window shows.
-        #expect(core.scrollingRowShowsOthers(leaving: WindowID(4)))
+        // The premise the overflowing cases read: another window shows.
+        #expect(
+            tiles < 6 || core.scrollingRowShowsOthers(leaving: WindowID(4))
+        )
         return core
     }
 
@@ -162,6 +164,47 @@ struct ZOrderScrollingArmTests {
         )
     }
 
+    // MARK: - What the row shows
+
+    /// 700 pt slots: the focus, and past it the one window it left,
+    /// with only slivers beside them.
+    private func seatTwoUp(_ core: KiwiCore) {
+        #expect(
+            core.execute(
+                "scroll.set_slot_size",
+                args: [.number(700)]
+            ).isSuccess
+        )
+        core.tiler.animation.cancelAll(snapToTargets: true)
+    }
+
+    @Test("The window the focus left does not count as another")
+    func leftWindowIsNoOther() throws {
+        let core = try makeCore()
+        seatTwoUp(core)
+        #expect(core.scrollingRowShowsOthers(leaving: nil))
+        #expect(!core.scrollingRowShowsOthers(leaving: WindowID(3)))
+    }
+
+    /// A focused float has no slot, and under a fixed anchor the
+    /// remembered one is seated: the plan splits on it, never on the
+    /// row's first window, which would call the seated window shown.
+    @Test("A focused float's plan reads the seated slot")
+    func floatPlanReadsTheSeat() throws {
+        let core = try makeCore()
+        #expect(
+            core.execute(
+                "scroll.set_anchor",
+                args: [.string("end")]
+            ).isSuccess
+        )
+        seatTwoUp(core)
+        let space = try #require(core.activeSpace)
+        core.state.workspaces.focus(WindowID(7), in: space.id)
+        #expect(core.scrollingRowShowsOthers(leaving: nil))
+        #expect(!core.scrollingRowShowsOthers(leaving: WindowID(3)))
+    }
+
     // MARK: - A focus report
 
     @Test("A report that pans arms")
@@ -246,17 +289,11 @@ struct ZOrderScrollingArmTests {
     /// A row that fits has no restore for the raise to answer.
     @Test("A close in a row that fits owes the floats nothing")
     func fittingCloseOwesNothing() throws {
-        let core = try makeCore()
-        #expect(
-            core.execute(
-                "scroll.set_slot_size",
-                args: [.number(200)]
-            ).isSuccess
-        )
+        let core = try makeCore(tiles: 3)
         try startDummyPan(core)
         core.deferred.cancel(.floatRaise)
         core.armCloseReturnRestack(
-            to: WindowID(4),
+            to: WindowID(3),
             fromRemovedSlot: 0
         )
         #expect(!core.pendingZOrderRestore)
