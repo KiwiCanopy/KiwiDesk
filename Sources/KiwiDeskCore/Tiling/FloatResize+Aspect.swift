@@ -116,6 +116,11 @@ extension FloatResize {
                 shrinkFloor(minSize: min(minSize.height, frame.height))
                     * ratio
             )
+            // At the floor the ratio's height is no ask an app can
+            // refuse: mpv fits itself inside it and shrinks (#3018).
+            guard frame.width - floor > boundaryTolerance else {
+                return Outcome(frame: frame, refusal: nil)
+            }
             width = min(max(width, floor), frame.width)
         }
         let across = resized(

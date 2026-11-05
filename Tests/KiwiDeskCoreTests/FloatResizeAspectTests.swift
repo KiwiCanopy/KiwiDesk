@@ -131,6 +131,23 @@ struct FloatResizeAspectTests {
         #expect(outcome.refusal == .blocked)
     }
 
+    /// mpv fits itself inside a ratio's height and shrinks (#3018).
+    @Test("A window at its floor is left exactly as it stands")
+    func atFloor() {
+        let drifted = CGRect(x: 400, y: 0, width: 328, height: 192)
+        for horizontal in [true, false] {
+            let outcome = FloatResize.scaled(
+                drifted,
+                horizontal: horizontal,
+                delta: -50,
+                ratio: ratio,
+                minSize: CGSize(width: 300, height: 192),
+                bounds: nil
+            )
+            #expect(outcome.frame == drifted)
+        }
+    }
+
     @Test("A glide frame's small delta has room, and accumulates")
     func smallDeltaIsNotBlocked() {
         // `step * 6 * dt` at 120 Hz is under 1 pt: a judge reading the
