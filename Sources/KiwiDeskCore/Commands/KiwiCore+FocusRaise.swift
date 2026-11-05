@@ -238,19 +238,19 @@ extension KiwiCore {
         }
         // Scrolling: a multi-slot JUMP leaves every window
         // between the old and the new focus stacked for the old
-        // one, which the edge piles show (#674). A ±1 step never
-        // does — the raise above fronts the new focus and that is
-        // the whole change — so only a jump arms the restack. An
-        // App Bar item carries an absolute `WindowID`, which is
-        // how a click crosses several slots at once.
+        // one, which the edge piles show (#674). A ±1 step owes it
+        // only where it brings a window into view beyond the one it
+        // left (#2985): the raise above fronts the new focus, and a
+        // restore keeps only what shows in order. An App Bar item
+        // carries an absolute `WindowID`, which is how a click
+        // crosses several slots at once.
         //
         // The narrowness is load-bearing, not thrift. The restore
-        // raises each pile-mate that shows through the blocking
-        // ordered queue, and the tiled plane then sits above the
-        // float layer until the next genuine focus event
-        // re-raises it (#418) — arming that on every step would
-        // bury floats routinely and drag ring and mark a restack
-        // behind (`KiwiCore+Settle`).
+        // raises through the blocking ordered queue, and the tiled
+        // plane then sits above the float layer until the next
+        // genuine focus event re-raises it (#418) — arming that on
+        // every step would bury floats routinely and drag ring and
+        // mark a restack behind (`KiwiCore+Settle`).
         //
         // LAST in this function, after the deferred-raise block,
         // for the reason that block states: `scheduleZOrderRestore`
@@ -271,7 +271,9 @@ extension KiwiCore {
         // the row lands inside that window constantly and would
         // see every second jump silently skip its restack
         // (owner device QA, 2026-08-02).
-        if scrollFocusJumpsSlots(to: id, from: previousFocused) {
+        if scrollFocusJumpsSlots(to: id, from: previousFocused)
+            || scrollFocusStepShowsOthers(to: id, from: previousFocused)
+        {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }
         return true

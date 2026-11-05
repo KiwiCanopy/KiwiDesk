@@ -116,6 +116,28 @@ struct ZOrderFocusJumpTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
+    /// A fixed anchor seats the focus and brings another window out
+    /// of the pile on every step, unraised, whose order a restore no
+    /// longer keeps (#2985). Vertical, since macOS walls the top on
+    /// every host and a pile needs a wall; three 300 pt slots fit,
+    /// so the third lands over the pile's window.
+    @Test("A step that brings another window into view arms")
+    func stepShowingAnotherArms() {
+        let core = makeCore()
+        _ = makeSpace(core, windows: 6, focused: 3)
+        for (verb, value) in [
+            ("scroll.set_orientation", JSONValue.string("vertical")),
+            ("scroll.set_slot_size", JSONValue.number(300)),
+            ("scroll.set_anchor", JSONValue.string("end")),
+        ] {
+            #expect(core.execute(verb, args: [value]).isSuccess)
+        }
+        guard startDummyPan(core) else { return }
+        core.focusWindow(WindowID(4), warp: false)
+        #expect(core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
     /// The gate arm: an all-visible row has no piles, so nothing
     /// overlaps and even a jump scrambles no stacking.
     @Test("A focus jump in an all-visible row arms nothing")

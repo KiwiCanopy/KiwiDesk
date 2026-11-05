@@ -256,41 +256,6 @@ extension KiwiCore {
         )
     }
 
-    /// Scrolling: columns pushed past the screen edges are
-    /// clamped there by macOS and pile up, overlapping. Each
-    /// side must stack toward its own edge — the column
-    /// nearest the focus on top, farther ones underneath —
-    /// so the piles read as the row receding to the left and
-    /// to the right of the viewport. Only what shows is raised
-    /// (#2985): a long row's whole sequence outran the drain's
-    /// budget, leaving the shown windows, raised last, unverified.
-    private func restoreScrollingZOrder(_ space: Space) {
-        let tiled = state.effectiveTiledMembers(of: space)
-        guard tiled.count > 1,
-            let usable = tiler.layoutInput(state: state)?.context.usable
-        else { return }
-        // Anchor, not `space.focused` — see restoreTrackZOrder.
-        // The pile split follows the traveler's slot too: it is
-        // the row position the viewport actually centers on.
-        let anchor = state.focusAnchor(of: space, tiled: tiled)
-        let focusIndex =
-            anchor.flatMap {
-                tiled.firstIndex(of: $0)
-            } ?? 0
-        let plan = Self.scrollingRestorePlan(
-            tiled,
-            focusIndex: focusIndex,
-            frames: tiler.calculatedFrames(state: state),
-            on: usable
-        )
-        raiseSequentially(
-            plan.raise,
-            thenFocus: anchor,
-            above: plan.floor,
-            front: anchor
-        )
-    }
-
     /// Raises the windows in exactly the given order, waiting for
     /// each raise to LAND before issuing the next.
     ///
@@ -301,7 +266,7 @@ extension KiwiCore {
     /// them, and the pile settles scrambled. `ZOrderDrain` owns
     /// the verification, the budget and the measurements. `front`
     /// is the window the drain waits on before its first raise.
-    private func raiseSequentially(
+    func raiseSequentially(
         _ ids: [WindowID],
         thenFocus focused: WindowID?,
         above floor: [WindowID],

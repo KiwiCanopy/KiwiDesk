@@ -116,16 +116,53 @@ struct ZOrderCloseReturnArmTests {
         core.tiler.animation.cancelAll(snapToTargets: false)
     }
 
-    @Test("An adjacent pick arms nothing")
-    func adjacentPickArmsNothing() {
+    /// The successor pick is a ±1 move, but the close brings the
+    /// next window into view, whose order a restore no longer keeps
+    /// (#2985): the wrong pile member would stay on top. Vertical,
+    /// since macOS walls the top on every host and a pile needs a
+    /// wall; a side edge's wall is the host's screens. Three 300 pt
+    /// slots fit, so the third lands over the top pile's window.
+    @Test("An adjacent pick arms when another window shows")
+    func adjacentPickArmsWhenAnotherShows() {
         let core = makeCore()
-        _ = makeSpace(core, windows: 6, focused: 4)
+        _ = makeSpace(core, windows: 6, focused: 6)
+        #expect(
+            core.execute(
+                "scroll.set_orientation",
+                args: [.string("vertical")]
+            ).isSuccess
+        )
+        #expect(
+            core.execute(
+                "scroll.set_slot_size",
+                args: [.number(300)]
+            ).isSuccess
+        )
         guard startDummyPan(core) else { return }
-        // The successor pick: the neighbor inherits the removed
-        // slot, a ±1 move — the raise is the whole change.
         core.armCloseReturnRestack(
-            to: WindowID(4),
-            fromRemovedSlot: 4
+            to: WindowID(6),
+            fromRemovedSlot: 5
+        )
+        #expect(core.pendingZOrderRestore)
+        core.tiler.animation.cancelAll(snapToTargets: false)
+    }
+
+    /// A row that fits shows every window with no overlap, so the
+    /// plan raises nothing and the pick owes no restore.
+    @Test("An adjacent pick in a row that fits arms nothing")
+    func adjacentPickInFittingRowArmsNothing() {
+        let core = makeCore()
+        _ = makeSpace(core, windows: 3, focused: 2)
+        #expect(
+            core.execute(
+                "scroll.set_slot_size",
+                args: [.number(200)]
+            ).isSuccess
+        )
+        guard startDummyPan(core) else { return }
+        core.armCloseReturnRestack(
+            to: WindowID(2),
+            fromRemovedSlot: 1
         )
         #expect(!core.pendingZOrderRestore)
         core.tiler.animation.cancelAll(snapToTargets: false)

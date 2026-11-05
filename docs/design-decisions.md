@@ -3731,12 +3731,15 @@ change already triggers.
 raises the windows that show and leaves the buried ones below them
 in any order, because raising a long row one verified window at a
 time outran its time budget, and the windows raised last are the
-ones on screen. Corner-parking the buried windows would remove the
-overlap instead, and was rejected again: walled on both sides, the
-hide corner hangs the body onto a neighbouring screen, which is
+ones on screen. A step or a close that brings a buried window into
+view takes a restore of its own for that reason, which a whole-row
+restack never needed. Corner-parking the buried windows would remove
+the overlap instead, and was rejected again: walled on both sides,
+the hide corner hangs the body onto a neighbouring screen, which is
 what the wall exists to prevent, every park snaps, and a slot that
-cannot fully fit still underlaps its neighbour, so the restore
-would stay. The traded cost is the limitation below.
+cannot fully fit still underlaps its neighbour, so the restore would
+stay. The traded cost is in
+[Accepted limitations](accepted-limitations.md).
 :::
 
 **Monocle hides by z-order, and `park` is the opt-in for

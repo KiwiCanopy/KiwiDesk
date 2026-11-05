@@ -76,7 +76,7 @@ struct ZOrderDrain: Sendable {
         let limit = min(now() + Self.landingLimit, deadline)
         while !observed.isEmpty,
             !Self.clears([front], floor: below, in: observed),
-            now() < limit
+            now() < limit, isCurrent()
         {
             sleep(Self.pollInterval)
             observed = stacking()

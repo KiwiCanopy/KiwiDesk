@@ -40,7 +40,11 @@ extension KiwiCore {
             let targetIndex = tiled.firstIndex(of: target)
         else { return }
         let from = min(slot, tiled.count - 1)
-        if abs(targetIndex - from) > 1 {
+        // A close brings the pile's next window into view, whose
+        // order a restore no longer keeps (#2985).
+        if abs(targetIndex - from) > 1
+            || scrollingRowShowsOthers(leaving: nil)
+        {
             scheduleScrollingZOrderRestoreIfOverflowing()
         }
     }

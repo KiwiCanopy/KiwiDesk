@@ -108,63 +108,93 @@ extension KiwiCore {
             + windows[(focusIndex + 1)...].reversed()
     }
 
-    /// Each scrolling tile's verdict when stacked in `order`, back
-    /// to front, in the area the row fills: the one reading the App
-    /// Bar and the pile restore share (#2234, #2985).
-    nonisolated static func scrollingVerdicts(
-        order: [WindowID],
-        frames: [WindowID: CGRect],
-        on usable: CGRect
-    ) -> [WindowID: BarVisibility] {
-        var verdicts: [WindowID: BarVisibility] = [:]
-        for (rank, id) in order.enumerated() {
-            verdicts[id] = BarVisibility.judge(
-                frames[id],
-                on: usable,
-                above: order[(rank + 1)...].compactMap { frames[$0] }
-            )
-        }
-        return verdicts
-    }
-
     /// What a scrolling restore raises and what it must land above
-    /// (#2985): only a window that shows and overlaps another needs
-    /// a place in the stack, since a hidden one's order cannot show.
-    /// Hidden windows are the floor, the previous focus and pinned
-    /// slivers among them: a sliver over a flush neighbour paints a
-    /// strip on it. The focus is neither, its re-assert closing the
-    /// restore. Raise order keeps `scrollingRaiseOrder`'s.
+    /// (#2985). A window with nothing left to show is buried: off
+    /// the area, or inside one window stacked over it, so its order
+    /// cannot show, and it is the floor. Any other that overlaps a
+    /// window is raised, in `scrollingRaiseOrder`'s order. `shown`
+    /// is the raised windows more than a strip of which shows, what
+    /// a step or a close arms a restore for: a strip's stale order
+    /// is an edge's few points, and it stands on most steps of a
+    /// row. The focus is none of these, its re-assert closing the
+    /// restore.
     nonisolated static func scrollingRestorePlan(
         _ windows: [WindowID],
         focusIndex: Int,
         frames: [WindowID: CGRect],
         on usable: CGRect
-    ) -> (raise: [WindowID], floor: [WindowID]) {
+    ) -> (raise: [WindowID], floor: [WindowID], shown: [WindowID]) {
         guard windows.indices.contains(focusIndex) else {
-            return (windows, [])
+            return (windows, [], [])
         }
         let order = scrollingRaiseOrder(windows, focusIndex: focusIndex)
-        let verdicts = scrollingVerdicts(
-            order: order + [windows[focusIndex]],
-            frames: frames,
-            on: usable
-        )
-        let floor = order.filter { verdicts[$0] == .hidden }
-        let hidden = Set(floor)
-        let raise = order.filter { id in
-            guard !hidden.contains(id), let rect = frames[id] else {
-                return false
+        let stacked = order + [windows[focusIndex]]
+        var raise: [WindowID] = []
+        var floor: [WindowID] = []
+        var shown: [WindowID] = []
+        for (rank, id) in order.enumerated() {
+            let over = stacked[(rank + 1)...].compactMap { frames[$0] }
+            guard let rect = frames[id],
+                !isBuried(rect, under: over, on: usable)
+            else {
+                floor.append(id)
+                continue
             }
-            return windows.contains { other in
-                guard other != id, let cover = frames[other] else {
-                    return false
-                }
-                let overlap = rect.intersection(cover)
-                return !overlap.isNull
-                    && overlap.width > BarVisibility.tolerance
-                    && overlap.height > BarVisibility.tolerance
+            let others = stacked.filter { $0 != id }
+            guard
+                others.contains(where: { other in
+                    frames[other].map { overlaps(rect, $0) } == true
+                })
+            else { continue }
+            raise.append(id)
+            if showsMoreThanAStrip(rect, under: over, on: usable) {
+                shown.append(id)
             }
         }
-        return (raise, floor)
+        return (raise, floor, shown)
+    }
+
+    private nonisolated static func isBuried(
+        _ rect: CGRect,
+        under over: [CGRect],
+        on usable: CGRect
+    ) -> Bool {
+        let shown = rect.intersection(usable)
+        guard !shown.isNull, shown.width > BarVisibility.tolerance,
+            shown.height > BarVisibility.tolerance
+        else { return true }
+        return over.contains {
+            $0.insetBy(
+                dx: -BarVisibility.tolerance,
+                dy: -BarVisibility.tolerance
+            ).contains(shown)
+        }
+    }
+
+    /// The largest single cover, as `BarVisibility.judge` reads it,
+    /// with the App Bar's share for "all but buried".
+    private nonisolated static func showsMoreThanAStrip(
+        _ rect: CGRect,
+        under over: [CGRect],
+        on usable: CGRect
+    ) -> Bool {
+        let shown = rect.intersection(usable)
+        let covered =
+            over.map { area(shown.intersection($0)) }.max() ?? 0
+        return area(shown) - covered
+            > BarVisibility.partlyFloor * area(rect)
+    }
+
+    private nonisolated static func area(_ rect: CGRect) -> CGFloat {
+        rect.isNull ? 0 : rect.width * rect.height
+    }
+
+    private nonisolated static func overlaps(
+        _ a: CGRect,
+        _ b: CGRect
+    ) -> Bool {
+        let overlap = a.intersection(b)
+        return !overlap.isNull && overlap.width > BarVisibility.tolerance
+            && overlap.height > BarVisibility.tolerance
     }
 }
