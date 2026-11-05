@@ -239,9 +239,9 @@ extension TilingEngine {
         animated: Bool,
         isNewWindow: Bool = false,
         sizing: BatchSizing = .mayInstantSize,
-        sizeLedFrom anchor: CGRect? = nil
+        sizeLedFrom run: SizeLedRun? = nil
     ) -> Bool {
-        applier.sizeLedAnchors[id] = anchor
+        applier.sizeLedRuns[id] = run
         // Every engine frame retires the open size ask (#1694);
         // the layout loop re-opens one with `recordAsk` right
         // after its own `applyFrame`, so only a LAYOUT frame is
@@ -270,7 +270,7 @@ extension TilingEngine {
             return false
         } else {
             animation.cancel(window: id)
-            applier.sizeLedAnchors[id] = anchor  // cancel ended it
+            applier.sizeLedRuns[id] = run  // cancel ended it
             // A parked corner may lie on a neighbour: no resend on
             // a park or an unpark, so a switch moves each window once.
             setFrame(

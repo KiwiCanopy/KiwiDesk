@@ -13,7 +13,7 @@ import os
 /// and bottom edges while its origin has not moved.
 final class SizeLedApp: Sendable {
     enum Kind: Sendable {
-        case free, fixed, fixedWidth, ratio, atMaximum
+        case free, fixed, fixedWidth, ratio, atMaximum, grid
     }
 
     let frame: OSAllocatedUnfairLock<CGRect>
@@ -35,6 +35,9 @@ final class SizeLedApp: Sendable {
                 return
             case .fixedWidth:
                 now.size.height = min(asked.height, screen.maxY - now.minY)
+            case .grid:
+                now.size.width = asked.width
+                now.size.height = (asked.height / 17).rounded(.down) * 17
             case .free:
                 now.size.width = min(asked.width, screen.maxX - now.minX)
                 now.size.height = min(asked.height, screen.maxY - now.minY)

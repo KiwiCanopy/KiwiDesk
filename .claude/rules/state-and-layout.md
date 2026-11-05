@@ -2272,7 +2272,8 @@ editing here:
   clamp measured against — a floor a clamp adds beside the
   setting (the scrolling slot's `ScrollSize.minPoints`) rides
   `raisedBy`, never the verdict — and a call site never hands
-  the verdict in, which `RefusalCueSeamTests` holds by spelling:
+  the verdict in, save macOS's statement that a size cannot be set
+  (#2994), which `RefusalCueSeamTests` holds by spelling:
   every call site answering by hand is the #1258 shape one
   level down. The anchor's floor is the pair's verdict, since
   the anchor is the window whose floor bound; the learned
@@ -2778,7 +2779,14 @@ editing here:
   `SizeLedWrite` judges each one on the app's queue. Keep it per
   write: a stored verdict about a window is what that issue's rejected
   branch was (`docs/design-decisions.md` ▸ *A floating keyboard resize
-  is symmetric*). A new keyboard path takes `sizeLedFrom`, which is
+  is symmetric*). A window macOS says cannot be sized is
+  reported by that write and kept nowhere; only that statement ends a
+  refused ask, never a short answer, which a cell grid or a late app
+  also gives, and a report at or below `cuedThrough` draws nothing
+  (#2994, `FixedSizeWindowWiringTests`). A report sounds through
+  `soundRefusal`'s gate, never a second speaker
+  (`RefusalCueSeamTests`).
+  A new keyboard path takes `sizeLedFrom`, which is
   review's, since the parameter defaults to nil. A reader asking
   where a press left the window asks `SizeLedWrite.origin` too, as
   the #2973 judge does, not the press's base and target alone.

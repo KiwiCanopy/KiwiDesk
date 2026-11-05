@@ -12,6 +12,13 @@ enum SizeLedWrite {
     struct Lead: Equatable {
         let anchor: CGRect
         let screens: [CGRect]
+        /// Hears a write whose window macOS says is fixed (#2994), with
+        /// the size asked. No part of its identity.
+        var fixed: (@Sendable (CGSize) -> Void)?
+
+        static func == (lhs: Lead, rhs: Lead) -> Bool {
+            lhs.anchor == rhs.anchor && lhs.screens == rhs.screens
+        }
     }
 
     /// An answer this close to the ask took it: Terminal's cell
@@ -121,6 +128,7 @@ extension SizeLedWrite.Lead {
             writer.setSize(frame.size, element)
             return
         }
+        noteFixed(asked: frame.size, answer: first.size, element, writer)
         let held = origin(for: first.size)
         guard
             held != frame.origin,
@@ -139,5 +147,25 @@ extension SizeLedWrite.Lead {
                 writer.setPosition(settled, element)
             }
         }
+    }
+
+    /// Asks macOS only where the answer stayed at the anchor, so a
+    /// window that took the size pays no read.
+    private func noteFixed(
+        asked: CGSize,
+        answer: CGSize,
+        _ element: AXUIElement,
+        _ writer: FrameWriter
+    ) {
+        guard let fixed else { return }
+        let tolerance = SizeLedWrite.tolerance
+        let width = abs(asked.width - anchor.width) > tolerance
+        let height = abs(asked.height - anchor.height) > tolerance
+        guard width || height,
+            abs(answer.width - anchor.width) <= tolerance,
+            abs(answer.height - anchor.height) <= tolerance,
+            !writer.sizeSettable(element)
+        else { return }
+        fixed(asked)
     }
 }
