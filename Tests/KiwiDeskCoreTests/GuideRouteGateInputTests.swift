@@ -19,13 +19,11 @@ import Testing
 /// comment arguing for the mechanism.
 @Suite("Guide route gate inputs")
 struct GuideRouteGateInputTests {
-    /// Both lists, separately. `push` and `pull_request` carry
-    /// their own `paths:`, and the one that matters is
-    /// `pull_request` — the gate has to fire on the PR that
-    /// widens the list, not after it merges. Deleting just that
-    /// one passed the first cut of this test.
-    @Test("both triggers take the guide-route inputs")
-    func bothTriggersWatchTheDeclaration() throws {
+    /// The one list: `push`'s `paths:`, which the `changes` job
+    /// applies to a PR, so the gate fires on the PR that widens
+    /// the list and not after it merges (`SiteGateRequiredTests`).
+    @Test("the site's list takes the guide-route inputs")
+    func theListWatchesTheDeclaration() throws {
         let source = try workflowSource("site.yml")
         let inputs = [
             "Sources/KiwiDesk/SupportLinks.swift",
@@ -38,15 +36,14 @@ struct GuideRouteGateInputTests {
         ]
         for input in inputs {
             #expect(
-                source.occurrencesOfInput(input) == 2,
+                source.occurrencesOfInput(input) == 1,
                 Comment(
                     rawValue:
                         "site.yml names \(input) "
                         + "\(source.occurrencesOfInput(input))× — "
-                        + "it needs one entry under push and one "
-                        + "under pull_request, and the "
-                        + "pull_request one is what makes the "
-                        + "gate fire before a merge"
+                        + "it needs one entry in push's paths, "
+                        + "which the changes job also applies to "
+                        + "a PR"
                 )
             )
         }

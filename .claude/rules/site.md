@@ -156,7 +156,7 @@ clause green and takes the only thing watching this with it.
 lets the release-time sweep stay fail-fast. It sits in the
 workflow carrying the appcast, so a malformed `:::` reaching
 `main` would otherwise block the update feed on a docs typo.
-`docs/**` is a path input of `site.yml` on both triggers, held by
+`docs/**` is on `site.yml`'s one list of inputs, held by
 `UnreleasedStripWorkflowTests` and `GuideRouteGateInputTests` —
 that suite also holds `scripts/unreleased-strip` itself as an
 input, since the gate runs it and `check-site-tokens.py` imports
@@ -583,7 +583,7 @@ on a live English page until someone widens the list.
 
 **Every site catalog carries every key `en.json` has**, enforced
 by `scripts/extract-keys --site --check`, which `site.yml` runs on
-any PR touching `site/**`, `docs/**` or `assets/**`. The app
+any PR touching an input on its list. The app
 corpus deliberately has no such rule: an `L(key, english)` call
 site carries its English inline, so an app locale may lag and the
 worksheet round exists for it to catch up. A site component reads
@@ -623,6 +623,28 @@ BUILT output, and `site.yml` runs on every `site/**` PR. Read
 `scripts/build-app.sh` for the shipped URL rather than restating
 it — a guard agreeing with its own literal is how the two would
 drift apart while staying green.
+
+**`Build site` is a required check on `main`, so `--auto` waits for
+it.** On a change confined to `site/**` the macOS jobs skip, and
+without this `gh pr merge --auto` lands before the build reports.
+`site.yml`'s `pull_request` trigger therefore stays unfiltered: a
+`changes` job applies the `push` trigger's `paths:`, the one list of
+the site's inputs, and skips the build on a PR outside it, which is
+what lets a Swift-only PR through (`SiteGateRequiredTests`).
+`scripts/protect-main.sh`'s `CONTEXTS` requires it. Anything the gate
+runs, imports or reads outside `site/` joins that one list, since a
+wrong skip passes the check with nothing built;
+`check-site-tokens.py` ▸ `check_gate_inputs` holds the list to the
+shapes its header's item 11 names, on this gate for the reason the feed
+check is, and a read of any other shape is review's. Write an entry as
+a plain `- "path"` or `- "dir/**"`: the filter builds on anything else
+and this gate refuses it.
+
+The price is accepted: a red on this gate blocks the merge with no
+override, so a site gate that reads a remote source (the voices'
+Sanity read below) can hold every site and docs PR until that source
+recovers. A gate step reading a remote source says what it does when
+the source is down.
 
 **A path served to a program is not a page**, so the site's page
 rules do not reach it. Give it no `/de/` or `/ja/` route, add it

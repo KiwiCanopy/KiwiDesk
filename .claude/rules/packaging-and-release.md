@@ -804,7 +804,9 @@ output — and on its failure too: a gated job's `if:` takes
 `!cancelled()` and a failure arm, so a `changes` job that did not
 succeed runs everything. The bare `if:` implies `success()`, and a
 failed filter would otherwise skip the build and pass the check
-with nothing run (#1984, `CiPathFilterTests`).
+with nothing run (#1984, `CiPathFilterTests`). `site.yml`'s
+`pull_request` trigger takes the same shape, since `Build site` is
+required too; `.claude/rules/site.md` owns it.
 
 **Add an entry to `.github/ci-ignore.txt` only when no test, no
 build step and no lint step reads the path** — and audit all three,
@@ -871,8 +873,8 @@ script and the build never hold it.
 **A workflow-opened PR gets its CI started for it, and one it
 expects to merge itself gets armed too.** Running the gate before
 the PR exists proves the change; it does not get the PR merged.
-Branch protection requires `ci.yml`'s two macOS contexts (and
-`cla.yml`'s since #1521), and a PR opened with `GITHUB_TOKEN`
+Branch protection requires the contexts `scripts/protect-main.sh`
+lists, and a PR opened with `GITHUB_TOKEN`
 fires no `pull_request`, so none of them ever reports and the PR
 sits BLOCKED — the release path hit that
 at v1.1.1, and every release before #1154 needed a human between
@@ -907,11 +909,15 @@ one head, a race over which verdict lands. **The fallback
 delivers less since the CLA check (#1521):** a `github.token` PR
 fires no `pull_request_target` either, and `cla.yml` cannot be
 dispatched — the action needs a PR event — so on that path the
-sync PR sits blocked on "CLA" until a human pushes any commit to
-its branch, the remedy `app-font.yml`'s fallback PR still states.
-The PAT path is untouched: the PR's author is the owner, signed
+sync PR sits blocked on "CLA" and "Build site" until a human pushes
+any commit to its branch, the remedy `app-font.yml`'s fallback PR still states.
+On the PAT path "CLA" passes: the PR's author is the owner, signed
 once, and the `github-actions[bot]` commit author is on the
-allowlist.
+allowlist. The sync PR also waits on `Build site` there, whose
+checks reach further than the workflow's own pre-PR build, and that
+is ruled: a red holds the feed back rather than shipping past the
+gate, so **a red on the sync PR is a release problem to read, not a
+check to wait out**.
 
 **The dispatch and the arming are owed to a PR nobody is
 watching land, and that is the scope.** The release path is unwatched by

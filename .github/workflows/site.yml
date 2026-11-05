@@ -1,7 +1,7 @@
 name: Site
 
 # Builds the Astro/Starlight docs site so a broken build is caught
-# in the PR gate, not on Cloudflare after merge. Path-filtered to
+# in the PR gate, not on Cloudflare after merge. Builds only for
 # the site and the content it renders (docs/ and assets/ are
 # symlinked into the site, so a docs edit can break the build).
 #
@@ -19,10 +19,21 @@ name: Site
 # same reason one
 # level up — editing a check did not previously run it, and
 # several of its checks read inputs from outside site/. Both are
-# inputs to the GATE, not to the build. Written without a count:
+# inputs to the GATE, not to the build, and so are extract-keys,
+# which the gate runs, the modules it imports, and build-app.sh,
+# whose feed URL check-site-tokens.py reads. Written without a count:
 # #1232 moved it, and a number here is one nothing derives.
 # pull_request has no branch filter so it also validates the
 # stacked docs → site PR chain before either reaches main.
+#
+# `Build site` is a required check on main
+# (scripts/protect-main.sh), so pull_request takes no `paths:`: a
+# filtered-out workflow never reports and a required check waits
+# forever, while a job skipped by `if:` satisfies one. The `changes`
+# job applies push's list below, the one list of the site's inputs,
+# and builds when it cannot read an entry.
+# push keeps the trigger filter, so a Swift-only merge cannot cancel
+# a site run through the concurrency group.
 on:
   push:
     branches: [main]
@@ -35,25 +46,96 @@ on:
       - "ROADMAP.md"
       - "scripts/check-site-tokens.py"
       - "scripts/unreleased-strip"
+      - "scripts/extract-keys"
+      - "scripts/locale_decoder.py"
+      - "scripts/locale_paths.py"
+      - "scripts/localization_guards.py"
+      - "scripts/build-app.sh"
       - ".github/workflows/site.yml"
   pull_request:
-    paths:
-      - "site/**"
-      - "docs/**"
-      - "assets/**"
-      - "Sources/KiwiDesk/SupportLinks.swift"
-      - "Sources/KiwiDesk/Updates/NextOnMyList.swift"
-      - "ROADMAP.md"
-      - "scripts/check-site-tokens.py"
-      - "scripts/unreleased-strip"
-      - ".github/workflows/site.yml"
 
 concurrency:
   group: site-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
+  changes:
+    name: Detect site changes
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.filter.outputs.run }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          # The diff base is a commit on this repo, and a shallow
+          # clone would not contain it.
+          fetch-depth: 0
+
+      - name: Decide whether the site must build
+        id: filter
+        env:
+          EVENT: ${{ github.event_name }}
+          BASE: ${{ github.event.pull_request.base.sha }}
+        run: |
+          set -euo pipefail
+          # Every unknown resolves to "run": a wrong skip passes a
+          # required check with nothing built.
+          answer() {
+            echo "run=$1" >> "$GITHUB_OUTPUT"
+            exit 0
+          }
+          # A push already passed the trigger's own `paths:`.
+          [ "$EVENT" = pull_request ] || answer true
+          git cat-file -e "${BASE}^{commit}" 2>/dev/null || answer true
+          # --no-renames: a file moved out of an input still names
+          # the path it left.
+          changed="$(git -c core.quotePath=false diff --name-only \
+            --no-renames "$BASE"...HEAD)"
+          # Only a plain path or `dir/**` is compared, and anything else
+          # reads as `*`, which builds. The trade: a path holding any
+          # other character builds every PR until it is written plainly.
+          inputs="$(awk '
+            /^    paths:$/ { list = 1; next }
+            !list { next }
+            /^[ \t]*(#.*)?$/ { next }
+            !/^      / { exit }
+            /^      - "[A-Za-z0-9._\/-]+(\/\*\*)?"$/ {
+              gsub(/^      - "|"$/, ""); print; next
+            }
+            { print "*" }
+          ' .github/workflows/site.yml)"
+          if [ -z "$changed" ] || [ -z "$inputs" ]; then
+            answer true
+          fi
+          while IFS= read -r file; do
+            # Git still quotes a name holding a quote or a control
+            # character, and a quoted name matches nothing.
+            case "$file" in \"*) answer true ;; esac
+            # The list is read from this PR, so a PR dropping this file's
+            # own entry must still build for the gate to refuse it.
+            [ "$file" != .github/workflows/site.yml ] || answer true
+            while IFS= read -r input; do
+              case "$input" in
+                '*') answer true ;;
+                */'**')
+                  case "$file" in
+                    "${input%/\*\*}"/*) answer true ;;
+                  esac
+                  ;;
+                "$file") answer true ;;
+              esac
+            done <<< "$inputs"
+          done <<< "$changed"
+          answer false
+
   build:
+    needs: changes
+    # A failed or timed-out filter builds: a bare `if:` implies
+    # success(), and the skip it makes passes a required check with
+    # nothing run (#1984).
+    if: >-
+      ${{ !cancelled() && (needs.changes.result != 'success'
+      || needs.changes.outputs.run == 'true') }}
     name: Build site
     runs-on: ubuntu-latest
     defaults:
