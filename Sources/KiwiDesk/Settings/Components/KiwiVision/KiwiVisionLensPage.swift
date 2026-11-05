@@ -59,7 +59,7 @@ struct KiwiVisionEveryLensHeading: View {
                 .foregroundStyle(SettingsTheme.ink2)
                 .accessibilityAddTraits(.isHeader)
             Rectangle()
-                .fill(SettingsTheme.hairline)
+                .fill(SettingsTheme.hairlineSubtle)
                 .frame(height: 1)
                 .accessibilityHidden(true)
         }

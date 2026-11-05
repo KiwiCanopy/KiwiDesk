@@ -1551,7 +1551,7 @@ then shows every such setting in ONE sheet (#2450), not an alert
 per setting: an alert per setting would ask four times for one
 nudge of the Outer gap, and a list the user sees whole is easier
 to answer than a run of questions. Each row starts with neither
-Yours nor Theirs picked, and Save stays dimmed beside an amber
+Yours nor Theirs picked, and Save stays dimmed beside a
 warning band until every row has a side, so Return does nothing
 until then and Escape cancels: a conflict is two Macs
 disagreeing, and a default — or an accept-all control — would let
@@ -3725,6 +3725,26 @@ recomputed from the connected screens on every retile
 (`ScreenNeighbors.detect`) — an input, never a cache — so a
 screen plugged in or out is correct from the retile the display
 change already triggers.
+
+:::unreleased
+**A Scrolling pile keeps only what shows in order (#2985).** A
+Scrolling restore raises the windows that show and leaves the buried
+ones below them in any order, because raising a long row one verified
+window at a time outran its time budget, and the windows raised last
+are the ones on screen. A focus move between two of the row's windows
+that moves the row, by command, a click or an app's activation, and a
+focused close take a restore of their own for that
+reason, which a whole-row restack never needed. A change that keeps
+the focus takes none: a restore ends by re-asserting the focus, which
+would steal it from an event nobody asked to move focus for, and such
+a change owes the floats no raise back. Corner-parking the buried windows would remove
+the overlap instead, and was rejected again: walled on both sides,
+the hide corner hangs the body onto a neighbouring screen, which is
+what the wall exists to prevent, every park snaps, and a slot that
+cannot fully fit still underlaps its neighbour, so the restore would
+stay. The traded cost is in
+[Accepted limitations](accepted-limitations.md).
+:::
 
 **Monocle hides by z-order, and `park` is the opt-in for
 bodies the stack shows through (#881).** The default `stack`
@@ -8710,12 +8730,28 @@ banner's amber could not be given one at all while it was
 inside this one window, and that is the price. What it buys is
 that the window looks like KiwiDesk rather than like a generic
 form, which is the same argument as the entry above: the IA and
-the look are ours. The accent is also identical in light and
-dark, because brand recognisability is the thing it carries —
-the same reason the tokens that paint *pictures* (the desktop
-plate, the keyboard board's fills) hold one value in both modes:
-what a picture shows must not change with the window's
-appearance.
+the look are ours. The accent stays one kiwi green in light and
+dark, because brand recognisability is the thing it carries. The
+tokens that paint *pictures* (the desktop plate, the keyboard
+board's free keys) hold one value in both modes, since what a
+picture shows must not change with the window's appearance.
+
+:::unreleased
+Dark's page is pure black, and a plane on it reads by its edge
+rather than by a lifted grey, so the accent sits one step brighter
+there and the line splits in two: `hairline` is a plane's edge,
+and `hairlineSubtle` is a rule that is no plane's edge, which would
+otherwise compete with the edge of what holds it. The header takes
+the page's black and keeps its line, since a full-width band of
+green read as more saturated than the neutral controls on it, and
+those controls stay neutral. A mark the accent
+paints on a picture follows the accent, since it names the same
+state as the controls beside the board.
+:::
+
+The site takes the same black, surfaces and lines but keeps its
+hero glow, card gradient and brown pill, because a marketing page
+flattened to one colour read as stark beside the app.
 
 What breaks if this is ignored: a second hex literal beside a
 view, which is invisible until the day the palette moves and one
@@ -11378,9 +11414,9 @@ better indicator" is a false choice.
 
 "No fixed surface token can be a rest cue at all" holds for
 `hairline` too, which is green-tinted and so answers the
-achromatic objection outright: it fails for a different, measured
-reason — about 1.05:1 against `sunken`, invisible on precisely the
-drawer whose card already is `sunken`. And a resting fill is
+achromatic objection outright: it failed for a different, measured
+reason — about 1.05:1 against `sunken` when this was ruled, invisible
+on precisely the drawer whose card already is `sunken`. And a resting fill is
 refused on a second ground: fifteen headers wearing a band would
 make the drawers the most-filled things on pages whose real
 controls carry no fill at all.
@@ -14915,7 +14951,7 @@ pointer resting on the marked chip must not read as unmarking it.
 **A chip must read as a button before it is pointed at** (#1520
 amendment 5, owner ruling 2026-10-07). A hairline capsule is the
 passive chip's vocabulary — a badge, a tag — and on the chip's
-own rest fill the container hairline all but vanishes in dark,
+own rest fill the container hairline all but vanished in dark,
 so the row read as labels. The chip therefore draws an edge of
 its own, `chipEdge`, which must separate from the rest fill it
 rims by more than the container hairline separates from the

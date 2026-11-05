@@ -1049,6 +1049,10 @@ change too, and a shared look missing it owes
 `settleSharedMotion` its value; **a bundled look, the tour's paint
 and its Revert carry `LookKeys.styling` alone**, never motion
 (`LookMotionTests`, `LookCatalogSeamTests` ▸ `glassReadsTheStarter`).
+**A further input to the bundled looks joins
+`BundledLooksMemo`'s key**, which holds their answer per screen
+sizes (#2993, `BundledLooksMemoTests`), and a file newly under the
+catalog joins `LookCatalogSeamTests` ▸ `catalogReadsNoHost`.
 
 The format bumps above are the obligation the format integers
 rest on: `<=` is decoder tolerance rather than a compatibility

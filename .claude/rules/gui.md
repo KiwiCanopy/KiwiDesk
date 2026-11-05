@@ -444,7 +444,7 @@ take the screen.
 
 Take the seam that NAMES the moment the window appears; a
 callback that merely fires near it is a race, not a fix. #1011 is
-the worked case (Sparkle 2.10.0, the version `Package.resolved`
+the worked case (Sparkle 2.10.1, the version `Package.resolved`
 pins — a bump re-checks it): `UpdatePromptDriver` overrides
 `showReadyToInstallAndRelaunch`, and `UpdatePromptPolicy` refuses
 the status window's minimize button.
@@ -507,7 +507,7 @@ that bring-forward (`UpdateUpToDateTests` ▸
 bypasses the policy's delegate answers, so the own path asks the
 policy through its own doors (`offerArrived`,
 `offerGotAttention`) and never writes `updatePending` itself.
-Two orderings are Sparkle 2.10.0's and a bump re-checks them
+Two orderings are Sparkle 2.10.1's and a bump re-checks them
 beside #1011's: the ready-to-install prompt is answered
 `.install` because the window already had its Install; and Try
 Again's check starts at
@@ -1659,6 +1659,11 @@ Every surface, border and ink in the Settings tree comes from
   (stem-derived, so a §2.1 split cannot fall out of it) — on
   mode-varying surfaces `.secondary` still self-inverts and
   "prefer a concrete ink" stays a preference.
+- **A plane's edge is `hairline`; a rule that is no plane's edge
+  is `hairlineSubtle`** — between a card's groups or entries,
+  between chips in a strip. The two differ only in dark, where a
+  rule at the edge's strength competes with the edge of what holds
+  it. No scan tells a rule from an edge, so this is review's.
 - **A dark plane on a dark ground takes the `planeRing` seam**
   (16b's one non-swap construction): where a fixed-dark surface
   meets a mode-varying one — the plate, the save pill, the
@@ -1795,6 +1800,9 @@ Every surface, border and ink in the Settings tree comes from
   not move it — so its ink is the resolved paint's, never an
   ambient grey, and Advanced's Layouts sketch files sit in the
   stems for it.
+- **A warning takes `WarningBox`, never a `warningSurface` fill of
+  its own** (#2982, `WarningBoxSeamTests` ▸ `oneFill`,
+  `WarningBoxSeamTests` ▸ `sitesTakeTheBox`).
 - **Prefer a concrete ink to `.secondary` wherever an ancestor
   may set a foreground.** `.secondary` and `.tertiary` are
   *hierarchical* — derived from the enclosing foreground, not from
@@ -2167,17 +2175,32 @@ is the one copy of who may hold a sideways scroll view). A bare
 fade draws. The container owns the scroll, so a tick never
 re-evaluates the host. The Spaces preview chips are the held-out
 strip: scroller only, no fade and no follow, until their varying
-widths are measured (#2990).
+widths are measured (#2990). The first-launch tour's rows are outside
+this paragraph: scroller only as well, centring the applied tile
+themselves.
 
-**A Settings strip that scrolls sideways keeps the platform's
-scroller**, which a mouse user drags to reach what the strip cuts
-(#2901 ▸ Ruling). Never hide it by argument, and a hide above a
-strip names `axes: .vertical` alone, since Apple documents the
-modifier as reaching nested scroll views (not measured here;
-`StripScrollerTests`). The scroller gives reach and the fade stays
-the cue: under *Automatically* a trackpad shows it only during a
-gesture (`docs/design-decisions.md` ▸ The platform's own indicator
-does not work).
+**A strip that scrolls sideways in Settings or the first-launch tour
+keeps the platform's scroller**, which a mouse user drags to reach
+what the strip cuts (#2901 ▸ Ruling, whose text names Settings; the
+tour follows it for the same reach). Never hide it by argument, and a
+hide above a strip names `axes: .vertical` alone, since Apple documents
+the modifier as reaching nested scroll views (not measured here;
+`StripScrollerTests`). The scroller gives reach and, on a
+`SidewaysStrip`, the fade stays the cue: under *Automatically* a
+trackpad shows the scroller only during a gesture
+(`docs/design-decisions.md` ▸ The platform's own indicator does not
+work), so a tour row cut at its edge is the only cue there.
+
+**A strip's content in those two trees clears an overlay scroller
+through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
+that strip's content width and viewport (`StripScrollerTests` ▸
+`clearance`, `clearanceHome`), never a bottom padding of its own
+beside it, which review holds in Settings since those needles do not
+see one there, and `StripScrollerTests` holds in the tour's rows. A
+new sideways strip in the tour joins that suite's `tourHolders`. As
+measured on macOS 27, 2026-11-05, an overlay scroller draws over the content's bottom edge, a legacy one grows the scroll
+view by its own height, and a strip that fits hides either. A macOS
+release re-measures `overlayHeight`.
 
 ## A sided chord is drawn once and spoken in words (#2601)
 

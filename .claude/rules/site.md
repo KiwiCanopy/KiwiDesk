@@ -281,8 +281,9 @@ Two gaps it deliberately leaves:
   new ones by hand.
 - **Values CSS cannot reach.** A `<meta name="theme-color">`
   attribute cannot read a custom property, so the shared
-  `ThemeHead.astro` component owns that non-token browser-chrome
-  color for every standalone page.
+  `ThemeHead.astro` component owns those non-token browser-chrome
+  colors for every standalone page, one per theme, and keeps the
+  metas on the resolved `data-theme` rather than on the OS alone.
 
 ## Build
 

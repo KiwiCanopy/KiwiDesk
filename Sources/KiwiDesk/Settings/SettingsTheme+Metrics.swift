@@ -25,6 +25,9 @@ extension SettingsTheme {
     /// Section container corner radius.
     static let sectionRadius: CGFloat = 16
 
+    /// A detail panel's desk plate corner radius.
+    static let panelPlateRadius: CGFloat = 12
+
     /// Disclosure interior corner radius.
     static let disclosureRadius: CGFloat = 12
 

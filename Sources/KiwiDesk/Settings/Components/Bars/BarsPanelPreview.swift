@@ -67,7 +67,12 @@ struct BarsPanelPreview: View {
             .padding(Self.framePad)
             .frame(height: caption == nil ? 210 : Self.shortFrame)
             .frame(maxWidth: .infinity)
-            .deskPlate(settings, in: RoundedRectangle(cornerRadius: 12))
+            .deskPlate(
+                settings,
+                in: RoundedRectangle(
+                    cornerRadius: SettingsTheme.panelPlateRadius
+                )
+            )
             .accessibilityHidden(true)
             .allowsHitTesting(false)
             if let caption {

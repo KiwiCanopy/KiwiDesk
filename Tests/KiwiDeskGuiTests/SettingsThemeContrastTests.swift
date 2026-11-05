@@ -308,7 +308,7 @@ struct SettingsThemeContrastTests {
         for pairing
             in pairings + Self.updateWindow + Self.jumpChips
             + Self.chips + Self.jumpPanel + Self.dropdownCursor
-            + Self.lightPlate
+            + Self.lightPlate + Self.header
         {
             for dark in [false, true] {
                 let ratio = try ThemeContrast.contrast(

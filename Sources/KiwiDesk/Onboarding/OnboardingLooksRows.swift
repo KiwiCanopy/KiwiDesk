@@ -14,7 +14,7 @@ struct OnboardingLookRow: View {
         VStack(alignment: .leading, spacing: 6) {
             OnboardingRowHeader(text: L("looks.title", "Looks"))
             ScrollViewReader { proxy in
-                ScrollView(.horizontal) {
+                OnboardingStripScroll {
                     HStack(alignment: .top, spacing: 8) {
                         ForEach(looks, id: \.name) { look in
                             tile(look)
@@ -22,7 +22,6 @@ struct OnboardingLookRow: View {
                                 .id(look.name)
                         }
                     }
-                    .padding(.bottom, 8)
                 }
                 .onAppear {
                     let applied = looks.first {
@@ -98,7 +97,7 @@ struct OnboardingPaletteRow: View {
                 text: L("palettes.title", "Color palette")
             )
             ScrollViewReader { proxy in
-                ScrollView(.horizontal) {
+                OnboardingStripScroll {
                     HStack(alignment: .top, spacing: 8) {
                         ForEach(palettes, id: \.name) { palette in
                             tile(palette, colors: colors)
@@ -106,7 +105,6 @@ struct OnboardingPaletteRow: View {
                                 .id(palette.name)
                         }
                     }
-                    .padding(.bottom, 8)
                 }
                 .onAppear { reveal(applied, proxy, animated: false) }
                 .onChange(of: applied) { _, name in
@@ -147,6 +145,34 @@ struct OnboardingPaletteRow: View {
         guard let name else { return }
         withAnimation(animated && !reduceMotion ? .default : nil) {
             proxy.scrollTo(name, anchor: .center)
+        }
+    }
+}
+
+/// A looks-step row's sideways scroll, clearing an overlay scroller
+/// (#2901). Its widths are its own state, so a resize never
+/// re-evaluates the row's tiles.
+private struct OnboardingStripScroll<Content: View>: View {
+    @ViewBuilder let content: Content
+    @State private var width: CGFloat = 0
+    @State private var viewport: CGFloat = 0
+
+    var body: some View {
+        ScrollView(.horizontal) {
+            content
+                .onGeometryChange(for: CGFloat.self) {
+                    $0.size.width
+                } action: {
+                    width = $0
+                }
+                .modifier(
+                    StripScrollerRoom(contentWidth: width, viewport: viewport)
+                )
+        }
+        .onGeometryChange(for: CGFloat.self) {
+            $0.size.width
+        } action: {
+            viewport = $0
         }
     }
 }

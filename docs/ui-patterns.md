@@ -498,8 +498,8 @@ choose by semantic role, not by a desired silhouette.
 and it is about ink rather than silhouette.**
 `.borderedProminent` picks its own label colour, white on
 macOS, which on KiwiDesk's kiwi green measures **2.41:1** in
-both appearances (the accent is the same hue in each), under
-every legibility floor this app holds. `accentInk` is the ink
+light, under every legibility floor this app holds; dark's
+accent is no darker, so the verdict stands there too. `accentInk` is the ink
 the theme declares for text drawn *on* the accent, a pairing
 the theme's contrast lens measures. Fill and ink are sealed
 into one style — `KiwiProminentButtonStyle`, applied as
@@ -532,9 +532,9 @@ modes, and an inactive window makes AppKit re-pick a prominent
 button's ink against the *window's* appearance rather than the
 plate the button sits on: in light mode the label and the fill
 both collapse into the plate, **1.23:1** enabled and **1.09:1**
-disabled, against the seal's 6.67:1 in every appearance and
-activation state (in dark mode the system button reads at
-11.48:1). So the pill's Save wears the seal, and every other
+disabled, against the seal's 6.67:1 or better in every
+appearance and activation state (in dark mode the system button
+read at 11.48:1 when this was measured). So the pill's Save wears the seal, and every other
 control on that plate sets its own ink (#1198). Settings'
 remaining prominent buttons take the system style; moving one
 onto the seal is its own change and its own eye-confirm.
@@ -1255,7 +1255,7 @@ opacity. A chip rests at `chipRest`, lifts to `chipHover` and,
 where its style can see the press, deepens to `chipPressed`; a
 full-row entry's hover and a segment's lift are one `chipRest`
 step; a segmented control's track is `trackFill`, fill and rim.
-All are stronger in dark, where a 6 % lift on the near-black
+All are stronger in dark, where a 6 % lift on the dark
 page does not read as a shape (#1520, #2047). A text chip that
 is a button also takes `chipEdge`, constant across states — the
 jump chips, a screen card's `+n`, the collapsed screen-setups

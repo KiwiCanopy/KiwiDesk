@@ -111,7 +111,7 @@ struct SettingsDisclosure<Content: View, Accessory: View>: View {
     private var inlineBody: some View {
         VStack(alignment: .leading, spacing: 10) {
             if chrome == .inline {
-                SettingsTheme.hairline.frame(height: 1)
+                SettingsTheme.hairlineSubtle.frame(height: 1)
             }
             group
         }

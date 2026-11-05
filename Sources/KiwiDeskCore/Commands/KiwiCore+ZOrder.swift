@@ -25,15 +25,7 @@ extension KiwiCore {
     ///
     /// NOT deferred past a restore that is still draining, though
     /// a sequence queued behind another does lag the settle
-    /// (#684's second half, still open). Holding it back and
-    /// running it from the drain's completion was built and
-    /// reverted: it re-raised windows whose echoes were still in
-    /// flight, and the ledger then consumed a stamp on its FIRST
-    /// echo, so the second echo read as a deliberate focus
-    /// change (owner QA, 2026-08-02). #689 retired consumption
-    /// (stamps expire by age), which removes that specific
-    /// blocker — re-attempting the coalesce now needs its own
-    /// red-proof, not this comment's permission.
+    /// (#684's second half, still open).
     func scheduleZOrderRestore() {
         pendingZOrderRestore = true
         // An owed pass has not drawn yet (#804): the restore waits
@@ -49,15 +41,17 @@ extension KiwiCore {
     /// scrambles no stacking. Call *after* the swap's retile, so
     /// the restore rides the new animations' settle rather than
     /// firing from the pre-swap frames (the #153 ordering rule).
-    func scheduleScrollingZOrderRestoreIfOverflowing() {
+    @discardableResult
+    func scheduleScrollingZOrderRestoreIfOverflowing() -> Bool {
         guard let input = tiler.layoutInput(state: state),
             input.space.mode == .scrolling,
             ScrollingLayout.rowOverflows(
                 for: input.tiled,
                 in: input.context
             )
-        else { return }
+        else { return false }
         scheduleZOrderRestore()
+        return true
     }
 
     /// Requests a z-order restore whose paired retile is the
@@ -264,33 +258,6 @@ extension KiwiCore {
         )
     }
 
-    /// Scrolling: columns pushed past the screen edges are
-    /// clamped there by macOS and pile up, overlapping. Each
-    /// side must stack toward its own edge — the column
-    /// nearest the focus on top, farther ones underneath —
-    /// so the piles read as the row receding to the left and
-    /// to the right of the viewport.
-    private func restoreScrollingZOrder(_ space: Space) {
-        let tiled = state.effectiveTiledMembers(of: space)
-        guard tiled.count > 1 else { return }
-        // Anchor, not `space.focused` — see restoreTrackZOrder.
-        // The pile split follows the traveler's slot too: it is
-        // the row position the viewport actually centers on.
-        let anchor = state.focusAnchor(of: space, tiled: tiled)
-        let focusIndex =
-            anchor.flatMap {
-                tiled.firstIndex(of: $0)
-            } ?? 0
-        raiseSequentially(
-            Self.scrollingRaiseOrder(
-                tiled,
-                focusIndex: focusIndex
-            ),
-            thenFocus: anchor,
-            above: []
-        )
-    }
-
     /// Raises the windows in exactly the given order, waiting for
     /// each raise to LAND before issuing the next.
     ///
@@ -299,11 +266,13 @@ extension KiwiCore {
     /// issued back to back — which took ~10 ms for eight windows —
     /// leaves the apps to land them in whatever order they get to
     /// them, and the pile settles scrambled. `ZOrderDrain` owns
-    /// the verification, the budget and the measurements.
-    private func raiseSequentially(
+    /// the verification, the budget and the measurements. `front`
+    /// is the window the drain waits on before its first raise.
+    func raiseSequentially(
         _ ids: [WindowID],
         thenFocus focused: WindowID?,
-        above floor: [WindowID]
+        above floor: [WindowID],
+        front: WindowID? = nil
     ) {
         let pairs = ids.compactMap { id in
             eventLoop.element(for: id).map { (id, $0) }
@@ -328,6 +297,7 @@ extension KiwiCore {
         performZOrderSequence(
             targets: pairs,
             above: floor,
+            front: front,
             generation: generation
         ) {
             [weak self] in
@@ -340,6 +310,15 @@ extension KiwiCore {
             else { return }
             if let focused, focused == self.activeSpace?.focused {
                 self.focusWindow(focused, warp: false)
+            }
+            // The raises lifted tiles over the other floats, and neither
+            // a re-assert nor a float's focus owes a raise; the rest
+            // above pays this. The live anchor: a sticky visitor holds
+            // no focus slot, and a float may have taken it mid-drain.
+            if let live = self.focusedWindowID,
+                self.isEffectiveFloatOnActiveSpace(live)
+            {
+                self.floatRaiseDebt.owed = live
             }
         }
     }
