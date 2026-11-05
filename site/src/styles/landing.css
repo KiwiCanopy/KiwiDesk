@@ -4,7 +4,7 @@
 /* =========================================================
    KiwiDesk — landing page styles
    Fully themeable: coherent LIGHT (cream, botanical, airy) and
-   DARK (deep green-black, kiwi glows) themes, driven by CSS
+   DARK (black, kiwi glows) themes, driven by CSS
    custom properties keyed on :root[data-theme]. The key matches
    Starlight's docs (`data-theme` on <html>) so a toggle carries
    across the whole site.
@@ -50,18 +50,16 @@
 
   /* Surfaces — the page is black and a container reads by its
      line, so bands and cards share one surface. */
-  --bg-0: var(--kiwi-sunken); /* code / diagrams */
+  --bg-0: var(--kiwi-dusk); /* code / diagrams */
   --bg-1: var(--kiwi-seed); /* page */
-  --bg-2: var(--kiwi-surface); /* tinted band */
-  --bg-3: var(--kiwi-surface); /* card */
+  --bg-2: var(--kiwi-night); /* tinted band */
+  --bg-3: var(--kiwi-night); /* card */
   --footer-bg: var(--bg-1); /* matches PageShell's unpainted footer */
   --footer-line: transparent;
-  --card-hover-line: var(--border); /* both look card hovers */
-  --card-hover-glow: 0 12px 40px 0 var(--glow);
-  --look-hover-shadow: var(--card-hover-glow);
-  --teaser-hover-shadow: var(--card-hover-glow);
-  --look-hover-line: var(--card-hover-line);
-  --teaser-hover-line: var(--card-hover-line);
+  --hover-glow: 0 12px 40px 0 var(--glow);
+  --look-hover-shadow: var(--hover-glow);
+  --teaser-hover-shadow: var(--hover-glow);
+  --look-hover-line: var(--accent);
   /* A full-width band fades into the black page; no hard edge. */
   --band-bg: linear-gradient(
     180deg,
@@ -71,8 +69,8 @@
     transparent
   );
   --band-line: transparent;
-  --border: var(--kiwi-line);
-  --border-strong: var(--kiwi-line);
+  --border: var(--kiwi-fern);
+  --border-strong: var(--kiwi-fern);
 
   /* Text — brand --ink / --text-muted (dark); --text-faint is a
      recomputed third tier, still AA on every dark surface above. */
@@ -86,8 +84,8 @@
   --accent-deep: var(--kiwi-flesh);
   --glow: rgba(141, 179, 84, 0.45);
 
-  /* Hero band — deep brand bg, glows read strongly */
-  --hero-bg-top: var(--kiwi-sunken);
+  /* Hero band — green-black fading to the page, soft glow */
+  --hero-bg-top: var(--kiwi-dusk);
   --hero-tuck: 6rem; /* above any nav height, so no edge shows */
   --hero-bg-bot: var(--bg-1);
   --hero-ink: var(--text);
@@ -108,8 +106,8 @@
   /* Card & surface fills */
   --card-bg: linear-gradient(
     180deg,
-    var(--kiwi-sunken),
-    var(--kiwi-surface)
+    var(--kiwi-dusk),
+    var(--kiwi-night)
   );
   --card-glow: rgba(170, 203, 93, 0.12);
 
@@ -117,15 +115,11 @@
   --ghost-bg: rgba(170, 203, 93, 0.06);
   --ghost-ink: var(--text);
   --ghost-border: var(--border-strong);
-  --ghost-hover-bg: rgba(170, 203, 93, 0.12);
-  --ghost-hover-border: var(--accent);
   /* A ghost button keeps its fill on hover and glows. */
-  --ghost-btn-hover-bg: var(--ghost-bg);
-  --ghost-btn-hover-border: var(--ghost-hover-border);
-  --ghost-btn-hover-shadow: var(--card-hover-glow);
-  --voice-hover-line: var(--accent);
+  --ghost-hover-bg: var(--ghost-bg);
+  --ghost-hover-border: var(--accent);
+  --ghost-hover-shadow: var(--hover-glow);
   --voice-hover-shadow: var(--shadow-sm); /* not clickable: no glow */
-  --voices-btn-hover-border: var(--accent);
   --voices-btn-hover-shadow: 0 4px 18px 2px var(--glow);
 
   /* Pill on the hero band — ink is the same text-safe accent
@@ -177,7 +171,6 @@
   --footer-bg: var(--bg-0);
   --footer-line: var(--border);
   --look-hover-line: var(--border-strong);
-  --teaser-hover-line: var(--accent);
   --look-hover-shadow: var(--shadow);
   --teaser-hover-shadow: var(--shadow-sm);
   --band-bg: var(--bg-2);
@@ -247,12 +240,8 @@
   --ghost-border: rgba(18, 37, 26, 0.28);
   --ghost-hover-bg: rgba(18, 37, 26, 0.08);
   --ghost-hover-border: var(--hero-ink);
-  --ghost-btn-hover-bg: var(--ghost-hover-bg);
-  --ghost-btn-hover-border: var(--ghost-hover-border);
-  --ghost-btn-hover-shadow: none;
-  --voice-hover-line: var(--accent);
+  --ghost-hover-shadow: none;
   --voice-hover-shadow: var(--shadow-sm), 0 0 0 3px var(--card-glow);
-  --voices-btn-hover-border: var(--accent);
   --voices-btn-hover-shadow: none;
 
   /* Pill on the hero band — ink is the same text-safe accent
@@ -875,7 +864,7 @@ body::before {
 
 /* Ghost buttons adapt per theme via --ghost-* — in the light
    theme they read as a teal-ink outline on cream; in dark, a
-   soft green outline on the green-black band. */
+   soft green outline on the dark page. */
 .btn--ghost,
 .btn--ghost-light {
   background: var(--ghost-bg);
@@ -885,9 +874,9 @@ body::before {
 
 .btn--ghost:hover,
 .btn--ghost-light:hover {
-  background: var(--ghost-btn-hover-bg);
-  border-color: var(--ghost-btn-hover-border);
-  box-shadow: var(--ghost-btn-hover-shadow);
+  background: var(--ghost-hover-bg);
+  border-color: var(--ghost-hover-border);
+  box-shadow: var(--ghost-hover-shadow);
 }
 
 .pill,
@@ -1627,7 +1616,7 @@ section {
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .voice:hover {
-  border-color: var(--voice-hover-line);
+  border-color: var(--accent);
   box-shadow: var(--voice-hover-shadow);
 }
 .voice::before {
@@ -1749,8 +1738,8 @@ section {
     box-shadow 0.25s ease;
 }
 .voices__btn:hover:not([aria-disabled="true"]) {
-  background: var(--ghost-btn-hover-bg);
-  border-color: var(--voices-btn-hover-border);
+  background: var(--ghost-hover-bg);
+  border-color: var(--accent);
   box-shadow: var(--voices-btn-hover-shadow);
 }
 .voices__btn[aria-disabled="true"] {
