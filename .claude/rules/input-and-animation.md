@@ -224,8 +224,9 @@ editing here:
   - A new size-limit refusal cue routes through
     `cueResizeRefusal` (`KiwiCore+SizeLimitPill.swift`) — the
     funnel is what ends a held run, so a cue beside it pills
-    once per FRAME. A glide step's refusal ends the run with no
-    cue, and only a press draws one (#3017,
+    once per FRAME. A refusal reaching the funnel during a glide
+    ends the run uncued, unless a fire or a pressed write's report
+    made it; the retile door still draws (#3017,
     `HoldGlideRefusalWiringTests`). The suite holds
     every `refuse*` function to the funnel and the funnel as
     the one `borders.onResizeRefusal` caller.
@@ -251,8 +252,8 @@ editing here:
     funnel, in `noteResizeRefusal`, is `isFiring`, `isGliding` or an
     armed hold, not
     `isFiring` alone: a glide runs outside any binding fire, so
-    dropping the second term makes the cue unreachable exactly
-    where the hold needs it (`HoldGlideRefusalWiringTests`), and a
+    dropping the second term leaves the run with no refusal to end
+    it, exactly where the hold needs one (`HoldGlideRefusalWiringTests`), and a
     fixed window's report lands in the key-repeat wait (#2994,
     `FixedSizeWindowWiringTests`).
   - The engine arms only when its registrar conforms to

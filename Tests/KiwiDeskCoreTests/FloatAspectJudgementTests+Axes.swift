@@ -38,6 +38,34 @@ extension FloatAspectJudgementTests {
 
     private var broken: CGSize { CGSize(width: 860, height: 400) }
 
+    /// The floor leaves the frame as it stands, so the writer's own
+    /// truncation arm is what cues (#3018).
+    @Test("A locked float at its floor cues on either axis")
+    func floorCuesOnBothAxes() {
+        for axis in ["x", "y"] {
+            let core = makeCore()
+            core.execute(
+                "set_min_window_size",
+                args: [.number(Double(start.width))]
+            )
+            core.state.floatAspects[id] = .init(
+                pid: 900_001,
+                ratio: start.width / start.height
+            )
+            var refusals: [ResizeRefusal] = []
+            core.borders.onResizeRefusal = { refusals.append($0) }
+            #expect(
+                core.execute("resize", args: [.string(axis), .number(-50)])
+                    .isSuccess
+            )
+            #expect(refusals.count == 1)
+            guard case .ownMinimum = refusals.first else {
+                Issue.record("expected the window's own minimum")
+                continue
+            }
+        }
+    }
+
     @Test("A broken ratio answer files nothing")
     func otherIsUnjudged() {
         let core = makeCore()

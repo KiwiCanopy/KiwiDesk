@@ -5183,12 +5183,15 @@ during the glide as well as the press fire, since the glide runs
 outside any binding fire.
 
 :::unreleased
-A hold now stops silently at any limit, and only a fresh press at the
-limit draws the pill, the bump and the sound (#3017, overturning "pills
-once per hold"). A pill on a hold arrived while the window was still
+This supersedes "pills once per hold" and "the cue is heard during the
+glide" above; remove both when this ships. A hold now stops silently at
+any limit, and only a fresh press at the limit draws the pill, the bump
+and the sound (#3017), a press's own fixed-size report included, however
+late it lands. A pill on a hold arrived while the window was still
 catching up, 32 to 75 pt before it landed on TextEdit, and a hold that
-has stopped already says so. A mouse refusal during a glide stays
-silent too; that needs a drag and a held chord at once.
+has stopped already says so. A mouse or CLI refusal during a glide stays
+silent too, which needs a drag or a script beside a held chord. A
+retile's cue is no hold's, so it still draws.
 :::
 
 Structurally, the engine arms only when its registrar can report

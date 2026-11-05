@@ -90,7 +90,8 @@ struct SplitFloorHealNeedleTests {
             under: "App"
         )
         // The glide note and the bump sit behind the press flag;
-        // the border report and the drawing do not. The sound
+        // the border report and the drawing are skipped only for a
+        // refusal in a glide that no press made (#3017). The sound
         // stays on the speaker's own gate, which requires a
         // press in flight — pinned HERE, since
         // `RefusalCueSeamTests` holds the offer's shape and not

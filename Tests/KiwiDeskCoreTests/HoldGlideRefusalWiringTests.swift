@@ -6,9 +6,9 @@ import Testing
 
 /// The refusal half of hold-to-glide's production wiring
 /// (#933/#1055, retimed #1082), on the shared
-/// `HoldGlideFixture`: a real size-limit cue reaching the engine
-/// and ending the hold, so the pill flashes once per hold rather
-/// than once per frame. Split from `HoldGlideWiringTests` at
+/// `HoldGlideFixture`: a real size-limit refusal reaching the engine
+/// and ending the hold, silently unless a press made it (#3017).
+/// Split from `HoldGlideWiringTests` at
 /// §2.1's ceiling; which cue SITES feed the funnel at all is
 /// `HoldGlideEligibilitySeamTests`' derived scan.
 @MainActor

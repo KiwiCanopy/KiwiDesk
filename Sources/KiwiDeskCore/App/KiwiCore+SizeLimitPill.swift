@@ -69,10 +69,10 @@ extension KiwiCore {
     ///
     /// The hotkey-fire gate is inherited deliberately (#184): a
     /// resize driven from the CLI or IPC must not make the
-    /// user's Mac beep at a script. And every caller has already
-    /// ended a held run, so a chord sounds ONCE per hold rather
-    /// than per frame — which is what makes sounding a real
-    /// refusal safe where sounding every `.fail` never was.
+    /// user's Mac beep at a script. And a glide step never reaches
+    /// this, so a chord sounds for its press alone — which is what
+    /// makes sounding a real refusal safe where sounding every
+    /// `.fail` never was.
     func soundRefusal() {
         // A pressed write's report stands in for its fire (#2994).
         guard keys.isFiring || tiler.applier.fixedSizeDoor.reportingPress
@@ -115,7 +115,7 @@ extension KiwiCore {
     /// glide step's refusal ends it with no cue at all (#3017) —
     /// `HoldGlideEligibilitySeamTests` pins this as the only
     /// production caller of `borders.onResizeRefusal`, which is
-    /// what makes "a cue stops the run" structural rather than a
+    /// what makes "a refusal stops the run" structural rather than a
     /// line to remember.
     ///
     /// `fromPress` is false for the one refusal a RETILE draws
@@ -128,11 +128,13 @@ extension KiwiCore {
         fromPress: Bool = true
     ) {
         // A hold stops silently at any limit; a press cues (#3017).
-        let held = fromPress && keys.holdGlide.isGliding && !keys.isFiring
+        let pressed =
+            keys.isFiring || tiler.applier.fixedSizeDoor.reportingPress
+        let silent = fromPress && keys.holdGlide.isGliding && !pressed
         if fromPress {
             keys.noteResizeRefusal()
         }
-        if held { return }
+        if silent { return }
         borders.onResizeRefusal(refusal)
         if let direction = refusal.bumpDirection {
             if fromPress {

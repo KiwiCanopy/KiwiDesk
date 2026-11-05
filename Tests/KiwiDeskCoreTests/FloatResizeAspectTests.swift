@@ -132,19 +132,27 @@ struct FloatResizeAspectTests {
     }
 
     /// mpv fits itself inside a ratio's height and shrinks (#3018).
+    /// Both axes stop together, so a drifted window's spare height
+    /// stands too (340x200 here has 8 pt above its floor).
     @Test("A window at its floor is left exactly as it stands")
     func atFloor() {
-        let drifted = CGRect(x: 400, y: 0, width: 328, height: 192)
-        for horizontal in [true, false] {
-            let outcome = FloatResize.scaled(
-                drifted,
-                horizontal: horizontal,
-                delta: -50,
-                ratio: ratio,
-                minSize: CGSize(width: 300, height: 192),
-                bounds: nil
-            )
-            #expect(outcome.frame == drifted)
+        let sizes = [
+            CGSize(width: 328, height: 192),
+            CGSize(width: 340, height: 200),
+        ]
+        for size in sizes {
+            let drifted = CGRect(origin: CGPoint(x: 400, y: 0), size: size)
+            for horizontal in [true, false] {
+                let outcome = FloatResize.scaled(
+                    drifted,
+                    horizontal: horizontal,
+                    delta: -50,
+                    ratio: ratio,
+                    minSize: CGSize(width: 300, height: 192),
+                    bounds: nil
+                )
+                #expect(outcome.frame == drifted)
+            }
         }
     }
 
