@@ -71,7 +71,13 @@ export default defineConfig({
     // precede Starlight so its remark/rehype pass runs first
     // (astro-mermaid ordering requirement). GitHub renders the
     // same fenced blocks natively, so the source stays one form.
-    mermaid({ theme: "forest", autoTheme: true }),
+    // Dagre, because mermaid 12's default ELK adds about 540 KB of
+    // compressed JS to every page carrying a diagram.
+    mermaid({
+      theme: "forest",
+      autoTheme: true,
+      mermaidConfig: { layout: "dagre" },
+    }),
     // Declared rather than inherited. Starlight registers
     // `@astrojs/sitemap` itself only when the integration list
     // does not already carry one, so naming it here is how its
