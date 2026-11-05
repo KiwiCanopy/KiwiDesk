@@ -81,6 +81,7 @@ extension KiwiCore {
         wireDrag()
         wireOwnKeyWindowRefresh()
         wireHoldGlide()
+        wireFixedSizeAnswer()
         wireMotionCause()
         wireSpaceBarLayerRefresh()
         appBars.onSelect = { [weak self] id in
