@@ -215,7 +215,7 @@ struct EdgeBandWriteTests {
         applier.elementProvider = { _ in element }
         applier.writer = app.writer
         applier.screenFrames = { [screen] in
-            [screen, screen.offsetBy(dx: 0, dy: screen.height)]
+            [screen, screen.offsetBy(dx: screen.width, dy: screen.height)]
         }
         return applier
     }

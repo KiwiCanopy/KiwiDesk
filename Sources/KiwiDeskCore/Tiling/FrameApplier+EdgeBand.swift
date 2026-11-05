@@ -10,6 +10,7 @@ extension FrameApplier {
             for: frame,
             among: EdgeBandWrite.bands(
                 of: screenFrames(),
+                for: frame,
                 separateSpaces: separateSpaces()
             )
         )

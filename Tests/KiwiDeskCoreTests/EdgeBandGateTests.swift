@@ -6,63 +6,107 @@ import os
 @testable import KiwiDeskCore
 
 /// A shrink near an edge is lifted only where macOS refuses it
-/// (#2966): another screen reaches past that edge, and for the
-/// bottom, separate Spaces is off. Screens are AX frames.
+/// (#2966). The table is the 2026-11-05 measurement: a 3200 x
+/// 1440 screen around a 1728 x 1117 laptop, separate Spaces off,
+/// Firefox and Finder alike. Screens are AX frames.
 @Suite("The edge lift runs only where the band exists (#2966)")
 @MainActor
 struct EdgeBandGateTests {
     private let laptop = CGRect(x: 0, y: 0, width: 1728, height: 1117)
-    private var lower: CGRect { laptop.offsetBy(dx: 0, dy: laptop.height) }
-    private var beside: CGRect { laptop.offsetBy(dx: laptop.width, dy: 0) }
+    private let wide = CGSize(width: 3200, height: 1440)
     private let slot = CGRect(x: 16, y: 606.5, width: 840, height: 494.5)
     private let start = CGRect(x: 16, y: 602, width: 847, height: 499)
+
+    private func other(_ x: CGFloat, _ y: CGFloat) -> CGRect {
+        CGRect(origin: CGPoint(x: x, y: y), size: wide)
+    }
+
+    private func edges(
+        _ frame: CGRect,
+        beside neighbour: CGRect?,
+        separateSpaces: Bool = false
+    ) -> (bottom: Bool, right: Bool) {
+        let band = EdgeBandWrite.bands(
+            of: [laptop] + (neighbour.map { [$0] } ?? []),
+            for: frame,
+            separateSpaces: separateSpaces
+        ).first { $0.screen == laptop }
+        return (band?.bottom ?? false, band?.right ?? false)
+    }
+
+    private func window(x: CGFloat, y: CGFloat) -> CGRect {
+        CGRect(x: x, y: y, width: 700, height: 460)
+    }
 
     @Test("One screen has no band, separate Spaces on or off")
     func oneScreenHasNone() {
         for separate in [false, true] {
-            let bands = EdgeBandWrite.bands(
-                of: [laptop],
+            let got = edges(
+                window(x: 16, y: 641),
+                beside: nil,
                 separateSpaces: separate
             )
-            #expect(bands.isEmpty)
+            #expect(got == (false, false))
         }
     }
 
-    @Test("A screen below gives the upper one a bottom band, no more")
-    func lowerScreenBandsTheUpper() {
+    @Test("A wide screen below covers the bottom and reaches past the right")
+    func belowCovers() {
+        let got = edges(window(x: 16, y: 641), beside: other(0, 1117))
+        #expect(got == (false, true))
+    }
+
+    @Test("A screen below offset bands only the span it does not cover")
+    func belowOffsetBandsTheUncovered() {
+        let below = other(800, 1117)
+        #expect(edges(window(x: 16, y: 641), beside: below).bottom)
+        #expect(edges(window(x: 514, y: 641), beside: below).bottom)
+        #expect(!edges(window(x: 1012, y: 641), beside: below).bottom)
+    }
+
+    @Test("A taller screen right covers the right and reaches past the bottom")
+    func rightCovers() {
+        let got = edges(window(x: 1012, y: 641), beside: other(1728, 0))
+        #expect(got == (true, false))
+    }
+
+    @Test("A screen right bands only the span it does not cover")
+    func rightBandsTheUncovered() {
+        let high = other(1728, -581)
+        #expect(!edges(window(x: 1012, y: 50), beside: high).right)
+        #expect(!edges(window(x: 1012, y: 328), beside: high).right)
+        #expect(edges(window(x: 1012, y: 641), beside: high).right)
+        #expect(!edges(window(x: 1012, y: 641), beside: high).bottom)
+        let low = other(1728, 400)
+        #expect(edges(window(x: 1012, y: 50), beside: low).right)
+        #expect(edges(window(x: 1012, y: 328), beside: low).right)
+        #expect(!edges(window(x: 1012, y: 641), beside: low).right)
+    }
+
+    /// Two neighbours sharing a span are not measured: the lift stays.
+    @Test("A span shared by two neighbours keeps the band")
+    func twoNeighboursKeepTheBand() {
+        let half = CGSize(width: 800, height: 900)
         let bands = EdgeBandWrite.bands(
-            of: [laptop, lower],
+            of: [
+                laptop,
+                CGRect(origin: CGPoint(x: 0, y: 1117), size: half),
+                CGRect(origin: CGPoint(x: 800, y: 1117), size: half),
+            ],
+            for: window(x: 500, y: 641),
             separateSpaces: false
         )
-        #expect(
-            bands == [EdgeBand(screen: laptop, bottom: true, right: false)]
-        )
+        #expect(bands.first { $0.screen == laptop }?.bottom == true)
     }
 
     @Test("Separate Spaces removes the bottom band and keeps the right")
     func separateSpacesKeepsTheRight() {
-        let bands = EdgeBandWrite.bands(
-            of: [laptop, lower, beside],
+        let got = edges(
+            window(x: 16, y: 641),
+            beside: other(800, 1117),
             separateSpaces: true
         )
-        #expect(
-            bands.map(\.screen) == [laptop, lower]
-        )
-        #expect(bands.allSatisfy { !$0.bottom && $0.right })
-    }
-
-    /// Where along an edge macOS refuses depends on the neighbours'
-    /// extent, so a screen past the edge counts anywhere along it.
-    @Test("A screen past the edge counts without facing the window")
-    func diagonalNeighbourCounts() {
-        let diagonal = laptop.offsetBy(dx: laptop.width, dy: 500)
-        let bands = EdgeBandWrite.bands(
-            of: [laptop, diagonal],
-            separateSpaces: false
-        )
-        #expect(
-            bands == [EdgeBand(screen: laptop, bottom: true, right: true)]
-        )
+        #expect(got == (false, true))
     }
 
     @Test("A frame near an edge with no band names nothing")
@@ -134,7 +178,7 @@ struct EdgeBandGateTests {
     @Test("The applier lifts with a screen past the edge")
     func applierLiftsWhereTheBandIs() async throws {
         let calls = try await writes(
-            screens: [laptop, lower],
+            screens: [laptop, other(1000, 1117)],
             separateSpaces: false
         )
         #expect(calls == ["read", "position", "frame"])
@@ -149,10 +193,19 @@ struct EdgeBandGateTests {
         #expect(calls == ["frame"])
     }
 
+    @Test("The applier writes plainly where a screen covers the span")
+    func applierSkipsACoveredSpan() async throws {
+        let calls = try await writes(
+            screens: [laptop, other(0, 1117)],
+            separateSpaces: false
+        )
+        #expect(calls == ["frame"])
+    }
+
     @Test("The applier writes plainly under separate Spaces")
     func applierSkipsSeparateSpaces() async throws {
         let calls = try await writes(
-            screens: [laptop, lower],
+            screens: [laptop, other(1000, 1117)],
             separateSpaces: true
         )
         #expect(calls == ["frame"])
