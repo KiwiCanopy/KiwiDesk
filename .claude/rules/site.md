@@ -411,8 +411,8 @@ withdraws.
 
 `site/csp-inline-scripts.mjs` gives every built page a `<meta>`
 `script-src` listing its inline scripts by hash, and
-`check-site-tokens.py` ▸ `check_inline_scripts_hashed` holds the built
-pages to it. `_headers` keeps `'unsafe-inline'` because it is one policy
+`scripts/check-site-tokens.py` ▸ `check_inline_scripts_hashed` holds
+the built pages to it. `_headers` keeps `'unsafe-inline'` because it is one policy
 for every page; browsers enforce both.
 
 - **Never add an `on*` attribute.** A hash cannot allow one, so it dies

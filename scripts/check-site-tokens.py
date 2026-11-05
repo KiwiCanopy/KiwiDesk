@@ -1627,6 +1627,8 @@ def check_inline_scripts_hashed(dist: pathlib.Path) -> None:
             ).decode()
             if f"'sha256-{digest}'" not in policy:
                 problems.append(f"{name}: unhashed {body.strip()[:40]!r}")
+    if not total:
+        fail("script policy: no inline scripts found, so nothing was checked")
     if problems:
         listed = "; ".join(problems[:5])
         fail(
