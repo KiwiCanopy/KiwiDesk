@@ -55,6 +55,7 @@ struct SpaceSlideSeamTests {
             )
             for (name, body) in SourceScan.memberBodies(in: source)
             where body.contains("writer.setFrame(")
+                || body.contains("writer.setSize(")
                 || body.contains("writer.setPosition(")
                 || body.contains("EdgeBandWrite.write(")
                 || body.contains("lead.write(")

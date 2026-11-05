@@ -184,6 +184,30 @@ struct SizeLedResizeWiringTests {
         #expect(app.now == start)
     }
 
+    /// A window at its maximum takes #2973's probe and refuses the
+    /// grow the judge then writes, so that write leads too.
+    @Test("The judge's asked size does not walk a window at its maximum")
+    func judgeWriteLeads() async {
+        let core = floatCore()
+        let app = answering(core, .atMaximum)
+        core.windowServer.readWindowBounds = { [start] _ in
+            CGRect(origin: start.origin, size: CGSize(width: 488, height: 400))
+        }
+        core.judgeFloatAspectProbe(
+            KiwiCore.FloatAspectAsk(
+                window: WindowID(1),
+                axis: "x",
+                delta: 50,
+                base: start,
+                target: CGRect(x: 75, y: 100, width: 550, height: 400)
+            ),
+            live: start
+        )
+        await drain()
+        #expect(!app.writes.withLock { $0.isEmpty })
+        #expect(app.now.origin == start.origin)
+    }
+
     /// The newest write says whether it leads, whatever waited.
     @Test("A led write merged over a staged one keeps its anchor")
     func heldMergeTakesTheNewerLead() async throws {

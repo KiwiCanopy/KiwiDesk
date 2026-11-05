@@ -188,7 +188,7 @@ struct FloatAspectJudgementTests {
     @Test("A press's size lands at the origin the window has now")
     func askLandsWhereItStands() {
         let core = makeCore()
-        // A hold walked it far past the first press's split.
+        // A later press moved it past the first press's frames.
         let walked = CGRect(x: 100, y: 200, width: 788, height: 450)
         core.windowServer.readWindowBounds = { _ in walked }
         core.judgeFloatAspectProbe(

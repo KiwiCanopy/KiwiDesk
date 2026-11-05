@@ -5605,8 +5605,7 @@ axes moving would read as a lock. A window judged free or locked is
 never judged again while it lives, so a window whose lock changes
 waits for a new window. A locked app already at its own minimum refuses
 the probe too and reads as free, accepted. A fixed-size window also reads
-as free and keeps the half-step walk it has always had, which is a defect
-of the split rather than of this judgement. The judgement waits out a
+as free, and stays put ([#2981](https://github.com/KiwiCanopy/KiwiDesk/issues/2981)). The judgement waits out a
 held key or a moving pointer rather than owing through the motion gate,
 since no later pass can re-derive a probe, and a written probe keeps its
 wait until they rest. A window a hand moved in the wait stays unjudged,

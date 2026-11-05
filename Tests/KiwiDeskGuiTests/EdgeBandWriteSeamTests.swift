@@ -29,6 +29,10 @@ struct EdgeBandWriteSeamTests {
                 source.occurrences(of: "writer.setFrame(") == 0,
                 "\(file) writes a frame past EdgeBandWrite.write"
             )
+            #expect(
+                source.occurrences(of: "writer.setSize(") == 0,
+                "\(file) sizes a window past the band"
+            )
             routed += source.occurrences(of: "EdgeBandWrite.write(")
         }
         // apply, applyInstant and the hold's release.

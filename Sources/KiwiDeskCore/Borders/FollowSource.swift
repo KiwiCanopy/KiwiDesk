@@ -22,9 +22,8 @@ public enum FollowSource {
     /// leading truth mid-flight and always renders — but where
     /// a `pin` says the commanded size re-asks a refused ask
     /// (#677), the truthful render is the commanded ORIGIN at
-    /// the pinned size: the app performs our position sets
-    /// (a float's resize holds its origin too, #2981, healed at
-    /// settle) and refuses the pinned axes, so riding the raw tick would
+    /// the pinned size: the app performs our position sets and
+    /// refuses the pinned axes, so riding the raw tick would
     /// sweep the overlay out to a size the window never reaches
     /// and snap it back after settle. An echo stands down while
     /// the WindowServer stream tracks the window (#285 — a
