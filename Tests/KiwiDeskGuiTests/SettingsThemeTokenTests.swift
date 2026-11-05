@@ -53,22 +53,22 @@ struct SettingsThemeTokenTests {
     }
 
     private let pins: [Pin] = [
-        Pin("page", 0xFB_FC_FA, 0x17_1C_19, SettingsTheme.page),
-        Pin("card", 0xFF_FF_FF, 0x1E_25_21, SettingsTheme.card),
-        Pin("panel", 0xF4_F6_F1, 0x1A_20_1C, SettingsTheme.panel),
+        Pin("page", 0xFB_FC_FA, 0x00_00_00, SettingsTheme.page),
+        Pin("card", 0xFF_FF_FF, 0x08_12_0C, SettingsTheme.card),
+        Pin("panel", 0xF4_F6_F1, 0x08_12_0C, SettingsTheme.panel),
         // The pointer's own surface (#1173): `card` stepped one
         // notch toward the ground in each appearance, matched by
         // LIFT rather than by hex.
         Pin(
             "cardHover",
             0xF2_F5_F0,
-            0x28_31_2C,
+            0x13_23_18,
             SettingsTheme.cardHover
         ),
         Pin(
             "sunken",
             0xF4_F7_F1,
-            0x23_2B_26,
+            0x0F_1B_13,
             SettingsTheme.sunken
         ),
         // Identical in both modes on purpose (#786): the token
@@ -140,8 +140,14 @@ struct SettingsThemeTokenTests {
         Pin(
             "hairline",
             0xE4_E9_E1,
-            0x2C_33_2D,
+            0x2B_45_34,
             SettingsTheme.hairline
+        ),
+        Pin(
+            "hairlineSubtle",
+            0xE4_E9_E1,
+            0x1A_2C_20,
+            SettingsTheme.hairlineSubtle
         ),
         // The 16b dark construction: transparent in light (the
         // fills separate the planes there), a faint light line
@@ -167,7 +173,7 @@ struct SettingsThemeTokenTests {
         Pin(
             "accent",
             0x8D_B3_54,
-            0x8D_B3_54,
+            0xAA_CB_5D,
             SettingsTheme.accent
         ),
         Pin(
@@ -185,7 +191,7 @@ struct SettingsThemeTokenTests {
         Pin(
             "accentPressed",
             0x7E_A2_4D,
-            0x7E_A2_4D,
+            0x98_B7_55,
             SettingsTheme.accentPressed
         ),
         Pin(
@@ -203,7 +209,7 @@ struct SettingsThemeTokenTests {
         Pin(
             "warningSurface",
             0xFD_F1_DD,
-            0x3A_2A_18,
+            0x13_23_18,
             SettingsTheme.warningSurface
         ),
         Pin(
@@ -229,7 +235,7 @@ struct SettingsThemeTokenTests {
         Pin(
             "savePill",
             0x12_25_1A,
-            0x0C_14_10,
+            0x08_12_0C,
             SettingsTheme.savePill
         ),
         Pin(

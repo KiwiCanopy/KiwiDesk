@@ -8710,12 +8710,15 @@ banner's amber could not be given one at all while it was
 inside this one window, and that is the price. What it buys is
 that the window looks like KiwiDesk rather than like a generic
 form, which is the same argument as the entry above: the IA and
-the look are ours. The accent is also identical in light and
-dark, because brand recognisability is the thing it carries —
-the same reason the tokens that paint *pictures* (the desktop
-plate, the keyboard board's fills) hold one value in both modes:
-what a picture shows must not change with the window's
-appearance.
+the look are ours. The accent is one kiwi hue in light and dark,
+one step brighter in dark, whose page is pure black (the KiwiCanopy
+palette *Grüne Haarlinie*, owner 2026-11-05). The tokens that paint
+*pictures* (the desktop plate, the keyboard board's free keys) hold
+one value in both modes, since what a picture shows must not change
+with the window's appearance; a mark the accent paints on one
+follows the accent. The site takes the same black, surfaces and
+lines but keeps its hero glow and brown pill, because a marketing
+page flattened to one colour read as stark beside the app.
 
 What breaks if this is ignored: a second hex literal beside a
 view, which is invisible until the day the palette moves and one

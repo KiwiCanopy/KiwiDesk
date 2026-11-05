@@ -10,13 +10,13 @@ enum SettingsTheme {
     // MARK: - Surfaces
 
     /// Window background behind all content.
-    static let page = token(light: 0xFB_FC_FA, dark: 0x17_1C_19)
+    static let page = token(light: 0xFB_FC_FA, dark: 0x00_00_00)
 
     /// Containers and rows: header bar, cards, section containers, footer.
-    static let card = token(light: 0xFF_FF_FF, dark: 0x1E_25_21)
+    static let card = token(light: 0xFF_FF_FF, dark: 0x08_12_0C)
 
     /// Preview column panel background.
-    static let panel = token(light: 0xF4_F6_F1, dark: 0x1A_20_1C)
+    static let panel = token(light: 0xF4_F6_F1, dark: 0x08_12_0C)
 
     /// A Home card under the pointer. Opaque rather than an
     /// alpha over `card` (#1198's rule one layer out), so every
@@ -25,11 +25,11 @@ enum SettingsTheme {
     /// `cardHover` pairings, `ink3` the tightest (#1173).
     static let cardHover = token(
         light: 0xF2_F5_F0,
-        dark: 0x28_31_2C
+        dark: 0x13_23_18
     )
 
     /// Disclosure interiors and filled chips.
-    static let sunken = token(light: 0xF4_F7_F1, dark: 0x23_2B_26)
+    static let sunken = token(light: 0xF4_F7_F1, dark: 0x0F_1B_13)
 
     /// Desktop-dark plate behind Home card picture (#786).
     static let previewPlate = token(
@@ -108,7 +108,14 @@ enum SettingsTheme {
     /// Container border hairline: card, section, header, footer.
     static let hairline = token(
         light: 0xE4_E9_E1,
-        dark: 0x2C_33_2D
+        dark: 0x2B_45_34
+    )
+
+    /// A rule inside a container: between a card's groups or
+    /// entries, under its own edge in dark.
+    static let hairlineSubtle = token(
+        light: 0xE4_E9_E1,
+        dark: 0x1A_2C_20
     )
 
     /// Inset light line separating dark planes in dark mode only.
@@ -150,9 +157,8 @@ enum SettingsTheme {
     /// 5, 6).
     static let chipEdge = token(
         light: 0x12_25_1A,
-        dark: 0xE6_EC_E6,
-        lightAlpha: 0.18,
-        darkAlpha: 0.20
+        dark: 0x7A_95_83,
+        lightAlpha: 0.18
     )
 
     /// A segmented control's track — fill and rim — the well its
@@ -185,8 +191,8 @@ enum SettingsTheme {
 
     // MARK: - Accent
 
-    /// KiwiDesk green accent, identical in both modes.
-    static let accent = token(light: 0x8D_B3_54, dark: 0x8D_B3_54)
+    /// KiwiDesk green accent, brighter on dark's black page.
+    static let accent = token(light: 0x8D_B3_54, dark: 0xAA_CB_5D)
 
     /// Text and glyphs drawn on `accent` (dark in both modes for contrast).
     static let accentInk = token(
@@ -203,13 +209,11 @@ enum SettingsTheme {
     )
 
     /// The accent seal's PRESSED fill — the accent darkened
-    /// toward `accentInk`. Fixed in both modes for the same
-    /// reason `accent` is: the seal's promise is a pair that
-    /// does not move with the appearance, and a state fill that
-    /// moved would keep that promise in one state only (#1198).
+    /// toward `accentInk`, the same 12% step in each mode, so
+    /// a press reads alike under either accent (#1198).
     static let accentPressed = token(
         light: 0x7E_A2_4D,
-        dark: 0x7E_A2_4D
+        dark: 0x98_B7_55
     )
 
     /// The accent seal's DISABLED fill: `ink2`'s own hue and
@@ -235,7 +239,7 @@ enum SettingsTheme {
     /// Floating save pill plate (#678).
     static let savePill = token(
         light: 0x12_25_1A,
-        dark: 0x0C_14_10
+        dark: 0x08_12_0C
     )
 
     /// Text on save pill (light in both modes).
@@ -256,7 +260,7 @@ enum SettingsTheme {
     /// Paused bar and first-run banner fill.
     static let warningSurface = token(
         light: 0xFD_F1_DD,
-        dark: 0x3A_2A_18
+        dark: 0x13_23_18
     )
 
     /// Warning text and glyphs (4.5:1 contrast on `warningSurface`).

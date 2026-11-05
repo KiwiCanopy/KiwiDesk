@@ -60,6 +60,7 @@ struct SettingsThemeWiringTests {
         "keyReserved": "KeyboardBoard.swift",
         "keyConflict": "KeyboardBoard.swift",
         "hairline": "SettingsDetailPanel.swift",
+        "hairlineSubtle": "GestureEntry.swift",
         "planeRing": "SettingsFooter.swift",
         "chipRest": "ButtonChipStyle.swift",
         "chipHover": "ButtonChipStyle.swift",
