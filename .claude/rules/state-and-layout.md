@@ -220,7 +220,12 @@ editing here:
   a rearranging write ends returns inside that write's pass. The
   float verb's own placement, outside a pass, takes
   `placeFloating(_:asStateChange: true)` while a detected float
-  keeps `on_relayout` (`StateChangeAnimationTests`).
+  keeps `on_relayout` (`StateChangeAnimationTests`); `center_floating`
+  writes the same way (#3007, `FloatCentreCommandTests`). A verb moving
+  a float at its own size resolves it through `floatMoveFocus` and
+  clamps through `floatMoveFrame`, never the raw clamp, which reads a
+  traveler's home and can carry a top edge out of reach
+  (`FloatCentreRenderSpaceTests`).
 - The **create fold's spawn grant** — the focus a fresh window
   gets for existing, not one macOS reported — consults
   `ManagedWindow.isTransientOverlay`

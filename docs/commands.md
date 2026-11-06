@@ -46,6 +46,7 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`pocket_app`](lua-reference.md#pocket_app) | Takes an app's own pocket window out or puts it away, or opens a new window of the app there. |
 | [`override_sticky_reach`](lua-reference.md#override_sticky_reach) | Overrides Desktop reach for the focused sticky window; auto follows sticky.set_desktop_reach. |
 | [`resize`](lua-reference.md#resize) | Resizes the focused window along the x or y axis. |
+| [`center_floating`](lua-reference.md#center_floating) | Moves the focused floating window to the middle of its screen, clear of the bars, at its size. |
 | [`move_to_track`](lua-reference.md#move_to_track) | Moves the focused window one track along; takes prev or next. |
 | [`focus_or_spawn`](lua-reference.md#focus_or_spawn) | Focuses an app's window, or launches a new instance. |
 | [`spawn_new`](lua-reference.md#spawn_new) | Launches a new instance of an app by bundle identifier. |

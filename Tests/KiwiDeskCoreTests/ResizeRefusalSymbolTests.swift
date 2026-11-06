@@ -39,6 +39,9 @@ struct ResizeRefusalSymbolTests {
             // #1298: full screen is a fact about the window, and
             // there is no resize here either — the non-arrow arm.
             .windowIsFullscreen(window),
+            // #3007: no move here either.
+            .fullscreenCannotMove(window),
+            .moveNeedsFloat(window),
         ] {
             #expect(!refusal.pillSymbol.contains("arrow"))
         }
@@ -143,6 +146,8 @@ struct ResizeRefusalSymbolTests {
             ),
             .noAxisHere(window, axis: "y"), .layoutHasNoResize(window),
             .windowIsFullscreen(window),
+            .fullscreenCannotMove(window),
+            .moveNeedsFloat(window),
         ] {
             #expect(
                 NSImage(

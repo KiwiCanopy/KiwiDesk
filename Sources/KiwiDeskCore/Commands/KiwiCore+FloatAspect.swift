@@ -6,6 +6,12 @@ import Foundation
 /// inside the asked box: a one-axis grow lands nowhere and a one-axis
 /// shrink moves both axes. `docs/design-decisions.md` has the argument.
 extension KiwiCore {
+    /// Whether an aspect probe's answer is still owed on `id`.
+    func floatAspectProbeOwed(_ id: WindowID) -> Bool {
+        state.floatAspectFlight == .probing(id)
+            && deferred.isScheduled(.floatAspect)
+    }
+
     /// One press being judged. `base` is where the window stood when
     /// it was pressed, read from WindowServer: a spring's target is
     /// what was asked, never what the app showed. `target` is the frame

@@ -111,6 +111,25 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+A Space switch while `center_floating` is still moving a window can
+lose the centring: the switch files the frame the window has reached,
+as it does for a window `make_floating` is placing
+([#3007](https://github.com/KiwiCanopy/KiwiDesk/issues/3007)). Press
+it again on the way back. No fix is planned.
+:::
+
+:::unreleased
+A floating window whose app holds it taller or wider than the area
+between the bars can lose its top or left edge under a bottom or right
+bar at the next layout pass, though `center_floating` left it in reach:
+that pass pushes every float clear of a bar, and position is all it can
+change on such a window
+([#3007](https://github.com/KiwiCanopy/KiwiDesk/issues/3007)). Move the
+bar, or size the window down. Whether the pass should keep that edge
+too is open.
+:::
+
+:::unreleased
 An app that keeps one axis or its ratio can show half a resize step
 for a moment when a floating window's keyboard resize grows it at a
 screen's right or bottom edge, or off every screen. macOS clamps a size write there until

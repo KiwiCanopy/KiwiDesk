@@ -52,6 +52,9 @@
 /// either side, judged where it plays out
 /// (`isEffectiveFloatForPlacement`): a float has no slot to
 /// trade (`SwapWindowIDTests`).
+/// `center_floating` (#3007) acts on the focus anchor, judged there
+/// too: it refuses an anchor that is no effective float and re-files
+/// none (`FloatCentreCommandTests`).
 /// Ruled to STAY on the flag: the Space Bar float badge and
 /// the group-breaking beside it (`KiwiCore+SpaceBarItems`), which
 /// mark the exception to a space's layout and in a floating-mode

@@ -5439,6 +5439,40 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
+:::unreleased
+### center_floating
+
+**Expects:** nothing.
+
+**Does:** moves the focused floating window to the middle of its
+screen, clear of the bars, at the size it has. Its screen is the one
+showing the Space the window is drawn on, so a sticky window and a
+pocket window that is out stay where you are looking. A window larger
+than that area keeps its size and sits against the area's top or left
+edge, so its title bar is in reach
+([accepted limitations](accepted-limitations.md)).
+
+It works under either [`set_float_placement`](#set_float_placement)
+and follows
+[`animations.set_on_state_change`](#animationsset_on_state_change). A
+window already centred stays put and the call succeeds.
+
+A full-screen window is refused with `the focused window is
+fullscreen`, and a tiled one with `the focused window is not
+floating`, which never floats it. Each shows a pill on the window.
+
+No shortcut comes with it. Bind it in init.lua or in Settings' Lua
+bindings drawer.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+c", function()
+    KiwiDesk.center_floating()
+end)
+```
+:::
+
 ## Opening and Closing Windows
 
 Both verbs take an optional window id from
@@ -7904,6 +7938,10 @@ back in one move. Under
 Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
+
+:::unreleased
+[`center_floating`](#center_floating) follows it too.
+:::
 
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)

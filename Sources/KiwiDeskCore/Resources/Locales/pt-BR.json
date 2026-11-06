@@ -1853,6 +1853,8 @@
   "resize.grid_no_other_row": "Não há outra linha para ficar com a altura",
   "resize.layout_has_none": "Este layout não tem redimensionamento",
   "resize.min_size_reached": "Tamanho mínimo da janela atingido",
+  "resize.move_fullscreen": "Janelas em tela cheia não podem ser movidas",
+  "resize.move_needs_float": "Só é possível mover uma janela flutuante",
   "resize.neighbor_app_min": "O app vizinho não fica menor",
   "resize.neighbor_min_size": "A janela vizinha está no tamanho mínimo",
   "resize.no_height_here": "Esta zona divide a largura, não a altura",

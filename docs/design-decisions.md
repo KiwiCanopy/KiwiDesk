@@ -6674,6 +6674,12 @@ leaving only the corner to travel. A slow app's window trails our
 spring, so its ring is held dormant until the window has landed
 rather than running ahead of it.
 
+:::unreleased
+`center_floating` follows the same switch (#3007). It changes where a
+window is, not what it is, but it is one deliberate placement of one
+window, as a float's own placement is, and no reflow.
+:::
+
 **One toggle, not a choice of styles.** No style can capture
 another app's window, and none can set its transparency
 ([Blocked by macOS (SIP)](#blocked-by-macos-sip)), so a "fade" is

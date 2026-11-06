@@ -162,6 +162,8 @@ struct ResizeRefusalRenderingTests {
             .gridNoOtherTrack(window, axis: "x"),
             .layoutHasNoResize(window),
             .windowIsFullscreen(window),
+            .fullscreenCannotMove(window),
+            .moveNeedsFloat(window),
         ].map(\.pillText)
         #expect(Set(texts).count == texts.count)
         #expect(texts.allSatisfy { !$0.isEmpty })
@@ -262,6 +264,14 @@ struct ResizeRefusalRenderingTests {
         #expect(
             ResizeRefusal.windowIsFullscreen(window).pillText
                 == "Full-screen windows can't be resized"
+        )
+        #expect(
+            ResizeRefusal.fullscreenCannotMove(window).pillText
+                == "Full-screen windows can't be moved"
+        )
+        #expect(
+            ResizeRefusal.moveNeedsFloat(window).pillText
+                == "Only a floating window can be moved"
         )
     }
 

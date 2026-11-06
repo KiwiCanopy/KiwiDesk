@@ -71,6 +71,7 @@ struct StateChangeSeamTests {
                     "KiwiCore+StateChange.swift": 1,
                     "KiwiCore+Retile.swift": 1,
                     "KiwiCore+FloatPlacement.swift": 1,
+                    "KiwiCore+FloatMove.swift": 1,
                 ]
         )
     }

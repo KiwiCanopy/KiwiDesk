@@ -9,6 +9,7 @@ public enum FocusedCommandPolicy {
         "swap",
         "swap_here",
         "resize",
+        "center_floating",
         "move_to_space",
         "move_to_space_and_follow",
         "move_to_desktop",

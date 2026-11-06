@@ -183,6 +183,10 @@ extension APIReference {
             .text("axis"),
             .number("delta")
         ),
+        "center_floating": APIRecord(
+            "Moves the focused floating window to the middle of "
+                + "its screen, clear of the bars, at its size."
+        ),
         "move_to_track": APIRecord(
             "Moves the focused window one track along; takes "
                 + "prev or next.",
