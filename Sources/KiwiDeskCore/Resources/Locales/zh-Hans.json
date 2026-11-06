@@ -42,6 +42,7 @@
   "ai.setup.intro": "KiwiDesk 本身没有 AI。连接你已在使用的 AI App，只需提出请求，即可设置和控制 KiwiDesk。",
   "ai.setup.title": "连接设置",
   "ai.setup.translocated": "请先将 KiwiDesk 移到“应用程序”文件夹。从“下载”中打开时，它会从一个每次启动都会变化的临时位置运行。",
+  "animations.space_scroll_transition": "在空间之间切换（鼠标或触控板）",
   "animations.space_slide_duration": "滑动时长",
   "animations.space_slide_duration.help": "薄板滑向你要切换到的空间所需的时间。时长越长，速度越慢。",
   "animations.space_transition": "空间切换",

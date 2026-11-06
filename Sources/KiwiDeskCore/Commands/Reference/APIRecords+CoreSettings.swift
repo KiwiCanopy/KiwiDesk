@@ -97,6 +97,12 @@ extension APIReference {
                 + "slide, the Space and its layout, or nothing.",
             .choice("transition", SpaceTransition.self)
         ),
+        "set_space_scroll_transition": APIRecord(
+            "Sets how the scroll Space step shows itself, apart from "
+                + "every other Space switch: the plate slide, the "
+                + "Space and its layout, or nothing.",
+            .choice("transition", SpaceTransition.self)
+        ),
         "set_space_slide_duration": APIRecord(
             "Sets the Space slide's pace in milliseconds, clamped "
                 + "to its band.",

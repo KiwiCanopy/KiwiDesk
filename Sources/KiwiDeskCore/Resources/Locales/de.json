@@ -42,6 +42,7 @@
   "ai.setup.intro": "KiwiDesk hat keine eigene KI. Verbinde die KI-App, die du schon nutzt, und richte KiwiDesk ein und steuere es, indem du sie einfach fragst.",
   "ai.setup.title": "Einrichtung",
   "ai.setup.translocated": "Bewege KiwiDesk zuerst in deinen Programme-Ordner. Aus „Downloads“ geöffnet, läuft es an einem temporären Ort, der sich bei jedem Start ändert.",
+  "animations.space_scroll_transition": "Zwischen Spaces wechseln (Maus oder Trackpad)",
   "animations.space_slide_duration": "Gleitdauer",
   "animations.space_slide_duration.help": "Wie lange die Flächen brauchen, um in den Space zu gleiten, zu dem du wechselst. Eine längere Dauer ist langsamer.",
   "animations.space_transition": "Space-Wechsel",

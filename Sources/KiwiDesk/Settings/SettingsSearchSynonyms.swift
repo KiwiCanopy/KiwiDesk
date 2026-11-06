@@ -122,6 +122,8 @@ enum SettingsSearchSynonyms {
             return ["gloss", "shine", "gradient", "highlight", "shade"]
         case .colours(.spaceTransition):
             return ["slide", "transition", "space change", "cue"]
+        case .colours(.spaceScrollTransition):
+            return ["scroll", "gesture", "swipe", "slide", "transition"]
         case .colours(.spaceSlideDuration):
             return ["speed", "space speed", "slide speed", "transition"]
         case .colours(.liquidGlassMaster):

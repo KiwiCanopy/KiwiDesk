@@ -71,6 +71,7 @@ appWide.modifierSides
 appWide.pocketCapacity
 appWide.quitGridTargetDepth
 appWide.refusalSound
+appWide.spaceScrollTransition
 appWide.spaceSlideDuration
 appWide.spaceTransition
 appWide.visionAppearance

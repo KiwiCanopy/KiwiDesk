@@ -42,6 +42,7 @@
   "ai.setup.intro": "KiwiDesk non ha un'IA propria. Collega l'app di IA che usi già, poi configura e controlla KiwiDesk semplicemente chiedendoglielo.",
   "ai.setup.title": "Configurazione",
   "ai.setup.translocated": "Prima sposta KiwiDesk nella cartella Applicazioni. Se aperto da Download, viene eseguito da una posizione temporanea che cambia a ogni avvio.",
+  "animations.space_scroll_transition": "Passa da uno spazio all'altro (mouse o trackpad)",
   "animations.space_slide_duration": "Durata dello scorrimento",
   "animations.space_slide_duration.help": "Quanto impiegano le piastre a scorrere verso lo spazio a cui passi. Una durata maggiore è più lenta.",
   "animations.space_transition": "Cambi di spazio",

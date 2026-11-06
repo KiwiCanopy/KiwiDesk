@@ -82,6 +82,7 @@ struct GateReasonPlacementTests {
                 // #2524: the Space switch picker and the slide's
                 // pace, the same shape on Colors ▸ Animations.
                 .colours(.spaceTransition),
+                .colours(.spaceScrollTransition),
                 .colours(.spaceSlideDuration),
                 // The Reveal row beside it greys while no bar hides:
                 // the bars' values sit above it, not that a reveal

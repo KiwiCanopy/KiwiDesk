@@ -1,8 +1,9 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The Space switch rows (#2524): Slide, Show the Space or None,
-/// and the slide's pace beneath. App-wide (#1741), written at once
+/// The Space switch rows (#2524): Slide, Show the Space or None for
+/// every switch, the same for the scroll step (#2971), and the
+/// slide's pace beneath. App-wide (#1741), written at once
 /// like the Desktop cue's row, above the window master and outside
 /// Reduce Motion's grey. The caption follows the selection.
 extension MotionCard {
@@ -48,6 +49,44 @@ extension MotionCard {
         }
     }
 
+    /// The scroll step's pick (#2971). Its caption speaks only where
+    /// the pick differs from the row above, which says the same
+    /// sentence otherwise.
+    @ViewBuilder var spaceScrollTransitionRow: some View {
+        let style = model.appWide.spaceScrollTransition
+        VStack(alignment: .leading, spacing: 4) {
+            DropdownRow(
+                label: Self.spaceScrollTransitionLabel,
+                spokenValue: Self.spaceTransitionTitle(style)
+            ) {
+                Picker(
+                    Self.spaceScrollTransitionLabel,
+                    selection: Binding(
+                        get: { model.appWide.spaceScrollTransition },
+                        set: { pick in
+                            model.setAppWide {
+                                $0.spaceScrollTransition = pick
+                            }
+                        }
+                    )
+                ) {
+                    ForEach(SpaceTransition.allCases, id: \.self) {
+                        Text(Self.spaceTransitionTitle($0)).tag($0)
+                    }
+                }
+                .neutralMenuLabel()
+            }
+            .disabled(spaceTransitionLuaOwned)
+            .searchAnchored(SettingsCatalog.colors.spaceScrollTransition)
+            if style != model.appWide.spaceTransition {
+                Text(spaceTransitionCaption(style))
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                    .fixedSize(horizontal: false, vertical: true)
+            }
+        }
+    }
+
     var spaceSlideDurationRow: some View {
         StepperRow(
             label: L(
@@ -85,17 +124,26 @@ extension MotionCard {
         Divider()
     }
 
-    /// Greys the duration while no slide plays — off Slide, or
-    /// under Reduce Motion — a wiring predicate on Core's one
-    /// fallback, beside the census's Lua gate.
+    /// Greys the duration while no slide plays — neither pick on
+    /// Slide (#2971), or under Reduce Motion — a wiring predicate on
+    /// Core's one fallback, beside the census's Lua gate.
     var spaceSlideDurationInert: Bool {
         spaceTransitionLuaOwned
-            || model.appWide.spaceTransition
-                .drawn(reduceMotion: reduceMotion) != .slide
+            || ![
+                model.appWide.spaceTransition,
+                model.appWide.spaceScrollTransition,
+            ].contains { $0.drawn(reduceMotion: reduceMotion) == .slide }
     }
 
     static var spaceTransitionLabel: String {
         L("animations.space_transition", "Space switches")
+    }
+
+    static var spaceScrollTransitionLabel: String {
+        L(
+            "animations.space_scroll_transition",
+            "Step between Spaces (mouse or trackpad)"
+        )
     }
 
     /// The option's title, drawn and spoken alike.

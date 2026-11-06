@@ -42,6 +42,7 @@
   "ai.setup.intro": "KiwiDesk has no AI of its own. Connect the AI app you already use, and set up and control KiwiDesk by asking it.",
   "ai.setup.title": "Set up",
   "ai.setup.translocated": "Move KiwiDesk to your Applications folder first. Opened from Downloads, it runs from a temporary location that changes each time it starts.",
+  "animations.space_scroll_transition": "Step between Spaces (mouse or trackpad)",
   "animations.space_slide_duration": "Slide duration",
   "animations.space_slide_duration.help": "How long the plates take to slide to the Space you're switching to. A longer duration is slower.",
   "animations.space_transition": "Space switches",

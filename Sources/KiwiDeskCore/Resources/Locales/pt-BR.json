@@ -42,6 +42,7 @@
   "ai.setup.intro": "O KiwiDesk não tem IA própria. Conecte o app de IA que você já usa e configure e controle o KiwiDesk só pedindo a ele.",
   "ai.setup.title": "Configuração",
   "ai.setup.translocated": "Primeiro, mova o KiwiDesk para a pasta Aplicativos. Aberto a partir de Downloads, ele é executado de um local temporário que muda a cada vez que é iniciado.",
+  "animations.space_scroll_transition": "Passar de um espaço a outro (mouse ou trackpad)",
   "animations.space_slide_duration": "Duração do deslizamento",
   "animations.space_slide_duration.help": "Quanto tempo as placas levam para deslizar até o espaço para o qual você vai. Uma duração maior é mais lenta.",
   "animations.space_transition": "Trocas de espaço",

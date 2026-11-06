@@ -56,7 +56,7 @@ extension SettingsValueReadout {
                 LiquidGlassAgreement(settings: old.settings).allOn,
                 LiquidGlassAgreement(settings: new.settings).allOn
             )
-        case .spaceTransition, .spaceSlideDuration:
+        case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
             // No model path: the rows write at once (#1741).
             return []
         case .animationsMaster:

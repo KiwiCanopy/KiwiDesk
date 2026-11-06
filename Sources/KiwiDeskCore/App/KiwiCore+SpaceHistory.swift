@@ -102,7 +102,8 @@ extension KiwiCore {
         guard let screen = focusedScreen else {
             return .fail("no focused screen")
         }
-        guard stepSpace(on: screen, by: step, warp: true) else {
+        guard stepSpace(on: screen, by: step, warp: true, scrolled: false)
+        else {
             return .fail(
                 "no \(step < 0 ? "previous" : "next") Space on "
                     + "this screen"

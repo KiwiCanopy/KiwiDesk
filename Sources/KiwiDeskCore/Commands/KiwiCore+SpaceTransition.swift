@@ -67,7 +67,7 @@ extension KiwiCore {
         if let run {
             runSpaceSlide(run)
         } else if let slide {
-            paySpaceCue(on: slide.display)
+            paySpaceCue(for: slide)
         }
     }
 }

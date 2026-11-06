@@ -482,6 +482,12 @@ that way, stopping at the edge; neither takes other arguments
 `set_space_slide_duration` paces the slide
 ([`set_space_transition`](lua-reference.md#set_space_transition)).
 
+:::unreleased
+`set_space_scroll_transition` picks the same for the scroll Space
+step alone, which `set_space_transition` no longer covers
+([`set_space_scroll_transition`](lua-reference.md#set_space_scroll_transition)).
+:::
+
 `animations.set_on_state_change` animates a window floating,
 maximizing or going into the Pocket and out, the last as a brief
 pocket
@@ -640,6 +646,7 @@ every lens with why it cannot turn on.
 | | `set_refusal_sound` | true\|false (default `false`) — add the system alert sound to a blocked action's pill |
 | | `set_desktop_cue` | true\|false (default `true`) — the plate naming the Desktop a `focus_desktop` lands on |
 | | `set_space_transition` | `slide` (default) \| `show` \| `none` — how an explicit Space switch shows itself: the plate slide, a plate naming the Space, or nothing |
+| | `set_space_scroll_transition` | `slide` (default) \| `show` \| `none` — how the scroll Space step shows itself |
 | | `set_space_slide_duration` | ms (150–1000, default 300) — the plate slide's pace |
 | | `set_mode_cue` | true\|false (default `true`) — the plate showing the layout a `cycle_mode` lands on |
 | | `set_space_history` | `per_screen` (default) \| `all_screens` — whose visits Space back and forward walk |
