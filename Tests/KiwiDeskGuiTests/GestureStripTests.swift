@@ -53,6 +53,7 @@ struct GestureStripTests {
                 $0 + GestureStrip.leading(of: $1)
             } + CGFloat(GestureItem.allCases.count) * Self.plate.width
             + 2 * GestureStrip.endRoom
+        #expect(GestureStrip.run.total == total)
         let viewport: CGFloat = 664
         let rest = Self.fades(offset: 0, viewport: viewport)
         #expect(rest.leading == 0)

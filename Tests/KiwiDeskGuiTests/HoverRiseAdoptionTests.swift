@@ -170,6 +170,7 @@ struct HoverRiseAdoptionTests {
             )
         )
         #expect(strip.contains("lineWidth:risen?SettingsTheme."))
+        #expect(strip.contains("risen?SettingsTheme.hoverEdge:"))
         #expect(
             strip.contains(
                 "lineWidth:SettingsTheme.paletteCardStrokeApplied"
