@@ -189,7 +189,7 @@ struct HomeCardChromeTests {
                     + ":SettingsTheme.hairline"
             )
         )
-        #expect(card.contains("hoverStroke:CGFloat=2"))
+        #expect(card.contains("hoverStroke:CGFloat=1.5"))
     }
 
     @Test("Simple's picture drops the outer frame, the board its edge")

@@ -11181,7 +11181,7 @@ is, the fill says where the pointer is.
 :::unreleased
 With the marking gone (#2654), no durable statement on a Home card
 uses its border, so the pointer takes it: the fill lift was too
-faint to find, a 2 pt `cardHoverEdge` is not, and the fill no longer
+faint to find, a 1.5 pt `cardHoverEdge` is not, and the fill no longer
 changes (#3040, owner 2026-11-06). A marking returning to that edge
 takes its own channel. Surfaces carrying a durable marking keep the
 neutral lift. The site's glow and lift stay out for now, as shadow

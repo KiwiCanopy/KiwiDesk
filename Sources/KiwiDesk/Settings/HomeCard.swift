@@ -8,7 +8,7 @@ struct HomeCard: View {
     let spotlighted: Bool
     let open: () -> Void
     @State private var hovering = false
-    private static let hoverStroke: CGFloat = 2
+    private static let hoverStroke: CGFloat = 1.5
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 

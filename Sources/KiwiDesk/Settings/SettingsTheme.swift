@@ -22,10 +22,10 @@ enum SettingsTheme {
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x08_12_0C)
 
-    /// A Home card's edge under the pointer (#3040): the darker
-    /// brand green in light, the brighter one in dark.
+    /// A Home card's edge under the pointer (#3040): 3:1 or more
+    /// on both the card and the plate it crosses.
     static let cardHoverEdge = token(
-        light: 0x4F_7A_2B,
+        light: 0x5F_8F_35,
         dark: 0xAA_CB_5D
     )
 

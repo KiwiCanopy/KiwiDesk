@@ -64,7 +64,7 @@ struct SettingsThemeTokenTests {
         Pin("panel", 0xF4_F6_F1, 0x08_12_0C, SettingsTheme.panel),
         Pin(
             "cardHoverEdge",
-            0x4F_7A_2B,
+            0x5F_8F_35,
             0xAA_CB_5D,
             SettingsTheme.cardHoverEdge
         ),
