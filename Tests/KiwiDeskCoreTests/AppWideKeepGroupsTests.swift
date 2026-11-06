@@ -39,5 +39,12 @@ struct AppWideKeepGroupsTests {
             KeepPointer.diff(before, settings.groupsJSON)
                 == [["refusal", "sound"]]
         )
+        // The scroll step's pick is its own leaf (#2971).
+        var scroll = AppWideSettings()
+        scroll.spaceScrollTransition = .none
+        #expect(
+            KeepPointer.diff(before, scroll.groupsJSON)
+                == [["space", "scroll_transition"]]
+        )
     }
 }

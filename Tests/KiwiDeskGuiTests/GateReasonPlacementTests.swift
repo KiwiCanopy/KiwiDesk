@@ -79,9 +79,11 @@ struct GateReasonPlacementTests {
                 .shortcuts(.shortcutBase),
                 // #2601: the sides switch, on the same card.
                 .shortcuts(.modifierSides),
-                // #2524: the Space switch picker and the slide's
-                // pace, the same shape on Colors ▸ Animations.
+                // #2524, #2971: the Space switch pickers and the
+                // slide's pace, the same shape on Colors ▸ Animations,
+                // one sentence for the group under its first row.
                 .colours(.spaceTransition),
+                .colours(.spaceScrollTransition),
                 .colours(.spaceSlideDuration),
                 // The Reveal row beside it greys while no bar hides:
                 // the bars' values sit above it, not that a reveal

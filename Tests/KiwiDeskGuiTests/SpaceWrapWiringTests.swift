@@ -23,13 +23,48 @@ struct SpaceWrapWiringTests {
         // Blind to a shadowed `step`, as any needle is; the
         // behaviour is `SpaceWrapTests`'.
         #expect(
-            step.contains("switchSpace(to:order[next],warp:warp,step:step)")
+            step.contains(
+                "switchSpace(to:order[next],warp:warp,step:step,"
+                    + "scrolled:scrolled)"
+            )
         )
         let switchBody = try Self.squashed(
             "Commands/KiwiCore+SpaceSwitch.swift"
         )
-        #expect(switchBody.contains("spaceSlideIntent(to:space,step:step)"))
+        #expect(
+            switchBody.contains(
+                "spaceSlideIntent(to:space,step:step,scrolled:scrolled)"
+            )
+        )
         let slide = try Self.squashed("Commands/KiwiCore+SpaceSlide.swift")
         #expect(slide.contains("direction:intent.direction("))
+    }
+
+    /// Only the gesture says it scrolled, and the argument is
+    /// required so a door through `stepSpace` cannot leave it out
+    /// (#2971). The scan sees the spelling `scrolled: true` alone; a
+    /// value computed elsewhere is review's.
+    /// `SpaceSlideSwitchTests+Scroll` holds the behaviour.
+    @Test("the gesture alone reaches the intent as scrolled")
+    func scrolledReachesTheIntent() throws {
+        let step = try Self.squashed("App/KiwiCore+ScrollSpaceStep.swift")
+        #expect(step.contains("warp:false,scrolled:true)"))
+        #expect(step.contains("warp:Bool,scrolled:Bool)->Bool"))
+        let keys = try Self.squashed("App/KiwiCore+SpaceHistory.swift")
+        #expect(keys.contains("warp:true,scrolled:false)"))
+        var saying: [String] = []
+        let walker = FileManager.default.enumerator(
+            at: Self.core,
+            includingPropertiesForKeys: nil
+        )
+        while let url = walker?.nextObject() as? URL {
+            guard url.pathExtension == "swift" else { continue }
+            let text = try SourceScan.strippedSource(at: url)
+                .filter { !$0.isWhitespace }
+            if text.contains("scrolled:true") {
+                saying.append(url.lastPathComponent)
+            }
+        }
+        #expect(saying == ["KiwiCore+ScrollSpaceStep.swift"])
     }
 }

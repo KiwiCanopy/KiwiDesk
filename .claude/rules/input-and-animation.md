@@ -825,11 +825,17 @@ editing here:
   The Space cue (#2143) rides the same
   intent: `spaceSwitchRetile` is its one payer, where no slide
   ran, and the slide and the cue ask the one
-  `drawnSpaceTransition` — the one Core reader of the stored
-  `space.transition` — so a stand-down or a second reader added
-  beside it leaves a switch with neither, or with both
-  (`SpaceCueSeamTests`). Slide under Reduce Motion reading as Show
-  the Space is stated once, in `SpaceTransition.drawn(reduceMotion:)`,
+  `drawnSpaceTransition(for:)` — the one Core reader of the stored
+  `space.transition` and `space.scroll_transition`, picked by the
+  intent's `scrolled` (#2971) — so a stand-down or a second reader
+  added beside it leaves a switch with neither, or with both
+  (`SpaceCueSeamTests`). `stepSpace` takes `scrolled` as a required
+  argument and only the gesture may pass `true`, never a scope bit
+  like `fromSpaceBar`, which catches inline Lua; below `stepSpace` it
+  defaults `false`, so a new gesture door calling `switchSpace` itself
+  owes it or reads the keys' pick
+  (`SpaceWrapWiringTests` ▸ `scrolledReachesTheIntent`). Slide under
+  Reduce Motion reading as Show the Space is stated once, in `SpaceTransition.drawn(reduceMotion:)`,
   which that reader and the Settings rows ask, never a copy of
   its branch beside either. The one ruled stand-down inside the
   payer is a switch the Space Bar picked (#2591): every bar door

@@ -1269,10 +1269,9 @@ end)
 
 **Does:** sets how an explicit Space switch —
 [`focus_space`](#focus_space) and the Space history and order
-steps, the [scroll Space step](#scroll_gestureset_space_step), a
-[move-and-follow](#move_to_space_and_follow), Open or Focus onto
-another Space or a launch follow — shows itself on the screen that
-switched:
+steps, a [move-and-follow](#move_to_space_and_follow), Open or
+Focus onto another Space or a launch follow — shows itself on the
+screen that switched:
 
 - `"slide"`: the plate slide. A plate with its app's icon fades in
   over each window on that screen, the plates slide as one strip
@@ -1298,6 +1297,11 @@ switched:
   and leaves without the fade.
 - `"none"`: the screen changes at once.
 
+:::unreleased
+The [scroll Space step](#scroll_gestureset_space_step) has its own
+choice, [`set_space_scroll_transition`](#set_space_scroll_transition).
+:::
+
 The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Space
 switches**, which neither Reduce Motion nor the **Animate
 windows** switch greys. Like [`set_desktop_cue`](#set_desktop_cue),
@@ -1317,6 +1321,33 @@ macOS Desktop switches are never animated in either direction (see
 KiwiDesk.set_space_transition("show")
 ```
 
+### set_space_scroll_transition
+
+:::unreleased
+**Expects:** `"slide"`, `"show"` or `"none"` (default `"slide"`).
+
+**Does:** sets how the
+[scroll Space step](#scroll_gestureset_space_step) shows itself,
+apart from every other Space switch. The three values mean what
+they mean for [`set_space_transition`](#set_space_transition), and
+with Reduce Motion on `"slide"` shows the Space there too. So a
+press can switch at once while a swipe still slides:
+`set_space_transition("none")` beside the default here.
+
+The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Step between
+Spaces (mouse or trackpad)**. The setting is app-wide, stored in
+`gui.json` as `space.scroll_transition`; the verb changes the
+running value only. Neither `set_space_transition` nor a stored
+`space.transition` sets it.
+
+**Example:**
+
+```lua
+KiwiDesk.set_space_transition("none")
+KiwiDesk.set_space_scroll_transition("slide")
+```
+:::
+
 ### set_space_slide_duration
 
 **Expects:** a number (milliseconds, clamped 150–1000; default
@@ -1326,18 +1357,23 @@ KiwiDesk.set_space_transition("show")
 ([`set_space_transition`](#set_space_transition)): how long the
 plates take to slide to the new Space. Their fades keep fixed
 lengths whatever the pace: 80 ms in, 300 ms out. It has
-no effect unless the transition is `"slide"`, nor while Reduce
-Motion is on. Window motion keeps its own pace
+no effect where no slide plays, as while Reduce Motion is on. Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at the
 next switch.
 
 The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Slide
-duration**, grey while **Space switches** is not on Slide or
-Reduce Motion is on. The
+duration**, grey while no slide would play. The
 setting is app-wide, stored in `gui.json` as
 `space.slide_duration`; the verb changes the running value only.
 It replaces `animations.set_space_change_duration`, which is
 refused, naming it.
+
+:::unreleased
+A slide plays where [`set_space_transition`](#set_space_transition),
+or for the scroll step
+[`set_space_scroll_transition`](#set_space_scroll_transition), is
+`"slide"`.
+:::
 
 **Example:**
 
@@ -1440,6 +1476,11 @@ owns the model.
 How the switch shows itself — the plate slide, at once with a
 plate naming the Space, or at once — is
 [`set_space_transition`](#set_space_transition).
+
+:::unreleased
+The scroll Space step's is
+[`set_space_scroll_transition`](#set_space_scroll_transition).
+:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked

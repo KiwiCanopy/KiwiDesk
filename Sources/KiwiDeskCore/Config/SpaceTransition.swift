@@ -1,7 +1,8 @@
 import Foundation
 
 /// How an explicit Space switch shows itself (`space.transition`,
-/// #2524).
+/// #2524) and the scroll Space step (`space.scroll_transition`,
+/// #2971).
 public enum SpaceTransition: String, Codable, CaseIterable, Sendable {
     /// The #1956 plate slide; Reduce Motion shows the plate instead.
     case slide

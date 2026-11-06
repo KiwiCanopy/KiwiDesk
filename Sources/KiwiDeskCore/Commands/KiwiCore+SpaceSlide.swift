@@ -10,6 +10,9 @@ struct SpaceSlideIntent: Equatable {
     /// wrap from the last Space to the first slides forward; nil
     /// lets the Space order decide.
     var step: Int?
+    /// Whether the scroll Space step made the switch, which reads
+    /// its own transition (#2971).
+    let scrolled: Bool
 
     /// +1 where the target's page enters from the trailing side.
     func direction(to target: SpaceID, order: [SpaceID]) -> CGFloat {
@@ -29,10 +32,12 @@ struct SpaceSlideIntent: Equatable {
 extension KiwiCore {
     /// The slide a switch to `target` would play; nil where its
     /// screen already shows it, so nothing parks. `step` is the
-    /// key's, where a Space step made the switch.
+    /// key's, where a Space step made the switch; `scrolled` says
+    /// the scroll gesture made that step.
     func spaceSlideIntent(
         to target: SpaceID,
-        step: Int? = nil
+        step: Int? = nil,
+        scrolled: Bool = false
     ) -> SpaceSlideIntent? {
         guard let display = state.workspaces.display(of: target)
         else { return nil }
@@ -41,22 +46,23 @@ extension KiwiCore {
         return SpaceSlideIntent(
             display: display,
             leaving: leaving,
-            step: step
+            step: step,
+            scrolled: scrolled
         )
     }
 
-    /// How this switch shows itself (#2524): the stored
-    /// transition, save that Slide under Reduce Motion shows the
-    /// Space instead. The one reading the slide and the Space cue
-    /// both take.
-    var drawnSpaceTransition: SpaceTransition {
-        appWide.spaceTransition.drawn(
-            reduceMotion: spaceSlide.reduceMotion()
-        )
+    /// How this switch shows itself (#2524): the pick for its input
+    /// (#2971), save that Slide under Reduce Motion shows the Space
+    /// instead. The one reading the slide and the Space cue both
+    /// take.
+    func drawnSpaceTransition(
+        for intent: SpaceSlideIntent
+    ) -> SpaceTransition {
+        let pick =
+            intent.scrolled
+            ? appWide.spaceScrollTransition : appWide.spaceTransition
+        return pick.drawn(reduceMotion: spaceSlide.reduceMotion())
     }
-
-    /// Anything but a drawn Slide: no slide.
-    var spaceSlideStandsDown: Bool { drawnSpaceTransition != .slide }
 
     /// Starts the slide ahead of the switch's one retile: covers
     /// what the screen shows, decides the strip's motion and holds
@@ -65,7 +71,7 @@ extension KiwiCore {
     func prepareSpaceSlide(_ intent: SpaceSlideIntent) -> SpaceSlideRun? {
         // Never over a full-screen app or a presentation, as the
         // Space cue (#2524): the switch is instant there.
-        guard !spaceSlideStandsDown,
+        guard drawnSpaceTransition(for: intent) == .slide,
             !shelfStandsDown(on: intent.display),
             let target = state.workspaces.activeSpace,
             let screen = screen(for: intent.display)
