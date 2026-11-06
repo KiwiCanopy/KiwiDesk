@@ -59,7 +59,9 @@ struct XcodePinParityTests {
             let jobs = CiPathFilterTests.jobIDs(in: text).compactMap {
                 CiPathFilterTests.jobBlock($0, in: text)
             }
-            let macJobs = jobs.filter { $0.contains("runs-on: xcode-") }
+            let macJobs = jobs.filter {
+                $0.contains("runs-on:") && !$0.contains("runs-on: ubuntu-")
+            }
             #expect(!macJobs.isEmpty, "\(name): no macOS job read")
             for job in macJobs {
                 #expect(

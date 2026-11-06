@@ -22,6 +22,17 @@ struct CiRequiredJobTests {
             try workflowStep($0, in: yaml).contains("swift test")
         }
         try #require(!steps.isEmpty, "no test step read")
+        // `workflowStep` finds a name's first step and reads no unnamed
+        // one, so either shape would escape every reader of this list.
+        try #require(
+            Set(steps).count == steps.count,
+            "two test steps share a name"
+        )
+        try #require(
+            yaml.components(separatedBy: "swift test").count - 1
+                == steps.count,
+            "a step runs `swift test` this list cannot read"
+        )
         return steps
     }
 
@@ -100,11 +111,21 @@ struct CiRequiredJobTests {
                 == "!cancelled()"
         )
         #expect(try requiredContexts().contains("Build, Lint & Test"))
+        // The same hazard one level in: a second `if` on the step
+        // skips the verdict while the job still reports.
+        let conditions = block.split(separator: "\n").filter {
+            $0.trimmingCharacters(in: .whitespaces).hasPrefix("if:")
+        }
+        #expect(conditions.count == 1, "the judge's verdict is conditional")
+        // A job or step so marked reports `success` whatever it did.
+        #expect(!yaml.contains("continue-on-error"))
     }
 
     /// A gated job whose red nothing required reads merges anyway. The
     /// test injects the judge's environment, so the wiring from each
-    /// job's result into it is held here.
+    /// job's result into it is held here. Trade: the verdict's read is
+    /// a text match, so a key only echoed passes; `judgeFailsClosed`
+    /// holds the keys it injects.
     @Test("the judge reads every gated job that is no required context")
     func judgeCoversEveryGatedJob() throws {
         let yaml = try workflowSource("ci.yml")
@@ -112,18 +133,21 @@ struct CiRequiredJobTests {
         let block = try #require(
             CiPathFilterTests.jobBlock(Self.judge, in: yaml)
         )
-        let needs = try #require(
+        let needsLine = try #require(
             block.split(separator: "\n")
                 .first { $0.hasPrefix("    needs: [") }
         )
+        let needs = needsLine.dropFirst("    needs: [".count).dropLast()
+            .components(separatedBy: ", ")
         let step = try judgeStep()
+        // Every job but the filter and the judge, however it is gated.
         let gated = CiPathFilterTests.jobIDs(in: yaml).filter {
+            if $0 == "changes" || $0 == Self.judge { return false }
             let body = CiPathFilterTests.jobBlock($0, in: yaml) ?? ""
             let name = body.split(separator: "\n")
                 .first { $0.hasPrefix("    name: ") }?
                 .dropFirst("    name: ".count)
-            return body.contains("    needs: changes\n")
-                && !required.contains(String(name ?? ""))
+            return !required.contains(String(name ?? ""))
         }
         try #require(gated.count > 1, "no gated job read")
         for job in gated {
@@ -140,9 +164,6 @@ struct CiRequiredJobTests {
                 step.contains("\"$\(key)\""),
                 "the judge's verdict does not read \(key)"
             )
-            // It reports `success` to `needs` whatever its steps did.
-            let body = CiPathFilterTests.jobBlock(job, in: yaml) ?? ""
-            #expect(!body.contains("continue-on-error"))
         }
         #expect(
             step.contains("CHANGES: ${{ needs.changes.result }}"),
@@ -227,6 +248,14 @@ struct CiRequiredJobTests {
             try !judges(
                 changes: "failure",
                 run: "",
+                gui: "skipped",
+                core: "skipped"
+            )
+        )
+        #expect(
+            try !judges(
+                changes: "failure",
+                run: "false",
                 gui: "skipped",
                 core: "skipped"
             )
