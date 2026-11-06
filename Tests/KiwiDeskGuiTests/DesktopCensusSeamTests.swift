@@ -117,13 +117,9 @@ struct DesktopCensusSeamTests {
         )
     }
 
-    /// The per-window symbol has three ruled doors and no fourth
-    /// (#1410, #2968): the census's `windowSpace` (the classifier's
-    /// hosted/gone reading), the raise gate's `isOnShownDesktop`
-    /// and the heal stand-down's `anyOffShownDesktop` batch, both
-    /// over the `windowSpaces` list. Every caller of the raw reads
-    /// and the batch's inner read lives in the OS lane, so a Core
-    /// consumer or a new wrapper past those seams reds here.
+    /// Every reach of the per-window symbol stays on its ruled sites,
+    /// by call or by reference (#1410, #2968); the doors are
+    /// os-private-apis.md's.
     @Test("the raw per-window Space read has its ruled callers")
     func rawWindowSpaceReadHasRuledCallers() throws {
         let list = try SourceScan.identifierSites(
@@ -155,35 +151,40 @@ struct DesktopCensusSeamTests {
                     + one.map(\.site).joined(separator: ", ")
             )
         )
-        // Both overloads' definitions, the one-window door's
-        // forward and the batch's call.
-        let shown = try SourceScan.identifierSites(
-            of: "isOnShownDesktop(",
-            under: Self.sources
-        )
-        #expect(
-            Set(shown.map(\.file.lastPathComponent))
-                == ["NativeSpaces+Census.swift"]
-                && shown.count == 4,
-            .init(
-                rawValue: "found "
-                    + shown.map(\.site).joined(separator: ", ")
+        let census = "NativeSpaces+Census.swift"
+        let memory = "DesktopMemory.swift"
+        let doors: [(needle: String, files: Set<String>, count: Int)] = [
+            ("windowSpaceReading", [census, memory], 2),
+            ("isOnShownDesktop", [census, "KiwiCore.swift"], 5),
+            ("anyOffShownDesktop", [census, memory], 2),
+            (
+                "desktopMemory.readOffShown",
+                ["KiwiCore+HealStandDown.swift"], 1
+            ),
+            (
+                "windowIsOnShownDesktop",
+                ["KiwiCore.swift", "KiwiCore+DesktopRaiseGate.swift"], 2
+            ),
+            ("SkyLight.copySpacesForWindows", [census], 1),
+            (
+                "\"SLSCopySpacesForWindows\"",
+                ["SkyLight+WindowSpaces.swift"], 1
+            ),
+        ]
+        for door in doors {
+            let sites = try SourceScan.identifierSites(
+                of: door.needle,
+                under: Self.sources
             )
-        )
-        // The definition alone: `DesktopMemory.readOffShown` takes
-        // it by reference (`HealStandDownSeamTests`).
-        let batch = try SourceScan.identifierSites(
-            of: "anyOffShownDesktop(",
-            under: Self.sources
-        )
-        #expect(
-            batch.map(\.file.lastPathComponent)
-                == ["NativeSpaces+Census.swift"],
-            .init(
-                rawValue: "found "
-                    + batch.map(\.site).joined(separator: ", ")
+            #expect(
+                Set(sites.map(\.file.lastPathComponent)) == door.files
+                    && sites.count == door.count,
+                .init(
+                    rawValue: "\(door.needle) found "
+                        + sites.map(\.site).joined(separator: ", ")
+                )
             )
-        )
+        }
     }
 
     @Test("a test never calls the builder")

@@ -160,12 +160,14 @@ Every one of the following binds whoever touches them:
   (`SLSCopySpacesForWindows`) has THREE ruled doors and no fourth
   (#1410, #2968): the census's `SkyLight.windowSpace` behind
   `DesktopMemory.readWindowSpace` — the classifier's hosted/gone
-  reading — and two over the `SkyLight.windowSpaces` list: the
-  gate's `KiwiCore.windowIsOnShownDesktop`, a different question
-  (is any host shown) the raise owns, and the heal stand-down's
-  batch of that question behind `DesktopMemory.readOffShown`;
+  reading — and two over the `SkyLight.windowSpaces` list, which
+  ask a different question (is any host shown): the raise gate
+  per window behind `KiwiCore.windowIsOnShownDesktop`, the heal
+  stand-down in a batch behind `DesktopMemory.readOffShown`.
   `DesktopCensusSeamTests` ▸ `rawWindowSpaceReadHasRuledCallers`
-  pins the caller sets to the OS lane. Two readings that must not be
+  pins every door's sites and the symbol's one spelling, and each
+  door's default binding has its own guard (`rawHostReadHasOneHome`,
+  `batchReadIsPinned`). Two readings that must not be
   confused: **"gone" is the SPACE LIST being empty**
   (`SLSCopySpacesForWindows` answering `[]`, or the id on no
   Desktop's list) — never absence from
