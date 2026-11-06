@@ -29,7 +29,7 @@ extension EventLoop {
     /// lands here, behavior-testable, rather than as a third
     /// inline condition pinned by its own source needle.
     ///
-    /// Three arms. A HIDE stands the raise down (#913): macOS
+    /// A HIDE stands the raise down (#913): macOS
     /// picks the next frontmost app itself when an app hides,
     /// and a raise racing that choice lands the user somewhere
     /// neither chose — with `warp: true` dragging the pointer

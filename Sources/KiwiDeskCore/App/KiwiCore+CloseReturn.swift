@@ -27,12 +27,9 @@ extension KiwiCore {
         // Closing or minimizing the focused window hands focus
         // to the space's fallback (state picked one; this raise
         // makes it real). A fallback on a Desktop nobody shows is
-        // refused by `focusWindow`'s own gate (#1345). A hide, an
-        // active own dialog, a window that left with its Desktop,
-        // or a Desktop follow's eager departure stands the raise
-        // down —
-        // `closeReturnRaiseStandsDown` owns every arm's
-        // arguments (#913/#929/#935/#1023). The fold's focus pick
+        // refused by `focusWindow`'s own gate (#1345).
+        // `closeReturnRaiseStandsDown` owns every arm that stands
+        // the raise down and its argument. The fold's focus pick
         // still stands: state names the survivor, and the OS's
         // own activation reports it. Guarded on the focus loss
         // so only a removal that would raise pays the seam's
@@ -103,6 +100,7 @@ extension KiwiCore {
             event: event,
             effects: effects,
             departed: departedWithDesktop,
+            movedWithoutFocus: movedWithoutFocus,
             standsDown: closeReturnRaiseStandsDown
         )
     }

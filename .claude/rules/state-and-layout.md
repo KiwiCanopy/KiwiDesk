@@ -1410,7 +1410,13 @@ editing here:
   restoring it, so the #1161 placement distrust stands down on it
   rather than bouncing the OS's own restore, and on nothing older,
   where the memory names whatever was honored last
-  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple); and
+  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple); a move
+  verb's departure of a window that was not the focus anchor stands
+  the raise down too (#2888), asked at the VANISH against the anchor
+  read ahead of the fold and ahead of the record's claim, never at
+  the command, since an earlier window of a burst can hand the window
+  the focus after its verb ran (`DesktopDepartureStandDownTests` ▸
+  `burstInheritsTheRaise`); and
   the settle's own (#1364): `desktopSettle` never re-asserts a
   focus the switch itself removed — a window whose departure
   `departedWithDesktop` filed, through the one
