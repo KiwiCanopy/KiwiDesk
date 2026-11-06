@@ -1396,8 +1396,8 @@ editing here:
   the same reading that a swipe is not a close — append one here
   rather than opening a bullet of its own: a window that LEFT
   WITH ITS DESKTOP — `vanished`, and not a move verb's own
-  departure, which the verb records per window and the gone
-  handler claims (`departedWithDesktop`, never the #482 follow
+  departure of a window holding focus, which the verb records per
+  window and the gone handler claims (`departedWithDesktop`, never the #482 follow
   latch, whose second expires before a slow app's destroy) —
   stands the close-return raise down as one arm of the ONE
   predicate (the #936 clause above says why that predicate, and

@@ -113,13 +113,12 @@ struct DesktopMoveRehomeWiringTests {
             text.range(of: "moveWindows([window], to: target.space)")
         )
         #expect(anchor.upperBound < bridge.lowerBound)
-        let raise = try #require(
+        _ = try #require(
             text.range(
                 of: "focusIfFiledIntoActiveSpace(",
                 range: bridge.upperBound..<text.endIndex
             )
         )
-        #expect(raise.lowerBound > bridge.upperBound)
     }
 
     /// The re-home's own body, bounded by the declaration that

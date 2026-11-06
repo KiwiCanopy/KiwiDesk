@@ -96,8 +96,10 @@ extension KiwiCore {
     /// Whether a removal is the window LEAVING WITH ITS DESKTOP
     /// (#1345): `vanished` — hosted on a Desktop nobody shows —
     /// and not a move verb's own departure, recorded by the verb
-    /// and claimed here. A swipe's removals are exactly these,
-    /// and macOS picks the focus on the Desktop it shows, so the
+    /// and claimed here. A swipe's removals are these, as is the
+    /// verb's move of a window that held no focus, which it does
+    /// not record (#2888): macOS picks the focus on the Desktop it
+    /// shows, or the focus never moved, so the
     /// close-return raise stands down for them the way it does
     /// for a hide (#913). On a host without the compositor read,
     /// `vanished` is the #40 timer's word inside the switch
@@ -124,7 +126,8 @@ extension KiwiCore {
     /// than name the window's next swipe departure as the verb's.
     static let desktopMoveDepartureWindow: TimeInterval = 10
 
-    /// A move verb's own departure (#1345): the vanish that
+    /// A move verb's own departure of a window that held focus
+    /// (#1345, #2888): the vanish that
     /// follows is the verb's hand-off, never a swipe's. Recorded
     /// per window and claimed at the vanish, so a slow app's
     /// destroy seconds later still reads as the verb's. Only

@@ -3,17 +3,22 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The fixture both Desktop-move-naming suites share (#2888). The
-/// topology is the #888 fixture (Desktops 1–2 on `UUID-A`, ids 10/11;
-/// 3–4 on `UUID-B`, ids 20/21), Desktops 1 and 3 shown, so Desktop 2
-/// is a HIDDEN target on the main screen and Desktop 1 a SHOWN one.
+/// `move_to_desktop(N, space, window)` and its follow (#2888),
+/// through the real dispatch: the argument and its refusals. Over
+/// the #888 fixture (Desktops 1–2 on `UUID-A`, ids 10/11; 3–4 on
+/// `UUID-B`, ids 20/21), Desktops 1 and 3 shown: Desktop 2 is HIDDEN
+/// on the main screen, Desktop 1 SHOWN.
+///
+/// `WMBridge.classResolverOverride` is process-global; the same
+/// synchronous-body arrangement as `DesktopCommandTests` applies.
+@Suite("Desktop move naming a window (#2888)", .serialized)
 @MainActor
-struct DesktopMoveNamedFixture {
-    let focused = WindowID(7)
-    let named = WindowID(8)
-    var id: JSONValue { .number(Double(named.raw)) }
+struct DesktopMoveNamedWindowTests {
+    private let focused = WindowID(7)
+    private let named = WindowID(8)
+    private var id: JSONValue { .number(Double(named.raw)) }
 
-    func makeCore(bridge: Bool = true) -> KiwiCore {
+    private func makeCore(bridge: Bool = true) -> KiwiCore {
         DesktopVerbBridge.reset()
         NativeSpaces.spacesOverride = authorityTopology(
             mainCurrent: 10,
@@ -36,50 +41,17 @@ struct DesktopMoveNamedFixture {
         return core
     }
 
-    func teardown() {
+    private func teardown() {
         WMBridge.classResolverOverride = nil
         resetAuthorityOverrides()
     }
 
-    func movedWindows() -> [[NSNumber]] {
+    private func movedWindows() -> [[NSNumber]] {
         DesktopVerbBridge.moves.map { $0.0 }
     }
 
-    func moved(_ window: WindowID) -> [[NSNumber]] {
-        [[NSNumber(value: window.raw)]]
-    }
-
-    /// Files `named` into Space `2`, leaving the focus alone.
-    func parkNamed(_ core: KiwiCore) {
-        core.execute("move_to_space", args: [.string("2"), id])
-        #expect(core.state.workspaces.space(of: named) == SpaceID("2"))
-        #expect(core.focusedWindowID == focused)
-    }
-}
-
-/// `move_to_desktop(N, space, window)` and its follow (#2888),
-/// through the real dispatch: the argument and its refusals.
-///
-/// `WMBridge.classResolverOverride` is process-global; the same
-/// synchronous-body arrangement as `DesktopCommandTests` applies.
-@Suite("Desktop move naming a window (#2888)", .serialized)
-@MainActor
-struct DesktopMoveNamedWindowTests {
-    private let fixture = DesktopMoveNamedFixture()
-    private var focused: WindowID { fixture.focused }
-    private var named: WindowID { fixture.named }
-    private var id: JSONValue { fixture.id }
-
-    private func makeCore(bridge: Bool = true) -> KiwiCore {
-        fixture.makeCore(bridge: bridge)
-    }
-
-    private func teardown() { fixture.teardown() }
-
-    private func movedWindows() -> [[NSNumber]] { fixture.movedWindows() }
-
     private func moved(_ window: WindowID) -> [[NSNumber]] {
-        fixture.moved(window)
+        [[NSNumber(value: window.raw)]]
     }
 
     // MARK: - The argument

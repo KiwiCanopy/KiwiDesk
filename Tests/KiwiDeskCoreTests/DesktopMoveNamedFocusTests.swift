@@ -5,29 +5,56 @@ import Testing
 @testable import KiwiDeskCore
 
 /// What naming a window on a Desktop move does to the focus (#2888),
-/// and the follow, through the real dispatch.
+/// and the follow, through the real dispatch, over the topology
+/// `DesktopMoveNamedWindowTests` states.
 ///
 /// `WMBridge.classResolverOverride` is process-global; the same
 /// synchronous-body arrangement as `DesktopCommandTests` applies.
 @Suite("Desktop move naming a window: focus (#2888)", .serialized)
 @MainActor
 struct DesktopMoveNamedFocusTests {
-    private let fixture = DesktopMoveNamedFixture()
-    private var focused: WindowID { fixture.focused }
-    private var named: WindowID { fixture.named }
-    private var id: JSONValue { fixture.id }
+    private let focused = WindowID(7)
+    private let named = WindowID(8)
+    private var id: JSONValue { .number(Double(named.raw)) }
 
-    private func makeCore() -> KiwiCore { fixture.makeCore() }
+    private func makeCore() -> KiwiCore {
+        DesktopVerbBridge.reset()
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
+        NativeSpaces.activeSpaceIDOverride = 10
+        pinTwoDisplays()
+        WMBridge.classResolverOverride = { desktopVerbBridgeClasses[$0] }
+        let core = makeTestCore()
+        for (window, pid) in [(named, pid_t(2)), (focused, pid_t(1))] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(id: window, pid: pid, appName: "App")
+                )
+            )
+        }
+        core.state.apply(.windowFocused(focused))
+        return core
+    }
 
-    private func teardown() { fixture.teardown() }
+    private func teardown() {
+        WMBridge.classResolverOverride = nil
+        resetAuthorityOverrides()
+    }
 
-    private func parkNamed(_ core: KiwiCore) { fixture.parkNamed(core) }
+    /// Files `named` into Space `2`, leaving the focus alone.
+    private func parkNamed(_ core: KiwiCore) {
+        core.execute("move_to_space", args: [.string("2"), id])
+    }
 
     @Test("a window filed into the active Space takes focus")
     func filedIntoActiveTakesFocus() {
         let core = makeCore()
         defer { teardown() }
         parkNamed(core)
+        #expect(core.state.workspaces.space(of: named) == SpaceID("2"))
+        #expect(core.focusedWindowID == focused)
         let active = core.state.workspaces.activeSpace
         core.eventLoop.lastCommandedFocus = nil
         let response = core.execute(
@@ -146,6 +173,24 @@ struct DesktopMoveNamedFocusTests {
         #expect(core.followFocus.claim(if: { $0 == named }) == named)
     }
 
+    @Test("a refused follow of a named window owes its bookkeeping")
+    func refusedFollowKeepsTheBookkeeping() {
+        let core = makeCore()
+        defer { teardown() }
+        WMBridge.classResolverOverride = { name in
+            name == "ManagedDisplaySetCurrentSpaceOperation"
+                ? nil : desktopVerbBridgeClasses[name]
+        }
+        let response = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(2), .null, id]
+        )
+        #expect(!response.isSuccess)
+        #expect(core.moveLatch.isLatched(named))
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
+        #expect(core.desktopMoveDepartures[named] == nil)
+    }
+
     @Test("an already-shown follow of an unfocused window focuses it")
     func alreadyShownFocusesIt() {
         let core = makeCore()
@@ -163,6 +208,8 @@ struct DesktopMoveNamedFocusTests {
         let core = makeCore()
         defer { teardown() }
         parkNamed(core)
+        #expect(core.state.workspaces.space(of: named) == SpaceID("2"))
+        #expect(core.focusedWindowID == focused)
         let response = core.execute(
             "move_to_desktop_and_follow",
             args: [.number(1), .null, id]
