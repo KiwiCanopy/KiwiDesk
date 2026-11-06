@@ -8128,19 +8128,24 @@ a follow arrives the same way
 ([#3033](https://github.com/KiwiCanopy/KiwiDesk/issues/3033)). Only
 the visible Desktop files a window at the command, where the layout can
 carry it, so the rule users carry is that screens can only be crossed
-through the visible Desktop.
-:::
+through the visible Desktop. A window on a hidden Desktop is refused
+even when it would keep its Desktop.
 
 A window already on a hidden Desktop produces no departure, so
 naming one
 ([#3034](https://github.com/KiwiCanopy/KiwiDesk/issues/3034)) files
-the name straight into its remembered Space, and the arrival pays it
-as any other. It is not in state, so even a shown Desktop cannot file
-it at once: on shared Desktops a Space off its screen is refused for
-any target. The away ledger's copy of its Desktop is left to the
-census, read by the move's own reap, so the ledger keeps one reader
-of the compositor and takes no write of an answer the bridge has not
-confirmed.
+it at the command, always as a watched departure so the #1010 net
+answers its arrival whatever filing it had. The filing is written once
+the bridge accepts, which is not proof the move applied: a move that
+performs nothing returns the window to the named Space on its old
+Desktop, a trade taken because no later moment reports the move. The
+ledger's copy of its Desktop stays the census's, re-read by the move's
+own reap with no prune, since a window mid-move must not read as
+closed. A follow onto a shown Desktop has no reveal, so it switches
+the Space at the command and owes Move here's plain arrival focus,
+never the #1007 debt, and a follow refuses a minimized or hidden
+window, which no arrival would bring.
+:::
 
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
 

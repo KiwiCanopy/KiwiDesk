@@ -93,6 +93,13 @@ extension StateCoordinator {
         }
     }
 
+    /// Whether `window` left with a sticky scope `restoreStickyIntent`
+    /// will put back at its arrival.
+    func remembersSticky(_ window: ManagedWindow) -> Bool {
+        WindowIdentity.exists(for: window)
+            && rememberedSticky[WindowIdentity(of: window)] != nil
+    }
+
     /// Restores remembered sticky intent onto (re)tracked window (#414).
     mutating func restoreStickyIntent(
         of window: ManagedWindow

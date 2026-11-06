@@ -178,14 +178,14 @@ extension KiwiCore {
                 }
             } else if !target.isCurrent
                 || state.awayWindows[window] != nil,
-                let held = screenHolding(window),
-                assigned != held
+                screens.count > 1,
+                screenHolding(window) != assigned
             {
                 return .refused(
                     .fail(
-                        "Can't move a window across screens "
-                            + (target.isCurrent ? "from" : "to")
-                            + " a hidden Desktop."
+                        "Screens can only be crossed through the "
+                            + "visible Desktop. Cross there first, then "
+                            + "move the window."
                     )
                 )
             }
@@ -206,7 +206,7 @@ extension KiwiCore {
     /// The screen a window's frame sits on, the reading the arrival
     /// takes; a frame on no screen answers by its Space's screen. An
     /// away window has no state frame, and its Space is remembered.
-    private func screenHolding(_ window: WindowID) -> DisplayID? {
+    func screenHolding(_ window: WindowID) -> DisplayID? {
         let frame =
             state.windows[window]?.frame
             ?? windowServer.readWindowBounds(window)

@@ -514,10 +514,11 @@ also [name the window](#move_to_desktop_and_follow).
 
 With *Displays have separate Spaces* off, macOS keeps a window on its
 screen when it changes Desktop, so screens can only be crossed through
-the visible Desktop. A Space on another screen than the window's is
-taken only for the Desktop on screen; a hidden one refuses it. To send
-a window to another screen and another Desktop, cross on the visible
-Desktop first, then move it.
+the visible Desktop. A Space on another screen than the
+window's is taken only when the window is on that Desktop and you name
+that Desktop; anything else is refused. To send a window to another
+screen and another Desktop, cross on the visible Desktop first, then
+move it.
 :::
 
 ### move_to_desktop_and_follow
@@ -571,9 +572,11 @@ into the current Space on a Desktop already on screen takes focus
 there. The follow ends with keyboard focus on the window you named,
 and shows its Space.
 
-A window on a hidden Desktop joins its Space when it arrives, and
-with *Displays have separate Spaces* off it refuses a Space on
-another screen than its own, whichever Desktop you send it to.
+A window on a hidden Desktop joins its Space when it arrives. A
+sticky one refuses a named Space, and the follow refuses a minimized
+or hidden one, since it could not take focus. With *Displays have
+separate Spaces* off it cannot [cross screens](#move_to_desktop) while
+hidden: bring it to the visible Desktop first.
 :::
 
 ### move_space_to_display

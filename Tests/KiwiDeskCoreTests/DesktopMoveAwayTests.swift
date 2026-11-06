@@ -190,6 +190,78 @@ struct DesktopMoveAwayTests {
         #expect(DesktopVerbBridge.moves.isEmpty)
     }
 
+    @Test("a pocket window refuses in either phase")
+    func pocketRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        // A vanish keeps the slot: only a close or a minimize empties it.
+        core.execute("toggle_pocket_window")
+        #expect(core.state.pocketPhase(of: focused) == .out)
+        core.state.apply(.windowDestroyed(focused, wasMinimized: false))
+        core.state.awayWindows[focused] = AwayWindow(
+            id: focused,
+            pid: 900_002,
+            appName: "Here",
+            appBundleID: nil,
+            title: "",
+            nativeSpace: 11
+        )
+        #expect(core.state.pocketPhase(of: focused) != nil)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .null, .number(Double(focused.raw))]
+            ).error == "a pocket window cannot change Desktop"
+        )
+        #expect(DesktopVerbBridge.moves.isEmpty)
+    }
+
+    @Test("a window that left sticky refuses a named Space")
+    func stickyRefusesTheName() {
+        let core = makeCore()
+        defer { teardown() }
+        var window = ManagedWindow(
+            id: away,
+            pid: pid,
+            appName: "Away",
+            title: "Elsewhere"
+        )
+        window.stickyScope = .global
+        core.state.rememberStickyIntent(of: window)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .string("mail"), id]
+            ).error == "a sticky window keeps its Space"
+        )
+        #expect(DesktopVerbBridge.moves.isEmpty)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .null, id]
+            ).isSuccess
+        )
+    }
+
+    /// A tracked id takes the tracked route even if the ledger names
+    /// it too: that route files a shown Desktop's Space at once.
+    @Test("a tracked id takes the tracked route")
+    func trackedOutranksTheLedger() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.awayWindows[focused] = core.state.awayWindows[away]
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [
+                    .number(1), .string("mail"),
+                    .number(Double(focused.raw)),
+                ]
+            ).isSuccess
+        )
+        #expect(core.state.workspaces.space(of: focused) == mail)
+    }
+
     @Test("a refused bridge files nothing")
     func bridgeRefusal() {
         let core = makeCore()
@@ -205,140 +277,5 @@ struct DesktopMoveAwayTests {
         #expect(response.error?.contains("bridge") == true)
         #expect(core.state.rememberedSpace(of: away) == nil)
         #expect(core.state.workspaces[mail] == nil)
-    }
-
-    // MARK: - A named Space
-
-    @Test("a named Space is filed at once and paid at the arrival")
-    func namedSpace() {
-        let core = makeCore()
-        defer { teardown() }
-        core.state.rememberedSpaces[away] = .departed("1")
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(1), .string("mail"), id]
-            ).isSuccess
-        )
-        #expect(core.state.rememberedSpace(of: away) == mail)
-        #expect(core.pendingSpace.isEmpty)
-        arrive(core)
-        #expect(core.state.workspaces.space(of: away) == mail)
-    }
-
-    @Test("a window nothing has filed takes the name")
-    func unfiledTakesTheName() {
-        let core = makeCore()
-        defer { teardown() }
-        #expect(core.state.rememberedSpace(of: away) == nil)
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(1), .string("mail"), id]
-            ).isSuccess
-        )
-        #expect(core.state.rememberedSpace(of: away) == mail)
-    }
-
-    /// Separate Spaces: the parse compares with the Desktop's screen,
-    /// the same refusal a tracked window takes.
-    @Test("a Space off the Desktop's screen refuses")
-    func offTheDesktopsScreen() {
-        let core = makeCore()
-        defer { teardown() }
-        addDisplays(core)
-        core.state.workspaces.assign(mail, to: DisplayID(2))
-        let response = core.execute(
-            "move_to_desktop",
-            args: [.number(1), .string("mail"), id]
-        )
-        #expect(response.error?.contains("another screen") == true)
-        #expect(DesktopVerbBridge.moves.isEmpty)
-    }
-
-    // MARK: - Shared Desktops
-
-    private func sharedCore() -> KiwiCore {
-        let core = makeCore(spaces: [
-            authoritySpace(10, display: "Main", current: true),
-            authoritySpace(11, display: "Main"),
-            authoritySpace(12, display: "Main"),
-        ])
-        addDisplays(core)
-        core.state.workspaces.assign("1", to: DisplayID(1))
-        core.state.rememberedSpaces[away] = .departed("1")
-        core.state.workspaces.assign(mail, to: DisplayID(2))
-        return core
-    }
-
-    /// Only an arrival files it, and an arrival stays on its screen,
-    /// so a shown Desktop refuses here where a tracked window crosses.
-    @Test("a Space off its screen refuses for a shown Desktop too")
-    func sharedRefusesEitherTarget() {
-        let core = sharedCore()
-        defer { teardown() }
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(1), .string("mail"), id]
-            ).error
-                == "Can't move a window across screens from a hidden Desktop."
-        )
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(3), .string("mail"), id]
-            ).error
-                == "Can't move a window across screens to a hidden Desktop."
-        )
-        #expect(DesktopVerbBridge.moves.isEmpty)
-    }
-
-    @Test("a Space on its screen is taken")
-    func sharedTakesItsScreen() {
-        let core = sharedCore()
-        defer { teardown() }
-        core.state.workspaces.assign(mail, to: DisplayID(1))
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(3), .string("mail"), id]
-            ).isSuccess
-        )
-        #expect(core.state.rememberedSpace(of: away) == mail)
-    }
-
-    // MARK: - The follow
-
-    @Test("a follow to a hidden Desktop owes the focus")
-    func followHidden() {
-        let core = makeCore()
-        defer { teardown() }
-        let response = core.execute(
-            "move_to_desktop_and_follow",
-            args: [.number(4), .null, id]
-        )
-        #expect(response.isSuccess)
-        #expect(core.followFocus.owed() == away)
-    }
-
-    /// No switch happens, and the reap still brings an arrival, so
-    /// the debt is paid there as a whole switch into its Space.
-    @Test("a follow to a shown Desktop pays at the arrival")
-    func followShown() {
-        let core = makeCore()
-        defer { teardown() }
-        core.state.rememberedSpaces[away] = .departed("1")
-        core.state.workspaces.ensureSpace(mail)
-        let response = core.execute(
-            "move_to_desktop_and_follow",
-            args: [.number(1), .string("mail"), id]
-        )
-        #expect(response.isSuccess)
-        #expect(core.followFocus.owed() == away)
-        arrive(core)
-        #expect(core.followFocus.owed() == nil)
-        #expect(core.state.workspaces.activeSpace == mail)
-        #expect(core.focusedWindowID == away)
     }
 }

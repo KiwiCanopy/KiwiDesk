@@ -5,7 +5,7 @@ import Foundation
 /// An entry is written on a compositor-confirmed `vanished` and
 /// at the boot census, pruned by a census that no longer hosts
 /// the id (the corrective `closed`), and read by Open-or-Focus
-/// and `get_state` — never the Space Bar, which draws the
+/// `get_state` and a Desktop move — never the Space Bar, which draws the
 /// Desktop in front of the user (#1228). The argument is
 /// state-and-layout.md's.
 extension KiwiCore {
@@ -91,6 +91,15 @@ extension KiwiCore {
         }
         fold(census, pruning: true)
         return true
+    }
+
+    /// Re-reads the ledger's hosts with no prune: a Desktop move's
+    /// reap, which must not read a window mid-move as closed (#3034).
+    func refreshAwayHosts() {
+        guard !state.awayWindows.isEmpty,
+            let census = desktopMemory.readCensus(NativeSpaces.allSpaces())
+        else { return }
+        fold(census, pruning: false)
     }
 
     /// Folds ONE census into the ledger — the reading every

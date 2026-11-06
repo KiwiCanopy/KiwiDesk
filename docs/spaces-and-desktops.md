@@ -325,6 +325,13 @@ Space when that Desktop is next shown — or the Space you named,
 when you named one. It is reported gone with `reason: vanished`,
 the same value a plain Desktop swipe produces.
 
+:::unreleased
+A window on a hidden Desktop can be moved too, by naming its id from
+`get_state`. With *Displays have separate Spaces* off, screens can
+only be crossed through the visible Desktop; the
+[Lua reference](lua-reference.md#move_to_desktop) has the limits.
+:::
+
 KiwiDesk keeps knowing it is there, but does not draw it. The
 Space Bar shows the Desktop you are looking at, so a window on
 another Desktop leaves the bar, and *Hide empty Spaces* hides a

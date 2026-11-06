@@ -183,9 +183,9 @@ itself when an eighth is added.
   reads the argument ONLY through `commandTarget`, which also
   refuses an id no tracked window carries, with the Desktop moves'
   `awayTarget` ahead of it for the one id family they reach (#3034).
-  Adding `.window` to a record whose handler ignores it would let a named call skip the
-  preflight and still act on the focus, which is the hazard #292
-  closes; `WindowArgumentReachTests` probes every such record with
+  Adding `.window` to a record whose handler ignores it would let a
+  named call skip the preflight and still act on the focus, which is
+  the hazard #292 closes; `WindowArgumentReachTests` probes every such record with
   an unknown id and reds on a handler that does not refuse it. A
   question "does this call act on the focus" asks
   `impliesFocus(_:_:)`, never `FocusedCommandPolicy` alone.

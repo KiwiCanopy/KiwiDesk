@@ -333,12 +333,13 @@ editing here:
   against the screen holding the window's frame, the arrival's
   reading, or that net drops the name (#3033,
   `DesktopMoveSharedSpaceTests`). A window already away produces no
-  departure: its name is filed at once through
-  `StateCoordinator.fileAway`, its follow is owed on a shown Desktop
-  too since its reap brings an arrival, and its move reads the census
-  in that reap rather than writing `nativeSpace` (#3034,
-  `DesktopMoveAwayTests`). Carry the screen a Space lands on
-  ON the resolution
+  departure: its filing is written at once through
+  `StateCoordinator.fileAwayMove`, always `.departed` so the #1010 net
+  answers its arrival, a follow onto a shown Desktop owes Move here's
+  plain arrival focus and never a #1007 debt, and its move re-reads
+  the ledger's hosts in the reap, with no prune, rather than writing
+  `nativeSpace` (#3034, `DesktopMoveAwayTests`). Carry the screen a
+  Space lands on ON the resolution
   (`SpaceTargetResolution.space(_:landing:)`) and hand it to the
   sticky gate as `landingOn` — the gate reads a nil assignment
   as "elsewhere", so the thread is load-bearing exactly where

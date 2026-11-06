@@ -311,7 +311,7 @@ extension KiwiCore {
             guard let self else { return }
             let pids = self.desktopMemory.moveReapPIDs
             self.desktopMemory.moveReapPIDs = []
-            self.refreshAwayWindows()
+            self.refreshAwayHosts()
             guard self.eventLoop.isRunning else { return }
             for pid in pids {
                 self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))

@@ -38,8 +38,8 @@ struct FollowFocusSeamTests {
         // verb's follow branch in `moveToDesktop`, and the
         // Open-or-Focus reach onto an away window (#1146), which
         // is a follow by the same rule: the press named the window.
-        // An away window's Desktop move records on a shown Desktop
-        // too (#3034), since its reap brings the arrival that drains.
+        // An away window's Desktop move records behind its own
+        // `.switched` arm (#3034).
         (
             "followFocus.record(",
             [

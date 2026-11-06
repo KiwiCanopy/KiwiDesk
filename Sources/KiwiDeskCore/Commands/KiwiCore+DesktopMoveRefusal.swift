@@ -3,6 +3,9 @@ import Foundation
 /// What a Desktop move owes the window itself (#2888), split from
 /// `KiwiCore+DesktopMove.swift` at the §2.1 target.
 extension KiwiCore {
+    static let pocketedMoveRefusal = "a pocketed window cannot change Desktop"
+    static let outPocketMoveRefusal = "a pocket window cannot change Desktop"
+
     /// The refusal of a window no Desktop move may take, in either
     /// form of the verb, ahead of the Space parse. A pocketed
     /// window is filed nowhere (#2446), an out one is carried back
@@ -11,7 +14,7 @@ extension KiwiCore {
     func desktopMoveRefusal(_ window: WindowID) -> CommandResponse? {
         switch state.pocketPhase(of: window) {
         case .pocketed:
-            return .fail("a pocketed window cannot change Desktop")
+            return .fail(Self.pocketedMoveRefusal)
         case .out:
             soundIfDrawn(
                 flashRefusalPill(
@@ -21,7 +24,7 @@ extension KiwiCore {
                     announce: true
                 )
             )
-            return .fail("a pocket window cannot change Desktop")
+            return .fail(Self.outPocketMoveRefusal)
         case nil:
             break
         }

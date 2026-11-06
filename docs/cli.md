@@ -847,7 +847,8 @@ window carries (`kiwidesk make_floating 4711`).
 window `id`, after the space id. Ahead of an id, an empty string
 leaves the space out: `kiwidesk move_to_desktop 3 "" 4711`. The id
 may be one `get_state` lists under `away_windows`. Neither moves a
-full-screen window or a pocket window, named or focused.
+full-screen window or a pocket window, named or focused. A named Space
+has [limits with *Displays have separate Spaces* off](lua-reference.md#move_to_desktop).
 :::
 
 `new_window` and `close_window` take the same optional window
@@ -1192,6 +1193,13 @@ there is no `window_moved_to_space` at all: the window is
 reported `vanished` and comes back with `window_created`,
 `reason: returned`, already in the named Space
 ([#1150](https://github.com/KiwiCanopy/KiwiDesk/issues/1150)).
+
+:::unreleased
+A window already on a hidden Desktop was reported `vanished` when it
+left, so a move emits nothing until it reaches a Desktop on screen,
+where it comes back with `window_created`, `reason: returned`.
+:::
+
 Bulk reassignments (profile load, session restore) stay silent:
 
 ```json

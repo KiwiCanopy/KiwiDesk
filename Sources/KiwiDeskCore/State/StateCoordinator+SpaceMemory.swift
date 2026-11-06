@@ -156,15 +156,20 @@ extension StateCoordinator {
         return true
     }
 
-    /// Files an away window in the Space a Desktop move named
-    /// (#3034): `refileAway`, or the first filing of a window the
-    /// boot found and nothing has filed.
-    mutating func fileAway(_ id: WindowID, in space: SpaceID) {
-        guard rememberedSpaces[id] != nil else {
-            rememberedSpaces[id] = .departed(space)
-            return
-        }
-        refileAway(of: id, to: space)
+    /// Files an away window a Desktop move took (#3034): the named
+    /// Space, else its own, else `home`. Always `.departed`: the
+    /// user moved it, so the #1010 net answers its arrival, and no
+    /// restored frame is owed.
+    mutating func fileAwayMove(
+        _ id: WindowID,
+        named: SpaceID?,
+        home: SpaceID?
+    ) {
+        let current = rememberedSpaces[id]?.space
+        guard let space = named ?? current ?? home else { return }
+        if current != space { retireDepartureRecord(of: id) }
+        rememberedSpaces[id] = .departed(space)
+        restoredFrames[id] = nil
     }
 
     /// A head gone for good makes its hand-off permanent (#1387):
