@@ -42,8 +42,12 @@ extension StateCoordinator {
         let slot = home.flatMap {
             workspaces[$0]?.windows.firstIndex(of: id)
         }
+        let traveler =
+            workspaces.lastFocused == id
+            ? maximizedTraveler(beneath: id) : nil
         windows.remove(id)
         workspaces.remove(id)
+        if let traveler { workspaces.handFocusBack(toTraveler: traveler) }
         if let home, let handedTo {
             workspaces.withSpace(home) {
                 $0.markHandedBreak(of: handedTo)

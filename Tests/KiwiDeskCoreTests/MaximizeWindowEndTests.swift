@@ -164,16 +164,6 @@ struct MaximizeWindowEndTests {
         #expect(maximized(core) == nil)
     }
 
-    @Test("A sticky window is refused")
-    func stickyRefused() {
-        let core = makeCore()
-        core.state.setSticky(w1, .global)
-        #expect(maximized(core) == nil)
-        core.retile()
-        #expect(!core.execute("toggle_maximized").isSuccess)
-        #expect(maximized(core) == nil)
-    }
-
     @Test("Each screen's Space keeps its own maximize")
     func everyScreenMaximizes() {
         let core = makeCore()

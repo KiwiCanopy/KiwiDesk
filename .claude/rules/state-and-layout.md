@@ -2334,7 +2334,11 @@ editing here:
   through `awaitsMaximizedReturn`, and a close or a minimize ends it
   in its own fold, so every ender reaches a departed maximize too
   (`MaximizeWindowEndTests` ▸ `desktopReturnKeeps`,
-  `enderReachesDeparted`).
+  `enderReachesDeparted`). **A traveler's flag sits on the Space it
+  renders on, naming no member there (#3035)**: a new writer or
+  ender of the flag reaches that Space rather than the window's
+  home, the home-keyed close and minimize folds leaving it to the
+  retire at the head of `retile()` (`MaximizeStickyWindowTests`).
 - **A tracked window's "is it presenting" is asked through the
   one `KiwiCore.presents` door (#1788)**, which rules the float
   gate once — a tiled slot a gapless layout sizes to its screen
