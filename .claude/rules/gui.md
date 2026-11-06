@@ -1163,7 +1163,8 @@ must keep:
   `SchematicPalette.unresolved`, and a value the light plate
   needs is an accessor on the paint. Every desk picture takes
   it, KiwiVision's scene included; only the look tiles
-  (`LookPlate`, #1740) keep their own ground. **No view forces
+  (`LookPlate`, #1740) keep their own ground, and only Home's cards
+  skip the verdict (`PlateGroundWiringTests` ▸ `oneDarkHost`). **No view forces
   an appearance where the plate verdict could read it** — a
   `colorScheme` write, `preferredColorScheme`, an AppKit
   appearance set; a file in the Settings trees that must joins
@@ -1289,10 +1290,10 @@ must keep:
   compose instead of one erasing the other. An accent hover edge
   is legal only on a surface that carries no durable marking at
   all, as the gesture strip's pictures (#2537, `GestureStripTests`
-  ▸ `plateHoverCue`). The Home card is one since #2654 removed its
-  marking: its fill stays and its border takes the pointer, 2 pt
-  `cardHoverEdge` (#3040, `HomeCardChromeTests`). A marking returning
-  to that card takes its own channel. A searchable dropdown's
+  ▸ `plateHoverCue`). The Home card is one since #2654: its badges
+  do not use the border, so its fill stays and its border takes the
+  pointer (#3040, `HomeCardChromeTests`). A marking returning to that
+  edge takes its own channel, which is review's. A searchable dropdown's
   `DropdownCursor` IS the selection Return reads, so real
   pointer motion may move it there (`DropdownCursorWiringTests`)
   and nowhere else — a list whose selection anything beyond
@@ -1661,7 +1662,7 @@ Every surface, border and ink in the Settings tree comes from
 - **A plane's edge is `hairline`; a rule that is no plane's edge
   is `hairlineSubtle`** — between a card's groups or entries,
   between chips in a strip. `hairline` is the stronger in both
-  modes: in dark a rule at the edge's strength competes with the
+  modes (`SettingsThemeTokenTests`): in dark a rule at the edge's strength competes with the
   edge of what holds it, and in light the edge has to shape a white
   card on a pale page (#3040). No scan tells a rule from an edge, so
   this is review's.

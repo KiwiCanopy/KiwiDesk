@@ -139,8 +139,8 @@ struct HomeCard: View {
             .fill(SettingsTheme.card)
     }
 
-    /// The card's edge and the pointer's channel: a Home card
-    /// carries no durable marking (#1173, #2654, #3040).
+    /// The card's edge and the pointer's channel: no durable
+    /// marking on a Home card uses its border (#1173, #2654, #3040).
     private var cardStroke: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .strokeBorder(

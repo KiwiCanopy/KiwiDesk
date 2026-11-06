@@ -1,9 +1,10 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The plate paint every desk picture resolves (#2859): the light
+/// The plate paint a desk picture resolves (#2859): the light
 /// plate where the window is light and the look holds it
-/// (`holdsLightPlate`), else the dark plate (#786).
+/// (`holdsLightPlate`), else the dark plate (#786). Home's cards
+/// skip the verdict and keep the dark plate (#3040).
 extension HomeCardPlate {
     /// The one paint a picture of `settings` draws in `scheme`.
     static func palette(
@@ -24,7 +25,7 @@ extension HomeCardPlate {
 
     /// The dark plate's paint, the user's colours folded against
     /// it (ui-designer 2026-08-09). The look tiles (`LookPlate`,
-    /// #1740) keep it in both modes.
+    /// #1740) and Home's cards (#3040) keep it in both modes.
     static func darkPalette(
         _ settings: TilingSettings
     ) -> SchematicPalette {
@@ -59,7 +60,7 @@ extension SchematicPalette {
 /// picture's one writer, so every mark on it reads one verdict.
 private struct PlatePaintWriter: ViewModifier {
     let settings: TilingSettings
-    let alwaysDark: Bool
+    var alwaysDark = false
     @Environment(\.colorScheme) private var scheme
 
     func body(content: Content) -> some View {
@@ -94,13 +95,8 @@ private struct DeskPlateGround<Plate: InsettableShape>: ViewModifier {
 extension View {
     /// Resolves the plate paint for `settings` (#2859) without
     /// drawing a plate — for a picture whose plates sit inside.
-    func platePaint(
-        _ settings: TilingSettings,
-        alwaysDark: Bool = false
-    ) -> some View {
-        modifier(
-            PlatePaintWriter(settings: settings, alwaysDark: alwaysDark)
-        )
+    func platePaint(_ settings: TilingSettings) -> some View {
+        modifier(PlatePaintWriter(settings: settings))
     }
 
     /// Draws the picture on its plate, `shape`, in the paint
@@ -114,6 +110,8 @@ extension View {
         alwaysDark: Bool = false
     ) -> some View {
         modifier(DeskPlateGround(shape: shape, edged: edged))
-            .platePaint(settings, alwaysDark: alwaysDark)
+            .modifier(
+                PlatePaintWriter(settings: settings, alwaysDark: alwaysDark)
+            )
     }
 }

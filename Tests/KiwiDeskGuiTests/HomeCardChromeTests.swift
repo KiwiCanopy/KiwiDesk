@@ -7,8 +7,8 @@ import Testing
 /// The Home cards' plate-era chrome (#786): the two deliberate
 /// card heights, the desktop plate's shape and silence, the
 /// plate↔tall-group parity and the stroke-above-clip order —
-/// and, since #1173, the channel split gui.md cites this suite
-/// for: which property carries the mode and which the pointer.
+/// and the pointer's channel gui.md cites this suite for: the
+/// border takes the pointer and the fill stays (#3040).
 /// The palette hand-off's needle net split to
 /// `HomeCardPaletteWiringTests` at the file ceiling.
 ///
@@ -182,9 +182,14 @@ struct HomeCardChromeTests {
                 ".fill(SettingsTheme.card)"
             )
         )
-        let body = try propertyBody("cardStroke")
-        #expect(body.contains("hovering"))
-        #expect(body.contains("SettingsTheme.cardHoverEdge"))
+        let card = try squashed("HomeCard.swift")
+        #expect(
+            card.contains(
+                "hovering?SettingsTheme.cardHoverEdge"
+                    + ":SettingsTheme.hairline"
+            )
+        )
+        #expect(card.contains("hoverStroke:CGFloat=2"))
     }
 
     @Test("Simple's picture drops the outer frame, the board its edge")
@@ -194,12 +199,21 @@ struct HomeCardChromeTests {
         )
         #expect(picture.contains("drawsFrame:false"))
         let tile = try squashed("HomeCardPlate+Bars.swift")
-        #expect(tile.contains(".opacity(drawsChrome&&drawsFrame?1:0)"))
+        #expect(
+            tile.contains(
+                ".opacity(drawsChrome&&(drawsFrame"
+                    + "||!(palette??.unresolved).frameIsOptional)?1:0)"
+            )
+        )
         let board = try squashed(
             "Components/Keybindings/KeyboardBoard.swift"
         )
-        #expect(board.contains(".boardEdge"))
-        #expect(board.contains(".boardEdgeWidth"))
+        #expect(
+            board.contains(
+                ".strokeBorder((palette??.unresolved).boardEdge,"
+                    + "lineWidth:(palette??.unresolved).boardEdgeWidth)"
+            )
+        )
     }
 
     /// The brace-balanced body of a computed property, off the
