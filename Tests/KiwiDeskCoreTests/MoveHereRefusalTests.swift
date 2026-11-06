@@ -83,7 +83,7 @@ struct MoveHereRefusalTests {
             args: [.string(Self.bundle)]
         )
         #expect(!response.isSuccess)
-        #expect(refused(recorder, .cannotMoveHere(window: "")))
+        #expect(refused(recorder, .cannotMoveHereFullScreen))
         #expect(!refused(recorder, .noTitleMatch(app: "", text: "")))
         #expect(core.state.workspaces.space(of: WindowID(2)) == "3")
     }

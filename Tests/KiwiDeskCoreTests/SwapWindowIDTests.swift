@@ -160,7 +160,9 @@ struct SwapWindowIDTests {
             args: [.string("left"), .number(900_003)]
         )
         #expect(
-            away.error == "window 900003 is not in the Space you are on"
+            away.error
+                == "a directional swap takes only a window "
+                + "in the active Space"
         )
         #expect(row(core, Self.two) == [900_003, 900_004])
     }
@@ -179,13 +181,13 @@ struct SwapWindowIDTests {
         let core = makeCore()
         file(core, 900_005, in: Self.two, floating: true)
         let flagged = core.execute("swap", args: [.number(900_005)])
-        #expect(flagged.error == "window 900005 is floating")
+        #expect(flagged.error == "floating window 900005 cannot be swapped")
         core.state.workspaces.setMode(Self.two, .floating)
         let member = core.execute(
             "swap",
             args: [.number(900_001), .number(900_003)]
         )
-        #expect(member.error == "window 900003 is floating")
+        #expect(member.error == "floating window 900003 cannot be swapped")
         #expect(row(core, Self.one) == [900_001, 900_002])
         #expect(row(core, Self.two) == [900_003, 900_004, 900_005])
     }
@@ -195,7 +197,10 @@ struct SwapWindowIDTests {
         let core = makeCore()
         file(core, 900_006, in: Self.two, fullscreen: true)
         let response = core.execute("swap", args: [.number(900_006)])
-        #expect(response.error == "window 900006 is full screen")
+        #expect(
+            response.error
+                == "full-screen window 900006 cannot be swapped"
+        )
         #expect(row(core, Self.one) == [900_001, 900_002])
     }
 }

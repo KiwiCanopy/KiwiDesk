@@ -89,7 +89,10 @@ struct DesktopMoveNamedWindowTests {
             "move_to_desktop",
             args: [.number(2), .null, .number(99)]
         )
-        #expect(response.error == "desktop bridge unavailable on this macOS")
+        #expect(
+            response.error
+                == "the Desktop bridge is unavailable on this macOS"
+        )
     }
 
     @Test("a bad Desktop number answers ahead of an unknown window")
@@ -162,11 +165,11 @@ struct DesktopMoveNamedWindowTests {
             "move_to_desktop",
             args: [.number(2), .null, id]
         )
-        #expect(response.error == "window \(named.raw) is full screen")
+        #expect(response.error == "a full-screen window cannot change Desktop")
         #expect(lines.contains { $0.contains("cannot change Desktop") })
         core.state.apply(.windowFullscreenChanged(focused, isFullscreen: true))
         let unnamed = core.execute("move_to_desktop", args: [.number(2)])
-        #expect(unnamed.error == "window \(focused.raw) is full screen")
+        #expect(unnamed.error == "a full-screen window cannot change Desktop")
         #expect(movedWindows().isEmpty)
     }
 
@@ -183,7 +186,7 @@ struct DesktopMoveNamedWindowTests {
             "move_to_desktop",
             args: [.number(1), .string("mail"), .number(Double(window.raw))]
         )
-        #expect(response.error == "window \(window.raw) is in the pocket")
+        #expect(response.error == "a pocketed window cannot change Desktop")
         #expect(core.state.workspaces.space(of: window) == nil)
         #expect(spoken.isEmpty)
         #expect(movedWindows().isEmpty)
@@ -197,7 +200,7 @@ struct DesktopMoveNamedWindowTests {
         #expect(core.state.pocketPhase(of: focused) == .out)
         var spoken: [String] = []
         core.borders.announceRefusal = { spoken.append($0) }
-        let refusal = "window \(focused.raw) is a pocket window"
+        let refusal = "a pocket window cannot change Desktop"
         let unnamed = core.execute("move_to_desktop", args: [.number(2)])
         #expect(unnamed.error == refusal)
         let named = core.execute(

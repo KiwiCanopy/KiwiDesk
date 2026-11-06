@@ -172,7 +172,7 @@ struct EmptyActiveSpaceRefusalTests {
             args: [.number(1)]
         )
         #expect(
-            response.error == "no managed window is currently focused"
+            response.error == "no window is focused"
         )
         #expect(
             logs.contains {

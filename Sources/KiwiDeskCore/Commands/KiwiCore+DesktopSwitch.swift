@@ -81,9 +81,9 @@ extension KiwiCore {
                 displayIdentifier: target.displayIdentifier
             )
         else {
-            onLog("\(verb): the Desktop bridge refused the switch")
+            onLog("\(verb): the Desktop bridge is unavailable on this macOS")
             return .refused(
-                .fail("the Desktop bridge refused the switch")
+                .fail("the Desktop bridge is unavailable on this macOS")
             )
         }
         // origin == space would mean isCurrent, which the guard

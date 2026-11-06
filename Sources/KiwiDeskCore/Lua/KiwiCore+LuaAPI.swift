@@ -176,15 +176,29 @@ extension KiwiCore {
     ) {
         lua.register(luaName, in: table) { [weak self] args in
             guard let self else { return .none }
-            let response = self.execute(
-                command,
-                args: args.map(\.jsonValue)
-            )
+            let values = args.map(\.jsonValue)
+            let response = self.execute(command, args: values)
             if let error = response.error {
-                self.onLog("\(command): \(error)")
+                let call = Self.loggedCall(command, values)
+                self.onLog("\(call): \(error)")
             }
             return response.data?.luaValue ?? .none
         }
+    }
+
+    /// A failed Lua call for the log, with the values a script's
+    /// loop passed, since a refusal does not repeat them (#3033).
+    static func loggedCall(
+        _ command: String,
+        _ args: [JSONValue]
+    ) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        guard !args.isEmpty,
+            let data = try? encoder.encode(args),
+            let text = String(data: data, encoding: .utf8)
+        else { return command }
+        return "\(command) \(text.prefix(200))"
     }
 
     /// `KiwiDesk.on(event, callback)`.

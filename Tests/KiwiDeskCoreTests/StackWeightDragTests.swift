@@ -236,7 +236,8 @@ struct StackWeightDragTests {
         )
         #expect(
             response.error
-                == "the focused window is visiting from another Space"
+                == "a tiled sticky window can be resized only "
+                + "in its home Space"
         )
         #expect(weight(core, 50) == nil)
         let home = core.state.workspaces[SpaceID("2")]?.stackWeights

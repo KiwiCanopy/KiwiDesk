@@ -129,10 +129,10 @@ struct JumpSwapHereTests {
         let (core, recorder) = makeCore()
         pair(core)
         core.swapHere(.window(WindowID(9)))
-        #expect(cued(recorder, .cannotSwapHere(window: "")))
+        #expect(cued(recorder, .cannotSwapGone))
         recorder.logs = []
         core.swapHere(.hiddenApp(900_009))
-        #expect(cued(recorder, .cannotSwapHere(window: "")))
+        #expect(cued(recorder, .cannotSwapHiddenApp))
         #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
     }
 
@@ -147,8 +147,29 @@ struct JumpSwapHereTests {
         #expect(core.state.isPocketed(WindowID(3)))
         core.state.workspaces.focus(WindowID(1), in: "1")
         recorder.logs = []
-        #expect(!core.execute("swap_here", args: [.number(3)]).isSuccess)
-        #expect(cued(recorder, .cannotSwapHere(window: "")))
+        let response = core.execute("swap_here", args: [.number(3)])
+        #expect(response.error == "pocketed window 3 cannot be swapped")
+        #expect(cued(recorder, .cannotSwapPocketed))
+    }
+
+    /// In no Space and not pocketed: the verb's other unfiled side.
+    @Test("a window in no Space is cued as unfiled")
+    func unfiledIsCued() {
+        let (core, recorder) = makeCore()
+        pair(core)
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: WindowID(3),
+                pid: getpid(),
+                appName: "App",
+                title: "W3"
+            )
+        )
+        recorder.logs = []
+        let response = core.execute("swap_here", args: [.number(3)])
+        #expect(response.error == "window 3 is in no Space")
+        #expect(cued(recorder, .cannotSwapUnfiled))
+        #expect(!cued(recorder, .cannotSwapPocketed))
     }
 
     /// The CLI draws the same cues (Ruling 5).

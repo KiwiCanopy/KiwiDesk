@@ -12,15 +12,19 @@ extension KiwiCore {
         case keyed(app: String)
         /// One window, another already marked.
         case taken
-        /// Untracked, in native full screen, or a transient panel.
-        case cannot
+        /// What `pocketBlock` refuses, or untracked: a construction
+        /// net, since `commandTarget` refuses an untracked id first.
+        case cannot(reason: String)
     }
 
     func pocketNamedRefusal(_ id: WindowID) -> PocketNamedRefusal? {
         if let app = state.pocketKeyOwner(of: id) { return .keyed(app: app) }
-        guard let window = state.windows[id], !window.isFullscreen,
-            !window.isTransientOverlay
-        else { return .cannot }
+        guard let window = state.windows[id] else {
+            return .cannot(reason: "this window cannot be pocketed")
+        }
+        if let reason = pocketBlock(window) {
+            return .cannot(reason: reason)
+        }
         guard state.pocketPhase(of: id) == nil else { return nil }
         let capacity = appWide.pocketCapacity
         return state.pocketAcceptsMark(capacity) ? nil : .taken
@@ -37,7 +41,7 @@ extension KiwiCore {
             switch pocketNamedRefusal(id) {
             case .keyed(let app): return refuseKeyedPocketWindow(id, app: app)
             case .taken: return refuseSecondPocketWindow(id)
-            case .cannot: return .fail("this window cannot be pocketed")
+            case .cannot(let reason): return .fail(reason)
             case nil: break
             }
             if state.isPocketed(id) { return .ok() }
@@ -49,14 +53,23 @@ extension KiwiCore {
         }
     }
 
+    /// The rule keeping `window` out of the pocket, nil where it
+    /// may go in: the one home of that gate.
+    func pocketBlock(_ window: ManagedWindow) -> String? {
+        if window.isFullscreen {
+            return "a full-screen window cannot be pocketed"
+        }
+        return window.isTransientOverlay
+            ? "a panel or popup cannot be pocketed" : nil
+    }
+
     /// Marks `id` and pockets it — the empty pocket's press, and a
     /// named one (#2678).
     func markAndPocket(_ id: WindowID) -> CommandResponse {
         guard let window = state.windows[id] else {
             return .fail("no focused window")
         }
-        guard !window.isFullscreen, !window.isTransientOverlay
-        else { return .fail("this window cannot be pocketed") }
+        if let reason = pocketBlock(window) { return .fail(reason) }
         // Marked first (#2675), its float frame read while it is
         // still in its Space and filed at the park; a window
         // already floating keeps its own.

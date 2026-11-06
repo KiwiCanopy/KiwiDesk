@@ -64,7 +64,7 @@ struct ResizeRefusalCensusTests {
             "ownMaximum on a grow, gridNoOtherTrack on a shrink — "
             + "the cell reaches both outer edges on the axis "
             + "(#763, #2707)",
-        "no \\(axis) parameter for this arrangement":
+        "this zone does not divide \\(spans)":
             "noAxisHere — the other axis divides (#1255)",
         "focused window is alone in its column":
             "nothingToDivide — the column has one member (#1258)",
@@ -123,7 +123,7 @@ struct ResizeRefusalCensusTests {
             + "all — nothing to draw on",
         "track has no local window":
             "every member is a visiting traveler; #414's rule",
-        "the focused window is visiting from ":
+        "a tiled sticky window can be resized only ":
             "a traveler's share write is refused (#308); the "
             + "sticky mark carries this one, not the pill",
     ]

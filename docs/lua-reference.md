@@ -5826,9 +5826,13 @@ it with [`toggle_pocket_window`](#toggle_pocket_window); each
   where that is still on the Space, else to the Space's focused
   window.
 
+:::unreleased
 While the window's app is hidden, taking it out or putting it back
-fails with `pocket is unreachable` until the app is shown again; an
-app that quit while hidden empties the pocket at the next call. A
+fails with `the pocket window's app is hidden or relaunching` until
+the app is shown again.
+:::
+
+An app that quit while hidden empties the pocket at the next call. A
 `move_to_space` or `swap` naming the pocketed window's id is
 refused.
 
@@ -5915,8 +5919,13 @@ mark. Unmarking tiles it on the active Space, as
 [`make_tiled`](#make_tiled) does; a window a float rule or
 detection floats stays floating.
 
+:::unreleased
 While one window is marked, a call on another window fails with a
-pill: "Pocket is already taken". Unmark the marked window first; a
+pill: "The Pocket takes one window. Set it to Several windows to add
+more."
+:::
+
+Unmark the marked window first; a
 pocketed window is never the focused one, so take it out
 with [`pocket`](#pocket) before unmarking it. Fails on a window in
 native full screen and on a transient panel or popup. Bound to
@@ -5975,8 +5984,9 @@ app, added with **Give an app its own Pocket key…**.
 Called with no such shortcut — from the CLI, say — the window it
 opens is an ordinary pocket window, counted like any other: under
 `"one"`, with another pocket window marked, the call fails with
-`another window is the pocket window` (and the pill "Pocket is
-already taken" on the focused window) and opens nothing. Fails
+`another window is the pocket window` (and the pill "The Pocket
+takes one window. Set it to Several windows to add more." on the
+focused window) and opens nothing. Fails
 with `app not found: <id>` for an app macOS cannot find.
 
 **Example:**

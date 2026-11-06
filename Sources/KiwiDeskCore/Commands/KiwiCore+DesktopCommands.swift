@@ -103,7 +103,7 @@ extension KiwiCore {
     ) -> DesktopResolution {
         guard canDriveDesktops else {
             return .refused(
-                .fail("desktop bridge unavailable on this macOS")
+                .fail("the Desktop bridge is unavailable on this macOS")
             )
         }
         guard let number = args.first?.intValue, number >= 1 else {

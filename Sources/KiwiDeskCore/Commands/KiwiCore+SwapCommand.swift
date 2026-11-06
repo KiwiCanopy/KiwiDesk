@@ -41,8 +41,8 @@ extension KiwiCore {
                         == state.workspaces.activeSpace
                 else {
                     return .fail(
-                        "window \(window.raw) is not in the Space you "
-                            + "are on"
+                        "a directional swap takes only a window "
+                            + "in the active Space"
                     )
                 }
                 return navigate(args, swapping: true, origin: window)

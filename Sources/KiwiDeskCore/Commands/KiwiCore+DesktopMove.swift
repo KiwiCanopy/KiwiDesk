@@ -82,7 +82,7 @@ extension KiwiCore {
             }
             guard WMBridge.moveWindows([window], to: target.space)
             else {
-                return .fail("the Desktop bridge refused the move")
+                return .fail("the Desktop bridge is unavailable on this macOS")
             }
             // An explicit Space outranks the screen-home rule:
             // the user named the destination (#1150).

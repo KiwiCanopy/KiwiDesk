@@ -41,13 +41,15 @@ extension KiwiCore {
         let id = slot.window
         guard state.windows[id] != nil else {
             guard let pid = slot.pid, eventLoop.processIdentity.runs(pid)
-            else { return .fail("pocket is unreachable") }
+            else {
+                return .fail("the pocket window's app cannot be found")
+            }
             openOrFocus.activate(pid)
             return .ok()
         }
         if state.isPocketed(id) {
             return takePocketOut(id)
-                ? .ok() : .fail("pocket is unreachable")
+                ? .ok() : .fail(takeOutFailure(id))
         }
         putInPocket(id)
         return .ok()
