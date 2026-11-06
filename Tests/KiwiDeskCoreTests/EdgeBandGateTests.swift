@@ -110,6 +110,12 @@ struct EdgeBandGateTests {
             separateSpaces: false
         )
         #expect(bands.first { $0.screen == laptop }?.bottom == true)
+        let right = EdgeBandWrite.bands(
+            of: [laptop, other(1728, 0), other(0, 1117)],
+            for: window(x: 1012, y: 50),
+            separateSpaces: false
+        )
+        #expect(right.first { $0.screen == laptop }?.right == true)
     }
 
     /// Only a screen touching the edge covers: this one leaves a gap.
