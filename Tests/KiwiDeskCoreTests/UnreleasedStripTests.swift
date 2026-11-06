@@ -21,7 +21,7 @@ import Testing
 /// reads that name off `site/remark-unreleased.mjs`. **Do not
 /// read that as this suite guarding the rename.** `site/**` is on
 /// `.github/ci-ignore.txt`, so a PR touching only the plugin
-/// skips both macOS jobs and this suite never runs for the edit
+/// skips the macOS jobs and this suite never runs for the edit
 /// it would catch — the placement `CiPathFilterTests` refuses,
 /// invisible to it here because the value arrives through a
 /// script this suite shells out to rather than through a literal

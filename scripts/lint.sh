@@ -28,19 +28,30 @@ FORMAT_ROOTS=("$ROOT/Sources" "$ROOT/Tests" "$ROOT/Package.swift")
 if [ "$#" -gt 0 ]; then
     FORMAT_ROOTS=()
     for path in "$@"; do
+        # A bare `a=b.swift` would read to awk as an assignment.
+        case "$path" in
+            /*) ;;
+            *) path="./$path" ;;
+        esac
         if [ -d "$path" ]; then
             FORMAT_ROOTS+=("$path")
             while IFS= read -r f; do
-                FILES+=("$f")
+                [ -f "$f" ] && FILES+=("$f")
             done < <(find "$path" -name '*.swift')
         elif [ -f "$path" ]; then
-            FORMAT_ROOTS+=("$path")
+            case "$path" in
+                *.swift) FORMAT_ROOTS+=("$path") ;;
+            esac
             FILES+=("$path")
+        else
+            # A typo would otherwise check nothing and read "Lint OK".
+            echo "ERROR: no such file or directory: $path"
+            STATUS=1
         fi
     done
 else
     while IFS= read -r f; do
-        FILES+=("$f")
+        [ -f "$f" ] && FILES+=("$f")
     done < <(find "$ROOT/Sources" "$ROOT/Tests" -name '*.swift' \
         2>/dev/null; echo "$ROOT/Package.swift")
 fi
@@ -81,10 +92,12 @@ if [ "${#FILES[@]}" -gt 0 ]; then
     REPORT="$(printf '%s\0' "${FILES[@]}" | xargs -0 awk \
         -v max="$MAX_LINE" -v hard="$HARD_FILE" -v soft="$SOFT_FILE" \
         -v show="$SHOW_WARNINGS" "$CHECK")" || STATUS=1
-    SOFT_COUNT="$(grep -c '^#SOFT$' <<<"$REPORT" || true)"
-    grep -v '^#SOFT$' <<<"$REPORT" || true
-    if grep -q '^ERROR:' <<<"$REPORT"; then
-        STATUS=1
+    if [ -n "$REPORT" ]; then
+        SOFT_COUNT="$(grep -c '^#SOFT$' <<<"$REPORT" || true)"
+        grep -v '^#SOFT$' <<<"$REPORT" || true
+        if grep -q '^ERROR:' <<<"$REPORT"; then
+            STATUS=1
+        fi
     fi
 fi
 

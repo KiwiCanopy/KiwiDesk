@@ -369,7 +369,8 @@ jobs:
               *) exit 1 ;;
             esac
           done
-          if [ "$CHANGES" != "success" ] || [ "$RUN" = "true" ]; then
+          # Only an explicit `run=false` owes less than the full run.
+          if [ "$CHANGES" != "success" ] || [ "$RUN" != "false" ]; then
             [ "$GUI" = "success" ] && [ "$CORE" = "success" ]
           elif [ "$LIGHT" = "true" ]; then
             [ "$READERS" = "success" ]
@@ -384,9 +385,9 @@ jobs:
       ${{ !cancelled() && (needs.changes.result != 'success'
       || needs.changes.outputs.run == 'true') }}
     name: Release Build
-    # A sibling job, not a fourth step in build-lint-test: `swift
-    # test` there already compiles the tree in debug, so building
-    # release in the same job compiles it twice in series and
+    # A sibling job, not a step in test-gui: `swift test` there
+    # already compiles the tree in debug, so building release in
+    # the same job compiles it twice in series and
     # grows the pipeline by the release build's full wall clock.
     # As a parallel job it costs nothing on the critical path.
     #

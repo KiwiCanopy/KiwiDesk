@@ -742,17 +742,19 @@ the `verify-gate` skill, which owns that call.
 
 **Each test target compiles and runs in a job of its own, and a new
 test target joins one of those jobs in the same change**: `swift
-test --test-product` builds that target and its dependencies, so a
-runner compiles half the tree and the two runs stop queueing behind
-each other (`CiRequiredJobTests` ▸ `everyTargetHasAJob`). The flag is
-hidden in SwiftPM (read 2026-11-06), so it may go without notice;
-that fails the job loudly, and the remedy is the plain whole-package
-`swift test`. **The required context is the `build-lint-test` job, a
+test --test-product` builds that target and its dependencies, so the
+two targets stop building and running in series
+(`CiRequiredJobTests` ▸ `everyTargetHasAJob`). The flag is hidden in
+SwiftPM (read 2026-11-06), so it may go without notice; that fails
+the jobs loudly, and the remedy is one test job running the plain
+`swift test`, with the judge's `needs` and `CiRequiredJobTests` moving
+in the same change. **The required context is the `build-lint-test` job, a
 judge over the test jobs**, so moving a job costs no ruleset edit. It
 fails closed: a job the filter's answer owed must have succeeded,
 since a skip reaches it looking like a pass (`CiRequiredJobTests` ▸
-`judgeFailsClosed`), and a new gated job joins its `needs` and its
-verdict.
+`judgeFailsClosed`), and a gated job that is no required context of
+its own joins its `needs` and its verdict (`CiRequiredJobTests` ▸
+`judgeCoversEveryGatedJob`).
 
 **Ratchet a compiler diagnostic on the DEBUG PR build, never on
 the release job or the tag path (#1594).** `ci.yml`'s `Build`
@@ -781,7 +783,7 @@ same ones in the same order, so `Tests/` is ratcheted too
 (#1596).** A difference is a test-only warning landing green, and
 it rebuilds the package between the steps, since SwiftPM
 recompiles when the flag set changes. `WarningRatchetWorkflowTests`
-reads both test steps' arguments — and the `verify-gate` skill's
+reads every test step's arguments — and the `verify-gate` skill's
 local check — off the Build step's. What the ratchet does NOT
 reach is worth stating once: `-Xswiftc` is swiftc's, so
 `Vendor/`'s C stays clang's.
@@ -948,8 +950,8 @@ the dispatch on the day it does.
 **The dispatch is filtered, and that buys the PR leg only.** It
 passes `filter_paths`, asking that run to apply
 `.github/ci-ignore.txt` the way the `pull_request` it stands in
-for would — so a `site/**`-only sync reports both contexts as
-skipped in under a minute instead of paying a full macOS build
+for would — so a `site/**`-only sync reports both contexts in under
+a minute instead of paying a full macOS build
 before it can land. (The `merge_group` leg went with the queue
 on 2026-09-14; `main` requires an up-to-date branch instead, so
 the PR run IS the run on the merged result.) The button's
