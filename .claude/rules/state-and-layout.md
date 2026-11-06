@@ -329,7 +329,11 @@ editing here:
   #1150's review found them disagreeing), so it is refused with
   the pin hint, never hand-assigned, because the next
   `resolveSpaceDisplays` would move it back and re-open the same
-  undo. Carry the screen a Space lands on ON the resolution
+  undo. A shared Desktop names no screen, so a hidden one is judged
+  against the screen holding the window's frame, the arrival's
+  reading, or that net drops the name (#3033,
+  `DesktopMoveSharedSpaceTests`). Carry the screen a Space lands on
+  ON the resolution
   (`SpaceTargetResolution.space(_:landing:)`) and hand it to the
   sticky gate as `landingOn` — the gate reads a nil assignment
   as "elsewhere", so the thread is load-bearing exactly where

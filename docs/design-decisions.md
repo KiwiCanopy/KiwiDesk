@@ -8117,6 +8117,20 @@ Space it was taken in, so a window filed into a different Space
 returns by the arrival's ordinary placement rather than at its
 old index (#1207).
 
+:::unreleased
+Shared Desktops (*Displays have separate Spaces* off) name no
+screen, so that refusal has nothing to compare with, and a hidden
+one moves no frame: the window arrives on the screen it left, and
+the #1010 net rightly outranks a name on another screen. So a
+hidden shared Desktop refuses a Space off the window's screen, read
+from its frame as the arrival reads it, and a follow with it, since
+a follow arrives the same way
+([#3033](https://github.com/KiwiCanopy/KiwiDesk/issues/3033)). Only
+the visible Desktop files a window at the command, where the layout can
+carry it, so the rule users carry is that screens can only be crossed
+through the visible Desktop.
+:::
+
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
 
 **[Principle]**

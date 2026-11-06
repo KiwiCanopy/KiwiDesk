@@ -511,6 +511,13 @@ Neither `move_to_desktop` nor `move_to_desktop_and_follow` moves a
 **full-screen** window or a **pocket** window, named or focused:
 each refuses and the window stays on its Desktop. Either verb can
 also [name the window](#move_to_desktop_and_follow).
+
+With *Displays have separate Spaces* off, macOS keeps a window on its
+screen when it changes Desktop, so screens can only be crossed through
+the visible Desktop. A Space on another screen than the window's is
+taken only for the Desktop on screen; a hidden one refuses it. To send
+a window to another screen and another Desktop, cross on the visible
+Desktop first, then move it.
 :::
 
 ### move_to_desktop_and_follow
