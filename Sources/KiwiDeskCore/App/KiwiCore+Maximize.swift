@@ -2,7 +2,9 @@ import Foundation
 
 /// `toggle_maximized` (#2448): the focused tiled window fills its
 /// screen until pressed again, until focus lands on another tiled
-/// window of its Space, or until it leaves the tiled set. The
+/// window of its Space, or until it leaves the tiled set. A sticky
+/// window's flag sits on the Space it renders on, so leaving that
+/// Space ends it (#3035). The
 /// verdict is `StateCoordinator.maximizedWindow(of:)`; the frame
 /// is `TilingEngine.fillingMaximized`. A write that rearranges a
 /// Space ends its maximize at the write (`Space.releaseScrollSlot`,
@@ -10,23 +12,18 @@ import Foundation
 extension KiwiCore {
     func toggleMaximized() -> CommandResponse {
         guard let id = focusedWindowID,
-            let spaceID = state.workspaces.space(of: id),
+            let window = state.windows[id],
+            let spaceID = state.renderSpace(of: window),
             let space = state.workspaces[spaceID]
         else { return .fail("no focused window") }
         if state.maximizedWindow(of: space) == id {
             state.workspaces.withSpace(spaceID) { $0.maximized = nil }
         } else {
-            // A sticky window draws on other Spaces' layouts too,
-            // so only a plain tiled member of its own Space fills.
-            guard state.windows[id]?.isSticky == false else {
-                cueMaximizeRefused(id, sticky: true)
-                return .fail("a sticky window cannot be maximized")
-            }
             guard space.mode != .floating,
                 spaceID == state.workspaces.activeSpace,
-                state.localTiledMembers(of: space).contains(id)
+                state.effectiveTiledMembers(of: space).contains(id)
             else {
-                cueMaximizeRefused(id, sticky: false)
+                cueMaximizeRefused(id)
                 return .fail("only a tiled window can be maximized")
             }
             state.workspaces.withSpace(spaceID) { $0.maximized = id }
@@ -56,7 +53,7 @@ extension KiwiCore {
     /// of it; the drop's pass places it. Bars and rings return now.
     @discardableResult
     func endMaximize(of window: WindowID) -> Bool {
-        guard let spaceID = state.workspaces.space(of: window),
+        guard let spaceID = state.windows[window].flatMap(state.renderSpace),
             state.workspaces[spaceID]?.maximized == window
         else { return false }
         state.workspaces.withSpace(spaceID) { $0.maximized = nil }
@@ -68,18 +65,13 @@ extension KiwiCore {
 
     /// A refused press's cue: the pill is its only one, so
     /// VoiceOver hears it too (#2480).
-    private func cueMaximizeRefused(_ window: WindowID, sticky: Bool) {
+    private func cueMaximizeRefused(_ window: WindowID) {
         flashRefusalPill(
             window,
-            text: sticky
-                ? L(
-                    "maximize.refused.sticky",
-                    "A sticky window can't be maximized."
-                )
-                : L(
-                    "maximize.refused.floating",
-                    "Only a tiled window can be maximized."
-                ),
+            text: L(
+                "maximize.refused.floating",
+                "Only a tiled window can be maximized."
+            ),
             symbol: "arrow.up.left.and.arrow.down.right",
             announce: true
         )

@@ -246,12 +246,23 @@ public struct WorkspaceManager: Sendable {
         spaces[id]?.remove(window)
     }
 
+    /// Hands the system focus to a maximized traveler a window closed
+    /// over (#3035). No `Space.focused` write: a traveler is never
+    /// one (#431).
+    mutating func handFocusBack(toTraveler window: WindowID) {
+        lastFocused = window
+    }
+
     /// Re-keys window ID preserving slot and focus (#308).
     public mutating func rekey(_ old: WindowID, to new: WindowID) {
         if lastFocused == old { lastFocused = new }
         // The candidate follows a native-tab rekey like
         // `lastFocused`, or every tab switch silently kills it.
         if focusReturnCandidate == old { focusReturnCandidate = new }
+        // A traveler's flag sits on a Space it is no member of (#3035).
+        for id in order where spaces[id]?.maximized == old {
+            spaces[id]?.maximized = new
+        }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)
     }
