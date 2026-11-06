@@ -60,7 +60,7 @@ jobs:
   changes:
     name: Detect relevant changes
     # ubuntu, not macOS: this runs on every push and bills at 1x.
-    # It exists to stop the two 10x jobs below, so it has to be
+    # It exists to stop the 10x jobs below, so it has to be
     # cheap enough that the trade is never in question.
     runs-on: ubuntu-latest
     outputs:
@@ -191,17 +191,20 @@ jobs:
           echo "run=$run" >> "$GITHUB_OUTPUT"
           echo "light=$light" >> "$GITHUB_OUTPUT"
 
-  build-lint-test:
+  # Each test target compiles and runs on a runner of its own: `swift
+  # test --test-product` builds that target and its dependencies, where
+  # a whole test build costs the two in series. The flag is hidden in
+  # SwiftPM, so a removal reds here rather than silently widening.
+  # `CiRequiredJobTests` holds every test target to one of these jobs.
+  test-gui:
     needs: changes
     # A failed or timed-out filter runs everything: a bare `if:`
     # implies success(), and the skip it makes passes a required
-    # check with nothing run (#1984). The light lane (#2712) runs
-    # this job too, its test steps swapped for the readers'.
+    # check with nothing run (#1984).
     if: >-
       ${{ !cancelled() && (needs.changes.result != 'success'
-      || needs.changes.outputs.run == 'true'
-      || needs.changes.outputs.light == 'true') }}
-    name: Build, Lint & Test
+      || needs.changes.outputs.run == 'true') }}
+    name: Build, Lint & Test GUI
     # xcode-27 (macOS 27, a preview image, #1500) with Xcode 27.2,
     # which the image ships beside its 27.1 default:
     # the toolchain the tree is developed on. The tree needs at
@@ -257,32 +260,120 @@ jobs:
       # suite TYPE names, so exec-child suites carry the
       # ExecTests prefix (.claude/rules/tests.md, pinned by
       # MachineTouchTests).
-      # `!= 'true'`, never `== 'false'`: a filter that failed
-      # leaves `light` empty, and the full suite must run.
-      - name: Test
-        if: needs.changes.outputs.light != 'true'
+      - name: Test (GUI)
         run: >-
-          scripts/warning-gate swift test --skip ExecTests
+          scripts/warning-gate swift test
+          --test-product KiwiDeskGuiTests --skip ExecTests
           -Xswiftc -warnings-as-errors
           -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
-      - name: Test (ExecTests)
-        if: needs.changes.outputs.light != 'true'
+      - name: Test (GUI ExecTests)
         run: >-
-          scripts/warning-gate swift test --filter ExecTests
+          scripts/warning-gate swift test
+          --test-product KiwiDeskGuiTests --filter ExecTests
           -Xswiftc -warnings-as-errors
           -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 
-      # The light lane's suites: those reading `.claude/` or
-      # AGENTS.md, held to the tree by CiInstructionLaneTests.
+  test-core:
+    needs: changes
+    if: >-
+      ${{ !cancelled() && (needs.changes.result != 'success'
+      || needs.changes.outputs.run == 'true') }}
+    name: Test Core
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode
+        run: |
+          if ! sudo xcode-select -s /Applications/Xcode_27.2.app; then
+            echo "::warning::Xcode_27.2.app is gone; fell back to" \
+              "Xcode.app, which release.yml will not do"
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          swift --version
+          xcodebuild -version
+
+      - name: Test (Core)
+        run: >-
+          scripts/warning-gate swift test
+          --test-product KiwiDeskCoreTests --skip ExecTests
+          -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
+
+      - name: Test (Core ExecTests)
+        run: >-
+          scripts/warning-gate swift test
+          --test-product KiwiDeskCoreTests --filter ExecTests
+          -Xswiftc -warnings-as-errors
+          -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
+
+  # The light lane's suites: those reading `.claude/` or
+  # AGENTS.md, held to the tree by CiInstructionLaneTests.
+  instruction-readers:
+    needs: changes
+    # Only the filter's own answer: a failed filter runs everything.
+    if: >-
+      ${{ needs.changes.result == 'success'
+      && needs.changes.outputs.light == 'true' }}
+    name: Instruction Readers
+    runs-on: xcode-27
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Select Xcode
+        run: |
+          if ! sudo xcode-select -s /Applications/Xcode_27.2.app; then
+            echo "::warning::Xcode_27.2.app is gone; fell back to" \
+              "Xcode.app, which release.yml will not do"
+            sudo xcode-select -s /Applications/Xcode.app
+          fi
+          swift --version
+          xcodebuild -version
+
+      - name: Lint
+        run: ./scripts/lint.sh
+
+      # The filter on its own line, so a refusal fails the step.
       - name: Instruction readers
-        if: needs.changes.outputs.light == 'true'
-        # The filter on its own line, so a refusal fails the step.
         run: |
           filter="$(scripts/ci-instruction-filter)"
           scripts/warning-gate swift test --filter "$filter" \
             -Xswiftc -warnings-as-errors \
             -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
+
+  # The required context (scripts/protect-main.sh), so the jobs above
+  # can change without a ruleset edit. It runs whatever they did and
+  # fails closed: a job the filter owed must have succeeded, since a
+  # skip would otherwise pass the check with nothing run (#1984).
+  build-lint-test:
+    needs: [changes, test-gui, test-core, instruction-readers]
+    if: ${{ !cancelled() }}
+    name: Build, Lint & Test
+    runs-on: ubuntu-latest
+    steps:
+      - name: Judge the test jobs
+        env:
+          CHANGES: ${{ needs.changes.result }}
+          RUN: ${{ needs.changes.outputs.run }}
+          LIGHT: ${{ needs.changes.outputs.light }}
+          GUI: ${{ needs.test-gui.result }}
+          CORE: ${{ needs.test-core.result }}
+          READERS: ${{ needs.instruction-readers.result }}
+        run: |
+          echo "changes=$CHANGES run=$RUN light=$LIGHT" \
+            "gui=$GUI core=$CORE readers=$READERS"
+          for result in "$GUI" "$CORE" "$READERS"; do
+            case "$result" in
+              success|skipped) ;;
+              *) exit 1 ;;
+            esac
+          done
+          if [ "$CHANGES" != "success" ] || [ "$RUN" = "true" ]; then
+            [ "$GUI" = "success" ] && [ "$CORE" = "success" ]
+          elif [ "$LIGHT" = "true" ]; then
+            [ "$READERS" = "success" ]
+          fi
 
   release-build:
     needs: changes

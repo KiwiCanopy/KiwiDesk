@@ -732,13 +732,27 @@ and locale checks with it.
 `main` and on PRs targeting it — and on the same two events for a
 long-lived release branch, which is a merge target like `main`:
 **a branch PRs merge into joins both trigger lists before its
-first PR**, or those PRs merge with no CI at all. Both jobs are gated on a `changes`
+first PR**, or those PRs merge with no CI at all. The macOS jobs are gated on a `changes`
 job, so a change confined to `.github/ci-ignore.txt`'s list leaves
 them skipped. A red build blocks merging. The release build runs
-as a separate job (#532), required on `main` exactly like the
-build-lint-test one — `scripts/protect-main.sh`'s `CONTEXTS`
+as a separate job (#532), required on `main` exactly like
+`Build, Lint & Test` — `scripts/protect-main.sh`'s `CONTEXTS`
 names both — and when to run it locally as well is decided by
 the `verify-gate` skill, which owns that call.
+
+**Each test target compiles and runs in a job of its own, and a new
+test target joins one of those jobs in the same change**: `swift
+test --test-product` builds that target and its dependencies, so a
+runner compiles half the tree and the two runs stop queueing behind
+each other (`CiRequiredJobTests` ▸ `everyTargetHasAJob`). The flag is
+hidden in SwiftPM (read 2026-11-06), so it may go without notice;
+that fails the job loudly, and the remedy is the plain whole-package
+`swift test`. **The required context is the `build-lint-test` job, a
+judge over the test jobs**, so moving a job costs no ruleset edit. It
+fails closed: a job the filter's answer owed must have succeeded,
+since a skip reaches it looking like a pass (`CiRequiredJobTests` ▸
+`judgeFailsClosed`), and a new gated job joins its `needs` and its
+verdict.
 
 **Ratchet a compiler diagnostic on the DEBUG PR build, never on
 the release job or the tag path (#1594).** `ci.yml`'s `Build`
@@ -799,7 +813,7 @@ forever on it. A job skipped by `if:` satisfies one. Both shapes
 save the same macOS minutes; only the second survives
 `scripts/protect-main.sh` (#487). `ci.yml` therefore always
 triggers, and a cheap `ubuntu-latest` `changes` job reads
-`.github/ci-ignore.txt` and gates the two macOS jobs on its
+`.github/ci-ignore.txt` and gates the macOS jobs on its
 output — and on its failure too: a gated job's `if:` takes
 `!cancelled()` and a failure arm, so a `changes` job that did not
 succeed runs everything. The bare `if:` implies `success()`, and a
@@ -822,8 +836,8 @@ paths, never the whole suite or the release build. They cannot join
 the ignore list, since tests read them. The `changes` job picks the
 lane for a pull request, or a dispatch standing in for one
 (`filter_paths`) — `main`'s push run stays the full-suite
-backstop — any other path clears it, and every full
-test step gates on `light != 'true'`, so a filter that failed runs
+backstop — any other path clears it, and its job gates on the
+filter having succeeded, so a filter that failed runs
 everything. The
 suites run are `.github/ci-instruction-readers.txt`, held to the
 tree both ways by `CiInstructionLaneTests`: a suite that starts

@@ -135,9 +135,7 @@ struct WarningGateTests {
     @Test("Every ratcheted step runs through the gate")
     func ratchetedStepsAreGated() throws {
         let yaml = try workflowSource("ci.yml")
-        for name in [
-            "Build", "Test", "Test (ExecTests)", "Instruction readers",
-        ] {
+        for name in ["Build"] + CiRequiredJobTests.ratchetedTestSteps {
             let step = try workflowStep(name, in: yaml)
             try #require(
                 step.split(separator: "\n").first?

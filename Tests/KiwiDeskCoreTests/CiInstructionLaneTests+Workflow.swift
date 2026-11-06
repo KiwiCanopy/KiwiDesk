@@ -156,15 +156,14 @@ extension CiInstructionLaneTests {
                 "            light=false\n            break"
             )
         )
-        for name in ["Test", "Test (ExecTests)"] {
-            let step = try workflowStep(name, in: yaml)
-            #expect(
-                step.contains("if: needs.changes.outputs.light != 'true'"),
-                "\(name) must run unless the lane was picked"
-            )
-        }
+        // The lane answers `run=false`, so the test jobs' own gate
+        // skips them; a filter that failed runs them, never the lane.
+        #expect(
+            CiPathFilterTests.jobGate("instruction-readers", in: yaml)
+                == "needs.changes.result == 'success' "
+                + "&& needs.changes.outputs.light == 'true'"
+        )
         let readers = try workflowStep("Instruction readers", in: yaml)
-        #expect(readers.contains("if: needs.changes.outputs.light == 'true'"))
         #expect(
             readers.contains("filter=\"$(scripts/ci-instruction-filter)\"")
         )
