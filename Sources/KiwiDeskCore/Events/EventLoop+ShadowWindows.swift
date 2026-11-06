@@ -136,6 +136,19 @@ extension EventLoop {
                 // past its launch: nothing of its lists late.
                 guard elements[pid]?.isEmpty ?? true else {
                     shadows.endWait(id, pid: pid)
+                    // AppKit's placeholder for a sibling's fullscreen
+                    // transition: a tile drawn for its beat, whose
+                    // leaving misranks the stayer (#2935).
+                    if let host = fullscreenSibling(pid, siblings) {
+                        shadows.record(id, host: host, pid: pid)
+                        onLog(
+                            "shadow: w\(id.raw) stands in for "
+                                + "w\(host.raw)'s fullscreen transition "
+                                + "— not tracked"
+                        )
+                        queueRetrack(pid: pid)
+                        return .shadow
+                    }
                     return .window
                 }
                 return waitOrTrack(id, pid: pid, reading: "alone")
@@ -146,6 +159,21 @@ extension EventLoop {
                     + "(pid \(pid)) — not tracked"
             )
             return .shadow
+        }
+    }
+
+    /// The tracked window of `pid` out of the list with the
+    /// fullscreen arm open for it and its budget unspent (#2935):
+    /// past that a shell owes it nothing, whatever the sweep does.
+    private func fullscreenSibling(
+        _ pid: pid_t,
+        _ siblings: [WindowTraits]
+    ) -> WindowID? {
+        let listed = Set(siblings.map(\.id))
+        return elements[pid]?.keys.first {
+            !listed.contains($0)
+                && (removalDistrusted[$0]?.arms ?? 0) < Self.removalRecheckCap
+                && fullscreenRemovalArmIsOpen(for: $0)
         }
     }
 
