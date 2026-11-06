@@ -101,9 +101,10 @@ struct CoreLocalizationBoundaryTests {
         // menu's greyed row, both Core's.
         "Commands/AutoFloatReason+Rendering.swift": 6,
         // The pocket's sticky refusal (#2446), its second-window
-        // refusal (#2675), its keyed one, two spellings (#2612), and
-        // its Desktop move refusal (#2888), on the same pill.
-        "Commands/PocketRefusal.swift": 5,
+        // refusal (#2675) with the capacity label it names, its keyed
+        // one, two spellings (#2612), and its Desktop move refusal
+        // (#2888), on the same pill.
+        "Commands/PocketRefusal.swift": 6,
         // The three marks' VoiceOver names (#1799, #2446), with
         // the plate's glyph images since #2671.
         "Borders/StickyMarkOverlay+Glyphs.swift": 3,
@@ -157,9 +158,10 @@ struct CoreLocalizationBoundaryTests {
         // draws on the window, as the resize pills are — and Jump
         // to window's Bring here refusal (#1875), move_here's
         // two (#1513), a move into the window's own Space, the
-        // swap verbs' five (#2885) and a full-screen window's Desktop
+        // swap verbs' per-state refusals (#2885), Move here's
+        // full-screen one and a full-screen window's Desktop
         // move (#2888).
-        "Commands/WindowActionRefusal.swift": 13,
+        "Commands/WindowActionRefusal.swift": 19,
         // KiwiVision's out-of-reach pill (#2103 ruling 16).
         "App/KiwiCore+VisionReach.swift": 1,
         // A bar shortcut's refusal pill (#761), drawn beside the

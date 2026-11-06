@@ -24,7 +24,7 @@ extension KiwiCore {
                 state.effectiveTiledMembers(of: space).contains(id)
             else {
                 cueMaximizeRefused(id)
-                return .fail("not a tiled window")
+                return .fail("only a tiled window can be maximized")
             }
             state.workspaces.withSpace(spaceID) { $0.maximized = id }
         }

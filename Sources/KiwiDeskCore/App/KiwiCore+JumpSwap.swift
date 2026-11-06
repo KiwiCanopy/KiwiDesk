@@ -16,7 +16,7 @@ extension KiwiCore {
         withUserMotion {
             guard case .window(let id) = target, state.windows[id] != nil
             else {
-                refuseJumpSwap(target)
+                refuseJumpSwap(target, on: display)
                 return
             }
             let here = moveHereSpace(on: display)
@@ -54,10 +54,11 @@ extension KiwiCore {
     /// A row no verb can see in this slice — a hidden app, or a
     /// window minimized or on a Desktop no screen shows — cued on
     /// the focused window, where the user is looking.
-    private func refuseJumpSwap(_ target: JumpEntry.Target) {
-        let refusal = WindowActionRefusal.cannotSwapHere(
-            window: jumpRowName(target)
-        )
+    private func refuseJumpSwap(
+        _ target: JumpEntry.Target,
+        on display: DisplayID?
+    ) {
+        let refusal = jumpSwapRefusal(target, on: display)
         guard let focused = focusedWindowID else {
             onLog("\(refusal.logReason): \(target)")
             return
@@ -65,21 +66,34 @@ extension KiwiCore {
         cueWindowAction(refusal, on: focused)
     }
 
-    /// A row's name as Core knows it: its window's title, else its
-    /// app's name.
-    private func jumpRowName(_ target: JumpEntry.Target) -> String {
-        switch target {
-        case .hiddenApp(let pid):
-            return eventLoop.liveApps(owners: [])
-                .first { $0.pid == pid }?.ref.name ?? ""
-        case .window(let id):
-            if let away = state.awayWindows[id] {
-                return away.title.isEmpty ? away.appName : away.title
-            }
-            if let parked = state.minimizeOrder.first(where: { $0.id == id }) {
-                return parked.title.isEmpty ? parked.app : parked.title
-            }
-            return ""
+    /// The pill for a row no verb can see, read off the verdict the
+    /// row is drawn by (`swapRefusal`), so the two never disagree.
+    private func jumpSwapRefusal(
+        _ target: JumpEntry.Target,
+        on display: DisplayID?
+    ) -> WindowActionRefusal {
+        switch swapRefusal(target, on: display) {
+        case .hiddenApp: .cannotSwapHiddenApp
+        case .minimized: .cannotSwapMinimized
+        case .otherDesktop: .cannotSwapHiddenDesktop
+        case .fullScreen:
+            .cannotSwapFullScreen(window: awayName(target))
+        case .yoursFullScreen:
+            .cannotSwapFullScreen(
+                window: jumpSwapPartner(
+                    in: moveHereSpace(on: display)
+                ).map(windowTitle) ?? ""
+            )
+        case nil, .floating, .sticky, .pocketed, .unfiled, .yours,
+            .yoursFloating, .yoursSticky, .nothingHere:
+            .cannotSwapGone
         }
+    }
+
+    private func awayName(_ target: JumpEntry.Target) -> String {
+        guard case .window(let id) = target,
+            let away = state.awayWindows[id]
+        else { return "" }
+        return away.title.isEmpty ? away.appName : away.title
     }
 }

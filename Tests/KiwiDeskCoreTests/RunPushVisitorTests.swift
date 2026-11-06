@@ -124,7 +124,8 @@ struct RunPushVisitorTests {
         )
         #expect(
             response?.error
-                == "the focused window is visiting from another Space"
+                == "a tiled sticky window can be resized only "
+                + "in its home Space"
         )
         #expect(core.state.workspaces[id]?.runSizes.isEmpty == true)
     }
@@ -172,7 +173,8 @@ struct RunPushVisitorTests {
         )
         #expect(
             response?.error
-                == "the focused window is visiting from another Space"
+                == "a tiled sticky window can be resized only "
+                + "in its home Space"
         )
         #expect(core.state.workspaces[id]?.stackWeights[w(50)] == nil)
     }

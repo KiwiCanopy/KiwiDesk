@@ -267,8 +267,8 @@ extension KiwiCore {
         // traveler; the keyboard path's `space.focused` cannot.
         guard space.windows.contains(focused) else {
             return .fail(
-                "the focused window is visiting from "
-                    + "another Space"
+                "a tiled sticky window can be resized only "
+                    + "in its home Space"
             )
         }
         guard let offset = column.firstIndex(of: focused),

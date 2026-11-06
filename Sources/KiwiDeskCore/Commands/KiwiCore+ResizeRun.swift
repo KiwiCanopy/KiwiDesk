@@ -106,8 +106,8 @@ extension KiwiCore {
     ) -> CommandResponse {
         guard space.windows.contains(window) else {
             return .fail(
-                "the focused window is visiting from "
-                    + "another Space"
+                "a tiled sticky window can be resized only "
+                    + "in its home Space"
             )
         }
         guard let index = zone.members.firstIndex(of: window) else {
@@ -160,8 +160,8 @@ extension KiwiCore {
         // pruned (#308): its Space never removes it.
         guard space.windows.contains(focused) else {
             return .fail(
-                "the focused window is visiting from "
-                    + "another Space"
+                "a tiled sticky window can be resized only "
+                    + "in its home Space"
             )
         }
         guard

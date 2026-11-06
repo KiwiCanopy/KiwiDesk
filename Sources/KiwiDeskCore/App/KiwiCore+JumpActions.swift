@@ -154,7 +154,7 @@ extension KiwiCore {
         // The one verdict KiwiHub's rows are drawn by (#2885).
         switch moveHereVerdict(window, into: active) {
         case .fullScreen:
-            cueWindowAction(.cannotMoveHere(window: name), on: window.id)
+            cueWindowAction(.cannotMoveHereFullScreen, on: window.id)
             return false
         case .sticky(let scope):
             // The sticky gate's own refusal, cued.
@@ -200,7 +200,11 @@ extension KiwiCore {
             away,
             in: desktopMemory.readDesktops()
         )
-        guard !fullScreen, let bundleID = away.appBundleID?.lowercased(),
+        guard !fullScreen else {
+            cueWindowAction(.cannotMoveHereFullScreen, on: away.id)
+            return false
+        }
+        guard let bundleID = away.appBundleID?.lowercased(),
             let hopped = hopAwayWindows(
                 bundleID: bundleID,
                 into: active,

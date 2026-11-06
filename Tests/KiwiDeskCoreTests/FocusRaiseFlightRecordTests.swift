@@ -11,7 +11,8 @@ import Testing
 @Suite("Raise flight write sites", .serialized)
 @MainActor
 struct FocusRaiseFlightRecordTests {
-    private static let generic = "no managed window is currently focused"
+    private static let anotherApp =
+        "another app is in front of the focused window"
     private let anchor = WindowID(1)
     private let previous = WindowID(2)
     private let previousPID: pid_t = 999
@@ -109,7 +110,7 @@ struct FocusRaiseFlightRecordTests {
             )
         )
         #expect(core.raiseFlight == nil)
-        #expect(preflight(core, "focus")?.error == Self.generic)
+        #expect(preflight(core, "focus")?.error == Self.anotherApp)
     }
 
     /// The write site: a `focus` press that moved the anchor
@@ -157,6 +158,6 @@ struct FocusRaiseFlightRecordTests {
         )
         core.focusWindow(anchor, warp: false)
         #expect(core.raiseFlight == nil)
-        #expect(preflight(core, "focus")?.error == Self.generic)
+        #expect(preflight(core, "focus")?.error == Self.anotherApp)
     }
 }

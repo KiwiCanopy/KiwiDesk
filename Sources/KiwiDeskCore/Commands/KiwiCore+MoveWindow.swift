@@ -17,7 +17,7 @@ extension KiwiCore {
         case .refused(let response): return response
         case .window(let window):
             guard !state.isPocketed(window) else {
-                return .fail("window \(window.raw) is in the pocket")
+                return .fail("a pocketed window cannot move to a Space")
             }
             let target = SpaceID(raw)
             if state.workspaces.space(of: window) == target,
@@ -46,10 +46,10 @@ extension KiwiCore {
             $0.title.isEmpty ? $0.appName : $0.title
         }
         cueWindowAction(
-            .alreadyIn(window: name ?? "", space: target.raw),
+            .alreadyIn(window: name ?? ""),
             on: window
         )
-        return .fail("window \(window.raw) is already in \(target.raw)")
+        return .fail("the window is already in that Space")
     }
 
     /// Relocates an explicit `window` into `target`. `follow`

@@ -10,8 +10,7 @@ import Testing
 @Suite("A move into the window's own Space refuses", .serialized)
 struct MoveToOwnSpaceTests {
     private static let reason = WindowActionRefusal.alreadyIn(
-        window: "",
-        space: ""
+        window: ""
     ).logReason
 
     /// Three windows in Space 1, the first focused, Space 2 empty.
@@ -97,11 +96,8 @@ struct MoveToOwnSpaceTests {
     @Test("the sentence names the window it is about")
     func sentenceNamesTheWindow() {
         LocalizationManager.shared.select("en")
-        let pill = WindowActionRefusal.alreadyIn(
-            window: "App1",
-            space: "1"
-        )
-        #expect(pill.sentence == "“App1” is already in Space 1")
+        let pill = WindowActionRefusal.alreadyIn(window: "App1")
+        #expect(pill.sentence == "“App1” is already in that Space")
     }
 
     @Test("a sticky window keeps the sticky gate's answer")

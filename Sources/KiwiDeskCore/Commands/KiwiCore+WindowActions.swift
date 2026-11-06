@@ -81,7 +81,7 @@ extension KiwiCore {
         case .success(let target): window = target
         }
         guard let element = eventLoop.element(for: window.id) else {
-            return .fail("window \(window.id.raw) has no AX element")
+            return .fail("the window has no AX element")
         }
         windowActions.close(element) { [weak self] pressed in
             guard !pressed else { return }
@@ -125,7 +125,7 @@ extension KiwiCore {
     }
 
     /// Flashes the refusal where `cueWindow(for:)` says; the
-    /// sentence names its subject, so it reads right on either.
+    /// sentence names its subject, by title or by kind of window.
     /// Drawn without sound: it lands after the walk, long after
     /// any hotkey fire that asked, and the sound is a fire's.
     func cueWindowAction(

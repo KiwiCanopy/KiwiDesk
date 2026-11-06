@@ -149,7 +149,11 @@ struct PocketAppTests {
         fixture.arrive(9)
         fixture.core.state.apply(.windowFocused(mine))
         fixture.core.execute("toggle_pocket_window")
-        #expect(spoken == ["Its Pocket key is Control Option T"])
+        #expect(
+            spoken == [
+                "This window has its own Pocket key: Control Option T"
+            ]
+        )
     }
 
     @Test("pocket steps past the keyed window")

@@ -5,11 +5,12 @@ paths:
 
 # Core boundaries
 
-Deliberately short — it loads on every `KiwiDeskCore` edit. Six
+Deliberately short — it loads on every `KiwiDeskCore` edit. Seven
 rules that bind anywhere in Core: five seams, each violated
-*outside* the directory that owns them, and the one lifetime rule
-every panel owner owes — the count is the six bullets immediately
-below, so it corrects itself when a seventh is added.
+*outside* the directory that owns them, the one lifetime rule
+every panel owner owes and the one wording rule every refusal owes
+— the count is the seven bullets immediately below, so it corrects
+itself when an eighth is added.
 
 - **Core names, the GUI narrates (#96).** A user-facing
   condition detected in Core returns **structure** (a case, an
@@ -37,6 +38,21 @@ below, so it corrects itself when a seventh is added.
   [localization.md](localization.md).
 - **CLI/IPC error strings stay English** — they are a machine
   contract, not UI copy. The deliberate exception to the above.
+- **A refusal states the rule that forbids the act, and names a
+  value only to say which (#3033).** Write `Can't move a window
+  across screens to a hidden Desktop.`, never `Space 5 is on
+  another screen, and Desktop 2 is hidden`, which repeats the
+  arguments and explains nothing. A limit reached is such a rule:
+  `Minimum window size reached`. A value earns its place only where
+  the rule alone would not tell the reader what to change: the
+  argument that is the fault (`unknown space: 9`), one of several
+  same-kind arguments (which of `swap`'s windows), or the subject
+  of a pill that may draw on another window. A refusal may also
+  name the setting, chord or command that lifts it, with the value
+  that command needs. This binds a `.fail(`
+  string and a pill's sentence alike, and a no-arm spelling keeps
+  the grammar `CommandDispatchReachTests` reads. No scan can tell
+  a rule from a restatement, so the wording is review's.
 - **A `var onLog` seam is wired in `KiwiCore+Bootstrap`**, in
   the group where all of them are, and in the same change that
   declares it — and it **defaults to `CoreLog.write`**, which is

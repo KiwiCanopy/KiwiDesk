@@ -101,7 +101,11 @@ struct AwayFullScreenTests {
         #expect(row?.movesHere == false)
         #expect(core.swapRefusal(.window(WindowID(7))) == .fullScreen)
         #expect(core.moveHereRefusal(.window(WindowID(7))) == .fullScreen)
+        var logs: [String] = []
+        core.onLog = { logs.append($0) }
         #expect(core.moveHere(.window(WindowID(7))) == false)
+        let cue = WindowActionRefusal.cannotMoveHereFullScreen.logReason
+        #expect(logs.contains { $0.contains(cue) })
         // On a user Desktop it is the other-Desktop row it was.
         core.state.awayWindows[WindowID(7)]?.nativeSpace = 4
         let desk = core.jumpEntries().first

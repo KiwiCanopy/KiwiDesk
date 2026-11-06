@@ -21,7 +21,7 @@ extension KiwiCore {
         // the screen is why nothing shows, whatever those say (#2775).
         if shelfStandsDown(on: display) {
             cueRevealRefusal(.standsDown(bar), display: display)
-            return .fail("the \(name) stands down for what is in front")
+            return .fail("bars stay hidden while a window fills the screen")
         }
         let mode = workspaces[space]?.mode ?? .bsp
         let settings = tiler.settings

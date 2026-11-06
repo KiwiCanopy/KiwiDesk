@@ -16,7 +16,7 @@ extension KiwiCore {
         case .window(let id):
             if state.isPocketed(id) {
                 return takePocketOut(id)
-                    ? .ok() : .fail("pocket is unreachable")
+                    ? .ok() : .fail(takeOutFailure(id))
             }
             guard let window = state.windows[id] else {
                 return .fail("unknown window: \(id.raw)")
@@ -24,7 +24,7 @@ extension KiwiCore {
             // A full-screen window keeps a macOS Space of its own,
             // which no KiwiDesk switch reaches (#670).
             guard !window.isFullscreen else {
-                return .fail("window \(id.raw) is full screen")
+                return .fail("focus_window cannot reach a full-screen window")
             }
             guard !raiseCrossesDesktops(id) else {
                 return .fail(

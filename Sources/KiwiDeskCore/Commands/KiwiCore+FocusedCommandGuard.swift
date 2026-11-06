@@ -240,39 +240,44 @@ extension KiwiCore {
     /// The denied clause, said twice from ONE reading — the
     /// log's `reason` and the response's `error`. An anchor
     /// missing because the ACTIVE Space is empty is the one
-    /// clause whose error leaves the generic sentence (#1336);
-    /// every other clause keeps it.
+    /// clause whose error names the Space instead (#1336);
+    /// every other clause says its own.
     private func denialSentences(
         focused: ManagedWindow?,
         front: pid_t?
     ) -> (anchor: String, reason: String, error: String) {
-        let generic = "no managed window is currently focused"
         let anchor =
             focused.map { "window \($0.id.raw) pid \($0.pid)" }
             ?? "none"
         let reason: String
+        let error: String
         if let focused, let front {
             if !owns(front: front, pid: focused.pid) {
                 reason = "frontmost pid \(front) is another app"
+                error = "another app is in front of the focused window"
             } else if !eventLoop.observes(pid: focused.pid) {
                 reason = "pid unobserved"
+                error = "KiwiDesk is not tracking the focused window's app"
             } else {
                 reason = "ignored panel latched"
+                error = "a panel KiwiDesk ignores is in front"
             }
         } else if focused == nil {
             if let empty = emptyActiveSpaceRefusal() {
                 return (anchor, "no focus anchor — \(empty)", empty)
             }
             reason = "no focus anchor"
+            error = "no window is focused"
         } else {
             reason = "foreground unknown"
+            error = "the frontmost app is unknown"
         }
-        return (anchor, reason, generic)
+        return (anchor, reason, error)
     }
 
     /// The refusal for a focus anchor missing because the active
     /// Space holds nothing (#1336), or nil when it is not empty —
-    /// members none of which is focused stay the generic case.
+    /// members none of which is focused say none is focused.
     /// Names the window a sibling Space on the SAME screen marks
     /// focused and the `focus_space` that brings it under the
     /// verb: `lastFocused`'s Space where it is among them, else
