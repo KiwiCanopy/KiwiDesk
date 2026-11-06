@@ -80,9 +80,13 @@ extension KiwiCore {
             .cannotSwapFullScreen(window: awayName(target))
         case .yoursFullScreen:
             .cannotSwapFullScreen(
-                window: focusedWindowID.map(windowTitle) ?? ""
+                window: jumpSwapPartner(
+                    in: moveHereSpace(on: display)
+                ).map(windowTitle) ?? ""
             )
-        default: .cannotSwapGone
+        case nil, .floating, .sticky, .pocketed, .unfiled, .yours,
+            .yoursFloating, .yoursSticky, .nothingHere:
+            .cannotSwapGone
         }
     }
 

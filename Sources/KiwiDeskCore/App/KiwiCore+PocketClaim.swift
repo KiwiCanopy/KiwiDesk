@@ -26,7 +26,7 @@ extension KiwiCore {
                 for: bundle,
                 at: wallClock()
             ),
-            !claim.spent, !window.isTransientOverlay, !window.isFullscreen,
+            !claim.spent, pocketBlock(window) == nil,
             state.pocketPhase(of: window.id) == nil
         else { return nil }
         switch provenance {

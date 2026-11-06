@@ -168,6 +168,39 @@ struct RefusalWordingTests {
         #expect(core.execute("pocket").error == KiwiCore.pocketAppHidden)
     }
 
+    @Test("an out window its app's hiding took says so")
+    func outSlotAnswersHidden() {
+        let core = makeCore()
+        let id = WindowID(1)
+        track(core, 1, pid: getpid())
+        let marked = core.state.markPocketWindow(id)
+        #expect(marked)
+        core.state.windows.remove(id)
+        #expect(core.execute("pocket").error == KiwiCore.pocketAppHidden)
+    }
+
+    @Test("every take-out door names no active Space")
+    func takeOutWithNoSpace() {
+        let core = makeCore()
+        let id = WindowID(1)
+        track(core, 1)
+        let marked = core.state.markPocketWindow(
+            id,
+            owner: "com.example.app"
+        )
+        #expect(marked)
+        core.state.pocket[0].phase = .pocketed
+        core.state.workspaces = WorkspaceManager()
+        let noSpace = "no active Space to take the pocket window out onto"
+        #expect(
+            core.execute("focus_window", args: [.number(1)]).error == noSpace
+        )
+        #expect(
+            core.execute("pocket_app", args: [.string("com.example.app")])
+                .error == noSpace
+        )
+    }
+
     @Test("an app's key on a slot with no process says it is not found")
     func keyedSlotNotFound() {
         let core = makeCore()
@@ -300,6 +333,12 @@ struct RefusalWordingTests {
         #expect(
             KiwiCore.loggedCall("set", [.string(long)]).count
                 == "set ".count + 200
+        )
+        #expect(
+            KiwiCore.loggedCall(
+                "put",
+                [.object(["b": .string("/x"), "a": .number(1)])]
+            ) == "put [{\"a\":1,\"b\":\"/x\"}]"
         )
     }
 }

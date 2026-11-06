@@ -12,7 +12,8 @@ extension KiwiCore {
         case keyed(app: String)
         /// One window, another already marked.
         case taken
-        /// Untracked, or what `pocketBlock` refuses.
+        /// What `pocketBlock` refuses, or untracked: a construction
+        /// net, since `commandTarget` refuses an untracked id first.
         case cannot(reason: String)
     }
 
