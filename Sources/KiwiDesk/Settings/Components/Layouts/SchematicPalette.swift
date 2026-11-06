@@ -73,8 +73,8 @@ struct SchematicPalette: Equatable {
     var boundKeyEdge: Color { light ? SettingsTheme.lightAccent : .clear }
 }
 
-/// Which plate a picture draws on (#2859): the dark plate, or the
-/// light one a look earns in light mode.
+/// Which plate a picture draws on (#2859, #3041): the dark plate,
+/// or the light one in light mode.
 enum PlateGround: Equatable {
     case dark
     case light

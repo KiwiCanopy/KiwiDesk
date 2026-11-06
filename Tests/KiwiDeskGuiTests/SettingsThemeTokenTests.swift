@@ -82,7 +82,7 @@ struct SettingsThemeTokenTests {
         ),
         // Identical in both modes on purpose (#786): the token
         // never repaints with the window's appearance; which
-        // plate a picture takes is the look's verdict (#2859).
+        // plate a picture takes is `HomeCardPlate.palette`'s (#3041).
         Pin(
             "previewPlate",
             0x12_25_1A,

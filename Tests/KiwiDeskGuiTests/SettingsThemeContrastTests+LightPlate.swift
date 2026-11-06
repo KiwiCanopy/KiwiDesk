@@ -5,7 +5,7 @@ import SwiftUI
 /// The inks the light plate draws (#2859 ruling 3): its caption,
 /// readout and fallback ink on the plate, the well and a window,
 /// and the incoming window's `+` — a mark, so the non-text floor.
-/// The focus ring on the plate is the verdict's, measured per
+/// The focus ring on the plate is `lightRingHex`'s, measured per
 /// look in `PlateGroundTests`.
 extension SettingsThemeContrastTests {
     static let lightPlate: [Pairing] = [
@@ -42,6 +42,6 @@ extension SettingsThemeContrastTests {
         ),
         // KiwiVision's scene puts no ink of its own on the plate:
         // its windows draw on their own fills, its menu bar is a
-        // wash of `lightInk`, its ring is the verdict's.
+        // wash of `lightInk`, its ring is `lightRingHex`'s.
     ]
 }

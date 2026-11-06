@@ -7,8 +7,8 @@ import Testing
 /// `SettingsRawColorTests` at the §2.1 ceiling.
 ///
 /// Chrome whose ground the window's appearance does not pick —
-/// dark in both modes, or a plate the look's verdict picks
-/// (#2859): the ambient-derived
+/// dark in both modes, or a plate that repaints only through its
+/// paint (#2859, #3041): the ambient-derived
 /// hierarchical greys land near-white or near-black by the
 /// WINDOW's appearance while the ground never moves, so on
 /// these families they are banned outright — on mode-varying
@@ -56,8 +56,8 @@ struct SettingsFixedGroundTests {
         // plate (#1726); `GestureEntry`'s sentence is not.
         "GestureInk", "GesturePictures",
         // Advanced's Layouts sketches, moved onto the plate
-        // (#2859): the plate's ground is the look's verdict, not
-        // the window's, so no ambient ink rides beside it.
+        // (#2859): a picture reads the plate's paint, so no ambient
+        // ink rides beside it.
         "LayoutStrip", "LayoutPreviewPanel", "SpacesPanelPreview",
     ]
 

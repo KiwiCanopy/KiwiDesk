@@ -1,17 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The plate paint a desk picture resolves (#2859): the light
-/// plate where the window is light and the look holds it
-/// (`holdsLightPlate`), else the dark plate (#786). Home's cards
-/// skip the verdict and keep the dark plate (#3040).
+/// The plate paint a desk picture resolves: the light plate where
+/// the window is light, with a ring that reads on it (#2859, #3041),
+/// else the dark plate (#786). Home's cards keep the dark plate
+/// (#3040).
 extension HomeCardPlate {
     /// The one paint a picture of `settings` draws in `scheme`.
     static func palette(
         _ settings: TilingSettings,
         in scheme: ColorScheme
     ) -> SchematicPalette {
-        guard scheme == .light, holdsLightPlate(settings) else {
+        guard scheme == .light else {
             return darkPalette(settings)
         }
         return SchematicPalette(
@@ -19,7 +19,8 @@ extension HomeCardPlate {
             ink: SettingsTheme.lightInk,
             base: SettingsTheme.lightPlate,
             ground: .light,
-            focus: Color(kiwiHex: focusHex(settings))
+            focus: lightRingHex(settings).map(Color.init(kiwiHex:))
+                ?? SettingsTheme.lightInk
         )
     }
 
@@ -57,7 +58,7 @@ extension SchematicPalette {
 }
 
 /// Writes a picture's plate paint into `schematicPalette`: the
-/// picture's one writer, so every mark on it reads one verdict.
+/// picture's one writer, so every mark on it reads one paint.
 private struct PlatePaintWriter: ViewModifier {
     let settings: TilingSettings
     var alwaysDark = false
@@ -101,8 +102,8 @@ extension View {
 
     /// Draws the picture on its plate, `shape`, in the paint
     /// resolved for `settings` (#2859); `edged` strokes the
-    /// plate's inset edge over it. `alwaysDark` skips the verdict:
-    /// Home's cards, in both modes (#3040).
+    /// plate's inset edge over it. `alwaysDark` keeps the dark plate
+    /// in both modes: Home's cards (#3040).
     func deskPlate(
         _ settings: TilingSettings,
         in shape: some InsettableShape,
