@@ -1106,14 +1106,24 @@ Accessibility.
 
 The Space switch is on that card: **Space switches** at its top
 picks Slide, Show the Space or None, and **Slide duration**
-beneath it paces the slide (#1956, #2524). The **Animate windows**
-master greys neither, and Reduce Motion greys only the duration:
+beneath the picks paces the slide (#1956, #2524). The **Animate
+windows** master greys none of them, and Reduce Motion greys only
+the duration:
 under Reduce Motion a Slide shows the Space instead, which is how
 a switch reads with less motion, and the plate drops only its
-fade. The duration also greys while the pick is not Slide. The
-pair closes with "Applies at once, in every profile." and a
+fade. The duration also greys while no slide would play. The
+group closes with "Applies at once, in every profile." and a
 divider above **Animate windows**, and the card's Reduce Motion
 warning names window animations alone.
+
+:::unreleased
+**Step between Spaces (mouse or trackpad)** sits under **Space
+switches** with the same three options, for the scroll Space step
+alone; **Space switches** keeps every other switch. Its caption
+shows only while its pick differs from the row above, which says
+the same sentence otherwise. **Slide duration** stays live while
+either pick draws a slide (#2971).
+:::
 
 Three bar motions keep playing under Reduce Motion, by the owner's
 ruling: a hidden shelf's reveal — slide, grow, unfold or fade — its

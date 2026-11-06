@@ -7,6 +7,8 @@ extension MotionCard {
         switch key {
         case .spaceTransition:
             spaceTransitionRow
+        case .spaceScrollTransition:
+            spaceScrollTransitionRow
         case .spaceSlideDuration:
             spaceSlideDurationRow
         case .animationsMaster:

@@ -148,6 +148,8 @@ extension KiwiCore {
             return setModeCue(args)
         case "set_space_transition":
             return setSpaceTransition(args)
+        case "set_space_scroll_transition":
+            return setSpaceScrollTransition(args)
         case "set_space_slide_duration":
             return setSpaceSlideDuration(args)
         case "set_space_history":

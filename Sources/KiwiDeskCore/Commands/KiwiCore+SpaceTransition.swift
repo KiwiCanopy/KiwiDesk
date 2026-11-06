@@ -3,9 +3,9 @@ import Foundation
 /// The retile behind a Space switch (#207, #1956).
 ///
 /// State (active space, focus, bars, events) commits up front; the
-/// frames then land in one instant pass. An explicit switch with
-/// `space.transition` on Slide plays the plate slide around that
-/// pass (`prepareSpaceSlide`, `runSpaceSlide`, #1956, #2524): the
+/// frames then land in one instant pass. An explicit switch whose
+/// `drawnSpaceTransition(for:)` is Slide plays the plate slide around
+/// that pass (`prepareSpaceSlide`, `runSpaceSlide`, #1956, #2524): the
 /// motion is drawn, and the windows still move once each. On Show
 /// the Space — or Slide under Reduce Motion — it pays the plate
 /// naming the Space instead (`paySpaceCue`, #2143).
@@ -67,7 +67,7 @@ extension KiwiCore {
         if let run {
             runSpaceSlide(run)
         } else if let slide {
-            paySpaceCue(on: slide.display)
+            paySpaceCue(for: slide)
         }
     }
 }

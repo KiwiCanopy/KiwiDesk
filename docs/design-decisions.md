@@ -3854,16 +3854,47 @@ in "Scrolling, special setting". A Monocle with no chrome needs
 no layout of its own either: its per-layout App Bar row turned
 off is that already.
 
-**A Space switch slides, shows the Space, or neither — one
-app-wide choice, the slide by default (#2524).** An explicit
-switch — `focus_space` and the Space history and order steps, the
-scroll Space step, a move-and-follow, Open or Focus onto another
+**A Space switch slides, shows the Space, or neither — app-wide,
+the slide by default (#2524).** An explicit
+switch — `focus_space` and the Space history and order steps, a
+move-and-follow, Open or Focus onto another
 Space or a launch follow — shows itself as `space.transition`
 says: **Slide**, the #1956 plate slide; **Show the Space**, the
 instant switch with #2142's plate naming the Space and its layout
 on the screen that switched; or **None**, the instant switch
 alone. Every switch is one instant pass underneath, and the
 choice changes only what is drawn over it.
+
+:::unreleased
+*The scroll step chooses for itself (#2971).* A key press is a
+command whose result you want now; a scroll step is a hand moving
+the desk, and a hand expects to see it move. So
+`space.scroll_transition` picks Slide, Show the Space or None for
+the scroll Space step alone, default Slide, and `space.transition`
+keeps every other switch; a user who wants instant keys and a
+sliding swipe picks None and leaves Slide. It is one more app-wide
+value in the `space` group rather than a `scroll_gesture.*` leaf,
+which resolves per profile, and the two rows sit together because
+they answer one question. The step's own `scrolled` argument rides
+`SpaceSlideIntent`, never a scope like `fromSpaceBar`, which catches
+whatever inline Lua the scope runs. Reduce Motion still wins: the
+pick for the input is resolved first, then
+`drawn(reduceMotion:)`, so Slide draws Show the Space under it.
+
+*Not carried over, by the owner's ruling (2026-11-04).* A stored
+`none` or `show` does not reach the new key and no
+`ConfigMigration` step is owed: nobody had a scroll choice to make,
+they picked one value that covered both. So a user who picked `none`
+or `show` sees a slide on scroll until they change the new row, and
+the release notes tell them to. The rejected alternative is a `same`
+default, or a step carrying the old value, so a user who picked
+`none` for comfort without Reduce Motion is not overridden; the cost
+of the ruling is that user. No format bump either: the change breaks
+no reader, since an older build's `Space` skips a key it does not
+know, and latching the whole file read-only there would cost more
+than the one pick. An older build saving the file drops the key, so
+the row reads Slide again after a round trip through one.
+:::
 
 *Why three, and the slide first.* The slide and the plate answer
 different questions. The plate says where you are now, at the
@@ -3920,14 +3951,14 @@ reason (`FullscreenStandDownTests` ▸
 `fullScreenKeepsTheSlideAway`).
 
 *On the Animations card, apart from the window rows.* The
-picker and **Slide duration** sit at the top of Looks &
+pickers and **Slide duration** sit at the top of Looks &
 Animations ▸ Animations, above **Animate windows**, which does
 not reach them:
 that master paces windows, and the slide moves none. Reduce
-Motion does not grey the picker, since the fallback above is the
+Motion does not grey a picker, since the fallback above is the
 answer that setting asks for. The duration greys whenever no
-slide would play — the pick is not Slide, or Reduce Motion is on —
-read through the same `drawn(reduceMotion:)`, and both grey where
+slide would play, read through the same `drawn(reduceMotion:)`,
+and all grey where
 `init.lua` owns the config, as the Desktop cue's row does (#1741,
 #2142). The group ends with the note that it applies at once in
 every profile and a divider, so the window rows below it read as

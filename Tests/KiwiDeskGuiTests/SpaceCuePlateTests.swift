@@ -48,14 +48,16 @@ struct SpaceCuePlateTests {
     @Test("the picker and its pace lead the Animations card")
     func pickerLeadsTheAnimationsCard() {
         #expect(
-            Array(ColorsRowOrder.motionAtRest.prefix(3)) == [
+            Array(ColorsRowOrder.motionAtRest.prefix(4)) == [
                 .colours(.spaceTransition),
+                .colours(.spaceScrollTransition),
                 .colours(.spaceSlideDuration),
                 .colours(.animationsMaster),
             ]
         )
         for key in [
             SettingKey.colours(.spaceTransition),
+            .colours(.spaceScrollTransition),
             .colours(.spaceSlideDuration),
         ] {
             let placement = key.placement
@@ -95,8 +97,25 @@ struct SpaceCuePlateTests {
         )
         #expect(
             rows.contains(
-                "spaceTransitionLuaOwned||model.appWide.spaceTransition"
-                    + ".drawn(reduceMotion:reduceMotion)!=.slide"
+                "spaceTransitionLuaOwned||![model.appWide.spaceTransition,"
+                    + "model.appWide.spaceScrollTransition,]"
+                    + ".contains{$0.drawn(reduceMotion:reduceMotion)==.slide}"
+            )
+        )
+        // The scroll step's picker greys the same way and writes its
+        // own member; its caption speaks only where the picks differ
+        // (#2971), a surfacing branch nothing else can see.
+        #expect(
+            rows.components(
+                separatedBy: ".neutralMenuLabel()}"
+                    + ".disabled(spaceTransitionLuaOwned)"
+            ).count == 3
+        )
+        #expect(rows.contains("$0.spaceScrollTransition=pick"))
+        #expect(
+            rows.contains(
+                "ifstyle!=model.appWide.spaceTransition{"
+                    + "Text(spaceTransitionCaption(style))"
             )
         )
         let card = try flat("MotionCard.swift")

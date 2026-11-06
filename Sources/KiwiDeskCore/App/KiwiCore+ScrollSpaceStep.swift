@@ -53,7 +53,12 @@ extension KiwiCore {
         guard steps != 0, let display = session.display else { return }
         // Content follows the fingers: moving it back brings the
         // NEXT Space in, so a step runs against the delta's sign.
-        stepSpace(on: display, by: steps > 0 ? -1 : 1, warp: false)
+        stepSpace(
+            on: display,
+            by: steps > 0 ? -1 : 1,
+            warp: false,
+            scrolled: true
+        )
     }
 
     /// The neighbour of the Space `display` shows, in that
@@ -63,12 +68,14 @@ extension KiwiCore {
     /// The one step the gesture and `focus_space_previous` /
     /// `_next` (#1655) share. Past an end it wraps round that
     /// screen's order unless Wrap focus is Off, never onto another
-    /// screen (#2592); false where it stops, which bumps.
+    /// screen (#2592); false where it stops, which bumps. `scrolled`
+    /// is required: this step is the one both inputs share (#2971).
     @discardableResult
     func stepSpace(
         on display: DisplayID,
         by step: Int,
-        warp: Bool
+        warp: Bool,
+        scrolled: Bool
     ) -> Bool {
         let order = state.workspaces.spaces(on: display)
         guard let shown = state.workspaces.activeSpace(on: display),
@@ -84,7 +91,12 @@ extension KiwiCore {
             }
             next = (next % order.count + order.count) % order.count
         }
-        switchSpace(to: order[next], warp: warp, step: step)
+        switchSpace(
+            to: order[next],
+            warp: warp,
+            step: step,
+            scrolled: scrolled
+        )
         return true
     }
 }

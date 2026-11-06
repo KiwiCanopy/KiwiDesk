@@ -34,7 +34,7 @@ struct SpaceCueSeamTests {
     @Test("spaceSwitchRetile is the one payer")
     func onePayer() throws {
         let calls = try Self.sources().flatMap { name, text in
-            text.components(separatedBy: "paySpaceCue(on:").dropFirst()
+            text.components(separatedBy: "paySpaceCue(for:").dropFirst()
                 .map { _ in name }
         }
         #expect(calls == ["KiwiCore+SpaceTransition.swift"])
@@ -44,13 +44,20 @@ struct SpaceCueSeamTests {
     func oneReading() throws {
         let files = Dictionary(uniqueKeysWithValues: try Self.sources())
         let cue = try #require(files["SpaceSwitchCue.swift"])
-        #expect(cue.contains("guard drawnSpaceTransition == .show,"))
+        #expect(
+            cue.contains("guard drawnSpaceTransition(for: intent) == .show,")
+        )
         // Nothing else reads the stored pick to decide a switch:
         // the slide and the cue both take the drawn reading.
         let readers = try Self.sources().filter { _, text in
             text.contains("appWide.spaceTransition")
         }.map(\.0)
         #expect(readers == ["KiwiCore+SpaceSlide.swift"])
+        // The scroll step's pick has the same one reader (#2971).
+        let scrollReaders = try Self.sources().filter { _, text in
+            text.contains("appWide.spaceScrollTransition")
+        }.map(\.0)
+        #expect(scrollReaders == ["KiwiCore+SpaceSlide.swift"])
     }
 
     /// A Space Bar pick pays no cue (#2591): each bar door that can

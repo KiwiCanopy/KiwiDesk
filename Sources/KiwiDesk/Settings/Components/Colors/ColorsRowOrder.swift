@@ -33,9 +33,11 @@ enum ColorsRowOrder {
     ]
 
     /// The Motion card's Space switch group: how a switch shows
-    /// itself and the slide's pace beneath it (#2524).
+    /// itself, how the scroll step does (#2971), and the slide's
+    /// pace beneath them (#2524).
     static let motionSpaceSwitch: [SettingKey] = [
         .colours(.spaceTransition),
+        .colours(.spaceScrollTransition),
         .colours(.spaceSlideDuration),
     ]
 

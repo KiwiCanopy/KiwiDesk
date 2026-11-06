@@ -1,7 +1,7 @@
 import QuartzCore
 
 /// The Space-switch plate slide's motion (#1956). Under Reduce
-/// Motion the slide never plays — `KiwiCore.spaceSlideStandsDown`
+/// Motion the slide never plays — `KiwiCore.drawnSpaceTransition`
 /// takes the instant switch — so each reduced shape here is the
 /// zero-travel step `flipFade` keeps as a net.
 extension BarMotion {

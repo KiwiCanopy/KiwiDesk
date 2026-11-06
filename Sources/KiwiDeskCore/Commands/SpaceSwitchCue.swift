@@ -31,8 +31,9 @@ extension KiwiCore {
     /// not, save where the shelf stands down (#1787) and a switch
     /// the Space Bar picked, whose chip already named the Space
     /// (#2591).
-    func paySpaceCue(on display: DisplayID) {
-        guard drawnSpaceTransition == .show,
+    func paySpaceCue(for intent: SpaceSlideIntent) {
+        let display = intent.display
+        guard drawnSpaceTransition(for: intent) == .show,
             !cueHooks.spaceBarPicking,
             let space = state.workspaces.activeSpace(on: display),
             let mode = state.workspaces[space]?.mode,
@@ -62,6 +63,17 @@ extension KiwiCore {
             let style = SpaceTransition(rawValue: raw)
         else { return .expected(SpaceTransition.self) }
         setAppWide(persisting: false) { $0.spaceTransition = style }
+        return .ok()
+    }
+
+    /// `KiwiDesk.set_space_scroll_transition(name)` (#2971): the same
+    /// three, for the scroll Space step alone. Session-only and read
+    /// at each switch, as `set_space_transition`.
+    func setSpaceScrollTransition(_ args: [JSONValue]) -> CommandResponse {
+        guard let raw = args.first?.stringValue,
+            let style = SpaceTransition(rawValue: raw)
+        else { return .expected(SpaceTransition.self) }
+        setAppWide(persisting: false) { $0.spaceScrollTransition = style }
         return .ok()
     }
 

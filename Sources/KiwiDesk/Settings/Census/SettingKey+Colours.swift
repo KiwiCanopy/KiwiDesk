@@ -12,6 +12,8 @@ enum ColoursKey: String, CaseIterable, Hashable {
     /// App-wide (#1741), not an `AnimationSettings` field: how a
     /// Space switch shows itself and the slide's pace (#2524).
     case spaceTransition = "appWide.spaceTransition"
+    /// The scroll Space step's own pick (#2971), the same shape.
+    case spaceScrollTransition = "appWide.spaceScrollTransition"
     case spaceSlideDuration = "appWide.spaceSlideDuration"
     case animationsOnWindowResize = "settings.animations.onWindowResize"
     case animationsOnWindowSwap = "settings.animations.onWindowSwap"
@@ -83,7 +85,7 @@ extension ColoursKey {
             )
         case .animationsMaster:
             return .row(.coloursAndMotion, .motion, .atRest)
-        case .spaceTransition, .spaceSlideDuration:
+        case .spaceTransition, .spaceScrollTransition, .spaceSlideDuration:
             // Above the master, which does not reach them, and
             // outside Reduce Motion's grey: the slide falls back to
             // Show the Space there (#2524). App-wide (#1741), so
@@ -202,7 +204,12 @@ extension ColoursKey {
                 help: "behavior.animations.master.help"
             )
         case .spaceTransition:
-            return .text("animations.space_transition")
+            return .text(
+                "animations.space_transition",
+                help: "animations.space_transition.help"
+            )
+        case .spaceScrollTransition:
+            return .text("animations.space_scroll_transition")
         case .spaceSlideDuration:
             return .text(
                 "animations.space_slide_duration",

@@ -87,6 +87,7 @@ public enum APIReference {
             ("set_modifier_sides", "set_modifier_sides"),
             ("set_mode_cue", "set_mode_cue"),
             ("set_space_transition", "set_space_transition"),
+            ("set_space_scroll_transition", "set_space_scroll_transition"),
             ("set_space_slide_duration", "set_space_slide_duration"),
             ("set_space_history", "set_space_history"),
             ("set_focus_wrap", "set_focus_wrap"),
