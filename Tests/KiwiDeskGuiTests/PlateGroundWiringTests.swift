@@ -152,9 +152,9 @@ struct PlateGroundWiringTests {
     @Test("only Home's cards pass alwaysDark")
     func oneDarkHost() throws {
         let hosts = try sources().filter {
-            $0.value.contains("alwaysDark:true")
+            $0.1.contains("alwaysDark:true")
         }
-        #expect(Set(hosts.keys) == ["HomeCardPlate.swift"])
+        #expect(hosts.map(\.0) == ["HomeCardPlate.swift"])
     }
 
     @Test("only the resolver names the dark plate or writes paint")
