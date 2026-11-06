@@ -7,6 +7,9 @@ import SwiftUI
 struct StripScrollerRoom: ViewModifier {
     let contentWidth: CGFloat
     let viewport: CGFloat
+    /// The least room to keep, whether or not a scroller draws: a
+    /// risen tile's shadow (#3042).
+    var floor: CGFloat = 0
     @State private var style = NSScroller.preferredScrollerStyle
 
     /// An overlay scroller's height over the content's bottom edge.
@@ -17,10 +20,13 @@ struct StripScrollerRoom: ViewModifier {
         content
             .padding(
                 .bottom,
-                Self.room(
-                    contentWidth: contentWidth,
-                    viewport: viewport,
-                    style: style
+                max(
+                    floor,
+                    Self.room(
+                        contentWidth: contentWidth,
+                        viewport: viewport,
+                        style: style
+                    )
                 )
             )
             .onReceive(

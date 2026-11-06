@@ -8,8 +8,10 @@ struct ScreensPicture: View {
     let rows: ScreensFamilyRows
     @Binding var selection: DisplayID?
 
-    private static let canvasHeight: CGFloat = 240
-    private static let inset: CGFloat = 4
+    private static let canvasHeight: CGFloat = 248
+    /// Room inside the clip for a risen card's shadow and the main
+    /// card's glow.
+    private static let inset = SettingsTheme.hoverShadowRadius
     private static let standBand: CGFloat = 16
 
     var body: some View {
@@ -64,7 +66,7 @@ struct ScreensPicture: View {
         return VStack(spacing: 0) {
             Rectangle()
                 .fill(SettingsTheme.ink3)
-                .frame(width: neck, height: 7)
+                .frame(width: neck, height: 7 + SettingsTheme.hoverRise)
             RoundedRectangle(cornerRadius: 2.5)
                 .fill(SettingsTheme.ink3)
                 .frame(width: base, height: 5)
@@ -99,9 +101,13 @@ struct ScreensPicture: View {
                     width: drawn.rect.width,
                     height: drawn.rect.height
                 )
-                .overlay(alignment: .bottom) {
+                // Behind the card and tucked under its edge, so a
+                // risen card opens no gap above the neck.
+                .background(alignment: .bottom) {
                     stand(cardWidth: drawn.rect.width)
-                        .alignmentGuide(.bottom) { $0[.top] }
+                        .alignmentGuide(.bottom) {
+                            $0[.top] + SettingsTheme.hoverRise
+                        }
                 }
                 .offset(x: drawn.rect.minX, y: drawn.rect.minY)
             }

@@ -278,9 +278,10 @@ restated `20...80` satisfies on the day it is written.
   key frame, and always under Reduce Motion, never a bundled clip,
   with the gate named per call (`ReduceMotionGateTests`).
   `GestureAutoplayWiringTests` holds the click as the only
-  trigger. A strip picture's hover and click live in a sibling
-  overlay, `GestureStripHoverCue`, never in the view that draws
-  the picture, so a hover never re-renders it (#2537,
+  trigger. A strip picture's hover and click live in
+  `GestureStripHoverCue`, which holds the picture as a stored value,
+  never in the view that draws the picture, so a hover never
+  re-renders it (#2537, #3042,
   `GestureAutoplayWiringTests` ▸ `stripRests`, `GestureStripTests`
   ▸ `plateHoverCue`). An entry's sentence, picture, surface and pace live
   once, on `GestureItem`, which the entry and the strip both read
@@ -1287,13 +1288,26 @@ must keep:
   neutral fill lift says where the pointer is (the idiom
   `hoverHighlight` and `ShortcutLayerChip` already keep — the
   accent is reserved for identity and selection). The two then
-  compose instead of one erasing the other. An accent hover edge
-  is legal only on a surface that carries no durable marking at
-  all, as the gesture strip's pictures (#2537, `GestureStripTests`
-  ▸ `plateHoverCue`). The Home card is one since #2654: its badges
-  do not use the border, so its fill stays and its border takes the
-  pointer (#3040, `HomeCardChromeTests`). A marking returning to that
-  edge takes its own channel, which is review's. A searchable dropdown's
+  compose instead of one erasing the other. **A clickable tile or card
+  is the owner's exception (#3042):** it answers the pointer with
+  `hoverEdge` and `hoverRise(_:in:)`, no fill change
+  (`HoverRiseAdoptionTests`; `docs/ui-patterns.md` ▸ *Hover confirms
+  custom hit areas* names the surfaces). The pointer still never
+  replaces a marked stroke: selection's colour and weight win, and a
+  selected stroke stays heavier than `hoverEdgeStroke`, since the two
+  share a colour in dark. A selected surface whose click changes nothing
+  stays flat and carries a check; a Screen card's click deselects, so it
+  rises, `screenCardStrokeSelected` the mark by ruling. A marking other
+  than selection returning to a tile's or card's edge takes its own
+  channel, which is review's. `hoverRise` owes its host two things: a host that clips
+  keeps room for the rise and the shadow (`SidewaysStrip` draws its
+  `StripRun.endRoom` and `StripScrollerRoom`'s `floor`), and a surface
+  whose shadow reaches an opaque sibling raises its own `zIndex`, on the
+  view the sibling sits beside: a trait set inside a `Button` label is
+  taken not to reach it (SwiftUI's model, unmeasured 2026-11-06). A tile on a ground other than
+  `card` owes a choice, since the rise fills under it: the setup tour
+  passes `PaletteTile`'s `rises: false`. What every other control does
+  under the pointer is `docs/ui-patterns.md`'s. A searchable dropdown's
   `DropdownCursor` IS the selection Return reads, so real
   pointer motion may move it there (`DropdownCursorWiringTests`)
   and nowhere else — a list whose selection anything beyond
@@ -2195,7 +2209,8 @@ work), so a tour row cut at its edge is the only cue there.
 **A strip's content in those two trees clears an overlay scroller
 through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
 that strip's content width and viewport (`StripScrollerTests` ▸
-`clearance`, `clearanceHome`), never a bottom padding of its own
+`clearance`, `clearanceHome`), a room it must always keep passed as
+its `floor` (#3042), never a bottom padding of its own
 beside it, which review holds in Settings since those needles do not
 see one there, and `StripScrollerTests` holds in the tour's rows. A
 new sideways strip in the tour joins that suite's `tourHolders`. As

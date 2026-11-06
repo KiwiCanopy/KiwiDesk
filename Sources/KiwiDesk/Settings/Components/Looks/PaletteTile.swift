@@ -15,6 +15,9 @@ struct PaletteTile<Plate: View>: View {
     /// Lines the caption wraps to, reserved so a row of tiles
     /// ends level; zero draws no caption line at all.
     var captionLines = 1
+    /// False keeps the hover edge and drops the rise: the setup tour
+    /// sits on `page` in scrollers with no room for one (#3042).
+    var rises = true
     @ViewBuilder var plate: () -> Plate
     @State private var hovered = false
     @Environment(\.isEnabled) private var isEnabled
@@ -44,23 +47,29 @@ struct PaletteTile<Plate: View>: View {
         }
         .padding(Self.inset)
         .frame(maxWidth: .infinity)
-        .background(lift)
         .overlay(frame)
+        .overlay(
+            SelectionStroke(
+                selected: isApplied,
+                shape: RoundedRectangle(
+                    cornerRadius: SettingsTheme.disclosureRadius
+                ),
+                style: SettingsTheme.accent,
+                lineWidth: SettingsTheme.paletteCardStrokeApplied
+            )
+        )
+        .hoverRise(
+            risen && rises,
+            in: RoundedRectangle(
+                cornerRadius: SettingsTheme.disclosureRadius
+            )
+        )
         .onHover { hovered = $0 }
     }
 
-    /// The pointer's grey lift, a fill apart from the applied
-    /// stroke (#1173); the applied tile, whose click changes
-    /// nothing, stays flat (owner, 2026-10-17).
-    private var lift: some View {
-        RoundedRectangle(
-            cornerRadius: SettingsTheme.disclosureRadius
-        )
-        .fill(
-            hovered && isEnabled && !isApplied
-                ? SettingsTheme.chipRest : .clear
-        )
-    }
+    /// The applied tile, whose click changes nothing, stays flat
+    /// (owner, 2026-10-17).
+    private var risen: Bool { hovered && isEnabled && !isApplied }
 
     /// Leading checkmark indicator for active palette
     /// (`ColorField`, `FitGapsAction`, `LoginItemCard`).
@@ -70,6 +79,7 @@ struct PaletteTile<Plate: View>: View {
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(SettingsTheme.ink)
                 .opacity(isApplied ? 1 : 0)
+                .selectionFade(isApplied)
                 .accessibilityLabel(
                     appliedSpoken ?? L("palettes.applied", "Applied")
                 )
@@ -96,12 +106,10 @@ struct PaletteTile<Plate: View>: View {
             cornerRadius: SettingsTheme.disclosureRadius
         )
         .strokeBorder(
-            isApplied
-                ? AnyShapeStyle(SettingsTheme.accent)
-                : AnyShapeStyle(SettingsTheme.hairline),
+            risen ? SettingsTheme.hoverEdge : SettingsTheme.hairline,
             style: StrokeStyle(
-                lineWidth: isApplied
-                    ? SettingsTheme.paletteCardStrokeApplied
+                lineWidth: risen
+                    ? SettingsTheme.hoverEdgeStroke
                     : SettingsTheme.paletteCardStroke,
                 dash: dashed ? [4] : []
             )

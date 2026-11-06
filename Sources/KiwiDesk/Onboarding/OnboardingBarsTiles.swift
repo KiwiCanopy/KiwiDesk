@@ -32,7 +32,8 @@ struct OnboardingBarsTiles: View {
                 name: Self.name(visibility),
                 caption: Self.caption(visibility),
                 isApplied: applied,
-                captionLines: 3
+                captionLines: 3,
+                rises: false
             ) {
                 OnboardingBarsPicture(visibility: visibility)
             }

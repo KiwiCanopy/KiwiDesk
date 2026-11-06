@@ -1,8 +1,9 @@
 import Foundation
 import Testing
 
-/// Every click target KiwiDesk draws lifts under the pointer
-/// through a shared seam, and nothing a click leaves alone lifts
+/// A click target other than a tile or card (`HoverRiseAdoptionTests`)
+/// lifts under the pointer through a shared seam, and nothing a click
+/// leaves alone lifts
 /// (owner rulings 2026-10-17, `docs/ui-patterns.md` ▸ Hover
 /// confirms custom hit areas). Each clause pins one site's
 /// ADOPTION of its seam — which seam, applied once — never the
@@ -41,22 +42,6 @@ struct HoverLiftAdoptionTests {
                 Comment(rawValue: declaration)
             )
         )
-    }
-
-    /// An unselected Layouts tile lifts with a fill apart from the
-    /// selection, which is the stroke alone (#1173); the selected
-    /// tile stays flat (PaletteTile's shape, #2383).
-    @Test("a layout tile lifts; the selected one stays flat")
-    func layoutTileLifts() throws {
-        let strip = try squashed(
-            "Settings/Components/Layouts/LayoutStrip.swift"
-        )
-        #expect(strip.contains("hovered==mode&&isEnabled&&!selected"))
-        #expect(strip.contains(".fill(lifted?SettingsTheme."))
-        #expect(strip.contains(".onHover{insideinifinside{"))
-        // Selection is the stroke alone: no accent wash.
-        #expect(!strip.contains("SettingsTheme.accent.opacity("))
-        #expect(strip.contains(".strokeBorder(selected?SettingsTheme."))
     }
 
     /// Revert and Save a copy wash like the count button beside

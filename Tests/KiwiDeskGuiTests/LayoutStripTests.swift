@@ -158,9 +158,14 @@ struct LayoutStripTests {
                     + ".frame(width:Self.tileWidth)"
             )
         )
-        // The ring room sits inside the clip, given back outside.
-        #expect(strip.contains(".padding(Self.ringRoom)"))
-        #expect(strip.contains(".padding(.horizontal,-Self.ringRoom)"))
+        // The run carries the ring room and the strip draws it, so a
+        // host has one place to say it.
+        let metrics = try Self.squashed(
+            "Sources/KiwiDesk/Settings/Components/Layouts/"
+                + "LayoutStrip+Metrics.swift"
+        )
+        #expect(metrics.contains("endRoom:ringRoom"))
+        #expect(!strip.contains("ringRoom"))
     }
 
     @Test("the thumbnail is drawn at the strip's scale")

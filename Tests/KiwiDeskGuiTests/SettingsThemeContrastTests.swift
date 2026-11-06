@@ -254,17 +254,29 @@ struct SettingsThemeContrastTests {
             SettingsTheme.accent,
             on: SettingsTheme.previewPlate
         ),
-        // A Home card's hover edge crosses its plate and its body:
-        // non-text, so the 3.0 floor (#3040).
+        // A hover edge crosses a card's plate and its body, and a
+        // tile's ground: non-text, so the 3.0 floor (#3040, #3042).
         Pairing(
-            "cardHoverEdge on previewPlate",
-            SettingsTheme.cardHoverEdge,
+            "hoverEdge on sunken",
+            SettingsTheme.hoverEdge,
+            on: SettingsTheme.sunken,
+            floor: 3.0
+        ),
+        Pairing(
+            "hoverEdge on page",
+            SettingsTheme.hoverEdge,
+            on: SettingsTheme.page,
+            floor: 3.0
+        ),
+        Pairing(
+            "hoverEdge on previewPlate",
+            SettingsTheme.hoverEdge,
             on: SettingsTheme.previewPlate,
             floor: 3.0
         ),
         Pairing(
-            "cardHoverEdge on card",
-            SettingsTheme.cardHoverEdge,
+            "hoverEdge on card",
+            SettingsTheme.hoverEdge,
             on: SettingsTheme.card,
             floor: 3.0
         ),

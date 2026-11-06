@@ -7,8 +7,8 @@ import SwiftUI
 /// its gesture's sentence as an AppKit tooltip (`PlateToolTip`),
 /// half-faded where the gesture is off — faded, not `GreyOut`,
 /// whose `.disabled` would refuse the click that lands on the
-/// entry explaining why. Its click and hover cue are
-/// `GestureStripHoverCue`'s (#2537).
+/// entry explaining why. Its click and hover are
+/// `GestureStripHoverCue`'s (#2537, #3042).
 struct GestureStripPlate: View {
     let item: GestureItem
     let settings: TilingSettings
@@ -16,12 +16,12 @@ struct GestureStripPlate: View {
     let onLand: (GestureItem) -> Void
 
     var body: some View {
-        GesturePlate {
-            item.picture(t: 1, gestures: gestures)
+        GestureStripHoverCue(onTap: { onLand(item) }) {
+            GesturePlate {
+                item.picture(t: 1, gestures: gestures)
+            }
+            .opacity(item.isOff(gestures) ? 0.5 : 1)
         }
-        .opacity(item.isOff(gestures) ? 0.5 : 1)
-        // Over the fade, so an off gesture's hover cue is as strong.
-        .overlay(GestureStripHoverCue { onLand(item) })
         .overlay(PlateToolTip(text: item.sentence(settings)))
     }
 }
