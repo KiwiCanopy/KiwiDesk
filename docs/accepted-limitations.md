@@ -114,8 +114,8 @@ class — see
 With "Displays have separate Spaces" off and a second screen reaching
 past a screen's bottom or right edge, a window near that edge jumps up to
 about 32 pt and back on a small resize, unless a neighbouring screen
-sits beside the window's whole length there. macOS refuses the size
-otherwise, and a refused size leaves the window stuck
+sits beside the window's whole length there and no third screen reaches
+past that edge. macOS refuses the size otherwise, and a refused size leaves the window stuck
 ([#2966](https://github.com/KiwiCanopy/KiwiDesk/issues/2966)). No escape
 is planned beyond arranging the screens or turning that setting on.
 :::

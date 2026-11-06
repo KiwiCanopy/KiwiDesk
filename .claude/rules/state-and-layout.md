@@ -1774,7 +1774,9 @@ editing here:
   the measurement. Lift only an edge `EdgeBandWrite.bands` names
   (#2966, `EdgeBandGateTests`); its docstring carries where a band
   is measured and where it is not. A lift that runs where nothing
-  refuses is a visible jump per press. The screens it reads come
+  refuses is a visible jump per press. A band answers for the frame
+  it was asked with, at enqueue; anything read from the window's
+  current frame is decided on its queue. The screens it reads come
   from `TilingEngine.allScreenFrames`, never a live read in the
   applier, and the setting through `FrameApplier.separateSpaces`.
   Whether a write shrinks the window is the window's own frame,

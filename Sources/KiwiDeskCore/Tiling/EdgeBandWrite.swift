@@ -1,7 +1,8 @@
 import ApplicationServices
 import CoreGraphics
 
-/// Which edges of `screen` refuse a small shrink (#2966).
+/// Which edges of `screen` refuse a small shrink of the frame it was
+/// asked for (#2966): a verdict about that frame's span, not the desk.
 struct EdgeBand: Equatable, Sendable {
     let screen: CGRect
     let bottom: Bool
@@ -22,9 +23,10 @@ struct EdgeBand: Equatable, Sendable {
 /// along it is not wholly beside one neighbour on that edge (#2966;
 /// Firefox and Finder alike, bare AX, a 700 x 460 window 16 pt inside
 /// the edge, five arrangements of two screens under each setting,
-/// 2026-11-05/06). Not measured, so they keep the band: two neighbours
-/// sharing a span, and a third screen past the edge beside a covering
-/// neighbour.
+/// 2026-11-05/06). Overhangs and arrivals onto a covered target land
+/// without a lift too, as `setFrame`'s size, position, size. Not
+/// measured, so they keep the band: two neighbours sharing a span, and
+/// a third screen past the edge beside a covering neighbour.
 enum EdgeBandWrite {
     /// How far inside a screen's bottom or right edge a shrink is
     /// refused: measured ~19 pt, escaped from ~25 pt, set wider so
