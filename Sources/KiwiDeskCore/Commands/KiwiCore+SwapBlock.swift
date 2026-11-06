@@ -57,21 +57,25 @@ extension KiwiCore {
             cueWindowAction(.swapWithSelf(window: windowTitle(id)), on: id)
             return .fail("cannot swap a window with itself")
         case .unfiled(let id):
-            cueWindowAction(.cannotSwapHere(window: windowTitle(id)), on: id)
-            return .fail("window is in no Space")
+            cueWindowAction(
+                state.isPocketed(id)
+                    ? .cannotSwapPocketed : .cannotSwapUnfiled,
+                on: id
+            )
+            return .fail("window \(id.raw) is in no Space")
         case .fullScreen(let id):
             cueWindowAction(
                 .cannotSwapFullScreen(window: windowTitle(id)),
                 on: id
             )
-            return .fail("window \(id.raw) is full screen")
+            return .fail("full-screen window \(id.raw) cannot be swapped")
         case .floating(let id):
             cueWindowAction(.cannotSwapFloating, on: id)
-            return .fail("window \(id.raw) is floating")
+            return .fail("floating window \(id.raw) cannot be swapped")
         case .sticky(let id, let scope):
             // The sticky gate's own pill.
             flashStickyMoveBlocked(id, scope: scope)
-            return .fail("a sticky window cannot change Space")
+            return .fail("sticky window \(id.raw) cannot change Space")
         }
     }
 }

@@ -161,9 +161,7 @@ struct TravelerFocusedCommandTests {
         // command is a semantic refusal (pill), reported as success —
         // never the guard denial, and never a local mutation.
         #expect(response.isSuccess)
-        #expect(
-            response.error != "no managed window is currently focused"
-        )
+        #expect(response.error == nil)
         #expect(core.state.workspaces["1"]?.windows == before)
     }
 }

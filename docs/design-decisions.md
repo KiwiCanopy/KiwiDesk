@@ -8273,7 +8273,7 @@ refuses, and the refusal names the Space that is empty, the
 window `get_state` marks focused in a sibling Space on the same
 screen, and the `focus_space` that brings it back under the verb
 — or the Space alone, when no sibling there marks a focus — never
-"no managed window is currently focused", which names a fact
+"no window is focused", which names a fact
 that is not the case.
 
 The measurement: `move_to_desktop 2` leaves the window's Space

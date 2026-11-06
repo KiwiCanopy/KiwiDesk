@@ -27,7 +27,7 @@ extension KiwiCore {
             return refuseSecondPocketWindow(id)
         }
         guard !window.isFullscreen, !window.isTransientOverlay
-        else { return .fail("this window cannot be pocketed") }
+        else { return .fail(cannotPocketReason(id)) }
         markAsPocketWindow(id)
         return .ok()
     }

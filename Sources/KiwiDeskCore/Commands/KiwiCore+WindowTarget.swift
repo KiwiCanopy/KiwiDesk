@@ -71,11 +71,22 @@ extension KiwiCore {
         // `exactly:` refuses a fraction, a negative and the
         // out-of-range alike.
         guard let number = value.numberValue,
-            let raw = UInt32(exactly: number),
-            state.windows[WindowID(raw)] != nil
+            let raw = UInt32(exactly: number)
         else {
             return .refused(.fail("unknown window: \(spelled)"))
         }
-        return .window(WindowID(raw))
+        let id = WindowID(raw)
+        guard state.windows[id] != nil else {
+            // A window on another Desktop exists (#3034).
+            return .refused(
+                .fail(
+                    state.awayWindows[id] != nil
+                        ? "this command cannot reach window \(raw) "
+                            + "on another Desktop"
+                        : "unknown window: \(spelled)"
+                )
+            )
+        }
+        return .window(id)
     }
 }

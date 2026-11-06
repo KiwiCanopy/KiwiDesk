@@ -100,8 +100,8 @@ extension KiwiCore {
         // drop can hand one; `space.focused` cannot.
         guard space.windows.contains(focused) else {
             return .fail(
-                "the focused window is visiting from "
-                    + "another Space"
+                "a tiled sticky window can be resized only "
+                    + "in its home Space"
             )
         }
         guard
@@ -160,9 +160,8 @@ extension KiwiCore {
             } else {
                 refuseAxisAbsent(focused, axis: axis)
             }
-            return .fail(
-                "no \(axis) parameter for this arrangement"
-            )
+            let spans = axis == "y" ? "heights" : "widths"
+            return .fail("this zone does not divide \(spans)")
         }
         guard let focusOffset = column.firstIndex(of: focused),
             column.count > 1

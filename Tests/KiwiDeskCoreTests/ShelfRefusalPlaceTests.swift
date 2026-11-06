@@ -108,7 +108,7 @@ struct ShelfRefusalPlaceTests {
         NativeSpaces.currentSpaceIsUserOverride = { _ in false }
         #expect(
             core.shelfRevealCommand(.space).error
-                == "the Space Bar stands down for what is in front"
+                == "bars stay hidden while a window fills the screen"
         )
     }
 }

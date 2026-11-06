@@ -81,7 +81,7 @@ extension KiwiCore {
         case .success(let target): window = target
         }
         guard let element = eventLoop.element(for: window.id) else {
-            return .fail("window \(window.id.raw) has no AX element")
+            return .fail("the window has no AX element")
         }
         windowActions.close(element) { [weak self] pressed in
             guard !pressed else { return }

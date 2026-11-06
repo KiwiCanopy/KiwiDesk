@@ -20,14 +20,14 @@ extension KiwiCore {
             // so only a plain tiled member of its own Space fills.
             guard state.windows[id]?.isSticky == false else {
                 cueMaximizeRefused(id, sticky: true)
-                return .fail("a sticky window")
+                return .fail("a sticky window cannot be maximized")
             }
             guard space.mode != .floating,
                 spaceID == state.workspaces.activeSpace,
                 state.localTiledMembers(of: space).contains(id)
             else {
                 cueMaximizeRefused(id, sticky: false)
-                return .fail("not a tiled window")
+                return .fail("only a tiled window can be maximized")
             }
             state.workspaces.withSpace(spaceID) { $0.maximized = id }
         }

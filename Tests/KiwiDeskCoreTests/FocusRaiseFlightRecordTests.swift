@@ -11,7 +11,8 @@ import Testing
 @Suite("Raise flight write sites", .serialized)
 @MainActor
 struct FocusRaiseFlightRecordTests {
-    private static let generic = "no managed window is currently focused"
+    private static let generic =
+        "another app is in front of the focused window"
     private let anchor = WindowID(1)
     private let previous = WindowID(2)
     private let previousPID: pid_t = 999

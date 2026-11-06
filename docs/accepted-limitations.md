@@ -484,7 +484,7 @@ again as soon as the prompt closes or Brave loses focus.
 
 A window in the [pocket](lua-reference.md#pocket) cannot be taken
 out, or put back, while its app is hidden: the `pocket` command
-answers `pocket is unreachable`
+answers `the pocket window's app is hidden or relaunching`
 ([#2446](https://github.com/KiwiCanopy/KiwiDesk/issues/2446)). A
 hidden app's windows leave KiwiDesk's tracking, and a window
 KiwiDesk does not track cannot be moved. Show the app again —

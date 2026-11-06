@@ -129,10 +129,10 @@ struct JumpSwapHereTests {
         let (core, recorder) = makeCore()
         pair(core)
         core.swapHere(.window(WindowID(9)))
-        #expect(cued(recorder, .cannotSwapHere(window: "")))
+        #expect(cued(recorder, .cannotSwapGone))
         recorder.logs = []
         core.swapHere(.hiddenApp(900_009))
-        #expect(cued(recorder, .cannotSwapHere(window: "")))
+        #expect(cued(recorder, .cannotSwapHiddenApp))
         #expect(core.state.workspaces.space(of: WindowID(1)) == "1")
     }
 
@@ -148,7 +148,7 @@ struct JumpSwapHereTests {
         core.state.workspaces.focus(WindowID(1), in: "1")
         recorder.logs = []
         #expect(!core.execute("swap_here", args: [.number(3)]).isSuccess)
-        #expect(cued(recorder, .cannotSwapHere(window: "")))
+        #expect(cued(recorder, .cannotSwapPocketed))
     }
 
     /// The CLI draws the same cues (Ruling 5).

@@ -20,13 +20,21 @@ enum PocketRefusal {
                 "This window has a Pocket key of its own"
             )
         }
-        return L("pocket.refusal.keyed", "Its Pocket key is %1$@", chord)
+        return L(
+            "pocket.refusal.keyed",
+            "This window has its own Pocket key: %1$@",
+            chord
+        )
     }
 
     /// `toggle_pocket_window` on a second window (#2675), drawn
     /// beside `PocketMark.takenName`.
     @MainActor
     static var markedElsewhereSentence: String {
-        L("pocket.refusal.marked_elsewhere", "Pocket is already taken")
+        L(
+            "pocket.refusal.marked_elsewhere",
+            "The Pocket takes one window. Set it to %1$@ to add more.",
+            L("pocket.capacity.several", "Several windows")
+        )
     }
 }

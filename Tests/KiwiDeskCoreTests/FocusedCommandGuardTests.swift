@@ -71,7 +71,8 @@ struct FocusedCommandGuardTests {
         let response = core.execute("make_floating")
         #expect(!response.isSuccess)
         #expect(
-            response.error == "no managed window is currently focused"
+            response.error
+                == "another app is in front of the focused window"
         )
         // Fail closed = no mutation.
         #expect(core.state.windows[WindowID(1)]?.isFloating == false)
@@ -195,8 +196,6 @@ struct FocusedCommandGuardTests {
             args: [.number(8)]
         )
         #expect(response.isSuccess)
-        #expect(
-            response.error != "no managed window is currently focused"
-        )
+        #expect(response.error == nil)
     }
 }

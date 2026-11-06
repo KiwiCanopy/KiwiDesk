@@ -21,12 +21,12 @@ extension KiwiCore {
         }
         if let id = state.pocketTakeOutNext {
             return takePocketOut(id)
-                ? .ok() : .fail("pocket is unreachable")
+                ? .ok() : .fail(takeOutFailure(id))
         }
         // Out with its app hidden: the unhide brings it back. Only
         // an empty pocket marks the focus here.
         guard state.generalPocket.isEmpty else {
-            return .fail("pocket is unreachable")
+            return .fail(Self.pocketAppHidden)
         }
         guard let id = focusedWindowID else {
             return .fail("no focused window")
@@ -134,6 +134,18 @@ extension KiwiCore {
     /// ahead of it by a caller that switches first (#2791).
     func canTakePocketOut(_ id: WindowID) -> Bool {
         state.pocketPhase(of: id) == .pocketed && state.windows[id] != nil
+    }
+
+    /// A slot whose window is not tracked: a hidden app, or an
+    /// in-place relaunch still bringing it back.
+    static let pocketAppHidden =
+        "the pocket window's app is hidden or relaunching"
+
+    /// Why `takePocketOut(id)` answered false.
+    func takeOutFailure(_ id: WindowID) -> String {
+        state.windows[id] == nil
+            ? Self.pocketAppHidden
+            : "no active Space to take the pocket window out onto"
     }
 
     /// Takes the pocketed window `id` out onto the active Space's

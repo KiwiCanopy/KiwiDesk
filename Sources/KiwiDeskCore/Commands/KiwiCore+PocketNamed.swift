@@ -37,7 +37,7 @@ extension KiwiCore {
             switch pocketNamedRefusal(id) {
             case .keyed(let app): return refuseKeyedPocketWindow(id, app: app)
             case .taken: return refuseSecondPocketWindow(id)
-            case .cannot: return .fail("this window cannot be pocketed")
+            case .cannot: return .fail(cannotPocketReason(id))
             case nil: break
             }
             if state.isPocketed(id) { return .ok() }
@@ -49,6 +49,19 @@ extension KiwiCore {
         }
     }
 
+    /// The rule refusing `id`, by what it is.
+    func cannotPocketReason(_ id: WindowID) -> String {
+        guard let window = state.windows[id] else {
+            return "this window cannot be pocketed"
+        }
+        if window.isFullscreen {
+            return "a full-screen window cannot be pocketed"
+        }
+        return window.isTransientOverlay
+            ? "a panel or popup cannot be pocketed"
+            : "this window cannot be pocketed"
+    }
+
     /// Marks `id` and pockets it — the empty pocket's press, and a
     /// named one (#2678).
     func markAndPocket(_ id: WindowID) -> CommandResponse {
@@ -56,7 +69,7 @@ extension KiwiCore {
             return .fail("no focused window")
         }
         guard !window.isFullscreen, !window.isTransientOverlay
-        else { return .fail("this window cannot be pocketed") }
+        else { return .fail(cannotPocketReason(id)) }
         // Marked first (#2675), its float frame read while it is
         // still in its Space and filed at the park; a window
         // already floating keeps its own.

@@ -11,17 +11,19 @@ enum WindowActionRefusal: Equatable {
     /// `gather` found no window of the app to bring (#1510).
     case nothingToGather(app: String)
     /// Jump to window's Move here cannot move the window into
-    /// this Space (#1875): full screen, a move the sticky gate
-    /// stood down, or an away window the hop cannot reach — no
-    /// bridge, another screen's Desktop, unfiled, no census.
+    /// this Space (#1875): a move the sticky gate stood down, or
+    /// an away window the hop cannot reach — no bridge, another
+    /// screen's Desktop, unfiled, no census.
     case cannotMoveHere(window: String)
+    /// The same verb on a full-screen window: its own macOS Space.
+    case cannotMoveHereFullScreen
     /// `move_here` found every matching window already here (#1513).
     case allHere(app: String)
     /// `move_here`'s title text matched no window of the app.
     case noTitleMatch(app: String, text: String)
     /// `move_to_space(_and_follow)` named the Space the window
     /// is already in.
-    case alreadyIn(window: String, space: String)
+    case alreadyIn(window: String)
     /// A swap named one window twice (#2885).
     case swapWithSelf(window: String)
     /// `swap_here` found no focused window to trade with.
@@ -30,9 +32,15 @@ enum WindowActionRefusal: Equatable {
     case cannotSwapFloating
     /// A side is full screen, in its own macOS Space (#670).
     case cannotSwapFullScreen(window: String)
-    /// KiwiHub's Swap here reaches no slot for the row: pocketed,
-    /// a hidden app, minimized or on another Desktop (#2885).
-    case cannotSwapHere(window: String)
+    /// A window with no slot to swap, each by what it is (#2885):
+    /// the verb's unfiled sides and KiwiHub's rows no verb can see.
+    case cannotSwapPocketed
+    case cannotSwapUnfiled
+    case cannotSwapMinimized
+    case cannotSwapHiddenApp
+    case cannotSwapHiddenDesktop
+    /// KiwiHub's row names a window no longer tracked or listed.
+    case cannotSwapGone
 
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
@@ -66,6 +74,11 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” can't be moved here",
                 window
             )
+        case .cannotMoveHereFullScreen:
+            L(
+                "window_action.refusal.cannot_move_here_full_screen",
+                "A full-screen window can't be moved here"
+            )
         case .allHere(let app):
             L(
                 "window_action.refusal.all_here",
@@ -79,12 +92,11 @@ enum WindowActionRefusal: Equatable {
                 app,
                 text
             )
-        case .alreadyIn(let window, let space):
+        case .alreadyIn(let window):
             L(
                 "window_action.refusal.already_in",
-                "“%1$@” is already in Space %2$@",
-                window,
-                space
+                "“%1$@” is already in that Space",
+                window
             )
         case .swapWithSelf(let window):
             L(
@@ -108,11 +120,35 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” is full screen and can't be swapped",
                 window
             )
-        case .cannotSwapHere(let window):
+        case .cannotSwapPocketed:
             L(
-                "window_action.refusal.cannot_swap_here",
-                "“%1$@” can't be swapped here",
-                window
+                "window_action.refusal.cannot_swap_pocketed",
+                "A pocketed window can't be swapped"
+            )
+        case .cannotSwapUnfiled:
+            L(
+                "window_action.refusal.cannot_swap_unfiled",
+                "A window in no Space can't be swapped"
+            )
+        case .cannotSwapMinimized:
+            L(
+                "window_action.refusal.cannot_swap_minimized",
+                "A minimized window can't be swapped"
+            )
+        case .cannotSwapHiddenApp:
+            L(
+                "window_action.refusal.cannot_swap_hidden_app",
+                "A hidden app's window can't be swapped"
+            )
+        case .cannotSwapHiddenDesktop:
+            L(
+                "window_action.refusal.cannot_swap_hidden_desktop",
+                "A window on a hidden Desktop can't be swapped"
+            )
+        case .cannotSwapGone:
+            L(
+                "window_action.refusal.cannot_swap_gone",
+                "That window is no longer here"
             )
         }
     }
@@ -124,6 +160,8 @@ enum WindowActionRefusal: Equatable {
         case .noCloseButton: "no enabled close button"
         case .nothingToGather: "no window to gather"
         case .cannotMoveHere: "cannot move the window here"
+        case .cannotMoveHereFullScreen:
+            "a full-screen window cannot be moved here"
         case .allHere: "every matching window is already here"
         case .noTitleMatch: "no window title matches"
         case .alreadyIn: "the window is already in that Space"
@@ -131,7 +169,17 @@ enum WindowActionRefusal: Equatable {
         case .nothingHereToSwap: "no focused window to swap with"
         case .cannotSwapFloating: "a floating window cannot be swapped"
         case .cannotSwapFullScreen: "a full-screen window cannot be swapped"
-        case .cannotSwapHere: "the window cannot be swapped here"
+        case .cannotSwapPocketed:
+            "a pocketed window cannot be swapped"
+        case .cannotSwapUnfiled:
+            "a window in no Space cannot be swapped"
+        case .cannotSwapMinimized:
+            "a minimized window cannot be swapped"
+        case .cannotSwapHiddenApp:
+            "a hidden app's window cannot be swapped"
+        case .cannotSwapHiddenDesktop:
+            "a window on a hidden Desktop cannot be swapped"
+        case .cannotSwapGone: "the window is no longer here"
         }
     }
 }

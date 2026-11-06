@@ -55,9 +55,7 @@ extension KiwiCore {
     /// window minimized or on a Desktop no screen shows — cued on
     /// the focused window, where the user is looking.
     private func refuseJumpSwap(_ target: JumpEntry.Target) {
-        let refusal = WindowActionRefusal.cannotSwapHere(
-            window: jumpRowName(target)
-        )
+        let refusal = jumpSwapRefusal(target)
         guard let focused = focusedWindowID else {
             onLog("\(refusal.logReason): \(target)")
             return
@@ -65,21 +63,23 @@ extension KiwiCore {
         cueWindowAction(refusal, on: focused)
     }
 
-    /// A row's name as Core knows it: its window's title, else its
-    /// app's name.
-    private func jumpRowName(_ target: JumpEntry.Target) -> String {
-        switch target {
-        case .hiddenApp(let pid):
-            return eventLoop.liveApps(owners: [])
-                .first { $0.pid == pid }?.ref.name ?? ""
-        case .window(let id):
-            if let away = state.awayWindows[id] {
-                return away.title.isEmpty ? away.appName : away.title
-            }
-            if let parked = state.minimizeOrder.first(where: { $0.id == id }) {
-                return parked.title.isEmpty ? parked.app : parked.title
-            }
-            return ""
+    /// What a row no verb can see is, as the pill says it.
+    private func jumpSwapRefusal(
+        _ target: JumpEntry.Target
+    ) -> WindowActionRefusal {
+        guard case .window(let id) = target else {
+            return .cannotSwapHiddenApp
         }
+        if let away = state.awayWindows[id] {
+            let desktops = desktopMemory.readDesktops()
+            guard awayIsFullScreen(away, in: desktops) else {
+                return .cannotSwapHiddenDesktop
+            }
+            return .cannotSwapFullScreen(
+                window: away.title.isEmpty ? away.appName : away.title
+            )
+        }
+        return state.minimizeOrder.contains { $0.id == id }
+            ? .cannotSwapMinimized : .cannotSwapGone
     }
 }
