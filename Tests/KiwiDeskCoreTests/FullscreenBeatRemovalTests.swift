@@ -222,6 +222,16 @@ struct FullscreenBeatRemovalTests {
         #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
     }
 
+    /// The close the beat holds ends at the first recheck only
+    /// while the beat is the shorter (`hostedNowhereBeat`'s doc).
+    @Test("the beat ends ahead of the first recheck")
+    func beatIsShorterThanTheRecheck() {
+        let delay = CoreTimings().transientRetrackDelay.components
+        let seconds =
+            Double(delay.seconds) + Double(delay.attoseconds) / 1e18
+        #expect(EventLoop.hostedNowhereBeat < seconds)
+    }
+
     @Test("a beat's sweep between rechecks keeps the window")
     func hostedNowhereSurvivesASecondSweep() {
         let (loop, box) = makeLoop()

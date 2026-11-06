@@ -146,6 +146,7 @@ extension EventLoop {
                                 + "w\(host.raw)'s fullscreen transition "
                                 + "— not tracked"
                         )
+                        queueRetrack(pid: pid)
                         return .shadow
                     }
                     return .window
@@ -162,14 +163,17 @@ extension EventLoop {
     }
 
     /// The tracked window of `pid` out of the list with the
-    /// fullscreen arm open for it (#2935).
+    /// fullscreen arm open for it and its budget unspent (#2935):
+    /// past that a shell owes it nothing, whatever the sweep does.
     private func fullscreenSibling(
         _ pid: pid_t,
         _ siblings: [WindowTraits]
     ) -> WindowID? {
         let listed = Set(siblings.map(\.id))
         return elements[pid]?.keys.first {
-            !listed.contains($0) && fullscreenRemovalArmIsOpen(for: $0)
+            !listed.contains($0)
+                && (removalDistrusted[$0]?.arms ?? 0) < Self.removalRecheckCap
+                && fullscreenRemovalArmIsOpen(for: $0)
         }
     }
 

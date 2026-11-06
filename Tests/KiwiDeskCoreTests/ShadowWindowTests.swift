@@ -152,6 +152,15 @@ struct ShadowWindowTests {
         #expect(verdict(loop, elements, box, 0) == .shadow)
         // A shadow: never a tab, and its focus reports dropped.
         #expect(loop.shadows.holds(placeholder.id, pid: pid))
+        // Asked again, or a real frameless window waits on an event.
+        #expect(box.retracks == 1)
+        loop.shadows.clear(placeholder.id, pid: pid)
+        // The sibling's budget is spent: it owes the shell nothing.
+        loop.removalDistrusted[tracked.id] = RemovalEpisode(
+            arms: EventLoop.removalRecheckCap
+        )
+        #expect(verdict(loop, elements, box, 0) == .window)
+        loop.removalDistrusted[tracked.id] = nil
         loop.shadows.clear(placeholder.id, pid: pid)
         // The entry: hosted nowhere reads the same.
         loop.detectedFullscreen[tracked.id] = false

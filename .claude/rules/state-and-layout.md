@@ -249,7 +249,9 @@ editing here:
   tracker's writes on the no-arrival path). The verdict is an
   ADOPTION fact: its layer and button are never refreshed, so a
   reader past the create fold refreshes both on the recheck path
-  first or does not ask it.
+  first or does not ask it. The fullscreen arm's button read is
+  ruled adoption-scoped: a stale `false` keeps a close's verdict
+  (#2935, accessibility.md).
 - **A window that lands on another screen takes THAT screen's
   space, through the one shared predicate** (#1010):
   `StateCoordinator.screenHome(of:leaving:landingOn:)`. Two
