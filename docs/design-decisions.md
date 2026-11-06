@@ -5097,7 +5097,7 @@ rather than arithmetic in a command file — the same shape the
 ratio clamps take in `SplitDomain`.
 (`ScrollSlotDomainTests`, `ScrollingFixedSpanCueTests`)
 
-**A held resize chord glides — and only resize (#1056/#1082).**
+**A held resize chord glides — and another verb only by ruling (#1056/#1082).**
 [Principle] Every other keyboard adjustment on a Mac repeats
 while held; resize was one press per step by construction — a
 Carbon hot key delivers exactly one press and one release per
@@ -5106,10 +5106,18 @@ holds is decided by what the press DID, not by what the binding
 says:* a binding's body is opaque Lua, so `KiwiCore.execute`
 tallies every command run inside a hotkey fire, and a hold arms
 only when the press-fire executed exactly one command, it was
-`resize`, and it succeeded. `focus` and `swap` are deliberately
+one `HoldGlide.glidableCommands` names, and it succeeded. `focus` and `swap` are deliberately
 out — overshooting focus is worse than pressing again — and
 widening the set (`HoldGlide.glidableCommands`) is a per-verb
 ruling, never an inference.
+
+:::unreleased
+`move_floating` is the second verb so ruled (#2972). A nudge is the
+same small adjustment a resize is, and overshooting one costs a nudge
+back, where overshooting focus lands on another window. So a hold on
+it arms and glides by the same tally, and its stop at the float region
+ends the run through the same refusal.
+:::
 
 *A hold GLIDES rather than repeating* (owner ruling, replacing
 #1056's interval acceleration). Re-firing the binding on a
@@ -6726,6 +6734,12 @@ axes, and a shrinking axis otherwise takes its target on frame 1,
 leaving only the corner to travel. A slow app's window trails our
 spring, so its ring is held dormant until the window has landed
 rather than running ahead of it.
+
+:::unreleased
+`center_floating` follows the same switch (#3007). It changes where a
+window is, not what it is, but it is one deliberate placement of one
+window, as a float's own placement is, and no reflow.
+:::
 
 **One toggle, not a choice of styles.** No style can capture
 another app's window, and none can set its transparency

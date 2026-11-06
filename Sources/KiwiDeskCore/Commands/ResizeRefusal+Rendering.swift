@@ -43,8 +43,16 @@ extension ResizeRefusal {
         case .ownMaximum:
             "arrow.up.left.and.arrow.down.right"
         case .noAxisHere, .layoutHasNoResize, .nothingToDivide,
-            .gridNoOtherTrack, .windowIsFullscreen:
+            .gridNoOtherTrack, .windowIsFullscreen,
+            .fullscreenCannotMove, .moveNeedsFloat:
             "nosign"
+        case .moveAtBoundary(_, let direction):
+            switch direction {
+            case .left: "arrow.left"
+            case .right: "arrow.right"
+            case .up: "arrow.up"
+            case .down: "arrow.down"
+            }
         }
     }
 
@@ -127,6 +135,18 @@ extension ResizeRefusal {
                 "resize.window_fullscreen",
                 "Full-screen windows can't be resized"
             )
+        case .fullscreenCannotMove:
+            L(
+                "resize.move_fullscreen",
+                "Full-screen windows can't be moved"
+            )
+        case .moveNeedsFloat:
+            L(
+                "resize.move_needs_float",
+                "Only a floating window can be moved"
+            )
+        case .moveAtBoundary:
+            L("resize.move_boundary", "No room left to move")
         }
     }
 

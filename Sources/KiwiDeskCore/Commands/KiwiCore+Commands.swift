@@ -90,6 +90,10 @@ extension KiwiCore {
             return setFocusedStickyReach(args)
         case "resize":
             return resize(args)
+        case "center_floating":
+            return centerFloating()
+        case "move_floating":
+            return moveFloating(args)
         case "move_to_track":
             return moveToTrack(args)
         case "track.swap":
