@@ -79,13 +79,14 @@ extension HomeCardPlate {
         return "#000000"
     }
 
-    /// `hex` with each channel multiplied by `scale`, opaque.
+    /// `hex` darkened to `scale` of itself: black over it at the
+    /// remaining alpha, the way `ColorVision` composites any ink.
     static func scaled(_ hex: String, by scale: Double) -> String? {
-        guard let color = HexColor.parse(hex) else { return nil }
-        let bytes = [color.red, color.green, color.blue].map {
-            String(format: "%02X", Int(($0 * scale * 255).rounded()))
-        }
-        return "#" + bytes.joined()
+        let alpha = Int(((1 - scale) * 255).rounded())
+        return ColorVision.composite(
+            "#000000" + String(format: "%02X", alpha),
+            over: hex
+        )
     }
 
     private static let ringSteps = 40
