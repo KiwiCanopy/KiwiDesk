@@ -2502,7 +2502,7 @@
   "window_action.refusal.cannot_swap_hidden_desktop": "Окно на скрытом рабочем столе нельзя поменять местами",
   "window_action.refusal.cannot_swap_minimized": "Свёрнутое окно нельзя поменять местами",
   "window_action.refusal.cannot_swap_pocketed": "Окно в Pocket нельзя поменять местами",
-  "window_action.refusal.cannot_swap_unfiled": "Окно не в пространстве нельзя поменять местами",
+  "window_action.refusal.cannot_swap_unfiled": "Окно вне пространств нельзя поменять местами",
   "window_action.refusal.no_close_button": "У окна «%1$@» нет кнопки закрытия",
   "window_action.refusal.no_new_window": "%1$@: нет команды «Новое окно»",
   "window_action.refusal.no_title_match": "Нет окна %1$@, подходящего под «%2$@»",
