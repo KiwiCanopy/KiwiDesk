@@ -110,6 +110,32 @@ struct DesktopMoveSharedSpaceTests {
         #expect(core.state.workspaces.space(of: window) == mail)
     }
 
+    /// One screen is never a crossing, whatever its frame reads: a
+    /// refusal here would reach every single-screen user.
+    @Test("one screen never refuses, with no screen read")
+    func oneScreenNeverRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.workspaces.removeDisplay(DisplayID(2))
+        core.state.workspaces.assign(mail, to: DisplayID(1))
+        core.state.apply(.windowDestroyed(window, wasMinimized: false))
+        core.state.rememberedSpaces[window] = nil
+        core.state.awayWindows[window] = AwayWindow(
+            id: window,
+            pid: 1,
+            appName: "App",
+            appBundleID: nil,
+            title: "",
+            nativeSpace: 11
+        )
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(2), .string("mail"), .number(7)]
+            ).isSuccess
+        )
+    }
+
     /// The frame outranks the Space, since the frame is what the
     /// arrival reads: a window sitting on another screen than its
     /// Space's is judged where it sits.

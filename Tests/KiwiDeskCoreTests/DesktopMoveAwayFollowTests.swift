@@ -4,8 +4,8 @@ import Testing
 
 @testable import KiwiDeskCore
 
-/// The follow of `DesktopMoveAwayTests`' away window (#3034), over the
-/// same fixture. Split at the §2.1 ceiling.
+/// The follow and focus of `DesktopMoveAwayTests`' away window (#3034),
+/// over the same fixture. Split at the §2.1 ceiling.
 ///
 /// `WMBridge.classResolverOverride` is process-global; the same
 /// synchronous-body arrangement as `DesktopCommandTests` applies.
@@ -89,6 +89,8 @@ struct DesktopMoveAwayFollowTests {
     func followHidden() {
         let core = makeCore()
         defer { teardown() }
+        let now = Date()
+        core.followFocus.clock = { now }
         let response = core.execute(
             "move_to_desktop_and_follow",
             args: [.number(4), .null, id]
@@ -112,9 +114,59 @@ struct DesktopMoveAwayFollowTests {
         #expect(response.isSuccess)
         #expect(core.followFocus.owed() == nil)
         #expect(core.state.workspaces.activeSpace == mail)
+        #expect(core.desktopMemory.moveReapPIDs == [pid])
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
         arrive(core)
         #expect(core.state.workspaces.space(of: away) == mail)
         #expect(core.focusedWindowID == away)
+    }
+
+    /// A Space that holds a focus grants the arrival nothing, so only
+    /// the debt can carry the follow's focus onto the window.
+    @Test("a follow's focus beats a Space that already holds one")
+    func followShownOverAFocus() {
+        let core = makeCore()
+        defer { teardown() }
+        let holder = WindowID(11)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: holder, pid: 900_003, appName: "Holder")
+            )
+        )
+        core.execute("focus_space", args: [.string("mail")])
+        core.state.workspaces.add(holder, to: mail)
+        core.state.workspaces.focus(holder, in: mail)
+        core.execute("focus_space", args: [.string("1")])
+        core.state.rememberedSpaces[away] = .departed("1")
+        #expect(
+            core.execute(
+                "move_to_desktop_and_follow",
+                args: [.number(1), .string("mail"), id]
+            ).isSuccess
+        )
+        #expect(core.state.workspaces.activeSpace == mail)
+        arrive(core)
+        #expect(core.focusedWindowID == away)
+    }
+
+    /// The window moved and only the switch was refused, so it still
+    /// owes the reap, and no focus.
+    @Test("a follow whose switch is refused still reaps")
+    func followRefusedSwitchReaps() {
+        let core = makeCore()
+        defer { teardown() }
+        WMBridge.classResolverOverride = {
+            $0 == "ManagedDisplaySetCurrentSpaceOperation"
+                ? nil : desktopVerbBridgeClasses[$0]
+        }
+        let response = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(4), .null, id]
+        )
+        #expect(!response.isSuccess)
+        #expect(DesktopVerbBridge.moves.count == 1)
+        #expect(core.followFocus.owed() == nil)
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
     }
 
     /// A Space no screen owns yet is no crossing: on one screen every
@@ -205,5 +257,67 @@ struct DesktopMoveAwayFollowTests {
                 args: [.number(4), .null, id]
             ).isSuccess
         )
+    }
+
+    // MARK: - The focus
+
+    /// The fold grants the focus in state alone, so without the debt
+    /// the next focused verb refuses at the #292 preflight (device,
+    /// 2026-11-06).
+    @Test("an arrival in a Space with no focus owes the raise")
+    func vacantOwesTheRaise() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("focus_space", args: [.string("mail")]).isSuccess)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .string("mail"), id]
+            ).isSuccess
+        )
+        // A filing here would undo a #1010 re-home across screens.
+        #expect(core.jump.take(arrived: away)?.relocates == false)
+    }
+
+    @Test("a hidden Desktop owes no raise")
+    func hiddenOwesNoRaise() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("focus_space", args: [.string("mail")]).isSuccess)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(2), .string("mail"), id]
+            ).isSuccess
+        )
+        #expect(core.jump.take(arrived: away) == nil)
+    }
+
+    @Test("a filing elsewhere owes no raise")
+    func otherSpaceOwesNoRaise() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("focus_space", args: [.string("mail")]).isSuccess)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .string("other"), id]
+            ).isSuccess
+        )
+        #expect(core.jump.take(arrived: away) == nil)
+    }
+
+    @Test("an arrival beside a focus owes nothing")
+    func occupiedOwesNothing() {
+        let core = makeCore()
+        defer { teardown() }
+        let active = core.state.workspaces.activeSpace!
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .string(active.raw), id]
+            ).isSuccess
+        )
+        #expect(core.jump.take(arrived: away) == nil)
     }
 }
