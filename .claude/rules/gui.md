@@ -1153,8 +1153,8 @@ must keep:
   hue alone. A profile card's picture rides the desktop plate
   (#786), drawn from the draft through the `schematicPalette`
   environment — never an init parameter — on the plate its
-  look earns (#2859), except Home's cards, whose plate is dark in
-  both modes (#3040): **a desk picture takes its plate through
+  appearance picks (#2859, #3041), except Home's cards, whose plate
+  is dark in both modes (#3040): **a desk picture takes its plate through
   `deskPlate` / `platePaint`, the picture's one palette
   writer, and never names `SettingsTheme.previewPlate` itself**
   (`PlateGroundWiringTests`). **A picture reads the paint's

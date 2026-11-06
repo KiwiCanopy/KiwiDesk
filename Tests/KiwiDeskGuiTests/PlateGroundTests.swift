@@ -5,15 +5,14 @@ import Testing
 
 @testable import KiwiDesk
 
-/// The light plate's verdict (#2859 ruling 1) over the bundled
-/// palettes and looks, and the paint it resolves: a look holds
-/// the light plate only where its bar ink and focus ring pass on
-/// it, dark mode and a failing look keep the dark plate's paint
-/// unchanged.
+/// The light plate's ring (#2859 ruling 1, #3041) over the bundled
+/// palettes and looks, and the paint it resolves: in light mode every
+/// look draws on the light plate, a ring that fails there darkened
+/// until it reads; dark mode keeps the dark plate's paint.
 @MainActor
-@Suite("Plate ground verdict")
+@Suite("Plate ground")
 struct PlateGroundTests {
-    /// The two bundled palettes ruled onto the dark plate.
+    /// The two bundled palettes whose own ring fails the plate.
     private static let darkPalettes: Set<String> = [
         "True Dark", "Monochrome",
     ]
@@ -24,48 +23,59 @@ struct PlateGroundTests {
         return settings
     }
 
-    @Test("the bundled palettes earn the ruled plates")
-    func bundledPalettesEarnTheirPlates() {
+    @Test("only the ruled palettes have their ring adjusted")
+    func bundledPalettesRing() {
         let palettes = PaletteCatalog.bundled()
         #expect(palettes.count == 10)
         #expect(
             Set(palettes.map(\.name)).isSuperset(of: Self.darkPalettes)
         )
         for palette in palettes {
-            let holds = HomeCardPlate.holdsLightPlate(painted(palette))
+            let settings = painted(palette)
+            let ring = HomeCardPlate.lightRingHex(settings)
+            #expect(HomeCardPlate.holdsLightRing(ring))
             #expect(
-                holds != Self.darkPalettes.contains(palette.name),
-                Comment(rawValue: "\(palette.name) holds: \(holds)")
+                (ring != settings.borderStyle.focusedColor)
+                    == Self.darkPalettes.contains(palette.name),
+                Comment(rawValue: "\(palette.name): \(ring)")
             )
         }
     }
 
-    /// The looks carry their palettes' colours, so only the one
-    /// drawn in True Dark keeps the dark plate.
-    @Test("the bundled looks follow their palettes")
-    func bundledLooksFollowTheirPalettes() {
+    /// Every bundled look draws on the light plate in light mode.
+    @Test("the bundled looks take the light plate")
+    func bundledLooksTakeTheLightPlate() {
         let looks = makeTestModel().core.bundledLooks
         #expect(looks.count >= 6)
-        let darkPalettes = PaletteCatalog.bundled()
-            .filter { Self.darkPalettes.contains($0.name) }
         for look in looks {
             var settings = TilingSettings()
             look.apply(to: &settings)
-            let drawnDark = darkPalettes.contains {
-                $0.isApplied(to: settings)
-            }
-            #expect(
-                HomeCardPlate.holdsLightPlate(settings) != drawnDark,
-                Comment(rawValue: "\(look.name)")
-            )
+            let paint = HomeCardPlate.palette(settings, in: .light)
+            #expect(paint.ground == .light, Comment(rawValue: look.name))
         }
-        #expect(
-            looks.contains { look in
-                var settings = TilingSettings()
-                look.apply(to: &settings)
-                return !HomeCardPlate.holdsLightPlate(settings)
+    }
+
+    /// Adjusting darkens the look's own colour, so a blue stays a
+    /// blue, and goes no further than it must.
+    @Test("an adjusted ring is the least darkening that holds")
+    func adjustedRingIsMinimal() throws {
+        var settings = TilingSettings()
+        settings.borderStyle.focusedColor = "#64D2FF"
+        let ring = HomeCardPlate.lightRingHex(settings)
+        let color = try #require(HexColor.parse(ring))
+        #expect(color.blue > color.red)
+        #expect(ring != "#000000")
+        let lighter =
+            "#"
+            + [color.red, color.green, color.blue]
+            .map {
+                String(
+                    format: "%02X",
+                    min(255, Int(($0 * 255 * 1.06).rounded()))
+                )
             }
-        )
+            .joined()
+        #expect(!HomeCardPlate.holdsLightRing(lighter))
     }
 
     /// The ruling's eight light palettes each keep their ring apart
@@ -100,14 +110,13 @@ struct PlateGroundTests {
         #expect(ruled.contains { $0.name == "Sunset" })
     }
 
-    /// Light mode paints the light plate for a holder; dark mode,
-    /// and a failing look in light mode, take the dark paint as
-    /// it shipped before #2859.
-    @Test("the paint follows the verdict and the appearance")
-    func paintFollowsTheVerdict() throws {
+    /// Light mode paints the light plate for every look; dark mode
+    /// takes the dark paint as it shipped before #2859.
+    @Test("the paint follows the appearance alone")
+    func paintFollowsTheAppearance() throws {
         let palettes = PaletteCatalog.bundled()
         let holder = painted(try #require(palettes.first))
-        let failing = painted(
+        let adjusted = painted(
             try #require(palettes.first { $0.name == "True Dark" })
         )
         let lit = HomeCardPlate.palette(holder, in: .light)
@@ -118,42 +127,39 @@ struct PlateGroundTests {
         #expect(
             lit.focus == Color(kiwiHex: holder.borderStyle.focusedColor)
         )
-        for (settings, scheme) in [
-            (holder, ColorScheme.dark), (failing, .dark),
-            (failing, .light),
-        ] {
-            let paint = HomeCardPlate.palette(settings, in: scheme)
+        let moved = HomeCardPlate.palette(adjusted, in: .light)
+        #expect(moved.ground == .light)
+        #expect(
+            moved.focus
+                == Color(kiwiHex: HomeCardPlate.lightRingHex(adjusted))
+        )
+        for settings in [holder, adjusted] {
+            let paint = HomeCardPlate.palette(settings, in: .dark)
             #expect(paint == HomeCardPlate.darkPalette(settings))
             #expect(paint.ground == .dark)
             #expect(paint.focus == nil)
         }
     }
 
-    /// The default look holds the plate, and loses it once its ink
-    /// sinks into its bar or its ring into the plate or outline.
-    @Test("a sunk ink or ring fails the verdict")
-    func sunkColoursFail() throws {
-        let base = TilingSettings()
-        #expect(HomeCardPlate.holdsLightPlate(base))
-        var sunkInk = base
-        sunkInk.kiwishelf.itemColor = try #require(
-            ColorVision.composite(
-                base.kiwishelf.fillColor,
-                over: HomeCardPlate.lightGround
+    /// A ring lost in the plate or the outline fails, and is
+    /// adjusted until it holds.
+    @Test("a sunk ring fails and is adjusted")
+    func sunkRingsFail() {
+        for sunk in [HomeCardPlate.lightGround, HomeCardPlate.lightOutline] {
+            #expect(!HomeCardPlate.holdsLightRing(sunk))
+            var settings = TilingSettings()
+            settings.borderStyle.focusedColor = sunk
+            #expect(
+                HomeCardPlate.holdsLightRing(
+                    HomeCardPlate.lightRingHex(settings)
+                )
             )
-        )
-        #expect(!HomeCardPlate.holdsLightPlate(sunkInk))
-        var paleRing = base
-        paleRing.borderStyle.focusedColor = HomeCardPlate.lightGround
-        #expect(!HomeCardPlate.holdsLightPlate(paleRing))
-        var outlineRing = base
-        outlineRing.borderStyle.focusedColor = HomeCardPlate.lightOutline
-        #expect(!HomeCardPlate.holdsLightPlate(outlineRing))
+        }
     }
 
     /// One ring per ring clause that passes the other two and
     /// fails only that one, so deleting any clause reds.
-    @Test("each ring clause fails the verdict alone")
+    @Test("each ring clause fails alone")
     func ringClausesFailAlone() throws {
         let plate = HomeCardPlate.lightGround
         let outline = HomeCardPlate.lightOutline
@@ -192,10 +198,8 @@ struct PlateGroundTests {
         #expect(faintly.contrast > outlineContrast)
         #expect(faintly.separation >= ColorVision.separationFloor)
         for ring in [flat, twin, faint] {
-            var settings = TilingSettings()
-            settings.borderStyle.focusedColor = ring
             #expect(
-                !HomeCardPlate.holdsLightPlate(settings),
+                !HomeCardPlate.holdsLightRing(ring),
                 Comment(rawValue: "\(ring) held the light plate")
             )
         }
@@ -209,7 +213,7 @@ struct PlateGroundTests {
         var settings = TilingSettings()
         settings.borderStyle.enabled = true
         settings.borderStyle.focusedColor = ring
-        #expect(HomeCardPlate.holdsLightPlate(settings))
+        #expect(HomeCardPlate.holdsLightRing(ring))
         #expect(
             !HomeCardPlate.plateLegible(ring, on: HomeCardPlate.darkGround)
         )
@@ -221,13 +225,12 @@ struct PlateGroundTests {
     }
 
     /// With borders off no ring draws, so the plate's focus mark
-    /// and the verdict both take the active item colour.
+    /// takes the active item colour, adjusted the same way.
     @Test("borders off judge and paint the active item colour")
     func bordersOffUseTheActiveColour() {
         var settings = TilingSettings()
         settings.borderStyle.enabled = false
         settings.borderStyle.focusedColor = HomeCardPlate.lightGround
-        #expect(HomeCardPlate.holdsLightPlate(settings))
         let paint = HomeCardPlate.palette(settings, in: .light)
         #expect(
             paint.focus
@@ -237,6 +240,10 @@ struct PlateGroundTests {
             LayoutSchematicView.focusStroke(settings, on: paint) == nil
         )
         settings.kiwishelf.activeItemColor = HomeCardPlate.lightGround
-        #expect(!HomeCardPlate.holdsLightPlate(settings))
+        #expect(
+            HomeCardPlate.holdsLightRing(
+                HomeCardPlate.lightRingHex(settings)
+            )
+        )
     }
 }

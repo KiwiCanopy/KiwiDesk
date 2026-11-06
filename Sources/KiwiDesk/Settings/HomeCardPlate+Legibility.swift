@@ -41,21 +41,12 @@ extension HomeCardPlate {
             : settings.kiwishelf.activeItemColor
     }
 
-    /// Whether a look holds the light plate (#2859 ruling 1): its
-    /// item ink clears the floor on its own bar fill over the
-    /// plate, and its focus ring clears the floor, out-contrasts
-    /// the unfocused outline and separates from it under protan
-    /// simulation. A failing look keeps the dark plate; its ink is
-    /// never swapped.
-    static func holdsLightPlate(_ settings: TilingSettings) -> Bool {
-        let shelf = settings.kiwishelf
-        let ring = focusHex(settings)
-            .trimmingCharacters(in: .whitespaces)
+    /// Whether a ring reads on the light plate (#2859 ruling 1):
+    /// it clears the floor, out-contrasts the unfocused outline and
+    /// separates from it under protan simulation.
+    static func holdsLightRing(_ hex: String) -> Bool {
+        let ring = hex.trimmingCharacters(in: .whitespaces)
         guard
-            let bar = ColorVision.composite(
-                shelf.fillColor.trimmingCharacters(in: .whitespaces),
-                over: lightGround
-            ),
             let drawn = ColorVision.composite(ring, over: lightGround),
             let ringContrast = ColorVision.contrast(drawn, lightGround),
             let outlineContrast = ColorVision.contrast(
@@ -64,9 +55,38 @@ extension HomeCardPlate {
             ),
             let separation = ColorVision.separation(drawn, lightOutline)
         else { return false }
-        return plateLegible(shelf.itemColor, on: bar)
-            && plateLegible(ring, on: lightGround)
+        return plateLegible(ring, on: lightGround)
             && ringContrast > outlineContrast
             && separation >= ColorVision.separationFloor
     }
+
+    /// The ring a picture draws on the light plate: the look's own
+    /// where it holds, else that colour darkened just far enough
+    /// (#3041). Bars keep the look's colours, as on a real desk.
+    static func lightRingHex(_ settings: TilingSettings) -> String {
+        let ring = focusHex(settings)
+            .trimmingCharacters(in: .whitespaces)
+        if holdsLightRing(ring) { return ring }
+        let drawn = ColorVision.composite(ring, over: lightGround)
+        guard let drawn, let color = HexColor.parse(drawn) else {
+            return lightInkHex
+        }
+        for step in 1...ringSteps {
+            let scale = 1 - Double(step) / Double(ringSteps)
+            let hex =
+                "#"
+                + [color.red, color.green, color.blue]
+                .map {
+                    let byte = Int(($0 * scale * 255).rounded())
+                    return String(format: "%02X", byte)
+                }
+                .joined()
+            if holdsLightRing(hex) { return hex }
+        }
+        return lightInkHex
+    }
+
+    private static let ringSteps = 40
+    /// `SettingsTheme.lightInk`, for a ring that names no colour.
+    private static let lightInkHex = "#2B3B31"
 }

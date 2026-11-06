@@ -60,10 +60,9 @@ enum SettingsTheme {
 
     // MARK: - Light plate (#2859)
 
-    /// The light plate a look that holds it draws on in light
-    /// mode, and the plate's own paint. Fixed in both modes: the
-    /// verdict picks the plate (`HomeCardPlate.holdsLightPlate`),
-    /// the window's appearance never repaints it.
+    /// The light plate a picture draws on in light mode, and the
+    /// plate's own paint. Fixed in both modes: `HomeCardPlate.palette`
+    /// picks the plate, the token never repaints.
     static let lightPlate = token(light: 0xDF_E6_DC, dark: 0xDF_E6_DC)
     static let lightEdge = token(light: 0xC6_CF_C4, dark: 0xC6_CF_C4)
     /// The keyboard board's edge on the light plate (#3040).

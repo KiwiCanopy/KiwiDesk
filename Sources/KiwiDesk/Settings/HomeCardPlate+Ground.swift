@@ -1,17 +1,17 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// The plate paint a desk picture resolves (#2859): the light
-/// plate where the window is light and the look holds it
-/// (`holdsLightPlate`), else the dark plate (#786). Home's cards
-/// skip the verdict and keep the dark plate (#3040).
+/// The plate paint a desk picture resolves: the light plate where
+/// the window is light, with a ring that reads on it (#2859, #3041),
+/// else the dark plate (#786). Home's cards keep the dark plate
+/// (#3040).
 extension HomeCardPlate {
     /// The one paint a picture of `settings` draws in `scheme`.
     static func palette(
         _ settings: TilingSettings,
         in scheme: ColorScheme
     ) -> SchematicPalette {
-        guard scheme == .light, holdsLightPlate(settings) else {
+        guard scheme == .light else {
             return darkPalette(settings)
         }
         return SchematicPalette(
@@ -19,7 +19,7 @@ extension HomeCardPlate {
             ink: SettingsTheme.lightInk,
             base: SettingsTheme.lightPlate,
             ground: .light,
-            focus: Color(kiwiHex: focusHex(settings))
+            focus: Color(kiwiHex: lightRingHex(settings))
         )
     }
 

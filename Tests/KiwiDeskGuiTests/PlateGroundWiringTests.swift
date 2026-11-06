@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// Every desk picture but Home's cards, which pass `alwaysDark`
-/// (#3040), draws the plate its look earned (#2859):
+/// (#3040), draws the plate its appearance picks (#3041):
 /// each in-scope surface reads the resolved paint through
 /// `deskPlate`/`platePaint` or the palette they write, a plate
 /// view with no writer takes `SchematicPalette.unresolved`, and

@@ -10962,6 +10962,16 @@ the ground. The page moves to `F1F3ED`, the darkest that keeps
 an edge on it.
 :::
 
+:::unreleased
+**Every look draws on the light plate outside Home (#3041, owner
+2026-11-06, reversing #2859's "a failing look swaps the ground, never
+the ink" for these hosts).** A single dark block among light pictures
+broke the page more than a slightly different ring misreports a look.
+So `holdsLightPlate` is gone: a ring that fails on the plate is
+darkened just far enough to hold (`lightRingHex`), keeping its hue,
+and the bars keep the look's own colours, as they do on a real desk.
+:::
+
 **Settings is one surface: depth grows in place, never by a
 mode.** (#2654, owner ruling 2026-10-26, superseding #678's
 Simple / Power User segment and #760's reveal wash and
