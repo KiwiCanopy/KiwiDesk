@@ -10,7 +10,7 @@ enum SettingsTheme {
     // MARK: - Surfaces
 
     /// Window background behind all content.
-    static let page = token(light: 0xFB_FC_FA, dark: 0x00_00_00)
+    static let page = token(light: 0xF1_F3_ED, dark: 0x00_00_00)
 
     /// Containers and rows: cards, section containers, footer.
     static let card = token(light: 0xFF_FF_FF, dark: 0x08_12_0C)
@@ -22,14 +22,11 @@ enum SettingsTheme {
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x08_12_0C)
 
-    /// A Home card under the pointer. Opaque rather than an
-    /// alpha over `card` (#1198's rule one layer out), so every
-    /// ink above it is measured against what it actually sits
-    /// on — the floors are `SettingsThemeContrastTests`'
-    /// `cardHover` pairings, `ink3` the tightest (#1173).
-    static let cardHover = token(
-        light: 0xF2_F5_F0,
-        dark: 0x13_23_18
+    /// A Home card's edge under the pointer (#3040): the darker
+    /// brand green in light, the brighter one in dark.
+    static let cardHoverEdge = token(
+        light: 0x4F_7A_2B,
+        dark: 0xAA_CB_5D
     )
 
     /// Disclosure interiors and filled chips.
@@ -69,6 +66,11 @@ enum SettingsTheme {
     /// the window's appearance never repaints it.
     static let lightPlate = token(light: 0xDF_E6_DC, dark: 0xDF_E6_DC)
     static let lightEdge = token(light: 0xC6_CF_C4, dark: 0xC6_CF_C4)
+    /// The keyboard board's edge on the light plate (#3040).
+    static let lightBoardEdge = token(
+        light: 0x8E_9A_8E,
+        dark: 0x8E_9A_8E
+    )
     static let lightWell = token(light: 0xEC_F0_EA, dark: 0xEC_F0_EA)
     static let lightWindow = token(light: 0xF8_FA_F6, dark: 0xF8_FA_F6)
     static let lightOutline = token(light: 0xBC_C5_BA, dark: 0xBC_C5_BA)
@@ -111,7 +113,7 @@ enum SettingsTheme {
 
     /// Container border hairline: card, section, header, footer.
     static let hairline = token(
-        light: 0xE4_E9_E1,
+        light: 0xD6_DC_D1,
         dark: 0x2B_45_34
     )
 

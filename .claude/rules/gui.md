@@ -1153,7 +1153,8 @@ must keep:
   hue alone. A profile card's picture rides the desktop plate
   (#786), drawn from the draft through the `schematicPalette`
   environment — never an init parameter — on the plate its
-  look earns (#2859): **a desk picture takes its plate through
+  look earns (#2859), except Home's cards, whose plate is dark in
+  both modes (#3040): **a desk picture takes its plate through
   `deskPlate` / `platePaint`, the picture's one palette
   writer, and never names `SettingsTheme.previewPlate` itself**
   (`PlateGroundWiringTests`). **A picture reads the paint's
@@ -1288,12 +1289,10 @@ must keep:
   compose instead of one erasing the other. An accent hover edge
   is legal only on a surface that carries no durable marking at
   all, as the gesture strip's pictures (#2537, `GestureStripTests`
-  ▸ `plateHoverCue`). The Home card keeps the neutral fill lift
-  though #2654 removed its marking: its border stays reserved for
-  identity.
-  `HomeCardChromeTests` holds the split, its negative half
-  located by `cardStroke`'s brace-balanced body rather than by
-  a spelling a retune may move. A searchable dropdown's
+  ▸ `plateHoverCue`). The Home card is one since #2654 removed its
+  marking: its fill stays and its border takes the pointer, 2 pt
+  `cardHoverEdge` (#3040, `HomeCardChromeTests`). A marking returning
+  to that card takes its own channel. A searchable dropdown's
   `DropdownCursor` IS the selection Return reads, so real
   pointer motion may move it there (`DropdownCursorWiringTests`)
   and nowhere else — a list whose selection anything beyond
@@ -1661,9 +1660,11 @@ Every surface, border and ink in the Settings tree comes from
   "prefer a concrete ink" stays a preference.
 - **A plane's edge is `hairline`; a rule that is no plane's edge
   is `hairlineSubtle`** — between a card's groups or entries,
-  between chips in a strip. The two differ only in dark, where a
-  rule at the edge's strength competes with the edge of what holds
-  it. No scan tells a rule from an edge, so this is review's.
+  between chips in a strip. `hairline` is the stronger in both
+  modes: in dark a rule at the edge's strength competes with the
+  edge of what holds it, and in light the edge has to shape a white
+  card on a pale page (#3040). No scan tells a rule from an edge, so
+  this is review's.
 - **A dark plane on a dark ground takes the `planeRing` seam**
   (16b's one non-swap construction): where a fixed-dark surface
   meets a mode-varying one — the plate, the save pill, the

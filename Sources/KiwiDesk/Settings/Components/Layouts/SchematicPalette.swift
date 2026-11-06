@@ -43,6 +43,9 @@ struct SchematicPalette: Equatable {
     var well: Color { light ? SettingsTheme.lightWell : ghostFill }
     /// The "+" of an incoming window.
     var mark: Color { light ? SettingsTheme.lightMark : ink }
+    /// The keyboard board's edge and its width (#3040).
+    var boardEdge: Color { light ? SettingsTheme.lightBoardEdge : edge }
+    var boardEdgeWidth: CGFloat { light ? 1.5 : 1 }
     /// The plate's inset edge; `planeRing` stays the dark seam.
     var edge: Color {
         light ? SettingsTheme.lightEdge : SettingsTheme.planeRing

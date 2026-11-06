@@ -78,7 +78,7 @@ enum HomeCardPlate {
                 .padding(.top, Self.topAir)
                 .frame(height: SettingsTheme.plateHeight)
                 .frame(maxWidth: .infinity)
-                .deskPlate(settings, in: Rectangle())
+                .deskPlate(settings, in: Rectangle(), alwaysDark: true)
                 .accessibilityHidden(true)
                 .allowsHitTesting(false)
         )

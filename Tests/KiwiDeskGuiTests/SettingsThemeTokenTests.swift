@@ -53,7 +53,7 @@ struct SettingsThemeTokenTests {
     }
 
     private let pins: [Pin] = [
-        Pin("page", 0xFB_FC_FA, 0x00_00_00, SettingsTheme.page),
+        Pin("page", 0xF1_F3_ED, 0x00_00_00, SettingsTheme.page),
         Pin("card", 0xFF_FF_FF, 0x08_12_0C, SettingsTheme.card),
         Pin(
             "headerGround",
@@ -62,14 +62,17 @@ struct SettingsThemeTokenTests {
             SettingsTheme.headerGround
         ),
         Pin("panel", 0xF4_F6_F1, 0x08_12_0C, SettingsTheme.panel),
-        // The pointer's own surface (#1173): `card` stepped one
-        // notch toward the ground in each appearance, matched by
-        // LIFT rather than by hex.
         Pin(
-            "cardHover",
-            0xF2_F5_F0,
-            0x13_23_18,
-            SettingsTheme.cardHover
+            "cardHoverEdge",
+            0x4F_7A_2B,
+            0xAA_CB_5D,
+            SettingsTheme.cardHoverEdge
+        ),
+        Pin(
+            "lightBoardEdge",
+            0x8E_9A_8E,
+            0x8E_9A_8E,
+            SettingsTheme.lightBoardEdge
         ),
         Pin(
             "sunken",
@@ -145,7 +148,7 @@ struct SettingsThemeTokenTests {
         ),
         Pin(
             "hairline",
-            0xE4_E9_E1,
+            0xD6_DC_D1,
             0x2B_45_34,
             SettingsTheme.hairline
         ),

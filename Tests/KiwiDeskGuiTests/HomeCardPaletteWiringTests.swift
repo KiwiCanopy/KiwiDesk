@@ -28,14 +28,15 @@ struct HomeCardPaletteWiringTests {
     func paletteIsWired() throws {
         #expect(
             try squashed("HomeCardPlate.swift").contains(
-                ".deskPlate(settings,in:Rectangle())"
+                ".deskPlate(settings,in:Rectangle(),alwaysDark:true)"
             )
         )
         // The one writer behind every plate, from the verdict.
         #expect(
             try squashed("HomeCardPlate+Ground.swift").contains(
-                "content.environment(\\.schematicPalette,"
-                    + "HomeCardPlate.palette(settings,in:scheme))"
+                "content.environment(\\.schematicPalette,alwaysDark"
+                    + "?HomeCardPlate.darkPalette(settings)"
+                    + ":HomeCardPlate.palette(settings,in:scheme))"
             )
         )
         let kit = try squashed(

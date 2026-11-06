@@ -59,12 +59,15 @@ extension SchematicPalette {
 /// picture's one writer, so every mark on it reads one verdict.
 private struct PlatePaintWriter: ViewModifier {
     let settings: TilingSettings
+    let alwaysDark: Bool
     @Environment(\.colorScheme) private var scheme
 
     func body(content: Content) -> some View {
         content.environment(
             \.schematicPalette,
-            HomeCardPlate.palette(settings, in: scheme)
+            alwaysDark
+                ? HomeCardPlate.darkPalette(settings)
+                : HomeCardPlate.palette(settings, in: scheme)
         )
     }
 }
@@ -91,19 +94,26 @@ private struct DeskPlateGround<Plate: InsettableShape>: ViewModifier {
 extension View {
     /// Resolves the plate paint for `settings` (#2859) without
     /// drawing a plate — for a picture whose plates sit inside.
-    func platePaint(_ settings: TilingSettings) -> some View {
-        modifier(PlatePaintWriter(settings: settings))
+    func platePaint(
+        _ settings: TilingSettings,
+        alwaysDark: Bool = false
+    ) -> some View {
+        modifier(
+            PlatePaintWriter(settings: settings, alwaysDark: alwaysDark)
+        )
     }
 
     /// Draws the picture on its plate, `shape`, in the paint
     /// resolved for `settings` (#2859); `edged` strokes the
-    /// plate's inset edge over it.
+    /// plate's inset edge over it. `alwaysDark` skips the verdict:
+    /// Home's cards, in both modes (#3040).
     func deskPlate(
         _ settings: TilingSettings,
         in shape: some InsettableShape,
-        edged: Bool = true
+        edged: Bool = true,
+        alwaysDark: Bool = false
     ) -> some View {
         modifier(DeskPlateGround(shape: shape, edged: edged))
-            .platePaint(settings)
+            .platePaint(settings, alwaysDark: alwaysDark)
     }
 }

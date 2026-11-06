@@ -15,7 +15,8 @@ import Testing
 struct PlateGroundWiringTests {
     /// Surface file → the squashed consult it must carry.
     private let surfaces: [String: String] = [
-        "HomeCardPlate.swift": ".deskPlate(settings,in:Rectangle())",
+        "HomeCardPlate.swift":
+            ".deskPlate(settings,in:Rectangle(),alwaysDark:true)",
         "SimpleSpacePicture.swift": ".deskPlate(settings,in:shape)",
         "BarsPanelPreview.swift":
             ".deskPlate(settings,in:RoundedRectangle("
