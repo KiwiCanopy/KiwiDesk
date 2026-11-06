@@ -157,14 +157,15 @@ Every one of the following binds whoever touches them:
   `AwayBootSeedTests` ▸ `noCensusSeedsNothing`,
   `LifecycleReasonTests`' `.unknown` clauses), and a new
   consumer owes that clause. The per-window symbol
-  (`SLSCopySpacesForWindows`) has TWO ruled doors and no third
-  (#1410): the census's `SkyLight.windowSpace` behind
+  (`SLSCopySpacesForWindows`) has THREE ruled doors and no fourth
+  (#1410, #2968): the census's `SkyLight.windowSpace` behind
   `DesktopMemory.readWindowSpace` — the classifier's hosted/gone
-  reading — and the gate's `SkyLight.windowSpaces` list behind
-  `KiwiCore.windowIsOnShownDesktop`, a different question (is any
-  host shown) the raise owns; `DesktopCensusSeamTests` ▸
-  `rawWindowSpaceReadHasRuledCallers` pins both caller sets to
-  the OS lane. Two readings that must not be
+  reading — and two over the `SkyLight.windowSpaces` list: the
+  gate's `KiwiCore.windowIsOnShownDesktop`, a different question
+  (is any host shown) the raise owns, and the heal stand-down's
+  batch of that question behind `DesktopMemory.readOffShown`;
+  `DesktopCensusSeamTests` ▸ `rawWindowSpaceReadHasRuledCallers`
+  pins the caller sets to the OS lane. Two readings that must not be
   confused: **"gone" is the SPACE LIST being empty**
   (`SLSCopySpacesForWindows` answering `[]`, or the id on no
   Desktop's list) — never absence from

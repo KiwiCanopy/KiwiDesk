@@ -117,13 +117,14 @@ struct DesktopCensusSeamTests {
         )
     }
 
-    /// The per-window symbol has two ruled doors and no third
-    /// (#1410): the census's `windowSpace` (the classifier's
-    /// hosted/gone reading) and the gate's `windowSpaces` list;
-    /// every caller of either lives in the OS lane, so a Core
-    /// consumer reaching the live WindowServer past both seams
-    /// reds here.
-    @Test("the raw per-window Space read has its two ruled callers")
+    /// The per-window symbol has three ruled doors and no fourth
+    /// (#1410, #2968): the census's `windowSpace` (the classifier's
+    /// hosted/gone reading), the raise gate's `isOnShownDesktop`
+    /// and the heal stand-down's `anyOffShownDesktop` batch, both
+    /// over the `windowSpaces` list. Every caller of the raw reads
+    /// and the batch's inner read lives in the OS lane, so a Core
+    /// consumer or a new wrapper past those seams reds here.
+    @Test("the raw per-window Space read has its ruled callers")
     func rawWindowSpaceReadHasRuledCallers() throws {
         let list = try SourceScan.identifierSites(
             of: "windowSpaces(",
@@ -152,6 +153,35 @@ struct DesktopCensusSeamTests {
             .init(
                 rawValue: "found "
                     + one.map(\.site).joined(separator: ", ")
+            )
+        )
+        // Both overloads' definitions, the one-window door's
+        // forward and the batch's call.
+        let shown = try SourceScan.identifierSites(
+            of: "isOnShownDesktop(",
+            under: Self.sources
+        )
+        #expect(
+            Set(shown.map(\.file.lastPathComponent))
+                == ["NativeSpaces+Census.swift"]
+                && shown.count == 4,
+            .init(
+                rawValue: "found "
+                    + shown.map(\.site).joined(separator: ", ")
+            )
+        )
+        // The definition alone: `DesktopMemory.readOffShown` takes
+        // it by reference (`HealStandDownSeamTests`).
+        let batch = try SourceScan.identifierSites(
+            of: "anyOffShownDesktop(",
+            under: Self.sources
+        )
+        #expect(
+            batch.map(\.file.lastPathComponent)
+                == ["NativeSpaces+Census.swift"],
+            .init(
+                rawValue: "found "
+                    + batch.map(\.site).joined(separator: ", ")
             )
         )
     }
