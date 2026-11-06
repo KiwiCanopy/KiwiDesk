@@ -81,10 +81,9 @@ extension KiwiCore {
             .map(WindowID.init)
     }
 
-    /// The tracked window `value` names — the one parse of a
-    /// window id. Outside `commandTarget` only for an id that
-    /// sits where the record's `.window` argument cannot: the
-    /// first of `swap`'s two and `swap_here`'s (#2509).
+    /// The tracked window `value` names. Outside `commandTarget` only
+    /// for an id that sits where the record's `.window` argument
+    /// cannot: the first of `swap`'s two and `swap_here`'s (#2509).
     func windowTarget(_ value: JSONValue) -> CommandTarget {
         guard let spelled = value.stringValue else {
             return .refused(.fail("expected window id"))

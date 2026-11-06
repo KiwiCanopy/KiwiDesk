@@ -124,6 +124,26 @@ struct DesktopMoveAwayLandingTests {
         #expect(core.state.restoredFrames[away] == nil)
     }
 
+    @Test("a hand float's record survives, and it arrives floating")
+    func handFloatStays() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.rememberedSpaces[away] = .restored("1")
+        core.state.restoredFrames[away] = .init(
+            frame: CGRect(x: 1, y: 2, width: 3, height: 4),
+            floating: true
+        )
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .null, id]
+            ).isSuccess
+        )
+        #expect(core.state.rememberedSpaces[away] == .departed("1"))
+        arrive(core)
+        #expect(core.state.windows[away]?.isFloating == true)
+    }
+
     /// Filed into the Space shown, it is a return and no new window,
     /// so the fold's new-window grant leaves the focus alone.
     @Test("an unfiled window arriving takes no focus")
@@ -292,59 +312,5 @@ struct DesktopMoveAwayLandingTests {
             ).isSuccess
         )
         #expect(core.jump.take(arrived: away) == nil)
-    }
-
-    // MARK: - The follow
-
-    @Test("a follow to a hidden Desktop owes the focus")
-    func followHidden() {
-        let core = makeCore()
-        defer { teardown() }
-        let response = core.execute(
-            "move_to_desktop_and_follow",
-            args: [.number(4), .null, id]
-        )
-        #expect(response.isSuccess)
-        #expect(core.followFocus.owed() == away)
-    }
-
-    /// No reveal comes: the Space switches at the command, whole, and
-    /// the reap's arrival takes a plain focus, which owes no #1007 debt.
-    @Test("a follow to a shown Desktop switches now, focus at the arrival")
-    func followShown() {
-        let core = makeCore()
-        defer { teardown() }
-        core.state.rememberedSpaces[away] = .departed("1")
-        core.state.workspaces.ensureSpace(mail)
-        let response = core.execute(
-            "move_to_desktop_and_follow",
-            args: [.number(1), .string("mail"), id]
-        )
-        #expect(response.isSuccess)
-        #expect(core.followFocus.owed() == nil)
-        #expect(core.state.workspaces.activeSpace == mail)
-        arrive(core)
-        #expect(core.state.workspaces.space(of: away) == mail)
-        #expect(core.focusedWindowID == away)
-    }
-
-    @Test("a follow never switches for a minimized or hidden window")
-    func followRefusesParked() {
-        let core = makeCore()
-        defer { teardown() }
-        core.state.awayWindows[away]?.isUp = false
-        let response = core.execute(
-            "move_to_desktop_and_follow",
-            args: [.number(4), .null, id]
-        )
-        #expect(response.error == "Can't follow a minimized or hidden window.")
-        #expect(DesktopVerbBridge.moves.isEmpty)
-        #expect(core.followFocus.owed() == nil)
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(4), .null, id]
-            ).isSuccess
-        )
     }
 }

@@ -159,7 +159,8 @@ extension StateCoordinator {
     /// Files an away window a Desktop move took (#3034): the named
     /// Space, else its own, else `home`. Always `.departed`: the
     /// user moved it, so the #1010 net answers its arrival, and no
-    /// restored frame is owed.
+    /// tiled frame is owed. A hand float's record stays, since the
+    /// arrival reads the float from it (#1864).
     mutating func fileAwayMove(
         _ id: WindowID,
         named: SpaceID?,
@@ -169,7 +170,7 @@ extension StateCoordinator {
         guard let space = named ?? current ?? home else { return }
         if current != space { retireDepartureRecord(of: id) }
         rememberedSpaces[id] = .departed(space)
-        restoredFrames[id] = nil
+        if restoredFrames[id]?.floating != true { restoredFrames[id] = nil }
     }
 
     /// A head gone for good makes its hand-off permanent (#1387):

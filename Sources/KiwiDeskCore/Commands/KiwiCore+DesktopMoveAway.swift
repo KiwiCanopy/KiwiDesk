@@ -125,8 +125,9 @@ extension KiwiCore {
     }
 
     /// Whether `away` left with a sticky scope, restored at its
-    /// arrival (#414): a named Space is a membership write the
-    /// sticky gate refuses, and that gate reads tracked windows.
+    /// arrival (#414). A named Space is a membership write, and the
+    /// sticky gate reads tracked windows, so every scope refuses here,
+    /// a screen-sticky window's other-screen re-home included.
     private func awayIsSticky(_ away: AwayWindow) -> Bool {
         let window = ManagedWindow(
             id: away.id,
@@ -148,7 +149,8 @@ extension KiwiCore {
             return nil
         }
         guard let screen = display(forUUID: target.displayIdentifier),
-            state.workspaces.display(of: filed) != screen
+            let home = state.workspaces.display(of: filed),
+            home != screen
         else { return filed }
         return moveHereSpace(on: screen)
     }

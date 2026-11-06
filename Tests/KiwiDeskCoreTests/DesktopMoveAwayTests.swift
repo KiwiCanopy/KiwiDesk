@@ -165,6 +165,25 @@ struct DesktopMoveAwayTests {
         #expect(core.state.awayWindows[away]?.nativeSpace == 21)
     }
 
+    /// A census read 400 ms after the move must not read a window
+    /// mid-move as closed: that is the settle's and the task's prune.
+    @Test("the reap prunes nothing")
+    func reapKeepsAnAbsentEntry() async {
+        let core = makeCore()
+        defer { teardown() }
+        core.desktopMemory.readCensus = { _ in
+            DesktopCensus(hosts: [:], shown: [10, 20])
+        }
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(4), .null, id]
+            ).isSuccess
+        )
+        await core.deferred.task(for: .desktopMoveReap)?.value
+        #expect(core.state.awayWindows[away] != nil)
+    }
+
     // MARK: - The refusals
 
     @Test("a window on a full-screen Space refuses")
@@ -190,28 +209,47 @@ struct DesktopMoveAwayTests {
         #expect(DesktopVerbBridge.moves.isEmpty)
     }
 
-    @Test("a pocket window refuses in either phase")
-    func pocketRefuses() {
-        let core = makeCore()
-        defer { teardown() }
-        // A vanish keeps the slot: only a close or a minimize empties it.
-        core.execute("toggle_pocket_window")
-        #expect(core.state.pocketPhase(of: focused) == .out)
-        core.state.apply(.windowDestroyed(focused, wasMinimized: false))
-        core.state.awayWindows[focused] = AwayWindow(
-            id: focused,
+    /// A vanish keeps the slot: only a close or a minimize empties it.
+    private func vanish(_ core: KiwiCore, _ window: WindowID) {
+        core.state.apply(.windowDestroyed(window, wasMinimized: false))
+        core.state.awayWindows[window] = AwayWindow(
+            id: window,
             pid: 900_002,
             appName: "Here",
             appBundleID: nil,
             title: "",
             nativeSpace: 11
         )
-        #expect(core.state.pocketPhase(of: focused) != nil)
+    }
+
+    @Test("an out pocket window refuses")
+    func outPocketRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        core.execute("toggle_pocket_window")
+        #expect(core.state.pocketPhase(of: focused) == .out)
+        vanish(core, focused)
         #expect(
             core.execute(
                 "move_to_desktop",
                 args: [.number(1), .null, .number(Double(focused.raw))]
             ).error == "a pocket window cannot change Desktop"
+        )
+        #expect(DesktopVerbBridge.moves.isEmpty)
+    }
+
+    @Test("a pocketed window refuses")
+    func pocketedRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        core.execute("pocket")
+        #expect(core.state.pocketPhase(of: focused) == .pocketed)
+        vanish(core, focused)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .null, .number(Double(focused.raw))]
+            ).error == "a pocketed window cannot change Desktop"
         )
         #expect(DesktopVerbBridge.moves.isEmpty)
     }
