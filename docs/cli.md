@@ -845,8 +845,9 @@ window carries (`kiwidesk make_floating 4711`).
 :::unreleased
 `move_to_desktop` and `move_to_desktop_and_follow` take the same
 window `id`, after the space id. Ahead of an id, an empty string
-leaves the space out: `kiwidesk move_to_desktop 3 "" 4711`. Neither
-moves a full-screen window or a pocket window, named or focused.
+leaves the space out: `kiwidesk move_to_desktop 3 "" 4711`. The id
+may be one `get_state` lists under `away_windows`. Neither moves a
+full-screen window or a pocket window, named or focused.
 :::
 
 `new_window` and `close_window` take the same optional window

@@ -181,8 +181,9 @@ itself when an eighth is added.
   from the #292 foreground preflight whenever a call names one —
   the target is named rather than implied — so that verb's handler
   reads the argument ONLY through `commandTarget`, which also
-  refuses an id no tracked window carries. Adding `.window` to a
-  record whose handler ignores it would let a named call skip the
+  refuses an id no tracked window carries, with the Desktop moves'
+  `awayTarget` ahead of it for the one id family they reach (#3034).
+  Adding `.window` to a record whose handler ignores it would let a named call skip the
   preflight and still act on the focus, which is the hazard #292
   closes; `WindowArgumentReachTests` probes every such record with
   an unknown id and reds on a handler that does not refuse it. A

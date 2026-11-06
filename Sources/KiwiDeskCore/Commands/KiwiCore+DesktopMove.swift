@@ -48,6 +48,14 @@ extension KiwiCore {
         case .refused(let response):
             return response
         case .target(let target):
+            if let away = awayTarget(command, args) {
+                return moveAwayToDesktop(
+                    away,
+                    to: target,
+                    args,
+                    follow: follow
+                )
+            }
             let window: WindowID
             switch commandTarget(command, args) {
             case .refused(let response):
@@ -286,8 +294,15 @@ extension KiwiCore {
         recordDesktopMoveDeparture(window, targetIsCurrent: targetIsCurrent)
         lastDesktopSwitch = Date()
         guard let pid = state.windows[window]?.pid else { return }
-        // One slot, which a later move re-arms: the pids collect so
-        // a burst of named moves reaps every app, not the last.
+        armMoveReap(pid: pid)
+    }
+
+    /// Reconciles the app a Desktop move dispatched for, and re-reads
+    /// the away ledger, whose copy of a hidden window's Desktop the
+    /// move just outdated (#3034). One slot, which a later move
+    /// re-arms: the pids collect so a burst of named moves reaps every
+    /// app, not the last.
+    func armMoveReap(pid: pid_t) {
         desktopMemory.moveReapPIDs.insert(pid)
         deferred.schedule(
             .desktopMoveReap,
@@ -296,6 +311,7 @@ extension KiwiCore {
             guard let self else { return }
             let pids = self.desktopMemory.moveReapPIDs
             self.desktopMemory.moveReapPIDs = []
+            self.refreshAwayWindows()
             guard self.eventLoop.isRunning else { return }
             for pid in pids {
                 self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))

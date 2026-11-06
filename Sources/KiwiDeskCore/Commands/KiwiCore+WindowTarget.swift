@@ -60,6 +60,19 @@ extension KiwiCore {
         return windowTarget(args[index])
     }
 
+    /// The away window `args` name, for the one verb family that
+    /// reaches one (#3034); nil leaves the call to `commandTarget`,
+    /// which refuses an id it does not track.
+    func awayTarget(_ command: String, _ args: [JSONValue]) -> AwayWindow? {
+        guard let index = APIReference.windowArgumentIndex(command),
+            args.indices.contains(index),
+            let number = args[index].numberValue,
+            let raw = UInt32(exactly: number),
+            state.windows[WindowID(raw)] == nil
+        else { return nil }
+        return state.awayWindows[WindowID(raw)]
+    }
+
     /// The tracked window `value` names — the one parse of a
     /// window id. Outside `commandTarget` only for an id that
     /// sits where the record's `.window` argument cannot: the

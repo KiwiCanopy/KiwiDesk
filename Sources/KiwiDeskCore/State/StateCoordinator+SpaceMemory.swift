@@ -156,6 +156,17 @@ extension StateCoordinator {
         return true
     }
 
+    /// Files an away window in the Space a Desktop move named
+    /// (#3034): `refileAway`, or the first filing of a window the
+    /// boot found and nothing has filed.
+    mutating func fileAway(_ id: WindowID, in space: SpaceID) {
+        guard rememberedSpaces[id] != nil else {
+            rememberedSpaces[id] = .departed(space)
+            return
+        }
+        refileAway(of: id, to: space)
+    }
+
     /// A head gone for good makes its hand-off permanent (#1387):
     /// the holder its link names keeps the break by right — live,
     /// in the Space (`Space.promoteHandedBreak`); away, on its

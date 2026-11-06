@@ -562,13 +562,18 @@ window id from [`get_state`](#get_state) after the space, and then
 move that window rather than the focused one. Pass `nil` for the
 space to leave it out: `KiwiDesk.move_to_desktop(3, nil, 4711)`.
 `KiwiDesk.move_to_desktop(3, 4711)` names Space 4711, not a window.
-An id no managed window carries is refused, a window on another
-Desktop included.
+An id no managed window carries is refused. A window on a hidden
+Desktop, which [`get_state`](#get_state) lists under `away_windows`,
+can be named.
 
 A window moved this way changes no focus, except that one filed
 into the current Space on a Desktop already on screen takes focus
 there. The follow ends with keyboard focus on the window you named,
 and shows its Space.
+
+A window on a hidden Desktop joins its Space when it arrives, and
+with *Displays have separate Spaces* off it refuses a Space on
+another screen than its own, whichever Desktop you send it to.
 :::
 
 ### move_space_to_display

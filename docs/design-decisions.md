@@ -8131,6 +8131,17 @@ carry it, so the rule users carry is that screens can only be crossed
 through the visible Desktop.
 :::
 
+A window already on a hidden Desktop produces no departure, so
+naming one
+([#3034](https://github.com/KiwiCanopy/KiwiDesk/issues/3034)) files
+the name straight into its remembered Space, and the arrival pays it
+as any other. It is not in state, so even a shown Desktop cannot file
+it at once: on shared Desktops a Space off its screen is refused for
+any target. The away ledger's copy of its Desktop is left to the
+census, read by the move's own reap, so the ledger keeps one reader
+of the compositor and takes no write of an answer the bridge has not
+confirmed.
+
 ### KiwiDesk's own Desktop switch names where it landed (#2142)
 
 **[Principle]**
