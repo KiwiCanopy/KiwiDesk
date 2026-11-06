@@ -151,7 +151,7 @@ struct OnboardingLoginCheckbox: View {
     }
 }
 
-/// The closing card's menu bar, drawn on the plate the look earns
+/// The closing card's menu bar, drawn on its plate
 /// (#2859), in the paint's chrome ink and brand mark.
 private struct OnboardingMenuBarStrip: View {
     @Environment(\.schematicPalette) private var palette

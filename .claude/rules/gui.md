@@ -1154,8 +1154,8 @@ must keep:
   hue alone. A profile card's picture rides the desktop plate
   (#786), drawn from the draft through the `schematicPalette`
   environment — never an init parameter — on the plate its
-  look earns (#2859), except Home's cards, whose plate is dark in
-  both modes (#3040): **a desk picture takes its plate through
+  appearance picks (#2859, #3041), except Home's cards, whose plate
+  is dark in both modes (#3040): **a desk picture takes its plate through
   `deskPlate` / `platePaint`, the picture's one palette
   writer, and never names `SettingsTheme.previewPlate` itself**
   (`PlateGroundWiringTests`). **A picture reads the paint's
@@ -1165,21 +1165,21 @@ must keep:
   needs is an accessor on the paint. Every desk picture takes
   it, KiwiVision's scene included; only the look tiles
   (`LookPlate`, #1740) keep their own ground, and only Home's cards
-  skip the verdict (`PlateGroundWiringTests` ▸ `oneDarkHost`). **No view forces
-  an appearance where the plate verdict could read it** — a
+  keep the dark plate (`PlateGroundWiringTests` ▸ `oneDarkHost`).
+  **No view forces an appearance where the plate paint could read it** — a
   `colorScheme` write, `preferredColorScheme`, an AppKit
   appearance set; a file in the Settings trees that must joins
   `PlateGroundWiringTests` ▸ `appearanceWritesAreRuled`'s
   register with its reason (#2871). On the dark
-  plate the fold floors against it, on the light one the ink
-  floors against its bar composite and a failing look keeps
-  the dark plate. The two
+  plate the fold floors against it; on the light one a failing
+  ring darkens (`lightRingHex`, #3041) and bars keep the look's own
+  colours, with no ink floor. The two
   card heights derive from the group partition.
   `HomeCardChromeTests` pins the heights pair, the plate's
   shape, silence and group parity and the stroke-above-clip
   order; `HomeCardPaletteWiringTests` the per-struct palette
   consults, the floor and the shared border-width remap;
-  `PlateGroundTests` the verdict over the bundled looks.
+  `PlateGroundTests` the ring over the bundled looks.
 - **A per-row surface explains; an aggregate surface counts only
   what the user should act on (#1094, live-read #1105).** A ⚠️
   on one row and a ring on one key show everything
@@ -1811,9 +1811,8 @@ Every surface, border and ink in the Settings tree comes from
   file whose own ground does move. **Whatever such a file draws
   ON that plate still states a fixed ink**, and only review can
   see it; `SettingsFixedGroundTests`' docstring names the
-  shipped cases. A plate whose ground the look's verdict picks
-  (#2859) counts as fixed here — the window's appearance does
-  not move it — so its ink is the resolved paint's, never an
+  shipped cases. A plate counts as fixed here: a picture reads its
+  paint (#2859, #3041), so its ink is the resolved paint's, never an
   ambient grey, and Advanced's Layouts sketch files sit in the
   stems for it.
 - **A warning takes `WarningBox`, never a `warningSurface` fill of
