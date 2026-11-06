@@ -9,7 +9,7 @@ struct FrameWriter: Sendable {
     var setPosition: @Sendable (CGPoint, AXUIElement) -> Void
     var writeEUI: @Sendable (pid_t, Bool) -> Void
     /// The window's current frame, read for every sized write
-    /// ending near a screen's bottom or right edge (#2894): one AX
+    /// ending near an edge with a band (#2894, #2966): one AX
     /// message on the app's queue beside the write's three, per
     /// animation frame of such a window and per such window a
     /// Space switch shows. One read measured 0.4–2.7 ms median,
