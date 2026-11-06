@@ -103,7 +103,7 @@ extension SizeLedWrite.Lead {
         _ frame: CGRect,
         _ element: AXUIElement,
         _ setSize: Bool,
-        _ band: CGRect?,
+        _ band: EdgeBand?,
         _ writer: FrameWriter
     ) {
         func origin(for answer: CGSize) -> CGPoint {

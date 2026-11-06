@@ -296,6 +296,7 @@ public final class TilingEngine {
         applier.screenFrames = { [weak self] in
             self?.allScreenFrames() ?? []
         }
+        applier.separateSpaces = { NSScreen.screensHaveSeparateSpaces }
         animation.onAnimationStart = { [applier] id in
             applier.beginAnimating(id)
         }

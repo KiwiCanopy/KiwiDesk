@@ -16,6 +16,9 @@ struct EdgeBandWriteTests {
     private let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
     private let slot = CGRect(x: 16, y: 606.5, width: 840, height: 494.5)
     private let start = CGRect(x: 16, y: 602, width: 847, height: 499)
+    private var band: EdgeBand {
+        EdgeBand(screen: screen, bottom: true, right: true)
+    }
 
     /// An app answering as macOS did on the device: a size write
     /// is refused while the window's bottom AND the asked bottom
@@ -79,18 +82,22 @@ struct EdgeBandWriteTests {
         EdgeBandWrite.liftedOrigin(
             target: target,
             current: current,
-            screen: screen
+            band: band
         )
     }
 
-    @Test("A frame ending near a screen's bottom names that screen")
+    @Test("A frame ending near a screen's bottom names its band")
     func screenNearTheBottom() {
-        let near = { EdgeBandWrite.screen(for: $0, among: [self.screen]) }
-        #expect(near(slot) == screen)
+        let near = { EdgeBandWrite.band(for: $0, among: [self.band]) }
+        #expect(near(slot) == band)
         #expect(near(slot.offsetBy(dx: 0, dy: -200)) == nil)
         #expect(near(slot.offsetBy(dx: 0, dy: 100)) == nil)
-        let beside = screen.offsetBy(dx: screen.width, dy: 0)
-        #expect(EdgeBandWrite.screen(for: slot, among: [beside]) == nil)
+        let beside = EdgeBand(
+            screen: screen.offsetBy(dx: screen.width, dy: 0),
+            bottom: true,
+            right: true
+        )
+        #expect(EdgeBandWrite.band(for: slot, among: [beside]) == nil)
     }
 
     @Test("A shrink lifts the current frame clear of the band")
@@ -165,7 +172,7 @@ struct EdgeBandWriteTests {
         EdgeBandWrite.write(
             slot,
             element,
-            nearEdgeOf: screen,
+            nearEdgeOf: band,
             writer: app.writer
         )
         #expect(app.frame.withLock { $0 } == slot)
@@ -207,7 +214,9 @@ struct EdgeBandWriteTests {
         let element = element
         applier.elementProvider = { _ in element }
         applier.writer = app.writer
-        applier.screenFrames = { [screen] in [screen] }
+        applier.screenFrames = { [screen] in
+            [screen, screen.offsetBy(dx: screen.width, dy: screen.height)]
+        }
         return applier
     }
 
@@ -260,7 +269,7 @@ struct EdgeBandWriteTests {
         let id = WindowID(1)
         _ = pending.put(
             id,
-            .init(element: element, frame: slot, setSize: true, band: screen)
+            .init(element: element, frame: slot, setSize: true, band: band)
         )
         _ = pending.put(
             id,
@@ -268,7 +277,7 @@ struct EdgeBandWriteTests {
         )
         let entry = pending.take(id)
         #expect(entry?.setSize == true)
-        #expect(entry?.band == screen)
+        #expect(entry?.band == band)
     }
 
     @Test("A merge drops a waiting band its newer frame left")
@@ -276,7 +285,7 @@ struct EdgeBandWriteTests {
         let high = slot.offsetBy(dx: 0, dy: -300)
         let merged = EdgeBandWrite.mergedBand(
             newer: nil,
-            waiting: screen,
+            waiting: band,
             frame: high
         )
         #expect(merged == nil)
@@ -289,13 +298,13 @@ struct EdgeBandWriteTests {
         let taller = slot.insetBy(dx: 0, dy: -1)
         _ = pending.put(
             id,
-            .init(element: element, frame: slot, setSize: true, band: screen)
+            .init(element: element, frame: slot, setSize: true, band: band)
         )
         _ = pending.put(
             id,
             .init(element: element, frame: taller, setSize: true)
         )
-        #expect(pending.take(id)?.band == screen)
+        #expect(pending.take(id)?.band == band)
     }
 
     @Test("A taller sized frame merged into a held shrink keeps its band")
@@ -304,14 +313,14 @@ struct EdgeBandWriteTests {
         let id = WindowID(1)
         let taller = slot.insetBy(dx: 0, dy: -1)
         held.hold([id], until: .now() + 60)
-        _ = held.stage(id, slot, setSize: true, band: screen)
+        _ = held.stage(id, slot, setSize: true, band: band)
         _ = held.stage(id, taller, setSize: true)
         guard case .write(let entry) = held.release(id, now: .now() + 120)
         else {
             Issue.record("the staged write was not released")
             return
         }
-        #expect(entry.band == screen)
+        #expect(entry.band == band)
     }
 
     @Test("A write far from any bottom edge reads nothing")
