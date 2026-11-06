@@ -185,11 +185,11 @@ struct HomeCardChromeTests {
         let card = try squashed("HomeCard.swift")
         #expect(
             card.contains(
-                "hovering?SettingsTheme.cardHoverEdge"
+                "hovering?SettingsTheme.hoverEdge"
                     + ":SettingsTheme.hairline"
             )
         )
-        #expect(card.contains("hoverStroke:CGFloat=1.5"))
+        #expect(card.contains("SettingsTheme.hoverEdgeStroke"))
     }
 
     @Test("Simple's picture drops the outer frame, the board its edge")

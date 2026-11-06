@@ -9530,7 +9530,7 @@ behaviour (`docs/ui-patterns.md` ▸ *Hover confirms custom hit
 areas*). The chip keeps the system bezel's rounded rectangle: the
 lift is the change, not the shape. A segmented picker's unselected
 segment lifts one step over its track and presses one step further,
-the same order. A palette or look tile lifts too. **A lift promises
+the same order. **A lift promises
 the click:** what a click would leave alone — the applied tile, a
 KiwiHub item the query dims — stays flat (owner ruling 2026-10-17).
 
@@ -10976,11 +10976,23 @@ options previewed gave Home's small cards no shape: a pale band on
 a white card reads as nothing, and the light plate sits below the
 page. A short dark band is a card's picture, where large dark
 pictures on Simple read as holes, which is #2859's objection and
-stands there. So Home passes `alwaysDark`, Simple and every other
-host keep the verdict, and switching between the two pages changes
-the ground. The page moves to `F1F3ED`, the darkest that keeps
+stands there. So Home passes `alwaysDark`, and switching between
+Home and Simple changes the ground. The page moves to `F1F3ED`, the darkest that keeps
 `ink3` at its floor, and `hairline` to `D6DCD1` so a white card has
 an edge on it.
+:::
+
+:::unreleased
+**Every look draws on the light plate outside Home (#3041, owner
+2026-11-06, reversing #2859's "a failing look swaps the ground, never
+the ink" for these hosts).** A single dark block among light pictures
+broke the page more than a slightly different ring misreports a look.
+So `holdsLightPlate` is gone: a ring that fails on the plate is
+darkened just far enough to hold (`lightRingHex`), keeping its hue,
+and the bars keep the look's own colours, as they do on a real desk.
+That also retires #2859's floor on a look's ink against its own bar:
+a saved look whose ink sinks into its fill draws that way here, as it
+does on the desk.
 :::
 
 **Settings is one surface: depth grows in place, never by a
@@ -11202,11 +11214,25 @@ is, the fill says where the pointer is.
 :::unreleased
 With the marking gone (#2654), no durable statement on a Home card
 uses its border, so the pointer takes it: the fill lift was too
-faint to find, a 1.5 pt `cardHoverEdge` is not, and the fill no longer
+faint to find, a 1.5 pt `hoverEdge` is not, and the fill no longer
 changes (#3040, owner 2026-11-06). A marking returning to that edge
-takes its own channel. Surfaces carrying a durable marking keep the
-neutral lift. The site's glow and lift stay out for now, as shadow
-and movement do on every ordinary button.
+takes its own channel. Glow stays out, as shadow and movement do on
+every ordinary button.
+
+**A tile or card takes the edge and a rise, and selection shares its
+border (#3042, owner 2026-11-06).** The fill lift, a neutral edge and
+an inset ring were all previewed; one green edge with a 2 pt rise was
+chosen, on the surfaces `docs/ui-patterns.md` names, so a tile or card
+has one answer to the pointer. That gives up the #1173 split above
+where a border carries selection, at a known cost: in dark the two strokes are one colour and
+the shadow barely shows on the black page, and a rise reads mainly
+while it moves, so a still frame cannot lean on it. So the weights
+differ, a tile whose click changes nothing stays flat, and a selected
+Layout tile gains a check, which is what a colour-blind reader and a
+screenshot have left. A chip, a row and a Space card's menu face keep
+the fill, and KiwiHub does because it marks selection with a fill the
+split still protects. The setup tour's tiles take the edge alone: its
+scrollers leave no room for a rise, and its ground is not a card's.
 :::
 
 **One draft, three views — and the save surface is the floating
@@ -14812,6 +14838,12 @@ so a wheel or swipe begun over the strip stuttered. The tooltip
 already names the gesture and the click plays it, so the hover
 loop taught nothing they do not.
 
+:::unreleased
+The strip's picture takes the edge and rise every tile takes, in place
+of its accent edge (#3042). Its frame moves and its drawing does not,
+which keeps the ruling that the strip's pictures stay still.
+:::
+
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the
 app does not do — the channel-not-yet-existing case, removed
@@ -15105,7 +15137,7 @@ page, in either appearance (`SettingsThemeContrastTests` ▸
 says "button", the fills say what the pointer is doing. A press
 deepens the pointer's layer (`chipPressed`), which still sits beneath the marking, so
 holding down the marked chip cannot unmark it either. **No
-shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
+shadow**: a chip takes none (ui-patterns ▸ *Buttons take a native
 style*), the thumb's shadow being the settings' sign for
 "movable", and the edge already carries what a shadow would.
 

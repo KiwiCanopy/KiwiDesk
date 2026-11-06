@@ -12,6 +12,8 @@ struct ScreenCard: View {
     @Binding var selection: DisplayID?
     @State private var targeted = false
     @State private var showingOverflow = false
+    @State private var hovering = false
+    @Environment(\.isEnabled) private var isEnabled
 
     var body: some View {
         VStack(
@@ -35,6 +37,14 @@ struct ScreenCard: View {
         .background(dropWash)
         .background(plate)
         .overlay(border)
+        .overlay(
+            SelectionStroke(
+                selected: isSelected,
+                shape: RoundedRectangle(cornerRadius: 6),
+                style: .tint,
+                lineWidth: SettingsTheme.screenCardStrokeSelected
+            )
+        )
         .clipShape(RoundedRectangle(cornerRadius: 6))
         // Main screen accent glow (#758, ui-designer 2026-08-09).
         .compositingGroup()
@@ -44,7 +54,10 @@ struct ScreenCard: View {
                 : .clear,
             radius: isMain ? 6 : 0
         )
-        .contentShape(RoundedRectangle(cornerRadius: 6))
+        .hoverRise(risen, in: RoundedRectangle(cornerRadius: 6))
+        .onHover { hovering = $0 }
+        // Over the next card, which would cover the shadow.
+        .zIndex(risen ? 1 : 0)
         .dropDestination(for: DraggableSpace.self) { items, _ in
             pin(items)
         } isTargeted: { hovering in
@@ -68,6 +81,10 @@ struct ScreenCard: View {
     }
 
     private var isSelected: Bool { selection == display.id }
+
+    /// A selected card rises too: its click deselects (#3042). A drag
+    /// answers with the wash instead.
+    private var risen: Bool { hovering && isEnabled && !targeted }
 
     /// No `Divider()`: at the floor a card is barely two chip
     /// rows tall, and a rule across it spends height on chrome
@@ -191,13 +208,15 @@ struct ScreenCard: View {
     private var border: some View {
         RoundedRectangle(cornerRadius: 6)
             .strokeBorder(
-                isSelected || targeted
+                targeted
                     ? AnyShapeStyle(.tint)
                     : AnyShapeStyle(
-                        SettingsTheme.ink3.opacity(0.5)
+                        risen
+                            ? SettingsTheme.hoverEdge
+                            : SettingsTheme.ink3.opacity(0.5)
                     ),
-                lineWidth: isSelected
-                    ? SettingsTheme.screenCardStrokeSelected
+                lineWidth: risen
+                    ? SettingsTheme.hoverEdgeStroke
                     : SettingsTheme.screenCardStroke
             )
     }

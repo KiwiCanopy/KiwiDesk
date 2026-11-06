@@ -101,9 +101,13 @@ struct SimpleLookCard: View {
                 if case .hairline = $0 { hairline } else { tileWidth }
             },
             gap: gap,
-            depth: PaletteTile<EmptyView>.plateHeight
+            depth: PaletteTile<EmptyView>.plateHeight,
+            endRoom: endRoom
         )
     }
+
+    nonisolated private static let endRoom =
+        SettingsTheme.hoverShadowRadius
 
     /// The Tab-focused tile, which the strip scrolls clear of the fade.
     /// Focus holds an entry's id: a user look may share a bundled name.

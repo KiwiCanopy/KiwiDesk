@@ -8,9 +8,6 @@ struct HomeCard: View {
     let spotlighted: Bool
     let open: () -> Void
     @State private var hovering = false
-    private static let hoverStroke: CGFloat = 1.5
-    @Environment(\.accessibilityReduceMotion)
-    private var reduceMotion
 
     var body: some View {
         Button(action: open) {
@@ -41,20 +38,17 @@ struct HomeCard: View {
             // hairline and the #760 frame on every plated card
             // (ui-designer blocker, 2026-08-09).
             .overlay(cardStroke)
-            .contentShape(
-                RoundedRectangle(
+            .hoverRise(
+                hovering,
+                in: RoundedRectangle(
                     cornerRadius: SettingsTheme.cardRadius
                 )
-            )
-            // `HoverChip`'s own duration, so the two hover
-            // idioms in the tree move at one speed.
-            .animation(
-                reduceMotion ? nil : .easeOut(duration: 0.12),
-                value: hovering
             )
         }
         .buttonStyle(.plain)
         .onHover { hovering = $0 }
+        // Over the next card, which would cover the shadow.
+        .zIndex(hovering ? 1 : 0)
         .accessibilityLabel(destination.title)
         .accessibilityValue(axValue)
     }
@@ -145,10 +139,10 @@ struct HomeCard: View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .strokeBorder(
                 hovering
-                    ? SettingsTheme.cardHoverEdge
+                    ? SettingsTheme.hoverEdge
                     : SettingsTheme.hairline,
                 lineWidth: hovering
-                    ? Self.hoverStroke
+                    ? SettingsTheme.hoverEdgeStroke
                     : SettingsTheme.containerStroke
             )
             .allowsHitTesting(false)

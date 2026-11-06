@@ -1,9 +1,9 @@
 import Foundation
 import KiwiDeskCore
 
-/// The plates' legibility floor and the light plate's verdict
+/// The plates' legibility floor and the light plate's ring
 /// (`HomeCardPaletteWiringTests`, `PlateGroundTests`; #786,
-/// #2859). The grounds' hexes are their tokens'
+/// #2859, #3041). The grounds' hexes are their tokens'
 /// (`previewPlate`, `lightPlate`, `lightOutline`), pinned equal
 /// by those suites.
 extension HomeCardPlate {
@@ -41,21 +41,12 @@ extension HomeCardPlate {
             : settings.kiwishelf.activeItemColor
     }
 
-    /// Whether a look holds the light plate (#2859 ruling 1): its
-    /// item ink clears the floor on its own bar fill over the
-    /// plate, and its focus ring clears the floor, out-contrasts
-    /// the unfocused outline and separates from it under protan
-    /// simulation. A failing look keeps the dark plate; its ink is
-    /// never swapped.
-    static func holdsLightPlate(_ settings: TilingSettings) -> Bool {
-        let shelf = settings.kiwishelf
-        let ring = focusHex(settings)
-            .trimmingCharacters(in: .whitespaces)
+    /// Whether a ring reads on the light plate (#2859 ruling 1):
+    /// it clears the floor, out-contrasts the unfocused outline and
+    /// separates from it under protan simulation.
+    static func holdsLightRing(_ hex: String) -> Bool {
+        let ring = hex.trimmingCharacters(in: .whitespaces)
         guard
-            let bar = ColorVision.composite(
-                shelf.fillColor.trimmingCharacters(in: .whitespaces),
-                over: lightGround
-            ),
             let drawn = ColorVision.composite(ring, over: lightGround),
             let ringContrast = ColorVision.contrast(drawn, lightGround),
             let outlineContrast = ColorVision.contrast(
@@ -64,9 +55,39 @@ extension HomeCardPlate {
             ),
             let separation = ColorVision.separation(drawn, lightOutline)
         else { return false }
-        return plateLegible(shelf.itemColor, on: bar)
-            && plateLegible(ring, on: lightGround)
+        return plateLegible(ring, on: lightGround)
             && ringContrast > outlineContrast
             && separation >= ColorVision.separationFloor
     }
+
+    /// The ring a picture draws on the light plate: the look's own
+    /// where it holds, else that colour darkened just far enough
+    /// (#3041). Nil for a colour that does not parse. Bars keep the
+    /// look's colours, as on a real desk.
+    static func lightRingHex(_ settings: TilingSettings) -> String? {
+        let ring = focusHex(settings)
+            .trimmingCharacters(in: .whitespaces)
+        if holdsLightRing(ring) { return ring }
+        guard let drawn = ColorVision.composite(ring, over: lightGround)
+        else { return nil }
+        for step in 1..<ringSteps {
+            let scale = 1 - Double(step) / Double(ringSteps)
+            if let hex = scaled(drawn, by: scale), holdsLightRing(hex) {
+                return hex
+            }
+        }
+        return "#000000"
+    }
+
+    /// `hex` darkened to `scale` of itself: black over it at the
+    /// remaining alpha, the way `ColorVision` composites any ink.
+    static func scaled(_ hex: String, by scale: Double) -> String? {
+        let alpha = Int(((1 - scale) * 255).rounded())
+        return ColorVision.composite(
+            "#000000" + String(format: "%02X", alpha),
+            over: hex
+        )
+    }
+
+    private static let ringSteps = 40
 }

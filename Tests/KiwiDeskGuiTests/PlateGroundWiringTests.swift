@@ -4,7 +4,7 @@ import Testing
 @testable import KiwiDesk
 
 /// Every desk picture but Home's cards, which pass `alwaysDark`
-/// (#3040), draws the plate its look earned (#2859):
+/// (#3040), draws the plate its appearance picks (#3041):
 /// each in-scope surface reads the resolved paint through
 /// `deskPlate`/`platePaint` or the palette they write, a plate
 /// view with no writer takes `SchematicPalette.unresolved`, and
@@ -81,7 +81,7 @@ struct PlateGroundWiringTests {
                 !source.contains("SettingsTheme.previewPlate"),
                 Comment(rawValue: "\(file) names the dark plate")
             )
-            // The verdict reads the window's appearance; a picture
+            // The paint reads the window's appearance; a picture
             // forcing its own would pick the plate for it. The
             // KiwiVision scene's windows take the appearance the
             // mode will show, below the writer, and are the one
@@ -201,7 +201,7 @@ struct PlateGroundWiringTests {
         // Forces only under a ruled tint (`panelGlassChrome`, #2569),
         // whose surfaces paint their own palette and draw no plate.
         "GlassChrome.swift": 1,
-        // The user's app-wide appearance, which the verdict follows.
+        // The user's app-wide appearance, which the paint follows.
         "AppearanceChoice+Scheme.swift": 1,
     ]
 

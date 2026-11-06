@@ -10,9 +10,13 @@ extension LayoutStrip {
     /// content inside its chrome.
     nonisolated static let platePadding: CGFloat = 4
     nonisolated static let chromePadding: CGFloat = 6
+    /// The selected name's check, and its balance past the name.
+    nonisolated static let checkSlot: CGFloat = 10
     nonisolated static let gap: CGFloat = 10
-    /// Room around the row for a tile's focus ring, inside the clip.
-    nonisolated static let ringRoom: CGFloat = 4
+    /// Room past the end tiles for a focus ring and a risen tile's
+    /// shadow, inside the clip.
+    nonisolated static let ringRoom: CGFloat =
+        SettingsTheme.hoverShadowRadius
 
     /// Factor from `SchematicScale.tile` down to the strip's size.
     nonisolated static var schematicFactor: CGFloat {

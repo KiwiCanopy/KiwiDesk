@@ -18,9 +18,6 @@ struct LayoutStrip: View {
             SidewaysStrip(run: Self.run, followed: followed) {
                 row
             }
-            // The ring inset stays inside the clip; the row still
-            // lines up with the header.
-            .padding(.horizontal, -Self.ringRoom)
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(chooseTitle)
@@ -43,9 +40,10 @@ struct LayoutStrip: View {
                 tile(mode)
                     .focused($focused, equals: mode)
                     .id(mode)
+                    // Over the next tile, which would cover the shadow.
+                    .zIndex(hovered == mode ? 1 : 0)
             }
         }
-        .padding(Self.ringRoom)
     }
 
     private var chooseTitle: String {
@@ -54,6 +52,7 @@ struct LayoutStrip: View {
 
     private func tile(_ mode: LayoutMode) -> some View {
         let selected = mode == selection
+        let risen = hovered == mode && isEnabled && !selected
         return Button {
             selection = mode
         } label: {
@@ -64,18 +63,30 @@ struct LayoutStrip: View {
                         model.config.settings,
                         in: RoundedRectangle(cornerRadius: 6)
                     )
-                Label(mode.displayName, systemImage: mode.symbol)
-                    .font(.subheadline)
-                    .labelStyle(.titleAndIcon)
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
+                HStack(spacing: 3) {
+                    // A slot on each side, so the name holds its place
+                    // whichever tile is selected.
+                    Image(systemName: "checkmark")
+                        .font(.caption2.weight(.semibold))
+                        .frame(width: Self.checkSlot)
+                        .opacity(selected ? 1 : 0)
+                        .selectionFade(selected)
+                        .accessibilityHidden(true)
+                    Label(mode.displayName, systemImage: mode.symbol)
+                        .font(.subheadline)
+                        .labelStyle(.titleAndIcon)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                    Color.clear.frame(width: Self.checkSlot, height: 0)
+                }
                 Text(usageText(mode))
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
             }
             .padding(Self.chromePadding)
             .frame(width: Self.tileWidth)
-            .background(selectionChrome(mode, selected: selected))
+            .background(chrome(selected: selected, risen: risen))
+            .hoverRise(risen, in: RoundedRectangle(cornerRadius: 8))
         }
         .buttonStyle(.plain)
         .onHover { inside in
@@ -90,28 +101,29 @@ struct LayoutStrip: View {
         )
     }
 
-    /// The tile's plate: selection is the stroke alone, and the
-    /// pointer's grey lift a fill apart from it (#1173); the
-    /// selected tile, whose click changes nothing, stays flat.
-    private func selectionChrome(
-        _ mode: LayoutMode,
-        selected: Bool
-    ) -> some View {
-        let lifted = hovered == mode && isEnabled && !selected
-        return RoundedRectangle(cornerRadius: 8)
+    /// The tile's plate. Selection and the pointer share the stroke,
+    /// told apart by its weight, the rise and the name's check
+    /// (#3042); the selected tile, whose click changes nothing, stays
+    /// flat.
+    private func chrome(selected: Bool, risen: Bool) -> some View {
+        RoundedRectangle(cornerRadius: 8)
             .fill(SettingsTheme.card)
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
-                    .fill(lifted ? SettingsTheme.chipRest : .clear)
+                    .strokeBorder(
+                        risen
+                            ? SettingsTheme.hoverEdge
+                            : SettingsTheme.ink2.opacity(0.25),
+                        lineWidth: risen ? SettingsTheme.hoverEdgeStroke : 1
+                    )
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 8)
-                    .strokeBorder(
-                        selected
-                            ? SettingsTheme.accent
-                            : SettingsTheme.ink2.opacity(0.25),
-                        lineWidth: selected ? 2 : 1
-                    )
+                SelectionStroke(
+                    selected: selected,
+                    shape: RoundedRectangle(cornerRadius: 8),
+                    style: SettingsTheme.accent,
+                    lineWidth: SettingsTheme.paletteCardStrokeApplied
+                )
             )
     }
 
