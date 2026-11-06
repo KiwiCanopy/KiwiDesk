@@ -182,6 +182,7 @@ func makeTestCore(
     // window id on the host otherwise.
     core.jump.knownWindows = { nil }
     core.tiler.allScreenFrames = { [] }
+    core.tiler.applier.separateSpaces = { false }
     // Same class, fifth time (#933): the own-key-window seam
     // reads `NSApplication.shared` live; a runner holding a key
     // window would suppress the focused ring in every suite.

@@ -5461,6 +5461,79 @@ KiwiDesk.bind("cmd+alt+f", function()
 end)
 ```
 
+:::unreleased
+### center_floating
+
+**Expects:** nothing.
+
+**Does:** moves the focused floating window to the middle of its
+screen, clear of the bars, at the size it has. Its screen is the one
+showing the Space the window is drawn on, so a sticky window and a
+pocket window that is out stay where you are looking. A window larger
+than that area keeps its size and sits against the area's top or left
+edge, so its title bar is in reach
+([accepted limitations](accepted-limitations.md)).
+
+It works under either [`set_float_placement`](#set_float_placement)
+and follows
+[`animations.set_on_state_change`](#animationsset_on_state_change). A
+window already centred stays put and the call succeeds.
+
+A full-screen window is refused with `the focused window is
+fullscreen`, and a tiled one with `the focused window is not
+floating`, which never floats it. Each shows a pill on the window.
+
+No shortcut comes with it. Bind it in init.lua or in Settings' Lua
+bindings drawer.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+c", function()
+    KiwiDesk.center_floating()
+end)
+```
+
+### move_floating
+
+**Expects:**
+
+- An axis: `"x"` or `"y"`.
+- A delta in points. A positive `"x"` moves right and a positive `"y"`
+  moves down.
+
+**Does:** moves the focused floating window by the delta, at once,
+with no animation. It stops at the edge of the area its screen leaves
+clear of the bars and never crosses onto another screen. Stopping
+there shows a pill. A window you dragged past that edge stays where it
+is if you move it further out, and comes back freely. A window larger
+than the area reaches its top or left edge and goes no further.
+Two calls closer together than the app reports the first move can
+land as one, as a fast run of `resize` presses can
+([accepted limitations](accepted-limitations.md)).
+
+Hold the key and the window glides, as a held
+[`resize`](#resize) does, until you let go or it reaches the edge,
+where it stops without a pill.
+
+It reaches a sticky window and a pocket window that is out, on the
+Space they are drawn on, and leaves them filed where they are. A
+maximized window beneath a floating one stays maximized. A full-screen
+window is refused with `the focused window is fullscreen`, and a tiled
+one with `the focused window is not floating`, each with a pill.
+
+No shortcut comes with it. Bind it in init.lua or in Settings' Lua
+bindings drawer.
+
+**Example:**
+
+```lua
+KiwiDesk.bind("ctrl+alt+shift+l", function()
+    KiwiDesk.move_floating("x", 20)
+end)
+```
+:::
+
 ## Opening and Closing Windows
 
 Both verbs take an optional window id from
@@ -6677,7 +6750,7 @@ layout-specific text; the two ratio cases report success, since
 the ratio is stored either way.
 
 **Held, the chord glides (#1056, #1082).** A hotkey whose press
-ran exactly one command — a successful `resize` — keeps applying
+ran exactly one command, a successful `resize`, keeps applying
 while you hold it: one step on the press, then, after your Mac's
 own key-repeat delay, a continuous **glide** on the screen's
 frame clock. Each frame moves a fraction of *that binding's own
@@ -6687,12 +6760,12 @@ elapsed time × that speed, so the same hold travels the same
 distance on a 60 Hz screen, a 120 Hz one, and a ProMotion panel
 changing rate mid-hold.
 
-The glide re-issues the **`resize` command your press ran**,
+The glide re-issues the **command your press ran**,
 with a scaled delta — never the binding's Lua body, which runs
 exactly once, on the press. Whether a binding glides is decided
 by what its press **did**: a body that runs two commands, or a
-different verb, fires once per press, and `focus`/`swap` never
-glide. A body that rebuilds its own bindings (`bind` inside the
+verb that does not glide, fires once per press, and `focus`/`swap`
+never glide. A body that rebuilds its own bindings (`bind` inside the
 body) arms nothing.
 
 While [`set_modifier_sides`](#set_modifier_sides) is on, a
@@ -6701,6 +6774,10 @@ fires once per press.
 
 A limit (#933/#1055) ends the run; scrolling's wordless out-of-screen
 stop keeps gliding harmlessly until release.
+
+:::unreleased
+[`move_floating`](#move_floating) glides the same way.
+:::
 
 :::unreleased
 A hold reaching a limit stops with no pill, and a fresh press there
@@ -7932,6 +8009,10 @@ back in one move. Under
 Reduce Motion nothing animates. The windows around it, and a window
 float rules make floating, follow
 [`set_on_relayout`](#animationsset_on_relayout).
+
+:::unreleased
+[`center_floating`](#center_floating) follows it too.
+:::
 
 [`kiwishelf.set_pocket_edge`](#kiwishelfset_pocket_edge) and
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position)

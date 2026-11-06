@@ -487,6 +487,10 @@ maximizing or going into the Pocket and out, the last as a brief
 pocket
 ([`animations.set_on_state_change`](lua-reference.md#animationsset_on_state_change)).
 
+:::unreleased
+`center_floating` follows it too.
+:::
+
 `kiwishelf.set_pocket_edge top|bottom|left|right` (default
 `bottom`) and `kiwishelf.set_pocket_position 0–100` (default `82`)
 place the pocket
@@ -625,6 +629,8 @@ every lens with why it cannot turn on.
 | | `toggle_pocket_window` | — marks the focused window as the pocket window, floating it, or unmarks it, tiling it ([`toggle_pocket_window`](lua-reference.md#toggle_pocket_window)) |
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
+| | `center_floating` | — the focused floating window moves to the middle of its screen, at its size ([`center_floating`](lua-reference.md#center_floating)) |
+| | `move_floating` | `x\|y`, delta (pt, positive y down) — moves the focused floating window, stopping at its screen's edge or a bar ([`move_floating`](lua-reference.md#move_floating)) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `focus_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
 | | `spawn_new` | app bundle id |
@@ -718,6 +724,14 @@ every lens with why it cannot turn on.
 | | `track.set_new_window` | `own_track\|focused_track` (default `focused_track`) |
 | | `track.set_new_window_position` | placement¹ (default `first`) — where within the new_window choice |
 | Spawn | `set_new_window_placement_override` | space id, placement¹ (not track spaces — they follow `track.set_new_window`) |
+
+:::unreleased
+`center_floating` moves the focused floating window to the middle of
+its screen at its size
+([`center_floating`](lua-reference.md#center_floating)).
+`move_floating` moves it by a delta in points and a held key glides
+([`move_floating`](lua-reference.md#move_floating)).
+:::
 
 :::unreleased
 `pocket_app` takes an app bundle id: the app's own pocket window

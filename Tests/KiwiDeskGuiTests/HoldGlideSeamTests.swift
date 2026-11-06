@@ -248,6 +248,9 @@ struct HoldGlideSeamTests {
         // meets a weight's limit, ends with no cue, in the run's writer.
         #expect(byFile["KiwiCore+ResizeRun.swift"]?.count == 1)
         #expect(byFile["KiwiCore+MotionCause.swift"]?.count == 1)
+        // The sixth is #2972's, the base question again, for a float's
+        // move: bound to one local, as #1090's is.
+        #expect(byFile["KiwiCore+FloatMove.swift"]?.count == 1)
         #expect(
             Set(byFile.keys) == [
                 "HoldGlide.swift",
@@ -257,6 +260,7 @@ struct HoldGlideSeamTests {
                 "KiwiCore+Resize.swift",
                 "KiwiCore+ResizeFloating.swift",
                 "KiwiCore+MotionCause.swift",
+                "KiwiCore+FloatMove.swift",
             ],
             .init(
                 rawValue: "unexpected isApplyingGlideStep site "

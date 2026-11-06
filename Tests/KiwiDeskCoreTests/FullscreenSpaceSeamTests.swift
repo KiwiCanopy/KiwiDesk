@@ -57,4 +57,44 @@ struct FullscreenSpaceSeamTests {
         core.desktopMemory.readWindowSpace = { _ in .hosted(9_999) }
         #expect(!core.eventLoop.fullscreenSpaceHosts(window))
     }
+
+    /// #2935's reading of the first beat, wired the same way: the
+    /// false default keeps every ENTER a close on AppKit's own
+    /// transition with every other suite green.
+    @Test("hosted nowhere opens the first beat, and only that")
+    func hostedNowhereIsWired() {
+        let core = makeCore()
+        defer { teardown() }
+        core.desktopMemory.readWindowSpace = { _ in .gone }
+        #expect(core.eventLoop.compositorHostsNowhere(window))
+        core.desktopMemory.readWindowSpace = { _ in .unavailable }
+        #expect(!core.eventLoop.compositorHostsNowhere(window))
+        core.desktopMemory.readWindowSpace = { _ in .hosted(1) }
+        #expect(!core.eventLoop.compositorHostsNowhere(window))
+    }
+
+    @Test("a window with no title-bar button is no transition")
+    func buttonlessWindowIsNoTransition() {
+        let core = makeCore()
+        defer { teardown() }
+        core.desktopMemory.readWindowSpace = { _ in .gone }
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: window,
+                pid: 900_001,
+                appName: "Placeholder",
+                hasTitlebarButton: false
+            )
+        )
+        #expect(!core.eventLoop.compositorHostsNowhere(window))
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: window,
+                pid: 900_001,
+                appName: "Finder",
+                hasTitlebarButton: true
+            )
+        )
+        #expect(core.eventLoop.compositorHostsNowhere(window))
+    }
 }

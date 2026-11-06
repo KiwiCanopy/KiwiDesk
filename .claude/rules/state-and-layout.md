@@ -220,7 +220,14 @@ editing here:
   a rearranging write ends returns inside that write's pass. The
   float verb's own placement, outside a pass, takes
   `placeFloating(_:asStateChange: true)` while a detected float
-  keeps `on_relayout` (`StateChangeAnimationTests`).
+  keeps `on_relayout` (`StateChangeAnimationTests`); `center_floating`
+  writes the same way (#3007, `FloatCentreCommandTests`). A verb moving
+  a float at its own size resolves it through `floatMoveFocus` and
+  clamps through `floatMoveFrame`, never the raw clamp, which reads a
+  traveler's home and can carry a top edge out of reach
+  (`FloatCentreRenderSpaceTests`); one stepping by a delta also takes
+  `FloatMove.holdingTheAsk` against that clamp's push
+  (`FloatNudgeRenderSpaceTests`).
 - The **create fold's spawn grant** — the focus a fresh window
   gets for existing, not one macOS reported — consults
   `ManagedWindow.isTransientOverlay`
@@ -249,7 +256,9 @@ editing here:
   tracker's writes on the no-arrival path). The verdict is an
   ADOPTION fact: its layer and button are never refreshed, so a
   reader past the create fold refreshes both on the recheck path
-  first or does not ask it.
+  first or does not ask it. The fullscreen arm's button read is
+  ruled adoption-scoped: a stale `false` keeps a close's verdict
+  (#2935, accessibility.md).
 - **A window that lands on another screen takes THAT screen's
   space, through the one shared predicate** (#1010):
   `StateCoordinator.screenHome(of:leaving:landingOn:)`. Two
@@ -1785,11 +1794,17 @@ editing here:
   moves a window ending near a screen's bottom or right edge
   clear of it before sizing it, which macOS would otherwise
   refuse; its docstring carries
-  the measurement. The screens it reads come from
-  `TilingEngine.allScreenFrames`, never a live read in the applier.
+  the measurement. Lift only an edge `EdgeBandWrite.bands` names
+  (#2966, `EdgeBandGateTests`); its docstring carries where a band
+  is measured and where it is not. A lift that runs where nothing
+  refuses is a visible jump per press. A band answers for the frame
+  it was asked with, at enqueue; anything read from the window's
+  current frame is decided on its queue. The screens it reads come
+  from `TilingEngine.allScreenFrames`, never a live read in the
+  applier, and the setting through `FrameApplier.separateSpaces`.
   Whether a write shrinks the window is the window's own frame,
-  read on its queue for every sized write ending near either
-  edge — never a record of what was asked or echoed, which an
+  read on its queue for every sized write ending near an edge
+  with a band — never a record of what was asked or echoed, which an
   app's own resize or a spring's overshoot leaves behind. A merge
   over a waiting write keeps its band through the one
   `EdgeBandWrite.mergedBand`, held and queued alike

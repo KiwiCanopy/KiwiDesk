@@ -49,20 +49,6 @@ extension KiwiCore {
         )
     }
 
-    /// `announceRefusal`'s live default: a VoiceOver announcement.
-    /// `NSApp` is nil in a process with no `NSApplication`.
-    static func postAnnouncement(_ text: String) {
-        guard let app = NSApp else { return }
-        NSAccessibility.post(
-            element: app,
-            notification: .announcementRequested,
-            userInfo: [
-                .announcement: text,
-                .priority: NSAccessibilityPriorityLevel.high.rawValue,
-            ]
-        )
-    }
-
     /// The audible half of a refusal (#1255): a drawn pill may
     /// also sound, which is what the toggle has always claimed
     /// to control and now does.
@@ -225,6 +211,21 @@ extension KiwiCore {
     /// The focused window is in native full screen (#1298).
     func refuseWindowIsFullscreen(_ window: WindowID) {
         cueResizeRefusal(.windowIsFullscreen(window))
+    }
+
+    /// A float-move verb on a full-screen focus (#3007).
+    func refuseMoveWhileFullscreen(_ window: WindowID) {
+        cueResizeRefusal(.fullscreenCannotMove(window))
+    }
+
+    /// A float-move verb on a tiled focus (#3007).
+    func refuseMoveNotFloating(_ window: WindowID) {
+        cueResizeRefusal(.moveNeedsFloat(window))
+    }
+
+    /// `move_floating` stopped at the float region (#2972).
+    func refuseMoveAtBoundary(_ window: WindowID, _ to: Direction) {
+        cueResizeRefusal(.moveAtBoundary(window, direction: to))
     }
 
     /// A shrink hit the window's effective minimum (#933) — on

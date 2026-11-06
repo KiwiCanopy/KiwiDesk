@@ -221,7 +221,7 @@ editing here:
     single call site. Since #1082 that wrapper also carries the
     ARGUMENTS, because the glide re-issues the press's own
     `resize` rather than re-running the binding.
-  - A new size-limit refusal cue routes through
+  - A new refusal cue on a glidable verb routes through
     `cueResizeRefusal` (`KiwiCore+SizeLimitPill.swift`) — the
     funnel is what ends a held run, so a cue beside it pills
     once per FRAME. A refusal reaching the funnel during a glide
@@ -373,6 +373,9 @@ editing here:
   `lockedPressIsInstant`). A new resize write path
   inherits the instant write and owes the same two questions:
   what is my next frame's base, and what retires it?
+  `move_floating` answers them as `resizeFloating` does, and since
+  every press of it writes instantly, it always takes the press
+  residue below (#2972, `FloatNudgeGlideTests`).
 
   Two residues stay, deliberately. A PRESS still re-bases on the
   echo-fed frame where no animation is in flight — the accepted
@@ -385,7 +388,7 @@ editing here:
   "genuine" during a glide would re-base a frame on the echo and
   re-open the defect. The hold is the ceiling instead.
 
-  The product rulings (resize-only, the tally, the glide, the
+  The product rulings (which verbs glide, the tally, the glide, the
   steps-per-second unit) are argued in `docs/design-decisions.md`
   ▸ "A held resize chord glides"; widen
   `HoldGlide.glidableCommands` only with a ruling of that

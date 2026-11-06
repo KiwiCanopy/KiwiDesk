@@ -490,7 +490,9 @@ editing AX code:
   process shows no tracked window** — a fresh Orion listed the
   twin over a second before the real window (device,
   2026-09-30) — and tiles at once beside a tracked window of its
-  app, so a decoration-less app's next window pays nothing; the
+  app, so a decoration-less app's next window pays nothing, save
+  beside a sibling in a fullscreen transition (#2935, the
+  fullscreen arm below), where it is asked again next pass; the
   launch-time wait is `docs/accepted-limitations.md`'s row.
   **A tracked window that reads as a shell beside a buttoned
   sibling is handed back at the reconcile that lists it**
@@ -795,9 +797,8 @@ editing AX code:
   **The fullscreen arm (#1272) refuses the beat a native
   fullscreen transition orders the window out for, on BOTH
   ends.** #670 rests on "moved off the Desktop without a
-  destroy", and AppKit's own transition keeps that: the element
-  stays listed and `recheckFullscreen` flips the flag. Zen
-  (Firefox) does not: for a beat on ENTER and on EXIT alike the
+  destroy", and neither AppKit's transition (below) nor Zen
+  (Firefox) keeps that: for a beat on ENTER and on EXIT alike the
   real window is absent from the app's AX list AND the on-screen
   census while the compositor keeps it — already on the
   fullscreen Space on ENTER, already back on the Desktop on EXIT
@@ -822,8 +823,9 @@ editing AX code:
   same `gone: … still hosted on shown space — closed` line
   fires for ordinary closes across Finder, TextEdit, VS Code and
   qemu in that log, because a closed window lingers on its
-  Desktop's Space — only the FULLSCREEN half of the reading
-  tells the transition from a close, and a compositor read may
+  Desktop's Space — for a window still hosted, only the FULLSCREEN
+  half of the reading tells the transition from a close, and a
+  compositor read may
   still only refuse (#1157). The refusal is the carried arm's
   exactly — outright while the census shows the window,
   census-blind on the SAME ledger and cap otherwise, the destroy
@@ -831,10 +833,33 @@ editing AX code:
   `expectedAbsence` reading, state and registration kept — and
   the re-listed window's exit is a `.windowFullscreenChanged`,
   never a create, so #670's exit path re-places the kept slot.
-  Hide and minimize stay exempt. Residue, recorded in
-  `docs/accepted-limitations.md`: a window closed WHILE
-  fullscreen takes its removal one recheck budget late.
-  `FullscreenRemovalTests` pins the sweep's clauses,
+  Hide and minimize stay exempt. **AppKit's transition hosts the
+  window on NO Space for a beat at both ends (#2935):** unlisted,
+  then hosted nowhere within 0–25 ms, for 350–670 ms, before its
+  next Space hosts it. A close reads hosted when its removal is
+  judged: nowhere comes 260–270 ms after it is unlisted, 34 ms with
+  no animation, and an `orderOut` stays hosted (device, Finder,
+  TextEdit and a test app, separate Spaces off, 2026-11-06). So
+  hosted nowhere opens the arm through the one
+  `EventLoop.compositorHostsNowhere` seam (`FullscreenSpaceSeamTests`),
+  believed for `EventLoop.hostedNowhereBeat` from the episode's
+  opening, whose first recheck therefore ends a close, and never for
+  a window adopted with no title-bar button. AppKit lists a
+  button-less placeholder for the same beat, and the arm is also
+  read at adoption, for this one verdict: a shell beside an unlisted
+  sibling the arm holds open is that sibling's shadow, since a tile
+  draws a phantom slot and its leaving misranks the stayer through
+  `rememberDepartedSlot`, which cost the slot the arm kept
+  (`ShadowWindowTests` ▸ `shellInATransitionIsNoTile`). A reading
+  of `.gone` elsewhere is no close during that beat either: the
+  away prune still takes it for one (#2949 owes the second read).
+  Residue, recorded in `docs/accepted-limitations.md`: a window
+  closed WHILE fullscreen takes its removal one recheck budget late,
+  and a close first judged after it reads nowhere one recheck late.
+  A sweep inside the 0–25 ms before nowhere with no census to refuse
+  it still removes the window, and a shell adopted in that gap
+  tiles. `FullscreenRemovalTests` pins the
+  sweep's clauses, `FullscreenBeatRemovalTests` the nowhere beat's,
   `FullscreenDestroyArmTests` the notification's.
 - **The startup scan may skip the AX warmup only for an app the
   WindowServer reports windowless, and only because a following
