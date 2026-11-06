@@ -59,7 +59,8 @@ extension KiwiCore {
                 return refusal
             }
             // Read before any filing, which stamps the focus.
-            let held = holdsFocus(window)
+            let anchor = focusedWindowID
+            let held = window == anchor
             let from = state.workspaces.space(of: window)
             let explicit: SpaceID?
             switch resolveSpaceTarget(args, for: target) {
@@ -155,6 +156,7 @@ extension KiwiCore {
                     // the user).
                     departWithoutFollowing(
                         window,
+                        held: held,
                         targetIsCurrent: target.isCurrent
                     )
                 }
@@ -162,12 +164,13 @@ extension KiwiCore {
             }
             departWithoutFollowing(
                 window,
+                held: held,
                 targetIsCurrent: target.isCurrent
             )
             focusIfFiledIntoActiveSpace(
                 window,
                 from: from,
-                held: held,
+                leaving: anchor,
                 target: target
             )
             return .ok()
@@ -212,10 +215,10 @@ extension KiwiCore {
     /// the destination surfaces a stale anchor — burying the
     /// window in Monocle, panning it out in Scrolling — and a
     /// session-long nil `lastFocused` reaches every consumer
-    /// that reads it. The stamp is TRUE here rather than a
-    /// convenience: the gate above means the window stays
-    /// visible on the target screen, where it keeps OS key
-    /// focus (device-measured, 2026-08-25).
+    /// that reads it. For the window holding focus the stamp is
+    /// TRUE rather than a convenience: the gate above means the
+    /// window stays visible on the target screen, where it keeps
+    /// OS key focus (device-measured, 2026-08-25).
     ///
     /// And it retiles itself. The claim that "each branch
     /// already retiles" is false exactly where this fires: with
@@ -276,13 +279,21 @@ extension KiwiCore {
     /// - The departure record (#1345) keeps the vanish that
     ///   follows a move onto a HIDDEN Desktop as the verb's
     ///   hand-off; a target its screen already shows produces
-    ///   no vanish, so nothing is recorded for it.
+    ///   no vanish, so nothing is recorded for it. Nor for a
+    ///   window that held no focus (#2888): it hands nothing off,
+    ///   so its vanish stands the close-return raise down.
     private func departWithoutFollowing(
         _ window: WindowID,
+        held: Bool,
         targetIsCurrent: Bool
     ) {
         moveLatch.stamp(window)
-        recordDesktopMoveDeparture(window, targetIsCurrent: targetIsCurrent)
+        if held {
+            recordDesktopMoveDeparture(
+                window,
+                targetIsCurrent: targetIsCurrent
+            )
+        }
         lastDesktopSwitch = Date()
         guard let pid = state.windows[window]?.pid else { return }
         // One slot, which a later move re-arms: the pids collect so

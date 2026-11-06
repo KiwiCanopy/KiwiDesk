@@ -1075,7 +1075,7 @@ editing here:
   — never from the nil Mission Control number, which cannot be
   told apart from "SkyLight unavailable", where the
   single-space fallback must keep bars and settles running.
-  A Desktop move refuses such a window, named or focused, since
+  A Desktop move refuses a full-screen window, named or focused, since
   its macOS Space is its own (#2888,
   `DesktopMoveNamedWindowTests` ▸ `fullScreenRefuses`).
   `FullscreenLayoutExemptionTests` pins the membership half and
@@ -1108,9 +1108,11 @@ editing here:
   the next genuine focus. The raise is paid on every landing of
   such a path, an already-shown Space included, where it is
   harmless; a path that can ONLY land on a shown Space (the #446
-  display follow, `handFollowFocus`, whose caller sends any other
-  landing through `followSwitch`, #2888) un-stashes nothing and
-  states that it owes none. The focus the raise hands back, and the one
+  display follow, `handFollowFocus`) un-stashes nothing and
+  states that it owes none; a Desktop follow whose window held no
+  focus, or whose Space is not shown, takes `followSwitch`
+  (#2888, `DesktopMoveNamedFocusTests` ▸
+  `focusedFollowToUnshownSpace`). The focus the raise hands back, and the one
   `raiseFloatsAbove` re-reads, is the focus ANCHOR, never the
   Space's slot, or a sticky traveler loses it
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred

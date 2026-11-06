@@ -35,29 +35,28 @@ extension KiwiCore {
         return .fail("window \(window.raw) is full screen")
     }
 
-    /// Whether `window` holds the focus a move leaves alone. A
-    /// verb naming no window acts on the anchor, which `lastFocused`
-    /// can lag (the #463 hazard `moveWindow` argues).
-    func holdsFocus(_ window: WindowID) -> Bool {
-        window == focusedWindowID || window == state.workspaces.lastFocused
-    }
-
-    /// Takes focus for a named window a shown Desktop's move filed
-    /// into the active Space, as `move_to_space` does: the filing
-    /// stamped the state focus with no raise, and the split would
-    /// fail the next focused verb's #292 preflight. Every other
+    /// Takes focus for a window a shown Desktop's move filed into
+    /// the active Space from where it held none, as `move_to_space`
+    /// does: the filing stamped the state focus with no raise, and
+    /// the split would fail the next focused verb's #292 preflight.
+    /// `leaving` is the anchor read before that filing. Every other
     /// move changes no focus.
     func focusIfFiledIntoActiveSpace(
         _ window: WindowID,
         from: SpaceID?,
-        held: Bool,
+        leaving: WindowID?,
         target: DesktopTarget
     ) {
-        guard !held, target.isCurrent,
+        guard window != leaving, target.isCurrent,
             let destination = state.workspaces.space(of: window),
             destination != from,
             destination == state.workspaces.activeSpace
         else { return }
-        focusWindow(window, refocusRetile: false, warp: true)
+        focusWindow(
+            window,
+            refocusRetile: false,
+            warp: true,
+            leaving: leaving
+        )
     }
 }

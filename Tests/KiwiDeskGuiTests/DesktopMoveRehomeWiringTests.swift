@@ -97,6 +97,29 @@ struct DesktopMoveRehomeWiringTests {
             SourceScan.declarationBody(after: "for pid in pids", in: body)
         )
         #expect(loop.contains("reconcile(pid: pid"))
+        // Or the set grows, and every reap repeats each past app.
+        #expect(body.contains("moveReapPIDs = []"))
+    }
+
+    /// The filing stamps the state focus, so only this order keeps
+    /// the anchor it left and only the call raises the window.
+    @Test("the verb reads the anchor before filing and raises after")
+    func theAnchorPrecedesTheFiling() throws {
+        let text = try desktopCommandsSource()
+        let anchor = try #require(
+            text.range(of: "let anchor = focusedWindowID")
+        )
+        let bridge = try #require(
+            text.range(of: "moveWindows([window], to: target.space)")
+        )
+        #expect(anchor.upperBound < bridge.lowerBound)
+        let raise = try #require(
+            text.range(
+                of: "focusIfFiledIntoActiveSpace(",
+                range: bridge.upperBound..<text.endIndex
+            )
+        )
+        #expect(raise.lowerBound > bridge.upperBound)
     }
 
     /// The re-home's own body, bounded by the declaration that
