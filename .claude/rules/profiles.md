@@ -572,8 +572,9 @@ away ledger, the heal and the shelf stand-down read through —
 `readCensus` and `readWindowSpace` (#1146), `readOffShown` (#2907)
 and `liveSpaceIsUser` (#2937), [os-private-apis.md](os-private-apis.md)'s
 — which `makeTestCore` pins to "no compositor"
-(`DesktopCensusSeamTests` ▸ `testCorePinsBothDoors`); a suite
-wanting a verdict states it on the instance. It also files each
+(`DesktopCensusSeamTests` ▸ `testCorePinsBothDoors`,
+`HealStandDownSeamTests` ▸ `batchReadIsPinned`,
+`ShownUserSpaceSeamTests`); a suite wanting a verdict states it on the instance. It also files each
 screen's user-Space verdict for the shelf's stand-down, whose
 filing obligations are [bars.md](bars.md)'s (#2667).
 

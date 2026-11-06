@@ -117,13 +117,10 @@ struct DesktopCensusSeamTests {
         )
     }
 
-    /// The per-window symbol has two ruled doors and no third
-    /// (#1410): the census's `windowSpace` (the classifier's
-    /// hosted/gone reading) and the gate's `windowSpaces` list;
-    /// every caller of either lives in the OS lane, so a Core
-    /// consumer reaching the live WindowServer past both seams
-    /// reds here.
-    @Test("the raw per-window Space read has its two ruled callers")
+    /// Every reach of the per-window symbol stays on its ruled sites,
+    /// by call or by reference (#1410, #2968); the doors are
+    /// os-private-apis.md's.
+    @Test("the raw per-window Space read has its ruled callers")
     func rawWindowSpaceReadHasRuledCallers() throws {
         let list = try SourceScan.identifierSites(
             of: "windowSpaces(",
@@ -154,6 +151,40 @@ struct DesktopCensusSeamTests {
                     + one.map(\.site).joined(separator: ", ")
             )
         )
+        let census = "NativeSpaces+Census.swift"
+        let memory = "DesktopMemory.swift"
+        let doors: [(needle: String, files: Set<String>, count: Int)] = [
+            ("windowSpaceReading", [census, memory], 2),
+            ("isOnShownDesktop", [census, "KiwiCore.swift"], 5),
+            ("anyOffShownDesktop", [census, memory], 2),
+            (
+                "desktopMemory.readOffShown",
+                ["KiwiCore+HealStandDown.swift"], 1
+            ),
+            (
+                "windowIsOnShownDesktop",
+                ["KiwiCore.swift", "KiwiCore+DesktopRaiseGate.swift"], 2
+            ),
+            ("SkyLight.copySpacesForWindows", [census], 1),
+            (
+                "\"SLSCopySpacesForWindows\"",
+                ["SkyLight+WindowSpaces.swift"], 1
+            ),
+        ]
+        for door in doors {
+            let sites = try SourceScan.identifierSites(
+                of: door.needle,
+                under: Self.sources
+            )
+            #expect(
+                Set(sites.map(\.file.lastPathComponent)) == door.files
+                    && sites.count == door.count,
+                .init(
+                    rawValue: "\(door.needle) found "
+                        + sites.map(\.site).joined(separator: ", ")
+                )
+            )
+        }
     }
 
     @Test("a test never calls the builder")
