@@ -43,7 +43,8 @@ struct OwnDialogFocusTests {
         #expect(
             loop.closeReturnRaiseStandsDown(
                 after: .windowHidden(WindowID(7)),
-                departedWithDesktop: false
+                departedWithDesktop: false,
+                movedWithoutFocus: false
             )
         )
     }
@@ -57,7 +58,8 @@ struct OwnDialogFocusTests {
         #expect(
             loop.closeReturnRaiseStandsDown(
                 after: destroy,
-                departedWithDesktop: false
+                departedWithDesktop: false,
+                movedWithoutFocus: false
             )
         )
     }
@@ -73,7 +75,8 @@ struct OwnDialogFocusTests {
         #expect(
             !loop.closeReturnRaiseStandsDown(
                 after: destroy,
-                departedWithDesktop: false
+                departedWithDesktop: false,
+                movedWithoutFocus: false
             )
         )
     }
@@ -85,7 +88,8 @@ struct OwnDialogFocusTests {
         #expect(
             !loop.closeReturnRaiseStandsDown(
                 after: destroy,
-                departedWithDesktop: false
+                departedWithDesktop: false,
+                movedWithoutFocus: false
             )
         )
     }

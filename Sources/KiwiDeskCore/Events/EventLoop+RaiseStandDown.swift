@@ -49,13 +49,19 @@ extension EventLoop {
     /// `KiwiCore.departedWithDesktop`): a swipe is not a close,
     /// macOS picks the focus on the Desktop it shows, and the
     /// same-app successor the fold picks can sit on the Desktop
-    /// the user just left — the bounce.
+    /// the user just left — the bounce. And a move verb's departure
+    /// of a window that was not the focus anchor stands it down
+    /// (#2888, `KiwiCore.movedWithoutFocus`): the fold reads the
+    /// Space's slot, and the raise would take the focus from the
+    /// anchor the verb named a window beside.
     func closeReturnRaiseStandsDown(
         after event: KiwiEvent,
-        departedWithDesktop: Bool
+        departedWithDesktop: Bool,
+        movedWithoutFocus: Bool
     ) -> Bool {
         event.isHideDrop
             || departedWithDesktop
+            || movedWithoutFocus
             || eagerDepartureInFlight != nil
             || ownKeyWindow()?.isDialog == true
     }

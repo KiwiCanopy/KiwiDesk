@@ -1187,7 +1187,7 @@ editing here:
   re-raise of the very anchor the stand-down refused, one settle
   later; the next genuine mutation's arm heals the pile. **Which
   removals those are is
-  `EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`
+  `EventLoop.closeReturnRaiseStandsDown`
   and not a list here** — this row carried one, a third arm landed under it
   (#1007), and a rule file that reads as instructions was
   carrying a false census until review caught it. A new arm goes
@@ -1396,8 +1396,8 @@ editing here:
   the same reading that a swipe is not a close — append one here
   rather than opening a bullet of its own: a window that LEFT
   WITH ITS DESKTOP — `vanished`, and not a move verb's own
-  departure of a window holding focus, which the verb records per
-  window and the gone handler claims (`departedWithDesktop`, never the #482 follow
+  departure, which the verb records per window and the gone
+  handler claims (`departedWithDesktop`, never the #482 follow
   latch, whose second expires before a slow app's destroy) —
   stands the close-return raise down as one arm of the ONE
   predicate (the #936 clause above says why that predicate, and

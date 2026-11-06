@@ -149,16 +149,6 @@ struct DesktopMoveNamedFocusTests {
         #expect(core.focusedWindowID == focused)
     }
 
-    @Test("only a window that held focus hands a departure off")
-    func departureRecordNeedsTheFocus() {
-        let core = makeCore()
-        defer { teardown() }
-        core.execute("move_to_desktop", args: [.number(2), .null, id])
-        #expect(core.desktopMoveDepartures[named] == nil)
-        core.execute("move_to_desktop", args: [.number(2)])
-        #expect(core.desktopMoveDepartures[focused] != nil)
-    }
-
     // MARK: - The follow
 
     @Test("a follow onto a hidden Desktop owes the named window")
@@ -181,14 +171,16 @@ struct DesktopMoveNamedFocusTests {
             name == "ManagedDisplaySetCurrentSpaceOperation"
                 ? nil : desktopVerbBridgeClasses[name]
         }
+        // Asked at the press: a starved run outlasts the latch.
+        let now = Date()
         let response = core.execute(
             "move_to_desktop_and_follow",
             args: [.number(2), .null, id]
         )
         #expect(!response.isSuccess)
-        #expect(core.moveLatch.isLatched(named))
+        #expect(core.moveLatch.isLatched(named, at: now))
         #expect(core.deferred.isScheduled(.desktopMoveReap))
-        #expect(core.desktopMoveDepartures[named] == nil)
+        #expect(core.desktopMoveDepartures[named] != nil)
     }
 
     @Test("an already-shown follow of an unfocused window focuses it")

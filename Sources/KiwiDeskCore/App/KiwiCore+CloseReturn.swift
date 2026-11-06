@@ -10,6 +10,7 @@ extension KiwiCore {
         event: KiwiEvent,
         effects foldEffects: AppliedEffects,
         goneReason: WindowGoneReason?,
+        anchorBeforeFold: WindowID?,
         willRetile: Bool
     ) {
         // A close the distrust delayed past a same-app focus on
@@ -36,6 +37,11 @@ extension KiwiCore {
         // own activation reports it. Guarded on the focus loss
         // so only a removal that would raise pays the seam's
         // NSApplication read.
+        let movedWithoutFocus = movedWithoutFocus(
+            event,
+            reason: goneReason,
+            anchorBeforeFold: anchorBeforeFold
+        )
         let departedWithDesktop =
             departedWithDesktop(event, reason: goneReason)
         if departedWithDesktop, let id = event.goneWindowID {
@@ -45,7 +51,8 @@ extension KiwiCore {
             effects.removedWindow?.focusLost == true
             && eventLoop.closeReturnRaiseStandsDown(
                 after: event,
-                departedWithDesktop: departedWithDesktop
+                departedWithDesktop: departedWithDesktop,
+                movedWithoutFocus: movedWithoutFocus
             )
         if effects.removedWindow?.focusLost == true,
             !closeReturnRaiseStandsDown,

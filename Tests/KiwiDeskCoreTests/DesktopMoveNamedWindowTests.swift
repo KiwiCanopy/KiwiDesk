@@ -60,6 +60,8 @@ struct DesktopMoveNamedWindowTests {
     func namedMoves() {
         let core = makeCore()
         defer { teardown() }
+        // Asked at the press: a starved run outlasts the latch.
+        let now = Date()
         let response = core.execute(
             "move_to_desktop",
             args: [.number(2), .null, id]
@@ -67,8 +69,8 @@ struct DesktopMoveNamedWindowTests {
         #expect(response.isSuccess)
         #expect(movedWindows() == moved(named))
         #expect(core.focusedWindowID == focused)
-        #expect(core.moveLatch.isLatched(named))
-        #expect(!core.moveLatch.isLatched(focused))
+        #expect(core.moveLatch.isLatched(named, at: now))
+        #expect(!core.moveLatch.isLatched(focused, at: now))
     }
 
     @Test("no window argument still moves the focus")

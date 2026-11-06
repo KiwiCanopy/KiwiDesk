@@ -156,7 +156,6 @@ extension KiwiCore {
                     // the user).
                     departWithoutFollowing(
                         window,
-                        held: held,
                         targetIsCurrent: target.isCurrent
                     )
                 }
@@ -164,7 +163,6 @@ extension KiwiCore {
             }
             departWithoutFollowing(
                 window,
-                held: held,
                 targetIsCurrent: target.isCurrent
             )
             focusIfFiledIntoActiveSpace(
@@ -279,21 +277,13 @@ extension KiwiCore {
     /// - The departure record (#1345) keeps the vanish that
     ///   follows a move onto a HIDDEN Desktop as the verb's
     ///   hand-off; a target its screen already shows produces
-    ///   no vanish, so nothing is recorded for it. Nor for a
-    ///   window that held no focus (#2888): it hands nothing off,
-    ///   so its vanish stands the close-return raise down.
+    ///   no vanish, so nothing is recorded for it.
     private func departWithoutFollowing(
         _ window: WindowID,
-        held: Bool,
         targetIsCurrent: Bool
     ) {
         moveLatch.stamp(window)
-        if held {
-            recordDesktopMoveDeparture(
-                window,
-                targetIsCurrent: targetIsCurrent
-            )
-        }
+        recordDesktopMoveDeparture(window, targetIsCurrent: targetIsCurrent)
         lastDesktopSwitch = Date()
         guard let pid = state.windows[window]?.pid else { return }
         // One slot, which a later move re-arms: the pids collect so

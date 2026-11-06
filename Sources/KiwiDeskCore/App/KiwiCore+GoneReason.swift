@@ -96,10 +96,8 @@ extension KiwiCore {
     /// Whether a removal is the window LEAVING WITH ITS DESKTOP
     /// (#1345): `vanished` — hosted on a Desktop nobody shows —
     /// and not a move verb's own departure, recorded by the verb
-    /// and claimed here. A swipe's removals are these, as is the
-    /// verb's move of a window that held no focus, which it does
-    /// not record (#2888): macOS picks the focus on the Desktop it
-    /// shows, or the focus never moved, so the
+    /// and claimed here. A swipe's removals are exactly these,
+    /// and macOS picks the focus on the Desktop it shows, so the
     /// close-return raise stands down for them the way it does
     /// for a hide (#913). On a host without the compositor read,
     /// `vanished` is the #40 timer's word inside the switch
@@ -118,6 +116,26 @@ extension KiwiCore {
         return reason == .vanished && !moved
     }
 
+    /// Whether a removal is a move verb's departure of a window that
+    /// was not the focus anchor as its vanish folded (#2888): the
+    /// verb named a window beside the focus, so nothing is owed a
+    /// hand-off. Asked at the vanish, since an earlier window of a
+    /// burst can hand the window the focus after its verb ran, and
+    /// ahead of `departedWithDesktop`, which claims the record.
+    func movedWithoutFocus(
+        _ event: KiwiEvent,
+        reason: WindowGoneReason?,
+        anchorBeforeFold: WindowID?,
+        now: Date = Date()
+    ) -> Bool {
+        guard reason == .vanished, let id = event.goneWindowID,
+            id != anchorBeforeFold,
+            let recorded = desktopMoveDepartures[id]
+        else { return false }
+        return now.timeIntervalSince(recorded)
+            < Self.desktopMoveDepartureWindow
+    }
+
     /// How long a move verb's departure record may wait for its
     /// vanish: past a slow app's destroy (Electron's trailed the
     /// swipe by up to ~3 s on device, 2026-09-08), and the verb's
@@ -126,8 +144,7 @@ extension KiwiCore {
     /// than name the window's next swipe departure as the verb's.
     static let desktopMoveDepartureWindow: TimeInterval = 10
 
-    /// A move verb's own departure of a window that held focus
-    /// (#1345, #2888): the vanish that
+    /// A move verb's own departure (#1345): the vanish that
     /// follows is the verb's hand-off, never a swipe's. Recorded
     /// per window and claimed at the vanish, so a slow app's
     /// destroy seconds later still reads as the verb's. Only

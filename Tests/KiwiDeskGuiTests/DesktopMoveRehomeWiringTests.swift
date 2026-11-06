@@ -94,7 +94,7 @@ struct DesktopMoveRehomeWiringTests {
             )
         )
         let loop = try #require(
-            SourceScan.declarationBody(after: "for pid in pids", in: body)
+            SourceScan.declarationBody(after: "for pid in pids {", in: body)
         )
         #expect(loop.contains("reconcile(pid: pid"))
         // Or the set grows, and every reap repeats each past app.
