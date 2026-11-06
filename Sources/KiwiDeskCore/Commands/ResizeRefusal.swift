@@ -77,6 +77,9 @@ enum ResizeRefusal: Equatable {
     /// A float-move verb on a tiled focus (#3007): the layout places
     /// it, and the verb never floats it.
     case moveNeedsFloat(WindowID)
+    /// `move_floating` stopped at the float region (#2972), going
+    /// `direction`. A wall reached, so it bumps the way it was going.
+    case moveAtBoundary(WindowID, direction: Direction)
 }
 
 extension ResizeRefusal {
@@ -91,7 +94,8 @@ extension ResizeRefusal {
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
             .gridNoOtherTrack(let id, _), .layoutHasNoResize(let id),
             .windowIsFullscreen(let id),
-            .fullscreenCannotMove(let id), .moveNeedsFloat(let id):
+            .fullscreenCannotMove(let id), .moveNeedsFloat(let id),
+            .moveAtBoundary(let id, _):
             id
         case .neighborMinimum(_, let focused, _, _):
             focused
@@ -109,6 +113,8 @@ extension ResizeRefusal {
             axis
         case .neighborMinimum(_, _, let axis, _):
             axis
+        case .moveAtBoundary(_, let direction):
+            direction == .left || direction == .right ? "x" : "y"
         case .nothingToDivide, .layoutHasNoResize,
             .windowIsFullscreen, .fullscreenCannotMove,
             .moveNeedsFloat:
@@ -133,6 +139,8 @@ extension ResizeRefusal {
             axis == "y" ? .down : .right
         case .neighborMinimum(_, _, let axis, _):
             axis == "y" ? .down : .right
+        case .moveAtBoundary(_, let direction):
+            direction
         case .noAxisHere, .nothingToDivide, .gridNoOtherTrack,
             .layoutHasNoResize, .windowIsFullscreen,
             .fullscreenCannotMove, .moveNeedsFloat:

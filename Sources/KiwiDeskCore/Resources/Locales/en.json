@@ -1856,6 +1856,7 @@
   "resize.grid_no_other_row": "No other row to take the height",
   "resize.layout_has_none": "This layout has no resizing",
   "resize.min_size_reached": "Minimum window size reached",
+  "resize.move_boundary": "No room left to move",
   "resize.move_fullscreen": "Full-screen windows can't be moved",
   "resize.move_needs_float": "Only a floating window can be moved",
   "resize.neighbor_app_min": "Neighboring app won't go smaller",

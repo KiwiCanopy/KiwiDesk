@@ -98,4 +98,71 @@ extension KiwiCore {
         holdRingForStateChange(id)
         return .ok()
     }
+
+    /// `move_floating`: `delta` points along `axis`, positive y moving
+    /// down, stopping at the float region, so it never reaches another
+    /// screen. A tap and a glide both write instantly. It ends no
+    /// maximize: a float holds none, and one standing on a tile beneath
+    /// is that tile's (#2972). Base and retire as `resizeFloating`,
+    /// whose comments argue them.
+    func moveFloating(_ args: [JSONValue]) -> CommandResponse {
+        guard let axis = args.first?.stringValue,
+            axis == "x" || axis == "y",
+            let delta = args.dropFirst().first?.numberValue,
+            delta.isFinite
+        else {
+            return .fail("expected axis (x|y) and delta")
+        }
+        let target: FloatMoveTarget
+        switch floatMoveFocus() {
+        case .answered(let response): return response
+        case .target(let focus): target = focus
+        }
+        let id = target.id
+        let isGlideWrite = keys.isApplyingGlideStep
+        let base =
+            tiler.animation.commandedFrame(
+                window: id,
+                includingHeldGlide: isGlideWrite
+            ) ?? target.window.frame
+        let horizontal = axis == "x"
+        let moved = FloatMove.holdingTheAsk(
+            floatMoveFrame(
+                FloatMove.moved(
+                    base,
+                    horizontal: horizontal,
+                    delta: delta,
+                    bounds: target.region
+                ),
+                for: target
+            ),
+            from: base,
+            horizontal: horizontal,
+            delta: delta
+        )
+        // A truncated step cues, its landing on the wall included (#933).
+        if FloatMove.stoppedShort(
+            of: base,
+            at: moved,
+            horizontal: horizontal,
+            delta: delta
+        ) {
+            refuseMoveAtBoundary(
+                id,
+                horizontal
+                    ? (delta > 0 ? .right : .left)
+                    : (delta > 0 ? .down : .up)
+            )
+        }
+        if moved != base {
+            tiler.applyFrame(
+                id,
+                from: target.window.frame,
+                to: moved,
+                animated: false
+            )
+        }
+        tiler.animation.recordGlideCommanded(id, frame: moved)
+        return .ok()
+    }
 }

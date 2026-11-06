@@ -630,6 +630,7 @@ every lens with why it cannot turn on.
 | | `override_sticky_reach` | `on\|off\|auto` — pins the focused sticky window's Desktop reach against `sticky.set_desktop_reach` (`auto` clears the pin) |
 | | `resize` | `x\|y`, delta (px) |
 | | `center_floating` | — the focused floating window moves to the middle of its screen, at its size ([`center_floating`](lua-reference.md#center_floating)) |
+| | `move_floating` | `x\|y`, delta (pt, positive y down) — moves the focused floating window, stopping at its screen's edge or a bar ([`move_floating`](lua-reference.md#move_floating)) |
 | | `move_to_track` | `prev\|next` — move window to the adjacent track (track spaces) |
 | Launch | `focus_or_spawn` | app bundle id (e.g. `com.apple.safari`) — a repeat press while its window is focused cycles the app's windows |
 | | `spawn_new` | app bundle id |
@@ -728,6 +729,8 @@ every lens with why it cannot turn on.
 `center_floating` moves the focused floating window to the middle of
 its screen at its size
 ([`center_floating`](lua-reference.md#center_floating)).
+`move_floating` moves it by a delta in points and a held key glides
+([`move_floating`](lua-reference.md#move_floating)).
 :::
 
 :::unreleased

@@ -1853,6 +1853,7 @@
   "resize.grid_no_other_row": "沒有其他列可以接收高度",
   "resize.layout_has_none": "此佈局不支援調整尺寸",
   "resize.min_size_reached": "已達到視窗最小尺寸",
+  "resize.move_boundary": "已無移動的餘地",
   "resize.move_fullscreen": "全螢幕視窗無法移動",
   "resize.move_needs_float": "只能移動浮動視窗",
   "resize.neighbor_app_min": "相鄰 App 尺寸無法再減少",

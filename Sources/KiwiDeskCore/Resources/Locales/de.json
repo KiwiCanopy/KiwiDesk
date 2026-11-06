@@ -1853,6 +1853,7 @@
   "resize.grid_no_other_row": "Keine andere Zeile nimmt die Höhe auf",
   "resize.layout_has_none": "Dieses Layout kennt keine Größenänderung",
   "resize.min_size_reached": "Mindestfenstergröße erreicht",
+  "resize.move_boundary": "Kein Platz mehr zum Verschieben",
   "resize.move_fullscreen": "Vollbildfenster können nicht verschoben werden",
   "resize.move_needs_float": "Nur schwebende Fenster können verschoben werden",
   "resize.neighbor_app_min": "Nachbar-App wird nicht kleiner",

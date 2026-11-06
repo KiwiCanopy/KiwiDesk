@@ -1,15 +1,15 @@
 import AppKit
 import Foundation
 
-/// Hold-to-glide for keyboard resize (#1056, retimed by #1082). A held resize
+/// Hold-to-glide for `glidableCommands` (#1056, retimed by #1082). A held
 /// chord glides after initial key-repeat delay. Re-issues the command (never
 /// binding, owner ruling 2026-08-29) with scaled delta (`HoldGlideTests`).
 /// Refusal cues stop run (#933, #1055).
 @MainActor
 final class HoldGlide {
-    /// The verbs a held chord may glide (only `resize`). Checked in
+    /// The verbs a held chord may glide. Checked in
     /// `HoldGlideEligibilitySeamTests` against the API census (#614).
-    static let glidableCommands: Set<String> = ["resize"]
+    static let glidableCommands: Set<String> = ["resize", "move_floating"]
 
     /// Force-end bound if release event is lost (#611).
     static let maxRunSeconds: TimeInterval = 30

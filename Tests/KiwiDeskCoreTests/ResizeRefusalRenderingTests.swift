@@ -164,6 +164,7 @@ struct ResizeRefusalRenderingTests {
             .windowIsFullscreen(window),
             .fullscreenCannotMove(window),
             .moveNeedsFloat(window),
+            .moveAtBoundary(window, direction: .up),
         ].map(\.pillText)
         #expect(Set(texts).count == texts.count)
         #expect(texts.allSatisfy { !$0.isEmpty })
@@ -272,6 +273,10 @@ struct ResizeRefusalRenderingTests {
         #expect(
             ResizeRefusal.moveNeedsFloat(window).pillText
                 == "Only a floating window can be moved"
+        )
+        #expect(
+            ResizeRefusal.moveAtBoundary(window, direction: .up).pillText
+                == "No room left to move"
         )
     }
 

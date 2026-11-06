@@ -1116,7 +1116,7 @@ the caps print, not which key fires.
   resize shortcut glides: the first press is one step; after
   your Mac's key-repeat delay the window resizes smoothly, faster
   over the next couple of seconds, scaled to your resize step.
-  Only resize glides. A floating window grows around its centre;
+  A floating window grows around its centre;
   an edge against the screen edge or a bar stays put and the
   whole step goes to the other side. Floats are held clear of a
   bar and the screen edge by the focus ring's width.

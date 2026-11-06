@@ -1853,6 +1853,7 @@
   "resize.grid_no_other_row": "Nessun’altra riga può prendere l’altezza",
   "resize.layout_has_none": "Questo layout non prevede il ridimensionamento",
   "resize.min_size_reached": "Dimensione minima della finestra raggiunta",
+  "resize.move_boundary": "Non c'è più posto per spostare",
   "resize.move_fullscreen": "Le finestre a tutto schermo non possono essere spostate",
   "resize.move_needs_float": "Si può spostare solo una finestra fluttuante",
   "resize.neighbor_app_min": "L'app adiacente non si riduce oltre",

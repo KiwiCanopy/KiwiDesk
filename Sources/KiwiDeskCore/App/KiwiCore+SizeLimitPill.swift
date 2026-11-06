@@ -223,6 +223,11 @@ extension KiwiCore {
         cueResizeRefusal(.moveNeedsFloat(window))
     }
 
+    /// `move_floating` stopped at the float region (#2972).
+    func refuseMoveAtBoundary(_ window: WindowID, _ to: Direction) {
+        cueResizeRefusal(.moveAtBoundary(window, direction: to))
+    }
+
     /// A shrink hit the window's effective minimum (#933) — on
     /// the FIRST attempt the clamp truncates, landing ON the
     /// minimum included, not only once already there. Whose

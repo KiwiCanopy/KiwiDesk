@@ -111,6 +111,18 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+A second `move_floating` landing before the app reports the first
+re-asks the same frame instead of adding to it, so it is swallowed.
+This is the rapid-resize row above with its one difference: `resize`
+has a spring to measure from where animation is on, and a move writes
+instantly, so a press always measures from the reported frame. Holding
+the key is exact. A Space switch inside that lag files the frame from
+before the move, as it does for a drag or a `resize`
+([#2972](https://github.com/KiwiCanopy/KiwiDesk/issues/2972)). Press
+again if a burst comes up short. No fix is planned.
+:::
+
+:::unreleased
 A Space switch while `center_floating` is still moving a window can
 lose the centring: the switch files the frame the window has reached,
 as it does for a window `make_floating` is placing

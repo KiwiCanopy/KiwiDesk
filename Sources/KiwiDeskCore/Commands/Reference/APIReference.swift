@@ -51,6 +51,7 @@ public enum APIReference {
             ("override_sticky_reach", "override_sticky_reach"),
             ("resize", "resize"),
             ("center_floating", "center_floating"),
+            ("move_floating", "move_floating"),
             ("move_to_track", "move_to_track"),
             ("focus_or_spawn", "focus_or_spawn"),
             ("spawn_new", "spawn_new"),

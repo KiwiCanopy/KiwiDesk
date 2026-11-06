@@ -225,7 +225,9 @@ editing here:
   a float at its own size resolves it through `floatMoveFocus` and
   clamps through `floatMoveFrame`, never the raw clamp, which reads a
   traveler's home and can carry a top edge out of reach
-  (`FloatCentreRenderSpaceTests`).
+  (`FloatCentreRenderSpaceTests`); one stepping by a delta also takes
+  `FloatMove.holdingTheAsk` against that clamp's push
+  (`FloatNudgeRenderSpaceTests`).
 - The **create fold's spawn grant** — the focus a fresh window
   gets for existing, not one macOS reported — consults
   `ManagedWindow.isTransientOverlay`

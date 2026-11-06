@@ -59,6 +59,11 @@ struct ResizeRefusalSymbolTests {
                 axis: "y",
                 atBoundary: false
             ),
+            // #2972: a move stopped, each way.
+            .moveAtBoundary(window, direction: .left),
+            .moveAtBoundary(window, direction: .right),
+            .moveAtBoundary(window, direction: .up),
+            .moveAtBoundary(window, direction: .down),
             .neighborMinimum(
                 anchor: other,
                 focused: window,
@@ -148,6 +153,10 @@ struct ResizeRefusalSymbolTests {
             .windowIsFullscreen(window),
             .fullscreenCannotMove(window),
             .moveNeedsFloat(window),
+            .moveAtBoundary(window, direction: .left),
+            .moveAtBoundary(window, direction: .right),
+            .moveAtBoundary(window, direction: .up),
+            .moveAtBoundary(window, direction: .down),
         ] {
             #expect(
                 NSImage(
