@@ -148,9 +148,15 @@ extension KiwiCore {
     /// re-open the same undo. A parse writes nothing: the route
     /// creates the Space once the bridge accepted, so a refused
     /// move leaves no empty Space behind.
+    ///
+    /// Shared Desktops name no screen, and a hidden one moves no
+    /// frame, so the arrival's #1010 net would drop a Space off the
+    /// window's screen: that is refused here (#3033). A shown one
+    /// files at once and crosses.
     func resolveSpaceTarget(
         _ args: [JSONValue],
-        for target: DesktopTarget
+        for target: DesktopTarget,
+        moving window: WindowID
     ) -> SpaceTargetResolution {
         guard args.count > 1, args[1] != .null else { return .none }
         if args.count > 2, args[1].stringValue == "" { return .none }
@@ -160,13 +166,23 @@ extension KiwiCore {
         let space = SpaceID(raw)
         let screens = state.workspaces.allDisplays
         if let assigned = state.workspaces.display(of: space) {
-            if let screen = display(forUUID: target.displayIdentifier),
-                assigned != screen
+            if let screen = display(forUUID: target.displayIdentifier) {
+                guard assigned == screen else {
+                    return .refused(
+                        .fail(
+                            "space \(raw) lays out on another screen "
+                                + "than that Desktop's"
+                        )
+                    )
+                }
+            } else if !target.isCurrent,
+                let held = screenHolding(window),
+                assigned != held
             {
                 return .refused(
                     .fail(
-                        "space \(raw) lays out on another screen "
-                            + "than that Desktop's"
+                        "Can't move a window across screens "
+                            + "to a hidden Desktop."
                     )
                 )
             }
@@ -182,6 +198,17 @@ extension KiwiCore {
             )
         }
         return .space(space, landing: screens.first?.id)
+    }
+
+    /// The screen a window's frame sits on, the reading the arrival
+    /// takes; a frame on no screen answers by its Space's screen.
+    private func screenHolding(_ window: WindowID) -> DisplayID? {
+        state.windows[window].flatMap {
+            TilingEngine.screen(containing: $0.frame)?.kiwiDisplayID
+        }
+            ?? state.workspaces.space(of: window).flatMap {
+                state.workspaces.display(of: $0)
+            }
     }
 
     /// `focus_desktop <n>` (#26): switches the Desktop's screen

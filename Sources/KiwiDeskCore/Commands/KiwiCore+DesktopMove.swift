@@ -63,7 +63,7 @@ extension KiwiCore {
             let held = window == anchor
             let from = state.workspaces.space(of: window)
             let explicit: SpaceID?
-            switch resolveSpaceTarget(args, for: target) {
+            switch resolveSpaceTarget(args, for: target, moving: window) {
             case .refused(let response):
                 return response
             case .none:
