@@ -159,7 +159,8 @@ struct LayoutStripTests {
             )
         )
         // The ring room sits inside the clip, given back outside.
-        #expect(strip.contains(".padding(Self.ringRoom)"))
+        #expect(strip.contains(".padding(.horizontal,Self.ringRoom)"))
+        #expect(strip.contains(".padding(.vertical,Self.ringRoomVertical)"))
         #expect(strip.contains(".padding(.horizontal,-Self.ringRoom)"))
     }
 

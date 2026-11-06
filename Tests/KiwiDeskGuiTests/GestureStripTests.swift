@@ -153,8 +153,9 @@ struct GestureStripTests {
             )
         )
         #expect(view.contains("privateletcontent:Content"))
-        // The view itself never fades out of hit-testing.
-        #expect(!view.contains(").opacity("))
+        // The view itself never fades out of hit-testing: the edge's
+        // ink is the one fade.
+        #expect(view.components(separatedBy: ".opacity(").count == 2)
         // The edge lies over the stored picture, whose body the hover
         // never reaches.
         #expect(!view.contains("picture("))

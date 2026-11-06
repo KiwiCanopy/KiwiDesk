@@ -152,7 +152,7 @@ struct HoverRiseAdoptionTests {
     func layoutTileCarriesACheck() throws {
         let strip = try squashed("Components/Layouts/LayoutStrip.swift")
         let check = try #require(
-            strip.range(of: "ifselected{Image(systemName:\"checkmark\")")
+            strip.range(of: "Image(systemName:\"checkmark\")")
         )
         let name = try #require(
             strip.range(
@@ -160,7 +160,19 @@ struct HoverRiseAdoptionTests {
             )
         )
         #expect(check.upperBound < name.lowerBound)
+        // The slot stays, so the name never slides.
+        #expect(
+            strip.contains(
+                ".frame(width:Self.checkSlot)"
+                    + ".opacity(selected?1:0).selectionFade(selected)"
+            )
+        )
         #expect(strip.contains("lineWidth:risen?SettingsTheme."))
+        #expect(
+            strip.contains(
+                "lineWidth:SettingsTheme.paletteCardStrokeApplied"
+            )
+        )
     }
 
     /// A selected stroke sits on its own layer so it fades, and a
@@ -178,18 +190,20 @@ struct HoverRiseAdoptionTests {
             )
         }
         #expect(
-            try squashed("Components/Layouts/LayoutStrip.swift").contains(
-                ".selectionFade(selected)"
-            )
-        )
-        #expect(
             try squashed("Components/Looks/PaletteTile.swift").contains(
                 ".opacity(isApplied?1:0).selectionFade(isApplied)"
             )
         )
-        let stroke = try squashed("SelectionStroke.swift")
-        #expect(stroke.contains(".opacity(selected?1:0)"))
+        let stroke = try squashed("Components/Common/SelectionStroke.swift")
+        #expect(
+            stroke.contains(".opacity(selected?1:0).selectionFade(selected)")
+        )
         #expect(stroke.contains("reduceMotion?nil:"))
+        #expect(
+            try squashed("Components/Screens/ScreenCard.swift").contains(
+                "style:.tint,lineWidth:SettingsTheme.screenCardStrokeSelected"
+            )
+        )
     }
 
     /// A scroller clips what leaves its bounds, a risen tile's top and
@@ -200,6 +214,31 @@ struct HoverRiseAdoptionTests {
         #expect(strip.contains(".padding(.top,SettingsTheme.hoverRise)"))
         #expect(
             strip.contains("floor:SettingsTheme.hoverRiseShadowRoom")
+        )
+    }
+
+    /// Room past an end tile, inside the clip and given back outside.
+    @Test("an end tile's shadow has room in every strip")
+    func endTilesHaveRoom() throws {
+        let gesture = try squashed("Components/Gestures/GestureStrip.swift")
+        let simple = try squashed("Components/Simple/SimpleLookCard.swift")
+        for source in [gesture, simple] {
+            #expect(source.contains(".padding(.horizontal,Self.endRoom)"))
+            #expect(source.contains(".padding(.horizontal,-Self.endRoom)"))
+            #expect(source.contains("endRoom:endRoom"))
+        }
+    }
+
+    /// Behind the card and tucked under its edge by what it rises.
+    @Test("a risen Screen card opens no gap above its stand")
+    func standTucksUnderTheCard() throws {
+        let picture = try squashed("Components/Screens/ScreensPicture.swift")
+        #expect(picture.contains(".background(alignment:.bottom){stand("))
+        #expect(picture.contains("$0[.top]+SettingsTheme.hoverRise"))
+        #expect(
+            picture.contains(
+                ".frame(width:neck,height:7+SettingsTheme.hoverRise)"
+            )
         )
     }
 

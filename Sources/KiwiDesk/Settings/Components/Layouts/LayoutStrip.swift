@@ -47,7 +47,8 @@ struct LayoutStrip: View {
                     .zIndex(hovered == mode ? 1 : 0)
             }
         }
-        .padding(Self.ringRoom)
+        .padding(.horizontal, Self.ringRoom)
+        .padding(.vertical, Self.ringRoomVertical)
     }
 
     private var chooseTitle: String {
@@ -68,19 +69,21 @@ struct LayoutStrip: View {
                         in: RoundedRectangle(cornerRadius: 6)
                     )
                 HStack(spacing: 3) {
-                    if selected {
-                        Image(systemName: "checkmark")
-                            .font(.caption2.weight(.semibold))
-                            .transition(.opacity)
-                            .accessibilityHidden(true)
-                    }
+                    // A slot on each side, so the name holds its place
+                    // whichever tile is selected.
+                    Image(systemName: "checkmark")
+                        .font(.caption2.weight(.semibold))
+                        .frame(width: Self.checkSlot)
+                        .opacity(selected ? 1 : 0)
+                        .selectionFade(selected)
+                        .accessibilityHidden(true)
                     Label(mode.displayName, systemImage: mode.symbol)
                         .font(.subheadline)
                         .labelStyle(.titleAndIcon)
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
+                    Color.clear.frame(width: Self.checkSlot, height: 0)
                 }
-                .selectionFade(selected)
                 Text(usageText(mode))
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
@@ -124,7 +127,7 @@ struct LayoutStrip: View {
                     selected: selected,
                     shape: RoundedRectangle(cornerRadius: 8),
                     style: SettingsTheme.accent,
-                    lineWidth: 2
+                    lineWidth: SettingsTheme.paletteCardStrokeApplied
                 )
             )
     }
