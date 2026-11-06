@@ -3864,13 +3864,14 @@ pick for the input is resolved first, then
 `ConfigMigration` step is owed: nobody had a scroll choice to make,
 they picked one value that covered both. So a user who picked `none`
 or `show` sees a slide on scroll until they change the new row, and
-the release's *Before you update* says so. The rejected alternative
-is a `same` default, or a step carrying the old value, which both
-reviewers preferred so a user who picked `none` for comfort without
-Reduce Motion is not overridden; the cost of the ruling is that
-user. No format bump either, since an older reader's `Space` skips a
-key it does not know. An older build saving the file drops the key,
-so the row reads Slide again after a round trip through one.
+the release notes tell them to. The rejected alternative is a `same`
+default, or a step carrying the old value, so a user who picked
+`none` for comfort without Reduce Motion is not overridden; the cost
+of the ruling is that user. No format bump either: the change breaks
+no reader, since an older build's `Space` skips a key it does not
+know, and latching the whole file read-only there would cost more
+than the one pick. An older build saving the file drops the key, so
+the row reads Slide again after a round trip through one.
 :::
 
 *Why three, and the slide first.* The slide and the plate answer
@@ -3928,13 +3929,14 @@ reason (`FullscreenStandDownTests` ▸
 `fullScreenKeepsTheSlideAway`).
 
 *On the Animations card, apart from the window rows.* The
-picker and **Slide duration** sit at the top of Looks &
+pickers and **Slide duration** sit at the top of Looks &
 Animations ▸ Animations, above **Animate windows**, which does
 not reach them:
 that master paces windows, and the slide moves none. Reduce
-Motion does not grey the picker, since the fallback above is the
+Motion does not grey a picker, since the fallback above is the
 answer that setting asks for. The duration greys whenever no
-slide would play, read through the same `drawn(reduceMotion:)`, and both grey where
+slide would play, read through the same `drawn(reduceMotion:)`,
+and all grey where
 `init.lua` owns the config, as the Desktop cue's row does (#1741,
 #2142). The group ends with the note that it applies at once in
 every profile and a divider, so the window rows below it read as

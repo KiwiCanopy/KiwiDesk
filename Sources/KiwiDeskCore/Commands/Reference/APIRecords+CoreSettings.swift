@@ -93,8 +93,9 @@ extension APIReference {
             .text("flag", optional: true)
         ),
         "set_space_transition": APIRecord(
-            "Sets how a Space switch shows itself: the plate "
-                + "slide, the Space and its layout, or nothing.",
+            "Sets how a Space switch other than the scroll step shows "
+                + "itself: the plate slide, the Space and its layout, "
+                + "or nothing.",
             .choice("transition", SpaceTransition.self)
         ),
         "set_space_scroll_transition": APIRecord(

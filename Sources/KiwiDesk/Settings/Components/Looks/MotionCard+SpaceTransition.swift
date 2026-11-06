@@ -112,7 +112,7 @@ extension MotionCard {
         .searchAnchored(SettingsCatalog.colors.spaceSlideDuration)
     }
 
-    /// Closes the Space switch group: both rows are app-wide on a
+    /// Closes the Space switch group: its rows are app-wide on a
     /// profile's page, so it says so, as KiwiVision's immediate
     /// cards do (#1741); the divider parts it from the window
     /// master, which does not reach it (#1932, #2524).

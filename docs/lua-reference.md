@@ -1316,9 +1316,7 @@ The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Step between
 Spaces (mouse or trackpad)**. The setting is app-wide, stored in
 `gui.json` as `space.scroll_transition`; the verb changes the
 running value only. Neither `set_space_transition` nor a stored
-`space.transition` sets it, so a config that picked `"none"` or
-`"show"` before this verb existed sees the slide on a scroll step
-until it picks otherwise.
+`space.transition` sets it.
 
 **Example:**
 
@@ -1337,18 +1335,23 @@ KiwiDesk.set_space_scroll_transition("slide")
 ([`set_space_transition`](#set_space_transition)): how long the
 plates take to slide to the new Space. Their fades keep fixed
 lengths whatever the pace: 80 ms in, 300 ms out. It has
-no effect unless the transition is `"slide"`, nor while Reduce
-Motion is on. Window motion keeps its own pace
+no effect where no slide plays, as while Reduce Motion is on. Window motion keeps its own pace
 ([animations.set_duration](#animationsset_duration)). Read at the
 next switch.
 
 The GUI twin is **Looks &amp; Animations ▸ Animations ▸ Slide
-duration**, grey while **Space switches** is not on Slide or
-Reduce Motion is on. The
+duration**, grey while no slide would play. The
 setting is app-wide, stored in `gui.json` as
 `space.slide_duration`; the verb changes the running value only.
 It replaces `animations.set_space_change_duration`, which is
 refused, naming it.
+
+:::unreleased
+A slide plays where [`set_space_transition`](#set_space_transition),
+or for the scroll step
+[`set_space_scroll_transition`](#set_space_scroll_transition), is
+`"slide"`.
+:::
 
 **Example:**
 
@@ -1451,6 +1454,11 @@ owns the model.
 How the switch shows itself — the plate slide, at once with a
 plate naming the Space, or at once — is
 [`set_space_transition`](#set_space_transition).
+
+:::unreleased
+The scroll Space step's is
+[`set_space_scroll_transition`](#set_space_scroll_transition).
+:::
 
 Focusing a hidden window (cmd+tab) pulls its space forward.
 Floating windows, picture-in-picture included, are never parked

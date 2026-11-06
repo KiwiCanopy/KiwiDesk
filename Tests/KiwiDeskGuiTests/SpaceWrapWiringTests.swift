@@ -41,8 +41,10 @@ struct SpaceWrapWiringTests {
     }
 
     /// Only the gesture says it scrolled, and the argument is
-    /// required so a new door cannot leave it out (#2971).
-    /// `SpaceScrollTransitionPlayTests` holds the behaviour.
+    /// required so a door through `stepSpace` cannot leave it out
+    /// (#2971). The scan sees the spelling `scrolled: true` alone; a
+    /// value computed elsewhere is review's.
+    /// `SpaceSlideSwitchTests+Scroll` holds the behaviour.
     @Test("the gesture alone reaches the intent as scrolled")
     func scrolledReachesTheIntent() throws {
         let step = try Self.squashed("App/KiwiCore+ScrollSpaceStep.swift")
@@ -50,5 +52,19 @@ struct SpaceWrapWiringTests {
         #expect(step.contains("warp:Bool,scrolled:Bool)->Bool"))
         let keys = try Self.squashed("App/KiwiCore+SpaceHistory.swift")
         #expect(keys.contains("warp:true,scrolled:false)"))
+        var saying: [String] = []
+        let walker = FileManager.default.enumerator(
+            at: Self.core,
+            includingPropertiesForKeys: nil
+        )
+        while let url = walker?.nextObject() as? URL {
+            guard url.pathExtension == "swift" else { continue }
+            let text = try SourceScan.strippedSource(at: url)
+                .filter { !$0.isWhitespace }
+            if text.contains("scrolled:true") {
+                saying.append(url.lastPathComponent)
+            }
+        }
+        #expect(saying == ["KiwiCore+ScrollSpaceStep.swift"])
     }
 }

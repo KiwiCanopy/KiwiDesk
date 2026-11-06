@@ -71,8 +71,7 @@ struct SpaceScrollTransitionTests {
         #expect(back.spaceScrollTransition == .slide)
     }
 
-    /// No format bump is owed: a current file stays current, so no
-    /// step and no rewrite stands between the key and its reader.
+    /// A current file carrying the key is not rewritten.
     @Test("a current file with the key needs no migration")
     func currentFileIsLeftAlone() throws {
         let root = try encoded { $0.spaceScrollTransition = .none }

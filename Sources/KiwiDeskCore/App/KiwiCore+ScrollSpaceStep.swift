@@ -69,7 +69,7 @@ extension KiwiCore {
     /// `_next` (#1655) share. Past an end it wraps round that
     /// screen's order unless Wrap focus is Off, never onto another
     /// screen (#2592); false where it stops, which bumps. `scrolled`
-    /// is required, so no door picks a transition by default (#2971).
+    /// is required: this step is the one both inputs share (#2971).
     @discardableResult
     func stepSpace(
         on display: DisplayID,

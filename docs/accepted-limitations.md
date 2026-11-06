@@ -360,6 +360,11 @@ KiwiDesk sends each window its move at the press and holds the
 arriving ones until the plates land, but when the app performs
 the move is the app's.
 
+:::unreleased
+The same holds with **Step between Spaces (mouse or trackpad)** on
+Slide.
+:::
+
 A Stack zone, a Track track — the overflow track included —, a
 Grid's last track (#2541) or BSP's scrolling line
 ([#2542](https://github.com/KiwiCanopy/KiwiDesk/issues/2542)),

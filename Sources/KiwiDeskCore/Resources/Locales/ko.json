@@ -42,7 +42,7 @@
   "ai.setup.intro": "KiwiDesk에는 자체 AI가 없습니다. 이미 사용 중인 AI 앱을 연결하고, 요청만으로 KiwiDesk를 설정하고 제어하십시오.",
   "ai.setup.title": "연결 설정",
   "ai.setup.translocated": "먼저 KiwiDesk를 응용 프로그램 폴더로 이동하십시오. 다운로드 폴더에서 열면, 시작할 때마다 바뀌는 임시 위치에서 실행됩니다.",
-  "animations.space_scroll_transition": "공간 사이 이동 (마우스 또는 트랙패드)",
+  "animations.space_scroll_transition": "공간 사이 이동(마우스 또는 트랙패드)",
   "animations.space_slide_duration": "슬라이드 지속 시간",
   "animations.space_slide_duration.help": "판이 전환하는 공간으로 슬라이드하는 데 걸리는 시간입니다. 지속 시간이 길수록 느려집니다.",
   "animations.space_transition": "공간 전환",
