@@ -24,7 +24,7 @@ struct PlateGroundTests {
     }
 
     @Test("only the ruled palettes have their ring adjusted")
-    func bundledPalettesRing() {
+    func bundledPalettesRing() throws {
         let palettes = PaletteCatalog.bundled()
         #expect(palettes.count == 10)
         #expect(
@@ -32,11 +32,11 @@ struct PlateGroundTests {
         )
         for palette in palettes {
             let settings = painted(palette)
-            let ring = HomeCardPlate.lightRingHex(settings)
+            let own = settings.borderStyle.focusedColor
+            let ring = try #require(HomeCardPlate.lightRingHex(settings))
             #expect(HomeCardPlate.holdsLightRing(ring))
             #expect(
-                (ring != settings.borderStyle.focusedColor)
-                    == Self.darkPalettes.contains(palette.name),
+                (ring != own) == Self.darkPalettes.contains(palette.name),
                 Comment(rawValue: "\(palette.name): \(ring)")
             )
         }
@@ -55,32 +55,39 @@ struct PlateGroundTests {
         }
     }
 
-    /// Adjusting darkens the look's own colour, so a blue stays a
-    /// blue, and goes no further than it must.
-    @Test("an adjusted ring is the least darkening that holds")
+    /// The first of `steps` darkenings of `hex` that holds.
+    private func firstHolding(_ hex: String, steps: Int = 40) -> String? {
+        (1..<steps).lazy.compactMap {
+            HomeCardPlate.scaled(hex, by: 1 - Double($0) / Double(steps))
+        }
+        .first(where: HomeCardPlate.holdsLightRing)
+    }
+
+    /// Adjusting scales the look's own colour, so a blue stays that
+    /// blue, and stops at the first step that holds.
+    @Test("an adjusted ring is the first darkening that holds")
     func adjustedRingIsMinimal() throws {
         var settings = TilingSettings()
         settings.borderStyle.focusedColor = "#64D2FF"
-        let ring = HomeCardPlate.lightRingHex(settings)
-        let color = try #require(HexColor.parse(ring))
-        #expect(color.blue > color.red)
-        #expect(ring != "#000000")
-        let lighter =
-            "#"
-            + [color.red, color.green, color.blue]
-            .map {
-                String(
-                    format: "%02X",
-                    min(255, Int(($0 * 255 * 1.06).rounded()))
-                )
-            }
-            .joined()
-        #expect(!HomeCardPlate.holdsLightRing(lighter))
+        #expect(!HomeCardPlate.holdsLightRing("#64D2FF"))
+        let ring = try #require(HomeCardPlate.lightRingHex(settings))
+        #expect(ring == firstHolding("#64D2FF"))
+    }
+
+    /// A colour that does not parse has no ring to darken, so the
+    /// paint falls back to the plate's own ink.
+    @Test("a malformed ring takes the plate's ink")
+    func malformedRing() {
+        var settings = TilingSettings()
+        settings.borderStyle.focusedColor = "not-a-hex"
+        #expect(HomeCardPlate.lightRingHex(settings) == nil)
+        let paint = HomeCardPlate.palette(settings, in: .light)
+        #expect(paint.focus == SettingsTheme.lightInk)
     }
 
     /// The ruling's eight light palettes each keep their ring apart
     /// from the unfocused outline under protan simulation, measured
-    /// on its own rather than through the verdict that contains it;
+    /// on its own rather than through `holdsLightRing`;
     /// Sunset is the tightest, at 72.9.
     @Test("the ruled light rings separate from the outline")
     func lightRingsSeparate() throws {
@@ -127,12 +134,10 @@ struct PlateGroundTests {
         #expect(
             lit.focus == Color(kiwiHex: holder.borderStyle.focusedColor)
         )
+        let ring = try #require(HomeCardPlate.lightRingHex(adjusted))
         let moved = HomeCardPlate.palette(adjusted, in: .light)
         #expect(moved.ground == .light)
-        #expect(
-            moved.focus
-                == Color(kiwiHex: HomeCardPlate.lightRingHex(adjusted))
-        )
+        #expect(moved.focus == Color(kiwiHex: ring))
         for settings in [holder, adjusted] {
             let paint = HomeCardPlate.palette(settings, in: .dark)
             #expect(paint == HomeCardPlate.darkPalette(settings))
@@ -149,11 +154,7 @@ struct PlateGroundTests {
             #expect(!HomeCardPlate.holdsLightRing(sunk))
             var settings = TilingSettings()
             settings.borderStyle.focusedColor = sunk
-            #expect(
-                HomeCardPlate.holdsLightRing(
-                    HomeCardPlate.lightRingHex(settings)
-                )
-            )
+            #expect(HomeCardPlate.lightRingHex(settings) == firstHolding(sunk))
         }
     }
 
@@ -226,7 +227,7 @@ struct PlateGroundTests {
 
     /// With borders off no ring draws, so the plate's focus mark
     /// takes the active item colour, adjusted the same way.
-    @Test("borders off judge and paint the active item colour")
+    @Test("borders off paint the active item colour")
     func bordersOffUseTheActiveColour() {
         var settings = TilingSettings()
         settings.borderStyle.enabled = false
@@ -239,11 +240,11 @@ struct PlateGroundTests {
         #expect(
             LayoutSchematicView.focusStroke(settings, on: paint) == nil
         )
+        settings.borderStyle.focusedColor = "#0000FF"
         settings.kiwishelf.activeItemColor = HomeCardPlate.lightGround
         #expect(
-            HomeCardPlate.holdsLightRing(
-                HomeCardPlate.lightRingHex(settings)
-            )
+            HomeCardPlate.lightRingHex(settings)
+                == firstHolding(HomeCardPlate.lightGround)
         )
     }
 }

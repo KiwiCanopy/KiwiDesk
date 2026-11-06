@@ -1,9 +1,9 @@
 import Foundation
 import KiwiDeskCore
 
-/// The plates' legibility floor and the light plate's verdict
+/// The plates' legibility floor and the light plate's ring
 /// (`HomeCardPaletteWiringTests`, `PlateGroundTests`; #786,
-/// #2859). The grounds' hexes are their tokens'
+/// #2859, #3041). The grounds' hexes are their tokens'
 /// (`previewPlate`, `lightPlate`, `lightOutline`), pinned equal
 /// by those suites.
 extension HomeCardPlate {
@@ -62,31 +62,31 @@ extension HomeCardPlate {
 
     /// The ring a picture draws on the light plate: the look's own
     /// where it holds, else that colour darkened just far enough
-    /// (#3041). Bars keep the look's colours, as on a real desk.
-    static func lightRingHex(_ settings: TilingSettings) -> String {
+    /// (#3041). Nil for a colour that does not parse. Bars keep the
+    /// look's colours, as on a real desk.
+    static func lightRingHex(_ settings: TilingSettings) -> String? {
         let ring = focusHex(settings)
             .trimmingCharacters(in: .whitespaces)
         if holdsLightRing(ring) { return ring }
-        let drawn = ColorVision.composite(ring, over: lightGround)
-        guard let drawn, let color = HexColor.parse(drawn) else {
-            return lightInkHex
-        }
-        for step in 1...ringSteps {
+        guard let drawn = ColorVision.composite(ring, over: lightGround)
+        else { return nil }
+        for step in 1..<ringSteps {
             let scale = 1 - Double(step) / Double(ringSteps)
-            let hex =
-                "#"
-                + [color.red, color.green, color.blue]
-                .map {
-                    let byte = Int(($0 * scale * 255).rounded())
-                    return String(format: "%02X", byte)
-                }
-                .joined()
-            if holdsLightRing(hex) { return hex }
+            if let hex = scaled(drawn, by: scale), holdsLightRing(hex) {
+                return hex
+            }
         }
-        return lightInkHex
+        return "#000000"
+    }
+
+    /// `hex` with each channel multiplied by `scale`, opaque.
+    static func scaled(_ hex: String, by scale: Double) -> String? {
+        guard let color = HexColor.parse(hex) else { return nil }
+        let bytes = [color.red, color.green, color.blue].map {
+            String(format: "%02X", Int(($0 * scale * 255).rounded()))
+        }
+        return "#" + bytes.joined()
     }
 
     private static let ringSteps = 40
-    /// `SettingsTheme.lightInk`, for a ring that names no colour.
-    private static let lightInkHex = "#2B3B31"
 }

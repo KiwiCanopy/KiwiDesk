@@ -19,7 +19,8 @@ extension HomeCardPlate {
             ink: SettingsTheme.lightInk,
             base: SettingsTheme.lightPlate,
             ground: .light,
-            focus: Color(kiwiHex: lightRingHex(settings))
+            focus: lightRingHex(settings).map(Color.init(kiwiHex:))
+                ?? SettingsTheme.lightInk
         )
     }
 
@@ -57,7 +58,7 @@ extension SchematicPalette {
 }
 
 /// Writes a picture's plate paint into `schematicPalette`: the
-/// picture's one writer, so every mark on it reads one verdict.
+/// picture's one writer, so every mark on it reads one paint.
 private struct PlatePaintWriter: ViewModifier {
     let settings: TilingSettings
     var alwaysDark = false
@@ -101,8 +102,8 @@ extension View {
 
     /// Draws the picture on its plate, `shape`, in the paint
     /// resolved for `settings` (#2859); `edged` strokes the
-    /// plate's inset edge over it. `alwaysDark` skips the verdict:
-    /// Home's cards, in both modes (#3040).
+    /// plate's inset edge over it. `alwaysDark` keeps the dark plate
+    /// in both modes: Home's cards (#3040).
     func deskPlate(
         _ settings: TilingSettings,
         in shape: some InsettableShape,

@@ -5,7 +5,7 @@ import SwiftUI
 /// The light plate's pins (#2859 ruling 3), kept here for the
 /// main suite's length (§2.1): fixed in both modes for
 /// `previewPlate`'s reason — the window's appearance never
-/// repaints a plate, the look's verdict picks which one draws.
+/// repaints a plate token; `HomeCardPlate.palette` picks which draws.
 extension SettingsThemeTokenTests {
     static let lightPlatePins: [Pin] = [
         Pin("lightPlate", 0xDF_E6_DC, 0xDF_E6_DC, SettingsTheme.lightPlate),

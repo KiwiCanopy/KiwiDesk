@@ -31,7 +31,7 @@ struct HomeCardPaletteWiringTests {
                 ".deskPlate(settings,in:Rectangle(),alwaysDark:true)"
             )
         )
-        // The one writer behind every plate, from the verdict.
+        // The one writer behind every plate.
         #expect(
             try squashed("HomeCardPlate+Ground.swift").contains(
                 "content.environment(\\.schematicPalette,alwaysDark"
@@ -133,7 +133,7 @@ struct HomeCardPaletteWiringTests {
     /// Each floor's ground derives from the shipped plate token,
     /// not from a dated copy of its hex: retune `previewPlate`,
     /// `lightPlate` or `lightOutline` and this reds until the
-    /// verdict's hex follows (architect + code review,
+    /// ring's hex follows (architect + code review,
     /// 2026-08-09; #2859).
     @Test("the floors' grounds match the plate tokens")
     @MainActor

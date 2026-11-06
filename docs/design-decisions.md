@@ -10955,9 +10955,8 @@ options previewed gave Home's small cards no shape: a pale band on
 a white card reads as nothing, and the light plate sits below the
 page. A short dark band is a card's picture, where large dark
 pictures on Simple read as holes, which is #2859's objection and
-stands there. So Home passes `alwaysDark`, Simple and every other
-host keep the verdict, and switching between the two pages changes
-the ground. The page moves to `F1F3ED`, the darkest that keeps
+stands there. So Home passes `alwaysDark`, and switching between
+Home and Simple changes the ground. The page moves to `F1F3ED`, the darkest that keeps
 `ink3` at its floor, and `hairline` to `D6DCD1` so a white card has
 an edge on it.
 :::
@@ -10970,6 +10969,9 @@ broke the page more than a slightly different ring misreports a look.
 So `holdsLightPlate` is gone: a ring that fails on the plate is
 darkened just far enough to hold (`lightRingHex`), keeping its hue,
 and the bars keep the look's own colours, as they do on a real desk.
+That also retires #2859's floor on a look's ink against its own bar:
+a saved look whose ink sinks into its fill draws that way here, as it
+does on the desk.
 :::
 
 **Settings is one surface: depth grows in place, never by a
