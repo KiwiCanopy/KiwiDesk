@@ -107,13 +107,15 @@ struct DesktopDepartureStandDownTests {
         #expect(
             core.eventLoop.closeReturnRaiseStandsDown(
                 after: destroy,
-                departedWithDesktop: true
+                departedWithDesktop: true,
+                movedWithoutFocus: false
             )
         )
         #expect(
             !core.eventLoop.closeReturnRaiseStandsDown(
                 after: destroy,
-                departedWithDesktop: false
+                departedWithDesktop: false,
+                movedWithoutFocus: false
             )
         )
     }
@@ -147,6 +149,68 @@ struct DesktopDepartureStandDownTests {
         core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
         let decision = log.first { $0.contains("close-return: removed") }
         #expect(decision?.contains("departed=false") == true)
+        #expect(decision?.contains("standsDown=false") == true)
+    }
+
+    /// The fold's focus loss reads the slot, so a window beside a
+    /// travelling anchor reads as losing it (#2888).
+    @Test("A verb's move of a window beside the anchor keeps the focus")
+    func moveBesideTheAnchorStandsDown() {
+        let core = makeCore()
+        defer { NativeSpaces.spacesOverride = nil }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(11) }
+        let traveler = WindowID(3)
+        core.state.workspaces.ensureSpace(SpaceID("2"))
+        core.state.windows.upsert(
+            ManagedWindow(
+                id: traveler,
+                pid: 3,
+                appName: "App3",
+                isFloating: true,
+                stickyScope: .global
+            )
+        )
+        core.state.workspaces.add(traveler, to: SpaceID("2"))
+        core.state.workspaces.focus(traveler, in: SpaceID("2"))
+        #expect(core.focusedWindowID == traveler)
+        core.recordDesktopMoveDeparture(WindowID(1), targetIsCurrent: false)
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
+        let decision = log.first { $0.contains("close-return: removed") }
+        #expect(decision?.contains("departed=false") == true)
+        #expect(decision?.contains("standsDown=true") == true)
+        #expect(core.focusedWindowID == traveler)
+    }
+
+    /// An earlier window of a burst hands the next one the focus
+    /// after its verb ran, so the answer is the vanish's (#2888).
+    @Test("A burst's second window owes the raise it inherited")
+    func burstInheritsTheRaise() {
+        let core = makeCore()
+        defer { NativeSpaces.spacesOverride = nil }
+        core.desktopMemory.readWindowSpace = { _ in .hosted(11) }
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: WindowID(3), pid: 3, appName: "App3")
+            )
+        )
+        core.state.workspaces.focus(WindowID(1), in: SpaceID(1))
+        for raw: UInt32 in [1, 2, 3] {
+            core.recordDesktopMoveDeparture(
+                WindowID(raw),
+                targetIsCurrent: false
+            )
+        }
+        core.handle(.windowDestroyed(WindowID(1), wasMinimized: false))
+        let inherited = core.focusedWindowID
+        #expect(inherited != nil && inherited != WindowID(1))
+        var log: [String] = []
+        core.onLog = { log.append($0) }
+        core.handle(
+            .windowDestroyed(inherited ?? WindowID(2), wasMinimized: false)
+        )
+        let decision = log.first { $0.contains("close-return: removed") }
         #expect(decision?.contains("standsDown=false") == true)
     }
 

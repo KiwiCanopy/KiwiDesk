@@ -577,7 +577,7 @@ editing AX code:
   rather than race the frontmost app macOS itself picks
   (`HiddenAppRaiseTests` holds the event classification; since
   #935 the hide is one arm of
-  `EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`,
+  `EventLoop.closeReturnRaiseStandsDown`,
   whose raise site `CloseReturnStandDownWiringTests` pins — a needle,
   because no decision line names which site asked the predicate).
 

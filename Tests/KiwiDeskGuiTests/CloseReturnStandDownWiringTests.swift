@@ -67,7 +67,7 @@ struct CloseReturnStandDownWiringTests {
         let text = try eventsSource()
         // First match is the shared local's DEFINITION (the
         // raise's own condition repeats the phrase a few lines
-        // later, past the predicate's two-argument call since
+        // later, past the predicate's call since
         // #1345), so the 400-char window spans definition and
         // raise condition together. The trade of the wider
         // window: the trailing arm's own spelling sits ~600 chars

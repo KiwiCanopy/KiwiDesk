@@ -616,8 +616,8 @@ every lens with why it cannot turn on.
 | | `move_to_space` | space id |
 | | `move_to_space_and_follow` | space id |
 | | `focus_desktop` | Desktop number, counted across every screen ([which count](spaces-and-desktops.md#a-desktop-has-two-numbers)) |
-| | `move_to_desktop` | Desktop number, [space id] — moves the focused window there; you stay. `space id` names the Space it lands in |
-| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the focused window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
+| | `move_to_desktop` | Desktop number, [space id] — moves the window there; you stay. `space id` names the Space it lands in |
+| | `move_to_desktop_and_follow` | Desktop number, [space id] — moves the window there, switches with it and keeps keyboard focus on it. `space id` names the Space it lands in |
 | | `move_space_to_display` | space id, display index or name |
 | | `pin_space_to_display` | space id, display index or name |
 | | `create_space` | space id, [mode] — see [`create_space`](lua-reference.md#create_space) |
@@ -841,6 +841,13 @@ is opened. See [move_here](lua-reference.md#move_here).
 argument, a window `id` from `get_state`: they then act on that
 window rather than the focused one, and refuse an id no managed
 window carries (`kiwidesk make_floating 4711`).
+
+:::unreleased
+`move_to_desktop` and `move_to_desktop_and_follow` take the same
+window `id`, after the space id. Ahead of an id, an empty string
+leaves the space out: `kiwidesk move_to_desktop 3 "" 4711`. Neither
+moves a full-screen window or a pocket window, named or focused.
+:::
 
 `new_window` and `close_window` take the same optional window
 `id`. `new_window` presses that window's app's **File ▸ New

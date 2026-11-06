@@ -116,6 +116,27 @@ extension KiwiCore {
         return reason == .vanished && !moved
     }
 
+    /// Whether a removal is a move verb's departure of a window that
+    /// was not the focus anchor as its vanish folded (#2888): it was
+    /// named beside the focus, or the focus moved on ahead of a slow
+    /// destroy, so nothing is owed a hand-off. Asked at the vanish,
+    /// since an earlier window of a
+    /// burst can hand the window the focus after its verb ran, and
+    /// ahead of `departedWithDesktop`, which claims the record.
+    func movedWithoutFocus(
+        _ event: KiwiEvent,
+        reason: WindowGoneReason?,
+        anchorBeforeFold: WindowID?,
+        now: Date = Date()
+    ) -> Bool {
+        guard reason == .vanished, let id = event.goneWindowID,
+            id != anchorBeforeFold,
+            let recorded = desktopMoveDepartures[id]
+        else { return false }
+        return now.timeIntervalSince(recorded)
+            < Self.desktopMoveDepartureWindow
+    }
+
     /// How long a move verb's departure record may wait for its
     /// vanish: past a slow app's destroy (Electron's trailed the
     /// swipe by up to ~3 s on device, 2026-09-08), and the verb's

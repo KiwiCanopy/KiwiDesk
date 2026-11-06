@@ -506,6 +506,13 @@ KiwiDesk.move_to_desktop(3)
 KiwiDesk.move_to_desktop(3, "mail")
 ```
 
+:::unreleased
+Neither `move_to_desktop` nor `move_to_desktop_and_follow` moves a
+**full-screen** window or a **pocket** window, named or focused:
+each refuses and the window stays on its Desktop. Either verb can
+also [name the window](#move_to_desktop_and_follow).
+:::
+
 ### move_to_desktop_and_follow
 
 **Expects:** a macOS Desktop number, and optionally a space
@@ -541,6 +548,21 @@ Same requirement as `focus_desktop`.
 KiwiDesk.move_to_desktop_and_follow(3)
 KiwiDesk.move_to_desktop_and_follow(3, "mail")
 ```
+
+:::unreleased
+`move_to_desktop` and `move_to_desktop_and_follow` take an optional
+window id from [`get_state`](#get_state) after the space, and then
+move that window rather than the focused one. Pass `nil` for the
+space to leave it out: `KiwiDesk.move_to_desktop(3, nil, 4711)`.
+`KiwiDesk.move_to_desktop(3, 4711)` names Space 4711, not a window.
+An id no managed window carries is refused, a window on another
+Desktop included.
+
+A window moved this way changes no focus, except that one filed
+into the current Space on a Desktop already on screen takes focus
+there. The follow ends with keyboard focus on the window you named,
+and shows its Space.
+:::
 
 ### move_space_to_display
 
@@ -5813,7 +5835,13 @@ every marked window in does it take one out, the one put in last.
 
 Out of the pocket the window floats on every Space, as a
 [global sticky](#make_sticky) window does, and a move to another
-Space is refused with the same pill. It comes along when you switch
+Space is refused with the same pill.
+
+:::unreleased
+[`move_to_desktop`](#move_to_desktop) refuses it too.
+:::
+
+It comes along when you switch
 macOS Desktops whatever
 [`sticky.set_desktop_reach`](#stickyset_desktop_reach) says, in
 either state, where KiwiDesk can drive Desktops. Move and resize it

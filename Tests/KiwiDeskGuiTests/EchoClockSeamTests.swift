@@ -184,7 +184,7 @@ struct EchoClockSeamTests {
         "MoveIntentLatch.swift": 2,  // debt: callers default
         "KiwiCore+DesktopSettle.swift": 1,  // param
         "EventLoop+Tabs.swift": 1,  // param
-        "KiwiCore+GoneReason.swift": 3,  // param ×2, debt
+        "KiwiCore+GoneReason.swift": 4,  // param ×3, debt
         "KiwiCore+WakeFocus.swift": 2,  // param, debt
         "KiwiCore+Teardown.swift": 2,  // stamp: a 1 s spin deadline
         "SleepWakeManager.swift": 1,  // stamp: a snapshot's age
