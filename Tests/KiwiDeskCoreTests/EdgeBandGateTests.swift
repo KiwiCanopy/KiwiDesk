@@ -60,6 +60,7 @@ struct EdgeBandGateTests {
     func belowOffsetBandsTheUncovered() {
         let below = other(800, 1117)
         #expect(edges(window(x: 16, y: 641), beside: below).bottom)
+        #expect(edges(window(x: 16, y: 641), beside: below).right)
         #expect(edges(window(x: 514, y: 641), beside: below).bottom)
         #expect(!edges(window(x: 1012, y: 641), beside: below).bottom)
     }
@@ -81,6 +82,7 @@ struct EdgeBandGateTests {
         #expect(edges(window(x: 1012, y: 50), beside: low).right)
         #expect(edges(window(x: 1012, y: 328), beside: low).right)
         #expect(!edges(window(x: 1012, y: 641), beside: low).right)
+        #expect(edges(window(x: 1012, y: 641), beside: low).bottom)
     }
 
     /// Two neighbours sharing a span are not measured: the lift stays.
@@ -97,6 +99,25 @@ struct EdgeBandGateTests {
             separateSpaces: false
         )
         #expect(bands.first { $0.screen == laptop }?.bottom == true)
+    }
+
+    /// Not measured: the covering screen does not excuse another.
+    @Test("A third screen past the edge keeps the band beside a cover")
+    func thirdScreenKeepsTheBand() {
+        let bands = EdgeBandWrite.bands(
+            of: [laptop, other(0, 1117), other(3200, 400)],
+            for: window(x: 16, y: 641),
+            separateSpaces: false
+        )
+        #expect(bands.first { $0.screen == laptop }?.bottom == true)
+    }
+
+    /// Only a screen touching the edge covers: this one leaves a gap.
+    @Test("A screen clear of the edge covers nothing")
+    func gapCoversNothing() {
+        #expect(edges(window(x: 16, y: 641), beside: other(0, 1200)).bottom)
+        let far = other(1800, 0)
+        #expect(edges(window(x: 1012, y: 50), beside: far).right)
     }
 
     @Test("Separate Spaces has no band on either edge")

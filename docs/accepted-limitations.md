@@ -112,8 +112,8 @@ class — see
 
 :::unreleased
 With "Displays have separate Spaces" off and a second screen reaching
-past a screen's bottom or right edge, a tiled window near that edge jumps
-about 30 to 40 pt and back on a small resize, unless a neighbouring screen
+past a screen's bottom or right edge, a window near that edge jumps up to
+about 32 pt and back on a small resize, unless a neighbouring screen
 sits beside the window's whole length there. macOS refuses the size
 otherwise, and a refused size leaves the window stuck
 ([#2966](https://github.com/KiwiCanopy/KiwiDesk/issues/2966)). No escape

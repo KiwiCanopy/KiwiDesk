@@ -20,9 +20,11 @@ struct EdgeBand: Equatable, Sendable {
 /// A band exists only with "Displays have separate Spaces" off, where
 /// another screen reaches past that edge line and the window's span
 /// along it is not wholly beside one neighbour on that edge (#2966;
-/// Firefox and Finder alike, bare AX, five arrangements of two screens
-/// under each setting, 2026-11-05/06). Two neighbours sharing a span
-/// are not measured, so they keep the band.
+/// Firefox and Finder alike, bare AX, a 700 x 460 window 16 pt inside
+/// the edge, five arrangements of two screens under each setting,
+/// 2026-11-05/06). Not measured, so they keep the band: two neighbours
+/// sharing a span, and a third screen past the edge beside a covering
+/// neighbour.
 enum EdgeBandWrite {
     /// How far inside a screen's bottom or right edge a shrink is
     /// refused: measured ~19 pt, escaped from ~25 pt, set wider so
@@ -38,18 +40,20 @@ enum EdgeBandWrite {
         guard !separateSpaces else { return [] }
         return screens.compactMap { screen in
             let others = screens.filter { $0 != screen }
-            let bottom =
-                others.contains { $0.maxY > screen.maxY }
-                && !others.contains {
-                    abs($0.minY - screen.maxY) <= 1
-                        && $0.minX <= frame.minX && $0.maxX >= frame.maxX
-                }
-            let right =
-                others.contains { $0.maxX > screen.maxX }
-                && !others.contains {
-                    abs($0.minX - screen.maxX) <= 1
-                        && $0.minY <= frame.minY && $0.maxY >= frame.maxY
-                }
+            let below = others.first {
+                abs($0.minY - screen.maxY) <= 1
+                    && $0.minX <= frame.minX && $0.maxX >= frame.maxX
+            }
+            let beside = others.first {
+                abs($0.minX - screen.maxX) <= 1
+                    && $0.minY <= frame.minY && $0.maxY >= frame.maxY
+            }
+            let bottom = others.contains {
+                $0 != below && $0.maxY > screen.maxY
+            }
+            let right = others.contains {
+                $0 != beside && $0.maxX > screen.maxX
+            }
             guard bottom || right else { return nil }
             return EdgeBand(screen: screen, bottom: bottom, right: right)
         }
