@@ -172,6 +172,17 @@ struct ShadowWindowTests {
         #expect(verdict(loop, elements, box, 0) == .window)
     }
 
+    @Test("a sibling still listed is in no transition")
+    func listedSiblingIsNoTransition() {
+        let tracked = traits(1, buttons: false, children: 0)
+        let frameless = traits(2, buttons: false, children: 0)
+        let (loop, elements, box) = makeLoop([tracked, frameless])
+        loop.elements[pid] = [tracked.id: elements[0]]
+        // In full screen and listed: no beat to stand in for.
+        loop.detectedFullscreen[tracked.id] = true
+        #expect(verdict(loop, elements, box, 1) == .window)
+    }
+
     @Test("an unanswered read beside a tracked window still waits")
     func unreadPastLaunchStillWaits() {
         let tracked = traits(1, buttons: true, children: 6)

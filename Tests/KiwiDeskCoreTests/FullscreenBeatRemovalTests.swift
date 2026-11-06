@@ -169,6 +169,45 @@ struct FullscreenBeatRemovalTests {
         #expect(box.destroyed.map(\.id) == [WindowID(12)])
     }
 
+    @Test("a census episode with no sweep in the beat ends past it")
+    func censusEpisodeEndsWithOneArmSpent() {
+        let (loop, box) = makeLoop()
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        loop.detectedFullscreen[WindowID(12)] = false
+        var now = Date(timeIntervalSince1970: 1_000)
+        loop.wallClock = { now }
+        loop.compositorHostsNowhere = { _ in false }
+        box.listed = []
+        box.census = [pid: [WindowID(12)]]
+        loop.lastDesktopChange = .distantPast
+        loop.reconcile(pid: pid, app: ref)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+        _ = loop.drainPendingRemovalRecheck()
+        loop.compositorHostsNowhere = { _ in true }
+        box.census = [:]
+        // With arms left, only the beat can end it.
+        now += EventLoop.hostedNowhereBeat
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.destroyed.map(\.id) == [WindowID(12)])
+    }
+
+    @Test("an entry's longest measured beat is still believed")
+    func beatCoversAMeasuredEntry() {
+        let (loop, box) = makeLoop()
+        loop.elements[pid] = [WindowID(12): dummyElement]
+        loop.detectedFullscreen[WindowID(12)] = false
+        var now = Date(timeIntervalSince1970: 1_000)
+        loop.wallClock = { now }
+        loop.compositorHostsNowhere = { _ in true }
+        box.listed = []
+        box.census = [:]
+        loop.reconcile(pid: pid, app: ref)
+        // 512 ms, the longest of six entries (device, 2026-11-06).
+        now += 0.512
+        loop.reconcile(pid: pid, app: ref)
+        #expect(box.destroyed.isEmpty)
+    }
+
     @Test("nowhere past the beat is a close, one recheck late")
     func hostedNowhereEndsAtTheBeat() {
         let (loop, box) = makeLoop()
@@ -238,6 +277,8 @@ struct FullscreenBeatRemovalTests {
         loop.elements[pid] = [WindowID(12): dummyElement]
         loop.detectedFullscreen[WindowID(12)] = false
         loop.compositorHostsNowhere = { _ in true }
+        let frozen = Date(timeIntervalSince1970: 1_000)
+        loop.wallClock = { frozen }
         box.listed = []
         box.census = [:]
         loop.reconcile(pid: pid, app: ref)
