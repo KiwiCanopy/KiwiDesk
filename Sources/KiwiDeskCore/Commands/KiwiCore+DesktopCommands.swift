@@ -181,8 +181,9 @@ extension KiwiCore {
             {
                 return .refused(
                     .fail(
-                        "Can't move a window across screens "
-                            + "to a hidden Desktop."
+                        "Screens can only be crossed through the "
+                            + "visible Desktop. Cross there first, then "
+                            + "move the window."
                     )
                 )
             }
