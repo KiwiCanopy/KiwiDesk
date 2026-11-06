@@ -17,6 +17,9 @@ struct EdgeBandRightEdgeTests {
     private let screen = CGRect(x: 0, y: 0, width: 1728, height: 1117)
     private let upper = CGRect(x: 872, y: 16, width: 840, height: 566)
     private let wide = CGRect(x: 866, y: 16, width: 846, height: 566)
+    private var band: EdgeBand {
+        EdgeBand(screen: screen, bottom: true, right: true)
+    }
 
     /// An app answering as macOS did on the device: each axis of a
     /// size write is refused while the window's far edge AND the
@@ -65,13 +68,17 @@ struct EdgeBandRightEdgeTests {
         AXUIElementCreateApplication(getpid())
     }
 
-    @Test("A frame ending near a screen's right edge names that screen")
+    @Test("A frame ending near a screen's right edge names its band")
     func screenNearTheRight() {
-        let near = { EdgeBandWrite.screen(for: $0, among: [self.screen]) }
-        #expect(near(upper) == screen)
+        let near = { EdgeBandWrite.band(for: $0, among: [self.band]) }
+        #expect(near(upper) == band)
         #expect(near(upper.offsetBy(dx: -200, dy: 0)) == nil)
-        let below = screen.offsetBy(dx: 0, dy: screen.height)
-        #expect(EdgeBandWrite.screen(for: upper, among: [below]) == nil)
+        let below = EdgeBand(
+            screen: screen.offsetBy(dx: 0, dy: screen.height),
+            bottom: true,
+            right: true
+        )
+        #expect(EdgeBandWrite.band(for: upper, among: [below]) == nil)
     }
 
     @Test("A width shrink moves the window left and keeps its top")
@@ -79,7 +86,7 @@ struct EdgeBandRightEdgeTests {
         let origin = EdgeBandWrite.liftedOrigin(
             target: upper,
             current: wide,
-            screen: screen
+            band: band
         )
         #expect(origin == CGPoint(x: 1728 - EdgeBandWrite.band - 846, y: 16))
     }
@@ -92,7 +99,7 @@ struct EdgeBandRightEdgeTests {
         let origin = EdgeBandWrite.liftedOrigin(
             target: upper,
             current: other,
-            screen: screen
+            band: band
         )
         #expect(origin == CGPoint(x: 1728 - EdgeBandWrite.band - 846, y: 16))
     }
@@ -106,7 +113,7 @@ struct EdgeBandRightEdgeTests {
         let lifted = EdgeBandWrite.liftedOrigin(
             target: CGRect(x: 872, y: 606.5, width: 840, height: 494.5),
             current: hanging,
-            screen: screen
+            band: band
         )
         #expect(lifted?.x == 0)
         #expect(lifted?.y == 1117 - EdgeBandWrite.band - 501)
@@ -137,7 +144,9 @@ struct EdgeBandRightEdgeTests {
         let element = element
         applier.elementProvider = { _ in element }
         applier.writer = app.writer
-        applier.screenFrames = { [screen] in [screen] }
+        applier.screenFrames = { [screen] in
+            [screen, screen.offsetBy(dx: screen.width, dy: screen.height)]
+        }
         let id = WindowID(1)
         switch door {
         case .animated:

@@ -88,4 +88,19 @@ struct EdgeBandWriteSeamTests {
             )
         }
     }
+
+    @Test("the engine wires macOS's separate Spaces answer (#2966)")
+    func engineWiresSeparateSpaces() throws {
+        // A value test cannot red: the unwired default equals the
+        // answer on a Mac with the setting off.
+        let engine = try SourceScan.strippedSource(
+            at: Self.root.appendingPathComponent(
+                "Sources/KiwiDeskCore/Tiling/TilingEngine.swift"
+            )
+        )
+        let wire =
+            "applier.separateSpaces = { "
+            + "NSScreen.screensHaveSeparateSpaces }"
+        #expect(engine.occurrences(of: wire) == 1)
+    }
 }

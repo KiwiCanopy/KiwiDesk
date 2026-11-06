@@ -16,9 +16,8 @@ final class HeldWrites: @unchecked Sendable {
     struct Entry: Equatable {
         var frame: CGRect
         var setSize: Bool
-        /// The screen whose edge band the size write clears
-        /// (#2894).
-        var band: CGRect? = nil
+        /// The edge band the size write clears (#2894, #2966).
+        var band: EdgeBand? = nil
         /// A floating resize's write (#2981).
         var lead: SizeLedWrite.Lead? = nil
     }
@@ -75,7 +74,7 @@ final class HeldWrites: @unchecked Sendable {
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool,
-        band: CGRect? = nil,
+        band: EdgeBand? = nil,
         lead: SizeLedWrite.Lead? = nil,
         now: DispatchTime = .now()
     ) -> Staging {
@@ -168,7 +167,7 @@ extension FrameApplier {
         _ id: WindowID,
         _ frame: CGRect,
         setSize: Bool,
-        band: CGRect? = nil,
+        band: EdgeBand? = nil,
         lead: SizeLedWrite.Lead? = nil
     ) -> Bool {
         switch held.stage(

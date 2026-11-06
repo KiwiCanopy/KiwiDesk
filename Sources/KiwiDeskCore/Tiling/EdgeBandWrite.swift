@@ -1,35 +1,80 @@
 import ApplicationServices
 import CoreGraphics
 
+/// Which edges of `screen` refuse a small shrink of the frame it was
+/// asked for (#2966): a verdict about that frame's span, not the desk.
+struct EdgeBand: Equatable, Sendable {
+    let screen: CGRect
+    let bottom: Bool
+    let right: Bool
+}
+
 /// A shrink near a screen's bottom or right edge, written from
 /// clear of that edge (#2894). macOS refuses a small shrink of a
 /// window whose bottom ends within ~19 pt of its screen's bottom,
 /// or whose right side ends within ~16 pt of its screen's right,
 /// while the app's `AXEnhancedUserInterface` is off, as KiwiDesk
-/// holds it while writing, and another screen reaches past that
-/// edge (macOS 27, Firefox and Finder, measured 2026-11-01/02).
-/// A resize keeps the top-left corner, so only these two edges
-/// move. The band applies whatever the neighbours: where along an
-/// edge macOS refuses depends on their extent, which no gate here
-/// models. AX frames: y grows down.
+/// holds it while writing (macOS 27, Firefox and Finder, measured
+/// 2026-11-01/02). A resize keeps the top-left corner, so only
+/// these two edges move. AX frames: y grows down.
+///
+/// A band exists only with "Displays have separate Spaces" off, where
+/// another screen reaches past that edge line and the window's span
+/// along it is not wholly beside one neighbour on that edge (#2966;
+/// Firefox and Finder alike, bare AX, a 700 x 460 window 16 pt inside
+/// the edge, five arrangements of two screens under each setting,
+/// 2026-11-05/06). Overhangs and arrivals onto a covered target land
+/// without a lift too, as `setFrame`'s size, position, size. Not
+/// measured, so they keep the band: two neighbours sharing a span, and
+/// a third screen past the edge beside a covering neighbour.
 enum EdgeBandWrite {
     /// How far inside a screen's bottom or right edge a shrink is
     /// refused: measured ~19 pt, escaped from ~25 pt, set wider so
     /// a band that differs by setup still clears.
     static let band: CGFloat = 32
 
-    /// The whole frame of the screen whose bottom or right edge
-    /// `frame` ends near, or nil.
-    static func screen(
+    /// The screens with an edge refusing `frame`, each naming which.
+    static func bands(
+        of screens: [CGRect],
         for frame: CGRect,
-        among screens: [CGRect]
-    ) -> CGRect? {
-        screens.first { screen in
+        separateSpaces: Bool
+    ) -> [EdgeBand] {
+        guard !separateSpaces else { return [] }
+        return screens.compactMap { screen in
+            let others = screens.filter { $0 != screen }
+            let below = others.first {
+                abs($0.minY - screen.maxY) <= 1
+                    && $0.minX <= frame.minX && $0.maxX >= frame.maxX
+            }
+            let beside = others.first {
+                abs($0.minX - screen.maxX) <= 1
+                    && $0.minY <= frame.minY && $0.maxY >= frame.maxY
+            }
+            let bottom = others.contains {
+                $0 != below && $0.maxY > screen.maxY
+            }
+            let right = others.contains {
+                $0 != beside && $0.maxX > screen.maxX
+            }
+            guard bottom || right else { return nil }
+            return EdgeBand(screen: screen, bottom: bottom, right: right)
+        }
+    }
+
+    /// The band whose refusing edge `frame` ends near, or nil.
+    static func band(
+        for frame: CGRect,
+        among bands: [EdgeBand]
+    ) -> EdgeBand? {
+        bands.first { band in
+            let screen = band.screen
             let bottom =
-                frame.midX >= screen.minX && frame.midX < screen.maxX
+                band.bottom
+                && frame.midX >= screen.minX && frame.midX < screen.maxX
                 && ends(frame.maxY, near: screen.maxY)
             let right =
-                frame.midY >= screen.minY && frame.midY < screen.maxY
+                band.right
+                && frame.midY >= screen.minY && frame.midY < screen.maxY
                 && ends(frame.maxX, near: screen.maxX)
             return bottom || right
         }
@@ -40,42 +85,47 @@ enum EdgeBandWrite {
     }
 
     /// Where to move the window before its size is written, with
-    /// its `current` frame clear of the band and on `screen`; nil
+    /// its `current` frame clear of `band` and on its screen; nil
     /// where no size write would be refused or no move clears it.
     /// A size write lands from the window's current corner, so an
     /// axis is refused only when that write ends in its band — a
     /// later frame of a long shrink, never its first — or when the
     /// window arrives from another screen. An axis that needs no
     /// move keeps its coordinate, or on an arrival takes the
-    /// target's, either clamped so the current length is on
-    /// `screen`: a window hanging over onto a neighbouring screen
+    /// target's, either clamped so the current length is on the
+    /// screen: a window hanging over onto a neighbouring screen
     /// takes no size write at all.
     static func liftedOrigin(
         target: CGRect,
         current: CGRect,
-        screen: CGRect
+        band: EdgeBand
     ) -> CGPoint? {
+        let screen = band.screen
         let arriving = !screen.contains(
             CGPoint(x: current.midX, y: current.midY)
         )
-        let x = clear(
-            current.minX,
-            current.width,
-            to: target.minX,
-            target.width,
-            within: screen.minX,
-            screen.maxX,
-            arriving: arriving
-        )
-        let y = clear(
-            current.minY,
-            current.height,
-            to: target.minY,
-            target.height,
-            within: screen.minY,
-            screen.maxY,
-            arriving: arriving
-        )
+        let x =
+            band.right
+            ? clear(
+                current.minX,
+                current.width,
+                to: target.minX,
+                target.width,
+                within: screen.minX,
+                screen.maxX,
+                arriving: arriving
+            ) : nil
+        let y =
+            band.bottom
+            ? clear(
+                current.minY,
+                current.height,
+                to: target.minY,
+                target.height,
+                within: screen.minY,
+                screen.maxY,
+                arriving: arriving
+            ) : nil
         guard x != nil || y != nil else { return nil }
         func kept(
             _ now: CGFloat,
@@ -129,23 +179,23 @@ enum EdgeBandWrite {
     /// newer frame's, else the waiting one's where the newer frame
     /// still ends in it, since the waiting write never ran.
     static func mergedBand(
-        newer: CGRect?,
-        waiting: CGRect?,
+        newer: EdgeBand?,
+        waiting: EdgeBand?,
         frame: CGRect
-    ) -> CGRect? {
-        newer ?? waiting.flatMap { screen(for: frame, among: [$0]) }
+    ) -> EdgeBand? {
+        newer ?? waiting.flatMap { band(for: frame, among: [$0]) }
     }
 
-    /// Writes `frame` through `writer`, moved first where the band
-    /// of `screen` would refuse its size; runs on the app's frame
-    /// queue. A nil `screen` is the plain write.
+    /// Writes `frame` through `writer`, moved first where `band`
+    /// would refuse its size; runs on the app's frame queue. A nil
+    /// `band` is the plain write.
     static func write(
         _ frame: CGRect,
         _ element: AXUIElement,
-        nearEdgeOf screen: CGRect?,
+        nearEdgeOf band: EdgeBand?,
         writer: FrameWriter
     ) {
-        lift(frame, element, nearEdgeOf: screen, writer: writer)
+        lift(frame, element, nearEdgeOf: band, writer: writer)
         writer.setFrame(frame, element)
     }
 
@@ -153,15 +203,15 @@ enum EdgeBandWrite {
     static func lift(
         _ frame: CGRect,
         _ element: AXUIElement,
-        nearEdgeOf screen: CGRect?,
+        nearEdgeOf band: EdgeBand?,
         writer: FrameWriter
     ) {
-        if let screen,
+        if let band,
             let current = writer.frame(element),
             let origin = liftedOrigin(
                 target: frame,
                 current: current,
-                screen: screen
+                band: band
             )
         {
             writer.setPosition(origin, element)
