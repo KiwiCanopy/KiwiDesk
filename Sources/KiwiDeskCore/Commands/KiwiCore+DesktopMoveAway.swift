@@ -44,6 +44,7 @@ extension KiwiCore {
         )
         guard follow else {
             armMoveReap(pid: away.pid)
+            oweFocusIfVacant(away.id, to: target)
             return .ok()
         }
         let outcome = switchDesktop(
@@ -75,6 +76,27 @@ extension KiwiCore {
             armMoveReap(pid: away.pid)
         }
         return outcome.response
+    }
+
+    /// A window arriving in the active Space where nothing holds the
+    /// focus takes it from the fold in state alone, which would fail
+    /// the next focused verb's #292 preflight, so it owes the raise.
+    private func oweFocusIfVacant(
+        _ window: WindowID,
+        to target: DesktopTarget
+    ) {
+        guard target.isCurrent,
+            let active = state.workspaces.activeSpace,
+            state.rememberedSpace(of: window) == active,
+            state.workspaces[active]?.focused == nil
+        else { return }
+        jump.owe(
+            window,
+            in: active,
+            at: wallClock(),
+            relocates: true,
+            hopped: true
+        )
     }
 
     /// What refuses an away window before anything moves. A follow

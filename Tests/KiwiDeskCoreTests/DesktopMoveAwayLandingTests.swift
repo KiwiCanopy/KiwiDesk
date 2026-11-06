@@ -261,6 +261,39 @@ struct DesktopMoveAwayLandingTests {
         )
     }
 
+    // MARK: - The focus
+
+    /// The fold grants the focus in state alone, so without the debt
+    /// the next focused verb refuses at the #292 preflight (device,
+    /// 2026-11-06).
+    @Test("an arrival in a Space with no focus owes the raise")
+    func vacantOwesTheRaise() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("focus_space", args: [.string("mail")]).isSuccess)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .string("mail"), id]
+            ).isSuccess
+        )
+        #expect(core.jump.take(arrived: away) != nil)
+    }
+
+    @Test("an arrival beside a focus owes nothing")
+    func occupiedOwesNothing() {
+        let core = makeCore()
+        defer { teardown() }
+        let active = core.state.workspaces.activeSpace!
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(1), .string(active.raw), id]
+            ).isSuccess
+        )
+        #expect(core.jump.take(arrived: away) == nil)
+    }
+
     // MARK: - The follow
 
     @Test("a follow to a hidden Desktop owes the focus")

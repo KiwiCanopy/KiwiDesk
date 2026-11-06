@@ -572,8 +572,9 @@ into the current Space on a Desktop already on screen takes focus
 there. The follow ends with keyboard focus on the window you named,
 and shows its Space.
 
-A window on a hidden Desktop joins its Space when it arrives. A
-sticky one refuses a named Space, and the follow refuses a minimized
+A window on a hidden Desktop joins its Space when it arrives, and
+takes focus only if that is the current Space and nothing there holds
+it. A sticky one refuses a named Space, and the follow refuses a minimized
 or hidden one, since it could not take focus. With *Displays have
 separate Spaces* off it cannot [cross screens](#move_to_desktop) while
 hidden: bring it to the visible Desktop first.
