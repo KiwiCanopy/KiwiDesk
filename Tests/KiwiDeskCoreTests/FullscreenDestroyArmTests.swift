@@ -132,6 +132,27 @@ struct FullscreenDestroyArmTests {
         #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
     }
 
+    @Test("a window hosted nowhere defers too (#2935)")
+    func hostedNowhereDestroyDefersToTheSweep() {
+        let (loop, box, pid) = makeOwnLoop()
+        let element = dummyElement
+        loop.detectedFullscreen[WindowID(12)] = false
+        loop.compositorHostsNowhere = { $0 == WindowID(12) }
+        loop.elements[pid] = [WindowID(12): element]
+        box.listed = []
+        box.census = [:]
+        loop.lastDesktopChange = .distantPast
+        loop.handle(
+            kAXUIElementDestroyedNotification,
+            element,
+            pid: pid,
+            app: own
+        )
+        #expect(box.destroyed.isEmpty)
+        #expect(loop.elements[pid]?[WindowID(12)] != nil)
+        #expect(loop.removalDistrusted[WindowID(12)]?.arms == 1)
+    }
+
     @Test("a window no arm expects destroys eagerly")
     func plainDestroyIsEager() {
         let (loop, box, pid) = makeOwnLoop()

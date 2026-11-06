@@ -140,6 +140,29 @@ struct ShadowWindowTests {
         #expect(box.retracks == 0)
     }
 
+    @Test("a shell during a sibling's fullscreen transition never tiles")
+    func shellInATransitionIsNoTile() {
+        let tracked = traits(1, buttons: true, children: 6)
+        let placeholder = traits(2, buttons: false, children: 0)
+        let (loop, elements, box) = makeLoop([placeholder])
+        loop.elements[pid] = [tracked.id: elements[0]]
+        // The exit: the sibling left the list in this very read,
+        // ahead of the sweep that would open its episode.
+        loop.detectedFullscreen[tracked.id] = true
+        #expect(verdict(loop, elements, box, 0) == .shadow)
+        // A shadow: never a tab, and its focus reports dropped.
+        #expect(loop.shadows.holds(placeholder.id, pid: pid))
+        loop.shadows.clear(placeholder.id, pid: pid)
+        // The entry: hosted nowhere reads the same.
+        loop.detectedFullscreen[tracked.id] = false
+        loop.compositorHostsNowhere = { _ in true }
+        #expect(verdict(loop, elements, box, 0) == .shadow)
+        loop.shadows.clear(placeholder.id, pid: pid)
+        // No arm open: a plain frameless window, it tiles at once.
+        loop.compositorHostsNowhere = { _ in false }
+        #expect(verdict(loop, elements, box, 0) == .window)
+    }
+
     @Test("an unanswered read beside a tracked window still waits")
     func unreadPastLaunchStillWaits() {
         let tracked = traits(1, buttons: true, children: 6)

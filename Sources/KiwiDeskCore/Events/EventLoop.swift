@@ -121,17 +121,16 @@ public final class EventLoop {
     /// The open #1157 episodes (`RemovalEpisode`), on this clock.
     var removalDistrusted: [WindowID: RemovalEpisode] = [:]
     var wallClock: () -> Date = Date.init
-    /// The windows sticky reach has carried and still holds IN
-    /// FLIGHT (#1145) — the gate's carried arm reads it
-    /// (`EventLoop+RemovalDistrust`). Wired in `KiwiCore+Bootstrap`
-    /// to `KiwiCore.stickyReachInFlight`; the empty default keeps
-    /// every harness inert.
+    /// Windows sticky reach holds IN FLIGHT (#1145), for the gate's
+    /// carried arm. Wired in `KiwiCore+Bootstrap`, inert by default.
     var carriedWindows: () -> Set<WindowID> = { [] }
     /// The compositor hosts this window on a native fullscreen
-    /// Space — the removal gate's fullscreen ENTER arm (#1272).
-    /// Wired in `KiwiCore+Bootstrap`; the false default keeps
-    /// every harness inert.
+    /// Space — the gate's fullscreen ENTER arm (#1272). Wired in
+    /// `KiwiCore+Bootstrap`; the false default keeps harnesses inert.
     var fullscreenSpaceHosts: (WindowID) -> Bool = { _ in false }
+    /// The compositor hosts it on no Space — that arm's first beat
+    /// (#2935). Wired as above.
+    var compositorHostsNowhere: (WindowID) -> Bool = { _ in false }
     /// The Desktop-reach carry OWES this window a move: reach
     /// enabled, and the compositor hosts it on a user Desktop
     /// nobody shows — it left with its Desktop on a gesture and
