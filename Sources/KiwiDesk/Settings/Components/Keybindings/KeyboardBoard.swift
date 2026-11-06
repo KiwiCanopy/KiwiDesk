@@ -45,8 +45,8 @@ struct KeyboardBoard: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 10)
                     .strokeBorder(
-                        (palette ?? .unresolved).edge,
-                        lineWidth: 1
+                        (palette ?? .unresolved).boardEdge,
+                        lineWidth: (palette ?? .unresolved).boardEdgeWidth
                     )
             )
         }
