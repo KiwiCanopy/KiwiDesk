@@ -43,22 +43,6 @@ struct HoverLiftAdoptionTests {
         )
     }
 
-    /// An unselected Layouts tile lifts with a fill apart from the
-    /// selection, which is the stroke alone (#1173); the selected
-    /// tile stays flat (PaletteTile's shape, #2383).
-    @Test("a layout tile lifts; the selected one stays flat")
-    func layoutTileLifts() throws {
-        let strip = try squashed(
-            "Settings/Components/Layouts/LayoutStrip.swift"
-        )
-        #expect(strip.contains("hovered==mode&&isEnabled&&!selected"))
-        #expect(strip.contains(".fill(lifted?SettingsTheme."))
-        #expect(strip.contains(".onHover{insideinifinside{"))
-        // Selection is the stroke alone: no accent wash.
-        #expect(!strip.contains("SettingsTheme.accent.opacity("))
-        #expect(strip.contains(".strokeBorder(selected?SettingsTheme."))
-    }
-
     /// Revert and Save a copy wash like the count button beside
     /// them; the wash does not react while disabled, and the
     /// pointing hand stays a link's.

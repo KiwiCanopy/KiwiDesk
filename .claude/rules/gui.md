@@ -278,9 +278,10 @@ restated `20...80` satisfies on the day it is written.
   key frame, and always under Reduce Motion, never a bundled clip,
   with the gate named per call (`ReduceMotionGateTests`).
   `GestureAutoplayWiringTests` holds the click as the only
-  trigger. A strip picture's hover and click live in a sibling
-  overlay, `GestureStripHoverCue`, never in the view that draws
-  the picture, so a hover never re-renders it (#2537,
+  trigger. A strip picture's hover and click live in
+  `GestureStripHoverCue`, which holds the picture as a stored value,
+  never in the view that draws the picture, so a hover never
+  re-renders it (#2537, #3042,
   `GestureAutoplayWiringTests` ▸ `stripRests`, `GestureStripTests`
   ▸ `plateHoverCue`). An entry's sentence, picture, surface and pace live
   once, on `GestureItem`, which the entry and the strip both read
@@ -1287,13 +1288,16 @@ must keep:
   neutral fill lift says where the pointer is (the idiom
   `hoverHighlight` and `ShortcutLayerChip` already keep — the
   accent is reserved for identity and selection). The two then
-  compose instead of one erasing the other. An accent hover edge
-  is legal only on a surface that carries no durable marking at
-  all, as the gesture strip's pictures (#2537, `GestureStripTests`
-  ▸ `plateHoverCue`). The Home card is one since #2654: its badges
-  do not use the border, so its fill stays and its border takes the
-  pointer (#3040, `HomeCardChromeTests`). A marking returning to that
-  edge takes its own channel, which is review's. A searchable dropdown's
+  compose instead of one erasing the other. **A tile or card is the
+  owner's exception (#3042):** Home cards, Layout, palette, look and
+  dashed tiles, Screen cards and the gesture strip's pictures answer
+  the pointer with `hoverEdge` and `hoverRise(_:in:)`, no fill change
+  (`HoverRiseAdoptionTests`). Where that stroke also carries selection,
+  a surface owes three things apart from the colour, which is one in
+  dark: a selected stroke heavier than `hoverEdgeStroke`, a selected
+  tile that stays flat where its click changes nothing, and a check
+  where the stroke alone would mark it. A chip, a row and KiwiHub keep
+  the fill. A searchable dropdown's
   `DropdownCursor` IS the selection Return reads, so real
   pointer motion may move it there (`DropdownCursorWiringTests`)
   and nowhere else — a list whose selection anything beyond

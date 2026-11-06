@@ -47,6 +47,17 @@ extension SettingsTheme {
     /// Container border weight.
     static let containerStroke: CGFloat = 1
 
+    /// A tile or card under the pointer (#3042): its edge's weight,
+    /// under every selected stroke, its rise and its shadow.
+    static let hoverEdgeStroke: CGFloat = 1.5
+    static let hoverRise: CGFloat = 2
+    static let hoverRiseShadowRadius: CGFloat = 8
+    static let hoverRiseShadowDrop: CGFloat = 6
+    /// Below a clipped row of tiles, so a risen tile's shadow shows.
+    static var hoverRiseShadowRoom: CGFloat {
+        hoverRiseShadowRadius + hoverRiseShadowDrop
+    }
+
     /// Notice strip accent fill opacity (`WhatsNewTrailBanner`).
     static let noticeFillOpacity: CGFloat = 0.12
 

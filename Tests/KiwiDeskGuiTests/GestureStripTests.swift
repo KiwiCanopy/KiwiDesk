@@ -111,7 +111,7 @@ struct GestureStripTests {
             Self.gestures + "GestureStripPlate.swift"
         )
         #expect(
-            plate.contains(".overlay(GestureStripHoverCue{onLand(item)})")
+            plate.contains("GestureStripHoverCue(onTap:{onLand(item)})")
         )
         #expect(
             plate.contains(
@@ -121,19 +121,20 @@ struct GestureStripTests {
         #expect(!plate.contains("GreyOut("))
     }
 
-    /// The hover cue (#2537): its own view, so the picture never
-    /// re-renders on hover; an accent border bound to the pointer
-    /// over the off-gesture fade, the pointing hand, the click.
-    @Test("a picture under the pointer wears the accent border")
+    /// The hover cue (#2537, #3042): its own view holding the picture
+    /// as a stored value, so a hover never rebuilds it; the hover edge
+    /// over the off-gesture fade, the rise, the pointing hand, the
+    /// click.
+    @Test("a picture under the pointer wears the hover edge and rises")
     func plateHoverCue() throws {
         let plate = try Self.squashed(
             Self.gestures + "GestureStripPlate.swift"
         )
-        let fade = try #require(plate.range(of: ".opacity(item.isOff"))
         let cue = try #require(
-            plate.range(of: ".overlay(GestureStripHoverCue{")
+            plate.range(of: "GestureStripHoverCue(onTap:")
         )
-        #expect(fade.upperBound < cue.lowerBound)
+        let fade = try #require(plate.range(of: ".opacity(item.isOff"))
+        #expect(cue.upperBound < fade.lowerBound)
         let view = try Self.squashed(
             Self.gestures + "GestureStripHoverCue.swift"
         )
@@ -142,12 +143,13 @@ struct GestureStripTests {
         #expect(view.contains(".pointingHandCursor()"))
         #expect(
             view.contains(
-                ".strokeBorder((palette??.unresolved).accentMark"
+                ".strokeBorder(SettingsTheme.hoverEdge"
                     + ".opacity(hovering?1:0),"
             )
         )
-        // The view itself never fades out of hit-testing.
-        #expect(!view.contains(").opacity("))
+        #expect(view.contains("privateletcontent:Content"))
+        // The edge lies over the stored picture, whose body the hover
+        // never reaches.
         #expect(!view.contains("picture("))
     }
 }

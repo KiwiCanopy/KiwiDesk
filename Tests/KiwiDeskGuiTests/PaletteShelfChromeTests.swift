@@ -85,6 +85,7 @@ struct PaletteShelfChromeTests {
         #expect(
             tile.contains(
                 "SettingsTheme.paletteCardStrokeApplied"
+                    + ":risen?SettingsTheme.hoverEdgeStroke"
                     + ":SettingsTheme.paletteCardStroke"
             ),
             Comment(
@@ -95,7 +96,8 @@ struct PaletteShelfChromeTests {
         )
         let ink = try Regex(
             #"AnyShapeStyle\(SettingsTheme\.(\w+)\)"#
-                + #":AnyShapeStyle\(SettingsTheme\.(\w+)\)"#
+                + #":AnyShapeStyle\(risen\?SettingsTheme\.\w+"#
+                + #":SettingsTheme\.(\w+)\)"#
         )
         let arms = try #require(
             tile.firstMatch(of: ink)?.output,
@@ -238,18 +240,13 @@ struct PaletteShelfChromeTests {
         }
     }
 
-    /// The pointer lifts a tile with a grey FILL, apart from the
-    /// applied stroke (#1173), and the applied tile — whose click
-    /// changes nothing — stays flat (owner, 2026-10-17).
-    @Test("the pointer lifts a tile; the applied one stays flat")
-    func hoverLiftsATile() throws {
+    /// The pointer takes the edge and the rise (#3042); the applied
+    /// tile, whose click changes nothing, stays flat (owner,
+    /// 2026-10-17). `HoverRiseAdoptionTests` holds the rise.
+    @Test("the pointer raises a tile; the applied one stays flat")
+    func hoverRaisesATile() throws {
         let tile = try squashed("PaletteTile.swift")
-        #expect(tile.contains(".background(lift)"))
         #expect(tile.contains(".onHover{hovered=$0}"))
-        #expect(
-            tile.contains(
-                "hovered&&isEnabled&&!isApplied?SettingsTheme.chipRest"
-            )
-        )
+        #expect(tile.contains("risen?SettingsTheme.hoverEdge"))
     }
 }

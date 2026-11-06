@@ -44,23 +44,19 @@ struct PaletteTile<Plate: View>: View {
         }
         .padding(Self.inset)
         .frame(maxWidth: .infinity)
-        .background(lift)
         .overlay(frame)
+        .hoverRise(
+            risen,
+            in: RoundedRectangle(
+                cornerRadius: SettingsTheme.disclosureRadius
+            )
+        )
         .onHover { hovered = $0 }
     }
 
-    /// The pointer's grey lift, a fill apart from the applied
-    /// stroke (#1173); the applied tile, whose click changes
-    /// nothing, stays flat (owner, 2026-10-17).
-    private var lift: some View {
-        RoundedRectangle(
-            cornerRadius: SettingsTheme.disclosureRadius
-        )
-        .fill(
-            hovered && isEnabled && !isApplied
-                ? SettingsTheme.chipRest : .clear
-        )
-    }
+    /// The applied tile, whose click changes nothing, stays flat
+    /// (owner, 2026-10-17).
+    private var risen: Bool { hovered && isEnabled && !isApplied }
 
     /// Leading checkmark indicator for active palette
     /// (`ColorField`, `FitGapsAction`, `LoginItemCard`).
@@ -98,11 +94,15 @@ struct PaletteTile<Plate: View>: View {
         .strokeBorder(
             isApplied
                 ? AnyShapeStyle(SettingsTheme.accent)
-                : AnyShapeStyle(SettingsTheme.hairline),
+                : AnyShapeStyle(
+                    risen ? SettingsTheme.hoverEdge : SettingsTheme.hairline
+                ),
             style: StrokeStyle(
                 lineWidth: isApplied
                     ? SettingsTheme.paletteCardStrokeApplied
-                    : SettingsTheme.paletteCardStroke,
+                    : risen
+                        ? SettingsTheme.hoverEdgeStroke
+                        : SettingsTheme.paletteCardStroke,
                 dash: dashed ? [4] : []
             )
         )

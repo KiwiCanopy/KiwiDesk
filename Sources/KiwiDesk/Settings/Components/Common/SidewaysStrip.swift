@@ -32,6 +32,9 @@ struct SidewaysStrip<ID: Hashable, Content: View>: View {
                             viewport: scroll.viewport
                         )
                     )
+                    // The scroller clips a risen tile and its shadow.
+                    .padding(.top, SettingsTheme.hoverRise)
+                    .padding(.bottom, SettingsTheme.hoverRiseShadowRoom)
                     .onGeometryChange(for: CGFloat.self) {
                         -$0.frame(in: .named(stripSpace)).minX
                     } action: {

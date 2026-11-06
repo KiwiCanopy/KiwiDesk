@@ -63,12 +63,6 @@ struct SettingsThemeTokenTests {
         ),
         Pin("panel", 0xF4_F6_F1, 0x08_12_0C, SettingsTheme.panel),
         Pin(
-            "cardHoverEdge",
-            0x5F_8F_35,
-            0xAA_CB_5D,
-            SettingsTheme.cardHoverEdge
-        ),
-        Pin(
             "lightBoardEdge",
             0x8E_9A_8E,
             0x8E_9A_8E,
@@ -256,7 +250,7 @@ struct SettingsThemeTokenTests {
     ]
 
     private var allPins: [Pin] {
-        pins + Self.chipPins + Self.lightPlatePins
+        pins + Self.chipPins + Self.lightPlatePins + Self.hoverPins
     }
 
     @Test("every token resolves to its pinned light/dark pair")

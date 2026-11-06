@@ -11188,11 +11188,24 @@ is, the fill says where the pointer is.
 :::unreleased
 With the marking gone (#2654), no durable statement on a Home card
 uses its border, so the pointer takes it: the fill lift was too
-faint to find, a 1.5 pt `cardHoverEdge` is not, and the fill no longer
+faint to find, a 1.5 pt `hoverEdge` is not, and the fill no longer
 changes (#3040, owner 2026-11-06). A marking returning to that edge
-takes its own channel. Surfaces carrying a durable marking keep the
-neutral lift. The site's glow and lift stay out for now, as shadow
-and movement do on every ordinary button.
+takes its own channel. Glow stays out, as shadow and movement do on
+every ordinary button.
+
+**A tile or card takes the edge and a rise, and selection shares its
+border (#3042, owner 2026-11-06).** The fill lift, a neutral edge and
+an inset ring were all previewed; one green edge with a 2 pt rise was
+chosen, on every tile and card, so Settings has one answer to the
+pointer. That gives up this section's split where a border carries
+selection, at a known cost: in dark the two strokes are one colour and
+the shadow barely shows on the black page, and a rise reads mainly
+while it moves, so a still frame cannot lean on it. So the weights
+differ, a tile whose click changes nothing stays flat, and a selected
+Layout tile gains a check, which is what a colour-blind reader and a
+screenshot have left. A chip, a row and KiwiHub keep the fill: a small
+control rising reads as a jump, and KiwiHub marks selection with a fill
+the split still protects.
 :::
 
 **One draft, three views — and the save surface is the floating
@@ -14776,10 +14789,11 @@ and fading at an end where it cuts a picture, the KiwiShelf's
 overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
 A picture stays still, shows its entry's own sentence as
 a tooltip after the window's 250 ms delay, marks itself as a link
-under the pointer with an accent edge and the pointing hand
-(#2537) — the accent, not the neutral hover lift, because the
-picture is otherwise read as decoration and its plate carries no
-marking the edge could overwrite — and a click opens the
+under the pointer with an edge and the pointing hand (#2537, its
+edge and rise since #3042 the ones every tile takes) — an edge, not
+a fill, because the picture is otherwise read as decoration and its
+plate carries no marking the edge could overwrite — and a click
+opens the
 card at its entry and plays that one — the same "a click asked to
 read it" argument as the first picture's, aimed. The strip is a
 pointer shortcut: hidden from VoiceOver, never a focus stop, since

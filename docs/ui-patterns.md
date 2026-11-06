@@ -1207,9 +1207,8 @@ affordance.** A bordered action button (`settingsActionButton()`,
 KiwiHub's footer buttons) is a button chip: `chipRest`, `chipHover`
 under the pointer, `chipPressed` while pressed, under a constant
 `chipEdge`, no animation, a disabled one not reacting, in the
-system bezel's rounded rectangle (#2377). A palette or look tile
-lifts with `chipRest` as a fill apart from its applied stroke, and
-nothing a click would leave alone lifts. A
+system bezel's rounded rectangle (#2377). Nothing a click would
+leave alone lifts. A
 prominent (accent-filled) button, a menu picker, a stepper, a
 checkbox, a toggle, a slider, a field and a sidebar keep system
 behaviour: their shape already says "control". Ambiguous
@@ -1243,8 +1242,20 @@ discoverable.
 On KiwiHub's tinted Fill a button chip's fills fade with the
 panel's other fills (#2725).
 
-A Layouts strip tile lifts like a palette tile, with the
-selection drawn as its stroke alone. A borderless value-menu or
+:::unreleased
+**A tile or card answers the pointer with its edge and a rise
+(#3042).** Home cards, Layout, palette, look and dashed tiles, Screen
+cards and the gesture strip's pictures take `hoverEdge` at
+`hoverEdgeStroke` and rise on a shadow through `hoverRise(_:in:)`,
+with no fill change and a hit area that stays at rest. A selected
+stroke stays heavier. A selected tile stays flat, since its click
+changes nothing, and a selected Screen card rises, since its click
+deselects. A selected Layout tile shows a check in place of its
+layout symbol. Under Reduce Motion the rise arrives rather than
+travels. Everything else on this page keeps its fill.
+:::
+
+A borderless value-menu or
 popover trigger whose label is text takes the glyph chip's lift
 without its `ink2` tint (`menuTriggerHover`), chosen by role
 since a value's label must not go `ink2`, and drawn on the

@@ -22,11 +22,20 @@ enum SettingsTheme {
     /// Preview column panel background.
     static let panel = token(light: 0xF4_F6_F1, dark: 0x08_12_0C)
 
-    /// A Home card's edge under the pointer (#3040): 3:1 or more
-    /// on both the card and the plate it crosses.
-    static let cardHoverEdge = token(
+    /// A tile's or card's edge under the pointer (#3040, #3042): 3:1
+    /// or more on every ground it crosses.
+    static let hoverEdge = token(
         light: 0x5F_8F_35,
         dark: 0xAA_CB_5D
+    )
+
+    /// The shadow under a risen tile or card (#3042). In dark it
+    /// barely shows on the black page; the rise carries that mode.
+    static let hoverRiseShadow = token(
+        light: 0x12_25_1A,
+        dark: 0x00_00_00,
+        lightAlpha: 0.20,
+        darkAlpha: 0.80
     )
 
     /// Disclosure interiors and filled chips.
