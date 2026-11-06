@@ -33,9 +33,8 @@ extension StateCoordinator {
     func maximizedTraveler(beneath id: WindowID) -> WindowID? {
         guard let window = windows[id],
             let space = renderSpace(of: window).flatMap({ workspaces[$0] }),
-            let traveler = space.maximized, traveler != id,
-            !space.windows.contains(traveler),
-            effectiveTiledMembers(of: space).contains(traveler)
+            let traveler = maximizedWindow(of: space), traveler != id,
+            !space.windows.contains(traveler)
         else { return nil }
         return traveler
     }

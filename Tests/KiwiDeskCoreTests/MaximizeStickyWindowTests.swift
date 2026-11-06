@@ -166,6 +166,16 @@ struct MaximizeStickyWindowTests {
         #expect(core.state.workspaces.lastFocused == nil)
     }
 
+    @Test("A focused tile closing before the retire brings nothing back")
+    func endedMaximizeStaysEnded() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        core.state.workspaces.focus(tile, in: here)
+        #expect(core.state.workspaces[here]?.maximized == sticky)
+        core.state.apply(.windowDestroyed(tile, wasMinimized: false))
+        #expect(core.state.workspaces.lastFocused != sticky)
+    }
+
     @Test("A window closing while focus is elsewhere moves no focus")
     func unfocusedCloseLeavesFocus() {
         let core = makeCore()
