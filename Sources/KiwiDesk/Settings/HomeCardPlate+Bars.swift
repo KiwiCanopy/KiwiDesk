@@ -39,6 +39,9 @@ struct HomeCardBarsTile: View {
     /// Whether the frame and the well draw their schematic chrome;
     /// a look's picture draws its own ground beneath (#1740).
     var drawsChrome = true
+    /// False drops the outer stroke where the paint allows it:
+    /// Simple's Space cards on the light plate (#3040).
+    var drawsFrame = true
     @Environment(\.schematicPalette) private var palette
 
     /// An App Bar item's art (#1740): an app's own icon, or its
@@ -166,7 +169,12 @@ struct HomeCardBarsTile: View {
                 .strokeBorder(
                     (palette ?? .unresolved).frame
                 )
-                .opacity(drawsChrome ? 1 : 0)
+                .opacity(
+                    drawsChrome
+                        && (drawsFrame
+                            || !(palette ?? .unresolved).frameIsOptional)
+                        ? 1 : 0
+                )
         )
         .aspectRatio(Self.screenAspect, contentMode: .fit)
         .frame(maxWidth: .infinity, maxHeight: .infinity)

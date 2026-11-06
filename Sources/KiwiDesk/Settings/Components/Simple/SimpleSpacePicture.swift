@@ -23,7 +23,8 @@ struct SimpleSpacePicture: View {
                 activeSpace: model.config.spaces.firstIndex(of: space) ?? 0,
                 showsAppBar: settings.appBarVisibility(in: mode)
                     .map(\.showsUnprompted) == true,
-                wellContent: AnyView(schematic(settings, mode: mode))
+                wellContent: AnyView(schematic(settings, mode: mode)),
+                drawsFrame: false
             )
         }
         .padding(Self.padding)

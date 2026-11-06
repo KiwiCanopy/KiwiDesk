@@ -10946,6 +10946,20 @@ KiwiVision's veil stays black over either plate. Only the look
 tiles keep their own ground (`LookPlate`, #1740), since a look
 is chosen by its mood.
 
+:::unreleased
+**Home's cards keep the dark plate in light mode (#3040, owner
+2026-11-06, amending #2859 for that one host).** The light-plate
+options previewed gave Home's small cards no shape: a pale band on
+a white card reads as nothing, and the light plate sits below the
+page. A short dark band is a card's picture, where large dark
+pictures on Simple read as holes, which is #2859's objection and
+stands there. So Home passes `alwaysDark`, Simple and every other
+host keep the verdict, and switching between the two pages changes
+the ground. The page moves to `F1F3ED`, the darkest that keeps
+`ink3` at its floor, and `hairline` to `D6DCD1` so a white card has
+an edge on it.
+:::
+
 **Settings is one surface: depth grows in place, never by a
 mode.** (#2654, owner ruling 2026-10-26, superseding #678's
 Simple / Power User segment and #760's reveal wash and
@@ -11160,12 +11174,17 @@ permanently hovered, and pointing at one OVERWROTE the one
 channel carrying its marking, which no ceiling can fix, because
 a statement a pointer can delete is not a statement. So the
 channels split by what they answer: the border says what a card
-is, the fill says where the pointer is (`cardHover`, `card`
-stepped one notch toward the ground in each appearance — opaque,
-so the inks above it are measured against what they actually
-sit on). The split holds with the marking gone (#2654): the
-neutral lift is the idiom the rest of the tree keeps, and the
-border stays free for a future identity marking.
+is, the fill says where the pointer is.
+
+:::unreleased
+With the marking gone (#2654), no durable statement on a Home card
+uses its border, so the pointer takes it: the fill lift was too
+faint to find, a 1.5 pt `cardHoverEdge` is not, and the fill no longer
+changes (#3040, owner 2026-11-06). A marking returning to that edge
+takes its own channel. Surfaces carrying a durable marking keep the
+neutral lift. The site's glow and lift stay out for now, as shadow
+and movement do on every ordinary button.
+:::
 
 **One draft, three views — and the save surface is the floating
 pill.** (#678 turn 9; Phase 4 shell.) Three views of one draft on

@@ -25,6 +25,16 @@ struct SchematicPaletteMarkTests {
         #expect(palette(.light).boundKeyEdge == SettingsTheme.lightAccent)
     }
 
+    @Test("only the light plate strengthens the board and may drop the frame")
+    func boardAndFrame() {
+        #expect(palette(.light).boardEdge == SettingsTheme.lightBoardEdge)
+        #expect(palette(.light).boardEdgeWidth == 1.5)
+        #expect(palette(.light).frameIsOptional)
+        #expect(palette(.dark).boardEdge == palette(.dark).edge)
+        #expect(palette(.dark).boardEdgeWidth == 1)
+        #expect(!palette(.dark).frameIsOptional)
+    }
+
     @Test("the dark plate's mark is the accent, with no key edge")
     func darkMarks() {
         #expect(palette(.dark).accentMark == SettingsTheme.accent)

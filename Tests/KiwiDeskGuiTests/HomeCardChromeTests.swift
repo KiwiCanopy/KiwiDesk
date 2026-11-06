@@ -7,8 +7,8 @@ import Testing
 /// The Home cards' plate-era chrome (#786): the two deliberate
 /// card heights, the desktop plate's shape and silence, the
 /// plate↔tall-group parity and the stroke-above-clip order —
-/// and, since #1173, the channel split gui.md cites this suite
-/// for: which property carries the mode and which the pointer.
+/// and the pointer's channel gui.md cites this suite for: the
+/// border takes the pointer and the fill stays (#3040).
 /// The palette hand-off's needle net split to
 /// `HomeCardPaletteWiringTests` at the file ceiling.
 ///
@@ -78,7 +78,7 @@ struct HomeCardChromeTests {
         )
         #expect(
             plate.contains(
-                ".deskPlate(settings,in:Rectangle())"
+                ".deskPlate(settings,in:Rectangle(),alwaysDark:true)"
             )
         )
         #expect(plate.contains(".accessibilityHidden(true)"))
@@ -173,43 +173,45 @@ struct HomeCardChromeTests {
         )
     }
 
-    /// The channel split (#1173): the border says one thing —
-    /// mode-gated or not — and the fill says the other, pointer
-    /// or not. A state that reads BOTH must not share a
-    /// property with either, which is what shipped: hover drew
-    /// the full accent on the border, so pointing at a
-    /// mode-gated card erased the marking it was pointing at.
-    ///
-    /// The negative half is the load-bearing one, and it is
-    /// located by what `cardStroke` cannot lose — its own
-    /// brace-balanced body, reached through the shared walker —
-    /// never by a spelling inside it: a needle for the retired
-    /// ternary would quietly stop matching on any innocent
-    /// retune and pass over a restored collision.
-    ///
-    /// What that body-scoped walk TRADES: it sees only what is
-    /// spelled inside `cardStroke`. Hover re-entering through a
-    /// helper property it calls, or through a second
-    /// `.overlay(hoverRing)` appended beside it, passes here —
-    /// and `strokeRidesAboveTheClip` bars neither. That residue
-    /// is review's.
-    @Test("the pointer draws on the fill, never on the border")
-    func hoverAndMarkingTakeDifferentChannels() throws {
+    /// A Home card carries no durable marking (#2654), so the
+    /// pointer takes its border (#1173, #3040).
+    @Test("the pointer draws on the border, the fill stays")
+    func hoverTakesTheBorder() throws {
         #expect(
             try squashed("HomeCard.swift").contains(
-                ".fill(hovering?SettingsTheme.cardHover"
-                    + ":SettingsTheme.card)"
+                ".fill(SettingsTheme.card)"
             )
         )
-        let body = try propertyBody("cardStroke")
-        #expect(!body.isEmpty)
+        let card = try squashed("HomeCard.swift")
         #expect(
-            !body.contains("hovering"),
-            Comment(
-                rawValue:
-                    "cardStroke reads the pointer again — the "
-                    + "border says what a card is, the fill "
-                    + "where the pointer is (#1173)"
+            card.contains(
+                "hovering?SettingsTheme.cardHoverEdge"
+                    + ":SettingsTheme.hairline"
+            )
+        )
+        #expect(card.contains("hoverStroke:CGFloat=1.5"))
+    }
+
+    @Test("Simple's picture drops the outer frame, the board its edge")
+    func frameAndBoardEdges() throws {
+        let picture = try squashed(
+            "Components/Simple/SimpleSpacePicture.swift"
+        )
+        #expect(picture.contains("drawsFrame:false"))
+        let tile = try squashed("HomeCardPlate+Bars.swift")
+        #expect(
+            tile.contains(
+                ".opacity(drawsChrome&&(drawsFrame"
+                    + "||!(palette??.unresolved).frameIsOptional)?1:0)"
+            )
+        )
+        let board = try squashed(
+            "Components/Keybindings/KeyboardBoard.swift"
+        )
+        #expect(
+            board.contains(
+                ".strokeBorder((palette??.unresolved).boardEdge,"
+                    + "lineWidth:(palette??.unresolved).boardEdgeWidth)"
             )
         )
     }

@@ -3,7 +3,8 @@ import Testing
 
 @testable import KiwiDesk
 
-/// Every desk picture draws the plate its look earned (#2859):
+/// Every desk picture but Home's cards, which pass `alwaysDark`
+/// (#3040), draws the plate its look earned (#2859):
 /// each in-scope surface reads the resolved paint through
 /// `deskPlate`/`platePaint` or the palette they write, a plate
 /// view with no writer takes `SchematicPalette.unresolved`, and
@@ -15,7 +16,8 @@ import Testing
 struct PlateGroundWiringTests {
     /// Surface file → the squashed consult it must carry.
     private let surfaces: [String: String] = [
-        "HomeCardPlate.swift": ".deskPlate(settings,in:Rectangle())",
+        "HomeCardPlate.swift":
+            ".deskPlate(settings,in:Rectangle(),alwaysDark:true)",
         "SimpleSpacePicture.swift": ".deskPlate(settings,in:shape)",
         "BarsPanelPreview.swift":
             ".deskPlate(settings,in:RoundedRectangle("
@@ -145,6 +147,14 @@ struct PlateGroundWiringTests {
         }
         #expect(scanned > 50)
         #expect(named > 20)
+    }
+
+    @Test("only Home's cards pass alwaysDark")
+    func oneDarkHost() throws {
+        let hosts = try sources().filter {
+            $0.1.contains("alwaysDark:true")
+        }
+        #expect(hosts.map(\.0) == ["HomeCardPlate.swift"])
     }
 
     @Test("only the resolver names the dark plate or writes paint")

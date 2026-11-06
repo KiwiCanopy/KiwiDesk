@@ -8,6 +8,7 @@ struct HomeCard: View {
     let spotlighted: Bool
     let open: () -> Void
     @State private var hovering = false
+    private static let hoverStroke: CGFloat = 1.5
     @Environment(\.accessibilityReduceMotion)
     private var reduceMotion
 
@@ -133,25 +134,22 @@ struct HomeCard: View {
             .lineLimit(1)
     }
 
-    /// The pointer's channel. On a plated card the lift is the
-    /// text band alone: the plate is opaque and full-bleed
-    /// (#1173).
     private var cardFill: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
-            .fill(
-                hovering
-                    ? SettingsTheme.cardHover
-                    : SettingsTheme.card
-            )
+            .fill(SettingsTheme.card)
     }
 
-    /// The card's edge; the pointer lifts the fill, never this
-    /// (#1173).
+    /// The card's edge and the pointer's channel: no durable
+    /// marking on a Home card uses its border (#1173, #2654, #3040).
     private var cardStroke: some View {
         RoundedRectangle(cornerRadius: SettingsTheme.cardRadius)
             .strokeBorder(
-                SettingsTheme.hairline,
-                lineWidth: SettingsTheme.containerStroke
+                hovering
+                    ? SettingsTheme.cardHoverEdge
+                    : SettingsTheme.hairline,
+                lineWidth: hovering
+                    ? Self.hoverStroke
+                    : SettingsTheme.containerStroke
             )
             .allowsHitTesting(false)
     }
