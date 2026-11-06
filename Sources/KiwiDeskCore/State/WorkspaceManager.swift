@@ -243,17 +243,14 @@ public struct WorkspaceManager: Sendable {
         if lastFocused == window { lastFocused = nil }
         if focusReturnCandidate == window { focusReturnCandidate = nil }
         guard let id = space(of: window) else { return }
-        let held = spaces[id]?.focused == window && lastFocused == nil
         spaces[id]?.remove(window)
-        // A window closing over a maximized traveler hands focus
-        // back to it: `Space.remove` keeps its member-only hand-back
-        // (#431), and the traveler's maximize is lost otherwise
-        // (#3035).
-        if held, let traveler = spaces[id]?.maximized,
-            spaces[id]?.windows.contains(traveler) == false
-        {
-            lastFocused = traveler
-        }
+    }
+
+    /// Hands the system focus to a maximized traveler a window closed
+    /// over (#3035). No `Space.focused` write: a traveler is never
+    /// one (#431).
+    mutating func handFocusBack(toTraveler window: WindowID) {
+        lastFocused = window
     }
 
     /// Re-keys window ID preserving slot and focus (#308).
@@ -262,6 +259,10 @@ public struct WorkspaceManager: Sendable {
         // The candidate follows a native-tab rekey like
         // `lastFocused`, or every tab switch silently kills it.
         if focusReturnCandidate == old { focusReturnCandidate = new }
+        // A traveler's flag sits on a Space it is no member of (#3035).
+        for id in order where spaces[id]?.maximized == old {
+            spaces[id]?.maximized = new
+        }
         guard let id = space(of: old) else { return }
         spaces[id]?.rekey(old, to: new)
     }

@@ -29,14 +29,14 @@ struct MaximizedReaderCensusTests {
         "Models/StateSnapshot+InPlace.swift": 3,
         // The verdict and the retire, which names the windows it
         // ended (#2676).
-        "State/StateCoordinator+Maximized.swift": 4,
+        "State/StateCoordinator+Maximized.swift": 5,
         // A close while away and a minimize end it; a Desktop
         // departure keeps the id for the return.
         "State/StateCoordinator+SpaceMemory.swift": 2,
         "State/StateCoordinator+WindowDestroyed.swift": 2,
-        // The mode write ends it; a window closing over a
-        // maximized traveler hands focus back to it (#3035).
-        "State/WorkspaceManager.swift": 2,
+        // The mode write ends it; a re-key reaches a traveler's flag
+        // on a Space it is no member of (#3035).
+        "State/WorkspaceManager.swift": 3,
         // The toggle and the drag's end.
         "App/KiwiCore+Maximize.swift": 5,
         // Rearranging writes end it.

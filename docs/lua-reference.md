@@ -5787,7 +5787,10 @@ a floating window. Bound to `⌃⌥M` by default.
 A sticky window fills the screen of the Space it is drawn on. Its
 maximize ends when you leave that Space, and it does not come back
 when you return. KiwiDesk's own restart ends it too while the
-window is away from its home Space.
+window is away from its home Space. With
+[`sticky.set_desktop_reach`](#stickyset_desktop_reach) off, one
+maximized on its home Space leaves with its Desktop and comes back
+maximized, as any window does.
 :::
 
 **Example:**

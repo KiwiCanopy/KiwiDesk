@@ -137,6 +137,35 @@ struct MaximizeStickyWindowTests {
         #expect(maximized(core) == sticky)
     }
 
+    @Test("A sticky dialog homed elsewhere hands focus back too")
+    func stickyDialogCloseKeeps() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        core.state.workspaces.activate(home)
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: float, pid: 900_003, appName: "C")
+            )
+        )
+        core.state.workspaces.activate(here)
+        core.state.windows.setFloating(float, true)
+        core.state.setSticky(float, .global)
+        core.state.workspaces.focus(float, in: home)
+        #expect(core.state.workspaces.space(of: float) == home)
+        core.state.apply(.windowDestroyed(float, wasMinimized: false))
+        #expect(core.state.workspaces.lastFocused == sticky)
+    }
+
+    @Test("Closing a plain maximized window hands focus to nothing dead")
+    func plainCloseLeavesNoDeadFocus() {
+        let core = makeCore()
+        core.state.workspaces.focus(tile, in: here)
+        core.execute("toggle_maximized")
+        #expect(maximized(core) == tile)
+        core.state.apply(.windowDestroyed(tile, wasMinimized: false))
+        #expect(core.state.workspaces.lastFocused == nil)
+    }
+
     @Test("A window closing while focus is elsewhere moves no focus")
     func unfocusedCloseLeavesFocus() {
         let core = makeCore()
@@ -176,6 +205,38 @@ struct MaximizeStickyWindowTests {
         #expect(maximized(core) == sticky)
     }
 
+    @Test("A display sticky ends when its screen shows another Space")
+    func displayStickyEnds() {
+        let core = makeCore()
+        core.state.workspaces.assign(here, to: DisplayID(1))
+        core.state.workspaces.assign(home, to: DisplayID(1))
+        core.state.setSticky(sticky, .display)
+        core.execute("toggle_maximized")
+        #expect(maximized(core) == sticky)
+        core.state.workspaces.activate(home)
+        core.retile()
+        #expect(core.state.workspaces[here]?.maximized == nil)
+    }
+
+    @Test("A native-tab re-key carries the flag off its home")
+    func rekeyCarries() {
+        let core = makeCore()
+        core.execute("toggle_maximized")
+        let next = WindowID(9)
+        core.state.workspaces.rekey(sticky, to: next)
+        #expect(core.state.workspaces[here]?.maximized == next)
+    }
+
+    @Test("A Desktop departure from its home Space waits for the return")
+    func homeDepartureWaits() {
+        let core = makeCore()
+        core.state.workspaces.activate(home)
+        core.execute("toggle_maximized")
+        core.state.apply(.windowDestroyed(sticky, wasMinimized: false))
+        core.retile()
+        #expect(core.state.workspaces[home]?.maximized == sticky)
+    }
+
     @Test("Closing it ends it, though the flag is not on its home")
     func closeEnds() {
         let core = makeCore()
@@ -210,6 +271,8 @@ struct MaximizeStickyWindowTests {
         core.execute("toggle_maximized")
         core.state.setSticky(sticky, .none)
         #expect(maximized(core) == nil)
+        core.retile()
+        #expect(core.state.workspaces[here]?.maximized == nil)
     }
 
     @Test("A floating sticky window is still refused")

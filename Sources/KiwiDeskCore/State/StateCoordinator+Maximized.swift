@@ -13,10 +13,10 @@ extension StateCoordinator {
     /// (#431), so it asks the system focus itself, and focus on
     /// another screen keeps it (#3035).
     public func maximizedWindow(of space: Space) -> WindowID? {
-        let tiled = effectiveTiledMembers(of: space)
-        guard let id = space.maximized, space.mode != .floating,
-            tiled.contains(id)
+        guard let id = space.maximized, space.mode != .floating
         else { return nil }
+        let tiled = effectiveTiledMembers(of: space)
+        guard tiled.contains(id) else { return nil }
         let rival =
             space.windows.contains(id)
             ? focusAnchor(of: space, tiled: tiled)
@@ -25,6 +25,19 @@ extension StateCoordinator {
             return nil
         }
         return id
+    }
+
+    /// The maximized traveler drawn beneath `id`, on the Space `id`
+    /// renders on, which focus returns to if `id` holds it and
+    /// closes (#3035). A member's hand-back is `Space.remove`'s.
+    func maximizedTraveler(beneath id: WindowID) -> WindowID? {
+        guard let window = windows[id],
+            let space = renderSpace(of: window).flatMap({ workspaces[$0] }),
+            let traveler = space.maximized, traveler != id,
+            !space.windows.contains(traveler),
+            effectiveTiledMembers(of: space).contains(traveler)
+        else { return nil }
+        return traveler
     }
 
     /// Whether `id`'s maximize waits for its return: no longer
