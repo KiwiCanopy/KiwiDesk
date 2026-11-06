@@ -156,6 +156,18 @@ extension KiwiCore {
         return !NativeSpaces.isUserSpace(space, in: spaces)
     }
 
+    /// The compositor hosts `id` on no Space — the fullscreen
+    /// arm's first beat (`EventLoop.compositorHostsNowhere`,
+    /// #2935). An unavailable read says nothing, and a window
+    /// adopted with no title-bar button enters no fullscreen:
+    /// AppKit's placeholder for the beat is one.
+    func windowIsHostedNowhere(_ id: WindowID) -> Bool {
+        guard state.windows[id]?.hasTitlebarButton != false,
+            case .gone = desktopMemory.readWindowSpace(id)
+        else { return false }
+        return true
+    }
+
     /// The compositor's answer for a window that just left the
     /// AX list. `spaces` is the caller's one topology reading
     /// (profiles.md). A Space the topology does not list reads
