@@ -9516,7 +9516,7 @@ behaviour (`docs/ui-patterns.md` ▸ *Hover confirms custom hit
 areas*). The chip keeps the system bezel's rounded rectangle: the
 lift is the change, not the shape. A segmented picker's unselected
 segment lifts one step over its track and presses one step further,
-the same order. A palette or look tile lifts too. **A lift promises
+the same order. **A lift promises
 the click:** what a click would leave alone — the applied tile, a
 KiwiHub item the query dims — stays flat (owner ruling 2026-10-17).
 
@@ -11196,16 +11196,17 @@ every ordinary button.
 **A tile or card takes the edge and a rise, and selection shares its
 border (#3042, owner 2026-11-06).** The fill lift, a neutral edge and
 an inset ring were all previewed; one green edge with a 2 pt rise was
-chosen, on every tile and card, so Settings has one answer to the
-pointer. That gives up this section's split where a border carries
-selection, at a known cost: in dark the two strokes are one colour and
+chosen, on the surfaces `docs/ui-patterns.md` names, so a tile or card
+has one answer to the pointer. That gives up the #1173 split above
+where a border carries selection, at a known cost: in dark the two strokes are one colour and
 the shadow barely shows on the black page, and a rise reads mainly
 while it moves, so a still frame cannot lean on it. So the weights
 differ, a tile whose click changes nothing stays flat, and a selected
 Layout tile gains a check, which is what a colour-blind reader and a
-screenshot have left. A chip, a row and KiwiHub keep the fill: a small
-control rising reads as a jump, and KiwiHub marks selection with a fill
-the split still protects.
+screenshot have left. A chip, a row and a Space card's menu face keep
+the fill, and KiwiHub does because it marks selection with a fill the
+split still protects. The setup tour's tiles take the edge alone: its
+scrollers leave no room for a rise, and its ground is not a card's.
 :::
 
 **One draft, three views — and the save surface is the floating
@@ -14789,11 +14790,10 @@ and fading at an end where it cuts a picture, the KiwiShelf's
 overflow arithmetic (`ShelfOverflow.fades`) rather than a copy.
 A picture stays still, shows its entry's own sentence as
 a tooltip after the window's 250 ms delay, marks itself as a link
-under the pointer with an edge and the pointing hand (#2537, its
-edge and rise since #3042 the ones every tile takes) — an edge, not
-a fill, because the picture is otherwise read as decoration and its
-plate carries no marking the edge could overwrite — and a click
-opens the
+under the pointer with an accent edge and the pointing hand
+(#2537) — the accent, not the neutral hover lift, because the
+picture is otherwise read as decoration and its plate carries no
+marking the edge could overwrite — and a click opens the
 card at its entry and plays that one — the same "a click asked to
 read it" argument as the first picture's, aimed. The strip is a
 pointer shortcut: hidden from VoiceOver, never a focus stop, since
@@ -14811,6 +14811,12 @@ under the resting pointer rebuilt and started a loop mid-scroll,
 so a wheel or swipe begun over the strip stuttered. The tooltip
 already names the gesture and the click plays it, so the hover
 loop taught nothing they do not.
+
+:::unreleased
+The strip's picture takes the edge and rise every tile takes, in place
+of its accent edge (#3042). Its frame moves and its drawing does not,
+which keeps the ruling that the strip's pictures stay still.
+:::
 
 **An entry lands with its feature, and greys where its surface is
 off.** Describing #1528's clicks before they ship teaches what the

@@ -1,8 +1,9 @@
 import Foundation
 import Testing
 
-/// Every click target KiwiDesk draws lifts under the pointer
-/// through a shared seam, and nothing a click leaves alone lifts
+/// A click target other than a tile or card (`HoverRiseAdoptionTests`)
+/// lifts under the pointer through a shared seam, and nothing a click
+/// leaves alone lifts
 /// (owner rulings 2026-10-17, `docs/ui-patterns.md` ▸ Hover
 /// confirms custom hit areas). Each clause pins one site's
 /// ADOPTION of its seam — which seam, applied once — never the

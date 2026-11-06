@@ -26,7 +26,10 @@ struct HoverRiseAdoptionTests {
         for (path, needle) in [
             ("HomeCard.swift", ".hoverRise(hovering,in:"),
             ("Components/Layouts/LayoutStrip.swift", ".hoverRise(risen,in:"),
-            ("Components/Looks/PaletteTile.swift", ".hoverRise(risen,in:"),
+            (
+                "Components/Looks/PaletteTile.swift",
+                ".hoverRise(risen&&rises,in:"
+            ),
             ("Components/Screens/ScreenCard.swift", ".hoverRise(risen,in:"),
             (
                 "Components/Gestures/GestureStripHoverCue.swift",
@@ -35,13 +38,14 @@ struct HoverRiseAdoptionTests {
         ] {
             let source = try squashed(path)
             #expect(source.contains(needle), Comment(rawValue: path))
+            // Followed by a non-identifier: `hoverEdgeStroke` must not
+            // answer for the colour.
             #expect(
-                source.contains("SettingsTheme.hoverEdge"),
+                source.contains(try Regex(#"SettingsTheme\.hoverEdge\W"#)),
                 Comment(rawValue: path)
             )
             #expect(
-                source.contains("SettingsTheme.hoverEdgeStroke")
-                    || path.hasSuffix("ScreenCard.swift"),
+                source.contains("SettingsTheme.hoverEdgeStroke"),
                 Comment(rawValue: path)
             )
             #expect(!source.contains("chipRest"), Comment(rawValue: path))
@@ -57,6 +61,57 @@ struct HoverRiseAdoptionTests {
         let offset = try #require(rise.range(of: ".offset(y:risen?"))
         let shape = try #require(rise.range(of: ".contentShape(shape)"))
         #expect(offset.upperBound < shape.lowerBound)
+        // At rest the shadow's shape does not show.
+        #expect(rise.contains(".opacity(risen?1:0)"))
+    }
+
+    /// `HoverRise` cannot own this: a `Button` label stops the trait.
+    @Test("a surface over opaque siblings raises its own zIndex")
+    func opaqueSurfacesTakeZIndex() throws {
+        for (path, needle) in [
+            ("HomeCard.swift", ".zIndex(hovering?1:0)"),
+            (
+                "Components/Layouts/LayoutStrip.swift",
+                ".zIndex(hovered==mode?1:0)"
+            ),
+            ("Components/Screens/ScreenCard.swift", ".zIndex(risen?1:0)"),
+            (
+                "Components/Gestures/GestureStripHoverCue.swift",
+                ".zIndex(hovering?1:0)"
+            ),
+        ] {
+            #expect(
+                try squashed(path).contains(needle),
+                Comment(rawValue: path)
+            )
+        }
+    }
+
+    /// The tour's scrollers leave no room and its ground is `page`.
+    @Test("the setup tour's tiles keep the edge and do not rise")
+    func tourStaysDown() throws {
+        for path in [
+            "OnboardingLooksRows.swift",
+            "OnboardingBarsTiles.swift",
+        ] {
+            let url = SourceScan.repoRoot(from: #filePath)
+                .appendingPathComponent("Sources/KiwiDesk/Onboarding")
+                .appendingPathComponent(path)
+            let text = SourceScan.stripComments(
+                try String(contentsOf: url, encoding: .utf8)
+            )
+            #expect(
+                text.components(separatedBy: "PaletteTile(").count
+                    == text.components(separatedBy: "rises: false").count,
+                Comment(rawValue: path)
+            )
+            #expect(text.contains("PaletteTile("), Comment(rawValue: path))
+        }
+        #expect(
+            try squashed("Components/Looks/PaletteTile.swift").contains(
+                ".hoverRise(risen&&rises,in:"
+            )
+        )
     }
 
     /// Where a click changes nothing a selected surface stays flat;
@@ -96,10 +151,45 @@ struct HoverRiseAdoptionTests {
     @Test("a selected Layout tile carries a check")
     func layoutTileCarriesACheck() throws {
         let strip = try squashed("Components/Layouts/LayoutStrip.swift")
-        #expect(
-            strip.contains("systemImage:selected?\"checkmark\":mode.symbol")
+        let check = try #require(
+            strip.range(of: "ifselected{Image(systemName:\"checkmark\")")
         )
-        #expect(strip.contains("lineWidth:selected?2:risen?SettingsTheme."))
+        let name = try #require(
+            strip.range(
+                of: "Label(mode.displayName,systemImage:mode.symbol)"
+            )
+        )
+        #expect(check.upperBound < name.lowerBound)
+        #expect(strip.contains("lineWidth:risen?SettingsTheme."))
+    }
+
+    /// A selected stroke sits on its own layer so it fades, and a
+    /// check fades with it, through the one gated animation.
+    @Test("a selection's stroke and check fade in")
+    func selectionFades() throws {
+        for (path, selected) in [
+            ("Components/Layouts/LayoutStrip.swift", "selected:selected"),
+            ("Components/Looks/PaletteTile.swift", "selected:isApplied"),
+            ("Components/Screens/ScreenCard.swift", "selected:isSelected"),
+        ] {
+            #expect(
+                try squashed(path).contains("SelectionStroke(" + selected),
+                Comment(rawValue: path)
+            )
+        }
+        #expect(
+            try squashed("Components/Layouts/LayoutStrip.swift").contains(
+                ".selectionFade(selected)"
+            )
+        )
+        #expect(
+            try squashed("Components/Looks/PaletteTile.swift").contains(
+                ".opacity(isApplied?1:0).selectionFade(isApplied)"
+            )
+        )
+        let stroke = try squashed("SelectionStroke.swift")
+        #expect(stroke.contains(".opacity(selected?1:0)"))
+        #expect(stroke.contains("reduceMotion?nil:"))
     }
 
     /// A scroller clips what leaves its bounds, a risen tile's top and
@@ -109,9 +199,7 @@ struct HoverRiseAdoptionTests {
         let strip = try squashed("Components/Common/SidewaysStrip.swift")
         #expect(strip.contains(".padding(.top,SettingsTheme.hoverRise)"))
         #expect(
-            strip.contains(
-                ".padding(.bottom,SettingsTheme.hoverRiseShadowRoom)"
-            )
+            strip.contains("floor:SettingsTheme.hoverRiseShadowRoom")
         )
     }
 

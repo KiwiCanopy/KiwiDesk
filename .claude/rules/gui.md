@@ -1288,15 +1288,24 @@ must keep:
   neutral fill lift says where the pointer is (the idiom
   `hoverHighlight` and `ShortcutLayerChip` already keep — the
   accent is reserved for identity and selection). The two then
-  compose instead of one erasing the other. **A tile or card is the
-  owner's exception (#3042):** Home cards, Layout, palette, look and
-  dashed tiles, Screen cards and the gesture strip's pictures answer
-  the pointer with `hoverEdge` and `hoverRise(_:in:)`, no fill change
-  (`HoverRiseAdoptionTests`). Where that stroke also carries selection,
-  a surface owes three things apart from the colour, which is one in
-  dark: a selected stroke heavier than `hoverEdgeStroke`, a selected
-  tile that stays flat where its click changes nothing, and a check
-  where the stroke alone would mark it. A chip, a row and KiwiHub keep
+  compose instead of one erasing the other. **A clickable tile or card
+  is the owner's exception (#3042):** it answers the pointer with
+  `hoverEdge` and `hoverRise(_:in:)`, no fill change
+  (`HoverRiseAdoptionTests`; `docs/ui-patterns.md` ▸ *Hover confirms
+  custom hit areas* names the surfaces). The pointer still never
+  replaces a marked stroke: selection's colour and weight win, and a
+  selected stroke stays heavier than `hoverEdgeStroke`, since the two
+  share a colour in dark. A selected surface whose click changes nothing
+  stays flat and carries a check; a Screen card's click deselects, so it
+  rises, its 3 pt stroke the mark by ruling. A marking other than
+  selection returning to a tile's edge takes its own channel, which is
+  review's. `hoverRise` owes its host two things: a host that clips
+  keeps room for the rise and the shadow (`SidewaysStrip`,
+  `StripScrollerRoom`'s `floor`), and a surface whose shadow reaches an
+  opaque sibling raises its own `zIndex`, which the modifier cannot
+  since a `Button` label stops the trait. A tile on a ground other than
+  `card` owes a choice, since the rise fills under it: the setup tour
+  passes `PaletteTile`'s `rises: false`. Anything else clickable takes
   the fill. A searchable dropdown's
   `DropdownCursor` IS the selection Return reads, so real
   pointer motion may move it there (`DropdownCursorWiringTests`)
@@ -2200,7 +2209,8 @@ work), so a tour row cut at its edge is the only cue there.
 **A strip's content in those two trees clears an overlay scroller
 through the one `StripScrollerRoom`, inside the `ScrollView`**, handed
 that strip's content width and viewport (`StripScrollerTests` ▸
-`clearance`, `clearanceHome`), never a bottom padding of its own
+`clearance`, `clearanceHome`), a room it must always keep passed as
+its `floor` (#3042), never a bottom padding of its own
 beside it, which review holds in Settings since those needles do not
 see one there, and `StripScrollerTests` holds in the tour's rows. A
 new sideways strip in the tour joins that suite's `tourHolders`. As

@@ -57,7 +57,8 @@ struct OnboardingLookRow: View {
                         "looks.applied_other_colors",
                         "Applied, with other colors"
                     ) : nil,
-                captionLines: 3
+                captionLines: 3,
+                rises: false
             ) {
                 LookPlate(settings: preview(look), spaceLabels: spaceLabels)
             }
@@ -124,7 +125,11 @@ struct OnboardingPaletteRow: View {
         return Button {
             pick(palette)
         } label: {
-            PaletteTile(name: palette.name, isApplied: isApplied) {
+            PaletteTile(
+                name: palette.name,
+                isApplied: isApplied,
+                rises: false
+            ) {
                 PaletteSceneThumbnail(
                     palette: palette,
                     drawsBorder: live.kiwishelf.border,

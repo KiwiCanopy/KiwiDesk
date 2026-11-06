@@ -52,6 +52,7 @@ struct GestureStripTests {
             GestureItem.allCases.reduce(CGFloat(0)) {
                 $0 + GestureStrip.leading(of: $1)
             } + CGFloat(GestureItem.allCases.count) * Self.plate.width
+            + 2 * GestureStrip.endRoom
         let viewport: CGFloat = 664
         let rest = Self.fades(offset: 0, viewport: viewport)
         #expect(rest.leading == 0)
@@ -130,11 +131,15 @@ struct GestureStripTests {
         let plate = try Self.squashed(
             Self.gestures + "GestureStripPlate.swift"
         )
-        let cue = try #require(
-            plate.range(of: "GestureStripHoverCue(onTap:")
+        // The fade stays inside the cue's closure, so the edge laid
+        // over the content stays whole on an off gesture.
+        let closure = try #require(
+            SourceScan.declarationBody(
+                after: "){GesturePlate",
+                in: plate
+            )
         )
-        let fade = try #require(plate.range(of: ".opacity(item.isOff"))
-        #expect(cue.upperBound < fade.lowerBound)
+        #expect(closure.contains(".opacity(item.isOff"))
         let view = try Self.squashed(
             Self.gestures + "GestureStripHoverCue.swift"
         )
@@ -148,6 +153,8 @@ struct GestureStripTests {
             )
         )
         #expect(view.contains("privateletcontent:Content"))
+        // The view itself never fades out of hit-testing.
+        #expect(!view.contains(").opacity("))
         // The edge lies over the stored picture, whose body the hover
         // never reaches.
         #expect(!view.contains("picture("))

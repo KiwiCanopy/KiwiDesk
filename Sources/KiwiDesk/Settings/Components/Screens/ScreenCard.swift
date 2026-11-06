@@ -37,6 +37,14 @@ struct ScreenCard: View {
         .background(dropWash)
         .background(plate)
         .overlay(border)
+        .overlay(
+            SelectionStroke(
+                selected: isSelected,
+                shape: RoundedRectangle(cornerRadius: 6),
+                style: .tint,
+                lineWidth: SettingsTheme.screenCardStrokeSelected
+            )
+        )
         .clipShape(RoundedRectangle(cornerRadius: 6))
         // Main screen accent glow (#758, ui-designer 2026-08-09).
         .compositingGroup()
@@ -200,15 +208,15 @@ struct ScreenCard: View {
     private var border: some View {
         RoundedRectangle(cornerRadius: 6)
             .strokeBorder(
-                isSelected || targeted
+                targeted
                     ? AnyShapeStyle(.tint)
                     : AnyShapeStyle(
                         risen
                             ? SettingsTheme.hoverEdge
                             : SettingsTheme.ink3.opacity(0.5)
                     ),
-                lineWidth: isSelected
-                    ? SettingsTheme.screenCardStrokeSelected
+                lineWidth: risen
+                    ? SettingsTheme.hoverEdgeStroke
                     : SettingsTheme.screenCardStroke
             )
     }

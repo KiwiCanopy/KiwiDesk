@@ -43,6 +43,8 @@ struct LayoutStrip: View {
                 tile(mode)
                     .focused($focused, equals: mode)
                     .id(mode)
+                    // Over the next tile, which would cover the shadow.
+                    .zIndex(hovered == mode ? 1 : 0)
             }
         }
         .padding(Self.ringRoom)
@@ -65,14 +67,20 @@ struct LayoutStrip: View {
                         model.config.settings,
                         in: RoundedRectangle(cornerRadius: 6)
                     )
-                Label(
-                    mode.displayName,
-                    systemImage: selected ? "checkmark" : mode.symbol
-                )
-                .font(.subheadline)
-                .labelStyle(.titleAndIcon)
-                .lineLimit(1)
-                .minimumScaleFactor(0.8)
+                HStack(spacing: 3) {
+                    if selected {
+                        Image(systemName: "checkmark")
+                            .font(.caption2.weight(.semibold))
+                            .transition(.opacity)
+                            .accessibilityHidden(true)
+                    }
+                    Label(mode.displayName, systemImage: mode.symbol)
+                        .font(.subheadline)
+                        .labelStyle(.titleAndIcon)
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                }
+                .selectionFade(selected)
                 Text(usageText(mode))
                     .font(.caption)
                     .foregroundStyle(SettingsTheme.ink2)
@@ -105,15 +113,19 @@ struct LayoutStrip: View {
             .overlay(
                 RoundedRectangle(cornerRadius: 8)
                     .strokeBorder(
-                        selected
-                            ? SettingsTheme.accent
-                            : risen
-                                ? SettingsTheme.hoverEdge
-                                : SettingsTheme.ink2.opacity(0.25),
-                        lineWidth: selected
-                            ? 2
-                            : risen ? SettingsTheme.hoverEdgeStroke : 1
+                        risen
+                            ? SettingsTheme.hoverEdge
+                            : SettingsTheme.ink2.opacity(0.25),
+                        lineWidth: risen ? SettingsTheme.hoverEdgeStroke : 1
                     )
+            )
+            .overlay(
+                SelectionStroke(
+                    selected: selected,
+                    shape: RoundedRectangle(cornerRadius: 8),
+                    style: SettingsTheme.accent,
+                    lineWidth: 2
+                )
             )
     }
 

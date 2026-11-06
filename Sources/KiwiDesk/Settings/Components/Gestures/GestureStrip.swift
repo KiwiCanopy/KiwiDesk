@@ -16,6 +16,7 @@ struct GestureStrip: View {
     /// Between two pictures of a group, and between two groups.
     nonisolated static let gap: CGFloat = 10
     nonisolated static let groupGap: CGFloat = 24
+    nonisolated static let endRoom = SettingsTheme.hoverRiseShadowRadius
 
     var body: some View {
         SidewaysStrip(run: Self.run) {
@@ -30,7 +31,11 @@ struct GestureStrip: View {
                     .padding(.leading, Self.leading(of: item))
                 }
             }
+            // A risen end picture's shadow, inside the clip, given
+            // back outside so the row still lines up.
+            .padding(.horizontal, Self.endRoom)
         }
+        .padding(.horizontal, -Self.endRoom)
         .accessibilityHidden(true)
     }
 
@@ -56,7 +61,8 @@ struct GestureStrip: View {
         return StripRun(
             lengths: lengths,
             gap: gap,
-            depth: GesturePlate<EmptyView>.size.height
+            depth: GesturePlate<EmptyView>.size.height,
+            endRoom: endRoom
         )
     }
 }

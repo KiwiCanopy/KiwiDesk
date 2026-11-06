@@ -98,9 +98,12 @@ struct ScreensChromeWiringTests {
         )
         #expect(
             card.contains(
-                "SettingsTheme.screenCardStrokeSelected"
-                    + ":SettingsTheme.screenCardStroke)"
-            ),
+                "lineWidth:SettingsTheme.screenCardStrokeSelected"
+            )
+                && card.contains(
+                    "lineWidth:risen?SettingsTheme.hoverEdgeStroke"
+                        + ":SettingsTheme.screenCardStroke)"
+                ),
             Comment(
                 rawValue:
                     "ScreenCard's border no longer takes both "

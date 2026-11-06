@@ -84,29 +84,22 @@ struct PaletteShelfChromeTests {
         let tile = try squashed("PaletteTile.swift")
         #expect(
             tile.contains(
-                "SettingsTheme.paletteCardStrokeApplied"
-                    + ":risen?SettingsTheme.hoverEdgeStroke"
-                    + ":SettingsTheme.paletteCardStroke"
-            ),
+                "lineWidth:SettingsTheme.paletteCardStrokeApplied"
+            )
+                && tile.contains(
+                    "risen?SettingsTheme.hoverEdgeStroke"
+                        + ":SettingsTheme.paletteCardStroke"
+                ),
             Comment(
                 rawValue:
                     "the tile's frame no longer takes both "
                     + "weights from SettingsTheme"
             )
         )
-        let ink = try Regex(
-            #"AnyShapeStyle\(SettingsTheme\.(\w+)\)"#
-                + #":AnyShapeStyle\(risen\?SettingsTheme\.\w+"#
-                + #":SettingsTheme\.(\w+)\)"#
-        )
-        let arms = try #require(
-            tile.firstMatch(of: ink)?.output,
-            "the applied frame no longer switches its theme ink"
-        )
-        #expect(
-            arms[1].substring != arms[2].substring,
-            "the applied and plain frames draw one ink"
-        )
+        // The applied stroke is its own layer, in its own ink.
+        #expect(tile.contains("SelectionStroke(selected:isApplied"))
+        #expect(tile.contains("style:SettingsTheme.accent"))
+        #expect(tile.contains("risen?SettingsTheme.hoverEdge:"))
         // The mark itself, and the slot that keeps names aligned
         // when it is absent.
         #expect(tile.contains("opacity(isApplied?1:0)"))
@@ -247,6 +240,6 @@ struct PaletteShelfChromeTests {
     func hoverRaisesATile() throws {
         let tile = try squashed("PaletteTile.swift")
         #expect(tile.contains(".onHover{hovered=$0}"))
-        #expect(tile.contains("risen?SettingsTheme.hoverEdge"))
+        #expect(tile.contains("risen?SettingsTheme.hoverEdge:"))
     }
 }

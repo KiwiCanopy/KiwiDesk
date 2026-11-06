@@ -3,8 +3,8 @@ import SwiftUI
 /// A strip picture's pointer half (#2537): the click that lands on
 /// its entry, and under the pointer the hover edge, the rise and the
 /// pointing hand, the one cue that the picture is a link (#3042). The
-/// faded picture arrives as a stored value, so a hover redraws this
-/// view and never rebuilds the picture (owner ruling 2026-10-18).
+/// faded picture arrives as a stored value, so a hover moves its frame
+/// and never rebuilds or animates it (#2537).
 struct GestureStripHoverCue<Content: View>: View {
     let onTap: () -> Void
     private let content: Content
@@ -33,5 +33,7 @@ struct GestureStripHoverCue<Content: View>: View {
             .onTapGesture(perform: onTap)
             .onHover { hovering = $0 }
             .pointingHandCursor()
+            // Over the next picture, which would cover the shadow.
+            .zIndex(hovering ? 1 : 0)
     }
 }

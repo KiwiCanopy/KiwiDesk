@@ -136,8 +136,9 @@ struct StripScrollerTests {
         let home = try #require(takers["StripScrollerRoom.swift"])
         #expect(
             home.contains(
-                ".padding(.bottom,Self.room(contentWidth:contentWidth,"
-                    + "viewport:viewport,style:style))"
+                ".padding(.bottom,max(floor,Self.room("
+                    + "contentWidth:contentWidth,"
+                    + "viewport:viewport,style:style)))"
             )
         )
         #expect(
@@ -149,7 +150,8 @@ struct StripScrollerTests {
             takers["SidewaysStrip.swift"]?.contains(
                 "ScrollView(.horizontal){content"
                     + ".modifier(StripScrollerRoom("
-                    + "contentWidth:run.total,viewport:scroll.viewport))"
+                    + "contentWidth:run.total,viewport:scroll.viewport,"
+                    + "floor:SettingsTheme.hoverRiseShadowRoom))"
             ) == true
         )
         #expect(

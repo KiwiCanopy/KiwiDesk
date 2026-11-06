@@ -29,12 +29,12 @@ struct SidewaysStrip<ID: Hashable, Content: View>: View {
                     .modifier(
                         StripScrollerRoom(
                             contentWidth: run.total,
-                            viewport: scroll.viewport
+                            viewport: scroll.viewport,
+                            floor: SettingsTheme.hoverRiseShadowRoom
                         )
                     )
-                    // The scroller clips a risen tile and its shadow.
+                    // The scroller clips a risen tile's top edge.
                     .padding(.top, SettingsTheme.hoverRise)
-                    .padding(.bottom, SettingsTheme.hoverRiseShadowRoom)
                     .onGeometryChange(for: CGFloat.self) {
                         -$0.frame(in: .named(stripSpace)).minX
                     } action: {

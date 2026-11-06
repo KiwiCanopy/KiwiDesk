@@ -15,6 +15,9 @@ struct PaletteTile<Plate: View>: View {
     /// Lines the caption wraps to, reserved so a row of tiles
     /// ends level; zero draws no caption line at all.
     var captionLines = 1
+    /// False keeps the hover edge and drops the rise: the setup tour
+    /// sits on `page` in scrollers with no room for one (#3042).
+    var rises = true
     @ViewBuilder var plate: () -> Plate
     @State private var hovered = false
     @Environment(\.isEnabled) private var isEnabled
@@ -45,8 +48,18 @@ struct PaletteTile<Plate: View>: View {
         .padding(Self.inset)
         .frame(maxWidth: .infinity)
         .overlay(frame)
+        .overlay(
+            SelectionStroke(
+                selected: isApplied,
+                shape: RoundedRectangle(
+                    cornerRadius: SettingsTheme.disclosureRadius
+                ),
+                style: SettingsTheme.accent,
+                lineWidth: SettingsTheme.paletteCardStrokeApplied
+            )
+        )
         .hoverRise(
-            risen,
+            risen && rises,
             in: RoundedRectangle(
                 cornerRadius: SettingsTheme.disclosureRadius
             )
@@ -66,6 +79,7 @@ struct PaletteTile<Plate: View>: View {
                 .font(.caption2.weight(.semibold))
                 .foregroundStyle(SettingsTheme.ink)
                 .opacity(isApplied ? 1 : 0)
+                .selectionFade(isApplied)
                 .accessibilityLabel(
                     appliedSpoken ?? L("palettes.applied", "Applied")
                 )
@@ -92,17 +106,11 @@ struct PaletteTile<Plate: View>: View {
             cornerRadius: SettingsTheme.disclosureRadius
         )
         .strokeBorder(
-            isApplied
-                ? AnyShapeStyle(SettingsTheme.accent)
-                : AnyShapeStyle(
-                    risen ? SettingsTheme.hoverEdge : SettingsTheme.hairline
-                ),
+            risen ? SettingsTheme.hoverEdge : SettingsTheme.hairline,
             style: StrokeStyle(
-                lineWidth: isApplied
-                    ? SettingsTheme.paletteCardStrokeApplied
-                    : risen
-                        ? SettingsTheme.hoverEdgeStroke
-                        : SettingsTheme.paletteCardStroke,
+                lineWidth: risen
+                    ? SettingsTheme.hoverEdgeStroke
+                    : SettingsTheme.paletteCardStroke,
                 dash: dashed ? [4] : []
             )
         )

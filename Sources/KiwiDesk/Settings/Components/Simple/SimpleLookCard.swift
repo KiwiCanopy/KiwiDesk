@@ -45,8 +45,11 @@ struct SimpleLookCard: View {
                         in: entries
                     )
                 ) {
-                    line(entries)
+                    // A risen end tile's shadow, inside the clip, given
+                    // back outside so the row still lines up.
+                    line(entries).padding(.horizontal, Self.endRoom)
                 }
+                .padding(.horizontal, -Self.endRoom)
             }
             CrossReferenceRow(
                 prose: Self.hintProse,
@@ -101,9 +104,13 @@ struct SimpleLookCard: View {
                 if case .hairline = $0 { hairline } else { tileWidth }
             },
             gap: gap,
-            depth: PaletteTile<EmptyView>.plateHeight
+            depth: PaletteTile<EmptyView>.plateHeight,
+            endRoom: endRoom
         )
     }
+
+    nonisolated private static let endRoom =
+        SettingsTheme.hoverRiseShadowRadius
 
     /// The Tab-focused tile, which the strip scrolls clear of the fade.
     /// Focus holds an entry's id: a user look may share a bundled name.

@@ -494,6 +494,11 @@ override resets), never a normal row action. Native macOS
 shape differences between these classes are intentional —
 choose by semantic role, not by a desired silhouette.
 
+:::unreleased
+A tile or card is the one other button that casts a shadow: it rises
+under the pointer (*Hover confirms custom hit areas*, #3042).
+:::
+
 **The exception is a button filled with the app's own accent,
 and it is about ink rather than silhouette.**
 `.borderedProminent` picks its own label colour, white on
@@ -574,8 +579,8 @@ label, the ink staying neutral (the accent marks fills, never
 text); the rest fill, its
 lift and its press sit on a layer of their own beneath that, so
 pointing at or pressing the marked chip never unmarks it, and
-the edge stays the same neutral line in every state. Like every
-button it takes no shadow. A chip is a button, the marked one
+the edge stays the same neutral line in every state. It takes no
+shadow. A chip is a button, the marked one
 announced as selected, and the row is one container named
 and captioned "Jump to", the caption on a line of its own above
 the chips. A click puts the group's header under the bar, and
@@ -1247,12 +1252,16 @@ panel's other fills (#2725).
 (#3042).** Home cards, Layout, palette, look and dashed tiles, Screen
 cards and the gesture strip's pictures take `hoverEdge` at
 `hoverEdgeStroke` and rise on a shadow through `hoverRise(_:in:)`,
-with no fill change and a hit area that stays at rest. A selected
-stroke stays heavier. A selected tile stays flat, since its click
-changes nothing, and a selected Screen card rises, since its click
-deselects. A selected Layout tile shows a check in place of its
-layout symbol. Under Reduce Motion the rise arrives rather than
-travels. Everything else on this page keeps its fill.
+with no fill change and a hit area that stays at rest. They are the
+exception to the ban on movement and shadow on buttons above. A
+selected stroke stays heavier. A selected tile stays flat, since its
+click changes nothing, and a selected Screen card rises, since its
+click deselects. A selected Layout tile shows a check beside its name.
+A selected stroke and check fade in over 0.12 s (`SelectionStroke`,
+`selectionFade(_:)`).
+Under Reduce Motion the rise arrives rather than travels. The setup
+tour's tiles take the edge without the rise. A chip, a row, a KiwiHub
+item and a Space card's menu face keep their fill.
 :::
 
 A borderless value-menu or
