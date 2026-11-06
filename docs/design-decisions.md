@@ -6401,9 +6401,14 @@ naming the departed window and the return finds it maximized,
 while a close or a minimize ends it. A profile change keeps no
 rule of its own: a maximize ends where the new arrangement
 changes its Space's layout or files the window elsewhere, and
-stands where both stay. A sticky window is
-refused, since it draws on other Spaces' layouts too. It
-survives KiwiDesk's own in-place restart and not a Quit. Its motion is
+stands where both stay. A sticky window's flag sits on the Space
+it renders on, where its layout input already places it, so
+leaving that Space ends it (#3035): a traveler is never that
+Space's own focus (#431), so a return could not keep it, and a
+flag on the window would cover every Space and leave a switch
+nothing to show. It survives KiwiDesk's own in-place restart and
+not a Quit, save a traveler's, whose flag names no member of that
+Space at the replay. Its motion is
 the state-change animation ([a window changing
 state](#a-window-changing-state-animates-under-its-own-switch-2676)).
 Named "Maximize": "Zoom" and "Fill"

@@ -6,19 +6,22 @@ import Foundation
 /// leaves the tiled set or focus lands on another tiled member.
 extension StateCoordinator {
     /// The window `space` shows filling its screen, or nil: the
-    /// stored `Space.maximized` while that window is a tiled,
-    /// non-sticky member of a tiled layout and the Space's focus
-    /// anchor — a tiled traveler included — is on it, or on a
-    /// window the layout draws no slot for (a float).
+    /// stored `Space.maximized` while that window is drawn tiled
+    /// on a tiled layout, a traveler included, and the Space's
+    /// focus anchor is on it, or on a window the layout draws no
+    /// slot for (a float). A traveler is never `space.focused`
+    /// (#431), so it asks the system focus itself, and focus on
+    /// another screen keeps it (#3035).
     public func maximizedWindow(of space: Space) -> WindowID? {
-        guard let id = space.maximized, space.mode != .floating,
-            windows[id]?.isSticky == false,
-            localTiledMembers(of: space).contains(id)
-        else { return nil }
         let tiled = effectiveTiledMembers(of: space)
-        if let anchor = focusAnchor(of: space, tiled: tiled),
-            anchor != id, tiled.contains(anchor)
-        {
+        guard let id = space.maximized, space.mode != .floating,
+            tiled.contains(id)
+        else { return nil }
+        let rival =
+            space.windows.contains(id)
+            ? focusAnchor(of: space, tiled: tiled)
+            : workspaces.lastFocused
+        if let rival, rival != id, tiled.contains(rival) {
             return nil
         }
         return id

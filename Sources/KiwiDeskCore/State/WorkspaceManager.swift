@@ -243,7 +243,17 @@ public struct WorkspaceManager: Sendable {
         if lastFocused == window { lastFocused = nil }
         if focusReturnCandidate == window { focusReturnCandidate = nil }
         guard let id = space(of: window) else { return }
+        let held = spaces[id]?.focused == window && lastFocused == nil
         spaces[id]?.remove(window)
+        // A window closing over a maximized traveler hands focus
+        // back to it: `Space.remove` keeps its member-only hand-back
+        // (#431), and the traveler's maximize is lost otherwise
+        // (#3035).
+        if held, let traveler = spaces[id]?.maximized,
+            spaces[id]?.windows.contains(traveler) == false
+        {
+            lastFocused = traveler
+        }
     }
 
     /// Re-keys window ID preserving slot and focus (#308).

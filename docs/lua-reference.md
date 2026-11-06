@@ -5781,7 +5781,14 @@ puts it back first, then acts, and a mouse drag of it puts it
 back; a command that refuses leaves it as it is. Focus on a
 floating window, a switch to another Space or Desktop and back,
 or KiwiDesk's own restart leaves it filling the screen. Fails on
-a floating or sticky window. Bound to `⌃⌥M` by default.
+a floating window. Bound to `⌃⌥M` by default.
+
+:::unreleased
+A sticky window fills the screen of the Space it is drawn on. Its
+maximize ends when you leave that Space, and it does not come back
+when you return. KiwiDesk's own restart ends it too while the
+window is away from its home Space.
+:::
 
 **Example:**
 

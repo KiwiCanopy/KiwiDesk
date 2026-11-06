@@ -142,9 +142,9 @@ public struct Space: Sendable, Equatable {
     /// The last shown window of each such run that hides windows
     /// after it (#2235), the run's other end.
     public var runTails: Set<WindowID>
-    /// The member filling its screen until focus moves to another
-    /// tiled member or it leaves the tiled set (#2448); read
-    /// through `StateCoordinator.maximizedWindow(of:)`. Session-only.
+    /// The window filling its screen (a traveler's too, #3035) until
+    /// focus moves to another tiled window or it leaves the tiled set
+    /// (#2448): read `StateCoordinator.maximizedWindow(of:)`. Session-only.
     public var maximized: WindowID?
 
     public init(
