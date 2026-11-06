@@ -151,7 +151,7 @@ struct StripScrollerTests {
                 "ScrollView(.horizontal){content"
                     + ".modifier(StripScrollerRoom("
                     + "contentWidth:run.total,viewport:scroll.viewport,"
-                    + "floor:SettingsTheme.hoverRiseShadowRoom))"
+                    + "floor:SettingsTheme.hoverShadowRoom))"
             ) == true
         )
         #expect(

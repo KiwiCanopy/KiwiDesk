@@ -215,10 +215,10 @@ struct HoverRiseAdoptionTests {
     func stripLeavesRoom() throws {
         let strip = try squashed("Components/Common/SidewaysStrip.swift")
         #expect(
-            strip.contains(".padding(.top,SettingsTheme.hoverRiseTopRoom)")
+            strip.contains(".padding(.top,SettingsTheme.hoverTopRoom)")
         )
         #expect(
-            strip.contains("floor:SettingsTheme.hoverRiseShadowRoom")
+            strip.contains("floor:SettingsTheme.hoverShadowRoom")
         )
     }
 

@@ -107,7 +107,7 @@ struct SimpleLookCard: View {
     }
 
     nonisolated private static let endRoom =
-        SettingsTheme.hoverRiseShadowRadius
+        SettingsTheme.hoverShadowRadius
 
     /// The Tab-focused tile, which the strip scrolls clear of the fade.
     /// Focus holds an entry's id: a user look may share a bundled name.

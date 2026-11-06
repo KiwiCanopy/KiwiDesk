@@ -16,7 +16,7 @@ extension LayoutStrip {
     /// Room past the end tiles for a focus ring and a risen tile's
     /// shadow, inside the clip.
     nonisolated static let ringRoom: CGFloat =
-        SettingsTheme.hoverRiseShadowRadius
+        SettingsTheme.hoverShadowRadius
 
     /// Factor from `SchematicScale.tile` down to the strip's size.
     nonisolated static var schematicFactor: CGFloat {

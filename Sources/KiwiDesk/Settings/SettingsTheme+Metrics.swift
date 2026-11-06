@@ -51,14 +51,14 @@ extension SettingsTheme {
     /// under every selected stroke, its rise and its shadow.
     static let hoverEdgeStroke: CGFloat = 1.5
     static let hoverRise: CGFloat = 2
-    static let hoverRiseShadowRadius: CGFloat = 8
-    static let hoverRiseShadowDrop: CGFloat = 6
+    static let hoverShadowRadius: CGFloat = 8
+    static let hoverShadowDrop: CGFloat = 6
     /// Below and above a clipped row of tiles, so a risen tile and its
     /// shadow show.
-    static let hoverRiseShadowRoom: CGFloat =
-        hoverRiseShadowRadius + hoverRiseShadowDrop
-    static let hoverRiseTopRoom: CGFloat =
-        hoverRise + hoverRiseShadowRadius - hoverRiseShadowDrop
+    static let hoverShadowRoom: CGFloat =
+        hoverShadowRadius + hoverShadowDrop
+    static let hoverTopRoom: CGFloat =
+        hoverRise + hoverShadowRadius - hoverShadowDrop
 
     /// Notice strip accent fill opacity (`WhatsNewTrailBanner`).
     static let noticeFillOpacity: CGFloat = 0.12

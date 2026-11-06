@@ -11,7 +11,7 @@ struct ScreensPicture: View {
     private static let canvasHeight: CGFloat = 248
     /// Room inside the clip for a risen card's shadow and the main
     /// card's glow.
-    private static let inset = SettingsTheme.hoverRiseShadowRadius
+    private static let inset = SettingsTheme.hoverShadowRadius
     private static let standBand: CGFloat = 16
 
     var body: some View {

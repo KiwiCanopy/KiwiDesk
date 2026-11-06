@@ -30,13 +30,13 @@ struct SidewaysStrip<ID: Hashable, Content: View>: View {
                         StripScrollerRoom(
                             contentWidth: run.total,
                             viewport: scroll.viewport,
-                            floor: SettingsTheme.hoverRiseShadowRoom
+                            floor: SettingsTheme.hoverShadowRoom
                         )
                     )
                     // Inside the clip: a risen tile and its shadow, and
                     // past the ends the run's room, given back outside
                     // so the row still lines up.
-                    .padding(.top, SettingsTheme.hoverRiseTopRoom)
+                    .padding(.top, SettingsTheme.hoverTopRoom)
                     .padding(.horizontal, run.endRoom)
                     .onGeometryChange(for: CGFloat.self) {
                         -$0.frame(in: .named(stripSpace)).minX

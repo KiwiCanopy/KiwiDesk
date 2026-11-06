@@ -16,7 +16,7 @@ struct GestureStrip: View {
     /// Between two pictures of a group, and between two groups.
     nonisolated static let gap: CGFloat = 10
     nonisolated static let groupGap: CGFloat = 24
-    nonisolated static let endRoom = SettingsTheme.hoverRiseShadowRadius
+    nonisolated static let endRoom = SettingsTheme.hoverShadowRadius
 
     var body: some View {
         SidewaysStrip(run: Self.run) {

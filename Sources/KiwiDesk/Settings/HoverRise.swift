@@ -18,8 +18,8 @@ private struct HoverRise<S: Shape>: ViewModifier {
                     .fill(SettingsTheme.card)
                     .shadow(
                         color: SettingsTheme.hoverRiseShadow,
-                        radius: SettingsTheme.hoverRiseShadowRadius,
-                        y: SettingsTheme.hoverRiseShadowDrop
+                        radius: SettingsTheme.hoverShadowRadius,
+                        y: SettingsTheme.hoverShadowDrop
                     )
                     .opacity(risen ? 1 : 0)
                     .allowsHitTesting(false)
