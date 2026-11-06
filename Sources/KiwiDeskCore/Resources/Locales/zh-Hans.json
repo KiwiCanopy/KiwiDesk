@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "滑动时长",
   "animations.space_slide_duration.help": "薄板滑向你要切换到的空间所需的时间。时长越长，速度越慢。",
   "animations.space_transition": "空间切换",
+  "animations.space_transition.help": "除鼠标或触控板切换外的所有空间切换；前者在下方有单独一行。",
   "animations.space_transition.none": "无",
   "animations.space_transition.none.caption": "屏幕会立即切换。",
   "animations.space_transition.show": "显示空间",

@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "슬라이드 지속 시간",
   "animations.space_slide_duration.help": "판이 전환하는 공간으로 슬라이드하는 데 걸리는 시간입니다. 지속 시간이 길수록 느려집니다.",
   "animations.space_transition": "공간 전환",
+  "animations.space_transition.help": "마우스 또는 트랙패드로 하는 이동을 제외한 모든 공간 전환입니다. 그 이동은 아래에 별도의 행이 있습니다.",
   "animations.space_transition.none": "없음",
   "animations.space_transition.none.caption": "화면이 즉시 바뀝니다.",
   "animations.space_transition.show": "공간 표시",

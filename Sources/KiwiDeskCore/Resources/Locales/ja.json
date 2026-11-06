@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "スライドの継続時間",
   "animations.space_slide_duration.help": "プレートが切り替え先のスペースへスライドするのにかかる時間です。継続時間が長いほど遅くなります。",
   "animations.space_transition": "スペースの切り替え",
+  "animations.space_transition.help": "マウスまたはトラックパッドでの移動を除く、すべてのスペースの切り替えです。その移動には下に専用の行があります。",
   "animations.space_transition.none": "なし",
   "animations.space_transition.none.caption": "画面がすぐに切り替わります。",
   "animations.space_transition.show": "スペースを表示",

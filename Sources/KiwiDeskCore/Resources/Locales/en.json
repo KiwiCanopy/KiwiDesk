@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "Slide duration",
   "animations.space_slide_duration.help": "How long the plates take to slide to the Space you're switching to. A longer duration is slower.",
   "animations.space_transition": "Space switches",
+  "animations.space_transition.help": "Every Space switch except a mouse or trackpad step, which has its own row below.",
   "animations.space_transition.none": "None",
   "animations.space_transition.none.caption": "The screen changes at once.",
   "animations.space_transition.show": "Show the Space",

@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "Gleitdauer",
   "animations.space_slide_duration.help": "Wie lange die Flächen brauchen, um in den Space zu gleiten, zu dem du wechselst. Eine längere Dauer ist langsamer.",
   "animations.space_transition": "Space-Wechsel",
+  "animations.space_transition.help": "Jeder Space-Wechsel außer einem Schritt mit Maus oder Trackpad, der seine eigene Zeile darunter hat.",
   "animations.space_transition.none": "Ohne",
   "animations.space_transition.none.caption": "Der Bildschirm wechselt sofort.",
   "animations.space_transition.show": "Den Space zeigen",

@@ -204,7 +204,10 @@ extension ColoursKey {
                 help: "behavior.animations.master.help"
             )
         case .spaceTransition:
-            return .text("animations.space_transition")
+            return .text(
+                "animations.space_transition",
+                help: "animations.space_transition.help"
+            )
         case .spaceScrollTransition:
             return .text("animations.space_scroll_transition")
         case .spaceSlideDuration:

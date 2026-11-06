@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "Длительность скольжения",
   "animations.space_slide_duration.help": "Сколько времени пластины скользят к пространству, на которое ты переключаешься. Чем больше длительность, тем медленнее.",
   "animations.space_transition": "Переключение пространств",
+  "animations.space_transition.help": "Все переключения пространств, кроме перехода мышью или трекпадом, для которого ниже есть отдельная строка.",
   "animations.space_transition.none": "Нет",
   "animations.space_transition.none.caption": "Экран сменяется сразу.",
   "animations.space_transition.show": "Показ пространства",

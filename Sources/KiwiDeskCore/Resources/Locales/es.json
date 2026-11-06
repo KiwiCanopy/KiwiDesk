@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "Duración del deslizamiento",
   "animations.space_slide_duration.help": "Cuánto tardan las placas en deslizarse hasta el espacio al que cambias. Una duración mayor es más lenta.",
   "animations.space_transition": "Cambios de espacio",
+  "animations.space_transition.help": "Todos los cambios de espacio, salvo el paso con ratón o trackpad, que tiene su propia fila debajo.",
   "animations.space_transition.none": "Ninguno",
   "animations.space_transition.none.caption": "La pantalla cambia al instante.",
   "animations.space_transition.show": "Mostrar el espacio",

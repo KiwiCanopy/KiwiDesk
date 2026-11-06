@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "Durata dello scorrimento",
   "animations.space_slide_duration.help": "Quanto impiegano le piastre a scorrere verso lo spazio a cui passi. Una durata maggiore è più lenta.",
   "animations.space_transition": "Cambi di spazio",
+  "animations.space_transition.help": "Ogni cambio di spazio, tranne il passaggio con mouse o trackpad, che ha una riga propria qui sotto.",
   "animations.space_transition.none": "Nessuno",
   "animations.space_transition.none.caption": "Lo schermo cambia all'istante.",
   "animations.space_transition.show": "Mostra lo spazio",

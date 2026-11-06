@@ -46,6 +46,7 @@
   "animations.space_slide_duration": "Durée du glissement",
   "animations.space_slide_duration.help": "Le temps que mettent les plaques pour glisser jusqu'à l'espace vers lequel vous basculez. Une durée plus longue est plus lente.",
   "animations.space_transition": "Changements d'espace",
+  "animations.space_transition.help": "Tous les changements d'espace, sauf le passage à la souris ou au trackpad, qui a sa propre ligne en dessous.",
   "animations.space_transition.none": "Aucun",
   "animations.space_transition.none.caption": "L'écran change instantanément.",
   "animations.space_transition.show": "Afficher l'espace",

@@ -17,7 +17,12 @@ extension MotionCard {
         VStack(alignment: .leading, spacing: 4) {
             DropdownRow(
                 label: Self.spaceTransitionLabel,
-                spokenValue: Self.spaceTransitionTitle(style)
+                spokenValue: Self.spaceTransitionTitle(style),
+                help: L(
+                    "animations.space_transition.help",
+                    "Every Space switch except a mouse or trackpad step, "
+                        + "which has its own row below."
+                )
             ) {
                 Picker(
                     Self.spaceTransitionLabel,
