@@ -30,6 +30,9 @@ enum WindowActionRefusal: Equatable {
     case cannotSwapFloating
     /// A side is full screen, in its own macOS Space (#670).
     case cannotSwapFullScreen(window: String)
+    /// A Desktop move on a full-screen window, whose macOS Space
+    /// is its own (#670, #2888).
+    case cannotMoveFullScreen(window: String)
     /// KiwiHub's Swap here reaches no slot for the row: pocketed,
     /// a hidden app, minimized or on another Desktop (#2885).
     case cannotSwapHere(window: String)
@@ -108,6 +111,12 @@ enum WindowActionRefusal: Equatable {
                 "“%1$@” is full screen and can't be swapped",
                 window
             )
+        case .cannotMoveFullScreen(let window):
+            L(
+                "window_action.refusal.cannot_move_full_screen",
+                "“%1$@” is full screen and can't change Desktop",
+                window
+            )
         case .cannotSwapHere(let window):
             L(
                 "window_action.refusal.cannot_swap_here",
@@ -131,6 +140,8 @@ enum WindowActionRefusal: Equatable {
         case .nothingHereToSwap: "no focused window to swap with"
         case .cannotSwapFloating: "a floating window cannot be swapped"
         case .cannotSwapFullScreen: "a full-screen window cannot be swapped"
+        case .cannotMoveFullScreen:
+            "a full-screen window cannot change Desktop"
         case .cannotSwapHere: "the window cannot be swapped here"
         }
     }

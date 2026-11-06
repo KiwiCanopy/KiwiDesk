@@ -542,6 +542,23 @@ KiwiDesk.move_to_desktop_and_follow(3)
 KiwiDesk.move_to_desktop_and_follow(3, "mail")
 ```
 
+:::unreleased
+`move_to_desktop` and `move_to_desktop_and_follow` take an optional
+window id from [`get_state`](#get_state) after the space, and then
+move that window rather than the focused one. Pass `nil` for the
+space to leave it out: `KiwiDesk.move_to_desktop(3, nil, 4711)`.
+`KiwiDesk.move_to_desktop(3, 4711)` names Space 4711, not a window.
+An id no managed window carries is refused, a window on another
+Desktop included.
+
+A window moved this way changes no focus, except that one filed
+into the current Space takes focus there. The follow ends with
+keyboard focus on the window you named, and shows its Space.
+
+Neither verb moves a **full-screen** window or a **pocket** window,
+named or focused: each refuses and the window stays on its Desktop.
+:::
+
 ### move_space_to_display
 
 **Expects:** a space identifier, then a screen reference — a

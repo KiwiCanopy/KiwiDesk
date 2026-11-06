@@ -62,11 +62,11 @@ struct DesktopMoveRehomeWiringTests {
     func theMoveRehomesAfterTheBridge() throws {
         let text = try desktopCommandsSource()
         let bridge = try #require(
-            text.range(of: "moveWindows([focused], to: target.space)")
+            text.range(of: "moveWindows([window], to: target.space)")
         )
         let call = try #require(
             text.range(
-                of: "rehomeAcrossScreens(focused, to: target)",
+                of: "rehomeAcrossScreens(window, to: target)",
                 range: bridge.upperBound..<text.endIndex
             )
         )
@@ -79,6 +79,24 @@ struct DesktopMoveRehomeWiringTests {
             )
         )
         #expect(call.upperBound < follow.lowerBound)
+    }
+
+    /// Every pid a burst collected is reconciled (#2888): the one
+    /// slot's last schedule fires alone, and no fixture sees a
+    /// reconcile of a fake pid's app.
+    @Test("the reap reconciles every collected app")
+    func theReapDrainsEveryPID() throws {
+        let text = try desktopCommandsSource()
+        let body = try #require(
+            SourceScan.declarationBody(
+                after: ".desktopMoveReap,",
+                in: text
+            )
+        )
+        let loop = try #require(
+            SourceScan.declarationBody(after: "for pid in pids", in: body)
+        )
+        #expect(loop.contains("reconcile(pid: pid"))
     }
 
     /// The re-home's own body, bounded by the declaration that

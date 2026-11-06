@@ -821,6 +821,13 @@ argument, a window `id` from `get_state`: they then act on that
 window rather than the focused one, and refuse an id no managed
 window carries (`kiwidesk make_floating 4711`).
 
+:::unreleased
+`move_to_desktop` and `move_to_desktop_and_follow` take the same
+window `id`, after the space id. An empty string leaves the space
+out: `kiwidesk move_to_desktop 3 "" 4711`. Neither moves a
+full-screen window or a pocket window, named or focused.
+:::
+
 `new_window` and `close_window` take the same optional window
 `id`. `new_window` presses that window's app's **File ▸ New
 Window**; `close_window` presses the window's close button. Both

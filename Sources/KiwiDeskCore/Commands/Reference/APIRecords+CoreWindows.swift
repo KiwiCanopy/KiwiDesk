@@ -75,16 +75,18 @@ extension APIReference {
             .desktop("desktop")
         ),
         "move_to_desktop": APIRecord(
-            "Moves the focused window to a macOS Desktop, and "
-                + "into a Space when one is named.",
+            "Moves the focused or named window to a macOS "
+                + "Desktop, and into a Space when one is named.",
             .desktop("desktop"),
-            .space("space", optional: true)
+            .space("space", optional: true),
+            .window("window", optional: true)
         ),
         "move_to_desktop_and_follow": APIRecord(
-            "Moves the focused window to a macOS Desktop, into "
-                + "a Space when named, and follows it.",
+            "Moves the focused or named window to a macOS "
+                + "Desktop, into a Space if named, and follows it.",
             .desktop("desktop"),
-            .space("space", optional: true)
+            .space("space", optional: true),
+            .window("window", optional: true)
         ),
         "move_space_to_display": APIRecord(
             "Moves a Space to another screen, named by number, "

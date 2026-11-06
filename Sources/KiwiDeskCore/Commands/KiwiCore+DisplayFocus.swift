@@ -191,7 +191,9 @@ extension KiwiCore {
     /// absent with it: it must follow the retile this twin does
     /// not own, and neither arm lands on a Space it un-stashes —
     /// the paid arrival rides a native Desktop reveal, the other
-    /// arm's Space is already shown (#1727). The #463 dropped-activate
+    /// arm's Space is already shown (#1727), a window with no
+    /// focus to keep or a Space to un-stash taking `followSwitch`
+    /// (#2888). The #463 dropped-activate
     /// SETTLE is deliberately absent on both: the paid arrival
     /// rides a native switch whose own desktop settle re-asserts
     /// the active space's focus 600 ms later, and the

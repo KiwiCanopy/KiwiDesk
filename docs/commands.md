@@ -25,8 +25,8 @@ Each action below can be bound to a key with `bind`. The link opens its argument
 | [`move_to_space`](lua-reference.md#move_to_space) | Moves the focused window, or the one a window id names, to a Space without following it. |
 | [`move_to_space_and_follow`](lua-reference.md#move_to_space_and_follow) | Moves the focused window, or the one a window id names, to a Space and switches to it. |
 | [`focus_desktop`](lua-reference.md#focus_desktop) | Switches to a macOS Desktop, exactly as a swipe would. |
-| [`move_to_desktop`](lua-reference.md#move_to_desktop) | Moves the focused window to a macOS Desktop, and into a Space when one is named. |
-| [`move_to_desktop_and_follow`](lua-reference.md#move_to_desktop_and_follow) | Moves the focused window to a macOS Desktop, into a Space when named, and follows it. |
+| [`move_to_desktop`](lua-reference.md#move_to_desktop) | Moves the focused or named window to a macOS Desktop, and into a Space when one is named. |
+| [`move_to_desktop_and_follow`](lua-reference.md#move_to_desktop_and_follow) | Moves the focused or named window to a macOS Desktop, into a Space if named, and follows it. |
 | [`move_space_to_display`](lua-reference.md#move_space_to_display) | Moves a Space to another screen, named by number, fingerprint or name, and shows it there. |
 | [`create_space`](lua-reference.md#create_space) | Makes a Space; temporary unless scope is profile, which may take the optional mode's place. |
 | [`delete_space`](lua-reference.md#delete_space) | Removes a Space after rehoming its windows; scope profile removes it from the profile too. |

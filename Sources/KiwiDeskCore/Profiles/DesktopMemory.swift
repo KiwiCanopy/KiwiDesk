@@ -188,6 +188,10 @@ final class DesktopMemory {
     /// override; a fixture's unstated reads stay live.
     var readDesktops: () -> DesktopSnapshot = NativeSpaces.desktopSnapshot
 
+    /// The apps a no-follow Desktop move's one reap still owes a
+    /// reconcile (#2888).
+    var moveReapPIDs: Set<pid_t> = []
+
     /// The native Space each screen shows, filed at the HEAD of
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).

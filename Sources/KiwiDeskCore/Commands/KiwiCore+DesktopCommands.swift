@@ -131,7 +131,10 @@ extension KiwiCore {
     }
 
     /// Parses the composed `space:` target of a Desktop MOVE
-    /// (#1150) — absent for the one-argument form. A Space
+    /// (#1150) — absent for the one-argument form, and for a
+    /// `null` or, ahead of a window id, an empty string: the CLI
+    /// sends only strings, so that is how it skips the Space
+    /// (#2888). A Space
     /// assigned to a screen other than the Desktop's is refused
     /// up front: the layout carries a window to its Space's
     /// screen, and macOS then re-assigns its Desktop to match,
@@ -149,7 +152,8 @@ extension KiwiCore {
         _ args: [JSONValue],
         for target: DesktopTarget
     ) -> SpaceTargetResolution {
-        guard args.count > 1 else { return .none }
+        guard args.count > 1, args[1] != .null else { return .none }
+        if args.count > 2, args[1].stringValue == "" { return .none }
         guard let raw = args[1].stringValue, !raw.isEmpty else {
             return .refused(.fail("expected space id"))
         }

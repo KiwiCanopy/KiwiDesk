@@ -1,0 +1,301 @@
+import Foundation
+import Testing
+
+@testable import KiwiDeskCore
+
+/// `move_to_desktop(N, space, window)` and its follow (#2888),
+/// through the real dispatch. The topology is the #888 fixture
+/// (Desktops 1–2 on `UUID-A`, ids 10/11; 3–4 on `UUID-B`, ids
+/// 20/21), Desktops 1 and 3 shown, so Desktop 2 is a HIDDEN target
+/// on the main screen and Desktop 1 a SHOWN one.
+///
+/// `WMBridge.classResolverOverride` is process-global; the same
+/// synchronous-body arrangement as `DesktopCommandTests` applies.
+@Suite("Desktop move naming a window (#2888)", .serialized)
+@MainActor
+struct DesktopMoveNamedWindowTests {
+    private let focused = WindowID(7)
+    private let named = WindowID(8)
+    private var id: JSONValue { .number(Double(named.raw)) }
+
+    private func makeCore(bridge: Bool = true) -> KiwiCore {
+        DesktopVerbBridge.reset()
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
+        NativeSpaces.activeSpaceIDOverride = 10
+        pinTwoDisplays()
+        WMBridge.classResolverOverride = {
+            bridge ? desktopVerbBridgeClasses[$0] : nil
+        }
+        let core = makeTestCore()
+        for (window, pid) in [(named, pid_t(2)), (focused, pid_t(1))] {
+            core.state.apply(
+                .windowCreated(
+                    ManagedWindow(id: window, pid: pid, appName: "App")
+                )
+            )
+        }
+        core.state.apply(.windowFocused(focused))
+        return core
+    }
+
+    private func teardown() {
+        WMBridge.classResolverOverride = nil
+        resetAuthorityOverrides()
+    }
+
+    private func movedWindows() -> [[NSNumber]] {
+        DesktopVerbBridge.moves.map { $0.0 }
+    }
+
+    private func moved(_ window: WindowID) -> [[NSNumber]] {
+        [[NSNumber(value: window.raw)]]
+    }
+
+    /// Files `named` into Space `2`, leaving the focus alone.
+    private func parkNamed(_ core: KiwiCore) {
+        core.execute("move_to_space", args: [.string("2"), id])
+        #expect(core.state.workspaces.space(of: named) == SpaceID("2"))
+        #expect(core.focusedWindowID == focused)
+    }
+
+    // MARK: - The argument
+
+    @Test("a named window moves, and the focus stays")
+    func namedMoves() {
+        let core = makeCore()
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .null, id]
+        )
+        #expect(response.isSuccess)
+        #expect(movedWindows() == moved(named))
+        #expect(core.focusedWindowID == focused)
+        #expect(core.moveLatch.isLatched(named))
+        #expect(!core.moveLatch.isLatched(focused))
+    }
+
+    @Test("no window argument still moves the focus")
+    func unnamedMovesTheFocus() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(core.execute("move_to_desktop", args: [.number(2)]).isSuccess)
+        #expect(movedWindows() == moved(focused))
+    }
+
+    @Test("the capability answers a named call first")
+    func capabilityFirst() {
+        let core = makeCore(bridge: false)
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .null, .number(99)]
+        )
+        #expect(response.error == "desktop bridge unavailable on this macOS")
+    }
+
+    @Test("a bad Desktop number answers ahead of an unknown window")
+    func desktopParseFirst() {
+        let core = makeCore()
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(9), .null, .number(99)]
+        )
+        #expect(response.error == "no Desktop 9")
+    }
+
+    @Test("an empty Space is skipped only ahead of a window")
+    func cliSkipSpelling() {
+        let core = makeCore()
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.string("2"), .string(""), .string("\(named.raw)")]
+        )
+        #expect(response.isSuccess)
+        #expect(movedWindows() == moved(named))
+        let bare = core.execute(
+            "move_to_desktop",
+            args: [.string("2"), .string("")]
+        )
+        #expect(bare.error == "expected space id")
+    }
+
+    @Test("Lua skips the Space with nil")
+    func luaSkipsWithNil() {
+        let core = makeCore()
+        defer { teardown() }
+        core.loadConfig()
+        _ = core.lua?.run(
+            "KiwiDesk.move_to_desktop(2, nil, \(named.raw))"
+        )
+        #expect(movedWindows() == moved(named))
+    }
+
+    @Test("a named Space is pending for the named window")
+    func pendingSpaceTakesTheName() {
+        let core = makeCore()
+        defer { teardown() }
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .string("mail"), id]
+        )
+        #expect(response.isSuccess)
+        #expect(
+            lines.contains {
+                $0.contains("w\(named.raw) will join space mail")
+            }
+        )
+    }
+
+    // MARK: - The window's refusals
+
+    @Test("a full-screen window refuses in both forms")
+    func fullScreenRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        core.state.apply(.windowFullscreenChanged(named, isFullscreen: true))
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .null, id]
+        )
+        #expect(response.error == "window \(named.raw) is full screen")
+        core.state.apply(.windowFullscreenChanged(focused, isFullscreen: true))
+        let unnamed = core.execute("move_to_desktop", args: [.number(2)])
+        #expect(unnamed.error == "window \(focused.raw) is full screen")
+        #expect(movedWindows().isEmpty)
+    }
+
+    @Test("a pocketed window refuses and is filed nowhere")
+    func pocketedRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        core.execute("pocket")
+        let window = focused
+        #expect(core.state.isPocketed(window))
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(1), .string("mail"), .number(Double(window.raw))]
+        )
+        #expect(response.error == "window \(window.raw) is in the pocket")
+        #expect(core.state.workspaces.space(of: window) == nil)
+        #expect(movedWindows().isEmpty)
+    }
+
+    @Test("an out pocket window refuses in both forms")
+    func outPocketRefuses() {
+        let core = makeCore()
+        defer { teardown() }
+        core.execute("toggle_pocket_window")
+        #expect(core.state.pocketPhase(of: focused) == .out)
+        let refusal = "window \(focused.raw) is a pocket window"
+        let unnamed = core.execute("move_to_desktop", args: [.number(2)])
+        #expect(unnamed.error == refusal)
+        let named = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(2), .null, .number(Double(focused.raw))]
+        )
+        #expect(named.error == refusal)
+        #expect(movedWindows().isEmpty)
+    }
+
+    // MARK: - Focus
+
+    @Test("a window filed into the active Space takes focus")
+    func filedIntoActiveTakesFocus() {
+        let core = makeCore()
+        defer { teardown() }
+        parkNamed(core)
+        let active = core.state.workspaces.activeSpace
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(1), .string(active?.raw ?? ""), id]
+        )
+        #expect(response.isSuccess)
+        #expect(core.state.workspaces.space(of: named) == active)
+        #expect(core.focusedWindowID == named)
+    }
+
+    @Test("a shown Desktop's move that files nothing keeps the focus")
+    func noFilingKeepsFocus() {
+        let core = makeCore()
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(1), .null, id]
+        )
+        #expect(response.isSuccess)
+        #expect(core.focusedWindowID == focused)
+    }
+
+    @Test("a hidden Desktop's move keeps the focus")
+    func hiddenKeepsFocus() {
+        let core = makeCore()
+        defer { teardown() }
+        let active = core.state.workspaces.activeSpace
+        let response = core.execute(
+            "move_to_desktop",
+            args: [.number(2), .string(active?.raw ?? ""), id]
+        )
+        #expect(response.isSuccess)
+        #expect(core.focusedWindowID == focused)
+    }
+
+    // MARK: - The follow
+
+    @Test("a follow onto a hidden Desktop owes the named window")
+    func followOwesTheNamedWindow() {
+        let core = makeCore()
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(2), .null, id]
+        )
+        #expect(response.isSuccess)
+        #expect(core.followFocus.claim(if: { $0 == named }) == named)
+    }
+
+    @Test("an already-shown follow of an unfocused window focuses it")
+    func alreadyShownFocusesIt() {
+        let core = makeCore()
+        defer { teardown() }
+        let response = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(1), .null, id]
+        )
+        #expect(response.isSuccess)
+        #expect(core.focusedWindowID == named)
+    }
+
+    @Test("an already-shown follow into a parked Space switches there")
+    func alreadyShownSwitchesToItsSpace() {
+        let core = makeCore()
+        defer { teardown() }
+        parkNamed(core)
+        let response = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(1), .null, id]
+        )
+        #expect(response.isSuccess)
+        #expect(core.state.workspaces.activeSpace == SpaceID("2"))
+        #expect(core.focusedWindowID == named)
+    }
+
+    // MARK: - The reap
+
+    @Test("a burst of named moves reaps every app")
+    func burstKeepsEveryPID() {
+        let core = makeCore()
+        defer { teardown() }
+        core.execute("move_to_desktop", args: [.number(2), .null, id])
+        core.execute("move_to_desktop", args: [.number(2)])
+        #expect(core.desktopMemory.moveReapPIDs == [1, 2])
+        #expect(core.deferred.isScheduled(.desktopMoveReap))
+    }
+}

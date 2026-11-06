@@ -9,8 +9,9 @@ import Foundation
 /// three outcome rulings, and the no-follow bookkeeping.
 extension KiwiCore {
     /// `move_to_desktop <n>` / `move_to_desktop_and_follow <n>`
-    /// (#25): moves the focused window to the Desktop, and with
-    /// `follow` switches there after it.
+    /// (#25): moves the focused window, or the one a window id
+    /// names (#2888), to the Desktop, and with `follow` switches
+    /// there after it.
     ///
     /// The move always dispatches: whether the window is already
     /// on that Desktop is not knowable from a target that is
@@ -39,6 +40,7 @@ extension KiwiCore {
     /// explicit `space:` IS a membership write, so it takes that
     /// one gate before anything moves (#1150).
     func moveToDesktop(
+        _ command: String,
         _ args: [JSONValue],
         follow: Bool
     ) -> CommandResponse {
@@ -46,9 +48,19 @@ extension KiwiCore {
         case .refused(let response):
             return response
         case .target(let target):
-            guard let focused = focusedWindowID else {
-                return .fail("no focused window")
+            let window: WindowID
+            switch commandTarget(command, args) {
+            case .refused(let response):
+                return response
+            case .window(let id):
+                window = id
             }
+            if let refusal = desktopMoveRefusal(window) {
+                return refusal
+            }
+            // Read before any filing, which stamps the focus.
+            let held = holdsFocus(window)
+            let from = state.workspaces.space(of: window)
             let explicit: SpaceID?
             switch resolveSpaceTarget(args, for: target) {
             case .refused(let response):
@@ -58,7 +70,7 @@ extension KiwiCore {
             case .space(let space, let landing):
                 guard
                     !stickyMoveRefused(
-                        focused,
+                        window,
                         to: space,
                         landingOn: landing
                     )
@@ -67,16 +79,16 @@ extension KiwiCore {
                 }
                 explicit = space
             }
-            guard WMBridge.moveWindows([focused], to: target.space)
+            guard WMBridge.moveWindows([window], to: target.space)
             else {
                 return .fail("the Desktop bridge refused the move")
             }
             // An explicit Space outranks the screen-home rule:
             // the user named the destination (#1150).
             if let explicit {
-                fileExplicitly(focused, in: explicit, target: target)
+                fileExplicitly(window, in: explicit, target: target)
             } else {
-                rehomeAcrossScreens(focused, to: target)
+                rehomeAcrossScreens(window, to: target)
             }
             if follow {
                 let outcome = switchDesktop(
@@ -95,34 +107,41 @@ extension KiwiCore {
                     // handed to" after it is a window that never
                     // came back, which is otherwise
                     // indistinguishable from the bug this fixes.
-                    followFocus.record(focused)
+                    followFocus.record(window)
                     onLog(
-                        "follow: owing focus to w\(focused.raw) "
+                        "follow: owing focus to w\(window.raw) "
                             + "when its Desktop reveals it"
                     )
-                    departEagerly(focused)
+                    departEagerly(window)
                 case .alreadyShown:
-                    // No vanish, no reveal, and the OS half is
-                    // already right — the window stays visible
-                    // and keeps key focus (device-measured
-                    // 2026-08-25). The STATE half is not: the
-                    // re-home above stamps the destination's
-                    // focused member and deliberately does not
-                    // activate it, so `focusedWindowID` would
-                    // keep naming the space the user just left —
-                    // the exact defect the paying path bans
-                    // (review round 1). Commit the same hand-off
-                    // the payer makes at an arrival; a
-                    // same-screen follow's destination is the
-                    // active space already and skips it.
+                    // No vanish, no reveal. A window that held
+                    // focus keeps key focus through the move
+                    // (device-measured 2026-08-25), so only the
+                    // state half is owed: the re-home stamps the
+                    // destination's focused member without
+                    // activating it, and a same-screen follow's
+                    // destination is the active Space already.
+                    // Anything else has no focus to keep, or a
+                    // Space to un-stash, and is a whole switch
+                    // (#2888).
                     if let destination =
-                        state.workspaces.space(of: focused),
-                        destination != state.workspaces.activeSpace
+                        state.workspaces.space(of: window)
                     {
-                        handFollowFocus(
-                            to: focused,
-                            in: destination
-                        )
+                        if !held
+                            || !shownSpaceIDs().contains(destination)
+                        {
+                            followSwitch(
+                                to: destination,
+                                focusing: window
+                            )
+                        } else if destination
+                            != state.workspaces.activeSpace
+                        {
+                            handFollowFocus(
+                                to: window,
+                                in: destination
+                            )
+                        }
                     }
                 case .refused:
                     // The MOVE already happened — the window
@@ -135,15 +154,21 @@ extension KiwiCore {
                     // and its key-focus re-report can teleport
                     // the user).
                     departWithoutFollowing(
-                        focused,
+                        window,
                         targetIsCurrent: target.isCurrent
                     )
                 }
                 return outcome.response
             }
             departWithoutFollowing(
-                focused,
+                window,
                 targetIsCurrent: target.isCurrent
+            )
+            focusIfFiledIntoActiveSpace(
+                window,
+                from: from,
+                held: held,
+                target: target
             )
             return .ok()
         }
@@ -260,12 +285,20 @@ extension KiwiCore {
         recordDesktopMoveDeparture(window, targetIsCurrent: targetIsCurrent)
         lastDesktopSwitch = Date()
         guard let pid = state.windows[window]?.pid else { return }
+        // One slot, which a later move re-arms: the pids collect so
+        // a burst of named moves reaps every app, not the last.
+        desktopMemory.moveReapPIDs.insert(pid)
         deferred.schedule(
             .desktopMoveReap,
             after: .milliseconds(400)
         ) { [weak self] in
-            guard let self, self.eventLoop.isRunning else { return }
-            self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))
+            guard let self else { return }
+            let pids = self.desktopMemory.moveReapPIDs
+            self.desktopMemory.moveReapPIDs = []
+            guard self.eventLoop.isRunning else { return }
+            for pid in pids {
+                self.eventLoop.reconcile(pid: pid, app: AppRef(pid: pid))
+            }
             self.retile(animated: true)
         }
     }
