@@ -111,6 +111,16 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+With "Displays have separate Spaces" off and a second screen reaching
+past a screen's bottom or right edge, a window near that edge jumps up to
+about 32 pt and back on a small resize, unless a neighbouring screen
+sits beside the window's whole length there and no third screen reaches
+past that edge. macOS refuses the size otherwise, and a refused size leaves the window stuck
+([#2966](https://github.com/KiwiCanopy/KiwiDesk/issues/2966)). No escape
+is planned beyond arranging the screens or turning that setting on.
+:::
+
+:::unreleased
 A window whose close KiwiDesk judges late, most often one closing with
 no animation, can keep its tile for under a second. It reads like the
 first moment of native full screen, where macOS holds the window on no
