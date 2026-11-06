@@ -42,11 +42,7 @@ extension KiwiCore {
         let isGlideWrite = keys.isApplyingGlideStep
         // A probe's answer is owed: a press writing now would read as
         // the user moving the window, stranding the shrink (#2973).
-        if state.floatAspectFlight == .probing(id),
-            deferred.isScheduled(.floatAspect)
-        {
-            return .ok()
-        }
+        if floatAspectProbeOwed(id) { return .ok() }
         // Accumulate against the COMMANDED frame, not the echo
         // (#129/#1056/#1090): `state.windows[id].frame` is
         // echo-fed, and the echo lags by whole steps — so a

@@ -70,6 +70,16 @@ enum ResizeRefusal: Equatable {
     /// fills a macOS Space of its own (#670), so no layout
     /// places it. A fact about the WINDOW, whatever the layout.
     case windowIsFullscreen(WindowID)
+    /// A float-move verb on a native-full-screen focus (#3007): the
+    /// fact `windowIsFullscreen` states, in a sentence true of a
+    /// move.
+    case fullscreenCannotMove(WindowID)
+    /// A float-move verb on a tiled focus (#3007): the layout places
+    /// it, and the verb never floats it.
+    case moveNeedsFloat(WindowID)
+    /// `move_floating` stopped at the float region (#2972), going
+    /// `direction`. A wall reached, so it bumps the way it was going.
+    case moveAtBoundary(WindowID, direction: Direction)
 }
 
 extension ResizeRefusal {
@@ -83,7 +93,9 @@ extension ResizeRefusal {
         case .ownMinimum(let id, _, _), .ownMaximum(let id, _, _),
             .noAxisHere(let id, _), .nothingToDivide(let id, _),
             .gridNoOtherTrack(let id, _), .layoutHasNoResize(let id),
-            .windowIsFullscreen(let id):
+            .windowIsFullscreen(let id),
+            .fullscreenCannotMove(let id), .moveNeedsFloat(let id),
+            .moveAtBoundary(let id, _):
             id
         case .neighborMinimum(_, let focused, _, _):
             focused
@@ -101,8 +113,11 @@ extension ResizeRefusal {
             axis
         case .neighborMinimum(_, _, let axis, _):
             axis
+        case .moveAtBoundary(_, let direction):
+            direction == .left || direction == .right ? "x" : "y"
         case .nothingToDivide, .layoutHasNoResize,
-            .windowIsFullscreen:
+            .windowIsFullscreen, .fullscreenCannotMove,
+            .moveNeedsFloat:
             nil
         }
     }
@@ -124,8 +139,11 @@ extension ResizeRefusal {
             axis == "y" ? .down : .right
         case .neighborMinimum(_, _, let axis, _):
             axis == "y" ? .down : .right
+        case .moveAtBoundary(_, let direction):
+            direction
         case .noAxisHere, .nothingToDivide, .gridNoOtherTrack,
-            .layoutHasNoResize, .windowIsFullscreen:
+            .layoutHasNoResize, .windowIsFullscreen,
+            .fullscreenCannotMove, .moveNeedsFloat:
             nil
         }
     }

@@ -72,6 +72,24 @@ extension FloatPlacement {
         return GeometryUtils.confine(frame, to: region)
     }
 
+    /// `size` centred in `region` and never resized (#3007). An axis
+    /// larger than the region pins at its top or left edge, so the
+    /// title bar stays reachable and the rest overhangs.
+    public static func centered(
+        _ size: CGSize,
+        in region: CGRect
+    ) -> CGRect {
+        GeometryUtils.confine(
+            CGRect(
+                x: region.midX - size.width / 2,
+                y: region.midY - size.height / 2,
+                width: size.width,
+                height: size.height
+            ),
+            to: region
+        )
+    }
+
     /// `frame` stepped down and right by `cascadeStep` until no
     /// frame in `others` shares its centre, within half a step, or
     /// piles with it by `FloatGather.isPiled` either way (#1708).

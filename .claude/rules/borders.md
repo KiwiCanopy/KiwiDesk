@@ -363,9 +363,9 @@ these:
 **Hold a state change's ring through the one
 `KiwiCore.holdRingForStateChange`**, called after the write and
 only for a window our spring now moves — `KiwiCore.retile` calls
-it for the pass's `stateChange`, a held pass included, and the
-float verb's placement for its own write
-(`StateChangeSeamTests` ▸ `oneDoor`). A take-out, whose one write
+it for the pass's `stateChange`, a held pass included, and a verb
+writing outside a pass for its own write
+(`StateChangeSeamTests` ▸ `doorIsCalled`). A take-out, whose one write
 waits for the brief pocket, holds through the one
 `KiwiCore.holdRingThroughLanding` beside it, which settles the hold
 at the landing (#2680, `BriefPocketTests` ▸ `takeOutPlaysAndHolds`). The
