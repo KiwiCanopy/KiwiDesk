@@ -314,6 +314,9 @@ extension KiwiCore {
         eventLoop.fullscreenSpaceHosts = { [weak self] id in
             self?.windowIsOnFullscreenSpace(id) ?? false
         }
+        eventLoop.compositorHostsNowhere = { [weak self] id in
+            self?.windowIsHostedNowhere(id) ?? false
+        }
         eventLoop.reachAwaitsCarry = { [weak self] id in
             self?.stickyReachAwaitsCarry(id) ?? false
         }

@@ -34,6 +34,12 @@ extension EventLoop {
     /// gesture switch's destroys precede its handler (2026-09-21).
     static let removalRecheckCap = 2
 
+    /// How long hosted nowhere reads as a fullscreen transition.
+    /// Past the 400–510 ms an entry holds it (device, 2026-11-06)
+    /// and under the first recheck's delay, so that recheck ends a
+    /// close (#2935).
+    static let hostedNowhereBeat: TimeInterval = 0.7
+
     /// Why a vanished window is EXPECTED absent for a beat: the
     /// sticky carry has it in flight (#1145), the carry OWES it a
     /// move it has not made yet (#1215), or a native fullscreen
@@ -155,9 +161,26 @@ extension EventLoop {
     /// `fullscreenSpaceHosts`. "Still hosted" alone is never the
     /// signal — a closed window lingers on its Desktop's Space —
     /// so only the fullscreen half tells the transition from a
-    /// close.
+    /// close. The transition's first beat hosts it on NO Space
+    /// (#2935), which is believed only for
+    /// `hostedNowhereBeat` from the episode's opening, since a
+    /// close ends there too. Nowhere reads first: a read that
+    /// sees the hand-off to the fullscreen Space answers either
+    /// way.
     func fullscreenRemovalArmIsOpen(for id: WindowID) -> Bool {
-        detectedFullscreen[id] == true || fullscreenSpaceHosts(id)
+        if detectedFullscreen[id] == true { return true }
+        if hostedNowhereIsBelieved(id), compositorHostsNowhere(id) {
+            return true
+        }
+        return fullscreenSpaceHosts(id)
+    }
+
+    private func hostedNowhereIsBelieved(_ id: WindowID) -> Bool {
+        guard let opened = removalDistrusted[id]?.opened else {
+            return true
+        }
+        return wallClock().timeIntervalSince(opened)
+            < Self.hostedNowhereBeat
     }
 
     /// When the episode a CENSUS refusal opened on `id` began — a
