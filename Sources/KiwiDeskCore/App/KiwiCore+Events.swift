@@ -65,6 +65,8 @@ extension KiwiCore {
         let provenance = arrivalProvenance(of: event)  // #2630
         let pocketClaim = claimPocketArrival(event, provenance: provenance)
         state.pocketClaimed = pocketClaim  // #2612
+        let anchorBeforeFold =
+            event.goneWindowID == nil ? nil : focusedWindowID  // #2888
         let effects = state.apply(event)
         var newlyCreatedWindow: WindowID? = nil
         var launchFollow: (WindowID, SpaceID)? = nil
@@ -321,6 +323,7 @@ extension KiwiCore {
             event: event,
             effects: effects,
             goneReason: goneReason,
+            anchorBeforeFold: anchorBeforeFold,
             willRetile: willRetile
         )
     }

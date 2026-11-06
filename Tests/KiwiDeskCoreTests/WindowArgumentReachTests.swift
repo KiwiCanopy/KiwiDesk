@@ -29,6 +29,17 @@ struct WindowArgumentReachTests {
             APIReference.windowArgumentIndex($0) != nil
         }
         #expect(!verbs.isEmpty)
+        // The Desktop verbs parse the bridge and the number first.
+        WMBridge.classResolverOverride = { desktopVerbBridgeClasses[$0] }
+        NativeSpaces.spacesOverride = authorityTopology(
+            mainCurrent: 10,
+            secondaryCurrent: 20
+        )
+        pinTwoDisplays()
+        defer {
+            WMBridge.classResolverOverride = nil
+            resetAuthorityOverrides()
+        }
         for verb in verbs {
             let core = makeTestCore()
             core.state.apply(

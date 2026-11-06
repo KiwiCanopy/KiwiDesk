@@ -4,7 +4,7 @@ import Foundation
 /// `KiwiCore+DesktopMove.swift` at the §2.1 target; the verb's
 /// parse stays in `KiwiCore+DesktopCommands.swift`.
 extension KiwiCore {
-    /// Files the focused window into the Space the user named,
+    /// Files the moved window into the Space the user named,
     /// split by the same gate as the screen-home rule
     /// (`rehomeAcrossScreens`). A Desktop its screen ALREADY shows
     /// produces no departure, so the window is filed NOW — the

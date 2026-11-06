@@ -6501,6 +6501,13 @@ claims tiled, or held to one Space, which is neither state.
 `make_floating` asks for what the window already is and succeeds
 without a pill.
 
+:::unreleased
+A Desktop move is refused on it for the same reason, though a
+sticky window's is allowed (#2888): a sticky window's carry can be
+turned off with `override_sticky_reach`, so its move can be made to
+last, and the pocket's carry cannot.
+:::
+
 **Not minimize, not ⌘H, not a Space.** Minimize animates into the
 Dock, changes the Dock's state, and drops the window from
 KiwiDesk's state, so the window and everything known about it

@@ -16,7 +16,7 @@ import Testing
 ///
 /// Since #935 the hide is one arm of the ONE stand-down
 /// predicate
-/// (`EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`,
+/// (`EventLoop.closeReturnRaiseStandsDown`,
 /// behavior-tested in `OwnDialogFocusTests`); this suite keeps
 /// the event classification itself pinned. The raise site that
 /// asks the predicate is pinned by

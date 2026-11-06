@@ -9,6 +9,13 @@ enum PocketRefusal {
         L("pocket.refusal.sticky", "Pocket windows are always sticky")
     }
 
+    /// A Desktop move on an out pocket window (#2888): the carry
+    /// brings it back whatever a move does.
+    @MainActor
+    static var desktopMoveSentence: String {
+        L("pocket.refusal.desktop_move", "Pocket windows can't change Desktop")
+    }
+
     /// A general-list verb on a window its app's key owns (#2612
     /// ▸ 1), naming that key as the GUI renders it live; nil where
     /// no GUI reads one.

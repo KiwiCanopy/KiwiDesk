@@ -19,6 +19,7 @@ extension KiwiCore {
         event: KiwiEvent,
         effects: AppliedEffects,
         departed: Bool,
+        movedWithoutFocus: Bool,
         standsDown: Bool
     ) {
         guard let removed = effects.removedWindow,
@@ -56,6 +57,7 @@ extension KiwiCore {
                 + "gone=\(goneText), "
                 + "hide=\(event.isHideDrop), "
                 + "departed=\(departed), "
+                + "movedWithoutFocus=\(movedWithoutFocus), "
                 + "ownKey=\(ownText), "
                 + "standsDown=\(standsDown), "
                 + "next=\(nextText)"

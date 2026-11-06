@@ -867,7 +867,9 @@ editing here:
     slow app's window adopted after the replay comes back to it
     unfiled (`PocketEdgeTests` ▸ `adoptWaitsForSlowWindow`); a
     verb naming the pocketed window's id files it nowhere
-    (`explicitMoveRefused`); a quit
+    (`explicitMoveRefused`), and a Desktop move refuses it in both
+    phases, the carry bringing an out one back whatever a move does
+    (#2888, `DesktopMoveNamedWindowTests`); a quit
     releases the pocket ahead of its capture
     (`releasePocketForQuit`), so no other snapshot carries one
     (`PocketSurfaceTests` ▸ `inPlaceCarries`,
@@ -1082,6 +1084,9 @@ editing here:
   — never from the nil Mission Control number, which cannot be
   told apart from "SkyLight unavailable", where the
   single-space fallback must keep bars and settles running.
+  A Desktop move refuses a full-screen window, named or focused, since
+  its macOS Space is its own (#2888,
+  `DesktopMoveNamedWindowTests` ▸ `fullScreenRefuses`).
   `FullscreenLayoutExemptionTests` pins the membership half and
   `FullscreenStandDownTests` the verdict and the gated surfaces;
   the argument lives in `docs/design-decisions.md`. **The
@@ -1113,7 +1118,10 @@ editing here:
   such a path, an already-shown Space included, where it is
   harmless; a path that can ONLY land on a shown Space (the #446
   display follow, `handFollowFocus`) un-stashes nothing and
-  states that it owes none. The focus the raise hands back, and the one
+  states that it owes none; a Desktop follow whose window held no
+  focus, or whose Space is not shown, takes `followSwitch`
+  (#2888, `DesktopMoveNamedFocusTests` ▸
+  `focusedFollowToUnshownSpace`). The focus the raise hands back, and the one
   `raiseFloatsAbove` re-reads, is the focus ANCHOR, never the
   Space's slot, or a sticky traveler loses it
   (`FollowSwitchFloatRaiseTests`; the focus-follow's deferred
@@ -1188,7 +1196,7 @@ editing here:
   re-raise of the very anchor the stand-down refused, one settle
   later; the next genuine mutation's arm heals the pile. **Which
   removals those are is
-  `EventLoop.closeReturnRaiseStandsDown(after:departedWithDesktop:)`
+  `EventLoop.closeReturnRaiseStandsDown`
   and not a list here** — this row carried one, a third arm landed under it
   (#1007), and a rule file that reads as instructions was
   carrying a false census until review caught it. A new arm goes
@@ -1411,7 +1419,13 @@ editing here:
   restoring it, so the #1161 placement distrust stands down on it
   rather than bouncing the OS's own restore, and on nothing older,
   where the memory names whatever was honored last
-  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple); and
+  (`DesktopRaiseGateArmTests` ▸ the restored-focus triple); a move
+  verb's departure of a window that was not the focus anchor stands
+  the raise down too (#2888), asked at the VANISH against the anchor
+  read ahead of the fold and ahead of the record's claim, never at
+  the command, since an earlier window of a burst can hand the window
+  the focus after its verb ran (`DesktopDepartureStandDownTests` ▸
+  `burstInheritsTheRaise`); and
   the settle's own (#1364): `desktopSettle` never re-asserts a
   focus the switch itself removed — a window whose departure
   `departedWithDesktop` filed, through the one
