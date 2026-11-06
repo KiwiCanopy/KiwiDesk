@@ -8,8 +8,8 @@ import Foundation
 /// session to restore — discovery order leaves focus on an
 /// arbitrary last-scanned window whose pid rarely matches the
 /// OS foreground. Either way every implicit-focused command
-/// fails "no managed window is currently focused" until the
-/// first real click. No AX focus event fires for the window
+/// fails the foreground preflight until the first real click.
+/// No AX focus event fires for the window
 /// that is *already* frontmost at boot, so nothing heals this
 /// without user input.
 extension KiwiCore {

@@ -125,7 +125,7 @@ extension KiwiCore {
     }
 
     /// Flashes the refusal where `cueWindow(for:)` says; the
-    /// sentence names its subject, so it reads right on either.
+    /// sentence names its subject, by title or by kind of window.
     /// Drawn without sound: it lands after the walk, long after
     /// any hotkey fire that asked, and the sound is a fire's.
     func cueWindowAction(

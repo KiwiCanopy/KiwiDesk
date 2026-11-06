@@ -48,8 +48,9 @@ enum WindowActionRefusal: Equatable {
     /// The pill's glyph: there is no such action here.
     var pillSymbol: String { "nosign" }
 
-    /// The pill's sentence. It names its subject, since the pill
-    /// may draw on the focused window rather than the target.
+    /// The pill's sentence. It names its subject, by title or by
+    /// kind of window, since the pill may draw on the focused window
+    /// rather than the target.
     @MainActor
     var sentence: String {
         switch self {

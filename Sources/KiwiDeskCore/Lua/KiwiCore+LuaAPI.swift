@@ -192,8 +192,10 @@ extension KiwiCore {
         _ command: String,
         _ args: [JSONValue]
     ) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
         guard !args.isEmpty,
-            let data = try? JSONEncoder().encode(args),
+            let data = try? encoder.encode(args),
             let text = String(data: data, encoding: .utf8)
         else { return command }
         return "\(command) \(text.prefix(200))"

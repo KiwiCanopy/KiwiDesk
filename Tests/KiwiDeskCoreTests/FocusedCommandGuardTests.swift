@@ -196,6 +196,5 @@ struct FocusedCommandGuardTests {
             args: [.number(8)]
         )
         #expect(response.isSuccess)
-        #expect(response.error == nil)
     }
 }

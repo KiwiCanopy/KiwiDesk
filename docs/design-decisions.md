@@ -3322,8 +3322,7 @@ means: macOS keeps its own key app, and the command preflight
 compares the two before any implicit-focused shortcut runs
 ([#292](https://github.com/KiwiCanopy/KiwiDesk/issues/292)). A
 restore that stamps state and performs nothing leaves them
-diverged, so every shortcut fails "no managed window is
-currently focused" until the first click
+diverged, so every shortcut refuses until the first click
 ([#1130](https://github.com/KiwiCanopy/KiwiDesk/issues/1130):
 the arrangement comes back, and the window the user went to
 rest in does not).
@@ -8280,8 +8279,7 @@ refuses, and the refusal names the Space that is empty, the
 window `get_state` marks focused in a sibling Space on the same
 screen, and the `focus_space` that brings it back under the verb
 — or the Space alone, when no sibling there marks a focus — never
-"no window is focused", which names a fact
-that is not the case.
+a generic sentence, which names a fact that is not the case.
 
 The measurement: `move_to_desktop 2` leaves the window's Space
 membership behind, and `focus_desktop 2` opens that Desktop on

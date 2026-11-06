@@ -11,7 +11,7 @@ extension KiwiCore {
     func desktopMoveRefusal(_ window: WindowID) -> CommandResponse? {
         switch state.pocketPhase(of: window) {
         case .pocketed:
-            return .fail("window \(window.raw) is in the pocket")
+            return .fail("a pocketed window cannot change Desktop")
         case .out:
             soundIfDrawn(
                 flashRefusalPill(
@@ -21,7 +21,7 @@ extension KiwiCore {
                     announce: true
                 )
             )
-            return .fail("window \(window.raw) is a pocket window")
+            return .fail("a pocket window cannot change Desktop")
         case nil:
             break
         }
@@ -32,7 +32,7 @@ extension KiwiCore {
             .cannotMoveFullScreen(window: windowTitle(window)),
             on: window
         )
-        return .fail("window \(window.raw) is full screen")
+        return .fail("a full-screen window cannot change Desktop")
     }
 
     /// Takes focus for a window a shown Desktop's move filed into

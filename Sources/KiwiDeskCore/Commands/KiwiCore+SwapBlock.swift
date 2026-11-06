@@ -62,7 +62,11 @@ extension KiwiCore {
                     ? .cannotSwapPocketed : .cannotSwapUnfiled,
                 on: id
             )
-            return .fail("window \(id.raw) is in no Space")
+            return .fail(
+                state.isPocketed(id)
+                    ? "pocketed window \(id.raw) cannot be swapped"
+                    : "window \(id.raw) is in no Space"
+            )
         case .fullScreen(let id):
             cueWindowAction(
                 .cannotSwapFullScreen(window: windowTitle(id)),

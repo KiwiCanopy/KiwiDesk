@@ -48,7 +48,8 @@ itself when an eighth is added.
   argument that is the fault (`unknown space: 9`), one of several
   same-kind arguments (which of `swap`'s windows), or the subject
   of a pill that may draw on another window. A refusal may also
-  name the setting or chord that lifts it. This binds a `.fail(`
+  name the setting, chord or command that lifts it, with the value
+  that command needs. This binds a `.fail(`
   string and a pill's sentence alike, and a no-arm spelling keeps
   the grammar `CommandDispatchReachTests` reads. No scan can tell
   a rule from a restatement, so the wording is review's.

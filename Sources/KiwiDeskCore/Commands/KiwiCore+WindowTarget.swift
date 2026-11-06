@@ -77,13 +77,20 @@ extension KiwiCore {
         }
         let id = WindowID(raw)
         guard state.windows[id] != nil else {
-            // A window on another Desktop exists (#3034).
+            guard let away = state.awayWindows[id] else {
+                return .refused(.fail("unknown window: \(spelled)"))
+            }
+            // It exists, out of the command's reach (#3034).
+            let fullScreen = awayIsFullScreen(
+                away,
+                in: desktopMemory.readDesktops()
+            )
             return .refused(
                 .fail(
-                    state.awayWindows[id] != nil
-                        ? "this command cannot reach window \(raw) "
-                            + "on another Desktop"
-                        : "unknown window: \(spelled)"
+                    "this command cannot reach "
+                        + (fullScreen
+                            ? "full-screen window \(raw)"
+                            : "window \(raw) on another Desktop")
                 )
             )
         }

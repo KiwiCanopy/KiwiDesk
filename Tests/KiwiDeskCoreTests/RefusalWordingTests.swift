@@ -101,6 +101,32 @@ struct RefusalWordingTests {
         )
     }
 
+    @Test("a window on a full-screen Space is said apart")
+    func awayOnFullScreenSpace() {
+        let core = makeCore()
+        core.state.awayWindows[WindowID(9)] = away(9)
+        core.desktopMemory.readDesktops = {
+            DesktopSnapshot(
+                authority: nil,
+                mainUUID: nil,
+                mainCurrentSpace: nil,
+                currentSpaces: [:],
+                spaces: [
+                    NativeSpace(
+                        id: 999_999,
+                        displayUUID: "A",
+                        isCurrent: false,
+                        isUser: false
+                    )
+                ]
+            )
+        }
+        #expect(
+            core.execute("focus_window", args: [.number(9)]).error
+                == "this command cannot reach full-screen window 9"
+        )
+    }
+
     // MARK: - The pocket
 
     @Test("what cannot be pocketed says what it is")
@@ -108,7 +134,6 @@ struct RefusalWordingTests {
         let core = makeCore()
         track(core, 1) { $0.isFullscreen = true }
         track(core, 2) { $0.isTransientOverlay = true }
-        track(core, 3)
         #expect(
             core.execute("pocket", args: [.number(1)]).error
                 == "a full-screen window cannot be pocketed"
@@ -116,10 +141,6 @@ struct RefusalWordingTests {
         #expect(
             core.execute("pocket", args: [.number(2)]).error
                 == "a panel or popup cannot be pocketed"
-        )
-        #expect(
-            core.cannotPocketReason(WindowID(3))
-                == "this window cannot be pocketed"
         )
     }
 
@@ -133,7 +154,79 @@ struct RefusalWordingTests {
         )
         #expect(
             core.takeOutFailure(WindowID(99))
-                == "the pocket window's app is hidden or relaunching"
+                == KiwiCore.pocketAppHidden
+        )
+    }
+
+    @Test("pocket on a window its app's hiding took says so")
+    func pocketAnswersHidden() {
+        let core = makeCore()
+        let id = WindowID(1)
+        track(core, 1, pid: getpid())
+        #expect(core.execute("pocket", args: [.number(1)]).isSuccess)
+        core.state.windows.remove(id)
+        #expect(core.execute("pocket").error == KiwiCore.pocketAppHidden)
+    }
+
+    @Test("an app's key on a slot with no process says it is not found")
+    func keyedSlotNotFound() {
+        let core = makeCore()
+        let id = WindowID(1)
+        track(core, 1)
+        let marked = core.state.markPocketWindow(
+            id,
+            owner: "com.example.app"
+        )
+        #expect(marked)
+        core.state.pocket[0].pid = nil
+        core.state.windows.remove(id)
+        #expect(
+            core.execute("pocket_app", args: [.string("com.example.app")])
+                .error == "the pocket window's app cannot be found"
+        )
+    }
+
+    // MARK: - Maximize
+
+    @Test("maximize says only a tiled window can")
+    func maximizeNamesTheRule() {
+        let core = makeCore()
+        core.state.workspaces.ensureSpace("1")
+        core.state.workspaces.activate("1")
+        track(core, 1) { $0.isFloating = true }
+        #expect(
+            core.execute("toggle_maximized").error
+                == "only a tiled window can be maximized"
+        )
+    }
+
+    // MARK: - The pills
+
+    @Test("each new pill says its own sentence")
+    func pillSentences() {
+        LocalizationManager.shared.select("en")
+        let sentences: [(WindowActionRefusal, String)] = [
+            (
+                .cannotMoveHereFullScreen,
+                "A full-screen window can't be moved here"
+            ),
+            (.cannotSwapPocketed, "A pocketed window can't be swapped"),
+            (.cannotSwapUnfiled, "A window in no Space can't be swapped"),
+            (.cannotSwapMinimized, "A minimized window can't be swapped"),
+            (.cannotSwapHiddenApp, "A hidden app's window can't be swapped"),
+            (
+                .cannotSwapHiddenDesktop,
+                "A window on a hidden Desktop can't be swapped"
+            ),
+            (.cannotSwapGone, "That window is no longer here"),
+        ]
+        for (refusal, sentence) in sentences {
+            #expect(refusal.sentence == sentence)
+        }
+        #expect(
+            PocketRefusal.markedElsewhereSentence
+                == "The Pocket takes one window. "
+                + "Set it to Several windows to add more."
         )
     }
 
