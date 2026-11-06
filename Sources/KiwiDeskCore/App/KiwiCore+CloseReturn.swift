@@ -53,7 +53,10 @@ extension KiwiCore {
             )
         if effects.removedWindow?.focusLost == true,
             !closeReturnRaiseStandsDown,
+            // A maximized window takes it, a traveler included, which
+            // no `Space.focused` can name (#3035).
             let next = owedSpace.map({ state.workspaces[$0]?.focused })
+                ?? activeSpace.flatMap(state.maximizedWindow(of:))
                 ?? activeSpace?.focused,
             // Belt to the fold's re-pick (#670): never raise a
             // fullscreen fallback — it would switch the user

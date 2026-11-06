@@ -137,6 +137,28 @@ struct MaximizeStickyWindowTests {
         #expect(maximized(core) == sticky)
     }
 
+    @Test("The close-return raise takes it, not the Space's own focus")
+    func closeReturnRaisesIt() {
+        let core = makeCore()
+        var lines: [String] = []
+        core.onLog = { lines.append($0) }
+        core.execute("toggle_maximized")
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: float, pid: 900_003, appName: "C")
+            )
+        )
+        core.state.windows.setFloating(float, true)
+        core.state.workspaces.focus(float, in: here)
+        core.handle(.windowDestroyed(float, wasMinimized: false))
+        #expect(
+            lines.contains {
+                $0.contains("close-return: raising w\(sticky.raw)")
+            }
+        )
+        #expect(maximized(core) == sticky)
+    }
+
     @Test("A sticky dialog homed elsewhere hands focus back too")
     func stickyDialogCloseKeeps() {
         let core = makeCore()
@@ -164,6 +186,23 @@ struct MaximizeStickyWindowTests {
         #expect(maximized(core) == tile)
         core.state.apply(.windowDestroyed(tile, wasMinimized: false))
         #expect(core.state.workspaces.lastFocused == nil)
+    }
+
+    @Test("A dialog closing over a member leaves focus to the member's Space")
+    func memberDialogTakesNoHandBack() {
+        let core = makeCore()
+        core.state.workspaces.focus(tile, in: here)
+        core.execute("toggle_maximized")
+        core.state.apply(
+            .windowCreated(
+                ManagedWindow(id: float, pid: 900_003, appName: "C")
+            )
+        )
+        core.state.windows.setFloating(float, true)
+        core.state.workspaces.focus(float, in: here)
+        core.state.apply(.windowDestroyed(float, wasMinimized: false))
+        #expect(core.state.workspaces.lastFocused == nil)
+        #expect(core.state.workspaces[here]?.focused == tile)
     }
 
     @Test("A focused tile closing before the retire brings nothing back")
@@ -253,6 +292,7 @@ struct MaximizeStickyWindowTests {
         core.execute("toggle_maximized")
         core.state.apply(.windowDestroyed(sticky, wasMinimized: false))
         #expect(maximized(core) == nil)
+        #expect(core.state.workspaces.lastFocused != sticky)
         core.retile()
         #expect(core.state.workspaces[here]?.maximized == nil)
     }
