@@ -142,6 +142,13 @@ struct DesktopMoveAwayTests {
     func reapFoldsTheCensus() async {
         let core = makeCore()
         defer { teardown() }
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(4), .null, id]
+            ).isSuccess
+        )
+        #expect(core.state.awayWindows[away]?.nativeSpace == 11)
         core.desktopMemory.readCensus = { [away, pid] _ in
             DesktopCensus(
                 hosts: [
@@ -154,13 +161,6 @@ struct DesktopMoveAwayTests {
                 shown: [10, 20]
             )
         }
-        #expect(
-            core.execute(
-                "move_to_desktop",
-                args: [.number(4), .null, id]
-            ).isSuccess
-        )
-        #expect(core.state.awayWindows[away]?.nativeSpace == 11)
         await core.deferred.task(for: .desktopMoveReap)?.value
         #expect(core.state.awayWindows[away]?.nativeSpace == 21)
     }

@@ -162,6 +162,21 @@ struct DesktopMoveAwayLandingTests {
         #expect(core.focusedWindowID == focused)
     }
 
+    /// The reveal activates that Desktop's own Space, which the Space
+    /// shown now says nothing about (#1010).
+    @Test("an unfiled window bound for a hidden Desktop stays unfiled")
+    func unfiledHiddenStaysUnfiled() {
+        let core = makeCore()
+        defer { teardown() }
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(4), .null, id]
+            ).isSuccess
+        )
+        #expect(core.state.rememberedSpace(of: away) == nil)
+    }
+
     @Test("a window nothing has filed takes the name")
     func unfiledTakesTheName() {
         let core = makeCore()
@@ -297,7 +312,8 @@ struct DesktopMoveAwayLandingTests {
                 args: [.number(1), .string("mail"), id]
             ).isSuccess
         )
-        #expect(core.jump.take(arrived: away) != nil)
+        // A filing here would undo a #1010 re-home across screens.
+        #expect(core.jump.take(arrived: away)?.relocates == false)
     }
 
     @Test("an arrival beside a focus owes nothing")

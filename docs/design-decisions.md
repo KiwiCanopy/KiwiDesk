@@ -8144,7 +8144,10 @@ own reap with no prune, since a window mid-move must not read as
 closed. A follow onto a shown Desktop has no reveal, so it switches
 the Space at the command and owes Move here's plain arrival focus,
 never the #1007 debt, and a follow refuses a minimized or hidden
-window, which no arrival would bring.
+window, which no arrival would bring. A hand float restored from a
+snapshot keeps its restored record, since its float flag lives there,
+so it may take its old frame on arrival; moving one across screens
+with separate Spaces on has not been measured.
 :::
 
 ### KiwiDesk's own Desktop switch names where it landed (#2142)

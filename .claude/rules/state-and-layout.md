@@ -338,7 +338,9 @@ editing here:
   answers its arrival, a follow onto a shown Desktop owes Move here's
   plain arrival focus and never a #1007 debt, and its move re-reads
   the ledger's hosts in the reap, with no prune, rather than writing
-  `nativeSpace` (#3034, `DesktopMoveAwayTests`). Carry the screen a
+  `nativeSpace`; a plain move is the one reader that takes a parked
+  entry, and a follow refuses one (#3034, `DesktopMoveAwayTests`).
+  Carry the screen a
   Space lands on ON the resolution
   (`SpaceTargetResolution.space(_:landing:)`) and hand it to the
   sticky gate as `landingOn` — the gate reads a nil assignment

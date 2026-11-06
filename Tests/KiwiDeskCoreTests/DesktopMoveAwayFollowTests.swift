@@ -160,6 +160,33 @@ struct DesktopMoveAwayFollowTests {
         #expect(core.state.workspaces.activeSpace == "other")
     }
 
+    /// The ledger can lag the 60 s backstop: the refusal reads a fresh
+    /// census, as the Open or Focus reach does.
+    @Test("a follow judges a fresh census, not the stored flag")
+    func followReadsFreshHost() {
+        let core = makeCore()
+        defer { teardown() }
+        core.desktopMemory.readCensus = { [away, pid] _ in
+            DesktopCensus(
+                hosts: [
+                    away: DesktopCensus.Host(
+                        space: 11,
+                        pid: pid,
+                        isUp: false
+                    )
+                ],
+                shown: [10, 20]
+            )
+        }
+        #expect(
+            core.execute(
+                "move_to_desktop_and_follow",
+                args: [.number(4), .null, id]
+            ).error == "Can't follow a minimized or hidden window."
+        )
+        #expect(DesktopVerbBridge.moves.isEmpty)
+    }
+
     @Test("a follow never switches for a minimized or hidden window")
     func followRefusesParked() {
         let core = makeCore()

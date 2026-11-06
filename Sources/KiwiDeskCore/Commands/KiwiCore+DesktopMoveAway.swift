@@ -12,6 +12,9 @@ extension KiwiCore {
         _ args: [JSONValue],
         follow: Bool
     ) -> CommandResponse {
+        // A stale ledger would pass a follow no arrival can pay.
+        refreshAwayHosts()
+        let away = state.awayWindows[away.id] ?? away
         if let refusal = awayMoveRefusal(away, to: target, follow: follow) {
             return refusal
         }
@@ -31,12 +34,14 @@ extension KiwiCore {
             return .fail("the Desktop bridge is unavailable on this macOS")
         }
         if let explicit { state.workspaces.ensureSpace(explicit) }
-        // An unfiled window takes the Space its screen shows, or the
-        // fold would grant it a new window's focus.
+        // Arriving now, an unfiled window takes the Space its screen
+        // shows, or the fold would grant it a new window's focus. A
+        // hidden Desktop's reveal decides that Space itself (#1010).
         state.fileAwayMove(
             away.id,
             named: explicit,
-            home: moveHereSpace(on: screenHolding(away.id))
+            home: target.isCurrent
+                ? moveHereSpace(on: screenHolding(away.id)) : nil
         )
         onLog(
             "move_to_desktop: away w\(away.id.raw) filed under space "
@@ -81,6 +86,7 @@ extension KiwiCore {
     /// A window arriving in the active Space where nothing holds the
     /// focus takes it from the fold in state alone, which would fail
     /// the next focused verb's #292 preflight, so it owes the raise.
+    /// It owes no filing: a landing the #1010 net re-homes stands down.
     private func oweFocusIfVacant(
         _ window: WindowID,
         to target: DesktopTarget
@@ -94,8 +100,7 @@ extension KiwiCore {
             window,
             in: active,
             at: wallClock(),
-            relocates: true,
-            hopped: true
+            relocates: false
         )
     }
 
