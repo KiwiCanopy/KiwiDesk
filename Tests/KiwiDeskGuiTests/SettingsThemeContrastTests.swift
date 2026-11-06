@@ -254,17 +254,19 @@ struct SettingsThemeContrastTests {
             SettingsTheme.accent,
             on: SettingsTheme.previewPlate
         ),
-        // A Home card's hover edge crosses its plate and its body
-        // (#3040).
+        // A Home card's hover edge crosses its plate and its body:
+        // non-text, so the 3.0 floor (#3040).
         Pairing(
             "cardHoverEdge on previewPlate",
             SettingsTheme.cardHoverEdge,
-            on: SettingsTheme.previewPlate
+            on: SettingsTheme.previewPlate,
+            floor: 3.0
         ),
         Pairing(
             "cardHoverEdge on card",
             SettingsTheme.cardHoverEdge,
-            on: SettingsTheme.card
+            on: SettingsTheme.card,
+            floor: 3.0
         ),
         // The narrow-window "Show preview" chip (17a): ordinary
         // ink on a card plane the render washes with the accent
