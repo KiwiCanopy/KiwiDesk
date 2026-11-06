@@ -2384,6 +2384,28 @@ close; the residue, a window closed *while* fullscreen dropping a
 budget late, is in
 [Accepted Limitations](accepted-limitations.md).
 
+:::unreleased
+AppKit's own transition has the same beat, and it hosts the window
+on no Space at all
+([#2935](https://github.com/KiwiCanopy/KiwiDesk/issues/2935)): it
+leaves the Accessibility list, is hosted nowhere for about half a
+second at each end, then lands on its next Space. Neither arm's
+reading could open there, so every green-button entry gave up the
+window's slot and came back as new. A close is told apart by order:
+it still reads hosted when its removal is judged, since it lingers
+for its close animation (270 ms) and a no-animation close still beats
+the read (34 ms). So hosted nowhere opens the arm too, for 0.7 s from
+the first refusal: past an entry's 400–510 ms, and under the first
+recheck, which then ends any close it was holding. A button-less
+window takes no such reading, since AppKit lists one as a placeholder
+for the same beat. That placeholder must not tile either: its tile
+draws a phantom slot, and its leaving re-ranks the window beside it,
+which lands that window last in the row. The trade is a real frameless
+window opened beside a transitioning sibling, which is that sibling's
+shadow until the sibling lists again or goes, and a close judged late,
+one recheck late ([Accepted Limitations](accepted-limitations.md)).
+:::
+
 The ring **draws on the public AppKit panel and tracks through
 WindowServer opportunistically** (#285, #1917): when the
 runtime-linked SkyLight event surface resolves, the ring follows

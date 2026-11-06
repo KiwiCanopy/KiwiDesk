@@ -93,12 +93,14 @@ struct DesktopCensusSeamTests {
         )
         let files = Set(readers.map(\.file.lastPathComponent))
         #expect(
-            readers.count == 6
+            readers.count == 7
                 && files == [
                     // An away window WindowServer reported
                     // destroyed (#2660), and a census miss on a
                     // full-screen Space (#2930).
                     "KiwiCore+AwayWindows.swift",
+                    // The classifier, and the fullscreen arm's
+                    // first beat (#2935).
                     "KiwiCore+GoneReason.swift",
                     "KiwiCore+DesktopFocusMemory.swift",
                     // Boot's judge of a restored hold (#1646).
