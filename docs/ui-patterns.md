@@ -495,8 +495,8 @@ shape differences between these classes are intentional —
 choose by semantic role, not by a desired silhouette.
 
 :::unreleased
-A tile or card is the one other button that casts a shadow: it rises
-under the pointer (*Hover confirms custom hit areas*, #3042).
+A tile or card is the one clickable surface that casts a shadow: it
+rises under the pointer (*Hover confirms custom hit areas*, #3042).
 :::
 
 **The exception is a button filled with the app's own accent,
@@ -1259,7 +1259,7 @@ click changes nothing, and a selected Screen card rises, since its
 click deselects. A selected Layout tile shows a check beside its name.
 A selected stroke and check fade in over 0.12 s (`SelectionStroke`,
 `selectionFade(_:)`).
-Under Reduce Motion the rise arrives rather than travels. The setup
+Under Reduce Motion the rise and the fade arrive at once. The setup
 tour's tiles take the edge without the rise. A chip, a row, a KiwiHub
 item and a Space card's menu face keep their fill.
 :::

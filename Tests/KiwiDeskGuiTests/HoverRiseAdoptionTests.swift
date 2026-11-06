@@ -90,23 +90,25 @@ struct HoverRiseAdoptionTests {
     /// The tour's scrollers leave no room and its ground is `page`.
     @Test("the setup tour's tiles keep the edge and do not rise")
     func tourStaysDown() throws {
-        for path in [
-            "OnboardingLooksRows.swift",
-            "OnboardingBarsTiles.swift",
-        ] {
-            let url = SourceScan.repoRoot(from: #filePath)
-                .appendingPathComponent("Sources/KiwiDesk/Onboarding")
-                .appendingPathComponent(path)
+        let root = SourceScan.repoRoot(from: #filePath)
+            .appendingPathComponent("Sources/KiwiDesk/Onboarding")
+        let files = try FileManager.default.contentsOfDirectory(
+            at: root,
+            includingPropertiesForKeys: nil
+        ).filter { $0.pathExtension == "swift" }
+        var tiles = 0
+        for url in files {
             let text = SourceScan.stripComments(
                 try String(contentsOf: url, encoding: .utf8)
             )
+            let made = text.components(separatedBy: "PaletteTile(").count - 1
+            tiles += made
             #expect(
-                text.components(separatedBy: "PaletteTile(").count
-                    == text.components(separatedBy: "rises: false").count,
-                Comment(rawValue: path)
+                made == text.components(separatedBy: "rises: false").count - 1,
+                Comment(rawValue: url.lastPathComponent)
             )
-            #expect(text.contains("PaletteTile("), Comment(rawValue: path))
         }
+        #expect(tiles > 0)
         #expect(
             try squashed("Components/Looks/PaletteTile.swift").contains(
                 ".hoverRise(risen&&rises,in:"
@@ -211,21 +213,29 @@ struct HoverRiseAdoptionTests {
     @Test("a sideways strip leaves room for the rise")
     func stripLeavesRoom() throws {
         let strip = try squashed("Components/Common/SidewaysStrip.swift")
-        #expect(strip.contains(".padding(.top,SettingsTheme.hoverRise)"))
+        #expect(
+            strip.contains(".padding(.top,SettingsTheme.hoverRiseTopRoom)")
+        )
         #expect(
             strip.contains("floor:SettingsTheme.hoverRiseShadowRoom")
         )
     }
 
-    /// Room past an end tile, inside the clip and given back outside.
+    /// The strip draws its run's end room, inside the clip and given
+    /// back outside; each host states the room in its run.
     @Test("an end tile's shadow has room in every strip")
     func endTilesHaveRoom() throws {
-        let gesture = try squashed("Components/Gestures/GestureStrip.swift")
-        let simple = try squashed("Components/Simple/SimpleLookCard.swift")
-        for source in [gesture, simple] {
-            #expect(source.contains(".padding(.horizontal,Self.endRoom)"))
-            #expect(source.contains(".padding(.horizontal,-Self.endRoom)"))
-            #expect(source.contains("endRoom:endRoom"))
+        let strip = try squashed("Components/Common/SidewaysStrip.swift")
+        #expect(strip.contains(".padding(.horizontal,run.endRoom)"))
+        #expect(strip.contains(".padding(.horizontal,-run.endRoom)"))
+        for path in [
+            "Components/Gestures/GestureStrip.swift",
+            "Components/Simple/SimpleLookCard.swift",
+        ] {
+            #expect(
+                try squashed(path).contains("endRoom:endRoom"),
+                Comment(rawValue: path)
+            )
         }
     }
 

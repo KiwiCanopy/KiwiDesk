@@ -8,8 +8,9 @@ struct ScreensPicture: View {
     let rows: ScreensFamilyRows
     @Binding var selection: DisplayID?
 
-    private static let canvasHeight: CGFloat = 240
-    /// Room inside the clip for a risen card's shadow.
+    private static let canvasHeight: CGFloat = 248
+    /// Room inside the clip for a risen card's shadow and the main
+    /// card's glow.
     private static let inset = SettingsTheme.hoverRiseShadowRadius
     private static let standBand: CGFloat = 16
 

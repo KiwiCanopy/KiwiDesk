@@ -18,9 +18,6 @@ struct LayoutStrip: View {
             SidewaysStrip(run: Self.run, followed: followed) {
                 row
             }
-            // The ring inset stays inside the clip; the row still
-            // lines up with the header.
-            .padding(.horizontal, -Self.ringRoom)
         }
         .accessibilityElement(children: .contain)
         .accessibilityLabel(chooseTitle)
@@ -47,8 +44,6 @@ struct LayoutStrip: View {
                     .zIndex(hovered == mode ? 1 : 0)
             }
         }
-        .padding(.horizontal, Self.ringRoom)
-        .padding(.vertical, Self.ringRoomVertical)
     }
 
     private var chooseTitle: String {

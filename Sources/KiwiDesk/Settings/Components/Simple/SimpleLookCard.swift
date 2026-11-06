@@ -45,11 +45,8 @@ struct SimpleLookCard: View {
                         in: entries
                     )
                 ) {
-                    // A risen end tile's shadow, inside the clip, given
-                    // back outside so the row still lines up.
-                    line(entries).padding(.horizontal, Self.endRoom)
+                    line(entries)
                 }
-                .padding(.horizontal, -Self.endRoom)
             }
             CrossReferenceRow(
                 prose: Self.hintProse,

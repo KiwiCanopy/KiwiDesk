@@ -53,9 +53,13 @@ extension SettingsTheme {
     static let hoverRise: CGFloat = 2
     static let hoverRiseShadowRadius: CGFloat = 8
     static let hoverRiseShadowDrop: CGFloat = 6
-    /// Below a clipped row of tiles, so a risen tile's shadow shows.
+    /// Below and above a clipped row of tiles, so a risen tile and its
+    /// shadow show.
     static var hoverRiseShadowRoom: CGFloat {
         hoverRiseShadowRadius + hoverRiseShadowDrop
+    }
+    static var hoverRiseTopRoom: CGFloat {
+        hoverRise + hoverRiseShadowRadius - hoverRiseShadowDrop
     }
 
     /// Notice strip accent fill opacity (`WhatsNewTrailBanner`).

@@ -31,11 +31,7 @@ struct GestureStrip: View {
                     .padding(.leading, Self.leading(of: item))
                 }
             }
-            // A risen end picture's shadow, inside the clip, given
-            // back outside so the row still lines up.
-            .padding(.horizontal, Self.endRoom)
         }
-        .padding(.horizontal, -Self.endRoom)
         .accessibilityHidden(true)
     }
 

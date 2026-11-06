@@ -1297,16 +1297,17 @@ must keep:
   selected stroke stays heavier than `hoverEdgeStroke`, since the two
   share a colour in dark. A selected surface whose click changes nothing
   stays flat and carries a check; a Screen card's click deselects, so it
-  rises, its 3 pt stroke the mark by ruling. A marking other than
-  selection returning to a tile's edge takes its own channel, which is
-  review's. `hoverRise` owes its host two things: a host that clips
-  keeps room for the rise and the shadow (`SidewaysStrip`,
-  `StripScrollerRoom`'s `floor`), and a surface whose shadow reaches an
-  opaque sibling raises its own `zIndex`, which the modifier cannot
-  since a `Button` label stops the trait. A tile on a ground other than
+  rises, `screenCardStrokeSelected` the mark by ruling. A marking other
+  than selection returning to a tile's or card's edge takes its own
+  channel, which is review's. `hoverRise` owes its host two things: a host that clips
+  keeps room for the rise and the shadow (`SidewaysStrip` draws its
+  `StripRun.endRoom` and `StripScrollerRoom`'s `floor`), and a surface
+  whose shadow reaches an opaque sibling raises its own `zIndex`, on the
+  view the sibling sits beside: a trait set inside a `Button` label is
+  taken not to reach it (SwiftUI's model, unmeasured 2026-11-06). A tile on a ground other than
   `card` owes a choice, since the rise fills under it: the setup tour
-  passes `PaletteTile`'s `rises: false`. Anything else clickable takes
-  the fill. A searchable dropdown's
+  passes `PaletteTile`'s `rises: false`. What every other control does
+  under the pointer is `docs/ui-patterns.md`'s. A searchable dropdown's
   `DropdownCursor` IS the selection Return reads, so real
   pointer motion may move it there (`DropdownCursorWiringTests`)
   and nowhere else — a list whose selection anything beyond

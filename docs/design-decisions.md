@@ -15111,7 +15111,7 @@ page, in either appearance (`SettingsThemeContrastTests` ▸
 says "button", the fills say what the pointer is doing. A press
 deepens the pointer's layer (`chipPressed`), which still sits beneath the marking, so
 holding down the marked chip cannot unmark it either. **No
-shadow**: buttons take none (ui-patterns ▸ *Buttons take a native
+shadow**: a chip takes none (ui-patterns ▸ *Buttons take a native
 style*), the thumb's shadow being the settings' sign for
 "movable", and the edge already carries what a shadow would.
 
