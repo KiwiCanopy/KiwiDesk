@@ -96,9 +96,11 @@ public struct DesktopCensus: Sendable, Equatable {
         )
     }
 
-    /// The windows of each full-screen Space no display shows. A
-    /// list that cannot be read skips its Space rather than the
-    /// census: the user Desktops' reading stands without it.
+    /// The windows each full-screen Space no display shows names
+    /// as its own (`NativeSpace.fullScreenWindows`), never the
+    /// toolbar windows it also lists. A list that cannot be read
+    /// skips its Space rather than the census: the user Desktops'
+    /// reading stands without it.
     private static func hiddenFullScreenHosts(
         spaces: [NativeSpace],
         owners: [WindowID: pid_t],
@@ -110,7 +112,8 @@ public struct DesktopCensus: Sendable, Equatable {
                 let up = list(space.id, false)
             else { continue }
             let upSet = Set(up)
-            for id in all where hosts[id] == nil {
+            let shows = Set(space.fullScreenWindows)
+            for id in all where hosts[id] == nil && shows.contains(id) {
                 guard let pid = owners[id] else { continue }
                 hosts[id] = Host(
                     space: space.id,

@@ -12,9 +12,21 @@ struct DesktopCensusTests {
     private let spaces: [NativeSpace] = [
         authoritySpace(1, display: "UUID-A", current: true),
         authoritySpace(4, display: "UUID-A"),
-        authoritySpace(9, display: "UUID-A", isUser: false),
+        NativeSpace(
+            id: 9,
+            displayUUID: "UUID-A",
+            isCurrent: false,
+            isUser: false,
+            fullScreenWindows: [WindowID(7), WindowID(5)]
+        ),
         authoritySpace(20, display: "UUID-B", current: true),
-        authoritySpace(30, display: "UUID-C", current: true, isUser: false),
+        NativeSpace(
+            id: 30,
+            displayUUID: "UUID-C",
+            isCurrent: true,
+            isUser: false,
+            fullScreenWindows: [WindowID(6)]
+        ),
     ]
 
     /// Windows per space: `all` includes the parked ones.
@@ -123,6 +135,8 @@ struct DesktopCensusTests {
 
     /// #2949: the hidden full-screen Space 9 is read for the boot
     /// seed; the CURRENT one, 30, is not, and neither joins `hosts`.
+    /// Window 4 is a toolbar window the Space also lists, which the
+    /// Space does not name as its own.
     @Test("a hidden full-screen Space's windows are listed apart")
     func hiddenFullScreenIsListed() throws {
         let census = try #require(
@@ -130,14 +144,16 @@ struct DesktopCensusTests {
                 spaces: spaces,
                 owners: [
                     WindowID(7): 100, WindowID(5): 100, WindowID(6): 100,
+                    WindowID(4): 100,
                 ],
-                list: lister([9: ([7, 5], [7]), 30: ([6], [6])])
+                list: lister([9: ([7, 5, 4], [7, 4]), 30: ([6], [6])])
             )
         )
         #expect(census.hiddenFullScreenHosts[WindowID(7)]?.space == 9)
         #expect(census.hiddenFullScreenHosts[WindowID(7)]?.isUp == true)
         #expect(census.hiddenFullScreenHosts[WindowID(5)]?.isUp == false)
         #expect(census.hiddenFullScreenHosts[WindowID(6)] == nil)
+        #expect(census.hiddenFullScreenHosts[WindowID(4)] == nil)
         #expect(census.hosts.isEmpty)
     }
 

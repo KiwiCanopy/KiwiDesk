@@ -2,35 +2,6 @@ import CoreGraphics
 import Foundation
 
 /// A native macOS Space (Mission Control desktop).
-public struct NativeSpace: Sendable, Equatable {
-    public let id: SkyLight.SpaceID
-    public let displayUUID: String
-    public let isCurrent: Bool
-    /// False for fullscreen-app and system spaces, which
-    /// Mission Control does not count as desktops.
-    public let isUser: Bool
-    /// KiwiDesk's stamp on this Desktop, if it carries one
-    /// (#1147). Read from the SAME plist the topology comes
-    /// from — the bridge writes it, nothing reads it back
-    /// through the bridge — so every snapshot carries identities
-    /// at no extra cost.
-    public let identity: DesktopIdentity?
-
-    public init(
-        id: SkyLight.SpaceID,
-        displayUUID: String,
-        isCurrent: Bool,
-        isUser: Bool = true,
-        identity: DesktopIdentity? = nil
-    ) {
-        self.id = id
-        self.displayUUID = displayUUID
-        self.isCurrent = isCurrent
-        self.isUser = isUser
-        self.identity = identity
-    }
-}
-
 /// Detection of native macOS Spaces via SkyLight.
 ///
 /// All queries return nil/empty when the private APIs are
@@ -114,12 +85,32 @@ public enum NativeSpaces {
                         displayUUID: uuid,
                         isCurrent: id == current,
                         isUser: type == 0,
-                        identity: identity(in: space)
+                        identity: identity(in: space),
+                        fullScreenWindows: type == 0
+                            ? [] : fullScreenWindows(in: space)
                     )
                 )
             }
         }
         return result
+    }
+
+    /// The windows a full-screen Space shows as its tiles (two in
+    /// Split View), else its one `fs_wid` (#2949). The Space also
+    /// hosts the app's toolbar and title-bar windows, which these
+    /// keys never name.
+    private static func fullScreenWindows(
+        in space: [String: Any]
+    ) -> [WindowID] {
+        let layout = space["TileLayoutManager"] as? [String: Any]
+        let tiles = layout?["TileSpaces"] as? [[String: Any]] ?? []
+        let ids = tiles.compactMap {
+            ($0["TileWindowID"] as? NSNumber)?.uint32Value
+        }
+        if !ids.isEmpty { return ids.map(WindowID.init) }
+        guard let fs = (space["fs_wid"] as? NSNumber)?.uint32Value
+        else { return [] }
+        return [WindowID(fs)]
     }
 
     /// KiwiDesk's stamp on one space dictionary. Only the key
