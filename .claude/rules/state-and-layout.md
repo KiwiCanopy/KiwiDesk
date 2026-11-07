@@ -2359,7 +2359,7 @@ editing here:
   `ResizeRefusalAppBoundTests` builds the fixtures where the two
   terms disagree; the config-floor suites stamp the flag their
   fixtures earn. The trier's neighbour pill names the ANCHOR's
-  app, never the trier's: a builder resolves it at cue time
+  app, never the trier's (#3067): a builder resolves it at cue time
   through the one `anchorAppName(of:)` and carries it on the
   case, and the renderer never reads state for it
   (`ResizeRefusalAppNameTests`, and the seam suites comparing

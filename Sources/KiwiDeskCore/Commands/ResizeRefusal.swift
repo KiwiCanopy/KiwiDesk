@@ -26,7 +26,7 @@ enum ResizeRefusal: Equatable {
     /// ANCHOR's verdict, since the anchor is the window whose
     /// floor bound. `anchorApp` is the anchor's app name, since
     /// the anchor may be hidden (overflow) while the trier's
-    /// pill shows; empty where none is known.
+    /// pill shows; empty where none is known (#3067).
     case neighborMinimum(
         anchor: WindowID,
         focused: WindowID,

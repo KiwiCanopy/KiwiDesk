@@ -76,7 +76,8 @@ extension KiwiCore {
     }
 
     /// The app name a neighbour pill names: the ANCHOR's, never
-    /// the trier's, resolved at cue time; empty when unknown.
+    /// the trier's, resolved at cue time; empty when unknown
+    /// (#3067).
     func anchorAppName(of anchor: WindowID) -> String {
         state.windows[anchor]?.appName ?? ""
     }

@@ -6,7 +6,7 @@ import Testing
 /// The neighbour pill names the anchor's app: the anchor may be
 /// hidden in overflow, so the trier's pill is the only place the
 /// user learns which window blocked.
-@Suite("Resize refusal names the neighbour's app")
+@Suite("Resize refusal names the neighbour's app (#3067)")
 @MainActor
 struct ResizeRefusalAppNameTests {
     private let window = WindowID(1)

@@ -5036,11 +5036,11 @@ state and structural by actionability, and a third glyph in a
 slot that holds two would say neither.
 
 :::unreleased
-The neighbour pair's sentence names the anchor's app ("Neighboring
-Safari window won't go smaller", "Neighboring Safari window is at
-the minimum window size"): the anchor can wait out of sight behind
-an overflow mark, so its own pill is not seen and "Neighboring app"
-named nothing. The configured-floor sentence echoes the setting's
+The neighbour pair's sentence names the anchor's app (#3067,
+"Neighboring Safari window won't go smaller", "Neighboring Safari
+window is at the minimum window size"): the anchor can wait out of
+sight behind an overflow mark, so its own pill is not seen and
+"Neighboring app" named nothing. The configured-floor sentence echoes the setting's
 label rather than "your", which no catalog string uses for a
 setting. The nameless sentences stay for an unknown name.
 :::

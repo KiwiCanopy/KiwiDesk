@@ -173,7 +173,7 @@ extension ResizeRefusal {
     }
 
     /// The trier's sentence for a neighbour floor; an empty name
-    /// keeps the nameless one.
+    /// keeps the nameless one (#3067).
     @MainActor
     private static func neighborMinimumText(
         appBound: Bool,
