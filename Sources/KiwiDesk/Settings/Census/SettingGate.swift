@@ -44,7 +44,8 @@ enum SettingRuntimeGate: Hashable {
     case lookReplacedUnsavedColors
     /// Unadopted shortcuts present in init.lua.
     case luaImportAvailable
-    /// Restore Defaults appears when unseeded defaults exist.
+    /// Restore Defaults greys while the default layer matches the
+    /// shipped set or another layer is picked (#3074).
     case defaultsToRestore
     /// Non-default layer exists in configuration.
     case layersExist

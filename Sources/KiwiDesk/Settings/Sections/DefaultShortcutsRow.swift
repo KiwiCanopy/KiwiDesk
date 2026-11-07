@@ -1,29 +1,59 @@
 import KiwiDeskCore
 import SwiftUI
 
-/// Header for Shortcuts section with Import and Restore Defaults
-/// (#4, #1096).
-struct ShortcutsHeader: View {
+/// The Default shortcuts row under the Layers card (#3074): Restore
+/// and, while `init.lua` holds shortcuts, Import (#4, #1096), in
+/// the `SettingsActionRow` shape Files & Reset uses. Always drawn;
+/// Restore greys with its reason as the caption.
+struct DefaultShortcutsRow: View {
     @ObservedObject var model: SettingsModel
     @Binding var selected: String
     @State private var importedNote = false
     @State private var confirmingReset = false
 
+    /// Why Restore is live or greyed — the caption reads it.
+    enum RestoreState: Equatable {
+        case available
+        /// The layer picked above has no shipped defaults.
+        case otherLayer
+        /// The default layer already matches the shipped set.
+        case atDefaults
+    }
+
+    static func restoreState(
+        layer: String,
+        hasDefaultsToRestore: Bool
+    ) -> RestoreState {
+        if layer != KeyLayer.defaultName { return .otherLayer }
+        return hasDefaultsToRestore ? .available : .atDefaults
+    }
+
     var body: some View {
+        let state = Self.restoreState(
+            layer: selected,
+            hasDefaultsToRestore: model.hasDefaultsToRestore
+        )
         VStack(alignment: .leading, spacing: 8) {
-            // The edited layer is named on the pinned jump bar
-            // (#1520).
-            HStack(spacing: 8) {
-                Spacer()
-                if model.hasCustomLua,
-                    !model.editingStoredProfile
-                {
-                    importButton
-                }
-                if model.hasDefaultsToRestore {
-                    resetButton
+            SettingsActionRow(
+                title: L(
+                    "shortcuts.restore_defaults.row",
+                    "Default shortcuts"
+                ),
+                caption: caption(state),
+                help: restoreExplain,
+                helpSubject: restoreName
+            ) {
+                HStack(spacing: 8) {
+                    if model.hasCustomLua,
+                        !model.editingStoredProfile
+                    {
+                        importButton
+                    }
+                    resetButton(state)
                 }
             }
+            .padding(12)
+            .background(plate)
             if importedNote {
                 Text(importedNoteText)
                     .font(.caption)
@@ -40,6 +70,21 @@ struct ShortcutsHeader: View {
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
         }
+    }
+
+    /// The page's card plate, so the row reads as one of them.
+    private var plate: some View {
+        RoundedRectangle(cornerRadius: SettingsTheme.sectionRadius)
+            .fill(SettingsTheme.card)
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.sectionRadius
+                )
+                .strokeBorder(
+                    SettingsTheme.hairline,
+                    lineWidth: SettingsTheme.containerStroke
+                )
+            )
     }
 
     /// One line per chord the import or adoption left out (#1807).
@@ -67,23 +112,22 @@ struct ShortcutsHeader: View {
         )
     }
 
+    /// The census label: what VoiceOver calls the short button.
+    private var restoreName: String {
+        L("shortcuts.restore_defaults", "Restore Defaults…")
+    }
+
     /// Restores shipped shortcut defaults onto default layer (#1096).
-    private var resetButton: some View {
-        Button {
+    /// Greyed, never removed, off the default layer (#171).
+    private func resetButton(_ state: RestoreState) -> some View {
+        Button(L("shortcuts.restore_defaults.short", "Restore…")) {
             confirmingReset = true
-        } label: {
-            Label(
-                L(
-                    "shortcuts.restore_defaults",
-                    "Restore Defaults…"
-                ),
-                systemImage: "arrow.counterclockwise"
-            )
         }
         .settingsActionButton()
-        .controlSize(.small)
-        .disabled(selected != KeyLayer.defaultName)
-        .help(resetHelp)
+        .accessibilityLabel(restoreName)
+        .modifier(
+            GreyOut(active: state != .available, help: caption(state))
+        )
         .confirmationDialog(
             L(
                 "shortcuts.restore_defaults.title",
@@ -127,12 +171,8 @@ struct ShortcutsHeader: View {
                 restored
             )
         }
-        // "·" never a comma — six locales use the comma as a
-        // decimal separator, so "restored: 12, and" reads as a
-        // number.
-        // Naming Save as literal text is the #818 violation, and
-        // interpolating it reds `InterpolatedLabelTests`; filed —
-        // the staged-ness beat returns once the frame can say it.
+        // "·" never a comma: six locales use the comma as a decimal
+        // separator. Save is not named as text (#818).
         return L(
             "shortcuts.restore_defaults.message",
             "Your own shortcuts are kept, except any that use a "
@@ -143,25 +183,46 @@ struct ShortcutsHeader: View {
         )
     }
 
-    private var resetHelp: String {
-        selected == KeyLayer.defaultName
-            ? L(
+    private func caption(_ state: RestoreState) -> String {
+        switch state {
+        case .available:
+            return L(
                 "shortcuts.restore_defaults.help",
                 "Puts back the shortcuts KiwiDesk provides, "
                     + "including ones it has added since you "
                     + "installed it. Shortcuts you made yourself "
                     + "are kept."
             )
-            : L(
-                "shortcuts.restore_defaults.help_other_layer",
-                "Only the default layer has defaults to restore "
-                    + "— this one is yours."
+        case .otherLayer:
+            return L(
+                "shortcuts.restore_defaults.other_layer",
+                "Only the “default” layer has defaults to "
+                    + "restore. Pick it in %1$@ above.",
+                SettingsCatalog.shortcuts.layersCard.control.text
             )
+        case .atDefaults:
+            return L(
+                "shortcuts.restore_defaults.at_defaults",
+                "Your shortcuts match the defaults."
+            )
+        }
+    }
+
+    private var restoreExplain: String {
+        L(
+            "shortcuts.restore_defaults.explain",
+            "Only the “default” layer has shipped shortcuts; "
+                + "the layers you add are yours alone. Before "
+                + "anything changes, you are told how many "
+                + "shortcuts come back and how many of yours "
+                + "are lost because they use a key a default "
+                + "needs."
+        )
     }
 
     /// Import button reading shortcuts from init.lua (#4, #818).
     private var importButton: some View {
-        Button {
+        Button(L("shortcuts.import", "Import from init.lua…")) {
             model.importCurrentShortcuts()
             if !model.config.layers.contains(where: {
                 $0.name == selected
@@ -169,17 +230,8 @@ struct ShortcutsHeader: View {
                 selected = KeyLayer.defaultName
             }
             importedNote = true
-        } label: {
-            Label(
-                L(
-                    "shortcuts.import",
-                    "Import from init.lua…"
-                ),
-                systemImage: "square.and.arrow.down"
-            )
         }
         .settingsActionButton()
-        .controlSize(.small)
         .help(importHelp)
     }
 

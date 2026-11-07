@@ -83,14 +83,14 @@ extension SettingRuntimeGate {
             .noBarHides, .expandOffInConfig, .spaceHasNoOverrides,
             .reduceMotion,
             .reduceTransparency,
-            .noBindingStore:
+            .noBindingStore, .defaultsToRestore:
             return true
         case .orphanPinsExist, .screensDisconnected,
             .paletteGlowPairing, .lookReplacedUnsavedColors,
             .luaImportAvailable,
             .layersExist, .liquidGlassUnavailable,
             .desktopBridgeAbsent,
-            .trackInUse, .defaultsToRestore:
+            .trackInUse:
             return false
         }
     }

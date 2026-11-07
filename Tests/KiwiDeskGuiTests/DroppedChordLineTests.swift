@@ -37,7 +37,7 @@ struct DroppedChordLineTests {
         )
         // Vacuity: German names this row differently.
         #expect(localized != label)
-        let line = ShortcutsHeader.droppedLine(entry, config: config)
+        let line = DefaultShortcutsRow.droppedLine(entry, config: config)
         #expect(line.contains(localized))
         #expect(!line.contains(label))
     }

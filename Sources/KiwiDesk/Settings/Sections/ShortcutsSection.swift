@@ -153,8 +153,10 @@ struct ShortcutsSection: View {
         // layers card leads the section).
         ModifierKeysCard(model: model)
         GesturesDrawer(model: model, expanded: $gesturesExpanded)
-        ShortcutsHeader(model: model, selected: selection)
         layersCard
+        // Under the layer pick that gates it, above the groups it
+        // rewrites (#3074).
+        DefaultShortcutsRow(model: model, selected: selection)
     }
 
     private var layersCard: some View {

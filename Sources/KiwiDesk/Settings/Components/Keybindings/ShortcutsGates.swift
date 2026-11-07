@@ -123,7 +123,7 @@ struct ShortcutsGates {
 
     /// Gated keys resolved dynamically in view state: Import's
     /// and Restore Defaults' gates are live-editor questions no
-    /// saved `GuiConfig` can answer, so `ShortcutsHeader` keeps
+    /// saved `GuiConfig` can answer, so `DefaultShortcutsRow` keeps
     /// them. Naming them keeps the gap deliberate.
     static let resolvedElsewhere: Set<SettingKey> = [
         .shortcuts(.`import`),

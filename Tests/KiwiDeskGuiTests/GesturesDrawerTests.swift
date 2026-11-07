@@ -140,7 +140,7 @@ struct GesturesDrawerTests {
         let drawer = try #require(
             body.range(of: "GesturesDrawer(model: model,")
         )
-        let header = try #require(body.range(of: "ShortcutsHeader("))
+        let header = try #require(body.range(of: "layersCard"))
         #expect(drawer.lowerBound < header.lowerBound)
         #expect(
             body.components(separatedBy: "GesturesDrawer(").count
