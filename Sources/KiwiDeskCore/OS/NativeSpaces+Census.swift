@@ -2,8 +2,10 @@ import Foundation
 
 /// One reading of every user Desktop's layer-0 windows (#1146),
 /// shown Desktops included: which native Space hosts each window,
-/// who owns it, and whether it is up or parked there. Pure once
-/// built, so every consumer decides from one snapshot.
+/// who owns it, and whether it is up or parked there — plus, for
+/// the boot seed, the windows hidden full-screen Spaces show
+/// (`hiddenFullScreenHosts`, #2949). Pure once built, so every
+/// consumer decides from one snapshot.
 public struct DesktopCensus: Sendable, Equatable {
     public struct Host: Sendable, Equatable {
         public let space: SkyLight.SpaceID
@@ -26,15 +28,20 @@ public struct DesktopCensus: Sendable, Equatable {
     /// The topology's native full-screen Spaces, whose windows
     /// `hosts` never lists (#2930).
     public let fullScreen: Set<SkyLight.SpaceID>
+    /// The layer-0 windows of another process on a full-screen
+    /// Space no display shows, read for the boot seed (#2949).
+    public let hiddenFullScreenHosts: [WindowID: Host]
 
     public init(
         hosts: [WindowID: Host],
         shown: Set<SkyLight.SpaceID>,
-        fullScreen: Set<SkyLight.SpaceID> = []
+        fullScreen: Set<SkyLight.SpaceID> = [],
+        hiddenFullScreenHosts: [WindowID: Host] = [:]
     ) {
         self.hosts = hosts
         self.shown = shown
         self.fullScreen = fullScreen
+        self.hiddenFullScreenHosts = hiddenFullScreenHosts
     }
 
     /// Hosted on a user Desktop nobody shows.
@@ -82,8 +89,40 @@ public struct DesktopCensus: Sendable, Equatable {
         return DesktopCensus(
             hosts: hosts,
             shown: shown,
-            fullScreen: Set(spaces.filter { !$0.isUser }.map(\.id))
+            fullScreen: Set(spaces.filter { !$0.isUser }.map(\.id)),
+            hiddenFullScreenHosts: hiddenFullScreenHosts(
+                spaces: spaces,
+                owners: owners,
+                list: list
+            )
         )
+    }
+
+    /// The windows each full-screen Space no display shows names
+    /// as its own (`NativeSpace.fullScreenWindows`), never the
+    /// toolbar windows it also hosts. One UP-list read per such
+    /// Space, so a hidden app's window reads parked; a Space whose
+    /// list cannot be read is skipped, not the census.
+    private static func hiddenFullScreenHosts(
+        spaces: [NativeSpace],
+        owners: [WindowID: pid_t],
+        list: (SkyLight.SpaceID, _ includingParked: Bool) -> [WindowID]?
+    ) -> [WindowID: Host] {
+        var hosts: [WindowID: Host] = [:]
+        for space in spaces where !space.isUser && !space.isCurrent {
+            guard !space.fullScreenWindows.isEmpty,
+                let up = list(space.id, false).map(Set.init)
+            else { continue }
+            for id in space.fullScreenWindows where hosts[id] == nil {
+                guard let pid = owners[id] else { continue }
+                hosts[id] = Host(
+                    space: space.id,
+                    pid: pid,
+                    isUp: up.contains(id)
+                )
+            }
+        }
+        return hosts
     }
 }
 

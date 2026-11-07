@@ -63,9 +63,17 @@ struct HealStandDownSeamTests {
         }
     }
 
+    /// Both boot arms admit through the one `admitBootAway`, which
+    /// resumes a carried filing (#2907, #2949).
     @Test("the boot census resumes a carried filing")
     func seedResumesCarriedFilings() throws {
-        let seed = try source("App/KiwiCore+AwayWindows.swift")
-        #expect(seed.occurrences(of: "resumeCarriedDeparture(") == 1)
+        let admit = try source("App/KiwiCore+AwayBootSeed.swift")
+        #expect(admit.occurrences(of: "resumeCarriedDeparture(") == 1)
+        #expect(admit.occurrences(of: "admitBootAway(") == 2)
+        let desktops = try source("App/KiwiCore+AwayWindows.swift")
+        #expect(desktops.occurrences(of: "admitBootAway(") == 1)
+        // The gone handler's `recordAwayWindow` is the one other
+        // filing; the boot seed writes none beside the admission.
+        #expect(desktops.occurrences(of: "state.awayWindows[id] =") == 1)
     }
 }

@@ -124,4 +124,41 @@ struct NativeSpaceParseTests {
         ])
         #expect(spaces.map(\.id) == [2])
     }
+
+    /// #2949, shaped as the device's plist (2026-11-07, macOS
+    /// 27.2): a full-screen Space names its window by the tile's
+    /// `TileWindowID` and by `fs_wid`; a Desktop names none.
+    @Test("a full-screen Space names the window it shows")
+    func readsTheFullScreenWindow() {
+        let tiled: [String: Any] = [
+            "id64": UInt64(63), "type": 4,
+            "fs_wid": NSNumber(value: 218584),
+            "TileLayoutManager": [
+                "TileSpaces": [
+                    ["TileWindowID": NSNumber(value: 218584)],
+                    ["TileWindowID": NSNumber(value: 218590)],
+                ]
+            ],
+        ]
+        let bare: [String: Any] = [
+            "id64": UInt64(64), "type": 4,
+            "fs_wid": NSNumber(value: 7),
+        ]
+        let spaces = NativeSpaces.parse([
+            display(
+                "UUID-A",
+                current: 1,
+                spaces: [
+                    ["id64": UInt64(1), "type": 0, "fs_wid": 9],
+                    tiled, bare,
+                ]
+            )
+        ])
+        #expect(spaces[0].fullScreenWindows.isEmpty)
+        #expect(
+            spaces[1].fullScreenWindows
+                == [WindowID(218584), WindowID(218590)]
+        )
+        #expect(spaces[2].fullScreenWindows == [WindowID(7)])
+    }
 }

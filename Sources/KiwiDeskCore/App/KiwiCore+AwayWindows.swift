@@ -232,26 +232,8 @@ extension KiwiCore {
         for (id, host) in census.hosts.sorted(by: {
             $0.key.raw < $1.key.raw
         }) {
-            // A carried filing up on an away Desktop is the departure
-            // it was, whether or not its app is observed yet (#2907).
-            if census.isAway(id), host.isUp, state.windows[id] == nil {
-                state.resumeCarriedDeparture(id)
-            }
-            guard census.isAway(id),
-                host.isUp,
-                state.windows[id] == nil,
-                state.awayWindows[id] == nil,
-                eventLoop.observes(pid: host.pid),
-                let ref = refs[host.pid]
+            guard census.isAway(id), admitBootAway(id, host, refs: refs)
             else { continue }
-            state.awayWindows[id] = AwayWindow(
-                id: id,
-                pid: host.pid,
-                appName: ref.name,
-                appBundleID: ref.bundleID,
-                nativeSpace: host.space,
-                isUp: host.isUp
-            )
             if state.rememberedSpace(of: id) == nil,
                 let key = NativeSpaces.key(of: host.space, in: spaces),
                 let space = desktopMemory.virtualSpaces[key],
@@ -261,10 +243,11 @@ extension KiwiCore {
             }
             seeded += 1
         }
+        let fullScreen = seedFullScreenAway(census, refs: refs)
         if seeded > 0 {
             onLog("boot census: \(seeded) window(s) on away Desktops")
-            scheduleAwayCensus()
         }
+        if seeded + fullScreen > 0 { scheduleAwayCensus() }
     }
 
     /// The away members of `space`, in the order the row would

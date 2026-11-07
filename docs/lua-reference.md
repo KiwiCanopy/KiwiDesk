@@ -6459,7 +6459,9 @@ A window in native full screen is listed, and **Return** shows it
 on its own full-screen Space
 ([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939)).
 One already full screen on a Space no screen showed when KiwiDesk
-started is listed once its Space has been shown
+started is listed by its app's name
+([#2949](https://github.com/KiwiCanopy/KiwiDesk/issues/2949)), and
+picking it brings the app forward
 ([accepted limitations](accepted-limitations.md)).
 :::
 
@@ -8468,7 +8470,7 @@ space objects), `windows` (array of window objects), `away_windows`
 (array of the windows on Desktops no screen shows, each with `id`,
 `app`, `bundle_id`, `space_id` — `nil` for a window found at boot
 that no Space has filed yet — and `desktop`, its Mission Control
-number), `monitor_count`,
+number, `nil` for a window on a full-screen Space), `monitor_count`,
 `desktop` (the main screen's current Desktop — the number
 bindings fire on), `exec_running` (count of `KiwiDesk.exec`
 children still running).
