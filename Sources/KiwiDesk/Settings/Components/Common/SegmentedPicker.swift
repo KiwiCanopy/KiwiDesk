@@ -128,7 +128,8 @@ struct SegmentedPicker<Value: Hashable>: View {
         }
     }
 
-    private var track: some View {
+    /// Split from `track`: one chain took the type-checker 1.5 s.
+    private var trackFace: some View {
         segmentsLayout {
             ForEach(options.indices, id: \.self) { index in
                 segment(options[index], index: index)
@@ -143,32 +144,36 @@ struct SegmentedPicker<Value: Hashable>: View {
                 lineWidth: 0.5
             )
         )
-        // ONE Tab stop for the whole control, the way a native
-        // segmented control behaves — the segments opt out below
-        // (#997).
-        .focusable(isEnabled)
-        .focused($focused)
-        .onChange(of: focused) { _, now in
-            // This stop would otherwise ring on every click
-            // (`ClickBornFocus`).
-            guard now,
-                ClickBornFocus.isClickBorn(
-                    focusMayBeADescendant: false
-                )
-            else { return }
-            focused = false
-        }
-        // ← / → only: ↑ / ↓ must still leave the row.
-        .onKeyPress(.leftArrow) { move(-1) }
-        .onKeyPress(.rightArrow) { move(1) }
-        .accessibilityElement(children: .contain)
-        // Group value announcement for accessibility (#812, 2026-08-24).
-        .accessibilityValue(
-            spokenValue ?? selectedIndex.map { options[$0].title } ?? ""
-        )
-        .onChange(of: isEnabled) { _, now in
-            if !now { hoveredIndex = nil }
-        }
+    }
+
+    private var track: some View {
+        trackFace
+            // ONE Tab stop for the whole control, the way a native
+            // segmented control behaves — the segments opt out below
+            // (#997).
+            .focusable(isEnabled)
+            .focused($focused)
+            .onChange(of: focused) { _, now in
+                // This stop would otherwise ring on every click
+                // (`ClickBornFocus`).
+                guard now,
+                    ClickBornFocus.isClickBorn(
+                        focusMayBeADescendant: false
+                    )
+                else { return }
+                focused = false
+            }
+            // ← / → only: ↑ / ↓ must still leave the row.
+            .onKeyPress(.leftArrow) { move(-1) }
+            .onKeyPress(.rightArrow) { move(1) }
+            .accessibilityElement(children: .contain)
+            // Group value announcement for accessibility (#812, 2026-08-24).
+            .accessibilityValue(
+                spokenValue ?? selectedIndex.map { options[$0].title } ?? ""
+            )
+            .onChange(of: isEnabled) { _, now in
+                if !now { hoveredIndex = nil }
+            }
     }
 
     /// Moves the SELECTION one segment, as a native segmented
