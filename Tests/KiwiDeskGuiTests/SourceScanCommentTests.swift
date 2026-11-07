@@ -199,4 +199,17 @@ struct SourceScanCommentTests {
             with: ""
         )
     }
+
+    /// The strip is memoized by content (`memoizedStrip`), so a key
+    /// weaker than the whole text serves one source another's answer.
+    @Test("the strip memo answers each text, never a similar one")
+    func memoKeysOnContent() {
+        let first = "let a = 1 // one\n"
+        let second = "let b = 2 // two\n"
+        #expect(first.count == second.count)
+        for _ in 0..<2 {
+            #expect(SourceScan.stripComments(first) == "let a = 1 \n")
+            #expect(SourceScan.stripComments(second) == "let b = 2 \n")
+        }
+    }
 }

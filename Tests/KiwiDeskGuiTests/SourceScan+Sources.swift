@@ -7,9 +7,10 @@ extension SourceScan {
     private static let cacheLock = NSLock()
     nonisolated(unsafe) private static var sourcesCache: [URL: [URL]] = [:]
     nonisolated(unsafe) private static var rawFileCache: [URL: String] = [:]
-    nonisolated(unsafe) private static var strippedCache: [URL: String] = [:]
+    nonisolated(unsafe) private static var strippedCache: [StripKey: String] =
+        [:]
     nonisolated(unsafe) private static var blankedCache: [URL: String] = [:]
-    nonisolated(unsafe) private static var stripLocks: [URL: NSLock] = [:]
+    nonisolated(unsafe) private static var stripLocks: [StripKey: NSLock] = [:]
     nonisolated(unsafe) private static var blankLocks: [URL: NSLock] = [:]
 
     /// Reads raw string contents of `url`, cached in-memory
@@ -28,25 +29,56 @@ extension SourceScan {
         return raw
     }
 
-    /// Reads `url`, strips comments, and caches the result so
-    /// subsequent scans over the same file reuse the parsed representation.
-    /// Single-flight per file: a late caller waits for the first
-    /// strip instead of walking the file again (#1868).
+    /// Reads `url` and strips its comments, through `memoizedStrip`.
     static func strippedSource(at url: URL) throws -> String {
-        let fileLock: NSLock = cacheLock.withLock {
-            if let lock = stripLocks[url] { return lock }
+        stripComments(try rawSource(at: url))
+    }
+
+    /// One strip per distinct text, however it was read: most callers
+    /// read a file themselves, and re-walked it per test (#1868). Keyed
+    /// by content, so an edited fixture is never served stale, and safe
+    /// only while `walk` is a pure function of `source`. Single-flight:
+    /// a run starts nearly every suite at once, so a late caller waits
+    /// for the first walk rather than repeating it.
+    static func memoizedStrip(
+        _ source: String,
+        walk: () -> String
+    ) -> String {
+        let key = StripKey(source)
+        let textLock: NSLock = cacheLock.withLock {
+            if let lock = stripLocks[key] { return lock }
             let lock = NSLock()
-            stripLocks[url] = lock
+            stripLocks[key] = lock
             return lock
         }
-        fileLock.lock()
-        defer { fileLock.unlock() }
-        if let cached = cacheLock.withLock({ strippedCache[url] }) {
+        textLock.lock()
+        defer { textLock.unlock() }
+        if let cached = cacheLock.withLock({ strippedCache[key] }) {
             return cached
         }
-        let stripped = stripComments(try rawSource(at: url))
-        cacheLock.withLock { strippedCache[url] = stripped }
+        let stripped = walk()
+        cacheLock.withLock { strippedCache[key] = stripped }
         return stripped
+    }
+
+    /// A text with its hash taken once, outside `cacheLock`: hashing
+    /// whole files under that one lock queued every scan behind it.
+    private struct StripKey: Hashable {
+        let text: String
+        let textHash: Int
+
+        init(_ text: String) {
+            self.text = text
+            textHash = text.hashValue
+        }
+
+        func hash(into hasher: inout Hasher) {
+            hasher.combine(textHash)
+        }
+
+        static func == (lhs: Self, rhs: Self) -> Bool {
+            lhs.textHash == rhs.textHash && lhs.text == rhs.text
+        }
     }
 
     /// `url` with comments AND literals blanked, cached across

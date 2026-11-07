@@ -34,11 +34,13 @@ extension SourceScan {
     ) throws -> [MachineTouchSite] {
         var found: [MachineTouchSite] = []
         for file in try swiftSources(under: directory) {
-            let lines = try strippedSource(at: file)
-                .split(
-                    separator: "\n",
-                    omittingEmptySubsequences: false
-                )
+            let text = try strippedSource(at: file)
+            // Most files hold no site; only one that does pays the split.
+            guard text.contains(needle) else { continue }
+            let lines = text.split(
+                separator: "\n",
+                omittingEmptySubsequences: false
+            )
             for index in lines.indices {
                 let line = lines[index]
                 var cursor = line.startIndex

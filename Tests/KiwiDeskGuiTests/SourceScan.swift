@@ -101,7 +101,7 @@ enum SourceScan {
     /// `blankingCommentsAndLiterals` is the same walk with the
     /// other emit policy (`SourceScan+Literals.swift`).
     static func stripComments(_ source: String) -> String {
-        stripped(Array(source))
+        memoizedStrip(source) { stripped(Array(source)) }
     }
 
     /// ONE walk for both comment shapes, tracking string
