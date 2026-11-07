@@ -33,6 +33,11 @@ struct DefaultShortcutsRowTests {
 
     @Test("the resolver names why Restore greys")
     func restoreReasons() {
+        // A construction naming neither input greys.
+        #expect(
+            ShortcutsGates(config: GuiConfig())
+                .inertReason(for: .shortcuts(.restoreDefaults)) != nil
+        )
         let other = KeyLayer.defaultName + "-other"
         #expect(reason(layer: KeyLayer.defaultName, defaults: true) == nil)
         #expect(
@@ -88,9 +93,14 @@ struct DefaultShortcutsRowTests {
             "Sources/KiwiDesk/Settings/Sections/DefaultShortcutsRow.swift"
         )
         #expect(!body.contains("if model.hasDefaultsToRestore"))
+        // The row hands the resolver both of its inputs.
+        let squashed = body.filter { !$0.isWhitespace }
         #expect(
-            body.contains(
-                ".inertReason(for: .shortcuts(.restoreDefaults))"
+            squashed.contains(
+                "ShortcutsGates(config:model.config,"
+                    + "selectedLayer:selected,"
+                    + "defaultsToRestore:model.hasDefaultsToRestore)"
+                    + ".inertReason(for:.shortcuts(.restoreDefaults))"
             )
         )
         // The button stack, brace-balanced: Import's gate, then

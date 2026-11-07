@@ -18,11 +18,12 @@ struct ShortcutsGates {
     /// switch alone, whose Save must write the shared rows (#2460).
     var editingStoredProfile = false
     /// The layer the page edits; read by Restore Defaults alone,
-    /// which only the default layer can answer (#3074).
-    var selectedLayer = KeyLayer.defaultName
+    /// which only the default layer can answer (#3074). Both
+    /// defaults grey, so a site that drops one never lights it.
+    var selectedLayer = ""
     /// `SettingsModel.hasDefaultsToRestore`; read by Restore
     /// Defaults alone (#3074).
-    var defaultsToRestore = true
+    var defaultsToRestore = false
 
     /// Reason why a Shortcuts setting is withheld or gated.
     enum InertReason: Hashable, CaseIterable {
