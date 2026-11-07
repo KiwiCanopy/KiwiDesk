@@ -519,6 +519,12 @@ before it arrives, which can then cross only through the visible
 Desktop: a minimized or hidden one, one that has stayed on another
 Desktop since KiwiDesk started, and a native tab that became another
 window while away.
+
+A window on a hidden Desktop crossing to another screen lands up to
+about 150 ms after the command returns. Until it lands, a second
+`move_to_desktop` or `move_to_desktop_and_follow` of that window
+refuses with `A window moves again once its last move lands.`, so a
+script sending one window twice retries after a short wait.
 :::
 
 ### move_to_desktop_and_follow
