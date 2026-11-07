@@ -5,10 +5,8 @@ import Testing
 @testable import KiwiDesk
 
 /// `SettingsModel.draftDiff` serves the last walk while its inputs
-/// stand still (#3060). These hold that a change to any input it
-/// reads is a new walk, and that its key names every input
-/// `SettingsDraftDiff.between` takes, so a parameter added there
-/// cannot be served stale.
+/// stand still (#3060). These hold that a write to any input it
+/// reads is a new walk, the pill's rows reading the same diff.
 @Suite("Draft diff cache")
 @MainActor
 struct DraftDiffCacheTests {
@@ -40,38 +38,60 @@ struct DraftDiffCacheTests {
         #expect(model.draftDiff.luaChanged)
     }
 
-    /// The key's fields are `between`'s parameters, read from its
-    /// declaration: a parameter the key lacks would be served from
-    /// whichever walk read it last.
-    @Test("the key names every input the walk takes")
-    func keyCoversTheWalk() throws {
+    /// Every write to an input is a new walk, an `==`-equal one
+    /// included: `GuiConfig ==` skips fields the walk reads (a
+    /// binding's id, a Desktop entry's name), so the cache keys on the
+    /// writes rather than the values.
+    @Test("every write to an input is a new walk")
+    func everyWriteIsANewWalk() {
+        let model = makeTestModel()
+        let writes: [(String, () -> Void)] = [
+            ("config", { model.config = model.config }),
+            ("cleanConfig", { model.cleanConfig = model.cleanConfig }),
+            ("luaSource", { model.luaSource = model.luaSource }),
+            (
+                "cleanLuaSource",
+                { model.cleanLuaSource = model.cleanLuaSource }
+            ),
+        ]
+        for (name, write) in writes {
+            _ = model.draftDiff
+            #expect(model.draftMemo.value != nil, "\(name)")
+            write()
+            #expect(
+                model.draftMemo.value == nil,
+                "\(name) kept the last walk"
+            )
+        }
+    }
+
+    /// Unchanged inputs are served from the last walk.
+    @Test("a read with no write is served from the last walk")
+    func unchangedReadIsServed() {
+        let model = makeTestModel()
+        _ = model.draftDiff
+        let writes = model.draftMemo.writes
+        #expect(model.draftMemo.value != nil)
+        _ = model.draftDiff
+        #expect(model.draftMemo.writes == writes)
+        #expect(model.draftMemo.value != nil)
+    }
+
+    /// The pill's rows take the cached walk rather than one of their
+    /// own: a direct call is right and walks both configs per render.
+    @Test("the pill's rows read the cached diff")
+    func rowsReadTheCache() throws {
         let source = SourceScan.stripComments(
             try String(
                 contentsOf: SourceScan.repoRoot(from: #filePath)
                     .appendingPathComponent(
-                        "Sources/KiwiDesk/Settings/SettingsDraftDiff.swift"
+                        "Sources/KiwiDesk/Settings/SettingsDetailPanel.swift"
                     ),
                 encoding: .utf8
             )
         )
-        let start = try #require(source.range(of: "static func between("))
-        let end = try #require(
-            source.range(of: ")", range: start.upperBound..<source.endIndex)
-        )
-        let parameters = source[start.upperBound..<end.lowerBound]
-            .split(separator: ",")
-            .compactMap {
-                $0.split(separator: ":").first?
-                    .trimmingCharacters(in: .whitespacesAndNewlines)
-            }
-        #expect(parameters.count == 4)
-        let key = DraftDiffCache.Key(
-            config: GuiConfig(),
-            cleanConfig: GuiConfig(),
-            luaSource: "",
-            cleanLuaSource: ""
-        )
-        let fields = Mirror(reflecting: key).children.compactMap(\.label)
-        #expect(fields == parameters)
+        .filter { !$0.isWhitespace }
+        #expect(source.contains("letdiff=model.draftDiff"))
+        #expect(!source.contains("SettingsDraftDiff.between("))
     }
 }

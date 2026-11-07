@@ -19,38 +19,33 @@ extension SettingsModel {
             : 0
     }
 
-    /// The draft against its baseline, walked once per change of
+    /// The draft against its baseline, walked once per write to
     /// either: the save pill's rows and the dirty count both read it
-    /// on every render (#3060). `Key` lists every input
-    /// `SettingsDraftDiff.between` reads (`DraftDiffCacheTests`).
+    /// on every render (#3060, `DraftDiffCacheTests`).
     var draftDiff: SettingsDraftDiff {
-        let key = DraftDiffCache.Key(
+        if let value = draftMemo.value { return value }
+        let value = SettingsDraftDiff.between(
             config: config,
             cleanConfig: cleanConfig,
             luaSource: luaSource,
             cleanLuaSource: cleanLuaSource
         )
-        if let cache = draftDiffCache, cache.key == key { return cache.value }
-        let value = SettingsDraftDiff.between(
-            config: key.config,
-            cleanConfig: key.cleanConfig,
-            luaSource: key.luaSource,
-            cleanLuaSource: key.cleanLuaSource
-        )
-        draftDiffCache = DraftDiffCache(key: key, value: value)
+        draftMemo.value = value
         return value
     }
 }
 
-/// The last draft diff and the four inputs it read.
-struct DraftDiffCache {
-    struct Key: Equatable {
-        let config: GuiConfig
-        let cleanConfig: GuiConfig
-        let luaSource: String
-        let cleanLuaSource: String
-    }
+/// The last draft diff, dropped by every write to the four inputs it
+/// walks: `config`, `cleanConfig`, `luaSource`, `cleanLuaSource`.
+/// Keyed on the writes, never the values: `GuiConfig ==` skips
+/// fields the walk reads (a binding's id, a Desktop entry's name).
+struct DraftDiffMemo {
+    var value: SettingsDraftDiff?
+    /// How many writes it has seen, which a test reads.
+    private(set) var writes = 0
 
-    let key: Key
-    let value: SettingsDraftDiff
+    mutating func bump() {
+        writes += 1
+        value = nil
+    }
 }

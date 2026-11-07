@@ -2283,12 +2283,15 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   (`NavRowRenderSeamTests`, `NavRowEqualityTests`).
 - **A scroll into the Shortcuts page reaches the row's part
   first** (#3060). The page builds its parts lazily, so a scroll
-  to an id inside a part not yet built finds nothing: a reveal, a
-  recorder's Go to and a jump chip scroll to the part's id
-  through `ShortcutsPagePart.owner(of:expander:)`, and an anchor
-  it cannot place builds the whole page. A catalog control or
-  census container added to the page is placed there
-  (`ShortcutsPagePartTests` ▸ `catalogControlsHaveParts`,
+  to an id inside a part not yet built finds nothing: a reveal
+  (through `SettingsModel.revealLanding(for:)`), a recorder's Go
+  to and a jump chip scroll to the part's id, which
+  `ShortcutsPagePart.owner(of:expander:bindings:)` answers, and an
+  anchor it cannot place builds the whole page. A catalog control
+  or census container added to the page, or moved between its
+  cards, is placed there in the same change — a stale placement
+  scrolls to the wrong part and skips the fallback, which no test
+  sees (`ShortcutsPagePartTests` ▸ `catalogControlsHaveParts`,
   `censusContainersArePartsOfThePage`). Rows come into view with
   no motion of their own (owner ruling on #3060).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view

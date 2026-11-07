@@ -260,8 +260,11 @@ struct ShortcutsJumpTests {
         #expect(jump.contains("ifgroup==.gestures{gesturesExpanded=true}"))
         #expect(
             jump.contains(
-                "proxy.scrollTo(ShortcutsPagePart(group).id,anchor:.top)"
+                "letpart=ShortcutsPagePart(group).id"
             )
+        )
+        #expect(
+            jump.contains("{proxy.scrollTo(part,anchor:.top)}")
         )
     }
 

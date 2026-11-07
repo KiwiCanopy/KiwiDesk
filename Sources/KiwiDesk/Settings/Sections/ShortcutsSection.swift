@@ -23,8 +23,9 @@ struct ShortcutsSection: View {
     @State var jumpTracker = ShortcutsJumpTracker()
     /// Bumped by Add binding, whose row lands at the page's end.
     @State var luaAdded = 0
-    /// Set once a scroll targets a row no part is known to hold:
-    /// the page then builds every part, as before #3060.
+    /// Set once a scroll targets a row no part is known to hold —
+    /// the recorder's, or a reveal's through `nav` — and the page then
+    /// builds every part, as before #3060.
     @State var buildsWholePage = false
     @State private var endScroll: Task<Void, Never>?
     @State var targetScroll: Task<Void, Never>?
@@ -75,7 +76,7 @@ struct ShortcutsSection: View {
             coordinator.onArmedChange = { [model] armed in
                 model.setRecorderArmed(armed)
             }
-            buildWholePage(revealing: model.nav.revealTarget)
+            takeWholePageRequest()
         }
         // Here rather than on the drawer, which the lazy stack builds
         // only when it is scrolled to (#3060).
@@ -85,9 +86,10 @@ struct ShortcutsSection: View {
                 advancedExpanded = true
             }
         }
-        .onChange(of: model.nav.revealTarget) { _, target in
-            buildWholePage(revealing: target)
+        .onChange(of: model.nav.shortcutsWholePage) { _, _ in
+            takeWholePageRequest()
         }
+        .onDisappear { model.shortcutsPartsBuilt = [] }
         .onChange(of: model.config.layers.map(\.name)) {
             _,
             _ in
@@ -150,7 +152,15 @@ struct ShortcutsSection: View {
         ScrollView {
             stack {
                 ForEach(ShortcutsPagePart.allCases) { part in
+                    // The parts built, which a reveal reaches without a
+                    // detour (`revealLanding`); written here alone.
                     self.part(part, expander: expander)
+                        .onAppear {
+                            model.shortcutsPartsBuilt.insert(part)
+                        }
+                        .onDisappear {
+                            model.shortcutsPartsBuilt.remove(part)
+                        }
                 }
             }
             .padding(.horizontal, SettingsMetrics.paneInset)

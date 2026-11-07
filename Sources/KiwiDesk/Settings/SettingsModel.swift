@@ -10,12 +10,14 @@ final class SettingsModel: ObservableObject {
     /// The visually edited configuration.
     @Published var config: GuiConfig {
         didSet {
+            draftMemo.bump()
             if !suppressDirty { recomputeDirty() }
         }
     }
     /// Raw init.lua when unrepresentable visually or opted into.
     @Published var luaSource = "" {
         didSet {
+            draftMemo.bump()
             if !suppressDirty { recomputeDirty() }
         }
     }
@@ -95,13 +97,14 @@ final class SettingsModel: ObservableObject {
     /// without asking again (#2049).
     var quitAnswered = false
     /// Clean baseline state compared against `isDirty`; set by `apply(_:)`.
-    var cleanConfig = GuiConfig()
-    var cleanLuaSource = ""
+    var cleanConfig = GuiConfig() { didSet { draftMemo.bump() } }
+    var cleanLuaSource = "" { didSet { draftMemo.bump() } }
     /// Space list as seeded from live/stored state
     /// (`KiwiCore.mergeLiveSpaces`).
     var seedSpaces: [SpaceID] = []
 
-    // `recomputeDirty()` lives in `SettingsModel+Dirty.swift` (§2.1).
+    // `recomputeDirty()` and `draftDiff` live in `+Dirty` (§2.1).
+    var draftMemo = DraftDiffMemo()
 
     /// `UserDefaults` seam for non-config preferences; tests inject a scratch
     /// domain.
@@ -295,8 +298,7 @@ final class SettingsModel: ObservableObject {
     var encodedCache: EncodedReachCache?
     /// The layer readings over that pass (`layerReach`, #2783).
     var layerCache: LayerReachCache?
-    /// The last draft diff and what it read (`draftDiff`, #3060).
-    var draftDiffCache: DraftDiffCache?
+    var shortcutsPartsBuilt: Set<ShortcutsPagePart> = []
     /// The profile whose page the draft is — pinned by `reload()`,
     /// because the loaded name can move under an open draft (a
     /// Save as New makes its profile current mid-save; a Desktop
@@ -343,7 +345,6 @@ final class SettingsModel: ObservableObject {
         reload()
     }
 
-    /// Global color-palette library keyed off config directory (#375).
     /// Unapplied settings from last restore, or nil if complete (#606).
     @Published var lastRestoreOutcome: RestoreOutcome?
 }

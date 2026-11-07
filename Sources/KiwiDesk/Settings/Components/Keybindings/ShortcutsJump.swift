@@ -198,11 +198,6 @@ final class ShortcutsJumpTracker {
         moved(at: now)
     }
 
-    /// Whether a section has reported its frame under `id`: built.
-    func hasMeasured(_ id: String) -> Bool {
-        page.sections[id] != nil
-    }
-
     func jump(to group: ShortcutsJumpGroup, at now: Date = Date()) {
         hold = ShortcutsJumpHold(
             group,

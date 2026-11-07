@@ -13,7 +13,9 @@ import Testing
 @MainActor
 struct ShortcutsPagePartTests {
     /// Every catalog control declared for the page, drawers' children
-    /// included, resolves to the part that draws it.
+    /// included, names a part. Which part is review's: a second table
+    /// of right answers would be one more hand copy of
+    /// `catalogOwners` (gui.md ▸ the Shortcuts page's lazy parts).
     @Test("every catalog control names its part")
     func catalogControlsHaveParts() {
         let expander = Self.expander()
@@ -21,7 +23,11 @@ struct ShortcutsPagePartTests {
         #expect(controls.count > 20)
         for control in controls {
             #expect(
-                ShortcutsPagePart.owner(of: control.id, expander: expander)
+                ShortcutsPagePart.owner(
+                    of: control.id,
+                    expander: expander,
+                    bindings: []
+                )
                     != nil,
                 "no part draws \(control.id)"
             )
@@ -46,7 +52,11 @@ struct ShortcutsPagePartTests {
                 "no part draws \(container)"
             )
             #expect(
-                ShortcutsPagePart.owner(of: label, expander: expander)
+                ShortcutsPagePart.owner(
+                    of: label,
+                    expander: expander,
+                    bindings: []
+                )
                     == ShortcutsPagePart(container)
             )
         }
@@ -60,11 +70,19 @@ struct ShortcutsPagePartTests {
         let expander = Self.expander()
         let focus = try #require(KeybindingCatalog.focusDirections.first)
         #expect(
-            ShortcutsPagePart.owner(of: focus.lua, expander: expander)
+            ShortcutsPagePart.owner(
+                of: focus.lua,
+                expander: expander,
+                bindings: []
+            )
                 == .focus
         )
         #expect(
-            ShortcutsPagePart.owner(of: "no such row", expander: expander)
+            ShortcutsPagePart.owner(
+                of: "no such row",
+                expander: expander,
+                bindings: []
+            )
                 == nil
         )
     }
@@ -81,6 +99,76 @@ struct ShortcutsPagePartTests {
         }
     }
 
+    /// A Mouse & trackpad strip click lands on its entry, inside the
+    /// built gestures part: no whole-page rebuild, which would end the
+    /// play the click started.
+    @Test("every gesture entry is in the gestures part")
+    func gestureEntriesHaveTheirPart() {
+        let expander = Self.expander()
+        for item in GestureItem.allCases {
+            #expect(
+                ShortcutsPagePart.owner(
+                    of: item.anchor,
+                    expander: expander,
+                    bindings: []
+                ) == .gestures
+            )
+        }
+    }
+
+    /// The recorder names an app, pocket-app or Lua row by its
+    /// binding's id; each finds its own part rather than the page.
+    @Test("a binding row finds its part by kind")
+    func bindingRowsFindTheirPart() {
+        let app = KeyBinding(
+            combo: "",
+            lua: "kiwi.open_app(\"Safari\")",
+            kind: .application,
+            label: "Safari"
+        )
+        let lua = KeyBinding(
+            combo: "",
+            lua: "print(1)",
+            kind: .custom,
+            label: ""
+        )
+        let pocket = KeyBinding(
+            combo: "",
+            lua: KeybindingCatalog.pocketApp("com.apple.Safari").lua,
+            kind: .custom,
+            label: ""
+        )
+        let expander = Self.expander()
+        let rows = [app, lua, pocket]
+        let parts = rows.map {
+            ShortcutsPagePart.owner(
+                of: $0.id.uuidString,
+                expander: expander,
+                bindings: rows
+            )
+        }
+        #expect(parts == [.openApplications, .luaBindings, .pocket])
+    }
+
+    /// A reveal outside Shortcuts takes no detour; inside, a held part
+    /// needs none, an unbuilt one is reached first, and an unplaceable
+    /// anchor asks for the whole page.
+    @Test("a reveal lands through its part only where it must")
+    func revealLandings() {
+        let model = makeTestModel()
+        let anchor = SettingsCatalog.shortcuts.focusKeys.id
+        model.destination = .spaces
+        #expect(model.revealLanding(for: anchor) == nil)
+        model.destination = .shortcuts
+        #expect(
+            model.revealLanding(for: anchor)
+                == .part(ShortcutsPagePart.focus.id)
+        )
+        model.shortcutsPartsBuilt = [.focus]
+        #expect(model.revealLanding(for: anchor) == nil)
+        #expect(model.revealLanding(for: "no such row") == .wholePage)
+    }
+
     /// The page stacks the parts lazily, and every scroll into it
     /// takes the detour: the reveal, the recorder's Go to, and the
     /// whole-page fallback for a row no part is known to hold.
@@ -90,7 +178,7 @@ struct ShortcutsPagePartTests {
         #expect(
             parts.contains(
                 "ForEach(ShortcutsPagePart.allCases){partin"
-                    + "self.part(part,expander:expander)}"
+                    + "self.part(part,expander:expander).onAppear{"
             )
         )
         #expect(
@@ -99,30 +187,39 @@ struct ShortcutsPagePartTests {
                     + "content:content)}else{LazyVStack("
             )
         )
+        #expect(
+            parts.contains(
+                ".onAppear{model.shortcutsPartsBuilt.insert(part)}"
+                    + ".onDisappear{model.shortcutsPartsBuilt.remove(part)}"
+            )
+        )
         let detail = try Self.source("SettingsView+Detail.swift")
         #expect(
             detail.contains(
-                "ifletpart=model.revealPart(for:anchor){"
+                "ifletlanding=model.revealLanding(for:anchor){"
+                    + "switchlanding{case.part(letpart):"
                     + "proxy.scrollTo(part,anchor:.top)"
+                    + "case.wholePage:model.nav.shortcutsWholePage=true}"
             )
         )
         let jump = try Self.source("Sections/ShortcutsSection+Jump.swift")
+        #expect(jump.contains("ifowner==nil{buildsWholePage=true}"))
         #expect(
             jump.contains(
-                "letowner=ShortcutsPagePart.owner(of:target,"
-                    + "expander:expander)ifowner==nil{buildsWholePage=true}"
+                "guardmodel.nav.shortcutsWholePageelse{return}"
+                    + "model.nav.shortcutsWholePage=false"
+                    + "buildsWholePage=true"
             )
         )
-        let section = try Self.source("Sections/ShortcutsSection.swift")
         #expect(
-            section.contains(
+            parts.contains(
                 "scroll(to:target,proxy:proxy,expander:expander)"
             )
         )
         #expect(
-            section.contains(
-                ".onChange(of:model.nav.revealTarget){_,targetin"
-                    + "buildWholePage(revealing:target)}"
+            parts.contains(
+                ".onChange(of:model.nav.shortcutsWholePage){_,_in"
+                    + "takeWholePageRequest()}"
             )
         )
     }

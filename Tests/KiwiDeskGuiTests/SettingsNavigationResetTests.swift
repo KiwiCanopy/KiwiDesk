@@ -46,6 +46,7 @@ struct SettingsNavigationResetTests {
         nav.spaceOverridesFocus = SpaceID("code")
         nav.simpleHover = .look("Kiwi")
         nav.convergePending = true
+        nav.shortcutsWholePage = true
         nav.homeReturnFocus = .shortcuts
         nav.navigationMovesFocus = true
         nav.trailFocusRequest = 3
