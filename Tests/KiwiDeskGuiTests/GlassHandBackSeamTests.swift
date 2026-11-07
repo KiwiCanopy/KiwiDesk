@@ -21,7 +21,8 @@ struct GlassHandBackSeamTests {
     private static let allowed: [String: String] = [:]
 
     /// Text every `write` match contains, so a file without it is
-    /// skipped before the regex runs.
+    /// skipped before the regex runs. `needleShape` checks the
+    /// spelling only: an alternation matching without it passes.
     private static let mustContain = ".contentView"
 
     /// A `contentView` assignment (not `==`, not `!==`); group 1
