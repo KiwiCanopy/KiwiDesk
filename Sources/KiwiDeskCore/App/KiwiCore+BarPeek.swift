@@ -65,6 +65,9 @@ extension KiwiCore {
             keyed: rows.filter { owners[$0.window] != nil },
             chord: { [barMenuHooks] id in
                 owners[id].flatMap { barMenuHooks.pocketKeyChord($0)?.drawn }
+            },
+            spokenChord: { [barMenuHooks] id in
+                owners[id].flatMap { barMenuHooks.pocketKeyChord($0)?.spoken }
             }
         )
     }

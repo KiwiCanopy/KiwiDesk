@@ -56,6 +56,7 @@ extension BarPeekPanel {
             edge: request.edge
         )
         endUnlessContinued(by: next)
+        body.keyed = false
         let room = request.anchor.morphRoom.intersection(visible)
         let area = room.isNull ? visible : room
         let atTop = BarPeekMorph.headerAtTop(request.edge)
@@ -84,6 +85,7 @@ extension BarPeekPanel {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         panel.takesKey = true
+        panel.walksHeldKeys = false
         panel.setFrame(list, display: false)
         paint(shelf, edge: request.edge, size: list.size)
         let strip = BarPeekMorph.header(in: list.size, edge: request.edge)
@@ -261,6 +263,16 @@ extension BarPeekPanel {
         onClose()
     }
 
+    /// The keys a grown list uses.
+    enum ListKey {
+        static let escape: UInt16 = 53
+        static let down: UInt16 = 125
+        static let up: UInt16 = 126
+        static let enter: UInt16 = 36
+        static let keypadEnter: UInt16 = 76
+        static let all = [escape, down, up, enter, keypadEnter]
+    }
+
     /// A key on the grown list: Escape closes it, the arrows walk
     /// its rows, Return picks the lifted one; any other closes it.
     func morphKey(_ code: UInt16) -> Bool {
@@ -269,10 +281,10 @@ extension BarPeekPanel {
         // a key then is swallowed, never a beep.
         guard drawn != nil else { return true }
         switch code {
-        case 53: onClose()
-        case 125: body.stepHover(by: 1)
-        case 126: body.stepHover(by: -1)
-        case 36, 76: body.activateHovered()
+        case ListKey.escape: onClose()
+        case ListKey.down: body.stepHover(by: 1)
+        case ListKey.up: body.stepHover(by: -1)
+        case ListKey.enter, ListKey.keypadEnter: body.activateHovered()
         // Any other key closes the list rather than vanishing into a
         // beep: the user is typing for the app beneath.
         default: onClose()

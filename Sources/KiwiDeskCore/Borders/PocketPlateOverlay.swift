@@ -33,6 +33,9 @@ final class PocketPlateOverlay {
     /// play that holds it out; the pocket stands out of its handle
     /// for the play (#2678).
     var playing: [DisplayID: UUID] = [:]
+    /// The display `pocket.toggle_list` is standing the pocket on, for
+    /// the pass ahead of its list (#2974); the open list holds it after.
+    var openingList: DisplayID?
     /// A list opened on or closed off a pocket.
     var onListChanged: @MainActor () -> Void = {}
     /// The pointer came onto a display's pocket or left it.

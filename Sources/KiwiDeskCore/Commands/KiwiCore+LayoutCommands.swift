@@ -29,6 +29,11 @@ extension KiwiCore {
         if let action = APIReference.barAction(of: command) {
             return shelfRevealCommand(action)
         }
+        // So does the pocket's list key: its trailing forced pass would
+        // drop learned bounds and re-lay the Space (#2974, device).
+        if command == "pocket.toggle_list" {
+            return pocketToggleListCommand()
+        }
         let reservation = shelfReservations
         // Raised by the bars' own arms: their write may leave the
         // layout bounds alone (#1524).

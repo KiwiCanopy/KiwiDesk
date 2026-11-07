@@ -131,7 +131,8 @@ extension BarPeek {
                     item: view,
                     frame: frame,
                     edge: anchor.edge,
-                    strip: window.frame
+                    strip: window.frame,
+                    keyed: anchor.keyed
                 ),
                 visible: visibleArea(window)
             )

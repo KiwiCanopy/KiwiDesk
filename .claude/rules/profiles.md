@@ -54,7 +54,9 @@ because two real clients now remove drift — see
   ruling of its own, argued in `docs/design-decisions.md` ▸ "One
   pressed exception rides `⌥⌘`". Every other pressed verb off
   the ladder — the toggles, the layout cycle, app chrome — stays on
-  the base tier as a mnemonic letter (`SizeLayerSeedTests` ▸
+  the base tier as a mnemonic letter, save the Pocket's list on
+  `⌃⌥⌘P` (#2974), the one letter on `⌃⌥⌘`, a further one being a
+  ruling of its own (`SizeLayerSeedTests` ▸
   `sizeLayerCarriesOnlySize`, `DefaultKeybindingsTests`,
   `LayoutCycleSeedTests`).
 - **App chrome is seeded from the ONE `appChromeRows`, and

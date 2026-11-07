@@ -38,6 +38,18 @@ final class BarPeekBody: NSView {
     var chords: [NSTextField] = []
     /// An empty Pocket's header, which speaks its lines (#2941).
     var emptyInfo: NSTextField?
+    /// A key opened this list: a row stays lifted and the rows speak,
+    /// one button each (#2974, `BarPeekBody+Spoken`).
+    var keyed = false
+    var rowButtons: [BarPeekRowButton] = []
+    /// Moves VoiceOver's cursor onto a row; a test records it.
+    var moveVoiceOver: @MainActor (NSView) -> Void = { row in
+        NSAccessibility.post(
+            element: row,
+            notification: .layoutChanged,
+            userInfo: [.uiElements: [row]]
+        )
+    }
     /// The hairlines' ink: the bar's rule tier (`BarDivider`).
     private(set) var ruleInk = NSColor.clear
     /// The buttons the last build laid out, top to bottom, and the
@@ -77,6 +89,7 @@ final class BarPeekBody: NSView {
         sectionHeader = nil
         chords = []
         emptyInfo = nil
+        rowButtons = []
         resetTargets(shelf)
         setAccessibilityElement(false)
         ruleInk = BarDivider.color(textColor: shelf.itemColor)
@@ -171,6 +184,7 @@ final class BarPeekBody: NSView {
             height: ceil(y + Metrics.padV + reserve.bottom)
         )
         frame.size = size
+        if keyed { addRowButtons() }
         return size
     }
 
@@ -240,13 +254,15 @@ final class BarPeekBody: NSView {
                 placeChord(chord, at: y, end: lead + indent + rowWidth)
             }
             // The key is part of its row's button (#2923).
-            let keyed = chord.map { [row, $0] } ?? [row]
+            let keys = chord.map { [row, $0] } ?? [row]
             let span = chord.map { row.frame.union($0.frame) } ?? row.frame
+            let spoken = Self.spokenRow(built.group.rows[index])
             guard built.group.rows[index].focused, column > 0 else {
                 addTarget(
                     .window(built.group.rows[index].window),
                     around: span,
-                    inks: keyed
+                    inks: keys,
+                    spoken: spoken
                 )
                 y += height
                 continue
@@ -257,7 +273,8 @@ final class BarPeekBody: NSView {
             addTarget(
                 .window(built.group.rows[index].window),
                 around: span.union(mark.frame),
-                inks: keyed + [mark]
+                inks: keys + [mark],
+                spoken: spoken
             )
             y += height
         }

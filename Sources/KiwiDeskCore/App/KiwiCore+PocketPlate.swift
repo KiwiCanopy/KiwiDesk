@@ -16,17 +16,29 @@ extension KiwiCore {
     /// and that screen does not stand down — what the pocket draws
     /// and where a play lands both read (#2678 review 5).
     func pocketStands(on display: DisplayID) -> Bool {
-        pocketStands && !pocketPlate.standingDown.contains(display)
+        pocketStands(listing: pocketListedDisplay == display)
+            && !pocketPlate.standingDown.contains(display)
     }
 
     /// Whether the pocket shows this pass; the shelf's plan reads the
     /// capacity alone, so a drag or a play moves no bar (#2793).
     var pocketStands: Bool {
+        pocketStands(listing: pocketListedDisplay != nil)
+    }
+
+    private func pocketStands(listing: Bool) -> Bool {
         Self.pocketStands(
             several: pocketHoldsSeveral,
             dragging: pocketPlate.dragging != nil,
-            playing: !pocketPlate.playing.isEmpty
+            playing: !pocketPlate.playing.isEmpty,
+            listing: listing
         )
+    }
+
+    /// The display whose pocket stands for its list, opening or open:
+    /// that screen's alone, unlike a drag's target on every screen.
+    var pocketListedDisplay: DisplayID? {
+        pocketPlate.openingList ?? pocketListDisplay
     }
 
     /// Takes the bar pass's pocket slots, then syncs.
@@ -40,14 +52,17 @@ extension KiwiCore {
     /// stands — never for its hover, which the pointer leaves as it
     /// moves onto the list (#2678 review 1).
     func updatePocketPlate() {
-        let specs = pocketPlateSpecs()
+        var specs = pocketPlateSpecs()
         if let display = pocketListDisplay,
-            !Self.pocketListHolds(
-                was: pocketPlate.specs[display],
-                now: specs.first { $0.display == display }
-            )
+            pocketListIsStale
+                || !Self.pocketListHolds(
+                    was: pocketPlate.specs[display],
+                    now: specs.first { $0.display == display }
+                )
         {
             shelves.peek.dismiss()
+            // The list held a pocket that may stand no longer (#2974).
+            specs = pocketPlateSpecs()
         }
         pocketPlate.sync(specs)
     }
@@ -56,6 +71,15 @@ extension KiwiCore {
     var pocketListDisplay: DisplayID? {
         (shelves.peek.shown?.view as? PocketPlateView)
             .flatMap(pocketPlate.display(of:))
+    }
+
+    /// Whether the open list names other windows than it would now:
+    /// under One window it holds an app's own, which no spec counts.
+    private var pocketListIsStale: Bool {
+        guard case .pocket(let listed)? = shelves.peek.shown?.source else {
+            return false
+        }
+        return listed != pocketListWindows
     }
 
     /// Whether a list open on a pocket survives its pocket going
@@ -79,11 +103,19 @@ extension KiwiCore {
     /// stands at rest, under Several windows. Capacity counts the
     /// general list alone (`pocketAcceptsMark`).
     var pocketPlateWindows: [WindowID] {
+        pocketWindows(keyed: pocketHoldsSeveral)
+    }
+
+    /// What the list shows: under One window too, it lists the apps'
+    /// own pocket windows, since a key can open it there (#2974).
+    var pocketListWindows: [WindowID] { pocketWindows(keyed: true) }
+
+    private func pocketWindows(keyed: Bool) -> [WindowID] {
         let inside = { (slot: PocketSlot) in
             slot.phase == .pocketed && self.state.windows[slot.window] != nil
         }
-        let keyed = pocketHoldsSeveral ? state.keyedPocket : []
-        return (state.generalPocket + keyed).filter(inside).map(\.window)
+        let apps = keyed ? state.keyedPocket : []
+        return (state.generalPocket + apps).filter(inside).map(\.window)
     }
 
     /// What each display's pocket draws; empty while none is on
@@ -96,12 +128,13 @@ extension KiwiCore {
         let name = L(
             "pocket.plate.ax",
             "Pocket, windows inside: %1$d",
-            inside.count
+            // What its press opens, under One window an app's own too.
+            pocketListWindows.count
         )
         let edge = shelf.pocketEdge
         let rise = Self.pocketRiseSide(thickness: shelf.thickness)
         // A list open on a risen pocket holds it out (#2678 review 1).
-        let listed = pocketListDisplay
+        let listed = pocketListedDisplay
         return state.workspaces.allDisplays.compactMap {
             display -> PocketPlateOverlay.Spec? in
             guard pocketStands(on: display.id) else { return nil }
@@ -159,13 +192,15 @@ extension KiwiCore {
     /// Whether the pocket is on screen: always while Several windows
     /// holds it; under One window during a window drag, as its drop
     /// target, and while a window goes in or out — on a bar's edge
-    /// just inside the strip, which opens no slot (#2793).
+    /// just inside the strip, which opens no slot (#2793) — and while
+    /// its list is open or `pocket.toggle_list` is opening it (#2974).
     static func pocketStands(
         several: Bool,
         dragging: Bool,
-        playing: Bool
+        playing: Bool,
+        listing: Bool
     ) -> Bool {
-        several || dragging || playing
+        several || dragging || playing || listing
     }
 
     /// Whether a play on `display` draws its own pocket: not where
@@ -204,23 +239,25 @@ extension KiwiCore {
     func openPocketMenu(from view: PocketPlateView) {
         // An empty Pocket has no menu: its press grows the empty
         // state, which speaks (#2941 ▸ 1).
-        guard !pocketPlateWindows.isEmpty else {
+        guard !pocketListWindows.isEmpty else {
             openPocketList(from: view)
             return
         }
         shelves.peek.dismiss()
         // The menu holds a revealed shelf out while it tracks (#761).
         shelves.peek.noteMenuAnchor(view.window)
-        shelves.peek.openMenu(.pocket(pocketPlateWindows), nil, view)
+        shelves.peek.openMenu(.pocket(pocketListWindows), nil, view)
     }
 
-    /// Grows the list of the windows inside out of `view`.
-    func openPocketList(from view: PocketPlateView) {
+    /// Grows the list of the windows inside out of `view`; `keyed`
+    /// says a key opened it (#2974).
+    func openPocketList(from view: PocketPlateView, keyed: Bool = false) {
         shelves.peek.show(
             view,
-            source: .pocket(pocketPlateWindows),
+            source: .pocket(pocketListWindows),
             space: nil,
-            edge: tiler.settings.kiwishelf.pocketEdge
+            edge: tiler.settings.kiwishelf.pocketEdge,
+            keyed: keyed
         )
     }
 }

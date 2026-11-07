@@ -37,11 +37,6 @@ struct SwitchReconcileSeamTests {
             "updateBars(holdingForSwitch: snapshot.showsUserSpaces(changed))",
             "KiwiCore+Desktops.swift", 1
         ),
-        // The switch's public event waits for its arrivals.
-        (
-            "eventLoop.afterSwitchReads {",
-            "KiwiCore+DesktopEvents.swift", 1
-        ),
         // A switch reveal never claims a launch's follow (#1599).
         (
             "guard !eventLoop.switchReads.applying,",
@@ -53,6 +48,22 @@ struct SwitchReconcileSeamTests {
             "EventLoop+ReconcileOffMain.swift", 1
         ),
     ]
+
+    /// The switch's public event waits for its arrivals, and the
+    /// Pocket's list key for the pass that places its pocket (#2974).
+    @Test("what waits for a switch's fold is these two")
+    func owedWorkIsCensused() throws {
+        let sites = try SourceScan.identifierSites(
+            of: "eventLoop.afterSwitchReads {",
+            under: Self.core
+        )
+        #expect(
+            sites.map(\.file.lastPathComponent).sorted() == [
+                "KiwiCore+DesktopEvents.swift",
+                "KiwiCore+PocketList.swift",
+            ]
+        )
+    }
 
     @Test("each wiring exists exactly once, in its own file")
     func wiringsAreSingular() throws {

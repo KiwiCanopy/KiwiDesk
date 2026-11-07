@@ -22,7 +22,7 @@ extension SettingsValueReadout {
             .maximize,
             .toggleFloating, .toggleKiwiVision, .toggleLens,
             .toggleSpaceBar, .toggleAppBar,
-            .toggleSticky, .pocket, .pocketWindow,
+            .toggleSticky, .pocket, .pocketWindow, .pocketList,
             .showShortcuts,
             .openSettings, .switchToLayer, .openApplications,
             .pocketApps,

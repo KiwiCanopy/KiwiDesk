@@ -56,40 +56,44 @@ extension KiwiCore {
             bar == .app
             ? settings.appBarStyle.edge(on: fingerprint)
             : settings.spaceBarStyle.edge(on: fingerprint)
+        return (refusalStrip(of: screen, edge: edge), edge)
+    }
+
+    /// A zero-depth strip along `edge` of `screen`'s visible frame, AX
+    /// coordinates: where a pill stands with no shelf beside it.
+    func refusalStrip(of screen: NSScreen, edge: AppBarEdge) -> CGRect {
         // Chrome is drawn on a REAL screen (`VisibleBoundsRoutingTests`).
         let visible = GeometryUtils.axVisibleFrame(of: screen)
-        let strip: CGRect
         switch edge {
         case .top:
-            strip = CGRect(
+            return CGRect(
                 x: visible.minX,
                 y: visible.minY,
                 width: visible.width,
                 height: 0
             )
         case .bottom:
-            strip = CGRect(
+            return CGRect(
                 x: visible.minX,
                 y: visible.maxY,
                 width: visible.width,
                 height: 0
             )
         case .left:
-            strip = CGRect(
+            return CGRect(
                 x: visible.minX,
                 y: visible.minY,
                 width: 0,
                 height: visible.height
             )
         case .right:
-            strip = CGRect(
+            return CGRect(
                 x: visible.maxX,
                 y: visible.minY,
                 width: 0,
                 height: visible.height
             )
         }
-        return (strip, edge)
     }
 
     /// The pill's sentence: a fact, the fix living on the shortcut

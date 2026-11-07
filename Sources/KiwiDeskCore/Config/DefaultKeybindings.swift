@@ -75,6 +75,7 @@ public enum DefaultKeybindings {
         )
         rows.append(pocketRow())
         rows.append(pocketWindowRow())
+        rows.append(pocketListRow())
         rows.append(nextLayoutRow())
         rows.append(previousLayoutRow())
         rows.append(layoutPickerRow())

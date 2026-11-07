@@ -11,6 +11,9 @@ extension BarPeek {
         let space: SpaceID?
         let edge: AppBarEdge
         var frame: CGRect?
+        /// A key opened its list (#2974): a row starts selected, and
+        /// the rows speak, since no menu twins it.
+        var keyed = false
     }
 
     /// Where the peek stands: closed, resting out its dwell on an

@@ -6,6 +6,9 @@ import AppKit
 final class BarPeekWindow: NSPanel {
     /// Whether the panel may take the keyboard: the grown list's.
     var takesKey = false
+    /// A key opened the list: it walks with that chord's ⌘ still held
+    /// (#2974), since the arrows land before the chord lets go.
+    var walksHeldKeys = false
     /// A key pressed while the panel is key; true where it was used.
     var onKey: @MainActor (UInt16) -> Bool = { _ in false }
 
@@ -26,7 +29,9 @@ final class BarPeekWindow: NSPanel {
         guard takesKey, event.modifierFlags.contains(.command) else {
             return super.performKeyEquivalent(with: event)
         }
-        _ = onKey(UInt16.max)
+        let walks =
+            walksHeldKeys && BarPeekPanel.ListKey.all.contains(event.keyCode)
+        _ = onKey(walks ? event.keyCode : UInt16.max)
         return true
     }
 }

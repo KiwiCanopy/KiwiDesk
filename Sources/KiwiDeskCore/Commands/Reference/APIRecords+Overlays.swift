@@ -118,6 +118,10 @@ extension APIReference {
             "Sets whether the pocket holds one window or several.",
             .choice("capacity", PocketCapacity.self)
         ),
+        "toggle_list": APIRecord(
+            "Opens the pocket's list on the active Space's screen to "
+                + "pick a window by keyboard, or closes it."
+        ),
     ]
 
     static let mouseRecords: [String: APIRecord] = [
