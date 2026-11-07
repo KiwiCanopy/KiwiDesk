@@ -39,12 +39,18 @@ struct DeletionFocusRoutingTests {
             of: "DeletionFocus.neighbour(after:space,in:displayedSpaces)"
         )
         let write = body.range(of: "model.removeSpace(space)")
+        let land = body.range(of: "returningRow=neighbour")
         #expect(read != nil, "removeSpace bypasses DeletionFocus")
         #expect(write != nil, "removeSpace no longer removes")
-        if let read, let write {
+        #expect(land != nil, "the neighbour never reaches focus")
+        if let read, let write, let land {
             #expect(
                 read.lowerBound < write.lowerBound,
                 "the neighbour is read after the mutation (#816)"
+            )
+            #expect(
+                write.lowerBound < land.lowerBound,
+                "focus moves before the row is removed"
             )
         }
     }
