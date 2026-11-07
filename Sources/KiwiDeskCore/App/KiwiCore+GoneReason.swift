@@ -33,7 +33,9 @@ extension KiwiCore {
             )
         }
         let spaces = NativeSpaces.allSpaces()
-        let presence = gonePresence(of: id, spaces: spaces)
+        let presence =
+            eagerDeparturePresence(of: id)
+            ?? gonePresence(of: id, spaces: spaces)
         let reason = WindowGoneReason.classify(
             wasMinimized: wasMinimized,
             presence: presence
@@ -91,6 +93,26 @@ extension KiwiCore {
             desktop: desktop
         )
         return reason
+    }
+
+    /// A follow's eager departure is the verb's word, never the
+    /// compositor's: its switch is already dispatched, so the read
+    /// can find the target shown and call the move a close (#3052).
+    private func eagerDeparturePresence(of id: WindowID) -> GonePresence? {
+        guard eventLoop.eagerDepartureInFlight == id,
+            let host = desktopMemory.eagerDepartureHost
+        else { return nil }
+        return .hosted(space: host, shown: false)
+    }
+
+    /// The frame an arrival's screen is judged on (#1010). A departed
+    /// window's is the WindowServer's: its app's AX frame reads the
+    /// screen it left for a beat after a move across screens (#3052).
+    func arrivalFrame(of window: ManagedWindow) -> CGRect {
+        guard case .departed = state.rememberedSpaces[window.id] else {
+            return window.frame
+        }
+        return windowServer.readWindowBounds(window.id) ?? window.frame
     }
 
     /// Whether a removal is the window LEAVING WITH ITS DESKTOP

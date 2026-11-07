@@ -32,8 +32,8 @@ extension KiwiCore {
             state.trackCapacities = tiler.trackCapacities(
                 state: state
             )
-            // The screen the arriving window's frame physically
-            // sits on (#1010), mirrored in like the capacities
+            // The screen the arriving window physically sits on
+            // (#1010, #3052), mirrored in like the capacities
             // above: the fold prefers the space THAT display
             // shows over the one the window remembered on
             // another screen, and resolving a frame to a screen
@@ -42,7 +42,7 @@ extension KiwiCore {
             // (§2.6). `screen(containing:)` owns the flip.
             state.arrivalDisplay =
                 TilingEngine.screen(
-                    containing: window.frame
+                    containing: arrivalFrame(of: window)
                 )?.kiwiDisplayID
             // The Desktop return's owed focus, mirrored (#1207).
             state.returningFocus = desktopMemory.returnFocus.owed()

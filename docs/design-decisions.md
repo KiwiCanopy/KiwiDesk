@@ -8144,7 +8144,12 @@ own reap with no prune, since a window mid-move must not read as
 closed. A follow onto a shown Desktop has no reveal, so it switches
 the Space at the command and owes Move here's plain arrival focus,
 never the #1007 debt, and a follow refuses a minimized or hidden
-window, which no arrival would bring. A hand float restored from a
+window, which no arrival would bring. A follow's arrival is read
+from the WindowServer's frame and its departure from the verb
+([#3052](https://github.com/KiwiCanopy/KiwiDesk/issues/3052)): about
+100 ms after a move across screens the app's own frame still names
+the screen it left, and the switch already shows the target, so
+either reading alone brings the window home. A hand float restored from a
 snapshot keeps its restored record, since its float flag lives there,
 so it may take its old frame on arrival; with separate Spaces on, one
 moved across screens stayed a float on the new screen (measured once,

@@ -188,6 +188,10 @@ final class DesktopMemory {
     /// override; a fixture's unstated reads stay live.
     var readDesktops: () -> DesktopSnapshot = NativeSpaces.desktopSnapshot
 
+    /// Where a follow's eager departure sends its window, for exactly
+    /// the span `eagerDepartureInFlight` holds (#3052).
+    var eagerDepartureHost: SkyLight.SpaceID?
+
     /// The apps a no-follow Desktop move's one reap still owes a
     /// reconcile (#2888).
     var moveReapPIDs: Set<pid_t> = []

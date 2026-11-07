@@ -292,7 +292,12 @@ editing here:
   that needs the rule — a second screen at a negative y.
   `TilingEngine.screen(containing:)` resolves the pair
   correctly, over `GeometryUtils.axVisibleFrame(of:)`, which
-  owns the flip. Re-home through `workspaces.add` — the fold's
+  owns the flip. **Hand it the frame through the one
+  `KiwiCore.arrivalFrame(of:)` (#3052)**: a departed window's
+  answer is the WindowServer's, since its app's AX frame still
+  reads the screen it left when a follow's arrival lands, and the
+  net would stand down (`DesktopFollowAcrossScreensTests`).
+  Re-home through `workspaces.add` — the fold's
   own, or `addFocusedToSpace` at the command altitude — never
   `moveWindow(_:to:follow:)`: it fires a focus hand-off, the
   move latch and the #446 wallpaper focus yield, and both
@@ -406,6 +411,12 @@ editing here:
   reveal is not scoped to the window that owes, so an unrelated
   switch inside the drain window would pay the debt and yank
   focus mid-swipe.
+  The follow's eager departure classifies on the verb's word, hosted
+  on its target and `vanished`, never on the compositor's read: its
+  switch is already dispatched, so the read can find the target
+  shown and call the move a close, whose return is placed as new
+  in the Space the user left (#3052,
+  `DesktopFollowAcrossScreensTests` ▸ `departureIsNoClose`).
   `FollowFocusSeamTests` is the register of the production
   wirings — add a site there in the same change, since deleting
   any one of them leaves `FollowFocusIntentTests` fully green
