@@ -182,6 +182,32 @@ struct PocketListSpeechTests {
         #expect(core.shelves.peek.panel.body.rowButtons.isEmpty)
     }
 
+    /// Its plate speaks a count and opens a menu of what the list holds,
+    /// one's own window under One window included.
+    @Test("under One window VoiceOver's press menus an app's own window")
+    func pressMenusKeyedWindow() throws {
+        LocalizationManager.shared.select("en")
+        let fixture = try PocketListFixture()
+        let (core, display) = (fixture.core, fixture.display)
+        defer { fixture.tearDown() }
+        fixture.pocket([one])
+        core.state.pocket = core.state.pocket.map {
+            var slot = $0
+            slot.keyedApp = "com.example.app"
+            return slot
+        }
+        core.execute("pocket.set_capacity", args: [.string("one")])
+        core.pocketPlate.dragging = one
+        core.updatePocketPlate(slots: [:])
+        var asked: [BarPeekSource] = []
+        core.shelves.peek.openMenu = { source, _, _ in asked.append(source) }
+        let view = try #require(core.pocketPlate.view(on: display))
+        #expect(view.accessibilityLabel() == "Pocket, windows inside: 1")
+        #expect(view.accessibilityPerformPress())
+        #expect(asked == [.pocket([one])])
+        #expect(core.shelves.peek.shown == nil)
+    }
+
     @Test("a key-opened list's cursor lands on its first row")
     func openMovesVoiceOver() throws {
         let fixture = try PocketListFixture()

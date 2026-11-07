@@ -128,7 +128,8 @@ extension KiwiCore {
         let name = L(
             "pocket.plate.ax",
             "Pocket, windows inside: %1$d",
-            inside.count
+            // What its press opens, under One window an app's own too.
+            pocketListWindows.count
         )
         let edge = shelf.pocketEdge
         let rise = Self.pocketRiseSide(thickness: shelf.thickness)

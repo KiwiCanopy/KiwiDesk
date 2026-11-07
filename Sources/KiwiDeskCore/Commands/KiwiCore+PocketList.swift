@@ -30,8 +30,12 @@ extension KiwiCore {
         // The pass refreshes what places a pocket that stood nowhere.
         updateBars()
         // A Desktop switch's read holds that pass, its fold owing the
-        // repaint (#2347); the last pass's places serve meanwhile.
-        if eventLoop.switchReads.isPending { updatePocketPlate() }
+        // repaint (#2347): the last pass's places serve meanwhile, its
+        // stand-down answered above.
+        if eventLoop.switchReads.isPending {
+            pocketPlate.standingDown.remove(display)
+            updatePocketPlate()
+        }
         guard let view = pocketPlate.view(on: display) else {
             return .fail("the pocket draws on no screen here")
         }

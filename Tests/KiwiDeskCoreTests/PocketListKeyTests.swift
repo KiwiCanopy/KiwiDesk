@@ -255,6 +255,8 @@ struct PocketListKeyTests {
             fixture.tearDown()
             core.eventLoop.switchReads.drop()
         }
+        // Left a stood-down Desktop: the stand-down is judged anew.
+        core.pocketPlate.standingDown = [display]
         core.eventLoop.beginSwitchReconcile()
         #expect(core.eventLoop.switchReads.isPending)
         core.execute("pocket.toggle_list")

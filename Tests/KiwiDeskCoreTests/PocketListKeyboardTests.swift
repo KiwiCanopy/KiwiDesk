@@ -72,9 +72,8 @@ private struct PocketListFixture {
     }
 }
 
-/// A key-opened pocket list (#2974 ▸ Ruling 4): a row lifted, the
-/// arrows and Return walking it with the chord's ⌘ still held, and
-/// its rows speaking, since no menu twins it.
+/// A key-opened pocket list (#2974 ▸ Ruling 4): a row lifted, and the
+/// arrows and Return walking it with the chord's ⌘ still held.
 @Suite(
     "A key-opened pocket list takes the keyboard",
     .serialized,
