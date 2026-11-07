@@ -1590,7 +1590,9 @@ claim; the obligations a change here takes on:
   reads its
   neighbour through the one `DeletionFocus.neighbour` rule
   (#816, PR #842) — BEFORE the mutation, or it names whichever
-  row slid into the gap. Naming a destination is a different
+  row slid into the gap (`DeletionFocusRoutingTests` ▸
+  `noPrivateCopy` bans a pasted copy, #3059). Naming a
+  destination is a different
   claim from focus arriving there, and on a machine without
   keyboard navigation the two outcomes look identical.
 - **A shell statement hangs on the view that OUTLIVES the
