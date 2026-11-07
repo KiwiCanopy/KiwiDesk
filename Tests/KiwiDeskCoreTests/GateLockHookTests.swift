@@ -28,6 +28,20 @@ struct GateLockHookTests {
         }
     }
 
+    /// The ratchet's own wrapper reaches the same compile, and the
+    /// hook read past it only at a shell separator.
+    @Test("a step through the warning gate is queued too")
+    func ratchetedStepsAreQueued() throws {
+        for command in [
+            "scripts/warning-gate swift build --build-tests",
+            "./scripts/warning-gate swift test --skip ExecTests",
+            "cd x && scripts/warning-gate swift test",
+        ] {
+            #expect(try rewrite(command) != nil, "\(command)")
+        }
+        #expect(try rewrite("scripts/warning-gate true") == nil)
+    }
+
     @Test("a queued command is never queued twice")
     func alreadyLockedPassesThrough() throws {
         #expect(try rewrite("scripts/gate-lock swift test") == nil)

@@ -31,7 +31,7 @@ import sys
 HEAVY = re.compile(
     r"(?:^|[;&|(\n]|\bthen\b|\bdo\b)\s*"
     r"(?:[A-Za-z_][A-Za-z0-9_]*=\S*\s+)*"
-    r"(?:\./)?(?:swift\s+(?:build|test)\b"
+    r"(?:\./)?(?:(?:scripts/warning-gate\s+)?swift\s+(?:build|test)\b"
     r"|scripts/(?:release|build-app)\.sh\b)"
 )
 

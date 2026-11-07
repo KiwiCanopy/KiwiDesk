@@ -2,8 +2,9 @@ import Foundation
 
 /// This test process's private temp root (#2518), removed at its
 /// exit; a root whose process died first is swept by the next
-/// run. Twinned like `TestCore.swift`, and both test modules load
-/// into one process, so each claim mints its own root.
+/// run. Twinned like `TestCore.swift`, and a build system may load
+/// both test modules into one process, so each claim mints its own
+/// root.
 /// `TestScratchCensusTests` holds every temp-dir and scratch
 /// defaults spelling in `Tests/` to this file.
 let testTemporaryDirectory: URL = TestScratch.claimRoot()

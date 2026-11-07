@@ -102,9 +102,14 @@ check the warning the ratchet would see:
 
 ```
 scripts/warning-gate swift build --build-tests \
+  --scratch-path .build/ratchet \
   -Xswiftc -warnings-as-errors \
   -Xswiftc -Wwarning -Xswiftc DeprecatedDeclaration
 ```
+
+The folder of its own is what keeps it cheap: SwiftPM recompiles
+when the flag set changes, so flipping flags on one `.build` rebuilds
+the package each way (#1596). It costs about 4 GB per worktree.
 
 `scripts/warning-gate` fails on a warning `-warnings-as-errors`
 cannot promote — an isolation inherited from an SDK class
