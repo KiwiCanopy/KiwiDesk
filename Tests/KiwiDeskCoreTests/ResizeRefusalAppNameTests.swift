@@ -46,13 +46,14 @@ struct ResizeRefusalAppNameTests {
                 == "Neighboring app won't go smaller"
         )
         #expect(
-            neighbor(appBound: false, app: "  ").pillText
+            neighbor(appBound: false, app: " \n").pillText
                 == "Neighboring window at its minimum size"
         )
     }
 
     @Test("Named and nameless sentences differ in every verdict")
     func fourSentencesAreDistinct() {
+        LocalizationManager.shared.select("en")
         let texts = [true, false].flatMap { bound in
             ["", "Safari"].map {
                 neighbor(appBound: bound, app: $0).pillText
@@ -71,6 +72,11 @@ struct ResizeRefusalAppNameTests {
         #expect(
             neighbor(appBound: true, app: long).pillText
                 == "Neighboring \(cut) window won't go smaller"
+        )
+        // A cut landing after a space drops it before the "…".
+        #expect(
+            ResizeRefusal.pillAppName("Visual Studio Code Insiders")
+                == "Visual Studio Code…"
         )
         // A name at the limit stays whole.
         let exact = String(

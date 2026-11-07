@@ -172,9 +172,8 @@ extension ResizeRefusal {
         }
     }
 
-    /// The trier's sentence for a neighbour floor. It names the
-    /// anchor's app, since the anchor may be hidden in overflow;
-    /// an empty name keeps the nameless sentence.
+    /// The trier's sentence for a neighbour floor; an empty name
+    /// keeps the nameless one.
     @MainActor
     private static func neighborMinimumText(
         appBound: Bool,
@@ -213,8 +212,11 @@ extension ResizeRefusal {
 
     /// `name` trimmed, and cut to `pillAppNameLimit` characters.
     static func pillAppName(_ name: String) -> String {
-        let trimmed = name.trimmingCharacters(in: .whitespaces)
+        let trimmed = name.trimmingCharacters(
+            in: .whitespacesAndNewlines
+        )
         guard trimmed.count > pillAppNameLimit else { return trimmed }
-        return trimmed.prefix(pillAppNameLimit - 1) + "…"
+        let cut = trimmed.prefix(pillAppNameLimit - 1)
+        return cut.trimmingCharacters(in: .whitespaces) + "…"
     }
 }

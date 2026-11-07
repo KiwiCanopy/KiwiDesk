@@ -319,7 +319,7 @@ extension KiwiCore {
                 focused: focused,
                 axis: axis,
                 appBound: minimumIsAppBound(of: anchor, axis: axis),
-                anchorApp: state.windows[anchor]?.appName ?? ""
+                anchorApp: anchorAppName(of: anchor)
             )
         )
     }
@@ -339,7 +339,7 @@ extension KiwiCore {
                 focused: overhanging,
                 axis: axis,
                 appBound: minimumIsAppBound(of: anchor, axis: axis),
-                anchorApp: state.windows[anchor]?.appName ?? ""
+                anchorApp: anchorAppName(of: anchor)
             ),
             fromPress: false
         )
