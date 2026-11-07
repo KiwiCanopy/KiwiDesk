@@ -17,9 +17,9 @@ extension LocalizedStaticStorageTests {
         _ name: String,
         in text: String
     ) -> Bool {
-        occurrences(of: name, in: text, dotted: false).contains {
-            next(after: $0, in: Array(text)) == "("
-        }
+        let characters = Array(text)
+        return occurrences(of: name, in: characters, dotted: false)
+            .contains { next(after: $0, in: characters) == "(" }
     }
 
     /// Whether `text` READS the same-file member `name` — called
@@ -35,7 +35,7 @@ extension LocalizedStaticStorageTests {
         in text: String
     ) -> Bool {
         let characters = Array(text)
-        return occurrences(of: name, in: text, dotted: true)
+        return occurrences(of: name, in: characters, dotted: true)
             .contains { next(after: $0, in: characters) != ":" }
     }
 
@@ -44,18 +44,17 @@ extension LocalizedStaticStorageTests {
     /// and a free call must not.
     private static func occurrences(
         of name: String,
-        in text: String,
+        in characters: [Character],
         dotted: Bool
     ) -> [Int] {
-        let characters = Array(text)
         let needle = Array(name)
         var found: [Int] = []
         var index = 0
         while index + needle.count <= characters.count {
             defer { index += 1 }
             guard
-                Array(characters[index..<(index + needle.count)])
-                    == needle
+                characters[index..<(index + needle.count)]
+                    .elementsEqual(needle)
             else { continue }
             if index > 0,
                 SourceScan.isIdentifier(
@@ -95,10 +94,9 @@ extension LocalizedStaticStorageTests {
         at index: Int,
         _ needle: String
     ) -> Bool {
-        let characters = Array(needle)
-        guard index + characters.count <= text.count,
-            Array(text[index..<(index + characters.count)])
-                == characters
+        let count = needle.count
+        guard index + count <= text.count,
+            text[index..<(index + count)].elementsEqual(needle)
         else { return false }
         if index > 0,
             SourceScan.isIdentifier(text[index - 1], orDot: true)

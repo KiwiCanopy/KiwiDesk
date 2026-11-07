@@ -153,8 +153,8 @@ extension LocalizedStaticStorageTests {
         var index = 0
         while index + marker.count < characters.count {
             guard
-                Array(characters[index..<(index + marker.count)])
-                    == marker
+                characters[index..<(index + marker.count)]
+                    .elementsEqual(marker)
             else {
                 index += 1
                 continue

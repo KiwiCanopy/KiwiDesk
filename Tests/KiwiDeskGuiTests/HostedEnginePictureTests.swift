@@ -48,6 +48,9 @@ struct HostedEnginePictureTests {
     /// or an extension of it, never a longer name that starts with
     /// it.
     static func declares(_ type: String, in source: String) -> Bool {
+        // The pattern spells `type` literally; skip the regex where
+        // the text is absent.
+        guard source.contains(type) else { return false }
         let pattern =
             "\\b(class|extension)\\s+"
             + NSRegularExpression.escapedPattern(for: type)
