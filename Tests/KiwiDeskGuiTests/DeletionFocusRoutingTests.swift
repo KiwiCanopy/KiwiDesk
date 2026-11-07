@@ -1,6 +1,8 @@
 import Foundation
 import Testing
 
+@testable import KiwiDesk
+
 /// Every row deletion takes its focus neighbour from the one
 /// `DeletionFocus.neighbour` rule, read before the mutation
 /// (#816). Spaces carried a private copy that would keep the old
@@ -9,12 +11,21 @@ import Testing
 @Suite("Deletion focus routes through one rule (#3059)")
 struct DeletionFocusRoutingTests {
     /// The rule's next-else-previous step, whitespace removed:
-    /// the shape a private copy of `DeletionFocus.neighbour` has.
+    /// the spelling the #3059 copy had. A copy spelled another
+    /// way passes; the call-site clause is the stronger net.
     private static let ruleShape =
         #"\+1<(\w+)\.count\{return\1\[\w+\+1\]"#
 
     private static let home =
         "Sources/KiwiDesk/Settings/DeletionFocus.swift"
+
+    @Test("the rule names the next row, else the previous one")
+    func ruleStepsNextElsePrevious() {
+        #expect(DeletionFocus.neighbour(after: 1, in: [1, 2, 3]) == 2)
+        #expect(DeletionFocus.neighbour(after: 3, in: [1, 2, 3]) == 2)
+        #expect(DeletionFocus.neighbour(after: 1, in: [1]) == nil)
+        #expect(DeletionFocus.neighbour(after: 4, in: [1, 2]) == nil)
+    }
 
     @Test("removing a Space reads the shared rule before mutating")
     func spacesRemovalRoutesThroughTheRule() throws {
@@ -38,7 +49,7 @@ struct DeletionFocusRoutingTests {
         }
     }
 
-    @Test("no Settings file carries its own copy of the rule")
+    @Test("no KiwiDesk source carries its own copy of the rule")
     func noPrivateCopy() throws {
         let root = SourceScan.repoRoot(from: #filePath)
         let files = try SourceScan.swiftSources(
