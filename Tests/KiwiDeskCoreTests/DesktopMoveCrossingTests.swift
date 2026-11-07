@@ -197,7 +197,15 @@ struct DesktopMoveCrossingTests {
         fileAway(core)
         _ = moveAway(core)
         #expect(moveAway(core).error?.contains("still moving") == true)
+        #expect(
+            core.execute(
+                "move_to_desktop",
+                args: [.number(2), .string(""), awayID]
+            )
+            .error?.contains("still moving") == true
+        )
         #expect(writes.sent.count == 1)
+        #expect(DesktopVerbBridge.moves.isEmpty)
         writes.answers[0](true)
         #expect(DesktopVerbBridge.moves.count == 1)
         // Filed under `mail` now, so the next move crosses nothing.

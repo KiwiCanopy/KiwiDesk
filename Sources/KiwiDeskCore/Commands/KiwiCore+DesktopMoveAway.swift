@@ -35,13 +35,15 @@ extension KiwiCore {
                     ? crossingBaseOfAway(away.id) : nil
             }
         }
+        // Any move of a window whose crossing is landing, or that
+        // landing would undo it.
+        guard !desktopMemory.crossingsInFlight.contains(away.id) else {
+            return .fail("This window is still moving. Try again.")
+        }
         guard let crossingBase, let explicit else {
             return landAway(away, to: target, explicit, follow: follow)
         }
-        guard desktopMemory.crossingsInFlight.insert(away.id).inserted
-        else {
-            return .fail("This window is still moving. Try again.")
-        }
+        desktopMemory.crossingsInFlight.insert(away.id)
         // The frame lands first: moved first, the window shows on its
         // old screen (#3048). So the answer is the parse's: a write
         // that finds the element naming another window, or a bridge
