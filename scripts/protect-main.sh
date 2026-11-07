@@ -73,18 +73,19 @@
 # being reversed, and keep strict true while it is gone.
 #
 # Status checks are listed by JOB NAME and must match the
-# workflows that report them — .github/workflows/ci.yml for the two
-# macOS jobs, cla.yml for the CLA check, site.yml for the site
+# workflows that report them — .github/workflows/ci.yml for the
+# test judge and the release build, cla.yml for the CLA check, site.yml for the site
 # build. This is the setting that
 # finally makes CI block rather than report (#532).
 #
-# ci.yml's two jobs are gated on its `changes` job rather than
-# on a trigger filter, which is what makes requiring them safe: a
-# PR touching only ignored paths leaves them *skipped*, and GitHub
-# counts a skipped job as satisfying a required check. Filtering at
-# the trigger instead would leave the workflow unreported and every
-# such PR stuck on "Expected". A FAILED `changes` job runs them
-# instead, never skips them (#1984). CiPathFilterTests keeps that shape;
+# ci.yml's macOS jobs are gated on its `changes` job rather than
+# on a trigger filter, which is what makes requiring these safe: a
+# PR touching only ignored paths leaves them *skipped*, the judge
+# passes that, and GitHub counts the skipped release build as
+# satisfying a required check. Filtering at the trigger instead would
+# leave the workflow unreported and every such PR stuck on "Expected".
+# A FAILED `changes` job runs them instead, never skips them (#1984).
+# CiPathFilterTests and CiRequiredJobTests keep that shape;
 # packaging-and-release.md ("CI") carries the argument. The CLA
 # check is safe to require for a different reason: it runs on
 # every pull_request_target with no path filter, so it always

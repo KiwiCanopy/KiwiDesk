@@ -5,7 +5,7 @@
 #   Run inside the checkout, HEAD at the PR head. Exits 0 when the
 #   PR is a stamp alone, 1 otherwise; prints the reason either way.
 #
-# CI's `changes` job skips the two macOS jobs on a yes. What still
+# CI's `changes` job skips the macOS jobs on a yes. What still
 # gates the stamped tree is downstream, and the skip is safe only
 # while it stays there: `main`'s push CI after the merge,
 # `release.sh`'s second run, which re-verifies a tree its first run

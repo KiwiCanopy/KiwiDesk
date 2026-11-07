@@ -130,6 +130,18 @@ extension CiPathFilterTests {
         return lines[start..<end].joined(separator: "\n")
     }
 
+    /// Every job's id, in workflow order: the two-space keys under
+    /// `jobs:`, the sibling shape `jobBlock` stops on.
+    static func jobIDs(in yaml: String) -> [String] {
+        yaml.components(separatedBy: "\njobs:\n").last?
+            .split(separator: "\n")
+            .filter {
+                $0.hasPrefix("  ") && !$0.hasPrefix("   ")
+                    && $0.hasSuffix(":")
+            }
+            .map { String($0.dropFirst(2).dropLast()) } ?? []
+    }
+
     /// A job's own `if:` expression — the four-space key and its
     /// folded continuation lines, comments dropped, `${{ }}` and
     /// whitespace collapsed — so a step's `if:` cannot answer for

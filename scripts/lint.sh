@@ -20,67 +20,86 @@ if [ "${1:-}" = "--show-warnings" ]; then
     shift
 fi
 
+# A named directory is its Swift files, as the whole-tree walk reads.
+# Only a named path scopes `swift format`, so a commit pays for what
+# it staged (scripts/pre-commit).
+FILES=()
+FORMAT_ROOTS=("$ROOT/Sources" "$ROOT/Tests" "$ROOT/Package.swift")
 if [ "$#" -gt 0 ]; then
-    FILES=("$@")
+    FORMAT_ROOTS=()
+    for path in "$@"; do
+        # A bare `a=b.swift` would read to awk as an assignment.
+        case "$path" in
+            /*) ;;
+            *) path="./$path" ;;
+        esac
+        if [ -d "$path" ]; then
+            FORMAT_ROOTS+=("$path")
+            while IFS= read -r f; do
+                [ -f "$f" ] && FILES+=("$f")
+            done < <(find "$path" -name '*.swift')
+        elif [ -f "$path" ]; then
+            case "$path" in
+                *.swift) FORMAT_ROOTS+=("$path") ;;
+            esac
+            FILES+=("$path")
+        else
+            # A typo would otherwise check nothing and read "Lint OK".
+            echo "ERROR: no such file or directory: $path"
+            STATUS=1
+        fi
+    done
 else
-    FILES=()
     while IFS= read -r f; do
-        FILES+=("$f")
+        [ -f "$f" ] && FILES+=("$f")
     done < <(find "$ROOT/Sources" "$ROOT/Tests" -name '*.swift' \
         2>/dev/null; echo "$ROOT/Package.swift")
 fi
 
-for f in "${FILES[@]}"; do
-    [ -f "$f" ] || continue
-
-    # Line length check
-    long=$(awk -v max=$MAX_LINE 'length($0) > max {print FNR": "$0}' \
-        "$f")
-    if [ -n "$long" ]; then
-        echo "ERROR: lines exceed $MAX_LINE chars in $f"
-        echo "$long" | head -5
-        STATUS=1
-    fi
-
-    # File size check.
-    #
-    # .claude/rules/tests.md applies the §2.1 hard ceiling to suites
-    # as well — "split test suites early" is what forced every one
-    # of the ratified shared-helper extractions — but this used to
-    # `continue` on */Tests/*, so the rule was unenforceable AND
-    # invisible to anyone reading §5. A 448-line suite passed a
-    # green gate under two reviews explicitly hunting AGENTS
-    # violations (#277). The old reason ("data-heavy fixtures are
-    # fine") is about fixture files, not suites.
-    #
-    # #560 split the 11 suites that were over the ceiling, so the
-    # test case is now ERROR too — a source file and a test file
-    # fail identically at the hard limit. The soft 250 target stays
-    # source-only: dozens of test files exceed it, and that much
-    # noise would train people to ignore the whole check.
-    #
-    # No file is exempt today, so the hard-limit branch below is an
-    # unconditional ERROR. If a genuine data-heavy *fixture* file
-    # ever must exceed the ceiling, add a named `case "$f"` branch
-    # for it here with its reason — the repo idiom for narrow
-    # classes — rather than re-introducing the blanket `*/Tests/*`
-    # skip that hid the whole backlog for so long (#277).
-    lines=$(wc -l < "$f" | tr -d ' ')
-    case "$f" in
-        */Tests/*) is_test=1 ;;
-        *) is_test=0 ;;
-    esac
-    if [ "$lines" -gt "$HARD_FILE" ]; then
-        echo "ERROR: $f has $lines lines (hard limit $HARD_FILE)"
-        STATUS=1
-    elif [ "$is_test" -eq 0 ] && [ "$lines" -gt "$SOFT_FILE" ]; then
-        SOFT_COUNT=$((SOFT_COUNT + 1))
-        if [ "$SHOW_WARNINGS" -eq 1 ]; then
-            echo "WARNING: $f has $lines lines" \
-                "(sweet spot <=$SOFT_FILE)"
+# Line length and file size, in one awk per argument batch rather than
+# one per file, which cost most of a whole-tree run.
+#
+# .claude/rules/tests.md applies the §2.1 hard ceiling to suites as
+# well, so a source file and a test file fail identically at the hard
+# limit (#277, #560). The soft target stays source-only: dozens of test
+# files exceed it. A genuine data-heavy fixture over the ceiling takes
+# a named exemption here with its reason, never a blanket `*/Tests/*`
+# skip, which once hid the whole backlog.
+# shellcheck disable=SC2016
+CHECK='
+function finish() {
+    if (file == "") return
+    if (long > 0) {
+        print "ERROR: lines exceed " max " chars in " file
+        for (i = 1; i <= long && i <= 5; i++) print sample[i]
+    }
+    if (lines > hard) {
+        print "ERROR: " file " has " lines " lines (hard limit " hard ")"
+    } else if (file !~ /\/Tests\// && lines > soft) {
+        print "#SOFT"
+        if (show) {
+            print "WARNING: " file " has " lines \
+                " lines (sweet spot <=" soft ")"
+        }
+    }
+}
+FNR == 1 { finish(); file = FILENAME; long = 0 }
+{ lines = FNR }
+length($0) > max { long++; if (long <= 5) sample[long] = FNR ": " $0 }
+END { finish() }
+'
+if [ "${#FILES[@]}" -gt 0 ]; then
+    REPORT="$(printf '%s\0' "${FILES[@]}" | xargs -0 awk \
+        -v max="$MAX_LINE" -v hard="$HARD_FILE" -v soft="$SOFT_FILE" \
+        -v show="$SHOW_WARNINGS" "$CHECK")" || STATUS=1
+    if [ -n "$REPORT" ]; then
+        SOFT_COUNT="$(grep -c '^#SOFT$' <<<"$REPORT" || true)"
+        grep -v '^#SOFT$' <<<"$REPORT" || true
+        if grep -q '^ERROR:' <<<"$REPORT"; then
+            STATUS=1
         fi
     fi
-done
+fi
 
 if [ "$SOFT_COUNT" -gt 0 ] && [ "$SHOW_WARNINGS" -eq 0 ]; then
     echo "NOTE: $SOFT_COUNT file(s) over the $SOFT_FILE-line sweet" \
@@ -88,10 +107,12 @@ if [ "$SOFT_COUNT" -gt 0 ] && [ "$SHOW_WARNINGS" -eq 0 ]; then
 fi
 
 # swift-format lint (ships with Xcode 16+ toolchains)
-if swift format --version >/dev/null 2>&1; then
-    if ! swift format lint --strict --recursive \
+if [ "${#FORMAT_ROOTS[@]}" -eq 0 ]; then
+    :
+elif swift format --version >/dev/null 2>&1; then
+    if ! swift format lint --strict --recursive --parallel \
         --configuration "$ROOT/.swift-format" \
-        "$ROOT/Sources" "$ROOT/Tests" "$ROOT/Package.swift"; then
+        "${FORMAT_ROOTS[@]}"; then
         echo "ERROR: swift format lint failed"
         STATUS=1
     fi
