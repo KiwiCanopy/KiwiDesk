@@ -247,21 +247,24 @@ struct PocketListKeyTests {
         #expect(core.shelves.peek.shown == nil)
     }
 
-    @Test("a key held through a Desktop switch's read keeps its repaint")
-    func keepsTheSwitchRepaint() throws {
+    @Test("a press during a Desktop switch's read opens after its fold")
+    func waitsForTheSwitchFold() throws {
         let fixture = try PocketListFixture()
         let (core, display) = (fixture.core, fixture.display)
         defer {
             fixture.tearDown()
             core.eventLoop.switchReads.drop()
         }
-        // Left a stood-down Desktop: the stand-down is judged anew.
-        core.pocketPlate.standingDown = [display]
         core.eventLoop.beginSwitchReconcile()
-        #expect(core.eventLoop.switchReads.isPending)
-        core.execute("pocket.toggle_list")
+        #expect(core.execute("pocket.toggle_list").isSuccess)
+        #expect(core.shelves.peek.shown == nil)
+        #expect(core.pocketPlate.openingList == nil)
+        // As the fold pays what it owes.
+        let owed = core.eventLoop.switchReads.afterFold
+        core.eventLoop.switchReads.batch = nil
+        try #require(owed.count == 1)
+        owed.forEach { $0() }
         #expect(core.pocketListDisplay == display)
-        #expect(core.eventLoop.switchReads.barsOwed)
     }
 
     @Test("a handle's pocket rises for the key's list and sinks after it")

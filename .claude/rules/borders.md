@@ -453,7 +453,9 @@ or on one screen its list, open or being opened by
 `oneScreenStands`) — while the shelf's plan states the pocket by the
 capacity alone, so a drag, a play or the list moves no bar (#2793,
 `PocketShelfWiringTests` ▸ `dragStandsThePocket`,
-`PocketListKeyTests` ▸ `oneWindowStandsAndCloses`). **A verb that
+`PocketListKeyTests` ▸ `oneWindowStandsAndCloses`); it waits out a
+Desktop switch's read, which holds that pass
+(`PocketListKeyTests` ▸ `waitsForTheSwitchFold`). **A verb that
 draws and moves no window returns ahead of the setters' forced pass
 in `layoutCommand`'s dispatch**, as `toggle_reveal` does, or a press
 re-lays the Space (`PocketListKeyTests` ▸ `runsNoPass`). **Where it is is the one

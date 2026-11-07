@@ -6,6 +6,18 @@ import AppKit
 /// list under One window, and the plan stays capacity-only.
 extension KiwiCore {
     func pocketToggleListCommand() -> CommandResponse {
+        // A Desktop switch's read holds the bar pass that places the
+        // pocket (#2347), so the press waits for its fold.
+        guard eventLoop.switchReads.isPending else {
+            return togglePocketList()
+        }
+        eventLoop.afterSwitchReads { [weak self] in
+            _ = self?.togglePocketList()
+        }
+        return .ok()
+    }
+
+    private func togglePocketList() -> CommandResponse {
         // The chord closes a list open on any screen.
         if pocketListDisplay != nil {
             shelves.peek.dismiss()
@@ -29,13 +41,6 @@ extension KiwiCore {
         }
         // The pass refreshes what places a pocket that stood nowhere.
         updateBars()
-        // A Desktop switch's read holds that pass, its fold owing the
-        // repaint (#2347): the last pass's places serve meanwhile, its
-        // stand-down answered above.
-        if eventLoop.switchReads.isPending {
-            pocketPlate.standingDown.remove(display)
-            updatePocketPlate()
-        }
         guard let view = pocketPlate.view(on: display) else {
             return .fail("the pocket draws on no screen here")
         }
