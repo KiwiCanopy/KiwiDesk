@@ -798,9 +798,11 @@ holds the secondary-switch decision including its nil case.
   composed Standard has no file to stamp: its design entry states
   what it takes (`PocketVisibilityCrossingTests` ▸
   `adoptionStampsAndStrips`, `absentGroupCrossesAsOne`,
-  `insertIsSurgical`, `statedProfileKeeps`, `bundleStep`,
-  `bundleThroughMigration`, `crossingRunsFirst`; the newer-format
-  skip and the failed-write path are review's).
+  `unrestampedGroupCrossesAsOne`, `insertIsSurgical`,
+  `statedProfileKeeps`, `crossingRunsFirst`;
+  `PocketVisibilityBundleTests` ▸ `bundleStep`,
+  `bundleThroughMigration`; the newer-format skip and the
+  failed-write path are review's).
 
 ## Whose arrangement is live (#1249)
 

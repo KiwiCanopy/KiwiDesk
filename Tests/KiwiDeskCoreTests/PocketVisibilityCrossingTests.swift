@@ -88,50 +88,6 @@ struct PocketVisibilityCrossingTests {
         #expect(String(data: filled, encoding: .utf8) == stamped)
     }
 
-    @Test("a bundle crosses its config's capacity into its profiles")
-    func bundleStep() throws {
-        var stated = TilingSettings()
-        stated.kiwishelf.pocketVisibility = .hidden
-        func object(_ settings: TilingSettings) throws -> Any {
-            try JSONSerialization.jsonObject(
-                with: JSONEncoder().encode(settings)
-            )
-        }
-        var hidden = try #require(
-            try object(settings(space: .hidden, app: .hidden))
-                as? [String: Any]
-        )
-        var shelf = try #require(hidden["kiwishelf"] as? [String: Any])
-        shelf["pocket_visibility"] = nil
-        hidden["kiwishelf"] = shelf
-        let root: [String: Any] = [
-            "format": 42,
-            "writtenBy": "test",
-            "config": ["pocket": ["capacity": "several"]],
-            "profiles": [
-                ["settings": hidden],
-                ["settings": try object(stated)],
-            ],
-        ]
-        let data = try JSONSerialization.data(withJSONObject: root)
-        let out = try #require(
-            ConfigMigration.migratingPocketCapacityOntoShelf(data)
-        )
-        let crossed = try #require(
-            JSONSerialization.jsonObject(with: out) as? [String: Any]
-        )
-        let config = try #require(crossed["config"] as? [String: Any])
-        #expect(config["pocket"] == nil)
-        let profiles = try #require(
-            crossed["profiles"] as? [[String: Any]]
-        )
-        let values = profiles.map {
-            (($0["settings"] as? [String: Any])?["kiwishelf"]
-                as? [String: Any])?["pocket_visibility"] as? String
-        }
-        #expect(values == ["auto", "hidden"])
-    }
-
     private func makeGuiCore(capacity: String) throws -> KiwiCore {
         let core = makeTestCore(
             configDirectory:
@@ -277,51 +233,28 @@ struct PocketVisibilityCrossingTests {
         #expect(retired(core) == nil)
     }
 
-    /// A format-42 bundle's profile after `ConfigMigration.migrated`,
-    /// with `config` as given.
-    private func crossedBundle(config: [String: Any]?) throws -> String? {
-        var settings = try #require(
-            try JSONSerialization.jsonObject(
-                with: JSONEncoder().encode(
-                    self.settings(space: .always, app: .always)
-                )
-            ) as? [String: Any]
+    /// The crossing reads through the migration itself, so an older
+    /// file nothing restamped yet crosses too.
+    @Test("an unrestamped older gui.json crosses as One window")
+    func unrestampedGroupCrossesAsOne() throws {
+        let core = try makeGuiCore(capacity: "several")
+        let url = core.guiConfigStore.url
+        var root = try #require(
+            JSONSerialization.jsonObject(with: Data(contentsOf: url))
+                as? [String: Any]
         )
-        var shelf = try #require(settings["kiwishelf"] as? [String: Any])
-        shelf["pocket_visibility"] = nil
-        settings["kiwishelf"] = shelf
-        var root: [String: Any] = [
-            "format": 42,
-            "writtenBy": "test",
-            "profiles": [["settings": settings]],
-        ]
-        root["config"] = config
-        let out = try #require(
-            ConfigMigration.migrated(
-                try JSONSerialization.data(withJSONObject: root)
-            )
+        root["pocket"] = nil
+        root["format"] = 18
+        try JSONSerialization.data(withJSONObject: root).write(to: url)
+        try saveLegacy(
+            "Desk",
+            settings(space: .always, app: .always),
+            in: core
         )
-        let migrated = try #require(
-            JSONSerialization.jsonObject(with: out) as? [String: Any]
+        core.crossPocketVisibility()
+        #expect(
+            try core.profiles.read(name: "Desk").settings.kiwishelf
+                .pocketVisibility == .hidden
         )
-        #expect(migrated["format"] as? Int == SetupBundle.currentFormat)
-        let profiles = try #require(
-            migrated["profiles"] as? [[String: Any]]
-        )
-        return
-            ((profiles.first?["settings"] as? [String: Any])?[
-                "kiwishelf"
-            ] as? [String: Any])?["pocket_visibility"] as? String
-    }
-
-    @Test("a format-42 bundle crosses through the migration")
-    func bundleThroughMigration() throws {
-        let stated: [String: Any] = [
-            "format": 18, "pocket": ["capacity": "several"],
-        ]
-        #expect(try crossedBundle(config: stated) == "always")
-        // No group, and no config at all, read as One window.
-        #expect(try crossedBundle(config: ["format": 18]) == "hidden")
-        #expect(try crossedBundle(config: nil) == "hidden")
     }
 }
