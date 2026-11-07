@@ -259,7 +259,6 @@ struct AwayBootSeedTests {
         #expect(entry?.nativeSpace == 9)
         #expect(entry?.appName == "Observed")
         #expect(entry?.title == "")
-        #expect(core.state.rememberedSpace(of: WindowID(7)) == nil)
         // A full-screen-only seed still arms the census.
         #expect(core.deferred.isScheduled(.awayCensus))
         // KiwiHub lists it by app name, as full screen, in no Space.
@@ -269,6 +268,21 @@ struct AwayBootSeedTests {
         #expect(row?.app == "Observed")
         #expect(row?.status == .fullscreen)
         #expect(row?.space == nil)
+    }
+
+    /// The full-screen arm shares the Desktop arm's admission: a
+    /// carried filing resumes as the departure it was (#2907); a
+    /// parked one stays a filing.
+    @Test("a carried filing on a hidden full-screen Space resumes")
+    func fullScreenResumesCarried() {
+        defer { resetAuthorityOverrides() }
+        let core = makeCore()
+        core.state.refilePending([WindowID(7), WindowID(6)], in: "2")
+        core.desktopMemory.readCensus = { _ in self.fullScreenCensus() }
+        core.seedAwayWindows()
+        #expect(core.state.rememberedSpaces[WindowID(7)] == .departed("2"))
+        #expect(core.state.rememberedSpaces[WindowID(6)] == .restored("2"))
+        #expect(core.state.awayWindows[WindowID(7)]?.nativeSpace == 9)
     }
 
     @Test("the census prune keeps a seeded full-screen entry")

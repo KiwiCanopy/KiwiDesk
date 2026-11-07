@@ -98,7 +98,8 @@ public enum NativeSpaces {
     /// The windows a full-screen Space shows as its tiles (two in
     /// Split View), else its one `fs_wid` (#2949). The Space also
     /// hosts the app's toolbar and title-bar windows, which these
-    /// keys never name.
+    /// keys never name. Keys observed on macOS 27.2 (2026-11-07);
+    /// a missing key seeds nothing.
     private static func fullScreenWindows(
         in space: [String: Any]
     ) -> [WindowID] {

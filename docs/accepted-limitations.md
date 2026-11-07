@@ -334,13 +334,13 @@ New Window, or an un-minimize from the window switcher, pressed in the moment af
 
 :::unreleased
 Picking a window that was already in native full screen on a Space
-no screen showed as KiwiDesk started brings the app forward rather
-than that window's Space, until its Space has been shown once
+no screen showed as KiwiDesk started brings the app forward, until
+its Space has been shown once
 ([#2939](https://github.com/KiwiCanopy/KiwiDesk/issues/2939),
 [#2949](https://github.com/KiwiCanopy/KiwiDesk/issues/2949)).
-KiwiHub's window switcher lists it by app name from the start, but
 macOS gives KiwiDesk no handle on a window whose full-screen Space is
-not shown. Once the Space has been shown, picking it shows its Space.
+not shown. Show the Space once from Mission Control or with a swipe;
+from then on, picking it shows its Space.
 :::
 
 Reopening an app whose last window you closed while the app kept running can take you to **another macOS Desktop**. Some apps — Microsoft Word for one — hide a closed window and show that same window again when you click the app in the Dock, and macOS switches to the Desktop that window was on before KiwiDesk hears of it (measured 2026-10-13). KiwiDesk does not switch you back: undoing a switch macOS has already made would move you between two Desktops on every reopen ([#1515](https://github.com/KiwiCanopy/KiwiDesk/issues/1515)). An app you quit opens its next window on the Desktop you are on. macOS's own *When switching to an application, switch to a Space with open windows for the application* (System Settings ▸ Desktop & Dock ▸ Mission Control) governs that switch; whether turning it off keeps you on your Desktop for a re-shown window is not measured.
