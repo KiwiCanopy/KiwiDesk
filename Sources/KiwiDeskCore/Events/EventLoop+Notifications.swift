@@ -232,7 +232,7 @@ extension EventLoop {
     /// BEFORE it emits `.windowDestroyed`, in the same turn: the
     /// gone handler claims the released element there (#2939).
     func releaseWindowRegistration(_ id: WindowID, pid: pid_t) {
-        fullScreenElements.noteRelease(id, elements[pid]?[id])
+        awayElements.noteRelease(id, elements[pid]?[id])
         elements[pid]?[id] = nil
         detectedFloating[id] = nil
         detectedFullscreen[id] = nil

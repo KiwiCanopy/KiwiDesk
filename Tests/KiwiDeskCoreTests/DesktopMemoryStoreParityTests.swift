@@ -20,6 +20,14 @@ struct DesktopMemoryStoreParityTests {
         "stickyReturn", "switchDepartures",
     ]
 
+    /// Window-keyed stores no door owes, each with its reason.
+    private static let exempt: [String: String] = [
+        // Cleared by its own landing within the crossing's deadline
+        // (#3048); a re-key moving it would strand the new id, since
+        // the landing clears the id it was started for.
+        "crossingsInFlight": "bounded by its landing"
+    ]
+
     private let old = WindowID(7)
     private let new = WindowID(8)
 
@@ -34,7 +42,10 @@ struct DesktopMemoryStoreParityTests {
             else { continue }
             roster.insert(label)
         }
-        #expect(roster == Self.register)
+        #expect(
+            roster.subtracting(Self.exempt.keys) == Self.register
+        )
+        #expect(Set(Self.exempt.keys).isSubset(of: roster))
     }
 
     /// Every registered store, and the return debt, naming `old`.

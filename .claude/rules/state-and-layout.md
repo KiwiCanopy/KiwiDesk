@@ -336,10 +336,23 @@ editing here:
   #1150's review found them disagreeing), so it is refused with
   the pin hint, never hand-assigned, because the next
   `resolveSpaceDisplays` would move it back and re-open the same
-  undo. A shared Desktop names no screen, so a hidden one is judged
-  against the screen holding the window's frame, the screen it
-  arrives on, or that net drops the name (#3033,
-  `DesktopMoveSharedSpaceTests`). A window already away produces no
+  undo. A shared Desktop names no screen and macOS moves no frame with
+  a window, so a move naming a Space off the window's screen writes
+  the frame across before the arrival, or that net drops the name
+  (#3048). A tracked window writes at its departure, its frame carried
+  on `PendingSpaceAssignment`; an away window writes ahead of its move,
+  which waits on the write, so a second Desktop move of it refuses
+  until the first lands and its command answers from the parse; a
+  Move here's hop inside that wait is the residue the landing's
+  re-checks do not see. A new crossing
+  route writes through `writeCrossingFrame` and `FrameApplier.writeAway`
+  rather than a write of its own, which is review's, and a read-back
+  asks `readWindowBounds`, never `screenHolding`, whose fallback passes
+  a failed write, and stands down once the window arrived. A window the
+  write cannot reach is refused through `canWriteCrossing`
+  (#3033, `DesktopMoveCrossingTests`, `DesktopMoveCrossingTrackedTests`,
+  `FrameApplierWriteAwayTests`, `DesktopMoveSharedSpaceTests`). A
+  window already away produces no
   departure: its filing is written at once through
   `StateCoordinator.fileAwayMove`, always `.departed` so the #1010 net
   answers its arrival, a follow onto a shown Desktop owes Move here's
@@ -799,7 +812,7 @@ editing here:
   only at the top level — and a new reader owes the same branch.
   A per-away-id side store prunes itself to the ledger at each use
   and re-checks the id, so it takes no ender or re-key wiring
-  (`FullScreenElements`, #2939). What the ledger must never become: a member of `space.windows`
+  (`AwayElements`, #2939). What the ledger must never become: a member of `space.windows`
   with a flag (every `space.windows` consumer would gain an
   exclusion, and the return-by-rank fold above would be
   reworked), or a reason for the sweep to remove anything
@@ -1342,8 +1355,11 @@ editing here:
   `setFrame` — the two leaves the retile, the stash and the
   App-level placers share, so a NEW placement path routes through
   one of them rather than writing a frame beside them (the quit
-  teardown's direct `WindowControl.setFrame` is the one ruled
-  exception: the app is exiting, no focus report follows) — with
+  teardown's direct `WindowControl.setFrame` is one ruled exception:
+  the app is exiting, no focus report follows; a Desktop move's
+  `FrameApplier.writeAway` is the other: the window is on no Desktop
+  anyone sees, so nothing reports it, and its arrival's retile places
+  it through those leaves, #3048) — with
   the window a focus command moved focus OFF noted in the same
   ledger by the one `focusWindow` path (`noteDisplaced`, kept
   across the pan's later placement), and read by
@@ -1469,11 +1485,15 @@ editing here:
   the one `jumpToFullScreen`, which activates the app FIRST and then
   raises (`AXHelper.activateThenRaise`), never `AXHelper.raise`.
   No implicit raise calls the arm, its seam or its raise. An away
-  window's element comes from `FullScreenElements`, never a
+  window's element comes from `AwayElements`, never a
   remote-token scan, which is a ruling of its own; and a removal
-  path that can vanish a window to a full-screen Space releases its
+  path that can vanish a window to any Space nobody shows releases its
   registration BEFORE it emits `.windowDestroyed`, in the same turn,
-  since the gone handler claims the element there. A window with no
+  since the gone handler claims the element there for Jump and for a
+  Desktop move's frame write (#3048). A path whose release must follow
+  the destroy notes the element first through
+  `AwayElements.noteRelease`, as `departEagerly` does
+  (`DesktopMoveCrossingTrackedTests` ▸ `followWritesInItsTurn`). A window with no
   element brings its app forward (`docs/accepted-limitations.md`).
   `JumpFullScreenSeamTests` holds the raise's one home, the seam and
   the arm to Jump and both twins to the pin, `DesktopRaiseGateSeamTests`

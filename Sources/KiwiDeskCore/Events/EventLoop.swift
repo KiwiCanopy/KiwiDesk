@@ -74,7 +74,7 @@ public final class EventLoop {
 
     var observers: [pid_t: any AppObserving] = [:]
     var elements: [pid_t: [WindowID: AXUIElement]] = [:]
-    var fullScreenElements = FullScreenElements()
+    var awayElements = AwayElements()
     /// AXEnhancedUserInterface state observed before this loop
     /// changed it. An ignore transition or stop restores that
     /// exact value instead of assuming KiwiDesk owned `true`.

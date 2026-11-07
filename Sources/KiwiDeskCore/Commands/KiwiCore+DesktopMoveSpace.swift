@@ -23,7 +23,11 @@ extension KiwiCore {
         target: DesktopTarget
     ) {
         guard target.isCurrent else {
-            pendingSpace.record(window, space: space)
+            pendingSpace.record(
+                window,
+                space: space,
+                crossingFrom: crossingBase(of: window, to: space, target)
+            )
             onLog(
                 "move_to_desktop: w\(window.raw) will join space "
                     + "\(space.raw) when it departs"

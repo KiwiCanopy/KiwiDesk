@@ -85,6 +85,7 @@ struct SpaceSlideSeamTests {
         #expect(body.occurrences(of: "held.dropAll()") == 1)
     }
 
-    /// The hold's release writes the frame it staged.
-    private static let releases: Set<String> = ["write"]
+    /// The hold's release writes the frame it staged; `writeAway`
+    /// writes a window on no Desktop a slide shows (#3048).
+    private static let releases: Set<String> = ["write", "writeAway"]
 }

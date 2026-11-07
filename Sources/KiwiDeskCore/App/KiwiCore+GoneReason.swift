@@ -20,9 +20,12 @@ extension KiwiCore {
         // departure the fold just recorded (#1150): the name
         // replaces the remembered Space, and the arrival's
         // ordinary rule lands the window in it.
+        let crossingBase = pendingSpace.crossingBase(of: id)
+        var crossing: SpaceID?
         if let space = pendingSpace.claim(id),
             state.redirectDeparture(of: id, to: space)
         {
+            crossing = crossingBase == nil ? nil : space
             // Created at the claim, and only for a departure
             // the redirect took: the arrival's
             // `livingRememberedSpace` needs it to exist, and an
@@ -78,12 +81,16 @@ extension KiwiCore {
                 removed: effects.removedWindow,
                 nativeSpace: space
             )
-            // The element Jump raises it by on its Space (#2939).
-            if isFullScreenHost(space, in: spaces) {
-                eventLoop.fullScreenElements.keep(
-                    id,
-                    away: Set(state.awayWindows.keys)
-                )
+            // What Jump raises it by on a full-screen Space (#2939),
+            // and a move's frame write goes through (#3048).
+            eventLoop.awayElements.keep(
+                id,
+                away: Set(state.awayWindows.keys)
+            )
+            if let crossing, let crossingBase {
+                writeCrossingFrame(id, from: crossingBase, to: crossing) {
+                    _ in
+                }
             }
         }
         emitWindowDestroyed(

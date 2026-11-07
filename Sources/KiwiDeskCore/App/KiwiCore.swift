@@ -214,6 +214,8 @@ public final class KiwiCore {
     let moveLatch = MoveIntentLatch()
     let followFocus = FollowFocusIntent()
     let pendingSpace = PendingSpaceAssignment()
+    /// A crossing's frame write (#3048); tests answer it by hand.
+    var awayFrameWrite: AwayFrameWrite?
     let launchFollow = LaunchFollowIntent()
     let arrivals = ArrivalProvenanceDoor()
     let jump = JumpState()

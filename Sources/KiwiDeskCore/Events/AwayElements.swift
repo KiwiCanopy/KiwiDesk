@@ -1,14 +1,14 @@
 import ApplicationServices
 
-/// The AX element of each window that left for its own native
-/// full-screen Space (#2939). AX lists no window on a Space that is
-/// not shown, so the element its departure released is the one way
-/// Jump can raise the window later. Bookkeeping beside the away
-/// ledger, never a member of it: pruned to the ledger's ids at each
-/// keep and read, so it takes no ender or re-key of its own, and a
-/// use re-checks the id the element names. A window full screen
-/// since before KiwiDesk adopted it has none.
-struct FullScreenElements {
+/// The AX element of each window that left for a Space nobody shows
+/// (#2939, #3048). AX lists no such window, so the element its
+/// departure released is the one way to raise it on its full-screen
+/// Space or write its frame on a hidden Desktop. Bookkeeping beside
+/// the away ledger, never a member of it: pruned to the ledger's ids
+/// at each keep and read, so it takes no ender or re-key of its own,
+/// and a use re-checks the id the element names. A window away since
+/// before KiwiDesk adopted it has none.
+struct AwayElements {
     /// The registration released last, which the gone handler of
     /// the same removal claims synchronously.
     private var released: (id: WindowID, element: AXUIElement)?

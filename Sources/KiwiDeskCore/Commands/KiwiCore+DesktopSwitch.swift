@@ -167,6 +167,12 @@ extension KiwiCore {
         // (#936: the ONE predicate governs the raise and the
         // restore arm alike) — held for exactly this synchronous
         // span, see its doc on `EventLoop`.
+        // Ahead of the destroy, whose gone handler keeps the element
+        // a frame write needs (#3048); the release below follows.
+        eventLoop.awayElements.noteRelease(
+            window,
+            eventLoop.element(for: window)
+        )
         eventLoop.eagerDepartureInFlight = (window, host)
         handle(.windowDestroyed(window, wasMinimized: false))
         eventLoop.eagerDepartureInFlight = nil

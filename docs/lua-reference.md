@@ -512,13 +512,19 @@ Neither `move_to_desktop` nor `move_to_desktop_and_follow` moves a
 each refuses and the window stays on its Desktop. Either verb can
 also [name the window](#move_to_desktop_and_follow).
 
-With *Displays have separate Spaces* off, macOS keeps a window on its
-screen when it changes Desktop, so screens can only be crossed through
-the visible Desktop. A Space on another screen than the
-window's is taken only when the window is on that Desktop and you name
-that Desktop; anything else is refused. To send a window to another
-screen and another Desktop, cross on the visible Desktop first, then
-move it.
+With *Displays have separate Spaces* off, naming a Space on another
+screen sends the window to that screen and that Desktop in one command.
+The command refuses a window it cannot place on the other screen
+before it arrives, which can then cross only through the visible
+Desktop: a minimized or hidden one, one that has stayed on another
+Desktop since KiwiDesk started, and a native tab that became another
+window while away.
+
+A window on a hidden Desktop crossing to another screen lands up to
+about 150 ms after the command returns. Until it lands, a second
+`move_to_desktop` or `move_to_desktop_and_follow` of that window
+refuses with `A window moves again once its last move lands.`, so a
+script sending one window twice retries after a short wait.
 :::
 
 ### move_to_desktop_and_follow
@@ -576,8 +582,8 @@ A window on a hidden Desktop joins its Space when it arrives, and
 takes focus only if that is the current Space and nothing there holds
 it. A sticky one refuses a named Space, and the follow refuses a minimized
 or hidden one, since it could not take focus. With *Displays have
-separate Spaces* off it cannot [cross screens](#move_to_desktop) while
-hidden: bring it to the visible Desktop first.
+separate Spaces* off it can [cross screens](#move_to_desktop) too,
+with the limits named there.
 :::
 
 ### move_space_to_display

@@ -22,6 +22,9 @@ struct FrameWriter: Sendable {
     /// fixed-size window (Calculator, Digital Color Meter), true on
     /// one that only keeps an axis or a ratio.
     var sizeSettable: @Sendable (AXUIElement) -> Bool = { _ in true }
+    /// The window an element names: synchronous IPC into its app, so
+    /// it belongs on the app's queue.
+    var windowID: @Sendable (AXUIElement) -> WindowID? = { _ in nil }
 
     static let live = FrameWriter(
         setFrame: { WindowControl.setFrame($0, of: $1) },
@@ -34,7 +37,8 @@ struct FrameWriter: Sendable {
             return frame.size == .zero ? nil : frame
         },
         setSize: { WindowControl.setSize($0, of: $1) },
-        sizeSettable: { AXHelper.isSizeSettable($0) }
+        sizeSettable: { AXHelper.isSizeSettable($0) },
+        windowID: { AXHelper.windowID(of: $0) }
     )
 }
 

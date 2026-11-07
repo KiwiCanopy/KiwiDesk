@@ -192,6 +192,23 @@ final class DesktopMemory {
     /// reconcile (#2888).
     var moveReapPIDs: Set<pid_t> = []
 
+    /// The away windows whose crossing write a move still waits on
+    /// (#3048); a second Desktop move of one is refused until it
+    /// lands. Desktop-move bookkeeping, beside `moveReapPIDs`; no
+    /// lifecycle door owes it, since the landing clears its own id
+    /// (`DesktopMemoryStoreParityTests`' `exempt`).
+    var crossingsInFlight: Set<WindowID> = []
+
+    /// The crossing's deadline and read-back timer; tests fire it by
+    /// hand.
+    var scheduleCrossing:
+        @MainActor (TimeInterval, @escaping @MainActor () -> Void)
+            -> Void = { delay, work in
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) {
+                    MainActor.assumeIsolated { work() }
+                }
+            }
+
     /// The native Space each screen shows, filed at the HEAD of
     /// every Desktop switch so the switch's own rings read it
     /// (#2149); `lastDisplaySpaces` is filed at the tail (#1215).

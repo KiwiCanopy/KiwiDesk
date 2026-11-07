@@ -106,8 +106,10 @@ struct VisibleBoundsRoutingTests {
         // destination screen and early-returns when they are
         // equal — under a one-rect hook they always are, so
         // routing it would silently disable a default-ON feature
-        // (#502) in every pinned fixture while staying green.
-        "App/KiwiCore+FloatReanchor.swift": 2,
+        // (#502) in every pinned fixture while staying green. A
+        // Desktop move's crossing frame reads both the same way
+        // (#3048).
+        "App/KiwiCore+FloatReanchor.swift": 4,
     ]
 
     @Test("Only the allowlisted files resolve bounds directly")
