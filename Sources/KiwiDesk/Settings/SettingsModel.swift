@@ -295,6 +295,8 @@ final class SettingsModel: ObservableObject {
     var encodedCache: EncodedReachCache?
     /// The layer readings over that pass (`layerReach`, #2783).
     var layerCache: LayerReachCache?
+    /// The last draft diff and what it read (`draftDiff`, #3060).
+    var draftDiffCache: DraftDiffCache?
     /// The profile whose page the draft is — pinned by `reload()`,
     /// because the loaded name can move under an open draft (a
     /// Save as New makes its profile current mid-save; a Desktop

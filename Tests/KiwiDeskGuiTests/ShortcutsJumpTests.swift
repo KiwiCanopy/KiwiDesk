@@ -259,7 +259,9 @@ struct ShortcutsJumpTests {
         let jump = try Self.source("Sections/ShortcutsSection+Jump.swift")
         #expect(jump.contains("ifgroup==.gestures{gesturesExpanded=true}"))
         #expect(
-            jump.contains("proxy.scrollTo(group.control.id,anchor:.top)")
+            jump.contains(
+                "proxy.scrollTo(ShortcutsPagePart(group).id,anchor:.top)"
+            )
         )
     }
 

@@ -2281,6 +2281,16 @@ draw (`ModifierSidesCardTests` ▸ `menuSkipsSidedChords`).
   of SwiftUI's sight, and it must find its rows when called, since a
   skipped render keeps the last binding that drew
   (`NavRowRenderSeamTests`, `NavRowEqualityTests`).
+- **A scroll into the Shortcuts page reaches the row's part
+  first** (#3060). The page builds its parts lazily, so a scroll
+  to an id inside a part not yet built finds nothing: a reveal, a
+  recorder's Go to and a jump chip scroll to the part's id
+  through `ShortcutsPagePart.owner(of:expander:)`, and an anchor
+  it cannot place builds the whole page. A catalog control or
+  census container added to the page is placed there
+  (`ShortcutsPagePartTests` ▸ `catalogControlsHaveParts`,
+  `censusContainersArePartsOfThePage`). Rows come into view with
+  no motion of their own (owner ruling on #3060).
 - **Cursor changes use `NSCursor.set()`, never push/pop.** A view
   removed under the pointer (a link that deletes itself, a row
   rebuilt by rename) never delivers the balancing

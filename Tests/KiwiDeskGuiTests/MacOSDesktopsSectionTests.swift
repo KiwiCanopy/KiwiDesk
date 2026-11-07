@@ -95,11 +95,15 @@ struct MacOSDesktopsSectionTests {
         #expect(section.occurrences(of: "MacOSDesktopsGroup(") == 1)
         #expect(
             section.contains(
-                "MoveWindowsGroup(model:model,"
-                    + "bindings:bindingsBinding,expander:expander)"
-                    + "MacOSDesktopsGroup(model:model,"
+                "case.macosDesktops:MacOSDesktopsGroup(model:model,"
                     + "bindings:bindingsBinding,expander:expander)"
             )
+        )
+        // The page draws its parts in `ShortcutsPagePart` order.
+        let parts = ShortcutsPagePart.allCases
+        #expect(
+            parts.firstIndex(of: .macosDesktops)
+                == parts.firstIndex(of: .moveWindows).map { $0 + 1 }
         )
         let groups = try squashed(
             "Sources/KiwiDesk/Settings/Components/Keybindings/"
