@@ -137,10 +137,17 @@ struct GesturesDrawerTests {
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
-        let drawer = try #require(
-            body.range(of: "GesturesDrawer(model: model,")
+        // Both mounts are read inside the header's own body.
+        let decl = try #require(
+            body.range(of: "@ViewBuilder private var header:")
         )
-        let header = try #require(body.range(of: "layersCard"))
+        let rest = decl.upperBound..<body.endIndex
+        let drawer = try #require(
+            body.range(of: "GesturesDrawer(model: model,", range: rest)
+        )
+        let header = try #require(
+            body.range(of: "layersCard", range: rest)
+        )
         #expect(drawer.lowerBound < header.lowerBound)
         #expect(
             body.components(separatedBy: "GesturesDrawer(").count

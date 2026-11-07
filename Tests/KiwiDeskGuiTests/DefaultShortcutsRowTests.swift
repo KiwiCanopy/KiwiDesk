@@ -20,29 +20,31 @@ struct DefaultShortcutsRowTests {
         )
     }
 
-    @Test("the state names why Restore greys")
-    func restoreStates() {
+    private func reason(
+        layer: String,
+        defaults: Bool
+    ) -> ShortcutsGates.InertReason? {
+        ShortcutsGates(
+            config: GuiConfig(),
+            selectedLayer: layer,
+            defaultsToRestore: defaults
+        ).inertReason(for: .shortcuts(.restoreDefaults))
+    }
+
+    @Test("the resolver names why Restore greys")
+    func restoreReasons() {
         let other = KeyLayer.defaultName + "-other"
+        #expect(reason(layer: KeyLayer.defaultName, defaults: true) == nil)
         #expect(
-            DefaultShortcutsRow.restoreState(
-                layer: KeyLayer.defaultName,
-                hasDefaultsToRestore: true
-            ) == .available
-        )
-        #expect(
-            DefaultShortcutsRow.restoreState(
-                layer: KeyLayer.defaultName,
-                hasDefaultsToRestore: false
-            ) == .atDefaults
+            reason(layer: KeyLayer.defaultName, defaults: false)
+                == .matchesDefaults
         )
         // The layer outranks the count: off the default layer the
         // count is about a layer the user is not looking at.
-        for has in [true, false] {
+        for defaults in [true, false] {
             #expect(
-                DefaultShortcutsRow.restoreState(
-                    layer: other,
-                    hasDefaultsToRestore: has
-                ) == .otherLayer
+                reason(layer: other, defaults: defaults)
+                    == .otherLayerPicked
             )
         }
     }
@@ -52,15 +54,28 @@ struct DefaultShortcutsRowTests {
         let body = try Self.source(
             "Sources/KiwiDesk/Settings/Sections/ShortcutsSection.swift"
         )
-        let layers = try #require(body.range(of: "layersCard"))
-        let row = try #require(
-            body.range(of: "DefaultShortcutsRow(model: model,")
-        )
+        // The page mounts the header, then the groups.
+        let page = try #require(body.range(of: "private var page:"))
+        let tail = page.upperBound..<body.endIndex
+        let header = try #require(body.range(of: "header", range: tail))
         let groups = try #require(
-            body.range(of: "@ViewBuilder private var actionGroups")
+            body.range(of: "actionGroups", range: tail)
         )
+        #expect(header.upperBound < groups.lowerBound)
+        // Inside the header, the row comes last, after the card.
+        let decl = try #require(
+            body.range(of: "@ViewBuilder private var header:")
+        )
+        let rest = decl.upperBound..<body.endIndex
+        let layers = try #require(
+            body.range(of: "layersCard", range: rest)
+        )
+        let row = try #require(
+            body.range(of: "DefaultShortcutsRow(model: model,", range: rest)
+        )
+        let next = try #require(body.range(of: "private var", range: rest))
         #expect(layers.upperBound < row.lowerBound)
-        #expect(row.upperBound < groups.lowerBound)
+        #expect(row.upperBound < next.lowerBound)
         #expect(
             body.components(separatedBy: "DefaultShortcutsRow(")
                 .count == 2
@@ -73,22 +88,45 @@ struct DefaultShortcutsRowTests {
             "Sources/KiwiDesk/Settings/Sections/DefaultShortcutsRow.swift"
         )
         #expect(!body.contains("if model.hasDefaultsToRestore"))
-        let stack = try #require(body.range(of: "HStack(spacing: 8) {"))
-        let call = try #require(
-            body.range(
-                of: "resetButton(state)",
-                range: stack.upperBound..<body.endIndex
-            )
-        )
-        // The only branch in the button stack is Import's gate,
-        // which closes before Restore is drawn.
-        let between = body[stack.upperBound..<call.lowerBound]
-        #expect(between.components(separatedBy: "if ").count == 2)
-        #expect(between.contains("importButton\n                    }"))
         #expect(
             body.contains(
-                "GreyOut(active: state != .available, "
-                    + "help: caption(state))"
+                ".inertReason(for: .shortcuts(.restoreDefaults))"
+            )
+        )
+        // The button stack, brace-balanced: Import's gate, then
+        // Restore as its last view, with nothing wrapping it.
+        let chars = Array(body)
+        let stack = try #require(body.range(of: "HStack(spacing: 8)"))
+        var cursor = body.distance(
+            from: body.startIndex,
+            to: stack.upperBound
+        )
+        let run = try #require(
+            SourceScan.balanced(
+                chars,
+                from: &cursor,
+                open: "{",
+                close: "}"
+            )
+        )
+        let collapsed = run.split(whereSeparator: \.isWhitespace)
+            .joined(separator: " ")
+        #expect(
+            collapsed
+                == "if model.hasCustomLua, !model.editingStoredProfile "
+                + "{ importButton } resetButton(reason)"
+        )
+        // Greyed on Restore itself, never on the stack.
+        let button = try SourceScan.functionBody(
+            of: "resetButton",
+            in: "DefaultShortcutsRow.swift",
+            under: "Settings/Sections",
+            root: "Sources/KiwiDesk"
+        )
+        #expect(
+            button.contains(
+                "GreyOut(active: reason != nil, "
+                    + "help: caption(reason))"
             )
         )
     }

@@ -144,9 +144,9 @@ struct ShortcutsGateTests {
         #expect(ShortcutsGates(config: track).trackInUse)
         #expect(!ShortcutsGates(config: track).layersExist)
         #expect(!ShortcutsGates(config: track).desktopMovesBound)
-        // All cases are spoken for above, the plate switch's
-        // greying reasons (#2144, #2460) answering none of the
-        // readings; a FIFTH reds here — check what each named
+        // All cases are spoken for above, the greying reasons
+        // (#2144, #2460, #3074) answering none of the readings; a
+        // SEVENTH reds here — check what each named
         // reading should answer for it before extending, since
         // none is written against nil.
         #expect(
@@ -154,6 +154,8 @@ struct ShortcutsGateTests {
                 == [
                     .onlyDefaultLayer, .trackUnused,
                     .appWideLuaOwned, .storedProfilePage,
+                    // Restore Defaults' greys (#3074).
+                    .otherLayerPicked, .matchesDefaults,
                 ]
         )
     }

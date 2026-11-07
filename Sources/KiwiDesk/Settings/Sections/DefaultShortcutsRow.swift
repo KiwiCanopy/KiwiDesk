@@ -11,35 +11,24 @@ struct DefaultShortcutsRow: View {
     @State private var importedNote = false
     @State private var confirmingReset = false
 
-    /// Why Restore is live or greyed — the caption reads it.
-    enum RestoreState: Equatable {
-        case available
-        /// The layer picked above has no shipped defaults.
-        case otherLayer
-        /// The default layer already matches the shipped set.
-        case atDefaults
-    }
-
-    static func restoreState(
-        layer: String,
-        hasDefaultsToRestore: Bool
-    ) -> RestoreState {
-        if layer != KeyLayer.defaultName { return .otherLayer }
-        return hasDefaultsToRestore ? .available : .atDefaults
+    /// Why Restore greys, nil while it acts — the caption reads it.
+    private var restoreReason: ShortcutsGates.InertReason? {
+        ShortcutsGates(
+            config: model.config,
+            selectedLayer: selected,
+            defaultsToRestore: model.hasDefaultsToRestore
+        ).inertReason(for: .shortcuts(.restoreDefaults))
     }
 
     var body: some View {
-        let state = Self.restoreState(
-            layer: selected,
-            hasDefaultsToRestore: model.hasDefaultsToRestore
-        )
+        let reason = restoreReason
         VStack(alignment: .leading, spacing: 8) {
             SettingsActionRow(
                 title: L(
                     "shortcuts.restore_defaults.row",
                     "Default shortcuts"
                 ),
-                caption: caption(state),
+                caption: caption(reason),
                 help: restoreExplain,
                 helpSubject: restoreName
             ) {
@@ -49,11 +38,11 @@ struct DefaultShortcutsRow: View {
                     {
                         importButton
                     }
-                    resetButton(state)
+                    resetButton(reason)
                 }
             }
             .padding(12)
-            .background(plate)
+            .background(SettingsCardPlate())
             if importedNote {
                 Text(importedNoteText)
                     .font(.caption)
@@ -70,21 +59,6 @@ struct DefaultShortcutsRow: View {
                     .foregroundStyle(SettingsTheme.groupHeading)
             }
         }
-    }
-
-    /// The page's card plate, so the row reads as one of them.
-    private var plate: some View {
-        RoundedRectangle(cornerRadius: SettingsTheme.sectionRadius)
-            .fill(SettingsTheme.card)
-            .overlay(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.sectionRadius
-                )
-                .strokeBorder(
-                    SettingsTheme.hairline,
-                    lineWidth: SettingsTheme.containerStroke
-                )
-            )
     }
 
     /// One line per chord the import or adoption left out (#1807).
@@ -119,14 +93,16 @@ struct DefaultShortcutsRow: View {
 
     /// Restores shipped shortcut defaults onto default layer (#1096).
     /// Greyed, never removed, off the default layer (#171).
-    private func resetButton(_ state: RestoreState) -> some View {
+    private func resetButton(
+        _ reason: ShortcutsGates.InertReason?
+    ) -> some View {
         Button(L("shortcuts.restore_defaults.short", "Restore…")) {
             confirmingReset = true
         }
         .settingsActionButton()
         .accessibilityLabel(restoreName)
         .modifier(
-            GreyOut(active: state != .available, help: caption(state))
+            GreyOut(active: reason != nil, help: caption(reason))
         )
         .confirmationDialog(
             L(
@@ -183,9 +159,9 @@ struct DefaultShortcutsRow: View {
         )
     }
 
-    private func caption(_ state: RestoreState) -> String {
-        switch state {
-        case .available:
+    private func caption(_ reason: ShortcutsGates.InertReason?) -> String {
+        switch reason {
+        case nil:
             return L(
                 "shortcuts.restore_defaults.help",
                 "Puts back the shortcuts KiwiDesk provides, "
@@ -193,17 +169,18 @@ struct DefaultShortcutsRow: View {
                     + "installed it. Shortcuts you made yourself "
                     + "are kept."
             )
-        case .otherLayer:
+        case .otherLayerPicked?:
             return L(
                 "shortcuts.restore_defaults.other_layer",
                 "Only the “default” layer has defaults to "
                     + "restore. Pick it in %1$@ above.",
                 SettingsCatalog.shortcuts.layersCard.control.text
             )
-        case .atDefaults:
+        default:
+            // `.matchesDefaults`, the one other reason this key has.
             return L(
                 "shortcuts.restore_defaults.at_defaults",
-                "Your shortcuts match the defaults."
+                "Every default shortcut is in place."
             )
         }
     }

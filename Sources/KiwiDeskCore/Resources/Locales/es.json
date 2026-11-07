@@ -2173,7 +2173,7 @@
   "shortcuts.rename": "Renombrar",
   "shortcuts.rename_ellipsis": "Renombrar…",
   "shortcuts.restore_defaults": "Restaurar predeterminados…",
-  "shortcuts.restore_defaults.at_defaults": "Tus atajos coinciden con los predeterminados.",
+  "shortcuts.restore_defaults.at_defaults": "Todos los atajos predeterminados están en su sitio.",
   "shortcuts.restore_defaults.confirm": "Restaurar predeterminados",
   "shortcuts.restore_defaults.explain": "Solo la capa «default» trae atajos de serie; las capas que añades son solo tuyas. Antes de que cambie nada, se te indica cuántos atajos vuelven y cuántos de los tuyos se pierden porque usan una tecla que necesita un predeterminado.",
   "shortcuts.restore_defaults.help": "Repone los atajos que ofrece KiwiDesk, incluidos los que ha añadido desde que lo instalaste. Los atajos que hayas creado tú se conservan.",

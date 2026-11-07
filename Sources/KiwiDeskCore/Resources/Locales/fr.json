@@ -2173,7 +2173,7 @@
   "shortcuts.rename": "Renommer",
   "shortcuts.rename_ellipsis": "Renommer…",
   "shortcuts.restore_defaults": "Rétablir les valeurs par défaut…",
-  "shortcuts.restore_defaults.at_defaults": "Vos raccourcis correspondent aux valeurs par défaut.",
+  "shortcuts.restore_defaults.at_defaults": "Tous les raccourcis par défaut sont en place.",
   "shortcuts.restore_defaults.confirm": "Rétablir les valeurs par défaut",
   "shortcuts.restore_defaults.explain": "Seul le calque « default » contient des raccourcis fournis ; les calques que vous ajoutez n'appartiennent qu'à vous. Avant toute modification, vous voyez combien de raccourcis reviennent et combien des vôtres sont perdus parce qu'ils utilisent une touche requise par un raccourci par défaut.",
   "shortcuts.restore_defaults.help": "Remet les raccourcis fournis par KiwiDesk, y compris ceux qu'il a ajoutés depuis votre installation. Les raccourcis que vous avez créés vous-même sont conservés.",

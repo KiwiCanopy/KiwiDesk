@@ -2173,7 +2173,7 @@
   "shortcuts.rename": "Renomear",
   "shortcuts.rename_ellipsis": "Renomear…",
   "shortcuts.restore_defaults": "Restaurar Padrões…",
-  "shortcuts.restore_defaults.at_defaults": "Seus atalhos são iguais aos padrões.",
+  "shortcuts.restore_defaults.at_defaults": "Todos os atalhos padrão estão no lugar.",
   "shortcuts.restore_defaults.confirm": "Restaurar Padrões",
   "shortcuts.restore_defaults.explain": "Só a camada “default” traz atalhos de fábrica; as camadas que você adiciona são só suas. Antes de qualquer mudança, você vê quantos atalhos voltam e quantos dos seus se perdem por usarem uma tecla de que um padrão precisa.",
   "shortcuts.restore_defaults.help": "Repõe os atalhos que o KiwiDesk oferece, incluindo os que ele adicionou desde que você o instalou. Os atalhos que você mesmo criou são mantidos.",

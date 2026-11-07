@@ -4,7 +4,8 @@ import KiwiDeskCore
 /// gates SURFACE rather than grey — non-nil means "not yet at
 /// rest" (withheld behind the offer), with no inline sentence —
 /// save the layout plate's switch, which greys with General's
-/// Lua-owned sentence (#2144). `LayersCard` asks this
+/// Lua-owned sentence (#2144), and Restore Defaults, which greys
+/// with its row's caption (#3074). `LayersCard` asks this
 /// rather than re-deriving — a renderer whose predicate silently
 /// disagreed once hid a user's own configured layers
 /// (`ShortcutsGateTests`).
@@ -16,6 +17,12 @@ struct ShortcutsGates {
     /// `SettingsModel.editingStoredProfile`; read by the Shortcuts use
     /// switch alone, whose Save must write the shared rows (#2460).
     var editingStoredProfile = false
+    /// The layer the page edits; read by Restore Defaults alone,
+    /// which only the default layer can answer (#3074).
+    var selectedLayer = KeyLayer.defaultName
+    /// `SettingsModel.hasDefaultsToRestore`; read by Restore
+    /// Defaults alone (#3074).
+    var defaultsToRestore = true
 
     /// Reason why a Shortcuts setting is withheld or gated.
     enum InertReason: Hashable, CaseIterable {
@@ -30,6 +37,12 @@ struct ShortcutsGates {
         /// edited, so the Shortcuts use switch has no shared rows to
         /// write (#2460).
         case storedProfilePage
+        /// Another layer is picked, and only the default layer has
+        /// shipped shortcuts (#3074).
+        case otherLayerPicked
+        /// The default layer already matches the shipped set
+        /// (#3074).
+        case matchesDefaults
     }
 
     /// Evaluates inert reason for setting key.
@@ -51,6 +64,11 @@ struct ShortcutsGates {
         case .shortcuts(.shortcutBase):
             guard guiManaged else { return .appWideLuaOwned }
             return editingStoredProfile ? .storedProfilePage : nil
+        case .shortcuts(.restoreDefaults):
+            if selectedLayer != KeyLayer.defaultName {
+                return .otherLayerPicked
+            }
+            return defaultsToRestore ? nil : .matchesDefaults
         default:
             assertionFailure(
                 "ShortcutsGates does not own \(key.id)"
@@ -119,14 +137,15 @@ struct ShortcutsGates {
         .shortcuts(.hyperKey),
         .shortcuts(.modifierSides),
         .shortcuts(.shortcutBase),
+        .shortcuts(.restoreDefaults),
     ]
 
     /// Gated keys resolved dynamically in view state: Import's
-    /// and Restore Defaults' gates are live-editor questions no
-    /// saved `GuiConfig` can answer, so `DefaultShortcutsRow` keeps
-    /// them. Naming them keeps the gap deliberate.
+    /// gate asks whether the running `init.lua` holds shortcuts,
+    /// which no config this resolver is handed records, so
+    /// `DefaultShortcutsRow` keeps it. Naming it keeps the gap
+    /// deliberate.
     static let resolvedElsewhere: Set<SettingKey> = [
-        .shortcuts(.`import`),
-        .shortcuts(.restoreDefaults),
+        .shortcuts(.`import`)
     ]
 }

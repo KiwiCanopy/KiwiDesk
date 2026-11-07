@@ -2176,7 +2176,7 @@
   "shortcuts.rename": "Rename",
   "shortcuts.rename_ellipsis": "Rename…",
   "shortcuts.restore_defaults": "Restore Defaults…",
-  "shortcuts.restore_defaults.at_defaults": "Your shortcuts match the defaults.",
+  "shortcuts.restore_defaults.at_defaults": "Every default shortcut is in place.",
   "shortcuts.restore_defaults.confirm": "Restore Defaults",
   "shortcuts.restore_defaults.explain": "Only the “default” layer has shipped shortcuts; the layers you add are yours alone. Before anything changes, you are told how many shortcuts come back and how many of yours are lost because they use a key a default needs.",
   "shortcuts.restore_defaults.help": "Puts back the shortcuts KiwiDesk provides, including ones it has added since you installed it. Shortcuts you made yourself are kept.",

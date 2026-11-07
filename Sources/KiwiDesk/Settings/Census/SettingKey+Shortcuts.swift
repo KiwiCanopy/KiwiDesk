@@ -189,7 +189,8 @@ extension ShortcutsKey {
             return .row(.shortcuts, .luaBindings, .showMore)
         case .`import`:
             // Surfaced at rest (never behind disclosure) when init.lua has
-            // unadopted shortcuts.
+            // unadopted shortcuts; drawn in the Default shortcuts row
+            // (#3074) while its census container stays Lua bindings.
             return .row(
                 .shortcuts,
                 .luaBindings,
@@ -284,7 +285,7 @@ extension ShortcutsKey {
         case .restoreDefaults:
             return .text(
                 "shortcuts.restore_defaults",
-                help: "shortcuts.restore_defaults.help"
+                help: "shortcuts.restore_defaults.explain"
             )
         case .scrollPan:
             return .text("shortcuts.gestures.scroll.pan")

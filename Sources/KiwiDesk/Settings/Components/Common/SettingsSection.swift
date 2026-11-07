@@ -120,19 +120,7 @@ struct SettingsSection<Content: View>: View {
         }
     }
 
-    private var plateShape: some View {
-        RoundedRectangle(cornerRadius: SettingsTheme.sectionRadius)
-            .fill(SettingsTheme.card)
-            .overlay(
-                RoundedRectangle(
-                    cornerRadius: SettingsTheme.sectionRadius
-                )
-                .strokeBorder(
-                    SettingsTheme.hairline,
-                    lineWidth: SettingsTheme.containerStroke
-                )
-            )
-    }
+    private var plateShape: some View { SettingsCardPlate() }
 
     private func revealMarkers(
         _ anchors: [SettingsControl]
@@ -199,5 +187,23 @@ struct SettingsSection<Content: View>: View {
                     .foregroundStyle(SettingsTheme.ink3)
             }
         }
+    }
+}
+
+/// A settings card's plate: its fill and hairline edge. A row drawn
+/// as a card of its own takes it too (`DefaultShortcutsRow`).
+struct SettingsCardPlate: View {
+    var body: some View {
+        RoundedRectangle(cornerRadius: SettingsTheme.sectionRadius)
+            .fill(SettingsTheme.card)
+            .overlay(
+                RoundedRectangle(
+                    cornerRadius: SettingsTheme.sectionRadius
+                )
+                .strokeBorder(
+                    SettingsTheme.hairline,
+                    lineWidth: SettingsTheme.containerStroke
+                )
+            )
     }
 }

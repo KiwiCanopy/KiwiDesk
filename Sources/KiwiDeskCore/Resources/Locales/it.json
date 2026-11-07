@@ -2173,7 +2173,7 @@
   "shortcuts.rename": "Rinomina",
   "shortcuts.rename_ellipsis": "Rinomina…",
   "shortcuts.restore_defaults": "Ripristina predefiniti…",
-  "shortcuts.restore_defaults.at_defaults": "Le tue scorciatoie corrispondono ai valori predefiniti.",
+  "shortcuts.restore_defaults.at_defaults": "Tutte le scorciatoie predefinite sono al loro posto.",
   "shortcuts.restore_defaults.confirm": "Ripristina predefiniti",
   "shortcuts.restore_defaults.explain": "Solo il livello «default» ha scorciatoie fornite; i livelli che aggiungi sono solo tuoi. Prima di qualsiasi modifica ti viene detto quante scorciatoie tornano e quante delle tue vanno perse perché usano un tasto necessario a un valore predefinito.",
   "shortcuts.restore_defaults.help": "Rimette le scorciatoie fornite da KiwiDesk, comprese quelle che ha aggiunto dopo la tua installazione. Le scorciatoie che hai creato tu restano.",
