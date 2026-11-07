@@ -65,7 +65,7 @@ struct DesktopMoveCrossingTrackedTests {
             writes.sent.append((id, frame))
             writes.answers.append(landed)
         }
-        core.tiler.applier.scheduleResend = { delay, work in
+        core.desktopMemory.scheduleCrossing = { delay, work in
             writes.timers.append((delay, work))
         }
         return core

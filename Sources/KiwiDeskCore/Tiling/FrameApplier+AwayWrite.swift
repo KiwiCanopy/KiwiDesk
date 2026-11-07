@@ -9,8 +9,10 @@ extension FrameApplier {
     /// re-check is IPC into the app and a raw write glides about
     /// 300 ms (macOS 27.2, TextEdit). `landed` runs on the main actor
     /// with whether the element still named `id`, which is whether the
-    /// frame was written. Clears a pending resend; the caller owns the
-    /// spring and the stash capture.
+    /// frame was written. Sized through the screen's edge band, as every
+    /// applier write is (#2894). Never staged in a slide's hold: an
+    /// away window is on no Desktop a slide shows. Clears a pending
+    /// resend; the caller owns the spring and the stash capture.
     func writeAway(
         _ id: WindowID,
         _ frame: CGRect,
@@ -19,6 +21,7 @@ extension FrameApplier {
         landed: @escaping @MainActor (Bool) -> Void
     ) {
         pendingResends[id] = nil
+        let band = edgeBand(frame, setSize: true)
         nonisolated(unsafe) let target = element
         nonisolated(unsafe) let landed = landed
         let writer = writer
@@ -31,7 +34,14 @@ extension FrameApplier {
         queue(for: pid).async {
             holds.beginInstant(pid, writer)
             let same = writer.windowID(target) == id
-            if same { writer.setFrame(frame, target) }
+            if same {
+                EdgeBandWrite.write(
+                    frame,
+                    target,
+                    nearEdgeOf: band,
+                    writer: writer
+                )
+            }
             holds.endInstant(pid, writer)
             DispatchQueue.main.async {
                 MainActor.assumeIsolated { landed(same) }

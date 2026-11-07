@@ -268,6 +268,9 @@ func makeTestCore(
     // echo grace cannot age a stamp out under a starved runner
     // (#1456, tests.md ▸ age-bounded ledgers).
     core.tiler.applier.clock = { 0 }
+    // A Desktop move's frame write reaches the AX element of a
+    // real app (#3048); a suite that crosses answers it itself.
+    core.awayFrameWrite = { _, _, _, _, landed in landed(false) }
     // Same clock class (#1161): the placement ledger's echo
     // window is measured on its own seam; a test wanting the
     // expiry moves this clock ahead.

@@ -514,9 +514,11 @@ also [name the window](#move_to_desktop_and_follow).
 
 With *Displays have separate Spaces* off, naming a Space on another
 screen sends the window to that screen and that Desktop in one command.
-A window KiwiDesk has lost hold of can cross only through the visible
-Desktop, so the command refuses it: a minimized or hidden one, and one
-that has stayed on another Desktop since KiwiDesk started.
+The command refuses a window it cannot place on the other screen
+before it arrives, which can then cross only through the visible
+Desktop: a minimized or hidden one, one that has stayed on another
+Desktop since KiwiDesk started, and a native tab that became another
+window while away.
 :::
 
 ### move_to_desktop_and_follow

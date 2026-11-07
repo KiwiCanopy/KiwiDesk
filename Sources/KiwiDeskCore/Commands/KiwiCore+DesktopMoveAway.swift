@@ -38,20 +38,39 @@ extension KiwiCore {
         guard let crossingBase, let explicit else {
             return landAway(away, to: target, explicit, follow: follow)
         }
+        guard desktopMemory.crossingsInFlight.insert(away.id).inserted
+        else {
+            return .fail("This window is still moving. Try again.")
+        }
         // The frame lands first: moved first, the window shows on its
-        // old screen (#3048). The answer is the one the move will
-        // earn, since only `canDriveDesktops` could refuse it.
+        // old screen (#3048). So the answer is the parse's: a write
+        // that finds the element naming another window, or a bridge
+        // that refuses later, only logs.
         writeCrossingFrame(away.id, from: crossingBase, to: explicit) {
             [weak self] wrote in
             guard let self else { return }
-            guard wrote, self.state.awayWindows[away.id] != nil else {
+            self.desktopMemory.crossingsInFlight.remove(away.id)
+            // Up to the deadline later: the window may have arrived,
+            // gone or changed since the parse.
+            guard wrote, let now = self.state.awayWindows[away.id],
+                self.awayMoveRefusal(now, to: target, follow: follow)
+                    == nil
+            else {
                 self.onLog(
                     "move_to_desktop: w\(away.id.raw) not moved — its "
-                        + "frame could not be written"
+                        + "frame could not be written, or it changed"
                 )
                 return
             }
-            _ = self.landAway(away, to: target, explicit, follow: follow)
+            let landed = self.landAway(
+                now,
+                to: target,
+                explicit,
+                follow: follow
+            )
+            if let error = landed.error {
+                self.onLog("move_to_desktop: w\(away.id.raw) — \(error)")
+            }
         }
         guard follow else { return .ok() }
         let outcome: DesktopSwitchOutcome =

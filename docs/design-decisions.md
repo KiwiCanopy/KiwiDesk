@@ -8152,18 +8152,22 @@ behind it shows the window on its old screen for 11 to 123 ms. So its
 move, filing and switch wait for the write, off the main actor, and
 go ahead at 150 ms for an app that stalls, whose window may then show
 on the old screen and whose name the net may drop; a log line says
-so if the frame stayed. The command's answer is the one the move will
-earn, since only a Desktop bridge missing could refuse it, and that is
-asked at the parse. The written size is capped at the screen's, or a
+so if the frame stayed. The command answers from the parse, before
+the move: a write that then finds the element naming another window
+moves nothing, and only the log says so, the trade for keeping a slow
+app off the main actor. A second move of that window waits for the
+first. The written size is capped at the screen's, or a
 window would overhang the next screen until the layout placed it.
 
 A window with no element, found at boot or re-keyed, and a minimized
 or hidden one, whose write is unmeasured, keep the refusal
 ([#3033](https://github.com/KiwiCanopy/KiwiDesk/issues/3033)): such a
-window can cross screens only through the visible Desktop. The
-explicit name outranking the net needs no element, and was the fallback
-had slow apps failed; it draws a glide at the reveal, so it was not
-ruled.
+window can cross screens only through the visible Desktop.
+
+**[Trade-off]** Letting the explicit name outrank the net on shared
+Desktops needs no element, so it reaches every window, but the layout
+then carries the window across at the reveal, a glide on screen. The
+write lands it where it belongs before anyone sees it.
 
 A window already on a hidden Desktop produces no departure, so
 naming one

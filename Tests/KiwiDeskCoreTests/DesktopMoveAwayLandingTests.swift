@@ -232,16 +232,14 @@ struct DesktopMoveAwayLandingTests {
                 "move_to_desktop",
                 args: [.number(1), .string("mail"), id]
             ).error
-                == "This window can only cross screens through the visible "
-                + "Desktop. Move it there first."
+                == "This window can only cross screens on the visible Desktop."
         )
         #expect(
             core.execute(
                 "move_to_desktop",
                 args: [.number(3), .string("mail"), id]
             ).error
-                == "This window can only cross screens through the visible "
-                + "Desktop. Move it there first."
+                == "This window can only cross screens on the visible Desktop."
         )
         #expect(DesktopVerbBridge.moves.isEmpty)
     }

@@ -1,6 +1,11 @@
 import ApplicationServices
 import Foundation
 
+/// A crossing's frame write: nil is the live
+/// `FrameApplier.writeAway`. A seam of its own because that door
+/// answers on a later main-queue turn, which a test of the move
+/// around it would have to await across process-global bridge
+/// overrides; both `makeTestCore` twins pin it to a refusal.
 typealias AwayFrameWrite =
     @MainActor (
         WindowID, CGRect, AXUIElement, pid_t,
@@ -86,14 +91,13 @@ extension KiwiCore {
             return
         }
         tiler.animation.cancel(window: window)
-        tiler.forgetStash(window)
         var pending: (@MainActor (Bool) -> Void)? = landed
         let land: @MainActor (Bool) -> Void = { wrote in
             pending?(wrote)
             pending = nil
         }
         sendCrossingFrame(window, frame, resent: false, land: land)
-        tiler.applier.scheduleResend(Self.crossingWriteDeadline) {
+        desktopMemory.scheduleCrossing(Self.crossingWriteDeadline) {
             land(true)
         }
     }
@@ -119,6 +123,9 @@ extension KiwiCore {
             awayFrameWrite ?? tiler.applier.writeAway
         write(window, frame, element, pid) { [weak self] wrote in
             guard let self else { return }
+            // The capture is the frame a park would restore; it goes
+            // only once another frame landed.
+            if wrote { self.tiler.forgetStash(window) }
             land(wrote)
             guard wrote else {
                 self.onLog(
@@ -127,7 +134,7 @@ extension KiwiCore {
                 )
                 return
             }
-            self.tiler.applier.scheduleResend(Self.crossingCheckDelay) {
+            self.desktopMemory.scheduleCrossing(Self.crossingCheckDelay) {
                 [weak self] in
                 self?.checkCrossingFrame(window, frame, resent: resent)
             }

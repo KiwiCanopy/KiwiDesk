@@ -180,8 +180,8 @@ extension KiwiCore {
             {
                 return .refused(
                     .fail(
-                        "This window can only cross screens through the "
-                            + "visible Desktop. Move it there first."
+                        "This window can only cross screens on the "
+                            + "visible Desktop."
                     )
                 )
             }

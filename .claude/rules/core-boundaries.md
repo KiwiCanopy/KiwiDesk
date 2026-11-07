@@ -40,7 +40,7 @@ itself when an eighth is added.
   contract, not UI copy. The deliberate exception to the above.
 - **A refusal states the rule that forbids the act, and names a
   value only to say which (#3033).** Write `This window can only
-  cross screens through the visible Desktop.`, never `Space 5 is on
+  cross screens on the visible Desktop.`, never `Space 5 is on
   another screen, and Desktop 2 is hidden`, which repeats the
   arguments and explains nothing. A limit reached is such a rule:
   `Minimum window size reached`. A value earns its place only where

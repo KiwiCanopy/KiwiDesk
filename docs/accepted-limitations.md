@@ -111,6 +111,19 @@ class — see
 | Leaving Mission Control with the **swipe-down gesture** moves the focus to the window the pointer last hovered there, though you never clicked it; leaving with **Escape** keeps the focus where it was. | macOS moves the focus itself — it does the same with KiwiDesk quit (macOS 27.0.1, 2026-10-16) — and KiwiDesk follows the focus report macOS sends. Holding that report back would need a Mission Control open/close signal KiwiDesk does without, and the report looks like a ⌘-Tab, which must be honoured. | macOS ([#1920](https://github.com/KiwiCanopy/KiwiDesk/issues/1920)). | Leave Mission Control with Escape, or click the window you want in it. |
 
 :::unreleased
+With **Displays have separate Spaces** off, a `move_to_desktop` that
+sends a window to another screen answers before the window moves,
+since the move waits for its frame to be written first. If the app
+takes longer than about 150 ms, the window moves anyway, may show on
+its old screen for a moment, and can land in the Space its screen
+shows instead of the one named. If the window was re-created in that
+moment, it does not move at all, though the command said it did. Both
+leave a line in the log. Move it again
+([#3048](https://github.com/KiwiCanopy/KiwiDesk/issues/3048)). No fix
+is planned.
+:::
+
+:::unreleased
 A second `move_floating` landing before the app reports the first
 re-asks the same frame instead of adding to it, so it is swallowed.
 This is the rapid-resize row above with its one difference: `resize`

@@ -64,7 +64,7 @@ struct DesktopMoveCrossingTests {
             writes.sent.append((id, frame))
             writes.answers.append(landed)
         }
-        core.tiler.applier.scheduleResend = { delay, work in
+        core.desktopMemory.scheduleCrossing = { delay, work in
             writes.timers.append((delay, work))
         }
         return core
@@ -168,6 +168,8 @@ struct DesktopMoveCrossingTests {
         _ = moveAway(core)
         let frame = try #require(writes.sent.first?.1)
         #expect(frame.size == capture.size)
+        #expect(core.tiler.stashOriginal(away) == capture)
+        writes.answers[0](true)
         #expect(core.tiler.stashOriginal(away) == nil)
     }
 
@@ -185,6 +187,24 @@ struct DesktopMoveCrossingTests {
         #expect(DesktopVerbBridge.moves.count == 1)
     }
 
+    /// The command answered before the move, so a second press would
+    /// start a second write and a second move of one window.
+    @Test("a second move while the first is landing is refused")
+    func repeatWhileLandingRefuses() throws {
+        let writes = Writes()
+        let core = try makeCore(writes)
+        defer { teardown() }
+        fileAway(core)
+        _ = moveAway(core)
+        #expect(moveAway(core).error?.contains("still moving") == true)
+        #expect(writes.sent.count == 1)
+        writes.answers[0](true)
+        #expect(DesktopVerbBridge.moves.count == 1)
+        // Filed under `mail` now, so the next move crosses nothing.
+        #expect(moveAway(core).isSuccess)
+        #expect(DesktopVerbBridge.moves.count == 2)
+    }
+
     @Test("an element naming another window moves nothing")
     func staleElementMovesNothing() throws {
         let writes = Writes()
@@ -194,7 +214,24 @@ struct DesktopMoveCrossingTests {
         _ = moveAway(core)
         writes.answers[0](false)
         #expect(DesktopVerbBridge.moves.isEmpty)
+        #expect(moveAway(core).isSuccess)
         #expect(core.state.rememberedSpace(of: away) != mail)
+    }
+
+    /// The window was pocketed, say, while its frame was written.
+    @Test("a window refused by the time its frame lands is not moved")
+    func refusedAtTheLandingMovesNothing() throws {
+        let writes = Writes()
+        let core = try makeCore(writes)
+        defer { teardown() }
+        fileAway(core)
+        _ = core.execute(
+            "move_to_desktop_and_follow",
+            args: [.number(3), .string("mail"), awayID]
+        )
+        core.state.awayWindows[away]?.isUp = false
+        writes.answers[0](true)
+        #expect(DesktopVerbBridge.moves.isEmpty)
     }
 
     @Test("a follow answers switched, and switches after the write")

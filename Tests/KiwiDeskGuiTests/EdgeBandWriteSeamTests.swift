@@ -35,8 +35,8 @@ struct EdgeBandWriteSeamTests {
             )
             routed += source.occurrences(of: "EdgeBandWrite.write(")
         }
-        // apply, applyInstant and the hold's release.
-        #expect(routed == 3)
+        // apply, applyInstant, the hold's release and writeAway.
+        #expect(routed == 4)
     }
 
     /// A floating resize's write sizes by itself, so it spells the
