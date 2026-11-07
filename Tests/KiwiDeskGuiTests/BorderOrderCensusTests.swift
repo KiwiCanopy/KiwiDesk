@@ -142,7 +142,7 @@ struct BorderOrderCensusTests {
                 "Sources/KiwiDeskCore/App/KiwiCore+Shelf.swift"
             )
         )
-        #expect(shelf.contains("noteVisionStandDown(standingDown)"))
+        #expect(shelf.contains("noteVisionStandDown(plateStandingDown)"))
         let vision = try SourceScan.strippedSource(
             at: Self.root.appendingPathComponent(
                 "Sources/KiwiDeskCore/App/KiwiCore+Vision.swift"

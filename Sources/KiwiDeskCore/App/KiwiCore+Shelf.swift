@@ -69,6 +69,7 @@ extension KiwiCore {
         var spaceBarsShown: [SpaceBarManager.Bar] = []
         var strips: [ShelfStrip] = []
         var standingDown: Set<DisplayID> = []
+        var plateStandingDown: Set<DisplayID> = []
         var hiding = HidingShelves(
             dotStarts: shelves.handles.dotStarts
         )
@@ -87,7 +88,9 @@ extension KiwiCore {
             // #1787) gates here, read once for both bars: nil
             // retires each overlay through its manager, keeping
             // `shownStrips` consistent with the float clamp.
-            let down = shelfStandsDown(on: display.id)
+            let covered = screenIsCovered(on: display.id)
+            if covered { plateStandingDown.insert(display.id) }
+            let down = shelfStandsDown(on: display.id, covered: covered)
             if down { standingDown.insert(display.id) }
             let app =
                 down
@@ -191,8 +194,8 @@ extension KiwiCore {
         syncHidingShelves(hiding)
         syncShelves(strips, settings: settings)
         retireDepartedBars(live: Set(displays.map(\.id)))
-        // KiwiVision stands down on the same verdict (#2103).
-        noteVisionStandDown(standingDown)
+        // KiwiVision stands down on the covered half (#2103, #3061).
+        noteVisionStandDown(plateStandingDown)
         // The overflow marks wear the shelf's look, so they repaint
         // with every shelf repaint, on this pass's verdict (#2235).
         overflowMarks.standingDown = standingDown
@@ -256,75 +259,6 @@ extension KiwiCore {
                     }
                 )
             }
-        )
-    }
-
-    /// What one display's App Bar would draw, before the shelf
-    /// places it.
-    struct AppBarContent {
-        let space: Space
-        let style: AppBarLook
-        let groups: [[WindowID]]
-        /// The groups' items, then each float's (#1826).
-        let items: [AppBarOverlay.Item]
-
-        /// Every window the bar draws: each group's windows, then
-        /// one per float item — the hidden mark's count (#2567).
-        var windowCount: Int {
-            groups.reduce(0) { $0 + $1.count } + items.count - groups.count
-        }
-    }
-
-    /// The App Bar content for the space shown on `display`, or
-    /// nil when that space hosts no non-empty bar.
-    func appBarContent(
-        on display: DisplayID,
-        settings: TilingSettings
-    ) -> AppBarContent? {
-        guard
-            let id = state.workspaces.currentSpace(on: display),
-            let space = state.workspaces[id]
-        else { return nil }
-        return appBarContent(space: space, settings: settings)
-    }
-
-    /// The App Bar content for `space`, or nil when its layout hosts
-    /// no bar or it has no items — built whatever the bar's
-    /// visibility, since a hidden bar's shortcut may show it (#761).
-    func appBarContent(
-        space: Space,
-        settings: TilingSettings
-    ) -> AppBarContent? {
-        guard let host = barHost(for: space) else { return nil }
-        let style = host.resolvedBar(
-            global: settings.appBarGlobalLook
-        )
-        let groups = barGroups(
-            in: space,
-            grouping: style.groupAdjacentWindows
-        )
-        let floats = appBarFloats(in: space)
-        guard !groups.isEmpty || !floats.isEmpty else { return nil }
-        let seen = appBarVisibility(of: space, floats: floats)
-        // A group takes its first member's: the window its click
-        // focuses (#2234).
-        let items =
-            groups.map {
-                barItem(for: $0, style: style, visibility: seen)
-            }
-            + floats.map {
-                barItem(
-                    for: [$0],
-                    style: style,
-                    floating: true,
-                    visibility: seen
-                )
-            }
-        return AppBarContent(
-            space: space,
-            style: style,
-            groups: groups,
-            items: items
         )
     }
 

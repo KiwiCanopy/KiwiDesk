@@ -591,10 +591,15 @@ Obligations:
   (`WindowServerWatchTests` ▸ `phaseOrder`,
   `WindowServerWatchSeamTests`). A new consumer rules its
   position in the change that adds it.
-- **Read the stand-down from the shelf's verdict**, filed once per
-  pass by `updateBars()` through `noteVisionStandDown`, never a
+- **Read the stand-down from the shelf's covered half**, filed once
+  per pass by `updateBars()` through `noteVisionStandDown`, never a
   `shelfStandsDown` read of the plate's own: that read is a
-  WindowServer round trip per screen on the switch path.
+  WindowServer round trip per screen on the switch path. The half
+  is `screenIsCovered` — a native fullscreen Space or a
+  presentation — never the shelf's maximize arm: a screen showing
+  a Maximize keeps its plate, so the menu-bar band beside the notch
+  stays dimmed (#3061, `FullscreenStandDownTests` ▸
+  `maximizeKeepsThePlate`).
 - **Stand the blur down under Reduce transparency at the one
   `KiwiCore.kiwiVisionDrawsBlur` door, keeping the dim, and read
   whether the blur draws through that door alone** — the plate's

@@ -111,7 +111,7 @@ struct ShownUserSpaceSeamTests {
         )
         let standDown = try #require(
             SourceScan.declarationBody(
-                after: "func shelfStandsDown(on display: DisplayID)",
+                after: "func screenIsCovered(on display: DisplayID)",
                 in: covering
             )
         )
