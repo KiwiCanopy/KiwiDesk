@@ -861,7 +861,7 @@ Obligations:
   and one that moves none a repaint** — the capacity is the first
   input to the bounds no bar write carries: it reaches them through
   `TilingEngine.pocketAtRest` — the capacity alone, never
-  `pocketStands`, so a drag or a play never retiles — which
+  `pocketStands`, so a drag, a play or the list never retiles — which
   `shelfReservations` reads too, and `appWideLiveChanged` compares
   the reservations either side (`PocketReservationCoreTests` ▸
   `capacityMovesTheBounds`,
@@ -1148,7 +1148,10 @@ Obligations:
   swallows every chord while it is key, a ⌘Q aimed at the app
   beneath never quitting KiwiDesk (`OverflowMarkClickTests` ▸
   `chordIsSwallowed`); `PanelChordTests` ▸ `coreKeyPanelsSwallow`
-  holds every key-capable Core window to that override. Its
+  holds every key-capable Core window to that override. A list a key
+  opened alone walks with that chord's ⌘ still held, since its own
+  keys land before the chord lets go (#2974, `PocketListKeyboardTests` ▸
+  `commandHeldWalks`). Its
   landings run on the peek's `schedule`, which both `makeTestCore`
   twins pin.
 - **Every peek row is its window's button, picked through the
@@ -1187,7 +1190,9 @@ Obligations:
   `panelTakesClicksWithoutActivating`) — save an empty Pocket's
   state, which no menu twins, so it speaks: its text one element,
   each row a button landing through the peek's one `land` door on
-  a `SettingsLanding` (#2941, `PocketEmptyPeekTests`). The argument is
+  a `SettingsLanding` (#2941, `PocketEmptyPeekTests`) — and a
+  key-opened list, which no menu twins either, each row a button
+  (#2974, `PocketListKeyboardTests` ▸ `rowsSpeak`). The argument is
   `docs/design-decisions.md` ▸ A bar item's hover peek.
 - **A list peek marks the focused window's row with a check**
   (#2063), read through `barFocus(on:)` (below), in

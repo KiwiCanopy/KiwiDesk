@@ -924,7 +924,7 @@
   "keybinding.pocket": "Pocket에 넣기/꺼내기",
   "keybinding.pocket.help": "어디에 있든 Pocket 윈도우를 Pocket에 넣거나, 작업 중인 화면에 플로팅 윈도우로 꺼냅니다. 아직 Pocket 윈도우가 없으면 포커스된 윈도우를 Pocket 윈도우로 만들고 Pocket에 넣습니다.",
   "keybinding.pocket_list": "Pocket 목록 열기/닫기",
-  "keybinding.pocket_list.help": "바를 움직이지 않고 Pocket 목록을 열어 키보드로 윈도우를 선택합니다. 화살표 키로 이동하고, 리턴 키로 윈도우를 꺼내고, Esc 키로 닫습니다.",
+  "keybinding.pocket_list.help": "바를 움직이지 않고 Pocket 목록을 열어 키보드로 윈도우를 선택합니다. 화살표 키로 선택을 옮기고, 리턴 키로 윈도우를 꺼내고, Esc 키로 닫습니다.",
   "keybinding.pocket_window": "Pocket 전환",
   "keybinding.pocket_window.help": "포커스된 윈도우를 Pocket 윈도우로 만들거나 다시 일반 윈도우로 되돌립니다. Pocket 윈도우는 한 번에 하나만 둘 수 있습니다.",
   "keybinding.previous_layout": "이전 레이아웃으로 전환",

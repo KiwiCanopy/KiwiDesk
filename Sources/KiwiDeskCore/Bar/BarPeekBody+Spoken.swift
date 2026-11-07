@@ -16,6 +16,18 @@ extension BarPeekBody {
         setHovered(index.map { min($0, targets.count - 1) } ?? first ?? 0)
     }
 
+    /// The pointer on the button at `index`, or on none. A key-opened
+    /// list keeps its lifted row: Return must never lose it to a nudge.
+    func pointerHovers(_ index: Int?) {
+        guard index != nil || !keyed else { return }
+        setHovered(index)
+    }
+
+    /// A row's name: its title, then its Pocket key in words.
+    static func spokenRow(_ row: BarPeekContent.Row) -> String {
+        row.spokenChord.map { "\(row.title), \($0)" } ?? row.title
+    }
+
     /// One button per target, over its frame. The labels under it go
     /// quiet, so VoiceOver reads the row once; the body's `hitTest`
     /// keeps every press its own.
@@ -24,7 +36,8 @@ extension BarPeekBody {
             let button = BarPeekRowButton(frame: target.frame)
             for ink in target.inks { ink.setAccessibilityElement(false) }
             button.setAccessibilityLabel(
-                (target.inks.first as? NSTextField)?.stringValue
+                target.spoken
+                    ?? (target.inks.first as? NSTextField)?.stringValue
             )
             let action = target.action
             button.onPress = { [weak self] in self?.act(action) }
@@ -36,15 +49,10 @@ extension BarPeekBody {
     /// Moves VoiceOver's cursor onto the lifted row, as the arrows
     /// move the highlight.
     func speakLiftedRow() {
-        guard speaksRows, let hovered, hovered < rowButtons.count else {
+        guard keyed, let hovered, hovered < rowButtons.count else {
             return
         }
-        let button = rowButtons[hovered]
-        NSAccessibility.post(
-            element: button,
-            notification: .layoutChanged,
-            userInfo: [.uiElements: [button]]
-        )
+        moveVoiceOver(rowButtons[hovered])
     }
 }
 

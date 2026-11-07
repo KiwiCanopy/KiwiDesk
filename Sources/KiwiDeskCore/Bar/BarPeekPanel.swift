@@ -34,7 +34,7 @@ final class BarPeekPanel {
     var drawn: BarPeekContent? {
         didSet {
             panel?.setAccessibilityElement(
-                drawn?.empty != nil || (drawn != nil && body.speaksRows)
+                drawn?.empty != nil || (drawn != nil && body.keyed)
             )
         }
     }
@@ -81,7 +81,7 @@ final class BarPeekPanel {
         let shelf = LiquidGlassGate.rendered(stored)
         dropMorph()
         body.reserve = .none
-        body.speaksRows = false
+        body.keyed = false
         header.isHidden = true
         let size = Self.fittedSize(
             of: body,
@@ -94,6 +94,7 @@ final class BarPeekPanel {
         let panel = self.panel ?? makePanel()
         self.panel = panel
         panel.takesKey = false
+        panel.walksHeldKeys = false
         let origin = Self.origin(
             size: size,
             edge: edge,

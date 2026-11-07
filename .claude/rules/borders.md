@@ -448,13 +448,15 @@ it STANDS — a drag starting or ending, a play's hold — calls
 `updateBars()`, since the bar pass refreshes what places it: the
 slot, the strip it stands inside and the stand-down. **Whether it
 shows is the one `pocketStands`** — Several windows, a drag, a play,
-its list open or `pocket.toggle_list` opening it (#2974, the list's
-key stands it through `openingList` for that one pass, and the open
-list holds it after) — while the shelf's plan states the pocket by
-the capacity alone, so
-a drag, a play or the list moves no bar (#2793, `PocketShelfWiringTests` ▸
-`dragStandsThePocket`, `PocketListKeyTests` ▸
-`oneWindowStandsAndCloses`). **Where it is is the one
+or on one screen its list, open or being opened by
+`pocket.toggle_list` (#2974, `PocketListKeyTests` ▸
+`oneScreenStands`) — while the shelf's plan states the pocket by the
+capacity alone, so a drag, a play or the list moves no bar (#2793,
+`PocketShelfWiringTests` ▸ `dragStandsThePocket`,
+`PocketListKeyTests` ▸ `oneWindowStandsAndCloses`). **A verb that
+draws and moves no window returns ahead of the setters' forced pass
+in `layoutCommand`'s dispatch**, as `toggle_reveal` does, or a press
+re-lays the Space (`PocketListKeyTests` ▸ `runsNoPass`). **Where it is is the one
 `pocketPlace(on:)`, which the drawing and `pocketLanding(on:)` both
 read** (`PocketPlaceTests` ▸ `landingIsTheDrawing`): its slot on a
 bar edge under Several, read off `ShelfArrangement.arrange(…pocket:)`;
@@ -484,13 +486,15 @@ hover dropped drops its dwell (`PocketPlateOverlay.hovered`'s
 `didSet`, `PocketHandleDwellTests` ▸ `dwellEndsWithTheHover`), and
 its peek grows the handle's panel
 (`PocketHandleDwellTests` ▸ `hoverPeeksThenRises`).
-**What it counts, shows for and lists is the one
+**What it counts and shows for is the one
 `pocketPlateWindows`**, never `pocketedWindows` beside it: the
 general list, then under Several windows the apps' own pocket
 windows, built from `generalPocket` and `keyedPocket` and never a
 filter beside them, while the capacity stays `pocketAcceptsMark`'s
-(#2923). A reader that means the general list alone takes
-`generalPocket`. Its list is the bars' click-held peek, its panel
+(#2923). **What it lists is the one `pocketListWindows`**, the same
+under One window too, where a key can open it (#2974,
+`PocketListKeyTests` ▸ `oneWindowListsKeyed`). A reader that means the
+general list alone takes `generalPocket`. Its list is the bars' click-held peek, its panel
 answering `shelfBeyondBars` (`PocketPlateTests`); the peek and its
 VoiceOver menu set the keyed windows last, under the Pocket Keys
 header, through `BarPeekSource.keysPocketWindows`
@@ -499,10 +503,11 @@ that menu, never the peek**, which is hidden from accessibility:
 the plate's `onPress` takes the peek's one `openMenu` door, never
 the click's list (#2936, `PocketPlateVoiceOverTests`) — save an
 empty pocket, whose press and click both grow the empty state,
-the one peek body that speaks (#2941, `PocketEmptyPlateTests`) until
-a key opens the list: no menu twins that one, so the peek's `keyed`
-anchor lifts its first window row and gives each row a button
-(#2974, `PocketListKeyTests` ▸ `rowsSpeak`).
+a peek body that speaks (#2941, `PocketEmptyPlateTests`). A
+key-opened list speaks too, since no menu twins it: its `keyed`
+anchor lifts the first window row (#2974, `PocketListKeyboardTests` ▸
+`keyLiftsTheFirstRow`) and gives each row a button
+(`PocketListKeyboardTests` ▸ `rowsSpeak`).
 **An empty pocket's content is `pocketEmptyState`, read when the
 peek shows**: each chord through the one `pocketVerbChord` hook,
 never `menuChord`, a line only while its key is bound, and `pocket`'s

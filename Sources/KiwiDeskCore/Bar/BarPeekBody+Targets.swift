@@ -21,6 +21,8 @@ extension BarPeekBody {
         let frame: CGRect
         let inks: [NSView]
         let rest: [NSColor?]
+        /// A key-opened list's name for it (`BarPeekBody+Spoken`).
+        var spoken: String?
     }
 
     func resetTargets(_ shelf: KiwiShelf) {
@@ -36,7 +38,12 @@ extension BarPeekBody {
     }
 
     /// A button around `text`, its hover reaching a little past it.
-    func addTarget(_ action: Action, around text: CGRect, inks: [NSView]) {
+    func addTarget(
+        _ action: Action,
+        around text: CGRect,
+        inks: [NSView],
+        spoken: String? = nil
+    ) {
         targets.append(
             Target(
                 action: action,
@@ -45,7 +52,8 @@ extension BarPeekBody {
                     dy: -Metrics.hoverPadV
                 ),
                 inks: inks,
-                rest: inks.map(Self.ink(of:))
+                rest: inks.map(Self.ink(of:)),
+                spoken: spoken
             )
         )
     }
@@ -171,20 +179,20 @@ extension BarPeekBody {
     override func mouseEntered(with event: NSEvent) {
         SkyLight.ensureBackgroundCursor()
         NSCursor.arrow.set()
-        setHovered(target(at: local(event)))
+        pointerHovers(target(at: local(event)))
         onPointerInside(true)
     }
 
     override func mouseMoved(with event: NSEvent) {
         NSCursor.arrow.set()
         guard pressed == nil else { return }
-        setHovered(target(at: local(event)))
+        pointerHovers(target(at: local(event)))
     }
 
     override func mouseExited(with event: NSEvent) {
         onPointerInside(false)
         guard pressed == nil else { return }
-        setHovered(nil)
+        pointerHovers(nil)
     }
 
     override func cursorUpdate(with event: NSEvent) {

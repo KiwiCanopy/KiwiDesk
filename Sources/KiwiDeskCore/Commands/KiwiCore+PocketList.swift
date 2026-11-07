@@ -29,16 +29,15 @@ extension KiwiCore {
         }
         // The pass refreshes what places a pocket that stood nowhere.
         updateBars(holdingForSwitch: false)
+        // That pass clears a Desktop switch's owed repaint, which its
+        // fold still owes once its arrivals are read (#2347).
+        if eventLoop.switchReads.isPending {
+            eventLoop.switchReads.barsOwed = true
+        }
         guard let view = pocketPlate.view(on: display) else {
             return .fail("the pocket draws on no screen here")
         }
-        shelves.peek.show(
-            view,
-            source: .pocket(pocketPlateWindows),
-            space: nil,
-            edge: tiler.settings.kiwishelf.pocketEdge,
-            keyed: true
-        )
+        openPocketList(from: view, keyed: true)
         return pocketListDisplay == display
             ? .ok() : .fail("the pocket draws on no screen here")
     }

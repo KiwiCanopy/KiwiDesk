@@ -6209,9 +6209,9 @@ no drop there until the pointer has left it. Switching back to `"one"` keeps the
 pocket.set_capacity("several")
 ```
 
+:::unreleased
 ### pocket.toggle_list
 
-:::unreleased
 **Expects:** nothing.
 
 **Does:** opens the [pocket](#pocket)'s list on the active Space's
@@ -6220,18 +6220,18 @@ screen, or closes the one open. The pocket comes up at
 [`kiwishelf.set_pocket_position`](#kiwishelfset_pocket_position) and
 the list grows out of it, under either
 [`pocket.set_capacity`](#pocketset_capacity), and no bar shows or
-moves. The list is the one a click on the pocket opens, its first
-row selected: the up and down arrows move, Return takes that window
-out, and Esc closes the list, as does any other key. An empty pocket
-shows how a window goes in. It refuses with a pill while KiwiShelf
-stands down for a window filling the screen.
-
-**Default:** `⌃⌥⌘P`.
+moves. The list is the one a click on the pocket opens, with
+[`pocket_app`](#pocket_app)'s windows under **Pocket Keys**, its first
+window row selected: the up and down arrows move, Return takes that
+window out, and Esc closes the list, as does any other key. An empty
+pocket shows how a window goes in. It refuses with a pill while
+KiwiShelf stands down for a window filling the screen. Bound to `⌃⌥⌘P`
+by default.
 
 **Example:**
 
 ```lua
-bind("control+option+command+p", function()
+KiwiDesk.bind("control+option+command+p", function()
     pocket.toggle_list()
 end)
 ```

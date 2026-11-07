@@ -202,7 +202,7 @@ final class BarPeek {
     /// cool-down — a fading one included — or re-reads the one
     /// showing in place: the open path of `clicked` (#2571) and the
     /// overflow mark's own click (#2563). `keyed` says a key opened
-    /// a grown list (#2974).
+    /// a grown list (#2974), which a re-read of that list keeps.
     func show(
         _ anchor: NSView,
         source: BarPeekSource,
@@ -211,13 +211,14 @@ final class BarPeek {
         keyed: Bool = false
     ) {
         spent = nil
+        let kept = shown.map { $0.view === anchor && $0.keyed } ?? false
         present(
             Anchor(
                 view: anchor,
                 source: source,
                 space: space,
                 edge: edge,
-                keyed: keyed
+                keyed: keyed || kept
             ),
             fades: false
         )

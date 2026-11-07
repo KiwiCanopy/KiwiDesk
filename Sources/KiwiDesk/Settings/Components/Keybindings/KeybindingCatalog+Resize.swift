@@ -199,8 +199,8 @@ extension KeybindingCatalog {
             L(
                 "keybinding.pocket_list.help",
                 "Opens the Pocket's list without moving a bar, to pick "
-                    + "a window by keyboard: the arrow keys move, Return "
-                    + "takes the window out, Esc closes."
+                    + "a window by keyboard: the arrow keys move the "
+                    + "selection, Return takes the window out, Esc closes."
             )
         }
     )

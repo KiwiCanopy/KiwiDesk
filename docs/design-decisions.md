@@ -6817,8 +6817,8 @@ count" and the #2776 fade, and hover still only lights it. Listing
 the two verbs as rows with their keys was rejected: rows in a
 click-held list read as acts on the focus (#2869), and Settings
 labels name keys without explaining the Pocket. A Settings link
-alone sends the user away instead of answering. Unlike the list,
-this panel speaks to VoiceOver, since no menu could twin it.
+alone sends the user away instead of answering. Unlike a click's
+list, this panel speaks to VoiceOver, since no menu could twin it.
 :::
 
 ### Spaces, profiles & config ownership

@@ -106,6 +106,8 @@ struct BarPeekContent: Equatable {
         /// The app's Pocket key, drawn after the title, on a row
         /// of the Pocket Keys section (#2923).
         var chord: String?
+        /// That key in words, for a list that speaks (#2974).
+        var spokenChord: String?
     }
 
     /// What a group's header draws (#2649).
@@ -210,7 +212,8 @@ struct BarPeekContent: Equatable {
         focus: WindowID? = nil,
         header: Header = .full,
         keyed: [BarWindowRow] = [],
-        chord: (WindowID) -> String? = { _ in nil }
+        chord: (WindowID) -> String? = { _ in nil },
+        spokenChord: (WindowID) -> String? = { _ in nil }
     ) {
         self.checks = checks
         self.header = header
@@ -224,7 +227,8 @@ struct BarPeekContent: Equatable {
                         window: row.window,
                         title: SpaceBarWindowMenu.windowName(row.title),
                         focused: checks && row.window == focus,
-                        chord: keyed ? chord(row.window) : nil
+                        chord: keyed ? chord(row.window) : nil,
+                        spokenChord: keyed ? spokenChord(row.window) : nil
                     )
                 )
             }

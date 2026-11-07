@@ -924,7 +924,7 @@
   "keybinding.pocket": "Pocket に入れる/取り出す",
   "keybinding.pocket.help": "どこにいても Pocket ウインドウを Pocket に入れるか、作業中の画面にフローティングとして取り出します。Pocket ウインドウがまだないときは、フォーカス中のウインドウを Pocket ウインドウにして Pocket に入れます。",
   "keybinding.pocket_list": "Pocket のリストを開く/閉じる",
-  "keybinding.pocket_list.help": "バーを動かさずに Pocket のリストを開き、キーボードでウインドウを選びます。矢印キーで移動し、リターンキーでウインドウを取り出し、Escキーで閉じます。",
+  "keybinding.pocket_list.help": "バーを動かさずに Pocket のリストを開き、キーボードでウインドウを選びます。矢印キーで選択を移動し、リターンキーでウインドウを取り出し、Escキーで閉じます。",
   "keybinding.pocket_window": "Pocket を切り替える",
   "keybinding.pocket_window.help": "フォーカス中のウインドウを Pocket ウインドウにするか、通常のウインドウに戻します。Pocket ウインドウにできるのは一度に1つだけです。",
   "keybinding.previous_layout": "前のレイアウトに切り替える",
